@@ -10743,7 +10743,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Weapon",
      "Evasion",
      "Flight 2",
      "Mighty 1"
@@ -10770,7 +10769,7 @@
   "genre": "core",
   "source": "X-Men Expansion",
   "equipment": [
-   "Techno- organic wings"
+   "Techno-Organic Wings"
   ],
   "id": "angel-x-men-expansion"
  },
@@ -11498,7 +11497,7 @@
   "id": "black-tom-cassidy-x-men-expansion"
  },
  {
-  "name": "BLINK EARTH 295",
+  "name": "BLINK (Earth-295)",
   "realName": "Clarice Ferguson",
   "rank": 4,
   "health": 90,
@@ -11547,7 +11546,6 @@
     "set": "Basic",
     "names": [
      "Accuracy 2",
-     "Iconic Weapon",
      "Inspiration"
     ]
    },
@@ -11582,7 +11580,7 @@
   "genre": "core",
   "source": "X-Men Expansion",
   "equipment": [
-   "Displacement field daggers"
+   "Displacement Field Daggers"
   ],
   "id": "blink-earth-295-x-men-expansion"
  },
@@ -12038,7 +12036,6 @@
     "names": [
      "Brilliance 3",
      "Flight 2",
-     "Iconic Weapon",
      "Inspiration",
      "Mighty 1",
      "Sturdy 3",
@@ -13062,7 +13059,7 @@
   "id": "exodus-x-men-expansion"
  },
  {
-  "name": "FANG AKIHIRO",
+  "name": "FANG (AKIHIRO)",
   "realName": "Akihiro",
   "rank": 4,
   "health": 120,
@@ -13277,7 +13274,6 @@
     "names": [
      "Accuracy 1",
      "Discipline 1",
-     "Iconic Weapon",
      "Inspiration",
      "Slow-Motion Dodge",
      "Sturdy 1"
@@ -13313,7 +13309,7 @@
   "genre": "core",
   "source": "X-Men Expansion",
   "equipment": [
-   "Charged cards"
+   "Charged Cards"
   ],
   "id": "gambit-x-men-expansion"
  },
@@ -14013,7 +14009,6 @@
     "set": "Basic",
     "names": [
      "Brawling",
-     "Iconic Weapon",
      "Reinforced Skeleton"
     ]
    },
@@ -14050,7 +14045,7 @@
   "genre": "core",
   "source": "X-Men Expansion",
   "equipment": [
-   "Adamantium nails"
+   "Adamantium Nails"
   ],
   "id": "lady-deathstrike-x-men-expansion"
  },
@@ -14351,7 +14346,6 @@
     "set": "Basic",
     "names": [
      "Discipline 2",
-     "Iconic Weapon",
      "Inspiration",
      "Sturdy 2",
      "Uncanny 2",
@@ -14470,7 +14464,7 @@
   "id": "magma-x-men-expansion"
  },
  {
-  "name": "MASTER OF THE WORLD",
+  "name": "MASTER OFTHE WORLD",
   "realName": "Eshu",
   "rank": 1,
   "health": 120,
@@ -14553,7 +14547,7 @@
   ],
   "genre": "core",
   "source": "X-Men Expansion",
-  "id": "master-of-the-world-x-men-expansion"
+  "id": "master-ofthe-world-x-men-expansion"
  },
  {
   "name": "MASTERMIND",
@@ -15012,7 +15006,6 @@
     "set": "Basic",
     "names": [
      "Flight 1",
-     "Iconic Weapon",
      "Inspiration",
      "Mighty 2",
      "Sturdy 2"
@@ -15137,7 +15130,7 @@
   "id": "nimrod-x-men-expansion"
  },
  {
-  "name": "NOCTURNE EARTH 2182",
+  "name": "NOCTURNE (Earth-2182)",
   "realName": "Talia Josephine “T.J.” Wagner",
   "rank": 4,
   "health": 90,
@@ -15320,7 +15313,7 @@
   "id": "northstar-x-men-expansion"
  },
  {
-  "name": "OLD MAN LOGAN EARTH 214923",
+  "name": "OLD MAN LOGAN (Earth-214923)",
   "realName": "James Howlett",
   "rank": 4,
   "health": 120,
@@ -15376,7 +15369,6 @@
      "Combat Trickery",
      "Healing Factor",
      "Heightened Senses 1",
-     "Iconic Weapon",
      "Reinforced Skeleton",
      "Uncanny 1"
     ]
@@ -15406,7 +15398,7 @@
   "genre": "core",
   "source": "X-Men Expansion",
   "equipment": [
-   "Adamantium claws"
+   "Adamantium Claws"
   ],
   "id": "old-man-logan-earth-214923-x-men-expansion"
  },
@@ -16362,7 +16354,956 @@
   "id": "shatterstar-x-men-expansion"
  },
  {
-  "name": "AGENTANTI-VENOM",
+  "name": "SILVER SAMURAI",
+  "realName": "Kenuichio “Ken” Harada",
+  "rank": 4,
+  "health": 150,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 6,
+   "agility": 1,
+   "resilience": 5,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Criminal",
+  "origin": "Mutant, Special Training",
+  "teams": "Hydra, Yakuza",
+  "base": "Krakoa",
+  "features": "",
+  "history": "Kenuichio Harada has been mixed up in the world of organized crime since the day he was born. As the son of Yakuza boss Shingen Harada, Ken spent his youth learning the skills he would need to one day take his father’s place. He took to the training like a fish takes to water, immediately excelling both in finance and in hand-to-hand combat. His prowess in battle was enhanced by his mutant power, which allows him to create a tachyon energy field. A er his father was killed in a duel with Wolverine (Logan), Ken assumed his long-awaited place as head of the Harada clan. He immediately entered into a long-term rivalry with Wolverine, setting the entirety of Japan’s criminal underworld on a mission to capture and execute the mutant hero. A er being defeated by Wolverine several times, Ken gave up on killing the mutant hero and instead became his friend. On Krakoa, Ken ran a combat arena, one which Wolverine frequently attended.",
+  "personality": "Ken Harada styles himself as a feudal-era samurai, but his actions o en con flict with a true samurai’s code. He initially adopted the identity of the Silver Samurai to intimidate his enemies and underlings, and it worked so well that he just kept doing it. This persona is largely based on the samurai films and comics he consumed as a child. Harada’s ruthlessness is both his greatest strength and his greatest weakness. His determination to get the job done, no matter the cost, allows him to go toe-to-toe with combat experts like Wolverine. However, that philosophy has also led him into making alliances of convenience with evil organizations like Hydra. Arts Melee Weapons Stance (Sharp)",
+  "traits": [
+   "Battle Ready",
+   "Combat Expert",
+   "Connections: Criminal (Yakuza)",
+   "Determination",
+   "Extraordinary Origin",
+   "Fearless"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "Signature Weapon: Katana (Sword)",
+   "Streetwise",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Discipline 1",
+     "Inspiration",
+     "Sturdy 1"
+    ]
+   },
+   {
+    "set": "Elemental Control (Energy)",
+    "names": [
+     "Elemental Burst",
+     "Elemental Infusion"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Attack Stance",
+     "Chain Strikes",
+     "Defense Stance",
+     "Fast Strikes",
+     "Focused Strike",
+     "Leg Sweep"
+    ]
+   },
+   {
+    "set": "Melee Weapons (Sharp)",
+    "names": [
+     "Exploit",
+     "Fast Attacks",
+     "Focused Fury",
+     "Hit & Run",
+     "Riposte",
+     "Vicious Attack"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "silver-samurai-x-men-expansion"
+ },
+ {
+  "name": "SIRYN",
+  "realName": "Theresa Rourke Cassidy",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 1,
+   "agility": 5,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 18
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "X-Factor, X-Force",
+  "base": "Krakoa",
+  "features": "",
+  "history": "Sean Cassidy (who later became the hero known as Banshee) was too wrapped up in the world of international espionage to notice when one of his old flames, Maeve, gave birth to a girl named Theresa. Maeve died shortly a er the birth, and Banshee’s cousin and rival, Black Tom (Thomas Cassidy), kidnapped the infant. Black Tom raised Theresa to be a criminal, and once she was old enough, he began having her accompany him on his super-villain escapades, as the Siryn. The guilt of a criminal life weighed heavily on her mind, though, and Black Tom couldn’t help but regret forcing her into it. A er a botched job nearly landed them both in prison, he wrote to Banshee, revealing the truth of Siryn’s birth. She reunited with her father, and under his tutelage, Siryn became a super hero. She joined X-Force shortly a er its foundation and quickly became one of its most important members. A er M-Day, Siryn moved to X-Factor Investigations and had a son with a duplicate of her long-term partner, Multiple Man. Unfortunately, Multiple Man accidentally absorbed the infant upon first holding him, and their relationship hasn’t been the same since. Shortly a er leaving X-Factor Investigations, Siryn was possessed by the dark god Morrigan. She wasn’t freed until a er the foundation of Krakoa, at which point she dropped out of active duty to focus on herself.",
+  "personality": "Even more of a devout Catholic than her father, Siryn believes it is her duty in life to protect as many people as possible. She takes her responsibilities as a super hero seriously and blames herself for any casualties incurred on the job. Control (Sound) Barrier Blast Burst Protection 2 points to shatter) Ricochet /",
+  "traits": [
+   "Connections: Super Heroes",
+   "Determination",
+   "Fearless",
+   "Investigation",
+   "Situational Awareness"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Heroic",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Accuracy 2",
+     "Discipline 1",
+     "Evasion",
+     "Flight 2"
+    ]
+   },
+   {
+    "set": "Elemental Control (Sound)",
+    "names": [
+     "Elemental Barrier",
+     "Elemental Blast",
+     "Elemental Burst",
+     "Elemental Protection 2 (20 points to shatter)",
+     "Elemental Ricochet"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "siryn-x-men-expansion"
+ },
+ {
+  "name": "SNOWBIRD",
+  "realName": "Narya",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Adventurer",
+  "origin": "Mythic",
+  "teams": "Alpha Flight",
+  "base": "Mobile",
+  "features": "",
+  "history": "In order to create a champion worthy of her sacred stature, the Inuit goddess Nelvanna sired a daughter with a hapless archeologist named Richard. She named this child Narya. From the beginning, Nelvanna had hoped that Richard would be able to take care of their daughter, but the experience of connecting with the goddess had driven him insane. So Nelvanna instead le her daughter in the safe hands of the doctor who delivered her—Michael Twoyoungmen (A.K.A. Shaman). By the time she was born, Narya was already physically a year old, and she continued to grow rapidly throughout her youth—to the point where, within a few years, she was old enough to take care of herself. Right around then, both Narya and Shaman were recruited into the Canadian super-team Alpha Flight. She and her father have been with the organization ever since, working tirelessly to protect the people of Canada.",
+  "personality": "Snowbird’s sacred heritage can, at times, make her seem a bit stuck-up and perhaps even disconnected from regular human society. However, she is much more down to earth than the likes of Thor or Zeus. She grew up on Earth, and most other members of Alpha Flight, the people she considers her closest friends in the world, are Earthlings. Control Sixth Sense",
+  "traits": [
+   "Combat Reflexes",
+   "Connections: Super Heroes",
+   "Enhanced Physique",
+   "Fearless",
+   "God Heritage",
+   "Presence"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Heroic",
+   "Public Identity",
+   "Supernatural"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Disguise",
+     "Flight 1",
+     "Heightened Senses 1",
+     "Mighty 2",
+     "Shape-Shi",
+     "Sturdy 2"
+    ]
+   },
+   {
+    "set": "Elemental Control (Ice)",
+    "names": [
+     "Elemental Barrier",
+     "Elemental Blast",
+     "Elemental Burst",
+     "Elemental Grab Sixth Sense",
+     "Postcognition 1"
+    ]
+   },
+   {
+    "set": "Weather Control",
+    "names": [
+     "Control Fog",
+     "Control Weather 2",
+     "Weather Chill"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "snowbird-x-men-expansion"
+ },
+ {
+  "name": "THE STEPFORD CUCKOOS",
+  "realName": "",
+  "rank": 3,
+  "health": 60,
+  "focus": 120,
+  "karma": 3,
+  "abilities": {
+   "melee": 1,
+   "agility": 1,
+   "resilience": 2,
+   "vigilance": 4,
+   "ego": 2,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant, Weird Science",
+  "teams": "X-Force, X-Men",
+  "base": "Krakoa",
+  "features": "",
+  "history": "As part of the secretive Weapon Plus project, mutant hater and scientist John Sublime stole a sizable portion of Emma Frost’s eggs. He used them to create the five Stepford Cuckoos— Sophie, Phoebe, Irma, Celeste and Esme—who are essentially clones of Frost. They each contain minor genetic variations, but they all look like younger versions of Frost, talk like her and have powers similar to hers. Hoping to use his creations as moles, Sublime inserted the Cuckoos into Professor Charles Xavier’s mutant academy. This was a big mistake. With the help of the X-Men, Emma Frost quickly freed the Cuckoos from Sublime’s control and made them into regular hero trainees. Though they are not usually intimidating individually, as a collective, the Cuckoos number among the most powerful young mutants on the planet.",
+  "personality": "Much like Emma Frost, the Cuckoos can be aloof. They have trouble forming relationships with anyone outside of their inbuilt psychic network. A few of the Cuckoos have, for brief periods, gone o ﬀ on their own, but they always return to the fold. The relationship they have with each other is the most important one in their lives. Although the Cuckoos o en appear to act almost identically, they do have subtle di ﬀ erences in their personalities. Sophie is their stalwart heroic leader, while Phoebe is more of a hothead. Irma and Celeste are the shyest members of the crew, and Esme is a bit of a schemer. Alternate Form Just like Emma Frost, the Stepford Cuckoos can transform into an alternate crystalline form. This form grants them the Sturdy 1 power, but it prevents them from using the Brilliance 1 power and all their Telepathy and Power Control powers. They can use their Uncanny 1 power in either form. Numbers before a slash are for the Cuckoos’ regular human forms. Numbers a er a slash are for their crystalline forms. Note: The Stepford Cuckoos have / 1 Upload identical stat blocks and powers. 3 Individually, they are not nearly as / Blip powerful as Frost, but by working Reading together, they can become a force to C be reckoned with. O en in combat, H one of the Cuckoos goes on the attack A Blast while the others hang back and work R Link together to bump up their attacking A Network sister’s powers as much as possible. C T E R S",
+  "traits": [
+   "Beguiling",
+   "Connections: Super Heroes",
+   "Fearless",
+   "Presence",
+   "Quick Learner",
+   "Weird"
+  ],
+  "tags": [
+   "Alternate Form (crystalline form)",
+   "Black Market Access",
+   "Extreme Appearance (in alternate form)",
+   "Heroic",
+   "Hounded",
+   "Krakoan",
+   "Mentor: Emma Frost",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Brilliance 1",
+     "Sturdy 1",
+     "Uncanny 1"
+    ]
+   },
+   {
+    "set": "Power Control",
+    "names": [
+     "Bump Power"
+    ]
+   },
+   {
+    "set": "Telepathy",
+    "names": [
+     "Astral Form all their Telepathy and Power Control powers. They can use their Uncanny 1 power in either form. Numbers before a slash are for the Cuckoos’ regular human forms. Numbers a er a slash are for their crystalline forms.",
+     "Command Note: The Stepford Cuckoos have",
+     "Information Upload identical stat blocks and powers. Individually, they are not nearly",
+     "Memory Blip powerful as Frost, but by working",
+     "Mind Reading together, they can become a force",
+     "Mirage be reckoned with. O en in combat, one of the Cuckoos goes on the attack",
+     "Telepathic Blast while the others hang back and work together to bump up their attacking",
+     "Telepathic Link sister’s powers as much as possible.",
+     "Telepathic Network"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "the-stepford-cuckoos-x-men-expansion"
+ },
+ {
+  "name": "SUNFIRE",
+  "realName": "Shiro Yoshida",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 2,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 4,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 24
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "Alpha Flight, Avengers, X-Men",
+  "base": "Mobile",
+  "features": "",
+  "history": "Shiro Yoshida was raised by two di ﬀ erent men with two very di ﬀ erent ideologies. His father, Saburo, was a quiet but progressive man, while his uncle Tomo was a raging conservative nationalist. Gradually, Tomo’s loud and angry rhetoric infected Shiro, and as Shiro’s latent mutant powers began to manifest, Tomo convinced the boy he should use his fiery new abilities to attack the United States. Shiro was on the verge of burning down the U.S. Capitol when Tomo, in an act of rage, shot Saburo. Shiro immediately turned on his uncle, striking him down while rushing to his father’s side. As Saburo died, he made one last request of his son: fight for peace, not for war. Shiro vowed to ful fill his father’s dying wish. He spent the next several years traveling across Japan, making a name for himself as the country’s foremost defender. Although he occasionally le Japan to help superteams from other countries—like Alpha Flight and the X-Men—Shiro never strayed long from home. Not until the founding of Krakoa. With his loyalties torn between Japan and the new mutant nation, Shiro began to give up his nationalist roots in favor of a more humanist ideology, one that favors the wider success of all society.",
+  "personality": "As a young man, Shiro was both highly disciplined and a hothead. Like many fire-based heroes, he was prone to bouts of rage, but at the same time, he romanticized the stoic samurai of Japan’s past and worked to become more like them. Shiro still has some of that angry, wannabe-samurai persona in him, but years of actual combat have tempered his personality into that of a genuinely experienced warrior. Control Martial Arts",
+  "traits": [
+   "Combat Reflexes",
+   "Connections: Super Heroes",
+   "Determination",
+   "Fearless",
+   "Iron Will",
+   "Situational Awareness"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Heroic",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Discipline 2",
+     "Flight 2"
+    ]
+   },
+   {
+    "set": "Elemental Control (Fire)",
+    "names": [
+     "Elemental Barrage",
+     "Elemental Barrier",
+     "Elemental Blast",
+     "Elemental Burst",
+     "Elemental Form",
+     "Elemental Protection 2 (20 points to shatter)",
+     "Elemental Push",
+     "Elemental Reinforcement",
+     "Elemental Sphere",
+     "Supernova"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Banging Heads",
+     "Defense Stance",
+     "Fast Strikes"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "sunfire-x-men-expansion"
+ },
+ {
+  "name": "SYNCH",
+  "realName": "Everett Thomas",
+  "rank": 4,
+  "health": 90,
+  "focus": 210,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 6,
+   "ego": 4,
+   "logic": 3
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "Generation X, X-Men",
+  "base": "Krakoa",
+  "features": "",
+  "history": "Teenager Everett Thomas discovered his mutant powers during a chance encounter with the X-Men and an evil alien race known as the Phalanx. With concentration, he found that he could synchronize with members of the X-Men, gaining their powers for as long as they remained in his vicinity. He used these new abilities to help them defeat the Phalanx, and the X-Men, in turn, invited him to join their at-the-time-latest junior team: Generation X. Thomas agreed, but his time with the team didn’t last long. He was killed on the field of battle, and Generation X disbanded shortly therea er. Years later, the mutant government on Krakoa resurrected Thomas. He tried to pick up his life where he le o ﬀ , but the temporal disconnect between him and his former teammates le him feeling lonely. This problem only compounded when he and a few other X-Men were caught inside a bubble of highly accelerated time. These days, Synch is only really close with a single person: his romantic partner Talon, an older version of Wolverine (Laura Kinney) with whom he spent the accelerated-time incident. They have a romantic history stretching back untold centuries, most of which is known only to them.",
+  "personality": "Synch may have the body of a young man, but in his mind, he is hundreds of years old. He is, by any metric, an unimaginably experienced combat veteran. He’s seen things that would make most veteran X-Men quiver in their boots. Despite it all, Synch is neither bitter nor angry. He has the mental tranquility of an old man who has made peace with his mortality, such as it is. Arts Power Control",
+  "traits": [
+   "Battle Ready",
+   "Combat Expert",
+   "Combat Reflexes",
+   "Connections: Super Heroes",
+   "Fearless",
+   "Iron Will"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Heroic",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Accuracy 1",
+     "Combat Trickery",
+     "Discipline 1",
+     "Slow-Motion Dodge",
+     "Uncanny 1"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Banging Heads",
+     "Defense Stance",
+     "Fast Strikes"
+    ]
+   },
+   {
+    "set": "Power Control",
+    "names": [
+     "Clone Moves",
+     "Clone Powers",
+     "Copy Ability",
+     "Copy Power"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "synch-x-men-expansion"
+ },
+ {
+  "name": "TALISMAN",
+  "realName": "Elizabeth Twoyoungmen",
+  "rank": 4,
+  "health": 60,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 1,
+   "agility": 5,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 7,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 24
+  },
+  "occupation": "Adventurer",
+  "origin": "Magic: Sorcery",
+  "teams": "Alpha Flight, Beta Flight",
+  "base": "Mobile",
+  "features": "",
+  "history": "Following the death of his wife, Michael Twoyoungmen abandoned his daughter Elizabeth and retreated to the woods of northern Canada to learn the mystic secrets of his ancestors. Elizabeth spent the rest of her childhood with a foster family, hearing only whispers of her father’s exploits as the hero Shaman. Her life without Michael was a good one. She never intended to see her father again until an evil spirit began to menace the archaeological dig where she worked. To rid herself of the spirit, Elizabeth was forced to track down her father and request his assistance. Michael tried—and failed—to dispel the dark spirit. In the process, he discovered that his daughter was the reincarnation of a legendary mystical champion known as Talisman. With Micheal’s help, Elizabeth uncovered the Coronet of Enchantment — an ancient artifact which allowed her to unlock her ancestral powers. Together, she and Michael defeated the dark spirit. Michael brie fly convinced his daughter to join him in the super-hero group Alpha Flight, but old resentments kept the arrangement from becoming permanent. Nowadays, she uses her powers only in times of crisis, acting as backup for the main team.",
+  "personality": "If she ever set her mind to it, Talisman might be able to give Stephen Strange a run for his money. She never would, though, as it would take too much time and e ﬀ ort, and she prefers to avoid violence. There may remain some tension between Talisman and her father, but the rest of Alpha Flight adores her. She’s intelligent, chipper and an all-around loyal friend.",
+  "traits": [
+   "Combat Reflexes",
+   "Connections: Super Heroes",
+   "Fearless",
+   "First Aid",
+   "Magic Item Reliance",
+   "Presence",
+   "Quick Learner"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Heroic",
+   "Public Identity",
+   "Sorcerous",
+   "Supernatural"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Discipline 3",
+     "Flight 1"
+    ]
+   },
+   {
+    "set": "Magic",
+    "names": [
+     "Astral Form",
+     "Sense Supernatural"
+    ]
+   },
+   {
+    "set": "Magic (Sorcery Set)",
+    "names": [
+     "Bolts of Balthakk",
+     "Dispel Spell",
+     "Icy Tendrils of Ikthalon",
+     "Images of Ikonn",
+     "Shield of the Seraphim (20 points to shatter)",
+     "Summon Portal",
+     "Winds of Watoomb"
+    ]
+   },
+   {
+    "set": "Weather Control",
+    "names": [
+     "Control Weather 2",
+     "Thunder"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "talisman-x-men-expansion"
+ },
+ {
+  "name": "TOAD",
+  "realName": "Mortimer “Mort” Toynbee",
+  "rank": 1,
+  "health": 60,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 5,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 6,
+   "swim": 9,
+   "jump": 6
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "Brotherhood of Evil Mutants, X-Men",
+  "base": "Mobile",
+  "features": "Unnaturally long tongue",
+  "history": "Mort Toynbee spent his childhood in an orphanage where the other kids bullied him relentlessly. Adulthood served him no better, and the punks in his neighborhood took every chance they could to torture him, mocking his strange mannerisms and subjecting him to constant beatings. Then one day, Magneto appeared and o ﬀ ered Toynbee a founding position in the Brotherhood of Evil Mutants, which he accepted without hesitation, taking on the codename Toad. Unfortunately, the Brotherhood wasn’t everything he dreamed it would be. Magneto treated him as little more than a servant, and his other teammates, while not cruel, still considered him their inferior. Eventually, Toad le the group to go into business as a solo operative. He spent the next several years flipping back and forth between super-villain and super-hero work, gravitating toward jobs that served his burgeoning ego. As time went on, Toad gradually became more con fident and sociable. Slowly but surely, he gained the respect of both his former Brotherhood allies and most of the X-Men. Recently, as part of a scheme hatched by Magneto, Toad took the fall for a murder he didn’t commit, and the Krakoan authorities considered him a fugitive from justice.",
+  "personality": "It’s a cruel word, but the best word to describe Toad in his early days is sniveling. Filled with self-hatred, he cowered in the faces of both his allies and his enemies. Although he’s not entirely free from insecurity, the modern Toad has accepted who he is. Most mutants consider him a decent man who can be counted on in a pinch. Arts Spider-Powers",
+  "traits": [
+   "Combat Reflexes",
+   "Connections: Super Villains",
+   "Fearless",
+   "Situational Awareness",
+   "Sneaky"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Accuracy 1",
+     "Additional Limbs (Tongue)",
+     "Heightened Senses 1"
+    ]
+   },
+   {
+    "set": "Elemental Control (Air/Chemical)",
+    "names": [
+     "Elemental Burst"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Chain Strikes",
+     "Fast Strikes"
+    ]
+   },
+   {
+    "set": "Plasticity",
+    "names": [
+     "Extended Reach 1 (Tongue Only)",
+     "Slip Free"
+    ]
+   },
+   {
+    "set": "Spider-Powers",
+    "names": [
+     "Jump 1",
+     "Wallcrawling"
+    ]
+   },
+   {
+    "set": "Super-Speed",
+    "names": [
+     "Speed Swim"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "toad-x-men-expansion"
+ },
+ {
+  "name": "WARLOCK",
+  "realName": "Warlock",
+  "rank": 4,
+  "health": 90,
+  "focus": 60,
+  "karma": 4,
+  "abilities": {
+   "melee": 3,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 4,
+   "logic": 4
+  },
+  "speed": {
+   "run": 5,
+   "climb": 4,
+   "jump": 3,
+   "glide": 10
+  },
+  "occupation": "Outsider",
+  "origin": "Alien: Technarch, Mutant",
+  "teams": "Excalibur, New Mutants, X-Men",
+  "base": "Krakoa",
+  "features": "Gooey, Techno-Organic body",
+  "history": "As a child of the alien species known as the Technarchy, Warlock was expected to do one of two things when he came of age. He was to either kill Magus, his father, or else die by his father’s hand. Refusing to do either, Warlock fled to Earth. Injured and alone, he wandered onto the premises of Xavier’s School for Gi ed Youngsters, then the home of the New Mutants. In a haze of confusion and fear, Warlock attacked the young heroes. Thankfully, with the help of their linguistically gi ed associate Doug Ramsey (Cypher), the New Mutants eventually made peace with Warlock and convinced him to join their team. In the years since, Warlock has become a trusted and world-renowned hero. Although his adventures have, at times, taken him across the galaxy, he’s never strayed far from the company of the New Mutants, who love him with all their hearts. Warlock remains particularly close with Doug Ramsey and has spent some stretches of his life fully or partially merged with him. In their fused state, Ramsey and Warlock are referred to collectively as Douglock.",
+  "personality": "Warlock speaks in a strange and robotic dialect unique to members of the Technarchy. He does not use the pronoun “I,” instead referring to himself only as “Warlock” or “Self.” When speaking of others, he o en compounds names with other terms. For instance, he might refer to his friend Doug Ramsey as “sel ﬀ riend” or “Doug-friend.” Despite his alien mannerisms, Warlock is as kind and gentle a soul as exists on Earth. On Krakoa, he spent much of his time entertaining the children there with wacky acts of shape-shi ing.",
+  "traits": [
+   "Combat Reflexes",
+   "Connections: Outsiders",
+   "Enduring Constitution",
+   "Extraordinary Origin",
+   "Fearless",
+   "Fresh Eyes",
+   "Gearhead",
+   "Infector (Transmode virus)",
+   "Stranger"
+  ],
+  "tags": [
+   "A.I.",
+   "Alien Heritage",
+   "Extreme Appearance",
+   "Heroic",
+   "Hounded",
+   "Krakoan",
+   "Powerful",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Disguise",
+     "Environmental Protection",
+     "Shape-Shi"
+    ]
+   },
+   {
+    "set": "Magic",
+    "names": [
+     "Brain Drain",
+     "Leech Life"
+    ]
+   },
+   {
+    "set": "Plasticity",
+    "names": [
+     "Body Sheet",
+     "Body Sphere",
+     "Bounce Back",
+     "Coiling Crush",
+     "Extended Reach 2",
+     "Flexible Bones 2",
+     "Flexible Fingers",
+     "Reverse Punch",
+     "Rubberneck",
+     "Slip Free",
+     "Stilt Steps"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "warlock-x-men-expansion"
+ },
+ {
+  "name": "WARPATH",
+  "realName": "James “Jimmy” Proudstar",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 5,
+   "agility": 2,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 15
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "New Mutants, X-Force, X-Men",
+  "base": "Arizona",
+  "features": "",
+  "history": "Jimmy Proudstar grew up on an Apache reservation in southern Arizona alongside his brother, John. The boys were born with similar mutant super-powers lurking in their DNA, but John, as the older of the two, had his manifest first. Having always dreamed of being a hero, John le home and joined the X-Men under the codename Thunderbird, only to be tragically killed on one of his first missions. Blaming the X-Men for his brother’s death, Jimmy took on the codename Warpath and attempted to annihilate the mutant hero team. Jimmy eventually made peace with the X-Men and even agreed to join their organization, but his anger over his brother’s death never fully went away. Even as years passed and Jimmy gradually became a veteran member of many important super-teams, his resentment lingered. Only with the foundation of Krakoa and John’s subsequent resurrection did Jimmy finally begin to forgive and forget. Both of the Proudstar brothers remain active heroes, but lately, John has been spending most of his time taking care of their ailing grandmother in Arizona. Jimmy, on the other hand, splits his time between helping his grandmother and acting as a mentor to the New Mutants.",
+  "personality": "As opposed to his more levelheaded brother, Warpath has a no-nonsense attitude and a penchant for bouts of righteous rage. Age has somewhat tempered his harder edges, but his sheer determination for obtaining justice, no matter the cost, continues to make him a key component of more militant mutant groups. Few mutants can claim as much experience in battle as Warpath. Weapons Super-Strength",
+  "traits": [
+   "Combat Reflexes",
+   "Connections: Super Heroes",
+   "Determination",
+   "Fearless",
+   "Iron Will"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Heroic",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Flight 2",
+     "Heightened Senses 1",
+     "Mighty 2",
+     "Sturdy 2"
+    ]
+   },
+   {
+    "set": "Melee Weapons (Sharp)",
+    "names": [
+     "Fast Attacks",
+     "Vicious Attack"
+    ]
+   },
+   {
+    "set": "Super-Strength",
+    "names": [
+     "Banging Heads",
+     "Clobber",
+     "Crushing Grip",
+     "Smash"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "warpath-x-men-expansion"
+ },
+ {
+  "name": "WILD CHILD",
+  "realName": "Kyle Gibney",
+  "rank": 3,
+  "health": 90,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 6,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "Hellions, Gamma Flight",
+  "base": "Krakoa",
+  "features": "Minor wol flike features (pointy ears and teeth, claws, etc.)",
+  "history": "Kyle Gibney’s mutant powers give him the proportional strength and agility of a wolf, but le untreated, they also give him the mind of a wolf. These powers manifested suddenly in his early childhood, and by the time agents of the Canadian government discovered him living alone on the streets, he had gone almost entirely feral. Scientists within Canada’s secretive Department H developed a treatment for Gibney’s condition, allowing him to retain some semblance of intelligence. In exchange for this treatment, Gibney agreed to join Gamma Flight, which was then the department’s super-hero trainee program. The original Gamma Flight disbanded shortly a er Gibney joined it, but his friends in Alpha Flight managed to pick up where the government le o ﬀ , training him and administering his medication. Gibney eventually le Alpha Flight, feeling himself unworthy of a position in their ranks. He’s spent the time since bouncing around between various shady agencies and organizations, working for anyone who could provide his treatments. He currently works for the Krakoan strike team known as the Hellions, alongside other mutants with hard-to-control powers.",
+  "personality": "When he’s taking his meds, Gibney can be so hearted and sensitive. The moment he stops, though, that all fades. Slowly but surely, he becomes an angry, ruthless predator. He is then prone to lash out at anything and anyone in his immediate proximity. In this state, he can speak only in grunts and roars. Weapons (Sharp) Fury Attacks Run Attack Frenzy",
+  "traits": [
+   "Berserker",
+   "Combat Reflexes",
+   "Connections: Super Heroes",
+   "Fearless",
+   "Situational Awareness"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Extreme Appearance",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Brawling",
+     "Healing Factor",
+     "Heightened Senses 1",
+     "Mighty 1",
+     "Uncanny 1"
+    ]
+   },
+   {
+    "set": "Melee Weapons (Sharp)",
+    "names": [
+     "Exploit",
+     "Fast Attacks",
+     "Focused Fury",
+     "Furious Attacks",
+     "Hit & Run",
+     "Riposte",
+     "Vicious Attack",
+     "Whirling Frenzy"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "wild-child-x-men-expansion"
+ },
+ {
+  "name": "WOLFSBANE",
+  "realName": "Rahne Sinclair",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 3,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 7,
+   "climb": 4,
+   "swim": 4,
+   "jump": 4
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "New Mutants, X-Factor, X-Force, X-Men",
+  "base": "Krakoa",
+  "features": "Werewolf-like appear- ance (in alternate form)",
+  "history": "Rahne Sinclair’s lycanthropic powers manifested suddenly in her teen years, and the religious zealots who ran the insular Scottish community where she grew up did not take kindly to her new appearance. She was forced to flee her hometown, but she wound up in the relative safety and security of Xavier’s School for Gi ed Youngsters. Early in her stay at the school, Sinclair and a few other students helped to save Professor X from a plot that threatened his life. He was so impressed with the conduct of his charges that he formed a junior super-hero squadron just for them: the New Mutants. To this day, the friends Sinclair made in the New Mutants are the most important people in her life. A er they graduated from Xavier’s school, many of them followed Sinclair into X-Force, becoming founding members of yet another super-hero team. Sinclair was tragically beaten to death by mutant bigots, but the founding of Krakoa ensured that the time she spent dead was short. Since her revival, Sinclair has spent most of her time on Krakoa, palling around with her old comrades and lobbying for the resurrection of her son, Tier.",
+  "personality": "In her human form, Sinclair is shy and so hearted, but in her wolf form, she is vicious, uncommunicative and prone to bouts of rage. Her greatest worry is that she might, in one of her berserker states, lash out at the ones she loves. Raised Catholic, she sometimes still wrestles with fears that her powers were a gi from Satan. Weapons Attacks Attacks & Run Attack Frenzy /",
+  "traits": [
+   "Berserker",
+   "Big (in alternate form)",
+   "Combat Reflexes",
+   "Connections: Super Heroes",
+   "Fearless",
+   "Situational Awareness"
+  ],
+  "tags": [
+   "Alternate Form (werewolf/ wolf)",
+   "Black Market Access",
+   "Extreme Appearance (in alternate form)",
+   "Heroic",
+   "Hounded",
+   "Krakoan",
+   "Public Identity",
+   "X-Gene"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Evasion",
+     "Healing Factor",
+     "Heightened Senses 1",
+     "Mighty 1",
+     "Sturdy 2"
+    ]
+   },
+   {
+    "set": "Melee Weapons (Sharp)",
+    "names": [
+     "Exploit",
+     "Fast Attacks",
+     "Furious Attacks",
+     "Hit & Run",
+     "Vicious Attack",
+     "Whirling Frenzy"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "X-Men Expansion",
+  "id": "wolfsbane-x-men-expansion"
+ },
+ {
+  "name": "AGENT ANTI-VENOM",
   "realName": "Eugene “Flash” Thompson",
   "rank": 4,
   "health": 120,
@@ -16441,7 +17382,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "agentanti-venom-spider-verse-expansion"
+  "id": "agent-anti-venom-spider-verse-expansion"
  },
  {
   "name": "ARAÑA",
@@ -16598,7 +17539,7 @@
   "id": "beetle-spider-verse-expansion"
  },
  {
-  "name": "BLACKCAT",
+  "name": "BLACK CAT",
   "realName": "Felicia Sara Hardy",
   "rank": 4,
   "health": 60,
@@ -16681,7 +17622,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "blackcat-spider-verse-expansion"
+  "id": "black-cat-spider-verse-expansion"
  },
  {
   "name": "BOOMERANG",
@@ -16731,7 +17672,6 @@
      "Accuracy 2",
      "Evasion",
      "Flight 1",
-     "Iconic Weapon",
      "Sturdy 1"
     ]
    },
@@ -17066,7 +18006,7 @@
   "id": "chasm-spider-verse-expansion"
  },
  {
-  "name": "DOCTOROCTOPUS",
+  "name": "DOCTOR OCTOPUS",
   "realName": "Otto Octavius",
   "rank": 4,
   "health": 90,
@@ -17114,7 +18054,6 @@
     "names": [
      "Additional Limbs",
      "Brilliance 1",
-     "Iconic Weapon",
      "Inspiration",
      "Mighty 2"
     ]
@@ -17155,10 +18094,10 @@
   "equipment": [
    "Ocktoid Tentacles"
   ],
-  "id": "doctoroctopus-spider-verse-expansion"
+  "id": "doctor-octopus-spider-verse-expansion"
  },
  {
-  "name": "DOCTOROCTOPUS",
+  "name": "DOCTOR OCTOPUS (EARTH-90214)",
   "realName": "Otto Octavius",
   "rank": 2,
   "health": 30,
@@ -17230,7 +18169,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "doctoroctopus-otto-octavius-spider-verse-expansion"
+  "id": "doctor-octopus-earth-90214-spider-verse-expansion"
  },
  {
   "name": "DOPPELGANGER",
@@ -17309,7 +18248,7 @@
   "id": "doppelganger-spider-verse-expansion"
  },
  {
-  "name": "DUCKTORDOOM",
+  "name": "DUCKTOR DOOM",
   "realName": "Unknown",
   "rank": 4,
   "health": 120,
@@ -17395,7 +18334,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "ducktordoom-spider-verse-expansion"
+  "id": "ducktor-doom-spider-verse-expansion"
  },
  {
   "name": "ELECTRO",
@@ -17541,7 +18480,7 @@
   "id": "ghost-spider-spider-verse-expansion"
  },
  {
-  "name": "GREENGOBLIN",
+  "name": "GREEN GOBLIN (EARLY DAYS)",
   "realName": "Norman Osborn",
   "rank": 3,
   "health": 60,
@@ -17622,10 +18561,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "greengoblin-spider-verse-expansion"
+  "id": "green-goblin-early-days-spider-verse-expansion"
  },
  {
-  "name": "GREENGOBLIN",
+  "name": "GREEN GOBLIN (EARTH-1610)",
   "realName": "Norman Osborn",
   "rank": 4,
   "health": 150,
@@ -17706,10 +18645,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "greengoblin-norman-osborn-spider-verse-expansion"
+  "id": "green-goblin-earth-1610-spider-verse-expansion"
  },
  {
-  "name": "HALLOWS’EVE",
+  "name": "HALLOWS’ EVE",
   "realName": "Elizabeth Tyne (now mainly goes by Janine Godbe)",
   "rank": 3,
   "health": 60,
@@ -17780,7 +18719,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "hallowseve-spider-verse-expansion"
+  "id": "hallows-eve-spider-verse-expansion"
  },
  {
   "name": "HAMMERHEAD",
@@ -18196,7 +19135,7 @@
   "id": "kindred-spider-verse-expansion"
  },
  {
-  "name": "KINGPIN",
+  "name": "KINGPIN (EARTH-65)",
   "realName": "Matthew “Matt” Murdock",
   "rank": 2,
   "health": 60,
@@ -18268,10 +19207,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "kingpin-spider-verse-expansion"
+  "id": "kingpin-earth-65-spider-verse-expansion"
  },
  {
-  "name": "KRAVENTHEHUNTER",
+  "name": "KRAVEN THE HUNTER (ANA KRAVINOFF)",
   "realName": "Anastasia Tatiana “Ana” Kravinoff",
   "rank": 3,
   "health": 60,
@@ -18359,10 +19298,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "kraventhehunter-spider-verse-expansion"
+  "id": "kraven-the-hunter-ana-kravinoff-spider-verse-expansion"
  },
  {
-  "name": "LADYOCTOPUS",
+  "name": "LADY OCTOPUS",
   "realName": "Carolyn Trainer",
   "rank": 4,
   "health": 60,
@@ -18452,10 +19391,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "ladyoctopus-spider-verse-expansion"
+  "id": "lady-octopus-spider-verse-expansion"
  },
  {
-  "name": "LASTSTANDSPIDER-MAN",
+  "name": "LAST STAND SPIDER-MAN",
   "realName": "Peter Parker",
   "rank": 4,
   "health": 60,
@@ -18527,7 +19466,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "laststandspider-man-spider-verse-expansion"
+  "id": "last-stand-spider-man-spider-verse-expansion"
  },
  {
   "name": "LIZARD",
@@ -18621,7 +19560,7 @@
   "id": "lizard-spider-verse-expansion"
  },
  {
-  "name": "MADAMEMONSTROSITY",
+  "name": "MADAME MONSTROSITY",
   "realName": "Melodia Stillwell",
   "rank": 3,
   "health": 150,
@@ -18692,10 +19631,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "madamemonstrosity-spider-verse-expansion"
+  "id": "madame-monstrosity-spider-verse-expansion"
  },
  {
-  "name": "MADAMEWEB",
+  "name": "MADAME WEB",
   "realName": "Julia Eugenia Cornwall Carpenter",
   "rank": 4,
   "health": 60,
@@ -18776,10 +19715,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "madameweb-spider-verse-expansion"
+  "id": "madame-web-spider-verse-expansion"
  },
  {
-  "name": "MANGAVERSESPIDER-MAN",
+  "name": "MANGAVERSE SPIDER-MAN",
   "realName": "Peter Parker",
   "rank": 2,
   "health": 30,
@@ -18846,7 +19785,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "mangaversespider-man-spider-verse-expansion"
+  "id": "mangaverse-spider-man-spider-verse-expansion"
  },
  {
   "name": "MISERY",
@@ -18933,7 +19872,7 @@
   "id": "misery-spider-verse-expansion"
  },
  {
-  "name": "MISTERNEGATIVE",
+  "name": "MISTER NEGATIVE",
   "realName": "Unknown, but o‘ en uses alias of Martin Li",
   "rank": 4,
   "health": 60,
@@ -19012,7 +19951,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "misternegative-spider-verse-expansion"
+  "id": "mister-negative-spider-verse-expansion"
  },
  {
   "name": "MORLUN",
@@ -19175,7 +20114,7 @@
   "id": "mysterio-spider-verse-expansion"
  },
  {
-  "name": "NORMANOSBORN",
+  "name": "NORMAN OSBORN (EARTH-90214)",
   "realName": "Norman Osborn",
   "rank": 1,
   "health": 30,
@@ -19241,10 +20180,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "normanosborn-spider-verse-expansion"
+  "id": "norman-osborn-earth-90214-spider-verse-expansion"
  },
  {
-  "name": "PRESIDENTNORMANOSBORN",
+  "name": "PRESIDENT NORMAN OSBORN",
   "realName": "Norman “Ozzy” Osborn",
   "rank": 4,
   "health": 120,
@@ -19326,7 +20265,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "presidentnormanosborn-spider-verse-expansion"
+  "id": "president-norman-osborn-spider-verse-expansion"
  },
  {
   "name": "PROWLER",
@@ -19407,7 +20346,7 @@
   "id": "prowler-spider-verse-expansion"
  },
  {
-  "name": "QUEENGOBLIN",
+  "name": "QUEEN GOBLIN",
   "realName": "Ashley Kafk a",
   "rank": 4,
   "health": 90,
@@ -19456,7 +20395,6 @@
     "set": "Basic",
     "names": [
      "Flight 2",
-     "Iconic Weapon",
      "Mighty 2",
      "Sturdy 1"
     ]
@@ -19497,10 +20435,10 @@
   "equipment": [
    "Pumpkin Scepter"
   ],
-  "id": "queengoblin-spider-verse-expansion"
+  "id": "queen-goblin-spider-verse-expansion"
  },
  {
-  "name": "REDGOBLIN",
+  "name": "RED GOBLIN",
   "realName": "Norman Harold “Normie” Osborn",
   "rank": 3,
   "health": 90,
@@ -19570,7 +20508,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "redgoblin-spider-verse-expansion"
+  "id": "red-goblin-spider-verse-expansion"
  },
  {
   "name": "REK-RAP",
@@ -19722,7 +20660,7 @@
   "id": "rhino-spider-verse-expansion"
  },
  {
-  "name": "THEROSE",
+  "name": "THE ROSE",
   "realName": "Richard Fisk",
   "rank": 2,
   "health": 30,
@@ -19790,7 +20728,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "therose-spider-verse-expansion"
+  "id": "the-rose-spider-verse-expansion"
  },
  {
   "name": "SANDMAN",
@@ -19874,7 +20812,7 @@
   "id": "sandman-spider-verse-expansion"
  },
  {
-  "name": "SCARLETSPIDER",
+  "name": "SCARLET SPIDER",
   "realName": "Kaine Parker",
   "rank": 4,
   "health": 120,
@@ -19950,7 +20888,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "scarletspider-spider-verse-expansion"
+  "id": "scarlet-spider-spider-verse-expansion"
  },
  {
   "name": "SCORPION",
@@ -20443,7 +21381,6 @@
      "Environmental Protection",
      "Healing Factor",
      "Heightened Senses 1",
-     "Iconic Weapon",
      "Mighty 1"
     ]
    },
@@ -20690,8 +21627,7 @@
     "set": "Basic",
     "names": [
      "Accuracy 2",
-     "Combat Trickery",
-     "Iconic Weapon"
+     "Combat Trickery"
     ]
    },
    {
@@ -20875,7 +21811,7 @@
   "id": "sp-dr-spider-verse-expansion"
  },
  {
-  "name": "SPEEDDEMON",
+  "name": "SPEED DEMON",
   "realName": "James Sanders",
   "rank": 3,
   "health": 60,
@@ -20944,7 +21880,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "speeddemon-spider-verse-expansion"
+  "id": "speed-demon-spider-verse-expansion"
  },
  {
   "name": "SPIDER-BOY",
@@ -21248,7 +22184,7 @@
   "id": "spider-ham-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MAN",
+  "name": "SPIDER-MAN (EARTH-1610)",
   "realName": "Peter Parker",
   "rank": 3,
   "health": 60,
@@ -21316,10 +22252,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-man-spider-verse-expansion"
+  "id": "spider-man-earth-1610-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MAN",
+  "name": "SPIDER-MAN (EARTH-6160)",
   "realName": "Peter Parker",
   "rank": 3,
   "health": 90,
@@ -21393,10 +22329,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-man-peter-parker-spider-verse-expansion"
+  "id": "spider-man-earth-6160-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MAN",
+  "name": "SPIDER-MAN (MILES MORALES)",
   "realName": "Miles Morales",
   "rank": 4,
   "health": 90,
@@ -21476,7 +22412,7 @@
   "id": "spider-man-miles-morales-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MAN",
+  "name": "SPIDER-MAN (MILES MORALES) (EARTH-1048)",
   "realName": "Miles Morales",
   "rank": 4,
   "health": 90,
@@ -21553,10 +22489,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-man-miles-morales-spider-verse-expansion"
+  "id": "spider-man-miles-morales-earth-1048-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MAN",
+  "name": "SPIDER-MAN (PETER PARKER) (EARLY DAYS)",
   "realName": "Peter Parker",
   "rank": 2,
   "health": 30,
@@ -21619,10 +22555,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-man-peter-parker-spider-verse-expansion"
+  "id": "spider-man-peter-parker-early-days-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MAN",
+  "name": "SPIDER-MAN (PETER PARKER) (EARTH-1048)",
   "realName": "Peter Parker",
   "rank": 4,
   "health": 90,
@@ -21698,10 +22634,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-man-peter-parker-spider-verse-expansion"
+  "id": "spider-man-peter-parker-earth-1048-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MAN2099",
+  "name": "SPIDER-MAN 2099",
   "realName": "Miguel O’Hara",
   "rank": 4,
   "health": 90,
@@ -21779,10 +22715,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-man2099-spider-verse-expansion"
+  "id": "spider-man-2099-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MANINDIA",
+  "name": "SPIDER-MAN INDIA",
   "realName": "Pavitr Prabhakar",
   "rank": 3,
   "health": 60,
@@ -21850,10 +22786,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-manindia-spider-verse-expansion"
+  "id": "spider-man-india-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-MANNOIR",
+  "name": "SPIDER-MAN NOIR",
   "realName": "Peter Parker",
   "rank": 4,
   "health": 60,
@@ -21931,7 +22867,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-mannoir-spider-verse-expansion"
+  "id": "spider-man-noir-spider-verse-expansion"
  },
  {
   "name": "SPIDER-PUNK",
@@ -22164,7 +23100,7 @@
   "id": "spiders-man-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-WOMAN",
+  "name": "SPIDER-WOMAN (EARTH-1610)",
   "realName": "Jessica Drew",
   "rank": 3,
   "health": 90,
@@ -22236,10 +23172,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-woman-spider-verse-expansion"
+  "id": "spider-woman-earth-1610-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-WOMAN",
+  "name": "SPIDER-WOMAN (EARTH-332)",
   "realName": "Jessica “Jess” Drew",
   "rank": 4,
   "health": 90,
@@ -22316,10 +23252,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-woman-jessica-jess-drew-spider-verse-expansion"
+  "id": "spider-woman-earth-332-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-WOMAN",
+  "name": "SPIDER-WOMAN (JESSICA DREW)",
   "realName": "Jessica Miriam “Jess” Drew",
   "rank": 4,
   "health": 90,
@@ -22398,10 +23334,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-woman-jessica-miriam-jess-drew-spider-verse-expansion"
+  "id": "spider-woman-jessica-drew-spider-verse-expansion"
  },
  {
-  "name": "SPIDER-WOMAN",
+  "name": "SPIDER-WOMAN (MATTIE FRANKLIN)",
   "realName": "Martha “Mattie” Franklin",
   "rank": 3,
   "health": 60,
@@ -22471,7 +23407,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "spider-woman-martha-mattie-franklin-spider-verse-expansion"
+  "id": "spider-woman-mattie-franklin-spider-verse-expansion"
  },
  {
   "name": "SPOT",
@@ -22707,7 +23643,7 @@
   "id": "stegron-spider-verse-expansion"
  },
  {
-  "name": "SUPERIORSPIDER-MAN",
+  "name": "SUPERIOR SPIDER-MAN",
   "realName": "Otto Octavius",
   "rank": 4,
   "health": 90,
@@ -22785,7 +23721,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "superiorspider-man-spider-verse-expansion"
+  "id": "superior-spider-man-spider-verse-expansion"
  },
  {
   "name": "SWARM",
@@ -22865,7 +23801,7 @@
   "id": "swarm-spider-verse-expansion"
  },
  {
-  "name": "SYMBIOTE",
+  "name": "SYMBIOTE (UNBONDED)",
   "realName": "Varies",
   "rank": 1,
   "health": 30,
@@ -22918,10 +23854,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "symbiote-spider-verse-expansion"
+  "id": "symbiote-unbonded-spider-verse-expansion"
  },
  {
-  "name": "SYMBIOTEDRAGON",
+  "name": "SYMBIOTE DRAGON",
   "realName": "Varies",
   "rank": 3,
   "health": 120,
@@ -22997,10 +23933,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "symbiotedragon-spider-verse-expansion"
+  "id": "symbiote-dragon-spider-verse-expansion"
  },
  {
-  "name": "SYMBIOTESPIDER-MAN",
+  "name": "SYMBIOTE SPIDER-MAN",
   "realName": "Peter Parker",
   "rank": 5,
   "health": 150,
@@ -23079,10 +24015,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "symbiotespider-man-spider-verse-expansion"
+  "id": "symbiote-spider-man-spider-verse-expansion"
  },
  {
-  "name": "TERESAPARKER",
+  "name": "TERESA PARKER",
   "realName": "Teresa Elizabeth Parker",
   "rank": 3,
   "health": 60,
@@ -23159,7 +24095,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "teresaparker-spider-verse-expansion"
+  "id": "teresa-parker-spider-verse-expansion"
  },
  {
   "name": "TINKERER",
@@ -23477,7 +24413,7 @@
   "id": "venom-spider-verse-expansion"
  },
  {
-  "name": "VENOM",
+  "name": "VENOM (EARTH-1048)",
   "realName": "Harold “Harry” Osborn",
   "rank": 4,
   "health": 120,
@@ -23558,10 +24494,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "venom-harold-harry-osborn-spider-verse-expansion"
+  "id": "venom-earth-1048-spider-verse-expansion"
  },
  {
-  "name": "VENTURE2099",
+  "name": "VENTURE 2099",
   "realName": "Unknown",
   "rank": 3,
   "health": 90,
@@ -23633,7 +24569,7 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "venture2099-spider-verse-expansion"
+  "id": "venture-2099-spider-verse-expansion"
  },
  {
   "name": "VERMIN",
@@ -23793,7 +24729,7 @@
   "id": "vulture-spider-verse-expansion"
  },
  {
-  "name": "WHITERABBIT",
+  "name": "WHITE RABBIT",
   "realName": "Lorina Dodson",
   "rank": 2,
   "health": 60,
@@ -23862,10 +24798,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "whiterabbit-spider-verse-expansion"
+  "id": "white-rabbit-spider-verse-expansion"
  },
  {
-  "name": "WRAITH",
+  "name": "WRAITH (EARTH-1048)",
   "realName": "Yuriko “Yuri” Watanabe",
   "rank": 2,
   "health": 30,
@@ -23929,10 +24865,10 @@
   ],
   "genre": "core",
   "source": "Spider-Verse Expansion",
-  "id": "wraith-spider-verse-expansion"
+  "id": "wraith-earth-1048-spider-verse-expansion"
  },
  {
-  "name": "3-DMAN",
+  "name": "3-D MAN",
   "realName": "Delroy Garrett Jr.",
   "rank": 3,
   "health": 90,
@@ -24003,10 +24939,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "3-dman-avengers-expansion"
+  "id": "3-d-man-avengers-expansion"
  },
  {
-  "name": "ABSORBINGMAN",
+  "name": "ABSORBING MAN",
   "realName": "Carl “Crusher” Creel",
   "rank": 4,
   "health": 180,
@@ -24055,7 +24991,6 @@
     "set": "Basic",
     "names": [
      "Environmental Protection",
-     "Iconic Item",
      "Mighty 1",
      "Sturdy 1"
     ]
@@ -24084,12 +25019,9 @@
      "Crushing Grip",
      "Immovable",
      "Jump 1",
-     "Smash Absorbing Man’s Ball Chain Powers:",
      "Eff ect Options",
      "Returns When Thrown",
-     "Weapon: Range: Reach +1/10, Melee/Agility Damage Multiplier bonus: +1/+1. Restrictions:",
-     "Carried",
-     "Use: Must use the same eff ect options as the Absorbing Man. Power Value: 1"
+     "Carried"
     ]
    }
   ],
@@ -24098,10 +25030,10 @@
   "equipment": [
    "Ball & Chain"
   ],
-  "id": "absorbingman-avengers-expansion"
+  "id": "absorbing-man-avengers-expansion"
  },
  {
-  "name": "ALL-FATHERTHOR",
+  "name": "ALL-FATHER THOR",
   "realName": "Thor Odinson",
   "rank": 6,
   "health": 240,
@@ -24161,7 +25093,6 @@
     "names": [
      "Discipline 1",
      "Flight 2",
-     "Iconic Item",
      "Mighty 4",
      "Sturdy 2"
     ]
@@ -24194,10 +25125,9 @@
      "Summon Portal",
      "Summonable",
      "Uru",
-     "Weapon: Range: Reach/ Unlimited, Melee/Agility Dama Multiplier bonus: +1. Restrictions:",
      "Can only be used by someone with the Worthy tag.",
      "Carried",
-     "Flashy Power Value: 22 (2 for Thor, since he already has most of the powers granted)"
+     "Flashy"
     ]
    }
   ],
@@ -24206,10 +25136,10 @@
   "equipment": [
    "Mjolnir"
   ],
-  "id": "all-fatherthor-avengers-expansion"
+  "id": "all-father-thor-avengers-expansion"
  },
  {
-  "name": "AMERICANDREAM",
+  "name": "AMERICAN DREAM",
   "realName": "Shannon Carter",
   "rank": 3,
   "health": 60,
@@ -24256,7 +25186,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration"
     ]
    },
@@ -24276,14 +25205,11 @@
     "names": [
      "Change of Plans",
      "Combat Support",
-     "Keep Moving Captain America’s Shield Powers:",
      "Reduced Focus",
      "Shield 1",
      "Stackable",
-     "Weapon: Range: Reach/10, Melee/Agility Damage Multiplierbonus: +1. Restrictions:",
      "Carried",
-     "Flashy",
-     "Requires: Shield 1 power Power Value: 1"
+     "Flashy"
     ]
    }
   ],
@@ -24292,7 +25218,7 @@
   "equipment": [
    "Captain America"
   ],
-  "id": "americandream-avengers-expansion"
+  "id": "american-dream-avengers-expansion"
  },
  {
   "name": "ARES",
@@ -24433,7 +25359,6 @@
     "set": "Basic",
     "names": [
      "Accuracy 2",
-     "Iconic Item",
      "Inspiration",
      "Mighty 2",
      "Sturdy 2"
@@ -24455,12 +25380,10 @@
      "Focused Fury",
      "Furious Attacks",
      "Vicious Attack",
-     "Whirling Frenzy Arkon’s Lightning Bolts Powers:",
      "Elemental Blast (Electricity)",
      "Elemental Burst (Electricity)",
-     "Weapon: Range: 10 spaces, Agility Damage Multiplier bonus: +1. Restrictions:",
      "Carried",
-     "Flashy Power Value: 1"
+     "Flashy"
     ]
    }
   ],
@@ -24557,7 +25480,7 @@
   "id": "attuma-avengers-expansion"
  },
  {
-  "name": "AVENGERPRIME",
+  "name": "AVENGER PRIME",
   "realName": "Loki Laufeyson",
   "rank": 6,
   "health": 210,
@@ -24658,10 +25581,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "avengerprime-avengers-expansion"
+  "id": "avenger-prime-avengers-expansion"
  },
  {
-  "name": "BLACKANT",
+  "name": "BLACK ANT",
   "realName": "Eric O’Grady",
   "rank": 3,
   "health": 120,
@@ -24734,10 +25657,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "blackant-avengers-expansion"
+  "id": "black-ant-avengers-expansion"
  },
  {
-  "name": "BLACKDWARF",
+  "name": "BLACK DWARF",
   "realName": "Black Dwarf",
   "rank": 4,
   "health": 180,
@@ -24811,10 +25734,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "blackdwarf-avengers-expansion"
+  "id": "black-dwarf-avengers-expansion"
  },
  {
-  "name": "BLACKKNIGHT",
+  "name": "BLACK KNIGHT",
   "realName": "Dane Whitman",
   "rank": 4,
   "health": 90,
@@ -24864,7 +25787,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration",
      "Sturdy 1"
     ]
@@ -24887,10 +25809,9 @@
      "Shield of the Seraphim (20 points to shatter)",
      "Summonable",
      "Unkillable",
-     "Weapon: Range: Reach, Melee Damage Multiplier bonus: +2. Restrictions:",
      "Carried",
      "Menacing",
-     "Unkillable power usable only by descendants of King Arthur Power Value: 7"
+     "Unkillable power usable only by descendants of King Arthur"
     ]
    }
   ],
@@ -24899,10 +25820,10 @@
   "equipment": [
    "Ebony Blade"
   ],
-  "id": "blackknight-avengers-expansion"
+  "id": "black-knight-avengers-expansion"
  },
  {
-  "name": "BLACKPANTHER",
+  "name": "BLACK PANTHER (SHURI)",
   "realName": "Shuri",
   "rank": 5,
   "health": 90,
@@ -24958,7 +25879,6 @@
     "names": [
      "Brilliance 1",
      "Heightened Senses 1",
-     "Iconic Item",
      "Inspiration",
      "Mighty 1",
      "Sturdy 2"
@@ -24991,10 +25911,8 @@
      "Focus Fire",
      "Keep Moving",
      "On Your Feet",
-     "Operations Center Black Panther’s Claws Powers:",
      "Anti-Metal: Ignores Health Damage Reduction",
-     "Weapon: Range: Reach, Melee Damage Multiplier bonus: +1. Restrictions:",
-     "Worn Power Value: 1"
+     "Worn"
     ]
    }
   ],
@@ -25003,10 +25921,10 @@
   "equipment": [
    "Black Panther’s Claws"
   ],
-  "id": "blackpanther-avengers-expansion"
+  "id": "black-panther-shuri-avengers-expansion"
  },
  {
-  "name": "BLACKPANTHER",
+  "name": "BLACK PANTHER (T’CHALLA)",
   "realName": "T’Challa",
   "rank": 5,
   "health": 90,
@@ -25061,7 +25979,6 @@
      "Combat Trickery",
      "Discipline 1",
      "Heightened Senses 1",
-     "Iconic Item",
      "Inspiration",
      "Mighty 1",
      "Sturdy 2"
@@ -25090,10 +26007,8 @@
      "Change of Plans",
      "Combat Support",
      "Focus Fire",
-     "Operations Center Black Panther’s Claws Powers:",
      "Anti-Metal: Ignores Health Damage Reduction",
-     "Weapon: Range: Reach, Melee Damage Multiplier bonus: +1. Restrictions:",
-     "Worn Power Value: 1"
+     "Worn"
     ]
    }
   ],
@@ -25102,10 +26017,10 @@
   "equipment": [
    "Black Panther’s Claws"
   ],
-  "id": "blackpanther-tchalla-avengers-expansion"
+  "id": "black-panther-tchalla-avengers-expansion"
  },
  {
-  "name": "BLACKSWAN",
+  "name": "BLACK SWAN",
   "realName": "Yabbat Ummon Turru",
   "rank": 5,
   "health": 120,
@@ -25192,10 +26107,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "blackswan-avengers-expansion"
+  "id": "black-swan-avengers-expansion"
  },
  {
-  "name": "BLACKWIDOW",
+  "name": "BLACK WIDOW (WITH SYMBIOTE)",
   "realName": "Natasha Romanoff",
   "rank": 4,
   "health": 90,
@@ -25245,7 +26160,6 @@
     "set": "Basic",
     "names": [
      "Environmental Protection",
-     "Iconic Item",
      "Inspiration",
      "Mighty 1",
      "Slow-Motion Dodge"
@@ -25278,10 +26192,8 @@
    {
     "set": "Tactics",
     "names": [
-     "Change of Plans Widow’s Bite Powers:",
      "Eff ect Options: These blasts can count as either Electricity attacks or Force attacks.",
-     "Weapon: Range: 10 spaces, Agility Damage Multiplier bonus: +1. Restrictions:",
-     "Worn Power Value: 1"
+     "Worn"
     ]
    }
   ],
@@ -25290,10 +26202,10 @@
   "equipment": [
    "Widow’s Bite"
   ],
-  "id": "blackwidow-avengers-expansion"
+  "id": "black-widow-with-symbiote-avengers-expansion"
  },
  {
-  "name": "BLACKWIDOW",
+  "name": "BLACK WIDOW (EARTH-1610)",
   "realName": "Natasha Romanov",
   "rank": 4,
   "health": 90,
@@ -25364,25 +26276,27 @@
    {
     "set": "Tactics",
     "names": [
-     "Change of Plans Black Widow’s Battle Suit Powers:",
      "Elemental Barrage (Energy)",
      "Elemental Blast (Energy)",
      "Elemental Burst (Energy)",
      "Flight 2",
      "Mighty 1",
      "Sturdy 1",
-     "Wallcrawling Restrictions:",
+     "Wallcrawling",
      "Flashy",
-     "Worn Power Value: 6"
+     "Worn"
     ]
    }
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "blackwidow-natasha-romanov-avengers-expansion"
+  "equipment": [
+   "Black Widow (Earth-1610)’s Battle Suit"
+  ],
+  "id": "black-widow-earth-1610-avengers-expansion"
  },
  {
-  "name": "BRUCEBANNER",
+  "name": "BRUCE BANNER",
   "realName": "Robert Bruce Banner",
   "rank": 1,
   "health": 10,
@@ -25441,10 +26355,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "brucebanner-avengers-expansion"
+  "id": "bruce-banner-avengers-expansion"
  },
  {
-  "name": "CAPTAINAMERICA",
+  "name": "CAPTAIN AMERICA (BUCKY BARNES)",
   "realName": "James Buchanan “Bucky” Barnes",
   "rank": 4,
   "health": 90,
@@ -25495,7 +26409,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration",
      "Mighty 1"
     ]
@@ -25524,14 +26437,11 @@
      "Hurled Shield Block",
      "Rico-Shield",
      "Shield 2 (Shield 3 with Iconic Item)",
-     "Shield Bash Captain America’s Shield Powers:",
      "Reduced Focus",
      "Shield 1",
      "Stackable",
-     "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
      "Carried",
-     "Flashy",
-     "Requires: Shield 1 power Power Value: 1"
+     "Flashy"
     ]
    }
   ],
@@ -25540,10 +26450,10 @@
   "equipment": [
    "Captain America’s Shield"
   ],
-  "id": "captainamerica-avengers-expansion"
+  "id": "captain-america-bucky-barnes-avengers-expansion"
  },
  {
-  "name": "CAPTAINAMERICA",
+  "name": "CAPTAIN AMERICA (EARLY DAYS)",
   "realName": "Steve Rogers",
   "rank": 3,
   "health": 90,
@@ -25616,10 +26526,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "captainamerica-steve-rogers-avengers-expansion"
+  "id": "captain-america-early-days-avengers-expansion"
  },
  {
-  "name": "CAPTAINAMERICA",
+  "name": "CAPTAIN AMERICA (EARTH-1610)",
   "realName": "Steven “Steve” Rogers",
   "rank": 4,
   "health": 120,
@@ -25665,7 +26575,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration",
      "Mighty 1"
     ]
@@ -25694,14 +26603,11 @@
     "names": [
      "Battle Plan",
      "Change of Plans",
-     "Keep Moving Captain America’s Shield Powers:",
      "Reduced Focus",
      "Shield 1",
      "Stackable",
-     "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
      "Carried",
-     "Flashy",
-     "Requires: Shield 1 power Power Value: 1"
+     "Flashy"
     ]
    }
   ],
@@ -25710,10 +26616,10 @@
   "equipment": [
    "Captain America’s Shield"
   ],
-  "id": "captainamerica-steven-steve-rogers-avengers-expansion"
+  "id": "captain-america-earth-1610-avengers-expansion"
  },
  {
-  "name": "CAPTAINAMERICAOFTHERAILWAYS",
+  "name": "CAPTAIN AMERICA OF THE RAILWAYS",
   "realName": "Aaron Fischer",
   "rank": 3,
   "health": 60,
@@ -25764,7 +26670,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration"
     ]
    },
@@ -25788,9 +26693,8 @@
      "Shield Deflection Captain America of the Railways’ Shield Powers:",
      "Shield 1",
      "Stackable",
-     "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
      "Carried",
-     "Flashy Power Value: 1"
+     "Flashy"
     ]
    }
   ],
@@ -25799,10 +26703,10 @@
   "equipment": [
    "Captain America of the Railways’ Shield"
   ],
-  "id": "captainamericaoftherailways-avengers-expansion"
+  "id": "captain-america-of-the-railways-avengers-expansion"
  },
  {
-  "name": "CONTESSAVALENTINAALLEGRADEFONTAINE",
+  "name": "CONTESSA VALENTINA ALLEGRA DE FONTAINE",
   "realName": "Unknown",
   "rank": 3,
   "health": 60,
@@ -25879,10 +26783,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "contessavalentinaallegradefontaine-avengers-expansion"
+  "id": "contessa-valentina-allegra-de-fontaine-avengers-expansion"
  },
  {
-  "name": "COUNTNEFARIA",
+  "name": "COUNT NEFARIA",
   "realName": "Luchino Nefaria",
   "rank": 6,
   "health": 150,
@@ -25985,10 +26889,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "countnefaria-avengers-expansion"
+  "id": "count-nefaria-avengers-expansion"
  },
  {
-  "name": "CORVUSGLAIVE",
+  "name": "CORVUS GLAIVE",
   "realName": "Corvus Glaive",
   "rank": 4,
   "health": 90,
@@ -26036,7 +26940,6 @@
     "set": "Basic",
     "names": [
      "Brilliance 1",
-     "Iconic Item",
      "Inspiration",
      "Mighty 1"
     ]
@@ -26062,10 +26965,8 @@
      "Hit the Dirt",
      "Keep Moving",
      "On Your Feet",
-     "Operations Center Corvus Glaive’s Glaive Powers:",
      "Unkillable",
-     "Weapon: Range: Reach + 1, Melee Damage Multiplier bonus: +2. Restrictions:",
-     "Carried Power Value: 1"
+     "Carried"
     ]
    }
   ],
@@ -26074,7 +26975,7 @@
   "equipment": [
    "Corvus Glaive’s Glaive"
   ],
-  "id": "corvusglaive-avengers-expansion"
+  "id": "corvus-glaive-avengers-expansion"
  },
  {
   "name": "DESTROYER",
@@ -26128,7 +27029,6 @@
     "set": "Basic",
     "names": [
      "Accuracy 1",
-     "Iconic Item",
      "Sturdy 1"
     ]
    },
@@ -26153,10 +27053,8 @@
     "names": [
      "Double Tap",
      "Point-Blank Parry",
-     "Suppressive Fire Destroyer’s Energy Baton Powers:",
      "Neganite",
-     "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1 Restrictions:",
-     "Carried Power Value: 1"
+     "Carried"
     ]
    }
   ],
@@ -26168,7 +27066,7 @@
   "id": "destroyer-avengers-expansion"
  },
  {
-  "name": "EBONYMAW",
+  "name": "EBONY MAW",
   "realName": "Ebony Maw",
   "rank": 4,
   "health": 90,
@@ -26252,7 +27150,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "ebonymaw-avengers-expansion"
+  "id": "ebony-maw-avengers-expansion"
  },
  {
   "name": "EXECUTIONER",
@@ -26305,7 +27203,6 @@
     "set": "Basic",
     "names": [
      "Environmental Protection",
-     "Iconic Item",
      "Mighty 4",
      "Sturdy 1"
     ]
@@ -26329,9 +27226,8 @@
      "Godkiller",
      "Power Slider (Bloodied): If the user gets a Fantastic success on an attack with this weapon and causes bleeding, their powers are boosted. If they are knocked unconscious by a foe in battle, they die.",
      "Uru",
-     "Weapon: Range: Reach/ unlimited, Melee/Agility Damage Multiplier bonus: +2. Restrictions:",
      "Carried",
-     "Flashy Power Value: 2"
+     "Flashy"
     ]
    }
   ],
@@ -26343,7 +27239,7 @@
   "id": "executioner-avengers-expansion"
  },
  {
-  "name": "FALCON",
+  "name": "FALCON (JOAQUIN TORRES)",
   "realName": "Joaquin Torres",
   "rank": 3,
   "health": 60,
@@ -26416,10 +27312,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "falcon-avengers-expansion"
+  "id": "falcon-joaquin-torres-avengers-expansion"
  },
  {
-  "name": "FALCON",
+  "name": "FALCON (SAM WILSON)",
   "realName": "Samuel Thomas “Sam” Wilson",
   "rank": 4,
   "health": 90,
@@ -26503,10 +27399,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "falcon-samuel-thomas-sam-wilson-avengers-expansion"
+  "id": "falcon-sam-wilson-avengers-expansion"
  },
  {
-  "name": "GHOSTRIDER",
+  "name": "GHOST RIDER (JOHNNY BLAZE)",
   "realName": "Robbie Reyes",
   "rank": 5,
   "health": 150,
@@ -26589,7 +27485,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "ghostrider-avengers-expansion"
+  "id": "ghost-rider-johnny-blaze-avengers-expansion"
  },
  {
   "name": "GIANT-MAN",
@@ -26672,7 +27568,7 @@
   "id": "giant-man-avengers-expansion"
  },
  {
-  "name": "GGWWEENNPPOOOOLL",
+  "name": "GWENPOOL",
   "realName": "Gwendolyn “Gwen” Poole",
   "rank": 3,
   "health": 90,
@@ -26687,6 +27583,9 @@
    "logic": 1
   },
   "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
    "jump": 3
   },
   "occupation": "Adventurer",
@@ -26741,10 +27640,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "ggwweennppooooll-avengers-expansion"
+  "id": "gwenpool-avengers-expansion"
  },
  {
-  "name": "HAWKEYE",
+  "name": "HAWKEYE (EARTH-1610)",
   "realName": "Clint Barton",
   "rank": 3,
   "health": 60,
@@ -26818,10 +27717,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "hawkeye-avengers-expansion"
+  "id": "hawkeye-earth-1610-avengers-expansion"
  },
  {
-  "name": "HAWKEYE",
+  "name": "HAWKEYE (CLINT BARTON)",
   "realName": "Clinton Francis “Clint” Barton",
   "rank": 3,
   "health": 60,
@@ -26872,7 +27771,6 @@
     "set": "Basic",
     "names": [
      "Accuracy 3",
-     "Iconic Item",
      "Slow-Motion Dodge"
     ]
    },
@@ -26891,10 +27789,9 @@
      "Snap Shooting",
      "Sniping",
      "Stopping Power",
-     "Weapons Blazing Hawkeye’s Trick Quiver Powers:",
      "Toolkit",
-     "Eff ect Options: Each arrow the character shoots can have a diff erent elemental eff ect their choice. Restrictions:",
-     "Worn Power Value: 1"
+     "Eff ect Options: Each arrow the character shoots can have a diff erent elemental eff ect their choice.",
+     "Worn"
     ]
    }
   ],
@@ -26903,7 +27800,7 @@
   "equipment": [
    "Hawkeye’s Trick Quiver"
   ],
-  "id": "hawkeye-clinton-francis-clint-barton-avengers-expansion"
+  "id": "hawkeye-clint-barton-avengers-expansion"
  },
  {
   "name": "HERCULES",
@@ -26986,7 +27883,7 @@
   "id": "hercules-avengers-expansion"
  },
  {
-  "name": "HIGHEVOLUTIONARY",
+  "name": "HIGH EVOLUTIONARY",
   "realName": "Herbert Edgar Wyndham",
   "rank": 4,
   "health": 120,
@@ -27044,7 +27941,6 @@
      "Levitation",
      "Telekinetic Attack",
      "Telekinetic Grab",
-     "Telekinetic Manipulation High Evolutionary’s Armor Powers:",
      "Accuracy 1",
      "Elemental Barrier (Energy)",
      "Elemental Blast (Energy)",
@@ -27053,18 +27949,21 @@
      "Environmental Protection",
      "Healing Factor",
      "Mighty 1",
-     "Sturdy 1 Restrictions:",
+     "Sturdy 1",
      "Menacing",
-     "Worn Power Value: 8"
+     "Worn"
     ]
    }
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "highevolutionary-avengers-expansion"
+  "equipment": [
+   "High Evolutionary’s Armor"
+  ],
+  "id": "high-evolutionary-avengers-expansion"
  },
  {
-  "name": "HULK",
+  "name": "HULK (PROFESSOR HULK)",
   "realName": "Robert Bruce Banner",
   "rank": 5,
   "health": 180,
@@ -27140,10 +28039,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "hulk-avengers-expansion"
+  "id": "hulk-professor-hulk-avengers-expansion"
  },
  {
-  "name": "HULK",
+  "name": "HULK (SAVAGE)",
   "realName": "Robert Bruce Banner",
   "rank": 6,
   "health": 270,
@@ -27223,7 +28122,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "hulk-robert-bruce-banner-avengers-expansion"
+  "id": "hulk-savage-avengers-expansion"
  },
  {
   "name": "HULKLING",
@@ -27392,7 +28291,7 @@
   "id": "immortus-avengers-expansion"
  },
  {
-  "name": "IRONMAN",
+  "name": "IRON MAN (EARTH-1610)",
   "realName": "Antonio “Tony” Stark",
   "rank": 4,
   "health": 90,
@@ -27444,7 +28343,6 @@
     "names": [
      "Brilliance 2",
      "Combat Trickery",
-     "Inspiration Iron Man’s Armor Powers:",
      "Accuracy 1",
      "Elemental Barrage (Energy)",
      "Elemental Barrier (Energy)",
@@ -27457,18 +28355,21 @@
      "Invisibility",
      "Machine Telepathy",
      "Mighty 1",
-     "Sturdy 2 Restrictions:",
+     "Sturdy 2",
      "Flashy",
-     "Worn Power Value: 13"
+     "Worn"
     ]
    }
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "ironman-avengers-expansion"
+  "equipment": [
+   "Iron Man (Earth-1610)’s Armor"
+  ],
+  "id": "iron-man-earth-1610-avengers-expansion"
  },
  {
-  "name": "IRONMAN",
+  "name": "IRON MAN (HULKBUSTER ARMOR)",
   "realName": "Anthony “Tony” Stark",
   "rank": 6,
   "health": 270,
@@ -27548,10 +28449,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "ironman-anthony-tony-stark-avengers-expansion"
+  "id": "iron-man-hulkbuster-armor-avengers-expansion"
  },
  {
-  "name": "IRONMAN",
+  "name": "IRON MAN (MYSTERIUM ARMOR)",
   "realName": "Anthony “Tony” Stark",
   "rank": 5,
   "health": 180,
@@ -27630,7 +28531,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "ironman-anthony-tony-stark-avengers-expansion"
+  "id": "iron-man-mysterium-armor-avengers-expansion"
  },
  {
   "name": "J2",
@@ -27706,7 +28607,7 @@
   "id": "j2-avengers-expansion"
  },
  {
-  "name": "JEFFTHELANDSHARK",
+  "name": "JEFF THE LAND SHARK",
   "realName": "Jeff",
   "rank": 2,
   "health": 60,
@@ -27775,7 +28676,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "jeffthelandshark-avengers-expansion"
+  "id": "jeff-the-land-shark-avengers-expansion"
  },
  {
   "name": "JOCASTA",
@@ -27862,7 +28763,7 @@
   "id": "jocasta-avengers-expansion"
  },
  {
-  "name": "KIDJUGGERNAUT",
+  "name": "KID JUGGERNAUT",
   "realName": "Joon-Sung “Justin” Jin",
   "rank": 3,
   "health": 150,
@@ -27915,7 +28816,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration"
     ]
    },
@@ -27930,10 +28830,10 @@
      "Quick Toss",
      "Smash Shard of the Crimson Gem of Cyttorak Powers:",
      "Mighty 3",
-     "Sturdy 2 Restrictions:",
+     "Sturdy 2",
      "Flashy",
      "Large Tags:",
-     "Alternate Form Power Value: 3"
+     "Alternate Form"
     ]
    }
   ],
@@ -27942,7 +28842,7 @@
   "equipment": [
    "Shard of the Crimson Gem of Cyttorak"
   ],
-  "id": "kidjuggernaut-avengers-expansion"
+  "id": "kid-juggernaut-avengers-expansion"
  },
  {
   "name": "KLAW",
@@ -28193,7 +29093,7 @@
   "id": "mainframe-avengers-expansion"
  },
  {
-  "name": "MARVELBOY",
+  "name": "MARVEL BOY",
   "realName": "Noh-Varr",
   "rank": 4,
   "health": 90,
@@ -28278,10 +29178,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "marvelboy-avengers-expansion"
+  "id": "marvel-boy-avengers-expansion"
  },
  {
-  "name": "MELINDAMAY",
+  "name": "MELINDA MAY",
   "realName": "Melinda May",
   "rank": 2,
   "health": 30,
@@ -28348,7 +29248,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "melindamay-avengers-expansion"
+  "id": "melinda-may-avengers-expansion"
  },
  {
   "name": "METTLE",
@@ -28513,7 +29413,7 @@
   "id": "moonstone-avengers-expansion"
  },
  {
-  "name": "MS.MARVEL",
+  "name": "MS. MARVEL (EARLY DAYS)",
   "realName": "Carol Danvers",
   "rank": 3,
   "health": 90,
@@ -28590,7 +29490,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "ms-marvel-avengers-expansion"
+  "id": "ms-marvel-early-days-avengers-expansion"
  },
  {
   "name": "ODIN",
@@ -28783,7 +29683,7 @@
   "id": "patriot-avengers-expansion"
  },
  {
-  "name": "PROXIMAMIDNIGHT",
+  "name": "PROXIMA MIDNIGHT",
   "realName": "Proxima Midnight",
   "rank": 5,
   "health": 180,
@@ -28832,7 +29732,6 @@
     "set": "Basic",
     "names": [
      "Accuracy 1",
-     "Iconic Item",
      "Inspiration",
      "Mighty 2",
      "Sturdy 2"
@@ -28856,14 +29755,12 @@
      "Clobber",
      "Crushing Grip",
      "Immovable",
-     "Jump 1 Proxima Midnight’s Spear Powers:",
      "Elemental Barrage (Energy)",
      "Elemental Blast (Energy)",
      "Elemental Burst (Energy)",
      "Elemental Grab (Energy)",
-     "Weapon: Range: Reach + 1/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
      "Carried",
-     "Large Power Value: 3"
+     "Large"
     ]
    }
   ],
@@ -28872,7 +29769,7 @@
   "equipment": [
    "Proxima Midnight’s Spear"
   ],
-  "id": "proximamidnight-avengers-expansion"
+  "id": "proxima-midnight-avengers-expansion"
  },
  {
   "name": "QUAKE",
@@ -28964,7 +29861,7 @@
   "id": "quake-avengers-expansion"
  },
  {
-  "name": "RADIOACTIVEMAN",
+  "name": "RADIOACTIVE MAN",
   "realName": "Chen Lu",
   "rank": 4,
   "health": 120,
@@ -29045,10 +29942,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "radioactiveman-avengers-expansion"
+  "id": "radioactive-man-avengers-expansion"
  },
  {
-  "name": "REDHULK",
+  "name": "RED HULK",
   "realName": "Thaddeus E. “Thunderbolt” Ross",
   "rank": 6,
   "health": 270,
@@ -29144,7 +30041,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "redhulk-avengers-expansion"
+  "id": "red-hulk-avengers-expansion"
  },
  {
   "name": "SCORPIO",
@@ -29196,7 +30093,6 @@
     "names": [
      "Accuracy 2",
      "Combat Trickery",
-     "Iconic Item",
      "Slow-Motion Dodge"
     ]
    },
@@ -29211,8 +30107,8 @@
      "Elemental Barrier (Energy)",
      "Elemental Blast (Energy)",
      "Elemental Burst (Energy)",
-     "Elemental Protection 1 (Energy) (10 points to shatter) Restrictions:",
-     "Carried Power Value: 4"
+     "Elemental Protection 1 (Energy) (10 points to shatter)",
+     "Carried"
     ]
    }
   ],
@@ -29419,7 +30315,7 @@
   "id": "sersi-avengers-expansion"
  },
  {
-  "name": "SHANG-CHI",
+  "name": "SHANG-CHI (WITH THE TEN RINGS)",
   "realName": "Zheng Shang-Chi",
   "rank": 5,
   "health": 120,
@@ -29469,12 +30365,6 @@
   ],
   "powers": [
    {
-    "set": "Basic",
-    "names": [
-     "Iconic Item"
-    ]
-   },
-   {
     "set": "Martial Arts",
     "names": [
      "Attack Stance",
@@ -29498,8 +30388,7 @@
      "Flight 1",
      "Returns When Thrown",
      "Summon Portal",
-     "Weapon: Range: Reach/10 spaces, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
-     "Worn Power Value: 5"
+     "Worn"
     ]
    }
   ],
@@ -29508,7 +30397,7 @@
   "equipment": [
    "The Ten Rings"
   ],
-  "id": "shang-chi-avengers-expansion"
+  "id": "shang-chi-with-the-ten-rings-avengers-expansion"
  },
  {
   "name": "SHROUD",
@@ -29653,7 +30542,6 @@
     "set": "Basic",
     "names": [
      "Heightened Senses 2",
-     "Iconic Item",
      "Inspiration",
      "Mighty 2",
      "Sturdy 1",
@@ -29671,8 +30559,7 @@
      "Vicious Attack",
      "Whirling Frenzy Hofund Powers:",
      "Summon Portal",
-     "Weapon: Range: Reach, Melee Damage Multiplier bonus +2. Restrictions:",
-     "Carried Power Value: 1"
+     "Carried"
     ]
    }
   ],
@@ -30053,8 +30940,7 @@
    {
     "set": "Basic",
     "names": [
-     "Combat Trickery",
-     "Iconic Item"
+     "Combat Trickery"
     ]
    },
    {
@@ -30066,12 +30952,10 @@
      "Hit & Run",
      "Riposte",
      "Vicious Attack",
-     "Whirling Frenzy Swordsman’s Sword Powers:",
      "Bolts of Balthakk",
      "Flames of the Faltine",
      "Mists of Morpheus",
-     "Weapon: Range: Reach, Melee Damage Multiplier bonus: +2. Restrictions:",
-     "Carried Power Value: 3"
+     "Carried"
     ]
    }
   ],
@@ -30083,7 +30967,7 @@
   "id": "swordsman-avengers-expansion"
  },
  {
-  "name": "TEENIMMORTUS",
+  "name": "TEEN IMMORTUS",
   "realName": "Nathaniel Richards",
   "rank": 3,
   "health": 60,
@@ -30150,7 +31034,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "teenimmortus-avengers-expansion"
+  "id": "teen-immortus-avengers-expansion"
  },
  {
   "name": "TERMINUS",
@@ -30226,7 +31110,7 @@
   "id": "terminus-avengers-expansion"
  },
  {
-  "name": "THOR",
+  "name": "THOR (EARTH-1610)",
   "realName": "Thor Odinson",
   "rank": 5,
   "health": 180,
@@ -30281,7 +31165,6 @@
     "names": [
      "Discipline 1",
      "Flight 2",
-     "Iconic Item",
      "Mighty 4",
      "Sturdy 2 Mjolnir Powers:",
      "Control Weather 4",
@@ -30294,10 +31177,8 @@
      "Thunder",
      "Weather Chill",
      "Weather Warm (Earth-1610)",
-     "Weapon: Range: Reach/5, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
-     "Requires: Enhanced Physique trait and Mighty 2 power",
      "Carried",
-     "Flashy Power Value: 11"
+     "Flashy"
     ]
    }
   ],
@@ -30306,10 +31187,10 @@
   "equipment": [
    "Mjolnir"
   ],
-  "id": "thor-avengers-expansion"
+  "id": "thor-earth-1610-avengers-expansion"
  },
  {
-  "name": "THUNDERSTRIKE",
+  "name": "THUNDERSTRIKE (EARTH-982)",
   "realName": "Kevin “Kev” Masterson",
   "rank": 3,
   "health": 90,
@@ -30386,10 +31267,10 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "thunderstrike-avengers-expansion"
+  "id": "thunderstrike-earth-982-avengers-expansion"
  },
  {
-  "name": "TONYSTARK",
+  "name": "TONY STARK",
   "realName": "Anthony “Tony” Stark",
   "rank": 2,
   "health": 30,
@@ -30450,7 +31331,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "tonystark-avengers-expansion"
+  "id": "tony-stark-avengers-expansion"
  },
  {
   "name": "TRAPSTER",
@@ -30643,7 +31524,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration",
      "Mighty 1"
     ]
@@ -30669,14 +31549,11 @@
     "set": "Super-Strength",
     "names": [
      "Clobber",
-     "Crushing Grip U.S.Agent’s Shield Powers:",
      "Reduced Focus",
      "Shield 1",
      "Stackable",
-     "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
      "Carried",
-     "Flashy",
-     "Requires: Shield 1 power Power Value: 1"
+     "Flashy"
     ]
    }
   ],
@@ -31018,17 +31895,13 @@
      "Hit & Run",
      "Riposte",
      "Vicious Attack",
-     "Whirling Frenzy Whiplash’s Armor Powers:",
      "Flight 1",
-     "Iconic Item",
      "Mighty 1",
      "Sturdy 2",
-     "Summonable Restrictions:",
+     "Summonable",
      "Menacing",
-     "Worn Power Value: 4 Whiplash’s Energy Whips Powers:",
-     "Eff ect Options: These energy whips can count either Energy attacks or Sharp attacks.",
-     "Weapon: Range: Reach+1, Melee Damage Multiplier bonus: +1. Restrictions:",
-     "Worn Power Value: 1"
+     "Worn",
+     "Eff ect Options: These energy whips can count either Energy attacks or Sharp attacks."
     ]
    }
   ],
@@ -31123,7 +31996,7 @@
   "id": "whirlwind-avengers-expansion"
  },
  {
-  "name": "WHITEWIDOW",
+  "name": "WHITE WIDOW",
   "realName": "Yelena Belova",
   "rank": 3,
   "health": 60,
@@ -31170,7 +32043,6 @@
     "set": "Basic",
     "names": [
      "Accuracy 1",
-     "Iconic Item",
      "Inspiration",
      "Slow-Motion Dodge"
     ]
@@ -31195,10 +32067,8 @@
    {
     "set": "Tactics",
     "names": [
-     "Change of Plans Widow’s Bite Powers:",
      "Eff ect Options: These blasts can count as either electricity attacks or force attacks.",
-     "Weapon: Range: 10 spaces, Agility Damage Multiplier Bonus: +1. Restrictions:",
-     "Worn Power Value: 1"
+     "Worn"
     ]
    }
   ],
@@ -31207,7 +32077,7 @@
   "equipment": [
    "Widow’s Bite"
   ],
-  "id": "whitewidow-avengers-expansion"
+  "id": "white-widow-avengers-expansion"
  },
  {
   "name": "WICCAN",
@@ -31300,7 +32170,7 @@
   "id": "wiccan-avengers-expansion"
  },
  {
-  "name": "WONDERMAN",
+  "name": "WONDER MAN",
   "realName": "Simon Williams",
   "rank": 5,
   "health": 150,
@@ -31378,7 +32248,7 @@
   ],
   "genre": "core",
   "source": "Avengers Expansion",
-  "id": "wonderman-avengers-expansion"
+  "id": "wonder-man-avengers-expansion"
  },
  {
   "name": "ABYSS",
@@ -31600,7 +32470,6 @@
      "Environmental Protection",
      "Flight 2",
      "Heightened Senses 1",
-     "Iconic Item",
      "Inspiration",
      "Mighty 2",
      "Sturdy 1",
@@ -31628,9 +32497,9 @@
      "Elemental Push (Energy)",
      "Elemental Reinforcement (Energy)",
      "Energy Absorption (limited to Energy attacks)",
-     "Supernova (Energy) Restrictions:",
+     "Supernova (Energy)",
      "Carried",
-     "Flashy Power Value: 6"
+     "Flashy"
     ]
    }
   ],
@@ -31642,7 +32511,7 @@
   "id": "annihilus-secret-wars"
  },
  {
-  "name": "BARONKHONSHU",
+  "name": "BARON KHONSHU",
   "realName": "Khonshu",
   "rank": 6,
   "health": 210,
@@ -31734,7 +32603,7 @@
   ],
   "genre": "core",
   "source": "Secret Wars",
-  "id": "baronkhonshu-secret-wars"
+  "id": "baron-khonshu-secret-wars"
  },
  {
   "name": "BLASTAAR",
@@ -31908,7 +32777,7 @@
   "id": "builder-secret-wars"
  },
  {
-  "name": "CAPTAINMAR-VELL",
+  "name": "CAPTAIN MAR-VELL",
   "realName": "Mar-Vell",
   "rank": 6,
   "health": 180,
@@ -31964,7 +32833,6 @@
     "names": [
      "Accuracy 2",
      "Discipline 2",
-     "Iconic Item",
      "Inspiration",
      "Mighty 2 (Mighty 3 with Iconic Item)",
      "Wisdom"
@@ -31992,10 +32860,10 @@
      "Precognition 1",
      "Sturdy 2",
      "Supernova (Energy)",
-     "Warp Portal Restrictions:",
+     "Warp Portal",
      "Flashy",
      "Paired Item",
-     "Worn Power Value: 22 Value is 20."
+     "Worn"
     ]
    }
   ],
@@ -32004,7 +32872,7 @@
   "equipment": [
    "Nega-Bands"
   ],
-  "id": "captainmar-vell-secret-wars"
+  "id": "captain-mar-vell-secret-wars"
  },
  {
   "name": "CHARLIE-27",
@@ -32264,7 +33132,7 @@
   "id": "cosmo-secret-wars"
  },
  {
-  "name": "EXNIHILO",
+  "name": "EX NIHILO",
   "realName": "Ex Nihilo",
   "rank": 4,
   "health": 120,
@@ -32339,7 +33207,7 @@
   ],
   "genre": "core",
   "source": "Secret Wars",
-  "id": "exnihilo-secret-wars"
+  "id": "ex-nihilo-secret-wars"
  },
  {
   "name": "GLADIATOR",
@@ -32520,7 +33388,7 @@
   "id": "jo-venn-secret-wars"
  },
  {
-  "name": "MAJORVICTORY",
+  "name": "MAJOR VICTORY",
   "realName": "Vance Astro",
   "rank": 4,
   "health": 60,
@@ -32572,7 +33440,6 @@
     "names": [
      "Accuracy 1",
      "Brilliance 1",
-     "Iconic Item",
      "Inspiration",
      "Sturdy 1"
     ]
@@ -32604,10 +33471,8 @@
      "Reduced Focus",
      "Shield 1",
      "Stackable",
-     "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier: +1 Restrictions:",
      "Carried",
-     "Flashy",
-     "Requires: Shield 1 power Power Value: 1"
+     "Flashy"
     ]
    }
   ],
@@ -32616,10 +33481,10 @@
   "equipment": [
    "Captain America’s Shield"
   ],
-  "id": "majorvictory-secret-wars"
+  "id": "major-victory-secret-wars"
  },
  {
-  "name": "THEMAKER",
+  "name": "THE MAKER",
   "realName": "Reed Richards",
   "rank": 5,
   "health": 120,
@@ -32703,7 +33568,7 @@
   ],
   "genre": "core",
   "source": "Secret Wars",
-  "id": "themaker-secret-wars"
+  "id": "the-maker-secret-wars"
  },
  {
   "name": "MANTIS",
@@ -33130,7 +33995,7 @@
   "id": "nkalla-secret-wars"
  },
  {
-  "name": "NOVA",
+  "name": "NOVA (RICHARD RIDER)",
   "realName": "Richard “Rich” Rider",
   "rank": 6,
   "health": 150,
@@ -33181,7 +34046,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration",
      "Wisdom",
      "Wisecracker Nova Helmet: Centurion This powerful Nova Centurion helm a sentient repository of the lost civilization’s Origin: Weird Science Powers:",
@@ -33200,9 +34064,9 @@
      "Power Slider (Energy Supply)",
      "Sturdy 4",
      "Supernova (Energy)",
-     "Warp Portal Restrictions:",
+     "Warp Portal",
      "Flashy",
-     "Worn Power Value: 25 A.I. (Xandarian Worldmind)"
+     "Worn"
     ]
    }
   ],
@@ -33211,7 +34075,7 @@
   "equipment": [
    "Nova Helmet: Centurion"
   ],
-  "id": "nova-secret-wars"
+  "id": "nova-richard-rider-secret-wars"
  },
  {
   "name": "PSYCHO-MAN",
@@ -33263,7 +34127,6 @@
     "set": "Basic",
     "names": [
      "Brilliance 3",
-     "Iconic Item",
      "Inspiration",
      "Mighty 1",
      "Sturdy 2",
@@ -33277,8 +34140,8 @@
      "Change of Plans",
      "Keep Moving Control Box By pressing a button on this high-tech device, the user can manipulate oth- ers’ emotions. Origin: High Tech Powers:",
      "Control Emotion",
-     "Control Group Emotion Restrictions:",
-     "Carried Power Value: 1"
+     "Control Group Emotion",
+     "Carried"
     ]
    }
   ],
@@ -33513,7 +34376,7 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
+     "Iconic Item: The Starbrand The Starbrand This world-destroying weapon manifests Origin: Weird Science Powers:",
      "Accuracy 4",
      "Clobber",
      "Discipline 3",
@@ -33598,7 +34461,6 @@
    {
     "set": "Basic",
     "names": [
-     "Iconic Item",
      "Inspiration",
      "Uncanny 2 Stormbreaker Though this hammer goes by another name, Origin:",
      "Mythic: Asgardian Powers:",
@@ -33618,10 +34480,9 @@
      "Summonable",
      "Thunder",
      "Uru",
-     "Weapon: Range: Reach/Unlimited, Melee/Agility Damage Multiplier: +1 Restrictions:",
      "Can only be used by the worthy",
      "Carried",
-     "Flashy Power Value: 22"
+     "Flashy"
     ]
    }
   ],
@@ -33691,7 +34552,6 @@
      "Discipline 1",
      "Environmental Protection",
      "Flight 2",
-     "Iconic Item",
      "Mighty 4",
      "Power Cosmic",
      "Sturdy 3"
@@ -33724,8 +34584,7 @@
      "Vicious Attack",
      "Whirling Frenzy iconic item Cosmic Axe Cra(cid:28) ed by Galactus, this axe ments Terrax’s existing powers. Origin: Weird Science Powers:",
      "Eff ect Options (Earth/ Energy/Sharp)",
-     "Weapon: Range: Reach/ Unlimited; Melee/Agility Damage Multiplier: +2 Restrictions:",
-     "Carried Power Value: 1"
+     "Carried"
     ]
    }
   ],
@@ -33737,7 +34596,7 @@
   "id": "terrax-secret-wars"
  },
  {
-  "name": "THOROFHIGHERAVALON",
+  "name": "THOR OF HIGHER AVALON",
   "realName": "Thor Odinson",
   "rank": 5,
   "health": 180,
@@ -33791,7 +34650,7 @@
     "set": "Basic",
     "names": [
      "Brawling",
-     "Iconic Item",
+     "Iconic Item: Mjolnir Mjolnir “Whosoever holds this hammer, if they Origin: Mythic: Asgardian Powers:",
      "Asgardian Transformation",
      "Control Fog",
      "Control Weather 4",
@@ -33817,10 +34676,10 @@
   ],
   "genre": "core",
   "source": "Secret Wars",
-  "id": "thorofhigheravalon-secret-wars"
+  "id": "thor-of-higher-avalon-secret-wars"
  },
  {
-  "name": "VALERIARICHARDS",
+  "name": "VALERIA RICHARDS",
   "realName": "Valeria Richards",
   "rank": 2,
   "health": 30,
@@ -33878,7 +34737,7 @@
   ],
   "genre": "core",
   "source": "Secret Wars",
-  "id": "valeriarichards-secret-wars"
+  "id": "valeria-richards-secret-wars"
  },
  {
   "name": "VICTORIOUS",
@@ -34045,7 +34904,7 @@
   "id": "volcana-secret-wars"
  },
  {
-  "name": "WEAPONXWOLVERINE",
+  "name": "WEAPON X WOLVERINE",
   "realName": "James “Logan” Howlett",
   "rank": 4,
   "health": 150,
@@ -34100,7 +34959,6 @@
      "Combat Trickery",
      "Healing Factor",
      "Heightened Senses 1",
-     "Iconic Item",
      "Reinforced Skeleton"
     ]
    },
@@ -34117,8 +34975,7 @@
      "Vicious Attack",
      "Whirling Frenzy Adamantium Claws A set of retractable claws embedded the user’s limbs, fashioned from razor- sharp adamantium. Origin: High Tech: Cybernetics Powers:",
      "Adamantium: Ignores level of Health Damage Reduction.",
-     "Weapon: Range: Reach; Melee Damage Multiplier: Restrictions:",
-     "Healing Factor–powered characters only Power Value: 1"
+     "Healing Factor–powered characters only"
     ]
    }
   ],
@@ -34127,7 +34984,7 @@
   "equipment": [
    "Adamantium Claws"
   ],
-  "id": "weaponxwolverine-secret-wars"
+  "id": "weapon-x-wolverine-secret-wars"
  },
  {
   "name": "WIZARD",
@@ -34177,9 +35034,7 @@
     "set": "Basic",
     "names": [
      "Brilliance 2",
-     "Evasion",
-     "Iconic Item",
-     "Iconic Item: Wonder Gloves"
+     "Evasion"
     ]
    },
    {
@@ -34188,22 +35043,20 @@
      "Keep Moving",
      "On Your Feet battle suit Wizard Armor This pink-and-blue armored suit uses anti-grav technology to soar through the air. Origin: High Tech: Battle Suit Powers:",
      "Flight 2",
-     "Sturdy 1 Restrictions:",
+     "Sturdy 1",
      "Flashy",
-     "Worn Power Value: 1 Anti-Gravity These sticky anti-grav discs will the edge of outer space. Origin: High Tech Powers:",
+     "Worn",
      "Anti-Gravity Disc",
      "Ranged",
-     "Weapon: Range: 10; Agility Damage Multiplier: ×0 Wonder Lined with power generators, these elemental eff ects. Origin: High Tech Powers:",
      "Eff ect Options: Can pick the Elemental Control power special eff ect from energy (blind), force (inflict trouble) or fire (set ablaze).",
-     "Elemental Barrier Disc Shooter carry their victims all the way up to Restrictions:",
+     "Elemental Barrier Disc Shooter carry their victims all the way up to",
      "Carried",
-     "Does No Actual Damage Power Value: 1 iconic item Gloves pink-and-blue gloves have incredible",
+     "Does No Actual Damage",
      "Elemental Blast",
      "Elemental Burst",
      "Elemental Grab",
      "Elemental Push",
-     "Mighty 1 Restrictions:",
-     "Worn Power Value: 6"
+     "Mighty 1"
     ]
    }
   ],
@@ -34215,7 +35068,7 @@
   "id": "wizard-secret-wars"
  },
  {
-  "name": "YONDUUDONTA",
+  "name": "YONDU UDONTA",
   "realName": "Yondu Udonta",
   "rank": 4,
   "health": 90,
@@ -34264,7 +35117,6 @@
      "Accuracy 2",
      "Evasion",
      "Heightened Senses 1",
-     "Iconic Item",
      "Mighty 1"
     ]
    },
@@ -34289,8 +35141,7 @@
      "Snap Shooting",
      "Sniping Yaka Arrow By whistling, Udonta can adjust arrow’s position in flight with point accuracy. Origin: Alien Powers:",
      "Psychic Link (communicates via unique whistling noises)",
-     "Weapon: Range: 30, Agility Damage Multiplier: +1 Restrictions:",
-     "Loud Power Value: 1"
+     "Loud"
     ]
    }
   ],
@@ -34299,7 +35150,7 @@
   "equipment": [
    "Yaka Arrow"
   ],
-  "id": "yonduudonta-secret-wars"
+  "id": "yondu-udonta-secret-wars"
  },
  {
   "name": "ZOMBIE",

@@ -439,13 +439,19 @@ var ABILITIES=[
 ];
 var CONDITIONS=[
   {name:'Ablaze',desc:'Lose 5 Health at the end of each of your turns until put out (Agility vs TN 10).'},
+  {name:'Asleep',desc:"Out cold — you can't take any actions, your defenses drop to 10, and Melee attacks automatically hit you.",src:'Avengers Expansion'},
   {name:'Bleeding',desc:'Lose 5 Health at the end of each turn until stopped (Logic vs TN 10) or you recover any Health.'},
   {name:'Blinded',desc:'Sight-based concentration powers end; speed halved; trouble on sight checks; enemies get an edge on you.'},
+  {name:'Corroding',desc:'Lose 5 Health at the end of each of your turns until the condition ends (e.g. washed off with water).',src:'X-Men Expansion'},
   {name:'Deafened',desc:'Hearing-based concentration powers end; trouble on action checks that need hearing.'},
   {name:'Demoralized',desc:'Your concentration powers end; you have trouble on all action checks.'},
+  {name:'Exhausted',desc:'Physically and mentally worn out — trouble on all action checks until you get a good night’s sleep.',src:'Spider-Verse Expansion'},
+  {name:'Frightened',desc:'Struck with fear: make Ego vs TN 13 or be paralyzed for a round; otherwise you must flee the source at top speed.',src:'Spider-Verse Expansion'},
   {name:'Grabbed',desc:"You can't move (nor can the grabber, unless they carry you along)."},
+  {name:'Infected',desc:"Infected with a disease — resist with the infection's check (often Resilience vs TN 12); effects and cures vary.",src:'X-Men Expansion'},
   {name:'Paralyzed',desc:"Can't move or take actions needing Melee or Agility; attackers get an edge."},
   {name:'Pinned',desc:'Like Grabbed, plus trouble on Melee/Agility checks and no movement actions.'},
+  {name:'Poisoned',desc:'At the start of each turn make Resilience vs TN 18 (no action); on a fail lose 1 Health. A Fantastic success ends it.',src:'X-Men Expansion'},
   {name:'Prone',desc:'On the ground: trouble on your ranged attacks; close attackers get an edge.'},
   {name:'Shattered',desc:'Mentally broken — requires long-term care.'},
   {name:'Stunned',desc:'Concentration powers end; you lose your next action; enemies get an edge.'},
@@ -630,10 +636,12 @@ function rollDamage(key){
 var CONDMECH={
   'Blinded':{halveSpeed:true},
   'Demoralized':{troubleAll:true},
+  'Exhausted':{troubleAll:true},
   'Pinned':{trouble:['melee','agility']},
   'Prone':{troubleAtk:['agility']},
   'Paralyzed':{disable:['melee','agility']},
   'Grabbed':{noMove:true},
+  'Asleep':{disableAll:true},
   'Unconscious':{disableAll:true},
 };
 function condOn(n){ return !!(S.conditions&&S.conditions[n]); }

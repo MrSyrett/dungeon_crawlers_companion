@@ -14,23 +14,6 @@ export const MMRPG_EQUIPMENT = [
     "source": "X-Men Expansion"
   },
   {
-    "name": "Adamantium claws",
-    "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Old Man Logan Earth 214923",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "+1",
-    "multBonus": 1,
-    "special": "+1 melee damage multiplier; ignores 1 level of DR",
-    "notes": "",
-    "source": "X-Men Expansion",
-    "multAbilities": [
-      "melee"
-    ]
-  },
-  {
     "name": "Adamantium Claws",
     "tier": "Iconic",
     "type": "Weapon",
@@ -66,21 +49,18 @@ export const MMRPG_EQUIPMENT = [
     "source": "X-Men '97"
   },
   {
-    "name": "Adamantium nails",
+    "name": "Adamantium Nails",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Lady Deathstrike",
+    "source": "X-Men Expansion",
+    "notes": "",
+    "special": "+1 Melee damage multiplier; ignores 1 level of DR",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "+1",
-    "multBonus": 1,
-    "special": "+1 Melee damage multiplier; ignores 1 level of DR",
-    "notes": "",
-    "source": "X-Men Expansion",
-    "multAbilities": [
-      "melee"
-    ]
+    "multBonus": 1
   },
   {
     "name": "Alien Weaponry",
@@ -109,16 +89,13 @@ export const MMRPG_EQUIPMENT = [
   {
     "name": "Anti-Gravity Disc Shooter",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
+    "type": "Item",
+    "category": "Item",
     "owner": "Wizard",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Secret Wars",
     "notes": "",
-    "source": "Secret Wars"
+    "special": "Restrictions: Flashy, Worn; Power Value: 1",
+    "powerValue": 1
   },
   {
     "name": "Anti-Telepathy Helmet",
@@ -135,13 +112,14 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Arkon",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried, Flashy; Power Value: 1",
+    "ability": "agility",
+    "range": "10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
   },
   {
     "name": "Assorted Bomberangs",
@@ -149,41 +127,58 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Boomerang",
+    "source": "Spider-Verse Expansion",
+    "notes": "",
+    "special": "ranged weapon; on a Fantastic success, user can apply an elemental eff ect of their choice.",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "ranged weapon; on a Fantastic success, user can apply an elemental eff ect of their choice.",
-    "notes": "",
-    "source": "Spider-Verse Expansion"
+    "multBonus": 0
   },
   {
     "name": "Ball & Chain",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Absorbingman",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "owner": "Absorbing Man",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried; Power Value: 1",
+    "ability": "melee",
+    "range": "Reach +1/10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 1
   },
   {
     "name": "Black Panther’s Claws",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Blackpanther",
+    "owner": "Black Panther (shuri)",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Worn; Power Value: 1",
     "ability": "melee",
     "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
+    "name": "Black Widow (Earth-1610)’s Battle Suit",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Black Widow (Earth-1610)",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Flashy, Worn; Power Value: 6",
+    "powerValue": 6
   },
   {
     "name": "Bo Staff",
@@ -210,30 +205,32 @@ export const MMRPG_EQUIPMENT = [
   {
     "name": "Captain America",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Americandream",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "type": "Item",
+    "category": "Item",
+    "owner": "American Dream",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Shield 2 (Shield 3 with Iconic Item); Earth-9907; Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
+    "powerValue": 1
   },
   {
     "name": "Captain America of the Railways’ Shield",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Captainamericaoftherailways",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "owner": "Captain America Of The Railways",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Shield 2 (Shield 3 with Iconic Item); Restrictions: Carried, Flashy; Power Value: 1",
+    "ability": "melee",
+    "range": "Reach/10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 1
   },
   {
     "name": "Captain America's Shield",
@@ -259,14 +256,19 @@ export const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Captainamerica",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "owner": "Captain America (bucky Barnes)",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Shield 2 (Shield 3 with Iconic Item); Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
+    "ability": "melee",
+    "range": "Reach/10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 1
   },
   {
     "name": "Celestial Armor",
@@ -287,18 +289,18 @@ export const MMRPG_EQUIPMENT = [
     "source": "X-Men Expansion"
   },
   {
-    "name": "Charged cards",
+    "name": "Charged Cards",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Gambit",
+    "source": "X-Men Expansion",
+    "notes": "",
+    "special": "These act as knives, usually thrown. Using Elemental Infusion on them costs 0 Focus. Cards function only for Gambit.",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "These act as knives, usually thrown. Using Elemental Infusion on them costs 0 Focus. Cards function only for Gambit.",
-    "notes": "",
-    "source": "X-Men Expansion"
+    "multBonus": 0
   },
   {
     "name": "Club",
@@ -316,30 +318,28 @@ export const MMRPG_EQUIPMENT = [
   {
     "name": "Control Box",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
+    "type": "Item",
+    "category": "Item",
     "owner": "Psycho-man",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Secret Wars",
     "notes": "",
-    "source": "Secret Wars"
+    "special": "Restrictions: Carried; Power Value: 1",
+    "powerValue": 1
   },
   {
     "name": "Corvus Glaive’s Glaive",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Corvusglaive",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "owner": "Corvus Glaive",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried; Power Value: 1",
+    "ability": "melee",
+    "range": "Reach +1",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 1
   },
   {
     "name": "Cosmic Axe",
@@ -347,27 +347,25 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Terrax",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Carried; Power Value: 1",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
     "multBonus": 0,
-    "special": "",
-    "notes": "",
-    "source": "Secret Wars"
+    "powerValue": 1
   },
   {
     "name": "Cosmic Control Rod",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
+    "type": "Item",
+    "category": "Item",
     "owner": "Annihilus",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Secret Wars",
     "notes": "",
-    "source": "Secret Wars"
+    "special": "Restrictions: Carried, Flashy; Power Value: 6",
+    "powerValue": 6
   },
   {
     "name": "Cosmic Cube",
@@ -420,41 +418,47 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Destroyer",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried; Power Value: 1",
+    "ability": "melee",
+    "range": "Reach/10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 1
   },
   {
-    "name": "Displacement field daggers",
+    "name": "Displacement Field Daggers",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Blink Earth 295",
+    "owner": "Blink (Earth-295)",
+    "source": "X-Men Expansion",
+    "notes": "",
+    "special": "Ranged weapons. Blink can use her Teleport Object and Teleport Other powers on any person or object she hits with these daggers.",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "Ranged weapons. Blink can use her Teleport Object and Teleport Other powers on any person or object she hits with these daggers.",
-    "notes": "",
-    "source": "X-Men Expansion"
+    "multBonus": 0
   },
   {
     "name": "Ebony Blade",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Blackknight",
+    "owner": "Black Knight",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Unkillable; Power Value: 7",
     "ability": "melee",
     "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
-    "notes": "",
-    "source": "Avengers Expansion"
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 7
   },
   {
     "name": "Electrified Vibranium Claws",
@@ -518,13 +522,14 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Whiplash",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Worn; Power Value: 4",
+    "ability": "melee",
+    "range": "Reach+1",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 4
   },
   {
     "name": "Eternity Mask",
@@ -620,14 +625,15 @@ export const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Hawkeye",
+    "owner": "Hawkeye (clint Barton)",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Worn; Power Value: 1",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
     "multBonus": 0,
-    "special": "",
-    "notes": "",
-    "source": "Avengers Expansion"
+    "powerValue": 1
   },
   {
     "name": "Hell-Mark",
@@ -635,27 +641,35 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Silence",
+    "source": "Spider-Verse Expansion",
+    "notes": "",
+    "special": "Grants Elemental Burst (Hellfire). Also allows Silence to create dimensional portals exclusively to and from Hell. She must still pay the regular Dimensional Portal power cost of 15 Focus.",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "Grants Elemental Burst (Hellfire). Also allows Silence to create dimensional portals exclusively to and from Hell. She must still pay the regular Dimensional Portal power cost of 15 Focus.",
+    "multBonus": 0
+  },
+  {
+    "name": "High Evolutionary’s Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "High Evolutionary",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Spider-Verse Expansion"
+    "special": "Restrictions: Worn; Power Value: 8",
+    "powerValue": 8
   },
   {
     "name": "Hofund",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
+    "type": "Item",
+    "category": "Item",
     "owner": "Sif",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried; Power Value: 1",
+    "powerValue": 1
   },
   {
     "name": "Infinity Gauntlet",
@@ -674,6 +688,17 @@ export const MMRPG_EQUIPMENT = [
     "owner": "—",
     "notes": "These incredibly powerful stones come from the First Cosmos and are sent into various parts of the Multiverse to influence the course of a universe’s history. Each stone works fully only in its home universe. If brought to another universe and used, they can function but may shatter if pushed too hard For a long time, there were six Infinity Stones, each of which had a different color and controlled a different aspect of the universe. They have changed colors sometimes, but they are currently Power (Violet), Mind (Yellow), Reality (Red), Soul (Orange), Space (Blue) and Time (Green). Recently, another Infinity Stone was created: Death (Black). On their own, the stones grant the following powers. They also give their users unlimited Focus and allow them to spend up to 30 points of Focus at once—or more if needed for narrative purposes. • Death: The user knows the location of everyone who is about to die at any moment, along with the circumstances surrounding their death. They can teleport anywhere so that they can escort the dead to their final reward. The user can also instantly kill anyone with a touch. They cannot, however, spare the lives of the dying, no matter how much they might wish to. • Mind: The user has incredible telepathic powers. They gain all powers from the Telekinesis and Telepathy power sets, ignoring any prerequisites. They can also travel through dreams and can construct psychic weapons. (See page 110 for an example of something like this: Betsy Braddock’s Psychic Sword.) They also gain Brilliance 4 and Uncanny 4. • Power: The user gains all powers from the Elemental Control (all types), Power Control and Super-Strength power sets, ignoring any prerequisites. They also gain Accuracy 4, Mighty 4 and Sturdy 4. • Reality: The user can alter physical reality as they see fit. They can change any physical characteristics like size, density or chemical composition. They gain all powers from the Elemental Control (all types), Luck, Phasing, Resize and Teleportation power sets, ignoring any prerequisites. They also gain Flight 2, Mighty 4 and Sturdy 4. • Soul: The user can preserve souls for the a˜ erlife, and they can examine a person’s soul and even reach into a person’s soul to damage it, heal it or alter its nature. They gain all powers from the Healing and Telepathy power sets, ignoring any prerequisites. They can also conjure soul-based constructs of other people, including super heroes and villains. They also gain Discipline 4 and Uncanny 4. • Space: The user can travel in space and has control over the positions of things within it. This includes teleporting things of any size over unlimited distances. They gain all powers from the Teleportation power set, ignoring any prerequisites. • Time: The user can slow down, speed up and freeze time for everyone around them for themselves or for specific things. They can use this to age or youthen people or things as well. They can also see into the past and the future. They gain all powers from the Omniversal Travel (Time) and Sixth Sense power sets, ignoring any prerequisites. The stones become more powerful when brought together, forming a circuit that grants unlimited control over the entire universe. For this reason, people who covet them have created items on which the stones can be mounted in close proximity to each other. The most notorious of these is the Infinity Gauntlet. A single stone grants +1 rank to its user. Each stone that is within 100 spaces of another grants another +1 rank to all of the stones’ users. In either case, this can boost a user to a maximum of Rank 6. In many ways, the use of an Infinity Stone’s powers is limited only by the user’s imagination. Most users learn to be cautious with their powers early on. Otherwise, they can cause all sorts of unintended consequences that are diffi cult even for them to repair.",
     "source": "Avengers Expansion"
+  },
+  {
+    "name": "Iron Man (Earth-1610)’s Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Iron Man (Earth-1610)",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn; Power Value: 13",
+    "powerValue": 13
   },
   {
     "name": "Iron Man's Gloves",
@@ -787,44 +812,38 @@ export const MMRPG_EQUIPMENT = [
   {
     "name": "Nega-Bands",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Captainmar-vell",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Captain Mar-vell",
+    "source": "Secret Wars",
     "notes": "",
-    "source": "Secret Wars"
+    "special": "Mighty 2 (Mighty 3 with Iconic Item); Restrictions: Flashy, Worn; Power Value: 22",
+    "powerValue": 22
   },
   {
     "name": "Nova Helmet: Centurion",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Nova",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "Richard Rider",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Nova (richard Rider)",
+    "source": "Secret Wars",
     "notes": "",
-    "source": "Secret Wars"
+    "special": "Richard Rider; Restrictions: Flashy, Worn; Power Value: 25",
+    "powerValue": 25
   },
   {
     "name": "Ocktoid Tentacles",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Doctoroctopus",
+    "owner": "Doctor Octopus",
+    "source": "Spider-Verse Expansion",
+    "notes": "",
+    "special": "These semi- autonomous drones have a psychic link with Octavius. He can see through them and pilot them by remote. While under remote control, they use Octavius’ stats and take his place in the initiative order. If Octavius is rendered unconscious, the tentacles automatically stop fighting and attempt to transport him to safety.",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "These semi- autonomous drones have a psychic link with Octavius. He can see through them and pilot them by remote. While under remote control, they use Octavius’ stats and take his place in the initiative order. If Octavius is rendered unconscious, the tentacles automatically stop fighting and attempt to transport him to safety.",
-    "notes": "",
-    "source": "Spider-Verse Expansion"
+    "multBonus": 0
   },
   {
     "name": "Pistol",
@@ -854,14 +873,19 @@ export const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Proximamidnight",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "owner": "Proxima Midnight",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried, Large; Power Value: 3",
+    "ability": "melee",
+    "range": "Reach +1/10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 3
   },
   {
     "name": "Psychic Sword",
@@ -869,27 +893,27 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Captain Britain",
+    "source": "X-Men Expansion",
+    "notes": "",
+    "special": "Deals either Focus or Health damage, as Betsy chooses. Summonable.",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "Deals either Focus or Health damage, as Betsy chooses. Summonable.",
-    "notes": "",
-    "source": "X-Men Expansion"
+    "multBonus": 0
   },
   {
     "name": "Pumpkin Scepter",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Queengoblin",
+    "owner": "Queen Goblin",
+    "source": "Spider-Verse Expansion",
+    "notes": "",
+    "special": "Inflicts hellfire damage on a Fantastic success, splitting the damage equally between Health and Focus; otherwise acts as an ordinary club",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "Inflicts hellfire damage on a Fantastic success, splitting the damage equally between Health and Focus; otherwise acts as an ordinary club",
-    "notes": "",
-    "source": "Spider-Verse Expansion"
+    "multBonus": 0
   },
   {
     "name": "Red Boomerangs",
@@ -943,27 +967,24 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Nemesis Heather Hudson",
+    "source": "X-Men Expansion",
+    "notes": "",
+    "special": "The wielder of this mystic sword must pay the Focus costs of their powers with their Health instead.",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "The wielder of this mystic sword must pay the Focus costs of their powers with their Health instead.",
-    "notes": "",
-    "source": "X-Men Expansion"
+    "multBonus": 0
   },
   {
     "name": "Shard of the Crimson Gem of Cyttorak",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Kidjuggernaut",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Kid Juggernaut",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Flashy, Large, Alternate Form; Power Value: 3",
+    "powerValue": 3
   },
   {
     "name": "Shotgun",
@@ -993,13 +1014,13 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Sin-eater",
+    "source": "Spider-Verse Expansion",
+    "notes": "",
+    "special": "Applies the eff ects of Penance Stare on a Fantastic success; otherwise acts as a normal shotgun",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "Applies the eff ects of Penance Stare on a Fantastic success; otherwise acts as a normal shotgun",
-    "notes": "",
-    "source": "Spider-Verse Expansion"
+    "multBonus": 0
   },
   {
     "name": "Skurge's Battle-Ax",
@@ -1056,13 +1077,14 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Stormborn",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Carried, Flashy; Power Value: 22",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
     "multBonus": 0,
-    "special": "",
-    "notes": "",
-    "source": "Secret Wars"
+    "powerValue": 22
   },
   {
     "name": "Submachine Gun",
@@ -1096,13 +1118,14 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Swordsman",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried; Power Value: 3",
     "ability": "melee",
     "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
-    "notes": "",
-    "source": "Avengers Expansion"
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 3
   },
   {
     "name": "Tallus",
@@ -1114,18 +1137,18 @@ export const MMRPG_EQUIPMENT = [
     "source": "X-Men Expansion"
   },
   {
-    "name": "Techno- organic wings",
+    "name": "Techno-Organic Wings",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Angel",
+    "source": "X-Men Expansion",
+    "notes": "",
+    "special": "when in Archangel form, can fire feathery flechettes (treat like a submachine gun) and can act as a protective barrier (20 points to shatter)",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
-    "multBonus": 0,
-    "special": "when in Archangel form, can fire feathery flechettes (treat like a submachine gun) and can act as a protective barrier (20 points to shatter)",
-    "notes": "",
-    "source": "X-Men Expansion"
+    "multBonus": 0
   },
   {
     "name": "The Bloodaxe",
@@ -1133,13 +1156,18 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Executioner",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried, Flashy; Power Value: 2",
+    "ability": "melee",
+    "range": "Reach/unlimited",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 2
   },
   {
     "name": "The Soulsword",
@@ -1147,44 +1175,43 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Magik",
-    "ability": "melee",
+    "source": "X-Men Expansion",
+    "notes": "",
+    "special": "Summonable. Provides a +4 Ego damage multiplier, but only against extra- dimensional creatures.",
+    "ability": "ego",
     "range": "Reach",
     "damageBonus": "+4",
-    "multBonus": 4,
-    "special": "Summonable. Provides a +4 Ego damage multiplier, but only against extra- dimensional creatures.",
-    "notes": "",
-    "source": "X-Men Expansion",
-    "multAbilities": [
-      "ego"
-    ]
+    "multBonus": 4
   },
   {
     "name": "The Ten Rings",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Shang-chi",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "owner": "Shang-chi (with The Ten Rings)",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Worn; Power Value: 5",
+    "ability": "melee",
+    "range": "Reach/10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 5
   },
   {
     "name": "The Zodiac Key",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
+    "type": "Item",
+    "category": "Item",
     "owner": "Scorpio",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried; Power Value: 4",
+    "powerValue": 4
   },
   {
     "name": "U.S.Agent's Shield",
@@ -1207,13 +1234,18 @@ export const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "U.s.agent",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
+    "ability": "melee",
+    "range": "Reach/10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 1
   },
   {
     "name": "Widow's Bite",
@@ -1235,27 +1267,25 @@ export const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Blackwidow",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "owner": "Black Widow (with Symbiote)",
+    "source": "Avengers Expansion",
     "notes": "",
-    "source": "Avengers Expansion"
+    "special": "Restrictions: Worn; Power Value: 1",
+    "ability": "agility",
+    "range": "10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
   },
   {
     "name": "Yaka Arrow",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Yonduudonta",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Yondu Udonta",
+    "source": "Secret Wars",
     "notes": "",
-    "source": "Secret Wars"
+    "special": "Power Value: 1",
+    "powerValue": 1
   }
 ] as unknown as MmrpgEquipment[];

@@ -5,7 +5,7 @@ import type { MmrpgCharacter } from "./mmrpg-types";
 
 export const MMRPG_CHARACTERS = [
   {
-    "name": "3-DMAN",
+    "name": "3-D MAN",
     "realName": "Delroy Garrett Jr.",
     "rank": 3,
     "health": 90,
@@ -76,7 +76,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "3-dman-avengers-expansion"
+    "id": "3-d-man-avengers-expansion"
   },
   {
     "name": "A.I.M. AGENT",
@@ -213,7 +213,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "ABSORBINGMAN",
+    "name": "ABSORBING MAN",
     "realName": "Carl “Crusher” Creel",
     "rank": 4,
     "health": 180,
@@ -262,7 +262,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Environmental Protection",
-          "Iconic Item",
           "Mighty 1",
           "Sturdy 1"
         ]
@@ -291,12 +290,9 @@ export const MMRPG_CHARACTERS = [
           "Crushing Grip",
           "Immovable",
           "Jump 1",
-          "Smash Absorbing Man’s Ball Chain Powers:",
           "Eff ect Options",
           "Returns When Thrown",
-          "Weapon: Range: Reach +1/10, Melee/Agility Damage Multiplier bonus: +1/+1. Restrictions:",
-          "Carried",
-          "Use: Must use the same eff ect options as the Absorbing Man. Power Value: 1"
+          "Carried"
         ]
       }
     ],
@@ -305,7 +301,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Ball & Chain"
     ],
-    "id": "absorbingman-avengers-expansion"
+    "id": "absorbing-man-avengers-expansion"
   },
   {
     "name": "ABYSS",
@@ -469,70 +465,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "AGENT PHIL COULSON",
-    "realName": "Phillip “Phil” Coulson",
-    "rank": 2,
-    "health": 30,
-    "focus": 30,
-    "karma": null,
-    "abilities": {
-      "melee": 2,
-      "agility": 3,
-      "resilience": 1,
-      "vigilance": 1,
-      "ego": 2,
-      "logic": 1
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Law Enforcer",
-    "origin": "Special Training",
-    "teams": "Power Elite, S.H.I.E.L.D., Secret Avengers",
-    "base": "S.H.I.E.L.D. Helicarrier",
-    "features": "",
-    "history": "From an early age, Phil Coulson was a massive super-hero fan. Over the course of decades, he has built a thorough database of all existing superhumans, including information on their strengths, abilities and weaknesses. As a young adult, Coulson joined the U.S. Army Rangers, where he fought alongside an equally young Nick Fury Jr. A— er their time in the service, both men decided to join up with S.H.I.E.L.D. Coulson’s leadership skills quickly earned him the rank of Special Ops Supreme Commander. In recent years, Coulson has taken a more villainous turn, dedicating himself to ridding the world of the heroes he admired for so long.",
-    "personality": "While considered fun and personable by his allies, Coulson is nonetheless a strict and serious field commander, not to mention a formidable combatant. Having worked in intelligence for so long, he is accustomed to keeping big secrets. Weapons Tactics",
-    "traits": [
-      "Combat Expert",
-      "Determination",
-      "Eidetic Memory",
-      "Interrogation",
-      "Investigation"
-    ],
-    "tags": [
-      "Authority",
-      "Backup",
-      "Headquarters: S.H.I.E.L.D. Helicarrier",
-      "Public Identity",
-      "Signature Weapon: Pistol"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Accuracy 1",
-          "Inspiration"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Double Tap",
-          "Snap Shooting",
-          "Suppressive Fire",
-          "Weapons Blazing"
-        ]
-      }
-    ],
-    "id": "agent-phil-coulson",
-    "genre": "core"
-  },
-  {
-    "name": "AGENTANTI-VENOM",
+    "name": "AGENT ANTI-VENOM",
     "realName": "Eugene “Flash” Thompson",
     "rank": 4,
     "health": 120,
@@ -611,7 +544,70 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "agentanti-venom-spider-verse-expansion"
+    "id": "agent-anti-venom-spider-verse-expansion"
+  },
+  {
+    "name": "AGENT PHIL COULSON",
+    "realName": "Phillip “Phil” Coulson",
+    "rank": 2,
+    "health": 30,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Law Enforcer",
+    "origin": "Special Training",
+    "teams": "Power Elite, S.H.I.E.L.D., Secret Avengers",
+    "base": "S.H.I.E.L.D. Helicarrier",
+    "features": "",
+    "history": "From an early age, Phil Coulson was a massive super-hero fan. Over the course of decades, he has built a thorough database of all existing superhumans, including information on their strengths, abilities and weaknesses. As a young adult, Coulson joined the U.S. Army Rangers, where he fought alongside an equally young Nick Fury Jr. A— er their time in the service, both men decided to join up with S.H.I.E.L.D. Coulson’s leadership skills quickly earned him the rank of Special Ops Supreme Commander. In recent years, Coulson has taken a more villainous turn, dedicating himself to ridding the world of the heroes he admired for so long.",
+    "personality": "While considered fun and personable by his allies, Coulson is nonetheless a strict and serious field commander, not to mention a formidable combatant. Having worked in intelligence for so long, he is accustomed to keeping big secrets. Weapons Tactics",
+    "traits": [
+      "Combat Expert",
+      "Determination",
+      "Eidetic Memory",
+      "Interrogation",
+      "Investigation"
+    ],
+    "tags": [
+      "Authority",
+      "Backup",
+      "Headquarters: S.H.I.E.L.D. Helicarrier",
+      "Public Identity",
+      "Signature Weapon: Pistol"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Suppressive Fire",
+          "Weapons Blazing"
+        ]
+      }
+    ],
+    "id": "agent-phil-coulson",
+    "genre": "core"
   },
   {
     "name": "ALEPH",
@@ -687,7 +683,7 @@ export const MMRPG_CHARACTERS = [
     "id": "aleph-secret-wars"
   },
   {
-    "name": "ALL-FATHERTHOR",
+    "name": "ALL-FATHER THOR",
     "realName": "Thor Odinson",
     "rank": 6,
     "health": 240,
@@ -747,7 +743,6 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Discipline 1",
           "Flight 2",
-          "Iconic Item",
           "Mighty 4",
           "Sturdy 2"
         ]
@@ -780,10 +775,9 @@ export const MMRPG_CHARACTERS = [
           "Summon Portal",
           "Summonable",
           "Uru",
-          "Weapon: Range: Reach/ Unlimited, Melee/Agility Dama Multiplier bonus: +1. Restrictions:",
           "Can only be used by someone with the Worthy tag.",
           "Carried",
-          "Flashy Power Value: 22 (2 for Thor, since he already has most of the powers granted)"
+          "Flashy"
         ]
       }
     ],
@@ -792,7 +786,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Mjolnir"
     ],
-    "id": "all-fatherthor-avengers-expansion"
+    "id": "all-father-thor-avengers-expansion"
   },
   {
     "name": "AMERICA CHAVEZ",
@@ -872,7 +866,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "AMERICANDREAM",
+    "name": "AMERICAN DREAM",
     "realName": "Shannon Carter",
     "rank": 3,
     "health": 60,
@@ -919,7 +913,6 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Item",
           "Inspiration"
         ]
       },
@@ -939,14 +932,11 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Change of Plans",
           "Combat Support",
-          "Keep Moving Captain America’s Shield Powers:",
           "Reduced Focus",
           "Shield 1",
           "Stackable",
-          "Weapon: Range: Reach/10, Melee/Agility Damage Multiplierbonus: +1. Restrictions:",
           "Carried",
-          "Flashy",
-          "Requires: Shield 1 power Power Value: 1"
+          "Flashy"
         ]
       }
     ],
@@ -955,7 +945,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Captain America"
     ],
-    "id": "americandream-avengers-expansion"
+    "id": "american-dream-avengers-expansion"
   },
   {
     "name": "ANGEL",
@@ -1006,7 +996,6 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Weapon",
           "Evasion",
           "Flight 2",
           "Mighty 1"
@@ -1033,7 +1022,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "equipment": [
-      "Techno- organic wings"
+      "Techno-Organic Wings"
     ],
     "id": "angel-x-men-expansion"
   },
@@ -1096,7 +1085,6 @@ export const MMRPG_CHARACTERS = [
           "Environmental Protection",
           "Flight 2",
           "Heightened Senses 1",
-          "Iconic Item",
           "Inspiration",
           "Mighty 2",
           "Sturdy 1",
@@ -1124,9 +1112,9 @@ export const MMRPG_CHARACTERS = [
           "Elemental Push (Energy)",
           "Elemental Reinforcement (Energy)",
           "Energy Absorption (limited to Energy attacks)",
-          "Supernova (Energy) Restrictions:",
+          "Supernova (Energy)",
           "Carried",
-          "Flashy Power Value: 6"
+          "Flashy"
         ]
       }
     ],
@@ -1582,7 +1570,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Accuracy 2",
-          "Iconic Item",
           "Inspiration",
           "Mighty 2",
           "Sturdy 2"
@@ -1604,12 +1591,10 @@ export const MMRPG_CHARACTERS = [
           "Focused Fury",
           "Furious Attacks",
           "Vicious Attack",
-          "Whirling Frenzy Arkon’s Lightning Bolts Powers:",
           "Elemental Blast (Electricity)",
           "Elemental Burst (Electricity)",
-          "Weapon: Range: 10 spaces, Agility Damage Multiplier bonus: +1. Restrictions:",
           "Carried",
-          "Flashy Power Value: 1"
+          "Flashy"
         ]
       }
     ],
@@ -1881,7 +1866,7 @@ export const MMRPG_CHARACTERS = [
     "id": "aurora-x-men-expansion"
   },
   {
-    "name": "AVENGERPRIME",
+    "name": "AVENGER PRIME",
     "realName": "Loki Laufeyson",
     "rank": 6,
     "health": 210,
@@ -1982,7 +1967,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "avengerprime-avengers-expansion"
+    "id": "avenger-prime-avengers-expansion"
   },
   {
     "name": "AVERAGE CIVILIAN",
@@ -2089,6 +2074,101 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "banshee-x-men-expansion"
+  },
+  {
+    "name": "BARON KHONSHU",
+    "realName": "Khonshu",
+    "rank": 6,
+    "health": 210,
+    "focus": 210,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 3,
+      "resilience": 7,
+      "vigilance": 7,
+      "ego": 8,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Leader",
+    "origin": "Mythic",
+    "teams": "None",
+    "base": "Egyptia, Battleworld",
+    "features": "Head is a floating bird skull",
+    "history": "On Battleworld, Khonshu is not only the Egyptian god of the Moon but the official baron of the Lower Kingdom of Egyptia, as per her agreement with the Panther-Man, who oversees the Upper Kingdom. The people of the Lower Kingdom are forced to worship her day and night, toiling their lives away to build monuments in her honor. Any potential rebellions against her brutal regime are swi„ ly snuff ed out by her loyal lycanthropic followers in the Order of the Moon Knights. In the final days of Battleworld, Egyptia’s people free themselves and repay all the pain and suff ering that Khonshu dealt to them. At the time of this profile, she is unaware of that yet and would scoff at the idea that it could actually happen. Playing As Khonshu uses hierarchical systems to keep her people in line, but she doesn’t recognize anyone’s superiority, save for her own. Be they rich or poor, law-abiding or criminal, Khonshu sees all mortals as equally beneath her. Their only value comes in how useful they can be to her. Khonshu off ers the same deal to all of her defeated opponents. “Join the Moon Knights. Become one of my loyal man-wolves, and I will spare your life.” Those who do become werewolves and have their faces marked with a crescent moon. Those who refuse are slain.",
+    "personality": "",
+    "traits": [
+      "Abrasive",
+      "Dealmaker",
+      "Famous",
+      "God Heritage",
+      "Leverage",
+      "Presence",
+      "Public Speaking"
+    ],
+    "tags": [
+      "Allspeak",
+      "Authority",
+      "Extreme Appearance",
+      "Headquarters: The Temple Khonshu",
+      "Powerful",
+      "Public Identity",
+      "Rich",
+      "Supernatural",
+      "Villainous",
+      "Worshipped"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 2",
+          "Discipline 2",
+          "Environmental Protection",
+          "Inspiration",
+          "Sturdy 2",
+          "Uncanny 2"
+        ]
+      },
+      {
+        "set": "Resize",
+        "names": [
+          "Grow 2"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Focus Fire",
+          "Keep Moving",
+          "On Your Feet",
+          "Rally on Me"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Animal Communication (wolves)",
+          "Astral Form",
+          "Borrow Senses",
+          "Command",
+          "Domination",
+          "Orders",
+          "Telepathic Link",
+          "Telepathic Network"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "baron-khonshu-secret-wars"
   },
   {
     "name": "BARON MORDO",
@@ -2231,101 +2311,6 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "baron-zemo",
     "genre": "core"
-  },
-  {
-    "name": "BARONKHONSHU",
-    "realName": "Khonshu",
-    "rank": 6,
-    "health": 210,
-    "focus": 210,
-    "karma": null,
-    "abilities": {
-      "melee": 3,
-      "agility": 3,
-      "resilience": 7,
-      "vigilance": 7,
-      "ego": 8,
-      "logic": 4
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Leader",
-    "origin": "Mythic",
-    "teams": "None",
-    "base": "Egyptia, Battleworld",
-    "features": "Head is a floating bird skull",
-    "history": "On Battleworld, Khonshu is not only the Egyptian god of the Moon but the official baron of the Lower Kingdom of Egyptia, as per her agreement with the Panther-Man, who oversees the Upper Kingdom. The people of the Lower Kingdom are forced to worship her day and night, toiling their lives away to build monuments in her honor. Any potential rebellions against her brutal regime are swi„ ly snuff ed out by her loyal lycanthropic followers in the Order of the Moon Knights. In the final days of Battleworld, Egyptia’s people free themselves and repay all the pain and suff ering that Khonshu dealt to them. At the time of this profile, she is unaware of that yet and would scoff at the idea that it could actually happen. Playing As Khonshu uses hierarchical systems to keep her people in line, but she doesn’t recognize anyone’s superiority, save for her own. Be they rich or poor, law-abiding or criminal, Khonshu sees all mortals as equally beneath her. Their only value comes in how useful they can be to her. Khonshu off ers the same deal to all of her defeated opponents. “Join the Moon Knights. Become one of my loyal man-wolves, and I will spare your life.” Those who do become werewolves and have their faces marked with a crescent moon. Those who refuse are slain.",
-    "personality": "",
-    "traits": [
-      "Abrasive",
-      "Dealmaker",
-      "Famous",
-      "God Heritage",
-      "Leverage",
-      "Presence",
-      "Public Speaking"
-    ],
-    "tags": [
-      "Allspeak",
-      "Authority",
-      "Extreme Appearance",
-      "Headquarters: The Temple Khonshu",
-      "Powerful",
-      "Public Identity",
-      "Rich",
-      "Supernatural",
-      "Villainous",
-      "Worshipped"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Brilliance 2",
-          "Discipline 2",
-          "Environmental Protection",
-          "Inspiration",
-          "Sturdy 2",
-          "Uncanny 2"
-        ]
-      },
-      {
-        "set": "Resize",
-        "names": [
-          "Grow 2"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Focus Fire",
-          "Keep Moving",
-          "On Your Feet",
-          "Rally on Me"
-        ]
-      },
-      {
-        "set": "Telepathy",
-        "names": [
-          "Animal Communication (wolves)",
-          "Astral Form",
-          "Borrow Senses",
-          "Command",
-          "Domination",
-          "Orders",
-          "Telepathic Link",
-          "Telepathic Network"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Secret Wars",
-    "id": "baronkhonshu-secret-wars"
   },
   {
     "name": "BEAK",
@@ -2792,6 +2777,82 @@ export const MMRPG_CHARACTERS = [
     "id": "bishop-x-men-expansion"
   },
   {
+    "name": "BLACK ANT",
+    "realName": "Eric O’Grady",
+    "rank": 3,
+    "health": 120,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 4,
+      "resilience": 4,
+      "vigilance": 3,
+      "ego": 0,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "High Tech: Android, High Tech: Pym Particles",
+    "teams": "Lethal Legion, Secret Avengers",
+    "base": "Mobile",
+    "features": "",
+    "history": "During a brief period when the second Ant-Man (Scott Lang) was thought dead, S.H.I.E.L.D. hired the original Ant-Man (Hank Pym) to create a new version of the hero. The organization planned to hold tryouts among their top members to pick a new Ant-Man based on their performance, but before S.H.I.E.L.D. could make a decision, an unscrupulous lowlevel agent named Eric O’Grady stole Pym’s Ant-Man suit and ran off , dreaming of evading the law while achieving fame and fortune as an independent adventurer. He ultimately failed on both counts, though aš er he was captured and brought back home, S.H.I.E.L.D. decided to let him keep being Ant-Man. During a mission with the Secret Avengers, O’Grady was killed by a race of evil androids known as the Descendants and secretly replaced with a robotic replica. Going under the codename Black Ant, this evil version of O’Grady attempted to wipe out the Avengers, but before he could, Valkyrie (Brunnhilde) uncovered the deception and destroyed him. Black Ant was later rebuilt by the Mad Thinker and briefly enlisted into the Hood’s Illuminati before being betrayed by his own team and once again destroyed. He later reappeared in the employ of Taskmaster, working as a mercenary.",
+    "personality": "Even when he was a human, Black Ant was a creature of greed and opportunism driven primarily by his hedonistic impulses. He struggles with his existence as a LifeModel Decoy and grows increasingly disillusioned with his lot in life every time his body is rebuilt. Control Telepathy",
+    "traits": [
+      "Abrasive",
+      "Connections: Super Villains",
+      "Enduring Constitution",
+      "Extraordinary Origin",
+      "Fearless",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "A.I.",
+      "Black Market Access",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Blast",
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Resize",
+        "names": [
+          "Grow 2",
+          "Resize Object",
+          "Shrink 4",
+          "Shrinking Dodge"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Animal Communication (bugs)"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "black-ant-avengers-expansion"
+  },
+  {
     "name": "BLACK BOLT",
     "realName": "Blackagar Boltagon",
     "rank": 5,
@@ -2860,6 +2921,255 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "black-bolt",
     "genre": "core"
+  },
+  {
+    "name": "BLACK CAT",
+    "realName": "Felicia Sara Hardy",
+    "rank": 4,
+    "health": 60,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 5,
+      "resilience": 2,
+      "vigilance": 4,
+      "ego": 5,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 6,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Criminal",
+    "origin": "High Tech: Cybernetics, Special Training",
+    "teams": "Heroes for Hire, Thieves Guild, Secret Defenders",
+    "base": "New York City",
+    "features": "",
+    "history": "Felicia Hardy’s father, Walter, might have been a legendary thief, but to her, he was never anything more than a good dad. So when a group of corrupt cops threw him in jail for a crime he didn’t actually commit, Felicia flew into a rage. She spent the rest of her youth tirelessly preparing to break her father out, training her body and mind in the ways of a master thief and even augmenting her body with a cybernetic probability generator. As a tribute to her father’s life as a cat burglar, she equipped herself with a pair of sharp claws and took on the codename Black Cat. When Hardy finally did break her father out of prison, Spider-Man (Peter Parker) tried to stop her. However, a‘ er he realized that Walter Hardy was on death’s door, Parker allowed Felicia to take her father home. He tried to apprehend her a‘ er the fact, only for her to slip away. This chance encounter sparked a long relationship between the cat burglar and the web-slinger. In the coming years, they became many things to each other. Sometimes, they were enemies. Sometimes, they were partners. Sometimes, they were lovers. No matter the circumstances, they were always important to each other. Currently, the pair are just good friends. Black Cat is an independent crimefighter, but she’s always willing to help out Spider-Man, and she’s even had adventures with another ex of his: Mary Jane Watson.",
+    "personality": "Black Cat is best known for the flirty, femme fatale persona she puts on whenever she’s interacting with Parker, but her playful, blasé exterior belies a deeply empathetic, if not heroic, interior. She has been a thief for the good of others just as o‘ en as she’s been a thief for herself.",
+    "traits": [
+      "Beguiling",
+      "Combat Reflexes",
+      "Connections: Criminal",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Extraordinary Origin",
+      "Fearless",
+      "Sneaky",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Public Identity",
+      "Streetwise"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Evasion",
+          "Mighty 1 Luck",
+          "Evil Eye",
+          "Jinx You",
+          "Jinx You All"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Banging Heads",
+          "Fast Strikes",
+          "Flying Double Kick",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Hit & Run",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Wallcrawling"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "black-cat-spider-verse-expansion"
+  },
+  {
+    "name": "BLACK DWARF",
+    "realName": "Black Dwarf",
+    "rank": 4,
+    "health": 180,
+    "focus": 150,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 1,
+      "resilience": 6,
+      "vigilance": 4,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 24
+    },
+    "occupation": "Military",
+    "origin": "Alien",
+    "teams": "Black Order",
+    "base": "Mobile",
+    "features": "Bright yellow eyes, scaly skin, spiked fists, sharpened teeth, tendrils for hair",
+    "history": "Despite being the largest and angriest member of Thanos’ Black Order, Black Dwarf may have the worst track record of all the Titan’s generals. During Thanos’ last invasion of Earth, Dwarf led a costly and ultimately pointless campaign into Wakanda. In an attempt to make up for his mistakes, Dwarf tried to take on the Avengers all on his own. He was almost immediately killed. Months later, Dwarf was resurrected, long aš er Thanos himself had perished. With nowhere else to go, Dwarf returned to the company of his old comrades in the Black Order. These days, the Order works as mass killers for hire. They take any job that pays and at least piques their interest.",
+    "personality": "Black Dwarf cares little for what may be technically correct on a tactical level. If the other members of the Black Order are scalpels, Dwarf is a hammer. He overwhelms his enemies with raw strength, attacking with reckless and joyful abandon. Although he may have a short temper, Dwarf is not, as many have assumed him to be, stupid. Like all of Thanos’ former generals, he speaks in a sophisticated and formal manner and maintains a subtle air of superiority at all times. Weapons Super-Strength",
+    "traits": [
+      "Battle Ready",
+      "Berserker",
+      "Big (Reach 2)",
+      "Connections: Military (Thanos’ army)",
+      "Enduring Constitution",
+      "Fearless",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Extreme Appearance",
+      "Public Identity",
+      "Signature Weapon: Ax (acts as sword)",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 4",
+          "Sturdy 3"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Hit & Run",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Jump 2",
+          "Quick Toss",
+          "Smash"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "black-dwarf-avengers-expansion"
+  },
+  {
+    "name": "BLACK KNIGHT",
+    "realName": "Dane Whitman",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 6,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 2,
+      "logic": 3
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Scientist",
+    "origin": "Magic: Sorcery",
+    "teams": "Avengers, Defenders, Savage Avengers",
+    "base": "Garrett Castle",
+    "features": "",
+    "history": "Centuries ago, the great wizard Merlin, having either forged or found the cursed Ebony Blade (stories diff er), giš ed the weapon to the one man he trusted to wield it: the loyal Sir Percival. True to his word, Percival faithfully executed the will of King Arthur as the brutal but noble Black Knight. When Percival died, he passed the blade down to his descendants, and they onto theirs, and so on into the modern era, when it passed into the hands of the unscrupulous Nathan Garrett. Though the blade rejected Garrett, he nonetheless took on the title of Black Knight and set out to seek fame and fortune with the Masters of Evil. Shortly thereaš er, he sustained fatal injuries battling Iron Man (Tony Stark) and, having seen the error of his ways, used his final hours to transfer all his possessions to his nephew: a humble scientist named Dane Whitman. Determined to redeem his family’s name, Whitman took up the Ebony Blade and, in the guise of his uncle, infiltrated the Masters of Evil and destroyed it from within, earning himself a place of honor among the Avengers. Since then, Whitman’s adventures have taken him to strange places all across time and space, leaving him little opportunity for a personal life. However, he recently reconnected with his long-lost daughter, Jackie Chopra, and he now shares with her the title of Black Knight.",
+    "personality": "Though his noble heart forces him to continue onward, Whitman does not actually like being the Black Knight. The burden of wielding the Ebony Blade, which constantly pushes him to commit terrible violence, causes him endless stress. To help keep himself levelheaded, he oš en speaks in an aff ected medieval accent. iconic item Ebony Blade",
+    "traits": [
+      "Berserker",
+      "Connections: Super Heroes",
+      "Extra Occupation",
+      "Fearless",
+      "Inventor",
+      "Iron Will",
+      "Magic Item Reliance",
+      "Scientific Expertise",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Lab Access",
+      "Secret Identity",
+      "Sorcerous",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Focused Fury",
+          "Hit & Run",
+          "Riposte",
+          "Vicious Attack",
+          "Whirling Frenzy Ebony Powers:",
+          "Bolts of Balthakk",
+          "Dispel Spell",
+          "Mighty 2",
+          "Power Slider (Blood Curse): If the user gets a Fantastic success on an attack with this weapon and causes bleeding, their powers are boosted. However, they also gain the Bloodthirsty tag. If they kill someone while Bloodthirsty, they lose their Heroic tag. Blade",
+          "Sense Supernatural",
+          "Shield of the Seraphim (20 points to shatter)",
+          "Summonable",
+          "Unkillable",
+          "Carried",
+          "Menacing",
+          "Unkillable power usable only by descendants of King Arthur"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Ebony Blade"
+    ],
+    "id": "black-knight-avengers-expansion"
   },
   {
     "name": "BLACK PANTHER",
@@ -2933,6 +3243,203 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Electrified Vibranium Claws"
     ]
+  },
+  {
+    "name": "BLACK PANTHER (SHURI)",
+    "realName": "Shuri",
+    "rank": 5,
+    "health": 90,
+    "focus": 120,
+    "karma": 5,
+    "abilities": {
+      "melee": 7,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 2,
+      "logic": 5
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Leader, Scientist",
+    "origin": "High Tech, Magic",
+    "teams": "Panther Cult",
+    "base": "Wakanda",
+    "features": "",
+    "history": "As the lone daughter of the Wakandan royal family, Shuri was narrowly defeated by her brother, T’Challa, in a contest to determine the next Wakandan regent, the Black Panther. Although she had long dreamed of becoming the Panther, Shuri did not let her envy consume her. Instead, she set out to make a name for herself in her own right. Shuri’s brilliant mind and natural combat skills make her a fighter on par with T’Challa. In times of national upheaval, she has temporarily accepted the title of Black Panther, but more oš en, she works as an advocate for the Wakandan people under her own name—and to great success. This profile, however, represents Shuri during periods when she has taken on the mantle of the Panther and the responsibility of defending her country in battle.",
+    "personality": "Shuri sometimes resents the disproportionate amount of attention and power given to her brother, but her love for him and the Wakandan people outweighs all that. Eloquent, personable and incredibly sharp, she has proven an excellent leader. iconic item Weapons Black Panther’s Claws Powers:",
+    "traits": [
+      "Combat Reflexes",
+      "Extra Occupation",
+      "Extraordinary Origin",
+      "Free Running",
+      "Inventor",
+      "Presence",
+      "Public Speaking",
+      "Scientific Expertise",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Authority",
+      "Backup",
+      "Black Market Access",
+      "Headquarters: Wakanda",
+      "Heroic",
+      "Lab Access",
+      "Obligation: Wakanda",
+      "Powerful",
+      "Public Identity",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Heightened Senses 1",
+          "Inspiration",
+          "Mighty 1",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Always Ready",
+          "Attack Stance",
+          "Brace for Impact",
+          "Counterstrike Technique",
+          "Do This All Day"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Combat Support",
+          "Focus Fire",
+          "Keep Moving",
+          "On Your Feet",
+          "Anti-Metal: Ignores Health Damage Reduction",
+          "Worn"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Black Panther’s Claws"
+    ],
+    "id": "black-panther-shuri-avengers-expansion"
+  },
+  {
+    "name": "BLACK PANTHER (T’CHALLA)",
+    "realName": "T’Challa",
+    "rank": 5,
+    "health": 90,
+    "focus": 120,
+    "karma": 5,
+    "abilities": {
+      "melee": 7,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 2,
+      "logic": 6
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "High Tech, Magic",
+    "teams": "Agents of Wakanda, Avengers, Fantastic Four, Panther Cult, Ultimates",
+    "base": "Impossible City",
+    "features": "",
+    "history": "As the heir to the Wakandan throne, T’Challa underwent a grueling series of tests to prove his worthiness to consume the mystical heartshaped herb and become the king of the most technologically advanced nation on the planet, as well as its protector: the Black Panther. Though he later lost the powers given to him by the herb, T’Challa regained his former abilities by pledging himself to the panther god Bast and becoming King of the Dead, ruler of the Necropolis under Wakanda. In the years since his ascension to the throne, T’Challa has served as an astoundingly eff ective leader, not only for Wakanda but also for international super-teams like the Avengers. Aš er introducing democracy to Wakanda in the form of a parliament that he oversaw as king, T’Challa suff ered a series of public embarrassments and a brief spat with the Avengers that led to the parliament ousting T’Challa and abolishing the throne. Though T’Challa is still a member of the Avengers, he’s been going on long away missions as of late, so as to avoid any awkward confrontations with his teammate and ex-wife, Storm.",
+    "personality": "T’Challa is serious, competent and regal. He takes nothing for granted, especially his responsibilities, the greatest of which is the welfare of his people. He has an unrivaled mind for tactics and can hold his own in a contest of wits with the smartest people on the planet. iconic item Black Panther’s Claws Powers:",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Extraordinary Origin",
+      "Famous",
+      "Fearless",
+      "Presence",
+      "Public Speaking",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Enemy: Killmonger",
+      "Headquarters: Impossible",
+      "Heroic",
+      "Obligation: Wakanda",
+      "Public Identity",
+      "Rich",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 2",
+          "Combat Trickery",
+          "Discipline 1",
+          "Heightened Senses 1",
+          "Inspiration",
+          "Mighty 1",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Counterstrike Technique",
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Combat Support",
+          "Focus Fire",
+          "Anti-Metal: Ignores Health Damage Reduction",
+          "Worn"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Black Panther’s Claws"
+    ],
+    "id": "black-panther-tchalla-avengers-expansion"
   },
   {
     "name": "BLACK PRIESTESS",
@@ -3031,6 +3538,96 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "black-priestess-x-men-expansion"
+  },
+  {
+    "name": "BLACK SWAN",
+    "realName": "Yabbat Ummon Turru",
+    "rank": 5,
+    "health": 120,
+    "focus": 180,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 5,
+      "resilience": 4,
+      "vigilance": 6,
+      "ego": 3,
+      "logic": 4
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 30,
+      "jump": 3
+    },
+    "occupation": "Outsider",
+    "origin": "Alien",
+    "teams": "Black Order",
+    "base": "Mobile",
+    "features": "Unnaturally pale skin",
+    "history": "Yabbat Tarru was raised as the youngest princess of a strict and oppressive royal family on an alternate Earth where the stars never shine and the last vestiges of intelligent life in the universe have fled underground. As grim as her reality was, it took a significant turn for the worse when an army of interdimensional warriors known as Black Swans slaughtered all the people of her planet. The leader of the invading army—secretly Doctor Doom—spared her from death, but only so that she too could one day become a Black Swan. The final remnants of Tarru’s world were swallowed up by an incursion, so with nowhere else to go, she assented to Doom’s demands and entered into his service. Many years later, when Doom finally turned his army on Earth-616, Tarru took the opportunity to abandon him for another warlord: Thanos. Proving herself in battle against Doom, she quickly earned a position within the Mad Titan’s inner circle—the Black Order—and though Thanos was killed shortly aš er she joined the organization, she stuck with the Black Order for a time.",
+    "personality": "Unlike the rest of the Black Order, Swan is not wholly committed to Thanos or to his mission of mass murder. Her particular brand of evil emerges more from a place of nihilistic sorrow than bloodthirstiness. She seeks power because she believes it is the only way to protect herself from an uncaring and merciless universe. Swan may maintain the self-superior air of an otherworldly princess, but her every word is tinged with insecurity and quiet melancholy. If any member of the Black Order can be reasoned with, it is her. Control Super-Strength",
+    "traits": [
+      "Beguiling",
+      "Combat Reflexes",
+      "Connections: Outsiders",
+      "Fresh Eyes",
+      "Iron Will",
+      "Leverage",
+      "Presence",
+      "Stranger"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Extreme Appearance",
+      "Linguist: English, various alien languages",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Brilliance 1",
+          "Environmental Protection",
+          "Flight 2",
+          "Mighty 2",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Protection 2 (20 points to shatter)",
+          "Elemental Push"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Crushing Grip",
+          "Immovable",
+          "Smash"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Mind Reading",
+          "Telepathic Link",
+          "Telepathic Network"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "black-swan-avengers-expansion"
   },
   {
     "name": "BLACK TOM CASSIDY",
@@ -3171,725 +3768,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "BLACKANT",
-    "realName": "Eric O’Grady",
-    "rank": 3,
-    "health": 120,
-    "focus": 90,
-    "karma": null,
-    "abilities": {
-      "melee": 3,
-      "agility": 4,
-      "resilience": 4,
-      "vigilance": 3,
-      "ego": 0,
-      "logic": 1
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer",
-    "origin": "High Tech: Android, High Tech: Pym Particles",
-    "teams": "Lethal Legion, Secret Avengers",
-    "base": "Mobile",
-    "features": "",
-    "history": "During a brief period when the second Ant-Man (Scott Lang) was thought dead, S.H.I.E.L.D. hired the original Ant-Man (Hank Pym) to create a new version of the hero. The organization planned to hold tryouts among their top members to pick a new Ant-Man based on their performance, but before S.H.I.E.L.D. could make a decision, an unscrupulous lowlevel agent named Eric O’Grady stole Pym’s Ant-Man suit and ran off , dreaming of evading the law while achieving fame and fortune as an independent adventurer. He ultimately failed on both counts, though aš er he was captured and brought back home, S.H.I.E.L.D. decided to let him keep being Ant-Man. During a mission with the Secret Avengers, O’Grady was killed by a race of evil androids known as the Descendants and secretly replaced with a robotic replica. Going under the codename Black Ant, this evil version of O’Grady attempted to wipe out the Avengers, but before he could, Valkyrie (Brunnhilde) uncovered the deception and destroyed him. Black Ant was later rebuilt by the Mad Thinker and briefly enlisted into the Hood’s Illuminati before being betrayed by his own team and once again destroyed. He later reappeared in the employ of Taskmaster, working as a mercenary.",
-    "personality": "Even when he was a human, Black Ant was a creature of greed and opportunism driven primarily by his hedonistic impulses. He struggles with his existence as a LifeModel Decoy and grows increasingly disillusioned with his lot in life every time his body is rebuilt. Control Telepathy",
-    "traits": [
-      "Abrasive",
-      "Connections: Super Villains",
-      "Enduring Constitution",
-      "Extraordinary Origin",
-      "Fearless",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "A.I.",
-      "Black Market Access",
-      "Public Identity",
-      "Villainous"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Mighty 1"
-        ]
-      },
-      {
-        "set": "Elemental Control (Energy)",
-        "names": [
-          "Elemental Blast",
-          "Elemental Burst"
-        ]
-      },
-      {
-        "set": "Resize",
-        "names": [
-          "Grow 2",
-          "Resize Object",
-          "Shrink 4",
-          "Shrinking Dodge"
-        ]
-      },
-      {
-        "set": "Telepathy",
-        "names": [
-          "Animal Communication (bugs)"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "id": "blackant-avengers-expansion"
-  },
-  {
-    "name": "BLACKCAT",
-    "realName": "Felicia Sara Hardy",
-    "rank": 4,
-    "health": 60,
-    "focus": 120,
-    "karma": null,
-    "abilities": {
-      "melee": 3,
-      "agility": 5,
-      "resilience": 2,
-      "vigilance": 4,
-      "ego": 5,
-      "logic": 1
-    },
-    "speed": {
-      "run": 6,
-      "climb": 6,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer, Criminal",
-    "origin": "High Tech: Cybernetics, Special Training",
-    "teams": "Heroes for Hire, Thieves Guild, Secret Defenders",
-    "base": "New York City",
-    "features": "",
-    "history": "Felicia Hardy’s father, Walter, might have been a legendary thief, but to her, he was never anything more than a good dad. So when a group of corrupt cops threw him in jail for a crime he didn’t actually commit, Felicia flew into a rage. She spent the rest of her youth tirelessly preparing to break her father out, training her body and mind in the ways of a master thief and even augmenting her body with a cybernetic probability generator. As a tribute to her father’s life as a cat burglar, she equipped herself with a pair of sharp claws and took on the codename Black Cat. When Hardy finally did break her father out of prison, Spider-Man (Peter Parker) tried to stop her. However, a‘ er he realized that Walter Hardy was on death’s door, Parker allowed Felicia to take her father home. He tried to apprehend her a‘ er the fact, only for her to slip away. This chance encounter sparked a long relationship between the cat burglar and the web-slinger. In the coming years, they became many things to each other. Sometimes, they were enemies. Sometimes, they were partners. Sometimes, they were lovers. No matter the circumstances, they were always important to each other. Currently, the pair are just good friends. Black Cat is an independent crimefighter, but she’s always willing to help out Spider-Man, and she’s even had adventures with another ex of his: Mary Jane Watson.",
-    "personality": "Black Cat is best known for the flirty, femme fatale persona she puts on whenever she’s interacting with Parker, but her playful, blasé exterior belies a deeply empathetic, if not heroic, interior. She has been a thief for the good of others just as o‘ en as she’s been a thief for herself.",
-    "traits": [
-      "Beguiling",
-      "Combat Reflexes",
-      "Connections: Criminal",
-      "Connections: Super Heroes",
-      "Determination",
-      "Extra Occupation",
-      "Extraordinary Origin",
-      "Fearless",
-      "Sneaky",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Public Identity",
-      "Streetwise"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Evasion",
-          "Mighty 1 Luck",
-          "Evil Eye",
-          "Jinx You",
-          "Jinx You All"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Attack Stance",
-          "Banging Heads",
-          "Fast Strikes",
-          "Flying Double Kick",
-          "Leg Sweep"
-        ]
-      },
-      {
-        "set": "Melee Weapons (Sharp)",
-        "names": [
-          "Exploit",
-          "Fast Attacks",
-          "Hit & Run",
-          "Vicious Attack"
-        ]
-      },
-      {
-        "set": "Spider-Powers",
-        "names": [
-          "Wallcrawling"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Spider-Verse Expansion",
-    "id": "blackcat-spider-verse-expansion"
-  },
-  {
-    "name": "BLACKDWARF",
-    "realName": "Black Dwarf",
-    "rank": 4,
-    "health": 180,
-    "focus": 150,
-    "karma": null,
-    "abilities": {
-      "melee": 6,
-      "agility": 1,
-      "resilience": 6,
-      "vigilance": 4,
-      "ego": 1,
-      "logic": 2
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 24
-    },
-    "occupation": "Military",
-    "origin": "Alien",
-    "teams": "Black Order",
-    "base": "Mobile",
-    "features": "Bright yellow eyes, scaly skin, spiked fists, sharpened teeth, tendrils for hair",
-    "history": "Despite being the largest and angriest member of Thanos’ Black Order, Black Dwarf may have the worst track record of all the Titan’s generals. During Thanos’ last invasion of Earth, Dwarf led a costly and ultimately pointless campaign into Wakanda. In an attempt to make up for his mistakes, Dwarf tried to take on the Avengers all on his own. He was almost immediately killed. Months later, Dwarf was resurrected, long aš er Thanos himself had perished. With nowhere else to go, Dwarf returned to the company of his old comrades in the Black Order. These days, the Order works as mass killers for hire. They take any job that pays and at least piques their interest.",
-    "personality": "Black Dwarf cares little for what may be technically correct on a tactical level. If the other members of the Black Order are scalpels, Dwarf is a hammer. He overwhelms his enemies with raw strength, attacking with reckless and joyful abandon. Although he may have a short temper, Dwarf is not, as many have assumed him to be, stupid. Like all of Thanos’ former generals, he speaks in a sophisticated and formal manner and maintains a subtle air of superiority at all times. Weapons Super-Strength",
-    "traits": [
-      "Battle Ready",
-      "Berserker",
-      "Big (Reach 2)",
-      "Connections: Military (Thanos’ army)",
-      "Enduring Constitution",
-      "Fearless",
-      "Situational Awareness"
-    ],
-    "tags": [
-      "Alien Heritage",
-      "Extreme Appearance",
-      "Public Identity",
-      "Signature Weapon: Ax (acts as sword)",
-      "Villainous"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Mighty 4",
-          "Sturdy 3"
-        ]
-      },
-      {
-        "set": "Melee Weapons (Sharp)",
-        "names": [
-          "Hit & Run",
-          "Vicious Attack"
-        ]
-      },
-      {
-        "set": "Super-Strength",
-        "names": [
-          "Banging Heads",
-          "Clobber",
-          "Crushing Grip",
-          "Ground-Shaking Stomp",
-          "Immovable",
-          "Jump 2",
-          "Quick Toss",
-          "Smash"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "id": "blackdwarf-avengers-expansion"
-  },
-  {
-    "name": "BLACKKNIGHT",
-    "realName": "Dane Whitman",
-    "rank": 4,
-    "health": 90,
-    "focus": 120,
-    "karma": 4,
-    "abilities": {
-      "melee": 6,
-      "agility": 2,
-      "resilience": 3,
-      "vigilance": 4,
-      "ego": 2,
-      "logic": 3
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer, Scientist",
-    "origin": "Magic: Sorcery",
-    "teams": "Avengers, Defenders, Savage Avengers",
-    "base": "Garrett Castle",
-    "features": "",
-    "history": "Centuries ago, the great wizard Merlin, having either forged or found the cursed Ebony Blade (stories diff er), giš ed the weapon to the one man he trusted to wield it: the loyal Sir Percival. True to his word, Percival faithfully executed the will of King Arthur as the brutal but noble Black Knight. When Percival died, he passed the blade down to his descendants, and they onto theirs, and so on into the modern era, when it passed into the hands of the unscrupulous Nathan Garrett. Though the blade rejected Garrett, he nonetheless took on the title of Black Knight and set out to seek fame and fortune with the Masters of Evil. Shortly thereaš er, he sustained fatal injuries battling Iron Man (Tony Stark) and, having seen the error of his ways, used his final hours to transfer all his possessions to his nephew: a humble scientist named Dane Whitman. Determined to redeem his family’s name, Whitman took up the Ebony Blade and, in the guise of his uncle, infiltrated the Masters of Evil and destroyed it from within, earning himself a place of honor among the Avengers. Since then, Whitman’s adventures have taken him to strange places all across time and space, leaving him little opportunity for a personal life. However, he recently reconnected with his long-lost daughter, Jackie Chopra, and he now shares with her the title of Black Knight.",
-    "personality": "Though his noble heart forces him to continue onward, Whitman does not actually like being the Black Knight. The burden of wielding the Ebony Blade, which constantly pushes him to commit terrible violence, causes him endless stress. To help keep himself levelheaded, he oš en speaks in an aff ected medieval accent. iconic item Ebony Blade",
-    "traits": [
-      "Berserker",
-      "Connections: Super Heroes",
-      "Extra Occupation",
-      "Fearless",
-      "Inventor",
-      "Iron Will",
-      "Magic Item Reliance",
-      "Scientific Expertise",
-      "Situational Awareness"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Heroic",
-      "Lab Access",
-      "Secret Identity",
-      "Sorcerous",
-      "Supernatural"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Iconic Item",
-          "Inspiration",
-          "Sturdy 1"
-        ]
-      },
-      {
-        "set": "Melee Weapons (Sharp)",
-        "names": [
-          "Exploit",
-          "Fast Attacks",
-          "Focused Fury",
-          "Hit & Run",
-          "Riposte",
-          "Vicious Attack",
-          "Whirling Frenzy Ebony Powers:",
-          "Bolts of Balthakk",
-          "Dispel Spell",
-          "Mighty 2",
-          "Power Slider (Blood Curse): If the user gets a Fantastic success on an attack with this weapon and causes bleeding, their powers are boosted. However, they also gain the Bloodthirsty tag. If they kill someone while Bloodthirsty, they lose their Heroic tag. Blade",
-          "Sense Supernatural",
-          "Shield of the Seraphim (20 points to shatter)",
-          "Summonable",
-          "Unkillable",
-          "Weapon: Range: Reach, Melee Damage Multiplier bonus: +2. Restrictions:",
-          "Carried",
-          "Menacing",
-          "Unkillable power usable only by descendants of King Arthur Power Value: 7"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Ebony Blade"
-    ],
-    "id": "blackknight-avengers-expansion"
-  },
-  {
-    "name": "BLACKPANTHER",
-    "realName": "Shuri",
-    "rank": 5,
-    "health": 90,
-    "focus": 120,
-    "karma": 5,
-    "abilities": {
-      "melee": 7,
-      "agility": 4,
-      "resilience": 3,
-      "vigilance": 4,
-      "ego": 2,
-      "logic": 5
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Leader, Scientist",
-    "origin": "High Tech, Magic",
-    "teams": "Panther Cult",
-    "base": "Wakanda",
-    "features": "",
-    "history": "As the lone daughter of the Wakandan royal family, Shuri was narrowly defeated by her brother, T’Challa, in a contest to determine the next Wakandan regent, the Black Panther. Although she had long dreamed of becoming the Panther, Shuri did not let her envy consume her. Instead, she set out to make a name for herself in her own right. Shuri’s brilliant mind and natural combat skills make her a fighter on par with T’Challa. In times of national upheaval, she has temporarily accepted the title of Black Panther, but more oš en, she works as an advocate for the Wakandan people under her own name—and to great success. This profile, however, represents Shuri during periods when she has taken on the mantle of the Panther and the responsibility of defending her country in battle.",
-    "personality": "Shuri sometimes resents the disproportionate amount of attention and power given to her brother, but her love for him and the Wakandan people outweighs all that. Eloquent, personable and incredibly sharp, she has proven an excellent leader. iconic item Weapons Black Panther’s Claws Powers:",
-    "traits": [
-      "Combat Reflexes",
-      "Extra Occupation",
-      "Extraordinary Origin",
-      "Free Running",
-      "Inventor",
-      "Presence",
-      "Public Speaking",
-      "Scientific Expertise",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "Authority",
-      "Backup",
-      "Black Market Access",
-      "Headquarters: Wakanda",
-      "Heroic",
-      "Lab Access",
-      "Obligation: Wakanda",
-      "Powerful",
-      "Public Identity",
-      "Supernatural"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Brilliance 1",
-          "Heightened Senses 1",
-          "Iconic Item",
-          "Inspiration",
-          "Mighty 1",
-          "Sturdy 2"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Always Ready",
-          "Attack Stance",
-          "Brace for Impact",
-          "Counterstrike Technique",
-          "Do This All Day"
-        ]
-      },
-      {
-        "set": "Melee Weapons (Sharp)",
-        "names": [
-          "Exploit",
-          "Fast Attacks",
-          "Vicious Attack"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Change of Plans",
-          "Combat Support",
-          "Focus Fire",
-          "Keep Moving",
-          "On Your Feet",
-          "Operations Center Black Panther’s Claws Powers:",
-          "Anti-Metal: Ignores Health Damage Reduction",
-          "Weapon: Range: Reach, Melee Damage Multiplier bonus: +1. Restrictions:",
-          "Worn Power Value: 1"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Black Panther’s Claws"
-    ],
-    "id": "blackpanther-avengers-expansion"
-  },
-  {
-    "name": "BLACKPANTHER",
-    "realName": "T’Challa",
-    "rank": 5,
-    "health": 90,
-    "focus": 120,
-    "karma": 5,
-    "abilities": {
-      "melee": 7,
-      "agility": 4,
-      "resilience": 3,
-      "vigilance": 4,
-      "ego": 2,
-      "logic": 6
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer",
-    "origin": "High Tech, Magic",
-    "teams": "Agents of Wakanda, Avengers, Fantastic Four, Panther Cult, Ultimates",
-    "base": "Impossible City",
-    "features": "",
-    "history": "As the heir to the Wakandan throne, T’Challa underwent a grueling series of tests to prove his worthiness to consume the mystical heartshaped herb and become the king of the most technologically advanced nation on the planet, as well as its protector: the Black Panther. Though he later lost the powers given to him by the herb, T’Challa regained his former abilities by pledging himself to the panther god Bast and becoming King of the Dead, ruler of the Necropolis under Wakanda. In the years since his ascension to the throne, T’Challa has served as an astoundingly eff ective leader, not only for Wakanda but also for international super-teams like the Avengers. Aš er introducing democracy to Wakanda in the form of a parliament that he oversaw as king, T’Challa suff ered a series of public embarrassments and a brief spat with the Avengers that led to the parliament ousting T’Challa and abolishing the throne. Though T’Challa is still a member of the Avengers, he’s been going on long away missions as of late, so as to avoid any awkward confrontations with his teammate and ex-wife, Storm.",
-    "personality": "T’Challa is serious, competent and regal. He takes nothing for granted, especially his responsibilities, the greatest of which is the welfare of his people. He has an unrivaled mind for tactics and can hold his own in a contest of wits with the smartest people on the planet. iconic item Black Panther’s Claws Powers:",
-    "traits": [
-      "Combat Reflexes",
-      "Connections: Super Heroes",
-      "Extraordinary Origin",
-      "Famous",
-      "Fearless",
-      "Presence",
-      "Public Speaking",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Enemy: Killmonger",
-      "Headquarters: Impossible",
-      "Heroic",
-      "Obligation: Wakanda",
-      "Public Identity",
-      "Rich",
-      "Supernatural"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Brilliance 2",
-          "Combat Trickery",
-          "Discipline 1",
-          "Heightened Senses 1",
-          "Iconic Item",
-          "Inspiration",
-          "Mighty 1",
-          "Sturdy 2"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Attack Stance",
-          "Counterstrike Technique",
-          "Fast Strikes",
-          "Leg Sweep"
-        ]
-      },
-      {
-        "set": "Melee Weapons (Sharp)",
-        "names": [
-          "Exploit",
-          "Vicious Attack"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Change of Plans",
-          "Combat Support",
-          "Focus Fire",
-          "Operations Center Black Panther’s Claws Powers:",
-          "Anti-Metal: Ignores Health Damage Reduction",
-          "Weapon: Range: Reach, Melee Damage Multiplier bonus: +1. Restrictions:",
-          "Worn Power Value: 1"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Black Panther’s Claws"
-    ],
-    "id": "blackpanther-tchalla-avengers-expansion"
-  },
-  {
-    "name": "BLACKSWAN",
-    "realName": "Yabbat Ummon Turru",
-    "rank": 5,
-    "health": 120,
-    "focus": 180,
-    "karma": null,
-    "abilities": {
-      "melee": 3,
-      "agility": 5,
-      "resilience": 4,
-      "vigilance": 6,
-      "ego": 3,
-      "logic": 4
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "flight": 30,
-      "jump": 3
-    },
-    "occupation": "Outsider",
-    "origin": "Alien",
-    "teams": "Black Order",
-    "base": "Mobile",
-    "features": "Unnaturally pale skin",
-    "history": "Yabbat Tarru was raised as the youngest princess of a strict and oppressive royal family on an alternate Earth where the stars never shine and the last vestiges of intelligent life in the universe have fled underground. As grim as her reality was, it took a significant turn for the worse when an army of interdimensional warriors known as Black Swans slaughtered all the people of her planet. The leader of the invading army—secretly Doctor Doom—spared her from death, but only so that she too could one day become a Black Swan. The final remnants of Tarru’s world were swallowed up by an incursion, so with nowhere else to go, she assented to Doom’s demands and entered into his service. Many years later, when Doom finally turned his army on Earth-616, Tarru took the opportunity to abandon him for another warlord: Thanos. Proving herself in battle against Doom, she quickly earned a position within the Mad Titan’s inner circle—the Black Order—and though Thanos was killed shortly aš er she joined the organization, she stuck with the Black Order for a time.",
-    "personality": "Unlike the rest of the Black Order, Swan is not wholly committed to Thanos or to his mission of mass murder. Her particular brand of evil emerges more from a place of nihilistic sorrow than bloodthirstiness. She seeks power because she believes it is the only way to protect herself from an uncaring and merciless universe. Swan may maintain the self-superior air of an otherworldly princess, but her every word is tinged with insecurity and quiet melancholy. If any member of the Black Order can be reasoned with, it is her. Control Super-Strength",
-    "traits": [
-      "Beguiling",
-      "Combat Reflexes",
-      "Connections: Outsiders",
-      "Fresh Eyes",
-      "Iron Will",
-      "Leverage",
-      "Presence",
-      "Stranger"
-    ],
-    "tags": [
-      "Alien Heritage",
-      "Extreme Appearance",
-      "Linguist: English, various alien languages",
-      "Public Identity",
-      "Villainous"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Accuracy 2",
-          "Brilliance 1",
-          "Environmental Protection",
-          "Flight 2",
-          "Mighty 2",
-          "Sturdy 1"
-        ]
-      },
-      {
-        "set": "Elemental Control (Energy)",
-        "names": [
-          "Elemental Barrier",
-          "Elemental Blast",
-          "Elemental Burst",
-          "Elemental Protection 2 (20 points to shatter)",
-          "Elemental Push"
-        ]
-      },
-      {
-        "set": "Super-Strength",
-        "names": [
-          "Clobber",
-          "Crushing Grip",
-          "Immovable",
-          "Smash"
-        ]
-      },
-      {
-        "set": "Telepathy",
-        "names": [
-          "Mind Reading",
-          "Telepathic Link",
-          "Telepathic Network"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "id": "blackswan-avengers-expansion"
-  },
-  {
-    "name": "BLACKWIDOW",
-    "realName": "Natasha Romanoff",
-    "rank": 4,
-    "health": 90,
-    "focus": 90,
-    "karma": 4,
-    "abilities": {
-      "melee": 3,
-      "agility": 5,
-      "resilience": 3,
-      "vigilance": 3,
-      "ego": 4,
-      "logic": 2
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3,
-      "swingline": 18
-    },
-    "occupation": "Spy",
-    "origin": "Special Training, Symbiote",
-    "teams": "Avengers, Infinity Watch, S.H.I.E.L.D.",
-    "base": "Mobile",
-    "features": "",
-    "history": "Trained from a young age to be a Russian special agent, Natasha Romanoff defected to the United States aš er clashing with the Avengers. Since then, she has served as a vital ally to many of the most powerful organizations on the planet, particularly S.H.I.E.L.D. and the Avengers. Romanoff has spent much of her career as a solo mercenary, doing high-level black ops for paying clients. She tries to never take a job she believes to be immoral, but in the world of espionage, things are not always so clear-cut. Recently, while investigating the corporate conglomerate Alchemax, Romanoff encountered an off shoot of the Venom symbiote named Sliver and willingly bonded with it, making the creature her new partner in crime. Though Sliver later disappeared while helping her defeat other Alchemax experimental symbiotes, this profile represents Romanoff and Sliver when they were together, at the height of their powers.",
-    "personality": "Charming and coolheaded, Romanoff ’s personality makes her an excellent spy. A life of espionage has made her slow to trust others, but those closest to her consider her a good friend and an exceptional team leader. Her partner, Sliver, is soš -spoken and cooperative—unusually so for a symbiote. It’s a young organism with a lot to learn, and it looks up to Romanoff as an almost mother-like figure. iconic item Widow’s Bite Powers:",
-    "traits": [
-      "Anathema: Extreme Heat/ Extreme Sonics",
-      "Beguiling",
-      "Connections: Espionage",
-      "Determination",
-      "Extraordinary Origin",
-      "Free Running",
-      "Leverage",
-      "Sneaky",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Heroic",
-      "Linguist: Chinese, English, French, German, Japanese, Russian",
-      "Public Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Environmental Protection",
-          "Iconic Item",
-          "Inspiration",
-          "Mighty 1",
-          "Slow-Motion Dodge"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Attack Stance",
-          "Counterstrike Technique",
-          "Defense Stance"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Snap Shooting",
-          "Sniping",
-          "Weapons Blazing"
-        ]
-      },
-      {
-        "set": "Spider-Powers",
-        "names": [
-          "Webcasting",
-          "Webgrabbing",
-          "Webslinging"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Change of Plans Widow’s Bite Powers:",
-          "Eff ect Options: These blasts can count as either Electricity attacks or Force attacks.",
-          "Weapon: Range: 10 spaces, Agility Damage Multiplier bonus: +1. Restrictions:",
-          "Worn Power Value: 1"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Widow’s Bite"
-    ],
-    "id": "blackwidow-avengers-expansion"
-  },
-  {
-    "name": "BLACKWIDOW",
+    "name": "BLACK WIDOW (EARTH-1610)",
     "realName": "Natasha Romanov",
     "rank": 4,
     "health": 90,
@@ -3960,22 +3839,119 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Tactics",
         "names": [
-          "Change of Plans Black Widow’s Battle Suit Powers:",
           "Elemental Barrage (Energy)",
           "Elemental Blast (Energy)",
           "Elemental Burst (Energy)",
           "Flight 2",
           "Mighty 1",
           "Sturdy 1",
-          "Wallcrawling Restrictions:",
+          "Wallcrawling",
           "Flashy",
-          "Worn Power Value: 6"
+          "Worn"
         ]
       }
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "blackwidow-natasha-romanov-avengers-expansion"
+    "equipment": [
+      "Black Widow (Earth-1610)’s Battle Suit"
+    ],
+    "id": "black-widow-earth-1610-avengers-expansion"
+  },
+  {
+    "name": "BLACK WIDOW (WITH SYMBIOTE)",
+    "realName": "Natasha Romanoff",
+    "rank": 4,
+    "health": 90,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 3,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 4,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3,
+      "swingline": 18
+    },
+    "occupation": "Spy",
+    "origin": "Special Training, Symbiote",
+    "teams": "Avengers, Infinity Watch, S.H.I.E.L.D.",
+    "base": "Mobile",
+    "features": "",
+    "history": "Trained from a young age to be a Russian special agent, Natasha Romanoff defected to the United States aš er clashing with the Avengers. Since then, she has served as a vital ally to many of the most powerful organizations on the planet, particularly S.H.I.E.L.D. and the Avengers. Romanoff has spent much of her career as a solo mercenary, doing high-level black ops for paying clients. She tries to never take a job she believes to be immoral, but in the world of espionage, things are not always so clear-cut. Recently, while investigating the corporate conglomerate Alchemax, Romanoff encountered an off shoot of the Venom symbiote named Sliver and willingly bonded with it, making the creature her new partner in crime. Though Sliver later disappeared while helping her defeat other Alchemax experimental symbiotes, this profile represents Romanoff and Sliver when they were together, at the height of their powers.",
+    "personality": "Charming and coolheaded, Romanoff ’s personality makes her an excellent spy. A life of espionage has made her slow to trust others, but those closest to her consider her a good friend and an exceptional team leader. Her partner, Sliver, is soš -spoken and cooperative—unusually so for a symbiote. It’s a young organism with a lot to learn, and it looks up to Romanoff as an almost mother-like figure. iconic item Widow’s Bite Powers:",
+    "traits": [
+      "Anathema: Extreme Heat/ Extreme Sonics",
+      "Beguiling",
+      "Connections: Espionage",
+      "Determination",
+      "Extraordinary Origin",
+      "Free Running",
+      "Leverage",
+      "Sneaky",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Linguist: Chinese, English, French, German, Japanese, Russian",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Environmental Protection",
+          "Inspiration",
+          "Mighty 1",
+          "Slow-Motion Dodge"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Counterstrike Technique",
+          "Defense Stance"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Snap Shooting",
+          "Sniping",
+          "Weapons Blazing"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Webcasting",
+          "Webgrabbing",
+          "Webslinging"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Eff ect Options: These blasts can count as either Electricity attacks or Force attacks.",
+          "Worn"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Widow’s Bite"
+    ],
+    "id": "black-widow-with-symbiote-avengers-expansion"
   },
   {
     "name": "BLADE",
@@ -4144,7 +4120,7 @@ export const MMRPG_CHARACTERS = [
     "id": "blastaar-secret-wars"
   },
   {
-    "name": "BLINK EARTH 295",
+    "name": "BLINK (Earth-295)",
     "realName": "Clarice Ferguson",
     "rank": 4,
     "health": 90,
@@ -4193,7 +4169,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Accuracy 2",
-          "Iconic Weapon",
           "Inspiration"
         ]
       },
@@ -4228,7 +4203,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "equipment": [
-      "Displacement field daggers"
+      "Displacement Field Daggers"
     ],
     "id": "blink-earth-295-x-men-expansion"
   },
@@ -4437,7 +4412,6 @@ export const MMRPG_CHARACTERS = [
           "Accuracy 2",
           "Evasion",
           "Flight 1",
-          "Iconic Weapon",
           "Sturdy 1"
         ]
       },
@@ -4607,7 +4581,7 @@ export const MMRPG_CHARACTERS = [
     "id": "brood-x-men-expansion"
   },
   {
-    "name": "BRUCEBANNER",
+    "name": "BRUCE BANNER",
     "realName": "Robert Bruce Banner",
     "rank": 1,
     "health": 10,
@@ -4666,7 +4640,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "brucebanner-avengers-expansion"
+    "id": "bruce-banner-avengers-expansion"
   },
   {
     "name": "BUILDER",
@@ -5140,6 +5114,354 @@ export const MMRPG_CHARACTERS = [
     ]
   },
   {
+    "name": "CAPTAIN AMERICA (BUCKY BARNES)",
+    "realName": "James Buchanan “Bucky” Barnes",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 4,
+      "agility": 6,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Spy",
+    "origin": "High Tech: Cybernetics, Special Training, Weird Science",
+    "teams": "Avengers, KGB, S.H.I.E.L.D.",
+    "base": "Mobile",
+    "features": "Bionic le§ arm",
+    "history": "Toward the end of World War II, the aerial explosion that sent Captain America (Steve Rogers) into the north Atlantic where he froze into a block of ice seemingly killed his sidekick, the young Bucky (Bucky Barnes). He was captured by Soviet scientists, who replaced a missing arm with a bionic prosthetic and brainwashed him to become a Russian assassin codenamed the Winter Soldier. He was kept in suspended animation for decades, only released to kill and then returned to sleep again. Cap eventually discovered who the Winter Soldier was and successfully undid Bucky’s brainwashing. During a period when Rogers was believed to be dead, Bucky took up the shield and replaced him as Captain America. Bucky eventually gave up the title and returned to his regular globe-trotting activities, first as the Winter Soldier and then, most recently, as the Revolution. This profile, however, represents Bucky during the period when he was Captain America, when he was doing everything he could to live up to the legacy of his old mentor.",
+    "personality": "Bucky is a deadly serious and world-weary vet. The remorse he feels for his time as an assassin weighs on him every day. iconic item Bearer Captain America’s Shield Bash Shield Shield Block Powers:",
+    "traits": [
+      "Combat Expert",
+      "Connections: Espionage",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Extraordinary Origin (2)",
+      "Fearless",
+      "Leverage",
+      "Sneaky",
+      "Tech Reliance",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Heroic",
+      "Linguist: Chinese (Mandarin), English, German, Japanese, Russian",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Snap Shooting",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Shield Bearer",
+        "names": [
+          "Hurled Shield Bash",
+          "Hurled Shield Block",
+          "Rico-Shield",
+          "Shield 2 (Shield 3 with Iconic Item)",
+          "Reduced Focus",
+          "Shield 1",
+          "Stackable",
+          "Carried",
+          "Flashy"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Captain America’s Shield"
+    ],
+    "id": "captain-america-bucky-barnes-avengers-expansion"
+  },
+  {
+    "name": "CAPTAIN AMERICA (EARLY DAYS)",
+    "realName": "Steve Rogers",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 5,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "Weird Science",
+    "teams": "U.S. Army",
+    "base": "Camp Lehigh, Virginia",
+    "features": "",
+    "history": "At the dawn of World War II, scrawny Steve Rogers was rejected by the U.S. Army as unfit for service, but Dr. Abraham Erskine saw something in the eager young man and selected him for the first human trials of his Super-Soldier Serum. A Nazi sympathizer assassinated Erskine during the procedure, but not before Rogers was improved to the peak of human physical ability. As Captain America, Rogers fought Nazis on the front lines in Europe, alongside his sidekick Bucky Barnes— right up until 1945, when they were seemingly killed stopping a plot of the evil Baron Zemo (Heinrich Zemo). Decades later, the newly formed Avengers found Rogers frozen in a block of ice and revived him, allowing him to return to the field. However, this profile represents Rogers long before he was frozen, even before the United States entered World War II. This is Rogers in his earliest days, back when he and Bucky were just a couple of low-rank grunts, secretly performing covert military operations in their off -hours.",
+    "personality": "Rogers is serious about helping people out, and he’s a natural leader, both in and out of combat. When he’s in his costume and carrying his shield, he tries to represent everything that is great about the ideals of the land and the people he loves so much. Bearer Tactics",
+    "traits": [
+      "Battle Ready",
+      "Beguiling",
+      "Combat Reflexes",
+      "Connections: Military",
+      "Public Speaking",
+      "Situational Awareness",
+      "Weird"
+    ],
+    "tags": [
+      "Enemy: Hydra",
+      "Enemy: Red Skull",
+      "Heroic",
+      "Secret Identity",
+      "Signature Weapon: Triangular shield (acts standard shield)"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Shield Bearer",
+        "names": [
+          "Brace for Impact",
+          "Do This All Day",
+          "Immovable",
+          "Shield 1",
+          "Shield Bash",
+          "Shield Deflection",
+          "Shield Wall"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "captain-america-early-days-avengers-expansion"
+  },
+  {
+    "name": "CAPTAIN AMERICA (EARTH-1610)",
+    "realName": "Steven “Steve” Rogers",
+    "rank": 4,
+    "health": 120,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 6,
+      "agility": 5,
+      "resilience": 4,
+      "vigilance": 3,
+      "ego": 0,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "Weird Science",
+    "teams": "Ultimates",
+    "base": "Mobile (Earth-1610)",
+    "features": "",
+    "history": "The life of Earth-1610’s Captain America largely resembles that of his Earth-616 counterpart, right up until the end of World War II. Rogers fell into the icy water while disarming an experimental missile created by a Nazi named Herr Kleiser, who was actually an alien Chitauri. Decades later, Rogers was fished out of the ice by agents of S.H.I.E.L.D. who immediately dra§ ed him into their new super-team program: the Ultimates. His unrelenting ruthlessness as a combatant quickly propelled him to become the team’s field leader, and he led the Ultimates on a mission that successfully wiped out Kleiser and his plot for the shape-changing Chitauri to take over the world. Since then, Rogers has faithfully and consistently served as the linchpin of both the Ultimates and the United States itself. He even served as the president of the country during a brief period when it seemed like the nation might once again descend into a civil war, though he stepped down as soon as the crisis ended.",
+    "personality": "While Earth-1610’s Steve Rogers has a lot in common with his Earth-616 counterpart, he lacks the latter man’s idealism. He’s an oldfashioned soldier and a die-hard patriot, but he’s not as concerned about the symbolism of his role. Rogers’ determination to win and to never give up drives him hard. iconic item Captain America’s Plan Shield of Plans Powers:",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Military",
+      "Determination",
+      "Public Speaking",
+      "Situational Awareness",
+      "Weird"
+    ],
+    "tags": [
+      "Enemy: Hydra",
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Shield Bearer",
+        "names": [
+          "Do This All Day",
+          "Hurled Shield Bash",
+          "Hurled Shield Block",
+          "Rico-Shield",
+          "Shield 3 (Shield 4 with Iconic Item)",
+          "Shield Bash",
+          "Shield Deflection"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Reduced Focus",
+          "Shield 1",
+          "Stackable",
+          "Carried",
+          "Flashy"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Captain America’s Shield"
+    ],
+    "id": "captain-america-earth-1610-avengers-expansion"
+  },
+  {
+    "name": "CAPTAIN AMERICA OF THE RAILWAYS",
+    "realName": "Aaron Fischer",
+    "rank": 3,
+    "health": 60,
+    "focus": 120,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 4,
+      "ego": 3,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Student",
+    "origin": "Weird Science",
+    "teams": "Avengers Academy, Captains Network",
+    "base": "Avengers Academy",
+    "features": "",
+    "history": "Life at home was never great for Aaron Fischer growing up as an openly gay teen in an isolated community, and a§ er cancer took his mother, things only got worse. One day, he decided he’d had enough of his father’s beatings and hit the rails, living out of boxcars and dri§ ing wherever the tracks took him. As time passed and Fischer witnessed more and more of the hardships that come with rough living, he gradually came to see the rails as his home and himself as their protector. Inspired by his childhood hero—Captain America—Fischer fashioned a shield and a costume and became the Captain America of the Railways, champion of those with nowhere else to go. Soon a§ er that, he met both of the main Captains America— Steve Rogers and Sam Wilson—and helped them expose a string of vagrant kidnappings by the Roxxon Energy Corporation. in Later, while investigating a similar string of crimes committed by Alchemax, Fischer stumbled into a trap set by the ringleaders of the conspiracy. The corporation had been testing a deadly new Super-Soldier treatment on the local unhoused population. It forced this treatment onto Fischer, hoping to kill him, but for some reason, the treatment actually worked on him. With his new energy powers, Fischer dismantled the facility and freed the remaining victims. These days, Fischer spends most of his time at the new Avengers Academy, learning how to be a better hero alongside his crush, Kid Juggernaut.",
+    "personality": "In regular interpersonal situations, Fischer can be awkward and shy, but that all disappears the second he sees someone in need. He has an unflinching commitment to helping others, particularly the poor and disenfranchised. His first priority is always the protection of others, and as such, he never uses his energy powers to blast others, only to shield them. iconic item Protection 1 Captain America of the to shatter) Railways’ Shield Powers:",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Fearless",
+      "Quick Learner",
+      "Weird"
+    ],
+    "tags": [
+      "Auditory Issues (partially right ear)",
+      "Black Market Access",
+      "Headquarters: Avengers Academy",
+      "Heroic",
+      "Mentor: Captain Marvel (Carol Danvers)",
+      "Obligation: School",
+      "Poor",
+      "Public Identity",
+      "Young"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Protection 1 (10 points to shatter)"
+        ]
+      },
+      {
+        "set": "Shield Bearer",
+        "names": [
+          "Do This All Day",
+          "Hurled Shield Bash",
+          "Rico-Shield",
+          "Shield 2 (Shield 3 with Iconic Item)",
+          "Shield Bash",
+          "Shield Deflection Captain America of the Railways’ Shield Powers:",
+          "Shield 1",
+          "Stackable",
+          "Carried",
+          "Flashy"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Captain America of the Railways’ Shield"
+    ],
+    "id": "captain-america-of-the-railways-avengers-expansion"
+  },
+  {
     "name": "CAPTAIN BRITAIN",
     "realName": "Elizabeth “Betsy” Braddock",
     "rank": 5,
@@ -5192,7 +5514,6 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Brilliance 3",
           "Flight 2",
-          "Iconic Weapon",
           "Inspiration",
           "Mighty 1",
           "Sturdy 3",
@@ -5225,6 +5546,104 @@ export const MMRPG_CHARACTERS = [
       "Psychic Sword"
     ],
     "id": "captain-britain-x-men-expansion"
+  },
+  {
+    "name": "CAPTAIN MAR-VELL",
+    "realName": "Mar-Vell",
+    "rank": 6,
+    "health": 180,
+    "focus": 180,
+    "karma": 6,
+    "abilities": {
+      "melee": 6,
+      "agility": 4,
+      "resilience": 6,
+      "vigilance": 5,
+      "ego": 7,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 30,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Military",
+    "origin": "Alien: Kree, Weird Science",
+    "teams": "Imperial Kree Army, Legion of the Unliving",
+    "base": "Mobile, formerly Titan",
+    "features": "",
+    "history": "The Kree Empire sent Mar-Vell to Earth to pave the way for an invasion, but a‰ er encountering Earth’s people, he chose to defend the planet. His second-in-command, Yon-Rogg, stabbed him and le‰ him for dead. Mar-Vell eventually made it back to Kree territory and defended the Supreme Intelligence from a traitorous plot. The Supreme Intelligence rewarded him with powers and sent him back to Earth. However, he became trapped in the Negative Zone. With the Supreme Intelligence’s help, he guided Rick Jones to a set of Nega-Bands. By clanging the bands together, the pair could swap places, freeing Mar-Vell from the Negative Zone. The two men were stuck together for years before Mar-Vell could free Jones. While Jones and Mar-Vell were still bound to each other, the villain Nitro exposed Mar-Vell to a nerve gas that caused him to develop cancer. Unable to stem the disease, Mar-Vell retired to Titan, where he passed away surrounded by family and friends. He was survived by his lover, Elysius, who later had two children by him: Genis-Vell and Phyla-Vell. Playing As Mar-Vell was a profoundly strong and noble hero; his only flaw was his pride. He tried to ignore his cancer diagnosis at first, and by the time he was ready to face it, it was too late. Even in battle, Mar-Vell puts protecting people over all other concerns. iconic item Nega-Bands bracers grant their user great powers and the ability to swap in another dimension.",
+    "personality": "",
+    "traits": [
+      "Battle Ready",
+      "Breathe Different (negated by Environmental Protection)",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Military (Imperial Kree Army)",
+      "Connections: Super Heroes",
+      "Determination",
+      "Enhanced Physique"
+    ],
+    "tags": [
+      "Extra Occupation",
+      "Extraordinary erent Origin",
+      "Fearless",
+      "Iron Will",
+      "Situational Awareness",
+      "Weird",
+      "Alien Heritage",
+      "Black Market Access",
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Discipline 2",
+          "Inspiration",
+          "Mighty 2 (Mighty 3 with Iconic Item)",
+          "Wisdom"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Do This All Day These legendary Kree bracers places with an ally in another Origin: Weird Science Powers:",
+          "Allspeak",
+          "Attunable",
+          "Cosmic Awareness",
+          "Elemental Blast (Energy)",
+          "Elemental Burst (Energy)",
+          "Elemental Grab (Energy) Note:Mar-Vell has Mighty Nega-Bands grant their user great powers dimension.",
+          "Elemental Protection 3 (Energy)",
+          "Elemental Sphere (Energy)",
+          "Entangled",
+          "Environmental Protection",
+          "Flight 2",
+          "Healing Factor",
+          "Illumination",
+          "Mighty 3 2, so for him, the Power and the ability to swap",
+          "Postcognition 1",
+          "Precognition 1",
+          "Sturdy 2",
+          "Supernova (Energy)",
+          "Warp Portal",
+          "Flashy",
+          "Paired Item",
+          "Worn"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Secret Wars",
+    "equipment": [
+      "Nega-Bands"
+    ],
+    "id": "captain-mar-vell-secret-wars"
   },
   {
     "name": "CAPTAIN MARVEL",
@@ -5307,463 +5726,6 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "captain-marvel",
     "genre": "core"
-  },
-  {
-    "name": "CAPTAINAMERICA",
-    "realName": "James Buchanan “Bucky” Barnes",
-    "rank": 4,
-    "health": 90,
-    "focus": 120,
-    "karma": 4,
-    "abilities": {
-      "melee": 4,
-      "agility": 6,
-      "resilience": 3,
-      "vigilance": 4,
-      "ego": 1,
-      "logic": 2
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer, Spy",
-    "origin": "High Tech: Cybernetics, Special Training, Weird Science",
-    "teams": "Avengers, KGB, S.H.I.E.L.D.",
-    "base": "Mobile",
-    "features": "Bionic le§ arm",
-    "history": "Toward the end of World War II, the aerial explosion that sent Captain America (Steve Rogers) into the north Atlantic where he froze into a block of ice seemingly killed his sidekick, the young Bucky (Bucky Barnes). He was captured by Soviet scientists, who replaced a missing arm with a bionic prosthetic and brainwashed him to become a Russian assassin codenamed the Winter Soldier. He was kept in suspended animation for decades, only released to kill and then returned to sleep again. Cap eventually discovered who the Winter Soldier was and successfully undid Bucky’s brainwashing. During a period when Rogers was believed to be dead, Bucky took up the shield and replaced him as Captain America. Bucky eventually gave up the title and returned to his regular globe-trotting activities, first as the Winter Soldier and then, most recently, as the Revolution. This profile, however, represents Bucky during the period when he was Captain America, when he was doing everything he could to live up to the legacy of his old mentor.",
-    "personality": "Bucky is a deadly serious and world-weary vet. The remorse he feels for his time as an assassin weighs on him every day. iconic item Bearer Captain America’s Shield Bash Shield Shield Block Powers:",
-    "traits": [
-      "Combat Expert",
-      "Connections: Espionage",
-      "Connections: Super Heroes",
-      "Determination",
-      "Extra Occupation",
-      "Extraordinary Origin (2)",
-      "Fearless",
-      "Leverage",
-      "Sneaky",
-      "Tech Reliance",
-      "Weird"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Extreme Appearance",
-      "Heroic",
-      "Linguist: Chinese (Mandarin), English, German, Japanese, Russian",
-      "Public Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Iconic Item",
-          "Inspiration",
-          "Mighty 1"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Attack Stance",
-          "Defense Stance",
-          "Do This All Day",
-          "Fast Strikes",
-          "Leg Sweep"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Snap Shooting",
-          "Suppressive Fire"
-        ]
-      },
-      {
-        "set": "Shield Bearer",
-        "names": [
-          "Hurled Shield Bash",
-          "Hurled Shield Block",
-          "Rico-Shield",
-          "Shield 2 (Shield 3 with Iconic Item)",
-          "Shield Bash Captain America’s Shield Powers:",
-          "Reduced Focus",
-          "Shield 1",
-          "Stackable",
-          "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
-          "Carried",
-          "Flashy",
-          "Requires: Shield 1 power Power Value: 1"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Captain America’s Shield"
-    ],
-    "id": "captainamerica-avengers-expansion"
-  },
-  {
-    "name": "CAPTAINAMERICA",
-    "realName": "Steve Rogers",
-    "rank": 3,
-    "health": 90,
-    "focus": 90,
-    "karma": 3,
-    "abilities": {
-      "melee": 5,
-      "agility": 3,
-      "resilience": 3,
-      "vigilance": 2,
-      "ego": 2,
-      "logic": 2
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Military",
-    "origin": "Weird Science",
-    "teams": "U.S. Army",
-    "base": "Camp Lehigh, Virginia",
-    "features": "",
-    "history": "At the dawn of World War II, scrawny Steve Rogers was rejected by the U.S. Army as unfit for service, but Dr. Abraham Erskine saw something in the eager young man and selected him for the first human trials of his Super-Soldier Serum. A Nazi sympathizer assassinated Erskine during the procedure, but not before Rogers was improved to the peak of human physical ability. As Captain America, Rogers fought Nazis on the front lines in Europe, alongside his sidekick Bucky Barnes— right up until 1945, when they were seemingly killed stopping a plot of the evil Baron Zemo (Heinrich Zemo). Decades later, the newly formed Avengers found Rogers frozen in a block of ice and revived him, allowing him to return to the field. However, this profile represents Rogers long before he was frozen, even before the United States entered World War II. This is Rogers in his earliest days, back when he and Bucky were just a couple of low-rank grunts, secretly performing covert military operations in their off -hours.",
-    "personality": "Rogers is serious about helping people out, and he’s a natural leader, both in and out of combat. When he’s in his costume and carrying his shield, he tries to represent everything that is great about the ideals of the land and the people he loves so much. Bearer Tactics",
-    "traits": [
-      "Battle Ready",
-      "Beguiling",
-      "Combat Reflexes",
-      "Connections: Military",
-      "Public Speaking",
-      "Situational Awareness",
-      "Weird"
-    ],
-    "tags": [
-      "Enemy: Hydra",
-      "Enemy: Red Skull",
-      "Heroic",
-      "Secret Identity",
-      "Signature Weapon: Triangular shield (acts standard shield)"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Inspiration",
-          "Mighty 1"
-        ]
-      },
-      {
-        "set": "Shield Bearer",
-        "names": [
-          "Brace for Impact",
-          "Do This All Day",
-          "Immovable",
-          "Shield 1",
-          "Shield Bash",
-          "Shield Deflection",
-          "Shield Wall"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Change of Plans"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "id": "captainamerica-steve-rogers-avengers-expansion"
-  },
-  {
-    "name": "CAPTAINAMERICA",
-    "realName": "Steven “Steve” Rogers",
-    "rank": 4,
-    "health": 120,
-    "focus": 120,
-    "karma": 4,
-    "abilities": {
-      "melee": 6,
-      "agility": 5,
-      "resilience": 4,
-      "vigilance": 3,
-      "ego": 0,
-      "logic": 2
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Military",
-    "origin": "Weird Science",
-    "teams": "Ultimates",
-    "base": "Mobile (Earth-1610)",
-    "features": "",
-    "history": "The life of Earth-1610’s Captain America largely resembles that of his Earth-616 counterpart, right up until the end of World War II. Rogers fell into the icy water while disarming an experimental missile created by a Nazi named Herr Kleiser, who was actually an alien Chitauri. Decades later, Rogers was fished out of the ice by agents of S.H.I.E.L.D. who immediately dra§ ed him into their new super-team program: the Ultimates. His unrelenting ruthlessness as a combatant quickly propelled him to become the team’s field leader, and he led the Ultimates on a mission that successfully wiped out Kleiser and his plot for the shape-changing Chitauri to take over the world. Since then, Rogers has faithfully and consistently served as the linchpin of both the Ultimates and the United States itself. He even served as the president of the country during a brief period when it seemed like the nation might once again descend into a civil war, though he stepped down as soon as the crisis ended.",
-    "personality": "While Earth-1610’s Steve Rogers has a lot in common with his Earth-616 counterpart, he lacks the latter man’s idealism. He’s an oldfashioned soldier and a die-hard patriot, but he’s not as concerned about the symbolism of his role. Rogers’ determination to win and to never give up drives him hard. iconic item Captain America’s Plan Shield of Plans Powers:",
-    "traits": [
-      "Battle Ready",
-      "Combat Expert",
-      "Combat Reflexes",
-      "Connections: Military",
-      "Determination",
-      "Public Speaking",
-      "Situational Awareness",
-      "Weird"
-    ],
-    "tags": [
-      "Enemy: Hydra",
-      "Heroic",
-      "Public Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Iconic Item",
-          "Inspiration",
-          "Mighty 1"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Double Tap",
-          "Suppressive Fire"
-        ]
-      },
-      {
-        "set": "Shield Bearer",
-        "names": [
-          "Do This All Day",
-          "Hurled Shield Bash",
-          "Hurled Shield Block",
-          "Rico-Shield",
-          "Shield 3 (Shield 4 with Iconic Item)",
-          "Shield Bash",
-          "Shield Deflection"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Change of Plans",
-          "Keep Moving Captain America’s Shield Powers:",
-          "Reduced Focus",
-          "Shield 1",
-          "Stackable",
-          "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
-          "Carried",
-          "Flashy",
-          "Requires: Shield 1 power Power Value: 1"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Captain America’s Shield"
-    ],
-    "id": "captainamerica-steven-steve-rogers-avengers-expansion"
-  },
-  {
-    "name": "CAPTAINAMERICAOFTHERAILWAYS",
-    "realName": "Aaron Fischer",
-    "rank": 3,
-    "health": 60,
-    "focus": 120,
-    "karma": 3,
-    "abilities": {
-      "melee": 2,
-      "agility": 3,
-      "resilience": 2,
-      "vigilance": 4,
-      "ego": 3,
-      "logic": 1
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer, Student",
-    "origin": "Weird Science",
-    "teams": "Avengers Academy, Captains Network",
-    "base": "Avengers Academy",
-    "features": "",
-    "history": "Life at home was never great for Aaron Fischer growing up as an openly gay teen in an isolated community, and a§ er cancer took his mother, things only got worse. One day, he decided he’d had enough of his father’s beatings and hit the rails, living out of boxcars and dri§ ing wherever the tracks took him. As time passed and Fischer witnessed more and more of the hardships that come with rough living, he gradually came to see the rails as his home and himself as their protector. Inspired by his childhood hero—Captain America—Fischer fashioned a shield and a costume and became the Captain America of the Railways, champion of those with nowhere else to go. Soon a§ er that, he met both of the main Captains America— Steve Rogers and Sam Wilson—and helped them expose a string of vagrant kidnappings by the Roxxon Energy Corporation. in Later, while investigating a similar string of crimes committed by Alchemax, Fischer stumbled into a trap set by the ringleaders of the conspiracy. The corporation had been testing a deadly new Super-Soldier treatment on the local unhoused population. It forced this treatment onto Fischer, hoping to kill him, but for some reason, the treatment actually worked on him. With his new energy powers, Fischer dismantled the facility and freed the remaining victims. These days, Fischer spends most of his time at the new Avengers Academy, learning how to be a better hero alongside his crush, Kid Juggernaut.",
-    "personality": "In regular interpersonal situations, Fischer can be awkward and shy, but that all disappears the second he sees someone in need. He has an unflinching commitment to helping others, particularly the poor and disenfranchised. His first priority is always the protection of others, and as such, he never uses his energy powers to blast others, only to shield them. iconic item Protection 1 Captain America of the to shatter) Railways’ Shield Powers:",
-    "traits": [
-      "Combat Reflexes",
-      "Connections: Super Heroes",
-      "Determination",
-      "Extra Occupation",
-      "Fearless",
-      "Quick Learner",
-      "Weird"
-    ],
-    "tags": [
-      "Auditory Issues (partially right ear)",
-      "Black Market Access",
-      "Headquarters: Avengers Academy",
-      "Heroic",
-      "Mentor: Captain Marvel (Carol Danvers)",
-      "Obligation: School",
-      "Poor",
-      "Public Identity",
-      "Young"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Iconic Item",
-          "Inspiration"
-        ]
-      },
-      {
-        "set": "Elemental Control (Energy)",
-        "names": [
-          "Elemental Barrier",
-          "Elemental Blast",
-          "Elemental Burst",
-          "Elemental Protection 1 (10 points to shatter)"
-        ]
-      },
-      {
-        "set": "Shield Bearer",
-        "names": [
-          "Do This All Day",
-          "Hurled Shield Bash",
-          "Rico-Shield",
-          "Shield 2 (Shield 3 with Iconic Item)",
-          "Shield Bash",
-          "Shield Deflection Captain America of the Railways’ Shield Powers:",
-          "Shield 1",
-          "Stackable",
-          "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
-          "Carried",
-          "Flashy Power Value: 1"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Captain America of the Railways’ Shield"
-    ],
-    "id": "captainamericaoftherailways-avengers-expansion"
-  },
-  {
-    "name": "CAPTAINMAR-VELL",
-    "realName": "Mar-Vell",
-    "rank": 6,
-    "health": 180,
-    "focus": 180,
-    "karma": 6,
-    "abilities": {
-      "melee": 6,
-      "agility": 4,
-      "resilience": 6,
-      "vigilance": 5,
-      "ego": 7,
-      "logic": 2
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "flight": 30,
-      "jump": 3
-    },
-    "occupation": "Adventurer, Military",
-    "origin": "Alien: Kree, Weird Science",
-    "teams": "Imperial Kree Army, Legion of the Unliving",
-    "base": "Mobile, formerly Titan",
-    "features": "",
-    "history": "The Kree Empire sent Mar-Vell to Earth to pave the way for an invasion, but a‰ er encountering Earth’s people, he chose to defend the planet. His second-in-command, Yon-Rogg, stabbed him and le‰ him for dead. Mar-Vell eventually made it back to Kree territory and defended the Supreme Intelligence from a traitorous plot. The Supreme Intelligence rewarded him with powers and sent him back to Earth. However, he became trapped in the Negative Zone. With the Supreme Intelligence’s help, he guided Rick Jones to a set of Nega-Bands. By clanging the bands together, the pair could swap places, freeing Mar-Vell from the Negative Zone. The two men were stuck together for years before Mar-Vell could free Jones. While Jones and Mar-Vell were still bound to each other, the villain Nitro exposed Mar-Vell to a nerve gas that caused him to develop cancer. Unable to stem the disease, Mar-Vell retired to Titan, where he passed away surrounded by family and friends. He was survived by his lover, Elysius, who later had two children by him: Genis-Vell and Phyla-Vell. Playing As Mar-Vell was a profoundly strong and noble hero; his only flaw was his pride. He tried to ignore his cancer diagnosis at first, and by the time he was ready to face it, it was too late. Even in battle, Mar-Vell puts protecting people over all other concerns. iconic item Nega-Bands bracers grant their user great powers and the ability to swap in another dimension.",
-    "personality": "",
-    "traits": [
-      "Battle Ready",
-      "Breathe Different (negated by Environmental Protection)",
-      "Combat Expert",
-      "Combat Reflexes",
-      "Connections: Military (Imperial Kree Army)",
-      "Connections: Super Heroes",
-      "Determination",
-      "Enhanced Physique"
-    ],
-    "tags": [
-      "Extra Occupation",
-      "Extraordinary erent Origin",
-      "Fearless",
-      "Iron Will",
-      "Situational Awareness",
-      "Weird",
-      "Alien Heritage",
-      "Black Market Access",
-      "Heroic",
-      "Public Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Accuracy 2",
-          "Discipline 2",
-          "Iconic Item",
-          "Inspiration",
-          "Mighty 2 (Mighty 3 with Iconic Item)",
-          "Wisdom"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Do This All Day These legendary Kree bracers places with an ally in another Origin: Weird Science Powers:",
-          "Allspeak",
-          "Attunable",
-          "Cosmic Awareness",
-          "Elemental Blast (Energy)",
-          "Elemental Burst (Energy)",
-          "Elemental Grab (Energy) Note:Mar-Vell has Mighty Nega-Bands grant their user great powers dimension.",
-          "Elemental Protection 3 (Energy)",
-          "Elemental Sphere (Energy)",
-          "Entangled",
-          "Environmental Protection",
-          "Flight 2",
-          "Healing Factor",
-          "Illumination",
-          "Mighty 3 2, so for him, the Power and the ability to swap",
-          "Postcognition 1",
-          "Precognition 1",
-          "Sturdy 2",
-          "Supernova (Energy)",
-          "Warp Portal Restrictions:",
-          "Flashy",
-          "Paired Item",
-          "Worn Power Value: 22 Value is 20."
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Secret Wars",
-    "equipment": [
-      "Nega-Bands"
-    ],
-    "id": "captainmar-vell-secret-wars"
   },
   {
     "name": "CARDIAC",
@@ -6481,7 +6443,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "CONTESSAVALENTINAALLEGRADEFONTAINE",
+    "name": "CONTESSA VALENTINA ALLEGRA DE FONTAINE",
     "realName": "Unknown",
     "rank": 3,
     "health": 60,
@@ -6558,7 +6520,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "contessavalentinaallegradefontaine-avengers-expansion"
+    "id": "contessa-valentina-allegra-de-fontaine-avengers-expansion"
   },
   {
     "name": "CORSAIR",
@@ -6641,7 +6603,7 @@ export const MMRPG_CHARACTERS = [
     "id": "corsair-secret-wars"
   },
   {
-    "name": "CORVUSGLAIVE",
+    "name": "CORVUS GLAIVE",
     "realName": "Corvus Glaive",
     "rank": 4,
     "health": 90,
@@ -6689,7 +6651,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Brilliance 1",
-          "Iconic Item",
           "Inspiration",
           "Mighty 1"
         ]
@@ -6715,10 +6676,8 @@ export const MMRPG_CHARACTERS = [
           "Hit the Dirt",
           "Keep Moving",
           "On Your Feet",
-          "Operations Center Corvus Glaive’s Glaive Powers:",
           "Unkillable",
-          "Weapon: Range: Reach + 1, Melee Damage Multiplier bonus: +2. Restrictions:",
-          "Carried Power Value: 1"
+          "Carried"
         ]
       }
     ],
@@ -6727,7 +6686,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Corvus Glaive’s Glaive"
     ],
-    "id": "corvusglaive-avengers-expansion"
+    "id": "corvus-glaive-avengers-expansion"
   },
   {
     "name": "COSMO",
@@ -6819,7 +6778,7 @@ export const MMRPG_CHARACTERS = [
     "id": "cosmo-secret-wars"
   },
   {
-    "name": "COUNTNEFARIA",
+    "name": "COUNT NEFARIA",
     "realName": "Luchino Nefaria",
     "rank": 6,
     "health": 150,
@@ -6922,7 +6881,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "countnefaria-avengers-expansion"
+    "id": "count-nefaria-avengers-expansion"
   },
   {
     "name": "CROSSBONES",
@@ -7635,7 +7594,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Accuracy 1",
-          "Iconic Item",
           "Sturdy 1"
         ]
       },
@@ -7660,10 +7618,8 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Double Tap",
           "Point-Blank Parry",
-          "Suppressive Fire Destroyer’s Energy Baton Powers:",
           "Neganite",
-          "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1 Restrictions:",
-          "Carried Power Value: 1"
+          "Carried"
         ]
       }
     ],
@@ -7893,6 +7849,172 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "DOCTOR OCTOPUS",
+    "realName": "Otto Octavius",
+    "rank": 4,
+    "health": 90,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 4,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 0,
+      "logic": 6
+    },
+    "speed": {
+      "run": 5,
+      "climb": 5,
+      "swim": 3,
+      "jump": 5
+    },
+    "occupation": "Scientist",
+    "origin": "High Tech, Weird Science",
+    "teams": "Masters of Evil, Sinister Six",
+    "base": "New York City",
+    "features": "Four biomechanical Ocktoid tentacles",
+    "history": "Everything changed for brilliant scientist Otto Octavius a‘ er a lab experiment gone wrong drove him mad and le‘ him with mental control of four mechanical arms. With these powerful limbs at his disposal, Octavius decided to finance his future research through crime, becoming the super villain Doctor Octopus. Doc Ock’s life has been intertwined with that of his one-time admirer Peter Parker (Spider-Man). Ock has fought Spider-Man countless times, romanced Aunt May and even became Parker himself for a brief period. As more multiversal variants of Spider-Man appear, more versions of Doc Ock have also manifested themselves.",
+    "personality": "Doctor Octopus is a grade A narcissist. He considers his scientific endeavors to be of the greatest importance to humanity, and he is not above robbing, hurting and even killing others in the pursuit of his research.",
+    "traits": [
+      "Abrasive",
+      "Combat Reflexes",
+      "Extraordinary Origin",
+      "Inventor",
+      "Scientific Expertise",
+      "Skeptical",
+      "Tech Reliance",
+      "Weird"
+    ],
+    "tags": [
+      "Lab Access",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Additional Limbs",
+          "Brilliance 1",
+          "Inspiration",
+          "Mighty 2"
+        ]
+      },
+      {
+        "set": "Plasticity",
+        "names": [
+          "Extended Reach 1"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Spider-Dodge",
+          "Wallcrawling"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Jump 1",
+          "Quick Toss"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "equipment": [
+      "Ocktoid Tentacles"
+    ],
+    "id": "doctor-octopus-spider-verse-expansion"
+  },
+  {
+    "name": "DOCTOR OCTOPUS (EARTH-90214)",
+    "realName": "Otto Octavius",
+    "rank": 2,
+    "health": 30,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 1,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 0,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 5,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Scientist",
+    "origin": "High Tech",
+    "teams": "Friends of New Germany",
+    "base": "Ellis Island, New York City (Earth-90214)",
+    "features": "Four mechanical arms",
+    "history": "Though he was born without the use of his legs, the Noir Universe’s Otto Octavius never struggled a day in his life. He grew up in South Africa in the era before apartheid, in a household where enslaved native people were forced to wait on him hand and foot. Unwilling to acknowledge his family’s exploitation of the native people, Octavius instead became obsessed with proving that his servants were worthless lesser beings that he could “improve” with science. With the backing of the Nazi-associated Friends of New Germany, he moved to New York City and began carrying out a series of brutal experiments on members of the city’s Black population, using his mechanical arms to administer gruesome, forced lobotomies. Spider-Man uncovered the scheme while investigating the head of the Friends of New Germany’s organized crime unit: the Crime Master. Realizing that he had been caught, Octavius attempted to get on Spider-Man’s good side by murdering the Crime Master, but the wall-crawler apprehended him nonetheless. Octavius leveraged the last of his resources to escape to Germany, but to his surprise, the Nazi government wasn’t willing to hire a disabled man. Undeterred, Octavius eventually reappeared in New York, determined to brainwash the city’s people against Spider-Man, only for the Web-Head to thwart him once again. He was last seen going down in a flaming zeppelin as he tried to flee the United States.",
+    "personality": "Octavius is a Nazi and a fascist through and through, but of late, his ideological goals have taken a back seat to his vendetta against Spider-Man. The wall-crawler embarrassed him, and that is the one thing that Octavius absolutely cannot stand.",
+    "traits": [
+      "Abrasive",
+      "Combat Reflexes",
+      "Inventor",
+      "Scientific Expertise",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Lab Access",
+      "Mobility Issues",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Additional Limbs",
+          "Brilliance 1",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Plasticity",
+        "names": [
+          "Extended Reach 1"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Wallcrawling"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "doctor-octopus-earth-90214-spider-verse-expansion"
+  },
+  {
     "name": "DOCTOR STRANGE",
     "realName": "Stephen Vincent Strange",
     "rank": 6,
@@ -7969,173 +8091,6 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "doctor-strange",
     "genre": "core"
-  },
-  {
-    "name": "DOCTOROCTOPUS",
-    "realName": "Otto Octavius",
-    "rank": 4,
-    "health": 90,
-    "focus": 90,
-    "karma": null,
-    "abilities": {
-      "melee": 4,
-      "agility": 4,
-      "resilience": 3,
-      "vigilance": 3,
-      "ego": 0,
-      "logic": 6
-    },
-    "speed": {
-      "run": 5,
-      "climb": 5,
-      "swim": 3,
-      "jump": 5
-    },
-    "occupation": "Scientist",
-    "origin": "High Tech, Weird Science",
-    "teams": "Masters of Evil, Sinister Six",
-    "base": "New York City",
-    "features": "Four biomechanical Ocktoid tentacles",
-    "history": "Everything changed for brilliant scientist Otto Octavius a‘ er a lab experiment gone wrong drove him mad and le‘ him with mental control of four mechanical arms. With these powerful limbs at his disposal, Octavius decided to finance his future research through crime, becoming the super villain Doctor Octopus. Doc Ock’s life has been intertwined with that of his one-time admirer Peter Parker (Spider-Man). Ock has fought Spider-Man countless times, romanced Aunt May and even became Parker himself for a brief period. As more multiversal variants of Spider-Man appear, more versions of Doc Ock have also manifested themselves.",
-    "personality": "Doctor Octopus is a grade A narcissist. He considers his scientific endeavors to be of the greatest importance to humanity, and he is not above robbing, hurting and even killing others in the pursuit of his research.",
-    "traits": [
-      "Abrasive",
-      "Combat Reflexes",
-      "Extraordinary Origin",
-      "Inventor",
-      "Scientific Expertise",
-      "Skeptical",
-      "Tech Reliance",
-      "Weird"
-    ],
-    "tags": [
-      "Lab Access",
-      "Public Identity",
-      "Villainous"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Additional Limbs",
-          "Brilliance 1",
-          "Iconic Weapon",
-          "Inspiration",
-          "Mighty 2"
-        ]
-      },
-      {
-        "set": "Plasticity",
-        "names": [
-          "Extended Reach 1"
-        ]
-      },
-      {
-        "set": "Spider-Powers",
-        "names": [
-          "Spider-Dodge",
-          "Wallcrawling"
-        ]
-      },
-      {
-        "set": "Super-Strength",
-        "names": [
-          "Banging Heads",
-          "Clobber",
-          "Crushing Grip",
-          "Jump 1",
-          "Quick Toss"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Change of Plans"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Spider-Verse Expansion",
-    "equipment": [
-      "Ocktoid Tentacles"
-    ],
-    "id": "doctoroctopus-spider-verse-expansion"
-  },
-  {
-    "name": "DOCTOROCTOPUS",
-    "realName": "Otto Octavius",
-    "rank": 2,
-    "health": 30,
-    "focus": 30,
-    "karma": null,
-    "abilities": {
-      "melee": 3,
-      "agility": 1,
-      "resilience": 1,
-      "vigilance": 1,
-      "ego": 0,
-      "logic": 4
-    },
-    "speed": {
-      "run": 5,
-      "climb": 5,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Scientist",
-    "origin": "High Tech",
-    "teams": "Friends of New Germany",
-    "base": "Ellis Island, New York City (Earth-90214)",
-    "features": "Four mechanical arms",
-    "history": "Though he was born without the use of his legs, the Noir Universe’s Otto Octavius never struggled a day in his life. He grew up in South Africa in the era before apartheid, in a household where enslaved native people were forced to wait on him hand and foot. Unwilling to acknowledge his family’s exploitation of the native people, Octavius instead became obsessed with proving that his servants were worthless lesser beings that he could “improve” with science. With the backing of the Nazi-associated Friends of New Germany, he moved to New York City and began carrying out a series of brutal experiments on members of the city’s Black population, using his mechanical arms to administer gruesome, forced lobotomies. Spider-Man uncovered the scheme while investigating the head of the Friends of New Germany’s organized crime unit: the Crime Master. Realizing that he had been caught, Octavius attempted to get on Spider-Man’s good side by murdering the Crime Master, but the wall-crawler apprehended him nonetheless. Octavius leveraged the last of his resources to escape to Germany, but to his surprise, the Nazi government wasn’t willing to hire a disabled man. Undeterred, Octavius eventually reappeared in New York, determined to brainwash the city’s people against Spider-Man, only for the Web-Head to thwart him once again. He was last seen going down in a flaming zeppelin as he tried to flee the United States.",
-    "personality": "Octavius is a Nazi and a fascist through and through, but of late, his ideological goals have taken a back seat to his vendetta against Spider-Man. The wall-crawler embarrassed him, and that is the one thing that Octavius absolutely cannot stand.",
-    "traits": [
-      "Abrasive",
-      "Combat Reflexes",
-      "Inventor",
-      "Scientific Expertise",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "Lab Access",
-      "Mobility Issues",
-      "Public Identity",
-      "Villainous"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Additional Limbs",
-          "Brilliance 1",
-          "Mighty 1"
-        ]
-      },
-      {
-        "set": "Plasticity",
-        "names": [
-          "Extended Reach 1"
-        ]
-      },
-      {
-        "set": "Spider-Powers",
-        "names": [
-          "Wallcrawling"
-        ]
-      },
-      {
-        "set": "Super-Strength",
-        "names": [
-          "Banging Heads",
-          "Clobber",
-          "Crushing Grip"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Spider-Verse Expansion",
-    "id": "doctoroctopus-otto-octavius-spider-verse-expansion"
   },
   {
     "name": "DOMINO",
@@ -8622,7 +8577,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "DUCKTORDOOM",
+    "name": "DUCKTOR DOOM",
     "realName": "Unknown",
     "rank": 4,
     "health": 120,
@@ -8708,7 +8663,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "ducktordoom-spider-verse-expansion"
+    "id": "ducktor-doom-spider-verse-expansion"
   },
   {
     "name": "DUST",
@@ -8793,7 +8748,7 @@ export const MMRPG_CHARACTERS = [
     "id": "dust-x-men-expansion"
   },
   {
-    "name": "EBONYMAW",
+    "name": "EBONY MAW",
     "realName": "Ebony Maw",
     "rank": 4,
     "health": 90,
@@ -8877,7 +8832,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "ebonymaw-avengers-expansion"
+    "id": "ebony-maw-avengers-expansion"
   },
   {
     "name": "ECHO",
@@ -9488,95 +9443,7 @@ export const MMRPG_CHARACTERS = [
     "id": "escapade-x-men-expansion"
   },
   {
-    "name": "EXECUTIONER",
-    "realName": "Skurge",
-    "rank": 4,
-    "health": 180,
-    "focus": 120,
-    "karma": null,
-    "abilities": {
-      "melee": 7,
-      "agility": 2,
-      "resilience": 6,
-      "vigilance": 3,
-      "ego": 1,
-      "logic": 1
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 6
-    },
-    "occupation": "Outsider",
-    "origin": "Mythic: Asgardian",
-    "teams": "Asgardians of the Galaxy, Masters of Evil, Roxxon",
-    "base": "Asgard",
-    "features": "",
-    "history": "A fierce but lonely Asgardian warrior, Skurge the Executioner proved all too easy for the Enchantress to manipulate. Without her casting so much as a simple charm, he vowed to obey her every word. He assisted her in countless schemes to ensnare Thor, even while knowing that the Thunder God was the one she truly loved. He followed her into the Masters of Evil and dozens of disastrous fights with the Avengers. He followed her into exile, into war and even to the brink of death. A§ er years of such abuse, Skurge never stopped loving the Enchantress, but he did start going on adventures of his own. On one of those adventures, he sacrificed himself to save Thor from the assembled forces of Hel and to preserve the safety of Asgard. Then, a§ er escaping Valhalla, he once again gave his life to protect Earth during the War of the Realms.",
-    "personality": "Deep down, Skurge is a so§ -spoken and noble warrior. Under normal circumstances, he would never attack an unarmed opponent or harm another Asgardian—at least not without serious provocation. However, he’s willing to put his principles aside to prove his undying love for the Enchantress. He knows that she may never truly love him, yet he believes that to defy her would be to deny his own heart. iconic item Bloodaxe (New) Powers:",
-    "traits": [
-      "Battle Ready",
-      "Big",
-      "Combat Expert",
-      "Connections: Outsiders",
-      "Determination",
-      "Enhanced Physique",
-      "Fearless",
-      "Fresh Eyes",
-      "God Heritage",
-      "Magic Item Reliance",
-      "Stranger"
-    ],
-    "tags": [
-      "Public Identity",
-      "Supernatural",
-      "Worshipped"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Environmental Protection",
-          "Iconic Item",
-          "Mighty 4",
-          "Sturdy 1"
-        ]
-      },
-      {
-        "set": "Melee Weapons (Sharp)",
-        "names": [
-          "Exploit",
-          "Fast Attacks",
-          "Furious Attacks",
-          "Vicious Attack",
-          "Whirling Frenzy"
-        ]
-      },
-      {
-        "set": "Super-Strength",
-        "names": [
-          "Banging Heads",
-          "Immovable",
-          "Jump 1 Bloodaxe (New) Powers:",
-          "Godkiller",
-          "Power Slider (Bloodied): If the user gets a Fantastic success on an attack with this weapon and causes bleeding, their powers are boosted. If they are knocked unconscious by a foe in battle, they die.",
-          "Uru",
-          "Weapon: Range: Reach/ unlimited, Melee/Agility Damage Multiplier bonus: +2. Restrictions:",
-          "Carried",
-          "Flashy Power Value: 2"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "The Bloodaxe"
-    ],
-    "id": "executioner-avengers-expansion"
-  },
-  {
-    "name": "EXNIHILO",
+    "name": "EX NIHILO",
     "realName": "Ex Nihilo",
     "rank": 4,
     "health": 120,
@@ -9651,7 +9518,93 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Secret Wars",
-    "id": "exnihilo-secret-wars"
+    "id": "ex-nihilo-secret-wars"
+  },
+  {
+    "name": "EXECUTIONER",
+    "realName": "Skurge",
+    "rank": 4,
+    "health": 180,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 7,
+      "agility": 2,
+      "resilience": 6,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 6
+    },
+    "occupation": "Outsider",
+    "origin": "Mythic: Asgardian",
+    "teams": "Asgardians of the Galaxy, Masters of Evil, Roxxon",
+    "base": "Asgard",
+    "features": "",
+    "history": "A fierce but lonely Asgardian warrior, Skurge the Executioner proved all too easy for the Enchantress to manipulate. Without her casting so much as a simple charm, he vowed to obey her every word. He assisted her in countless schemes to ensnare Thor, even while knowing that the Thunder God was the one she truly loved. He followed her into the Masters of Evil and dozens of disastrous fights with the Avengers. He followed her into exile, into war and even to the brink of death. A§ er years of such abuse, Skurge never stopped loving the Enchantress, but he did start going on adventures of his own. On one of those adventures, he sacrificed himself to save Thor from the assembled forces of Hel and to preserve the safety of Asgard. Then, a§ er escaping Valhalla, he once again gave his life to protect Earth during the War of the Realms.",
+    "personality": "Deep down, Skurge is a so§ -spoken and noble warrior. Under normal circumstances, he would never attack an unarmed opponent or harm another Asgardian—at least not without serious provocation. However, he’s willing to put his principles aside to prove his undying love for the Enchantress. He knows that she may never truly love him, yet he believes that to defy her would be to deny his own heart. iconic item Bloodaxe (New) Powers:",
+    "traits": [
+      "Battle Ready",
+      "Big",
+      "Combat Expert",
+      "Connections: Outsiders",
+      "Determination",
+      "Enhanced Physique",
+      "Fearless",
+      "Fresh Eyes",
+      "God Heritage",
+      "Magic Item Reliance",
+      "Stranger"
+    ],
+    "tags": [
+      "Public Identity",
+      "Supernatural",
+      "Worshipped"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Environmental Protection",
+          "Mighty 4",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Furious Attacks",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Immovable",
+          "Jump 1 Bloodaxe (New) Powers:",
+          "Godkiller",
+          "Power Slider (Bloodied): If the user gets a Fantastic success on an attack with this weapon and causes bleeding, their powers are boosted. If they are knocked unconscious by a foe in battle, they die.",
+          "Uru",
+          "Carried",
+          "Flashy"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "The Bloodaxe"
+    ],
+    "id": "executioner-avengers-expansion"
   },
   {
     "name": "EXODUS",
@@ -9750,7 +9703,7 @@ export const MMRPG_CHARACTERS = [
     "id": "exodus-x-men-expansion"
   },
   {
-    "name": "FALCON",
+    "name": "FALCON (JOAQUIN TORRES)",
     "realName": "Joaquin Torres",
     "rank": 3,
     "health": 60,
@@ -9823,10 +9776,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "falcon-avengers-expansion"
+    "id": "falcon-joaquin-torres-avengers-expansion"
   },
   {
-    "name": "FALCON",
+    "name": "FALCON (SAM WILSON)",
     "realName": "Samuel Thomas “Sam” Wilson",
     "rank": 4,
     "health": 90,
@@ -9910,10 +9863,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "falcon-samuel-thomas-sam-wilson-avengers-expansion"
+    "id": "falcon-sam-wilson-avengers-expansion"
   },
   {
-    "name": "FANG AKIHIRO",
+    "name": "FANG (AKIHIRO)",
     "realName": "Akihiro",
     "rank": 4,
     "health": 120,
@@ -10294,7 +10247,6 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Accuracy 1",
           "Discipline 1",
-          "Iconic Weapon",
           "Inspiration",
           "Slow-Motion Dodge",
           "Sturdy 1"
@@ -10330,7 +10282,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "equipment": [
-      "Charged cards"
+      "Charged Cards"
     ],
     "id": "gambit-x-men-expansion"
   },
@@ -10413,78 +10365,6 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "GGWWEENNPPOOOOLL",
-    "realName": "Gwendolyn “Gwen” Poole",
-    "rank": 3,
-    "health": 90,
-    "focus": 90,
-    "karma": 3,
-    "abilities": {
-      "melee": 2,
-      "agility": 4,
-      "resilience": 3,
-      "vigilance": 3,
-      "ego": 2,
-      "logic": 1
-    },
-    "speed": {
-      "jump": 3
-    },
-    "occupation": "Adventurer",
-    "origin": "Unknown",
-    "teams": "GwenHive, M.O.D.O.K., West Coast Avengers",
-    "base": "Mobile",
-    "features": "",
-    "history": "Gwendolyn Poole grew up in a world much like our own, in which the heroes and villains of Earth-616 exist only as fictional characters. As a high-school dropout with few prospects in life, she spent her days holed up in her room, reading hundreds of comics, all the while wishing that she could be a Marvel character herself. Then, somehow, it happened. Poole was sucked onto the real Earth-616, where she immediately threw on a costume and began working her way up the ranks of the underworld as the unbelievable Gwenpool. Poole’s awareness of Marvel tropes allowed her to quickly propel herself into a position of power, but success brought her no satisfaction. Eventually, she sought out her brother, Teddy, who tried to return them to their homeworld, but only stranded them in a similar-looking comic book dimension. Through sheer willpower, Poole pierced the veil of this false world and gained the ability to traverse the spaces between panels and rewrite the reality of comic books themselves. Shocked by the implications of her new powers, Poole returned to Earth-616 and rededicated herself to the life of a hero. Since then, she’s worked with the West Coast Avengers, the X-Men and even other versions of herself.",
-    "personality": "In her early days, Gwenpool was violent at best and outright murderous at worst. It took a long time for her to begin thinking of the denizens of Earth-616 as real people rather than fictional fodder. However, she’s since learned the error of her ways, and the super-hero community now knows her for what she is: an excitable nerd with a good heart. Though she loves romance stories, Poole personally identifies as asexual and aromantic. Weapons Ranged Weapons",
-    "traits": [
-      "Combat Reflexes",
-      "Connections: Super Heroes",
-      "Fearless",
-      "Free Running",
-      "Fresh Eyes"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Heroic",
-      "Media Awareness",
-      "Mysterious",
-      "Public Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Accuracy 1",
-          "Combat Trickery",
-          "Slow-Motion Dodge"
-        ]
-      },
-      {
-        "set": "Melee Weapons (Sharp)",
-        "names": [
-          "Fast Attacks",
-          "Hit & Run",
-          "Whirling Frenzy Narrative",
-          "Reality Manipulation"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Dance of Death",
-          "Double Tap",
-          "Slow-Motion Shoot-Dodge",
-          "Snap Shooting",
-          "Weapons Blazing"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "id": "ggwweennppooooll-avengers-expansion"
-  },
-  {
     "name": "GHOST RIDER",
     "realName": "Robbie Reyes",
     "rank": 5,
@@ -10554,6 +10434,92 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "ghost-rider",
     "genre": "core"
+  },
+  {
+    "name": "GHOST RIDER (JOHNNY BLAZE)",
+    "realName": "Robbie Reyes",
+    "rank": 5,
+    "health": 150,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 7,
+      "agility": 5,
+      "resilience": 5,
+      "vigilance": 4,
+      "ego": 3,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Mechanic",
+    "origin": "Spirit of Vengeance",
+    "teams": "Savage Avengers, Thunderbolts",
+    "base": "Mobile",
+    "features": "Flaming skull for a head when transformed",
+    "history": "To cure his adoptive father Crash Simpson’s terminal illness, Johnny Blaze summoned Mephisto and made him an off er: save Simpson’s life in exchange for Blaze’s eternal servitude. Mephisto agreed, but as with all deals with the devil, there was a catch. Mere days later, not knowing that he had been cured, Simpson decided to go out in a blaze of glory and died attempting to perform a nearly impossible motorcycle stunt. Blaze, unfortunately, still had to hold up his end of the bargain. Mephisto imbued his new servant with an ancient Spirit of Vengeance named Zarathos, turning him into the brimstone daredevil known as Ghost Rider. Unable to fully control his dangerous new form, Blaze abandoned his remaining loved ones and began a lonely life on the Form road, traveling aimlessly from town to town and meting out justice to every criminal and demon foolish enough to cross his path. Over the years, Blaze’s travels have taken him just about everywhere. He’s fought alongside the likes of the Avengers and seen the sun rise in distant dimensions. On one adventure, he (in even managed to depose Mephisto and install form) himself as the King of Hell. Blaze has been depowered, repowered, killed and resurrected, and he’s reigned in Hell and served in Heaven. But no matter what happens to him, he always returns to the status quo: just him and Zarathos riding into the unknown.",
+    "personality": "For many years, Blaze and Zarathos resented each other. Blaze wanted to live a normal life, while the spirit wanted to wreak vengeance everywhere. Eventually, they reached something of an equilibrium. Blaze has resigned himself to the life of a Ghost Rider, and Zarathos holds back his thirst for vengeance when Blaze asks. Control Magic (Demonic)",
+    "traits": [
+      "Connections: Super Heroes",
+      "Enduring Constitution",
+      "Extra Occupation",
+      "Famous",
+      "Fearless",
+      "Gearhead",
+      "Loner",
+      "Piloting",
+      "Presence",
+      "Public Speaking"
+    ],
+    "tags": [
+      "Alternate (Johnny Blaze)",
+      "Black Market Access",
+      "Cursed",
+      "Extreme Appearance alternate",
+      "Public Identity",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Environmental Protection",
+          "Healing Factor",
+          "Mighty 4",
+          "Slow-Motion Dodge"
+        ]
+      },
+      {
+        "set": "Elemental Control (Hellfire)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Infusion",
+          "Elemental Protection 3 (30 points to shatter)",
+          "Elemental Reinforcement",
+          "Elemental Ricochet"
+        ]
+      },
+      {
+        "set": "Magic (Demonic)",
+        "names": [
+          "Hellfire Chains",
+          "Penance Stare",
+          "Possess Vehicle",
+          "Sense Sins"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "ghost-rider-johnny-blaze-avengers-expansion"
   },
   {
     "name": "GHOST-SPIDER",
@@ -10693,92 +10659,6 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "ghost-spider-spider-verse-expansion"
-  },
-  {
-    "name": "GHOSTRIDER",
-    "realName": "Robbie Reyes",
-    "rank": 5,
-    "health": 150,
-    "focus": 120,
-    "karma": null,
-    "abilities": {
-      "melee": 7,
-      "agility": 5,
-      "resilience": 5,
-      "vigilance": 4,
-      "ego": 3,
-      "logic": 1
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Mechanic",
-    "origin": "Spirit of Vengeance",
-    "teams": "Savage Avengers, Thunderbolts",
-    "base": "Mobile",
-    "features": "Flaming skull for a head when transformed",
-    "history": "To cure his adoptive father Crash Simpson’s terminal illness, Johnny Blaze summoned Mephisto and made him an off er: save Simpson’s life in exchange for Blaze’s eternal servitude. Mephisto agreed, but as with all deals with the devil, there was a catch. Mere days later, not knowing that he had been cured, Simpson decided to go out in a blaze of glory and died attempting to perform a nearly impossible motorcycle stunt. Blaze, unfortunately, still had to hold up his end of the bargain. Mephisto imbued his new servant with an ancient Spirit of Vengeance named Zarathos, turning him into the brimstone daredevil known as Ghost Rider. Unable to fully control his dangerous new form, Blaze abandoned his remaining loved ones and began a lonely life on the Form road, traveling aimlessly from town to town and meting out justice to every criminal and demon foolish enough to cross his path. Over the years, Blaze’s travels have taken him just about everywhere. He’s fought alongside the likes of the Avengers and seen the sun rise in distant dimensions. On one adventure, he (in even managed to depose Mephisto and install form) himself as the King of Hell. Blaze has been depowered, repowered, killed and resurrected, and he’s reigned in Hell and served in Heaven. But no matter what happens to him, he always returns to the status quo: just him and Zarathos riding into the unknown.",
-    "personality": "For many years, Blaze and Zarathos resented each other. Blaze wanted to live a normal life, while the spirit wanted to wreak vengeance everywhere. Eventually, they reached something of an equilibrium. Blaze has resigned himself to the life of a Ghost Rider, and Zarathos holds back his thirst for vengeance when Blaze asks. Control Magic (Demonic)",
-    "traits": [
-      "Connections: Super Heroes",
-      "Enduring Constitution",
-      "Extra Occupation",
-      "Famous",
-      "Fearless",
-      "Gearhead",
-      "Loner",
-      "Piloting",
-      "Presence",
-      "Public Speaking"
-    ],
-    "tags": [
-      "Alternate (Johnny Blaze)",
-      "Black Market Access",
-      "Cursed",
-      "Extreme Appearance alternate",
-      "Public Identity",
-      "Supernatural"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Accuracy 2",
-          "Environmental Protection",
-          "Healing Factor",
-          "Mighty 4",
-          "Slow-Motion Dodge"
-        ]
-      },
-      {
-        "set": "Elemental Control (Hellfire)",
-        "names": [
-          "Elemental Barrage",
-          "Elemental Barrier",
-          "Elemental Blast",
-          "Elemental Burst",
-          "Elemental Infusion",
-          "Elemental Protection 3 (30 points to shatter)",
-          "Elemental Reinforcement",
-          "Elemental Ricochet"
-        ]
-      },
-      {
-        "set": "Magic (Demonic)",
-        "names": [
-          "Hellfire Chains",
-          "Penance Stare",
-          "Possess Vehicle",
-          "Sense Sins"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "id": "ghostrider-avengers-expansion"
   },
   {
     "name": "GIANT-MAN",
@@ -11183,7 +11063,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "GREENGOBLIN",
+    "name": "GREEN GOBLIN (EARLY DAYS)",
     "realName": "Norman Osborn",
     "rank": 3,
     "health": 60,
@@ -11264,10 +11144,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "greengoblin-spider-verse-expansion"
+    "id": "green-goblin-early-days-spider-verse-expansion"
   },
   {
-    "name": "GREENGOBLIN",
+    "name": "GREEN GOBLIN (EARTH-1610)",
     "realName": "Norman Osborn",
     "rank": 4,
     "health": 150,
@@ -11348,7 +11228,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "greengoblin-norman-osborn-spider-verse-expansion"
+    "id": "green-goblin-earth-1610-spider-verse-expansion"
   },
   {
     "name": "GREYCROW",
@@ -11575,7 +11455,82 @@ export const MMRPG_CHARACTERS = [
     "id": "guardian-x-men-expansion"
   },
   {
-    "name": "HALLOWS’EVE",
+    "name": "GWENPOOL",
+    "realName": "Gwendolyn “Gwen” Poole",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Unknown",
+    "teams": "GwenHive, M.O.D.O.K., West Coast Avengers",
+    "base": "Mobile",
+    "features": "",
+    "history": "Gwendolyn Poole grew up in a world much like our own, in which the heroes and villains of Earth-616 exist only as fictional characters. As a high-school dropout with few prospects in life, she spent her days holed up in her room, reading hundreds of comics, all the while wishing that she could be a Marvel character herself. Then, somehow, it happened. Poole was sucked onto the real Earth-616, where she immediately threw on a costume and began working her way up the ranks of the underworld as the unbelievable Gwenpool. Poole’s awareness of Marvel tropes allowed her to quickly propel herself into a position of power, but success brought her no satisfaction. Eventually, she sought out her brother, Teddy, who tried to return them to their homeworld, but only stranded them in a similar-looking comic book dimension. Through sheer willpower, Poole pierced the veil of this false world and gained the ability to traverse the spaces between panels and rewrite the reality of comic books themselves. Shocked by the implications of her new powers, Poole returned to Earth-616 and rededicated herself to the life of a hero. Since then, she’s worked with the West Coast Avengers, the X-Men and even other versions of herself.",
+    "personality": "In her early days, Gwenpool was violent at best and outright murderous at worst. It took a long time for her to begin thinking of the denizens of Earth-616 as real people rather than fictional fodder. However, she’s since learned the error of her ways, and the super-hero community now knows her for what she is: an excitable nerd with a good heart. Though she loves romance stories, Poole personally identifies as asexual and aromantic. Weapons Ranged Weapons",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Free Running",
+      "Fresh Eyes"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Media Awareness",
+      "Mysterious",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Combat Trickery",
+          "Slow-Motion Dodge"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Fast Attacks",
+          "Hit & Run",
+          "Whirling Frenzy Narrative",
+          "Reality Manipulation"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Dance of Death",
+          "Double Tap",
+          "Slow-Motion Shoot-Dodge",
+          "Snap Shooting",
+          "Weapons Blazing"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "gwenpool-avengers-expansion"
+  },
+  {
+    "name": "HALLOWS’ EVE",
     "realName": "Elizabeth Tyne (now mainly goes by Janine Godbe)",
     "rank": 3,
     "health": 60,
@@ -11646,7 +11601,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "hallowseve-spider-verse-expansion"
+    "id": "hallows-eve-spider-verse-expansion"
   },
   {
     "name": "HAMMERHEAD",
@@ -11931,7 +11886,90 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "HAWKEYE",
+    "name": "HAWKEYE (CLINT BARTON)",
+    "realName": "Clinton Francis “Clint” Barton",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 6,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Entertainer",
+    "origin": "Special Training",
+    "teams": "Avengers, Thunderbolts",
+    "base": "Brooklyn, New York City",
+    "features": "",
+    "history": "A§ er his parents were killed in a tragic car accident, Clint Barton ran away to join the circus. Naturally talented, he quickly made a name as Hawkeye, one of the premier archers. Barton might have stayed a performer into his old age if a chance encounter hadn’t brought Iron Man to his circus. Inspired by the hero’s exploits, Barton created a costume and began fighting crime as Hawkeye. Although Barton sometimes operates solo, he’s best known for his work with the Avengers. A§ er years of such adventures, he trained and mentored Kate Bishop, the second Hawkeye. This profile represents the original sharpshooting Avenger at the height of his powers, fully decked out with a quiver of trick arrows.",
+    "personality": "Clint Barton is well aware that his lack of super-powers places the upper limits of his abilities well below those of most super heroes. He sometimes puts on an arrogant attitude to cover his insecurities. Barton can be led astray by his passions, but his conscience always brings him back to the fight for justice. iconic item Arts Hawkeye’s Trick Strikes Quiver Sweep Powers:",
+    "traits": [
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Famous",
+      "Fearless",
+      "Presence",
+      "Public Speaking",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Auditory Issues",
+      "Black Market Access",
+      "Heroic",
+      "Public Identity",
+      "Streetwise"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 3",
+          "Slow-Motion Dodge"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Slow-Motion Shoot-Dodge",
+          "Snap Shooting",
+          "Sniping",
+          "Stopping Power",
+          "Toolkit",
+          "Eff ect Options: Each arrow the character shoots can have a diff erent elemental eff ect their choice.",
+          "Worn"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Hawkeye’s Trick Quiver"
+    ],
+    "id": "hawkeye-clint-barton-avengers-expansion"
+  },
+  {
+    "name": "HAWKEYE (EARTH-1610)",
     "realName": "Clint Barton",
     "rank": 3,
     "health": 60,
@@ -12005,92 +12043,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "hawkeye-avengers-expansion"
-  },
-  {
-    "name": "HAWKEYE",
-    "realName": "Clinton Francis “Clint” Barton",
-    "rank": 3,
-    "health": 60,
-    "focus": 90,
-    "karma": 3,
-    "abilities": {
-      "melee": 2,
-      "agility": 6,
-      "resilience": 2,
-      "vigilance": 3,
-      "ego": 1,
-      "logic": 1
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer, Entertainer",
-    "origin": "Special Training",
-    "teams": "Avengers, Thunderbolts",
-    "base": "Brooklyn, New York City",
-    "features": "",
-    "history": "A§ er his parents were killed in a tragic car accident, Clint Barton ran away to join the circus. Naturally talented, he quickly made a name as Hawkeye, one of the premier archers. Barton might have stayed a performer into his old age if a chance encounter hadn’t brought Iron Man to his circus. Inspired by the hero’s exploits, Barton created a costume and began fighting crime as Hawkeye. Although Barton sometimes operates solo, he’s best known for his work with the Avengers. A§ er years of such adventures, he trained and mentored Kate Bishop, the second Hawkeye. This profile represents the original sharpshooting Avenger at the height of his powers, fully decked out with a quiver of trick arrows.",
-    "personality": "Clint Barton is well aware that his lack of super-powers places the upper limits of his abilities well below those of most super heroes. He sometimes puts on an arrogant attitude to cover his insecurities. Barton can be led astray by his passions, but his conscience always brings him back to the fight for justice. iconic item Arts Hawkeye’s Trick Strikes Quiver Sweep Powers:",
-    "traits": [
-      "Combat Expert",
-      "Combat Reflexes",
-      "Connections: Super Heroes",
-      "Determination",
-      "Extra Occupation",
-      "Famous",
-      "Fearless",
-      "Presence",
-      "Public Speaking",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "Auditory Issues",
-      "Black Market Access",
-      "Heroic",
-      "Public Identity",
-      "Streetwise"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Accuracy 3",
-          "Iconic Item",
-          "Slow-Motion Dodge"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Fast Strikes",
-          "Leg Sweep"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Double Tap",
-          "Slow-Motion Shoot-Dodge",
-          "Snap Shooting",
-          "Sniping",
-          "Stopping Power",
-          "Weapons Blazing Hawkeye’s Trick Quiver Powers:",
-          "Toolkit",
-          "Eff ect Options: Each arrow the character shoots can have a diff erent elemental eff ect their choice. Restrictions:",
-          "Worn Power Value: 1"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Hawkeye’s Trick Quiver"
-    ],
-    "id": "hawkeye-clinton-francis-clint-barton-avengers-expansion"
+    "id": "hawkeye-earth-1610-avengers-expansion"
   },
   {
     "name": "HELA",
@@ -12327,7 +12280,7 @@ export const MMRPG_CHARACTERS = [
     "id": "hercules-avengers-expansion"
   },
   {
-    "name": "HIGHEVOLUTIONARY",
+    "name": "HIGH EVOLUTIONARY",
     "realName": "Herbert Edgar Wyndham",
     "rank": 4,
     "health": 120,
@@ -12385,7 +12338,6 @@ export const MMRPG_CHARACTERS = [
           "Levitation",
           "Telekinetic Attack",
           "Telekinetic Grab",
-          "Telekinetic Manipulation High Evolutionary’s Armor Powers:",
           "Accuracy 1",
           "Elemental Barrier (Energy)",
           "Elemental Blast (Energy)",
@@ -12394,15 +12346,18 @@ export const MMRPG_CHARACTERS = [
           "Environmental Protection",
           "Healing Factor",
           "Mighty 1",
-          "Sturdy 1 Restrictions:",
+          "Sturdy 1",
           "Menacing",
-          "Worn Power Value: 8"
+          "Worn"
         ]
       }
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "highevolutionary-avengers-expansion"
+    "equipment": [
+      "High Evolutionary’s Armor"
+    ],
+    "id": "high-evolutionary-avengers-expansion"
   },
   {
     "name": "HOBGOBLIN",
@@ -12667,7 +12622,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "HULK",
+    "name": "HULK (PROFESSOR HULK)",
     "realName": "Robert Bruce Banner",
     "rank": 5,
     "health": 180,
@@ -12743,10 +12698,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "hulk-avengers-expansion"
+    "id": "hulk-professor-hulk-avengers-expansion"
   },
   {
-    "name": "HULK",
+    "name": "HULK (SAVAGE)",
     "realName": "Robert Bruce Banner",
     "rank": 6,
     "health": 270,
@@ -12826,7 +12781,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "hulk-robert-bruce-banner-avengers-expansion"
+    "id": "hulk-savage-avengers-expansion"
   },
   {
     "name": "HULKLING",
@@ -13570,7 +13525,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "IRONMAN",
+    "name": "IRON MAN (EARTH-1610)",
     "realName": "Antonio “Tony” Stark",
     "rank": 4,
     "health": 90,
@@ -13622,7 +13577,6 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Brilliance 2",
           "Combat Trickery",
-          "Inspiration Iron Man’s Armor Powers:",
           "Accuracy 1",
           "Elemental Barrage (Energy)",
           "Elemental Barrier (Energy)",
@@ -13635,18 +13589,21 @@ export const MMRPG_CHARACTERS = [
           "Invisibility",
           "Machine Telepathy",
           "Mighty 1",
-          "Sturdy 2 Restrictions:",
+          "Sturdy 2",
           "Flashy",
-          "Worn Power Value: 13"
+          "Worn"
         ]
       }
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "ironman-avengers-expansion"
+    "equipment": [
+      "Iron Man (Earth-1610)’s Armor"
+    ],
+    "id": "iron-man-earth-1610-avengers-expansion"
   },
   {
-    "name": "IRONMAN",
+    "name": "IRON MAN (HULKBUSTER ARMOR)",
     "realName": "Anthony “Tony” Stark",
     "rank": 6,
     "health": 270,
@@ -13726,10 +13683,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "ironman-anthony-tony-stark-avengers-expansion"
+    "id": "iron-man-hulkbuster-armor-avengers-expansion"
   },
   {
-    "name": "IRONMAN",
+    "name": "IRON MAN (MYSTERIUM ARMOR)",
     "realName": "Anthony “Tony” Stark",
     "rank": 5,
     "health": 180,
@@ -13808,7 +13765,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "ironman-anthony-tony-stark-avengers-expansion"
+    "id": "iron-man-mysterium-armor-avengers-expansion"
   },
   {
     "name": "ISCA THE UNBEATEN",
@@ -14113,7 +14070,7 @@ export const MMRPG_CHARACTERS = [
     "id": "jean-grey-xmen97"
   },
   {
-    "name": "JEFFTHELANDSHARK",
+    "name": "JEFF THE LAND SHARK",
     "realName": "Jeff",
     "rank": 2,
     "health": 60,
@@ -14182,7 +14139,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "jeffthelandshark-avengers-expansion"
+    "id": "jeff-the-land-shark-avengers-expansion"
   },
   {
     "name": "JESSICA JONES",
@@ -14791,6 +14748,88 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "KID JUGGERNAUT",
+    "realName": "Joon-Sung “Justin” Jin",
+    "rank": 3,
+    "health": 150,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 5,
+      "agility": 1,
+      "resilience": 5,
+      "vigilance": 2,
+      "ego": 3,
+      "logic": 0
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Student",
+    "origin": "Magic",
+    "teams": "Avengers Academy",
+    "base": "Avengers Academy",
+    "features": "",
+    "history": "The Crimson Gem of Cyttorak and the title of Juggernaut were once held by a Korean farmer named Moon-Ho Jin who—on orders from the demon Cyttorak—helped Japanese imperialists invade his homeland. However, when the time came to raze his own village, Jin hesitated. Outraged, Cyttorak summoned Cain Marko, who killed Moon-Ho and claimed the gem as his own, becoming the new Juggernaut. Moon-Ho’s son Jung-Woo recovered a shard of the gem, but out of shame for his father’s legacy, he kept the existence of the shard secret. He later married a woman named Hae-Ran with whom he had a son named Joon-Sung. For a few years, they lived happily together, but in time, the parents grew apart and divorced. In JungWoo’s absence, Hae-Ran and Joon-Sung moved to Vancouver, where they started a café. Years later, Cyttorak directed a mage named Malphegor to kill Jung-Woo and take possession of the shard. Though the wizard succeeded in the former task, he failed in the latter. As his final act, Jung-Woo sent the shard to his teenage son, who promptly absorbed its powers and defeated his father’s killer. Cyttorak pushed Joon-Sung to kill Malphegor, but the boy resisted the demon’s dark influence. Calling himself Kid Juggernaut, he vowed that, from that day forward, he would be the hero that his grandfather had never been. These days, Kid Juggernaut spends most of his time at the new Avengers Academy, learning the basics of hero work alongside his classmate and crush, Aaron Fischer.",
+    "personality": "Justin Jin is as kind as he is strong, and as gentle as he is unstoppable. He can, at times, be a bit inattentive to his surroundings, but he’s such a good guy that no one begrudges him for it. iconic item Shard of the Crimson Heads Gem of Cyttorak Powers:",
+    "traits": [
+      "Beguiling",
+      "Big (Reach 2; Kid Juggernaut form only)",
+      "Clueless",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Fearless",
+      "Magic Item Reliance",
+      "Quick Learner"
+    ],
+    "tags": [
+      "Alternate Kid (Justin Jin)",
+      "Black Market Access",
+      "Headquarters: Avengers Academy",
+      "Heroic",
+      "Mentor: Captain Marvel (Carol Danvers)",
+      "Obligation: School",
+      "Secret Identity",
+      "Supernatural",
+      "Young"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Quick Toss",
+          "Smash Shard of the Crimson Gem of Cyttorak Powers:",
+          "Mighty 3",
+          "Sturdy 2",
+          "Flashy",
+          "Large Tags:",
+          "Alternate Form"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "equipment": [
+      "Shard of the Crimson Gem of Cyttorak"
+    ],
+    "id": "kid-juggernaut-avengers-expansion"
+  },
+  {
     "name": "KID OMEGA",
     "realName": "Quintavius Quirinius “Quentin” Quire",
     "rank": 1,
@@ -14873,89 +14912,6 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "kid-omega-x-men-expansion"
-  },
-  {
-    "name": "KIDJUGGERNAUT",
-    "realName": "Joon-Sung “Justin” Jin",
-    "rank": 3,
-    "health": 150,
-    "focus": 60,
-    "karma": 3,
-    "abilities": {
-      "melee": 5,
-      "agility": 1,
-      "resilience": 5,
-      "vigilance": 2,
-      "ego": 3,
-      "logic": 0
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Adventurer, Student",
-    "origin": "Magic",
-    "teams": "Avengers Academy",
-    "base": "Avengers Academy",
-    "features": "",
-    "history": "The Crimson Gem of Cyttorak and the title of Juggernaut were once held by a Korean farmer named Moon-Ho Jin who—on orders from the demon Cyttorak—helped Japanese imperialists invade his homeland. However, when the time came to raze his own village, Jin hesitated. Outraged, Cyttorak summoned Cain Marko, who killed Moon-Ho and claimed the gem as his own, becoming the new Juggernaut. Moon-Ho’s son Jung-Woo recovered a shard of the gem, but out of shame for his father’s legacy, he kept the existence of the shard secret. He later married a woman named Hae-Ran with whom he had a son named Joon-Sung. For a few years, they lived happily together, but in time, the parents grew apart and divorced. In JungWoo’s absence, Hae-Ran and Joon-Sung moved to Vancouver, where they started a café. Years later, Cyttorak directed a mage named Malphegor to kill Jung-Woo and take possession of the shard. Though the wizard succeeded in the former task, he failed in the latter. As his final act, Jung-Woo sent the shard to his teenage son, who promptly absorbed its powers and defeated his father’s killer. Cyttorak pushed Joon-Sung to kill Malphegor, but the boy resisted the demon’s dark influence. Calling himself Kid Juggernaut, he vowed that, from that day forward, he would be the hero that his grandfather had never been. These days, Kid Juggernaut spends most of his time at the new Avengers Academy, learning the basics of hero work alongside his classmate and crush, Aaron Fischer.",
-    "personality": "Justin Jin is as kind as he is strong, and as gentle as he is unstoppable. He can, at times, be a bit inattentive to his surroundings, but he’s such a good guy that no one begrudges him for it. iconic item Shard of the Crimson Heads Gem of Cyttorak Powers:",
-    "traits": [
-      "Beguiling",
-      "Big (Reach 2; Kid Juggernaut form only)",
-      "Clueless",
-      "Connections: Super Heroes",
-      "Determination",
-      "Extra Occupation",
-      "Fearless",
-      "Magic Item Reliance",
-      "Quick Learner"
-    ],
-    "tags": [
-      "Alternate Kid (Justin Jin)",
-      "Black Market Access",
-      "Headquarters: Avengers Academy",
-      "Heroic",
-      "Mentor: Captain Marvel (Carol Danvers)",
-      "Obligation: School",
-      "Secret Identity",
-      "Supernatural",
-      "Young"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Iconic Item",
-          "Inspiration"
-        ]
-      },
-      {
-        "set": "Super-Strength",
-        "names": [
-          "Banging Heads",
-          "Clobber",
-          "Crushing Grip",
-          "Ground-Shaking Stomp",
-          "Immovable",
-          "Quick Toss",
-          "Smash Shard of the Crimson Gem of Cyttorak Powers:",
-          "Mighty 3",
-          "Sturdy 2 Restrictions:",
-          "Flashy",
-          "Large Tags:",
-          "Alternate Form Power Value: 3"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "equipment": [
-      "Shard of the Crimson Gem of Cyttorak"
-    ],
-    "id": "kidjuggernaut-avengers-expansion"
   },
   {
     "name": "KILLMONGER",
@@ -15193,7 +15149,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "KINGPIN",
+    "name": "KINGPIN (EARTH-65)",
     "realName": "Matthew “Matt” Murdock",
     "rank": 2,
     "health": 60,
@@ -15265,7 +15221,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "kingpin-spider-verse-expansion"
+    "id": "kingpin-earth-65-spider-verse-expansion"
   },
   {
     "name": "KLAW",
@@ -15420,7 +15376,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "KRAVENTHEHUNTER",
+    "name": "KRAVEN THE HUNTER (ANA KRAVINOFF)",
     "realName": "Anastasia Tatiana “Ana” Kravinoff",
     "rank": 3,
     "health": 60,
@@ -15508,7 +15464,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "kraventhehunter-spider-verse-expansion"
+    "id": "kraven-the-hunter-ana-kravinoff-spider-verse-expansion"
   },
   {
     "name": "LADY DEATHSTRIKE",
@@ -15559,7 +15515,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Brawling",
-          "Iconic Weapon",
           "Reinforced Skeleton"
         ]
       },
@@ -15596,12 +15551,12 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "equipment": [
-      "Adamantium nails"
+      "Adamantium Nails"
     ],
     "id": "lady-deathstrike-x-men-expansion"
   },
   {
-    "name": "LADYOCTOPUS",
+    "name": "LADY OCTOPUS",
     "realName": "Carolyn Trainer",
     "rank": 4,
     "health": 60,
@@ -15691,10 +15646,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "ladyoctopus-spider-verse-expansion"
+    "id": "lady-octopus-spider-verse-expansion"
   },
   {
-    "name": "LASTSTANDSPIDER-MAN",
+    "name": "LAST STAND SPIDER-MAN",
     "realName": "Peter Parker",
     "rank": 4,
     "health": 60,
@@ -15766,7 +15721,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "laststandspider-man-spider-verse-expansion"
+    "id": "last-stand-spider-man-spider-verse-expansion"
   },
   {
     "name": "LEADER",
@@ -16286,7 +16241,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "MADAMEMONSTROSITY",
+    "name": "MADAME MONSTROSITY",
     "realName": "Melodia Stillwell",
     "rank": 3,
     "health": 150,
@@ -16357,10 +16312,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "madamemonstrosity-spider-verse-expansion"
+    "id": "madame-monstrosity-spider-verse-expansion"
   },
   {
-    "name": "MADAMEWEB",
+    "name": "MADAME WEB",
     "realName": "Julia Eugenia Cornwall Carpenter",
     "rank": 4,
     "health": 60,
@@ -16441,7 +16396,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "madameweb-spider-verse-expansion"
+    "id": "madame-web-spider-verse-expansion"
   },
   {
     "name": "MADELYNE PRYOR",
@@ -16685,7 +16640,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Discipline 2",
-          "Iconic Weapon",
           "Inspiration",
           "Sturdy 2",
           "Uncanny 2",
@@ -17118,7 +17072,7 @@ export const MMRPG_CHARACTERS = [
     "id": "mainframe-avengers-expansion"
   },
   {
-    "name": "MAJORVICTORY",
+    "name": "MAJOR VICTORY",
     "realName": "Vance Astro",
     "rank": 4,
     "health": 60,
@@ -17170,7 +17124,6 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Accuracy 1",
           "Brilliance 1",
-          "Iconic Item",
           "Inspiration",
           "Sturdy 1"
         ]
@@ -17202,10 +17155,8 @@ export const MMRPG_CHARACTERS = [
           "Reduced Focus",
           "Shield 1",
           "Stackable",
-          "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier: +1 Restrictions:",
           "Carried",
-          "Flashy",
-          "Requires: Shield 1 power Power Value: 1"
+          "Flashy"
         ]
       }
     ],
@@ -17214,7 +17165,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Captain America’s Shield"
     ],
-    "id": "majorvictory-secret-wars"
+    "id": "major-victory-secret-wars"
   },
   {
     "name": "MALEKITH",
@@ -17364,7 +17315,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "MANGAVERSESPIDER-MAN",
+    "name": "MANGAVERSE SPIDER-MAN",
     "realName": "Peter Parker",
     "rank": 2,
     "health": 30,
@@ -17431,7 +17382,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "mangaversespider-man-spider-verse-expansion"
+    "id": "mangaverse-spider-man-spider-verse-expansion"
   },
   {
     "name": "MANTIS",
@@ -17617,7 +17568,7 @@ export const MMRPG_CHARACTERS = [
     "id": "martinex-secret-wars"
   },
   {
-    "name": "MARVELBOY",
+    "name": "MARVEL BOY",
     "realName": "Noh-Varr",
     "rank": 4,
     "health": 90,
@@ -17702,10 +17653,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "marvelboy-avengers-expansion"
+    "id": "marvel-boy-avengers-expansion"
   },
   {
-    "name": "MASTER OF THE WORLD",
+    "name": "MASTER OFTHE WORLD",
     "realName": "Eshu",
     "rank": 1,
     "health": 120,
@@ -17788,7 +17739,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "X-Men Expansion",
-    "id": "master-of-the-world-x-men-expansion"
+    "id": "master-ofthe-world-x-men-expansion"
   },
   {
     "name": "MASTERMIND",
@@ -17931,7 +17882,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "MELINDAMAY",
+    "name": "MELINDA MAY",
     "realName": "Melinda May",
     "rank": 2,
     "health": 30,
@@ -17998,7 +17949,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "melindamay-avengers-expansion"
+    "id": "melinda-may-avengers-expansion"
   },
   {
     "name": "METTLE",
@@ -18297,6 +18248,88 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "MISTER NEGATIVE",
+    "realName": "Unknown, but o‘ en uses alias of Martin Li",
+    "rank": 4,
+    "health": 60,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 4,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 4,
+      "ego": 5,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal",
+    "origin": "Weird Science",
+    "teams": "Inner Demons, Triads",
+    "base": "New York City",
+    "features": "Body and clothes ap- pear photonegative (in alternate form)",
+    "history": "Years ago, Maggia goons kidnapped dozens of people—mostly homeless teens—off the streets of New York to use as lab rats for an experimental new narcotic. Nearly everyone who took the drug died within minutes. Two of the survivors are well known. The drug gave Tyrone Johnson and Tandy Bowen control over the forces of dark and light, respectively, turning them into the super-hero duo of Cloak and Dagger. Though few knew it, there was a third survivor: an up-and-coming Triad grunt captured by rivals in the Maggia. This survivor gained control over both light and dark, powers that split his mind in twain. One half of him became Martin Li, a respectable philanthropist, healer and family man. The other half became Mister Negative, a super-powered Triad commander who corrupts all he touches. Spider-Man (Peter Parker) first encountered him as Li, the founder and head of the F.E.A.S.T. charity center where Parker’s Aunt May volunteered. How(in ever, a‘ er a long investigation, Spider-Man uncovered Li’s alter ego and revealed it to the world. Li has been on the run from the authorities ever since, lying low in Shanghai and popping back into New York City for major events, such as the massive gang war that recently consumed much of the city.",
+    "personality": "Mister Negative delights in corrupting others, agitating their base impulses and forcing them to confront the darkness lurking within their psyches. Martin Li, on the other hand, wants only to help people, but life as an outlaw has forced him to make a series of increasingly dire compromises with his negative half. Alternate Form Mr. Negative’s forms aff ect his access to his powers. He can use his Healing powers only in Martin Li form, and his Corrupting Touch power can be used only by his Mr. Negative form. / 1 Arts Narrative 1",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Criminal",
+      "Fearless",
+      "Presence",
+      "Public Speaking",
+      "Weird"
+    ],
+    "tags": [
+      "Alternate Form",
+      "Backup (Inner Demons)",
+      "Black Market Access",
+      "Extreme Appearance (in alternate form)",
+      "Public Identity",
+      "Streetwise",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration",
+          "Mighty 1 Healing",
+          "Cure-All",
+          "Healing Hands",
+          "Let’s Go"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Crushing Grip",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep Narrative",
+          "Corrupting Touch"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Keep Moving",
+          "On Your Feet"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "mister-negative-spider-verse-expansion"
+  },
+  {
     "name": "MISTER SINISTER",
     "realName": "Nathaniel Essex",
     "rank": 1,
@@ -18387,88 +18420,6 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "mister-sinister-x-men-expansion"
-  },
-  {
-    "name": "MISTERNEGATIVE",
-    "realName": "Unknown, but o‘ en uses alias of Martin Li",
-    "rank": 4,
-    "health": 60,
-    "focus": 120,
-    "karma": null,
-    "abilities": {
-      "melee": 4,
-      "agility": 3,
-      "resilience": 2,
-      "vigilance": 4,
-      "ego": 5,
-      "logic": 2
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Criminal",
-    "origin": "Weird Science",
-    "teams": "Inner Demons, Triads",
-    "base": "New York City",
-    "features": "Body and clothes ap- pear photonegative (in alternate form)",
-    "history": "Years ago, Maggia goons kidnapped dozens of people—mostly homeless teens—off the streets of New York to use as lab rats for an experimental new narcotic. Nearly everyone who took the drug died within minutes. Two of the survivors are well known. The drug gave Tyrone Johnson and Tandy Bowen control over the forces of dark and light, respectively, turning them into the super-hero duo of Cloak and Dagger. Though few knew it, there was a third survivor: an up-and-coming Triad grunt captured by rivals in the Maggia. This survivor gained control over both light and dark, powers that split his mind in twain. One half of him became Martin Li, a respectable philanthropist, healer and family man. The other half became Mister Negative, a super-powered Triad commander who corrupts all he touches. Spider-Man (Peter Parker) first encountered him as Li, the founder and head of the F.E.A.S.T. charity center where Parker’s Aunt May volunteered. How(in ever, a‘ er a long investigation, Spider-Man uncovered Li’s alter ego and revealed it to the world. Li has been on the run from the authorities ever since, lying low in Shanghai and popping back into New York City for major events, such as the massive gang war that recently consumed much of the city.",
-    "personality": "Mister Negative delights in corrupting others, agitating their base impulses and forcing them to confront the darkness lurking within their psyches. Martin Li, on the other hand, wants only to help people, but life as an outlaw has forced him to make a series of increasingly dire compromises with his negative half. Alternate Form Mr. Negative’s forms aff ect his access to his powers. He can use his Healing powers only in Martin Li form, and his Corrupting Touch power can be used only by his Mr. Negative form. / 1 Arts Narrative 1",
-    "traits": [
-      "Combat Reflexes",
-      "Connections: Criminal",
-      "Fearless",
-      "Presence",
-      "Public Speaking",
-      "Weird"
-    ],
-    "tags": [
-      "Alternate Form",
-      "Backup (Inner Demons)",
-      "Black Market Access",
-      "Extreme Appearance (in alternate form)",
-      "Public Identity",
-      "Streetwise",
-      "Villainous"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Inspiration",
-          "Mighty 1 Healing",
-          "Cure-All",
-          "Healing Hands",
-          "Let’s Go"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Attack Stance",
-          "Crushing Grip",
-          "Defense Stance",
-          "Do This All Day",
-          "Fast Strikes",
-          "Leg Sweep Narrative",
-          "Corrupting Touch"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Change of Plans",
-          "Keep Moving",
-          "On Your Feet"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Spider-Verse Expansion",
-    "id": "misternegative-spider-verse-expansion"
   },
   {
     "name": "MISTY KNIGHT",
@@ -19160,7 +19111,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "MS.MARVEL",
+    "name": "MS. MARVEL (EARLY DAYS)",
     "realName": "Carol Danvers",
     "rank": 3,
     "health": 90,
@@ -19237,7 +19188,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "ms-marvel-avengers-expansion"
+    "id": "ms-marvel-early-days-avengers-expansion"
   },
   {
     "name": "MULTIPLE MAN",
@@ -19724,7 +19675,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Flight 1",
-          "Iconic Weapon",
           "Inspiration",
           "Mighty 2",
           "Sturdy 2"
@@ -20298,7 +20248,7 @@ export const MMRPG_CHARACTERS = [
     "id": "nimrod-x-men-expansion"
   },
   {
-    "name": "NOCTURNE EARTH 2182",
+    "name": "NOCTURNE (Earth-2182)",
     "realName": "Talia Josephine “T.J.” Wagner",
     "rank": 4,
     "health": 90,
@@ -20396,7 +20346,7 @@ export const MMRPG_CHARACTERS = [
     "id": "nocturne-earth-2182-x-men-expansion"
   },
   {
-    "name": "NORMANOSBORN",
+    "name": "NORMAN OSBORN (EARTH-90214)",
     "realName": "Norman Osborn",
     "rank": 1,
     "health": 30,
@@ -20462,7 +20412,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "normanosborn-spider-verse-expansion"
+    "id": "norman-osborn-earth-90214-spider-verse-expansion"
   },
   {
     "name": "NORTHSTAR",
@@ -20550,7 +20500,7 @@ export const MMRPG_CHARACTERS = [
     "id": "northstar-x-men-expansion"
   },
   {
-    "name": "NOVA",
+    "name": "NOVA (RICHARD RIDER)",
     "realName": "Richard “Rich” Rider",
     "rank": 6,
     "health": 150,
@@ -20601,7 +20551,6 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Item",
           "Inspiration",
           "Wisdom",
           "Wisecracker Nova Helmet: Centurion This powerful Nova Centurion helm a sentient repository of the lost civilization’s Origin: Weird Science Powers:",
@@ -20620,9 +20569,9 @@ export const MMRPG_CHARACTERS = [
           "Power Slider (Energy Supply)",
           "Sturdy 4",
           "Supernova (Energy)",
-          "Warp Portal Restrictions:",
+          "Warp Portal",
           "Flashy",
-          "Worn Power Value: 25 A.I. (Xandarian Worldmind)"
+          "Worn"
         ]
       }
     ],
@@ -20631,7 +20580,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Nova Helmet: Centurion"
     ],
-    "id": "nova-secret-wars"
+    "id": "nova-richard-rider-secret-wars"
   },
   {
     "name": "ODIN",
@@ -20807,7 +20756,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "OLD MAN LOGAN EARTH 214923",
+    "name": "OLD MAN LOGAN (Earth-214923)",
     "realName": "James Howlett",
     "rank": 4,
     "health": 120,
@@ -20863,7 +20812,6 @@ export const MMRPG_CHARACTERS = [
           "Combat Trickery",
           "Healing Factor",
           "Heightened Senses 1",
-          "Iconic Weapon",
           "Reinforced Skeleton",
           "Uncanny 1"
         ]
@@ -20893,7 +20841,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "equipment": [
-      "Adamantium claws"
+      "Adamantium Claws"
     ],
     "id": "old-man-logan-earth-214923-x-men-expansion"
   },
@@ -21126,7 +21074,7 @@ export const MMRPG_CHARACTERS = [
     "id": "polaris-x-men-expansion"
   },
   {
-    "name": "PRESIDENTNORMANOSBORN",
+    "name": "PRESIDENT NORMAN OSBORN",
     "realName": "Norman “Ozzy” Osborn",
     "rank": 4,
     "health": 120,
@@ -21208,7 +21156,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "presidentnormanosborn-spider-verse-expansion"
+    "id": "president-norman-osborn-spider-verse-expansion"
   },
   {
     "name": "PROFESSOR X",
@@ -21373,7 +21321,7 @@ export const MMRPG_CHARACTERS = [
     "id": "prowler-spider-verse-expansion"
   },
   {
-    "name": "PROXIMAMIDNIGHT",
+    "name": "PROXIMA MIDNIGHT",
     "realName": "Proxima Midnight",
     "rank": 5,
     "health": 180,
@@ -21422,7 +21370,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Accuracy 1",
-          "Iconic Item",
           "Inspiration",
           "Mighty 2",
           "Sturdy 2"
@@ -21446,14 +21393,12 @@ export const MMRPG_CHARACTERS = [
           "Clobber",
           "Crushing Grip",
           "Immovable",
-          "Jump 1 Proxima Midnight’s Spear Powers:",
           "Elemental Barrage (Energy)",
           "Elemental Blast (Energy)",
           "Elemental Burst (Energy)",
           "Elemental Grab (Energy)",
-          "Weapon: Range: Reach + 1/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
           "Carried",
-          "Large Power Value: 3"
+          "Large"
         ]
       }
     ],
@@ -21462,7 +21407,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Proxima Midnight’s Spear"
     ],
-    "id": "proximamidnight-avengers-expansion"
+    "id": "proxima-midnight-avengers-expansion"
   },
   {
     "name": "PSYCHO-MAN",
@@ -21514,7 +21459,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Brilliance 3",
-          "Iconic Item",
           "Inspiration",
           "Mighty 1",
           "Sturdy 2",
@@ -21528,8 +21472,8 @@ export const MMRPG_CHARACTERS = [
           "Change of Plans",
           "Keep Moving Control Box By pressing a button on this high-tech device, the user can manipulate oth- ers’ emotions. Origin: High Tech Powers:",
           "Control Emotion",
-          "Control Group Emotion Restrictions:",
-          "Carried Power Value: 1"
+          "Control Group Emotion",
+          "Carried"
         ]
       }
     ],
@@ -21908,7 +21852,7 @@ export const MMRPG_CHARACTERS = [
     "id": "quake-avengers-expansion"
   },
   {
-    "name": "QUEENGOBLIN",
+    "name": "QUEEN GOBLIN",
     "realName": "Ashley Kafk a",
     "rank": 4,
     "health": 90,
@@ -21957,7 +21901,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Flight 2",
-          "Iconic Weapon",
           "Mighty 2",
           "Sturdy 1"
         ]
@@ -21998,7 +21941,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Pumpkin Scepter"
     ],
-    "id": "queengoblin-spider-verse-expansion"
+    "id": "queen-goblin-spider-verse-expansion"
   },
   {
     "name": "QUICKSILVER",
@@ -22072,7 +22015,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "RADIOACTIVEMAN",
+    "name": "RADIOACTIVE MAN",
     "realName": "Chen Lu",
     "rank": 4,
     "health": 120,
@@ -22153,7 +22096,80 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "radioactiveman-avengers-expansion"
+    "id": "radioactive-man-avengers-expansion"
+  },
+  {
+    "name": "RED GOBLIN",
+    "realName": "Norman Harold “Normie” Osborn",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 3,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 5,
+      "jump": 5
+    },
+    "occupation": "Student",
+    "origin": "Symbiote: Venom",
+    "teams": "Avengers Academy",
+    "base": "New York City",
+    "features": "",
+    "history": "As the son of the Green Goblin (Harry Osborn) and Misery (Liz Allan), Normie Osborn has been getting wrapped up in super-hero shenanigans since he was a toddler. Poisoned by the influence of his grandfather Norman, Normie wound up hating Spider-Man (Peter Parker) and everything the Web-Head stood for. However, a‘ er Spider-Man saved Normie from Carnage, the boy’s outlook changed. Now eager to follow in the web-slinger’s footsteps, he allowed Venom (Dylan Brock) to bond him with Rascal—a modified off shoot of the Carnage symbiote weak enough for even a little kid to keep under control. A‘ er helping Dylan to rescue his father, Eddie, Normie adopted the identity of the Red Goblin and quietly took to the streets to become New York City’s latest enigmatic crimefighting prodigy. Despite having been a hero for only a matter of months, Normie has become a trusted ally to many of the city’s foremost defenders, including Spider-Man himself. When he’s not spending time with his mother, Liz, or his brother, Stanley, Normie attends Avengers Academy, learning the ropes of heroism alongside other up-and-coming young heroes like Moon Girl and Escapade.",
+    "personality": "Despite all he’s been through, Normie is still just a regular kid, and like a lot of kids his age, he’s a bundle of insecurities and nervous tics. He’s not good at opening up to others, much less counting on them. Ironically, his closest friend is probably his symbiote, Rascal. Unlike most of his species, Rascal is too rambunctious and simpleminded to ever be outright evil.",
+    "traits": [
+      "Anathema: Extreme Heat/ Extreme Sonics/ Anti-Venom",
+      "Berserker",
+      "Combat Reflexes",
+      "Quick Learner",
+      "Situational Awareness",
+      "Small",
+      "Symbiotic Spider-Blinder"
+    ],
+    "tags": [
+      "Heroic",
+      "Mentor: Captain Marvel (Carol Danvers)",
+      "Obligation: School",
+      "Secret Identity",
+      "Young"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Disguise",
+          "Environmental Protection",
+          "Evasion",
+          "Healing Factor",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Jump 1",
+          "Razorwebs",
+          "Spider-Dodge",
+          "Spider-Strike",
+          "Wallcrawling",
+          "Webcasting",
+          "Webgrabbing",
+          "Webslinging",
+          "Webtrapping"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "red-goblin-spider-verse-expansion"
   },
   {
     "name": "RED GUARDIAN",
@@ -22238,6 +22254,105 @@ export const MMRPG_CHARACTERS = [
       "Red Guardian's Shield",
       "Red Boomerangs"
     ]
+  },
+  {
+    "name": "RED HULK",
+    "realName": "Thaddeus E. “Thunderbolt” Ross",
+    "rank": 6,
+    "health": 270,
+    "focus": 150,
+    "karma": null,
+    "abilities": {
+      "melee": 9,
+      "agility": 3,
+      "resilience": 9,
+      "vigilance": 4,
+      "ego": 3,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 36
+    },
+    "occupation": "Military",
+    "origin": "Weird Science: Gamma Mutate",
+    "teams": "Avengers, Thunderbolts",
+    "base": "Mobile",
+    "features": "Red Hulk form with orange blood and dark fingernails",
+    "history": "As the head of the army base where Bruce Banner first became the Hulk, General Thaddeus Ross made it his mission in life to take the green monstrosity down at any cost. Of course, that mission proved impossible, and as the years dragged on, the cost only rose. In his relentless pursuit of the Hulk, the general lost his military commission, his dignity and even his relationship with his daughter Betty who—despite everything—still loved Banner. At the end of his rope, Ross made a fateful decision. If he could not beat the Hulk as a man, maybe he could beat him as a monster. With the help of several of the Hulk’s greatest enemies, Ross stole and absorbed a portion of Banner’s gamma power, transforming himself into the Red Hulk. Even with power comparable to Banner’s own, though, Ross simply couldn’t keep the Hulk down. Gradually, he came to regret his transformation, and in an eff ort to redeem himself, he began working with many of the Hulk’s own super-teams, including the Avengers. For a while, he even led his own incarnation of the Thunderbolts. Though the Red Hulk’s appearances in the field have been sporadic as of late, he remains dedicated to making the world a safer place— by any means necessary.",
+    "personality": "He’s no longer an official member of the U.S. Air Force, but Ross is still a military man through and through. He is a proud patriot with unwavering respect for the chain of command, a man who treats every super-hero mission like a tactical military strike, never beginning a fight without multiple plans and backup plans in place. Control Super-Strength",
+    "traits": [
+      "Battle Ready",
+      "Big (Reach 2)",
+      "Combat Expert",
+      "Connections: Military (U.S. Force)",
+      "Interrogation",
+      "Leverage",
+      "Piloting",
+      "Presence",
+      "Situational Awareness",
+      "Weird"
+    ],
+    "tags": [
+      "Alternate (“Thunderbolt” Ross)",
+      "Extreme Appearance Air Red Hulk",
+      "Green Door",
+      "Immunity: Gamma Radiation",
+      "Public Identity",
+      "Radioactive"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Anger",
+          "Energy Absorption (limited to incorporeal forms of damage: energy, radiation, cosmic rays, etc.)",
+          "Healing Factor",
+          "Inspiration",
+          "Mighty 4",
+          "Sturdy 3"
+        ]
+      },
+      {
+        "set": "Elemental Control (Fire)",
+        "names": [
+          "Elemental Blast",
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Jump 2",
+          "Quick Toss",
+          "Smash",
+          "Unrelenting Smash"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Focus Fire"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "red-hulk-avengers-expansion"
   },
   {
     "name": "RED SKULL",
@@ -22381,178 +22496,6 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "red-wolf",
     "genre": "core"
-  },
-  {
-    "name": "REDGOBLIN",
-    "realName": "Norman Harold “Normie” Osborn",
-    "rank": 3,
-    "health": 90,
-    "focus": 60,
-    "karma": 3,
-    "abilities": {
-      "melee": 3,
-      "agility": 5,
-      "resilience": 3,
-      "vigilance": 2,
-      "ego": 1,
-      "logic": 1
-    },
-    "speed": {
-      "run": 5,
-      "climb": 5,
-      "jump": 5
-    },
-    "occupation": "Student",
-    "origin": "Symbiote: Venom",
-    "teams": "Avengers Academy",
-    "base": "New York City",
-    "features": "",
-    "history": "As the son of the Green Goblin (Harry Osborn) and Misery (Liz Allan), Normie Osborn has been getting wrapped up in super-hero shenanigans since he was a toddler. Poisoned by the influence of his grandfather Norman, Normie wound up hating Spider-Man (Peter Parker) and everything the Web-Head stood for. However, a‘ er Spider-Man saved Normie from Carnage, the boy’s outlook changed. Now eager to follow in the web-slinger’s footsteps, he allowed Venom (Dylan Brock) to bond him with Rascal—a modified off shoot of the Carnage symbiote weak enough for even a little kid to keep under control. A‘ er helping Dylan to rescue his father, Eddie, Normie adopted the identity of the Red Goblin and quietly took to the streets to become New York City’s latest enigmatic crimefighting prodigy. Despite having been a hero for only a matter of months, Normie has become a trusted ally to many of the city’s foremost defenders, including Spider-Man himself. When he’s not spending time with his mother, Liz, or his brother, Stanley, Normie attends Avengers Academy, learning the ropes of heroism alongside other up-and-coming young heroes like Moon Girl and Escapade.",
-    "personality": "Despite all he’s been through, Normie is still just a regular kid, and like a lot of kids his age, he’s a bundle of insecurities and nervous tics. He’s not good at opening up to others, much less counting on them. Ironically, his closest friend is probably his symbiote, Rascal. Unlike most of his species, Rascal is too rambunctious and simpleminded to ever be outright evil.",
-    "traits": [
-      "Anathema: Extreme Heat/ Extreme Sonics/ Anti-Venom",
-      "Berserker",
-      "Combat Reflexes",
-      "Quick Learner",
-      "Situational Awareness",
-      "Small",
-      "Symbiotic Spider-Blinder"
-    ],
-    "tags": [
-      "Heroic",
-      "Mentor: Captain Marvel (Carol Danvers)",
-      "Obligation: School",
-      "Secret Identity",
-      "Young"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Disguise",
-          "Environmental Protection",
-          "Evasion",
-          "Healing Factor",
-          "Mighty 1"
-        ]
-      },
-      {
-        "set": "Spider-Powers",
-        "names": [
-          "Jump 1",
-          "Razorwebs",
-          "Spider-Dodge",
-          "Spider-Strike",
-          "Wallcrawling",
-          "Webcasting",
-          "Webgrabbing",
-          "Webslinging",
-          "Webtrapping"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Spider-Verse Expansion",
-    "id": "redgoblin-spider-verse-expansion"
-  },
-  {
-    "name": "REDHULK",
-    "realName": "Thaddeus E. “Thunderbolt” Ross",
-    "rank": 6,
-    "health": 270,
-    "focus": 150,
-    "karma": null,
-    "abilities": {
-      "melee": 9,
-      "agility": 3,
-      "resilience": 9,
-      "vigilance": 4,
-      "ego": 3,
-      "logic": 2
-    },
-    "speed": {
-      "run": 6,
-      "climb": 3,
-      "swim": 3,
-      "jump": 36
-    },
-    "occupation": "Military",
-    "origin": "Weird Science: Gamma Mutate",
-    "teams": "Avengers, Thunderbolts",
-    "base": "Mobile",
-    "features": "Red Hulk form with orange blood and dark fingernails",
-    "history": "As the head of the army base where Bruce Banner first became the Hulk, General Thaddeus Ross made it his mission in life to take the green monstrosity down at any cost. Of course, that mission proved impossible, and as the years dragged on, the cost only rose. In his relentless pursuit of the Hulk, the general lost his military commission, his dignity and even his relationship with his daughter Betty who—despite everything—still loved Banner. At the end of his rope, Ross made a fateful decision. If he could not beat the Hulk as a man, maybe he could beat him as a monster. With the help of several of the Hulk’s greatest enemies, Ross stole and absorbed a portion of Banner’s gamma power, transforming himself into the Red Hulk. Even with power comparable to Banner’s own, though, Ross simply couldn’t keep the Hulk down. Gradually, he came to regret his transformation, and in an eff ort to redeem himself, he began working with many of the Hulk’s own super-teams, including the Avengers. For a while, he even led his own incarnation of the Thunderbolts. Though the Red Hulk’s appearances in the field have been sporadic as of late, he remains dedicated to making the world a safer place— by any means necessary.",
-    "personality": "He’s no longer an official member of the U.S. Air Force, but Ross is still a military man through and through. He is a proud patriot with unwavering respect for the chain of command, a man who treats every super-hero mission like a tactical military strike, never beginning a fight without multiple plans and backup plans in place. Control Super-Strength",
-    "traits": [
-      "Battle Ready",
-      "Big (Reach 2)",
-      "Combat Expert",
-      "Connections: Military (U.S. Force)",
-      "Interrogation",
-      "Leverage",
-      "Piloting",
-      "Presence",
-      "Situational Awareness",
-      "Weird"
-    ],
-    "tags": [
-      "Alternate (“Thunderbolt” Ross)",
-      "Extreme Appearance Air Red Hulk",
-      "Green Door",
-      "Immunity: Gamma Radiation",
-      "Public Identity",
-      "Radioactive"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Anger",
-          "Energy Absorption (limited to incorporeal forms of damage: energy, radiation, cosmic rays, etc.)",
-          "Healing Factor",
-          "Inspiration",
-          "Mighty 4",
-          "Sturdy 3"
-        ]
-      },
-      {
-        "set": "Elemental Control (Fire)",
-        "names": [
-          "Elemental Blast",
-          "Elemental Burst"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Double Tap"
-        ]
-      },
-      {
-        "set": "Super-Strength",
-        "names": [
-          "Banging Heads",
-          "Clobber",
-          "Crushing Grip",
-          "Ground-Shaking Stomp",
-          "Immovable",
-          "Jump 2",
-          "Quick Toss",
-          "Smash",
-          "Unrelenting Smash"
-        ]
-      },
-      {
-        "set": "Tactics",
-        "names": [
-          "Battle Plan",
-          "Focus Fire"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Avengers Expansion",
-    "id": "redhulk-avengers-expansion"
   },
   {
     "name": "REK-RAP",
@@ -23448,6 +23391,85 @@ export const MMRPG_CHARACTERS = [
     "id": "sasquatch-x-men-expansion"
   },
   {
+    "name": "SCARLET SPIDER",
+    "realName": "Kaine Parker",
+    "rank": 4,
+    "health": 120,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 6,
+      "agility": 7,
+      "resilience": 4,
+      "vigilance": 3,
+      "ego": 0,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 6,
+      "swim": 3,
+      "jump": 6,
+      "glide": 12,
+      "swingline": 18
+    },
+    "occupation": "Adventurer",
+    "origin": "Weird Science",
+    "teams": "New Warriors, Spider-Army, Spider- Society",
+    "base": "Mobile",
+    "features": "Massive scars across entire body, particularly the face",
+    "history": "When the Jackal (Miles Warren) set out to create a clone of Spider-Man (Peter Parker), it took him some time to iron out the kinks in his process. His first semi-successful attempt became Kaine Parker, an ultra-strong and disfigured version of Peter Parker. Driven half to madness by the pain of gradual cellular degeneration, Kaine became everything he despised. A combination of self-hatred and love for the original Peter Parker eventually led Kaine to try to eliminate Peter’s other clones, particularly the Scarlet Spider (Ben Reilly). Although Peter managed to talk Kaine out of killing Reilly, he could not convince the man to give up life as a criminal, and they clashed many times in the subsequent years. Their rivalry ended only a“ er Kaine inadvertently discovered that the cure for a Spider-Virus that temporarily gave most of New York City super-powers could also cure his degenerative condition. In full control of his faculties for the first time in his life, Kaine renounced his villainous ways and adopted the iconography of the man he once set out to kill, becoming the new Scarlet Spider. With Ben Reilly recently having been corrupted into the amnesiac Chasm, Kaine is the only Scarlet Spider right now, though he is actively working to restore Reilly to his former state.",
+    "personality": "Kaine used to be a much darker, angrier person, but as the years have worn on, he’s reverted to a personality similar to that of the original Peter Parker. In some ways, he now has a brighter outlook on life than Peter. Kaine has none of Peter’s life obligations, and he can be the Scarlet Spider 24/7 without having to worry about anyone needing him elsewhere.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Free Running",
+      "Loner",
+      "Sneaky",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Clone",
+      "Extreme Appearance",
+      "Heroic",
+      "Poor",
+      "Secret Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Combat Trickery",
+          "Evasion",
+          "Inspiration",
+          "Mighty 2",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Jump 1",
+          "Spider-Dodge",
+          "Spider-Sense",
+          "Spider-Strike",
+          "Wallcrawling",
+          "Webcasting",
+          "Webgliding",
+          "Webgrabbing",
+          "Webslinging",
+          "Webtrapping"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "scarlet-spider-spider-verse-expansion"
+  },
+  {
     "name": "SCARLET WITCH",
     "realName": "Wanda Maximoff",
     "rank": 5,
@@ -23532,85 +23554,6 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "SCARLETSPIDER",
-    "realName": "Kaine Parker",
-    "rank": 4,
-    "health": 120,
-    "focus": 90,
-    "karma": 4,
-    "abilities": {
-      "melee": 6,
-      "agility": 7,
-      "resilience": 4,
-      "vigilance": 3,
-      "ego": 0,
-      "logic": 2
-    },
-    "speed": {
-      "run": 6,
-      "climb": 6,
-      "swim": 3,
-      "jump": 6,
-      "glide": 12,
-      "swingline": 18
-    },
-    "occupation": "Adventurer",
-    "origin": "Weird Science",
-    "teams": "New Warriors, Spider-Army, Spider- Society",
-    "base": "Mobile",
-    "features": "Massive scars across entire body, particularly the face",
-    "history": "When the Jackal (Miles Warren) set out to create a clone of Spider-Man (Peter Parker), it took him some time to iron out the kinks in his process. His first semi-successful attempt became Kaine Parker, an ultra-strong and disfigured version of Peter Parker. Driven half to madness by the pain of gradual cellular degeneration, Kaine became everything he despised. A combination of self-hatred and love for the original Peter Parker eventually led Kaine to try to eliminate Peter’s other clones, particularly the Scarlet Spider (Ben Reilly). Although Peter managed to talk Kaine out of killing Reilly, he could not convince the man to give up life as a criminal, and they clashed many times in the subsequent years. Their rivalry ended only a“ er Kaine inadvertently discovered that the cure for a Spider-Virus that temporarily gave most of New York City super-powers could also cure his degenerative condition. In full control of his faculties for the first time in his life, Kaine renounced his villainous ways and adopted the iconography of the man he once set out to kill, becoming the new Scarlet Spider. With Ben Reilly recently having been corrupted into the amnesiac Chasm, Kaine is the only Scarlet Spider right now, though he is actively working to restore Reilly to his former state.",
-    "personality": "Kaine used to be a much darker, angrier person, but as the years have worn on, he’s reverted to a personality similar to that of the original Peter Parker. In some ways, he now has a brighter outlook on life than Peter. Kaine has none of Peter’s life obligations, and he can be the Scarlet Spider 24/7 without having to worry about anyone needing him elsewhere.",
-    "traits": [
-      "Combat Reflexes",
-      "Connections: Super Heroes",
-      "Fearless",
-      "Free Running",
-      "Loner",
-      "Sneaky",
-      "Weird"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Clone",
-      "Extreme Appearance",
-      "Heroic",
-      "Poor",
-      "Secret Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Brilliance 1",
-          "Combat Trickery",
-          "Evasion",
-          "Inspiration",
-          "Mighty 2",
-          "Sturdy 1"
-        ]
-      },
-      {
-        "set": "Spider-Powers",
-        "names": [
-          "Jump 1",
-          "Spider-Dodge",
-          "Spider-Sense",
-          "Spider-Strike",
-          "Wallcrawling",
-          "Webcasting",
-          "Webgliding",
-          "Webgrabbing",
-          "Webslinging",
-          "Webtrapping"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Spider-Verse Expansion",
-    "id": "scarletspider-spider-verse-expansion"
-  },
-  {
     "name": "SCORPIO",
     "realName": "Jacob “Jake” Fury",
     "rank": 3,
@@ -23660,7 +23603,6 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Accuracy 2",
           "Combat Trickery",
-          "Iconic Item",
           "Slow-Motion Dodge"
         ]
       },
@@ -23675,8 +23617,8 @@ export const MMRPG_CHARACTERS = [
           "Elemental Barrier (Energy)",
           "Elemental Blast (Energy)",
           "Elemental Burst (Energy)",
-          "Elemental Protection 1 (Energy) (10 points to shatter) Restrictions:",
-          "Carried Power Value: 4"
+          "Elemental Protection 1 (Energy) (10 points to shatter)",
+          "Carried"
         ]
       }
     ],
@@ -24469,7 +24411,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "SHANG-CHI",
+    "name": "SHANG-CHI (WITH THE TEN RINGS)",
     "realName": "Zheng Shang-Chi",
     "rank": 5,
     "health": 120,
@@ -24519,12 +24461,6 @@ export const MMRPG_CHARACTERS = [
     ],
     "powers": [
       {
-        "set": "Basic",
-        "names": [
-          "Iconic Item"
-        ]
-      },
-      {
         "set": "Martial Arts",
         "names": [
           "Attack Stance",
@@ -24548,8 +24484,7 @@ export const MMRPG_CHARACTERS = [
           "Flight 1",
           "Returns When Thrown",
           "Summon Portal",
-          "Weapon: Range: Reach/10 spaces, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
-          "Worn Power Value: 5"
+          "Worn"
         ]
       }
     ],
@@ -24558,7 +24493,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "The Ten Rings"
     ],
-    "id": "shang-chi-avengers-expansion"
+    "id": "shang-chi-with-the-ten-rings-avengers-expansion"
   },
   {
     "name": "SHATHRA",
@@ -25199,7 +25134,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Heightened Senses 2",
-          "Iconic Item",
           "Inspiration",
           "Mighty 2",
           "Sturdy 1",
@@ -25217,8 +25151,7 @@ export const MMRPG_CHARACTERS = [
           "Vicious Attack",
           "Whirling Frenzy Hofund Powers:",
           "Summon Portal",
-          "Weapon: Range: Reach, Melee Damage Multiplier bonus +2. Restrictions:",
-          "Carried Power Value: 1"
+          "Carried"
         ]
       }
     ],
@@ -25285,7 +25218,6 @@ export const MMRPG_CHARACTERS = [
           "Environmental Protection",
           "Healing Factor",
           "Heightened Senses 1",
-          "Iconic Weapon",
           "Mighty 1"
         ]
       },
@@ -25477,6 +25409,94 @@ export const MMRPG_CHARACTERS = [
     "id": "silk-spider-verse-expansion"
   },
   {
+    "name": "SILVER SAMURAI",
+    "realName": "Kenuichio “Ken” Harada",
+    "rank": 4,
+    "health": 150,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 1,
+      "resilience": 5,
+      "vigilance": 3,
+      "ego": 4,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal",
+    "origin": "Mutant, Special Training",
+    "teams": "Hydra, Yakuza",
+    "base": "Krakoa",
+    "features": "",
+    "history": "Kenuichio Harada has been mixed up in the world of organized crime since the day he was born. As the son of Yakuza boss Shingen Harada, Ken spent his youth learning the skills he would need to one day take his father’s place. He took to the training like a fish takes to water, immediately excelling both in finance and in hand-to-hand combat. His prowess in battle was enhanced by his mutant power, which allows him to create a tachyon energy field. A er his father was killed in a duel with Wolverine (Logan), Ken assumed his long-awaited place as head of the Harada clan. He immediately entered into a long-term rivalry with Wolverine, setting the entirety of Japan’s criminal underworld on a mission to capture and execute the mutant hero. A er being defeated by Wolverine several times, Ken gave up on killing the mutant hero and instead became his friend. On Krakoa, Ken ran a combat arena, one which Wolverine frequently attended.",
+    "personality": "Ken Harada styles himself as a feudal-era samurai, but his actions o en con flict with a true samurai’s code. He initially adopted the identity of the Silver Samurai to intimidate his enemies and underlings, and it worked so well that he just kept doing it. This persona is largely based on the samurai films and comics he consumed as a child. Harada’s ruthlessness is both his greatest strength and his greatest weakness. His determination to get the job done, no matter the cost, allows him to go toe-to-toe with combat experts like Wolverine. However, that philosophy has also led him into making alliances of convenience with evil organizations like Hydra. Arts Melee Weapons Stance (Sharp)",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Connections: Criminal (Yakuza)",
+      "Determination",
+      "Extraordinary Origin",
+      "Fearless"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "Signature Weapon: Katana (Sword)",
+      "Streetwise",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 1",
+          "Inspiration",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Burst",
+          "Elemental Infusion"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Chain Strikes",
+          "Defense Stance",
+          "Fast Strikes",
+          "Focused Strike",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Focused Fury",
+          "Hit & Run",
+          "Riposte",
+          "Vicious Attack"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "silver-samurai-x-men-expansion"
+  },
+  {
     "name": "SILVERMANE",
     "realName": "Silvio Manfredi",
     "rank": 3,
@@ -25605,8 +25625,7 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Accuracy 2",
-          "Combat Trickery",
-          "Iconic Weapon"
+          "Combat Trickery"
         ]
       },
       {
@@ -25626,6 +25645,74 @@ export const MMRPG_CHARACTERS = [
       "Sin-Eating Shotgun"
     ],
     "id": "sin-eater-spider-verse-expansion"
+  },
+  {
+    "name": "SIRYN",
+    "realName": "Theresa Rourke Cassidy",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 1,
+      "agility": 5,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 4,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 18
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "X-Factor, X-Force",
+    "base": "Krakoa",
+    "features": "",
+    "history": "Sean Cassidy (who later became the hero known as Banshee) was too wrapped up in the world of international espionage to notice when one of his old flames, Maeve, gave birth to a girl named Theresa. Maeve died shortly a er the birth, and Banshee’s cousin and rival, Black Tom (Thomas Cassidy), kidnapped the infant. Black Tom raised Theresa to be a criminal, and once she was old enough, he began having her accompany him on his super-villain escapades, as the Siryn. The guilt of a criminal life weighed heavily on her mind, though, and Black Tom couldn’t help but regret forcing her into it. A er a botched job nearly landed them both in prison, he wrote to Banshee, revealing the truth of Siryn’s birth. She reunited with her father, and under his tutelage, Siryn became a super hero. She joined X-Force shortly a er its foundation and quickly became one of its most important members. A er M-Day, Siryn moved to X-Factor Investigations and had a son with a duplicate of her long-term partner, Multiple Man. Unfortunately, Multiple Man accidentally absorbed the infant upon first holding him, and their relationship hasn’t been the same since. Shortly a er leaving X-Factor Investigations, Siryn was possessed by the dark god Morrigan. She wasn’t freed until a er the foundation of Krakoa, at which point she dropped out of active duty to focus on herself.",
+    "personality": "Even more of a devout Catholic than her father, Siryn believes it is her duty in life to protect as many people as possible. She takes her responsibilities as a super hero seriously and blames herself for any casualties incurred on the job. Control (Sound) Barrier Blast Burst Protection 2 points to shatter) Ricochet /",
+    "traits": [
+      "Connections: Super Heroes",
+      "Determination",
+      "Fearless",
+      "Investigation",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Discipline 1",
+          "Evasion",
+          "Flight 2"
+        ]
+      },
+      {
+        "set": "Elemental Control (Sound)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Protection 2 (20 points to shatter)",
+          "Elemental Ricochet"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "siryn-x-men-expansion"
   },
   {
     "name": "SKRULL",
@@ -25780,6 +25867,83 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "sleeper-spider-verse-expansion"
+  },
+  {
+    "name": "SNOWBIRD",
+    "realName": "Narya",
+    "rank": 4,
+    "health": 90,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 5,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 4,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 20
+    },
+    "occupation": "Adventurer",
+    "origin": "Mythic",
+    "teams": "Alpha Flight",
+    "base": "Mobile",
+    "features": "",
+    "history": "In order to create a champion worthy of her sacred stature, the Inuit goddess Nelvanna sired a daughter with a hapless archeologist named Richard. She named this child Narya. From the beginning, Nelvanna had hoped that Richard would be able to take care of their daughter, but the experience of connecting with the goddess had driven him insane. So Nelvanna instead le her daughter in the safe hands of the doctor who delivered her—Michael Twoyoungmen (A.K.A. Shaman). By the time she was born, Narya was already physically a year old, and she continued to grow rapidly throughout her youth—to the point where, within a few years, she was old enough to take care of herself. Right around then, both Narya and Shaman were recruited into the Canadian super-team Alpha Flight. She and her father have been with the organization ever since, working tirelessly to protect the people of Canada.",
+    "personality": "Snowbird’s sacred heritage can, at times, make her seem a bit stuck-up and perhaps even disconnected from regular human society. However, she is much more down to earth than the likes of Thor or Zeus. She grew up on Earth, and most other members of Alpha Flight, the people she considers her closest friends in the world, are Earthlings. Control Sixth Sense",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Enhanced Physique",
+      "Fearless",
+      "God Heritage",
+      "Presence"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Public Identity",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Disguise",
+          "Flight 1",
+          "Heightened Senses 1",
+          "Mighty 2",
+          "Shape-Shi",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Elemental Control (Ice)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Grab Sixth Sense",
+          "Postcognition 1"
+        ]
+      },
+      {
+        "set": "Weather Control",
+        "names": [
+          "Control Fog",
+          "Control Weather 2",
+          "Weather Chill"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "snowbird-x-men-expansion"
   },
   {
     "name": "SP//DR",
@@ -26023,7 +26187,7 @@ export const MMRPG_CHARACTERS = [
     "id": "speed-avengers-expansion"
   },
   {
-    "name": "SPEEDDEMON",
+    "name": "SPEED DEMON",
     "realName": "James Sanders",
     "rank": 3,
     "health": 60,
@@ -26092,7 +26256,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "speeddemon-spider-verse-expansion"
+    "id": "speed-demon-spider-verse-expansion"
   },
   {
     "name": "SPIDER-BOY",
@@ -26462,7 +26626,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "SPIDER-MAN",
+    "name": "SPIDER-MAN (EARTH-1610)",
     "realName": "Peter Parker",
     "rank": 3,
     "health": 60,
@@ -26530,10 +26694,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-man-spider-verse-expansion"
+    "id": "spider-man-earth-1610-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-MAN",
+    "name": "SPIDER-MAN (EARTH-6160)",
     "realName": "Peter Parker",
     "rank": 3,
     "health": 90,
@@ -26607,10 +26771,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-man-peter-parker-spider-verse-expansion"
+    "id": "spider-man-earth-6160-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-MAN",
+    "name": "SPIDER-MAN (MILES MORALES)",
     "realName": "Miles Morales",
     "rank": 4,
     "health": 90,
@@ -26690,7 +26854,7 @@ export const MMRPG_CHARACTERS = [
     "id": "spider-man-miles-morales-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-MAN",
+    "name": "SPIDER-MAN (MILES MORALES) (EARTH-1048)",
     "realName": "Miles Morales",
     "rank": 4,
     "health": 90,
@@ -26767,10 +26931,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-man-miles-morales-spider-verse-expansion"
+    "id": "spider-man-miles-morales-earth-1048-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-MAN",
+    "name": "SPIDER-MAN (PETER PARKER) (EARLY DAYS)",
     "realName": "Peter Parker",
     "rank": 2,
     "health": 30,
@@ -26833,10 +26997,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-man-peter-parker-spider-verse-expansion"
+    "id": "spider-man-peter-parker-early-days-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-MAN",
+    "name": "SPIDER-MAN (PETER PARKER) (EARTH-1048)",
     "realName": "Peter Parker",
     "rank": 4,
     "health": 90,
@@ -26912,7 +27076,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-man-peter-parker-spider-verse-expansion"
+    "id": "spider-man-peter-parker-earth-1048-spider-verse-expansion"
   },
   {
     "name": "SPIDER-MAN 2099",
@@ -26988,7 +27152,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "SPIDER-MAN2099",
+    "name": "SPIDER-MAN 2099",
     "realName": "Miguel O’Hara",
     "rank": 4,
     "health": 90,
@@ -27066,10 +27230,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-man2099-spider-verse-expansion"
+    "id": "spider-man-2099-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-MANINDIA",
+    "name": "SPIDER-MAN INDIA",
     "realName": "Pavitr Prabhakar",
     "rank": 3,
     "health": 60,
@@ -27137,10 +27301,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-manindia-spider-verse-expansion"
+    "id": "spider-man-india-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-MANNOIR",
+    "name": "SPIDER-MAN NOIR",
     "realName": "Peter Parker",
     "rank": 4,
     "health": 60,
@@ -27218,7 +27382,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-mannoir-spider-verse-expansion"
+    "id": "spider-man-noir-spider-verse-expansion"
   },
   {
     "name": "SPIDER-PUNK",
@@ -27378,6 +27542,80 @@ export const MMRPG_CHARACTERS = [
   },
   {
     "name": "SPIDER-WOMAN",
+    "realName": "Julia Eugenia Cornwall Carpenter",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 4,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 5,
+      "swim": 3,
+      "jump": 5
+    },
+    "occupation": "Adventurer",
+    "origin": "Weird Science",
+    "teams": "West Coast Avengers",
+    "base": "Los Angeles",
+    "features": "",
+    "history": "As a single mom and divorcée, Julia Carpenter spent her waking hours scrambling to make rent, so when an old college friend off ered her a bucketload of money to participate in a short scientific study, she readily agreed. A secretive government-backed research group known only as the Commission injected Carpenter with an experimental spider-serum, granting her a slew of spider-based super-powers. Government agents therea– er pressured her into joining the technically legal, but still villainous, team Freedom Force, but once Carpenter saw how bad the team was, she fled government custody and started working as a crimefighter for hire. As Spider-Woman, she established herself as one of the hardest-working heroes around, assisting dozens of super heroes in making the world a safer place, all while caring for her young daughter. During one of Spider-Woman’s first adventures, the small Colorado suburb where she grew up was torn from Earth and thrown into the Beyonder’s Battleworld for the first Secret Wars. The wars were far from pleasant, but they did give Carpenter a chance to get acquainted with Spider-Man (Peter Parker) and many of the Avengers she would work with later on. Later in life, Carpenter dropped the codename Spider-Woman and became the new Madame Web. This profile, however, represents Carpenter in the early days of her hero career, when she was still Spider-Woman. This was how she appeared during the first Secret Wars and throughout her subsequent adventures with the West Coast Avengers. Playing As Carpenter is serious, intelligent and careful, not the type to run blindly into battle, especially not when she knows her daughter, Rachel, is waiting for her at home. Though she can hold her own in melee, she prefers to psionically restrain her opponents from afar with her trademark psychic webs (via Telekinetic Grab) rather than risk an up-close confrontation.",
+    "personality": "",
+    "traits": [
+      "Abrasive",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Iron Will",
+      "Loner",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Dependent: Rachel Carpenter",
+      "Headquarters: West Coast Avengers",
+      "Heroic",
+      "Secret Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Inspiration",
+          "Mighty 1",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Jump 1",
+          "Wallcrawling"
+        ]
+      },
+      {
+        "set": "Telekinesis",
+        "names": [
+          "Telekinetic Attack",
+          "Telekinetic Barrier",
+          "Telekinetic Grab",
+          "Telekinetic Manipulation"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "spider-woman-secret-wars"
+  },
+  {
+    "name": "SPIDER-WOMAN (EARTH-1610)",
     "realName": "Jessica Drew",
     "rank": 3,
     "health": 90,
@@ -27449,10 +27687,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-woman-spider-verse-expansion"
+    "id": "spider-woman-earth-1610-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-WOMAN",
+    "name": "SPIDER-WOMAN (EARTH-332)",
     "realName": "Jessica “Jess” Drew",
     "rank": 4,
     "health": 90,
@@ -27529,10 +27767,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-woman-jessica-jess-drew-spider-verse-expansion"
+    "id": "spider-woman-earth-332-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-WOMAN",
+    "name": "SPIDER-WOMAN (JESSICA DREW)",
     "realName": "Jessica Miriam “Jess” Drew",
     "rank": 4,
     "health": 90,
@@ -27611,10 +27849,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-woman-jessica-miriam-jess-drew-spider-verse-expansion"
+    "id": "spider-woman-jessica-drew-spider-verse-expansion"
   },
   {
-    "name": "SPIDER-WOMAN",
+    "name": "SPIDER-WOMAN (MATTIE FRANKLIN)",
     "realName": "Martha “Mattie” Franklin",
     "rank": 3,
     "health": 60,
@@ -27684,81 +27922,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "spider-woman-martha-mattie-franklin-spider-verse-expansion"
-  },
-  {
-    "name": "SPIDER-WOMAN",
-    "realName": "Julia Eugenia Cornwall Carpenter",
-    "rank": 3,
-    "health": 60,
-    "focus": 90,
-    "karma": 3,
-    "abilities": {
-      "melee": 4,
-      "agility": 3,
-      "resilience": 2,
-      "vigilance": 3,
-      "ego": 2,
-      "logic": 4
-    },
-    "speed": {
-      "run": 5,
-      "climb": 5,
-      "swim": 3,
-      "jump": 5
-    },
-    "occupation": "Adventurer",
-    "origin": "Weird Science",
-    "teams": "West Coast Avengers",
-    "base": "Los Angeles",
-    "features": "",
-    "history": "As a single mom and divorcée, Julia Carpenter spent her waking hours scrambling to make rent, so when an old college friend off ered her a bucketload of money to participate in a short scientific study, she readily agreed. A secretive government-backed research group known only as the Commission injected Carpenter with an experimental spider-serum, granting her a slew of spider-based super-powers. Government agents therea– er pressured her into joining the technically legal, but still villainous, team Freedom Force, but once Carpenter saw how bad the team was, she fled government custody and started working as a crimefighter for hire. As Spider-Woman, she established herself as one of the hardest-working heroes around, assisting dozens of super heroes in making the world a safer place, all while caring for her young daughter. During one of Spider-Woman’s first adventures, the small Colorado suburb where she grew up was torn from Earth and thrown into the Beyonder’s Battleworld for the first Secret Wars. The wars were far from pleasant, but they did give Carpenter a chance to get acquainted with Spider-Man (Peter Parker) and many of the Avengers she would work with later on. Later in life, Carpenter dropped the codename Spider-Woman and became the new Madame Web. This profile, however, represents Carpenter in the early days of her hero career, when she was still Spider-Woman. This was how she appeared during the first Secret Wars and throughout her subsequent adventures with the West Coast Avengers. Playing As Carpenter is serious, intelligent and careful, not the type to run blindly into battle, especially not when she knows her daughter, Rachel, is waiting for her at home. Though she can hold her own in melee, she prefers to psionically restrain her opponents from afar with her trademark psychic webs (via Telekinetic Grab) rather than risk an up-close confrontation.",
-    "personality": "",
-    "traits": [
-      "Abrasive",
-      "Connections: Super Heroes",
-      "Fearless",
-      "Iron Will",
-      "Loner",
-      "Weird"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Dependent: Rachel Carpenter",
-      "Headquarters: West Coast Avengers",
-      "Heroic",
-      "Secret Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Brilliance 1",
-          "Inspiration",
-          "Mighty 1",
-          "Uncanny 1"
-        ]
-      },
-      {
-        "set": "Spider-Powers",
-        "names": [
-          "Jump 1",
-          "Wallcrawling"
-        ]
-      },
-      {
-        "set": "Telekinesis",
-        "names": [
-          "Telekinetic Attack",
-          "Telekinetic Barrier",
-          "Telekinetic Grab",
-          "Telekinetic Manipulation"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Secret Wars",
-    "id": "spider-woman-secret-wars"
+    "id": "spider-woman-mattie-franklin-spider-verse-expansion"
   },
   {
     "name": "SPIDERCIDE",
@@ -28208,7 +28372,7 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Item",
+          "Iconic Item: The Starbrand The Starbrand This world-destroying weapon manifests Origin: Weird Science Powers:",
           "Accuracy 4",
           "Clobber",
           "Discipline 3",
@@ -28764,7 +28928,6 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Item",
           "Inspiration",
           "Uncanny 2 Stormbreaker Though this hammer goes by another name, Origin:",
           "Mythic: Asgardian Powers:",
@@ -28784,10 +28947,9 @@ export const MMRPG_CHARACTERS = [
           "Summonable",
           "Thunder",
           "Uru",
-          "Weapon: Range: Reach/Unlimited, Melee/Agility Damage Multiplier: +1 Restrictions:",
           "Can only be used by the worthy",
           "Carried",
-          "Flashy Power Value: 22"
+          "Flashy"
         ]
       }
     ],
@@ -28873,6 +29035,86 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "sub-mariner",
     "genre": "core"
+  },
+  {
+    "name": "SUNFIRE",
+    "realName": "Shiro Yoshida",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 2,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 4,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 24
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "Alpha Flight, Avengers, X-Men",
+    "base": "Mobile",
+    "features": "",
+    "history": "Shiro Yoshida was raised by two di ﬀ erent men with two very di ﬀ erent ideologies. His father, Saburo, was a quiet but progressive man, while his uncle Tomo was a raging conservative nationalist. Gradually, Tomo’s loud and angry rhetoric infected Shiro, and as Shiro’s latent mutant powers began to manifest, Tomo convinced the boy he should use his fiery new abilities to attack the United States. Shiro was on the verge of burning down the U.S. Capitol when Tomo, in an act of rage, shot Saburo. Shiro immediately turned on his uncle, striking him down while rushing to his father’s side. As Saburo died, he made one last request of his son: fight for peace, not for war. Shiro vowed to ful fill his father’s dying wish. He spent the next several years traveling across Japan, making a name for himself as the country’s foremost defender. Although he occasionally le Japan to help superteams from other countries—like Alpha Flight and the X-Men—Shiro never strayed long from home. Not until the founding of Krakoa. With his loyalties torn between Japan and the new mutant nation, Shiro began to give up his nationalist roots in favor of a more humanist ideology, one that favors the wider success of all society.",
+    "personality": "As a young man, Shiro was both highly disciplined and a hothead. Like many fire-based heroes, he was prone to bouts of rage, but at the same time, he romanticized the stoic samurai of Japan’s past and worked to become more like them. Shiro still has some of that angry, wannabe-samurai persona in him, but years of actual combat have tempered his personality into that of a genuinely experienced warrior. Control Martial Arts",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Determination",
+      "Fearless",
+      "Iron Will",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 2",
+          "Flight 2"
+        ]
+      },
+      {
+        "set": "Elemental Control (Fire)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Form",
+          "Elemental Protection 2 (20 points to shatter)",
+          "Elemental Push",
+          "Elemental Reinforcement",
+          "Elemental Sphere",
+          "Supernova"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Banging Heads",
+          "Defense Stance",
+          "Fast Strikes"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "sunfire-x-men-expansion"
   },
   {
     "name": "SUNSPOT",
@@ -29106,7 +29348,7 @@ export const MMRPG_CHARACTERS = [
     "id": "supergiant-avengers-expansion"
   },
   {
-    "name": "SUPERIORSPIDER-MAN",
+    "name": "SUPERIOR SPIDER-MAN",
     "realName": "Otto Octavius",
     "rank": 4,
     "health": 90,
@@ -29184,7 +29426,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "superiorspider-man-spider-verse-expansion"
+    "id": "superior-spider-man-spider-verse-expansion"
   },
   {
     "name": "SWARM",
@@ -29316,8 +29558,7 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Combat Trickery",
-          "Iconic Item"
+          "Combat Trickery"
         ]
       },
       {
@@ -29329,12 +29570,10 @@ export const MMRPG_CHARACTERS = [
           "Hit & Run",
           "Riposte",
           "Vicious Attack",
-          "Whirling Frenzy Swordsman’s Sword Powers:",
           "Bolts of Balthakk",
           "Flames of the Faltine",
           "Mists of Morpheus",
-          "Weapon: Range: Reach, Melee Damage Multiplier bonus: +2. Restrictions:",
-          "Carried Power Value: 3"
+          "Carried"
         ]
       }
     ],
@@ -29346,7 +29585,7 @@ export const MMRPG_CHARACTERS = [
     "id": "swordsman-avengers-expansion"
   },
   {
-    "name": "SYMBIOTE",
+    "name": "SYMBIOTE (UNBONDED)",
     "realName": "Varies",
     "rank": 1,
     "health": 30,
@@ -29399,10 +29638,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "symbiote-spider-verse-expansion"
+    "id": "symbiote-unbonded-spider-verse-expansion"
   },
   {
-    "name": "SYMBIOTEDRAGON",
+    "name": "SYMBIOTE DRAGON",
     "realName": "Varies",
     "rank": 3,
     "health": 120,
@@ -29478,10 +29717,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "symbiotedragon-spider-verse-expansion"
+    "id": "symbiote-dragon-spider-verse-expansion"
   },
   {
-    "name": "SYMBIOTESPIDER-MAN",
+    "name": "SYMBIOTE SPIDER-MAN",
     "realName": "Peter Parker",
     "rank": 5,
     "health": 150,
@@ -29560,7 +29799,167 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "symbiotespider-man-spider-verse-expansion"
+    "id": "symbiote-spider-man-spider-verse-expansion"
+  },
+  {
+    "name": "SYNCH",
+    "realName": "Everett Thomas",
+    "rank": 4,
+    "health": 90,
+    "focus": 210,
+    "karma": 4,
+    "abilities": {
+      "melee": 5,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 6,
+      "ego": 4,
+      "logic": 3
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "Generation X, X-Men",
+    "base": "Krakoa",
+    "features": "",
+    "history": "Teenager Everett Thomas discovered his mutant powers during a chance encounter with the X-Men and an evil alien race known as the Phalanx. With concentration, he found that he could synchronize with members of the X-Men, gaining their powers for as long as they remained in his vicinity. He used these new abilities to help them defeat the Phalanx, and the X-Men, in turn, invited him to join their at-the-time-latest junior team: Generation X. Thomas agreed, but his time with the team didn’t last long. He was killed on the field of battle, and Generation X disbanded shortly therea er. Years later, the mutant government on Krakoa resurrected Thomas. He tried to pick up his life where he le o ﬀ , but the temporal disconnect between him and his former teammates le him feeling lonely. This problem only compounded when he and a few other X-Men were caught inside a bubble of highly accelerated time. These days, Synch is only really close with a single person: his romantic partner Talon, an older version of Wolverine (Laura Kinney) with whom he spent the accelerated-time incident. They have a romantic history stretching back untold centuries, most of which is known only to them.",
+    "personality": "Synch may have the body of a young man, but in his mind, he is hundreds of years old. He is, by any metric, an unimaginably experienced combat veteran. He’s seen things that would make most veteran X-Men quiver in their boots. Despite it all, Synch is neither bitter nor angry. He has the mental tranquility of an old man who has made peace with his mortality, such as it is. Arts Power Control",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Iron Will"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Combat Trickery",
+          "Discipline 1",
+          "Slow-Motion Dodge",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Banging Heads",
+          "Defense Stance",
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Power Control",
+        "names": [
+          "Clone Moves",
+          "Clone Powers",
+          "Copy Ability",
+          "Copy Power"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "synch-x-men-expansion"
+  },
+  {
+    "name": "TALISMAN",
+    "realName": "Elizabeth Twoyoungmen",
+    "rank": 4,
+    "health": 60,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 1,
+      "agility": 5,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 7,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 24
+    },
+    "occupation": "Adventurer",
+    "origin": "Magic: Sorcery",
+    "teams": "Alpha Flight, Beta Flight",
+    "base": "Mobile",
+    "features": "",
+    "history": "Following the death of his wife, Michael Twoyoungmen abandoned his daughter Elizabeth and retreated to the woods of northern Canada to learn the mystic secrets of his ancestors. Elizabeth spent the rest of her childhood with a foster family, hearing only whispers of her father’s exploits as the hero Shaman. Her life without Michael was a good one. She never intended to see her father again until an evil spirit began to menace the archaeological dig where she worked. To rid herself of the spirit, Elizabeth was forced to track down her father and request his assistance. Michael tried—and failed—to dispel the dark spirit. In the process, he discovered that his daughter was the reincarnation of a legendary mystical champion known as Talisman. With Micheal’s help, Elizabeth uncovered the Coronet of Enchantment — an ancient artifact which allowed her to unlock her ancestral powers. Together, she and Michael defeated the dark spirit. Michael brie fly convinced his daughter to join him in the super-hero group Alpha Flight, but old resentments kept the arrangement from becoming permanent. Nowadays, she uses her powers only in times of crisis, acting as backup for the main team.",
+    "personality": "If she ever set her mind to it, Talisman might be able to give Stephen Strange a run for his money. She never would, though, as it would take too much time and e ﬀ ort, and she prefers to avoid violence. There may remain some tension between Talisman and her father, but the rest of Alpha Flight adores her. She’s intelligent, chipper and an all-around loyal friend.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "First Aid",
+      "Magic Item Reliance",
+      "Presence",
+      "Quick Learner"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Public Identity",
+      "Sorcerous",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 3",
+          "Flight 1"
+        ]
+      },
+      {
+        "set": "Magic",
+        "names": [
+          "Astral Form",
+          "Sense Supernatural"
+        ]
+      },
+      {
+        "set": "Magic (Sorcery Set)",
+        "names": [
+          "Bolts of Balthakk",
+          "Dispel Spell",
+          "Icy Tendrils of Ikthalon",
+          "Images of Ikonn",
+          "Shield of the Seraphim (20 points to shatter)",
+          "Summon Portal",
+          "Winds of Watoomb"
+        ]
+      },
+      {
+        "set": "Weather Control",
+        "names": [
+          "Control Weather 2",
+          "Thunder"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "talisman-x-men-expansion"
   },
   {
     "name": "TASKMASTER",
@@ -29637,7 +30036,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "TEENIMMORTUS",
+    "name": "TEEN IMMORTUS",
     "realName": "Nathaniel Richards",
     "rank": 3,
     "health": 60,
@@ -29704,10 +30103,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "teenimmortus-avengers-expansion"
+    "id": "teen-immortus-avengers-expansion"
   },
   {
-    "name": "TERESAPARKER",
+    "name": "TERESA PARKER",
     "realName": "Teresa Elizabeth Parker",
     "rank": 3,
     "health": 60,
@@ -29784,7 +30183,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "teresaparker-spider-verse-expansion"
+    "id": "teresa-parker-spider-verse-expansion"
   },
   {
     "name": "TERMINUS",
@@ -29918,7 +30317,6 @@ export const MMRPG_CHARACTERS = [
           "Discipline 1",
           "Environmental Protection",
           "Flight 2",
-          "Iconic Item",
           "Mighty 4",
           "Power Cosmic",
           "Sturdy 3"
@@ -29951,8 +30349,7 @@ export const MMRPG_CHARACTERS = [
           "Vicious Attack",
           "Whirling Frenzy iconic item Cosmic Axe Cra(cid:28) ed by Galactus, this axe ments Terrax’s existing powers. Origin: Weird Science Powers:",
           "Eff ect Options (Earth/ Energy/Sharp)",
-          "Weapon: Range: Reach/ Unlimited; Melee/Agility Damage Multiplier: +2 Restrictions:",
-          "Carried Power Value: 1"
+          "Carried"
         ]
       }
     ],
@@ -30205,85 +30602,7 @@ export const MMRPG_CHARACTERS = [
     ]
   },
   {
-    "name": "THE WINTER SOLDIER",
-    "realName": "James Buchanan “Bucky” Barnes",
-    "rank": 3,
-    "health": 90,
-    "focus": 60,
-    "karma": 3,
-    "abilities": {
-      "melee": 4,
-      "agility": 3,
-      "resilience": 3,
-      "vigilance": 2,
-      "ego": 1,
-      "logic": 2
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "swim": 3,
-      "jump": 3
-    },
-    "occupation": "Spy",
-    "origin": "High Tech: Cybernetics, Special Training, Weird Science",
-    "teams": "Avengers, KGB, S.H.I.E.L.D., Thunderbolts",
-    "base": "Mobile",
-    "features": "Bionic left arm",
-    "history": "Toward the end of World War II, the aerial explosion that sent Captain America (Steve Rogers) into the north Atlantic where he froze into a block of ice seemingly killed his sidekick, the young Bucky (Bucky Barnes). He was captured by Soviet scientists, who replaced a missing arm with a bionic prosthetic and brainwashed him to become a Russian assassin codenamed the Winter Soldier, after which he was kept in suspended animation for decades, only released to kill and then returned to sleep again. During a brief period when Rogers was dead, Bucky took up the shield and replaced him as Captain America, though after Rogers' resurrection, Bucky returned both the name and the shield to his old mentor. More recently, Bucky took on a new codename—the Revolution—and founded a new incarnation of the Thunderbolts with the goal of leading a worldwide revolution against villainous organizations like Hydra.",
-    "personality": "Bucky is a deadly serious and world-weary vet. The remorse he feels for his time as an assassin weighs on him every day. Arts Ranged Weapons",
-    "traits": [
-      "Combat Expert",
-      "Connections: Espionage",
-      "Determination",
-      "Extraordinary Origin (2)",
-      "Leverage",
-      "Sneaky",
-      "Tech Reliance",
-      "Weird"
-    ],
-    "tags": [
-      "Black Market Access",
-      "Extreme Appearance",
-      "Heroic",
-      "Linguist: Chinese (Mandarin), English, German, Japanese, Russian",
-      "Public Identity"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Inspiration",
-          "Mighty 1"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Always Ready",
-          "Attack Stance",
-          "Defense Stance",
-          "Do This All Day",
-          "Fast Strikes",
-          "Leg Sweep"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Double Tap",
-          "Snap Shooting",
-          "Stopping Power",
-          "Suppressive Fire"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Quickstart",
-    "id": "the-winter-soldier-quickstart"
-  },
-  {
-    "name": "THEMAKER",
+    "name": "THE MAKER",
     "realName": "Reed Richards",
     "rank": 5,
     "health": 120,
@@ -30367,10 +30686,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Secret Wars",
-    "id": "themaker-secret-wars"
+    "id": "the-maker-secret-wars"
   },
   {
-    "name": "THEROSE",
+    "name": "THE ROSE",
     "realName": "Richard Fisk",
     "rank": 2,
     "health": 30,
@@ -30438,7 +30757,166 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "therose-spider-verse-expansion"
+    "id": "the-rose-spider-verse-expansion"
+  },
+  {
+    "name": "THE STEPFORD CUCKOOS",
+    "realName": "",
+    "rank": 3,
+    "health": 60,
+    "focus": 120,
+    "karma": 3,
+    "abilities": {
+      "melee": 1,
+      "agility": 1,
+      "resilience": 2,
+      "vigilance": 4,
+      "ego": 2,
+      "logic": 5
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant, Weird Science",
+    "teams": "X-Force, X-Men",
+    "base": "Krakoa",
+    "features": "",
+    "history": "As part of the secretive Weapon Plus project, mutant hater and scientist John Sublime stole a sizable portion of Emma Frost’s eggs. He used them to create the five Stepford Cuckoos— Sophie, Phoebe, Irma, Celeste and Esme—who are essentially clones of Frost. They each contain minor genetic variations, but they all look like younger versions of Frost, talk like her and have powers similar to hers. Hoping to use his creations as moles, Sublime inserted the Cuckoos into Professor Charles Xavier’s mutant academy. This was a big mistake. With the help of the X-Men, Emma Frost quickly freed the Cuckoos from Sublime’s control and made them into regular hero trainees. Though they are not usually intimidating individually, as a collective, the Cuckoos number among the most powerful young mutants on the planet.",
+    "personality": "Much like Emma Frost, the Cuckoos can be aloof. They have trouble forming relationships with anyone outside of their inbuilt psychic network. A few of the Cuckoos have, for brief periods, gone o ﬀ on their own, but they always return to the fold. The relationship they have with each other is the most important one in their lives. Although the Cuckoos o en appear to act almost identically, they do have subtle di ﬀ erences in their personalities. Sophie is their stalwart heroic leader, while Phoebe is more of a hothead. Irma and Celeste are the shyest members of the crew, and Esme is a bit of a schemer. Alternate Form Just like Emma Frost, the Stepford Cuckoos can transform into an alternate crystalline form. This form grants them the Sturdy 1 power, but it prevents them from using the Brilliance 1 power and all their Telepathy and Power Control powers. They can use their Uncanny 1 power in either form. Numbers before a slash are for the Cuckoos’ regular human forms. Numbers a er a slash are for their crystalline forms. Note: The Stepford Cuckoos have / 1 Upload identical stat blocks and powers. 3 Individually, they are not nearly as / Blip powerful as Frost, but by working Reading together, they can become a force to C be reckoned with. O en in combat, H one of the Cuckoos goes on the attack A Blast while the others hang back and work R Link together to bump up their attacking A Network sister’s powers as much as possible. C T E R S",
+    "traits": [
+      "Beguiling",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Presence",
+      "Quick Learner",
+      "Weird"
+    ],
+    "tags": [
+      "Alternate Form (crystalline form)",
+      "Black Market Access",
+      "Extreme Appearance (in alternate form)",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Mentor: Emma Frost",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Sturdy 1",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Power Control",
+        "names": [
+          "Bump Power"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Astral Form all their Telepathy and Power Control powers. They can use their Uncanny 1 power in either form. Numbers before a slash are for the Cuckoos’ regular human forms. Numbers a er a slash are for their crystalline forms.",
+          "Command Note: The Stepford Cuckoos have",
+          "Information Upload identical stat blocks and powers. Individually, they are not nearly",
+          "Memory Blip powerful as Frost, but by working",
+          "Mind Reading together, they can become a force",
+          "Mirage be reckoned with. O en in combat, one of the Cuckoos goes on the attack",
+          "Telepathic Blast while the others hang back and work together to bump up their attacking",
+          "Telepathic Link sister’s powers as much as possible.",
+          "Telepathic Network"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "the-stepford-cuckoos-x-men-expansion"
+  },
+  {
+    "name": "THE WINTER SOLDIER",
+    "realName": "James Buchanan “Bucky” Barnes",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 4,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Spy",
+    "origin": "High Tech: Cybernetics, Special Training, Weird Science",
+    "teams": "Avengers, KGB, S.H.I.E.L.D., Thunderbolts",
+    "base": "Mobile",
+    "features": "Bionic left arm",
+    "history": "Toward the end of World War II, the aerial explosion that sent Captain America (Steve Rogers) into the north Atlantic where he froze into a block of ice seemingly killed his sidekick, the young Bucky (Bucky Barnes). He was captured by Soviet scientists, who replaced a missing arm with a bionic prosthetic and brainwashed him to become a Russian assassin codenamed the Winter Soldier, after which he was kept in suspended animation for decades, only released to kill and then returned to sleep again. During a brief period when Rogers was dead, Bucky took up the shield and replaced him as Captain America, though after Rogers' resurrection, Bucky returned both the name and the shield to his old mentor. More recently, Bucky took on a new codename—the Revolution—and founded a new incarnation of the Thunderbolts with the goal of leading a worldwide revolution against villainous organizations like Hydra.",
+    "personality": "Bucky is a deadly serious and world-weary vet. The remorse he feels for his time as an assassin weighs on him every day. Arts Ranged Weapons",
+    "traits": [
+      "Combat Expert",
+      "Connections: Espionage",
+      "Determination",
+      "Extraordinary Origin (2)",
+      "Leverage",
+      "Sneaky",
+      "Tech Reliance",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Heroic",
+      "Linguist: Chinese (Mandarin), English, German, Japanese, Russian",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Always Ready",
+          "Attack Stance",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Stopping Power",
+          "Suppressive Fire"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Quickstart",
+    "id": "the-winter-soldier-quickstart"
   },
   {
     "name": "THING",
@@ -30670,7 +31148,7 @@ export const MMRPG_CHARACTERS = [
     ]
   },
   {
-    "name": "THOR",
+    "name": "THOR (EARTH-1610)",
     "realName": "Thor Odinson",
     "rank": 5,
     "health": 180,
@@ -30725,7 +31203,6 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Discipline 1",
           "Flight 2",
-          "Iconic Item",
           "Mighty 4",
           "Sturdy 2 Mjolnir Powers:",
           "Control Weather 4",
@@ -30738,10 +31215,8 @@ export const MMRPG_CHARACTERS = [
           "Thunder",
           "Weather Chill",
           "Weather Warm (Earth-1610)",
-          "Weapon: Range: Reach/5, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
-          "Requires: Enhanced Physique trait and Mighty 2 power",
           "Carried",
-          "Flashy Power Value: 11"
+          "Flashy"
         ]
       }
     ],
@@ -30750,10 +31225,10 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Mjolnir"
     ],
-    "id": "thor-avengers-expansion"
+    "id": "thor-earth-1610-avengers-expansion"
   },
   {
-    "name": "THOROFHIGHERAVALON",
+    "name": "THOR OF HIGHER AVALON",
     "realName": "Thor Odinson",
     "rank": 5,
     "health": 180,
@@ -30807,7 +31282,7 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Brawling",
-          "Iconic Item",
+          "Iconic Item: Mjolnir Mjolnir “Whosoever holds this hammer, if they Origin: Mythic: Asgardian Powers:",
           "Asgardian Transformation",
           "Control Fog",
           "Control Weather 4",
@@ -30833,10 +31308,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Secret Wars",
-    "id": "thorofhigheravalon-secret-wars"
+    "id": "thor-of-higher-avalon-secret-wars"
   },
   {
-    "name": "THUNDERSTRIKE",
+    "name": "THUNDERSTRIKE (EARTH-982)",
     "realName": "Kevin “Kev” Masterson",
     "rank": 3,
     "health": 90,
@@ -30913,7 +31388,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "thunderstrike-avengers-expansion"
+    "id": "thunderstrike-earth-982-avengers-expansion"
   },
   {
     "name": "TINKERER",
@@ -31049,6 +31524,95 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "TOAD",
+    "realName": "Mortimer “Mort” Toynbee",
+    "rank": 1,
+    "health": 60,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 5,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 6,
+      "swim": 9,
+      "jump": 6
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "Brotherhood of Evil Mutants, X-Men",
+    "base": "Mobile",
+    "features": "Unnaturally long tongue",
+    "history": "Mort Toynbee spent his childhood in an orphanage where the other kids bullied him relentlessly. Adulthood served him no better, and the punks in his neighborhood took every chance they could to torture him, mocking his strange mannerisms and subjecting him to constant beatings. Then one day, Magneto appeared and o ﬀ ered Toynbee a founding position in the Brotherhood of Evil Mutants, which he accepted without hesitation, taking on the codename Toad. Unfortunately, the Brotherhood wasn’t everything he dreamed it would be. Magneto treated him as little more than a servant, and his other teammates, while not cruel, still considered him their inferior. Eventually, Toad le the group to go into business as a solo operative. He spent the next several years flipping back and forth between super-villain and super-hero work, gravitating toward jobs that served his burgeoning ego. As time went on, Toad gradually became more con fident and sociable. Slowly but surely, he gained the respect of both his former Brotherhood allies and most of the X-Men. Recently, as part of a scheme hatched by Magneto, Toad took the fall for a murder he didn’t commit, and the Krakoan authorities considered him a fugitive from justice.",
+    "personality": "It’s a cruel word, but the best word to describe Toad in his early days is sniveling. Filled with self-hatred, he cowered in the faces of both his allies and his enemies. Although he’s not entirely free from insecurity, the modern Toad has accepted who he is. Most mutants consider him a decent man who can be counted on in a pinch. Arts Spider-Powers",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Villains",
+      "Fearless",
+      "Situational Awareness",
+      "Sneaky"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Additional Limbs (Tongue)",
+          "Heightened Senses 1"
+        ]
+      },
+      {
+        "set": "Elemental Control (Air/Chemical)",
+        "names": [
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Chain Strikes",
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Plasticity",
+        "names": [
+          "Extended Reach 1 (Tongue Only)",
+          "Slip Free"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Jump 1",
+          "Wallcrawling"
+        ]
+      },
+      {
+        "set": "Super-Speed",
+        "names": [
+          "Speed Swim"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "toad-x-men-expansion"
+  },
+  {
     "name": "TOMBSTONE",
     "realName": "Alonzo Thompson “Lonnie” Lincoln",
     "rank": 3,
@@ -31130,7 +31694,7 @@ export const MMRPG_CHARACTERS = [
     "id": "tombstone-spider-verse-expansion"
   },
   {
-    "name": "TONYSTARK",
+    "name": "TONY STARK",
     "realName": "Anthony “Tony” Stark",
     "rank": 2,
     "health": 30,
@@ -31191,7 +31755,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "tonystark-avengers-expansion"
+    "id": "tony-stark-avengers-expansion"
   },
   {
     "name": "TRAPSTER",
@@ -31388,7 +31952,6 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Item",
           "Inspiration",
           "Mighty 1"
         ]
@@ -31414,14 +31977,11 @@ export const MMRPG_CHARACTERS = [
         "set": "Super-Strength",
         "names": [
           "Clobber",
-          "Crushing Grip U.S.Agent’s Shield Powers:",
           "Reduced Focus",
           "Shield 1",
           "Stackable",
-          "Weapon: Range: Reach/10, Melee/Agility Damage Multiplier bonus: +1. Restrictions:",
           "Carried",
-          "Flashy",
-          "Requires: Shield 1 power Power Value: 1"
+          "Flashy"
         ]
       }
     ],
@@ -31662,7 +32222,7 @@ export const MMRPG_CHARACTERS = [
     "id": "ultron-5-avengers-expansion"
   },
   {
-    "name": "VALERIARICHARDS",
+    "name": "VALERIA RICHARDS",
     "realName": "Valeria Richards",
     "rank": 2,
     "health": 30,
@@ -31720,7 +32280,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Secret Wars",
-    "id": "valeriarichards-secret-wars"
+    "id": "valeria-richards-secret-wars"
   },
   {
     "name": "VAMPIRE",
@@ -31954,7 +32514,7 @@ export const MMRPG_CHARACTERS = [
     "id": "venom-spider-verse-expansion"
   },
   {
-    "name": "VENOM",
+    "name": "VENOM (EARTH-1048)",
     "realName": "Harold “Harry” Osborn",
     "rank": 4,
     "health": 120,
@@ -32035,10 +32595,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "venom-harold-harry-osborn-spider-verse-expansion"
+    "id": "venom-earth-1048-spider-verse-expansion"
   },
   {
-    "name": "VENTURE2099",
+    "name": "VENTURE 2099",
     "realName": "Unknown",
     "rank": 3,
     "health": 90,
@@ -32110,7 +32670,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "venture2099-spider-verse-expansion"
+    "id": "venture-2099-spider-verse-expansion"
   },
   {
     "name": "VERMIN",
@@ -32808,6 +33368,167 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "WARLOCK",
+    "realName": "Warlock",
+    "rank": 4,
+    "health": 90,
+    "focus": 60,
+    "karma": 4,
+    "abilities": {
+      "melee": 3,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 4,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 4,
+      "jump": 3,
+      "glide": 10
+    },
+    "occupation": "Outsider",
+    "origin": "Alien: Technarch, Mutant",
+    "teams": "Excalibur, New Mutants, X-Men",
+    "base": "Krakoa",
+    "features": "Gooey, Techno-Organic body",
+    "history": "As a child of the alien species known as the Technarchy, Warlock was expected to do one of two things when he came of age. He was to either kill Magus, his father, or else die by his father’s hand. Refusing to do either, Warlock fled to Earth. Injured and alone, he wandered onto the premises of Xavier’s School for Gi ed Youngsters, then the home of the New Mutants. In a haze of confusion and fear, Warlock attacked the young heroes. Thankfully, with the help of their linguistically gi ed associate Doug Ramsey (Cypher), the New Mutants eventually made peace with Warlock and convinced him to join their team. In the years since, Warlock has become a trusted and world-renowned hero. Although his adventures have, at times, taken him across the galaxy, he’s never strayed far from the company of the New Mutants, who love him with all their hearts. Warlock remains particularly close with Doug Ramsey and has spent some stretches of his life fully or partially merged with him. In their fused state, Ramsey and Warlock are referred to collectively as Douglock.",
+    "personality": "Warlock speaks in a strange and robotic dialect unique to members of the Technarchy. He does not use the pronoun “I,” instead referring to himself only as “Warlock” or “Self.” When speaking of others, he o en compounds names with other terms. For instance, he might refer to his friend Doug Ramsey as “sel ﬀ riend” or “Doug-friend.” Despite his alien mannerisms, Warlock is as kind and gentle a soul as exists on Earth. On Krakoa, he spent much of his time entertaining the children there with wacky acts of shape-shi ing.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Outsiders",
+      "Enduring Constitution",
+      "Extraordinary Origin",
+      "Fearless",
+      "Fresh Eyes",
+      "Gearhead",
+      "Infector (Transmode virus)",
+      "Stranger"
+    ],
+    "tags": [
+      "A.I.",
+      "Alien Heritage",
+      "Extreme Appearance",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Powerful",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Disguise",
+          "Environmental Protection",
+          "Shape-Shi"
+        ]
+      },
+      {
+        "set": "Magic",
+        "names": [
+          "Brain Drain",
+          "Leech Life"
+        ]
+      },
+      {
+        "set": "Plasticity",
+        "names": [
+          "Body Sheet",
+          "Body Sphere",
+          "Bounce Back",
+          "Coiling Crush",
+          "Extended Reach 2",
+          "Flexible Bones 2",
+          "Flexible Fingers",
+          "Reverse Punch",
+          "Rubberneck",
+          "Slip Free",
+          "Stilt Steps"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "warlock-x-men-expansion"
+  },
+  {
+    "name": "WARPATH",
+    "realName": "James “Jimmy” Proudstar",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 5,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 15
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "New Mutants, X-Force, X-Men",
+    "base": "Arizona",
+    "features": "",
+    "history": "Jimmy Proudstar grew up on an Apache reservation in southern Arizona alongside his brother, John. The boys were born with similar mutant super-powers lurking in their DNA, but John, as the older of the two, had his manifest first. Having always dreamed of being a hero, John le home and joined the X-Men under the codename Thunderbird, only to be tragically killed on one of his first missions. Blaming the X-Men for his brother’s death, Jimmy took on the codename Warpath and attempted to annihilate the mutant hero team. Jimmy eventually made peace with the X-Men and even agreed to join their organization, but his anger over his brother’s death never fully went away. Even as years passed and Jimmy gradually became a veteran member of many important super-teams, his resentment lingered. Only with the foundation of Krakoa and John’s subsequent resurrection did Jimmy finally begin to forgive and forget. Both of the Proudstar brothers remain active heroes, but lately, John has been spending most of his time taking care of their ailing grandmother in Arizona. Jimmy, on the other hand, splits his time between helping his grandmother and acting as a mentor to the New Mutants.",
+    "personality": "As opposed to his more levelheaded brother, Warpath has a no-nonsense attitude and a penchant for bouts of righteous rage. Age has somewhat tempered his harder edges, but his sheer determination for obtaining justice, no matter the cost, continues to make him a key component of more militant mutant groups. Few mutants can claim as much experience in battle as Warpath. Weapons Super-Strength",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Determination",
+      "Fearless",
+      "Iron Will"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Flight 2",
+          "Heightened Senses 1",
+          "Mighty 2",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Fast Attacks",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Smash"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "warpath-x-men-expansion"
+  },
+  {
     "name": "WASP",
     "realName": "Janet Van Dyne",
     "rank": 4,
@@ -32973,7 +33694,7 @@ export const MMRPG_CHARACTERS = [
     "id": "wasp-avengers-expansion"
   },
   {
-    "name": "WEAPONXWOLVERINE",
+    "name": "WEAPON X WOLVERINE",
     "realName": "James “Logan” Howlett",
     "rank": 4,
     "health": 150,
@@ -33028,7 +33749,6 @@ export const MMRPG_CHARACTERS = [
           "Combat Trickery",
           "Healing Factor",
           "Heightened Senses 1",
-          "Iconic Item",
           "Reinforced Skeleton"
         ]
       },
@@ -33045,8 +33765,7 @@ export const MMRPG_CHARACTERS = [
           "Vicious Attack",
           "Whirling Frenzy Adamantium Claws A set of retractable claws embedded the user’s limbs, fashioned from razor- sharp adamantium. Origin: High Tech: Cybernetics Powers:",
           "Adamantium: Ignores level of Health Damage Reduction.",
-          "Weapon: Range: Reach; Melee Damage Multiplier: Restrictions:",
-          "Healing Factor–powered characters only Power Value: 1"
+          "Healing Factor–powered characters only"
         ]
       }
     ],
@@ -33055,7 +33774,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Adamantium Claws"
     ],
-    "id": "weaponxwolverine-secret-wars"
+    "id": "weapon-x-wolverine-secret-wars"
   },
   {
     "name": "WHIPLASH",
@@ -33118,17 +33837,13 @@ export const MMRPG_CHARACTERS = [
           "Hit & Run",
           "Riposte",
           "Vicious Attack",
-          "Whirling Frenzy Whiplash’s Armor Powers:",
           "Flight 1",
-          "Iconic Item",
           "Mighty 1",
           "Sturdy 2",
-          "Summonable Restrictions:",
+          "Summonable",
           "Menacing",
-          "Worn Power Value: 4 Whiplash’s Energy Whips Powers:",
-          "Eff ect Options: These energy whips can count either Energy attacks or Sharp attacks.",
-          "Weapon: Range: Reach+1, Melee Damage Multiplier bonus: +1. Restrictions:",
-          "Worn Power Value: 1"
+          "Worn",
+          "Eff ect Options: These energy whips can count either Energy attacks or Sharp attacks."
         ]
       }
     ],
@@ -33221,6 +33936,78 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "whirlwind-avengers-expansion"
+  },
+  {
+    "name": "WHITE RABBIT",
+    "realName": "Lorina Dodson",
+    "rank": 2,
+    "health": 60,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal",
+    "origin": "High Tech",
+    "teams": "The Menagerie, the Syndicate, Tomb- stone’s gang",
+    "base": "New York City",
+    "features": "",
+    "history": "Lorina Dodson was born into money and grew up wanting for nothing. Finding her life to be a horrible bore, she took refuge in the family library and became particularly fond of Alice in Wonderland. In her early twenties, her parents married her off to a rich older man, but aŠ er finding married life to be just as dull, she murdered her husband and used his money to finance a new life of crime, thrills and intrigue. As the gadget-laden White Rabbit, Dodson attempted to rob a fast-food restaurant, and in the process, she nearly killed local defender FrogMan. Spider-Man (Peter Parker) arrived at the last minute to save Frog-Man’s life, and together, they took the White Rabbit down. In return, Dodson developed a lifelong grudge against both Spider-Man and Frog-Man. In the subsequent years, she and her gang of Alice in Wonderland-styled goons made dozens of vain attempts to defeat the wall-crawler and his amphibian friend. Dodson dislikes being subordinate to others, but aŠ er so many defeats, she has learned to occasionally swallow her pride and work with other villains outside of her own gang. These days, she spends most of her time helping the all-female Syndicate led by the Beetle (Janice Lincoln) establish itself as a powerhouse in New York’s underworld. e) Personality Though oŠ en treated as a laughingstock by New Yorkers and super villains alike, White Rabbit should not be taken lightly. Her villainy is pure and unbridled. She has no need for money. She robs and maims simply for the love of the game. Though not typically prone to killing, she would break her best friend’s legs in a heartbeat if she thought she could get a thrill out of it. Arts Ranged Weapons",
+    "personality": "",
+    "traits": [
+      "Connections: Criminal",
+      "Dealmaker",
+      "Presence",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Backup (the Menagerie)",
+      "Black Market Access",
+      "Convict",
+      "Public Identity",
+      "Rich",
+      "Signature Weapon: Mini Carrot Missiles (acts as a rifl",
+      "Streetwise",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Flight 1",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Defense Stance",
+          "Fast Stikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Suppressive Fire"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "white-rabbit-spider-verse-expansion"
   },
   {
     "name": "WHITE TIGER",
@@ -33364,79 +34151,7 @@ export const MMRPG_CHARACTERS = [
     ]
   },
   {
-    "name": "WHITERABBIT",
-    "realName": "Lorina Dodson",
-    "rank": 2,
-    "health": 60,
-    "focus": 60,
-    "karma": null,
-    "abilities": {
-      "melee": 1,
-      "agility": 3,
-      "resilience": 2,
-      "vigilance": 2,
-      "ego": 2,
-      "logic": 0
-    },
-    "speed": {
-      "run": 5,
-      "climb": 3,
-      "jump": 3
-    },
-    "occupation": "Criminal",
-    "origin": "High Tech",
-    "teams": "The Menagerie, the Syndicate, Tomb- stone’s gang",
-    "base": "New York City",
-    "features": "",
-    "history": "Lorina Dodson was born into money and grew up wanting for nothing. Finding her life to be a horrible bore, she took refuge in the family library and became particularly fond of Alice in Wonderland. In her early twenties, her parents married her off to a rich older man, but aŠ er finding married life to be just as dull, she murdered her husband and used his money to finance a new life of crime, thrills and intrigue. As the gadget-laden White Rabbit, Dodson attempted to rob a fast-food restaurant, and in the process, she nearly killed local defender FrogMan. Spider-Man (Peter Parker) arrived at the last minute to save Frog-Man’s life, and together, they took the White Rabbit down. In return, Dodson developed a lifelong grudge against both Spider-Man and Frog-Man. In the subsequent years, she and her gang of Alice in Wonderland-styled goons made dozens of vain attempts to defeat the wall-crawler and his amphibian friend. Dodson dislikes being subordinate to others, but aŠ er so many defeats, she has learned to occasionally swallow her pride and work with other villains outside of her own gang. These days, she spends most of her time helping the all-female Syndicate led by the Beetle (Janice Lincoln) establish itself as a powerhouse in New York’s underworld. e) Personality Though oŠ en treated as a laughingstock by New Yorkers and super villains alike, White Rabbit should not be taken lightly. Her villainy is pure and unbridled. She has no need for money. She robs and maims simply for the love of the game. Though not typically prone to killing, she would break her best friend’s legs in a heartbeat if she thought she could get a thrill out of it. Arts Ranged Weapons",
-    "personality": "",
-    "traits": [
-      "Connections: Criminal",
-      "Dealmaker",
-      "Presence",
-      "Tech Reliance"
-    ],
-    "tags": [
-      "Backup (the Menagerie)",
-      "Black Market Access",
-      "Convict",
-      "Public Identity",
-      "Rich",
-      "Signature Weapon: Mini Carrot Missiles (acts as a rifl",
-      "Streetwise",
-      "Villainous"
-    ],
-    "powers": [
-      {
-        "set": "Basic",
-        "names": [
-          "Flight 1",
-          "Inspiration"
-        ]
-      },
-      {
-        "set": "Martial Arts",
-        "names": [
-          "Defense Stance",
-          "Fast Stikes",
-          "Leg Sweep"
-        ]
-      },
-      {
-        "set": "Ranged Weapons",
-        "names": [
-          "Double Tap",
-          "Snap Shooting",
-          "Suppressive Fire"
-        ]
-      }
-    ],
-    "genre": "core",
-    "source": "Spider-Verse Expansion",
-    "id": "whiterabbit-spider-verse-expansion"
-  },
-  {
-    "name": "WHITEWIDOW",
+    "name": "WHITE WIDOW",
     "realName": "Yelena Belova",
     "rank": 3,
     "health": 60,
@@ -33483,7 +34198,6 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Accuracy 1",
-          "Iconic Item",
           "Inspiration",
           "Slow-Motion Dodge"
         ]
@@ -33508,10 +34222,8 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Tactics",
         "names": [
-          "Change of Plans Widow’s Bite Powers:",
           "Eff ect Options: These blasts can count as either electricity attacks or force attacks.",
-          "Weapon: Range: 10 spaces, Agility Damage Multiplier Bonus: +1. Restrictions:",
-          "Worn Power Value: 1"
+          "Worn"
         ]
       }
     ],
@@ -33520,7 +34232,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Widow’s Bite"
     ],
-    "id": "whitewidow-avengers-expansion"
+    "id": "white-widow-avengers-expansion"
   },
   {
     "name": "WICCAN",
@@ -33611,6 +34323,78 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "wiccan-avengers-expansion"
+  },
+  {
+    "name": "WILD CHILD",
+    "realName": "Kyle Gibney",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "Hellions, Gamma Flight",
+    "base": "Krakoa",
+    "features": "Minor wol flike features (pointy ears and teeth, claws, etc.)",
+    "history": "Kyle Gibney’s mutant powers give him the proportional strength and agility of a wolf, but le untreated, they also give him the mind of a wolf. These powers manifested suddenly in his early childhood, and by the time agents of the Canadian government discovered him living alone on the streets, he had gone almost entirely feral. Scientists within Canada’s secretive Department H developed a treatment for Gibney’s condition, allowing him to retain some semblance of intelligence. In exchange for this treatment, Gibney agreed to join Gamma Flight, which was then the department’s super-hero trainee program. The original Gamma Flight disbanded shortly a er Gibney joined it, but his friends in Alpha Flight managed to pick up where the government le o ﬀ , training him and administering his medication. Gibney eventually le Alpha Flight, feeling himself unworthy of a position in their ranks. He’s spent the time since bouncing around between various shady agencies and organizations, working for anyone who could provide his treatments. He currently works for the Krakoan strike team known as the Hellions, alongside other mutants with hard-to-control powers.",
+    "personality": "When he’s taking his meds, Gibney can be so hearted and sensitive. The moment he stops, though, that all fades. Slowly but surely, he becomes an angry, ruthless predator. He is then prone to lash out at anything and anyone in his immediate proximity. In this state, he can speak only in grunts and roars. Weapons (Sharp) Fury Attacks Run Attack Frenzy",
+    "traits": [
+      "Berserker",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brawling",
+          "Healing Factor",
+          "Heightened Senses 1",
+          "Mighty 1",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Focused Fury",
+          "Furious Attacks",
+          "Hit & Run",
+          "Riposte",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "wild-child-x-men-expansion"
   },
   {
     "name": "WINTER SOLDIER",
@@ -33728,9 +34512,7 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Brilliance 2",
-          "Evasion",
-          "Iconic Item",
-          "Iconic Item: Wonder Gloves"
+          "Evasion"
         ]
       },
       {
@@ -33739,22 +34521,20 @@ export const MMRPG_CHARACTERS = [
           "Keep Moving",
           "On Your Feet battle suit Wizard Armor This pink-and-blue armored suit uses anti-grav technology to soar through the air. Origin: High Tech: Battle Suit Powers:",
           "Flight 2",
-          "Sturdy 1 Restrictions:",
+          "Sturdy 1",
           "Flashy",
-          "Worn Power Value: 1 Anti-Gravity These sticky anti-grav discs will the edge of outer space. Origin: High Tech Powers:",
+          "Worn",
           "Anti-Gravity Disc",
           "Ranged",
-          "Weapon: Range: 10; Agility Damage Multiplier: ×0 Wonder Lined with power generators, these elemental eff ects. Origin: High Tech Powers:",
           "Eff ect Options: Can pick the Elemental Control power special eff ect from energy (blind), force (inflict trouble) or fire (set ablaze).",
-          "Elemental Barrier Disc Shooter carry their victims all the way up to Restrictions:",
+          "Elemental Barrier Disc Shooter carry their victims all the way up to",
           "Carried",
-          "Does No Actual Damage Power Value: 1 iconic item Gloves pink-and-blue gloves have incredible",
+          "Does No Actual Damage",
           "Elemental Blast",
           "Elemental Burst",
           "Elemental Grab",
           "Elemental Push",
-          "Mighty 1 Restrictions:",
-          "Worn Power Value: 6"
+          "Mighty 1"
         ]
       }
     ],
@@ -33764,6 +34544,79 @@ export const MMRPG_CHARACTERS = [
       "Anti-Gravity Disc Shooter"
     ],
     "id": "wizard-secret-wars"
+  },
+  {
+    "name": "WOLFSBANE",
+    "realName": "Rahne Sinclair",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 3,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 7,
+      "climb": 4,
+      "swim": 4,
+      "jump": 4
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "New Mutants, X-Factor, X-Force, X-Men",
+    "base": "Krakoa",
+    "features": "Werewolf-like appear- ance (in alternate form)",
+    "history": "Rahne Sinclair’s lycanthropic powers manifested suddenly in her teen years, and the religious zealots who ran the insular Scottish community where she grew up did not take kindly to her new appearance. She was forced to flee her hometown, but she wound up in the relative safety and security of Xavier’s School for Gi ed Youngsters. Early in her stay at the school, Sinclair and a few other students helped to save Professor X from a plot that threatened his life. He was so impressed with the conduct of his charges that he formed a junior super-hero squadron just for them: the New Mutants. To this day, the friends Sinclair made in the New Mutants are the most important people in her life. A er they graduated from Xavier’s school, many of them followed Sinclair into X-Force, becoming founding members of yet another super-hero team. Sinclair was tragically beaten to death by mutant bigots, but the founding of Krakoa ensured that the time she spent dead was short. Since her revival, Sinclair has spent most of her time on Krakoa, palling around with her old comrades and lobbying for the resurrection of her son, Tier.",
+    "personality": "In her human form, Sinclair is shy and so hearted, but in her wolf form, she is vicious, uncommunicative and prone to bouts of rage. Her greatest worry is that she might, in one of her berserker states, lash out at the ones she loves. Raised Catholic, she sometimes still wrestles with fears that her powers were a gi from Satan. Weapons Attacks Attacks & Run Attack Frenzy /",
+    "traits": [
+      "Berserker",
+      "Big (in alternate form)",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Alternate Form (werewolf/ wolf)",
+      "Black Market Access",
+      "Extreme Appearance (in alternate form)",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Evasion",
+          "Healing Factor",
+          "Heightened Senses 1",
+          "Mighty 1",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Furious Attacks",
+          "Hit & Run",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "wolfsbane-x-men-expansion"
   },
   {
     "name": "WOLVERINE",
@@ -34004,7 +34857,7 @@ export const MMRPG_CHARACTERS = [
     ]
   },
   {
-    "name": "WONDERMAN",
+    "name": "WONDER MAN",
     "realName": "Simon Williams",
     "rank": 5,
     "health": 150,
@@ -34082,7 +34935,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Avengers Expansion",
-    "id": "wonderman-avengers-expansion"
+    "id": "wonder-man-avengers-expansion"
   },
   {
     "name": "WONG",
@@ -34153,7 +35006,7 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
-    "name": "WRAITH",
+    "name": "WRAITH (EARTH-1048)",
     "realName": "Yuriko “Yuri” Watanabe",
     "rank": 2,
     "health": 30,
@@ -34217,10 +35070,10 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "Spider-Verse Expansion",
-    "id": "wraith-spider-verse-expansion"
+    "id": "wraith-earth-1048-spider-verse-expansion"
   },
   {
-    "name": "YONDUUDONTA",
+    "name": "YONDU UDONTA",
     "realName": "Yondu Udonta",
     "rank": 4,
     "health": 90,
@@ -34269,7 +35122,6 @@ export const MMRPG_CHARACTERS = [
           "Accuracy 2",
           "Evasion",
           "Heightened Senses 1",
-          "Iconic Item",
           "Mighty 1"
         ]
       },
@@ -34294,8 +35146,7 @@ export const MMRPG_CHARACTERS = [
           "Snap Shooting",
           "Sniping Yaka Arrow By whistling, Udonta can adjust arrow’s position in flight with point accuracy. Origin: Alien Powers:",
           "Psychic Link (communicates via unique whistling noises)",
-          "Weapon: Range: 30, Agility Damage Multiplier: +1 Restrictions:",
-          "Loud Power Value: 1"
+          "Loud"
         ]
       }
     ],
@@ -34304,7 +35155,7 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Yaka Arrow"
     ],
-    "id": "yonduudonta-secret-wars"
+    "id": "yondu-udonta-secret-wars"
   },
   {
     "name": "ZOMBIE",
