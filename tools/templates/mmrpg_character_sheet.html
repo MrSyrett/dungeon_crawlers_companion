@@ -475,7 +475,21 @@ function roll616(){
   var fantastic=(dice[1].marvel && dice[1].v===1);
   var marvelVal=fantastic?6:dice[1].v;
   var sum=faceOf(dice[0])+marvelVal+faceOf(dice[2]);
-  return {d1:dice[0].v, m:dice[1].v, d2:dice[2].v, marvelVal:marvelVal, fantastic:fantastic, sum:sum};
+  var res={d1:dice[0].v, m:dice[1].v, d2:dice[2].v, marvelVal:marvelVal, fantastic:fantastic, sum:sum};
+  animate616(res);
+  return res;
+}
+// The three d616 dice tumble across the sheet (shared /tools-data/dice-anim.js).
+// The middle die is the Marvel die — tint it red so it reads apart from the
+// two outer dice; a Fantastic (natural 1) fires the crit flourish.
+var MARVEL_DIE_COLOR='#EC1D24';
+function animate616(r){
+  if(!(window.DiceAnim&&window.DiceAnim.play))return;
+  try{ window.DiceAnim.play([
+    {sides:6, display:String(r.d1)},
+    {sides:6, display:String(r.m), color:MARVEL_DIE_COLOR},
+    {sides:6, display:String(r.d2)}
+  ], r.fantastic?'crit':'normal'); }catch(e){}
 }
 function dieStr(r){ var mid=r.fantastic?'M':String(r.m); return '['+r.d1+' '+mid+' '+r.d2+']'; }
 function consumeKarma(){ if(karmaArmed){ S.karma.cur=Math.max(0,num(S.karma.cur)-1); karmaArmed=false; $('karma-btn').classList.remove('on'); renderVitals(); return true; } return false; }
@@ -755,5 +769,7 @@ S=blankState();
 autoLoad();
 </script>
 <script src="/tools-data/mmrpg-sheet-builder.js"></script>
+<!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->
+<script src="/tools-data/dice-anim.js"></script>
 </body>
 </html>
