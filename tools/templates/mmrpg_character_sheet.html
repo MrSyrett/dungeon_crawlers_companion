@@ -87,11 +87,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);}
 .hdr-field{padding:5px 8px 6px;border-right:1px solid #34363e;border-bottom:1px solid #34363e;min-width:0;}
 .hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#f4a6a8;margin-bottom:2px;}
-.hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid #4a4d57;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
-.hdr-field select{font-size:14px;cursor:pointer;}
-.hdr-field select option{color:#111;background:#fff;}
-.hdr-field input::placeholder{color:#6a6e78;font-weight:500;}
+.hdr-field .hdr-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;padding:2px 0;min-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-field .hdr-val:empty::after,.hdr-field .hdr-val.dim{color:#6a6e78;font-weight:500;}
 .hdr-field.lastcol{border-right:none;}
+/* Hide native number-input spinners everywhere (write-in only) */
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 
 /* Body */
 .body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
@@ -100,17 +101,17 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .blk{padding:10px;}
 
 /* Abilities */
-.abil-list{padding:8px 10px;display:flex;flex-direction:column;gap:6px;}
+.abil-list{padding:8px 10px;display:flex;flex-direction:column;gap:7px;}
 .abil-row{display:flex;align-items:center;gap:8px;}
-.abil-row .a-name{flex:1 1 auto;min-width:0;font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.03em;background:none;border:none;text-align:left;cursor:pointer;color:var(--ink);padding:0;}
-.abil-row .a-name:hover{color:var(--mv-dk);text-decoration:underline;}
+.abil-row .a-name{flex:1 1 auto;min-width:0;font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.03em;color:var(--ink);}
 .abil-row .a-name small{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
-.abil-row .a-score{width:44px;}
-.abil-row .a-score input{width:44px;border:1px solid var(--rule);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:16px;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
-.abil-row .a-def{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);width:52px;text-align:center;flex:0 0 auto;}
-.abil-row .a-def b{color:var(--mv-dk);}
-.abil-row .a-roll{background:var(--mv);color:#fff;border:none;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:5px 9px;cursor:pointer;}
-.abil-row .a-roll:hover{background:var(--mv-dk);}
+.a-tiles{display:flex;gap:5px;flex:0 0 auto;}
+.a-tile{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:54px;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:4px 6px;cursor:pointer;transition:border-color .12s ease,background .12s ease,transform .05s ease;}
+.a-tile:hover{border-color:var(--mv);background:var(--input-bg);}
+.a-tile:active{transform:translateY(1px);}
+.a-tile .atl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.a-tile .atv{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--mv-dk);line-height:1.05;}
+@media(max-width:420px){.a-tile{min-width:46px;padding:4px 3px;}.a-tile .atv{font-size:15px;}.abil-row .a-name{font-size:13px;}}
 
 /* Vitals — bubble tiles (matching the other sheets' stat boxes) */
 .vitals{padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;border-bottom:1px solid var(--rule);align-items:stretch;}
@@ -257,14 +258,14 @@ body.dark .sheet{border-color:#3a3d47;}
   <div class="hdr-row">
     <div class="hdr-logo"><div class="lg-word">MARVEL</div><div class="lg-sub">Multiverse · d616</div></div>
     <div class="hdr-fields">
-      <div class="hdr-field" style="grid-column:span 4;"><label>Codename</label><input type="text" id="f-name" placeholder="Hero name"></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Real Name</label><input type="text" id="f-real" placeholder="Secret identity"></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Rank</label><select id="f-rank"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
-      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Origin</label><select id="f-origin"><option value="">—</option></select></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Occupation</label><select id="f-occupation"><option value="">—</option></select></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Size</label><select id="f-size"><option>Tiny</option><option>Little</option><option>Small</option><option selected>Average</option><option>Big</option><option>Huge</option><option>Gigantic</option></select></div>
-      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Teams</label><input type="text" id="f-teams" placeholder="Avengers…"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Codename</label><div class="hdr-val" id="d-name">—</div></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Real Name</label><div class="hdr-val" id="d-real">—</div></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Rank</label><div class="hdr-val" id="d-rank">1</div></div>
+      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><div class="hdr-val" id="d-pronouns">—</div></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Origin</label><div class="hdr-val" id="d-origin">—</div></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Occupation</label><div class="hdr-val" id="d-occupation">—</div></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Size</label><div class="hdr-val" id="d-size">Average</div></div>
+      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Teams</label><div class="hdr-val" id="d-teams">—</div></div>
     </div>
   </div>
 
@@ -286,16 +287,16 @@ body.dark .sheet{border-color:#3a3d47;}
         </div>
         <div class="vital karma">
           <div class="vlbl"><span>Karma</span><small>= Rank</small></div>
-          <div class="vbig"><button class="v-step" onclick="bumpVital('karma',-1)">−</button><input class="v-cur" id="v-karma" type="number" value="0" oninput="S.karma.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('karma',1)">＋</button><span class="v-max">/ <b id="v-karma-max">0</b></span></div>
+          <div class="vbig"><input class="v-cur" id="v-karma" type="number" value="0" oninput="S.karma.cur=num(this.value);scheduleAutosave()"><span class="v-max">/ <b id="v-karma-max">0</b></span></div>
         </div>
         <div class="vital focus">
           <div class="vlbl"><span>Focus</span><small>Vig × 30</small></div>
-          <div class="vbig"><button class="v-step" onclick="bumpVital('focus',-1)">−</button><input class="v-cur" id="v-focus" type="number" value="0" oninput="S.focus.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('focus',1)">＋</button><span class="v-max">/ <b id="v-focus-max">0</b></span></div>
+          <div class="vbig"><input class="v-cur" id="v-focus" type="number" value="0" oninput="S.focus.cur=num(this.value);scheduleAutosave()"><span class="v-max">/ <b id="v-focus-max">0</b></span></div>
           <div class="vline">DR <input id="v-focus-dr" type="number" value="0" oninput="S.focusDR=num(this.value);scheduleAutosave()"></div>
         </div>
         <div class="vital health">
           <div class="vlbl"><span>Health</span><small>Res × 30</small></div>
-          <div class="vbig"><button class="v-step" onclick="bumpVital('health',-1)">−</button><input class="v-cur" id="v-health" type="number" value="0" oninput="S.health.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('health',1)">＋</button><span class="v-max">/ <b id="v-health-max">0</b></span></div>
+          <div class="vbig"><input class="v-cur" id="v-health" type="number" value="0" oninput="S.health.cur=num(this.value);scheduleAutosave()"><span class="v-max">/ <b id="v-health-max">0</b></span></div>
           <div class="vline">DR <input id="v-health-dr" type="number" value="0" oninput="S.healthDR=num(this.value);scheduleAutosave()"></div>
         </div>
       </div>
@@ -311,22 +312,22 @@ body.dark .sheet{border-color:#3a3d47;}
       </div>
 
       <div class="tab-panel" id="tab-powers">
-        <div class="section-bar"><span>Powers &amp; Power Sets</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('power')">✦ Add Power</button></span></div>
+        <div class="section-bar"><span>Powers &amp; Power Sets</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">set at creation &amp; level-up</span></div>
         <div class="card-list" id="powers-list"></div>
-        <div id="powers-empty" class="tbl-empty">No powers yet. Add powers from the sets, or your basic powers.</div>
+        <div id="powers-empty" class="tbl-empty">No powers yet. Powers are chosen in the character builder (Create / Rebuild).</div>
       </div>
 
       <div class="tab-panel" id="tab-traits">
-        <div class="subhead"><span>Traits</span><button class="hdr-btn" style="background:var(--mv);border-color:var(--mv-dk);" onclick="openPicker('trait')">＋ Add Trait</button></div>
+        <div class="subhead"><span>Traits</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;color:var(--muted);">set at creation &amp; level-up</span></div>
         <div class="card-list" id="traits-list"></div>
-        <div id="traits-empty" class="tbl-empty">No traits yet. You get one extra trait per rank, plus origin/occupation traits.</div>
-        <div class="subhead"><span>Tags</span><button class="hdr-btn" style="background:var(--mv);border-color:var(--mv-dk);" onclick="openPicker('tag')">＋ Add Tag</button></div>
+        <div id="traits-empty" class="tbl-empty">No traits yet. Traits are chosen in the character builder (Create / Rebuild).</div>
+        <div class="subhead"><span>Tags</span></div>
         <div class="card-list" id="tags-list"></div>
-        <div id="tags-empty" class="tbl-empty">No tags yet. Tags describe who you are (Heroic gives you Karma).</div>
+        <div id="tags-empty" class="tbl-empty">No tags yet. Tags are set in the character builder (Create / Rebuild).</div>
       </div>
 
       <div class="tab-panel" id="tab-equipment">
-        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('equip','Weapon')">＋ Weapon</button><button class="hdr-btn" onclick="openPicker('equip','Gear')">＋ Gear</button><button class="hdr-btn" onclick="openPicker('equip','Vehicle')">＋ Vehicle</button><button class="hdr-btn" onclick="addAttack()">＋ Custom</button></span></div>
+        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('equip')">＋ Add Equipment</button></span></div>
         <table class="tbl" id="atk-tbl"><thead><tr><th style="width:28%;">Item</th><th style="width:15%;">Attacks with</th><th style="width:13%;">Range</th><th style="width:11%;">Dmg</th><th>Notes</th><th style="width:96px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
         <div id="atk-empty" class="tbl-empty">No equipment yet. Add a weapon, gear or vehicle from the list — a weapon rolls its ability and deals Marvel die × (multiplier + weapon bonus) + ability.</div>
       </div>
@@ -368,7 +369,7 @@ body.dark .sheet{border-color:#3a3d47;}
 <div id="picker-overlay" class="ov" onclick="if(event.target===this)closePicker()">
   <div class="modal wide">
     <div class="modal-hd"><div class="ttl" id="picker-title">Add</div><button class="x" onclick="closePicker()">✕</button></div>
-    <div class="brow-controls"><input id="picker-search" class="m-input" placeholder="Search…" style="flex:1;min-width:140px;" oninput="renderPicker()"><select id="picker-filter" class="brow-sel" onchange="renderPicker()" style="display:none;"></select></div>
+    <div class="brow-controls"><input id="picker-search" class="m-input" placeholder="Search…" style="flex:1;min-width:140px;" oninput="renderPicker()"><select id="picker-filter" class="brow-sel" onchange="renderPicker()" style="display:none;"></select><button id="picker-custom" class="hdr-btn" style="display:none;background:var(--mv);border-color:var(--mv-dk);" onclick="addAttack();closePicker();">＋ Custom item</button></div>
     <div class="modal-bd brow-list" id="picker-body"></div>
   </div>
 </div>
@@ -434,13 +435,24 @@ function dmgMult(){ return rank(); }
 function renderAbilities(){
   var host=$('abil-list'); if(!host)return; host.innerHTML='';
   ABILITIES.forEach(function(a){
+    var sc=ab(a.key), def=defense(a.key);
+    var sg=(sc>=0?'+':'')+sc;
     var row=document.createElement('div'); row.className='abil-row';
-    row.innerHTML='<button class="a-name" onclick="rollAbility(\''+a.key+'\')" title="d616 + '+a.name+'">'+a.name+'<small>'+a.desc+'</small></button>'
-      +'<span class="a-score"><input type="number" value="'+ab(a.key)+'" oninput="setAbility(\''+a.key+'\',this.value)"></span>'
-      +'<span class="a-def">def <b>'+defense(a.key)+'</b></span>'
-      +'<button class="a-roll" onclick="rollAbility(\''+a.key+'\')">Check</button>';
+    row.innerHTML='<div class="a-name">'+a.name+'<small>'+a.desc+'</small></div>'
+      +'<div class="a-tiles">'
+      +  '<button class="a-tile" onclick="rollCheck(\''+a.key+'\',\'score\')" title="Roll d616 + '+a.name+'"><span class="atl">Ability</span><span class="atv">'+sg+'</span></button>'
+      +  '<button class="a-tile" onclick="rollCheck(\''+a.key+'\',\'defense\')" title="'+a.name+' Defense (10 + score)"><span class="atl">Defense</span><span class="atv">'+def+'</span></button>'
+      +  '<button class="a-tile" onclick="rollCheck(\''+a.key+'\',\'noncombat\')" title="Roll a non-combat '+a.name+' check"><span class="atl">Non-Cmbt</span><span class="atv">'+sg+'</span></button>'
+      +'</div>';
     host.appendChild(row);
   });
+}
+// Roll a d616 check for an ability — score / defense / non-combat all add the
+// ability score (defense = 10 + score, shown as its target number).
+function rollCheck(key,kind){
+  var a=ABILITIES.find(function(x){return x.key===key;}); if(!a)return;
+  var label=a.name+(kind==='defense'?' Defense':kind==='noncombat'?' Non-Combat':' Check');
+  doCheck(label, key, {});
 }
 function setAbility(k,v){ S.abilities[k]=num(v);
   if(k==='resilience'){ S.health.max=healthMax(); if(S.health.cur<1||S.health.cur>S.health.max)S.health.cur=S.health.max; }
@@ -666,6 +678,7 @@ function openPicker(kind, preset){
   } else if(kind==='equip'){
     flt.style.display=''; flt.innerHTML='<option value="">All equipment</option>'+['Weapon','Gear','Vehicle'].map(function(c){return '<option value="'+c+'"'+(preset===c?' selected':'')+'>'+c+'s</option>';}).join('');
   } else flt.style.display='none';
+  var cb=$('picker-custom'); if(cb) cb.style.display=(kind==='equip')?'':'none';
   renderPicker(); $('picker-overlay').classList.add('open');
 }
 function closePicker(){ $('picker-overlay').classList.remove('open'); }
@@ -703,7 +716,7 @@ function setTab(name){
 function setDefaultTab(){ var t='powers'; try{ t=localStorage.getItem('mmrpg_tab')||'powers'; }catch(e){} if(!$('tab-'+t))t='powers'; setTab(t); }
 
 // ── Header selects ──
-function fillHeaderSelects(){
+function fillHeaderSelects(){ return; /* identity is display-only now; selects removed */
   var os=$('f-origin'); if(os) os.innerHTML='<option value="">—</option>'+ORIGINS.map(function(o){return '<option value="'+esc(o.name)+'">'+esc(o.name)+'</option>';}).join('');
   var oc=$('f-occupation'); if(oc) oc.innerHTML='<option value="">—</option>'+OCCUPATIONS.map(function(o){return '<option value="'+esc(o.name)+'">'+esc(o.name)+'</option>';}).join('');
 }
@@ -721,7 +734,7 @@ function openRules(){
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
 
 // ── Create → advancement (builder) button swap ──
-function hasCharacter(){ if(($('f-name').value||'').trim())return true; return ABILITIES.some(function(a){return ab(a.key)!==0;})||S.powers.length>0; }
+function hasCharacter(){ if((S.name||'').trim())return true; return ABILITIES.some(function(a){return ab(a.key)!==0;})||S.powers.length>0; }
 function refreshWizardButtons(){ var c=$('build-btn'); if(c) c.textContent=hasCharacter()?'Rebuild':'Create'; }
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
@@ -750,8 +763,8 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 
 // ═══ SAVE / LOAD ════════════════════════════════════════════════════════════
 function collectSheet(){
-  S.name=$('f-name').value.trim(); S.real=$('f-real').value; S.pronouns=$('f-pronouns').value; S.rank=num($('f-rank').value)||1;
-  S.origin=$('f-origin').value; S.occupation=$('f-occupation').value; S.size=$('f-size').value; S.teams=$('f-teams').value;
+  // Identity/rank/origin/size are set in the builder and live on S already;
+  // only the Bio-tab free-text fields are edited directly on the sheet.
   S.history=$('f-history').value; S.personality=$('f-personality').value; S.features=$('f-features').value; S.base=$('f-base').value; S.notes=$('f-notes').value;
   return Object.assign({}, S, { system:'MMRPG', class:(S.origin||S.occupation||''), campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
 }
@@ -772,11 +785,12 @@ function applySheet(d){
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
   scheduleAutosave();
 }
+function setDisp(id,v){ var el=$(id); if(!el)return; el.textContent=(v==null||v==='')?'—':v; el.classList.toggle('dim',(v==null||v===''));}
 function renderAll(){
-  $('f-name').value=S.name||''; $('f-real').value=S.real||''; $('f-pronouns').value=S.pronouns||'';
-  $('f-rank').value=String(rank()); $('f-size').value=S.size||'Average'; $('f-teams').value=S.teams||'';
+  setDisp('d-name',S.name); setDisp('d-real',S.real); setDisp('d-pronouns',S.pronouns);
+  var dr=$('d-rank'); if(dr){dr.textContent='Rank '+rank();dr.classList.remove('dim');}
+  setDisp('d-size',S.size||'Average'); setDisp('d-teams',S.teams); setDisp('d-origin',S.origin); setDisp('d-occupation',S.occupation);
   $('f-history').value=S.history||''; $('f-personality').value=S.personality||''; $('f-features').value=S.features||''; $('f-base').value=S.base||''; $('f-notes').value=S.notes||'';
-  fillHeaderSelects(); $('f-origin').value=S.origin||''; $('f-occupation').value=S.occupation||'';
   if(!S.health.max)S.health.max=healthMax(); if(!S.focus.max)S.focus.max=focusMax();
   renderAbilities(); renderVitals(); renderDerived(); renderConditions(); renderPowers(); renderTraitsTags(); renderAttacks(); renderDamage(); renderTray(); updateFoot(); refreshWizardButtons();
 }
@@ -787,7 +801,7 @@ function saveSheet(quiet){
   if(window.__ddSave) window.__ddSave({ mmrpg_sheet:json });
   if(!quiet) addLog('Sheet Saved','✓',data.name||'Unnamed','normal');
 }
-function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
+function syncDocTitle(){ var name=(S.name||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
 function exportSheet(){
   var data=collectSheet(), blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=((data.name||'marvel-hero').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'marvel-hero')+'.json'; a.click();
@@ -801,12 +815,9 @@ document.addEventListener('visibilitychange',function(){ if(document.visibilityS
 var _autoSaveTimer=null;
 function scheduleAutosave(){ if(!_pageReady)return; if(_autoSaveTimer)clearTimeout(_autoSaveTimer); _autoSaveTimer=setTimeout(function(){ try{ saveSheet(true); }catch(e){} },1500); }
 window.scheduleAutosave=scheduleAutosave;
-$('f-name').addEventListener('input',function(){ if(window.__ddSaveTitle)try{ window.__ddSaveTitle(($('f-name').value||'').trim()); }catch(e){} refreshWizardButtons(); });
-['f-real','f-pronouns','f-teams','f-history','f-personality','f-features','f-base','f-notes'].forEach(function(id){ $(id).addEventListener('input',scheduleAutosave); });
-$('f-rank').addEventListener('change',function(){ S.rank=num(this.value)||1; renderVitals(); renderDerived(); renderDamage(); updateFoot(); scheduleAutosave(); });
-$('f-size').addEventListener('change',function(){ S.size=this.value; renderDerived(); scheduleAutosave(); });
-$('f-origin').addEventListener('change',function(){ S.origin=this.value; scheduleAutosave(); });
-$('f-occupation').addEventListener('change',function(){ S.occupation=this.value; scheduleAutosave(); });
+// Identity/rank/origin/occupation/size are set in the builder now; only the
+// Bio-tab free-text fields are edited directly on the sheet.
+['f-history','f-personality','f-features','f-base','f-notes'].forEach(function(id){ var el=$(id); if(el) el.addEventListener('input',scheduleAutosave); });
 try{ if(localStorage.getItem('mmrpg_dark')==='1') setDarkMode(true); }catch(e){}
 </script>
 
@@ -814,7 +825,7 @@ try{ if(localStorage.getItem('mmrpg_dark')==='1') setDarkMode(true); }catch(e){}
 // ═══ CAMPAIGN LINK — same contract as the other sheets ══════════════════════
 var _campaign=null; var _campaignClientKey='ck-'+Math.random().toString(36).slice(2,12); var _campaignLastId=0; var _campaignTimer=null;
 var CAMPAIGN_SKIP_LABELS=new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign']);
-function campaignPlayerName(){ return ($('f-name').value||'').trim()||'Player'; }
+function campaignPlayerName(){ return (S.name||'').trim()||'Player'; }
 function campaignUpdateBtn(){ var btn=$('campaign-btn'); if(!btn)return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#3a1417'; btn.style.color='#f4a6a8'; btn.style.borderColor='#6a2226'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#b8a0a2'; btn.style.borderColor='#34272b'; } }
 function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
 function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
