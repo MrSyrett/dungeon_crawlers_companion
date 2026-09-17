@@ -5,10 +5,18 @@ import { useRouter } from "next/navigation";
 import { TALENT_TARGETS } from "@/lib/effects";
 import { MMRPG_HQ_TRAITS } from "@/lib/data/mmrpg-hq-traits";
 import { MMRPG_HQ_TAGS } from "@/lib/data/mmrpg-hq-tags";
+import { MMRPG_POWER_NAMES } from "@/lib/data/mmrpg-power-names";
 
 const HQ_TRAIT_OPTS: [string, string][] = MMRPG_HQ_TRAITS.map((t) => [t.name, t.name]);
 const HQ_TAG_OPTS: [string, string][] = MMRPG_HQ_TAGS.map((t) => [t.name, t.name]);
 const HQ_RANK_OPTS: [string, string][] = [1, 2, 3, 4, 5, 6].map((n) => [String(n), `Rank ${n}`]);
+// Standard iconic-item restrictions (Avengers Expansion). Access/Use restrictions
+// are open-ended, so the picker also allows custom text (allowCustom).
+const MMRPG_RESTRICTION_OPTS: readonly string[] = [
+  "Worn", "Carried", "Driven",
+  "Awkward", "Flashy", "Large", "Loud", "Menacing",
+  "Anathema", "Berserker", "Bloodthirsty", "Breathe Different", "Weakness",
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A generic, schema-driven homebrew editor shared by the lighter game systems
@@ -45,6 +53,9 @@ export type ScalarField =
 export type Field =
   | ScalarField
   | (BaseField & { type: "stringList"; placeholder?: string; addLabel?: string })
+  // Searchable multi-select backed by a datalist. Stores string[]. Only values in
+  // `options` are accepted unless `allowCustom` is set (for open-ended lists).
+  | (BaseField & { type: "picker"; options: readonly string[]; placeholder?: string; addLabel?: string; allowCustom?: boolean })
   | (BaseField & { type: "objectList"; addLabel?: string; fields: readonly ScalarField[] })
   // ── Mechanical-effect fields (reusable: bonuses / effect-rows / triad / titles) ──
   // Flat bonuses: rows of { amount, target } from BONUS_TARGET_OPTS.
@@ -614,16 +625,27 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "type", label: "Type", type: "select", options: [["Weapon", "Weapon"], ["Item", "Item"], ["Armor", "Battle Suit / Armor"]] },
       { key: "owner", label: "Signature owner (optional)", type: "text", placeholder: "e.g. Iron Man" },
       { key: "origin", label: "Origin granted (optional)", type: "text", placeholder: "e.g. High Tech, Weird Science" },
-      { key: "powers", label: "Powers granted", type: "textarea", full: true, placeholder: "Flight 2, Sturdy 3, Elemental Blast (Energy)…" },
-      { key: "attachment", label: "Attachment", type: "select", empty: "—", options: [["Worn", "Worn (like armor)"], ["Carried", "Carried (like a weapon)"], ["Driven", "Driven (like a vehicle)"]] },
-      { key: "restrictions", label: "Restrictions", type: "text", full: true, placeholder: "Flashy, Large, Menacing, Requires: Worthy tag…" },
+      { key: "powers", label: "Powers granted", type: "picker", full: true, options: MMRPG_POWER_NAMES, allowCustom: true, addLabel: "+ Power", placeholder: "Type to search powers…", help: "Pick real powers so the item automates when added to a character." },
+      { key: "restrictions", label: "Restrictions", type: "picker", full: true, options: MMRPG_RESTRICTION_OPTS, allowCustom: true, addLabel: "+ Restriction", placeholder: "Worn, Flashy… or type a custom one", help: "Includes Worn / Carried / Driven attachment. Custom access/use restrictions are allowed." },
       { key: "range", label: "Range (weapons)", type: "text", placeholder: "Reach, Reach +1, or spaces e.g. 10" },
       { key: "ability", label: "Attacks with (weapons)", type: "select", empty: "Melee", options: [["Melee", "Melee"], ["Agility", "Agility"], ["Ego", "Ego"], ["Logic", "Logic"]] },
       { key: "damageBonus", label: "Damage mult. bonus (weapons)", type: "text", placeholder: "+1, +2" },
-      { key: "powerValue", label: "Power Value", type: "number", placeholder: "power picks to own it" },
       { key: "special", label: "Special / effect", type: "textarea", full: true },
     ],
-    blank: () => ({ type: "Item" }), toForm: (d) => ({ ...d }),
+    blank: () => ({ type: "Item" }),
+    // Migrate older free-text records (grantsPowers string / attachment+restrictions
+    // text) into the new picker arrays so they still edit cleanly.
+    toForm: (d) => {
+      const split = (v: unknown) => (typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : []);
+      let powers = Array.isArray(d.powers) ? (d.powers as string[]) : [];
+      if (!powers.length) powers = split(d.grantsPowers);
+      let restrictions = Array.isArray(d.restrictions) ? (d.restrictions as string[]) : [];
+      if (!restrictions.length) {
+        const attach = sv(d, "attachment");
+        restrictions = [...(attach && attach !== "—" ? [attach] : []), ...split(d.restrictions)];
+      }
+      return { ...d, powers, restrictions };
+    },
     summary: (d) => `${sv(d, "type") || "Item"}${sv(d, "powerValue") ? " · PV " + sv(d, "powerValue") : ""}`,
   },
   "mmrpg-hq": {
@@ -821,8 +843,50 @@ export default function HomebrewEditor({
   );
 }
 
+function PickerAdd({ dlId, placeholder, addLabel, onAdd }: { dlId: string; placeholder?: string; addLabel?: string; onAdd: (v: string) => void }) {
+  const [t, setT] = useState("");
+  const commit = () => { onAdd(t); setT(""); };
+  return (
+    <div className="mt-1.5 flex gap-1.5">
+      <input list={dlId} className={`${fieldBase} min-w-0 flex-1`} value={t} placeholder={placeholder}
+        onChange={(e) => setT(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }} />
+      <button type="button" className={miniBtn} onClick={commit}>{addLabel ?? "+ Add"}</button>
+    </div>
+  );
+}
+
 function FieldView({ field, value, onChange }: { field: Field; value: unknown; onChange: (v: unknown) => void }) {
   const cls = field.full ? "sm:col-span-2" : "";
+
+  if (field.type === "picker") {
+    const list = Array.isArray(value) ? (value as string[]) : [];
+    const dlId = `dl-${field.key}`;
+    const add = (raw: string) => {
+      const v = raw.trim();
+      if (!v || list.includes(v)) return;
+      if (!field.allowCustom && !field.options.includes(v)) return;
+      onChange([...list, v]);
+    };
+    return (
+      <div className={cls}>
+        <label className={labelCls}>{field.label}</label>
+        {field.help ? <p className="mb-1 text-[11px] text-[var(--muted)]">{field.help}</p> : null}
+        {list.length ? (
+          <div className="flex flex-wrap gap-1.5">
+            {list.map((v, i) => (
+              <span key={i} className="inline-flex items-center gap-1 rounded border border-[var(--hb-accent)] bg-[var(--panel-2)] px-2 py-0.5 text-[12px] text-[var(--text)]">
+                {v}
+                <button type="button" className="text-[var(--muted)] hover:text-[var(--hb-accent)]" onClick={() => onChange(list.filter((_, j) => j !== i))}>✕</button>
+              </span>
+            ))}
+          </div>
+        ) : null}
+        <PickerAdd dlId={dlId} placeholder={field.placeholder} addLabel={field.addLabel} onAdd={add} />
+        <datalist id={dlId}>{field.options.map((o) => <option key={o} value={o} />)}</datalist>
+      </div>
+    );
+  }
 
   if (field.type === "stringList") {
     const list = Array.isArray(value) ? (value as string[]) : [];

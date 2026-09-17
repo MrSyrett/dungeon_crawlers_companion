@@ -45,4 +45,11 @@ for (const e of ENTITIES) {
   emitJs(e.base, e.constName, rows);
   summary.push(`${e.constName}=${rows.length}`);
 }
+// Lightweight names-only list of powers, for picker/datalist UIs (e.g. the iconic
+// homebrew builder) that must not bundle the full powers module client-side.
+{
+  const names = readJson(join(PARTS, "powers.json")).map((p) => String(p.name)).sort((a, b) => a.localeCompare(b, "en"));
+  writeFileSync(join(TS_DIR, "mmrpg-power-names.ts"), `${BANNER}\n\nexport const MMRPG_POWER_NAMES: readonly string[] = ${JSON.stringify(names, null, 2)};\n`, "utf8");
+  summary.push(`MMRPG_POWER_NAMES=${names.length}`);
+}
 console.log(`build-mmrpg-data: -> lib/data/ + public/tools-data/\n  ${summary.join(", ")}`);

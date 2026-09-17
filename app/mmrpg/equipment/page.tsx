@@ -57,6 +57,7 @@ function EquipCard({ e }: { e: EquipRow }) {
       )}
       {e.notes ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{e.notes}</p> : null}
       {e.grantsPowers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Grants:</span> {e.grantsPowers}</p> : null}
+      {e.restrictions?.length ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Restrictions:</span> {e.restrictions.join(", ")}</p> : null}
       {typeOf(e) === "Vehicle" && e.powers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Powers:</span> {e.powers}</p> : null}
       {typeOf(e) === "Vehicle" && e.weapons ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Weapons:</span> {e.weapons}</p> : null}
       {e.special ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">{typeOf(e) === "Vehicle" ? "Notes" : "Special"}:</span> {e.special}</p> : null}

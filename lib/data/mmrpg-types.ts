@@ -206,6 +206,8 @@ export interface MmrpgEquipment {
   grantsOrigin?: string;
   /** Comma-separated list of powers the iconic item grants. */
   grantsPowers?: string;
+  /** Restrictions on an iconic item (Worn/Carried, Flashy, Requires: …). */
+  restrictions?: string[];
   /** Power picks required to own the iconic item. */
   powerValue?: number;
   // ── Vehicle fields (type = "Vehicle"): a vehicle is just a kind of equipment. ──

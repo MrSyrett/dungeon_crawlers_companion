@@ -1756,27 +1756,29 @@ function normalizeMmrpgIconic(input: unknown): { name: string; data: Record<stri
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew iconic item needs a name.");
   const typ = ["Weapon", "Item", "Armor"].includes(str(o.type)) ? str(o.type) : "Item";
-  const restrBits: string[] = [];
-  const attach = str(o.attachment);
-  if (attach && attach !== "—") restrBits.push(attach);
-  if (str(o.restrictions)) restrBits.push(str(o.restrictions).slice(0, 300));
-  // Origin / granted powers / power value are structured fields the equipment
-  // card renders on their own; `special` carries only restrictions + free text,
-  // matching how the book iconic items are shaped.
-  const specialBits: string[] = [];
-  if (restrBits.length) specialBits.push("Restrictions: " + restrBits.join(", "));
-  if (str(o.special)) specialBits.push(str(o.special).slice(0, 1500));
-  const pv = num(o.powerValue);
+  // Powers and restrictions are picked lists (arrays), so granted powers are real
+  // power names the character sheet can automate — and the Power Value is derived.
+  const powers = [...new Set(strList(o.powers, 60, 60))];
+  const restrictions = [...new Set(strList(o.restrictions, 40, 80))];
+  const origin = str(o.origin).slice(0, 80);
+  // Power Value = number of powers (+1 for the weapon itself) − number of
+  // restrictions, minimum 1 (Avengers Expansion, p102).
+  const powerValue = Math.max(1, powers.length + (typ === "Weapon" ? 1 : 0) - restrictions.length);
   const data: Record<string, unknown> = {
     name,
     tier: "Iconic",
     type: typ,
     category: typ,
-    owner: str(o.owner).slice(0, 80) || "—",
-    notes: str(o.notes).slice(0, 800),
-    special: specialBits.join("; "),
+    owner: str(o.owner).slice(0, 80),
+    origin,                        // form round-trip
+    powers,                        // form round-trip + sheet automation
+    restrictions,                  // form round-trip + card display
+    special: str(o.special).slice(0, 1500),
+    powerValue,
+    grantsPowers: powers.join(", "), // display string on the equipment card
     source: "Homebrew",
   };
+  if (origin) data.grantsOrigin = origin;
   if (typ === "Weapon") {
     data.weaponClass = str(o.range).match(/^\d/) ? "ranged" : "melee";
     data.ability = ["melee", "agility", "ego", "logic"].includes(str(o.ability).toLowerCase())
@@ -1787,9 +1789,6 @@ function normalizeMmrpgIconic(input: unknown): { name: string; data: Record<stri
     const mb = parseInt(str(o.damageBonus).replace(/[^\d]/g, ""), 10);
     if (mb) data.multBonus = mb;
   }
-  if (str(o.origin)) data.grantsOrigin = str(o.origin).slice(0, 80);
-  if (str(o.powers)) data.grantsPowers = str(o.powers).slice(0, 500);
-  if (pv) data.powerValue = pv;
   return { name, data };
 }
 
