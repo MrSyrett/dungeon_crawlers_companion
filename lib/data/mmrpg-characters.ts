@@ -792,7 +792,7 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Heightened Senses 1",
-          "Iconic Weapon: Electrified vibranium claws [+1 damage multiplier]",
+          "Iconic Weapon",
           "Inspiration",
           "Mighty 1",
           "Sturdy 2",
@@ -808,7 +808,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "black-panther",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Electrified Vibranium Claws"
+    ]
   },
   {
     "name": "BLACK WIDOW",
@@ -1213,7 +1216,7 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Weapon: Captain America’s shield [+1 Melee and Agility Damage multiplier. Grants the user one extra level of the power Shield (up to Shield 4), which they can use without paying the additional level’s Focus cost.]",
+          "Iconic Weapon",
           "Inspiration",
           "Mighty 1"
         ]
@@ -1236,7 +1239,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "captain-america",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Captain America's Shield"
+    ]
   },
   {
     "name": "CAPTAIN MARVEL",
@@ -1659,7 +1665,7 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Heightened Senses 2",
-          "Iconic Weapon: Daredevil’s Billy Club. Adds +1 damage multiplier and grants the swingline movement mode, with a speed equal to triple his Run Speed. The Billy Club can be thrown and instantly retrieved. The range of the Billy Club and the reach of the swingline is equal to its Swingline Speed: 15 spaces."
+          "Iconic Weapon"
         ]
       },
       {
@@ -1674,7 +1680,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "daredevil",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Daredevil's Billy Club"
+    ]
   },
   {
     "name": "DEADPOOL",
@@ -2942,7 +2951,7 @@ export const MMRPG_CHARACTERS = [
           "Environmental Protection",
           "Flight 2",
           "Healing Factor",
-          "Iconic Weapon: All- Black the Necrosword [without All-Black, Gorr powerless]",
+          "Iconic Weapon",
           "Mighty 4",
           "Sturdy 4"
         ]
@@ -2962,7 +2971,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "gorr-the-god-butcher",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "All-Black the Necrosword"
+    ]
   },
   {
     "name": "GREEN GOBLIN",
@@ -4078,7 +4090,7 @@ export const MMRPG_CHARACTERS = [
         "set": "Basic",
         "names": [
           "Healing Factor",
-          "Iconic Weapon: Crimson Gem of Cyttorak [Any attack which deals less than 30 points of damage to the user of the Crimson Gem instantly negated.]",
+          "Iconic Weapon",
           "Mighty 4",
           "Sturdy 4"
         ]
@@ -4098,7 +4110,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "juggernaut",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Crimson Gem of Cyttorak"
+    ]
   },
   {
     "name": "KATE PRYDE",
@@ -5831,14 +5846,17 @@ export const MMRPG_CHARACTERS = [
       {
         "set": "Basic",
         "names": [
-          "Iconic Weapon: Iron Man's gloves (Elemental Burst: Energy)",
+          "Iconic Weapon",
           "Inspiration",
           "Integrity"
         ]
       }
     ],
     "id": "night-nurse",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Iron Man's Gloves"
+    ]
   },
   {
     "name": "NIGHTCRAWLER",
@@ -7548,7 +7566,7 @@ export const MMRPG_CHARACTERS = [
           "Environmental Protection (space helmet)",
           "Healing Factor",
           "Heightened Senses",
-          "Iconic Weapon: Element Gun [Can pick elemental eff ect from air, earth, fire, water, or energy; returns when summoned]",
+          "Iconic Weapon",
           "Inspiration",
           "Sturdy 1",
           "Wisecracker"
@@ -7578,7 +7596,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "star-lord",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Element Gun"
+    ]
   },
   {
     "name": "STORM",
@@ -8079,7 +8100,7 @@ export const MMRPG_CHARACTERS = [
           "Combat Trickery",
           "Discipline 2",
           "Flight 2",
-          "Iconic Weapon: Mjolnir [+1 Melee and Agility damage multiplier. Returns to thrower. Can only be wielded by the worthy.]",
+          "Iconic Weapon",
           "Mighty 4",
           "Sturdy 2"
         ]
@@ -8096,7 +8117,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "thor-jane-foster",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Mjolnir"
+    ]
   },
   {
     "name": "THOR",
@@ -8154,7 +8178,7 @@ export const MMRPG_CHARACTERS = [
         "names": [
           "Discipline 1",
           "Flight 2",
-          "Iconic Weapon: Mjolnir [+1 Melee and Agility damage multiplier. Returns to thrower. Can only be wielded by the worthy.]",
+          "Iconic Weapon",
           "Mighty 4",
           "Sturdy 2"
         ]
@@ -8170,7 +8194,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "thor-thor-odinson",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Mjolnir"
+    ]
   },
   {
     "name": "TITANIA",
@@ -8899,7 +8926,7 @@ export const MMRPG_CHARACTERS = [
           "Combat Trickery",
           "Healing Factor",
           "Heightened Senses 1",
-          "Iconic Weapon: Adamantium Claws [+1 Melee damage multiplier]",
+          "Iconic Weapon",
           "Reinforced Skeleton",
           "Uncanny 1"
         ]
@@ -8918,7 +8945,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "wolverine-laura-kinney",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Adamantium Claws"
+    ]
   },
   {
     "name": "WOLVERINE",
@@ -8975,7 +9005,7 @@ export const MMRPG_CHARACTERS = [
           "Combat Trickery",
           "Healing Factor",
           "Heightened Senses 1",
-          "Iconic Weapon: Adamantium Claws [+1 Melee damage multiplier]",
+          "Iconic Weapon",
           "Reinforced Skeleton",
           "Uncanny 1"
         ]
@@ -8989,7 +9019,10 @@ export const MMRPG_CHARACTERS = [
       }
     ],
     "id": "wolverine-james-howlett-a-k-a-logan",
-    "genre": "core"
+    "genre": "core",
+    "equipment": [
+      "Adamantium Claws"
+    ]
   },
   {
     "name": "WONG",

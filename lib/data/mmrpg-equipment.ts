@@ -5,7 +5,41 @@ import type { MmrpgEquipment } from "./mmrpg-types";
 
 export const MMRPG_EQUIPMENT = [
   {
+    "name": "Adamantium Claws",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Wolverine",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "melee"
+    ],
+    "notes": "Wolverine's adamantium-laced bone claws.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
+    "name": "All-Black the Necrosword",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Gorr the God Butcher",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "The source of all Gorr's powers — without All-Black, Gorr is powerless.",
+    "notes": "The first symbiote, a living blade forged from a god's shadow.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
     "name": "Bow",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -16,7 +50,28 @@ export const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Captain America's Shield",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Captain America",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach (thrown 10)",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "special": "Grants one extra level of the Shield power (up to Shield 4), usable without paying the additional level's Focus cost.",
+    "notes": "A nigh-indestructible vibranium disc that can be thrown and bounces back.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
     "name": "Club",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "melee",
     "ability": "melee",
@@ -27,7 +82,77 @@ export const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Crimson Gem of Cyttorak",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Juggernaut",
+    "special": "Any attack that deals less than 30 points of damage to the wielder is instantly negated.",
+    "notes": "The mystic ruby whose power transformed Cain Marko into the Juggernaut.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
+    "name": "Daredevil's Billy Club",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Daredevil",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "15",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "grantsMovement": [
+      {
+        "mode": "Swingline",
+        "mult": 3,
+        "base": "run"
+      }
+    ],
+    "special": "Can be thrown and instantly retrieved. The range of the club and the reach of the swingline both equal its Swingline Speed.",
+    "notes": "A billy club on a de-cel cable that doubles as a grappling line.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
+    "name": "Electrified Vibranium Claws",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Black Panther",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "melee"
+    ],
+    "notes": "Black Panther's iconic weapon — retractable vibranium claws that carry an electric charge.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
+    "name": "Element Gun",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Star-Lord",
+    "weaponClass": "ranged",
+    "ability": "agility",
+    "range": "10",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "With each use, choose an elemental effect from air, earth, fire, water, or energy. Returns to the wielder when summoned.",
+    "notes": "A Kree quad-blaster keyed to the elements.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
     "name": "Flash-Bang Grenade",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -39,6 +164,8 @@ export const MMRPG_EQUIPMENT = [
   },
   {
     "name": "Frag Grenade",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -49,7 +176,19 @@ export const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Iron Man's Gloves",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Night Nurse",
+    "special": "Grants the Elemental Burst power (Energy).",
+    "notes": "A repurposed pair of Iron Man's gauntlets.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
     "name": "Knife",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "melee",
     "ability": "melee",
@@ -61,6 +200,8 @@ export const MMRPG_EQUIPMENT = [
   },
   {
     "name": "Knife, Thrown",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -71,7 +212,28 @@ export const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Mjolnir",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Thor",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach (thrown 10)",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "special": "Returns to the thrower. Can only be wielded by the worthy.",
+    "notes": "Thor's enchanted Uru hammer.",
+    "source": "core ch.8 (Characters)"
+  },
+  {
     "name": "Pistol",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -83,6 +245,8 @@ export const MMRPG_EQUIPMENT = [
   },
   {
     "name": "Rifle",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -94,6 +258,8 @@ export const MMRPG_EQUIPMENT = [
   },
   {
     "name": "Shotgun",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -105,6 +271,8 @@ export const MMRPG_EQUIPMENT = [
   },
   {
     "name": "Sniper Rifle",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -116,6 +284,8 @@ export const MMRPG_EQUIPMENT = [
   },
   {
     "name": "Submachine Gun",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "ranged",
     "ability": "agility",
@@ -127,6 +297,8 @@ export const MMRPG_EQUIPMENT = [
   },
   {
     "name": "Sword",
+    "tier": "Common",
+    "type": "Weapon",
     "category": "Weapon",
     "weaponClass": "melee",
     "ability": "melee",

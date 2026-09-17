@@ -78,15 +78,36 @@ export interface MmrpgCharacter {
   tags?: string[];
   /** Powers grouped by power set ("" or "Basic" = basic powers). */
   powers?: { set: string; names: string[] }[];
+  /** Starting equipment (names referencing MmrpgEquipment), e.g. an iconic weapon. */
+  equipment?: string[];
   source?: string;
 }
 
-/** A piece of equipment — weapon, gear or vehicle. Core book has weapons;
- *  gear and vehicles arrive with the expansions. */
+/** Movement mode granted by a power or piece of equipment. The sheet computes
+ *  the speed as `mult` × the character's `base` speed (currently always "run"). */
+export interface MmrpgMovementGrant {
+  /** "Flight" | "Glide" | "Swingline" | "Climb" | … */
+  mode: string;
+  /** Multiplier applied to the base speed. */
+  mult: number;
+  /** Base speed the multiplier applies to (default "run"). */
+  base?: string;
+}
+
+/** A piece of equipment. Organised on two axes:
+ *  tier = Common | Narrative | Iconic, and type = Weapon | Item | Armor.
+ *  The core book has the common weapons plus the iconic weapons/items pulled
+ *  from the Characters chapter; narrative gear and armor arrive with expansions. */
 export interface MmrpgEquipment {
   name: string;
-  /** "Weapon" | "Gear" | "Vehicle". */
+  /** "Common" | "Narrative" | "Iconic". */
+  tier?: string;
+  /** "Weapon" | "Item" | "Armor". */
+  type?: string;
+  /** Legacy axis, kept in sync with `type` for the character sheet. */
   category: string;
+  /** Signature character for an iconic item (used to label it in the picker). */
+  owner?: string;
   /** Weapons: "melee" | "ranged". */
   weaponClass?: string;
   /** Ability a weapon attacks with. */
@@ -97,10 +118,17 @@ export interface MmrpgEquipment {
   damageBonus?: string;
   /** Numeric bonus added to the damage multiplier (rank + multBonus). */
   multBonus?: number;
+  /** Attack abilities the multiplier bonus applies to (e.g. ["melee","agility"]);
+   *  defaults to the weapon's own `ability` when absent. */
+  multAbilities?: string[];
   /** A flat damage multiplier that replaces the attacker's (e.g. a grenade's ×2). */
   flatMult?: number;
   /** Deals no Health damage (e.g. a flash-bang). */
   noDamage?: boolean;
+  /** Movement modes granted while equipped (shown in the Speed section). */
+  grantsMovement?: MmrpgMovementGrant[];
+  /** Conditional/narrative mechanical text the player applies manually. */
+  special?: string;
   notes?: string;
   source?: string;
 }

@@ -192,6 +192,47 @@ def parse_page(pg):
             'features':features,'history':history,'personality':personality,
             'traits':traits,'tags':tags,'powers':powers}
 
+# ── Iconic weapons/items: the pregens list their signature gear inline in the
+# "Iconic Weapon: <full text>" power. Move that to the Equipment list (see
+# data/mmrpg/parts/equipment.json, Iconic tier) and leave just the "Iconic
+# Weapon"/"Iconic Item" power on the character, with the item attached as
+# starting equipment. Also collapses power names duplicated by column reads.
+ICONIC={
+  'BLACK PANTHER':'Electrified Vibranium Claws',
+  'CAPTAIN AMERICA':"Captain America's Shield",
+  'DAREDEVIL':"Daredevil's Billy Club",
+  'GORR THE GOD BUTCHER':'All-Black the Necrosword',
+  'JUGGERNAUT':'Crimson Gem of Cyttorak',
+  'NIGHT NURSE':"Iron Man's Gloves",
+  'STAR-LORD':'Element Gun',
+  'THOR':'Mjolnir',
+  'WOLVERINE':'Adamantium Claws',
+}
+def apply_iconic(rec):
+    item=ICONIC.get((rec.get('name') or '').upper())
+    equip=[]
+    newgroups=[]
+    for g in rec.get('powers',[]):
+        names=[]
+        for n in g.get('names',[]):
+            m=re.match(r'^\s*Iconic (Weapon|Item)\b',n)
+            if m:
+                lbl='Iconic '+m.group(1)
+                if lbl not in names: names.append(lbl)
+                if item and item not in equip: equip.append(item)
+            elif n not in names:
+                names.append(n)
+        if names: newgroups.append({'set':g.get('set',''),'names':names})
+    # collapse groups that became identical after the rewrite
+    seen=set(); merged=[]
+    for g in newgroups:
+        key=(g['set'],tuple(g['names']))
+        if key in seen: continue
+        seen.add(key); merged.append(g)
+    rec['powers']=merged
+    if equip: rec['equipment']=equip
+    return rec
+
 if __name__=='__main__':
     if len(sys.argv)>2:
         lo,hi=int(sys.argv[1]),int(sys.argv[2])
@@ -218,5 +259,6 @@ if __name__=='__main__':
             base=slug(r['name'])
             r['id']= base if names[r['name']]==1 else base+'-'+slug(r['realName'] or '')
             r['genre']='core'
+            apply_iconic(r)
         json.dump(out,open('data/mmrpg/parts/characters.json','w'),ensure_ascii=False,indent=1)
         print("wrote",len(out),"characters")

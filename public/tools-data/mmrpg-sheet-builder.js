@@ -19,6 +19,10 @@
   function TRAITS() { return arr(W.MMRPG_TRAITS); }
   function TAGS() { return arr(W.MMRPG_TAGS); }
   function POWERS() { return arr(W.MMRPG_POWERS); }
+  function EQUIP() { return arr(W.MMRPG_EQUIPMENT); }
+  function equipByName(n) { var k = String(n || '').toLowerCase(); return EQUIP().filter(function (e) { return (e.name || '').toLowerCase() === k; })[0]; }
+  // Build a sheet equipment entry from an MMRPG_EQUIPMENT record.
+  function mkEquip(x, equipped) { x = x || {}; return { name:x.name || '', tier:x.tier || 'Common', type:x.type || x.category || 'Weapon', category:x.type || x.category || 'Weapon', owner:x.owner || '', ability:x.ability || 'melee', range:x.range || '', notes:x.notes || '', special:x.special || '', damageBonus:x.damageBonus || '', multBonus:parseInt(x.multBonus, 10) || 0, multAbilities:Array.isArray(x.multAbilities) ? x.multAbilities.slice() : null, flatMult:parseInt(x.flatMult, 10) || 0, noDamage:!!x.noDamage, grantsMovement:Array.isArray(x.grantsMovement) ? x.grantsMovement : null, equipped:!!equipped }; }
   function CHARS() { return arr(W.MMRPG_CHARACTERS); }
   var ABIL = (typeof ABILITIES !== 'undefined') ? ABILITIES : [
     { key:'melee', name:'Melee' }, { key:'agility', name:'Agility' }, { key:'resilience', name:'Resilience' },
@@ -113,7 +117,9 @@
         B.powers.push({ name:nm, powerSet: g.set || p.powerSet || '', action:p.action || '', duration:p.duration || '', cost:p.cost || '', range:p.range || '', prerequisites:p.prerequisites || '', effect:p.effect || '', fantastic:p.fantastic || '' });
       });
     });
-    B.attacks = [];
+    // Attach the character's starting equipment (e.g. their iconic weapon),
+    // auto-equipped so its bonuses/movement apply immediately.
+    B.attacks = arr(c.equipment).map(function (nm) { return mkEquip(equipByName(nm) || { name:nm }, true); });
     recompute();
   }
 
@@ -302,11 +308,15 @@
     h += '<div class="m-hint" style="margin:16px 0 2px;"><b>Weapons</b></div>';
     if (!B.attacks.length) h += '<p class="m-hint" style="margin:4px 0;color:#7a7e88;">None yet.</p>';
     else h += B.attacks.map(function (w, i) {
+      var badge = (w.tier === 'Iconic' || w.owner) ? '<span style="font:800 9px/1 \'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#f4a6a8;align-self:center;">Iconic' + (w.owner ? ' · ' + E(w.owner) : '') + '</span>' : '';
+      var note = w.special ? '<div class="m-hint" style="flex-basis:100%;margin:0 0 2px;color:#8a8e98;">' + E(w.special) + '</div>' : '';
       return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap;">'
         + '<input class="m-input" style="flex:2;min-width:120px;" value="' + E(w.name) + '" placeholder="Weapon name" oninput="window.MMRPGB.wset(' + i + ',\'name\',this.value)">'
         + '<select class="m-input" style="flex:1;min-width:90px;" onchange="window.MMRPGB.wset(' + i + ',\'ability\',this.value)">' + ABIL.map(function (a) { return '<option value="' + a.key + '"' + (w.ability === a.key ? ' selected' : '') + '>' + a.name + '</option>'; }).join('') + '</select>'
         + '<input class="m-input" style="flex:1;min-width:80px;" value="' + E(w.range) + '" placeholder="Range" oninput="window.MMRPGB.wset(' + i + ',\'range\',this.value)">'
-        + '<button class="m-btn ghost" style="padding:6px 10px;" onclick="window.MMRPGB.rmWeapon(' + i + ')">✕</button></div>';
+        + badge
+        + '<button class="m-btn ghost" style="padding:6px 10px;" onclick="window.MMRPGB.rmWeapon(' + i + ')">✕</button>'
+        + note + '</div>';
     }).join('');
     h += '<button class="m-btn ghost" style="margin-top:4px;" onclick="window.MMRPGB.addWeapon()">+ Add weapon</button>';
     return h;
@@ -482,7 +492,7 @@
       B[key] += d; if (kind === 'Ability') recompute(); paint();
     },
     // weapons
-    addWeapon: function () { B.attacks.push({ name:'', ability:'melee', range:'', notes:'' }); paint(); },
+    addWeapon: function () { B.attacks.push(mkEquip({ name:'', damageBonus:'+1', multBonus:1 }, false)); paint(); },
     wset: function (i, k, v) { if (B.attacks[i]) B.attacks[i][k] = v; },
     rmWeapon: function (i) { B.attacks.splice(i, 1); paint(); },
     // step 6
