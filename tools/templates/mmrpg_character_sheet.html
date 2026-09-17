@@ -452,7 +452,7 @@ function blankState(){
   var st={ name:'',real:'',pronouns:'',rank:1,origin:'',occupation:'',size:'Average',teams:'',
     abilities:{melee:0,agility:0,resilience:0,vigilance:0,ego:0,logic:0},
     health:{cur:0,max:0}, focus:{cur:0,max:0}, karma:{cur:1,max:1}, healthDR:0, focusDR:0,
-    conditions:{}, powers:[], traits:[], tags:[], attacks:[],
+    conditions:{}, powers:[], traits:[], tags:[], attacks:[], iconics:[],
     levelup:{abilityBoxes:0, powerBoxes:[], traitBox:0, picks:[]},
     history:'', personality:'', features:'', base:'', notes:'' };
   return st;
@@ -856,7 +856,8 @@ function mkEquip(x,equipped){ x=x||{};
   return {name:x.name||'',tier:x.tier||'Common',type:x.type||x.category||'Weapon',category:x.type||x.category||'Weapon',
     owner:x.owner||'',ability:x.ability||'melee',range:x.range||'',notes:x.notes||'',special:x.special||'',
     damageBonus:x.damageBonus||'',multBonus:num(x.multBonus)||0,multAbilities:Array.isArray(x.multAbilities)?x.multAbilities.slice():null,
-    flatMult:num(x.flatMult)||0,noDamage:!!x.noDamage,grantsMovement:Array.isArray(x.grantsMovement)?x.grantsMovement:null,equipped:!!equipped};
+    flatMult:num(x.flatMult)||0,noDamage:!!x.noDamage,grantsMovement:Array.isArray(x.grantsMovement)?x.grantsMovement:null,equipped:!!equipped,
+    _iconic:!!x._iconic,powerValue:x.powerValue};
 }
 // ── Picker ──
 var _pk=null, _pkRows=[];
@@ -968,7 +969,28 @@ function luPowerLeft(){ return 4 - LU().powerBoxes.length; }
 function luCanAbility(){ return LU().abilityBoxes<5 || luPowerLeft()>0; }
 function luCanPower(){ return luPowerLeft()>0; }
 function luCanTrait(){ return LU().traitBox<1 || luPowerLeft()>0; }
+function luCanIconic(){ return luPowerLeft()>0; }
 function luNextRank(){ return Math.min(6, rank()+1); }
+// Effective cost of owning an iconic item = Power Value − already-owned granted
+// powers, min 1 (Avengers Expansion p102).
+function luIconicCost(e){
+  var have={}; (S.powers||[]).forEach(function(p){ have[String(p.name).toLowerCase().replace(/\s+\d+$/,'')]=1; });
+  var owned=0; String(e.grantsPowers||'').replace(/\.\s*$/,'').split(',').map(function(s){return s.trim();}).filter(Boolean).forEach(function(nm){ if(have[String(nm).toLowerCase().replace(/\s+\d+$/,'')])owned++; });
+  var suit=/Battle Suit/i.test(String(e.grantsOrigin||''))?1:0; // battle suit: first pick free
+  return Math.max(1,(parseInt(e.powerValue,10)||1)-owned-suit);
+}
+// Remove auto-added reliance / Extraordinary Origin traits no longer implied by
+// any owned iconic (used on undo).
+function _iconicReconcileTraits(){
+  var need={};
+  (S.iconics||[]).forEach(function(it){ var o=String(it.grantsOrigin||'');
+    if(o && o!==S.origin) need['extraordinary origin']=1;
+    if(/High.?Tech|Battle Suit|Cybernetics/i.test(o)) need['tech reliance']=1;
+    else if(/Magic|Mythic|Asgardian|Sorcery/i.test(o)) need['magic item reliance']=1;
+  });
+  var AUTO={'extraordinary origin':1,'tech reliance':1,'magic item reliance':1};
+  S.traits=(S.traits||[]).filter(function(t){ var k=(t.name||'').toLowerCase(); return !(AUTO[k] && !need[k]); });
+}
 function prereqRank(p){ var m=/Rank\s*(\d+)/i.exec((p&&p.prerequisites)||''); return m?+m[1]:0; }
 function findLastIndex(arr,fn){ for(var i=arr.length-1;i>=0;i--){ if(fn(arr[i]))return i; } return -1; }
 
@@ -1005,6 +1027,35 @@ function luAddTrait(name){ if(!luCanTrait())return;
   luApply(box,'trait',name);
   luAfterPick('Trait: '+name+(box==='power'?' (traded a power pick)':''));
 }
+function luAddIconic(name){
+  var e=EQUIP().filter(function(x){return (x.name||'').toLowerCase()===String(name).toLowerCase() && x.tier==='Iconic';})[0];
+  if(!e) return;
+  if((S.iconics||[]).some(function(it){return (it.name||'').toLowerCase()===(e.name||'').toLowerCase();})) return; // already owned
+  var eff=luIconicCost(e);
+  if(luPowerLeft()<eff) return; // not enough power boxes left this rank-up
+  if(!S.iconics)S.iconics=[]; S.iconics.push(Object.assign({},e));
+  // granted powers (deduped, with effect + from)
+  var seen={}; (S.powers||[]).forEach(function(p){ seen[String(p.name).toLowerCase().replace(/\s+\d+$/,'')]=1; });
+  String(e.grantsPowers||'').replace(/\.\s*$/,'').split(',').map(function(s){return s.trim();}).filter(Boolean).forEach(function(nm){
+    var k=String(nm).toLowerCase().replace(/\s+\d+$/,''); if(seen[k])return; seen[k]=1;
+    var p=(POWERS||[]).find(function(x){return x.name===nm;})||{name:nm};
+    S.powers.push({name:nm,powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||'',from:e.name});
+  });
+  // reliance + extraordinary origin traits
+  var o=String(e.grantsOrigin||''), haveT={}; (S.traits||[]).forEach(function(t){haveT[(t.name||'').toLowerCase()]=1;});
+  function addT(nm,desc){ if(haveT[nm.toLowerCase()])return; haveT[nm.toLowerCase()]=1; var d=(TRAITS||[]).find(function(x){return x.name===nm;}); S.traits.push({name:nm,description:(d&&d.description)||desc||''}); }
+  if(o && o!==S.origin) addT('Extraordinary Origin','Gained from an iconic item ('+e.name+', '+o+').');
+  if(/High.?Tech|Battle Suit|Cybernetics/i.test(o)) addT('Tech Reliance','The item relies on technology for its powers.');
+  else if(/Magic|Mythic|Asgardian|Sorcery/i.test(o)) addT('Magic Item Reliance','The item relies on magic for its powers.');
+  // equipment entry
+  var atk=mkEquip(e,true); atk._iconic=true; S.attacks.push(atk);
+  // consume eff power boxes; record one undoable pick
+  var l=LU(); for(var i=0;i<eff;i++) l.powerBoxes.push('iconic');
+  l.picks.push({box:'power', action:'iconic', ref:e.name, eff:eff});
+  renderPowers(); renderAbilities(); renderDerived(); renderDamage(); renderTraitsTags(); if(typeof renderAttacks==='function')renderAttacks();
+  saveSheet(true);
+  luAfterPick('Iconic: '+e.name+' (−'+eff+' pick'+(eff===1?'':'s')+')');
+}
 function luAfterPick(label){
   addLog('Advancement','+ '+label, luFilled()+'/10 → Rank '+luNextRank(), 'normal');
   if(luFilled()>=10) luRankUp();
@@ -1019,6 +1070,16 @@ function luRankUp(){
 }
 function luUndo(){ var l=LU(); if(!l.picks.length)return;
   var last=l.picks.pop();
+  if(last.action==='iconic'){
+    var eff=last.eff||1; for(var b=0;b<eff;b++){ if(l.powerBoxes.length) l.powerBoxes.pop(); }
+    var nm=last.ref;
+    S.iconics=(S.iconics||[]).filter(function(it){return it.name!==nm;});
+    S.powers=(S.powers||[]).filter(function(p){return p.from!==nm;});
+    S.attacks=(S.attacks||[]).filter(function(w){return !(w._iconic && w.name===nm);});
+    _iconicReconcileTraits();
+    renderPowers();renderAbilities();renderDerived();renderDamage();renderTraitsTags();if(typeof renderAttacks==='function')renderAttacks();
+    saveSheet(true); _lu.mode=null; renderLevelUp(); refreshWizardButtons(); return;
+  }
   if(last.box==='ability') l.abilityBoxes=Math.max(0,l.abilityBoxes-1);
   else if(last.box==='trait') l.traitBox=0;
   else l.powerBoxes.pop();
@@ -1065,6 +1126,18 @@ function luPickList(){
     if(!tr.length) return '<div class="brow-empty">No matching traits.</div>';
     return tr.map(function(t){ return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(t.name)+'</div>'+(t.description?'<div class="brow-desc">'+esc(t.description)+'</div>':'')+'</div><button class="brow-add" onclick="luAddTrait('+jsq(t.name)+')">＋ Add</button></div>'; }).join('');
   }
+  if(_lu.mode==='iconic'){
+    var ownedI={}; (S.iconics||[]).forEach(function(it){ownedI[(it.name||'').toLowerCase()]=1;});
+    var left=luPowerLeft();
+    var ic=EQUIP().filter(function(e){ if(e.tier!=='Iconic'||ownedI[(e.name||'').toLowerCase()])return false; if(!q)return true; return ((e.name||'')+' '+(e.owner||'')+' '+(e.grantsPowers||'')+' '+(e.grantsOrigin||'')).toLowerCase().indexOf(q)>=0; }).slice(0,300);
+    if(!ic.length) return '<div class="brow-empty">No matching iconic items.</div>';
+    return ic.map(function(e){
+      var eff=luIconicCost(e), can=left>=eff;
+      var meta=(e.type||'Item')+(e.owner?' · '+e.owner:'')+' · PV '+(parseInt(e.powerValue,10)||1)+(e._hb?' · HB':'');
+      var desc=(e.grantsPowers?'Grants: '+e.grantsPowers:'')+(Array.isArray(e.restrictions)&&e.restrictions.length?' — '+e.restrictions.join(', '):'');
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(e.name)+'<span class="brow-cost">'+esc(meta)+'</span></div>'+(desc?'<div class="brow-desc">'+esc(desc)+'</div>':'')+'</div>'+(can?'<button class="brow-add" onclick="luAddIconic('+jsq(e.name)+')">＋ Own (−'+eff+')</button>':'<span class="brow-cost" style="align-self:center;color:#df8a8a;">Need '+eff+'</span>')+'</div>';
+    }).join('');
+  }
   return '';
 }
 function jsq(s){ return "'"+String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'"; }
@@ -1083,10 +1156,11 @@ function renderLevelUp(){
     +'<button class="m-btn'+(_lu.mode==='ability'?'':' ghost')+'" '+(luCanAbility()?'':'disabled ')+'onclick="luSetMode(\'ability\')">＋ Ability point</button>'
     +'<button class="m-btn'+(_lu.mode==='power'?'':' ghost')+'" '+(luCanPower()?'':'disabled ')+'onclick="luSetMode(\'power\')">＋ Power</button>'
     +'<button class="m-btn'+(_lu.mode==='trait'?'':' ghost')+'" '+(luCanTrait()?'':'disabled ')+'onclick="luSetMode(\'trait\')">＋ Trait</button>'
+    +'<button class="m-btn'+(_lu.mode==='iconic'?'':' ghost')+'" '+(luCanIconic()?'':'disabled ')+'onclick="luSetMode(\'iconic\')">＋ Iconic Item</button>'
     +(LU().picks.length?'<button class="m-btn ghost" onclick="luUndo()" title="Undo the last pick">↶ Undo</button>':'')
     +'</div>';
-  if(_lu.mode==='power'||_lu.mode==='trait'){
-    h+='<input class="m-input" style="margin:8px 0;" placeholder="Search '+_lu.mode+'s…" value="'+esc(_lu.q||'')+'" oninput="luSearch(this.value)">';
+  if(_lu.mode==='power'||_lu.mode==='trait'||_lu.mode==='iconic'){
+    h+='<input class="m-input" style="margin:8px 0;" placeholder="Search '+(_lu.mode==='iconic'?'iconic items':_lu.mode+'s')+'…" value="'+esc(_lu.q||'')+'" oninput="luSearch(this.value)">';
   }
   if(_lu.mode){
     if(_lu.mode==='ability') h+='<p class="m-hint" style="margin:6px 0 4px;">Choose an ability to raise by +1'+(LU().abilityBoxes>=5?' (this will trade a power pick)':'')+':</p>';
@@ -1146,7 +1220,8 @@ function applySheet(d){
   ['health','focus','karma'].forEach(function(w){ if(d[w])S[w]={cur:num(d[w].cur),max:num(d[w].max)}; });
   if(d.healthDR!=null)S.healthDR=num(d.healthDR); if(d.focusDR!=null)S.focusDR=num(d.focusDR);
   S.conditions={}; if(d.conditions) CONDITIONS.forEach(function(c){ if(d.conditions[c.name])S.conditions[c.name]=true; });
-  if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||''}; });
+  if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||'',from:p.from||''}; });
+  if(Array.isArray(d.iconics)) S.iconics=d.iconics.slice();
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.tags)) S.tags=d.tags.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.attacks)) S.attacks=d.attacks.map(function(w){ return mkEquip(w, w.equipped); });
@@ -1208,7 +1283,7 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','🔗','Connected to "'+_campaign.name+'"','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); try{ syncMmrpgHomebrew(); }catch(e){} addLog('Campaign','🔗','Connected to "'+_campaign.name+'"','normal'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
 function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','🔗','Left "'+name+'"','normal'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
@@ -1222,7 +1297,7 @@ async function campaignPoll(){ if(!_campaign)return; try{ var r=await fetch('/ap
 function campaignPollDelay(){ return document.hidden?20000:4000; }
 function campaignStartPolling(){ if(_campaignTimer)clearInterval(_campaignTimer); campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); }
 document.addEventListener('visibilitychange',function(){ if(!_campaign||!_campaignTimer)return; clearInterval(_campaignTimer); if(!document.hidden)campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); });
-function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:saved.id,code:saved.code,name:saved.name||'Campaign'}; campaignStartPolling(); } else campaignLeaveSilent(); campaignUpdateBtn(); }
+function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:saved.id,code:saved.code,name:saved.name||'Campaign'}; campaignStartPolling(); try{ syncMmrpgHomebrew(); }catch(e){} } else campaignLeaveSilent(); campaignUpdateBtn(); }
 window.openCampaign=openCampaign; window.closeCampaign=closeCampaign;
 
 // ═══ INIT ════════════════════════════════════════════════════════════════════
@@ -1233,8 +1308,45 @@ function autoLoad(){
   try{ applySheet(JSON.parse(saved)); }catch(e){ renderAll(); }
   setDefaultTab();
 }
+// ── Homebrew sync ──────────────────────────────────────────────────────────
+// The account's homebrew (personal + anything shared with this character's
+// campaign) is merged into the book data arrays IN PLACE — those arrays are
+// shared by reference with the builder and leveler, so homebrew powers, traits,
+// tags and iconic items become pickable/ownable just like book content. The
+// book data is snapshotted once and never mutated; nothing is kept in-browser.
+var _mmrpgBook=null;
+function _mmrpgSnapshotBook(){
+  if(_mmrpgBook)return;
+  _mmrpgBook={ equip:(window.MMRPG_EQUIPMENT||[]).slice(), powers:(window.MMRPG_POWERS||[]).slice(),
+    traits:(window.MMRPG_TRAITS||[]).slice(), tags:(window.MMRPG_TAGS||[]).slice() };
+}
+function _mmrpgRebuild(target, book, hb){
+  if(!Array.isArray(target))return; target.length=0; var seen={};
+  book.forEach(function(x){ target.push(x); seen[String(x&&x.name||'').toLowerCase()]=1; });
+  hb.forEach(function(x){ var k=String(x&&x.name||'').toLowerCase(); if(k&&!seen[k]){ x._hb=true; target.push(x); seen[k]=1; } });
+}
+async function syncMmrpgHomebrew(){
+  _mmrpgSnapshotBook();
+  var url='/api/homebrew'; if(_campaign&&_campaign.id) url+='?campaign='+encodeURIComponent(_campaign.id);
+  var items;
+  try{ var r=await fetch(url,{credentials:'same-origin'}); if(!r.ok)return; var data=await r.json(); items=Array.isArray(data.items)?data.items:[]; }catch(e){ return; }
+  var hb={iconic:[],power:[],trait:[],tag:[]}, seen={iconic:{},power:{},trait:{},tag:{}};
+  var MAP={'mmrpg-iconic':'iconic','mmrpg-power':'power','mmrpg-trait':'trait','mmrpg-tag':'tag'};
+  items.forEach(function(row){
+    if(!row||!row.data)return; var b=MAP[row.type]; if(!b)return;
+    var nm=String(row.data.name||'').toLowerCase(); if(!nm||seen[b][nm])return; seen[b][nm]=1;
+    hb[b].push(Object.assign({}, row.data));
+  });
+  _mmrpgRebuild(window.MMRPG_EQUIPMENT, _mmrpgBook.equip, hb.iconic);
+  _mmrpgRebuild(window.MMRPG_POWERS,    _mmrpgBook.powers, hb.power);
+  _mmrpgRebuild(window.MMRPG_TRAITS,    _mmrpgBook.traits, hb.trait);
+  _mmrpgRebuild(window.MMRPG_TAGS,      _mmrpgBook.tags,   hb.tag);
+  // Refresh an open equipment/power picker so new entries appear immediately.
+  try{ var po=document.getElementById('pick-overlay'); if(po && po.style.display!=='none' && typeof renderPicker==='function') renderPicker(); }catch(e){}
+}
 S=blankState();
 autoLoad();
+try{ syncMmrpgHomebrew(); }catch(e){}
 </script>
 <script src="/tools-data/mmrpg-sheet-builder.js"></script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->

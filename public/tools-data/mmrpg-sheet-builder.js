@@ -37,10 +37,10 @@
     return { step:0, source:null, sourceName:'',
       name:'', real:'', pronouns:'', rank:1,
       origin:'', occupation:'', history:'', personality:'', features:'', base:'', teams:'', size:'Average',
-      traits:[], tags:[], powers:[], attacks:[],
+      traits:[], tags:[], powers:[], attacks:[], iconics:[],
       scores:{ melee:0, agility:0, resilience:0, vigilance:0, ego:0, logic:0 },
       convAbility:0, convTraits:0,
-      _q:'', _focus:'', _pset:'', _showLocked:false };
+      _q:'', _focus:'', _pset:'', _showLocked:false, _iq:'', _ifocus:'' };
   }
   // budgets ------------------------------------------------------------------
   function cap() { return 3 + B.rank; }
@@ -50,9 +50,47 @@
   function setsUsed() { var s = {}; B.powers.forEach(function (p) { var ps = p.powerSet; if (ps && ps !== 'None' && ps !== 'Basic') s[ps] = 1; }); return Object.keys(s).length; }
   function thematicBonus() { return Math.max(0, B.rank - setsUsed()); }
   function powerBudget() { return 4 * B.rank + thematicBonus(); }
-  function powerSpent() { return B.powers.length + B.convAbility + B.convTraits; }
+  function powerSpent() { return B.powers.length + B.convAbility + B.convTraits + iconicCost(); }
   function powersUnused() { return powerBudget() - powerSpent(); }
   function traitLimit() { return B.rank + B.convTraits; }
+  // Owning an iconic item costs power picks equal to its Power Value, minus any
+  // of its granted powers you already picked yourself (min 1) — Avengers Exp. p102.
+  function iconicCost() { var total = 0; (B.iconics || []).forEach(function (it) { total += iconicEffCost(it); }); return total; }
+  function iconicEffCost(it) {
+    var pv = parseInt(it.powerValue, 10) || 1, owned = 0;
+    splitGrant(it.grantsPowers).forEach(function (nm) { if (hasPower(nm)) owned++; });
+    // A battle suit (High-Tech: Battle Suit origin) gets its first power pick free.
+    var suit = /Battle Suit/i.test(String(it.grantsOrigin || '')) ? 1 : 0;
+    return Math.max(1, pv - owned - suit);
+  }
+  function iconOwned(name) { var k = String(name).toLowerCase(); return (B.iconics || []).some(function (it) { return (it.name || '').toLowerCase() === k; }); }
+  // Full granted-power records across all owned iconics, deduped (rank-suffix-
+  // insensitive) against picks and each other. Each carries `from` so grants can
+  // be told apart from freely-picked powers on rebuild.
+  function iconicGrantedPowers() {
+    var out = [], seen = {};
+    B.powers.forEach(function (p) { seen[String(p.name).toLowerCase().replace(/\s+\d+$/, '')] = 1; });
+    (B.iconics || []).forEach(function (it) {
+      splitGrant(it.grantsPowers).forEach(function (nm) {
+        var key = String(nm).toLowerCase().replace(/\s+\d+$/, ''); if (seen[key]) return; seen[key] = 1;
+        var p = powerByName(nm) || {};
+        out.push({ name:nm, powerSet:p.powerSet || '', action:p.action || '', duration:p.duration || '', cost:p.cost || '', range:p.range || '', prerequisites:p.prerequisites || '', effect:p.effect || '', fantastic:p.fantastic || '', from:it.name });
+      });
+    });
+    return out;
+  }
+  // Reliance + Extraordinary Origin traits an owned iconic brings (Avengers Exp.).
+  function iconicDerivedTraits() {
+    var out = [], seen = {};
+    function add(name, desc) { var k = name.toLowerCase(); if (seen[k]) return; seen[k] = 1; var d = traitByName(name); out.push({ name:name, description:(d && d.description) || desc || '' }); }
+    (B.iconics || []).forEach(function (it) {
+      var o = String(it.grantsOrigin || '');
+      if (o && o !== B.origin) add('Extraordinary Origin', 'Gained from an iconic item (' + it.name + ', ' + o + ').');
+      if (/High.?Tech|Battle Suit|Cybernetics/i.test(o)) add('Tech Reliance', 'The item relies on technology for its powers.');
+      else if (/Magic|Mythic|Asgardian|Sorcery/i.test(o)) add('Magic Item Reliance', 'The item relies on magic for its powers.');
+    });
+    return out;
+  }
 
   // origin + occupation grants (comma lists like "Fearless, Connections: X.")
   function splitGrant(str) { return String(str || '').replace(/\.\s*$/, '').split(',').map(function (s) { return s.trim(); }).filter(Boolean); }
@@ -304,6 +342,7 @@
       + '<div style="display:flex;gap:16px;flex-wrap:wrap;">'
       + convCtl('Ability points', 'Ability', B.convAbility)
       + convCtl('Extra traits', 'Traits', B.convTraits) + '</div></div>';
+    h += iconicSection();
     // weapons
     h += '<div class="m-hint" style="margin:16px 0 2px;"><b>Weapons</b></div>';
     if (!B.attacks.length) h += '<p class="m-hint" style="margin:4px 0;color:#7a7e88;">None yet.</p>';
@@ -319,6 +358,45 @@
         + note + '</div>';
     }).join('');
     h += '<button class="m-btn ghost" style="margin-top:4px;" onclick="window.MMRPGB.addWeapon()">+ Add weapon</button>';
+    return h;
+  }
+  // Iconic-item ownership sub-section (Step 5).
+  function iconicSection() {
+    var owned = B.iconics || [], cost = iconicCost();
+    var h = '<div class="m-hint" style="margin:16px 0 2px;"><b>Iconic Items</b>' + (cost ? ' — <span style="color:#f4a6a8;">' + cost + ' pick' + (cost === 1 ? '' : 's') + ' spent</span>' : '') + '</div>';
+    h += '<p class="m-hint" style="margin:0 0 6px;color:#8a8e98;">Signature gear (book or your homebrew) that grants an origin and powers for a Power Value cost. Already-picked powers reduce the cost.</p>';
+    if (owned.length) h += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px;">' + owned.map(function (it, i) {
+      return '<span style="display:inline-flex;align-items:center;gap:6px;background:#221316;border:1px solid #3a2126;border-radius:14px;padding:3px 6px 3px 11px;font-size:12px;color:#f3e6e7;">' + E(it.name) + ' <span style="color:#8a8e98;">PV ' + (parseInt(it.powerValue, 10) || 1) + '</span><button onclick="window.MMRPGB.unownIconic(' + i + ')" style="border:none;background:#3a2126;color:#f4a6a8;border-radius:50%;width:17px;height:17px;cursor:pointer;font-size:11px;line-height:1;">✕</button></span>';
+    }).join('') + '</div>';
+    var iq = (B._iq || '').toLowerCase();
+    var list = EQUIP().filter(function (e) { return e.tier === 'Iconic' && !iconOwned(e.name); }).filter(function (e) {
+      var hay = (e.name + ' ' + (e.owner || '') + ' ' + (e.grantsPowers || '') + ' ' + (e.grantsOrigin || '')).toLowerCase();
+      return !iq || hay.indexOf(iq) >= 0;
+    });
+    h += '<input class="m-input" value="' + E(B._iq || '') + '" placeholder="Search iconic items…" oninput="window.MMRPGB.ifilter(this.value)">';
+    var focus = B._ifocus ? EQUIP().filter(function (e) { return e.name === B._ifocus; })[0] : null;
+    if (focus) h += iconicDetail(focus);
+    h += '<div style="max-height:22vh;overflow-y:auto;border:1px solid #201319;border-radius:5px;background:#0d0e12;margin-top:4px;">'
+      + (list.length ? list.slice(0, 80).map(function (e) {
+        var on = B._ifocus === e.name;
+        return '<button onclick="window.MMRPGB.ifocus(\'' + jq(e.name) + '\')" style="width:100%;text-align:left;border:none;border-bottom:1px solid #201319;background:' + (on ? '#1f1418' : 'transparent') + ';color:#e6dcde;padding:7px 8px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center;">'
+          + '<span>' + E(e.name) + (e._hb ? ' <span style="font-size:9px;color:#f4a6a8;letter-spacing:.08em;">HB</span>' : '') + '</span><span style="font-size:10px;color:#8a8e98;white-space:nowrap;">' + (e.owner ? E(e.owner) + ' · ' : '') + 'PV ' + (parseInt(e.powerValue, 10) || 1) + '</span></button>';
+      }).join('') : '<p class="m-hint" style="padding:8px;color:#7a7e88;">No iconic items match.</p>')
+      + '</div>';
+    return h;
+  }
+  function iconicDetail(e) {
+    var eff = iconicEffCost(e), can = powersUnused() >= eff;
+    var h = '<div style="background:#0f1014;border:1px solid var(--mv);border-radius:6px;padding:10px 12px;margin:6px 0;">'
+      + '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;"><b style="color:#f4a6a8;font-family:\'Oswald\',sans-serif;">' + E(e.name) + '</b>'
+      + (can ? '<button class="m-btn" style="padding:5px 12px;" onclick="window.MMRPGB.ownIconic(\'' + jq(e.name) + '\')">＋ Own (−' + eff + ')</button>' : '<span class="m-hint" style="margin:0;color:#df8a8a;">Need ' + eff + ' pick' + (eff === 1 ? '' : 's') + '</span>') + '</div>';
+    var meta = [(e.type || 'Item'), e.grantsOrigin ? 'Origin: ' + e.grantsOrigin : '', 'Power Value ' + (parseInt(e.powerValue, 10) || 1)].filter(Boolean).join(' · ');
+    h += '<div class="m-hint" style="margin:3px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#8a8e98;">' + E(meta) + '</div>';
+    if (e.grantsPowers) h += '<div class="m-hint" style="margin:5px 0 0;line-height:1.5;color:#cdc3c5;"><b style="color:#c9b0b2;">Grants:</b> ' + E(e.grantsPowers) + '</div>';
+    var restr = Array.isArray(e.restrictions) ? e.restrictions.join(', ') : '';
+    if (restr) h += '<div class="m-hint" style="margin:3px 0 0;"><b style="color:#c9b0b2;">Restrictions:</b> ' + E(restr) + '</div>';
+    if (e.special) h += '<div class="m-hint" style="margin:3px 0 0;color:#8a8e98;">' + E(e.special) + '</div>';
+    h += '</div>';
     return h;
   }
   function convCtl(label, key, val) {
@@ -422,6 +500,8 @@
     }).join('') + '</div>';
     h += '<div class="m-hint" style="margin:0 0 8px;"><b>Health</b> ' + Math.max(10, B.scores.resilience * 30) + ' · <b>Focus</b> ' + Math.max(10, B.scores.vigilance * 30) + ' · <b>Karma</b> ' + B.rank + '</div>';
     h += reviewRow('Powers (' + B.powers.length + ')', B.powers.map(function (p) { return p.name; }));
+    if (B.iconics.length) h += reviewRow('Iconic items', B.iconics.map(function (it) { return it.name + ' (PV ' + (parseInt(it.powerValue, 10) || 1) + ')'; }));
+    var _gp = iconicGrantedPowers(); if (_gp.length) h += reviewRow('Granted by iconics', _gp.map(function (p) { return p.name; }));
     h += reviewRow('Traits (' + allTraits.length + ')', allTraits.map(function (t) { return t.name; }));
     h += reviewRow('Tags (' + allTags.length + ')', allTags.map(function (t) { return t.name; }));
     if (B.attacks.length) h += reviewRow('Weapons', B.attacks.map(function (w) { return w.name || '—'; }));
@@ -455,16 +535,20 @@
           ABIL.forEach(function (a) { B.scores[a.key] = (S.abilities && S.abilities[a.key] != null) ? parseInt(S.abilities[a.key], 10) || 0 : 0; });
           B.traits = arr(S.traits).map(function (t) { return { name:t.name || '', description:t.description || '' }; });
           B.tags = arr(S.tags).map(function (t) { return { name:t.name || '', description:t.description || '' }; });
-          B.powers = arr(S.powers).map(function (p) { return Object.assign({}, p); });
-          B.attacks = arr(S.attacks).map(function (w) { return Object.assign({}, w); });
+          // Owned iconic items are first-class; their granted powers carry a `from`
+          // marker, so exclude those here (they're re-derived from B.iconics) and
+          // keep only the freely-picked powers.
+          B.iconics = arr(S.iconics).map(function (r) { return Object.assign({}, r); });
+          B.powers = arr(S.powers).filter(function (p) { return !p.from; }).map(function (p) { return Object.assign({}, p); });
+          B.attacks = arr(S.attacks).filter(function (w) { return !w._iconic; }).map(function (w) { return Object.assign({}, w); });
         }
       } catch (e) {}
       ensure(); B.step = 0; B._q = ''; B._focus = ''; paint(); ov.classList.add('open');
     },
     close: function () { if (ov) ov.classList.remove('open'); },
-    go: function (n) { if (n > B.step && B.step === 0 && !B.source) return; B.step = Math.max(0, Math.min(STEPS.length - 1, n)); B._q = ''; B._focus = ''; paint(); },
-    next: function () { if (B.step === 0 && !B.source) return; B.step = Math.min(STEPS.length - 1, B.step + 1); B._q = ''; B._focus = ''; paint(); },
-    back: function () { B.step = Math.max(0, B.step - 1); B._q = ''; B._focus = ''; paint(); },
+    go: function (n) { if (n > B.step && B.step === 0 && !B.source) return; B.step = Math.max(0, Math.min(STEPS.length - 1, n)); B._q = ''; B._focus = ''; B._iq = ''; B._ifocus = ''; paint(); },
+    next: function () { if (B.step === 0 && !B.source) return; B.step = Math.min(STEPS.length - 1, B.step + 1); B._q = ''; B._focus = ''; B._iq = ''; B._ifocus = ''; paint(); },
+    back: function () { B.step = Math.max(0, B.step - 1); B._q = ''; B._focus = ''; B._iq = ''; B._ifocus = ''; paint(); },
     // step 1
     search: function (v) { B._q = v; var el = document.getElementById('mmrpgb-list'); if (el) { var q = v.toLowerCase(); var list = CHARS().filter(function (c) { return !q || (c.name + ' ' + (c.realName || '') + ' ' + (c.teams || '')).toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { return String(a.name).localeCompare(b.name); }); el.innerHTML = charRows(list); } },
     focusChar: function (id) { B._focus = (B._focus === id ? '' : id); paint(); },
@@ -495,6 +579,11 @@
     addWeapon: function () { B.attacks.push(mkEquip({ name:'', damageBonus:'+1', multBonus:1 }, false)); paint(); },
     wset: function (i, k, v) { if (B.attacks[i]) B.attacks[i][k] = v; },
     rmWeapon: function (i) { B.attacks.splice(i, 1); paint(); },
+    // iconic items
+    ifilter: function (v) { B._iq = v; B._ifocus = ''; paint(); refocusBy('Search iconic'); },
+    ifocus: function (n) { B._ifocus = (B._ifocus === n ? '' : n); paint(); },
+    ownIconic: function (n) { var e = equipByName(n); if (!e || e.tier !== 'Iconic' || iconOwned(n)) return; if (powersUnused() < iconicEffCost(e)) return; B.iconics.push(Object.assign({}, e)); B._iq = ''; B._ifocus = ''; paint(); },
+    unownIconic: function (i) { B.iconics.splice(i, 1); paint(); },
     // step 6
     adj: function (k, d) { var nv = B.scores[k] + d; if (nv < -3 || nv > cap()) return; B.scores[k] = nv; recompute(); paint(); },
     // finish
@@ -503,8 +592,10 @@
         name:B.name, real:B.real, pronouns:B.pronouns, rank:B.rank,
         origin:B.origin, occupation:B.occupation, history:B.history, personality:B.personality,
         features:B.features, base:B.base, teams:B.teams, size:B.size,
-        abilities:{}, traits:mergeGrant(B.traits, grantedTraits()), tags:mergeGrant(B.tags, grantedTags()),
-        powers:B.powers.slice(), attacks:B.attacks.slice()
+        abilities:{}, traits:mergeGrant(B.traits, grantedTraits().concat(iconicDerivedTraits())), tags:mergeGrant(B.tags, grantedTags()),
+        powers:B.powers.concat(iconicGrantedPowers()),
+        attacks:B.attacks.concat((B.iconics || []).filter(function (it) { return !exists(B.attacks, it.name); }).map(function (it) { var e = mkEquip(it, true); e._iconic = true; return e; })),
+        iconics:B.iconics.slice()
       };
       ABIL.forEach(function (a) { d.abilities[a.key] = B.scores[a.key]; });
       var hp = Math.max(10, B.scores.resilience * 30), fp = Math.max(10, B.scores.vigilance * 30);
@@ -517,5 +608,6 @@
   };
   function exists(list, n) { var k = String(n).toLowerCase(); return list.some(function (x) { return (x.name || '').toLowerCase() === k; }); }
   function spentOf(s) { try { return ABIL.some(function (a) { return s.abilities && s.abilities[a.key]; }); } catch (e) { return false; } }
-  function refocusSearch() { try { var b = document.getElementById('mmrpgb-body'); if (!b) return; var inp = b.querySelector('input[placeholder^="Search"]'); if (inp) { inp.focus(); var n = inp.value.length; inp.setSelectionRange(n, n); } } catch (e) {} }
+  function refocusSearch() { refocusBy('Search'); }
+  function refocusBy(prefix) { try { var b = document.getElementById('mmrpgb-body'); if (!b) return; var inp = b.querySelector('input[placeholder^="' + prefix + '"]'); if (inp) { inp.focus(); var n = inp.value.length; inp.setSelectionRange(n, n); } } catch (e) {} }
 })();
