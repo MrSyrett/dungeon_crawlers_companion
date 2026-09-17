@@ -214,8 +214,9 @@ const SB_CONFIG = {
   abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: pool, damage · Note: …',
   mobs: null,
 };`,
-  mmrpg: `const SB_CONFIG = {
-  typePlaceholder: 'THUG // MINION',
+  mmrpg: `const _mvSgn = v => v == null ? '' : ((v >= 0 ? '+' : '') + v);
+const SB_CONFIG = {
+  typePlaceholder: 'THUG // Rank 1 · Melee +2',
   hp: null,
   rows: [
     [{ key:'rank', label:'RANK' }, { key:'melee', label:'MEL' }, { key:'agility', label:'AGI' }, { key:'resilience', label:'RES' }],
@@ -223,7 +224,27 @@ const SB_CONFIG = {
     [{ key:'health', label:'HEALTH' }, { key:'focus', label:'FOCUS' }, { key:'powers', label:'POWERS', ph:'Spider-Powers · Wall-Crawling' }],
   ],
   abilitiesLabel: 'Attacks & Traits', abilitiesPlaceholder: 'One per line — Attack: ability vs defense, dMarvel×rank+ability · Trait: …',
-  mobs: null,
+  mobs: { placeholder: 'Search the Marvel roster (heroes, villains & NPCs)…', pool: () => (typeof MMRPG_CHARACTERS !== 'undefined' && Array.isArray(MMRPG_CHARACTERS)) ? MMRPG_CHARACTERS : [], toCard: m => {
+    const A = m.abilities || {};
+    const heroic = (m.tags || []).some(t => /^heroic$/i.test(String(t)));
+    const rank = parseInt(m.rank, 10) || 0;
+    // The Characters list doubles as the bestiary: heroes/allies (Heroic tag) become
+    // NPCs, high-rank non-heroes become Threats, the rest become Villains.
+    return {
+    sbtype: heroic ? 'npc' : (rank >= 5 ? 'boss' : 'mob'), name: m.name || '',
+    type: [String(m.origin || '').toUpperCase(), 'RANK ' + (m.rank ?? '')].filter(Boolean).join(' // '),
+    flavor: [m.realName && m.realName !== m.name ? m.realName : '', m.occupation || ''].filter(Boolean).join(' · '),
+    rank: String(m.rank ?? ''), melee: _mvSgn(A.melee), agility: _mvSgn(A.agility), resilience: _mvSgn(A.resilience),
+    vigilance: _mvSgn(A.vigilance), ego: _mvSgn(A.ego), logic: _mvSgn(A.logic),
+    health: String(m.health ?? ''), focus: String(m.focus ?? ''),
+    powers: (m.powers || []).map(p => (p.set && p.set !== 'None') ? p.set : 'Basic').filter((v, i, a) => a.indexOf(v) === i).join(' · '),
+    abilities: [
+      (m.traits && m.traits.length) ? 'Traits: ' + m.traits.join(', ') : '',
+      (m.tags && m.tags.length) ? 'Tags: ' + m.tags.join(', ') : '',
+      ...(m.powers || []).map(p => ((p.set && p.set !== 'None') ? p.set : 'Basic') + ': ' + (p.names || []).join(', ')),
+      m.teams ? 'Teams: ' + m.teams : '',
+    ].filter(Boolean).join('\\n'),
+  }; }, sub: m => 'Rank ' + (m.rank ?? '') + (m.origin ? ' · ' + m.origin : '') + (m.source && m.source !== 'core' ? ' · ' + m.source : '') },
 };`,
 };
 const MOB_DATA = {
@@ -236,7 +257,7 @@ const MOB_DATA = {
   icrpg: '<script src="/tools-data/icrpg-monsters.js"></script>',
   co: '',
   yze: '',
-  mmrpg: '',
+  mmrpg: '<script src="/tools-data/mmrpg-characters.js"></script>',
 };
 
 function rep(s, a, b, all = true) {
