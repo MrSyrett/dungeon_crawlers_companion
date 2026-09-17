@@ -155,6 +155,13 @@ export interface MmrpgEquipment {
   special?: string;
   notes?: string;
   source?: string;
+  // ── Iconic items: what the item grants and what it costs. ──
+  /** Origin the iconic item grants its owner. */
+  grantsOrigin?: string;
+  /** Comma-separated list of powers the iconic item grants. */
+  grantsPowers?: string;
+  /** Power picks required to own the iconic item. */
+  powerValue?: number;
   // ── Vehicle fields (type = "Vehicle"): a vehicle is just a kind of equipment. ──
   /** "Named" (a specific vehicle) or "Basic" (a generic type). */
   vehicleClass?: string;

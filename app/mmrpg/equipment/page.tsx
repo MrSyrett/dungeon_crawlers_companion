@@ -69,10 +69,12 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
                   <span className="flex items-center gap-1.5">
                     {e.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
                     <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{typeOf(e)}</span>
+                    {typeof e.powerValue === "number" ? <span className={badge}>PV {e.powerValue}</span> : null}
                     {e.damageBonus && e.damageBonus !== "—" ? <span className={badge}>Dmg {e.damageBonus}</span> : null}
                   </span>
                 </div>
                 {e.owner && e.owner !== "—" ? <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--mmrpg)]">{e.owner}</p> : null}
+                {e.grantsOrigin ? <p className="mt-1 text-[11px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Grants origin:</span> {e.grantsOrigin}</p> : null}
                 {typeOf(e) === "Vehicle" ? (
                   <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
                     {e.health ? <span><span className="font-semibold text-[var(--text)]">Health:</span> {e.health}</span> : null}
@@ -90,6 +92,7 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
                   </p>
                 )}
                 {e.notes ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{e.notes}</p> : null}
+                {e.grantsPowers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Grants:</span> {e.grantsPowers}</p> : null}
                 {typeOf(e) === "Vehicle" && e.powers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Powers:</span> {e.powers}</p> : null}
                 {typeOf(e) === "Vehicle" && e.weapons ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Weapons:</span> {e.weapons}</p> : null}
                 {e.special ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">{typeOf(e) === "Vehicle" ? "Notes" : "Special"}:</span> {e.special}</p> : null}

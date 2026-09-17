@@ -1758,13 +1758,13 @@ function normalizeMmrpgIconic(input: unknown): { name: string; data: Record<stri
   const attach = str(o.attachment);
   if (attach && attach !== "—") restrBits.push(attach);
   if (str(o.restrictions)) restrBits.push(str(o.restrictions).slice(0, 300));
+  // Origin / granted powers / power value are structured fields the equipment
+  // card renders on their own; `special` carries only restrictions + free text,
+  // matching how the book iconic items are shaped.
   const specialBits: string[] = [];
-  if (str(o.special)) specialBits.push(str(o.special).slice(0, 1500));
-  if (str(o.origin)) specialBits.push("Origin: " + str(o.origin).slice(0, 80));
-  if (str(o.powers)) specialBits.push("Grants: " + str(o.powers).slice(0, 500));
   if (restrBits.length) specialBits.push("Restrictions: " + restrBits.join(", "));
+  if (str(o.special)) specialBits.push(str(o.special).slice(0, 1500));
   const pv = num(o.powerValue);
-  if (pv) specialBits.push("Power Value: " + pv);
   const data: Record<string, unknown> = {
     name,
     tier: "Iconic",

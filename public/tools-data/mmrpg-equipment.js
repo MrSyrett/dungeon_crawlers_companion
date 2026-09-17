@@ -3,6 +3,27 @@
 
 const MMRPG_EQUIPMENT = [
   {
+    "name": "Absorbing Man’s Ball & Chain",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Absorbing Man",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Use",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Effect Options, Returns When Thrown",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach +1/10",
+    "damageBonus": "+1/+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
     "name": "Adamantium",
     "tier": "Common",
     "type": "Item",
@@ -17,16 +38,16 @@ const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Wolverine",
-    "weaponClass": "melee",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Healing Factor-powered characters only",
+    "grantsOrigin": "High-Tech: Cybernetics",
+    "grantsPowers": "Adamantium",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "melee"
-    ],
-    "notes": "Wolverine's adamantium-laced bone claws.",
-    "source": "core ch.8 (Characters)"
+    "powerValue": 1
   },
   {
     "name": "Adamantium Claws (X-Men '97)",
@@ -70,6 +91,23 @@ const MMRPG_EQUIPMENT = [
     "source": "Secret Wars"
   },
   {
+    "name": "All-Black",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Menacing, Carried",
+    "grantsOrigin": "Symbiote: Knull",
+    "grantsPowers": "Environmental Protection, Flight 2, Healing Factor, Mighty 4, Sturdy 4",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 11
+  },
+  {
     "name": "All-Black the Necrosword",
     "tier": "Iconic",
     "type": "Weapon",
@@ -85,14 +123,37 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Angel’s Techno-Organic Wings",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Angel",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Large, Menacing; Note: Angel already has Flight 2, so for him, the Power Value is 1.",
+    "grantsOrigin": "Mutant",
+    "grantsPowers": "Elemental Protection 2 (Iron), Flight 2",
+    "ability": "agility",
+    "range": "10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 3
+  },
+  {
     "name": "Anti-Gravity Disc Shooter",
     "tier": "Iconic",
-    "type": "Item",
-    "category": "Item",
-    "owner": "Wizard",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Restrictions: Flashy, Worn; Power Value: 1",
+    "special": "Restrictions: Carried, Does No Actual Damage",
+    "grantsOrigin": "High Tech",
+    "grantsPowers": "Anti-Gravity Disc",
+    "ability": "agility",
+    "range": "10 spaces",
+    "damageBonus": "1",
+    "multBonus": 1,
     "powerValue": 1
   },
   {
@@ -130,7 +191,9 @@ const MMRPG_EQUIPMENT = [
     "owner": "Arkon",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried, Flashy; Power Value: 1",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "Alien",
+    "grantsPowers": "Elemental Blast (Electricity), Elemental Burst (Electricity)",
     "ability": "agility",
     "range": "10 spaces",
     "damageBonus": "+1",
@@ -152,22 +215,16 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 0
   },
   {
-    "name": "Ball & Chain",
+    "name": "AVENG.E.R.S. Jacket",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Absorbing Man",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 1",
-    "ability": "melee",
-    "range": "Reach +1/10",
-    "damageBonus": "+1",
-    "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Bandaging, Elemental Protection 1 (Force)",
     "powerValue": 1
   },
   {
@@ -234,14 +291,33 @@ const MMRPG_EQUIPMENT = [
     "source": "Secret Wars"
   },
   {
+    "name": "Betsy Braddock’s Psychic Sword",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Betsy Braddock",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Requires: Logic 2 or more",
+    "grantsOrigin": "Mutant",
+    "grantsPowers": "Constructable, Damage Switch",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 1
+  },
+  {
     "name": "Black Panther’s Claws",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Black Panther (Shuri)",
+    "owner": "Black Panther",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Worn; Power Value: 1",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Anti-Metal",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "+1",
@@ -253,10 +329,12 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Armor",
     "category": "Armor",
-    "owner": "Black Widow (Earth-1610)",
+    "owner": "Black Widow",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Flashy, Worn; Power Value: 6",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Elemental Barrage (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Flight 2, Mighty 1, Sturdy 1, Wallcrawling",
     "powerValue": 6
   },
   {
@@ -276,6 +354,69 @@ const MMRPG_EQUIPMENT = [
     "special": "Has VTOL capability. Cabin is pressurized and space-worthy. This includes the X-Jet, the Dove Weapons are all controlled by the (which is white) and the Thunder- Features onboard Cerebro tech for X-Man who gave his life for the",
     "owner": "—",
     "source": "X-Men Expansion"
+  },
+  {
+    "name": "Blink’s Displacement-Field Daggers",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Blink",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Does no actual damage; Note: Blink already has Teleport Object and Teleport Other, so for her, the Power Value is 1.",
+    "grantsOrigin": "Mutant",
+    "grantsPowers": "Constructable, Teleport Object, Teleport Other",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/5",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 3
+  },
+  {
+    "name": "Bloodaxe (New)",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Godkiller, Power Slider (Bloodied), Uru",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/Unlimited",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 2
+  },
+  {
+    "name": "Bloodaxe (Original)",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Flashy, Challenging",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Allspeak, Godkiller, Elemental Blast (Energy), Elemental Burst (Energy), Mighty 1, Sturdy 1, Uru",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/Unlimited",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 5
   },
   {
     "name": "Bo Staff",
@@ -320,6 +461,27 @@ const MMRPG_EQUIPMENT = [
     "damageBonus": "+1"
   },
   {
+    "name": "Boomerang’s Boomerangs",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Boomerang",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "Special Training",
+    "grantsPowers": "Returns When Thrown, Effect Options",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
     "name": "Bow",
     "tier": "Common",
     "type": "Weapon",
@@ -348,37 +510,24 @@ const MMRPG_EQUIPMENT = [
     "damageBonus": "+1"
   },
   {
-    "name": "Captain America (Earth-9907)’s Shield",
-    "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "American Dream",
-    "source": "Avengers Expansion",
-    "notes": "",
-    "special": "Shield 2 (Shield 3 with Iconic Item); Earth-9907; Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "powerValue": 1
-  },
-  {
     "name": "Captain America of the Railways’ Shield",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Captain America Of The Railways",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Shield 2 (Shield 3 with Iconic Item); Restrictions: Carried, Flashy; Power Value: 1",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Shield 1, Stackable",
     "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
     "range": "Reach/10",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
     "powerValue": 1
   },
   {
@@ -400,41 +549,24 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
-    "name": "Captain America's Shield",
-    "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Captain America",
-    "weaponClass": "melee",
-    "ability": "melee",
-    "range": "Reach (thrown 10)",
-    "damageBonus": "+1",
-    "multBonus": 1,
-    "multAbilities": [
-      "melee",
-      "agility"
-    ],
-    "special": "Grants one extra level of the Shield power (up to Shield 4), usable without paying the additional level's Focus cost.",
-    "notes": "A nigh-indestructible vibranium disc that can be thrown and bounces back.",
-    "source": "core ch.8 (Characters)"
-  },
-  {
     "name": "Captain America’s Shield",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Captain America (Bucky Barnes)",
+    "owner": "Captain America",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Shield 2 (Shield 3 with Iconic Item); Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
+    "special": "Restrictions: Carried, Flashy, Requires: Shield 1 power",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Reduced Focus, Shield 1, Stackable",
     "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
     "range": "Reach/10",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
     "powerValue": 1
   },
   {
@@ -518,6 +650,19 @@ const MMRPG_EQUIPMENT = [
     "damageBonus": "+1"
   },
   {
+    "name": "Cloak’s Cloak",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Cloak",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Large",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Darkforce Attack, Dimensional Travel Other",
+    "powerValue": 1
+  },
+  {
     "name": "Club",
     "tier": "Common",
     "type": "Weapon",
@@ -535,10 +680,12 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
-    "owner": "Psycho-Man",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 1",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "High Tech",
+    "grantsPowers": "Control Emotion, Control Group Emotion",
     "powerValue": 1
   },
   {
@@ -549,7 +696,9 @@ const MMRPG_EQUIPMENT = [
     "owner": "Corvus Glaive",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 1",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Alien",
+    "grantsPowers": "Unkillable",
     "ability": "melee",
     "range": "Reach +1",
     "damageBonus": "+2",
@@ -561,14 +710,20 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Terrax",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 1",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Effect Options (Earth/Energy/Sharp)",
     "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/Unlimited",
+    "damageBonus": "+2",
+    "multBonus": 2,
     "powerValue": 1
   },
   {
@@ -576,10 +731,12 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
-    "owner": "Annihilus",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Restrictions: Carried, Flashy; Power Value: 6",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "High Tech",
+    "grantsPowers": "Elemental Barrage (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Infusion (Energy), Elemental Push (Energy), Elemental Reinforcement (Energy), Supernova (Energy)",
     "powerValue": 6
   },
   {
@@ -592,40 +749,115 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
+    "name": "Cosmic Firestaff",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Accuracy 1, Stackable Effect Options, Elemental Barrage (Fire), Elemental Blast (Fire), Elemental Burst (Fire) Weapon",
+    "ability": "melee",
+    "range": "Reach +1",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 5
+  },
+  {
     "name": "Crimson Gem of Cyttorak",
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
     "owner": "Juggernaut",
-    "special": "Any attack that deals less than 30 points of damage to the wielder is instantly negated.",
-    "notes": "The mystic ruby whose power transformed Cain Marko into the Juggernaut.",
-    "source": "core ch.8 (Characters)"
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Large; Note: To use it with Juggernaut’s profile from the Core Rulebook , remove his Surprising Power trait and add Juggernaut’s Helmet (see page 113).",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Elemental Protection 3, Healing Factor, Mighty 4, Sturdy 4",
+    "powerValue": 10
   },
   {
-    "name": "Daredevil's Billy Club",
+    "name": "Crimson Gem-Powered Bands of Cyttorak",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Large; Note: This functions much like the Crimson Gem of Cyttorak, but it also grants Uncanny 4, and the user can manifest the Jug- gernaut armor and its powers at will. To use it with his profile from the Core Rulebook , remove his Surprising Power trait.",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Elemental Protection 3, Healing Factor, Mighty 4, Sturdy 4, Uncanny 4",
+    "powerValue": 14
+  },
+  {
+    "name": "Dagger’s Lightforce Daggers",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Daredevil",
-    "weaponClass": "melee",
+    "owner": "Dagger",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Requires: Ego 2 or more",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Constructable, Damage Switch",
     "ability": "melee",
-    "range": "15",
-    "damageBonus": "+1",
-    "multBonus": 1,
     "multAbilities": [
       "melee",
       "agility"
     ],
-    "grantsMovement": [
-      {
-        "mode": "Swingline",
-        "mult": 3,
-        "base": "run"
-      }
+    "range": "Reach/5",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
+    "name": "Daredevil’s Billy Club",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Daredevil",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: W, Carried, Flashy",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Returns When Thrown, Swingline",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
     ],
-    "special": "Can be thrown and instantly retrieved. The range of the club and the reach of the swingline both equal its Swingline Speed.",
-    "notes": "A billy club on a de-cel cable that doubles as a grappling line.",
-    "source": "core ch.8 (Characters)"
+    "range": "15 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
+    "name": "Darkhawk Amulet",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: W, Carried, Flashy",
+    "grantsOrigin": "/ High Tech: Android 9",
+    "grantsPowers": "Grants Alternate Form (Darkhawk), Elemental Blast (Energy)",
+    "powerValue": 1
+  },
+  {
+    "name": "Deep-Space Armor (Model 45)",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "High Tech: Battle Suit",
+    "grantsPowers": "Accuracy 3, Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Push (Energy), Elemental Ricochet (Energy), Flight 2, Mighty 2, Salvation, Sturdy 3, Summonable, Supernova (Energy), Uncanny 1, Warp Portal",
+    "powerValue": 19
   },
   {
     "name": "Destroyer’s Energy Baton",
@@ -635,15 +867,17 @@ const MMRPG_EQUIPMENT = [
     "owner": "Destroyer",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 1",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Special Training",
+    "grantsPowers": "Neganite",
     "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
     "range": "Reach/10",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
     "powerValue": 1
   },
   {
@@ -659,6 +893,32 @@ const MMRPG_EQUIPMENT = [
     "range": "Reach",
     "damageBonus": "—",
     "multBonus": 0
+  },
+  {
+    "name": "Doctor Doom’s Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Doctor Doom",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Menacing, Worn",
+    "grantsOrigin": "Magic: Sorcery",
+    "grantsPowers": "Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Flight 1, Mighty 1, Salvation, Sturdy 2, Summonable",
+    "powerValue": 8
+  },
+  {
+    "name": "Doctor Octopus’ Ocktoid Tentacles",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Psychic Link, Additional Limbs, Quick-Toss, Salvation, Banging Heads, Clobber, Spider-Dodge, Crushing Grip, Wallcrawling, Extended Reach, Jump 1, Mighty 2",
+    "powerValue": 12
   },
   {
     "name": "E.V.A.",
@@ -683,10 +943,12 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Black Knight",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried, Unkillable; Power Value: 7",
+    "special": "Restrictions: Carried, Menacing",
+    "grantsOrigin": "Magic: Sorcery",
+    "grantsPowers": "Bolts of Balthakk, Dispel Spell, Mighty 2, Power Slider (Blood Curse), Sense Supernatural, Shield of the Seraphim, Summonable, Unkillable",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "+2",
@@ -748,21 +1010,6 @@ const MMRPG_EQUIPMENT = [
     "special": "Ignores one level of the target's Damage Reduction.",
     "notes": "The Destroyer's collapsible energy baton.",
     "source": "Quickstart"
-  },
-  {
-    "name": "Energy Whips",
-    "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Whiplash",
-    "source": "Avengers Expansion",
-    "notes": "",
-    "special": "Restrictions: Worn; Power Value: 1",
-    "ability": "melee",
-    "range": "Reach+1",
-    "damageBonus": "+1",
-    "multBonus": 1,
-    "powerValue": 1
   },
   {
     "name": "Eternity Mask",
@@ -845,22 +1092,21 @@ const MMRPG_EQUIPMENT = [
     "source": "X-Men '97"
   },
   {
-    "name": "Gambit's Charged Cards",
+    "name": "Gambit’s Charged Cards",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Gambit",
-    "weaponClass": "ranged",
-    "ability": "agility",
-    "range": "5",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Mutant",
+    "grantsPowers": "Reduced Focus for Elemental Infusion",
+    "ability": "melee",
+    "range": "5 spaces",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility"
-    ],
-    "special": "Act as thrown knives. Using Elemental Infusion on them costs 0 Focus. The cards function only for Gambit.",
-    "notes": "Ordinary playing cards charged with kinetic energy.",
-    "source": "X-Men '97"
+    "powerValue": 1
   },
   {
     "name": "Glaive",
@@ -920,18 +1166,33 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
-    "name": "Hawkeye’s Trick Quiver",
+    "name": "H.E.R.B.I.E.’s Opti-Blaster",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Hawkeye (Clint Barton)",
+    "owner": "H.E.R.B.I.E.",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Worn; Power Value: 1",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Effect Option",
+    "ability": "agility",
+    "range": "10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
+    "name": "Hawkeye’s Trick Quiver",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Hawkeye",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "Special Training",
+    "grantsPowers": "Toolkit, Effect Options",
     "powerValue": 1
   },
   {
@@ -973,16 +1234,15 @@ const MMRPG_EQUIPMENT = [
   {
     "name": "Hell-Mark",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
+    "type": "Item",
+    "category": "Item",
     "owner": "Silence",
-    "source": "Spider-Verse Expansion",
+    "source": "Avengers Expansion",
     "notes": "",
-    "special": "Grants Elemental Burst (Hellfire",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0
+    "special": "",
+    "grantsOrigin": "Magic: Demonic",
+    "grantsPowers": "Dimensional Portal, Elemental Burst (Hellfire)",
+    "powerValue": 1
   },
   {
     "name": "High Evolutionary’s Armor",
@@ -992,29 +1252,26 @@ const MMRPG_EQUIPMENT = [
     "owner": "High Evolutionary",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Worn; Power Value: 8",
+    "special": "Restrictions: Menacing, Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Accuracy 1, Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Protection 2 (Energy), Environmental Protection, Healing Factor, Mighty 1, Sturdy 1",
     "powerValue": 8
-  },
-  {
-    "name": "High Tech",
-    "tier": "Iconic",
-    "type": "Item",
-    "category": "Item",
-    "owner": "Wizard",
-    "source": "Secret Wars",
-    "notes": "",
-    "special": "Restrictions: Carried; Power Value: 1",
-    "powerValue": 1
   },
   {
     "name": "Hofund",
     "tier": "Iconic",
-    "type": "Item",
-    "category": "Item",
-    "owner": "Sif",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 1",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Summon Portal",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+2",
+    "multBonus": 2,
     "powerValue": 1
   },
   {
@@ -1022,10 +1279,12 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Armor",
     "category": "Armor",
-    "owner": "Iron Man (Hulkbuster Armor)",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Large, Worn; Power Value: 20",
+    "special": "Restrictions: Large, Worn; Note: When worn by Tony Stark his rank increases to 6 (Melee 8, Agility 2, Resilience 9, Vigilance 4, Ego 5, Logic 5) and he gains the Big, Smash and Presence traits.",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Summonable, Clobber, Crushing Grip, Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Push (Energy), Environmental Protection, Flight 2, Immovable, Mighty 4, Salvation, Sturdy 4",
     "powerValue": 20
   },
   {
@@ -1047,14 +1306,16 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
-    "name": "Iron Man’s Armor",
+    "name": "Iron Man’s Armor (Earth-1610)",
     "tier": "Iconic",
     "type": "Armor",
     "category": "Armor",
-    "owner": "Iron Man (Earth-1610)",
+    "owner": "Iron Man",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Flashy, Worn; Power Value: 13",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Accuracy 1, Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Prison (Energy), Elemental Protection 1 (Energy), Environmental Protection, Flight 2, Invisibility, Machine Telepathy, Mighty 1, Sturdy 2",
     "powerValue": 13
   },
   {
@@ -1068,6 +1329,45 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Iron Man’s Model Nil Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Iron Man",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Menacing, Worn; Note: When worn by Tony Stark his rank increases to 4 (Melee 2, Agility 4, Resilience 2, Vigilance 3, Ego 5, Logic 5).",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Summonable, Wallcrawling, Elemental Barrage (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Environmental Protection, Flight 1, Illumination, Invisibility, Mighty 1, Salvation, Silence Self, Sturdy 1",
+    "powerValue": 11
+  },
+  {
+    "name": "Iron Man’s Mysterium Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Iron Man",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn; Note: When worn by Tony Stark his rank increases to 5 (Melee 3, Agility 4, Resilience 6, Vigilance 4, Ego 5, Logic 5) and he gains the Fearless trait.",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Accuracy 1, Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Push (Energy), Elemental Ricochet (Energy), Environmental Protection, Flight 2, Mighty 2, Mysterium, Salvation, Sturdy 3, Summonable, Supernova",
+    "powerValue": 17
+  },
+  {
+    "name": "Iron Man’s Standard Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Iron Man",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn; Note: When worn by Tony Stark his rank increases to 4 (Melee 3, Agility 4, Resilience 3, Vigilance 3, Ego 5, Logic 5).",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Summonable, Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Push (Energy), Environmental Protection, Flight 2, Mighty 1, Salvation, Sturdy 2",
+    "powerValue": 12
+  },
+  {
     "name": "Iron Spider Armor",
     "tier": "Common",
     "type": "Armor",
@@ -1075,6 +1375,19 @@ const MMRPG_EQUIPMENT = [
     "owner": "—",
     "notes": "Iron Man (Tony Stark) specifically designed this armor for Spider-Man (Peter Parker). It allows the user to have full access to their Spider-Powers and basic powers (assuming they have them). • The user gains the Extreme Appearance tag while wearing the suit and the Tech Reliance trait for all powers the suit grants. The suit grants the user the following powers: • Additional Limbs • Environmental Protection • Heightened Senses 1 • Mighty 1 • Sturdy 2 • Webgliding These powers do not stack with any powers the character already has. The suit’s Additional Limbs power counts as having Spider-Arms.",
     "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Iron Spider Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Additional Limbs, Environmental Protection, Heightened Senses, Mighty 1, Salvation, Sturdy 2, Summonable, Webgliding",
+    "powerValue": 8
   },
   {
     "name": "ISO-8",
@@ -1095,6 +1408,27 @@ const MMRPG_EQUIPMENT = [
     "source": "Secret Wars"
   },
   {
+    "name": "Jarnbjorn",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Large, Carried",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Godkiller, Uru",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/Unlimited",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 1
+  },
+  {
     "name": "Jet Ski",
     "tier": "Vehicle",
     "type": "Vehicle",
@@ -1111,6 +1445,36 @@ const MMRPG_EQUIPMENT = [
     "special": "",
     "owner": "—",
     "source": "Avengers Expansion"
+  },
+  {
+    "name": "Juggernaut’s Helmet",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Juggernaut",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn; Note: Juggernaut already has Uncanny 1, so for him, the Power Value is 1. To use with the Juggernaut profile in the Core Rulebook , remove his Banging Heads power.",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Uncanny 4",
+    "powerValue": 2
+  },
+  {
+    "name": "Karnak’s Hands",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Karnak",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Menacing",
+    "grantsOrigin": "Inhuman",
+    "grantsPowers": "Effect Option",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "1",
+    "multBonus": 1,
+    "powerValue": 1
   },
   {
     "name": "Knife",
@@ -1172,6 +1536,49 @@ const MMRPG_EQUIPMENT = [
     "source": "Secret Wars"
   },
   {
+    "name": "Magik’s Soulsword",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Magik",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "Magic: Sorcery",
+    "grantsPowers": "Discipline 4, Summonable",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 3
+  },
+  {
+    "name": "Magneto’s Helmet",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Magneto",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn; Note: Magneto already has Uncanny 1, so for him, the Power Value is 1. To use it with his profile in the Core Rulebook , replace his Scientifi c Expertise trait with Extraordinary Origin. 113",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Uncanny 4",
+    "powerValue": 2
+  },
+  {
+    "name": "Man-Ape Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "High Tech",
+    "grantsPowers": "Clobber, Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Grab (Energy), Elemental Protection 3 (Energy), Elemental Push (Energy), Elemental Sphere (Energy), Mighty 2, Sturdy 1",
+    "powerValue": 12
+  },
+  {
     "name": "Marauder",
     "tier": "Vehicle",
     "type": "Vehicle",
@@ -1195,36 +1602,40 @@ const MMRPG_EQUIPMENT = [
     "type": "Weapon",
     "category": "Weapon",
     "owner": "Thor",
-    "weaponClass": "melee",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Can only be used by the worthy, Carried, Flashy; Note: Adds the Summon Portal power to the wielder even when they are not holding the hammer.",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Summon Portal, Asgardian Transformation, Summonable, Control Fog, Thunder, Control Weather 4, Uru, Discipline 1, Elemental Barrage (Electricity), Elemental Blast (Electricity), Elemental Burst (Electricity), Elemental Push (Electricity), Elemental Ricochet (Electricity)",
     "ability": "melee",
-    "range": "Reach (thrown 10)",
-    "damageBonus": "+1",
-    "multBonus": 1,
     "multAbilities": [
       "melee",
       "agility"
     ],
-    "special": "Returns to the thrower. Can only be wielded by the worthy.",
-    "notes": "Thor's enchanted Uru hammer.",
-    "source": "core ch.8 (Characters)"
+    "range": "Reach/Unlimited",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 22
   },
   {
     "name": "Mjolnir (Earth-1610)",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Thor (Earth-1610)",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Earth-1610; Restrictions: Carried, Flashy; Requires: Enhanced Physique trait and Mighty 2 power; Power Value: 11",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Thunder, Control Weather 4, Elemental Barrage (Electricity), Elemental Blast (Electricity), Elemental Burst (Electricity), Elemental Push (Electricity), Weather Chill, Weather Warm",
     "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
     "range": "Reach/5",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
     "powerValue": 11
   },
   {
@@ -1255,37 +1666,77 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
-    "name": "Mysterium Armor",
-    "tier": "Iconic",
-    "type": "Armor",
-    "category": "Armor",
-    "owner": "Iron Man (Mysterium Armor)",
-    "source": "Avengers Expansion",
-    "notes": "",
-    "special": "Restrictions: Flashy, Worn; Power Value: 17",
-    "powerValue": 17
-  },
-  {
     "name": "Nega-Bands",
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
-    "owner": "Captain Mar-Vell",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Mighty 2 (Mighty 3 with Iconic Item); Restrictions: Flashy, Worn; Power Value: 22",
+    "special": "Restrictions: Flashy, Paired Item, Worn",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Allspeak, Attunable, Cosmic Awareness, Elemental Blast (Energy), Elemental Burst (Energy), Elemental Grab (Energy), Elemental Protection 3 (Energy), Elemental Sphere (Energy), Entangled, Environmental Protection, Flight 2, Healing Factor, Illumination, Mighty 3, Postcognition 1, Precognition 1, Sturdy 2, Supernova (Energy), Warp Portal",
     "powerValue": 22
   },
   {
-    "name": "Nova Helmet: Centurion",
+    "name": "Nemesis’ Scell",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Magic: Sorcery",
+    "grantsPowers": "Blink, Flight 1, Leech Life, Mighty 2, Sturdy 2, Sacrifice, Teleport 2, Teleport Together",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 9
+  },
+  {
+    "name": "Night Nurse’s Gauntlet",
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
-    "owner": "Nova (Richard Rider)",
+    "owner": "Night Nurse",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried; Note: Night Nurse is only borrowing the gauntlet, so there’s no need to change her origin.",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Elemental Burst (Energy), Summonable",
+    "powerValue": 1
+  },
+  {
+    "name": "Nova Helmet: Centurion (Richard Rider)",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Richard Rider; Restrictions: Flashy, Worn; Power Value: 25",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Accuracy 2, Discipline 4, Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Protection 2 (Energy), Elemental Reinforcement (Energy), Environmental Protection, Flight 2, Heightened Senses 1, Mighty 3, Power Slider (Energy Levels), Sturdy 4, Supernova (Energy), Warp Portal",
     "powerValue": 25
+  },
+  {
+    "name": "Nova Helmet: Supernova",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Accuracy 2, Discipline 1, Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Protection 2 (Energy), Elemental Reinforcement (Energy), Environmental Protection, Flight 2, Heightened Senses 1, Mighty 3, Sturdy 3, Supernova (Energy)",
+    "powerValue": 20
   },
   {
     "name": "Ocktoid Tentacles",
@@ -1300,6 +1751,36 @@ const MMRPG_EQUIPMENT = [
     "range": "Reach",
     "damageBonus": "—",
     "multBonus": 0
+  },
+  {
+    "name": "Paladin’s Stun Gun",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Paladin",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Only usable by Paladin; Note: Paladin’s origin in his profile in Deadpool Role-Plays the Marvel Universe should be changed to High-Tech.",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Effect Option",
+    "ability": "agility",
+    "range": "10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
+    "name": "Patriot’s Shield",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Patriot",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Flashy, Requires: Shield 1 power",
+    "grantsOrigin": "High-Tech",
+    "grantsPowers": "Elemental Burst (Energy), Glider, Psychic Link, Shield 1",
+    "powerValue": 1
   },
   {
     "name": "Pistol",
@@ -1368,15 +1849,17 @@ const MMRPG_EQUIPMENT = [
     "owner": "Proxima Midnight",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried, Large; Power Value: 3",
+    "special": "Restrictions: Carried, Large",
+    "grantsOrigin": "Alien",
+    "grantsPowers": "Elemental Barrage (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Grab (Energy)",
     "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
     "range": "Reach +1/10",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
     "powerValue": 3
   },
   {
@@ -1406,6 +1889,23 @@ const MMRPG_EQUIPMENT = [
     "range": "Reach",
     "damageBonus": "—",
     "multBonus": 0
+  },
+  {
+    "name": "Queen Goblin’s Pumpkin Scepter",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Queen Goblin",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Magic: Demonic",
+    "grantsPowers": "Effect Option",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
   },
   {
     "name": "Quinjet (Classic)",
@@ -1477,6 +1977,23 @@ const MMRPG_EQUIPMENT = [
     "source": "Quickstart"
   },
   {
+    "name": "Ren Kimura’s Razor Arms",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Ren Kimura",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Awkward",
+    "grantsOrigin": "Inhuman",
+    "grantsPowers": "Effect Option",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
     "name": "Rifle",
     "tier": "Common",
     "type": "Weapon",
@@ -1526,10 +2043,12 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
-    "owner": "Kid Juggernaut",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Flashy, Large, Alternate Form; Power Value: 3",
+    "special": "Restrictions: Flashy, Large",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Mighty 3, Sturdy 2",
     "powerValue": 3
   },
   {
@@ -1553,6 +2072,36 @@ const MMRPG_EQUIPMENT = [
     "owner": "—",
     "notes": "This is a door-sized portal that the controller can use to teleport to any other place on the same planet. The user needs to know of the intended destination, but they do not need to have been there before. When activated, a similar portal opens in the new location. It remains open on both sides until deactivated. The controller can deactivate the Siege Courageous from either side. Doing so causes the portal on the other side to vanish.",
     "source": "Secret Wars"
+  },
+  {
+    "name": "Silver Surfer’s Surfboard",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Silver Surfer",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Driven, Flashy",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Flight 2, Summonable",
+    "powerValue": 1
+  },
+  {
+    "name": "Sin-Eater’s Sin-Eating Shotgun",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Sin-Eater",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Effect Option",
+    "ability": "agility",
+    "range": "6 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
   },
   {
     "name": "Sin-Eating Shotgun",
@@ -1720,19 +2269,41 @@ const MMRPG_EQUIPMENT = [
     "source": "Spider-Verse Expansion"
   },
   {
-    "name": "Stormbreaker",
+    "name": "Star-Lord’s Element Gun",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "Stormborn",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Star-Lord",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Alien",
+    "grantsPowers": "Effect Options, Summonable",
+    "powerValue": 4
+  },
+  {
+    "name": "Starbrand",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Restrictions: Carried, Flashy; Power Value: 22",
-    "ability": "melee",
-    "range": "Reach",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "powerValue": 22
+    "special": "Restrictions: Flashy",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Ground-Shaking Stomp, Heightened Senses 2, Illumination, Accuracy 4, Clobber, Immovable, Discipline 3, Mighty 4, Disguise, Smash, Sturdy 3, Elemental Barrage (Energy), Supernova (Energy), Unrelenting Smash, Elemental Blast (Energy), Elemental Burst (Energy), Elemental Push (Energy), Environmental Protection, Flight 2",
+    "powerValue": 30
+  },
+  {
+    "name": "Stormbreaker",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Note: Functionally identical to Mjolnir in all but shape (see Mjolnir).",
+    "grantsOrigin": "Mythic: Asgardian"
   },
   {
     "name": "Stun gun",
@@ -1798,7 +2369,9 @@ const MMRPG_EQUIPMENT = [
     "owner": "Swordsman",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 3",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Bolts of Balthakk, Flames of the Faltine, Mists of Morpheus",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "+2",
@@ -1844,34 +2417,38 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 0
   },
   {
-    "name": "Teen Immortus’s Armor",
+    "name": "Teen Immortus’ Armor",
     "tier": "Iconic",
     "type": "Armor",
     "category": "Armor",
-    "owner": "Teen Immortus",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Flashy, Worn; Power Value: 11",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Accuracy 1, Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Protection 2 (Energy), Flight 2, Mighty 1, Salvation, Sturdy 1, Summonable, Time Travel, Time Travel Together",
     "powerValue": 11
   },
   {
-    "name": "The Bloodaxe",
+    "name": "Ten Rings",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Executioner",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried, Flashy; Power Value: 2",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Crimson Bands of Cyttorak, Elemental Burst (Energy), Flight 1, Returns When Thrown, Summon Portal",
     "ability": "melee",
-    "range": "Reach/unlimited",
-    "damageBonus": "+2",
-    "multBonus": 2,
     "multAbilities": [
-      "agility",
-      "melee"
+      "melee",
+      "agility"
     ],
-    "powerValue": 2
+    "range": "Reach/10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 5
   },
   {
     "name": "The Soulsword",
@@ -1888,34 +2465,70 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 4
   },
   {
-    "name": "The Ten Rings",
+    "name": "Thunderball’s Ball & Chain",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Shang-Chi (With The Ten Rings)",
+    "owner": "Thunderball",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Worn; Power Value: 5",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Returns When Thrown",
     "ability": "melee",
-    "range": "Reach/10 spaces",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "5 spaces",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
-    "powerValue": 5
+    "powerValue": 1
   },
   {
-    "name": "The Zodiac Key",
+    "name": "Thunderstrike",
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
-    "owner": "Scorpio",
+    "owner": "—",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried; Power Value: 4",
+    "special": "Note: Functionally identical to Mjolnir in all but shape (see Mjolnir).",
+    "grantsOrigin": "Mythic: Asgardian"
+  },
+  {
+    "name": "Time Platform",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Driven, Large",
+    "grantsOrigin": "High Tech",
+    "grantsPowers": "Environmental Protection, Flight 2, Summonable, Teleport Together, Time Travel Together",
     "powerValue": 4
+  },
+  {
+    "name": "Tormod",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Can only be used by the wise, Carried; Note: Thor has most of these ◆ Elemental Burst powers already, so for him, (Electricity) the Power Value is 2. Also, Tor- ◆ Elemental Push (Electricity) mod is not made from actual ◆ Elemental Ricochet adamantium, but the weapon (Electricity) is so sharp and indestructible ◆ Summonable that it is treated as if it is.",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Adamantium (equivalent), Elemental Barrage (Electricity)",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/5",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 6
   },
   {
     "name": "Turbo Cycle",
@@ -1936,19 +2549,21 @@ const MMRPG_EQUIPMENT = [
     "source": "Secret Wars"
   },
   {
-    "name": "U.S.Agent's Shield",
+    "name": "Twilight Sword",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "U.S.Agent",
-    "weaponClass": "melee",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Can only be used by the worthy., Carried; Note: Beta Ray Bill already has Mighty 2 and Sturdy 2, so for him, the Power Value is 3. / 8",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Asgardian Transformation, Effect Options, Mighty 4, Sturdy 2",
     "ability": "melee",
-    "range": "Reach (thrown 10)",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "Grants the user one extra level of the Shield power.",
-    "notes": "U.S.Agent's vibranium shield.",
-    "source": "Quickstart"
+    "range": "Reach",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 7
   },
   {
     "name": "U.S.Agent’s Shield",
@@ -1958,15 +2573,51 @@ const MMRPG_EQUIPMENT = [
     "owner": "U.S.Agent",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
+    "special": "Restrictions: Carried, Flashy; Note: Functionally identical to Captain America’s Shield in all but coloration (see Captain America’s Shield).",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Shield 1, Stackable",
     "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
     "range": "Reach/10",
     "damageBonus": "+1",
     "multBonus": 1,
-    "multAbilities": [
-      "agility",
-      "melee"
-    ],
+    "powerValue": 1
+  },
+  {
+    "name": "Universal Weapon",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Carried, Flashy",
+    "grantsOrigin": "Weird Science",
+    "grantsPowers": "Effect Options, Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Grab (Energy), Elemental Protection 2 (Energy), Environmental Protection, Flight 2, Invisibility, Postcognition 4, Summon Portal",
+    "ability": "melee",
+    "range": "Reach+1",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "powerValue": 15
+  },
+  {
+    "name": "Valkyrie Spear",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried, Large; Note: In the profile for Annabelle Riggs in De adpool Role-Plays the Marvel Multiverse , she is only borrowing one of these, which is why she does not have the Mythic: Asgardian origin.",
+    "grantsOrigin": "Mythic: Asgardian",
+    "grantsPowers": "Elemental Burst (Energy), Uru",
+    "ability": "melee",
+    "range": "Reach +1/Unlimited",
+    "damageBonus": "+1",
+    "multBonus": 1,
     "powerValue": 1
   },
   {
@@ -1986,6 +2637,19 @@ const MMRPG_EQUIPMENT = [
     "special": "",
     "owner": "—",
     "source": "Secret Wars"
+  },
+  {
+    "name": "War Machine Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Menacing, Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Elemental Blast (Energy), Elemental Burst (Energy), Environmental Protection, Flight 2, Mighty 1, Salvation, Sturdy 2, Summonable",
+    "powerValue": 9
   },
   {
     "name": "Warhammer",
@@ -2028,33 +2692,39 @@ const MMRPG_EQUIPMENT = [
     "owner": "Whiplash",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Worn; Power Value: 4",
+    "special": "Restrictions: Menacing, Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Flight 1, Iconic Item: Energy Whips",
     "powerValue": 4
   },
   {
-    "name": "Widow's Bite",
+    "name": "Whiplash’s Energy Whips",
     "tier": "Iconic",
-    "type": "Weapon",
-    "category": "Weapon",
-    "owner": "White Widow",
-    "weaponClass": "ranged",
-    "ability": "agility",
-    "range": "10",
-    "damageBonus": "—",
-    "multBonus": 0,
-    "special": "On a Fantastic success, stuns the target for one round.",
-    "notes": "Wrist gauntlets that fire electro-static bolts.",
-    "source": "Quickstart"
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Whiplash",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "High-Tech: Battle Suit",
+    "grantsPowers": "Effect Options",
+    "ability": "melee",
+    "range": "Reach +1",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
   },
   {
     "name": "Widow’s Bite",
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "Black Widow (With Symbiote)",
+    "owner": "White Widow",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Worn; Power Value: 1",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "Special Training",
+    "grantsPowers": "Effect Options",
     "ability": "agility",
     "range": "10 spaces",
     "damageBonus": "+1",
@@ -2062,15 +2732,80 @@ const MMRPG_EQUIPMENT = [
     "powerValue": 1
   },
   {
-    "name": "Yaka Arrow",
+    "name": "Wizard Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn",
+    "grantsOrigin": "High Tech: Battle Suit",
+    "grantsPowers": "Flight 2, Sturdy 1",
+    "powerValue": 1
+  },
+  {
+    "name": "Wonder Gloves",
     "tier": "Iconic",
     "type": "Item",
     "category": "Item",
-    "owner": "Yondu Udonta",
+    "owner": "—",
     "source": "Secret Wars",
     "notes": "",
-    "special": "Power Value: 1",
+    "special": "Restrictions: Worn",
+    "grantsOrigin": "High Tech",
+    "grantsPowers": "Effect Options, Elemental Barrier, Elemental Blast, Elemental Burst, Elemental Grab, Elemental Push, Mighty 1",
+    "powerValue": 6
+  },
+  {
+    "name": "Wrecker’s Crowbar",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Wrecker",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Magic",
+    "grantsPowers": "Returns When Thrown",
+    "ability": "melee",
+    "multAbilities": [
+      "melee",
+      "agility"
+    ],
+    "range": "Reach/10 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
     "powerValue": 1
+  },
+  {
+    "name": "Yaka Arrow",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Loud",
+    "grantsOrigin": "Alien",
+    "ability": "agility",
+    "range": "30 spaces",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "powerValue": 1
+  },
+  {
+    "name": "Zodiac Key",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Carried",
+    "grantsOrigin": "Alien",
+    "grantsPowers": "Elemental Barrage (Energy), Elemental Barrier (Energy), Elemental Blast (Energy), Elemental Burst (Energy), Elemental Protection 1 (Energy)",
+    "powerValue": 4
   },
   {
     "name": "ZSAJI’S VILLAGE",
