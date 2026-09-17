@@ -11,22 +11,26 @@ PARTS = 'data/mmrpg/parts/'
 
 EQUIP = {   # book: (New Equipment book page, stop banners)
     'X-Men Expansion':        (134, ['Vehicles', 'New Conditions']),
-    'Spider-Verse Expansion': (129, ['Vehicles', 'New Conditions', 'New Rules']),
+    'Spider-Verse Expansion': (129, ['Vehicles', 'New Conditions']),
     'Avengers Expansion':     (135, ['Vehicles', 'New Conditions']),
-    'Secret Wars':            (173, ['Vehicles', 'New Tags', 'New Powers']),
+    'Secret Wars':            (173, ['Vehicles', 'New Tags', 'New Powers', 'New Origins']),
 }
 
-# headers that are table/section furniture, not a pickable item
+# headers that are table/section furniture or rules, not a pickable item
 JUNK = {'melee weapons', 'ranged weapons', 'new ranged weapons', 'basic vehicles',
         'n w', 'additional weapon rules', 'vehicle profiles', 'operating a vehicle',
         'vehicular weaponry', 'defense and destruction', 'recalculating',
-        'rate of advancement', 'new weapon', 'incapacitating attacks'}
+        'rate of advancement', 'new weapon', 'incapacitating attacks',
+        'the gadget', 'gadgets', 'using a gadget', 'hacking a gadget',
+        'destroying a gadget', 'keeping gadgets', 'one at a time', 'stunt descriptions',
+        'powersweapons', 'powersnotes', 'notes', 'profile', 'weapons', 'powers',
+        'gadget hacking', "zsaji's village", 'zsaji', 'battleworld'}
 
 def norm(n): return re.sub(r'\s+', ' ', n).strip().lower()
 
 def classify(name, desc):
-    tier = 'Narrative'
-    typ = 'Item'
+    tier = 'Common'          # general New-Equipment gear (Narrative tier is reserved
+    typ = 'Item'             # for the Narrative Items — Cosmic Cube, Infinity Stones…)
     special = ''
     m = re.search(r'Health Damage Reduction\s*[–-]?\s*(\d+)', desc)
     if m or re.search(r'\barmor\b|\bvest\b|\bshield\b', name, re.I):
@@ -42,14 +46,16 @@ def extract(book):
         idx = S.find_header_page(pdf, page, 'New Equipment', window=6)
         if idx is None:
             print('  !! %s: New Equipment banner not found' % book); return []
-        items = S.name_items(pdf, idx, 'New Equipment', stops, drop=(), name_max_words=4)
-        out = []
+        items = S.name_items(pdf, idx, 'New Equipment', stops, drop=(), name_max_words=4, strict_stops=True)
+        out = []; seen = set()
         for it in items:
             nm = it['name']; desc = it['description']
             if norm(nm) in JUNK: continue
-            if len(nm) <= 3 and nm.isupper(): continue     # "N W" table banner
-            if len(desc) < 40: continue                    # stray fragment / table row
-            if re.match(r'^(Range|Weapon|Size|Vehicle|Speed)', nm): continue
+            if nm.isupper() and len(nm.replace(' ', '')) <= 12: continue   # sub-label banner
+            if len(desc) < 20: continue                    # stray fragment / table row
+            if re.match(r'^(Range|Weapon|Size|Vehicle|Speed|Die)\b', nm): continue
+            if norm(nm) in seen: continue                  # dedupe (size-16 + size-13 dup)
+            seen.add(norm(nm))
             tier, typ, special = classify(nm, desc)
             e = {'name': nm, 'tier': tier, 'type': typ, 'category': typ,
                  'owner': '—', 'notes': desc, 'source': book}
@@ -59,10 +65,9 @@ def extract(book):
 
 def main(merge=False):
     core = json.load(open(PARTS + 'equipment.json'))
-    # keep everything EXCEPT a prior New-Equipment import from these books (tier
-    # Narrative/Common from a book source). Iconic character gear (tier Iconic,
-    # book source) is preserved.
-    kept = [e for e in core if not (e.get('source') in EQUIP and e.get('tier') != 'Iconic')]
+    # keep everything EXCEPT a prior New-Equipment prose import (tier Common from a
+    # book source). Narrative Items (tier Narrative), Iconic gear and Vehicles stay.
+    kept = [e for e in core if not (e.get('source') in EQUIP and e.get('tier') == 'Common')]
     seen = {norm(e['name']) for e in kept}
     allnew = []
     for book in EQUIP:

@@ -19,7 +19,6 @@ const ENTITIES = [
   { key: "traits",      constName: "MMRPG_TRAITS",      type: "MmrpgTrait",      base: "mmrpg-traits" },
   { key: "tags",        constName: "MMRPG_TAGS",        type: "MmrpgTag",        base: "mmrpg-tags" },
   { key: "conditions",  constName: "MMRPG_CONDITIONS",  type: "MmrpgCondition",  base: "mmrpg-conditions" },
-  { key: "vehicles",    constName: "MMRPG_VEHICLES",    type: "MmrpgVehicle",    base: "mmrpg-vehicles" },
   { key: "powers",      constName: "MMRPG_POWERS",      type: "MmrpgPower",      base: "mmrpg-powers" },
   { key: "characters",  constName: "MMRPG_CHARACTERS",  type: "MmrpgCharacter",  base: "mmrpg-characters" },
   { key: "equipment",   constName: "MMRPG_EQUIPMENT",   type: "MmrpgEquipment",  base: "mmrpg-equipment" },

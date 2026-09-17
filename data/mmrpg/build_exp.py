@@ -74,8 +74,12 @@ def _name(page):
     titles are over-printed (each glyph drawn 2-3x), so we de-dupe first. The
     right-aligned rank number sits after a big (>14) gap and is dropped; a
     parenthetical like "(BUCKY BARNES)" is kept."""
-    ch = [c for c in page.chars if 44 <= c['top'] <= 82 and c.get('size', 0) >= 15
-          and c['x0'] < 430 and c['text'].strip() and c.get('upright', True)]
+    def titlechars(minsz):
+        return [c for c in page.chars if 44 <= c['top'] <= 84 and c.get('size', 0) >= minsz
+                and c['x0'] < 430 and c['text'].strip() and c.get('upright', True)]
+    ch = titlechars(15)
+    if len(ch) < 2:
+        ch = titlechars(12.8)                          # long/generic titles scale down to ~13pt
     if not ch:
         return None
     ch.sort(key=lambda c: c['x0'])
@@ -131,6 +135,11 @@ def _name(page):
             else:
                 merged.append(w)
         words = merged
+    # drop a stat-block section header glued onto a scaled-down long title
+    _SECT = {'BIOGRAPHY', 'ABILITIES', 'POWERS', 'TRAITS', 'TAGS', 'DAMAGE',
+             'WEAPONS', 'NOTES', 'PROFILE', 'HEALTH', 'FOCUS', 'KARMA', 'RANK'}
+    while words and words[-1].strip().upper() in _SECT:
+        words.pop()
     name = ' '.join(w for w in words if w.strip()).strip()
     name = re.sub(r'\s{2,}', ' ', name).strip()
     # a stray rank digit that landed inside a word ("HUDSO4N" -> "HUDSON")
@@ -380,7 +389,10 @@ def build_book(pdf_path, source, pmin=0, pmax=None):
         for idx in range(pmin, min(hi, len(pdf.pages))):
             r = parse_exp_page(pdf.pages[idx])
             if not r or not r.get('name'): continue
-            if len(r['name']) < 2 or len(r['name']) > 40: continue
+            nm = r['name']
+            # allow a 1-char codename ("M", "X") but only if it's a letter; drop 40+.
+            if len(nm) > 40 or not nm[0].isalnum(): continue
+            if len(nm) < 2 and not nm.isalpha(): continue
             r['genre'] = 'core'; r['source'] = source
             it = extract_iconic(r, source)
             if it and it['name'] and it['name'] not in icons:

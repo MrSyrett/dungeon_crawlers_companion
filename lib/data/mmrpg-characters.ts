@@ -1027,6 +1027,36 @@ export const MMRPG_CHARACTERS = [
     "id": "angel-x-men-expansion"
   },
   {
+    "name": "ANNIHILATION WAVE BUG",
+    "realName": "",
+    "rank": 1,
+    "health": 60,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 0,
+      "logic": 2
+    },
+    "speed": {},
+    "occupation": "",
+    "origin": "",
+    "teams": "",
+    "base": "",
+    "features": "",
+    "history": "",
+    "personality": "",
+    "traits": [],
+    "tags": [],
+    "powers": [],
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "annihilation-wave-bug-secret-wars"
+  },
+  {
     "name": "ANNIHILUS",
     "realName": "Annihilus",
     "rank": 5,
@@ -2074,6 +2104,50 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "banshee-x-men-expansion"
+  },
+  {
+    "name": "BARBARIAN",
+    "realName": "",
+    "rank": 1,
+    "health": 30,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {},
+    "occupation": "",
+    "origin": "",
+    "teams": "",
+    "base": "",
+    "features": "",
+    "history": "",
+    "personality": "",
+    "traits": [],
+    "tags": [],
+    "powers": [
+      {
+        "set": "",
+        "names": [
+          "Vicious Attack TRAITS",
+          "Signature Attack: Sword DAMAGE EE LE 3 3 M Y TI 3 3 L GIA POWERS",
+          "Heightened Senses 1",
+          "Speed Swim",
+          "Sturdy 1",
+          "Sword Henchmen O G 3 3 E CI G 3 0 OL TAGS",
+          "Amphibious",
+          "Extreme Appearance ITEMS"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Avengers Expansion",
+    "id": "barbarian-avengers-expansion"
   },
   {
     "name": "BARON KHONSHU",
@@ -13308,6 +13382,52 @@ export const MMRPG_CHARACTERS = [
     "id": "immortus-avengers-expansion"
   },
   {
+    "name": "INNER DEMON",
+    "realName": "",
+    "rank": 1,
+    "health": 60,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 1,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {},
+    "occupation": "",
+    "origin": "",
+    "teams": "",
+    "base": "",
+    "features": "",
+    "history": "",
+    "personality": "",
+    "traits": [],
+    "tags": [],
+    "powers": [
+      {
+        "set": "",
+        "names": [
+          "Fast Attacks",
+          "Healing Factor TRAITS",
+          "Fearless",
+          "Signature Weapon: Katana (+2 Melee damage multiplier bonus) TAGS",
+          "Backup",
+          "Black Market Access DAMAGE EE LE 2 2 M Y TI 3 2 L GIA POWERS",
+          "Flight 1",
+          "Snap Shooting TRAITS",
+          "Katana Henchmen O G 2 2 E CI G 2 0 OL ITEMS",
+          "Energy Pistol ( +1 to Agility damage multiplier, stuns target on a Fantastic success; range 10)"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "inner-demon-spider-verse-expansion"
+  },
+  {
     "name": "INVISIBLE WOMAN",
     "realName": "Susan “Sue” Storm Richards",
     "rank": 4,
@@ -14601,7 +14721,7 @@ export const MMRPG_CHARACTERS = [
     ]
   },
   {
-    "name": "KARMA",
+    "name": "KAR MA",
     "realName": "Xuân Cao Manh",
     "rank": 3,
     "health": 60,
@@ -14674,7 +14794,7 @@ export const MMRPG_CHARACTERS = [
     ],
     "genre": "core",
     "source": "X-Men Expansion",
-    "id": "karma-x-men-expansion"
+    "id": "kar-ma-x-men-expansion"
   },
   {
     "name": "KATE PRYDE",
@@ -16162,6 +16282,93 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "luke-cage",
     "genre": "core"
+  },
+  {
+    "name": "M",
+    "realName": "Monet St. Croix",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 4,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 1,
+      "logic": 5
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 20
+    },
+    "occupation": "Tycoon",
+    "origin": "Mutant",
+    "teams": "Avengers Unity Division, Generation X, X-Factor, X-Force, X-Men",
+    "base": "Krakoa",
+    "features": "Red, spiny Penance form",
+    "history": "As a young girl, Monet St. Croix was trapped in the form of a mute and prickly red creature by Marius St. Croix, her evil older brother. Marius intended to keep Monet in such chains for the rest of her life, using the marrow in her bones to quell his insatiable hunger for mutant genetic material. But with the help of the mysterious mutant hero Gateway, Monet eventually managed to escape. Gateway le Monet in the care of a team of young mutant super heroes known as Generation X. She became a successful member of the team, and they, in turn, helped free her from her alternate form (known as Penance). Finally back in her own body, Monet adopted the codename of M. M went on to become a vital member of many important mutant teams, such as X-Force, X-Factor Investigations and the X-Men themselves. She later took up residence on Krakoa, not far from her rambunctious younger sisters Claudette and Nicole, who have frequently used their own powers to disguise themselves as Monet. As the co-head of Krakoa’s X-Corp, M played a critical role in the maintenance of the island-nation’s finances. She has recently displayed the ability to voluntarily take on her old Penance form, though precisely how she managed this feat remains unknown.",
+    "personality": "The traumas M su ﬀ ered in her early life led her to adopt the personality of a stuck-up snob. Afraid of letting anyone get too close, she spent much of her life purposefully pushing her friends away, treating them like her lessers. M has mellowed out in her later years, but she is still a rather cold and ruthless person—which makes her a perfect fit for X-Corp. Alternate Form M’s Penance form slightly changes the way her powers work. As Penance, M gains the Mighty 2 and Sturdy 1 powers. Her attacks become Sharp, and she loses her Brilliance 1 power. In her M form, she retains Mighty 1 and gains Brilliance 1 but loses Sturdy 1. Numbers before a slash are for her regular human form, and numbers a er a slash are for her Penance form. Weapons Telekinesis",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Celebrities",
+      "Famous",
+      "Iron Will",
+      "Presence",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Alternate Form (Penance form)",
+      "Extreme Appearance (in alternate form)",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "Rich",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Flight 2",
+          "Heightened Senses 1",
+          "Mighty 2",
+          "Sturdy 1",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Blunt/Sharp)",
+        "names": [
+          "Fast Attacks",
+          "Hit & Run",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Telekinesis",
+        "names": [
+          "Telekinetic Attack",
+          "Telekinetic Manipulation"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Mind Reading",
+          "Mirage",
+          "Telepathic Link"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men Expansion",
+    "id": "m-x-men-expansion"
   },
   {
     "name": "M.O.D.O.K.",
@@ -28002,6 +28209,51 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "spidercide-spider-verse-expansion"
+  },
+  {
+    "name": "SPIDERLING",
+    "realName": "",
+    "rank": 6,
+    "health": 30,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 1,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {},
+    "occupation": "",
+    "origin": "",
+    "teams": "",
+    "base": "",
+    "features": "",
+    "history": "",
+    "personality": "",
+    "traits": [],
+    "tags": [],
+    "powers": [
+      {
+        "set": "",
+        "names": [
+          "Snap Shooting TRAITS",
+          "Situational Awareness TAGS",
+          "Backup DAMAGE EE LE 2 2 M Y TI 3 2 L GIA POWERS",
+          "Accuracy 1",
+          "Snap Shooting TRAITS",
+          "Flash-bang grenade (x2)",
+          "Rifle (+1 Agility damage multiplier; range 20) Henchmen O G 2 2 E CI G 2 0 OL ITEMS",
+          "Pistol (+1 Agility damage multiplier; Range 10)",
+          "Submachine gun (+1 Agility damage multiplier; range 10)"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Spider-Verse Expansion",
+    "id": "spiderling-spider-verse-expansion"
   },
   {
     "name": "SPIDERS-MAN",

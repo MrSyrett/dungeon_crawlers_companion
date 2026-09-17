@@ -113,11 +113,12 @@ def page_blocks_stitched(pdf, idx, gutters=None):
 
 BANNER_CAPS = 14.5  # a size>=this all-caps header starts/ends a major section
 
-def slice_section(pdf, start_idx, start_header, stop_headers, max_pages=8):
+def slice_section(pdf, start_idx, start_header, stop_headers, max_pages=8, strict_stops=False):
     """Collect (header,size,body) item-blocks from the section whose banner is
-    start_header (matched space-insensitively, size>=BANNER_CAPS) through pages,
-    stopping at the next banner in stop_headers (or any new size>=BANNER_CAPS caps
-    banner if stop_headers is None)."""
+    start_header (matched space-insensitively, size>=BANNER_CAPS) through pages.
+    By default any new size>=BANNER_CAPS caps banner ends the section; with
+    strict_stops=True only a banner in stop_headers ends it (so a big item-name
+    sub-banner like "SPIDER-BOTS" doesn't cut the section short)."""
     want = caps_key(start_header)
     stops = [caps_key(s) for s in (stop_headers or [])]
     items = []
@@ -130,15 +131,12 @@ def slice_section(pdf, start_idx, start_header, stop_headers, max_pages=8):
                 if b['size'] >= BANNER_CAPS and want in hk:
                     started = True
                 continue
-            # stop?
             if b['size'] >= BANNER_CAPS:
-                if stops:
-                    if any(s in hk for s in stops):
-                        return items
-                    # a different big banner that isn't a stop — treat as end too
+                if any(s in hk for s in stops):
                     return items
-                else:
+                if not strict_stops:
                     return items
+                # strict: a big banner that isn't a stop is an item name — keep it
             items.append({'header': h, 'size': b['size'], 'body': join_body(b['lines']), 'page': idx})
     return items
 
@@ -160,10 +158,10 @@ def merge_bullets(items):
             out.append(dict(it))
     return out
 
-def name_items(pdf, start_idx, banner, stops, drop=(), name_max_words=5):
+def name_items(pdf, start_idx, banner, stops, drop=(), name_max_words=5, strict_stops=False):
     """High-level: slice a name+description section (traits/tags/conditions), fold
     bullets, drop rule headers, and return [{'name','description'}]."""
-    raw = merge_bullets(slice_section(pdf, start_idx, banner, stops))
+    raw = merge_bullets(slice_section(pdf, start_idx, banner, stops, strict_stops=strict_stops))
     dropset = {d.lower() for d in drop}
     res = []
     for it in raw:

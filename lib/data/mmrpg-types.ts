@@ -155,6 +155,17 @@ export interface MmrpgEquipment {
   special?: string;
   notes?: string;
   source?: string;
+  // ── Vehicle fields (type = "Vehicle"): a vehicle is just a kind of equipment. ──
+  /** "Named" (a specific vehicle) or "Basic" (a generic type). */
+  vehicleClass?: string;
+  size?: string;
+  speed?: string;
+  health?: string;
+  damageReduction?: string;
+  passengers?: string;
+  /** Onboard powers / weapons for a vehicle. */
+  powers?: string;
+  weapons?: string;
 }
 
 export interface MmrpgPower {
