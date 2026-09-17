@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { MMRPG_ORIGINS } from "@/lib/data/mmrpg-origins";
 import { MMRPG_OCCUPATIONS } from "@/lib/data/mmrpg-occupations";
 import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, one, type Query, type RawQuery } from "@/components/MmrpgRef";
+import MmrpgRefTokens from "@/components/MmrpgRefTokens";
 
 export const dynamic = "force-dynamic";
 const BASE = "/mmrpg/origins";
@@ -15,9 +16,9 @@ function Card({ o, kind }: { o: Row; kind: "origin" | "occupation" }) {
       <h3 className={nameCls}>{o.name}</h3>
       <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{o.description}</p>
       <dl className="mt-2 space-y-0.5 text-[11px] text-[var(--muted)]">
-        {o.tags ? <div><span className="font-semibold text-[var(--text)]">Tags:</span> {o.tags}</div> : null}
-        {o.traits ? <div><span className="font-semibold text-[var(--text)]">Traits:</span> {o.traits}</div> : null}
-        {kind === "origin" && o.powers ? <div><span className="font-semibold text-[var(--text)]">Powers:</span> {o.powers}</div> : null}
+        {o.tags ? <div><span className="font-semibold text-[var(--text)]">Tags:</span> <MmrpgRefTokens text={o.tags} kind="tag" /></div> : null}
+        {o.traits ? <div><span className="font-semibold text-[var(--text)]">Traits:</span> <MmrpgRefTokens text={o.traits} kind="trait" /></div> : null}
+        {kind === "origin" && o.powers ? <div><span className="font-semibold text-[var(--text)]">Powers:</span> <MmrpgRefTokens text={o.powers} kind="power" /></div> : null}
         {kind === "origin" && o.occupation ? <div><span className="font-semibold text-[var(--text)]">Suggested occupation:</span> {o.occupation}</div> : null}
         {kind === "origin" && o.limitation ? <div><span className="font-semibold text-[var(--text)]">Limitation:</span> {o.limitation}</div> : null}
         {o.examples ? <div className="italic">e.g. {o.examples}</div> : null}

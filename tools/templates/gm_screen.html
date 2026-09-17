@@ -2156,6 +2156,12 @@ GMScenes.renderPins();
 .pty-lost { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:900; letter-spacing:.08em; color:#ff6a6a; border:1px solid #7a2d2d; background:#3a1414; border-radius:3px; padding:0 4px; margin-left:5px; vertical-align:middle; text-decoration:none; }
 .pty-spell-info { background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:13px; line-height:1; padding:0 3px; vertical-align:middle; }
 .pty-spell-info:hover { color:var(--white); }
+/* Inline "ⓘ" detail button (MMRPG powers/traits/tags on party cards + trackers) */
+.mmrpg-info { background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:12px; line-height:1; padding:0 2px 0 3px; vertical-align:middle; }
+.mmrpg-info:hover { color:var(--white); }
+#mmrpg-info-pop { position:fixed; z-index:9999; max-width:300px; display:none; background:#17131a; border:1px solid var(--border,#333); border-radius:7px; padding:9px 11px; font-family:'Montserrat',sans-serif; font-size:12px; line-height:1.45; color:#dcd7de; box-shadow:0 8px 28px rgba(0,0,0,.55); }
+#mmrpg-info-pop .mip-name { font-family:'Oswald',sans-serif; font-weight:600; font-size:14px; color:#3fd0e6; margin-bottom:3px; }
+#mmrpg-info-pop .mip-meta { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted,#999); margin-bottom:3px; }
 .pty-spell-desc { font-family:'Montserrat',sans-serif; font-size:10px; color:var(--muted); line-height:1.5; margin:3px 0 5px; padding:5px 8px; border-left:2px solid var(--gold); background:var(--panel); }
 .pty-gear-h { display:flex; align-items:center; justify-content:flex-start; gap:8px; flex-wrap:wrap; }
 .pty-slots { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--light); background:var(--panel); border:1px solid var(--border); border-radius:3px; padding:0 5px; margin-left:4px; }
@@ -2812,7 +2818,7 @@ GMScenes.renderPins();
 
       <!-- MARVEL MULTIVERSE RPG CHARACTER PANEL (roster draw; cards send to the tracker) -->
       <div class="gen-panel" data-panel="mmrpgmonster">
-        <div class="gen-controls">
+        <div class="gen-controls" style="align-items:flex-end;">
           <label class="gen-label">Rank
             <select class="gen-select" id="gen-mmrpgmon-kind"><option value="">Any Rank</option></select>
           </label>
@@ -2822,7 +2828,9 @@ GMScenes.renderPins();
               <option value="3">3</option><option value="5">5</option>
             </select>
           </label>
+          <button class="btn small primary gen-inline-roll" type="button">Generate</button>
         </div>
+        <div style="font-size:11px;color:var(--muted,#888);margin-top:2px;">Draws pre-gen Marvel characters (they double as the bestiary). Each card sends to the combat tracker.</div>
         <div class="gen-results" id="gen-mmrpgmon-kind-results"></div>
       </div>
 
@@ -4453,13 +4461,22 @@ function init_trackers(root) {
     // ACE Health is a row of clickable pips (like the ID card); Star Wars has
     // no HP at all — combatants use the same wound track as the players.
     const hpMode = src === 'ace' ? 'ace' : (src === 'sw' || src === 'd62e') ? 'sw' : 'standard';
+    // MMRPG: the tracker card already shows Health (the HP track) and Rank (the
+    // tag), so drop those two from the Stats chips to avoid listing them twice.
+    // Traits/tags/powers move from text lines to clickable chips (detail popovers).
+    let stats = sum.stats, lines = sum.lines, chips = null;
+    if(src === 'mmrpg') {
+      stats = stats.filter(st => st.label !== 'Health' && st.label !== 'Rank');
+      lines = lines.filter(l => !l.detail);
+      chips = sum.mmrpgChips || null;
+    }
     return {
       id: nextId++, type: 'npc',
       name: m.name || 'Monster',
       tag: sum.tag || '', hpMode: hpMode,
       hpCurrent: sum.hp, hpMax: sum.hp, wound: 'none',
       statuses: [], statsOpen: true, traitsOpen: false,
-      gmon: { src: src, stats: sum.stats, lines: sum.lines, notes: sum.notes, page: m.page || '' }
+      gmon: { src: src, stats: stats, lines: lines, notes: sum.notes, page: m.page || '', chips: chips }
     };
   }
   const SW_WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
@@ -4473,7 +4490,15 @@ function init_trackers(root) {
     const statsOpen = n.statsOpen !== false;
     const stats = `<button class="npc-mon-stats-btn">${statsOpen ? '&#9662;' : '&#9656;'} Stats</button>` +
       (statsOpen ? `<div class="npc-mon-stats-wrap"><div class="npc-mon-stats">${chips}</div></div>` : '');
-    const atks = lines ? `<div class="npc-mon-atks" style="min-width:0;max-width:100%;">${lines}</div>` : '';
+    // MMRPG traits/tags/powers as clickable chips (detail popovers) — replaces the
+    // plain text lines used on the browse cards.
+    const infoChip = (nm, kind) => `${escAttr(nm)}<button class="mmrpg-info" data-ik="${kind}" data-in="${escAttr(nm)}" title="Details" aria-label="Show details">&#9432;</button>`;
+    const chipRow = (label, arr, kind) => (arr && arr.length)
+      ? `<div class="npc-mon-atk"><span class="npc-mon-label">${label}</span><span class="npc-mon-atk-text">${arr.map(x => infoChip(x, kind)).join(', ')}</span></div>` : '';
+    const mchips = g.chips
+      ? chipRow('Traits', g.chips.traits, 'trait') + chipRow('Tags', g.chips.tags, 'tag') + chipRow('Powers', g.chips.powers, 'power')
+      : '';
+    const atks = (lines || mchips) ? `<div class="npc-mon-atks" style="min-width:0;max-width:100%;">${mchips}${lines}</div>` : '';
     const traits = (g.notes || []).length
       ? `<button class="npc-mon-traits-btn">${n.traitsOpen ? '&#9662;' : '&#9656;'} Notes</button>` +
         (n.traitsOpen ? `<div class="npc-mon-traits">${g.notes.map(t => '<div>' + escAttr(t) + '</div>').join('')}</div>` : '')
@@ -7437,14 +7462,17 @@ function xsMonSummary(src, m) {
     const sp = m.speed || {}; const spTxt = Object.keys(sp).map(k => k.charAt(0).toUpperCase() + k.slice(1) + ' ' + sp[k]).join(' · ');
     if(spTxt) out.lines.push({ label: 'Speed', text: spTxt });
     const traits = (m.traits || []).map(t => typeof t === 'string' ? t : (t.name || '')).filter(Boolean);
-    if(traits.length) out.lines.push({ label: 'Traits', text: traits.join(', ') });
+    if(traits.length) out.lines.push({ label: 'Traits', text: traits.join(', '), detail: true });
     const tags = (m.tags || []).map(t => typeof t === 'string' ? t : (t.name || '')).filter(Boolean);
-    if(tags.length) out.lines.push({ label: 'Tags', text: tags.join(', ') });
+    if(tags.length) out.lines.push({ label: 'Tags', text: tags.join(', '), detail: true });
+    const powerNames = [];
     (m.powers || []).forEach(p => {
-      if(typeof p === 'string') { out.lines.push({ label: 'Power', text: p }); }
-      else if(p && Array.isArray(p.names)) { out.lines.push({ label: p.set || 'Powers', text: p.names.join(', ') }); }
-      else if(p && p.name) { out.lines.push({ label: 'Power', text: p.name }); }
+      if(typeof p === 'string') { out.lines.push({ label: 'Power', text: p, detail: true }); powerNames.push(p); }
+      else if(p && Array.isArray(p.names)) { out.lines.push({ label: p.set || 'Powers', text: p.names.join(', '), detail: true }); p.names.forEach(nm => powerNames.push(nm)); }
+      else if(p && p.name) { out.lines.push({ label: 'Power', text: p.name, detail: true }); powerNames.push(p.name); }
     });
+    // Clickable chips for the combat tracker (traits/tags/powers with detail popovers).
+    out.mmrpgChips = { traits: traits, tags: tags, powers: powerNames };
     if(m.realName && m.realName !== m.name) out.notes.push(m.realName);
     out.notes.push([m.origin, m.occupation].filter(Boolean).join(' · '));
     if(m.teams) out.notes.push('Teams: ' + m.teams);
@@ -8950,7 +8978,7 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen', 'mmrpgmonster'];
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -8983,6 +9011,10 @@ window.init_gen = function(root) {
   if(typeof window.applyGmSystemToGenerators === 'function') window.applyGmSystemToGenerators(root);
   // Wire the loot-box + found-loot builders now living in this tool's panels.
   try { if(typeof wireAiConsole === 'function') wireAiConsole(root); } catch(e){}
+
+  // Newer per-system panels (e.g. the MMRPG character generator) carry their own
+  // inline Generate button; route it through the same toolbar generate handler.
+  root.querySelectorAll('.gen-inline-roll').forEach(b => b.addEventListener('click', () => { if(rollBtn) rollBtn.click(); }));
 
   rollBtn.addEventListener('click', () => {
     if(activeTab==='npc') {
@@ -11018,6 +11050,7 @@ else syncHomebrewMonsters();
 <script src="/tools-data/mmrpg-equipment.js"></script>
 <script src="/tools-data/mmrpg-powers.js"></script>
 <script src="/tools-data/mmrpg-traits.js"></script>
+<script src="/tools-data/mmrpg-tags.js"></script>
 <script>
 
 
@@ -11639,6 +11672,12 @@ function init_party(root) {
     const ABIL = [['melee','Melee'],['agility','Agility'],['resilience','Resilience'],['vigilance','Vigilance'],['ego','Ego'],['logic','Logic']];
     const list = arr => (Array.isArray(arr) ? arr : []).filter(x => x && x.name).map(x => x.name);
     const conds = d.conditions && typeof d.conditions === 'object' ? Object.keys(d.conditions).filter(k => d.conditions[k]) : [];
+    // Run Speed = 5 + ⌊Agility / 5⌋, ±1 for large/small size (mirrors the sheet).
+    let run = 5 + Math.floor(n(A.agility) / 5);
+    const size = d.size || '';
+    if(/Big|Huge|Gigantic/.test(size)) run += 1;
+    if(/Tiny|Little|Small/.test(size)) run -= 1;
+    if(run < 0) run = 0;
     return {
       system: 'MMRPG',
       name: d.name || 'Unnamed', real: d.real || '', rank: n(d.rank) || 1,
@@ -11646,6 +11685,7 @@ function init_party(root) {
       abilities: ABIL.map(([k, id]) => ({ id, mod: n(A[k]), defense: 10 + n(A[k]) })),
       health: pool(d.health), focus: pool(d.focus), karma: pool(d.karma),
       healthDR: n(d.healthDR), focusDR: n(d.focusDR),
+      speed: { run: run, half: Math.floor(run / 2) },
       powers: list(d.powers), traits: list(d.traits), tags: list(d.tags), conditions: conds,
     };
   }
@@ -12054,12 +12094,17 @@ function init_party(root) {
     const sub = [c.real, 'Rank ' + c.rank, [c.origin, c.occupation].filter(Boolean).join(' · ')].filter(Boolean).join(' · ');
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
     const hurt = c.health.max > 0 && c.health.cur < c.health.max;
+    const foff = c.focus.max > 0 && c.focus.cur < c.focus.max;
+    const sp = c.speed || { run: 0, half: 0 };
+    // A clickable name that opens the shared MMRPG detail popover.
+    const info = (nm, kind) => esc(nm) + '<button class="mmrpg-info" data-ik="' + kind + '" data-in="' + esc(nm) + '" title="Details" aria-label="Show details">ⓘ</button>';
     let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
     h += '<div class="pty-card-hd">'
        + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
        + '<div class="pty-sub">' + esc(sub) + '</div></div>'
        + '<span class="pty-chip"' + (hurt ? ' style="color:#ff6a6a;"' : '') + '>Health <b>' + esc(c.health.cur) + '/' + esc(c.health.max) + '</b></span>'
-       + '<span class="pty-chip">Karma <b>' + esc(c.karma.cur) + '</b></span>'
+       + '<span class="pty-chip"' + (foff ? ' style="color:#ffb15a;"' : '') + '>Focus <b>' + esc(c.focus.cur) + '/' + esc(c.focus.max) + '</b></span>'
+       + '<span class="pty-chip">Karma <b>' + esc(c.karma.cur) + '/' + esc(c.karma.max) + '</b></span>'
        + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
        + '</div>';
     h += '<div class="pty-card-bd">';
@@ -12067,13 +12112,13 @@ function init_party(root) {
         '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(a.id.slice(0,3).toUpperCase()) + '</div>'
       + '<div class="pty-stat-mod">' + (a.mod >= 0 ? '+' : '') + a.mod + '</div><div class="pty-stat-val">def ' + esc(a.defense) + '</div></div>').join('') + '</div>';
     h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
-       + cell('Health', c.health.cur + '/' + c.health.max) + cell('Focus', c.focus.cur + '/' + c.focus.max) + cell('Karma', c.karma.cur + '/' + c.karma.max)
+       + cell('Speed', 'Run ' + sp.run + ' · Climb/Swim ' + sp.half)
        + (c.healthDR ? cell('Health DR', c.healthDR) : '') + (c.focusDR ? cell('Focus DR', c.focusDR) : '')
        + '</div></div>';
     if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
-    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + esc(c.powers.join(', ')) + '</div></div>';
-    if(c.traits.length) h += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + esc(c.traits.join(', ')) + '</div></div>';
-    if(c.tags.length) h += '<div class="pty-sec"><div class="pty-sec-h">Tags</div><div class="pty-line dim">' + esc(c.tags.join(', ')) + '</div></div>';
+    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + c.powers.map(nm => info(nm, 'power')).join(', ') + '</div></div>';
+    if(c.traits.length) h += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + c.traits.map(nm => info(nm, 'trait')).join(', ') + '</div></div>';
+    if(c.tags.length) h += '<div class="pty-sec"><div class="pty-sec-h">Tags</div><div class="pty-line dim">' + c.tags.map(nm => info(nm, 'tag')).join(', ') + '</div></div>';
     if(c.teams) h += '<div class="pty-sec"><div class="pty-sec-h">Teams</div><div class="pty-line dim">' + esc(c.teams) + '</div></div>';
     h += '</div></div>';
     return h;
@@ -13307,6 +13352,65 @@ window.init_rules = init_rules;
     var label=btn.textContent; btn.textContent = ok ? 'Sent ✓' : 'Could not send'; btn.disabled=true;
     setTimeout(function(){ btn.textContent=label; btn.disabled=false; }, 1400);
   };
+})();
+</script>
+
+<!-- ── MMRPG detail popover: any button.mmrpg-info (data-ik = tag|trait|power,
+     data-in = name) opens a small floating card with that entry's details. Shared
+     by the Party cards and the combat trackers. -->
+<script>
+(function(){
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function find(list, name){
+    if(!Array.isArray(list)) return null;
+    var nm=String(name||'').toLowerCase().trim();
+    var hit=list.find(function(x){return String(x.name).toLowerCase()===nm;});
+    if(hit) return hit;
+    // fall back to the part before a ":" or "(" specifier (e.g. "Connections: …")
+    var base=nm.split(/[:(]/)[0].trim();
+    if(base && base!==nm) hit=list.find(function(x){return String(x.name).toLowerCase()===base;});
+    return hit||null;
+  }
+  // Public: returns {name, meta, body} for a tag/trait/power, or null.
+  window.mmrpgInfoText=function(kind, name){
+    name=String(name||'').trim(); if(!name) return null;
+    if(kind==='power'){
+      var L=(typeof MMRPG_POWERS!=='undefined')?MMRPG_POWERS:(window.MMRPG_POWERS||[]);
+      var p=find(L, name);
+      if(!p){ var b=name.toLowerCase().replace(/\s+\d+$/,''); p=find(L, b); }   // "Mighty 2" → "Mighty"
+      if(!p) return null;
+      var meta=[p.powerSet&&p.powerSet!=='None'?p.powerSet:'Basic', p.action, p.duration, p.range?('Range '+p.range):'', p.cost].filter(Boolean).join(' · ');
+      return { name:p.name, meta:meta, body:(p.effect||p.description||'') };
+    }
+    if(kind==='trait'){ var T=(typeof MMRPG_TRAITS!=='undefined')?MMRPG_TRAITS:(window.MMRPG_TRAITS||[]); var t=find(T,name); return t?{name:t.name,meta:'Trait',body:(t.description||'')}:null; }
+    if(kind==='tag'){ var G=(typeof MMRPG_TAGS!=='undefined')?MMRPG_TAGS:(window.MMRPG_TAGS||[]); var g=find(G,name); return g?{name:g.name,meta:'Tag',body:(g.description||'')}:null; }
+    return null;
+  };
+  var pop=null, forBtn=null;
+  function ensure(){ if(pop) return pop; pop=document.createElement('div'); pop.id='mmrpg-info-pop'; document.body.appendChild(pop); return pop; }
+  function hide(){ if(pop) pop.style.display='none'; forBtn=null; }
+  function show(btn){
+    var d=window.mmrpgInfoText(btn.getAttribute('data-ik'), btn.getAttribute('data-in'));
+    var name=btn.getAttribute('data-in')||'';
+    var p=ensure();
+    p.innerHTML='<div class="mip-name">'+esc(d?d.name:name)+'</div>'
+      +(d&&d.meta?'<div class="mip-meta">'+esc(d.meta)+'</div>':'')
+      +'<div>'+(d&&d.body?esc(d.body):'<i>No details found.</i>')+'</div>';
+    p.style.display='block'; p.style.visibility='hidden'; p.style.left='0px'; p.style.top='0px';
+    var r=btn.getBoundingClientRect(); var pr=p.getBoundingClientRect();
+    var left=Math.min(r.left, window.innerWidth-pr.width-8); if(left<8)left=8;
+    var top=r.bottom+6; if(top+pr.height>window.innerHeight-8) top=Math.max(8, r.top-pr.height-6);
+    p.style.left=left+'px'; p.style.top=top+'px'; p.style.visibility='visible';
+    forBtn=btn;
+  }
+  // Capture phase so a tool's own click handlers (card collapse, etc.) don't fire.
+  document.addEventListener('click', function(e){
+    var b=e.target.closest ? e.target.closest('.mmrpg-info') : null;
+    if(b){ e.preventDefault(); e.stopPropagation(); if(forBtn===b && pop && pop.style.display!=='none'){ hide(); } else { show(b); } return; }
+    if(pop && pop.style.display!=='none' && !(e.target.closest && e.target.closest('#mmrpg-info-pop'))) hide();
+  }, true);
+  window.addEventListener('scroll', hide, true);
+  window.addEventListener('resize', hide);
 })();
 </script>
 

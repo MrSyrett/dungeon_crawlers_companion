@@ -180,6 +180,18 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .cond .cbox{width:11px;height:11px;border:1.5px solid var(--input-border);border-radius:3px;display:inline-block;flex:0 0 auto;}
 .cond.on{border-color:var(--mv);color:var(--mv-dk);background:var(--mv-lt);}
 .cond.on .cbox{background:var(--mv);border-color:var(--mv);}
+.cond .cinfo{margin-left:1px;width:14px;height:14px;line-height:13px;text-align:center;border-radius:50%;border:1px solid var(--input-border);color:var(--muted);font-size:10px;font-weight:800;font-family:'Barlow Condensed',sans-serif;flex:0 0 auto;}
+.cond .cinfo:hover{border-color:var(--mv);color:var(--mv-dk);}
+.cond.on .cinfo{border-color:var(--mv);color:var(--mv-dk);}
+/* Collapsible section headers (Powers / Traits / Tags) */
+.section-bar.clp,.subhead.clp{cursor:pointer;user-select:none;}
+.clp-caret{font-size:11px;transition:transform .15s ease;opacity:.8;}
+.clp.collapsed .clp-caret{transform:rotate(-90deg);}
+.clp-hide{display:none;}
+/* Karma spend button (in the Karma bubble) */
+.karma-spend{margin-top:5px;width:100%;padding:5px 0;background:#2a2410;border:1px solid #6a5a20;color:#e8c86a;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border-radius:3px;}
+.karma-spend.on{background:#c8a020;color:#1a1a1a;border-color:#c8a020;}
+.karma-spend:disabled{opacity:.4;cursor:not-allowed;}
 
 /* Tabs */
 .tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
@@ -273,6 +285,9 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .rules-list p{font-size:12px;line-height:1.5;color:#ddd;}
 .rules-list ul{margin:3px 0 3px;padding-left:18px;}
 .rules-list li{font-size:12px;line-height:1.5;color:#ddd;margin-bottom:2px;}
+.rules-list dl.rules-conds{margin:3px 0 3px;}
+.rules-list dl.rules-conds dt{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;color:#f4a6a8;margin-top:7px;}
+.rules-list dl.rules-conds dd{margin:0;font-size:12px;line-height:1.45;color:#ddd;}
 
 /* Dark mode */
 body.dark{--bg:#0f1014;--paper:#181a20;--ink:#e6e8ee;--muted:#9aa0ac;--rule:#333743;--border:#3a3d47;--box:#20222a;--input-bg:#0f141a;--input-border:#3a3d47;--section-hdr:#0b0c10;--mv-lt:#2a1416;}
@@ -329,6 +344,7 @@ body.dark .sheet{border-color:#3a3d47;}
         <div class="vital karma">
           <div class="vlbl"><span>Karma</span><small>= Rank</small></div>
           <div class="vbig"><input class="v-cur" id="v-karma" type="number" value="0" oninput="S.karma.cur=num(this.value);scheduleAutosave()"><span class="v-max">/ <b id="v-karma-max">0</b></span></div>
+          <button class="karma-spend" id="karma-btn" onclick="toggleKarma()" title="Spend 1 Karma for an edge on your next roll">Spend</button>
         </div>
         <div class="vital focus">
           <div class="vlbl"><span>Focus</span><small>Vig × 30</small></div>
@@ -353,18 +369,24 @@ body.dark .sheet{border-color:#3a3d47;}
       </div>
 
       <div class="tab-panel" id="tab-powers">
-        <div class="section-bar"><span>Powers &amp; Power Sets</span></div>
-        <div class="card-list" id="powers-list"></div>
-        <div id="powers-empty" class="tbl-empty">No powers yet. Powers are chosen in the character builder (Create / Rebuild).</div>
+        <div class="section-bar clp" onclick="clpToggle(this)"><span>Powers &amp; Power Sets</span><span class="clp-caret">▾</span></div>
+        <div class="clp-body">
+          <div class="card-list" id="powers-list"></div>
+          <div id="powers-empty" class="tbl-empty">No powers yet. Powers are chosen in the character builder (Create / Rebuild).</div>
+        </div>
       </div>
 
       <div class="tab-panel" id="tab-traits">
-        <div class="subhead"><span>Traits</span></div>
-        <div class="card-list" id="traits-list"></div>
-        <div id="traits-empty" class="tbl-empty">No traits yet. Traits are chosen in the character builder (Create / Rebuild).</div>
-        <div class="subhead"><span>Tags</span></div>
-        <div class="card-list" id="tags-list"></div>
-        <div id="tags-empty" class="tbl-empty">No tags yet. Tags are set in the character builder (Create / Rebuild).</div>
+        <div class="subhead clp" onclick="clpToggle(this)"><span>Traits</span><span class="clp-caret">▾</span></div>
+        <div class="clp-body">
+          <div class="card-list" id="traits-list"></div>
+          <div id="traits-empty" class="tbl-empty">No traits yet. Traits are chosen in the character builder (Create / Rebuild).</div>
+        </div>
+        <div class="subhead clp" onclick="clpToggle(this)"><span>Tags</span><span class="clp-caret">▾</span></div>
+        <div class="clp-body">
+          <div class="card-list" id="tags-list"></div>
+          <div id="tags-empty" class="tbl-empty">No tags yet. Tags are set in the character builder (Create / Rebuild).</div>
+        </div>
       </div>
 
       <div class="tab-panel" id="tab-equipment">
@@ -401,7 +423,7 @@ body.dark .sheet{border-color:#3a3d47;}
   <div class="log-entries" id="log-entries"><div class="log-hint">Click an ability to make a d616 action check</div></div>
   <div class="dice-tray">
     <div class="tray-row" style="flex-wrap:nowrap;gap:4px;justify-content:space-between;"><span style="display:flex;align-items:center;gap:4px;"><span class="tray-label" style="color:#e8c86a;">Edges</span><button class="tray-step" onclick="bumpTray('edge',-1)">−</button><span id="tray-edge" style="font-family:'Share Tech Mono';color:#e8c86a;width:14px;text-align:center;">0</span><button class="tray-step" onclick="bumpTray('edge',1)">＋</button></span><span style="display:flex;align-items:center;gap:4px;"><span class="tray-label" style="color:#e0776f;">Troubles</span><button class="tray-step" onclick="bumpTray('trouble',-1)">−</button><span id="tray-trouble" style="font-family:'Share Tech Mono';color:#e0776f;width:14px;text-align:center;">0</span><button class="tray-step" onclick="bumpTray('trouble',1)">＋</button></span></div>
-    <div class="tray-row"><button class="dice-btn" onclick="rollFree()">Roll d616</button><button class="karma-btn" id="karma-btn" onclick="toggleKarma()" title="Spend 1 Karma to reroll a die (edge)">Karma</button></div>
+    <div class="tray-row"><button class="dice-btn" onclick="rollFree()">Roll d616</button></div>
   </div>
 </div>
 </div>
@@ -416,6 +438,7 @@ body.dark .sheet{border-color:#3a3d47;}
 </div>
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">d616 — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="info-overlay" class="ov" onclick="if(event.target===this)closeInfo()"><div class="modal"><div class="modal-hd"><div class="ttl" id="info-title">Info</div><button class="x" onclick="closeInfo()">✕</button></div><div class="modal-bd rules-list" id="info-body"></div></div></div>
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✨ Getting Schooled</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 
@@ -532,6 +555,7 @@ function renderVitals(){
   $('v-health').value=S.health.cur; $('v-health-max').textContent=S.health.max;
   $('v-focus').value=S.focus.cur; $('v-focus-max').textContent=S.focus.max;
   $('v-karma').value=S.karma.cur; $('v-karma-max').textContent=S.karma.max;
+  var kb=$('karma-btn'); if(kb){ var noK=num(S.karma.cur)<=0; kb.disabled=noK; if(noK&&karmaArmed){ karmaArmed=false; kb.classList.remove('on'); } }
   var hd=$('v-health-dr'); if(hd)hd.value=num(S.healthDR); var fd=$('v-focus-dr'); if(fd)fd.value=num(S.focusDR);
 }
 function bumpVital(w,d){ var mx=(w==='health'?healthMax():w==='focus'?focusMax():karmaMax()); S[w].cur=clamp(num(S[w].cur)+d,0, w==='karma'?99:mx); renderVitals(); scheduleAutosave(); }
@@ -653,10 +677,14 @@ function renderConditions(){
   var host=$('conds'); if(!host)return;
   host.innerHTML=CONDITIONS.map(function(c){
     var on=!!(S.conditions&&S.conditions[c.name]);
-    var auto=CONDMECH[c.name]?' ⚙':'';
-    return '<button class="cond'+(on?' on':'')+'" title="'+esc(c.desc)+(CONDMECH[c.name]?' — penalties auto-applied':'')+'" onclick="toggleCondition(\''+c.name+'\')"><span class="cbox"></span>'+esc(c.name)+auto+'</button>';
+    return '<button class="cond'+(on?' on':'')+'" onclick="toggleCondition(\''+esc(c.name)+'\')"><span class="cbox"></span>'+esc(c.name)
+      +'<span class="cinfo" title="What it does" onclick="event.stopPropagation();showCondInfo(\''+esc(c.name)+'\')">i</span></button>';
   }).join('');
 }
+function clpToggle(el){ var b=el.nextElementSibling; if(!b)return; var c=el.classList.toggle('collapsed'); b.classList.toggle('clp-hide', c); }
+function showCondInfo(name){ var c=CONDITIONS.find(function(x){return x.name===name;}); if(!c)return; showInfo(c.name, '<p>'+esc(c.desc)+'</p>'); }
+function showInfo(title, html){ $('info-title').textContent=title; $('info-body').innerHTML=html; $('info-overlay').classList.add('open'); }
+function closeInfo(){ $('info-overlay').classList.remove('open'); }
 function toggleCondition(name){ if(!S.conditions)S.conditions={}; S.conditions[name]=!S.conditions[name];
   addLog('Condition',(S.conditions[name]?'+ ':'− ')+name, S.conditions[name]?'gained':'cleared', S.conditions[name]?'fumble':'normal');
   renderConditions(); renderAbilities(); renderDamage(); renderDerived(); scheduleAutosave(); }
@@ -946,6 +974,8 @@ function openRules(){
   h+='<h4>Healing &amp; Recovery</h4><p>Rest for an hour to regain Health and Focus equal to your <b>rank</b>; sleep and it&rsquo;s double. To recover fast, spend 1 Karma and make a <b>Resilience check (Health)</b> or <b>Vigilance check (Focus)</b> vs TN 10 — on a success regain <b>Marvel die × rank</b> (a Fantastic doubles it). You can&rsquo;t spend a second Karma on that roll.</p>';
   h+='<h4>Down &amp; Out</h4><p>At <b>0 Health</b> you fall <b>Unconscious</b>; at <b>0 Focus</b> you&rsquo;re <b>Demoralized</b>. You recover when the score rises above 0. See the Conditions panel for the rest — tap a condition to track it.</p>';
   h+='<h4>Target Numbers</h4><p>A Challenging TN by rank: R1&nbsp;11 · R2&nbsp;12 · R3&nbsp;13 · R4&nbsp;14 · R5&nbsp;15 · R6&nbsp;16. Shift it by difficulty: Trivial −6, Easy −4, Routine −2, Challenging 0, Difficult +2, Ridiculous +4, Absurd +6 (lowest standard TN is 10).</p>';
+  h+='<h4>Conditions</h4><p>Tap a condition in the Conditions panel to track it; tap its <b>i</b> for the full effect. The sheet auto-applies the trouble/disable/half-speed parts where it can.</p>';
+  h+='<dl class="rules-conds">'+CONDITIONS.map(function(c){return '<dt>'+esc(c.name)+'</dt><dd>'+esc(c.desc)+'</dd>';}).join('')+'</dl>';
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
 }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }

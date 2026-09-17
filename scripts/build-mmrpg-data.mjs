@@ -52,4 +52,27 @@ for (const e of ENTITIES) {
   writeFileSync(join(TS_DIR, "mmrpg-power-names.ts"), `${BANNER}\n\nexport const MMRPG_POWER_NAMES: readonly string[] = ${JSON.stringify(names, null, 2)};\n`, "utf8");
   summary.push(`MMRPG_POWER_NAMES=${names.length}`);
 }
+// Trimmed power details (name/set/effect + a few stat fields) for the iconic-item
+// homebrew *picker popup*, which shows what each power does. Kept in its own module
+// so it can be dynamic-imported only when the picker opens (never in the main bundle).
+{
+  const rows = readJson(join(PARTS, "powers.json"))
+    .map((p) => ({
+      name: String(p.name),
+      set: p.powerSet && p.powerSet !== "None" ? String(p.powerSet) : "Basic",
+      effect: String(p.effect || p.description || "").trim(),
+      prereq: p.prerequisites && p.prerequisites !== "None" ? String(p.prerequisites) : "",
+      action: p.action ? String(p.action) : "",
+      duration: p.duration ? String(p.duration) : "",
+      range: p.range ? String(p.range) : "",
+      cost: p.cost ? String(p.cost) : "",
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "en"));
+  writeFileSync(
+    join(TS_DIR, "mmrpg-power-details.ts"),
+    `${BANNER}\n\nexport type MmrpgPowerDetail = { name: string; set: string; effect: string; prereq: string; action: string; duration: string; range: string; cost: string };\n\nexport const MMRPG_POWER_DETAILS: readonly MmrpgPowerDetail[] = ${JSON.stringify(rows, null, 2)};\n`,
+    "utf8",
+  );
+  summary.push(`MMRPG_POWER_DETAILS=${rows.length}`);
+}
 console.log(`build-mmrpg-data: -> lib/data/ + public/tools-data/\n  ${summary.join(", ")}`);
