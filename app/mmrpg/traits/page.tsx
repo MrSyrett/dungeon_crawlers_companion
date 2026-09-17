@@ -5,7 +5,7 @@ import { MMRPG_TAGS } from "@/lib/data/mmrpg-tags";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
-  MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, hbBadge,
+  MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, hbBadge,
   one, type Query, type RawQuery,
 } from "@/components/MmrpgRef";
 
@@ -65,7 +65,7 @@ export default async function MmrpgTraitsPage({ searchParams }: { searchParams: 
                   <h3 className={nameCls}>{t.name}</h3>
                   {t.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
                 </div>
-                <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{t.description}</p>
+                {t.description ? <RefDetails><p className="text-[12px] leading-relaxed text-[var(--muted)]">{t.description}</p></RefDetails> : null}
               </article>
             ))}
           </div>

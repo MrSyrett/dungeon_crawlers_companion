@@ -4,7 +4,7 @@ import { MMRPG_POWERS } from "@/lib/data/mmrpg-powers";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
-  MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge,
+  MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, badge, hbBadge,
   one, type Query, type RawQuery,
 } from "@/components/MmrpgRef";
 
@@ -72,8 +72,12 @@ export default async function MmrpgPowersPage({ searchParams }: { searchParams: 
                   {p.cost ? <span className={badge}>{p.cost}</span> : null}
                   {p.prerequisites && p.prerequisites !== "None" ? <span><span className="font-semibold text-[var(--text)]">Prereq:</span> {p.prerequisites}</span> : null}
                 </p>
-                {p.effect ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{p.effect}</p> : null}
-                {p.fantastic ? <p className="mt-2 text-[11px] leading-relaxed text-[#f4737a]"><span className="font-semibold">Fantastic:</span> {p.fantastic}</p> : null}
+                {p.effect || p.fantastic ? (
+                  <RefDetails>
+                    {p.effect ? <p className="text-[12px] leading-relaxed text-[var(--muted)]">{p.effect}</p> : null}
+                    {p.fantastic ? <p className="mt-2 text-[11px] leading-relaxed text-[#f4737a]"><span className="font-semibold">Fantastic:</span> {p.fantastic}</p> : null}
+                  </RefDetails>
+                ) : null}
               </article>
             ))}
           </div>

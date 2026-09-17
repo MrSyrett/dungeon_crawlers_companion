@@ -6,7 +6,8 @@ import type { MmrpgEquipment } from "@/lib/data/mmrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import MmrpgHeadquarters from "@/components/MmrpgHeadquarters";
-import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge, one, withParams, type Query, type RawQuery } from "@/components/MmrpgRef";
+import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, badge, hbBadge, one, withParams, type Query, type RawQuery } from "@/components/MmrpgRef";
+import MmrpgRefTokens from "@/components/MmrpgRefTokens";
 
 export const dynamic = "force-dynamic";
 const BASE = "/mmrpg/equipment";
@@ -42,7 +43,7 @@ function EquipCard({ e }: { e: EquipRow }) {
         </span>
       </div>
       {e.owner && e.owner !== "—" ? <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--mmrpg)]">{e.owner}</p> : null}
-      {e.grantsOrigin ? <p className="mt-1 text-[11px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Grants origin:</span> {e.grantsOrigin}</p> : null}
+      {e.grantsOrigin ? <p className="mt-1 text-[11px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Grants origin:</span> <MmrpgRefTokens text={e.grantsOrigin} kind="origin" /></p> : null}
       {isVehicle ? (
         <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
           {e.health ? <span><span className="font-semibold text-[var(--text)]">Health:</span> {e.health}</span> : null}
@@ -60,21 +61,14 @@ function EquipCard({ e }: { e: EquipRow }) {
         </p>
       )}
       {hasDetails ? (
-        <details className="group mt-2">
-          <summary className="flex cursor-pointer list-none items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mmrpg)] hover:text-[#f4737a] [&::-webkit-details-marker]:hidden">
-            <span className="inline-block transition-transform group-open:rotate-90">▸</span>
-            <span className="group-open:hidden">Details</span>
-            <span className="hidden group-open:inline">Hide details</span>
-          </summary>
-          <div className="mt-1.5">
-            {e.notes ? <p className="text-[12px] leading-relaxed text-[var(--muted)]">{e.notes}</p> : null}
-            {e.grantsPowers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Grants:</span> {e.grantsPowers}</p> : null}
-            {e.restrictions?.length ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Restrictions:</span> {e.restrictions.join(", ")}</p> : null}
-            {isVehicle && e.powers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Powers:</span> {e.powers}</p> : null}
-            {isVehicle && e.weapons ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Weapons:</span> {e.weapons}</p> : null}
-            {e.special ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">{isVehicle ? "Notes" : "Special"}:</span> {e.special}</p> : null}
-          </div>
-        </details>
+        <RefDetails>
+          {e.notes ? <p className="text-[12px] leading-relaxed text-[var(--muted)]">{e.notes}</p> : null}
+          {e.grantsPowers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Grants:</span> <MmrpgRefTokens text={e.grantsPowers} kind="power" /></p> : null}
+          {e.restrictions?.length ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Restrictions:</span> {e.restrictions.join(", ")}</p> : null}
+          {isVehicle && e.powers ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Powers:</span> {e.powers}</p> : null}
+          {isVehicle && e.weapons ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">Weapons:</span> {e.weapons}</p> : null}
+          {e.special ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[var(--mmrpg)]">{isVehicle ? "Notes" : "Special"}:</span> {e.special}</p> : null}
+        </RefDetails>
       ) : null}
     </article>
   );

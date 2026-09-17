@@ -2,7 +2,7 @@
  {
   "name": "Ablaze",
   "genre": "core",
-  "description": null,
+  "description": "The character is on fire. At the end of each of their turns they lose 5 Health until the flames are put out. Putting the fire out takes an action and an Agility check against TN 10 — dropping prone to roll or being doused in water makes that easier.",
   "source": "Lose 5 Health at the end of each of your turns until put out (Agility vs TN 10)."
  },
  {
@@ -17,13 +17,13 @@
  {
   "name": "Bleeding",
   "genre": "core",
-  "description": null,
+  "description": "The character has an open wound and loses 5 Health at the end of each of their turns. The bleeding stops as soon as they recover any Health, or when someone spends an action to stanch it with a Logic check against TN 10.",
   "source": "Lose 5 Health at the end of each turn until stopped (Logic vs TN 10) or you recover any Health."
  },
  {
   "name": "Blinded",
   "genre": "core",
-  "description": null,
+  "description": "The character cannot see. Any concentration power that relies on sight ends, their movement speed is halved, they have trouble on action checks that require sight, and attackers have an edge against them.",
   "source": "Sight-based concentration powers end; speed halved; trouble on sight checks; enemies get an edge on you.",
   "mech": {
    "halveSpeed": true
@@ -38,13 +38,13 @@
  {
   "name": "Deafened",
   "genre": "core",
-  "description": null,
+  "description": "The character cannot hear. Any concentration power that relies on hearing ends, and they have trouble on action checks that require hearing.",
   "source": "Hearing-based concentration powers end; trouble on action checks that need hearing."
  },
  {
   "name": "Demoralized",
   "genre": "core",
-  "description": null,
+  "description": "The character’s will is broken: their concentration powers end and they have trouble on all action checks. This is the Focus-track equivalent of being knocked out — it happens automatically when Focus drops to 0 and lifts once Focus rises above 0.",
   "source": "Your concentration powers end; you have trouble on all action checks.",
   "mech": {
    "troubleAll": true
@@ -68,7 +68,7 @@
  {
   "name": "Grabbed",
   "genre": "core",
-  "description": null,
+  "description": "The character is held and cannot move. The grabber cannot move either, unless they are strong enough to drag the character along. The character breaks free with the Escape action — a Melee check against the grabber’s Melee defense.",
   "source": "You can't move (nor can the grabber, unless they carry you along).",
   "mech": {
    "noMove": true
@@ -83,7 +83,7 @@
  {
   "name": "Paralyzed",
   "genre": "core",
-  "description": null,
+  "description": "The character is frozen in place. They cannot move and cannot take any action that uses Melee or Agility, and attackers have an edge against them.",
   "source": "Can't move or take actions needing Melee or Agility; attackers get an edge.",
   "mech": {
    "disable": [
@@ -95,7 +95,7 @@
  {
   "name": "Pinned",
   "genre": "core",
-  "description": null,
+  "description": "A stronger form of Grabbed: the character is held down, cannot take movement actions, and has trouble on Melee and Agility checks until they escape.",
   "source": "Like Grabbed, plus trouble on Melee/Agility checks and no movement actions.",
   "mech": {
    "trouble": [
@@ -113,7 +113,7 @@
  {
   "name": "Prone",
   "genre": "core",
-  "description": null,
+  "description": "The character is lying on the ground. They have trouble on their own ranged (Agility) attacks, while enemies attacking them in close combat have an edge. Standing up uses part of their movement.",
   "source": "On the ground: trouble on your ranged attacks; close attackers get an edge.",
   "mech": {
    "troubleAtk": [
@@ -124,25 +124,25 @@
  {
   "name": "Shattered",
   "genre": "core",
-  "description": null,
+  "description": "The character’s mind is broken — a long-term condition beyond a single scene. They cannot adventure effectively and need extended downtime or care to recover.",
   "source": "Mentally broken — requires long-term care."
  },
  {
   "name": "Stunned",
   "genre": "core",
-  "description": null,
+  "description": "The character is dazed. Their concentration powers end, they lose their next action, and attackers have an edge against them until then.",
   "source": "Concentration powers end; you lose your next action; enemies get an edge."
  },
  {
   "name": "Surprised",
   "genre": "core",
-  "description": null,
+  "description": "The character was caught off guard at the start of a fight. They cannot act during the surprise (bonus) round, and attackers have an edge against them during it.",
   "source": "Can't act in the bonus round; attackers get an edge on you."
  },
  {
   "name": "Unconscious",
   "genre": "core",
-  "description": null,
+  "description": "The character is knocked out — helpless and unable to act. Their concentration powers end and their defenses drop. This happens automatically when Health reaches 0 and lifts when they regain Health above 0.",
   "source": "Out cold — concentration powers end; helpless and unable to act.",
   "mech": {
    "disableAll": true

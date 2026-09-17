@@ -1,4 +1,5 @@
 import type { MmrpgCharacter } from "@/lib/data/mmrpg-types";
+import MmrpgRefTokens from "@/components/MmrpgRefTokens";
 
 // Full-profile body shown inside the shared Characters modal. Presentational
 // only — the <dialog> element and open/close state live in MmrpgCharacterBrowser,
@@ -20,14 +21,14 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
         <div>
           <h2 className="font-display text-2xl font-black uppercase tracking-wide text-[#f4737a]">{c.name}</h2>
           {c.realName && c.realName !== c.name ? <p className="mt-0.5 text-sm italic text-[var(--muted)]">{c.realName}</p> : null}
-          <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-[var(--mmrpg)]">Rank {c.rank}{c.origin ? ` · ${c.origin}` : ""}{c.source ? ` · ${c.source}` : ""}</p>
+          <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-[var(--mmrpg)]">Rank {c.rank}{c.origin ? <> · <MmrpgRefTokens text={c.origin} kind="origin" /></> : null}{c.source ? ` · ${c.source}` : ""}</p>
         </div>
         <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded border border-[var(--border)] px-2.5 py-1 text-lg leading-none text-[var(--muted)] hover:border-[var(--mmrpg)] hover:text-[var(--text)]">✕</button>
       </header>
 
       {(c.occupation || c.teams || c.base) ? (
         <p className="mb-4 text-[12px] leading-relaxed text-[var(--muted)]">
-          {c.occupation ? <span><span className="font-semibold text-[var(--text)]">Occupation:</span> {c.occupation}. </span> : null}
+          {c.occupation ? <span><span className="font-semibold text-[var(--text)]">Occupation:</span> <MmrpgRefTokens text={c.occupation} kind="occupation" />. </span> : null}
           {c.base ? <span><span className="font-semibold text-[var(--text)]">Base:</span> {c.base}. </span> : null}
           {c.teams ? <span><span className="font-semibold text-[var(--text)]">Teams:</span> {c.teams}.</span> : null}
         </p>
@@ -62,7 +63,7 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
             {c.powers.map((g, i) => (
               <div key={i} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-2.5">
                 <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{g.set || "Basic"}</div>
-                <div className="mt-1 text-[12px] leading-relaxed text-[var(--text)]">{g.names.join(" · ")}</div>
+                <div className="mt-1 text-[12px] leading-relaxed text-[var(--text)]"><MmrpgRefTokens items={g.names} kind="power" sep=" · " /></div>
               </div>
             ))}
           </div>
@@ -73,17 +74,13 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
         {c.traits && c.traits.length ? (
           <section>
             <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[#f4737a]">Traits</h3>
-            <ul className="space-y-1 text-[12px] leading-relaxed text-[var(--muted)]">
-              {c.traits.map((t, i) => <li key={i}>{t}</li>)}
-            </ul>
+            <p className="text-[12px] leading-relaxed text-[var(--muted)]"><MmrpgRefTokens items={c.traits} kind="trait" /></p>
           </section>
         ) : null}
         {c.tags && c.tags.length ? (
           <section>
             <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[#f4737a]">Tags</h3>
-            <ul className="space-y-1 text-[12px] leading-relaxed text-[var(--muted)]">
-              {c.tags.map((t, i) => <li key={i}>{t}</li>)}
-            </ul>
+            <p className="text-[12px] leading-relaxed text-[var(--muted)]"><MmrpgRefTokens items={c.tags} kind="tag" /></p>
           </section>
         ) : null}
       </div>

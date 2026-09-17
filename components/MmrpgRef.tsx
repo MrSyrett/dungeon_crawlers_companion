@@ -25,6 +25,21 @@ export function withParams(base: string, current: Query, patch: Query): string {
   return s ? `${base}?${s}` : base;
 }
 
+// Standard collapsible "Details" disclosure for reference cards — starts collapsed
+// so long descriptions don't dominate the page. Pure HTML <details>, no client JS.
+export function RefDetails({ label = "Details", openLabel = "Hide details", children }: { label?: string; openLabel?: string; children: React.ReactNode }) {
+  return (
+    <details className="group mt-2">
+      <summary className="flex cursor-pointer list-none items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mmrpg)] hover:text-[#f4737a] [&::-webkit-details-marker]:hidden">
+        <span className="inline-block transition-transform group-open:rotate-90">▸</span>
+        <span className="group-open:hidden">{label}</span>
+        <span className="hidden group-open:inline">{openLabel}</span>
+      </summary>
+      <div className="mt-1.5">{children}</div>
+    </details>
+  );
+}
+
 export function MmrpgHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
