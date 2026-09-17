@@ -267,6 +267,15 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
+    "name": "Celestial Armor",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "This is a gigantic battle suit that serves not to give the wearer power but to help control and contain them. Celestials are beings of energy that come from outside the Multiverse, much like the Beyonders. Their armor allows them to exist within reality and interact with it for as long as they like while keeping them and their surroundings relatively safe. If someone manages to get inside a suit of Celestial Armor, they find all sorts of mechanical and electronic systems designed to keep the armor functioning. There are also automated systems that protect the armor by attacking intruders. Celestials rarely die, but when they do, they leave their armor behind, and it can be repurposed for other things. Avengers Mountain, for example, was originally the armor of the Celestial known as the Progenitor.",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Cerebro",
     "tier": "Narrative",
     "type": "Item",
@@ -357,6 +366,15 @@ const MMRPG_EQUIPMENT = [
     "special": "",
     "notes": "",
     "source": "Secret Wars"
+  },
+  {
+    "name": "Cosmic Cube",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "A Cosmic Cube is a containment unit filled with energy drained from the all-powerful Beyonders. The energy is sentient and can fulfill the wishes of the person who holds and commands it. The sentience interprets the user’s will and fulfills it, usually as best it can. However, getting the sentience to properly understand the user’s intent can be tricky and is best learned with practice. In most cases, the sentience doesn’t purposefully misinterpret the user’s commands, but it can misunderstand, so the user must literally be careful what they wish for. Because of this, even the most ambitious villains tend to be cautious when using such power. Most such devices take the shape of afist-sized cube that glows with the bluish white energy contained inside, but they can come in different shapes or forms. Given enough time, the sentience inside a Cosmic Cube can develop its own personality, complete with its own desires. Such people include the Shaper of Worlds (originally a cube created by the Skrulls), Kubik (originally created by A.I.M.) and Kobik (created from fragments from several Cosmic Cubes that were fused together). A Cosmic Cube can be used to change reality, but it cannot affect the past or alter a person’s soul. It can be used to edit a person’s memories—or to create a new version of that person—making them think that the past was different, but the original person’s soul and the original timeline remain intact. Otherwise, the only limits of a Cosmic Cube’s power are the imagination of its user, the capability of the cube’s sentience to understand it and the sentience’s developing personality. Eventually, the sentience stops taking orders from a user and makes its own decisions about how to use its power best.",
+    "source": "Avengers Expansion"
   },
   {
     "name": "Crimson Gem of Cyttorak",
@@ -469,6 +487,15 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Elemental Converter",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "Galactus keeps this massive device stored on the Taa II. When he arrives to devour a planet, he prefers to take the time to transport the machine from his ship to the planet and assemble it there. This takes roughly 24 hours to accomplish, although Galactus can manage it in half that time if in a rush. The Elemental Converter transforms the energy of the planet into a form that is easier for Galactus to consume. (Think of it as a food processor on a planetary scale.) However, he does not need the Converter to feed and can manage without it when he must. Galactus usually protects this device while building and using it, but if he can be drawn away from it—or distracted in some way—the Converter can be dismantled or even destroyed. This reprieve is only temporary, though, as he can simply restart the process to build it again.",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Energy Baton",
     "tier": "Iconic",
     "type": "Weapon",
@@ -498,6 +525,15 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
+    "name": "Eternity Mask",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "This amazing mask is fashioned from a bit of the fabric of the universe. The fabric looks like a clear night sky filled with stars. Anyone who wears it has their powers increased to make them an equal match to any foe they face. However, it does not reduce any of the wearer’s existing powers, ability points, Health and Focus to make them equal. Wearing the Eternity Mask does not guarantee the wearer a victory. It only puts them on an equal footing with their foe. In game terms, it grants the wearer all the powers of any foe they face and boosts their ability scores to the same numbers. It boosts their Health and Focus to the foe’s numbers at the moment the wearer and the foe begin their conflict. It also grants the wearer the Intuition power. The mask does not work when the user intends to commit evil acts. It was created in medieval times so that a peasant could take on the Black Knight. In modern times, the Masked Raider was best known for using it, but the mask has been used by many others since, including America Chavez, Blue Marvel and Loki.",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Flash-Bang Grenade",
     "tier": "Common",
     "type": "Weapon",
@@ -522,6 +558,15 @@ const MMRPG_EQUIPMENT = [
     "flatMult": 2,
     "notes": "Affects all within 2 spaces of where it lands. Uses its own ×2 damage multiplier instead of the attacker's; a Fantastic success does ×4 to the center space.",
     "source": "core p34"
+  },
+  {
+    "name": "Galactus’ Armor",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "Much like with the Celestials and their armor, Galactus’ armor is designed to help him contain and control the incredible power he wields. He can survive without the armor, but being without it makes it more diffi cult for him to interact with matter without destroying it. Unlike the Celestials, Galactus can remove his armor, in part or in whole. If he removes his helmet, he remains solid, but if he removes the whole suit, he transforms back into his natural state: a humanoid form of pure energy.",
+    "source": "Secret Wars"
   },
   {
     "name": "Gambit's Bo Staff",
@@ -611,6 +656,24 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
+    "name": "Infinity Gauntlet",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "When the Infinity Stones are gathered together and controlled by a single person, they grant that user unlimited power, and the user becomes Rank X. To help arrange for this, people have constructed a number of different items on which all the stones can be mounted at once. The most famous of these is the Infinity Gauntlet. The Infinity Gauntlet is a right-handed glove made of a golden metal, and it features a space for an Infinity Stone along the largest knuckles of each finger, plus a space for a sixth on the back of the hand. When it was created, only six Infinity Stones were known, but a seventh—the Death Stone—recently emerged. No one yet knows what a device built to hold all seven stones might be able to manage, but even with just the original six stones, the Infinity Gauntlet makes its user one of the most powerful beings in the universe. Even cosmic Art by Mark Bagley, Danny Miki & Paul Mounts beings like Eternity and Infinity cannot stand against it. Only the Living Tribunal and the One Above All can fully counter the power of the Infinity Gauntlet. When Doctor Doom used the power of the Beyonders to become God Emperor Doom, he could also withstand it. Otherwise, the user of the completed Infinity Gauntlet is omnipotent. They have the ability to remake all of reality in their universe in any way they see fit. They can destroy star systems at will—or kill half of all life in the universe with a snap of their fingers. The only limits to their power are their imagination—and, perhaps, their arrogance.",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Infinity Stones",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "These incredibly powerful stones come from the First Cosmos and are sent into various parts of the Multiverse to influence the course of a universe’s history. Each stone works fully only in its home universe. If brought to another universe and used, they can function but may shatter if pushed too hard For a long time, there were six Infinity Stones, each of which had a different color and controlled a different aspect of the universe. They have changed colors sometimes, but they are currently Power (Violet), Mind (Yellow), Reality (Red), Soul (Orange), Space (Blue) and Time (Green). Recently, another Infinity Stone was created: Death (Black). On their own, the stones grant the following powers. They also give their users unlimited Focus and allow them to spend up to 30 points of Focus at once—or more if needed for narrative purposes. • Death: The user knows the location of everyone who is about to die at any moment, along with the circumstances surrounding their death. They can teleport anywhere so that they can escort the dead to their final reward. The user can also instantly kill anyone with a touch. They cannot, however, spare the lives of the dying, no matter how much they might wish to. • Mind: The user has incredible telepathic powers. They gain all powers from the Telekinesis and Telepathy power sets, ignoring any prerequisites. They can also travel through dreams and can construct psychic weapons. (See page 110 for an example of something like this: Betsy Braddock’s Psychic Sword.) They also gain Brilliance 4 and Uncanny 4. • Power: The user gains all powers from the Elemental Control (all types), Power Control and Super-Strength power sets, ignoring any prerequisites. They also gain Accuracy 4, Mighty 4 and Sturdy 4. • Reality: The user can alter physical reality as they see fit. They can change any physical characteristics like size, density or chemical composition. They gain all powers from the Elemental Control (all types), Luck, Phasing, Resize and Teleportation power sets, ignoring any prerequisites. They also gain Flight 2, Mighty 4 and Sturdy 4. • Soul: The user can preserve souls for the a˜ erlife, and they can examine a person’s soul and even reach into a person’s soul to damage it, heal it or alter its nature. They gain all powers from the Healing and Telepathy power sets, ignoring any prerequisites. They can also conjure soul-based constructs of other people, including super heroes and villains. They also gain Discipline 4 and Uncanny 4. • Space: The user can travel in space and has control over the positions of things within it. This includes teleporting things of any size over unlimited distances. They gain all powers from the Teleportation power set, ignoring any prerequisites. • Time: The user can slow down, speed up and freeze time for everyone around them for themselves or for specific things. They can use this to age or youthen people or things as well. They can also see into the past and the future. They gain all powers from the Omniversal Travel (Time) and Sixth Sense power sets, ignoring any prerequisites. The stones become more powerful when brought together, forming a circuit that grants unlimited control over the entire universe. For this reason, people who covet them have created items on which the stones can be mounted in close proximity to each other. The most notorious of these is the Infinity Gauntlet. A single stone grants +1 rank to its user. Each stone that is within 100 spaces of another grants another +1 rank to all of the stones’ users. In either case, this can boost a user to a maximum of Rank 6. In many ways, the use of an Infinity Stone’s powers is limited only by the user’s imagination. Most users learn to be cautious with their powers early on. Otherwise, they can cause all sorts of unintended consequences that are diffi cult even for them to repair.",
+    "source": "Avengers Expansion"
+  },
+  {
     "name": "Iron Man's Gloves",
     "tier": "Iconic",
     "type": "Item",
@@ -628,6 +691,24 @@ const MMRPG_EQUIPMENT = [
     "owner": "—",
     "notes": "Iron Man (Tony Stark) specifically designed this armor for Spider-Man (Peter Parker). It allows the user to have full access to their Spider-Powers and basic powers (assuming they have them). • The user gains the Extreme Appearance tag while wearing the suit and the Tech Reliance trait for all powers the suit grants. The suit grants the user the following powers: • Additional Limbs • Environmental Protection • Heightened Senses 1 • Mighty 1 • Sturdy 2 • Webgliding These powers do not stack with any powers the character already has. The suit’s Additional Limbs power counts as having Spider-Arms.",
     "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "ISO-8",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "Also known as neutronium, ISO-8 (short for Isotope-8) is a material usually found in Exo-Space. It is the pure creative force from which reality is created. It existed in the Seventh Cosmos but was rare and sought a• er for its incredible properties. A• er the birth of the Eighth Cosmos, ISO-8 became even more stable and useful, and there was more of it to be found. In particular, the universe that held what was once Battleworld—Earth-15513—had large amounts of it. The Elders of the Universe fought over it, assembling it into an ISO-Sphere. On their own, shards of ISO-8 can be used as a source of power for just about anything. Individual fragments can comprise multiple shards, so a player might find a large fragment that would be the equivalent of several shards. In game terms, each shard grants a user a pool of 100 Focus points that they can use at will and without normal limitations based on rank. Once the Focus points are consumed, the shard vanishes.",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "ISO-Sphere",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "The ISO-Sphere uses Celestial technology to collect and control ISO-8. As the ISO-Sphere gathers more ISO-8, it fills up, much like a ball of glass filling with liquid. When complete, it forms a transparent, spiked casing and hovers near its controller. It takes the equivalent of 1,000 ISO-8 shards to fill an ISO-Sphere. This should be impossible to manage under most circumstances. • The ISO-Sphere functions much like a Cosmic Cube, limited only by its user’s imagination. However, if two people struggle for control of the ISO-Sphere, the one with the stronger desire becomes its controller.",
+    "source": "Secret Wars"
   },
   {
     "name": "Knife",
@@ -663,6 +744,15 @@ const MMRPG_EQUIPMENT = [
     "owner": "—",
     "notes": "Krakoa can grow six different kinds offlowers that offer incredible powers. They are: • Gateways: These are grown in pairs that create connected teleportation portals that function much like the Teleportal power. Krakoa’s consciousness controls who can access them and who cannot. If someone can control Krakoa, they can control the gateways through it. • Habitat: These grow into self-sustaining biomes that are connected to Krakoa’s consciousness. • Human Drug I: This is made into a pill that works as a super-antibiotic. A single dose can eradicate all bacterial infections. • Human Drug L: This is made into pills that can extend the natural human life span by an average offive years, if taken daily. • Human Drug M: This is made into a pill that can cure mental illnesses caused by chemical imbalances in the brain. • No-Place: These flowers produce habitats that are disconnected from Krakoa’s consciousness. Moira MacTaggert lived in one of these so that few people would know she was secretly on Krakoa. In this way, these habitats are more like tumors than natural parts of Krakoa’s body. During the fall of Krakoa, Orchis revealed that the human drugs had all been tampered with and had secret genetic triggers that could be used to kill people who took them. They publicly blamed the government of Krakoa for this, although the true blame laid with them and their Director of Human/Resources, Doctor Stasis.",
     "source": "X-Men Expansion"
+  },
+  {
+    "name": "M’kraan Crystal",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "The M’kraan Crystal is a purple crystal the size of a truck. It sits on a planet near the center of the galaxy, guarded by two powerful creatures named Jahf and Modt. The world was once ruled by the Scy’ar Tal (later known as the M’kraan) and then by the Shi’ar. Those who have been inside the M’kraan Crystal report seeing a large alien city frozen in time, in the center of which lies a neutron galaxy. The M’kraan Crystal serves as the Nexus of All Realities, and those who enter it can travel to any other universe in the Multiverse, or to the Panoptichron (also known as the Crystal Palace), a location outside time and space. Even a shard of the crystal grants this power to anyone holding it. (See the X-Men Expansion for more details about this.) The M’kraan Crystal supposedly also houses the White Hot Room, although it’s possible that it simply serves as a gateway to that place. The Crystal is said to exist in all universes simultaneously. Legend has it that destroying it could wipe out the Multiverse.",
+    "source": "Secret Wars"
   },
   {
     "name": "Mjolnir",
@@ -885,6 +975,15 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 1,
     "notes": "Can attack up to two adjacent targets — one attack roll compared to both Agility defenses; split the damage equally.",
     "source": "core p34"
+  },
+  {
+    "name": "Siege Courageous",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "This is a door-sized portal that the controller can use to teleport to any other place on the same planet. The user needs to know of the intended destination, but they do not need to have been there before. When activated, a similar portal opens in the new location. It remains open on both sides until deactivated. The controller can deactivate the Siege Courageous from either side. Doing so causes the portal on the other side to vanish.",
+    "source": "Secret Wars"
   },
   {
     "name": "Sin-Eating Shotgun",

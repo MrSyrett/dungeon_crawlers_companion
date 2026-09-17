@@ -879,6 +879,21 @@ const MMRPG_POWERS = [
     "source": "X-Men Expansion"
   },
   {
+    "name": "Cosmic Hunger",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character must feed roughly once a month to live. They can only do so by consuming the life force of an entire planet. A er each full month that a character does not feed, their power diminishes, and this is reflected in the maximum size they can reach. For example, if the character can reach gargantuan size, a er one full month, they can only reach titanic size, and so on.",
+    "fantastic": "",
+    "description": "Example: Galactus",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Counterstrike Technique",
     "genre": "core",
     "powerSet": "Martial Arts",
@@ -1006,6 +1021,21 @@ const MMRPG_POWERS = [
     "fantastic": "",
     "description": "The character can feel danger on the way.",
     "source": "X-Men Expansion"
+  },
+  {
+    "name": "Dark Side",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character runs the risk of turning into a darker, evil version of themself with no human morals to guide them. This usually happens in the early days a er a mortal character ascends to Rank X and the power overwhelms them. When tempted to do something horrible with their powers—o en for good reasons—the character must make a Challenging Ego check. If they fail, they gain the Villainous tag and begin doing horrible things—until someone figures out how to stop them. Each time the hero passes such a check, they gain an edge on future checks. Each time they fail such a check, they gain trouble. Once they get far enough down one path or the other, it becomes nearly impossible to turn back.",
+    "fantastic": "",
+    "description": "Example: Phoenix",
+    "source": "Secret Wars"
   },
   {
     "name": "Darkness",
@@ -2333,6 +2363,21 @@ const MMRPG_POWERS = [
     "description": "The character gets their allies to take cover."
   },
   {
+    "name": "Home Universe",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character’s powers only function in their home universe. Because of this, they usually refuse to move to another universe, and if they do, they lose most (if not all) of their powers.",
+    "fantastic": "",
+    "description": "Example: Captain Universe",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Hurled Shield Bash",
     "genre": "core",
     "powerSet": "Shield Bearer",
@@ -2832,6 +2877,36 @@ const MMRPG_POWERS = [
     "effect": "Once per round, the character can use a standard action as a reaction or a reaction as a standard action. Additionally, they can turn their Marvel die to a Fantastic success when making an initiative check.",
     "fantastic": "",
     "description": "The character has lightning-fast moves."
+  },
+  {
+    "name": "Limited Omnipotence",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character’s omnipotence is limited to a number of powers or power sets rather than encompassing all standard powers. Sometimes, the powers or power sets they are not able to use are listed instead.",
+    "fantastic": "",
+    "description": "Example: God Emperor Doom",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Limited Timelines",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character (who o en also has the Timeless narrative power) can only exist in a limited number of related timelines. This may be due to the use of a Concordance Engine or for some other reason.",
+    "fantastic": "",
+    "description": "Example: Enigma",
+    "source": "Secret Wars"
   },
   {
     "name": "Living Energy",
@@ -3404,6 +3479,21 @@ const MMRPG_POWERS = [
     "description": "The character can walk on air."
   },
   {
+    "name": "Planetary Sized",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character is roughly the size of a planet or larger. They cannot travel to other planets or get too close to other planetary systems for fear of their mass disturbing the delicate dance of gravitational forces. Others can visit them, though, and land on their surface. O en, the character can create avatars to interact with other people, or they can communicate telepathically. t By Wellinton Alves, Geraldo Borges, Scott Hanna, Nelson Pereira, Anderson Silva & GURU-eFX",
+    "fantastic": "",
+    "description": "Example: Ego the Living Planet",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Point-Blank Parry",
     "genre": "core",
     "powerSet": "Ranged Weapons",
@@ -3951,6 +4041,21 @@ const MMRPG_POWERS = [
     "effect": "Any allies in earshot can be affected, up to a number equal to the character’s rank. Each affected ally can move away from you at half Speed and then fall prone. If this makes the ally an ineligible target for the initial attack, that attack automatically fails.",
     "fantastic": "",
     "description": "The character warns allies to take evasive action."
+  },
+  {
+    "name": "Self-Regulated",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character limits themself to acting as an average person of their kind, unless they or a loved one are in extreme danger. Whenever the character takes damage—or witnesses a loved one take damage—that would render them dead or unconscious, make a d616 roll. On a result of 12 or higher, they momentarily regain all their narrative powers until they can resolve the situation. The character can also place other contingencies on their limitations (or the removal of those limitations) if they like. For instance, the Molecule Man originally couldn’t affect organic molecules, but during the first Secret Wars, Doom explained that this was a mental block rather than an actual limit and removed it.",
+    "fantastic": "",
+    "description": "Example: Franklin Richards, Molecule Man",
+    "source": "Secret Wars"
   },
   {
     "name": "Sense Emotion",
@@ -5164,6 +5269,21 @@ const MMRPG_POWERS = [
     "effect": "The character exists across multiple universes at once and also exists in all times throughout each of those universes.",
     "fantastic": "",
     "description": "Example: Enigma and other Dominions",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Timestuck",
+    "genre": "core",
+    "powerSet": "Narrative Limitation",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "",
+    "range": "",
+    "cost": "",
+    "effect": "The character cannot travel through time—or be made to travel through time—by any means. Ruairí Coleman, Adriano di Benedetto & Andrew Cramer CHARACTER The various Secret Wars feature characters from all around the Marvel Multiverse. This chapter details many of them for use in your game, including new profiles for henchmen and—for the first time—some of the most powerful beings in any cosmos: Rank X characters.",
+    "fantastic": "",
+    "description": "Example: Beyonders",
     "source": "Secret Wars"
   },
   {

@@ -153,6 +153,7 @@ const MMRPG_REFERENCE: { href: string; label: string }[] = [
   { href: "/mmrpg/traits", label: "Traits, Tags & Conditions" },
   { href: "/mmrpg/powers", label: "Powers" },
   { href: "/mmrpg/equipment", label: "Equipment" },
+  { href: "/mmrpg/vehicles", label: "Vehicles" },
   { href: "/mmrpg/characters", label: "Characters" },
 ];
 

@@ -157,7 +157,7 @@ def parse_narrative(pdf, start_idx, source, banner='Narrative Power Descriptions
                     continue
                 k = S.caps_key(ln.text)
                 if not started:
-                    if 12.0 <= ln.size < 14.5 and want in k:
+                    if ln.size >= 12.0 and want in k:
                         started = True
                     continue
                 if ln.size >= 14.5 and any(st in k for st in stopset):

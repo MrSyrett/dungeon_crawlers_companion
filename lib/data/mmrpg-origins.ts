@@ -16,6 +16,18 @@ export const MMRPG_ORIGINS = [
     "limitation": ""
   },
   {
+    "name": "Alien: Brood",
+    "genre": "core",
+    "description": "The character is a member of the Brood, one of the most feared alien species in the galaxy. The Brood are insectoid creatures overseen by Brood Queens who all serve the Empress Brood. The Empress rules the entire Brood population through a hive mind that extends across the universe. Only Brood Queens (including the Empress) can implant a Brood embryo in creatures from other species, which is how the Brood reproduce. Queens prefer to implant embryos in an unconscious host to prevent the host from knowing about it. They often poison the host with their tail stinger and wait for them to fall before implanting the embryo, which neutralizes the poison. If a character is fully taken over by a Brood embryo implanted in them, they automatically gain this origin, along with the Extraordinary Origin trait",
+    "examples": "Broo, Brood Drone, Brood Queen, Empress Brood",
+    "tags": "Alien Heritage, Extreme Appearance, Villainous",
+    "traits": "Fearless, Hive Mind, Infector (Brood implantation, Queens only), Venomous. Suggested",
+    "occupation": "Military",
+    "powers": "Additional Limbs, Flight 1 (except for Queens), Mighty 1, Sturdy 1. Minimum Rank: 2",
+    "limitation": "Unless the Brood is a Queen, the character can only pick additional powers as if they had the Special Training origin",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Alien: Kree",
     "genre": "core",
     "description": "The character is a member of the Kree, a humanoid race from the planet Hala who formed the interstellar Kree Empire in the region of space known as the Large Magellanic Cloud. They resemble humans but are stronger and tougher. Many of them have blue skin, but a good number of them have pink skin. The air on Hala has much more nitrogen in it, and Kree who are raised in it (or something like it) have a hard time breathing the air on Earth.",
@@ -25,6 +37,18 @@ export const MMRPG_ORIGINS = [
     "occupation": "",
     "powers": "",
     "limitation": ""
+  },
+  {
+    "name": "Alien: Marginalian",
+    "genre": "core",
+    "description": "The character is a Marginal, a species of asexually reproducing hermaphrodites who come from Marginalia, a space between universes. They are legless, shaped like a green potato with arms, and they get around by means of levitation",
+    "examples": "Doop",
+    "tags": "Alien Heritage, Extreme Appearance",
+    "traits": "Weird. Suggested",
+    "occupation": "Outsider",
+    "powers": "Dimensional Portal, Dimensional Travel, Dimensional Travel Other, Dimensional Travel Together, Grow 2, Healing Factor, Levitation, Shrink 2, Sturdy 2, Uncanny 2. Minimum Rank: 3",
+    "limitation": "",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Alien: Shi’ar",
@@ -47,6 +71,18 @@ export const MMRPG_ORIGINS = [
     "occupation": "",
     "powers": "Disguise, Extended Reach 1, Flexible Bones 1, Shape-shift, Slip Free.",
     "limitation": ""
+  },
+  {
+    "name": "Alien: Technarch",
+    "genre": "core",
+    "description": "The character is a member of the alien species known as the Technarchy. These artificially intelligent techno-organic beings use a Transmode virus to infect other creatures and eventually take over a planet to prepare it to become part of the Phalanx or be devoured",
+    "examples": "Warlock, Magus",
+    "tags": "A.I., Alien Heritage, Extreme Appearance, Powerful",
+    "traits": "Enduring Constitution, Fresh Eyes, Infector (Transmode virus). Suggested",
+    "occupation": "Outsider",
+    "powers": "Brain Drain, Disguise, Environmental Protection, Extended Reach 1, Flexible Bones 1, Leech Life, Shape-Shift. Minimum Rank: 3. Art by John Cassaday & Laura Martin",
+    "limitation": "",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Atlantean",
@@ -203,6 +239,30 @@ export const MMRPG_ORIGINS = [
     "limitation": ""
   },
   {
+    "name": "Monstrous: Marvel Zombie",
+    "genre": "core",
+    "description": "The character was once alive but has died and risen as one of the living dead. There are many kinds of zombies, but this origin is particular to the kind that live in the Deadlands and appeared in the original Marvel Zombies comics. When a character becomes a zombie, they gain the listed tags and traits",
+    "examples": "Zombies in the Deadlands",
+    "tags": "Deceased, Extreme Appearance",
+    "traits": "Bloodthirsty, Fearless, Hard to Kill, The Hunger, Infector: The Hunger, Monster, and Signature Attack: Bite Limitations: Unless the character has another origin, they cannot choose other powers. If they do have another origin, they gain the Extraordinary Origin trait for free. If they have the Heroic tag or the Beguiling trait, they lose it",
+    "occupation": "",
+    "powers": "",
+    "limitation": "",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Monstrous: Mummudrai",
+    "genre": "core",
+    "description": "The character is a monster known as a Mummudrai, an evil twin spirit from the Astral Plane that each fetus must fight and defeat in the womb to be born. Few of them survive, but those who do can become terrifyingly powerful, as they can copy DNA and fashion physical forms for themselves",
+    "examples": "Cassandra Nova",
+    "tags": "",
+    "traits": "Monster",
+    "occupation": "",
+    "powers": "DNA Manipulation",
+    "limitation": "",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Monstrous: Vampire",
     "genre": "core",
     "description": "The character was once alive but was embraced by a vampire and has risen from death as a vampire too. They can transmit this magical disease to victims of their choosing. When a character becomes a vampire, they go up one rank and gain the listed tags, traits and powers. They do not gain any additional powers or traits from this bump in rank, but they do gain 5 ability points and add +1 to their damage multiplier. If they have the Heroic tag, they also add 1 to their Karma.",
@@ -234,6 +294,30 @@ export const MMRPG_ORIGINS = [
     "occupation": "",
     "powers": "",
     "limitation": ""
+  },
+  {
+    "name": "Mutant: Artificial",
+    "genre": "core",
+    "description": "The character’s powers spring from DNA manipulation—or a natural, inherent condition—that makes them appear to be a true mutant. They believe themselves to be a mutant, or they did for years. However, they were not born with an X-Gene",
+    "examples": "Deadpool, Mister Sinister, Quicksilver, Scarlet Witch",
+    "tags": "Hounded, Mutant Associate",
+    "traits": "",
+    "occupation": "",
+    "powers": "",
+    "limitation": "",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Mutant: External",
+    "genre": "core",
+    "description": "The character is a member of a rare and powerful subspecies of immortal mutants that stretches back thousands of years. Roughly a thousand years ago, the Externals formed a group called the High Lords that continues to influence the world’s destiny from behind the scenes. Some of them believe Cannonball to be the latest of their kind, although this is unconfirmed",
+    "examples": "Apocalypse, Selene",
+    "tags": "Externally Immortal, Hounded, X-Gene",
+    "traits": "External Awareness",
+    "occupation": "",
+    "powers": "",
+    "limitation": "",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Mythic",
@@ -302,6 +386,30 @@ export const MMRPG_ORIGINS = [
     "limitation": ""
   },
   {
+    "name": "Symbiote: Knull",
+    "genre": "core",
+    "description": "The character has bonded with one of the Klyntar, a race of alien symbiotes created by the alien god Knull and which has long been under his influence—unlike the Venom symbiote and its offspring. When a character bonds with such a symbiote, they go up one rank and gain the listed powers, which must be picked for the powers that the rank gives",
+    "examples": "",
+    "tags": "",
+    "traits": "Anathema: Lightning/Anti-Venom, Berserker",
+    "occupation": "",
+    "powers": "Disguise, Environmental Protection, Healing Factor, Mighty 1",
+    "limitation": "",
+    "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Symbiote: Venom",
+    "genre": "core",
+    "description": "The character has bonded with a symbiote that is either the Venom symbiote or descended from it. When a character bonds with such a symbiote, they go up two ranks and gain the listed traits and powers, which must be picked for the powers that the ranks give",
+    "examples": "Carnage, Venom (Eddie Brock), Shriek",
+    "tags": "",
+    "traits": "Anathema: Extreme Heat/Extreme Sonics/AntiVenom, Berserker, Symbiotic Spider-Blinder",
+    "occupation": "",
+    "powers": "Disguise, Environmental Protection, Healing Factor, Mighty 1, Webcasting, Wallcrawling",
+    "limitation": "",
+    "source": "Spider-Verse Expansion"
+  },
+  {
     "name": "Unknown",
     "genre": "core",
     "description": "The character has developed powers but is not entirely sure how. It could be that the player or the Narrator knows, but the character does not, or maybe nobody else does either. Astonishing things happen all the time in the Marvel Multiverse, and there’s no way to classify them all. The source of these powers may be explained in time. It could turn out that the character actually has a standard type of origin, or it could be that they have an origin that’s utterly unique.",
@@ -333,5 +441,17 @@ export const MMRPG_ORIGINS = [
     "occupation": "",
     "powers": "",
     "limitation": ""
+  },
+  {
+    "name": "Weird Science: Power Cosmic",
+    "genre": "core",
+    "description": "The character is able to tap into the Power Cosmic, the force behind the entire cosmos. This is o en (but not always) given to them by a Rank X character, as when Galactus bestows power upon his heralds",
+    "examples": "Firelord, Nova (Frankie Raye), Terrax, Victorious",
+    "tags": "",
+    "traits": "Weird",
+    "occupation": "Outsider",
+    "powers": "Power Cosmic Suggested",
+    "limitation": "Must be at or become Rank 5 or higher when taking this origin",
+    "source": "Secret Wars"
   }
 ] as unknown as MmrpgOrigin[];

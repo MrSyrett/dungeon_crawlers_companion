@@ -48,6 +48,23 @@ export interface MmrpgCondition {
   source?: string;
 }
 
+export interface MmrpgVehicle {
+  name: string;
+  genre: MmrpgGenre;
+  /** "Named" (a specific vehicle) or "Basic" (generic type). */
+  tier: string;
+  size?: string;
+  speed?: string;
+  health?: string;
+  damageReduction?: string;
+  passengers?: string;
+  description?: string;
+  powers?: string;
+  notes?: string;
+  weapons?: string;
+  source?: string;
+}
+
 export interface MmrpgAbilities {
   melee: number;
   agility: number;

@@ -19,7 +19,8 @@ import re, unicodedata
 from collections import namedtuple
 
 LIG = {'ﬀ': 'ff', 'ﬁ': 'fi', 'ﬂ': 'fl', 'ﬃ': 'ffi', 'ﬄ': 'ffl', 'ﬅ': 'ft',
-       '\x9c': 'ft', '\x97': 'ft', '\x9d': 'fi', '\x9e': 'fl', '�': 'ft', '\x8c': 'ft'}
+       '\x9c': 'ft', '\x97': 'ft', '\x9d': 'fi', '\x9e': 'fl', '�': 'ft', '\x8c': 'ft',
+       '†': 'ft', '‡': 'ft'}
 LIGSET = set(LIG)
 # Some ligatures are encoded not as a single Unicode glyph but as a char object
 # whose .text is the 2-3 letter combo ("ft", "fi", ...) drawn as one glyph.
