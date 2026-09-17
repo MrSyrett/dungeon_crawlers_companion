@@ -166,6 +166,21 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Energy Baton",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "The Destroyer",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Ignores one level of the target's Damage Reduction.",
+    "notes": "The Destroyer's collapsible energy baton.",
+    "source": "Quickstart"
+  },
+  {
     "name": "Flash-Bang Grenade",
     "tier": "Common",
     "type": "Weapon",
@@ -296,6 +311,39 @@ const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Red Boomerangs",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Red Guardian",
+    "weaponClass": "ranged",
+    "ability": "agility",
+    "range": "10",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility"
+    ],
+    "special": "Signature weapon — act as a pistol.",
+    "notes": "Red Guardian's throwing boomerangs.",
+    "source": "Quickstart"
+  },
+  {
+    "name": "Red Guardian's Shield",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Red Guardian",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach (thrown 10)",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Grants the user one extra level of the Shield power.",
+    "notes": "Red Guardian's star-emblazoned shield.",
+    "source": "Quickstart"
+  },
+  {
     "name": "Rifle",
     "tier": "Common",
     "type": "Weapon",
@@ -320,6 +368,24 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 1,
     "notes": "Can attack up to two adjacent targets — one attack roll compared to both Agility defenses; split the damage equally.",
     "source": "core p34"
+  },
+  {
+    "name": "Skurge's Battle-Ax",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "The Executioner",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+2",
+    "multBonus": 2,
+    "multAbilities": [
+      "melee"
+    ],
+    "special": "Signature weapon — acts as a sword.",
+    "notes": "Skurge's double-bladed Asgardian battle-ax.",
+    "source": "Quickstart"
   },
   {
     "name": "Sniper Rifle",
@@ -359,6 +425,36 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 2,
     "notes": "A bladed close weapon.",
     "source": "core p34"
+  },
+  {
+    "name": "U.S.Agent's Shield",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "U.S.Agent",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach (thrown 10)",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Grants the user one extra level of the Shield power.",
+    "notes": "U.S.Agent's vibranium shield.",
+    "source": "Quickstart"
+  },
+  {
+    "name": "Widow's Bite",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "White Widow",
+    "weaponClass": "ranged",
+    "ability": "agility",
+    "range": "10",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "On a Fantastic success, stuns the target for one round.",
+    "notes": "Wrist gauntlets that fire electro-static bolts.",
+    "source": "Quickstart"
   }
 ];
 if (typeof window !== 'undefined') { window.MMRPG_EQUIPMENT = MMRPG_EQUIPMENT; }

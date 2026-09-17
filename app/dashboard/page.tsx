@@ -150,8 +150,8 @@ const YZE_REFERENCE: { href: string; label: string }[] = [
 
 const MMRPG_REFERENCE: { href: string; label: string }[] = [
   { href: "/mmrpg/origins", label: "Origins & Occupations" },
-  { href: "/mmrpg/powers", label: "Powers" },
   { href: "/mmrpg/traits", label: "Traits & Tags" },
+  { href: "/mmrpg/powers", label: "Powers" },
   { href: "/mmrpg/equipment", label: "Equipment" },
   { href: "/mmrpg/characters", label: "Characters" },
 ];

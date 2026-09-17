@@ -4145,5 +4145,19 @@
   "cost": "",
   "effect": "The character cracks a joke at the enemy’s expense. Make an Ego attack. On a success, it does regular Focus damage. On a Fantastic success, the damage is doubled, and the target is stunned for one round.",
   "fantastic": ""
+ },
+ {
+  "name": "ESP",
+  "description": "",
+  "power_set": "Telepathy",
+  "prerequisites": "",
+  "action": "Standard",
+  "trigger": "",
+  "duration": "Concentration",
+  "range": "",
+  "cost": "",
+  "effect": "The character can reach out with their mind to sense the presence of others within 100 spaces per rank. This tells them the person’s location and general status. It can also identify if they have super-powers or not. If a target or targets wish to remain undetected, the character must make a Logic check and compare it against each target’s Vigilance defense. If they succeed, they sense the target. On a Fantastic success, they can also identify the source of any powers the target has.",
+  "fantastic": "",
+  "source": "Quickstart"
  }
 ]

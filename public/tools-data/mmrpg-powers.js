@@ -1403,6 +1403,20 @@ const MMRPG_POWERS = [
     "description": "Environmental effects don’t bother the character."
   },
   {
+    "name": "ESP",
+    "genre": "core",
+    "powerSet": "Telepathy",
+    "prerequisites": "",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "",
+    "effect": "The character can reach out with their mind to sense the presence of others within 100 spaces per rank. This tells them the person’s location and general status. It can also identify if they have super-powers or not. If a target or targets wish to remain undetected, the character must make a Logic check and compare it against each target’s Vigilance defense. If they succeed, they sense the target. On a Fantastic success, they can also identify the source of any powers the target has.",
+    "fantastic": "",
+    "description": ""
+  },
+  {
     "name": "Evasion",
     "genre": "core",
     "powerSet": "None",

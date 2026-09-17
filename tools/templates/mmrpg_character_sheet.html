@@ -137,8 +137,6 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .spd-lines .spd{display:flex;justify-content:space-between;align-items:baseline;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
 .spd-lines .spd b{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--mv-dk);}
 .spd-lines .spd.init{grid-column:1 / -1;border-bottom:1px solid var(--rule);padding-bottom:2px;margin-bottom:1px;}
-.spd-lines .spd.mv span{color:var(--mv);}
-.spd-lines .spd.mv b{color:var(--mv);}
 .eq-owner,.brow-owner{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mv);margin-left:5px;}
 .eq-tag{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;color:var(--mv);border:1px solid var(--mv);border-radius:4px;padding:0 3px;margin-left:4px;vertical-align:middle;}
 /* Attacks / Damage section (above the tabs) */
@@ -193,8 +191,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .card-list{padding:8px 10px;display:flex;flex-direction:column;gap:6px;}
 .pc-card{border:1px solid var(--rule);border-radius:7px;background:var(--box);padding:7px 9px;}
 .pc-head{display:flex;align-items:center;gap:8px;}
-.pc-head .pc-name{flex:1 1 auto;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;color:var(--mv-dk);background:none;border:none;cursor:pointer;text-align:left;padding:0;}
-.pc-head .pc-name:hover{text-decoration:underline;}
+.pc-head .pc-name{flex:1 1 auto;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;color:var(--mv-dk);background:none;border:none;cursor:default;text-align:left;padding:0;}
 .pc-head .pc-meta{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
 .pc-head .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
 .pc-head .row-x:hover{color:var(--red);}
@@ -208,6 +205,12 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .tbl input,.tbl select{width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
 .tbl input:focus{border-bottom-color:var(--mv);}
 .tbl input.cx{text-align:center;}
+.tbl tr.eq-main td{border-bottom:none;padding-bottom:1px;}
+.tbl tr.eq-det td{border-bottom:1px solid var(--rule);padding:0 6px 7px 6px;}
+.tbl tr.eq-det .eq-line{display:flex;align-items:baseline;gap:8px;margin-top:2px;}
+.tbl tr.eq-det .eq-lbl{flex:0 0 auto;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);min-width:52px;}
+.tbl tr.eq-det .eq-line input{font-size:12px;font-weight:500;color:var(--muted);}
+.tbl tr.eq-det .eq-line input:focus{color:var(--ink);}
 .tbl .w-roll{padding:4px 9px;font-size:11px;letter-spacing:.05em;}
 .tbl .w-roll::before{width:10px;height:10px;}
 .tbl .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;width:auto;}
@@ -353,7 +356,7 @@ body.dark .sheet{border-color:#3a3d47;}
 
       <div class="tab-panel" id="tab-equipment">
         <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('equip')">＋ Add Equipment</button></span></div>
-        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:28%;">Item</th><th style="width:15%;">Attacks with</th><th style="width:13%;">Range</th><th style="width:11%;">Dmg</th><th>Notes</th><th style="width:96px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
+        <table class="tbl" id="atk-tbl"><thead><tr><th>Item</th><th style="width:16%;">Attacks with</th><th style="width:14%;">Range</th><th style="width:12%;">Dmg</th><th style="width:96px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
         <div id="atk-empty" class="tbl-empty">No equipment yet. Add a weapon, gear or vehicle from the list — a weapon rolls its ability and deals Marvel die × (multiplier + weapon bonus) + ability.</div>
       </div>
 
@@ -565,7 +568,7 @@ function renderDerived(){
   var init=(ab('vigilance')>=0?'+':'')+ab('vigilance');
   var lines=[['init','Initiative',init],['','Run',run],['','Climb',half],['','Swim',half],['','Jump',half]];
   var mv=grantedMovement();
-  Object.keys(mv).forEach(function(mode){ lines.push(['mv',mode,hv(mv[mode])]); });
+  Object.keys(mv).forEach(function(mode){ lines.push(['',mode,hv(mv[mode])]); });
   if(halved) lines.push(['cond','⚙ Blinded','½ speed']);
   host.innerHTML=lines.map(function(l){ return '<div class="spd '+l[0]+'"><span>'+l[1]+'</span><b>'+l[2]+'</b></div>'; }).join('');
 }
@@ -778,7 +781,7 @@ function renderAttacks(){
   S.attacks.forEach(function(w,i){
     var isW=isWeaponRow(w);
     var own=w.owner?' <span class="eq-owner">'+esc(w.owner)+'</span>':'';
-    var tr=document.createElement('tr');
+    var tr=document.createElement('tr'); tr.className='eq-main';
     if(isW){
       var opts=ABILITIES.map(function(a){ return '<option value="'+a.key+'"'+(w.ability===a.key?' selected':'')+'>'+a.name+'</option>'; }).join('');
       var mAb=(Array.isArray(w.multAbilities)&&w.multAbilities.length>1)?' <span class="eq-tag" title="Bonus applies to: '+esc(w.multAbilities.join(', '))+'">+'+esc(w.multAbilities.map(function(k){return k.slice(0,3);}).join('/'))+'</span>':'';
@@ -786,17 +789,22 @@ function renderAttacks(){
         +'<td><select onchange="aEdit('+i+',\'ability\',this.value)">'+opts+'</select></td>'
         +'<td><input value="'+esc(w.range||'')+'" oninput="aEdit('+i+',\'range\',this.value)" placeholder="Reach / 10"></td>'
         +'<td><input class="cx" value="'+esc(w.damageBonus||'')+'" oninput="aEdit('+i+',\'dmg\',this.value)" placeholder="+1"></td>'
-        +'<td><input value="'+esc(w.special||w.notes||'')+'" oninput="aEdit('+i+',\''+(w.special?'special':'notes')+'\',this.value)"></td>'
         +'<td style="text-align:right;white-space:nowrap;"><button class="w-equip'+(w.equipped?' on':'')+'" onclick="toggleEquip('+i+')">'+(w.equipped?'Equipped':'Equip')+'</button> <button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
     } else {
       var act=isActivatable(w);
       var eqBtn=act?'<button class="w-equip'+(w.equipped?' on':'')+'" onclick="toggleEquip('+i+')">'+(w.equipped?'Equipped':'Equip')+'</button> ':'';
       tr.innerHTML='<td><input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Item">'+own+'</td>'
         +'<td colspan="3" style="font-family:\'Barlow Condensed\';font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);">'+esc((w.tier&&w.tier!=='Common'?w.tier+' ':'')+(w.type||w.category||'Item'))+'</td>'
-        +'<td><input value="'+esc(w.special||w.notes||'')+'" oninput="aEdit('+i+',\''+(w.special?'special':'notes')+'\',this.value)"></td>'
         +'<td style="text-align:right;white-space:nowrap;">'+eqBtn+'<button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
     }
     body.appendChild(tr);
+    // details: Special (book effect) and Notes on their own line(s) below
+    var det=document.createElement('tr'); det.className='eq-det';
+    det.innerHTML='<td colspan="5">'
+      +(w.special?'<div class="eq-line"><span class="eq-lbl">Special</span><input value="'+esc(w.special)+'" placeholder="Special effect" oninput="aEdit('+i+',\'special\',this.value)"></div>':'')
+      +'<div class="eq-line"><span class="eq-lbl">Notes</span><input value="'+esc(w.notes||'')+'" placeholder="Notes" oninput="aEdit('+i+',\'notes\',this.value)"></div>'
+      +'</td>';
+    body.appendChild(det);
   });
   $('atk-empty').style.display=S.attacks.length?'none':'block';
 }

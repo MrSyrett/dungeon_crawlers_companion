@@ -35,7 +35,7 @@ def powers_3col(page):
     # Detect the power columns from the ◆ bullet x-positions (they vary per
     # character: col1 ≈220, col2 ≈298-314, col3 ≈413-417). Cluster the bullet
     # x0s, then split the page into bands at the midpoints between column centres.
-    bx = sorted(w['x0'] for w in W if w['text'] == '◆' and 210 < w['x0'] < 555 and w['top'] > ytop)
+    bx = sorted(w['x0'] for w in W if w['text'] == '◆' and 198 < w['x0'] < 555 and w['top'] > ytop)
     centres = []
     for x in bx:
         if not centres or x - centres[-1][-1] > 40: centres.append([x])
@@ -61,7 +61,9 @@ def powers_3col(page):
     groups = []
     for x0, x1 in COLS:
         for ln in col_lines(x0, x1):
+            ln = re.sub(r'\s*©\s*20\d\d\s*MARVEL\s*$', '', ln).strip()  # drop page-footer bleed
             if not ln or ln in ('Powers',) or re.fullmatch(r'\d+', ln): continue
+            if re.search(r'©\s*20\d\d|MARVEL$', ln): continue
             if '◆' not in ln and (BC.is_set_header(ln) or BC.is_set_header(re.sub(r's$', '', ln))):
                 groups.append({'set': ln, 'names': []}); continue
             segs = ln.split('◆')

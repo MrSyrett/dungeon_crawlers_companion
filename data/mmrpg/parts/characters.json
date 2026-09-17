@@ -10097,5 +10097,601 @@
   "equipment": [
    "Adamantium Claws (X-Men '97)"
   ]
+ },
+ {
+  "name": "THE DESTROYER",
+  "realName": "Sharon Carter",
+  "rank": 3,
+  "health": 60,
+  "focus": 120,
+  "karma": 3,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 4,
+   "ego": 2,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Law Enforcer, Spy",
+  "origin": "High Tech, Special Training",
+  "teams": "Daughters of Liberty, S.H.I.E.L.D., Thunderbolts",
+  "base": "Mobile",
+  "features": "",
+  "history": "Inspired by her aunt Peggy’s old war stories, Sharon Carter signed up to protect the world with S.H.I.E.L.D. Not long after that, she began working alongside Peggy’s old comrade in arms and romantic partner, Captain America (Steve Rogers). In time, Carter and Rogers began a romance of their own, though because of their duties, the relationship played out in fits and spurts, when it played out at all. At times, life and circumstance have even conspired to push them into direct conflict—like after the first superhuman civil war, when Carter was brainwashed into killing Rogers, or during the reign of the Secret Empire, when Rogers seemingly became an agent of Hydra. But somehow, they have always managed to repair their relationship and pick up where they left off. Carter is one of the few S.H.I.E.L.D. operatives who can attest to having saved as many people as Steve Rogers himself, and for a brief period before it dissolved, she was even the head of the organization. After her old friend the Destroyer (Roger Aubrey) was killed in battle, Carter decided to honor him by taking up his codename. As the new Destroyer, she currently spends most of her time fighting villainy around the globe with the Thunderbolts.",
+  "personality": "Much like Rogers, Sharon Carter is a coolheaded and determined operative. She has high ideals, and she isn’t afraid to fight for them. In fact, she suspects that she’s fated to do just that for the rest of her life. Arts Ranged Weapons",
+  "traits": [
+   "Combat Expert",
+   "Connections: Espionage",
+   "Determination",
+   "Extra Occupation",
+   "Extraordinary Origin",
+   "Interrogation",
+   "Investigation",
+   "Leverage",
+   "Tech Reliance"
+  ],
+  "tags": [
+   "Authority",
+   "Backup",
+   "Black Market Access",
+   "Heroic",
+   "Public Identity"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Accuracy 1",
+     "Iconic Weapon",
+     "Sturdy 1"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Attack Stance",
+     "Counterstrike Technique"
+    ]
+   },
+   {
+    "set": "Melee Weapons (Sharp)",
+    "names": [
+     "Fast Attacks",
+     "Hit & Run",
+     "Riposte",
+     "Vicious Attack"
+    ]
+   },
+   {
+    "set": "Ranged Weapons",
+    "names": [
+     "Double Tap",
+     "Point-Blank Parry",
+     "Suppressive Fire"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "Quickstart",
+  "id": "the-destroyer-quickstart",
+  "equipment": [
+   "Energy Baton"
+  ]
+ },
+ {
+  "name": "ENCHANTRESS",
+  "realName": "Amora",
+  "rank": 5,
+  "health": 90,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 7,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25,
+   "jump": 3
+  },
+  "occupation": "Outsider",
+  "origin": "Magic, Mythic: Asgardian",
+  "teams": "Astonishing Avengers, Dark Council",
+  "base": "Asgard",
+  "features": "",
+  "history": "As the goddess of beauty and one of the most gifted magicians in existence, Amora ranks among the most powerful of the Asgardian elite. She seldom visited the modern world until the day she first encountered Thor Odinson. Impressed with the Thunder God’s power, she sought to seduce him, but Thor ultimately rejected her in favor of Jane Foster. Amora has harbored a grudge against Thor ever since. While she has had some brief flirtations with acting heroically, she spends most of her time plotting to take down Thor and the Asgardian royal family at large. To that end, she frequently finds herself acting as an ally to Loki.",
+  "personality": "Equal parts vain and vengeful, Amora takes no half measures. She takes great pride in her abilities as a seductress and a sorceress, and she extracts brutal retribution against anyone brave enough to slight her. The only thing she fears is being left completely alone, with no one to adore her.",
+  "traits": [
+   "Beguiling",
+   "Connections: Outsiders",
+   "Dealmaker",
+   "Enhanced Physique",
+   "Extraordinary Origin",
+   "Fresh Eyes",
+   "Glibness",
+   "God Heritage",
+   "Iron Will",
+   "Stranger"
+  ],
+  "tags": [
+   "Public Identity",
+   "Sorcerous",
+   "Supernatural",
+   "Villainous",
+   "Worshipped"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Discipline 2",
+     "Flight 2",
+     "Mighty 1",
+     "Uncanny 2"
+    ]
+   },
+   {
+    "set": "Magic (Chaos Set)",
+    "names": [
+     "Hex Bolt",
+     "Jinx"
+    ]
+   },
+   {
+    "set": "Magic (No Set)",
+    "names": [
+     "Astral Form"
+    ]
+   },
+   {
+    "set": "Magic (Sorcery Set)",
+    "names": [
+     "Flames of the Faltine",
+     "Images of Ikonn",
+     "Shield of the Seraphim (20 points to shatter)",
+     "Summon Portal"
+    ]
+   },
+   {
+    "set": "Telepathy",
+    "names": [
+     "Command",
+     "Domination",
+     "ESP",
+     "Mental Shelter",
+     "Mind Reading",
+     "Orders",
+     "Telepathic Link",
+     "Telepathic Possession"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "Quickstart",
+  "id": "enchantress-quickstart"
+ },
+ {
+  "name": "THE EXECUTIONER",
+  "realName": "Skurge",
+  "rank": 4,
+  "health": 210,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 7,
+   "agility": 2,
+   "resilience": 7,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 6
+  },
+  "occupation": "Outsider",
+  "origin": "Mythic: Asgardian",
+  "teams": "Asgardians of the Galaxy, Masters of Evil, Roxxon",
+  "base": "Asgard",
+  "features": "",
+  "history": "A fierce but lonely Asgardian warrior, Skurge the Executioner proved all too easy for the Enchantress to manipulate. Without her casting so much as a simple charm, he vowed to obey her every word. He assisted her in countless schemes to ensnare Thor Odinson, even while knowing that the Thunder God was the one she truly loved. He followed her into becoming part of the Masters of Evil and, from there, into dozens of disastrous fights with the Avengers. He followed her into exile, into war and even to the brink of death. After years of such abuse, Skurge gradually began to take sojourns from the Enchantress. He never stopped loving her—even now, he would do anything for her—but he did start going on adventures of his own. On one of those adventures, he sacrificed himself to save Thor from the assembled forces of Hel and to preserve the safety of Asgard. as Then, after escaping Valhalla, he once again gave his life for the greater good, protecting Earth during the War of the Realms. Though Skurge has since returned to the Enchantress’ nefarious service, the people of Asgard, particularly Thor, still respect him as a warrior and a man.",
+  "personality": "Deep down, Skurge is a soft-spoken and noble warrior. Under normal circumstances, he would never attack an unarmed opponent or harm another Asgardian—at least not without serious provocation. However, he’s willing to put his principles aside to prove his undying love for the Enchantress. He knows that she may never truly love him, yet he believes that to defy her would be to deny his own heart. Weapons Super-Strength",
+  "traits": [
+   "Battle Ready",
+   "Big",
+   "Combat Expert",
+   "Connections: Outsiders",
+   "Enhanced Physique",
+   "Fearless",
+   "Fresh Eyes",
+   "God Heritage",
+   "Stranger"
+  ],
+  "tags": [
+   "Public Identity",
+   "Signature Weapon: Battle-ax a sword)",
+   "Supernatural",
+   "Worshipped"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Environmental Protection",
+     "Mighty 4",
+     "Sturdy 1"
+    ]
+   },
+   {
+    "set": "Melee Weapons (Sharp)",
+    "names": [
+     "Exploit",
+     "Fast Attacks",
+     "Focused Fury",
+     "Furious Attacks",
+     "Riposte",
+     "Unstoppable Assault",
+     "Vicious Attack",
+     "Whirling Frenzy"
+    ]
+   },
+   {
+    "set": "Super-Strength",
+    "names": [
+     "Banging Heads",
+     "Immovable",
+     "Jump 1"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "Quickstart",
+  "id": "the-executioner-quickstart",
+  "equipment": [
+   "Skurge's Battle-Ax"
+  ]
+ },
+ {
+  "name": "RED GUARDIAN",
+  "realName": "Alexei Andreovitch Shostakov",
+  "rank": 3,
+  "health": 90,
+  "focus": 120,
+  "karma": 3,
+  "abilities": {
+   "melee": 4,
+   "agility": 2,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "Special Training",
+  "teams": "Thunderbolts, Winter Guard",
+  "base": "Mobile",
+  "features": "",
+  "history": "Already a decorated war hero and test pilot, Alexei Shostakov seemed like a natural choice to replace the original Red Guardian after the Russian government had the old warrior killed for insubordination. Indeed, Shostakov initially was the perfect candidate, loyal to a fault, willing even to abandon his wife, Natasha Romanoff (later known as the Black Widow), in the pursuit of becoming Russia’s answer to Captain America (Steve Rogers). When he finally met Captain America, though, things went wrong. Shostakov was strong, but his foe was stronger. Captain America was on the verge of defeating the Red Guardian when one of Shostakov’s superiors stabbed the First Avenger in the back. Unwilling to accept such a dishonorable victory, Shostakov defied his superiors and saved Captain America’s life, seemingly at the cost of his own. Some years later, Shostakov briefly resurfaced as the third person to take on the identity of Ronin—after Maya Lopez (also known as Echo) and Hawkeye (Clint Barton)—before being arrested by S.H.I.E.L.D. The Russian government arranged for Shostakov to be broken out of prison and subsequently recruited him into their super-hero team, the Winter Guard. However, after discovering that fascists had infiltrated the Russian command structure, Shostakov once again abandoned his commitment to the government. He’s since joined his former Winter Guard teammate White Widow in helping the Winter Soldier’s new incarnation of the Thunderbolts root out the Red Skull and his allies once and for all.",
+  "personality": "Shostakov is a burly, bearded man and a hard drinker. Look beneath his exterior, though, and there’s a kind and principled warrior, every bit as committed to the well-being of the Russian people as Captain America is to Americans. Bearer Tactics",
+  "traits": [
+   "Battle Ready",
+   "Beguiling",
+   "Combat Expert",
+   "Connections: Military",
+   "Determination",
+   "Piloting",
+   "Situational Awareness"
+  ],
+  "tags": [
+   "Heroic",
+   "Public Identity",
+   "Signature Weapon: Red boomerangs as pistol)"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Iconic Weapon",
+     "Inspiration"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Grappling Technique",
+     "Spin & Throw"
+    ]
+   },
+   {
+    "set": "Shield Bearer",
+    "names": [
+     "Brace for Impact",
+     "Do This All Day",
+     "Hurled Shield Bash",
+     "Shield 1 (Shield 2, with Iconic Weapon)",
+     "Shield Bash",
+     "Shield Deflection",
+     "Shield Wall"
+    ]
+   },
+   {
+    "set": "Tactics",
+    "names": [
+     "Keep Moving"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "Quickstart",
+  "id": "red-guardian-quickstart",
+  "equipment": [
+   "Red Guardian's Shield",
+   "Red Boomerangs"
+  ]
+ },
+ {
+  "name": "U.S.AGENT",
+  "realName": "John F. Walker",
+  "rank": 3,
+  "health": 90,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 5,
+   "agility": 2,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Law Enforcer",
+  "origin": "Weird Science",
+  "teams": "Thunderbolts, West Coast Avengers",
+  "base": "Mobile",
+  "features": "",
+  "history": "As a military brat, John Walker grew up dreaming of following in the footsteps of his father, Caleb, and his late brother, Mike, by becoming a heroic soldier. Ultimately, he opted to serve his country in a different way. As an adult, he agreed to undergo an experimental private procedure known as the Power Broker process, which granted him powers comparable to those of Captain America (Steve Rogers). With his new abilities, Walker took on the codename Super-Patriot and challenged Rogers to a showdown, claiming that Rogers was a fossil incapable of defending real American values. Though Walker lost the bout, when Rogers later gave up being Captain America, the government remembered Walker holding his own against the old fighter and nominated him as the Captain’s replacement. However, Walker found that the title Captain America ill-suited him, and he eventually turned on his bosses to help Rogers root out the government corruption that had forced him to abandon the Stars and Stripes in the first place. Ashamed of his own complicity in the government’s corruption, Walker considered retirement, but Rogers encouraged him to keep on as a hero under a new codename— U.S.Agent. Since then, the U.S.Agent has worked with everyone from the Thunderbolts to the Avengers.",
+  "personality": "In his early days, Walker came off as a bit of a patriotic extremist—in no small part because the Red Skull exploited his loyalty to the government to push him into taking on dubious assignments. However, in the years since, he’s shown himself to be a much more empathetic and thoughtful figure, more similar to Steve Rogers than not. He despises fascists, particularly the Red Skull, who not only manipulated him, but also ordered the killing of his parents. Weapons Super-Strength",
+  "traits": [
+   "Abrasive",
+   "Interrogation",
+   "Investigation",
+   "Presence",
+   "Public Speaking",
+   "Weird"
+  ],
+  "tags": [
+   "Authority",
+   "Backup",
+   "Heroic",
+   "Public Identity"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Iconic Weapon",
+     "Inspiration",
+     "Mighty 1"
+    ]
+   },
+   {
+    "set": "Ranged Weapons",
+    "names": [
+     "Double Tap",
+     "Stopping Power"
+    ]
+   },
+   {
+    "set": "Shield Bearer",
+    "names": [
+     "Hurled Shield Bash",
+     "Rico-Shield",
+     "Shield 1 (Shield 2, with Iconic Weapon)",
+     "Shield Bash",
+     "Shield Deflection"
+    ]
+   },
+   {
+    "set": "Super-Strength",
+    "names": [
+     "Clobber",
+     "Crushing Grip"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "Quickstart",
+  "id": "u-s-agent-quickstart",
+  "equipment": [
+   "U.S.Agent's Shield"
+  ]
+ },
+ {
+  "name": "WHITE WIDOW",
+  "realName": "Yelena Belova",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Spy",
+  "origin": "Special Training",
+  "teams": "A.I.M., S.H.I.E.L.D., Thunderbolts",
+  "base": "Mobile",
+  "features": "",
+  "history": "Much to her own dismay, Yelena Belova’s life has run in eerie parallel to that of the famous superspy Natasha Romanoff. Both were raised by the Russian government as part of the punishing and secretive Red Room training program. Both acted as government spies under the codename Black Widow before eventually defecting to the United States. Both went on to work together at S.H.I.E.L.D., where they took part in an operation that required them to temporarily switch identities. However, that last job sent Belova into an identity crisis so deep that she abandoned government work entirely and took a new job with A.I.M., whose scientists turned her into a living weapon called a Super-Adaptoid. Unfortunately, these same scientists proved less capable at keeping track of Belova in the field, and not long after her transformation, they mistakenly shot her dead. The Red Room later created several weaponized, amnesiac clones of Belova to hunt down Romanoff, and though Romanoff killed most of these clones, she managed to restore the original Belova’s memories to one. Profoundly grateful for a second chance at life, this new Belova took on the codename White Widow and returned to working with Romanoff. These days, both Black Widow and White Widow often work with the Winter Soldier as part of his new incarnation of the Thunderbolts.",
+  "personality": "Much like Black Widow, White Widow is a coolheaded and charismatic spy capable of talking her way through the toughest situations. However, perhaps on account of her less tumultuous career, White Widow is a bit more easygoing and trusting than her darker counterpart. Arts Ranged Weapons",
+  "traits": [
+   "Beguiling",
+   "Connections: Espionage",
+   "Determination",
+   "Free Running",
+   "Glibness",
+   "Leverage"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Clone",
+   "Heroic",
+   "Public Identity"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Accuracy 1",
+     "Iconic Weapon",
+     "Inspiration",
+     "Slow-Motion Dodge"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Attack Stance",
+     "Counterstrike Technique",
+     "Defense Stance"
+    ]
+   },
+   {
+    "set": "Ranged Weapons",
+    "names": [
+     "Slow-Motion Shoot-Dodge",
+     "Snap Shooting",
+     "Sniping",
+     "Weapons Blazing"
+    ]
+   },
+   {
+    "set": "Tactics",
+    "names": [
+     "Change of Plans"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "Quickstart",
+  "id": "white-widow-quickstart",
+  "equipment": [
+   "Widow's Bite"
+  ]
+ },
+ {
+  "name": "THE WINTER SOLDIER",
+  "realName": "James Buchanan “Bucky” Barnes",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Spy",
+  "origin": "High Tech: Cybernetics, Special Training, Weird Science",
+  "teams": "Avengers, KGB, S.H.I.E.L.D., Thunderbolts",
+  "base": "Mobile",
+  "features": "Bionic left arm",
+  "history": "Toward the end of World War II, the aerial explosion that sent Captain America (Steve Rogers) into the north Atlantic where he froze into a block of ice seemingly killed his sidekick, the young Bucky (Bucky Barnes). He was captured by Soviet scientists, who replaced a missing arm with a bionic prosthetic and brainwashed him to become a Russian assassin codenamed the Winter Soldier, after which he was kept in suspended animation for decades, only released to kill and then returned to sleep again. During a brief period when Rogers was dead, Bucky took up the shield and replaced him as Captain America, though after Rogers' resurrection, Bucky returned both the name and the shield to his old mentor. More recently, Bucky took on a new codename—the Revolution—and founded a new incarnation of the Thunderbolts with the goal of leading a worldwide revolution against villainous organizations like Hydra.",
+  "personality": "Bucky is a deadly serious and world-weary vet. The remorse he feels for his time as an assassin weighs on him every day. Arts Ranged Weapons",
+  "traits": [
+   "Combat Expert",
+   "Connections: Espionage",
+   "Determination",
+   "Extraordinary Origin (2)",
+   "Leverage",
+   "Sneaky",
+   "Tech Reliance",
+   "Weird"
+  ],
+  "tags": [
+   "Black Market Access",
+   "Extreme Appearance",
+   "Heroic",
+   "Linguist: Chinese (Mandarin), English, German, Japanese, Russian",
+   "Public Identity"
+  ],
+  "powers": [
+   {
+    "set": "Basic",
+    "names": [
+     "Inspiration",
+     "Mighty 1"
+    ]
+   },
+   {
+    "set": "Martial Arts",
+    "names": [
+     "Always Ready",
+     "Attack Stance",
+     "Defense Stance",
+     "Do This All Day",
+     "Fast Strikes",
+     "Leg Sweep"
+    ]
+   },
+   {
+    "set": "Ranged Weapons",
+    "names": [
+     "Double Tap",
+     "Snap Shooting",
+     "Stopping Power",
+     "Suppressive Fire"
+    ]
+   }
+  ],
+  "genre": "core",
+  "source": "Quickstart",
+  "id": "the-winter-soldier-quickstart"
  }
 ]
