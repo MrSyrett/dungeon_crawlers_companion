@@ -11,7 +11,7 @@ import { SectionH, cardCls, badge, hbBadge } from "@/components/MmrpgRef";
 type HqTrait = { name: string; n?: number };
 type HqTag = { name: string; note?: string };
 type Hq = {
-  name: string; teamRank: number; blurb?: string; notes?: string;
+  name: string; teamRank: number | string; blurb?: string; notes?: string;
   traits: HqTrait[]; tags: HqTag[];
   traitBudget?: number; traitsUsed?: number; warnings?: string[]; homebrew?: boolean;
 };
@@ -20,9 +20,10 @@ const traitLabel = (t: HqTrait) => (t.n && t.n > 1 ? `${t.name} ×${t.n}` : t.na
 const tagLabel = (t: HqTag) => (t.note ? `${t.name} (${t.note})` : t.name);
 
 function HqCard({ hq }: { hq: Hq }) {
-  const budget = hq.traitBudget ?? hq.teamRank * 3;
+  const rankNum = typeof hq.teamRank === "number" ? hq.teamRank : Number(hq.teamRank);
+  const budget = hq.traitBudget ?? (Number.isFinite(rankNum) ? rankNum * 3 : null); // Rank X HQs have no fixed budget
   const used = hq.traitsUsed ?? hq.traits.reduce((s, t) => s + (t.n || 1), 0);
-  const over = used > budget;
+  const over = budget != null && used > budget;
   return (
     <article className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -30,7 +31,7 @@ function HqCard({ hq }: { hq: Hq }) {
         <span className="flex items-center gap-1.5">
           {hq.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
           <span className={badge}>Rank {hq.teamRank}</span>
-          <span className={badge} style={over ? { color: "var(--mmrpg)", borderColor: "var(--mmrpg)" } : undefined}>{used}/{budget} traits</span>
+          <span className={badge} style={over ? { color: "var(--mmrpg)", borderColor: "var(--mmrpg)" } : undefined}>{budget != null ? `${used}/${budget}` : used} traits</span>
         </span>
       </div>
       {hq.blurb ? <p className="mt-1 text-[12px] italic leading-relaxed text-[var(--muted)]">{hq.blurb}</p> : null}

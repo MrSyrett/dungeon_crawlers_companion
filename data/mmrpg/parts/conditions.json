@@ -130,8 +130,12 @@
  {
   "name": "Stunned",
   "genre": "core",
-  "description": "The character is dazed. Their concentration powers end, they lose their next action, and attackers have an edge against them until then.",
-  "source": "Concentration powers end; you lose your next action; enemies get an edge."
+  "description": "The character is dazed. Their concentration powers end; they have trouble on all standard actions and reactions and cannot take movement actions (they can still use powers that work as a standard action or reaction), and attackers have an edge against them. Lasts 1 round. (Updated in the Secret Wars Expansion.)",
+  "source": "Trouble on standard actions/reactions; no movement; concentration ends; attackers get an edge (1 round).",
+  "mech": {
+   "troubleAll": true,
+   "noMove": true
+  }
  },
  {
   "name": "Surprised",

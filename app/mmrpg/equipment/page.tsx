@@ -6,6 +6,7 @@ import type { MmrpgEquipment } from "@/lib/data/mmrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import MmrpgHeadquarters from "@/components/MmrpgHeadquarters";
+import MmrpgStarships from "@/components/MmrpgStarships";
 import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, badge, hbBadge, one, withParams, type Query, type RawQuery } from "@/components/MmrpgRef";
 import MmrpgRefTokens from "@/components/MmrpgRefTokens";
 
@@ -15,6 +16,7 @@ const TABS = [
   { key: "gear", label: "Equipment" },
   { key: "iconic", label: "Iconic Items" },
   { key: "hq", label: "Headquarters" },
+  { key: "ships", label: "Starships" },
 ];
 const GEAR_TIERS = ["Common", "Narrative", "Vehicle"];
 const GEAR_TYPES = ["Weapon", "Item", "Armor", "Vehicle"];
@@ -97,11 +99,13 @@ function TabBar({ active }: { active: string }) {
 export default async function MmrpgEquipmentPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const [hbIconic, hbIconicOwn, hbHq, hbHqOwn, campaigns] = await Promise.all([
+  const [hbIconic, hbIconicOwn, hbHq, hbHqOwn, hbShip, hbShipOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "mmrpg-iconic" }),
     ownHomebrew(user.id, "mmrpg-iconic"),
     visibleHomebrew(user.id, { type: "mmrpg-hq" }),
     ownHomebrew(user.id, "mmrpg-hq"),
+    visibleHomebrew(user.id, { type: "mmrpg-starship" }),
+    ownHomebrew(user.id, "mmrpg-starship"),
     userCampaigns(user.id),
   ]);
 
@@ -114,7 +118,7 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
   const bookRows = MMRPG_EQUIPMENT as EquipRow[];
   const gearAll = bookRows.filter((e) => tierOf(e) !== "Iconic");
   const iconicAll = [...hbIconicRows, ...bookRows.filter((e) => tierOf(e) === "Iconic")];
-  const hbCount = hbIconicRows.length + hbHq.length;
+  const hbCount = hbIconicRows.length + hbHq.length + hbShip.length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -175,6 +179,8 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
       })() : null}
 
       {tab === "hq" ? <MmrpgHeadquarters campaigns={campaigns} own={hbHqOwn} visible={hbHq} /> : null}
+
+      {tab === "ships" ? <MmrpgStarships campaigns={campaigns} own={hbShipOwn} visible={hbShip} /> : null}
     </div>
   );
 }

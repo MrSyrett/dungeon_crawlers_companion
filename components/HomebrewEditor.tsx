@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { TALENT_TARGETS } from "@/lib/effects";
 import { MMRPG_HQ_TRAITS } from "@/lib/data/mmrpg-hq-traits";
 import { MMRPG_HQ_TAGS } from "@/lib/data/mmrpg-hq-tags";
+import { MMRPG_STARSHIP_TRAITS } from "@/lib/data/mmrpg-starship-traits";
+import { MMRPG_STARSHIP_TAGS } from "@/lib/data/mmrpg-starship-tags";
 import { MMRPG_POWER_NAMES } from "@/lib/data/mmrpg-power-names";
 
 // One option in a "Browse & pick" modal: the stored value plus a group heading and
@@ -14,10 +16,13 @@ type RichOpt = { value: string; group?: string; detail?: string };
 const HQ_TRAIT_OPTS: [string, string][] = MMRPG_HQ_TRAITS.map((t) => [t.name, t.name]);
 const HQ_TAG_OPTS: [string, string][] = MMRPG_HQ_TAGS.map((t) => [t.name, t.name]);
 const HQ_RANK_OPTS: [string, string][] = [1, 2, 3, 4, 5, 6].map((n) => [String(n), `Rank ${n}`]);
+// Starships can take HQ traits/tags plus ship-specific ones (ship systems first).
+const SHIP_TRAIT_OPTS: [string, string][] = [...MMRPG_STARSHIP_TRAITS, ...MMRPG_HQ_TRAITS].map((t) => [t.name, t.name]);
+const SHIP_TAG_OPTS: [string, string][] = [...MMRPG_STARSHIP_TAGS, ...MMRPG_HQ_TAGS].map((t) => [t.name, t.name]);
 // Standard iconic-item restrictions (Avengers Expansion). Access/Use restrictions
 // are open-ended, so the picker also allows custom text (allowCustom).
 const MMRPG_RESTRICTION_OPTS: readonly string[] = [
-  "Worn", "Carried", "Driven",
+  "Worn", "Carried", "Driven", "Paired Item",
   "Awkward", "Flashy", "Large", "Loud", "Menacing",
   "Anathema", "Berserker", "Bloodthirsty", "Breathe Different", "Weakness",
 ];
@@ -28,6 +33,7 @@ const MMRPG_RESTRICTION_RICH: readonly RichOpt[] = [
   { value: "Worn", group: "Attachment", detail: "How the item attaches — it's worn on the body. An attachment restriction means the item can be removed or taken; whoever grabs it can use it." },
   { value: "Carried", group: "Attachment", detail: "How the item attaches — it's carried or held in hand, so it can be dropped or taken away." },
   { value: "Driven", group: "Attachment", detail: "How the item attaches — it's driven or piloted, like a vehicle; leaving it behind gives it up." },
+  { value: "Paired Item", group: "Attachment", detail: "The item is a pair. Wearing only one half gives trouble on its permanent powers (Ego check with trouble each use, or the power stops for 1 round). A Warp Portal works instantly when the pair is worn together. (Secret Wars)" },
   { value: "Awkward", group: "Obvious", detail: "The item is unwieldy and gives its user trouble on some checks while it's in use." },
   { value: "Flashy", group: "Obvious", detail: "Using the item is showy and draws attention — hard to stay subtle." },
   { value: "Large", group: "Obvious", detail: "The item is big and hard to conceal, store or carry discreetly." },
@@ -684,6 +690,24 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "tags", label: "Tags (as many as you like)", type: "objectList", full: true, addLabel: "+ Tag", fields: [
         { key: "name", label: "Tag", type: "select", options: HQ_TAG_OPTS },
         { key: "note", label: "Note", type: "text", placeholder: "e.g. Stark Enterprises" },
+      ] },
+      { key: "notes", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ teamRank: "3" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `Rank ${sv(d, "teamRank") || "?"}`,
+  },
+  "mmrpg-starship": {
+    title: "My Homebrew Starships", noun: "Starship",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80, placeholder: "e.g. The Wayfinder" },
+      { key: "teamRank", label: "Team rank", type: "select", options: HQ_RANK_OPTS, help: "Sets the ship's Size, Health and passenger capacity (Starship Size table)." },
+      { key: "traits", label: "Traits (3 per team rank; ship systems + HQ traits)", type: "objectList", full: true, addLabel: "+ Trait", fields: [
+        { key: "name", label: "Trait", type: "select", options: SHIP_TRAIT_OPTS },
+        { key: "n", label: "×", type: "number", placeholder: "1" },
+      ] },
+      { key: "tags", label: "Tags (FTL Drive / Spaceworthy + HQ tags)", type: "objectList", full: true, addLabel: "+ Tag", fields: [
+        { key: "name", label: "Tag", type: "select", options: SHIP_TAG_OPTS },
+        { key: "note", label: "Note", type: "text", placeholder: "e.g. Governmental" },
       ] },
       { key: "notes", label: "Notes", type: "textarea", full: true },
     ],

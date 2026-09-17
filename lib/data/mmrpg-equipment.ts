@@ -2589,6 +2589,15 @@ export const MMRPG_EQUIPMENT = [
     "powerValue": 1
   },
   {
+    "name": "Ultimate Nullifier",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Galactus",
+    "notes": "A pistol-sized weapon that can theoretically destroy the universe. When fired it eliminates whatever target the user wishes, but if the user's mind isn't powerful enough it eliminates them too. A Rank X user can fire it without dying and can make it so the target never existed at all. Galactus normally keeps it on the Taa II and can recall it at will.",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Universal Weapon",
     "tier": "Iconic",
     "type": "Weapon",

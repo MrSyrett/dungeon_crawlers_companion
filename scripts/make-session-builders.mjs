@@ -224,7 +224,7 @@ const SB_CONFIG = {
     [{ key:'health', label:'HEALTH' }, { key:'focus', label:'FOCUS' }, { key:'powers', label:'POWERS', ph:'Spider-Powers · Wall-Crawling' }],
   ],
   abilitiesLabel: 'Attacks & Traits', abilitiesPlaceholder: 'One per line — Attack: ability vs defense, dMarvel×rank+ability · Trait: …',
-  mobs: { placeholder: 'Search the Marvel roster (heroes, villains & NPCs)…', pool: () => (typeof MMRPG_CHARACTERS !== 'undefined' && Array.isArray(MMRPG_CHARACTERS)) ? MMRPG_CHARACTERS : [], toCard: m => {
+  mobs: { placeholder: 'Search the Marvel roster (heroes, villains & NPCs)…', pool: () => (typeof MMRPG_CHARACTERS !== 'undefined' && Array.isArray(MMRPG_CHARACTERS)) ? MMRPG_CHARACTERS.filter(c => String(c.rank).toUpperCase() !== 'X') : [], toCard: m => {
     const A = m.abilities || {};
     const heroic = (m.tags || []).some(t => /^heroic$/i.test(String(t)));
     const rank = parseInt(m.rank, 10) || 0;

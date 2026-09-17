@@ -25,6 +25,9 @@ const ENTITIES = [
   { key: "hq-traits",   constName: "MMRPG_HQ_TRAITS",   type: "MmrpgHqTrait",    base: "mmrpg-hq-traits" },
   { key: "hq-tags",     constName: "MMRPG_HQ_TAGS",     type: "MmrpgHqTag",      base: "mmrpg-hq-tags" },
   { key: "hq-profiles", constName: "MMRPG_HQ_PROFILES", type: "MmrpgHqProfile",  base: "mmrpg-hq-profiles" },
+  { key: "starship-traits",   constName: "MMRPG_STARSHIP_TRAITS",   type: "MmrpgStarshipTrait",   base: "mmrpg-starship-traits" },
+  { key: "starship-tags",     constName: "MMRPG_STARSHIP_TAGS",     type: "MmrpgStarshipTag",     base: "mmrpg-starship-tags" },
+  { key: "starship-profiles", constName: "MMRPG_STARSHIP_PROFILES", type: "MmrpgStarshipProfile", base: "mmrpg-starship-profiles" },
 ];
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch (e) { throw new Error(`${p}: ${e.message}`); } };

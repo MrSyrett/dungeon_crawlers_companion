@@ -4,6 +4,8 @@ import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 import { MONSTER_TYPES } from "@/lib/data/monster-types";
 import { MMRPG_HQ_TRAITS } from "@/lib/data/mmrpg-hq-traits";
 import { MMRPG_HQ_TAGS } from "@/lib/data/mmrpg-hq-tags";
+import { MMRPG_STARSHIP_TRAITS } from "@/lib/data/mmrpg-starship-traits";
+import { MMRPG_STARSHIP_TAGS } from "@/lib/data/mmrpg-starship-tags";
 import { TALENT_TARGET_KEYS } from "@/lib/effects";
 import {
   sanitizeSelections, summarizeBuild, dccStatMod, statBase, hbSlotCount,
@@ -28,7 +30,7 @@ export type HbType =
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
   | "co-ability" | "co-gear"
   | "yze-weapon" | "yze-gear"
-  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq";
+  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -42,7 +44,7 @@ const HB_TYPES = [
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
   "co-ability", "co-gear",
   "yze-weapon", "yze-gear",
-  "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq",
+  "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq", "mmrpg-starship",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1838,6 +1840,68 @@ function normalizeMmrpgHq(input: unknown): { name: string; data: Record<string, 
   };
 }
 
+// Starship Size table (team rank -> size / passengers / Health), Secret Wars p183.
+const STARSHIP_SIZE: Record<number, { size: string; passengers: number; health: number }> = {
+  1: { size: "Average", passengers: 1, health: 100 },
+  2: { size: "Big", passengers: 2, health: 200 },
+  3: { size: "Huge", passengers: 5, health: 300 },
+  4: { size: "Gigantic", passengers: 20, health: 400 },
+  5: { size: "Titanic", passengers: 80, health: 600 },
+  6: { size: "Gargantuan", passengers: 320, health: 1000 },
+};
+
+function normalizeMmrpgStarship(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew starship needs a name.");
+  const rank = Math.max(1, Math.min(6, num(o.teamRank) || 1));
+  // A starship can take HQ traits/tags plus the ship-specific ones.
+  const traitDefs = new Map([...MMRPG_HQ_TRAITS, ...MMRPG_STARSHIP_TRAITS].map((t) => [t.name, t]));
+  const tagDefs = new Map([...MMRPG_HQ_TAGS, ...MMRPG_STARSHIP_TAGS].map((t) => [t.name, t]));
+  const traitCap = (n: string) => { const d = traitDefs.get(n) as { stackable?: boolean; maxStack?: number } | undefined; return d ? (d.stackable ? (d.maxStack || 4) : 1) : null; };
+
+  const traits: { name: string; n: number }[] = [];
+  for (const r of objList(o.traits, ["name", "n"], 40, 60)) {
+    const cap = traitCap(r.name);
+    if (cap == null) continue;
+    let n = parseInt(r.n || "1", 10); if (!Number.isFinite(n) || n < 1) n = 1;
+    const cur = traits.find((t) => t.name === r.name);
+    if (cur) cur.n = Math.min(cur.n + n, cap);
+    else traits.push({ name: r.name, n: Math.min(n, cap) });
+  }
+  const tags: { name: string; note?: string }[] = [];
+  for (const r of objList(o.tags, ["name", "note"], 40, 80)) {
+    if (!tagDefs.has(r.name) || tags.some((t) => t.name === r.name)) continue;
+    tags.push({ name: r.name, ...(r.note ? { note: r.note } : {}) });
+  }
+
+  const size = STARSHIP_SIZE[rank];
+  const cozy = tags.some((t) => t.name === "Cozy");
+  const roomy = tags.some((t) => t.name === "Roomy");
+  const sizeIdx = ["Average", "Big", "Huge", "Gigantic", "Titanic", "Gargantuan"].indexOf(size.size);
+  const adjIdx = Math.max(0, Math.min(5, sizeIdx + (roomy ? 1 : 0) - (cozy ? 1 : 0)));
+  const finalSize = ["Average", "Big", "Huge", "Gigantic", "Titanic", "Gargantuan"][adjIdx];
+
+  const traitBudget = rank * 3;
+  const traitsUsed = traits.reduce((s, t) => s + t.n, 0);
+  const chosen = new Set(tags.map((t) => t.name));
+  const has = (n: string) => traits.some((t) => t.name === n) || chosen.has(n);
+  const warnings: string[] = [];
+  if (has("FTL Drive") && !has("Star Drive")) warnings.push("FTL Drive needs the Star Drive trait.");
+  if (has("Star Drive") && !chosen.has("Mobile")) warnings.push("Star Drive needs the Mobile tag.");
+  if (traitsUsed > traitBudget) warnings.push(`Over trait budget — ${traitsUsed} of ${traitBudget} (Rank ${rank} × 3).`);
+
+  return {
+    name,
+    data: {
+      name, teamRank: rank, traits, tags,
+      health: size.health, size: finalSize, passengers: size.passengers, flightSpeed: has("Star Drive") ? 36 : 24, damageReduction: "—",
+      traitBudget, traitsUsed, warnings,
+      blurb: str(o.notes).slice(0, 800), source: "Homebrew",
+    },
+  };
+}
+
 function normalizeMmrpgLabel(input: unknown, noun: string): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
@@ -1903,6 +1967,7 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "mmrpg-tag": return normalizeMmrpgLabel(data, "tag");
     case "mmrpg-iconic": return normalizeMmrpgIconic(data);
     case "mmrpg-hq": return normalizeMmrpgHq(data);
+    case "mmrpg-starship": return normalizeMmrpgStarship(data);
   }
 }
 

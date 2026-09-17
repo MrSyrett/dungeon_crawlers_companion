@@ -87,7 +87,37 @@ export interface MmrpgHqTag {
 export interface MmrpgHqProfile {
   name: string;
   genre: MmrpgGenre;
-  teamRank: number;
+  teamRank: number | string;
+  blurb?: string;
+  traits: { name: string; n?: number }[];
+  tags: { name: string; note?: string }[];
+  source?: string;
+}
+// Starships (Secret Wars) reuse the HQ trait/tag shapes, plus ship-specific ones.
+export interface MmrpgStarshipTrait {
+  name: string;
+  genre: MmrpgGenre;
+  description: string;
+  downtime: string;
+  stackable?: boolean;
+  maxStack?: number;
+  source?: string;
+}
+export interface MmrpgStarshipTag {
+  name: string;
+  genre: MmrpgGenre;
+  description: string;
+  source?: string;
+}
+export interface MmrpgStarshipProfile {
+  name: string;
+  genre: MmrpgGenre;
+  teamRank: number | string;
+  health?: number;
+  damageReduction?: string;
+  size?: string;
+  passengers?: number;
+  flightSpeed?: number;
   blurb?: string;
   traits: { name: string; n?: number }[];
   tags: { name: string; note?: string }[];
@@ -126,12 +156,20 @@ export interface MmrpgCharacter {
   name: string;
   realName?: string;
   genre: MmrpgGenre;
-  rank: number;
-  health: number;
-  focus: number;
+  /** Rank 1–6, or "X" for narrative (Rank X) cosmic beings. */
+  rank: number | string;
+  /** null for Rank X narrative characters (no stat block). */
+  health: number | null;
+  focus: number | null;
   karma: number | null;
   abilities: MmrpgAbilities;
   speed?: Record<string, number>;
+  /** Rank X only: narrative limitations. */
+  limitations?: string[];
+  /** Rank X only: notable items the being carries. */
+  items?: string[];
+  /** True for Rank X narrative characters (no ability/Health/Focus numbers). */
+  narrative?: boolean;
   occupation?: string;
   origin?: string;
   teams?: string;

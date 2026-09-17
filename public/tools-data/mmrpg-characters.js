@@ -1549,6 +1549,61 @@ const MMRPG_CHARACTERS = [
     "id": "ares-avengers-expansion"
   },
   {
+    "name": "ARISHEM",
+    "realName": "Arishem the Judge, the Killer of Planets",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Cosmic Being",
+    "teams": "Celestials",
+    "base": "Mobile",
+    "features": "",
+    "history": "Like the other Celestials, Arishem was forged in the fi res of the First Cosmos and played a major role in the creation of life throughout every cosmos therea­ er. However, while all Celestials perform the work of gods, Arishem alone was selected to judge that work.",
+    "personality": "",
+    "traits": [
+      "Connections: Cosmic Beings",
+      "Fresh Eyes",
+      "Loner",
+      "Stranger",
+      "Unusual Size: Gigantic",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Extreme Appearance",
+      "Mute"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "FTL Travel",
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Living Energy",
+          "Manifestation",
+          "Matter Manipulation",
+          "Multiversal",
+          "Universal Teleportation"
+        ]
+      }
+    ],
+    "limitations": [],
+    "items": [
+      "Celestial Armor"
+    ],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-arishem"
+  },
+  {
     "name": "ARKON",
     "realName": "Arkon",
     "rank": 4,
@@ -2678,6 +2733,62 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "beetle-spider-verse-expansion"
+  },
+  {
+    "name": "BEYONDERS",
+    "realName": "The Ivory Kings, the Lords of the White Light, the Omegas",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Cosmic Being",
+    "teams": "Celestials, Knull",
+    "base": "The Beyond",
+    "features": "",
+    "history": "Soon a er the dawn of the Second Cosmos, the Celestials created a race of all- encompassing, all-powerful creatures called the Beyonders. These Beyonders helped to manage the nascent Multiverse and to check the power of the Celestials themselves, ensuring that no one group could gain total control over all existence.",
+    "personality": "",
+    "traits": [
+      "Connections: Cosmic Beings",
+      "Fresh Eyes",
+      "Loner",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Extreme Appearance"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Disintegration Fields",
+          "FTL Travel",
+          "Imbue Life",
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Living Energy",
+          "Manifestation",
+          "Matter Manipulation",
+          "Multiversal",
+          "Reality Manipulation",
+          "Universal Teleportation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Timestuck"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-beyonders"
   },
   {
     "name": "BISHOP",
@@ -5798,6 +5909,58 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "captain-marvel",
     "genre": "core"
+  },
+  {
+    "name": "CAPTAIN UNIVERSE",
+    "realName": "The Enigma Force, the Uni-Power",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Cosmic Being",
+    "teams": "Beyonders, Knull",
+    "base": "Mobile",
+    "features": "",
+    "history": "The Beyonders created the Enigma Force as an all-encompassing God of Light to check the power of the King in Black, Knull. For countless eons, the Enigma Force and its army of warriors fought Knull's symbiotes to a stalemate.",
+    "personality": "",
+    "traits": [
+      "Connections: Cosmic Beings",
+      "Fresh Eyes",
+      "Loner",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Extreme Appearance"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Eat Energy",
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Living Energy",
+          "Manifestation",
+          "Matter Manipulation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Home Universe",
+      "Limited Omnipotence (can use any powers from the Basic, Elemental Control and Healing sets, plus any power sets that its host already uses)"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-captain-universe"
   },
   {
     "name": "CARDIAC",
@@ -8970,6 +9133,55 @@ const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "EGO THE LIVING PLANET",
+    "realName": "Egros",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Primordial Being",
+    "teams": "Elders of the Universe",
+    "base": "Mobile",
+    "features": "",
+    "history": "Many years a\u0001 er he ascended to eternal cosmic power, the enigmatic Elder of the Universe known as the Stranger returned to his solar system of origin to destroy it. He set the local sun to go nova and le\u0001 , assuming his work fi nished.",
+    "personality": "",
+    "traits": [
+      "Connections: Elders of the Universe",
+      "Fresh Eyes",
+      "Loner",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Extreme Appearance"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Imbue Life",
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind (except within his core)"
+        ]
+      }
+    ],
+    "limitations": [
+      "Limited Omnipotence (All of Ego's powers, including his narrative powers, function only on his own surface)",
+      "Planetary Sized"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-ego-the-living-planet"
+  },
+  {
     "name": "ELECTRO",
     "realName": "Maxwell “Max” Dillon",
     "rank": 3,
@@ -9427,6 +9639,57 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Quickstart",
     "id": "enchantress-quickstart"
+  },
+  {
+    "name": "ENIGMA",
+    "realName": "Nathaniel Essex, the Crown Above All Things",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Dominion",
+    "teams": "Mister Sinister, Doctor Stasis, Mother Righteous and Orbis Stellaris",
+    "base": "Outside time and space",
+    "features": "",
+    "history": "When ten or more world-sized hive minds combine, they form a Dominion, an unstoppable superintelligence that exists forever outside time and space. In the Victorian era, a scientist named Nathaniel Essex became obsessed with the idea of a Dominion and sought to deliberately bring one about.",
+    "personality": "",
+    "traits": [
+      "Eidetic Memory",
+      "Font of Information",
+      "Fresh Eyes",
+      "Loner",
+      "Weird"
+    ],
+    "tags": [
+      "A.I. (partially)",
+      "Allspeak",
+      "Extreme Appearance",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Manifestation",
+          "Multiversal",
+          "Timeless"
+        ]
+      }
+    ],
+    "limitations": [
+      "Limited Timelines"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-enigma"
   },
   {
     "name": "ESCAPADE",
@@ -10173,6 +10436,119 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "forge",
     "genre": "core"
+  },
+  {
+    "name": "FRANKLIN RICHARDS",
+    "realName": "Franklin Benjamin Richards, Powerhouse, Psi-Lord",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Mutant",
+    "teams": "Fantastic Four",
+    "base": "Fantastic Farmhouse",
+    "features": "",
+    "history": "As the fi rst child of Mister Fantastic and the Invisible Woman, Franklin Richards was never going to be a normal kid, but his parents could not have anticipated just how abnormal he would be. As an above-Omega-level mutant, Franklin numbers among the most powerful entities in all existence.",
+    "personality": "",
+    "traits": [
+      "Connections: Super Heroes",
+      "Fearless",
+      "Fresh Eyes",
+      "Inventor",
+      "Quick Learner"
+    ],
+    "tags": [
+      "Heroic",
+      "Hounded (not currently)",
+      "Mentor (4): The Fantastic Four",
+      "Obligation: School",
+      "Public Identity",
+      "X-Gene (secret)"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Imbue Life",
+          "Immortality",
+          "Matter Manipulation",
+          "Reality Manipulation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Self-Regulated"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-franklin-richards"
+  },
+  {
+    "name": "GALACTUS",
+    "realName": "Galan, Devourer of Worlds",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Cosmic Being",
+    "teams": "Silver Surfer",
+    "base": "Taa II",
+    "features": "",
+    "history": "The end of the Sixth Cosmos was coming, but the greatest adventurer- explorers of the age—the scienceers of Taa—refused to acknowledge it. Only one scienceer, Galan, had the courage to stand against the establishment and mount an expedition into the coming storm.",
+    "personality": "",
+    "traits": [
+      "Connections: Cosmic Beings",
+      "Fresh Eyes",
+      "Loner",
+      "Stranger",
+      "Unusual Size: Gigantic",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Extreme Appearance"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Create Herald",
+          "Disintegration Fields",
+          "Eat Energy",
+          "FTL Travel",
+          "Imbue Life",
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Living Energy",
+          "Manifestation",
+          "Matter Manipulation",
+          "Universal Teleportation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Cosmic Hunger"
+    ],
+    "items": [
+      "Elemental Converter",
+      "Galactus' Armor",
+      "Taa II",
+      "Ultimate Nullifier"
+    ],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-galactus"
   },
   {
     "name": "GAMBIT",
@@ -10976,6 +11352,62 @@ const MMRPG_CHARACTERS = [
     "id": "gladiator-secret-wars"
   },
   {
+    "name": "GOD EMPEROR DOOM",
+    "realName": "Victor Von Doom",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Magic: Sorcery",
+    "teams": "Barons of Battleworld, Future Foundation, Thor Corps",
+    "base": "Doomstadt, Battleworld",
+    "features": "",
+    "history": "During the last Secret Wars, Doom stole the power of the Beyonders and allied himself with the Molecule Man to salvage the last vestiges of the Seventh Cosmos for a composite planet called Battleworld. This supercharged Doom reigned over the planet with an iron fi st, his vengeful moods moderated only by his wife (the Invisible Woman), their two children (Franklin and Valeria Von Doom) and his sheriﬀ (Doctor Strange).",
+    "personality": "",
+    "traits": [
+      "Combat Expert",
+      "Font of Information",
+      "Inventor",
+      "Iron Will",
+      "Piloting",
+      "Presence"
+    ],
+    "tags": [
+      "Authority",
+      "Extreme Appearance",
+      "Lab Access",
+      "Linguist: English, German, Hungarian, Latverian, Romani",
+      "Powerful",
+      "Public Identity",
+      "Sorcerous",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Matter Manipulation",
+          "Universal Teleportation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Limited Omnipotence (cannot use Sixth Sense or Telepathy powers)"
+    ],
+    "items": [
+      "Doctor Doom's Time Platform (functions poorly on Battleworld)"
+    ],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-god-emperor-doom"
+  },
+  {
     "name": "GORR THE GOD BUTCHER",
     "realName": "Gorr",
     "rank": 6,
@@ -11052,6 +11484,55 @@ const MMRPG_CHARACTERS = [
     "equipment": [
       "All-Black the Necrosword"
     ]
+  },
+  {
+    "name": "GRANDMASTER",
+    "realName": "En Dwi Gast",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Primordial Being",
+    "teams": "Elders of the Universe",
+    "base": "Grandmaster's Cosmic Game Room",
+    "features": "",
+    "history": "Though En Dwi Gast was not the fi rst Grandmaster, he earned the title early in the life span of the universe by defeating the original in a board-game tournament. On that day, Gast dedicated the entirety of his immortal life to becoming the greatest gamer in the known cosmos.",
+    "personality": "",
+    "traits": [
+      "Connections: Elders of the Universe",
+      "Fresh Eyes",
+      "Loner",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Extreme Appearance",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Immortality",
+          "Invulnerable Form",
+          "Universal Teleportation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Limited Omnipotence (cannot access Magic power sets)"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-grandmaster"
   },
   {
     "name": "GREEN GOBLIN",
@@ -15201,6 +15682,66 @@ const MMRPG_CHARACTERS = [
     "id": "kindred-spider-verse-expansion"
   },
   {
+    "name": "KING IN BLACK",
+    "realName": "Knull",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Cosmic Being, Symbiote: Knull",
+    "teams": "Symbiote hive",
+    "base": "Mobile",
+    "features": "",
+    "history": "Born from the primordial abyss at the beginning of time, Knull is the lord of all darkness and the original King in Black. Untold eons ago, he created the symbiotes to spread the gospel of annihilation across the cosmos, to devour and consume existence until nothing but void remained.",
+    "personality": "",
+    "traits": [
+      "Anathema: Lightning/ Anti-Venom",
+      "Berserker",
+      "Big (Reach 2)",
+      "Bloodthirsty",
+      "Connections: Cosmic Beings",
+      "Fresh Eyes",
+      "Hive Mind (leader of the symbiote hive)",
+      "Loner",
+      "Presence",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Backup (symbiote hive)",
+      "Extreme Appearance",
+      "Powerful",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "FTL Travel",
+          "Imbue Life",
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Manifestation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Limited Omnipotence (cannot use powers that produce electricity, fi re or light)"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-king-in-black"
+  },
+  {
     "name": "KINGPIN",
     "realName": "Wilson Fisk",
     "rank": 3,
@@ -15422,6 +15963,57 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "klaw-avengers-expansion"
+  },
+  {
+    "name": "KORVAC",
+    "realName": "Michael Korvac",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Cosmic Being",
+    "teams": "None",
+    "base": "Earth-813",
+    "features": "",
+    "history": "Korvac comes from Earth-691, the same alternate timeline that spawned the original Guardians of the Galaxy. Unlike the Guardians, he chose to cooperate with the Badoon rather than fi ght.",
+    "personality": "",
+    "traits": [
+      "Connections: Cosmic Beings",
+      "Fresh Eyes",
+      "Loner",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage (via Galactus)",
+      "Allspeak",
+      "Extreme Appearance (in original form)",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "FTL Travel",
+          "Imbue Life",
+          "Immortality",
+          "Invulnerable Form",
+          "Invulnerable Mind",
+          "Living Energy",
+          "Manifestation",
+          "Matter Manipulation"
+        ]
+      }
+    ],
+    "limitations": [],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-korvac"
   },
   {
     "name": "KRAVEN THE HUNTER",
@@ -18862,6 +19454,55 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "mojo-x-men-expansion"
+  },
+  {
+    "name": "MOLECULE MAN",
+    "realName": "Owen Reece",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Weird Science",
+    "teams": "Beyonders, God Emperor Doom",
+    "base": "Microverse",
+    "features": "",
+    "history": "To prevent the rise of the Enigma Dominion, the Beyonders decided to end the Multiverse. They popped a small hole between their own dimension and the wider cosmos and bestowed a portion of their power on a single identical person in every universe.",
+    "personality": "",
+    "traits": [
+      "Gullible",
+      "Honest",
+      "Loner",
+      "Scientifi c Expertise",
+      "Weird"
+    ],
+    "tags": [
+      "Extreme Appearance (in true form)",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "Imbue Life",
+          "Immortality",
+          "Invulnerable Mind",
+          "Matter Manipulation",
+          "Reality Manipulation",
+          "Universal Teleportation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Self-Regulated"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-molecule-man"
   },
   {
     "name": "MOON GIRL",
@@ -32249,6 +32890,60 @@ const MMRPG_CHARACTERS = [
       "U.S.Agent’s Shield"
     ],
     "id": "u-s-agent-avengers-expansion"
+  },
+  {
+    "name": "UATU THE WATCHER",
+    "realName": "None",
+    "rank": "X",
+    "health": null,
+    "focus": null,
+    "karma": null,
+    "abilities": {},
+    "speed": {},
+    "occupation": "",
+    "origin": "Primordial Being",
+    "teams": "Council of Watchers, Fantastic Four",
+    "base": "Mobile",
+    "features": "",
+    "history": "Long ago, Uatu's people, the Watchers, were interstellar teachers, and though they had noble intentions, sharing advanced science with civilizations led by bloodthirsty warlords proved to be a bad idea. To stop the resulting horrors, Uatu's father, Ikor, constructed the greatest weapon in all existence: the Ultimate Nullifier.",
+    "personality": "",
+    "traits": [
+      "Connections: Elders of the Universe",
+      "Connections: Watchers",
+      "Font of Information",
+      "Fresh Eyes",
+      "Loner",
+      "Presence",
+      "Stranger",
+      "Unusual Size: Huge",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Allspeak",
+      "Extreme Appearance",
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Narrative",
+        "names": [
+          "FTL Travel",
+          "Immortality",
+          "Invulnerable Mind",
+          "Universal Teleportation"
+        ]
+      }
+    ],
+    "limitations": [
+      "Limited Omnipotence (cannot access the Magic or Super-Strength power sets)"
+    ],
+    "items": [],
+    "narrative": true,
+    "genre": "core",
+    "source": "Secret Wars",
+    "id": "sw-rx-uatu-the-watcher"
   },
   {
     "name": "ULTIMATUM",

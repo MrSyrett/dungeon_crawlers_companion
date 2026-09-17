@@ -25,19 +25,25 @@ export default function MmrpgCharacterCard({ c, onOpen }: { c: MmrpgCharacter; o
         </span>
       </div>
       {c.realName && c.realName !== c.name ? <p className="text-[11px] italic text-[var(--muted)]">{c.realName}</p> : null}
-      <div className="mt-2 grid grid-cols-6 gap-1 text-center">
-        {ABIL.map(([k, lbl]) => (
-          <div key={k} className="rounded border border-[var(--border)] bg-[var(--panel)] py-1">
-            <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--muted)]">{lbl}</div>
-            <div className="text-sm font-bold text-[var(--text)]">{sign(c.abilities[k])}</div>
+      {c.narrative || String(c.rank).toUpperCase() === "X" || !c.abilities || Object.keys(c.abilities).length === 0 ? (
+        <p className="mt-2 text-[11px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[#f4737a]">Narrative cosmic being</span> — no stat block; Narrator-only.{c.origin ? ` ${c.origin}.` : ""}</p>
+      ) : (
+        <>
+          <div className="mt-2 grid grid-cols-6 gap-1 text-center">
+            {ABIL.map(([k, lbl]) => (
+              <div key={k} className="rounded border border-[var(--border)] bg-[var(--panel)] py-1">
+                <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--muted)]">{lbl}</div>
+                <div className="text-sm font-bold text-[var(--text)]">{sign(c.abilities[k])}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
-        <span><span className="font-semibold text-[var(--text)]">Health</span> {c.health}</span>
-        <span><span className="font-semibold text-[var(--text)]">Focus</span> {c.focus}</span>
-        <span><span className="font-semibold text-[var(--text)]">Karma</span> {c.karma ?? "—"}</span>
-      </p>
+          <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
+            <span><span className="font-semibold text-[var(--text)]">Health</span> {c.health}</span>
+            <span><span className="font-semibold text-[var(--text)]">Focus</span> {c.focus}</span>
+            <span><span className="font-semibold text-[var(--text)]">Karma</span> {c.karma ?? "—"}</span>
+          </p>
+        </>
+      )}
       <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--mmrpg)] opacity-0 transition-opacity group-hover:opacity-100">View full profile →</p>
     </button>
   );

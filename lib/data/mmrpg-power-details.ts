@@ -125,6 +125,16 @@ export const MMRPG_POWER_DETAILS: readonly MmrpgPowerDetail[] = [
     "cost": "5 Focus"
   },
   {
+    "name": "Anti-Gravity Disc",
+    "set": "Iconic Item",
+    "effect": "Once a disc hits a target, it adheres to it and causes the target to fly upward at the owner's Flight 1 speed at the end of the owner's turn. A disc can be disabled with a Might or Logic vs. TN 16 action check.",
+    "prereq": "",
+    "action": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": ""
+  },
+  {
     "name": "Astral Form",
     "set": "Magic",
     "effect": "The character can project an avatar into the Astral Plane, leaving their physical body in a deep trance in the real world, where it is vulnerable to attack. While in the Astral Plane, they can interact with other characters in the Astral Plane, but they are intangible, invisible and generally undetectable in the real world. However, they can sense things in the real world. If the character is Rank 4 or higher, they can also take on a transparent form that can be seen in the real world. While in the Astral Plane, the character can fly, and in combat, their Flight Speed is equal to their rank times their Run Speed. Outside of combat, they can move 10 times as fast.",
@@ -141,6 +151,16 @@ export const MMRPG_POWER_DETAILS: readonly MmrpgPowerDetail[] = [
     "prereq": "",
     "action": "Standard",
     "duration": "Concentration",
+    "range": "",
+    "cost": ""
+  },
+  {
+    "name": "Attunable",
+    "set": "Iconic Item",
+    "effect": "The item can be set so that it only grants its powers to someone to whom it has been attuned. Attuning requires a full day, a proper laboratory or similar workspace, and a Logic vs. TN 20 action check. Until attuned, anyone can use the item.",
+    "prereq": "",
+    "action": "",
+    "duration": "Permanent",
     "range": "",
     "cost": ""
   },
@@ -1183,6 +1203,16 @@ export const MMRPG_POWER_DETAILS: readonly MmrpgPowerDetail[] = [
     "duration": "Instant",
     "range": "",
     "cost": "15 Focus"
+  },
+  {
+    "name": "Entangled",
+    "set": "Iconic Item",
+    "effect": "When first used, the item forms a telepathic bond with a single other person in another dimension (often the Negative Zone or Microverse). The bonded pair can see and hear through each other's senses. With a movement action or reaction the item's holder can swap places with the other person as if they were Alternate Forms — the item stays put and the other person appears in the holder's place with it. If the holder becomes demoralized, the item swaps them automatically.",
+    "prereq": "",
+    "action": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": ""
   },
   {
     "name": "Environmental Protection",
@@ -3943,6 +3973,16 @@ export const MMRPG_POWER_DETAILS: readonly MmrpgPowerDetail[] = [
     "duration": "Permanent",
     "range": "",
     "cost": ""
+  },
+  {
+    "name": "Warp Portal",
+    "set": "Iconic Item",
+    "effect": "The user creates a warp portal that allows instantaneous travel through Exo-Space to another part of the universe. It can also travel to the regular universe from another dimension, but not to another dimension from the regular universe.",
+    "prereq": "",
+    "action": "Standard",
+    "duration": "Instant",
+    "range": "",
+    "cost": "15 Focus"
   },
   {
     "name": "Weapons Blazing",

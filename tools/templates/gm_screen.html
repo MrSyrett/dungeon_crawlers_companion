@@ -7376,7 +7376,7 @@ function xsBestiary(src) {
   if(src === 'dnd') return ok(typeof DND_MONSTERS !== 'undefined' ? DND_MONSTERS : undefined);
   if(src === 'd62e') return ok(typeof D62E_CREATURES !== 'undefined' ? D62E_CREATURES : undefined);
   if(src === 'icrpg') return ok(typeof ICRPG_MONSTERS !== 'undefined' ? ICRPG_MONSTERS : undefined);
-  if(src === 'mmrpg') return ok(typeof MMRPG_CHARACTERS !== 'undefined' ? MMRPG_CHARACTERS : undefined);
+  if(src === 'mmrpg') return ok(typeof MMRPG_CHARACTERS !== 'undefined' ? MMRPG_CHARACTERS.filter(function(c){ return String(c.rank).toUpperCase() !== 'X'; }) : undefined);
   return [];
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D

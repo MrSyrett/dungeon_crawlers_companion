@@ -174,6 +174,21 @@ export const MMRPG_POWERS = [
     "description": "By manipulating visual light, the character creates a moving hologram."
   },
   {
+    "name": "Anti-Gravity Disc",
+    "genre": "core",
+    "powerSet": "Iconic Item",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "Once a disc hits a target, it adheres to it and causes the target to fly upward at the owner's Flight 1 speed at the end of the owner's turn. A disc can be disabled with a Might or Logic vs. TN 16 action check.",
+    "fantastic": "",
+    "description": "",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Astral Form",
     "genre": "core",
     "powerSet": "Magic",
@@ -200,6 +215,21 @@ export const MMRPG_POWERS = [
     "effect": "The character doubles their Melee ability bonus to damage.",
     "fantastic": "",
     "description": "The character enters an aggressive attack stance, ready to strike in any direction."
+  },
+  {
+    "name": "Attunable",
+    "genre": "core",
+    "powerSet": "Iconic Item",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The item can be set so that it only grants its powers to someone to whom it has been attuned. Attuning requires a full day, a proper laboratory or similar workspace, and a Logic vs. TN 20 action check. Until attuned, anyone can use the item.",
+    "fantastic": "",
+    "description": "",
+    "source": "Secret Wars"
   },
   {
     "name": "Banging Heads",
@@ -1674,6 +1704,21 @@ export const MMRPG_POWERS = [
     "effect": "The character can take any Health damage done to them (after applying any damage reduction), ignore it and add that number to their Focus instead. In this way, they can increase their Focus up to double their regular maximum Focus. Once the combat is over, any extra Focus over the character’s regular maximum Focus score fades away. This power cannot be used again until any Focus the character gained in this way is spent. //7/",
     "fantastic": "",
     "description": "The character turns damage into power."
+  },
+  {
+    "name": "Entangled",
+    "genre": "core",
+    "powerSet": "Iconic Item",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "When first used, the item forms a telepathic bond with a single other person in another dimension (often the Negative Zone or Microverse). The bonded pair can see and hear through each other's senses. With a movement action or reaction the item's holder can swap places with the other person as if they were Alternate Forms — the item stays put and the other person appears in the holder's place with it. If the holder becomes demoralized, the item swaps them automatically.",
+    "fantastic": "",
+    "description": "",
+    "source": "Secret Wars"
   },
   {
     "name": "Environmental Protection",
@@ -5605,6 +5650,21 @@ export const MMRPG_POWERS = [
     "effect": "The character can climb at a speed equal to their regular speed. Under normal conditions, they never lose their grip, no matter the angle of the surface.",
     "fantastic": "",
     "description": "The character can climb like a spider."
+  },
+  {
+    "name": "Warp Portal",
+    "genre": "core",
+    "powerSet": "Iconic Item",
+    "prerequisites": "None",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "15 Focus",
+    "effect": "The user creates a warp portal that allows instantaneous travel through Exo-Space to another part of the universe. It can also travel to the regular universe from another dimension, but not to another dimension from the regular universe.",
+    "fantastic": "",
+    "description": "",
+    "source": "Secret Wars"
   },
   {
     "name": "Weapons Blazing",

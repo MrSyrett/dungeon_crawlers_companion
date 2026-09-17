@@ -17,7 +17,9 @@ const chipOn = "border-[var(--mmrpg)] bg-[var(--panel-2)] text-[#f4737a]";
 const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 
 const ALL = MMRPG_CHARACTERS as MmrpgCharacter[];
-const RANKS = Array.from(new Set(ALL.map((c) => c.rank))).sort((a, b) => a - b);
+// Ranks 1–6 ascending, with "X" (narrative cosmic beings) sorted last.
+const rankOrder = (r: number | string) => (String(r).toUpperCase() === "X" ? 99 : Number(r));
+const RANKS = Array.from(new Set(ALL.map((c) => c.rank))).sort((a, b) => rankOrder(a) - rankOrder(b));
 const SOURCES = Array.from(new Set(ALL.map((c) => c.source ?? "Core"))).sort((a, b) =>
   a === "Core" ? -1 : b === "Core" ? 1 : a.localeCompare(b),
 );
