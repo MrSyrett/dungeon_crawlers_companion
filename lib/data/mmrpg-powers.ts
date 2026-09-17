@@ -70,9 +70,9 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "The character has an additional prehensile appendage (like a tail) or a symmetrical pair of them (like arms) that can be used to li objects, use tools or otherwise take actions that normally require the use of a hand. This grants them an edge in Melee and Agility checks. A character can have as many additional limbs as they like—within reason—but they get no additional advantages for them.",
+    "effect": "The character has an additional prehensile appendage (like a tail) or a symmetrical pair of them (like arms) that can be used to liftobjects, use tools or otherwise take actions that normally require the use of a hand. This grants them an edge in Melee and Agility checks. A character can have as many additional limbs as they like—within reason—but they get no additional advantages for them.",
     "fantastic": "",
-    "description": "The character has extra limbs that can grab objects and attack"
+    "description": "The character has extra limbs that can grab objects and attack fo"
   },
   {
     "name": "Advance",
@@ -120,13 +120,13 @@ export const MMRPG_POWERS = [
     "name": "Animal Bond",
     "genre": "core",
     "powerSet": "Telepathy",
-    "prerequisites": "None foes. Action: Standard",
+    "prerequisites": "None es. Action: Standard",
     "action": "",
     "trigger": "",
     "duration": "Concentration",
     "range": "",
     "cost": "",
-    "effect": "The character can communicate telepathically with one animal of their choice, and they must have befriended the animal before. They cannot switch to another animal unless the animal dies, but they can select this power multiple times if desired. The communication can be verbal, visual or even more complex, such as imparting location information. There is no limit to the distance of the communication, as long as the character and the animal are in the same dimension. Animals with a telepathic bond are generally willing to communicate, even if they aren’t friendly. Bonded animals oen do whatever the character asks, even if it might put them in danger.",
+    "effect": "The character can communicate telepathically with one animal of their choice, and they must have befriended the animal before. They cannot switch to another animal unless the animal dies, but they can select this power multiple times if desired. The communication can be verbal, visual or even more complex, such as imparting location information. There is no limit to the distance of the communication, as long as the character and the animal are in the same dimension. Animals with a telepathic bond are generally willing to communicate, even if they aren’t friendly. Bonded animals often do whatever the character asks, even if it might put them in danger.",
     "fantastic": "",
     "description": "The character can communicate with an animal friend."
   },
@@ -140,7 +140,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "",
-    "effect": "The character can communicate telepathically with one taxonomic order of animals, such as birds, mammals, fish, amphibians and so on. They can call out to them as a group up to 500 spaces per rank away, and they can communicate specifically with ones they have met or at least seen. They cannot switch to another taxonomic order, but they can select this power multiple times if desired. The communication with the animals can be verbal, visual or even more complex, such as imparting location information. There is no limit to the distance of the communication, as long as the character and the animals are in the same dimension. Friendly animals oen do whatever the character asks, as long as it doesn’t put them in danger—and they may be willing to risk even that for one they consider a friend. Hostile animals simply ignore all such requests—which make them a poor choice for communication.",
+    "effect": "The character can communicate telepathically with one taxonomic order of animals, such as birds, mammals, fish, amphibians and so on. They can call out to them as a group up to 500 spaces per rank away, and they can communicate specifically with ones they have met or at least seen. They cannot switch to another taxonomic order, but they can select this power multiple times if desired. The communication with the animals can be verbal, visual or even more complex, such as imparting location information. There is no limit to the distance of the communication, as long as the character and the animals are in the same dimension. Friendly animals often do whatever the character asks, as long as it doesn’t put them in danger—and they may be willing to risk even that for one they consider a friend. Hostile animals simply ignore all such requests—which make them a poor choice for communication.",
     "fantastic": "",
     "description": "The character can communicate with a type of animal."
   },
@@ -159,21 +159,21 @@ export const MMRPG_POWERS = [
     "description": "By manipulating visual light, the character creates a moving hologram."
   },
   {
-    "name": "Ar t by Alan Davis",
+    "name": "Astral Form",
     "genre": "core",
-    "powerSet": "Plasticity",
-    "prerequisites": "Flexible Bones 1, Extended Reach 1",
-    "action": "Trigger charact Duratio",
+    "powerSet": "Magic",
+    "prerequisites": "Rank 2",
+    "action": "Standard",
     "trigger": "",
-    "duration": "Permanent",
+    "duration": "Concentration",
     "range": "",
-    "cost": "1",
-    "effect": "The character can move their head away from their body, up to their reach, to establish a line of sight to a target.",
+    "cost": "5 Focus",
+    "effect": "The character can project an avatar into the Astral Plane, leaving their physical body in a deep trance in the real world, where it is vulnerable to attack. While in the Astral Plane, they can interact with other characters in the Astral Plane, but they are intangible, invisible and generally undetectable in the real world. However, they can sense things in the real world. If the character is Rank 4 or higher, they can also take on a transparent form that can be seen in the real world. While in the Astral Plane, the character can fly, and in combat, their Flight Speed is equal to their rank times their Run Speed. Outside of combat, they can move 10 times as fast.",
     "fantastic": "",
-    "description": "Reverse The cha , Mark Farmer & Power S Prerequ"
+    "description": "The character can enter the Astral Plane."
   },
   {
-    "name": "Astral Form",
+    "name": "Attack Stance",
     "genre": "core",
     "powerSet": "Martial Arts",
     "prerequisites": "None",
@@ -181,13 +181,27 @@ export const MMRPG_POWERS = [
     "trigger": "",
     "duration": "Concentration",
     "range": "",
-    "cost": "5 Focus",
+    "cost": "",
     "effect": "The character doubles their Melee ability bonus to damage.",
     "fantastic": "",
-    "description": "The character can enter the Astral Plane."
+    "description": "The character enters an aggressive attack stance, ready to strike in any direction."
   },
   {
     "name": "Banging Heads",
+    "genre": "core",
+    "powerSet": "Martial Arts, Super-Strength",
+    "prerequisites": "None",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "",
+    "effect": "The character makes one Melee check against the Melee defense scores of two enemies within reach. If the attack fails against either foe, it fails entirely. If the attack is a success against both foes, each enemy takes full damage. On a Fantastic success, each enemy is also knocked prone. //7/",
+    "fantastic": "",
+    "description": "The character takes two nearby enemies and slams their heads into each other."
+  },
+  {
+    "name": "Battle Plan",
     "genre": "core",
     "powerSet": "Tactics",
     "prerequisites": "Inspiration, Rank 2",
@@ -196,12 +210,26 @@ export const MMRPG_POWERS = [
     "duration": "1 round",
     "range": "",
     "cost": "10 Focus",
-    "effect": "The character inspires one or more all choice in earshot, up to the character’s Vigil allies gain an edge on all action checks until the character’s next turn.",
+    "effect": "The character inspires one or more allies of their choice in earshot, up to the character’s Vigilance. Inspired allies gain an edge on all action checks until the start of the character’s next turn.",
     "fantastic": "",
-    "description": "The character takes two nearby enemies and slams their heads into each other."
+    "description": "The character always has a plan."
   },
   {
     "name": "Blazing-Fast Fists",
+    "genre": "core",
+    "powerSet": "Super-Speed",
+    "prerequisites": "Rank 2",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character has an edge on all Melee attacks.",
+    "fantastic": "",
+    "description": "The character can attack superfast."
+  },
+  {
+    "name": "Blink",
     "genre": "core",
     "powerSet": "Teleportation",
     "prerequisites": "None",
@@ -210,9 +238,9 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "",
-    "effect": "The character teleports into a clear s see or have been to, up to their rank in space If someone was about to attack them and they are now out of reach or line of sight, the att automatically fails. If they are still within reach or line of sight, the attack has trouble instead.",
+    "effect": "The character teleports into a clear space they can see or have been to, up to their rank in spaces away. If someone was about to attack them and they are now out of reach or line of sight, the attack automatically fails. If they are still within reach or line of sight, the attack has trouble instead.",
     "fantastic": "",
-    "description": "The character can attack superfast."
+    "description": "The character teleports a short distance away."
   },
   {
     "name": "Blink Barrage",
@@ -226,10 +254,24 @@ export const MMRPG_POWERS = [
     "cost": "5 Focus",
     "effect": "The character teleports several times in quick succession and winds up in a clear space they can see or have been to, up to their rank in spaces away. Any attacks have trouble against them for one round.",
     "fantastic": "",
-    "description": "The character teleports rapidly around an oppo"
+    "description": "The character teleports rapidly around an opponent."
   },
   {
     "name": "Blink Defense",
+    "genre": "core",
+    "powerSet": "Teleportation",
+    "prerequisites": "Blink, Rank 3",
+    "action": "Reaction",
+    "trigger": "The character or an ally within reach is the subject of a ranged attack.",
+    "duration": "Instant",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character pops away just as the attack reaches them and then pops back into the same space, leaving the projectile behind. The character makes an Ego check with an edge against the attacker’s Agility check result. On a success, the projectile from the attack is teleported away, someplace safe. On a Fantastic success, the attack is turned against the attacker, using the Ego check the character just made as the attack check.",
+    "fantastic": "",
+    "description": "The character teleports a short distance away."
+  },
+  {
+    "name": "Blur",
     "genre": "core",
     "powerSet": "Super-Speed",
     "prerequisites": "Speed Run 2, Rank 2",
@@ -238,9 +280,9 @@ export const MMRPG_POWERS = [
     "duration": "1 round",
     "range": "",
     "cost": "5 Focus",
-    "effect": "Any attacks against the character have trouble. attacks.",
+    "effect": "Any attacks against the character have trouble.",
     "fantastic": "",
-    "description": "The character teleports a short distance away."
+    "description": "The character moves like a blur!"
   },
   {
     "name": "Body Sheet",
@@ -248,11 +290,11 @@ export const MMRPG_POWERS = [
     "powerSet": "Plasticity",
     "prerequisites": "Flexible Bones 2, Extended Reach 2, Rank 4",
     "action": "Standard or reaction",
-    "trigger": "The character falls or is the target of an attack. pace they can s away. ack nent. .",
-    "duration": "",
+    "trigger": "The character falls or is the target of an attack. le Rosenberg",
+    "duration": "Concentration",
     "range": "",
-    "cost": "",
-    "effect": "",
+    "cost": "15 Focus",
+    "effect": "The character gains Health Damage Reduction 3, but they cannot make attacks. They gain a Glide Speed equal to double their Run Speed.",
     "fantastic": "",
     "description": "The character can flatten themselves like a sheet."
   },
@@ -282,7 +324,7 @@ export const MMRPG_POWERS = [
     "cost": "5 or more Focus",
     "effect": "The character makes an Ego check with an edge against the Agility defense of a target in their line of sight. For this attack, add +1 to the character’s Ego damage bonus for every 2 points of Focus they spend. On a success, an affected target takes that total damage. On a Fantastic success, an affected target takes double that total damage and is stunned for one round.",
     "fantastic": "",
-    "description": "The character fires enchanted bolts of electricity from their"
+    "description": "The character fires enchanted bolts of electricity from their finger"
   },
   {
     "name": "Boost Powers",
@@ -338,7 +380,7 @@ export const MMRPG_POWERS = [
     "cost": "5 or more Focus",
     "effect": "For every point of Focus spent, the character can ignore 1 point of Health damage dealt by the attack.",
     "fantastic": "",
-    "description": "fingers. The character mentally toughens themselves for a fight."
+    "description": "s. The character mentally toughens themselves for a fight."
   },
   {
     "name": "Brain Drain",
@@ -364,23 +406,93 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "The character can use their Melee defense score against Agility attacks too.",
+    "effect": "The character can use their Melee defense score against Agility attacks too. //7/",
     "fantastic": "",
     "description": "The character has the moves and is hard to hit."
+  },
+  {
+    "name": "Brilliance 1",
+    "genre": "core",
+    "powerSet": "None",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character adds +1 to their Logic damage multiplier, and they gain a +1 bonus to Logic checks other than attacks.",
+    "fantastic": "",
+    "description": "The character puts their brain to work."
+  },
+  {
+    "name": "Brilliance 2",
+    "genre": "core",
+    "powerSet": "None",
+    "prerequisites": "Brilliance 1, Rank 2",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character adds +2 to their Logic damage multiplier, and they gain a +2 bonus to Logic checks other than attacks.",
+    "fantastic": "",
+    "description": "Everything makes more sense to the character."
   },
   {
     "name": "Brilliance 3",
     "genre": "core",
     "powerSet": "None",
-    "prerequisites": "Brilliance 2, Rank 3 Permanent he character adds +3 to their age multiplier, and they bonus to Logic checks other cks. e 4 cter’s intelligence is unparalleled.",
+    "prerequisites": "Brilliance 2, Rank 3",
     "action": "",
     "trigger": "",
-    "duration": "",
+    "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "",
+    "effect": "The character adds +3 to their Logic damage multiplier, and they gain a +3 bonus to Logic checks other than attacks.",
     "fantastic": "",
     "description": "Little can stop the character’s mind."
+  },
+  {
+    "name": "Brilliance 4",
+    "genre": "core",
+    "powerSet": "None",
+    "prerequisites": "Brilliance 3, Rank 4",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character adds +4 to their Logic damage multiplier, and they gain a +4 bonus to Logic checks other than attacks.",
+    "fantastic": "",
+    "description": "The character’s intelligence is unparalleled."
+  },
+  {
+    "name": "Bump Power",
+    "genre": "core",
+    "powerSet": "Power Control",
+    "prerequisites": "Rank 2",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "5 or more Focus",
+    "effect": "The character picks one power from another character within 5 spaces and boosts it. If the power has ranges or effective areas or durations, these are doubled. If the power affects a damage multiplier, add 1 to the effect. Any effects that normally happen with a Fantastic success automatically happen on any success, not just a Fantastic one. If the power has a cost, the character must pay it as well, with a minimum of 5 Focus.",
+    "fantastic": "",
+    "description": "The character bumps up another character's power."
+  },
+  {
+    "name": "Catch Bullets",
+    "genre": "core",
+    "powerSet": "Super-Speed",
+    "prerequisites": "Speed Run 2, Rank 3",
+    "action": "Reaction",
+    "trigger": "A ranged attack using physical projectiles (arrows, bullets and so on) is made against the character— or a character within their character’s reach.",
+    "duration": "Instant",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character makes an Agility check, using the attacker’s attack result as the target number. If the character’s check succeeds, the attack is nullified. On a Fantastic success, the character gets their reaction back.",
+    "fantastic": "",
+    "description": "The character is fast enough to catch bullets—safely!"
   },
   {
     "name": "Chain Strikes",
@@ -392,7 +504,7 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "5 Focus",
-    "effect": "The character makes a close attack with an edge. I the attack is a success, the enemy takes regular damage. On a Fantastic success, the character can also make an additional Chain Strike.",
+    "effect": "The character makes a close attack with an edge. If the attack is a success, the enemy takes regular damage. On a Fantastic success, the character can also make an additional Chain Strike.",
     "fantastic": "",
     "description": "The character unleashes a hail of strikes."
   },
@@ -441,6 +553,20 @@ export const MMRPG_POWERS = [
   {
     "name": "Clobber",
     "genre": "core",
+    "powerSet": "Super-Strength",
+    "prerequisites": "None",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "",
+    "effect": "The character makes a close attack against an enemy. If the attack is a success, the enemy takes regular damage. On a Fantastic success, the enemy takes double damage and is knocked prone.",
+    "fantastic": "",
+    "description": "The character pummels their foe with enough force to knock them flat."
+  },
+  {
+    "name": "Clone Moves",
+    "genre": "core",
     "powerSet": "Power Control",
     "prerequisites": "Rank 2",
     "action": "Standard",
@@ -450,7 +576,7 @@ export const MMRPG_POWERS = [
     "cost": "5 or more Focus",
     "effect": "The character picks another character within 10 spaces and in their line of sight and duplicates all their powers that could be selected with the Special Training origin. They can now use those powers as if they were always theirs. If the copied powers have costs, the character must pay the highest of them, or a minimum of 5 Focus. When the character uses a copied power, they must pay any cost normally as well.",
     "fantastic": "",
-    "description": "The character pummels their foe with enough force to knock them flat."
+    "description": "The character duplicates another character’s combat moves."
   },
   {
     "name": "Clone Powers",
@@ -471,7 +597,7 @@ export const MMRPG_POWERS = [
     "genre": "core",
     "powerSet": "Plasticity",
     "prerequisites": "Extended Reach 1, Reverse Punch, Rank 3",
-    "action": "Reaction 7/ POWERS",
+    "action": "Reaction //7/",
     "trigger": "The character grabs an enemy.",
     "duration": "Concentration",
     "range": "",
@@ -504,7 +630,7 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "5 Focus",
-    "effect": "Once per battle, when the character is attacking targets of equal or higher rank, the character automaticall rolls a 1 on their Marvel die, and that die cannot be affec by trouble. If the character is attacking multiple targets, the targets must be of equal or higher rank.",
+    "effect": "Once per battle, when the character is attacking targets of equal or higher rank, the character automatically rolls a 1 on their Marvel die, and that die cannot be affected by trouble. If the character is attacking multiple targets, all the targets must be of equal or higher rank.",
     "fantastic": "",
     "description": "The character is a tricky one!"
   },
@@ -568,10 +694,10 @@ export const MMRPG_POWERS = [
     "name": "Control Weather 3",
     "genre": "core",
     "powerSet": "Weather Control",
-    "prerequisites": "Control Weather 2, Rank 4 y",
-    "action": "Standard ted",
+    "prerequisites": "Control Weather 2, Rank 4",
+    "action": "Standard",
     "trigger": "",
-    "duration": "Concentration all",
+    "duration": "Concentration",
     "range": "",
     "cost": "15 Focus",
     "effect": "It starts to storm in an area up to 5 miles across times the character’s rank, centered on the character. All ranges and all speeds are cut in half. If the character also has the Elemental Blast (Electricity) power, they can use it as a reaction when attacked while this power is active.",
@@ -646,7 +772,7 @@ export const MMRPG_POWERS = [
     "cost": "5 Focus",
     "effect": "The character deals half the attacker’s regular damage to the attacker.",
     "fantastic": "",
-    "description": "The character counters an enemy’s strike with one of their own"
+    "description": "The character counters an enemy’s strike with one of their own."
   },
   {
     "name": "Covering Fire",
@@ -702,7 +828,7 @@ export const MMRPG_POWERS = [
     "cost": "Varies",
     "effect": "The character picks one power from another character within 20 spaces and makes an Ego attack against them. On a success, they tamp the power down. If the power has ranges or effective areas or durations, these are halved. If the power affects a damage multiplier, subtract 1 from the effect. The power can no longer enjoy Fantastic successes. If the power has a Focus cost, the character must also pay that cost to dampen it.",
     "fantastic": "",
-    "description": "The character tamps down another character’s power. ."
+    "description": "The character tamps down another character’s power."
   },
   {
     "name": "Dance of Death",
@@ -744,7 +870,7 @@ export const MMRPG_POWERS = [
     "cost": "5 Focus io F",
     "effect": "The character makes an Ego check against an enemy in their line of sight and compares that against the target’s Vigilance defense. If the attack is a success, the enemy is blinded for 1 turn. On a Fantastic success, it also inflicts regular damage. Alternatively, the character can blind the victim with darkness.",
     "fantastic": "",
-    "description": "The character blasts a blinding light into the face of their"
+    "description": "The character blasts a blinding light into the face of their foe"
   },
   {
     "name": "Deafen",
@@ -772,7 +898,7 @@ export const MMRPG_POWERS = [
     "cost": "",
     "effect": "Any close attacks made against the character have trouble until they are successfully attacked in this combat.",
     "fantastic": "",
-    "description": "The character enters a fluid defensive stance, hands poised to foe. parry and counterattack."
+    "description": "The character enters a fluid defensive stance, hands poised to . parry and counterattack."
   },
   {
     "name": "Dimensional Portal",
@@ -909,7 +1035,7 @@ export const MMRPG_POWERS = [
     "trigger": "",
     "duration": "Instant",
     "range": "",
-    "cost": "15 Focus 7/ POWERS 7/ POWERS Ar t by Humbert o Ramos, Hecto r Olazaba & Edga r Delgado",
+    "cost": "15 Focus //7/ //7/ Ar t by Humbert o Ramos, Hecto r Olazaba & Edga r Delgado",
     "effect": "The character makes an Ego check against the Ego defense of a target using a magic power that requires concentration. On a success, the target’s concentration on that power is broken. On a Fantastic success, the target’s concentration is broken entirely.",
     "fantastic": "",
     "description": "The character puts an end to a foe’s magic."
@@ -945,6 +1071,20 @@ export const MMRPG_POWERS = [
   {
     "name": "Disrupt Person",
     "genre": "core",
+    "powerSet": "Phasing",
+    "prerequisites": "Phase Self, Rank 3",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character becomes the slightest bit solid while phasing themselves or a phased weapon through someone. They make a close attack. On a success, the attack does normal damage, ignoring any Health Damage Reduction. On a Fantastic success, the attack does double damage instead, ignoring any Health Damage Reduction, and the target is stunned for one round.",
+    "fantastic": "",
+    "description": "The character can hurt someone with their phasing powers."
+  },
+  {
+    "name": "Do This All Day",
+    "genre": "core",
     "powerSet": "Martial Arts, Shield Bearer",
     "prerequisites": "Rank 2",
     "action": "Standard",
@@ -954,7 +1094,7 @@ export const MMRPG_POWERS = [
     "cost": "5 or more Focus",
     "effect": "The character heals 2 points of Health for every point of Focus they spend.",
     "fantastic": "",
-    "description": "The character can hurt someone with their phasing powers."
+    "description": "The character draws on their inner strength to heal themselves."
   },
   {
     "name": "Domination",
@@ -966,7 +1106,7 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "20 Focus",
-    "effect": "The character dominates a target with whom they’ve established a Telepathic Link and who has no Focus le. The character makes a Logic check with trouble against the target’s Logic defense. On a success, the target is completely dominated and will follow the character’s orders. On a Fantastic success, the character gains an edge the next time they use this power against this same target. The result of the character’s check is the target number for any attempts by the target to end the domination. If any order involves harming someone, the target gets to make a Logic check to end the domination. If the target has the Heroic tag, they get an edge on the check. If the order would cause the target to harm themselves, the target gets an edge on the check. If they have the Heroic tag, they get a double edge.",
+    "effect": "The character dominates a target with whom they’ve established a Telepathic Link and who has no Focus left. The character makes a Logic check with trouble against the target’s Logic defense. On a success, the target is completely dominated and will follow the character’s orders. On a Fantastic success, the character gains an edge the next time they use this power against this same target. The result of the character’s check is the target number for any attempts by the target to end the domination. If any order involves harming someone, the target gets to make a Logic check to end the domination. If the target has the Heroic tag, they get an edge on the check. If the order would cause the target to harm themselves, the target gets an edge on the check. If they have the Heroic tag, they get a double edge.",
     "fantastic": "",
     "description": "The character forces someone to follow their orders—permanently."
   },
@@ -1064,7 +1204,7 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "The character’s body is made entirely of their element, which gives them a steady supply of their element to use and makes them essentially unkillable. When they lose all their Health, their form loses its cohesion and falls apart. When they have at least 1 Health—which they can gain back over time, normally— they can re-form. If the character wishes to use their elemental body in unusual ways, they should pick Plasticity powers. If they wish to be able to be fully human at times, they should take the Shape-Shi power.",
+    "effect": "The character’s body is made entirely of their element, which gives them a steady supply of their element to use and makes them essentially unkillable. When they lose all their Health, their form loses its cohesion and falls apart. When they have at least 1 Health—which they can gain back over time, normally— they can re-form. If the character wishes to use their elemental body in unusual ways, they should pick Plasticity powers. If they wish to be able to be fully human at times, they should take the Shape-Shiftpower.",
     "fantastic": "",
     "description": "The character’s body is made of their element."
   },
@@ -1240,18 +1380,18 @@ export const MMRPG_POWERS = [
     "name": "Energy Absorption",
     "genre": "core",
     "powerSet": "None",
-    "prerequisites": "None",
+    "prerequisites": "Rank 4",
     "action": "Reaction",
     "trigger": "The character takes Health damage.",
-    "duration": "Permanent",
+    "duration": "Instant",
     "range": "",
     "cost": "15 Focus",
-    "effect": "The character is not harmed by intense cold or heat, the pressure of the deep seas or the intense radiat and vacuum of space. The player can choose any or all of these protections, as best fits with the character concept.",
+    "effect": "The character can take any Health damage done to them (after applying any damage reduction), ignore it and add that number to their Focus instead. In this way, they can increase their Focus up to double their regular maximum Focus. Once the combat is over, any extra Focus over the character’s regular maximum Focus score fades away. This power cannot be used again until any Focus the character gained in this way is spent. //7/",
     "fantastic": "",
     "description": "The character turns damage into power."
   },
   {
-    "name": "ESP",
+    "name": "Environmental Protection",
     "genre": "core",
     "powerSet": "Telepathy",
     "prerequisites": "None",
@@ -1260,9 +1400,9 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "",
-    "effect": "The character can reach out with their mind to sense the presence of others within 100 spaces per rank. This tells them the person’s location and general status. can also identify if they have super-powers or not. If a target or targets wish to remain undetected, the character must make a Logic check and compare it against each target’s Vigilance defense. If they succeed, they sense the target. On a Fantastic success, they can also identify the source of any powers the target has.",
+    "effect": "The character can reach out with their mind to sense the presence of others within 100 spaces per rank. This tells them the person’s location and general status. It can also identify if they have super-powers or not. If a target or targets wish to remain undetected, the character must make a Logic check and compare it against each target’s Vigilance defense. If they succeed, they sense the target. On a Fantastic success, they can also identify the source of any powers the target has.",
     "fantastic": "",
-    "description": "The character can sense the presence of others."
+    "description": "Environmental effects don’t bother the character."
   },
   {
     "name": "Evasion",
@@ -1295,16 +1435,30 @@ export const MMRPG_POWERS = [
   {
     "name": "Exploit",
     "genre": "core",
+    "powerSet": "Melee Weapons",
+    "prerequisites": "Vicious Attack, Rank 2",
+    "action": "Reaction",
+    "trigger": "A Fantastic success on an attack using the character’s weapon that deals at least 1 point of damage",
+    "duration": "Instant",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "The character makes a Melee attack against the target’s Resilience defense score. If the attack is a success, the damage it does ignores Health Damage Reduction. On a Fantastic success, the target suffers double damage and the weapon’s special effect.",
+    "fantastic": "",
+    "description": "The character finds a weak spot and exploits it."
+  },
+  {
+    "name": "Extend Invisibility",
+    "genre": "core",
     "powerSet": "Illusion",
     "prerequisites": "Invisibility",
     "action": "Standard",
-    "trigger": "A Fantastic success on an attack using the ion character’s weapon that deals at least 1 point of damage",
+    "trigger": "",
     "duration": "Concentration",
     "range": "",
     "cost": "10 Focus",
     "effect": "The character makes something—a single person or object—within reach invisible. This can be one size bigger than them for every rank they have.",
     "fantastic": "",
-    "description": "The character finds a weak spot and exploits it."
+    "description": "The character makes something else invisible."
   },
   {
     "name": "Extended Reach 1",
@@ -1486,7 +1640,7 @@ export const MMRPG_POWERS = [
     "cost": "10 Focus",
     "effect": "The character makes a close attack against two enemies within reach. If an attack is a success, the enemy takes regular damage. If an attack is a Fantastic success, the enemy takes double damage and is knocked prone.",
     "fantastic": "",
-    "description": "The character leaps into the air and snap kicks two enemies"
+    "description": "The character leaps into the air and snap kicks two enemies at once"
   },
   {
     "name": "Focus Fire",
@@ -1526,7 +1680,7 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "10 or more Focus",
-    "effect": "The character makes a close attack. Add +1 to the character’s Melee damage bonus for every 2 points of Focus they spend. On a success, an affected target takes that total damage. On a Fantastic success, an affected target takes double that total damage and is stunned for one round. at once.",
+    "effect": "The character makes a close attack. Add +1 to the character’s Melee damage bonus for every 2 points of Focus they spend. On a success, an affected target takes that total damage. On a Fantastic success, an affected target takes double that total damage and is stunned for one round. .",
     "fantastic": "",
     "description": "The character finds the right spot and strikes."
   },
@@ -1570,7 +1724,7 @@ export const MMRPG_POWERS = [
     "cost": "10 Focus",
     "effect": "The character uses a mirage to alter their appearance—and the appearance of up to one other person per rank, within 10 spaces—in the minds of people within 20 spaces per rank. Cameras (for instance) can still record them, but when people look in the characters’ direction, they see other people. The target number for anyone trying to see through the mirage is the character’s Logic defense. If the affected characters are impersonating people known to the other person, that person has an edge.",
     "fantastic": "",
-    "description": "The character mentally makes the group they’re with appear t be like other people."
+    "description": "The character mentally makes the group they’re with appear to be like other people."
   },
   {
     "name": "Grand Illusion",
@@ -1617,6 +1771,20 @@ export const MMRPG_POWERS = [
   {
     "name": "Ground-Shaking Stomp",
     "genre": "core",
+    "powerSet": "Super-Strength",
+    "prerequisites": "Smash, Rank 3",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character makes a Melee check and compares that against the Agility defense of every target within the character’s reach plus their rank in spaces. Any targets the attack succeeds against take half regular damage. On a Fantastic success, the targets take full damage and are knocked prone.",
+    "fantastic": "",
+    "description": "The character smashes the ground so hard the earth trembles."
+  },
+  {
+    "name": "Group Flight",
+    "genre": "core",
     "powerSet": "None",
     "prerequisites": "Flight 1, Rank 2",
     "action": "Standard",
@@ -1626,7 +1794,7 @@ export const MMRPG_POWERS = [
     "cost": "5 Focus",
     "effect": "For every point of Ego the character has, they can hoist one ally into the air with them. The Flight Speed of the group is half the character’s, and all affected allies must remain within 5 spaces times the character’s rank. The character controls each ally’s speed and position during the character’s turn, but they can release any or all allies at any time.",
     "fantastic": "",
-    "description": "The character smashes the ground so hard the earth trembles."
+    "description": "The character can carry others with them into the sky."
   },
   {
     "name": "Group Invisibility",
@@ -1654,7 +1822,7 @@ export const MMRPG_POWERS = [
     "cost": "5 Focus",
     "effect": "The character can move up to one person per rank through the air in any direction at the character’s Run Speed. The levitated target(s) must remain within 5 spaces times the character’s rank. If any target does not wish to be moved like this, they must be telekinetically grabbed first.",
     "fantastic": "",
-    "description": "The character can li© others into the air too."
+    "description": "The character can liftothers into the air too."
   },
   {
     "name": "Grow 1",
@@ -1811,6 +1979,20 @@ export const MMRPG_POWERS = [
     "description": "The character hurls a hex bolt at their foe."
   },
   {
+    "name": "HiFi Design",
+    "genre": "core",
+    "powerSet": "Telekinesis",
+    "prerequisites": "Telekinetic Barrier, Rank 2",
+    "action": "Standard or reaction",
+    "trigger": "The character is attacked or otherwise in danger.",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "The character’s personal telekinetic field protects them. Any attacks against them that do 10 points of damage or less are instantly absorbed, and the protection continues. If an attack does more than 10 points of damage, it destroys the protection, allowing excess damage through.",
+    "fantastic": "",
+    "description": "protect themselves."
+  },
+  {
     "name": "Hit & Run",
     "genre": "core",
     "powerSet": "Melee Weapons",
@@ -1827,16 +2009,30 @@ export const MMRPG_POWERS = [
   {
     "name": "Hit the Dirt",
     "genre": "core",
+    "powerSet": "Tactics",
+    "prerequisites": "Keep Moving, Rank 2",
+    "action": "Reaction",
+    "trigger": "An enemy in line of sight makes an attack on an ally within earshot.",
+    "duration": "Instant",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "All allies within earshot can fall prone if they wish and are able to. If falling prone makes the ally an ineligible target for the initial attack, the attack automatically fails. //7/ //7/",
+    "fantastic": "",
+    "description": "The character gets their allies to take cover."
+  },
+  {
+    "name": "Hurled Shield Bash",
+    "genre": "core",
     "powerSet": "Shield Bearer",
     "prerequisites": "Shield Bash, Rank 2",
     "action": "Standard",
-    "trigger": "An enemy in line of sight makes an attack on an ally within earshot.",
+    "trigger": "",
     "duration": "Instant",
     "range": "10 spaces times the character’s rank",
     "cost": "5 Focus",
     "effect": "The character makes a ranged attack on an enemy. If the attack is a success, the enemy takes regular damage. On a Fantastic success, the enemy takes double damage and is knocked prone. The shield then bounces back to the character.",
     "fantastic": "",
-    "description": "The character gets their allies to take cover."
+    "description": "The character hurls their mighty shield at an enemy."
   },
   {
     "name": "Hurled Shield Block",
@@ -2170,7 +2366,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "",
-    "effect": "The character can communicate telepathically with one machine at a time, and they must have met or seen the machine before. The communication can be verbal, visual or even more complex, such as imparting location information. There is no limit to the distance of the communication, as long as the character and the machine are in the same dimension. Simple machines do not have much to offer in the way of conversation, but they are also generally compliant with requests. Complex machines—like computers, smartphones and other electronics—are also oen compliant, but if they are secured in any way, they usually refuse to communicate with strangers. A Logic check can get the character past such security, and the Narrator should set the target number according to the strength of the security.",
+    "effect": "The character can communicate telepathically with one machine at a time, and they must have met or seen the machine before. The communication can be verbal, visual or even more complex, such as imparting location information. There is no limit to the distance of the communication, as long as the character and the machine are in the same dimension. Simple machines do not have much to offer in the way of conversation, but they are also generally compliant with requests. Complex machines—like computers, smartphones and other electronics—are also often compliant, but if they are secured in any way, they usually refuse to communicate with strangers. A Logic check can get the character past such security, and the Narrator should set the target number according to the strength of the security.",
     "fantastic": "",
     "description": "The character can communicate with machines with their mind."
   },
@@ -2192,29 +2388,71 @@ export const MMRPG_POWERS = [
     "name": "Memory Blip",
     "genre": "core",
     "powerSet": "Telepathy",
+    "prerequisites": "Telepathic Link, Rank 2",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "The character causes a target with whom they’ve established a Telepathic Link to forget something that’s happened in the past hour. This gap can be up to an hour in length. The character makes a Logic check against the target’s Logic defense. On a success, the memories are forgotten. On a Fantastic success, the target has trouble on checks to recover such memories in the future. //7/ Jeromy Cox Any time the target is given good reason to question the blank in their memory, they can make a Logic check to recover their memory. If they succeed, the original memory floods back. On a Fantastic success, they know for sure who did this to them.",
+    "fantastic": "",
+    "description": "The character erases a bit of someone’s memory."
+  },
+  {
+    "name": "Mental Punch",
+    "genre": "core",
+    "powerSet": "Telepathy",
     "prerequisites": "None",
     "action": "Standard",
     "trigger": "",
     "duration": "Instant",
     "range": "",
-    "cost": "5 Focus",
-    "effect": "The character makes a Me against a target. If the attack inflicts regular Focus damage (i Health damage). On a Fantastic s target takes double damage inste stunned for one round.",
+    "cost": "",
+    "effect": "The character makes a Melee attack against a target. If the attack is a success, it inflicts regular Focus damage (instead of Health damage). On a Fantastic success, the target takes double damage instead and is stunned for one round.",
     "fantastic": "",
-    "description": "The character erases a bit of someone’s memory."
+    "description": "The character can blast a foe’s mind in melee."
   },
   {
     "name": "Mental Shelter",
     "genre": "core",
+    "powerSet": "Telepathy",
+    "prerequisites": "Uncanny 1, Rank 3",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character extends their mental defenses to protect any chosen people within up to 5 spaces times their rank. The protected targets are granted Focus Damage Reduction equal to the character’s Uncanny power.",
+    "fantastic": "",
+    "description": "The character can create a shelter for their mind."
+  },
+  {
+    "name": "Microdimensional Travel",
+    "genre": "core",
+    "powerSet": "Resize",
+    "prerequisites": "Shrink 4, Rank 4",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "15 Focus",
+    "effect": "The character can shrink enough to travel into subatomic realms. They can return to their normal size at will. Note that this is something that most characters would rarely want to do, as it removes them entirely from their regular universe and places them in a dimension in which the rules of time and space work differently. The Underspace, for example, might make a fine place to hide, but there’s little else of interest there.",
+    "fantastic": "",
+    "description": "The character shrinks out of the universe!"
+  },
+  {
+    "name": "Mighty 1",
+    "genre": "core",
     "powerSet": "None",
     "prerequisites": "None",
-    "action": "Standard",
+    "action": "",
     "trigger": "",
     "duration": "Permanent",
     "range": "",
-    "cost": "15 Focus",
-    "effect": "Treat the character as o liing, carrying, swinging and t also add +1 to their Melee damag gain a +1 bonus to Melee checks good reason emory, ecover he original ic success, to them. mind in melee. lee attack is a success, it nstead of uccess, the ad and is er for their mind. eir mental eople within The protected Reduction power. universe! enough to travel return to their that most characters emoves them entirely places them in a time and space work example, might make a little else of interest there. rong. ne size bigger for hrowing things. They e multiplier, and they other than attacks.",
+    "cost": "",
+    "effect": "Treat the character as one size bigger for lifting, carrying, swinging and throwing things. They also add +1 to their Melee damage multiplier, and they gain a +1 bonus to Melee checks other than attacks.",
     "fantastic": "",
-    "description": "The character can create a shelt"
+    "description": "The character is superhumanly strong."
   },
   {
     "name": "Mighty 2",
@@ -2226,9 +2464,9 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "Treat the character as two sizes bigger for liing, carrying, swinging and throwing things. They also add +2 to their Melee damage multiplier, and they gain a +2 bonus to Melee checks other than attacks.",
+    "effect": "Treat the character as two sizes bigger for lifting, carrying, swinging and throwing things. They also add +2 to their Melee damage multiplier, and they gain a +2 bonus to Melee checks other than attacks.",
     "fantastic": "",
-    "description": "The character could li© a bus."
+    "description": "The character could lifta bus."
   },
   {
     "name": "Mighty 3",
@@ -2240,9 +2478,9 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "Treat the character as three sizes bigger for liing, carrying, swinging and throwing things. They also add +3 to their Melee damage multiplier, and they gain a +3 bonus to Melee checks other than attacks.",
+    "effect": "Treat the character as three sizes bigger for lifting, carrying, swinging and throwing things. They also add +3 to their Melee damage multiplier, and they gain a +3 bonus to Melee checks other than attacks.",
     "fantastic": "",
-    "description": "The character could li© a house."
+    "description": "The character could lifta house."
   },
   {
     "name": "Mighty 4",
@@ -2254,7 +2492,7 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "Treat the character as four sizes bigger liing, carrying, swinging and throwing things. They also add +4 to their Melee damage multiplier, and they gain a +4 bonus to Melee checks other than attacks.",
+    "effect": "Treat the character as four sizes bigger lifting, carrying, swinging and throwing things. They also add +4 to their Melee damage multiplier, and they gain a +4 bonus to Melee checks other than attacks.",
     "fantastic": "",
     "description": "The character is among the strongest there are."
   },
@@ -2413,20 +2651,6 @@ export const MMRPG_POWERS = [
     "description": "The character brings someone with them to another universe."
   },
   {
-    "name": "None",
-    "genre": "core",
-    "powerSet": "Super-Speed",
-    "prerequisites": "Speed Run 2, Rank 3",
-    "action": "Reaction",
-    "trigger": "A ranged attack using physical projectiles (arrows, bullets and so on) is made against the character— or a character within their character’s reach.",
-    "duration": "Instant",
-    "range": "",
-    "cost": "10 Focus",
-    "effect": "The character makes an Agility check, using the attacker’s attack result as the target number. If the character’s check succeeds, the attack is nullified. On a Fantastic success, the character gets their reaction back.",
-    "fantastic": "",
-    "description": "tes: Brilliance 3, Rank 4 Permanent e character adds +4 to their Logic tiplier, and they gain a +4 ogic checks other than attacks. ter bumps up another character's power. : Power Control ites: Rank 2 andard Concentration more Focus e character picks one power er character within 5 spaces it. If the power has ranges or areas or durations, these are the power affects a damage add 1 to the effect. Any effects ly happen with a Fantastic omatically happen on any success, Fantastic one. power has a cost, the character as well, with a minimum of Catch Bullets The character is fast enough to catch bullets—safely!"
-  },
-  {
     "name": "Operations Center",
     "genre": "core",
     "powerSet": "Tactics",
@@ -2464,7 +2688,7 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "15 Focus",
-    "effect": "The character gives an order to a target with whom they’ve established a Telepathic Link and who has no Focus le. The character makes a Logic check against the target’s Logic defense. On a success, the target complies with the orders. On a Fantastic success, the character gains an edge the next time they use this power against this same target. The command must be to do something that can be completed in an hour or less. If it involves harming someone, the character has trouble on the check. If it would cause the target to harm themselves, the character has double trouble on the check.",
+    "effect": "The character gives an order to a target with whom they’ve established a Telepathic Link and who has no Focus left. The character makes a Logic check against the target’s Logic defense. On a success, the target complies with the orders. On a Fantastic success, the character gains an edge the next time they use this power against this same target. The command must be to do something that can be completed in an hour or less. If it involves harming someone, the character has trouble on the check. If it would cause the target to harm themselves, the character has double trouble on the check.",
     "fantastic": "",
     "description": "The character forces someone to follow a complex set of orders."
   },
@@ -2520,7 +2744,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "10 Focus",
-    "effect": "The character can make any person (and their clothing) they are touching intangible. The character can also phase any people the initial person is touching or grabbing. People the character has phased remain tangible to each other. If the target does not wish to be phased, the character must grab them first. When contact is broken, the phasing for those no longer in contact with the character (even indirectly) ends. 7/ POWERS Ar t by John Cassa day & Laura Marti n If a person is inside something when they stop phasing they are automatically pushed out of it but take damage from the disruption equal to a standard action check. The damage multiplier is 1 for every space they must move to reach a clear area. If this kills them, their body is tra inside the material they were phased into.",
+    "effect": "The character can make any person (and their clothing) they are touching intangible. The character can also phase any people the initial person is touching or grabbing. People the character has phased remain tangible to each other. If the target does not wish to be phased, the character must grab them first. When contact is broken, the phasing for those no longer in contact with the character (even indirectly) ends. //7/ Ar t by John Cassa day & Laura Marti n If a person is inside something when they stop phasing, they are automatically pushed out of it but take damage from the disruption equal to a standard action check. The damage multiplier is 1 for every space they must move to reach a clear area. If this kills them, their body is trapped inside the material they were phased into.",
     "fantastic": "",
     "description": "The character can phase someone they are touching."
   },
@@ -2541,6 +2765,20 @@ export const MMRPG_POWERS = [
   {
     "name": "Phase Walk",
     "genre": "core",
+    "powerSet": "Phasing",
+    "prerequisites": "Phase Self, Rank 2",
+    "action": "",
+    "trigger": "",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "When phasing, the character can move freely in any direction through anything—not just air, but also water, buildings and so on—at their Run Speed. The character can take anything or anyone they are phasing along with them.",
+    "fantastic": "",
+    "description": "The character can walk on air."
+  },
+  {
+    "name": "Point-Blank Parry",
+    "genre": "core",
     "powerSet": "Ranged Weapons",
     "prerequisites": "Rank 2",
     "action": "Reaction",
@@ -2550,7 +2788,7 @@ export const MMRPG_POWERS = [
     "cost": "5 Focus",
     "effect": "The character makes a ranged attack against the enemy who missed them. If the attack is a success, the enemy takes regular damage. On a Fantastic success, the enemy takes double damage and is bleeding.",
     "fantastic": "",
-    "description": "The character can walk on air."
+    "description": "When the enemy steps in, the character lets loose."
   },
   {
     "name": "Possess Vehicle",
@@ -2576,7 +2814,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "20 Focus",
-    "effect": "The character makes an Ego check with trouble against the Ego defense of a character who has no Focus le. On a success, the character takes over the target’s body completely. The character’s Ego defense is the target number for any checks to end the possession. If the character attempts to harm someone with the possessed body, the target gets to make an Ego check to end the possession. If the target has the Heroic tag, they get an edge on the check. If the character attempts to harm the possessed body, the target gets an edge on the check. If they have the Heroic tag, they get a double edge.",
+    "effect": "The character makes an Ego check with trouble against the Ego defense of a character who has no Focus left. On a success, the character takes over the target’s body completely. The character’s Ego defense is the target number for any checks to end the possession. If the character attempts to harm someone with the possessed body, the target gets to make an Ego check to end the possession. If the target has the Heroic tag, they get an edge on the check. If the character attempts to harm the possessed body, the target gets an edge on the check. If they have the Heroic tag, they get a double edge.",
     "fantastic": "",
     "description": "The character takes over someone else’s body."
   },
@@ -2679,6 +2917,132 @@ export const MMRPG_POWERS = [
     "description": "The character takes a moment to find their center."
   },
   {
+    "name": "Reinforced Skeleton",
+    "genre": "core",
+    "powerSet": "None",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character gains Health Damage Reduction 1.",
+    "fantastic": "",
+    "description": "The character’s bones have been reinforced or replaced with a super-strong alloy or metal."
+  },
+  {
+    "name": "Resize Object",
+    "genre": "core",
+    "powerSet": "Resize",
+    "prerequisites": "Grow 2 or Shrink 2, Rank 3",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character can make an object within reach grow or shrink. The character can resize the object as much as their own Grow or Shrink power would allow them to.",
+    "fantastic": "",
+    "description": "The character can change the size of an object within reach."
+  },
+  {
+    "name": "Resize Other",
+    "genre": "core",
+    "powerSet": "Resize",
+    "prerequisites": "Grow 2 or Shrink 2, Rank 3",
+    "action": "Standard or reaction",
+    "trigger": "The target is grabbed.",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character can resize any person (and their clothing) they are touching. The character can resize the object as much as their own Grow or Shrink power would allow them to. If the target does not wish to be resized, the character must grab them first.",
+    "fantastic": "",
+    "description": "The character can resize someone they are touching."
+  },
+  {
+    "name": "Return Fire",
+    "genre": "core",
+    "powerSet": "Ranged Weapons",
+    "prerequisites": "Suppressive Fire, Rank 2",
+    "action": "Reaction",
+    "trigger": "An enemy declares an attack against the character.",
+    "duration": "Instant",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "The character makes an Agility attack against a target’s Vigilance defense. If the attack is a success, apply Health Damage Reduction normally. Any damage taken is then applied to the target’s Focus instead. If it’s a Fantastic success, the damage is doubled and, if the target takes any Focus damage, they are stunned for 1 round. Ar t by Alan Davis",
+    "fantastic": "",
+    "description": "The character responds to an assault with a hail of shots."
+  },
+  {
+    "name": "Reverse Punch",
+    "genre": "core",
+    "powerSet": "Plasticity",
+    "prerequisites": "Flexible Bones 1, Rank 2",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant Rob Schwager",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "The character makes a close attack with an edge on an enemy. If the attack is a success, the enemy takes regular damage. On a Fantastic success, the enemy takes double damage and is stunned for one round.",
+    "fantastic": "",
+    "description": "The character can reach past an enemy and punch them from behind. , Mark Farmer &"
+  },
+  {
+    "name": "Reverse-Momentum Throw",
+    "genre": "core",
+    "powerSet": "Martial Arts",
+    "prerequisites": "Defense Stance, Rank 2",
+    "action": "Reaction",
+    "trigger": "While Defense Stance is active, a close attack against the character misses.",
+    "duration": "Instant",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "The attacker is knocked prone and takes half the damage their attack would have inflicted if it had succeeded.",
+    "fantastic": "",
+    "description": "The character uses the momentum of their attacker to hurl them to the ground."
+  },
+  {
+    "name": "Rico-Shield",
+    "genre": "core",
+    "powerSet": "Shield Bearer",
+    "prerequisites": "Hurled Shield Bash, Rank 3",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "10 spaces times the character’s rank",
+    "cost": "10 Focus",
+    "effect": "The character makes a ranged attack on a target. If the attack is a success, the target takes regular damage. On a Fantastic success, the target is also knocked prone, and the character can make an extra attack on another target, adding the extra range between the two targets to the new attack roll. This can be repeated until an attack is not a Fantastic success. When the attacks are over, the shield then bounces back to the character.",
+    "fantastic": "",
+    "description": "The character ricochets their shield from target to target."
+  },
+  {
+    "name": "Riposte",
+    "genre": "core",
+    "powerSet": "Melee Weapons",
+    "prerequisites": "None",
+    "action": "Reaction",
+    "trigger": "An enemy makes a close attack against the character that fails.",
+    "duration": "Instant",
+    "range": "",
+    "cost": "",
+    "effect": "The character makes a close attack on the enemy who just missed them. If the attack is a success, the enemy takes regular damage. On a Fantastic success, the enemy takes double damage and suffers the weapon’s special effect. //7/ g Rachelle Rosenber",
+    "fantastic": "",
+    "description": "Seeing the enemy offbalance, the character strikes back."
+  },
+  {
+    "name": "Rubberneck",
+    "genre": "core",
+    "powerSet": "Plasticity",
+    "prerequisites": "Flexible Bones 1, Extended Reach 1",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character can move their head away from their body, up to their reach, to establish a line of sight to a target.",
+    "fantastic": "",
+    "description": "The character can lengthen and twist their neck."
+  },
+  {
     "name": "Run on Water",
     "genre": "core",
     "powerSet": "Super-Speed",
@@ -2753,14 +3117,70 @@ export const MMRPG_POWERS = [
     "genre": "core",
     "powerSet": "Shield Bearer",
     "prerequisites": "None",
-    "action": "Standard",
+    "action": "Standard or reaction",
     "trigger": "The character is attacked.",
-    "duration": "Instant",
+    "duration": "Concentration",
     "range": "",
-    "cost": "25 Focus",
-    "effect": "The character makes a close attack on an en within their reach. If the attack is a success, the takes regular damage. On a Fantastic success, the e takes double damage and is knocked prone.",
+    "cost": "",
+    "effect": "The character gains Health Damage Reduction 1.",
     "fantastic": "",
     "description": "The character wields a personal shield."
+  },
+  {
+    "name": "Shield 2",
+    "genre": "core",
+    "powerSet": "Shield Bearer",
+    "prerequisites": "Shield 1, Rank 2",
+    "action": "Standard or reaction",
+    "trigger": "The character is attacked.",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "5 Focus",
+    "effect": "The character gains Health Damage Reduction 2.",
+    "fantastic": "",
+    "description": "The character’s shield protects them like a wall."
+  },
+  {
+    "name": "Shield 3",
+    "genre": "core",
+    "powerSet": "Shield Bearer",
+    "prerequisites": "Shield 2, Rank 4",
+    "action": "Standard or reaction",
+    "trigger": "The character is attacked.",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "15 Focus",
+    "effect": "The character gains Health Damage Reduction 3.",
+    "fantastic": "",
+    "description": "The character’s shield protects better than a tank."
+  },
+  {
+    "name": "Shield 4",
+    "genre": "core",
+    "powerSet": "Shield Bearer",
+    "prerequisites": "Shield 3, Rank 6",
+    "action": "Standard or reaction",
+    "trigger": "The character is attacked.",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "25 Focus",
+    "effect": "The character gains Health Damage Reduction 4.",
+    "fantastic": "",
+    "description": "The character’s shield protects like a concrete barrier."
+  },
+  {
+    "name": "Shield Bash",
+    "genre": "core",
+    "powerSet": "Shield Bearer",
+    "prerequisites": "None",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "",
+    "effect": "The character makes a close attack on an enemy within their reach. If the attack is a success, the enemy takes regular damage. On a Fantastic success, the enemy takes double damage and is knocked prone.",
+    "fantastic": "",
+    "description": "The character bashes a foe with their shield."
   },
   {
     "name": "Shield Deflection",
@@ -2768,7 +3188,7 @@ export const MMRPG_POWERS = [
     "powerSet": "Shield Bearer",
     "prerequisites": "None",
     "action": "Reaction",
-    "trigger": "The character is the target of an attack a their Agility defense.",
+    "trigger": "The character is the target of an attack against their Agility defense.",
     "duration": "Instant",
     "range": "",
     "cost": "",
@@ -2780,13 +3200,13 @@ export const MMRPG_POWERS = [
     "name": "Shield of the Seraphim",
     "genre": "core",
     "powerSet": "Magic",
-    "prerequisites": "Sorcerous, Rank 3 1. Action: Standard or reaction",
-    "action": "",
+    "prerequisites": "Sorcerous, Rank 3",
+    "action": "Standard or reaction",
     "trigger": "The character is attacked.",
     "duration": "Concentration",
     "range": "",
     "cost": "10 Focus",
-    "effect": "The character produces a magical shield that protects them from physical damage. Any attacks against them that do 20 points of damage or less are instantly absorbed, and the protection continues. If an attack does more than 20 points of damage, it destroys the protection, allowing excess damage through. 2.",
+    "effect": "The character produces a magical shield that protects them from physical damage. Any attacks against them that do 20 points of damage or less are instantly absorbed, and the protection continues. If an attack does more than 20 points of damage, it destroys the protection, allowing excess damage through.",
     "fantastic": "",
     "description": "The character produces a magical shield."
   },
@@ -2800,12 +3220,40 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "",
-    "effect": "Attacks against the character have trouble. The character breaks concentration on this power if they use a movement action. 3.",
+    "effect": "Attacks against the character have trouble. The character breaks concentration on this power if they use a movement action.",
     "fantastic": "",
     "description": "The character stands like an impenetrable wall."
   },
   {
+    "name": "Shrink 1",
+    "genre": "core",
+    "powerSet": "Resize",
+    "prerequisites": "None",
+    "action": "Standard or reaction",
+    "trigger": "The character is attacked.",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character can shrink down to little size. They can return to their normal size at will.",
+    "fantastic": "",
+    "description": "The character thinks small."
+  },
+  {
     "name": "Shrink 2",
+    "genre": "core",
+    "powerSet": "Resize",
+    "prerequisites": "Shrink 1",
+    "action": "Standard or reaction",
+    "trigger": "The character is attacked.",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character can shrink down to tiny size. They can return to their normal size at will.",
+    "fantastic": "",
+    "description": "The character becomes even smaller!"
+  },
+  {
+    "name": "Shrink 3",
     "genre": "core",
     "powerSet": "Resize",
     "prerequisites": "Shrink 2",
@@ -2814,9 +3262,9 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "The character can shrink down to miniature size. gainst They can return to their normal size at will.",
+    "effect": "The character can shrink down to miniature size. They can return to their normal size at will.",
     "fantastic": "",
-    "description": "The character becomes even smaller!"
+    "description": "The character is smaller than an action figure."
   },
   {
     "name": "Shrink 4",
@@ -2828,7 +3276,7 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "The character can shrink down to microscopic They can return to their normal size at will.",
+    "effect": "The character can shrink down to microscopic size. They can return to their normal size at will.",
     "fantastic": "",
     "description": "The character is so small that they’re hard to see."
   },
@@ -2856,7 +3304,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "15 or more Focus",
-    "effect": "The character picks another character within 20 spaces and makes an Ego attack against them. On a success, they remove all of a target’s powers. If the target’s powers have costs, the character pay the highest of them, or a minimum of 15 Focus.",
+    "effect": "The character picks another character within 20 spaces and makes an Ego attack against them. On a success, they remove all of a target’s powers. If the target’s powers have costs, the character must pay the highest of them, or a minimum of 15 Focus.",
     "fantastic": "",
     "description": "The character removes all of a target’s powers!"
   },
@@ -2870,7 +3318,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "5 Focus",
-    "effect": "An area up to 5 spaces wide per the characte rank—centered on anything the character wishes, with 50 spaces—is filled with silence. Those inside the a cannot hear anything, and no one outside of it can h noises made inside it. The character must remain wit spaces of the area to avoid breaking concentration.",
+    "effect": "An area up to 5 spaces wide per the character’s rank—centered on anything the character wishes, within 50 spaces—is filled with silence. Those inside the area cannot hear anything, and no one outside of it can hear any noises made inside it. The character must remain within 50 spaces of the area to avoid breaking concentration.",
     "fantastic": "",
     "description": "An unnatural silence falls over the area."
   },
@@ -2884,7 +3332,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "5 Focus",
-    "effect": "The character makes no noise at all—unless t wish to. They have an edge on Agility checks to snea people, and enemies have trouble on Vigilance checks perceive them.",
+    "effect": "The character makes no noise at all—unless they wish to. They have an edge on Agility checks to sneak past people, and enemies have trouble on Vigilance checks to perceive them.",
     "fantastic": "",
     "description": "Silence falls on the character."
   },
@@ -2895,10 +3343,10 @@ export const MMRPG_POWERS = [
     "prerequisites": "None",
     "action": "Reaction",
     "trigger": "The character is grabbed or pinned.",
-    "duration": "Instant size. Effect: The character is not grabbed or pinned.",
+    "duration": "Instant",
     "range": "",
     "cost": "",
-    "effect": "",
+    "effect": "The character is not grabbed or pinned.",
     "fantastic": "",
     "description": "The character is impossible to restrain."
   },
@@ -2920,15 +3368,43 @@ export const MMRPG_POWERS = [
     "name": "Slow-Motion Shoot-Dodge",
     "genre": "core",
     "powerSet": "Ranged Weapons",
-    "prerequisites": "None",
+    "prerequisites": "Slow-Motion Dodge, Weapons Blazing, Rank 3",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant + 1 round",
+    "range": "",
+    "cost": "10 Focus",
+    "effect": "The character splits their attack to make two ranged attacks against separate targets (or they can focus a single attack on a single target). Make a single Agility check and compare it to the targets’ Agility defenses. On a success, an affected target takes half regular damage. On a Fantastic success, an affected target takes full damage, and the character can make a bonus attack with this power against any available target, with the same effect. When the character moves, is moved or starts their next turn, they instantly fall prone. Until that happens, all attacks against their Agility defense have trouble.",
+    "fantastic": "",
+    "description": "The character dives sideways, weapons blazing, hanging in midair for a split second."
+  },
+  {
+    "name": "Smash",
+    "genre": "core",
+    "powerSet": "Super-Strength",
+    "prerequisites": "Clobber, Rank 2",
     "action": "Standard",
     "trigger": "",
     "duration": "Instant",
     "range": "",
     "cost": "5 or more Focus",
+    "effect": "The character makes a close attack with an edge. For this attack, add +1 to the character’s Melee damage bonus for every 2 points of Focus they spend. On a success, an affected target takes that total damage. On a Fantastic success, an affected target takes double that total damage and is stunned for one round. //7/",
+    "fantastic": "",
+    "description": ""
+  },
+  {
+    "name": "Snap Shooting",
+    "genre": "core",
+    "powerSet": "Ranged Weapons",
+    "prerequisites": "None",
+    "action": "Standard",
+    "trigger": "",
+    "duration": "Instant",
+    "range": "",
+    "cost": "",
     "effect": "The character splits their attack to make two ranged attacks against separate targets (or they can focus a single attack on a single target). Make a single Agility check and compare it to the targets’ Agility defenses. On a success, an affected target takes half regular damage. On a Fantastic success, an affected target takes full damage and is bleeding.",
     "fantastic": "",
-    "description": "The character dives sideways, weapons blazing, hanging in midair for a split second."
+    "description": "The character shoots from the hip with deadly speed."
   },
   {
     "name": "Sniping",
@@ -2954,9 +3430,9 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "10",
     "cost": "5 Focus",
-    "effect": "The character makes a ranged attack. If it succeeds the target is stunned for one round. On a Fantastic success the character is knocked prone too.",
+    "effect": "The character makes a ranged attack. If it succeeds, the target is stunned for one round. On a Fantastic success, the character is knocked prone too.",
     "fantastic": "",
-    "description": "The character fans their arms fast enough to blast a target a gust of air!"
+    "description": "The character fans their arms fast enough to blast a target with a gust of air!"
   },
   {
     "name": "Speed Run 1",
@@ -3022,11 +3498,25 @@ export const MMRPG_POWERS = [
     "action": "Standard",
     "trigger": "",
     "duration": "Concentration",
-    "range": "5 spaces with",
+    "range": "5 spaces",
     "cost": "",
     "effect": "The character has an edge on Ego (intimidation) checks against people who are not attracted to their gender. They also have an edge on Ego (persuasion) checks against people who are attracted to their gender.",
     "fantastic": "",
     "description": "The character exudes pheromones that affect those nearby."
+  },
+  {
+    "name": "Spider-Sense",
+    "genre": "core",
+    "powerSet": "Spider-Powers",
+    "prerequisites": "None",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character has an edge on initiative checks and on Vigilance checks to perceive danger. Enemies have trouble on Agility checks against the character’s Vigilance defense. The character also gains a permanent +2 bonus to their Agility defense.",
+    "fantastic": "",
+    "description": "The character has a sense of danger that tingles when threats are near."
   },
   {
     "name": "Spider-Strike",
@@ -3038,7 +3528,7 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "",
-    "effect": "The character splits their attack to make two close attacks against separate targets within reach (or they can focus a single attack on a single target). Make a single Melee check and compare it to the targets’ Melee defenses. On a success, the affected target takes half regular damage. On a Fantastic success, the affected target takes full damage and is paralyzed by webbing. Breaking free from webbing requires a Melee check (target number 20). Aer the attacks, the character may run, jump or climb at half speed for free.",
+    "effect": "The character splits their attack to make two close attacks against separate targets within reach (or they can focus a single attack on a single target). Make a single Melee check and compare it to the targets’ Melee defenses. On a success, the affected target takes half regular damage. On a Fantastic success, the affected target takes full damage and is paralyzed by webbing. Breaking free from webbing requires a Melee check (target number 20). After the attacks, the character may run, jump or climb at half speed for free.",
     "fantastic": "",
     "description": "The character strikes in a blur of punches, kicks and webbing."
   },
@@ -3122,7 +3612,7 @@ export const MMRPG_POWERS = [
     "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "The character’s body is so sturdy that they Health Damage Reduction 1. If this power stems from armor or anything else removable—like Iron Man’s armor—the character shoul apply the Tech Reliance trait to it.",
+    "effect": "The character’s body is so sturdy that they have Health Damage Reduction 1. If this power stems from armor or anything else removable—like Iron Man’s armor—the character should apply the Tech Reliance trait to it.",
     "fantastic": "",
     "description": "The character has protection from physical damage."
   },
@@ -3130,15 +3620,43 @@ export const MMRPG_POWERS = [
     "name": "Sturdy 2",
     "genre": "core",
     "powerSet": "None",
+    "prerequisites": "Sturdy 1, Rank 2",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character gains Health Damage Reduction 2.",
+    "fantastic": "",
+    "description": "The character is protected as if by steel."
+  },
+  {
+    "name": "Sturdy 3",
+    "genre": "core",
+    "powerSet": "None",
+    "prerequisites": "Sturdy 2, Rank 4",
+    "action": "",
+    "trigger": "",
+    "duration": "Permanent",
+    "range": "",
+    "cost": "",
+    "effect": "The character gains Health Damage Reduction 3. & Marte Gracia",
+    "fantastic": "",
+    "description": "The character is protected like a tank."
+  },
+  {
+    "name": "Sturdy 4",
+    "genre": "core",
+    "powerSet": "None",
     "prerequisites": "Sturdy 3, Rank 6",
     "action": "",
     "trigger": "",
-    "duration": "Permanent have Effect: The character gains Health Damage Reduction 4.",
+    "duration": "Permanent",
     "range": "",
     "cost": "",
-    "effect": "The character gains Health Damage Reduction & Marte Gracia Sturdy 4 The character is protected like a battleship.",
+    "effect": "The character gains Health Damage Reduction 4.",
     "fantastic": "",
-    "description": "The character is protected as if by steel."
+    "description": "The character is protected like a battleship."
   },
   {
     "name": "Summon Portal",
@@ -3150,9 +3668,9 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "15 Focus",
-    "effect": "The character opens a glowing portal in a space next to them that teleports anything that enters it 2. between that space and its destination, which forms a matched glowing portal in the other place. This can be between any two points in the Multiverse, as long as the character has seen the destination. Anything can move through the portal in either direction until it is closed, which the character can do at will. 3.",
+    "effect": "The character opens a glowing portal in a space next to them that teleports anything that enters it between that space and its destination, which forms a matched glowing portal in the other place. This can be between any two points in the Multiverse, as long as the character has seen the destination. Anything can move through the portal in either direction until it is closed, which the character can do at will.",
     "fantastic": "",
-    "description": "d The character opens a portal between space and dimensions."
+    "description": "The character opens a portal between space and dimensions."
   },
   {
     "name": "Supernova",
@@ -3194,7 +3712,7 @@ export const MMRPG_POWERS = [
     "cost": "10 or more Focus",
     "effect": "The character makes an Ego attack against the grabbed target. On a success, they remove one of the target’s powers and take it for their own. They can now use that power as if it was always theirs. If the power has a cost, the character must pay it or a minimum of 10 Focus. When the character uses the power, they must pay any cost normally as well.",
     "fantastic": "",
-    "description": "The character removes a target’s power and takes it for their"
+    "description": "The character removes a target’s power and takes it for their own!"
   },
   {
     "name": "Telekinetic Attack",
@@ -3234,7 +3752,7 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "10 Focus",
-    "effect": "The character makes a Logic attack against the own! grabbed target’s Resilience defense. If it’s a success, the target takes regular damage. On a Fantastic success, the target takes double damage and is pinned.",
+    "effect": "The character makes a Logic attack against the grabbed target’s Resilience defense. If it’s a success, the target takes regular damage. On a Fantastic success, the target takes double damage and is pinned.",
     "fantastic": "",
     "description": "The character mentally squeezes a foe."
   },
@@ -3262,40 +3780,40 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "Varies",
     "cost": "",
-    "effect": "The character can manipulate objects in their line of sight with their mind. The maximum range for this is 5 spaces times the character’ someone tries to prevent the cha taking control of an object, the makes a Logic check against the Agility defense.",
+    "effect": "The character can manipulate objects in their line of sight with their mind. The maximum range for this is 5 spaces times the character’s rank. If someone tries to prevent the character from taking control of an object, the character makes a Logic check against the opponent’s Agility defense. Telekinetic Protection 1 The character uses their mind to physically",
     "fantastic": "",
     "description": "The character can handle physical things with their mind."
-  },
-  {
-    "name": "Telekinetic Protection 1",
-    "genre": "core",
-    "powerSet": "Telekinesis",
-    "prerequisites": "Telekinetic Barri",
-    "action": "Standard or reaction",
-    "trigger": "The character is attack otherwise in danger.",
-    "duration": "Concentration",
-    "range": "",
-    "cost": "5 Focus",
-    "effect": "The character’s personal field protects them. Any attacks them that do 10 points of damage are instantly absorbed, and the continues. If an attack does mor points of damage, it destroys th allowing excess damage through.",
-    "fantastic": "",
-    "description": "The character uses their mind to protect themselves."
   },
   {
     "name": "Telekinetic Protection 2",
     "genre": "core",
     "powerSet": "Telekinesis",
-    "prerequisites": "Telekinetic Prote 1, Rank 3",
+    "prerequisites": "Telekinetic Protection 1, Rank 3",
     "action": "Standard or reaction",
-    "trigger": "The character is attack otherwise in danger.",
+    "trigger": "The character is attacked or otherwise in danger.",
     "duration": "Concentration",
     "range": "",
     "cost": "10 Focus",
-    "effect": "The character’s personal field protects them. Any attacks them that do 20 points of damage are instantly absorbed, and the continues. If an attack does mor points of damage, it destroys th allowing excess damage through.",
+    "effect": "The character’s personal telekinetic field protects them. Any attacks against them that do 20 points of damage or less are instantly absorbed, and the protection continues. If an attack does more than 20 points of damage, it destroys the protection, allowing excess damage through.",
     "fantastic": "",
-    "description": "The character toughens their min physical damage."
+    "description": "The character toughens their mind against physical damage."
   },
   {
     "name": "Telekinetic Protection 3",
+    "genre": "core",
+    "powerSet": "Telekinesis",
+    "prerequisites": "Telekinetic Protection 2, Rank 4",
+    "action": "Standard or reaction",
+    "trigger": "The character is attacked or otherwise in danger.",
+    "duration": "Concentration",
+    "range": "",
+    "cost": "15 Focus",
+    "effect": "The character’s personal telekinetic field protects them. Any attacks against them that do 30 points of damage or less are instantly absorbed, and the protection continues. If an attack does more than 30 points of damage, it destroys the protection, allowing excess damage through.",
+    "fantastic": "",
+    "description": "The character’s mind protects them like a tank."
+  },
+  {
+    "name": "Telekinetic Protection 4",
     "genre": "core",
     "powerSet": "Telekinesis",
     "prerequisites": "Telekinetic Protection 3, Rank 5",
@@ -3306,7 +3824,7 @@ export const MMRPG_POWERS = [
     "cost": "20 Focus",
     "effect": "The character’s personal telekinetic field grants them protection. Any attacks against them that do 40 points of damage or less are instantly absorbed, and the protection continues. If an attack does more than 40 points of damage, it destroys the protection, allowing excess damage through.",
     "fantastic": "",
-    "description": "The character’s mind protects th"
+    "description": "The character’s mind protects them like a fortress."
   },
   {
     "name": "Telekinetic Reinforcement",
@@ -3402,7 +3920,7 @@ export const MMRPG_POWERS = [
     "duration": "Concentration",
     "range": "",
     "cost": "20 Focus",
-    "effect": "The character possesses a target with whom they’ve established a Telepathic Link and who has no Focus le. The character makes a Logic check with trouble against the target’s Logic defense. On a success, the character takes over the target’s body completely. The result of the character’s check is the target number for any attempts by the target to end the possession. If the character attempts to harm someone with the possessed body, the target gets to make a Logic check to end the possession. If the target has the Heroic tag, they get an edge on the check. If the character attempts to harm the possessed body, the target gets an edge on the check. If the target has the Heroic tag, they get a double edge. This power can also be used to transfer the character’s mind into an empty-minded target—like a fresh clone or android—permanently. This requires no check, as there is no one in the body to challenge the character’s action.",
+    "effect": "The character possesses a target with whom they’ve established a Telepathic Link and who has no Focus left. The character makes a Logic check with trouble against the target’s Logic defense. On a success, the character takes over the target’s body completely. The result of the character’s check is the target number for any attempts by the target to end the possession. If the character attempts to harm someone with the possessed body, the target gets to make a Logic check to end the possession. If the target has the Heroic tag, they get an edge on the check. If the character attempts to harm the possessed body, the target gets an edge on the check. If the target has the Heroic tag, they get a double edge. This power can also be used to transfer the character’s mind into an empty-minded target—like a fresh clone or android—permanently. This requires no check, as there is no one in the body to challenge the character’s action.",
     "fantastic": "",
     "description": "The character mentally takes over someone else’s body."
   },
@@ -3584,7 +4102,7 @@ export const MMRPG_POWERS = [
     "duration": "1 round per rank.",
     "range": "",
     "cost": "15 Focus per round",
-    "effect": "The character freezes time for everyone but themselves. During this period, they can act normally while everyone else seems to be frozen in place. The character can choose to activate the power for the maximum duration or choose to stop at any time. However long, they must pay the Focus cost for each round. For example, a Rank 6 character uses Time-Out as an action and pays 30 Focus to activate it for two rounds. They can take their normal number of actions, reactions and move- ment, while the other characters cannot take any actions, reactions or movements until aer the two rounds end.",
+    "effect": "The character freezes time for everyone but themselves. During this period, they can act normally while everyone else seems to be frozen in place. The character can choose to activate the power for the maximum duration or choose to stop at any time. However long, they must pay the Focus cost for each round. For example, a Rank 6 character uses Time-Out as an action and pays 30 Focus to activate it for two rounds. They can take their normal number of actions, reactions and move- ment, while the other characters cannot take any actions, reactions or movements until after the two rounds end.",
     "fantastic": "",
     "description": "The character freezes time."
   },
@@ -3696,7 +4214,7 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "15 Focus",
-    "effect": "The character makes a Melee check and compares it against the Melee defense of every enemy within their reach. Any enemy the attack succeeds against takes half regular damage. On a Fantastic success, those enemies take full regular damage and are knocked prone instead. The character may then pay 15 more Focus to do the same thing again—before which they can move up to half their speed with anything le from their normal movement action. They can keep doing this until they run out of speed or Focus. Each target can be affected by this attack by this character only once per round.",
+    "effect": "The character makes a Melee check and compares it against the Melee defense of every enemy within their reach. Any enemy the attack succeeds against takes half regular damage. On a Fantastic success, those enemies take full regular damage and are knocked prone instead. The character may then pay 15 more Focus to do the same thing again—before which they can move up to half their speed with anything leftfrom their normal movement action. They can keep doing this until they run out of speed or Focus. Each target can be affected by this attack by this character only once per round.",
     "fantastic": "",
     "description": "The character smashes everything in reach."
   },
@@ -3710,7 +4228,7 @@ export const MMRPG_POWERS = [
     "duration": "Instant",
     "range": "",
     "cost": "15 Focus",
-    "effect": "The character makes a Melee check and compares that against the Melee defense of every enemy within their reach. Any enemy the attack succeeds against takes half regular damage. On a Fantastic success, those enemies take full regular damage instead and suffer the weapon’s special effect. The character may then pay 15 more Focus to do the same thing again—before which they can move up to half their Speed with whatever is le from their normal movement action. They can keep doing this until they run out of Speed or Focus. Each target can only be affected by this attack by this character once per round.",
+    "effect": "The character makes a Melee check and compares that against the Melee defense of every enemy within their reach. Any enemy the attack succeeds against takes half regular damage. On a Fantastic success, those enemies take full regular damage instead and suffer the weapon’s special effect. The character may then pay 15 more Focus to do the same thing again—before which they can move up to half their Speed with whatever is leftfrom their normal movement action. They can keep doing this until they run out of Speed or Focus. Each target can only be affected by this attack by this character once per round.",
     "fantastic": "",
     "description": "The character hews a path through their foes."
   },

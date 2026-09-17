@@ -115,6 +115,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .a-tile{display:flex;align-items:center;justify-content:center;min-width:54px;height:34px;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:2px 6px;cursor:pointer;transition:border-color .12s ease,background .12s ease,transform .05s ease;}
 .a-tile:hover{border-color:var(--mv);background:var(--input-bg);}
 .a-tile:active{transform:translateY(1px);}
+.a-tile.a-boosted{border-color:var(--mv);background:var(--input-bg);}
+.a-tile.a-boosted .atv{color:var(--mv);}
 .a-tile .atv{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--mv-dk);line-height:1;}
 @media(max-width:420px){.a-tile,.a-head-l{min-width:46px;}.a-tile{padding:2px 3px;}.a-tile .atv{font-size:15px;}.abil-row .a-name{font-size:13px;}}
 
@@ -438,22 +440,50 @@ function ab(k){ return num((S.abilities||{})[k]); }
 function healthMax(){ return Math.max(10, ab('resilience')*30); }
 function focusMax(){ return Math.max(10, ab('vigilance')*30); }
 function karmaMax(){ return rank(); }
-function defense(k){ return 10+ab(k); }
 function runSpeed(){ var s=5+Math.floor(ab('agility')/5); if(/Big|Huge|Gigantic/.test(S.size))s+=1; if(/Tiny|Little|Small/.test(S.size))s-=1; return s; }
 function dmgMult(){ return rank(); }
+// ── Power bonuses: read flat, unconditional numeric bonuses out of the
+// character's powers and apply them automatically. Handles the common
+// "+N to their <Ability> damage multiplier, and a +N bonus to <Ability> checks
+// other than attacks" family (Mighty / Accuracy / Discipline / Brilliance…),
+// plus "+N to <Ability> defense". Situational bonuses (edges, per-Focus spends,
+// "for this attack") are left to the player. Cached per render pass.
+var ABK_={melee:'Melee',agility:'Agility',resilience:'Resilience',vigilance:'Vigilance',ego:'Ego',logic:'Logic'};
+function powerBonuses(){
+  var out={dmgMult:{},noncombat:{},defense:{}};
+  (S.powers||[]).forEach(function(p){
+    var e=String(p.effect||''); if(!e)return;
+    Object.keys(ABK_).forEach(function(k){
+      var A=ABK_[k];
+      var md=new RegExp('[+](\\d+)\\s+to\\s+(?:their\\s+)?'+A+'\\s+damage multiplier','i').exec(e);
+      if(md) out.dmgMult[k]=Math.max(out.dmgMult[k]||0, +md[1]);
+      var mc=new RegExp('[+](\\d+)\\s+bonus\\s+to\\s+'+A+'\\s+checks other than attacks','i').exec(e);
+      if(mc) out.noncombat[k]=Math.max(out.noncombat[k]||0, +mc[1]);
+      var mdf=new RegExp('[+](\\d+)\\s+(?:bonus\\s+)?to\\s+(?:their\\s+)?'+A+'\\s+defense','i').exec(e);
+      if(mdf) out.defense[k]=Math.max(out.defense[k]||0, +mdf[1]);
+    });
+  });
+  return out;
+}
+function ncBonus(k){ return powerBonuses().noncombat[k]||0; }
+function defBonus(k){ return powerBonuses().defense[k]||0; }
+function pDmgBonus(k){ return powerBonuses().dmgMult[k]||0; }
+function defense(k){ return 10+ab(k)+defBonus(k); }
 
 // ── Render: abilities ──
 function renderAbilities(){
   var host=$('abil-list'); if(!host)return; host.innerHTML='';
   ABILITIES.forEach(function(a){
     var sc=ab(a.key), def=defense(a.key);
+    var nb=ncBonus(a.key), ncv=sc+nb, dfb=defBonus(a.key);
     var sg=(sc>=0?'+':'')+sc;
+    var ncg=(ncv>=0?'+':'')+ncv;
     var row=document.createElement('div'); row.className='abil-row';
     row.innerHTML='<div class="a-name">'+a.name+'<small>'+a.desc+'</small></div>'
       +'<div class="a-tiles">'
       +  '<button class="a-tile" onclick="rollCheck(\''+a.key+'\',\'score\')" title="Roll d616 + '+a.name+'"><span class="atv">'+sg+'</span></button>'
-      +  '<button class="a-tile" onclick="rollCheck(\''+a.key+'\',\'defense\')" title="'+a.name+' Defense (10 + score)"><span class="atv">'+def+'</span></button>'
-      +  '<button class="a-tile" onclick="rollCheck(\''+a.key+'\',\'noncombat\')" title="Roll a non-combat '+a.name+' check"><span class="atv">'+sg+'</span></button>'
+      +  '<button class="a-tile'+(dfb?' a-boosted':'')+'" onclick="rollCheck(\''+a.key+'\',\'defense\')" title="'+a.name+' Defense (10 + score'+(dfb?' + '+dfb+' power':'')+')"><span class="atv">'+def+'</span></button>'
+      +  '<button class="a-tile'+(nb?' a-boosted':'')+'" onclick="rollCheck(\''+a.key+'\',\'noncombat\')" title="Roll a non-combat '+a.name+' check'+(nb?' (incl. +'+nb+' power)':'')+'"><span class="atv">'+ncg+'</span></button>'
       +'</div>';
     host.appendChild(row);
   });
@@ -463,7 +493,7 @@ function renderAbilities(){
 function rollCheck(key,kind){
   var a=ABILITIES.find(function(x){return x.key===key;}); if(!a)return;
   var label=a.name+(kind==='defense'?' Defense':kind==='noncombat'?' Non-Combat':' Check');
-  doCheck(label, key, {});
+  doCheck(label, key, kind==='noncombat'?{bonus:ncBonus(key)}:{});
 }
 function setAbility(k,v){ S.abilities[k]=num(v);
   if(k==='resilience'){ S.health.max=healthMax(); if(S.health.cur<1||S.health.cur>S.health.max)S.health.cur=S.health.max; }
@@ -491,14 +521,18 @@ function renderDerived(){
 }
 // ── Attacks / Damage: the four damage abilities (Melee, Agility, Ego, Logic) ──
 var DMG_ABILITIES=['melee','agility','ego','logic'];
-function attackMult(key){ return dmgMult()+weaponBonus(key); }
+// Damage multiplier = rank + the GREATEST single multiplier bonus that applies
+// (weapon and power bonuses to the same multiplier don't stack — use the higher).
+function multBonusFor(key){ return Math.max(weaponBonus(key), pDmgBonus(key)); }
+function attackMult(key){ return dmgMult()+multBonusFor(key); }
 function renderDamage(){
   var host=$('dmg-wrap'); if(!host)return;
   host.innerHTML=DMG_ABILITIES.map(function(k){
     var a=ABILITIES.find(function(x){return x.key===k;}); var sc=ab(k);
-    var wb=weaponBonus(k), mult=dmgMult()+wb, wn=equippedWeaponName(k);
+    var wb=weaponBonus(k), pb=pDmgBonus(k), bonus=Math.max(wb,pb), mult=dmgMult()+bonus, wn=equippedWeaponName(k);
+    var src=bonus?(' ('+(pb>=wb&&pb>0?'+'+pb+' power':'+'+wb+' weapon')+')'):'';
     return '<div class="dmg-cell"><div class="dmg-ab">'+esc(a.name)+'</div>'
-      +'<div class="dmg-val">×'+mult+' <small>mult'+(wb?' (+'+wb+')':'')+'</small></div>'
+      +'<div class="dmg-val">×'+mult+' <small>mult'+src+'</small></div>'
       +'<div class="dmg-val">'+(sc>=0?'+':'')+sc+' <small>bonus</small></div>'
       +(wn?'<div class="dmg-wpn" title="Equipped">'+esc(wn)+'</div>':'')
       +'<button class="w-roll" onclick="rollDamage(\''+k+'\')">Attack</button></div>';
@@ -578,16 +612,16 @@ function dieStr(r){ var mid=r.fantastic?'M':String(r.m); return '['+r.d1+' '+mid
 function consumeKarma(){ if(karmaArmed){ S.karma.cur=Math.max(0,num(S.karma.cur)-1); karmaArmed=false; $('karma-btn').classList.remove('on'); renderVitals(); return true; } return false; }
 function doCheck(label, abilityKey, opts){
   opts=opts||{};
-  var mod=0;
-  // Karma edge: arm one extra reroll (edge) if armed
+  var bonus=num(opts.bonus)||0;   // flat bonus granted by powers (e.g. non-combat check bonus)
   var usedK=consumeKarma(); if(usedK) edges+=1;
   var r=roll616();
   if(usedK) edges-=1;
-  var score=abilityKey?ab(abilityKey):0;
-  var total=r.sum+score+mod;
+  var score=(abilityKey?ab(abilityKey):0)+bonus;
+  var total=r.sum+score;
   var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
   var kTxt=usedK?' · Karma':'';
-  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+kTxt+(r.fantastic?' · Fantastic! (Yes, and…)':'');
+  var bTxt=bonus?' (incl. +'+bonus+' power)':'';
+  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+bTxt+etTxt+kTxt+(r.fantastic?' · Fantastic! (Yes, and…)':'');
   addLog(label, (r.fantastic?'FANTASTIC · ':'')+total, detail, r.fantastic?'crit':'normal');
   edges=0; troubles=0; renderTray();
   return r;
@@ -639,7 +673,7 @@ function renderTraitsTags(){
   });
 }
 function delItem(kind,i){ S[kind].splice(i,1);
-  if(kind==='powers'){ renderPowers(); renderDerived(); renderDamage(); }
+  if(kind==='powers'){ renderPowers(); renderAbilities(); renderDerived(); renderDamage(); }
   else if(kind==='attacks'){ renderAttacks(); renderDamage(); }
   else renderTraitsTags();
   scheduleAutosave(); }
@@ -737,7 +771,7 @@ function renderPicker(){
   }).join('');
 }
 function pickAdd(idx){ var x=_pkRows[idx]; if(!x)return;
-  if(_pk==='power'){ S.powers.push({name:x.name,powerSet:x.powerSet||'',action:x.action||'',duration:x.duration||'',cost:x.cost||'',range:x.range||'',prerequisites:x.prerequisites||'',effect:x.effect||'',fantastic:x.fantastic||''}); renderPowers(); setTab('powers'); }
+  if(_pk==='power'){ S.powers.push({name:x.name,powerSet:x.powerSet||'',action:x.action||'',duration:x.duration||'',cost:x.cost||'',range:x.range||'',prerequisites:x.prerequisites||'',effect:x.effect||'',fantastic:x.fantastic||''}); renderPowers(); renderAbilities(); renderDerived(); renderDamage(); setTab('powers'); }
   else if(_pk==='trait'){ S.traits.push({name:x.name,description:x.description||''}); renderTraitsTags(); setTab('traits'); }
   else if(_pk==='equip'){ S.attacks.push({name:x.name,ability:x.ability||'melee',range:x.range||'',notes:x.notes||'',category:x.category||'Weapon',damageBonus:x.damageBonus||'',multBonus:num(x.multBonus)||0,flatMult:num(x.flatMult)||0,noDamage:!!x.noDamage,equipped:false}); renderAttacks(); renderDamage(); setTab('equipment'); }
   else { S.tags.push({name:x.name,description:x.description||''}); renderTraitsTags(); setTab('traits'); }
