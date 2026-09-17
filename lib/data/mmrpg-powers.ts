@@ -357,14 +357,14 @@ export const MMRPG_POWERS = [
   {
     "name": "Brawling",
     "genre": "core",
-    "powerSet": "Prerequisi",
+    "powerSet": "None",
     "prerequisites": "None",
-    "action": "St",
+    "action": "",
     "trigger": "",
-    "duration": "",
+    "duration": "Permanent",
     "range": "",
-    "cost": "5 or",
-    "effect": "Th from anoth and boosts effective doubled. If multiplier, that normal success aut not just a If the must pay it 5 Focus. iance 1 haracter puts their brain to work. Set: None quisites: None ion: Permanent : The character adds +1 to their damage multiplier, and they +1 bonus to Logic checks other ttacks. ance 2 hing makes more sense to the character. et: None isites: Brilliance 1, Rank 2 n: Permanent t: The character adds +2 to their ic damage multiplier, and they gain a +2 bonus to Logic checks other than attacks.",
+    "cost": "",
+    "effect": "The character can use their Melee defense score against Agility attacks too.",
     "fantastic": "",
     "description": "The character has the moves and is hard to hit."
   },
@@ -2667,16 +2667,16 @@ export const MMRPG_POWERS = [
   {
     "name": "Regain Focus",
     "genre": "core",
-    "powerSet": "Ranged Wea",
-    "prerequisites": "Suppre",
-    "action": "Reaction",
-    "trigger": "An enemy dec",
+    "powerSet": "Martial Arts",
+    "prerequisites": "Unflappable Poise, Untouchable Position, Rank 4",
+    "action": "Standard",
+    "trigger": "",
     "duration": "Instant",
     "range": "",
-    "cost": "5 Focus",
-    "effect": "The character target’s Vigilance de Health Damage Reducti then applied to the t success, the damage i Focus damage, they ar moment to find their center. ts pable Poise, Untouchable recovers Focus equal to their Vigilance. have been reinforced or replaced with a metal. gains Health Damage Reduction 1. nge the size of an object within reach. or Shrink 2, Rank 3 can make an object within reach grow ter can resize the object as much as their wer would allow them to. ize someone they are touching. or Shrink 2, Rank 3 eaction s grabbed. can resize any person (and their uching. The character can resize the ir own Grow or Shrink power would target does not wish to be resized, the hem first. s to an assault with a hail of shots. pons ssive Fire, Rank 2 lares an attack against the character. makes an Agility attack against a fense. If the attack is a success, apply on normally. Any damage taken is arget’s Focus instead. If it’s a Fantastic s doubled and, if the target takes any e stunned for 1 round.",
+    "cost": "None",
+    "effect": "The character recovers Focus equal to their Vigilance.",
     "fantastic": "",
-    "description": "The character takes a"
+    "description": "The character takes a moment to find their center."
   },
   {
     "name": "Run on Water",

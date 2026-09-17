@@ -41,6 +41,34 @@ export interface MmrpgTag {
   source?: string;
 }
 
+export interface MmrpgAbilities {
+  melee: number;
+  agility: number;
+  resilience: number;
+  vigilance: number;
+  ego: number;
+  logic: number;
+}
+
+/** A pre-generated hero/villain stat block from the core rulebook (Chapter 8). */
+export interface MmrpgCharacter {
+  id: string;
+  name: string;
+  realName?: string;
+  genre: MmrpgGenre;
+  rank: number;
+  health: number;
+  focus: number;
+  karma: number | null;
+  abilities: MmrpgAbilities;
+  speed?: Record<string, number>;
+  occupation?: string;
+  origin?: string;
+  teams?: string;
+  base?: string;
+  source?: string;
+}
+
 export interface MmrpgPower {
   name: string;
   genre: MmrpgGenre;

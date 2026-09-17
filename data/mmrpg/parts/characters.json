@@ -1,0 +1,3585 @@
+[
+ {
+  "name": "ABOMINATION",
+  "realName": "Emil Blonsky",
+  "rank": 5,
+  "health": 240,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 8,
+   "agility": 3,
+   "resilience": 8,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 4
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 30
+  },
+  "occupation": "Spy",
+  "origin": "Weird Science: Gamma Mutate",
+  "teams": "Thunderbolts, Project Green Spring",
+  "base": "Secret",
+  "id": "abomination",
+  "genre": "core"
+ },
+ {
+  "name": "AGATHA HARKNESS",
+  "realName": "Agatha Harkness",
+  "rank": 5,
+  "health": 60,
+  "focus": 150,
+  "karma": null,
+  "abilities": {
+   "melee": 1,
+   "agility": 4,
+   "resilience": 2,
+   "vigilance": 5,
+   "ego": 8,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Educator",
+  "origin": "Magic: Sorcery",
+  "teams": "Daughters of Liberty, Department of the Uncanny, Strange Academy",
+  "base": "Mobile",
+  "id": "agatha-harkness",
+  "genre": "core"
+ },
+ {
+  "name": "AGENT PHIL COULSON",
+  "realName": "Phillip “Phil” Coulson",
+  "rank": 2,
+  "health": 30,
+  "focus": 30,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 1,
+   "vigilance": 1,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Law Enforcer",
+  "origin": "Special Training",
+  "teams": "Power Elite, S.H.I.E.L.D., Secret Avengers",
+  "base": "S.H.I.E.L.D. Helicarrier",
+  "id": "agent-phil-coulson",
+  "genre": "core"
+ },
+ {
+  "name": "AMERICA CHAVEZ",
+  "realName": "America Chavez",
+  "rank": 5,
+  "health": 120,
+  "focus": 90,
+  "karma": 5,
+  "abilities": {
+   "melee": 6,
+   "agility": 7,
+   "resilience": 4,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 2
+  },
+  "speed": {
+   "run": 30,
+   "climb": 15,
+   "swim": 15,
+   "flight": 30
+  },
+  "occupation": "Adventurer, Student",
+  "origin": "Weird Science",
+  "teams": "Thunderbolts, Ultimates, Young Avengers",
+  "base": "Mobile",
+  "id": "america-chavez",
+  "genre": "core"
+ },
+ {
+  "name": "A.I.M. AGENT",
+  "realName": "Varies",
+  "rank": 1,
+  "health": 10,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 0,
+   "agility": 1,
+   "resilience": 0,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Scientist",
+  "origin": "High Tech",
+  "teams": "A.I.M.",
+  "base": "A.I.M. Island",
+  "id": "a-i-m-agent",
+  "genre": "core"
+ },
+ {
+  "name": "ANT-MAN",
+  "realName": "Scott Lang",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 3,
+   "agility": 4,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Criminal",
+  "origin": "High Tech: Pym Particles",
+  "teams": "Avengers, Future Foundation, Guardians of the Galaxy",
+  "base": "Mobile",
+  "id": "ant-man",
+  "genre": "core"
+ },
+ {
+  "name": "AVERAGE CIVILIAN",
+  "realName": "Anything",
+  "rank": 1,
+  "health": 10,
+  "focus": 10,
+  "karma": null,
+  "abilities": {
+   "melee": 0,
+   "agility": 0,
+   "resilience": 0,
+   "vigilance": 0,
+   "ego": 0,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Any",
+  "origin": "None",
+  "teams": "None",
+  "base": "Anywhere",
+  "id": "average-civilian",
+  "genre": "core"
+ },
+ {
+  "name": "BARON MORDO",
+  "realName": "Karl Amadeus Mordo",
+  "rank": 5,
+  "health": 90,
+  "focus": 150,
+  "karma": null,
+  "abilities": {
+   "melee": 3,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 5,
+   "ego": 8,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Adventurer",
+  "origin": "Magic: Sorcery",
+  "teams": "None",
+  "base": "Castle Mordo",
+  "id": "baron-mordo",
+  "genre": "core"
+ },
+ {
+  "name": "BARON ZEMO",
+  "realName": "Helmut Zemo",
+  "rank": 3,
+  "health": 60,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 4,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "Special Training",
+  "teams": "Hydra, Masters of Evil, Thunderbolts",
+  "base": "Tower Zemo",
+  "id": "baron-zemo",
+  "genre": "core"
+ },
+ {
+  "name": "BEAST",
+  "realName": "Henry Philip “Hank” McCoy",
+  "rank": 4,
+  "health": 60,
+  "focus": 60,
+  "karma": 4,
+  "abilities": {
+   "melee": 3,
+   "agility": 4,
+   "resilience": 2,
+   "vigilance": 2,
+   "ego": 3,
+   "logic": 6
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 6
+  },
+  "occupation": "Scientist",
+  "origin": "Mutant",
+  "teams": "Avengers, X-Men, X-Force",
+  "base": "Krakoa",
+  "id": "beast",
+  "genre": "core"
+ },
+ {
+  "name": "BLACK BOLT",
+  "realName": "Blackagar Boltagon",
+  "rank": 5,
+  "health": 120,
+  "focus": 120,
+  "karma": 5,
+  "abilities": {
+   "melee": 6,
+   "agility": 8,
+   "resilience": 4,
+   "vigilance": 4,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 30,
+   "climb": 15,
+   "swim": 15,
+   "flight": 30
+  },
+  "occupation": "Leader",
+  "origin": "Inhuman",
+  "teams": "The House of Agon, Universal Inhumans",
+  "base": "Attilan",
+  "id": "black-bolt",
+  "genre": "core"
+ },
+ {
+  "name": "BLACK PANTHER",
+  "realName": "T’Challa",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 7,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Leader",
+  "origin": "High Tech, Magic",
+  "teams": "Agents of Wakanda, Avengers, Fantastic Four, Panther Cult, Ultimates",
+  "base": "Wakanda",
+  "id": "black-panther",
+  "genre": "core"
+ },
+ {
+  "name": "BLACK WIDOW",
+  "realName": "Natasha Romanoff",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 2,
+   "agility": 4,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Spy",
+  "origin": "Special Training",
+  "teams": "Avengers, Infi nity Watch, S.H.I.E.L.D.",
+  "base": "Mobile",
+  "id": "black-widow",
+  "genre": "core"
+ },
+ {
+  "name": "BLADE",
+  "realName": "Eric Brooks",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 7,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Monstrous: Vampire, Special Training",
+  "teams": "Avengers, MI13, Midnight Sons",
+  "base": "Mobile",
+  "id": "blade",
+  "genre": "core"
+ },
+ {
+  "name": "BLUE MARVEL",
+  "realName": "Adam Bernard Brashear",
+  "rank": 6,
+  "health": 180,
+  "focus": 120,
+  "karma": 6,
+  "abilities": {
+   "melee": 9,
+   "agility": 5,
+   "resilience": 6,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 3
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 36
+  },
+  "occupation": "Educator, Military",
+  "origin": "Weird Science",
+  "teams": "Avengers, Ultimates",
+  "base": "New York City",
+  "id": "blue-marvel",
+  "genre": "core"
+ },
+ {
+  "name": "BRAWN",
+  "realName": "Amadeus Cho",
+  "rank": 4,
+  "health": 120,
+  "focus": 60,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 3,
+   "resilience": 4,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 5
+  },
+  "occupation": "Scientist",
+  "origin": "Weird Science: Gamma Mutate",
+  "teams": "Agents of Atlas, Champions",
+  "base": "Mobile",
+  "id": "brawn",
+  "genre": "core"
+ },
+ {
+  "name": "BULLSEYE",
+  "realName": "Lester",
+  "rank": 2,
+  "health": 90,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 1,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 0,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Assassin",
+  "origin": "Special Training. High Tech: Cybernetics",
+  "teams": "Dark Avengers, Fisk Industries, the Hand",
+  "base": "Hell’s Kitchen, New York City",
+  "id": "bullseye",
+  "genre": "core"
+ },
+ {
+  "name": "CAPTAIN AMERICA",
+  "realName": "Steve Rogers",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 6,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "Weird Science",
+  "teams": "Avengers, S.H.I.E.L.D., U.S. Army",
+  "base": "Avengers Mountain",
+  "id": "captain-america",
+  "genre": "core"
+ },
+ {
+  "name": "CAPTAIN MARVEL",
+  "realName": "Carol Danvers",
+  "rank": 6,
+  "health": 180,
+  "focus": 180,
+  "karma": 6,
+  "abilities": {
+   "melee": 7,
+   "agility": 6,
+   "resilience": 6,
+   "vigilance": 5,
+   "ego": 5,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 36
+  },
+  "occupation": "Military, Spy",
+  "origin": "Alien",
+  "teams": "Avengers, Ultimates, U.S. Air Force",
+  "base": "New York City",
+  "id": "captain-marvel",
+  "genre": "core"
+ },
+ {
+  "name": "CLEA",
+  "realName": "Clea",
+  "rank": 6,
+  "health": 90,
+  "focus": 180,
+  "karma": 6,
+  "abilities": {
+   "melee": 2,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 6,
+   "ego": 9,
+   "logic": 6
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 36
+  },
+  "occupation": "Adventurer, Outsider",
+  "origin": "Magic",
+  "teams": "Defenders",
+  "base": "Sanctum Sanctorum",
+  "id": "clea",
+  "genre": "core"
+ },
+ {
+  "name": "COLOSSUS",
+  "realName": "Piotr Nikolaievitch “Peter” Rasputin",
+  "rank": 4,
+  "health": 210,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 7,
+   "agility": 3,
+   "resilience": 7,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 6
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "X-Force, X-Men",
+  "base": "Krakoa",
+  "id": "colossus",
+  "genre": "core"
+ },
+ {
+  "name": "CROSSBONES",
+  "realName": "Brock Rumlow",
+  "rank": 3,
+  "health": 90,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 0,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "Special Training",
+  "teams": "Hydra, Thunderbolts, Skeleton Crew",
+  "base": "Mobile",
+  "id": "crossbones",
+  "genre": "core"
+ },
+ {
+  "name": "CYCLOPS",
+  "realName": "Scott Summers",
+  "rank": 4,
+  "health": 60,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 3,
+   "agility": 4,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 5,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Educator",
+  "origin": "Mutant",
+  "teams": "X-Force, X-Men",
+  "base": "Krakoa",
+  "id": "cyclops",
+  "genre": "core"
+ },
+ {
+  "name": "DAREDEVIL",
+  "realName": "Matthew “Matt” Murdock",
+  "rank": 2,
+  "health": 60,
+  "focus": 30,
+  "karma": 2,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "swim": 3,
+   "jump": 3,
+   "swingline": 15
+  },
+  "occupation": "Lawyer",
+  "origin": "Weird Science",
+  "teams": "Defenders",
+  "base": "Hell’s Kitchen, New York City",
+  "id": "daredevil",
+  "genre": "core"
+ },
+ {
+  "name": "DEADPOOL",
+  "realName": "Wade Wilson",
+  "rank": 4,
+  "health": 120,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 5,
+   "agility": 4,
+   "resilience": 4,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Weird Science",
+  "teams": "Mercs for Money",
+  "base": "Mobile",
+  "id": "deadpool",
+  "genre": "core"
+ },
+ {
+  "name": "DEVIL DINOSAUR",
+  "realName": "Devil",
+  "rank": 3,
+  "health": 180,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 6,
+   "agility": 2,
+   "resilience": 6,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 25,
+   "climb": 13,
+   "swim": 13,
+   "jump": 13
+  },
+  "occupation": "Outsider",
+  "origin": "Alien",
+  "teams": "Partner to Moon Girl and Moon-Boy",
+  "base": "New York City",
+  "id": "devil-dinosaur",
+  "genre": "core"
+ },
+ {
+  "name": "DOCTOR DOOM",
+  "realName": "Victor Von Doom",
+  "rank": 5,
+  "health": 90,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 7,
+   "logic": 6
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Leader",
+  "origin": "Magic: Sorcery",
+  "teams": "Intergalactic Council, Savage Avengers, Terrible Trio",
+  "base": "Latveria",
+  "id": "doctor-doom",
+  "genre": "core"
+ },
+ {
+  "name": "DOCTOR OCTOPUS",
+  "realName": "Otto Octavius",
+  "rank": 4,
+  "health": 90,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 4,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 5,
+   "swim": 3,
+   "jump": 5
+  },
+  "occupation": "Scientist",
+  "origin": "High Tech, Weird Science",
+  "teams": "Masters of Evil, Sinister Six",
+  "base": "New York City",
+  "id": "doctor-octopus",
+  "genre": "core"
+ },
+ {
+  "name": "DOCTOR STRANGE",
+  "realName": "Stephen Vincent Strange",
+  "rank": 6,
+  "health": 90,
+  "focus": 210,
+  "karma": 6,
+  "abilities": {
+   "melee": 3,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 7,
+   "ego": 9,
+   "logic": 6
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 30
+  },
+  "occupation": "Health Care Worker",
+  "origin": "Magic: Sorcery",
+  "teams": "Avengers, Strange Academy",
+  "base": "New York City",
+  "id": "doctor-strange",
+  "genre": "core"
+ },
+ {
+  "name": "DORA MILAJE WARRIOR",
+  "realName": "Varies",
+  "rank": 2,
+  "health": 60,
+  "focus": 60,
+  "karma": 2,
+  "abilities": {
+   "melee": 3,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "High Tech, Special Training",
+  "teams": "Dora Milaje",
+  "base": "Wakanda",
+  "id": "dora-milaje-warrior",
+  "genre": "core"
+ },
+ {
+  "name": "DORMAMMU",
+  "realName": "Dormammu",
+  "rank": 6,
+  "health": 150,
+  "focus": 180,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 6,
+   "resilience": 5,
+   "vigilance": 5,
+   "ego": 9,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 36
+  },
+  "occupation": "Leader",
+  "origin": "Magic: Demonic",
+  "teams": "Hell Lords, Lords of the Splinter Realms",
+  "base": "Dark Dimension",
+  "id": "dormammu",
+  "genre": "core"
+ },
+ {
+  "name": "DRAX",
+  "realName": "Arthur Sampson Douglas",
+  "rank": 5,
+  "health": 210,
+  "focus": 90,
+  "karma": 5,
+  "abilities": {
+   "melee": 8,
+   "agility": 4,
+   "resilience": 7,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 0
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Alien",
+  "teams": "Guardians of the Galaxy, Infi nity Watch, United Front",
+  "base": "Mobile",
+  "id": "drax",
+  "genre": "core"
+ },
+ {
+  "name": "ECHO",
+  "realName": "Maya Lopez",
+  "rank": 2,
+  "health": 30,
+  "focus": 60,
+  "karma": 2,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 1,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Entertainer",
+  "origin": "Special Training",
+  "teams": "Avengers, Daughters of Liberty",
+  "base": "Avengers Mountain",
+  "id": "echo",
+  "genre": "core"
+ },
+ {
+  "name": "ELEKTRA",
+  "realName": "Elektra Natchios",
+  "rank": 2,
+  "health": 60,
+  "focus": 30,
+  "karma": null,
+  "abilities": {
+   "melee": 3,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Assassin",
+  "origin": "Special Training",
+  "teams": "The Hand, Savage Avengers",
+  "base": "Hell’s Kitchen",
+  "id": "elektra",
+  "genre": "core"
+ },
+ {
+  "name": "EMMA FROST",
+  "realName": "Emma Frost",
+  "rank": 5,
+  "health": 120,
+  "focus": 180,
+  "karma": 5,
+  "abilities": {
+   "melee": 2,
+   "agility": 2,
+   "resilience": 4,
+   "vigilance": 6,
+   "ego": 4,
+   "logic": 8
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Tycoon",
+  "origin": "Mutant",
+  "teams": "Hellfi re Club, X-Men",
+  "base": "Krakoa",
+  "id": "emma-frost",
+  "genre": "core"
+ },
+ {
+  "name": "ENCHANTRESS",
+  "realName": "Amora",
+  "rank": 5,
+  "health": 90,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 7,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Outsider",
+  "origin": "Magic, Mythic: Asgardian",
+  "teams": "Astonishing Avengers, Dark Council",
+  "base": "Asgard",
+  "id": "enchantress",
+  "genre": "core"
+ },
+ {
+  "name": "FORGE",
+  "realName": "Unknown",
+  "rank": 4,
+  "health": 120,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 2,
+   "agility": 2,
+   "resilience": 4,
+   "vigilance": 3,
+   "ego": 5,
+   "logic": 4
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Scientist",
+  "origin": "High Tech: Cybernetics, Magic: Sorcery, Mutant",
+  "teams": "X-Force, X-Men",
+  "base": "Krakoa",
+  "id": "forge",
+  "genre": "core"
+ },
+ {
+  "name": "GAMORA",
+  "realName": "Gamora Zen Whoberi Ben Titan",
+  "rank": 5,
+  "health": 150,
+  "focus": 150,
+  "karma": 5,
+  "abilities": {
+   "melee": 8,
+   "agility": 6,
+   "resilience": 5,
+   "vigilance": 4,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 30,
+   "climb": 15,
+   "swim": 15,
+   "jump": 15
+  },
+  "occupation": "Adventurer",
+  "origin": "Alien",
+  "teams": "Graces, Guardians of the Galaxy, United Front",
+  "base": "Mobile",
+  "id": "gamora",
+  "genre": "core"
+ },
+ {
+  "name": "GHOST RIDER",
+  "realName": "Robbie Reyes",
+  "rank": 5,
+  "health": 150,
+  "focus": 60,
+  "karma": 0,
+  "abilities": {
+   "melee": 7,
+   "agility": 2,
+   "resilience": 5,
+   "vigilance": 2,
+   "ego": 7,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Mechanic",
+  "origin": "Spirit of Vengeance",
+  "teams": "Avengers, Spirits of Vengeance",
+  "base": "Los Angeles",
+  "id": "ghost-rider",
+  "genre": "core"
+ },
+ {
+  "name": "GHOST-SPIDER",
+  "realName": "Gwen Stacy",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 4,
+   "agility": 6,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "swim": 3,
+   "jump": 6,
+   "swingline": 18
+  },
+  "occupation": "Student",
+  "origin": "Weird Science",
+  "teams": "Spider-Army, Web-Warriors",
+  "base": "New York City",
+  "id": "ghost-spider",
+  "genre": "core"
+ },
+ {
+  "name": "GIANT-MAN",
+  "realName": "Raz Malhotra",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 4,
+   "agility": 1,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Scientist",
+  "origin": "High Tech: Pym Particles",
+  "teams": "Agents of Atlas",
+  "base": "Mobile",
+  "id": "giant-man",
+  "genre": "core"
+ },
+ {
+  "name": "GORR THE GOD BUTCHER",
+  "realName": "Gorr",
+  "rank": 6,
+  "health": 240,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 9,
+   "agility": 6,
+   "resilience": 8,
+   "vigilance": 4,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 36
+  },
+  "occupation": "Outsider",
+  "origin": "Alien, Symbiote",
+  "teams": "None",
+  "base": "Black World of Gorr",
+  "id": "gorr-the-god-butcher",
+  "genre": "core"
+ },
+ {
+  "name": "GREEN GOBLIN",
+  "realName": "Norman Osborn",
+  "rank": 4,
+  "health": 120,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 5,
+   "agility": 5,
+   "resilience": 4,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 3
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 24
+  },
+  "occupation": "Criminal, Tycoon",
+  "origin": "Weird Science",
+  "teams": "Dark Avengers, Goblin Nation, Sinister Six, Thunderbolts",
+  "base": "New York City",
+  "id": "green-goblin",
+  "genre": "core"
+ },
+ {
+  "name": "GROOT",
+  "realName": "Groot",
+  "rank": 4,
+  "health": 180,
+  "focus": 60,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 4,
+   "resilience": 6,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 10,
+   "swim": 5,
+   "jump": 5,
+   "glide": 10
+  },
+  "occupation": "Outsider",
+  "origin": "Alien",
+  "teams": "Guardians of the Galaxy",
+  "base": "Mobile",
+  "id": "groot",
+  "genre": "core"
+ },
+ {
+  "name": "HAND NINJA",
+  "realName": "Varies",
+  "rank": 1,
+  "health": 10,
+  "focus": 30,
+  "karma": null,
+  "abilities": {
+   "melee": 1,
+   "agility": 2,
+   "resilience": 0,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Assassins",
+  "origin": "Special Training",
+  "teams": "The Hand",
+  "base": "Japan",
+  "id": "hand-ninja",
+  "genre": "core"
+ },
+ {
+  "name": "HAWKEYE",
+  "realName": "Clinton Francis “Clint” Barton",
+  "rank": 2,
+  "health": 30,
+  "focus": 60,
+  "karma": 2,
+  "abilities": {
+   "melee": 2,
+   "agility": 4,
+   "resilience": 1,
+   "vigilance": 2,
+   "ego": 0,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Entertainer",
+  "origin": "Special Training",
+  "teams": "Avengers, Thunderbolts",
+  "base": "Brooklyn, New York City",
+  "id": "hawkeye",
+  "genre": "core"
+ },
+ {
+  "name": "HELA",
+  "realName": "Hela",
+  "rank": 6,
+  "health": 180,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 9,
+   "agility": 4,
+   "resilience": 6,
+   "vigilance": 3,
+   "ego": 6,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 36
+  },
+  "occupation": "Leader, Outsider",
+  "origin": "Mythic: Asgardian",
+  "teams": "Black Order, Gods of Asgard, Hell Lords",
+  "base": "Hel",
+  "id": "hela",
+  "genre": "core"
+ },
+ {
+  "name": "HELLCAT",
+  "realName": "Patricia “Patsy” Walker",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Special Training",
+  "teams": "Avengers, Defenders, Patsy Walker Temp Agency",
+  "base": "Brooklyn, New York City",
+  "id": "hellcat",
+  "genre": "core"
+ },
+ {
+  "name": "HULK",
+  "realName": "Robert Bruce Banner",
+  "rank": 6,
+  "health": 270,
+  "focus": 150,
+  "karma": 0,
+  "abilities": {
+   "melee": 9,
+   "agility": 3,
+   "resilience": 9,
+   "vigilance": 4,
+   "ego": 2,
+   "logic": 8
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 36
+  },
+  "occupation": "Scientist",
+  "origin": "Weird Science: Gamma Mutate",
+  "teams": "Avengers, S.H.I.E.L.D., U.S. Hulk Operations",
+  "base": "Mobile",
+  "id": "hulk",
+  "genre": "core"
+ },
+ {
+  "name": "HUMAN TORCH",
+  "realName": "Jonathan Lowell Spencer “Johnny” Storm",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 2,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 5,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Adventurer",
+  "origin": "Weird Science",
+  "teams": "Fantastic Four",
+  "base": "New York City",
+  "id": "human-torch",
+  "genre": "core"
+ },
+ {
+  "name": "HYDRA AGENT",
+  "realName": "Varies",
+  "rank": 1,
+  "health": 30,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 1,
+   "agility": 1,
+   "resilience": 1,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "Special Training",
+  "teams": "Hydra",
+  "base": "Secret",
+  "id": "hydra-agent",
+  "genre": "core"
+ },
+ {
+  "name": "ICEMAN",
+  "realName": "Robert “Bobby” Drake",
+  "rank": 4,
+  "health": 90,
+  "focus": 150,
+  "karma": 4,
+  "abilities": {
+   "melee": 1,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 5,
+   "ego": 6,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 24
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "Champions of Los Angeles, X-Men",
+  "base": "Krakoa",
+  "id": "iceman",
+  "genre": "core"
+ },
+ {
+  "name": "IKARIS",
+  "realName": "Unknown",
+  "rank": 5,
+  "health": 150,
+  "focus": 120,
+  "karma": 5,
+  "abilities": {
+   "melee": 6,
+   "agility": 2,
+   "resilience": 5,
+   "vigilance": 4,
+   "ego": 5,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Leader, Outsider",
+  "origin": "Eternal",
+  "teams": "The Eternals",
+  "base": "Olympia",
+  "id": "ikaris",
+  "genre": "core"
+ },
+ {
+  "name": "INVISIBLE WOMAN",
+  "realName": "Susan “Sue” Storm Richards",
+  "rank": 4,
+  "health": 60,
+  "focus": 150,
+  "karma": 4,
+  "abilities": {
+   "melee": 2,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 5,
+   "ego": 6,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Weird Science",
+  "teams": "Fantastic Four",
+  "base": "New York City",
+  "id": "invisible-woman",
+  "genre": "core"
+ },
+ {
+  "name": "IRON FIST",
+  "realName": "Daniel Thomas “Danny” Rand",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 4,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Magic, Special Training",
+  "teams": "The Defenders",
+  "base": "New York City",
+  "id": "iron-fist",
+  "genre": "core"
+ },
+ {
+  "name": "IRON MAN",
+  "realName": "Anthony “Tony” Stark",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 3,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 5,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Engineer, Tycoon",
+  "origin": "High Tech: Battle Suit",
+  "teams": "Avengers, Guardians of the Galaxy, S.H.I.E.L.D.",
+  "base": "New York City",
+  "id": "iron-man",
+  "genre": "core"
+ },
+ {
+  "name": "JESSICA JONES",
+  "realName": "Jessica Campbell Jones",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 3,
+   "agility": 2,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 4
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 15
+  },
+  "occupation": "Investigator",
+  "origin": "Weird Science",
+  "teams": "The Defenders",
+  "base": "New York City",
+  "id": "jessica-jones",
+  "genre": "core"
+ },
+ {
+  "name": "JUGGERNAUT",
+  "realName": "Cain Marko",
+  "rank": 4,
+  "health": 210,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 7,
+   "agility": 2,
+   "resilience": 7,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Magic",
+  "teams": "Brotherhood of Evil Mutants, X-Men",
+  "base": "Krakoa",
+  "id": "juggernaut",
+  "genre": "core"
+ },
+ {
+  "name": "KATE PRYDE",
+  "realName": "Katherine Anne “Kate” Pryde",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 3,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "Hellfi re Trading Company, X-Men, Marauders",
+  "base": "Krakoa",
+  "id": "kate-pryde",
+  "genre": "core"
+ },
+ {
+  "name": "KILLMONGER",
+  "realName": "Erik Killmonger",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 7,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Leader",
+  "origin": "High Tech, Magic",
+  "teams": "None",
+  "base": "Niganda",
+  "id": "killmonger",
+  "genre": "core"
+ },
+ {
+  "name": "KINGPIN",
+  "realName": "Wilson Fisk",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 5,
+   "agility": 1,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 3
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Criminal",
+  "origin": "Special Training",
+  "teams": "Power Elite, Fisk Industries",
+  "base": "New York City",
+  "id": "kingpin",
+  "genre": "core"
+ },
+ {
+  "name": "KRAVEN THE HUNTER",
+  "realName": "Sergei Nikolaevich Kravinoff",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 0
+  },
+  "speed": {
+   "run": 6,
+   "climb": 6,
+   "swim": 3,
+   "jump": 6
+  },
+  "occupation": "Adventurer",
+  "origin": "Magic",
+  "teams": "Sinister Six",
+  "base": "Savage Land",
+  "id": "kraven-the-hunter",
+  "genre": "core"
+ },
+ {
+  "name": "LEADER",
+  "realName": "Samuel “Sam” Sterns",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 1,
+   "agility": 1,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 4,
+   "logic": 7
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Criminal",
+  "origin": "Weird Science: Gamma Mutate",
+  "teams": "Intelligencia, Thunderbolts",
+  "base": "Mobile",
+  "id": "leader",
+  "genre": "core"
+ },
+ {
+  "name": "LOKI",
+  "realName": "Loki Laufeyson",
+  "rank": 5,
+  "health": 90,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 3,
+   "agility": 2,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 8,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Outsider",
+  "origin": "Mythic: Asgardian",
+  "teams": "Dark Council, Gods of Asgard",
+  "base": "Asgard",
+  "id": "loki",
+  "genre": "core"
+ },
+ {
+  "name": "LUKE CAGE",
+  "realName": "Lucas “Luke” Cage; formerly Carl Lucas",
+  "rank": 3,
+  "health": 150,
+  "focus": 30,
+  "karma": 3,
+  "abilities": {
+   "melee": 4,
+   "agility": 1,
+   "resilience": 5,
+   "vigilance": 1,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer, Leader",
+  "origin": "Weird Science",
+  "teams": "The Defenders, Heroes for Hire, Mighty Avengers",
+  "base": "New York City",
+  "id": "luke-cage",
+  "genre": "core"
+ },
+ {
+  "name": "MAGNETO",
+  "realName": "Max Eisenhardt",
+  "rank": 6,
+  "health": 90,
+  "focus": 180,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 6,
+   "ego": 9,
+   "logic": 7
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 30
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "Brotherhood of Evil Mutants, X-Men",
+  "base": "Krakoa",
+  "id": "magneto",
+  "genre": "core"
+ },
+ {
+  "name": "MAGNITRON",
+  "realName": "Yon-Rogg",
+  "rank": 4,
+  "health": 120,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 4,
+   "vigilance": 3,
+   "ego": 5,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Military, Outsider",
+  "origin": "Alien: Kree",
+  "teams": "Imperial Kree Amy",
+  "base": "Hala",
+  "id": "magnitron",
+  "genre": "core"
+ },
+ {
+  "name": "MALEKITH",
+  "realName": "Malekith",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 6,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Outsider",
+  "origin": "Mythic",
+  "teams": "Dark Council, Dark Elves",
+  "base": "Niffl eheim",
+  "id": "malekith",
+  "genre": "core"
+ },
+ {
+  "name": "MANDARIN",
+  "realName": "Unknown",
+  "rank": 5,
+  "health": 90,
+  "focus": 150,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 5,
+   "ego": 7,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Tycoon",
+  "origin": "Magic: Sorcery",
+  "teams": "The Hand, the Triads",
+  "base": "Mandarin City",
+  "id": "mandarin",
+  "genre": "core"
+ },
+ {
+  "name": "MAXIMUS",
+  "realName": "Maximus Boltagon",
+  "rank": 3,
+  "health": 30,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 1,
+   "agility": 1,
+   "resilience": 1,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 6
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Leader",
+  "origin": "Inhuman",
+  "teams": "Kree Imperium, League of Evil Inhumans",
+  "base": "New Arctilan",
+  "id": "maximus",
+  "genre": "core"
+ },
+ {
+  "name": "MIRAGE",
+  "realName": "Danielle “Dani” Moonstar",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": 3,
+  "abilities": {
+   "melee": 1,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Mutant",
+  "teams": "New Mutants, X-Men",
+  "base": "Krakoa",
+  "id": "mirage",
+  "genre": "core"
+ },
+ {
+  "name": "MISTER FANTASTIC",
+  "realName": "Reed Richards",
+  "rank": 4,
+  "health": 120,
+  "focus": 60,
+  "karma": 4,
+  "abilities": {
+   "melee": 2,
+   "agility": 4,
+   "resilience": 4,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 7
+  },
+  "speed": {
+   "run": 10,
+   "climb": 5,
+   "swim": 5,
+   "glide": 20
+  },
+  "occupation": "Scientist",
+  "origin": "Weird Science",
+  "teams": "Fantastic Four, Future Foundation",
+  "base": "New York City",
+  "id": "mister-fantastic",
+  "genre": "core"
+ },
+ {
+  "name": "MISTY KNIGHT",
+  "realName": "Mercedes “Misty” Knight",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 5,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 0,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Investigator, Law Enforcer",
+  "origin": "High Tech: Cybernetics, Special Training",
+  "teams": "Aberrant Crimes Division (ACD) of the F.B.I., Daughters of the Dragon, Defenders",
+  "base": "Mobile",
+  "id": "misty-knight",
+  "genre": "core"
+ },
+ {
+  "name": "M.O.D.O.K.",
+  "realName": "George Tarleton",
+  "rank": 4,
+  "health": 60,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 0,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 4,
+   "ego": 5,
+   "logic": 7
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 24
+  },
+  "occupation": "Scientist",
+  "origin": "High Tech: Battle Suit, Weird Science",
+  "teams": "A.I.M., Intelligencia",
+  "base": "Mobile",
+  "id": "m-o-d-o-k",
+  "genre": "core"
+ },
+ {
+  "name": "MOON GIRL",
+  "realName": "Lunella Louise Lafayette",
+  "rank": 2,
+  "health": 10,
+  "focus": 60,
+  "karma": 2,
+  "abilities": {
+   "melee": 0,
+   "agility": 1,
+   "resilience": 0,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 5
+  },
+  "speed": {
+   "run": 4,
+   "climb": 2,
+   "swim": 2,
+   "jump": 2
+  },
+  "occupation": "Scientist, Student",
+  "origin": "Inhuman",
+  "teams": "None",
+  "base": "New York City",
+  "id": "moon-girl",
+  "genre": "core"
+ },
+ {
+  "name": "MOON KNIGHT",
+  "realName": "Marc Spector",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 4,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 4
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Investigator, Military",
+  "origin": "Mythic",
+  "teams": "Defenders, Midnight Mission, Midnight Sons",
+  "base": "New York City",
+  "id": "moon-knight",
+  "genre": "core"
+ },
+ {
+  "name": "MORBIUS",
+  "realName": "Michael Morbius",
+  "rank": 3,
+  "health": 90,
+  "focus": 30,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 15
+  },
+  "occupation": "Scientist",
+  "origin": "Weird Science",
+  "teams": "Midnight Sons, Legion of Monsters",
+  "base": "Mobile",
+  "id": "morbius",
+  "genre": "core"
+ },
+ {
+  "name": "MS. MARVEL",
+  "realName": "Kamala Khan",
+  "rank": 3,
+  "health": 120,
+  "focus": 30,
+  "karma": 3,
+  "abilities": {
+   "melee": 2,
+   "agility": 4,
+   "resilience": 4,
+   "vigilance": 1,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 10,
+   "climb": 5,
+   "swim": 5,
+   "jump": 5
+  },
+  "occupation": "Student",
+  "origin": "Inhuman",
+  "teams": "Champions, Protectors",
+  "base": "Jersey City",
+  "id": "ms-marvel",
+  "genre": "core"
+ },
+ {
+  "name": "MYSTERIO",
+  "realName": "Quentin Beck",
+  "rank": 2,
+  "health": 30,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 0,
+   "agility": 0,
+   "resilience": 1,
+   "vigilance": 2,
+   "ego": 5,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Entertainer",
+  "origin": "High Tech",
+  "teams": "Sinister Six",
+  "base": "New York City",
+  "id": "mysterio",
+  "genre": "core"
+ },
+ {
+  "name": "MYSTIQUE",
+  "realName": "Raven Darkhölme",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Spy",
+  "origin": "Mutant",
+  "teams": "Brotherhood of Evil Mutants, Hellfi re Club, X-Men",
+  "base": "Krakoa",
+  "id": "mystique",
+  "genre": "core"
+ },
+ {
+  "name": "NEBULA",
+  "realName": "Nebula",
+  "rank": 4,
+  "health": 120,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 6,
+   "agility": 5,
+   "resilience": 4,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Alien",
+  "teams": "Graces",
+  "base": "Mobile",
+  "id": "nebula",
+  "genre": "core"
+ },
+ {
+  "name": "NICK FURY JR.",
+  "realName": "Nicholas Joseph “Nick” Fury Jr.",
+  "rank": 2,
+  "health": 60,
+  "focus": 60,
+  "karma": 2,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Law Enforcer",
+  "origin": "Special Training",
+  "teams": "C.I.A., S.H.I.E.L.D.",
+  "base": "Mobile",
+  "id": "nick-fury-jr",
+  "genre": "core"
+ },
+ {
+  "name": "NIGHT NURSE",
+  "realName": "Linda Carter",
+  "rank": 1,
+  "health": 30,
+  "focus": 30,
+  "karma": 1,
+  "abilities": {
+   "melee": 0,
+   "agility": 1,
+   "resilience": 1,
+   "vigilance": 1,
+   "ego": 0,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Health Care Worker",
+  "origin": "Special Training",
+  "teams": "None",
+  "base": "New York City",
+  "id": "night-nurse",
+  "genre": "core"
+ },
+ {
+  "name": "NIGHTCRAWLER",
+  "realName": "Kurt Wagner",
+  "rank": 3,
+  "health": 60,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 2,
+   "agility": 5,
+   "resilience": 2,
+   "vigilance": 2,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Entertainer",
+  "origin": "Mutant",
+  "teams": "X-Men",
+  "base": "Krakoa",
+  "id": "nightcrawler",
+  "genre": "core"
+ },
+ {
+  "name": "OKOYE",
+  "realName": "Okoye",
+  "rank": 2,
+  "health": 60,
+  "focus": 60,
+  "karma": 2,
+  "abilities": {
+   "melee": 4,
+   "agility": 1,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "Special Training, High Tech",
+  "teams": "Dora Milaje",
+  "base": "Wakanda",
+  "id": "okoye",
+  "genre": "core"
+ },
+ {
+  "name": "PHOTON",
+  "realName": "Monica Rambeau",
+  "rank": 5,
+  "health": 120,
+  "focus": 150,
+  "karma": 5,
+  "abilities": {
+   "melee": 7,
+   "agility": 5,
+   "resilience": 4,
+   "vigilance": 4,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 30
+  },
+  "occupation": "Law Enforcer",
+  "origin": "Weird Science",
+  "teams": "Avengers, Thunderbolts, Ultimates",
+  "base": "Mobile",
+  "id": "photon",
+  "genre": "core"
+ },
+ {
+  "name": "PROFESSOR X",
+  "realName": "Charles Francis Xavier",
+  "rank": 6,
+  "health": 60,
+  "focus": 300,
+  "karma": 6,
+  "abilities": {
+   "melee": 0,
+   "agility": 1,
+   "resilience": 2,
+   "vigilance": 9,
+   "ego": 9,
+   "logic": 9
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Educator",
+  "origin": "Mutant",
+  "teams": "X-Men",
+  "base": "Krakoa",
+  "id": "professor-x",
+  "genre": "core"
+ },
+ {
+  "name": "PSYLOCKE",
+  "realName": "Kwannon",
+  "rank": 3,
+  "health": 60,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 3,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 4
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 15
+  },
+  "occupation": "Assassin",
+  "origin": "Mutant",
+  "teams": "The Hand, Marauders, X-Men",
+  "base": "Mobile",
+  "id": "psylocke",
+  "genre": "core"
+ },
+ {
+  "name": "QUICKSILVER",
+  "realName": "Pietro Django Maximoff",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 3,
+   "agility": 7,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 24,
+   "climb": 12,
+   "swim": 12,
+   "jump": 12
+  },
+  "occupation": "Adventurer",
+  "origin": "Weird Science",
+  "teams": "Avengers, Brotherhood of Evil Mutants, X-Factor",
+  "base": "Mobile",
+  "id": "quicksilver",
+  "genre": "core"
+ },
+ {
+  "name": "RED SKULL",
+  "realName": "Johann Shmidt",
+  "rank": 3,
+  "health": 60,
+  "focus": 30,
+  "karma": null,
+  "abilities": {
+   "melee": 3,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 3,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Leader",
+  "origin": "Special Training",
+  "teams": "Hydra",
+  "base": "Mobile",
+  "id": "red-skull",
+  "genre": "core"
+ },
+ {
+  "name": "RED WOLF",
+  "realName": "Red Wolf",
+  "rank": 2,
+  "health": 60,
+  "focus": 30,
+  "karma": 2,
+  "abilities": {
+   "melee": 1,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Law Enforcer",
+  "origin": "Special Training",
+  "teams": "Santa Rosa Sheriff ’s Department",
+  "base": "Mobile",
+  "id": "red-wolf",
+  "genre": "core"
+ },
+ {
+  "name": "REPTIL",
+  "realName": "Humberto “Berto” Lopez",
+  "rank": 3,
+  "health": 150,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 4,
+   "agility": 2,
+   "resilience": 5,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 5
+  },
+  "occupation": "Adventurer",
+  "origin": "High Tech: Pym Particles, Magic",
+  "teams": "Avengers Academy",
+  "base": "Los Angeles",
+  "id": "reptil",
+  "genre": "core"
+ },
+ {
+  "name": "ROCKET RACCOON",
+  "realName": "Rocket",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 3,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 1,
+   "logic": 4
+  },
+  "speed": {
+   "run": 5,
+   "climb": 2,
+   "swim": 2,
+   "jump": 2
+  },
+  "occupation": "Criminal, Outsider",
+  "origin": "Alien",
+  "teams": "Avengers, Guardians of the Galaxy",
+  "base": "Mobile",
+  "id": "rocket-raccoon",
+  "genre": "core"
+ },
+ {
+  "name": "RONAN THE ACCUSER",
+  "realName": "Ronan",
+  "rank": 4,
+  "health": 120,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 5,
+   "agility": 2,
+   "resilience": 4,
+   "vigilance": 2,
+   "ego": 6,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 24
+  },
+  "occupation": "Leader",
+  "origin": "Alien: Kree",
+  "teams": "Kree Empire",
+  "base": "Kree-Lar",
+  "id": "ronan-the-accuser",
+  "genre": "core"
+ },
+ {
+  "name": "SABRETOOTH",
+  "realName": "Victor Creed",
+  "rank": 4,
+  "health": 180,
+  "focus": 150,
+  "karma": null,
+  "abilities": {
+   "melee": 7,
+   "agility": 4,
+   "resilience": 6,
+   "vigilance": 4,
+   "ego": 0,
+   "logic": 0
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 5
+  },
+  "occupation": "Military",
+  "origin": "High Tech: Cybernetics, Mutant",
+  "teams": "1959 Avengers, Brotherhood of Evil Mu- tants, the Hand, Marauders, Team X, X-Factor",
+  "base": "Krakoa",
+  "id": "sabretooth",
+  "genre": "core"
+ },
+ {
+  "name": "SCARLET WITCH",
+  "realName": "Wanda Maximoff",
+  "rank": 5,
+  "health": 90,
+  "focus": 150,
+  "karma": 5,
+  "abilities": {
+   "melee": 2,
+   "agility": 2,
+   "resilience": 3,
+   "vigilance": 5,
+   "ego": 8,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Adventurer",
+  "origin": "Weird Science, Magic: Chaos Magic",
+  "teams": "Brotherhood of Evil Mutants, X-Men",
+  "base": "Krakoa",
+  "id": "scarlet-witch",
+  "genre": "core"
+ },
+ {
+  "name": "SHANG-CHI",
+  "realName": "Zheng Shang-Chi",
+  "rank": 4,
+  "health": 90,
+  "focus": 150,
+  "karma": 4,
+  "abilities": {
+   "melee": 7,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 5,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Spy",
+  "origin": "Special Training",
+  "teams": "Agents of Atlas, Avengers, Five Weapons Society, Heroes for Hire, Protectors",
+  "base": "Chinatown, New York City",
+  "id": "shang-chi",
+  "genre": "core"
+ },
+ {
+  "name": "SHE-HULK",
+  "realName": "Jennifer Walters",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 6
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 24
+  },
+  "occupation": "Lawyer",
+  "origin": "Weird Science: Gamma Mutate",
+  "teams": "Avengers, Fantastic Four",
+  "base": "New York City",
+  "id": "she-hulk",
+  "genre": "core"
+ },
+ {
+  "name": "S.H.I.E.L.D. AGENT",
+  "realName": "Varies",
+  "rank": 1,
+  "health": 30,
+  "focus": 30,
+  "karma": 1,
+  "abilities": {
+   "melee": 1,
+   "agility": 1,
+   "resilience": 1,
+   "vigilance": 1,
+   "ego": 0,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Law Enforcer",
+  "origin": "Special Training",
+  "teams": "S.H.I.E.L.D.",
+  "base": "S.H.I.E.L.D. Helicarrier",
+  "id": "s-h-i-e-l-d-agent",
+  "genre": "core"
+ },
+ {
+  "name": "SHURI",
+  "realName": "Shuri",
+  "rank": 4,
+  "health": 90,
+  "focus": 60,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 2,
+   "logic": 4
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Leader, Scientist",
+  "origin": "High Tech, Magic",
+  "teams": "Panther Cult",
+  "base": "Wakanda",
+  "id": "shuri",
+  "genre": "core"
+ },
+ {
+  "name": "SILK",
+  "realName": "Cindy Moon",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 6,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 0,
+   "logic": 3
+  },
+  "speed": {
+   "swim": 3,
+   "jump": 6,
+   "glide": 12,
+   "swingline": 18
+  },
+  "occupation": "Journalist",
+  "origin": "Weird Science",
+  "teams": "Agents of Atlas, Spider-Army",
+  "base": "New York City",
+  "id": "silk",
+  "genre": "core"
+ },
+ {
+  "name": "SKRULL",
+  "realName": "Varies",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 4,
+   "resilience": 2,
+   "vigilance": 2,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 10,
+   "climb": 5,
+   "swim": 5,
+   "jump": 5
+  },
+  "occupation": "Military, Outsider",
+  "origin": "Alien: Skrull",
+  "teams": "Skrull Empire",
+  "base": "Tarnax II",
+  "id": "skrull",
+  "genre": "core"
+ },
+ {
+  "name": "SPIDER-MAN",
+  "realName": "Miles Morales",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 3,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "swim": 3,
+   "jump": 6,
+   "swingline": 18
+  },
+  "occupation": "Student",
+  "origin": "Weird Science",
+  "teams": "Champions, Spider-Army",
+  "base": "New York City",
+  "id": "spider-man-miles-morales",
+  "genre": "core"
+ },
+ {
+  "name": "SPIDER-MAN",
+  "realName": "Peter Parker",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 5,
+   "agility": 7,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 0,
+   "logic": 4
+  },
+  "speed": {
+   "swim": 3,
+   "jump": 6,
+   "glide": 12,
+   "swingline": 18
+  },
+  "occupation": "Journalist",
+  "origin": "Weird Science",
+  "teams": "Avengers, Fantastic Four, Spider-Army",
+  "base": "New York City",
+  "id": "spider-man-peter-parker",
+  "genre": "core"
+ },
+ {
+  "name": "SPIDER-MAN 2099",
+  "realName": "Miguel O’Hara",
+  "rank": 4,
+  "health": 90,
+  "focus": 60,
+  "karma": 4,
+  "abilities": {
+   "melee": 6,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 0,
+   "logic": 4
+  },
+  "speed": {
+   "swim": 3,
+   "jump": 6,
+   "glide": 12,
+   "swingline": 18
+  },
+  "occupation": "Scientist",
+  "origin": "Weird Science",
+  "teams": "Spider-Army",
+  "base": "New York City",
+  "id": "spider-man-2099",
+  "genre": "core"
+ },
+ {
+  "name": "SQUIRREL GIRL",
+  "realName": "Doreen Green",
+  "rank": 3,
+  "health": 60,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 3,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 2,
+   "ego": 6,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 5,
+   "swim": 3,
+   "jump": 5
+  },
+  "occupation": "Student",
+  "origin": "Unknown",
+  "teams": "Great Lakes Avengers, S.H.I.E.L.D.",
+  "base": "New York City",
+  "id": "squirrel-girl",
+  "genre": "core"
+ },
+ {
+  "name": "STAR-LORD",
+  "realName": "Peter Jason Quill",
+  "rank": 5,
+  "health": 150,
+  "focus": 120,
+  "karma": 5,
+  "abilities": {
+   "melee": 4,
+   "agility": 6,
+   "resilience": 5,
+   "vigilance": 4,
+   "ego": 3,
+   "logic": 3
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Alien",
+  "teams": "Guardians of the Galaxy, United Front",
+  "base": "Mobile",
+  "id": "star-lord",
+  "genre": "core"
+ },
+ {
+  "name": "STORM",
+  "realName": "Ororo Munroe",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 4,
+   "ego": 4,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Adventurer, Leader",
+  "origin": "Mutant",
+  "teams": "Avengers, Gods of Wakanda, Marauders (Pryde’s team), Quiet Council of Krakoa, X-Men",
+  "base": "Krakoa, Wakanda",
+  "id": "storm",
+  "genre": "core"
+ },
+ {
+  "name": "SUB-MARINER",
+  "realName": "Namor McKenzie",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 6,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 12,
+   "flight": 20
+  },
+  "occupation": "Leader, Outsider",
+  "origin": "Atlantean, Mutant",
+  "teams": "Atlantean Royal Family, Avengers",
+  "base": "Atlantis",
+  "id": "sub-mariner",
+  "genre": "core"
+ },
+ {
+  "name": "SUNSPOT",
+  "realName": "Roberto “Bobby” Da Costa",
+  "rank": 5,
+  "health": 90,
+  "focus": 90,
+  "karma": 5,
+  "abilities": {
+   "melee": 3,
+   "agility": 6,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 8,
+   "logic": 2
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 30
+  },
+  "occupation": "Tycoon",
+  "origin": "Mutant",
+  "teams": "Great Ring of Arakko, New Mutants, X-Men",
+  "base": "Arakko",
+  "id": "sunspot",
+  "genre": "core"
+ },
+ {
+  "name": "TASKMASTER",
+  "realName": "Anthony “Tony” Masters",
+  "rank": 3,
+  "health": 60,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 5,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Criminal",
+  "origin": "Unknown",
+  "teams": "Hydra, S.H.I.E.L.D.",
+  "base": "Mobile",
+  "id": "taskmaster",
+  "genre": "core"
+ },
+ {
+  "name": "THANOS",
+  "realName": "Thanos",
+  "rank": 6,
+  "health": 210,
+  "focus": 120,
+  "karma": null,
+  "abilities": {
+   "melee": 9,
+   "agility": 4,
+   "resilience": 7,
+   "vigilance": 3,
+   "ego": 5,
+   "logic": 3
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 36
+  },
+  "occupation": "Outsider",
+  "origin": "Eternal",
+  "teams": "The Eternals",
+  "base": "Mobile",
+  "id": "thanos",
+  "genre": "core"
+ },
+ {
+  "name": "THING",
+  "realName": "Benjamin Jacob “Ben” Grimm",
+  "rank": 5,
+  "health": 240,
+  "focus": 120,
+  "karma": 5,
+  "abilities": {
+   "melee": 8,
+   "agility": 3,
+   "resilience": 8,
+   "vigilance": 4,
+   "ego": 4,
+   "logic": 1
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 30
+  },
+  "occupation": "Adventurer",
+  "origin": "Weird Science",
+  "teams": "Fantastic Four",
+  "base": "New York City",
+  "id": "thing",
+  "genre": "core"
+ },
+ {
+  "name": "THOR",
+  "realName": "Jane Foster",
+  "rank": 5,
+  "health": 120,
+  "focus": 120,
+  "karma": 5,
+  "abilities": {
+   "melee": 7,
+   "agility": 4,
+   "resilience": 4,
+   "vigilance": 3,
+   "ego": 3,
+   "logic": 4
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Health Care Worker",
+  "origin": "Mythic: Asgardian, Special Training",
+  "teams": "Avengers",
+  "base": "New York City, Asgard",
+  "id": "thor-jane-foster",
+  "genre": "core"
+ },
+ {
+  "name": "THOR",
+  "realName": "Thor Odinson",
+  "rank": 5,
+  "health": 240,
+  "focus": 60,
+  "karma": 5,
+  "abilities": {
+   "melee": 8,
+   "agility": 4,
+   "resilience": 8,
+   "vigilance": 2,
+   "ego": 5,
+   "logic": 0
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 30
+  },
+  "occupation": "Leader, Outsider",
+  "origin": "Mythic: Asgardian",
+  "teams": "Gods of Asgard, Avengers, God Squad",
+  "base": "Asgard",
+  "id": "thor-thor-odinson",
+  "genre": "core"
+ },
+ {
+  "name": "TITANIA",
+  "realName": "Mary MacPherran",
+  "rank": 2,
+  "health": 90,
+  "focus": 30,
+  "karma": null,
+  "abilities": {
+   "melee": 4,
+   "agility": 1,
+   "resilience": 3,
+   "vigilance": 1,
+   "ego": 1,
+   "logic": 0
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Weird Science",
+  "teams": "Gamma Flight",
+  "base": "Mobile",
+  "id": "titania",
+  "genre": "core"
+ },
+ {
+  "name": "ULTRON",
+  "realName": "Ultron",
+  "rank": 5,
+  "health": 90,
+  "focus": 90,
+  "karma": null,
+  "abilities": {
+   "melee": 6,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 4,
+   "logic": 6
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 25
+  },
+  "occupation": "Outsider",
+  "origin": "High Tech: Android",
+  "teams": "Masters of Evil",
+  "base": "Mobile",
+  "id": "ultron",
+  "genre": "core"
+ },
+ {
+  "name": "VAMPIRE",
+  "realName": "Varies",
+  "rank": 2,
+  "health": 60,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Criminal",
+  "origin": "Monstrous: Vampire",
+  "teams": "Varies",
+  "base": "Varies",
+  "id": "vampire",
+  "genre": "core"
+ },
+ {
+  "name": "VENOM",
+  "realName": "Edward Charles Allan “Eddie” Brock",
+  "rank": 4,
+  "health": 90,
+  "focus": 60,
+  "karma": null,
+  "abilities": {
+   "melee": 6,
+   "agility": 5,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 4,
+   "logic": 0
+  },
+  "speed": {
+   "swim": 3,
+   "jump": 6,
+   "glide": 12,
+   "swingline": 18
+  },
+  "occupation": "Journalist",
+  "origin": "Symbiote",
+  "teams": "Sinister Six, Symbiote Hive",
+  "base": "New York City",
+  "id": "venom",
+  "genre": "core"
+ },
+ {
+  "name": "VISION",
+  "realName": "Vision",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 4,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 1,
+   "logic": 5
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Adventurer",
+  "origin": "High Tech: Android",
+  "teams": "Avengers",
+  "base": "Arlington, Virginia",
+  "id": "vision",
+  "genre": "core"
+ },
+ {
+  "name": "VULTURE",
+  "realName": "Adrian Toomes",
+  "rank": 2,
+  "health": 60,
+  "focus": 30,
+  "karma": null,
+  "abilities": {
+   "melee": 2,
+   "agility": 2,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 0,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 10
+  },
+  "occupation": "Criminal",
+  "origin": "High Tech",
+  "teams": "Sinister Six, Sinister Twelve, Savage Six",
+  "base": "New York City",
+  "id": "vulture",
+  "genre": "core"
+ },
+ {
+  "name": "WAR MACHINE",
+  "realName": "James Rupert “Jim” Rhodes",
+  "rank": 4,
+  "health": 90,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 2,
+   "agility": 6,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 2,
+   "logic": 4
+  },
+  "speed": {
+   "run": 6,
+   "climb": 3,
+   "swim": 3,
+   "flight": 24
+  },
+  "occupation": "Military",
+  "origin": "High Tech: Battle Suit",
+  "teams": "Avengers, S.H.I.E.L.D.",
+  "base": "New York City",
+  "id": "war-machine",
+  "genre": "core"
+ },
+ {
+  "name": "WASP",
+  "realName": "Janet Van Dyne",
+  "rank": 4,
+  "health": 90,
+  "focus": 90,
+  "karma": 4,
+  "abilities": {
+   "melee": 3,
+   "agility": 4,
+   "resilience": 3,
+   "vigilance": 3,
+   "ego": 5,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "flight": 20
+  },
+  "occupation": "Tycoon",
+  "origin": "High Tech: Pym Particles",
+  "teams": "Agents of Wakanda, Avengers",
+  "base": "Mobile",
+  "id": "wasp",
+  "genre": "core"
+ },
+ {
+  "name": "WHITE TIGER",
+  "realName": "Ava Ayala",
+  "rank": 2,
+  "health": 60,
+  "focus": 30,
+  "karma": 2,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 1,
+   "ego": 3,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Special Training",
+  "teams": "Avengers Academy, Daughters of Liberty, Heroes for Hire",
+  "base": "Mobile",
+  "id": "white-tiger",
+  "genre": "core"
+ },
+ {
+  "name": "WINTER SOLDIER",
+  "realName": "James Buchanan “Bucky” Barnes",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 4,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 1,
+   "logic": 2
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Spy",
+  "origin": "High Tech: Cybernetics, Special Training, Weird Science",
+  "teams": "Avengers, KGB, S.H.I.E.L.D.",
+  "base": "Mobile",
+  "id": "winter-soldier",
+  "genre": "core"
+ },
+ {
+  "name": "WOLVERINE",
+  "realName": "Laura Kinney",
+  "rank": 3,
+  "health": 90,
+  "focus": 60,
+  "karma": 3,
+  "abilities": {
+   "melee": 6,
+   "agility": 3,
+   "resilience": 3,
+   "vigilance": 2,
+   "ego": 0,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "High-Tech: Cybernetics, Mutant",
+  "teams": "X-Force, X-Men",
+  "base": "Krakoa",
+  "id": "wolverine-laura-kinney",
+  "genre": "core"
+ },
+ {
+  "name": "WOLVERINE",
+  "realName": "James Howlett (a.k.a. Logan)",
+  "rank": 4,
+  "health": 150,
+  "focus": 150,
+  "karma": 4,
+  "abilities": {
+   "melee": 7,
+   "agility": 2,
+   "resilience": 5,
+   "vigilance": 4,
+   "ego": 1,
+   "logic": 1
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Military",
+  "origin": "High Tech: Cybernetics, Mutant",
+  "teams": "Avengers, Fantastic Four, X-Force, X-Men",
+  "base": "Krakoa, Summer House (the Blue Area of the Moon)",
+  "id": "wolverine-james-howlett-a-k-a-logan",
+  "genre": "core"
+ },
+ {
+  "name": "WONG",
+  "realName": "Wong",
+  "rank": 4,
+  "health": 60,
+  "focus": 120,
+  "karma": 4,
+  "abilities": {
+   "melee": 2,
+   "agility": 3,
+   "resilience": 2,
+   "vigilance": 3,
+   "ego": 7,
+   "logic": 3
+  },
+  "speed": {
+   "run": 5,
+   "climb": 3,
+   "swim": 3,
+   "jump": 3
+  },
+  "occupation": "Adventurer",
+  "origin": "Magic: Sorcery",
+  "teams": "Midnight Sons",
+  "base": "New York City",
+  "id": "wong",
+  "genre": "core"
+ }
+]

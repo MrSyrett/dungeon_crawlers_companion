@@ -1454,6 +1454,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
       <option value="DND">D&amp;D</option>
       <option value="D62E">D6 System 2e</option>
       <option value="ICRPG">Index Card RPG</option>
+      <option value="MMRPG">Marvel Multiverse RPG</option>
       <option value="CO">Candela Obscura</option>
       <option value="YZE">Year Zero Engine</option>
     </select>
@@ -1498,6 +1499,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     DND: ['adventure','npc','dungeon','encounter','shop','dndmonster','dndtreasure'],
     D62E:['d62emonster','d62etreasure'],
     ICRPG:['icrpgmonster','icrpgtreasure'],
+    MMRPG:['mmrpgmonster'],
     CO:  [],
     YZE: ['yzetables'],
   };
@@ -2374,6 +2376,7 @@ GMScenes.renderPins();
         <option value="d62etreasure">D6 2e Gear Drop</option>
         <option value="icrpgmonster">ICRPG Monster</option>
         <option value="icrpgtreasure">ICRPG Loot</option>
+        <option value="mmrpgmonster">Marvel Character</option>
         <option value="yzetables">YZE Crit &amp; Panic</option>
         <option value="map">Map</option>
       </select>
@@ -2802,6 +2805,22 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-d62emon-kind-results"></div>
+      </div>
+
+      <!-- MARVEL MULTIVERSE RPG CHARACTER PANEL (roster draw; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="mmrpgmonster">
+        <div class="gen-controls">
+          <label class="gen-label">Rank
+            <select class="gen-select" id="gen-mmrpgmon-kind"><option value="">Any Rank</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-mmrpgmon-kind-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-mmrpgmon-kind-results"></div>
       </div>
 
       <!-- ACE! TREASURE PANEL (random spread + hand-picked items from the gear list; sends a claimable drop) -->
@@ -4862,7 +4881,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg'];
   function sysToSource(sys) { sys = String(sys || 'DCC').toLowerCase(); return sys === 'sd' ? 'sd' : XS_SOURCES.indexOf(sys) >= 0 ? sys : 'dcc'; }
   let pickerSource = (window.GM_SYSTEM === 'SD') ? 'sd' : XS_SOURCES.indexOf(String(window.GM_SYSTEM || '').toLowerCase()) >= 0 ? String(window.GM_SYSTEM).toLowerCase() : (dccBestiary().length ? 'dcc' : 'sd');
 
@@ -7267,11 +7286,12 @@ function xsBestiary(src) {
   if(src === 'dnd') return ok(typeof DND_MONSTERS !== 'undefined' ? DND_MONSTERS : undefined);
   if(src === 'd62e') return ok(typeof D62E_CREATURES !== 'undefined' ? D62E_CREATURES : undefined);
   if(src === 'icrpg') return ok(typeof ICRPG_MONSTERS !== 'undefined' ? ICRPG_MONSTERS : undefined);
+  if(src === 'mmrpg') return ok(typeof MMRPG_CHARACTERS !== 'undefined' ? MMRPG_CHARACTERS : undefined);
   return [];
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
 // group, D6 2e kind, ICRPG tier).
-function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : (m.group || ''); }
+function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : src === 'mmrpg' ? ('Rank ' + m.rank) : (m.group || ''); }
 function xsMonTypes(src) { return [...new Set(xsBestiary(src).map(m => xsMonType(src, m)).filter(Boolean))]; }
 // Star Wars die codes are stored as pips (3D+2 = 11).
 function swPipsCode(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p / 3), r = p % 3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); }
@@ -7337,6 +7357,24 @@ function xsMonSummary(src, m) {
     if(m.desc) out.notes.push(m.desc);
     out.notes.push([m.tier, m.world && m.world !== 'core' ? m.world : ''].filter(Boolean).join(' · '));
     out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : (m.hearts != null ? m.hearts * 10 : 10);
+  } else if(src === 'mmrpg') {
+    // Marvel Multiverse RPG (d616): roll 3d6 + ability vs a Target Number. Each
+    // ability's defense = 10 + score. Health is the hit-point track; Focus and
+    // Karma are separate pools shown as lines.
+    const A = m.abilities || {}; const sign = n => (n >= 0 ? '+' : '') + n;
+    [['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']].forEach(([k, l]) => {
+      if(A[k] != null) out.stats.push({ label: l, val: sign(A[k]), roll: '3d6' + sign(A[k]) });
+    });
+    out.stats.push({ label: 'Rank', val: String(m.rank ?? '') }, { label: 'Health', val: String(m.health ?? '') }, { label: 'Focus', val: String(m.focus ?? '') }, { label: 'Karma', val: m.karma == null ? '—' : String(m.karma) });
+    const defs = [['melee','Melee'],['agility','Agility'],['resilience','Resilience'],['vigilance','Vigilance'],['ego','Ego'],['logic','Logic']]
+      .filter(([k]) => A[k] != null).map(([k, l]) => l + ' ' + (10 + A[k])).join(' · ');
+    if(defs) out.lines.push({ label: 'Defenses', text: defs });
+    const sp = m.speed || {}; const spTxt = Object.keys(sp).map(k => k.charAt(0).toUpperCase() + k.slice(1) + ' ' + sp[k]).join(' · ');
+    if(spTxt) out.lines.push({ label: 'Speed', text: spTxt });
+    if(m.realName && m.realName !== m.name) out.notes.push(m.realName);
+    out.notes.push([m.origin, m.occupation].filter(Boolean).join(' · '));
+    if(m.teams) out.notes.push('Teams: ' + m.teams);
+    out.hp = parseInt(m.health, 10) || 1;
   }
   return out;
 }
@@ -8801,7 +8839,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -8840,7 +8878,7 @@ window.init_gen = function(root) {
   // so the toolbar "Generate" button is hidden while one of them is active.
   const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables'];
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier']].forEach(([src, id]) => {
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -9059,9 +9097,9 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : '#gen-icrpgmon-tier';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : '#gen-mmrpgmon-kind';
       const type=root.querySelector(idBase).value;
       const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
@@ -10892,6 +10930,7 @@ else syncHomebrewMonsters();
 <script src="/tools-data/icrpg-monsters.js"></script>
 <script src="/tools-data/icrpg-gear.js"></script>
 <script src="/tools-data/icrpg-loot.js"></script>
+<script src="/tools-data/mmrpg-characters.js"></script>
 <script>
 
 
@@ -11502,6 +11541,28 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from a Marvel Multiverse RPG (d616) sheet. The six
+  // MARVEL abilities are flat modifiers; Health/Focus/Karma are pools with a
+  // current/max; each ability's defense = 10 + score. Powers/traits/tags are name
+  // lists; conditions are the active toggles from the sheet.
+  function mmrpgParty(d) {
+    const n = v => parseInt(v) || 0;
+    const A = d.abilities || {};
+    const pool = p => ({ cur: n((p || {}).cur), max: n((p || {}).max) });
+    const ABIL = [['melee','Melee'],['agility','Agility'],['resilience','Resilience'],['vigilance','Vigilance'],['ego','Ego'],['logic','Logic']];
+    const list = arr => (Array.isArray(arr) ? arr : []).filter(x => x && x.name).map(x => x.name);
+    const conds = d.conditions && typeof d.conditions === 'object' ? Object.keys(d.conditions).filter(k => d.conditions[k]) : [];
+    return {
+      system: 'MMRPG',
+      name: d.name || 'Unnamed', real: d.real || '', rank: n(d.rank) || 1,
+      origin: d.origin || '', occupation: d.occupation || '', teams: d.teams || '',
+      abilities: ABIL.map(([k, id]) => ({ id, mod: n(A[k]), defense: 10 + n(A[k]) })),
+      health: pool(d.health), focus: pool(d.focus), karma: pool(d.karma),
+      healthDR: n(d.healthDR), focusDR: n(d.focusDR),
+      powers: list(d.powers), traits: list(d.traits), tags: list(d.tags), conditions: conds,
+    };
+  }
+
   // Build a Party-tool summary from a Nimble sheet (stats, skills, HP/wounds,
   // armor, mana, class features come straight from the saved blob).
   function nimParty(d) {
@@ -11606,6 +11667,7 @@ function init_party(root) {
     if(d && d.system === 'DND') return dndParty(d);
     if(d && d.system === 'D62E') return d62eParty(d);
     if(d && d.system === 'ICRPG') return icrpgParty(d);
+    if(d && d.system === 'MMRPG') return mmrpgParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
@@ -11899,6 +11961,37 @@ function init_party(root) {
     return h;
   }
 
+  function cardHTMLMMRPG(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [c.real, 'Rank ' + c.rank, [c.origin, c.occupation].filter(Boolean).join(' · ')].filter(Boolean).join(' · ');
+    const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
+    const hurt = c.health.max > 0 && c.health.cur < c.health.max;
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip"' + (hurt ? ' style="color:#ff6a6a;"' : '') + '>Health <b>' + esc(c.health.cur) + '/' + esc(c.health.max) + '</b></span>'
+       + '<span class="pty-chip">Karma <b>' + esc(c.karma.cur) + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats">' + c.abilities.map(a =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(a.id.slice(0,3).toUpperCase()) + '</div>'
+      + '<div class="pty-stat-mod">' + (a.mod >= 0 ? '+' : '') + a.mod + '</div><div class="pty-stat-val">def ' + esc(a.defense) + '</div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Health', c.health.cur + '/' + c.health.max) + cell('Focus', c.focus.cur + '/' + c.focus.max) + cell('Karma', c.karma.cur + '/' + c.karma.max)
+       + (c.healthDR ? cell('Health DR', c.healthDR) : '') + (c.focusDR ? cell('Focus DR', c.focusDR) : '')
+       + '</div></div>';
+    if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
+    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + esc(c.powers.join(', ')) + '</div></div>';
+    if(c.traits.length) h += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + esc(c.traits.join(', ')) + '</div></div>';
+    if(c.tags.length) h += '<div class="pty-sec"><div class="pty-sec-h">Tags</div><div class="pty-line dim">' + esc(c.tags.join(', ')) + '</div></div>';
+    if(c.teams) h += '<div class="pty-sec"><div class="pty-sec-h">Teams</div><div class="pty-line dim">' + esc(c.teams) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTMLNIM(entry) {
     const c = entry.sheet;
     const open = openIds.has(entry.id);
@@ -12038,6 +12131,7 @@ function init_party(root) {
     if(c.system === 'DND') return cardHTMLDND(entry);
     if(c.system === 'D62E') return cardHTMLD62E(entry);
     if(c.system === 'ICRPG') return cardHTMLICRPG(entry);
+    if(c.system === 'MMRPG') return cardHTMLMMRPG(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const open = openIds.has(entry.id);
     const hp = c.hpCur !== '' ? esc(c.hpCur) + '/' + c.hpMax : String(c.hpMax);
