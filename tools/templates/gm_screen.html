@@ -1499,7 +1499,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     DND: ['adventure','npc','dungeon','encounter','shop','dndmonster','dndtreasure'],
     D62E:['d62emonster','d62etreasure'],
     ICRPG:['icrpgmonster','icrpgtreasure'],
-    MMRPG:['mmrpgmonster','mmrpgtables'],
+    MMRPG:['mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
     CO:  [],
     YZE: ['yzetables'],
   };
@@ -2378,6 +2378,8 @@ GMScenes.renderPins();
         <option value="icrpgtreasure">ICRPG Loot</option>
         <option value="mmrpgmonster">Marvel Character</option>
         <option value="mmrpgtables">Marvel Encounters &amp; Danger Room</option>
+        <option value="mmrpgtreasure">Marvel Gear &amp; Loot</option>
+        <option value="mmrpghenchmen">Marvel Henchmen</option>
         <option value="yzetables">YZE Crit &amp; Panic</option>
         <option value="map">Map</option>
       </select>
@@ -2844,6 +2846,46 @@ GMScenes.renderPins();
           <button class="btn small primary" onclick="mmrpgRollDangerRoom(this)">Generate Danger Room</button>
         </div>
         <div class="gen-results" id="gen-mmrpg-dr-results" style="margin-top:8px;"></div>
+      </div>
+
+      <!-- MMRPG GEAR & LOOT (random drop from the equipment list; sends a claimable drop) -->
+      <div class="gen-panel xs-treasure" data-panel="mmrpgtreasure" data-sys="mmrpg">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Gear Drop</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it turns up (e.g. the villain's armory)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="common">Common gear</option><option value="narrative">Narrative item</option><option value="iconic">Iconic item</option><option value="vehicle">Vehicle</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="5">5</option></select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a spread from the equipment list">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search gear to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row"><button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button></div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MMRPG HENCHMEN QUICK-BUILDER (Rank 1-3 mooks; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="mmrpghenchmen">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label" style="min-width:170px;">Concept
+            <input type="text" class="gen-select" id="gen-mmrpg-hench-name" placeholder="e.g. Hydra Trooper">
+          </label>
+          <label class="gen-label" style="max-width:110px;">Rank
+            <select class="gen-select" id="gen-mmrpg-hench-rank"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
+          </label>
+          <label class="gen-label" style="max-width:110px;">Count
+            <select class="gen-select" id="gen-mmrpg-hench-count"><option>1</option><option>2</option><option selected>3</option><option>5</option></select>
+          </label>
+          <button class="btn small primary" onclick="mmrpgRollHenchman(this)">Build Henchmen</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted,#888);margin-top:4px;">Abilities = rank (Logic 0), one trait &amp; one power per rank. Henchmen are always a lower rank than their boss.</div>
+        <div class="gen-results" id="gen-mmrpg-hench-results" style="margin-top:8px;"></div>
       </div>
 
       <!-- ACE! TREASURE PANEL (random spread + hand-picked items from the gear list; sends a claimable drop) -->
@@ -7394,6 +7436,15 @@ function xsMonSummary(src, m) {
     if(defs) out.lines.push({ label: 'Defenses', text: defs });
     const sp = m.speed || {}; const spTxt = Object.keys(sp).map(k => k.charAt(0).toUpperCase() + k.slice(1) + ' ' + sp[k]).join(' · ');
     if(spTxt) out.lines.push({ label: 'Speed', text: spTxt });
+    const traits = (m.traits || []).map(t => typeof t === 'string' ? t : (t.name || '')).filter(Boolean);
+    if(traits.length) out.lines.push({ label: 'Traits', text: traits.join(', ') });
+    const tags = (m.tags || []).map(t => typeof t === 'string' ? t : (t.name || '')).filter(Boolean);
+    if(tags.length) out.lines.push({ label: 'Tags', text: tags.join(', ') });
+    (m.powers || []).forEach(p => {
+      if(typeof p === 'string') { out.lines.push({ label: 'Power', text: p }); }
+      else if(p && Array.isArray(p.names)) { out.lines.push({ label: p.set || 'Powers', text: p.names.join(', ') }); }
+      else if(p && p.name) { out.lines.push({ label: 'Power', text: p.name }); }
+    });
     if(m.realName && m.realName !== m.name) out.notes.push(m.realName);
     out.notes.push([m.origin, m.occupation].filter(Boolean).join(' · '));
     if(m.teams) out.notes.push('Teams: ' + m.teams);
@@ -8899,7 +8950,7 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -10964,6 +11015,9 @@ else syncHomebrewMonsters();
 <script src="/tools-data/icrpg-loot.js"></script>
 <script src="/tools-data/mmrpg-characters.js"></script>
 <script src="/tools-data/mmrpg-gm-tables.js"></script>
+<script src="/tools-data/mmrpg-equipment.js"></script>
+<script src="/tools-data/mmrpg-powers.js"></script>
+<script src="/tools-data/mmrpg-traits.js"></script>
 <script>
 
 
@@ -12903,6 +12957,16 @@ function wireAiConsole(root) {
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
       randomCats: ['weapon','armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 + (Math.random() < 0.3 ? 500 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'D6 2e equipment list',
     },
+    mmrpg: {
+      list: () => ((typeof MMRPG_EQUIPMENT !== 'undefined' && Array.isArray(MMRPG_EQUIPMENT)) ? MMRPG_EQUIPMENT : []).map(e => {
+        const t = String(e.tier || 'Common').toLowerCase();
+        const cat = t === 'iconic' ? 'iconic' : t === 'narrative' ? 'narrative' : t === 'vehicle' ? 'vehicle' : 'common';
+        const desc = [ (e.type || e.category || ''), e.owner && e.owner !== '—' ? e.owner : '', e.range ? 'Range ' + e.range : '', (e.damageBonus && e.damageBonus !== '—') ? 'Dmg ' + e.damageBonus : '', e.powerValue ? 'PV ' + e.powerValue : '', e.special || e.notes || '' ].filter(Boolean).join(' · ').slice(0, 180);
+        return { name: e.name, category: cat, desc };
+      }),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'common',label:'Common',cats:['common'] },{ key:'narrative',label:'Narrative',cats:['narrative'] },{ key:'iconic',label:'Iconic',cats:['iconic'] },{ key:'vehicle',label:'Vehicles',cats:['vehicle'] }],
+      randomCats: ['common','common','common','narrative','iconic','vehicle'], money: null, label: 'GEAR DROP', empty: 'MMRPG equipment list',
+    },
     icrpg: {
       list: () => []
         .concat(((typeof ICRPG_GEAR !== 'undefined' && Array.isArray(ICRPG_GEAR)) ? ICRPG_GEAR : []).map(g => ({ name: g.name, category: /gun|weapon/i.test(g.category) ? 'weapon' : /armor/i.test(g.category) ? 'armor' : 'gear', desc: [g.category, g.world && g.world !== 'core' ? g.world : '', (g.effects || []).join('; '), g.desc].filter(Boolean).join(' · ').slice(0, 160) })))
@@ -13152,6 +13216,97 @@ window.init_rules = init_rules;
     o.innerHTML=html+o.innerHTML;
   };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', populate); else populate();
+})();
+</script>
+
+<!-- ── MMRPG Henchmen quick-builder (Avengers Expansion p.190): rank-1..3 mooks.
+     Ability scores total 5×rank — each ability = rank, except Logic = 0.
+     One trait per rank, one power per rank. Cards send to the combat tracker. -->
+<script>
+(function(){
+  function TR(){ return (typeof MMRPG_TRAITS !== 'undefined') ? MMRPG_TRAITS : (typeof window!=='undefined'?window.MMRPG_TRAITS:null); }
+  function PW(){ return (typeof MMRPG_POWERS !== 'undefined') ? MMRPG_POWERS : (typeof window!=='undefined'?window.MMRPG_POWERS:null); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function pickN(arr,n){ // n distinct random members
+    var pool=(arr||[]).slice(), out=[];
+    while(out.length<n && pool.length){ out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
+    return out;
+  }
+  // Powers a henchman can actually use: skip Narrative powers and slider/variable
+  // entries that assume a full hero build.
+  function usablePowers(){
+    var p=PW()||[];
+    return p.filter(function(x){
+      var set=String(x.powerSet||'');
+      if(/narrative/i.test(set)) return false;
+      if(/slider/i.test(String(x.name||''))) return false;
+      return true;
+    });
+  }
+  var STORE = {};   // id -> henchman object, so the Send button pushes the exact build
+  var SEQ = 0;
+  function build(concept, rank, idx){
+    var t = concept || 'Henchman';
+    var name = t + (idx!=null ? ' ' + idx : '');
+    var traitNames = pickN((TR()||[]).map(function(x){return x.name;}), rank);
+    var pw = pickN(usablePowers(), rank);
+    // group powers by set into the {set,names[]} shape MMRPG bestiary cards use
+    var bySet = {}; var order = [];
+    pw.forEach(function(x){ var s=(x.powerSet && x.powerSet!=='None') ? x.powerSet : 'Basic'; if(!bySet[s]){bySet[s]=[];order.push(s);} bySet[s].push(x.name); });
+    var powers = order.map(function(s){ return { set:s, names:bySet[s] }; });
+    return {
+      name: name,
+      realName: concept && concept !== name ? concept : '',
+      rank: rank,
+      health: rank*30, focus: rank*30, karma: null,
+      abilities: { melee:rank, agility:rank, resilience:rank, vigilance:rank, ego:rank, logic:0 },
+      speed: { run: 6 },
+      traits: traitNames, tags: [], powers: powers,
+      origin: 'Henchman', occupation: '',
+      book: 'Avengers'
+    };
+  }
+  function statBox(label,val){
+    return '<div style="text-align:center;min-width:44px;"><div style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.06em;">'+esc(label)+'</div>'
+      + '<div style="font-size:15px;font-weight:800;color:#3fd0e6;">'+esc(val)+'</div></div>';
+  }
+  function card(id, h){
+    var A=h.abilities, sign=function(n){return (n>=0?'+':'')+n;};
+    var abil=[['MEL',A.melee],['AGI',A.agility],['RES',A.resilience],['VIG',A.vigilance],['EGO',A.ego],['LOG',A.logic]]
+      .map(function(p){return statBox(p[0], sign(p[1]));}).join('');
+    var pools = statBox('Health',h.health)+statBox('Focus',h.focus)+statBox('Rank',h.rank);
+    var traits = h.traits.length ? '<div style="font-size:12px;margin-top:5px;"><b style="color:#3fd0e6;">Traits</b> '+esc(h.traits.join(', '))+'</div>' : '';
+    var powers = h.powers.length ? '<div style="font-size:12px;margin-top:3px;"><b style="color:#3fd0e6;">Powers</b> '
+      + h.powers.map(function(g){return esc(g.set)+': '+esc(g.names.join(', '));}).join(' · ')+'</div>' : '';
+    return '<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">'
+      +   '<div style="font-size:16px;font-weight:800;">'+esc(h.name)+'</div>'
+      +   '<div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Rank '+h.rank+' Henchman</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">'+abil+'<div style="width:1px;background:var(--border,#333);"></div>'+pools+'</div>'
+      + traits + powers
+      + '<div style="margin-top:8px;"><button class="btn small primary" onclick="mmrpgSendHench(\''+id+'\',this)">Send to Tracker</button></div>'
+      + '</div>';
+  }
+  window.mmrpgRollHenchman=function(btn){
+    var p=btn.closest('[data-panel]'); var o=p&&p.querySelector('#gen-mmrpg-hench-results'); if(!o) return;
+    var concept=((p.querySelector('#gen-mmrpg-hench-name')||{}).value||'').trim();
+    var rank=Math.max(1,Math.min(3, parseInt((p.querySelector('#gen-mmrpg-hench-rank')||{}).value,10)||2));
+    var count=Math.max(1, parseInt((p.querySelector('#gen-mmrpg-hench-count')||{}).value,10)||1);
+    var html='';
+    for(var i=1;i<=count;i++){
+      var h=build(concept, rank, count>1?i:null);
+      var id='h'+(++SEQ); STORE[id]=h;
+      html+=card(id, h);
+    }
+    o.innerHTML=html+o.innerHTML;
+  };
+  window.mmrpgSendHench=function(id, btn){
+    var h=STORE[id]; if(!h) return;
+    var ok = typeof window.sendMonsterToTracker==='function' && window.sendMonsterToTracker(h,'mmrpg');
+    var label=btn.textContent; btn.textContent = ok ? 'Sent ✓' : 'Could not send'; btn.disabled=true;
+    setTimeout(function(){ btn.textContent=label; btn.disabled=false; }, 1400);
+  };
 })();
 </script>
 
