@@ -13,6 +13,7 @@
 <script src="/tools-data/mmrpg-tags.js"></script>
 <script src="/tools-data/mmrpg-powers.js"></script>
 <script src="/tools-data/mmrpg-characters.js"></script>
+<script src="/tools-data/mmrpg-equipment.js"></script>
 <style>
 /* ═══ Marvel Multiverse RPG (d616) sheet ═══ Same skeleton + chrome as the other
    sheets (framed card + two-column body + tabs + sticky Roll Log). Accent Marvel red. */
@@ -128,7 +129,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .dmg-cell .dmg-ab{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink);}
 .dmg-cell .dmg-val{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--mv-dk);}
 .dmg-cell .dmg-val small{color:var(--muted);font-size:10px;}
-.dmg-cell .w-roll{width:100%;}
+/* Stylized Attack button (damage section + equipment weapon rows) */
+.w-roll{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:linear-gradient(180deg,#f4353c 0%,#d21a20 55%,#b0141a 100%);color:#fff;border:none;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.09em;text-transform:uppercase;padding:6px 12px;cursor:pointer;white-space:nowrap;box-shadow:0 1px 0 #7a0d11,0 2px 5px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.28);transition:filter .12s ease,transform .05s ease,box-shadow .05s ease;}
+.w-roll::before{content:"";width:12px;height:12px;background:currentColor;-webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6.9 3 3 6.9l8.3 8.3-2 2 1.4 1.4 2-2 1.8 1.8-1.2 1.2 1.4 1.4 3.6-3.6-1.4-1.4-1.2 1.2-1.8-1.8 2-2-1.4-1.4-2 2L6.9 3Zm10.2 0L13.9 6.2l1.4 1.4 1.4-1.4h1.9V7.7l-1.4 1.4 1.4 1.4L21 7.1V3h-3.9Z'/></svg>") center/contain no-repeat;mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6.9 3 3 6.9l8.3 8.3-2 2 1.4 1.4 2-2 1.8 1.8-1.2 1.2 1.4 1.4 3.6-3.6-1.4-1.4-1.2 1.2-1.8-1.8 2-2-1.4-1.4-2 2L6.9 3Zm10.2 0L13.9 6.2l1.4 1.4 1.4-1.4h1.9V7.7l-1.4 1.4 1.4 1.4L21 7.1V3h-3.9Z'/></svg>") center/contain no-repeat;opacity:.95;flex:0 0 auto;}
+.w-roll:hover{filter:brightness(1.12);}
+.w-roll:active{transform:translateY(1px);box-shadow:0 0 0 #7a0d11,inset 0 1px 3px rgba(0,0,0,.35);}
+.dmg-cell .w-roll{width:100%;padding:7px 8px;font-size:12.5px;}
 .vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
 .vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;}
 .vbig{display:flex;align-items:center;gap:4px;}
@@ -178,8 +184,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tbl input,.tbl select{width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
 .tbl input:focus{border-bottom-color:var(--mv);}
 .tbl input.cx{text-align:center;}
-.tbl .w-roll{background:var(--mv);color:#fff;border:none;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;cursor:pointer;white-space:nowrap;}
-.tbl .w-roll:hover{background:var(--mv-dk);}
+.tbl .w-roll{padding:4px 9px;font-size:11px;letter-spacing:.05em;}
+.tbl .w-roll::before{width:10px;height:10px;}
 .tbl .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;width:auto;}
 
 /* Story */
@@ -320,9 +326,9 @@ body.dark .sheet{border-color:#3a3d47;}
       </div>
 
       <div class="tab-panel" id="tab-equipment">
-        <div class="section-bar"><span>Equipment &amp; Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="addAttack()">＋ Add</button></span></div>
-        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:32%;">Item</th><th style="width:16%;">Attacks with</th><th style="width:16%;">Range</th><th>Notes</th><th style="width:80px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-        <div id="atk-empty" class="tbl-empty">No equipment yet. Add weapons or gear — a weapon rolls its ability and deals Marvel die × damage multiplier + ability.</div>
+        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('equip','Weapon')">＋ Weapon</button><button class="hdr-btn" onclick="openPicker('equip','Gear')">＋ Gear</button><button class="hdr-btn" onclick="openPicker('equip','Vehicle')">＋ Vehicle</button><button class="hdr-btn" onclick="addAttack()">＋ Custom</button></span></div>
+        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:28%;">Item</th><th style="width:15%;">Attacks with</th><th style="width:13%;">Range</th><th style="width:11%;">Dmg</th><th>Notes</th><th style="width:96px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
+        <div id="atk-empty" class="tbl-empty">No equipment yet. Add a weapon, gear or vehicle from the list — a weapon rolls its ability and deals Marvel die × (multiplier + weapon bonus) + ability.</div>
       </div>
 
       <div class="tab-panel" id="tab-bio">
@@ -567,10 +573,15 @@ function rollAttack(i){
   var usedK=consumeKarma(); if(usedK) edges+=1;
   var r=roll616(); if(usedK) edges-=1;
   var score=ab(k); var total=r.sum+score+mod;
-  var dmg=r.marvelVal*dmgMult()*(r.fantastic?2:1)+score;
+  // A weapon adds its bonus to the damage multiplier (greater of the two, no stacking);
+  // a grenade uses its own flat multiplier. Flash-bang deals no Health damage.
+  var mult=w.flatMult?num(w.flatMult):(dmgMult()+(num(w.multBonus)||0));
   var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
-  var detail=dieStr(r)+' '+r.sum+' +'+score+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+(usedK?' · Karma':'')+' · dmg '+r.marvelVal+'×'+dmgMult()+(r.fantastic?'×2':'')+' +'+score;
-  addLog((w.name||'Attack')+' ('+ABILITIES.find(function(x){return x.key===k;}).name+')', (r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg', detail, r.fantastic?'crit':'normal');
+  var resultTxt, dmgTxt;
+  if(w.noDamage){ dmgTxt='no damage'; resultTxt=(r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmgTxt; }
+  else { var dmg=r.marvelVal*mult*(r.fantastic?2:1)+score; dmgTxt='dmg '+r.marvelVal+'×'+mult+(r.fantastic?'×2':'')+' +'+score; resultTxt=(r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg'; }
+  var detail=dieStr(r)+' '+r.sum+' +'+score+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+(usedK?' · Karma':'')+' · '+dmgTxt;
+  addLog((w.name||'Attack')+' ('+ABILITIES.find(function(x){return x.key===k;}).name+')', resultTxt, detail, r.fantastic?'crit':'normal');
   edges=0;troubles=0;renderTray();$('tray-mod').value='0';
 }
 function toggleKarma(){ if(!karmaArmed){ if(num(S.karma.cur)<=0){ addLog('Karma','✗','No Karma left','fumble'); return; } karmaArmed=true; } else karmaArmed=false; $('karma-btn').classList.toggle('on',karmaArmed); }
@@ -606,33 +617,54 @@ function delItem(kind,i){ S[kind].splice(i,1); if(kind==='powers')renderPowers()
 function renderAttacks(){
   var body=$('atk-body'); body.innerHTML='';
   S.attacks.forEach(function(w,i){
-    var opts=ABILITIES.map(function(a){ return '<option value="'+a.key+'"'+(w.ability===a.key?' selected':'')+'>'+a.name+'</option>'; }).join('');
+    var isW=!w.category||w.category==='Weapon';
     var tr=document.createElement('tr');
-    tr.innerHTML='<td><input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Attack"></td>'
-      +'<td><select onchange="aEdit('+i+',\'ability\',this.value)">'+opts+'</select></td>'
-      +'<td><input value="'+esc(w.range||'')+'" oninput="aEdit('+i+',\'range\',this.value)" placeholder="Melee/50 sp"></td>'
-      +'<td><input value="'+esc(w.notes||'')+'" oninput="aEdit('+i+',\'notes\',this.value)"></td>'
-      +'<td style="text-align:right;white-space:nowrap;"><button class="w-roll" onclick="rollAttack('+i+')">Attack</button> <button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
+    if(isW){
+      var opts=ABILITIES.map(function(a){ return '<option value="'+a.key+'"'+(w.ability===a.key?' selected':'')+'>'+a.name+'</option>'; }).join('');
+      tr.innerHTML='<td><input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Weapon"></td>'
+        +'<td><select onchange="aEdit('+i+',\'ability\',this.value)">'+opts+'</select></td>'
+        +'<td><input value="'+esc(w.range||'')+'" oninput="aEdit('+i+',\'range\',this.value)" placeholder="Reach / 10"></td>'
+        +'<td><input class="cx" value="'+esc(w.damageBonus||'')+'" oninput="aEdit('+i+',\'dmg\',this.value)" placeholder="+1"></td>'
+        +'<td><input value="'+esc(w.notes||'')+'" oninput="aEdit('+i+',\'notes\',this.value)"></td>'
+        +'<td style="text-align:right;white-space:nowrap;"><button class="w-roll" onclick="rollAttack('+i+')">Attack</button> <button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
+    } else {
+      tr.innerHTML='<td><input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Item"></td>'
+        +'<td colspan="3" style="font-family:\'Barlow Condensed\';font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);">'+esc(w.category||'')+'</td>'
+        +'<td><input value="'+esc(w.notes||'')+'" oninput="aEdit('+i+',\'notes\',this.value)"></td>'
+        +'<td style="text-align:right;white-space:nowrap;"><button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
+    }
     body.appendChild(tr);
   });
   $('atk-empty').style.display=S.attacks.length?'none':'block';
 }
-function aEdit(i,f,v){ if(S.attacks[i]){ S.attacks[i][f]=v; scheduleAutosave(); } }
-function addAttack(){ S.attacks.push({name:'',ability:'melee',range:'',notes:''}); renderAttacks(); setTab('equipment'); scheduleAutosave(); }
+function aEdit(i,f,v){ var w=S.attacks[i]; if(!w)return;
+  if(f==='dmg'){ w.damageBonus=v; var s=String(v).trim(); w.flatMult=0; w.noDamage=false; w.multBonus=0;
+    if(/[×x]\s*2/i.test(s)) w.flatMult=2;
+    else if(/^(—|-|none|no.*)$/i.test(s)) w.noDamage=true;
+    else w.multBonus=parseInt(s.replace(/[^\-0-9]/g,''),10)||0;
+  } else { w[f]=v; }
+  scheduleAutosave();
+}
+function addAttack(){ S.attacks.push({name:'',ability:'melee',range:'',notes:'',category:'Weapon',damageBonus:'+1',multBonus:1}); renderAttacks(); setTab('equipment'); scheduleAutosave(); }
 
 // ── Picker ──
 var _pk=null, _pkRows=[];
+function EQUIP(){ return (typeof MMRPG_EQUIPMENT!=='undefined'&&Array.isArray(MMRPG_EQUIPMENT))?MMRPG_EQUIPMENT:[]; }
 function pickerData(kind){
   if(kind==='power') return POWERS;
   if(kind==='trait') return TRAITS;
+  if(kind==='tag') return TAGS;
+  if(kind==='equip') return EQUIP();
   return TAGS;
 }
-function openPicker(kind){
-  _pk=kind; $('picker-title').textContent=kind==='power'?'✦ Powers':kind==='trait'?'＋ Traits':'＋ Tags';
+function openPicker(kind, preset){
+  _pk=kind; $('picker-title').textContent=kind==='power'?'✦ Powers':kind==='trait'?'＋ Traits':kind==='equip'?'＋ Equipment':'＋ Tags';
   $('picker-search').value='';
   var flt=$('picker-filter');
   if(kind==='power'){ var sets=['']; POWERS.forEach(function(p){ if(sets.indexOf(p.powerSet)<0)sets.push(p.powerSet); });
     flt.style.display=''; flt.innerHTML='<option value="">All power sets</option>'+sets.filter(Boolean).sort().map(function(s){return '<option value="'+esc(s)+'">'+esc(s==='None'?'Basic (None)':s)+'</option>';}).join('');
+  } else if(kind==='equip'){
+    flt.style.display=''; flt.innerHTML='<option value="">All equipment</option>'+['Weapon','Gear','Vehicle'].map(function(c){return '<option value="'+c+'"'+(preset===c?' selected':'')+'>'+c+'s</option>';}).join('');
   } else flt.style.display='none';
   renderPicker(); $('picker-overlay').classList.add('open');
 }
@@ -641,13 +673,15 @@ function renderPicker(){
   if(!_pk)return; var q=($('picker-search').value||'').toLowerCase().trim(); var fset=$('picker-filter').value;
   var rows=pickerData(_pk).filter(function(x){
     if(_pk==='power'&&fset&&x.powerSet!==fset)return false;
-    if(!q)return true; return ((x.name||'')+' '+(x.description||'')+' '+(x.effect||'')+' '+(x.powerSet||'')).toLowerCase().indexOf(q)>=0;
+    if(_pk==='equip'&&fset&&x.category!==fset)return false;
+    if(!q)return true; return ((x.name||'')+' '+(x.description||'')+' '+(x.effect||'')+' '+(x.notes||'')+' '+(x.powerSet||'')+' '+(x.category||'')).toLowerCase().indexOf(q)>=0;
   }).slice(0,400);
   _pkRows=rows; var el=$('picker-body');
-  if(!rows.length){ el.innerHTML='<div class="brow-empty">No matches.</div>'; return; }
+  if(!rows.length){ el.innerHTML='<div class="brow-empty">'+(_pk==='equip'&&fset&&fset!=='Weapon'?esc(fset)+'s arrive with the expansions.':'No matches.')+'</div>'; return; }
   el.innerHTML=rows.map(function(x,idx){
-    var meta=_pk==='power'?((x.powerSet&&x.powerSet!=='None'?x.powerSet:'Basic')+(x.action?' · '+x.action:'')+(x.cost?' · '+x.cost:'')):'';
-    var body=_pk==='power'?(x.effect||''):(x.description||'');
+    var meta=_pk==='power'?((x.powerSet&&x.powerSet!=='None'?x.powerSet:'Basic')+(x.action?' · '+x.action:'')+(x.cost?' · '+x.cost:''))
+      :_pk==='equip'?[x.category,x.weaponClass,x.range?('Range '+x.range):'',x.damageBonus?('Dmg '+x.damageBonus):''].filter(Boolean).join(' · '):'';
+    var body=_pk==='power'?(x.effect||''):_pk==='equip'?(x.notes||''):(x.description||'');
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+(meta?'<span class="brow-cost">'+esc(meta)+'</span>':'')+'</div>'
       +(body?'<div class="brow-desc">'+esc(body)+'</div>':'')+'</div><button class="brow-add" onclick="pickAdd('+idx+')">＋ Add</button></div>';
   }).join('');
@@ -655,6 +689,7 @@ function renderPicker(){
 function pickAdd(idx){ var x=_pkRows[idx]; if(!x)return;
   if(_pk==='power'){ S.powers.push({name:x.name,powerSet:x.powerSet||'',action:x.action||'',duration:x.duration||'',cost:x.cost||'',range:x.range||'',prerequisites:x.prerequisites||'',effect:x.effect||'',fantastic:x.fantastic||''}); renderPowers(); setTab('powers'); }
   else if(_pk==='trait'){ S.traits.push({name:x.name,description:x.description||''}); renderTraitsTags(); setTab('traits'); }
+  else if(_pk==='equip'){ S.attacks.push({name:x.name,ability:x.ability||'melee',range:x.range||'',notes:x.notes||'',category:x.category||'Weapon',damageBonus:x.damageBonus||'',multBonus:num(x.multBonus)||0,flatMult:num(x.flatMult)||0,noDamage:!!x.noDamage}); renderAttacks(); setTab('equipment'); }
   else { S.tags.push({name:x.name,description:x.description||''}); renderTraitsTags(); setTab('traits'); }
   scheduleAutosave();
 }
@@ -731,7 +766,7 @@ function applySheet(d){
   if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||''}; });
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.tags)) S.tags=d.tags.map(function(t){ return {name:t.name||'',description:t.description||''}; });
-  if(Array.isArray(d.attacks)) S.attacks=d.attacks.map(function(w){ return {name:w.name||'',ability:w.ability||'melee',range:w.range||'',notes:w.notes||''}; });
+  if(Array.isArray(d.attacks)) S.attacks=d.attacks.map(function(w){ return {name:w.name||'',ability:w.ability||'melee',range:w.range||'',notes:w.notes||'',category:w.category||'Weapon',damageBonus:w.damageBonus||'',multBonus:num(w.multBonus)||0,flatMult:num(w.flatMult)||0,noDamage:!!w.noDamage}; });
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}

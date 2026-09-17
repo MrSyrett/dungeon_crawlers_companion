@@ -20,6 +20,7 @@ const ENTITIES = [
   { key: "tags",        constName: "MMRPG_TAGS",        type: "MmrpgTag",        base: "mmrpg-tags" },
   { key: "powers",      constName: "MMRPG_POWERS",      type: "MmrpgPower",      base: "mmrpg-powers" },
   { key: "characters",  constName: "MMRPG_CHARACTERS",  type: "MmrpgCharacter",  base: "mmrpg-characters" },
+  { key: "equipment",   constName: "MMRPG_EQUIPMENT",   type: "MmrpgEquipment",  base: "mmrpg-equipment" },
 ];
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch (e) { throw new Error(`${p}: ${e.message}`); } };
