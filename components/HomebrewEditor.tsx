@@ -3,6 +3,12 @@
 import { useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { TALENT_TARGETS } from "@/lib/effects";
+import { MMRPG_HQ_TRAITS } from "@/lib/data/mmrpg-hq-traits";
+import { MMRPG_HQ_TAGS } from "@/lib/data/mmrpg-hq-tags";
+
+const HQ_TRAIT_OPTS: [string, string][] = MMRPG_HQ_TRAITS.map((t) => [t.name, t.name]);
+const HQ_TAG_OPTS: [string, string][] = MMRPG_HQ_TAGS.map((t) => [t.name, t.name]);
+const HQ_RANK_OPTS: [string, string][] = [1, 2, 3, 4, 5, 6].map((n) => [String(n), `Rank ${n}`]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A generic, schema-driven homebrew editor shared by the lighter game systems
@@ -619,6 +625,24 @@ const SCHEMAS: Record<string, Schema> = {
     ],
     blank: () => ({ type: "Item" }), toForm: (d) => ({ ...d }),
     summary: (d) => `${sv(d, "type") || "Item"}${sv(d, "powerValue") ? " · PV " + sv(d, "powerValue") : ""}`,
+  },
+  "mmrpg-hq": {
+    title: "My Homebrew Headquarters", noun: "Headquarters",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80, placeholder: "e.g. The Watchtower" },
+      { key: "teamRank", label: "Team rank", type: "select", options: HQ_RANK_OPTS },
+      { key: "traits", label: "Traits (3 per team rank)", type: "objectList", full: true, addLabel: "+ Trait", fields: [
+        { key: "name", label: "Trait", type: "select", options: HQ_TRAIT_OPTS },
+        { key: "n", label: "×", type: "number", placeholder: "1" },
+      ] },
+      { key: "tags", label: "Tags (as many as you like)", type: "objectList", full: true, addLabel: "+ Tag", fields: [
+        { key: "name", label: "Tag", type: "select", options: HQ_TAG_OPTS },
+        { key: "note", label: "Note", type: "text", placeholder: "e.g. Stark Enterprises" },
+      ] },
+      { key: "notes", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ teamRank: "3" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `Rank ${sv(d, "teamRank") || "?"}`,
   },
 };
 

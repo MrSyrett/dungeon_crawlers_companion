@@ -4,6 +4,7 @@ import { MMRPG_EQUIPMENT } from "@/lib/data/mmrpg-equipment";
 import type { MmrpgEquipment } from "@/lib/data/mmrpg-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import MmrpgHeadquarters from "@/components/MmrpgHeadquarters";
 import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge, one, type Query, type RawQuery } from "@/components/MmrpgRef";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +19,11 @@ const typeOf = (e: EquipRow) => e.type || e.category || "Weapon";
 export default async function MmrpgEquipmentPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const [hbIconic, hbIconicOwn, campaigns] = await Promise.all([
+  const [hbIconic, hbIconicOwn, hbHq, hbHqOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "mmrpg-iconic" }),
     ownHomebrew(user.id, "mmrpg-iconic"),
+    visibleHomebrew(user.id, { type: "mmrpg-hq" }),
+    ownHomebrew(user.id, "mmrpg-hq"),
     userCampaigns(user.id),
   ]);
   const ALL: EquipRow[] = [
@@ -101,6 +104,8 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
           </div>
         </section>
       ))}
+
+      <MmrpgHeadquarters campaigns={campaigns} own={hbHqOwn} visible={hbHq} />
     </div>
   );
 }

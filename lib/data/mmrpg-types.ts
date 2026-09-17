@@ -61,6 +61,39 @@ export interface MmrpgCondition {
   mech?: MmrpgConditionMech;
 }
 
+// ── Headquarters (Avengers Expansion): a team picks 3 traits per team rank and
+// unlimited tags. Traits carry a downtime activity; tags can be incompatible. ──
+export interface MmrpgHqTrait {
+  name: string;
+  genre: MmrpgGenre;
+  description: string;
+  /** The downtime activity + bonus this trait provides. */
+  downtime: string;
+  /** A tag/trait the HQ grants the team (e.g. Laboratory → Lab Access). */
+  grants?: string;
+  /** Security Measures can be taken multiple times (up to maxStack). */
+  stackable?: boolean;
+  maxStack?: number;
+  source?: string;
+}
+export interface MmrpgHqTag {
+  name: string;
+  genre: MmrpgGenre;
+  description: string;
+  /** Tags this one cannot be combined with. */
+  incompatibleWith?: string[];
+  source?: string;
+}
+export interface MmrpgHqProfile {
+  name: string;
+  genre: MmrpgGenre;
+  teamRank: number;
+  blurb?: string;
+  traits: { name: string; n?: number }[];
+  tags: { name: string; note?: string }[];
+  source?: string;
+}
+
 export interface MmrpgVehicle {
   name: string;
   genre: MmrpgGenre;

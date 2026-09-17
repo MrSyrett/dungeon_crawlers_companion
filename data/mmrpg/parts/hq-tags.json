@@ -1,0 +1,140 @@
+[
+ {
+  "name": "Arcane",
+  "genre": "core",
+  "description": "The headquarters is filled with magic of all kinds; its other tags and traits are often empowered by magical means.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "Central Location",
+  "genre": "core",
+  "description": "Located in a major metropolis with access to amenities and close to the action — but easy for others to reach too.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Isolated Location"
+  ]
+ },
+ {
+  "name": "Contains Secrets",
+  "genre": "core",
+  "description": "The place hides secrets the team can't easily solve or may be entirely unaware of.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "Cozy",
+  "genre": "core",
+  "description": "Relatively small — room for every member but not much more; people feel on top of each other.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Roomy"
+  ]
+ },
+ {
+  "name": "Embedded Assistance",
+  "genre": "core",
+  "description": "An embedded intelligence with its own name and personality controls the place and can exercise independent judgment.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "High-Tech",
+  "genre": "core",
+  "description": "Outfitted with all the latest technology, perhaps even tech beyond the cutting edge.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Low-Tech"
+  ]
+ },
+ {
+  "name": "Interdimensional",
+  "genre": "core",
+  "description": "Has easy access to more than one dimension — doors to other realms, times or universes.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "Isolated Location",
+  "genre": "core",
+  "description": "Isolated from the rest of the world — harder to reach, but less likely to be attacked. Should also have Transportation or Teleportation.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Central Location"
+  ]
+ },
+ {
+  "name": "Low-Tech",
+  "genre": "core",
+  "description": "Decidedly low-tech — old or purposefully rustic, and impervious to many tech-based attacks.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "High-Tech"
+  ]
+ },
+ {
+  "name": "Mobile",
+  "genre": "core",
+  "description": "Can move from place to place with ease; could double as the team's transportation.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Stationary"
+  ]
+ },
+ {
+  "name": "Outside Funding",
+  "genre": "core",
+  "description": "A person or organization outside the team paid for it — corporate, governmental or private — usually with strings attached.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "Public Location",
+  "genre": "core",
+  "description": "The location is widely known; those who need the team can find them, but so can villains.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Secret Location"
+  ]
+ },
+ {
+  "name": "Repurposed",
+  "genre": "core",
+  "description": "Not originally designed as a headquarters, so it has a history that predates the team.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "Roomy",
+  "genre": "core",
+  "description": "Much larger than necessary, giving the team room to grow — but it can feel lonely.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Cozy"
+  ]
+ },
+ {
+  "name": "Secret Location",
+  "genre": "core",
+  "description": "The location is a tightly held secret; few outside the team and staff know where it is.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Public Location"
+  ]
+ },
+ {
+  "name": "Shared",
+  "genre": "core",
+  "description": "Shares its location with someone or something else, so the team doesn't have full control of it.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "Staff",
+  "genre": "core",
+  "description": "Comes with a staff that handles the team's needs — the classic example being Edwin Jarvis.",
+  "source": "Avengers Expansion"
+ },
+ {
+  "name": "Stationary",
+  "genre": "core",
+  "description": "Stays in a single place — the default for most headquarters.",
+  "source": "Avengers Expansion",
+  "incompatibleWith": [
+   "Mobile"
+  ]
+ }
+]

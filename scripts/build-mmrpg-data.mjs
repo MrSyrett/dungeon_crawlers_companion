@@ -22,6 +22,9 @@ const ENTITIES = [
   { key: "powers",      constName: "MMRPG_POWERS",      type: "MmrpgPower",      base: "mmrpg-powers" },
   { key: "characters",  constName: "MMRPG_CHARACTERS",  type: "MmrpgCharacter",  base: "mmrpg-characters" },
   { key: "equipment",   constName: "MMRPG_EQUIPMENT",   type: "MmrpgEquipment",  base: "mmrpg-equipment" },
+  { key: "hq-traits",   constName: "MMRPG_HQ_TRAITS",   type: "MmrpgHqTrait",    base: "mmrpg-hq-traits" },
+  { key: "hq-tags",     constName: "MMRPG_HQ_TAGS",     type: "MmrpgHqTag",      base: "mmrpg-hq-tags" },
+  { key: "hq-profiles", constName: "MMRPG_HQ_PROFILES", type: "MmrpgHqProfile",  base: "mmrpg-hq-profiles" },
 ];
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch (e) { throw new Error(`${p}: ${e.message}`); } };

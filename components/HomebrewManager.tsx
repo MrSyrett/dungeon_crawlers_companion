@@ -30,7 +30,7 @@ type HbType =
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
   | "co-ability" | "co-gear"
   | "yze-weapon" | "yze-gear"
-  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic";
+  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {
   id: string;

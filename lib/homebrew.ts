@@ -2,6 +2,8 @@ import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 import { MONSTER_TYPES } from "@/lib/data/monster-types";
+import { MMRPG_HQ_TRAITS } from "@/lib/data/mmrpg-hq-traits";
+import { MMRPG_HQ_TAGS } from "@/lib/data/mmrpg-hq-tags";
 import { TALENT_TARGET_KEYS } from "@/lib/effects";
 import {
   sanitizeSelections, summarizeBuild, dccStatMod, statBase, hbSlotCount,
@@ -26,7 +28,7 @@ export type HbType =
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
   | "co-ability" | "co-gear"
   | "yze-weapon" | "yze-gear"
-  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic";
+  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -40,7 +42,7 @@ const HB_TYPES = [
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
   "co-ability", "co-gear",
   "yze-weapon", "yze-gear",
-  "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic",
+  "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1791,6 +1793,52 @@ function normalizeMmrpgIconic(input: unknown): { name: string; data: Record<stri
   return { name, data };
 }
 
+function normalizeMmrpgHq(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew headquarters needs a name.");
+  const rank = Math.max(1, Math.min(6, num(o.teamRank) || 1));
+  const traitCap = new Map(MMRPG_HQ_TRAITS.map((t) => [t.name, t.stackable ? (t.maxStack || 3) : 1]));
+  const tagDefs = new Map(MMRPG_HQ_TAGS.map((t) => [t.name, t]));
+
+  // Traits (objectList of {name, n}); collapse duplicates, clamp counts to the cap.
+  const traits: { name: string; n: number }[] = [];
+  for (const r of objList(o.traits, ["name", "n"], 40, 60)) {
+    const cap = traitCap.get(r.name);
+    if (cap == null) continue; // unknown trait
+    let n = parseInt(r.n || "1", 10); if (!Number.isFinite(n) || n < 1) n = 1;
+    const cur = traits.find((t) => t.name === r.name);
+    if (cur) cur.n = Math.min(cur.n + n, cap);
+    else traits.push({ name: r.name, n: Math.min(n, cap) });
+  }
+  // Tags (objectList of {name, note}); dedupe by name.
+  const tags: { name: string; note?: string }[] = [];
+  for (const r of objList(o.tags, ["name", "note"], 40, 80)) {
+    if (!tagDefs.has(r.name) || tags.some((t) => t.name === r.name)) continue;
+    tags.push({ name: r.name, ...(r.note ? { note: r.note } : {}) });
+  }
+
+  const traitBudget = rank * 3;
+  const traitsUsed = traits.reduce((s, t) => s + t.n, 0);
+  const chosen = new Set(tags.map((t) => t.name));
+  const warnings: string[] = [];
+  for (const t of tags) {
+    for (const inc of tagDefs.get(t.name)?.incompatibleWith || []) {
+      if (chosen.has(inc) && t.name < inc) warnings.push(`Incompatible tags: ${t.name} + ${inc}`);
+    }
+  }
+  if (traitsUsed > traitBudget) warnings.push(`Over trait budget — ${traitsUsed} of ${traitBudget} (Rank ${rank} × 3).`);
+
+  return {
+    name,
+    data: {
+      name, teamRank: rank, traits, tags,
+      traitBudget, traitsUsed, warnings,
+      notes: str(o.notes).slice(0, 800), source: "Homebrew",
+    },
+  };
+}
+
 function normalizeMmrpgLabel(input: unknown, noun: string): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
@@ -1855,6 +1903,7 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "mmrpg-trait": return normalizeMmrpgLabel(data, "trait");
     case "mmrpg-tag": return normalizeMmrpgLabel(data, "tag");
     case "mmrpg-iconic": return normalizeMmrpgIconic(data);
+    case "mmrpg-hq": return normalizeMmrpgHq(data);
   }
 }
 

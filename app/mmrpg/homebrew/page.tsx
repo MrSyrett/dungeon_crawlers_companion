@@ -11,6 +11,7 @@ const KINDS: { kind: HbType; label: string }[] = [
   { kind: "mmrpg-trait", label: "Traits" },
   { kind: "mmrpg-tag", label: "Tags" },
   { kind: "mmrpg-iconic", label: "Iconic Items" },
+  { kind: "mmrpg-hq", label: "Headquarters" },
 ];
 
 export default async function MmrpgHomebrewHubPage() {
