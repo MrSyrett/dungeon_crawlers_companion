@@ -66,6 +66,12 @@ export interface MmrpgCharacter {
   origin?: string;
   teams?: string;
   base?: string;
+  /** Traits carried by the character (name + any parenthetical). */
+  traits?: string[];
+  /** Tags carried by the character. */
+  tags?: string[];
+  /** Powers grouped by power set ("" or "Basic" = basic powers). */
+  powers?: { set: string; names: string[] }[];
   source?: string;
 }
 

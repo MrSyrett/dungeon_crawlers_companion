@@ -6,8 +6,20 @@ def clean(s):
     if s is None: return ''
     s=unicodedata.normalize('NFC',s)
     s=s.replace('ﬁ','fi').replace('ﬂ','fl')
-    s=re.sub(r'\bfl\s+aw','flaw',s)  # "fl aw" ligature split
+    s=re.sub(r'f([il])\s+(?=[a-z])',r'f\1',s)  # ligature split: "Refl exes"->"Reflexes", "Sacrifi ce"->"Sacrifice"
     return re.sub(r'\s+',' ',s).strip()
+
+# Canonical power-set names (from powers.json) — used to tell a set header from a
+# wrapped power name in the two-column POWERS block.
+SET_NAMES=['Elemental Control','Illusion','Magic','Martial Arts','Melee Weapons',
+    'Omniversal Travel','Phasing','Plasticity','Power Control','Ranged Weapons','Resize',
+    'Shield Bearer','Spider-Powers','Super-Speed','Super-Strength','Tactics','Telekinesis',
+    'Telepathy','Teleportation','Weather Control']
+def is_set_header(t):
+    t=t.strip()
+    if t=='Basic': return True
+    if re.search(r'\(.*Set\)', t): return True   # "Magic (Sorcery Set)"
+    return any(t==s or t.startswith(s+' ') or t.startswith(s+',') for s in SET_NAMES)
 
 def center(w): return (w['x0']+w['x1'])/2
 
@@ -81,6 +93,53 @@ def parse_page(pg):
             m=re.search(k+r'\s*:?\s*(\d+)',stext)
             if m: speed[k.lower()]=int(m.group(1))
 
+    # --- TRAITS / TAGS / POWERS: bulleted (◆) columns on the right of the block ---
+    def hdr(t):
+        h=[w for w in W if w['text']==t]; return h[0] if h else None
+    def col_lines(x0, x1, ytop, ybot):
+        ws=[w for w in W if x0<=w['x0']<x1 and ytop<w['top']<ybot]
+        ws.sort(key=lambda w:(round(w['top']/5),w['x0']))
+        lines=[]; cy=None; cur=None
+        for w in ws:
+            if cy is None or abs(w['top']-cy)>5: cur=[]; lines.append(cur); cy=w['top']
+            cur.append(w['text'])
+        return [clean(' '.join(l)) for l in lines if l]
+    def bullet_list(lines, drop={'Traits','Tags','Powers'}):
+        out=[]
+        for ln in lines:
+            if not ln or ln in drop or re.fullmatch(r'\d+',ln): continue
+            segs=ln.split('◆')  # interior bullets split too
+            head=segs[0].strip()
+            if head and out: out[-1]=(out[-1]+' '+head).strip()  # wrap continuation
+            for s in segs[1:]:
+                if s.strip(): out.append(s.strip())
+        return [o for o in out if o]
+    Tr=hdr('TRAITS'); Tg=hdr('TAGS'); Po=hdr('POWERS')
+    traits=tags=[]; powers=[]
+    if Tr and Po:
+        traits=bullet_list(col_lines(Tr['x0']-4, (Tg['x0'] if Tg else Tr['x0']+58), Tr['top']+8, Po['top']-2))
+    if Tg and Po:
+        tags=bullet_list(col_lines(Tg['x0']-4, Tg['x0']+72, Tg['top']+8, Po['top']-2))
+    if Po:
+        groups=[]
+        for cx0,cx1 in [(Po['x0']-4, Po['x0']+95),(Po['x0']+95, Po['x0']+230)]:
+            for ln in col_lines(cx0, cx1, Po['top']+8, Po['top']+270):
+                if not ln or ln in ('Powers',) or re.fullmatch(r'\d+',ln): continue
+                if '◆' not in ln and is_set_header(ln):
+                    groups.append({'set':ln,'names':[]}); continue
+                segs=ln.split('◆')
+                head=segs[0].strip()
+                if head:
+                    if groups and groups[-1]['names']:      # wrapped power name
+                        groups[-1]['names'][-1]=(groups[-1]['names'][-1]+' '+head).strip()
+                    elif groups:                            # wrapped set header
+                        groups[-1]['set']=(groups[-1]['set']+' '+head).strip()
+                for s in segs[1:]:
+                    if not s.strip(): continue
+                    if not groups: groups.append({'set':'','names':[]})
+                    groups[-1]['names'].append(s.strip())
+        powers=[g for g in groups if g['names']]
+
     # sanitize: strip any embedded "Label:" tail left by a scrambled reading order
     LBL=re.compile(r'\b(Origin|Teams|Base|Occupation|Height|Weight|Real Name|Gender|Eyes|Hair|Size|Distinguishing|Features)\b\s*:.*$')
     def san(v): return clean(LBL.sub('',v)) if v else v
@@ -96,7 +155,8 @@ def parse_page(pg):
         occ=o.get('occupation',occ) or occ
 
     return {'name':name,'realName':real,'rank':rank,'health':health,'focus':focus,'karma':karma,
-            'abilities':ab,'speed':speed,'occupation':occ,'origin':origin,'teams':teams,'base':base}
+            'abilities':ab,'speed':speed,'occupation':occ,'origin':origin,'teams':teams,'base':base,
+            'traits':traits,'tags':tags,'powers':powers}
 
 if __name__=='__main__':
     if len(sys.argv)>2:
@@ -119,6 +179,8 @@ if __name__=='__main__':
         names={}
         for r in out: names[r['name']]=names.get(r['name'],0)+1
         for r in out:
+            for g in r.get('powers',[]):
+                g['names']=[re.sub(r'\s+is$','',n).strip() for n in g['names']]
             base=slug(r['name'])
             r['id']= base if names[r['name']]==1 else base+'-'+slug(r['realName'] or '')
             r['genre']='core'
