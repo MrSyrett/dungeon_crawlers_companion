@@ -213,7 +213,7 @@
       var on = B._focus === c.id, sel = B.source === c.id;
       var ab = ABIL.map(function (a) { var v = c.abilities ? c.abilities[a.key] : 0; return a.name.slice(0, 1) + (v >= 0 ? '+' + v : v); }).join(' ');
       return '<button onclick="window.MMRPGB.focusChar(\'' + jq(c.id) + '\')" style="text-align:left;border:1px solid ' + (sel ? 'var(--mv)' : on ? '#7a4046' : '#241417') + ';background:' + (sel ? '#2a1215' : on ? '#1f1418' : '#141319') + ';border-radius:5px;padding:8px 10px;cursor:pointer;color:#f3e6e7;">'
-        + '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;"><b style="color:#f4a6a8;font-family:\'Oswald\',sans-serif;letter-spacing:.04em;">' + E(c.name) + (sel ? ' <span style="font-size:10px;color:#7dc47d;">✓ selected</span>' : '') + '</b><span style="font-size:10px;color:#8a8e98;text-transform:uppercase;letter-spacing:.1em;">Rank ' + E(c.rank) + '</span></div>'
+        + '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;"><b style="color:#f4a6a8;font-family:\'Oswald\',sans-serif;letter-spacing:.04em;">' + E(c.name) + (sel ? ' <span style="font-size:10px;color:#7dc47d;">✓ selected</span>' : '') + '</b><span style="font-size:10px;color:#8a8e98;text-transform:uppercase;letter-spacing:.1em;">' + (c.source ? '<span style="color:var(--mv);">' + E(c.source) + '</span> · ' : '') + 'Rank ' + E(c.rank) + '</span></div>'
         + (c.realName && c.realName !== c.name ? '<div class="m-hint" style="margin:1px 0 0;font-style:italic;">' + E(c.realName) + '</div>' : '')
         + '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:#9aa;letter-spacing:.02em;margin-top:3px;">' + E(ab) + '</div></button>';
     }).join('');
@@ -221,7 +221,7 @@
   function charDetail(c) {
     var powers = arr(c.powers).map(function (g) { return '<b style="color:#c9b0b2;">' + E(g.set || 'Basic') + ':</b> ' + E(g.names.join(', ')); }).join('<br>');
     var h = '<div style="background:#0f1014;border:1px solid var(--mv);border-radius:6px;padding:10px 12px;margin-bottom:10px;">'
-      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;"><b style="color:#f4a6a8;font-family:\'Oswald\',sans-serif;font-size:16px;">' + E(c.name) + '</b><span style="font-size:10px;color:#8a8e98;text-transform:uppercase;letter-spacing:.1em;">Rank ' + E(c.rank) + '</span></div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;"><b style="color:#f4a6a8;font-family:\'Oswald\',sans-serif;font-size:16px;">' + E(c.name) + '</b><span style="font-size:10px;color:#8a8e98;text-transform:uppercase;letter-spacing:.1em;">' + (c.source ? '<span style="color:var(--mv);">' + E(c.source) + '</span> · ' : '') + 'Rank ' + E(c.rank) + '</span></div>'
       + (c.realName ? '<div class="m-hint" style="margin:1px 0 6px;font-style:italic;">' + E(c.realName) + '</div>' : '');
     h += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:6px 0;">' + ABIL.map(function (a) {
       var v = c.abilities ? c.abilities[a.key] : 0;

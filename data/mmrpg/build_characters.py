@@ -59,7 +59,7 @@ def parse_page(pg):
     karma=None if kraw in (None,'—','-') else as_int(kraw)
 
     # --- codename: large title at top (size>=15), strip parenthetical ---
-    title=[w for w in W if 50<=w['top']<=62 and w.get('size',0)>=15 and w['x0']<355]
+    title=[w for w in W if 44<=w['top']<=62 and w.get('size',0)>=15 and w['x0']<355]
     title.sort(key=lambda w:w['x0'])
     name=re.split(r'\s*\(',' '.join(w['text'] for w in title))[0].strip()
 
@@ -122,7 +122,7 @@ def parse_page(pg):
         seg=[w for w in W if abs(center(w)-scx)<70 and sy<w['top']<sy+120]
         seg.sort(key=lambda w:(round(w['top']),w['x0']))
         stext=' '.join(w['text'] for w in seg)
-        for k in ['Run','Climb','Swim','Flight','Jump','Glide','Swingline','Teleport','Levitate','Burrow']:
+        for k in ['Run','Climb','Swim','Flight','Jump','Glide','Swingline','Teleport','Levitation','Levitate','Burrow']:
             m=re.search(k+r'\s*:?\s*(\d+)',stext)
             if m: speed[k.lower()]=int(m.group(1))
 

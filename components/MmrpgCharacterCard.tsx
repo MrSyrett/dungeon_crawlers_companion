@@ -24,7 +24,10 @@ export default function MmrpgCharacterCard({ c }: { c: MmrpgCharacter }) {
       >
         <div className="flex flex-wrap items-baseline justify-between gap-x-2">
           <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f4737a] group-hover:text-[var(--mmrpg)]">{c.name}</h3>
-          <span className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Rank {c.rank}</span>
+          <span className="flex items-center gap-1">
+            {c.source ? <span className="rounded bg-[var(--mmrpg)]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--mmrpg)]">{c.source}</span> : null}
+            <span className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Rank {c.rank}</span>
+          </span>
         </div>
         {c.realName && c.realName !== c.name ? <p className="text-[11px] italic text-[var(--muted)]">{c.realName}</p> : null}
         <div className="mt-2 grid grid-cols-6 gap-1 text-center">
@@ -53,7 +56,7 @@ export default function MmrpgCharacterCard({ c }: { c: MmrpgCharacter }) {
             <div>
               <h2 className="font-display text-2xl font-black uppercase tracking-wide text-[#f4737a]">{c.name}</h2>
               {c.realName && c.realName !== c.name ? <p className="mt-0.5 text-sm italic text-[var(--muted)]">{c.realName}</p> : null}
-              <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-[var(--mmrpg)]">Rank {c.rank}{c.origin ? ` · ${c.origin}` : ""}</p>
+              <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-[var(--mmrpg)]">Rank {c.rank}{c.origin ? ` · ${c.origin}` : ""}{c.source ? ` · ${c.source}` : ""}</p>
             </div>
             <button type="button" onClick={() => dlg.current?.close()} aria-label="Close" className="shrink-0 rounded border border-[var(--border)] px-2.5 py-1 text-lg leading-none text-[var(--muted)] hover:border-[var(--mmrpg)] hover:text-[var(--text)]">✕</button>
           </header>

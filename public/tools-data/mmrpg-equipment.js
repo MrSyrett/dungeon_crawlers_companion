@@ -20,6 +20,24 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Adamantium Claws (X-Men '97)",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Wolverine",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "melee"
+    ],
+    "special": "Ignores 1 level of the target's Damage Reduction.",
+    "notes": "Wolverine's adamantium claws (X-Men '97).",
+    "source": "X-Men '97"
+  },
+  {
     "name": "All-Black the Necrosword",
     "tier": "Iconic",
     "type": "Weapon",
@@ -172,6 +190,42 @@ const MMRPG_EQUIPMENT = [
     "flatMult": 2,
     "notes": "Affects all within 2 spaces of where it lands. Uses its own ×2 damage multiplier instead of the attacker's; a Fantastic success does ×4 to the center space.",
     "source": "core p34"
+  },
+  {
+    "name": "Gambit's Bo Staff",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Gambit",
+    "weaponClass": "melee",
+    "ability": "melee",
+    "range": "Reach +1",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "melee"
+    ],
+    "special": "Signature weapon — grants reach +1.",
+    "notes": "A collapsible telescoping bo staff.",
+    "source": "X-Men '97"
+  },
+  {
+    "name": "Gambit's Charged Cards",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Gambit",
+    "weaponClass": "ranged",
+    "ability": "agility",
+    "range": "5",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility"
+    ],
+    "special": "Act as thrown knives. Using Elemental Infusion on them costs 0 Focus. The cards function only for Gambit.",
+    "notes": "Ordinary playing cards charged with kinetic energy.",
+    "source": "X-Men '97"
   },
   {
     "name": "Iron Man's Gloves",

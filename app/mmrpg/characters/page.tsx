@@ -22,11 +22,15 @@ export default async function MmrpgCharactersPage({ searchParams }: { searchPara
   const ranks = Array.from(new Set(ALL.map((c) => c.rank))).sort((a, b) => a - b);
   const rankOpts = ranks.map((r) => ({ key: String(r), label: `Rank ${r}` }));
   const rank = ranks.map(String).includes(one(raw.rank)) ? one(raw.rank) : "";
-  const current: Query = { q, rank };
+  const sources = Array.from(new Set(ALL.map((c) => c.source ?? "Core"))).sort((a, b) => (a === "Core" ? -1 : b === "Core" ? 1 : a.localeCompare(b)));
+  const srcOpts = sources.map((s) => ({ key: s, label: s }));
+  const source = sources.includes(one(raw.source)) ? one(raw.source) : "";
+  const current: Query = { q, rank, source };
 
   const results = ALL.filter((c) =>
     (!rank || String(c.rank) === rank) &&
-    (!needle || [c.name, c.realName ?? "", c.occupation ?? "", c.origin ?? "", c.teams ?? ""].join(" ").toLowerCase().includes(needle)),
+    (!source || (c.source ?? "Core") === source) &&
+    (!needle || [c.name, c.realName ?? "", c.occupation ?? "", c.origin ?? "", c.teams ?? "", c.source ?? ""].join(" ").toLowerCase().includes(needle)),
   ).sort((a, b) => a.name.localeCompare(b.name, "en"));
 
   const groups = ranks.filter((r) => results.some((c) => c.rank === r));
@@ -34,9 +38,10 @@ export default async function MmrpgCharactersPage({ searchParams }: { searchPara
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Characters" subtitle={`${ALL.length} pre-generated heroes & villains`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Ready-to-play stat blocks from the core rulebook. Each lists the six <b>MARVEL</b> abilities (Melee, Agility, Resilience, Vigilance, Ego, Logic) plus Health, Focus, Karma and rank. Click a character for their full profile — defenses, speed, powers, traits and tags. Drop them straight into a scene as allies or opposition.</p>
+      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Ready-to-play stat blocks from the core rulebook and its supplements. Each lists the six <b>MARVEL</b> abilities (Melee, Agility, Resilience, Vigilance, Ego, Logic) plus Health, Focus, Karma and rank. Click a character for their full profile — defenses, speed, powers, traits and tags. Drop them straight into a scene as allies or opposition.</p>
 
-      <SearchForm base={BASE} q={q} placeholder="Search characters, teams, real names…" hidden={{ rank }} />
+      <SearchForm base={BASE} q={q} placeholder="Search characters, teams, real names…" hidden={{ rank, source }} />
+      {srcOpts.length > 1 ? <ChipRow label="Source" base={BASE} current={current} param="source" options={srcOpts} active={source} /> : null}
       <ChipRow label="Rank" base={BASE} current={current} param="rank" options={rankOpts} active={rank} />
       <CountLine count={results.length} noun="character" base={BASE} filtered={Boolean(needle || rank)} />
 

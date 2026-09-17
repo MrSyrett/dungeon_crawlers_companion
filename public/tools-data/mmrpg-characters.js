@@ -669,6 +669,176 @@ const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "BEAST",
+    "realName": "Henry Philip “Hank” McCoy",
+    "rank": 4,
+    "health": 60,
+    "focus": 60,
+    "karma": 4,
+    "abilities": {
+      "melee": 4,
+      "agility": 4,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 6
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 6
+    },
+    "occupation": "Scientist",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "Pointed teeth and ears, claws, blue fur",
+    "history": "Hank McCoy, alias the Beast, was one of the first mutants Professor X assembled to form the X-Men. Initially, he merely had enlarged hands and feet to go with his enhanced strength and agility, but eventually, his mutation progressed, giving him a blue-furred, bestial appearance. While many of his teammates have since come and gone, the Beast remains a stalwart with the team, and is the X-Men’s resident scientist. Shortly a(cid:30) er Jubilee joined the team, he was captured during a raid on a Sentinel factory and imprisoned for a time. A(cid:30) er the X-Men saved Senator Robert Kelly from assassination by the rogue Sentinels, he was released with a full pardon and became an important public advocate for mutant rights. He briefly romanced a patient of his, Carly Crocker, despite opposition from her bigoted father. She was subsequently kidnapped by the anti-mutant hate group the Friends of Humanity; although an enraged Hank saved her, he ended their relationship before she could be endangered again. Recently, he began developing a relationship with Trish Tilby, but they dri(cid:30) ed apart a(cid:30) er she conducted a hostile interview with his teammate Cyclops; he later had to battle her when Bastion transformed her into a cybernetic Prime Sentinel.",
+    "personality": "Despite his fearsome appearance, the Beast is a gentle soul. He is a brilliant scientist in a number of diff erent disciplines and maintains the X-Men’s advanced technology, including the Danger Room and the Blackbird jet. He is also extremely well-read and frequently peppers his speech with quotes from classical literature. He prefers to find nonviolent solutions to the X-Men’s problems; however, when he is called upon to fight, he does so with ferocity. He is a true believer in Xavier’s dream and is beloved by his teammates.",
+    "traits": [
+      "Big",
+      "Clinician",
+      "Combat Reflexes",
+      "Free Running",
+      "Inventor",
+      "Scientific Expertise"
+    ],
+    "tags": [
+      "Hounded",
+      "Extreme Appearance",
+      "Heroic",
+      "Lab Access",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Inspiration",
+          "Mighty 2",
+          "Sturdy 1",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep",
+          "Chain Strikes"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Jump 1"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Combat Support"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "beast-xmen97"
+  },
+  {
+    "name": "BISHOP",
+    "realName": "Lucas Bishop",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 2,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 4,
+      "logic": 3
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Investigator",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "Varies",
+    "features": "the shape of the letter “M”",
+    "history": "In Lucas Bishop’s timeline, Sentinels have ravaged humans and mutants alike by the year 2055. Despite being a mutant himself with the power to absorb energy, Bishop worked as a bounty hunter for the Sentinels, hunting down renegade mutants. However, when the Sentinels turned on him, he defected and joined a band of mutant rebels inspired by the legendary X-Men. The rebels sent him to the past to prevent Gambit from betraying the X-Men and assassinating Senator Robert Kelly, leading to a worldwide war on mutants. Once he arrived in the past, he eventually learned the real assassin was the shape-shi(cid:31) ing Mystique disguised as Gambit; even though Kelly was saved, Bishop returned to find his future unchanged. Now occasionally joined by his sister, Shard, he made subsequent jaunts to the past to prevent the Friends of Humanity from releasing a deadly plague, to stop Trevor Fitzroy from assassinating Charles Xavier before he could form the X-Men and to defeat Apocalypse before he could remake reality in his own image. Later, he returned to the present for some time to adventure with the X-Men. When Mister Sinister infected Cyclops’ infant son, Nathan, with a Techno-Organic virus, Bishop returned to his future with the boy, hoping that a cure could be found. Sometime later, a(cid:31) er the X-Men disappeared following a battle with Bastion, Bishop returned to the present and joined forces with Forge to hunt the time-lost mutants down.",
+    "personality": "Bishop is a harsh man from a harsh time. He is a battle-hardened, experienced warrior. Although he was initially self-centered enough to side against mutantkind, he was eventually swayed to fight for what’s right. Inspired by the legendary X-Men of the past, Bishop fights valiantly for mutantkind, knowing all too well what horrors could be unleashed if they fail. Control Ranged Weapons",
+    "traits": [
+      "Connections: Police",
+      "Connections: Super Heroes",
+      "Enduring Constitution",
+      "Extra Occupation",
+      "Fearless",
+      "Interrogation",
+      "Investigation",
+      "Presence",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Public Identity",
+      "Streetwise",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Discipline 2",
+          "Energy Absorption",
+          "Slow-Motion Dodge",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Blast (Energy)",
+          "Elemental Burst (Energy)",
+          "Elemental Infusion (Energy)"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Headshot",
+          "Slow-Motion Shoot-Dodge",
+          "Snap Shooting",
+          "Sniping",
+          "Stopping Power",
+          "Suppressive Fire",
+          "Weapons Blazing"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "bishop-xmen97"
+  },
+  {
     "name": "BLACK BOLT",
     "realName": "Blackagar Boltagon",
     "rank": 5,
@@ -1615,6 +1785,93 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "cyclops",
     "genre": "core"
+  },
+  {
+    "name": "CYCLOPS",
+    "realName": "Scott Summers",
+    "rank": 4,
+    "health": 60,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 2,
+      "agility": 5,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 6,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Educator",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "",
+    "history": "Scott Summers grew up in an orphanage. When he discovered his mutant ability–the power to emit blasts of energy from his eyes–he was taken in by Professor X and fitted with ruby-quartz glasses to control it. As Cyclops, he was part of Xavier’s first team of X-Men and remained their field leader throughout his tenure with the team. He fell in love with teammate Jean Grey, and the two eventually married. Their relationship was tested again and again by Jean’s mutual but unactedupon attraction to their teammate Wolverine; by the Phoenix, the cosmic force that granted Jean enormous power but corrupted her, leading her to die and be reborn; and by the twisted Mister Sinister, who wanted to experiment on them. During this period of turmoil, however, Scott learned that his long-thought-dead father had survived as the space-faring buccaneer Corsair. He also encountered the enigmatic Havok, leader of the government mutant task force X-Factor; their powers inexplicably canceled each other out. Eventually, he and Jean had a child, Nathan; however, much to his horror, he learned that Jean had been replaced by a Sinister-grown clone. Upon the real Jean’s return, the clone’s programming activated, and she turned Nathan over to Sinister, who infected him with a technoorganic virus. With modern science unable to cure the infant, Scott faced the agonizing decision of sending him to Bishop’s future timeline to be treated. Meanwhile, Cyclops was torn between the real Jean and the clone, who dubbed herself Madelyne Pryor, until the latter was killed by Sentinels. He also learned the mysterious mercenary Cable was really a grown-up Nathan.",
+    "personality": "Cyclops is a stalwart believer in Xavier’s dream, and an accomplished leader. He is unfailingly courageous, and a tactical genius. He can sometimes be too unyielding in his beliefs.",
+    "traits": [
+      "Connections: Community",
+      "Fearless",
+      "Iron Will",
+      "Piloting",
+      "Presence",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Heroic",
+      "Hounded",
+      "Linguist (Chinese)",
+      "Linguist (English)",
+      "Linguist (Russian)",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Combat Support",
+          "Focus Fire",
+          "Keep Moving",
+          "On Your Feet",
+          "Operations Center",
+          "Rally On Me"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Do This All Day",
+          "Brace For Impact"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrage (Energy)",
+          "Elemental Blast (Energy)",
+          "Elemental Burst (Energy)"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "cyclops-xmen97"
   },
   {
     "name": "DAREDEVIL",
@@ -2619,6 +2876,98 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "forge",
     "genre": "core"
+  },
+  {
+    "name": "GAMBIT",
+    "realName": "Remy Étienne LeBeau",
+    "rank": 4,
+    "health": 60,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 3,
+      "agility": 6,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 5,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Criminal",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "irises",
+    "history": "The roguish Cajun thief Remy LeBeau, alias Gambit, hails from the bayous of Louisiana. He and his family are members of the Thieves Guild, an ancient organization locked in an eternal rivalry with the Assassins Guild; both guilds vie for the favor of the powerful X-Ternal. Unlike his brethren in the Thieves Guild, LeBeau is a mutant, with the ability to charge any object he touches with energy, turning it into a dangerous explosive; he carries packs of playing cards to use as throwing weapons. He was betrothed to the Assassins Guild’s Bella Donna Boudreaux, but le(cid:31) her and the guild wars behind to join the X-Men. There, he pursued a romance with fellow Southerner Rogue; the attraction was mutual, but her mutant power le(cid:31) her unable to have physical contact with others, complicating their relationship. His past came back to haunt him when he had to journey back to Louisiana to save his brother, Bobby, which was part of Boudreaux’s plot to trap Gambit into marriage; with Rogue’s help, he saved Bobby, but vowed never to return. Recently, his and Rogue’s relationship was complicated by the arrival of Magneto as the X-Men’s new leader. Magneto had a past relationship with Rogue, and his control over the electromagnetic spectrum allowed the two of them to touch. The two reconnected, leaving Gambit feeling le(cid:31) out. Subsequently, LeBeau was in Genosha when it was attacked by Sentinels under Bastion’s control; LeBeau sacrificed himself to save Rogue and the attack’s other survivors.",
+    "personality": "Gambit is a charming, arrogant scoundrel who cares more about his friends than he lets on. He initially kept his distance from his teammates, but has gradually come to trust them and is a loyal member of the X-Men. He occasionally refers to himself in the third person.",
+    "traits": [
+      "Beguiling",
+      "Combat Reflexes",
+      "Connections: Criminal",
+      "Connections: Super Heroes",
+      "Extra Occupation",
+      "Fearless",
+      "Free Running"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Public Identity",
+      "Signature Weapon: Bo staff (+1 melee damage multiplier bonus; range: reach +1)",
+      "Streetwise",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Discipline 1",
+          "Iconic Weapon",
+          "Inspiration",
+          "Slow-Motion Dodge",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Burst",
+          "Elemental Infusion"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Dance of Death",
+          "Double Tap",
+          "Point-Blank Parry",
+          "Slow-Motion Shoot-Dodge",
+          "Suppressive Fire",
+          "Weapons Blazing"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "gambit-xmen97",
+    "equipment": [
+      "Gambit's Charged Cards",
+      "Gambit's Bo Staff"
+    ]
   },
   {
     "name": "GAMORA",
@@ -3973,6 +4322,91 @@ const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "JEAN GREY",
+    "realName": "Jean Grey-Summers",
+    "rank": 5,
+    "health": 90,
+    "focus": 180,
+    "karma": 5,
+    "abilities": {
+      "melee": 1,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 5,
+      "ego": 7,
+      "logic": 7
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "levitation": 5
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "",
+    "history": "One of Professor X’s first X-Men, the mutant telepath Jean Grey shared a lengthy romance with teammate Scott Summers. Although their relationship was troubled by Jean’s attraction to Wolverine, Jean and Scott were eventually married. The obsessive geneticist Mister Sinister captured Jean briefly during her honeymoon. Jean’s life would change dramatically during a mission to outer space. During a difficult re-entry into Earth’s atmosphere, the cosmic Phoenix Force occupied Jean’s body, giving her immense power and saving her life. Shortly a(cid:28) erward, Mastermind and the Hellfire Club tried to mind-control her; she eventually broke free, but the Phoenix’s evil side had been unleashed, transforming Jean into the Dark Phoenix. She went on a rampage before Jean reasserted control and seemingly destroyed herself to avoid harming her friends and her world. Jean survived, however, and the X-Men all sacrificed part of their life force to the Phoenix to return her to life. At some point, Jean was abducted by Sinister and replaced with a clone; unaware of her true nature, the clone believed she was the real Jean, and gave birth to Scott’s child, Nathan. Jean escaped from Sinister’s clutches and returned to the X-Men; the clone struck off on her own as “Madelyne Pryor,” while Nathan was sent to the future with Bishop to recover from Sinister’s experiments. Scott and Jean are attempting to pick up the pieces amid a worldwide war on mutantkind.",
+    "personality": "Jean is the emotional center of the X-Men and is a calming influence on her teammates; however, her placid exterior conceals her strong will. She maintains enormous discipline to keep her psychic powers in check.",
+    "traits": [
+      "Battle Ready",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Enduring Constitution",
+      "Fearless",
+      "Iron Will",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 2",
+          "Uncanny 2"
+        ]
+      },
+      {
+        "set": "Telekinesis",
+        "names": [
+          "Levitation",
+          "Telekinetic Attack",
+          "Telekinetic Barrier",
+          "Telekinetic Grab",
+          "Telekinetic Manipulation",
+          "Telekinetic Protection 2",
+          "Telekinetic Reinforcement",
+          "Telekinetic Sphere"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Cloak",
+          "Edit Memory",
+          "ESP",
+          "Memory Blip",
+          "Mental Punch",
+          "Mental Shelter",
+          "Mind Interrogation",
+          "Mind Reading",
+          "Telepathic Blast",
+          "Telepathic Link"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "jean-grey-xmen97"
+  },
+  {
     "name": "JESSICA JONES",
     "realName": "Jessica Campbell Jones",
     "rank": 3,
@@ -4040,6 +4474,84 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "jessica-jones",
     "genre": "core"
+  },
+  {
+    "name": "JUBILEE",
+    "realName": "Jubilation Lee",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 5,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "",
+    "history": "Jubilation Lee, alias Jubilee, was a normal, albeit rebellious, teenager until her mutant explosiveenergy-generating powers developed. Her foster parents alerted the authorities, who then sent the robotic Sentinels to apprehend her at her favorite hangout, the local mall. Jubilee was saved by the X-Men and was soon brought into their fold, becoming the newest member of the mutant hero team. The team helped her to master her powers and explore her mutant nature; she came to see the team as the family she never had, especially the otherwise-gruff Canadian mutant Wolverine. She has grown and matured during her tenure with the team; she successfully prevented the immortal mutant despot Apocalypse from using her as his new host body and handled herself admirably when she had to keep a group of children calm during a cave-in below the Xavier Mansion. Recently, she has connected with the X-Men’s newest recruit, the teenage Brazilian mutant Sunspot, and a romance between the two has blossomed. The duo was sucked into a virtualreality video game by the interdimensional media mogul Mojo, where Jubilee met Abscissa, an aged virtual-reality duplicate of herself who helped the two of them escape. Unfortunately, her nascent romance with Sunspot was cut short when he joined Rogue in defecting to Magneto’s side in his upcoming war on humanity. The two would-be lovers subsequently battled on Magneto’s Asteroid M.",
+    "personality": "Jubilee is energetic, fun-loving and eager to learn more about her growing mutant powers. As a teenager, she is immature and a tad selfcentered, and sometimes fails to grasp the gravity of the X-Men’s mission. Despite her age and inexperience, she refuses to be underestimated or excluded from “grown-up” X-Men operations. She is very close to her X-Men teammates, especially her mentor Wolverine. Control Illusions",
+    "traits": [
+      "Connections: Super Heroes",
+      "Determination",
+      "Fearless",
+      "Glibness",
+      "Quick Learner"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 2",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Push"
+        ]
+      },
+      {
+        "set": "Illusions",
+        "names": [
+          "Dazzle",
+          "Flare",
+          "Illumination"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Banging Heads"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "jubilee-xmen97"
   },
   {
     "name": "JUGGERNAUT",
@@ -4755,6 +5267,92 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "magneto",
     "genre": "core"
+  },
+  {
+    "name": "MAGNETO",
+    "realName": "Erik Lehnsherr",
+    "rank": 5,
+    "health": 90,
+    "focus": 150,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 5,
+      "ego": 8,
+      "logic": 5
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 25
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "X-Men, Brotherhood of Evil Mutants",
+    "base": "X-Mansion",
+    "features": "",
+    "history": "Erik Magnus Lehnsherr became embittered with humanity a(cid:31) er losing his family during the Holocaust. A(cid:31) er the war, Magnus befriended fellow mutant Charles Xavier, but Charles’ philosophy of peaceful coexistence between mutants and humans conflicted with his desire for mutant domination. Magnus married, but a(cid:31) er he used his mutant powers to control magnetism violently, his wife, Magda, fled. As Magneto, he gathered fellow mutants and began violent acts of terrorism against humanity. In the Antarctic Savage Land jungle, Magneto created a race of super-powered Mutates and became briefly involved romantically with the mutant Rogue, struggling to control her powers. Magneto wore a special helmet to protect himself from Xavier’s psychic powers. Magneto’s forces clashed with Xavier’s X-Men team, as Magneto attempted to provoke world war with nuclear weapons but was opposed by giant Sentinel robots. Magneto and the X-Men joined forces to defeat the Sentinel-creating Master Mold. Inviting all mutants to join him on the orbiting Asteroid M, Magneto’s dream to live completely independent of humanity failed a(cid:31) er he was betrayed by false follower Fabian Cortez. When Xavier was seemingly killed, Magneto inherited leadership of the X-Men and was soon invited to lead the mutant island of Genosha. The living Sentinel Bastion launched a devastating attack on Genosha and captured Magneto. Escaping, Magneto would attack Bastion’s army with a global electromagnetic pulse that endangered humanity. In the battle between Magneto, the Sentinels and the X-Men, Magneto pulled out Wolverine’s adamantium skeleton and Xavier damaged Magneto’s psyche. Xavier has pledged to repair the damage.",
+    "personality": "Magneto’s charisma is as powerful as his magnetic prowess. A stoic, inspirational leader, Magneto easily gathers followers despite his extremely cynical beliefs. Though respectful of",
+    "traits": [
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Determination",
+      "Fearless",
+      "Iron Will",
+      "Leverage",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Hounded",
+      "Linguist (Arabic)",
+      "Linguist (English)",
+      "Linguist (French)",
+      "Linguist (German)",
+      "Linguist (Hebrew)",
+      "Linguist (Polish)",
+      "Linguist (Russian)",
+      "Linguist"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 4",
+          "Flight 2",
+          "Inspiration",
+          "Uncanny"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Keep Moving"
+        ]
+      },
+      {
+        "set": "Elemental Control (Iron)",
+        "names": [
+          "Elemental Barrier (Iron)",
+          "Elemental Blast (Iron)",
+          "Elemental Burst (Iron)",
+          "Elemental Grab (Iron)",
+          "Elemental Protection (Iron) 4 (40 points to shatter)",
+          "Elemental Push (Iron)",
+          "Elemental Reinforcement (Iron)",
+          "Elemental Sphere (Iron)"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "magneto-xmen97"
   },
   {
     "name": "MAGNITRON",
@@ -5930,6 +6528,98 @@ const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "NIGHTCRAWLER",
+    "realName": "Kurt Wagner",
+    "rank": 4,
+    "health": 60,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 4,
+      "agility": 6,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 4,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 6,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Entertainer",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "appearance",
+    "history": "Abandoned by his shape-shi(cid:31) er mother Mystique at birth, the mutant later known as Nightcrawler was adopted and raised in the Wagner Circus, where he was given the name Kurt Wagner and became its star attraction. Despite his onstage fame, Nightcrawler was an outcast off stage due to his appearance, and his anger drove him to leave the Circus and find peace in religion. His devotion led him to the Swiss Alps, where he joined a monastery that judged him on the strength of his character rather than his appearance. A(cid:31) er being attacked by townspeople who assumed he was a demon, Nightcrawler drew the attention of vacationing X-Men Rogue, Gambit and Wolverine, allying with them to uncover the true culprit behind the attacking mob: the monastery’s own Brother Reinhart. When Mystique was later willingly used to lure the unknowing Nightcrawler into a trap set by his anti-mutant half brother Graydon Creed, Nightcrawler sought the X-Men’s assistance. Learning that Mystique was his mother and Rogue his adopted sister, Nightcrawler ultimately forgave Mystique for his earlier abandonment. When the island of Genosha was later restructured as a mutant haven, Nightcrawler joined the Genoshan council as part of their outreach to mutant communities of faith and he was present during a massive Sentinel attack, risking his life to help rescue innocent mutants. A(cid:31) er Gambit died in the attack, Nightcrawler delivered the eulogy at his funeral and subsequently joined the X-Men, helping the grieving Rogue and aiding them against the living Sentinel Bastion’s cyborg Prime Sentinels.",
+    "personality": "A devoted man of faith, Nightcrawler always looks at life from the perspective of love and caring. Friendly and easily approachable, Nightcrawler is fiercely loyal to his friends and family, genuinely caring about their well-being and o(cid:31) en playing the role of listener, dispensing advice gained from his unique life experiences. Arts Teleportation",
+    "traits": [
+      "Combat Expert",
+      "Famous",
+      "Free Running",
+      "Glibness",
+      "Presence",
+      "Public Speaking",
+      "Sneaky"
+    ],
+    "tags": [
+      "Extreme Appearance",
+      "Heroic",
+      "Hounded",
+      "Linguist (English)",
+      "Linguist (German)",
+      "Linguist (Japanese)",
+      "Linguist (Russian)",
+      "Linguist (Spanish)",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Additional Limbs",
+          "Combat Trickery"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Wallcrawling"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Banging Heads",
+          "Do This All Day",
+          "Fast Strikes",
+          "Grappling Technique",
+          "Leg Sweep",
+          "Always Ready",
+          "Chain Strikes",
+          "Flying Double Kick"
+        ]
+      },
+      {
+        "set": "Teleportation",
+        "names": [
+          "Blink",
+          "Blink Barrage",
+          "Blink Defense",
+          "Teleport 1",
+          "Teleport Object",
+          "Teleport Together"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "nightcrawler-xmen97"
+  },
+  {
     "name": "OKOYE",
     "realName": "Okoye",
     "rank": 2,
@@ -6570,6 +7260,83 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "rocket-raccoon",
     "genre": "core"
+  },
+  {
+    "name": "ROGUE",
+    "realName": "Anna Marie",
+    "rank": 4,
+    "health": 120,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 5,
+      "agility": 4,
+      "resilience": 4,
+      "vigilance": 3,
+      "ego": 4,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 20
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "",
+    "history": "A mutant with the power to absorb memories and super-powers upon touch, Rogue was disowned by her father a(cid:31) er her first kiss put her boyfriend Cody into a coma. Shape-shi(cid:31) ing mutant Mystique adopted the runaway Rogue. To help her control her powers, Mystique took Rogue to train under Magneto in the Savage Land. Magneto discovered he could touch Rogue, and the two became romantically involved for a time. As a part of Mystique’s Brotherhood of Mutants, Rogue performed illegal activities and permanently absorbed the strength, invulnerability and flying powers of Ms. Marvel (Carol Danvers), leaving Danvers comatose. As Danvers’ persona battled to control Rogue’s mind, Rogue fled to psychic mutant Charles Xavier for help. Finding peace a(cid:31) er Xavier blocked Rogue’s memories, Rogue joined Xavier’s X-Men, having many heroic adventures. She developed feelings for her flirtatious teammate Gambit, o(cid:31) en infuriated knowing her powers prevented them from touching. Hoping to remove her mutant abilities, Rogue traveled to Scotland where Mystique posed as a mutant cure’s administrator. The ancient mutant Apocalypse secretly orchestrated the “treatment” to build a team. With Apocalypse thwarted, Rogue returned home, powers intact. Rogue discovered Nightcrawler is Mystique’s son, making him like a brother. Cody returned, manipulated by aliens, but Rogue and the X-Men repelled the invasion. Invited by Magneto to co-lead Genosha, Rogue rejected Magneto for Gambit. But Gambit was killed and Genosha massacred by giant Sentinels. Heartbroken, Rogue joined Magneto in battling Bastion and the human-Sentinel hybrids responsible for the genocide.",
+    "personality": "With her distinctive striped hair, known for making playful, sometimes flirty, Southern metaphors, Rogue is a fiery and passionate woman. Though quick to protect those she loves, she can be emotionally distant knowing the dangers of her touch. This has o(cid:31) en le(cid:31) her lonely, tending toward individualism. / 8",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Glibness",
+      "Presence",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Flight 2",
+          "Mighty 3",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Power Control",
+        "names": [
+          "Clone Powers",
+          "Copy Power",
+          "Dampen Power",
+          "Shut Down Powers",
+          "Steal Powers"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Quick Toss",
+          "Smash"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "rogue-xmen97"
   },
   {
     "name": "RONAN THE ACCUSER",
@@ -7529,7 +8296,8 @@ const MMRPG_CHARACTERS = [
     "speed": {
       "run": 6,
       "climb": 3,
-      "swim": 3
+      "swim": 3,
+      "levitation": 6
     },
     "occupation": "Adventurer",
     "origin": "Alien",
@@ -7670,6 +8438,91 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "storm",
     "genre": "core"
+  },
+  {
+    "name": "STORM",
+    "realName": "Ororo Munroe",
+    "rank": 5,
+    "health": 120,
+    "focus": 120,
+    "karma": 5,
+    "abilities": {
+      "melee": 4,
+      "agility": 4,
+      "resilience": 4,
+      "vigilance": 4,
+      "ego": 6,
+      "logic": 3
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 25
+    },
+    "occupation": "Adventurer, Leader",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "when using her powers",
+    "history": "The weather-controlling mutant Ororo Munroe, alias Storm, was born in the shadow of Mount Kilimanjaro. As a child, she was once buried alive, leading to a lifelong case of claustrophobia. In her home village, she assisted in the birth of a baby, Mjnari; she subsequently considered him to be like a son to her. She first met Professor X during an encounter with the evil psychic the Shadow King; she subsequently joined him and his X-Men in America, becoming one of the team’s most powerful members. When Jean Grey and Cyclops were captured by the Morlocks, a subterranean group of mutant outcasts, Storm challenged their leader, Callisto, to a duel. Winning, she became the Morlocks’ leader, although she later passed that responsibility back to Callisto. The Shadow King, craving vengeance on her, lured her back home by possessing Mjnari, but Storm was able to defeat him once more. Later, she traveled to the alien world Polemachus to quell the storms that raged there and was briefly betrothed to the planet’s king, Arkon, but le(cid:29) when she realized he was a cruel tyrant. Recently, during a battle with the X-Cutioner, Storm was blasted with a hightech weapon that suppressed her mutant powers. She le(cid:29) the X-Men on a quest for self-discovery, linking up with the mutant inventor Forge along the way. She battled the demonic Adversary and regained her powers, returning to the X-Men to aid them in their battle against Bastion and his Prime Sentinels.",
+    "personality": "Storm is supremely empathetic and a valued friend and teammate to her fellow X-Men. In battle, Storm is bombastic, her proclamations eliciting as much fear from her adversaries as her ability to summon the elements. Even when denied the use of her powers, she is a capable and cra(cid:29) y fighter. Control Weather Control",
+    "traits": [
+      "Audience",
+      "Beguiling",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Extra Occupation",
+      "Fearless",
+      "Presence"
+    ],
+    "tags": [
+      "Authority",
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Powerful",
+      "Public Identity",
+      "Streetwise",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 3",
+          "Flight 2",
+          "Group Flight",
+          "Inspiration",
+          "Uncanny 2"
+        ]
+      },
+      {
+        "set": "Elemental Control (Electricity)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Push",
+          "Elemental Ricochet",
+          "Supernova"
+        ]
+      },
+      {
+        "set": "Weather Control",
+        "names": [
+          "Control Fog",
+          "Control Weather 4",
+          "Thunder",
+          "Weather Chill",
+          "Weather Warm"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "storm-xmen97"
   },
   {
     "name": "SUB-MARINER",
@@ -7822,6 +8675,76 @@ const MMRPG_CHARACTERS = [
     ],
     "id": "sunspot",
     "genre": "core"
+  },
+  {
+    "name": "SUNSPOT",
+    "realName": "Roberto “Bobby” Da Costa",
+    "rank": 3,
+    "health": 60,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 5,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 15
+    },
+    "occupation": "Tycoon",
+    "origin": "Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "darkness (when powers are active)",
+    "history": "Born into family fortune, Roberto Da Costa manifested solar-powered mutant abilities and attempted to hide his powers from his family. Roberto’s parents deduced his nature a(cid:31) er he accidentally burned four of their homes but pretended not to know. Roberto was eventually captured by the anti-mutant Friends of Humanity (FoH) before being rescued by the X-Men and questioned about the FoH’s Sentinel technology. Roberto befriended the X-Men’s Jubilee before departing. He continued to visit and soon became involved in battles against a mind-controlled Jean Grey clone and the extradimensional Mojo, who projected Roberto and Jubilee into a digital world where Roberto nearly perished. Roberto and Jubilee began dating, and Roberto was convinced to reveal his mutant nature to his mother. Roberto and Jubilee were later attacked by Da Costa’s butler, who had been transformed into a cyborg Prime Sentinel. Evading more Prime Sentinels, Roberto and Jubilee returned to Roberto’s mother, but she remanded them to the Sentinels, concerned more about bad publicity than her son’s safety. Escaping when Magneto unleashed a worldwide electromagnetic pulse, Roberto and Jubilee were rescued from the FoH by Storm and Forge. The increasingly cynical Roberto soon joined Magneto and reluctantly battled Jubilee when the X-Men infiltrated Magneto’s Asteroid M base. Denouncing Magneto a(cid:31) er witnessing him nearly kill the X-Man Wolverine, Roberto, now calling himself Sunspot, saved Jubilee from Asteroid M when it was shot down by the U.S. government.",
+    "personality": "Slightly self-centered due to his privileged upbringing, the fun-loving and outwardly confident Sunspot o(cid:31) en doesn’t seem to grasp the gravity of situations. Despite his sometimes cynical and skeptical demeanor, he is secretly unsure of himself and his powers, having spent much time hiding his true nature. Control Barrier / Blast (Energy) 8 Burst (Energy) / Form (Energy) C H Protection A R Push (Energy) A C (Energy) T E Ricochet R S",
+    "traits": [
+      "Connections: Celebrities",
+      "Enduring Constitution",
+      "Famous",
+      "Glibness",
+      "Public Speaking"
+    ],
+    "tags": [
+      "Extreme Appearance (when using powers)",
+      "Heroic",
+      "Hounded",
+      "Rich",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 1",
+          "Flight 2",
+          "Inspiration",
+          "Mighty 2"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrier (Energy)",
+          "Elemental Blast (Energy)",
+          "Elemental Burst (Energy)",
+          "Elemental Form (Energy)",
+          "Elemental Protection (Energy) 1",
+          "Elemental Push (Energy)",
+          "Elemental Reinforcement (Energy)",
+          "Elemental Ricochet (Energy)"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "sunspot-xmen97"
   },
   {
     "name": "TASKMASTER",
@@ -9020,6 +9943,94 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "equipment": [
       "Adamantium Claws"
+    ]
+  },
+  {
+    "name": "WOLVERINE",
+    "realName": "James Howlett (A.K.A. Logan)",
+    "rank": 4,
+    "health": 180,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 6,
+      "agility": 3,
+      "resilience": 6,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "High Tech: Cybernetics, Mutant",
+    "teams": "X-Men",
+    "base": "X-Mansion",
+    "features": "Retractable adamantium claws, muttonchops",
+    "history": "The origins, past and full name of the Canadian mutant named Logan, alias Wolverine, are unknown. Thanks to his mutant healing factor, he is extremely long-lived; he was first known to be active during World War II, when he aided Captain America in battling the Red Skull. Decades later, he was subjected to experimentation by the Weapon X program that bonded adamantium with his skeleton and gave him retractable metal claws, as well as modifying his memories; another Weapon X test subject, Sabretooth, would become his lifelong rival. He eventually escaped from Weapon X, resulting in the death of its chief scientist, Kenji Oyama. Oyama’s daughter and Logan’s ex-lover Yuriko Oyama would later stalk Logan as the adamantium-clawed Lady Deathstrike. Mac and Heather Hudson took in the fugitive Logan; he would later join Mac in the Canadian super-team Alpha Flight before leaving to join the X-Men. Although his solitary nature kept most of his teammates at a distance, he did befriend the eccentric Morph and was enraged when he was seemingly killed by Sentinels. He has continued to serve as a stalwart X-Man, mentoring new X-Men member Jubilee and helping the revived Morph rejoin the team. Recently, the X-Men’s archenemy Magneto tore the adamantium out of Wolverine’s body.",
+    "personality": "A loner by nature, Wolverine o(cid:30) en chooses to operate solo. His advanced age has given him years of experience, and he is an unmatched fighter and tracker. In battle, he o(cid:30) en lapses into a feral rage, making him a danger to friend and foe alike. Nevertheless, his attitude toward his fellow X-Men has so(cid:30) ened over time, and he has become a valued teammate. He has feelings for Jean Grey; combined with his natural distrust of authority, this o(cid:30) en puts him at odds with X-Men leader Cyclops. Arts Melee Weapons (sharp)",
+    "traits": [
+      "Battle Ready",
+      "Berserker",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Military",
+      "Extraordinary Origin",
+      "Situational Awareness",
+      "Tech Reliance (TR)"
+    ],
+    "tags": [
+      "Enemy: Sabretooth",
+      "Extreme Appearance",
+      "Heroic",
+      "Hounded",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brawling",
+          "Combat Trickery",
+          "Healing Factor",
+          "Heightened Senses 1",
+          "Iconic Weapon",
+          "Reinforced Skeleton",
+          "Uncanny 1"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Grappling Technique"
+        ]
+      },
+      {
+        "set": "Melee Weapons (sharp)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Focused Fury",
+          "Furious Attacks",
+          "Hit & Run",
+          "Riposte",
+          "Unstoppable Assault",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "X-Men '97",
+    "id": "wolverine-xmen97",
+    "equipment": [
+      "Adamantium Claws (X-Men '97)"
     ]
   },
   {
