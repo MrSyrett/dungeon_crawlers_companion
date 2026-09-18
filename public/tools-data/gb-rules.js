@@ -48,30 +48,36 @@ const GB_RULES = [
     "key": "combat",
     "title": "Combat",
     "order": 8,
-    "body": "Combat is just a task. Hand-to-hand uses Muscles (brawl, grapple); a weapon like a club adds a few dice. Ranged combat uses Moves (fire weapon). Range sets the Difficulty: Point-Blank (10 m or less) is 1–3 and the defender may grapple or fire back; Normal (~30 m pistols/proton packs, ~90 m bazookas) is 9–13 and the defender must fire back or take cover; Long (beyond normal) is 14+, up to 30 at extreme range. Knives and pistols generally don't work on ghosts — that's what the proton pack is for."
+    "body": "Combat is just a task, resolved in Combat Turns (Movement then Combat, in Moves/Cool order). Brawling is Muscles vs Muscles — the winner's margin sets the damage. Ranged weapons list a code of max range / difficulty increment (e.g. proton pack 5/1, machine gun 100/15): every increment of hexes raises the shot's Difficulty one UHM level. A target may Dodge once per Turn by rolling Moves; a higher Dodge becomes the new to-hit number. Some weapons add to-hit or damage dice, hit adjacent hexes (A), are inaccurate (S2), or can rebound on a Ghost roll (G*). Knives and pistols do nothing to an immaterial ghost — that is what the proton pack is for."
   },
   {
     "key": "hurt",
     "title": "Getting Hurt (UHM)",
     "order": 9,
-    "body": "Ghostbusters don't ordinarily die — they get hurt, slimed, and banged up, and their equipment gets toasted. The Ghostmaster resolves harm with the UHM (Universal How-Much) system: the more a roll beats the Difficulty, the greater the effect. Injury temporarily lowers Traits/talents (track the 'Current' values), costs hospital time, and docks Brownie Points. Only reckless, repeatedly-warned stars ever actually die — and then they come back as a ghost the Ghostmaster runs."
+    "body": "Ghostbusters don't ordinarily die — they get hurt, slimed and banged up. Damage lowers Traits: measure how much the attack beat the defense, then lower that many total Trait points (the UHM table): beat by 0-3 = 1 point (Very Little), 4-8 = 2 (Some), 9-13 = 3 (A Good Amount), 14-18 = 4 (Lots), 19-29 = 5 (Whole Lots — unconscious), 30+ = 6 (More Than You Can Imagine — straight to hospital). The player splits the loss among the four Traits however they like (talent dice are never lost); no Trait goes below 0. Track losses in the 'Current' column — that is your health. When every Trait hits 0 the Ghostbuster is helpless (can only 'laugh at danger'). Weapons add damage dice, and a Ghostbuster can spend Brownie Points to buy a loss down (never below 1 point)."
+  },
+  {
+    "key": "healing",
+    "title": "Healing Up",
+    "order": 10,
+    "body": "Lost Trait points come back slowly. Brownie Point substitution buys off a loss as it happens (it never does better than Very Little, and costs more BP than the point saved). The medicine talent lets a doctor roll medicine dice — the difficulty is one UHM level per Trait point the patient is down, and the level of success is how many points are restored (a patient can't revisit the doctor until healed or re-injured to the same total). Natural healing restores 1 point per week of rest. The Hospital takes any 'More Than You Can Imagine' casualty automatically and heals 1 point per day — then bills you like a phone book."
   },
   {
     "key": "equipment",
     "title": "Carrying Equipment",
-    "order": 10,
+    "order": 11,
     "body": "Each item has a Hands rating (how bulky — a '1½ hands' item is carried in one hand but used with two) and a Muscles rating (how heavy). You have two hands, two 'hands' worth on your belt, two on your back, and one on your head. Try not to carry more Muscles points of gear than your Muscles Trait, or you'll start to slow down — set up an equipment dump (usually ECTO-1) near the action."
   },
   {
     "key": "ectopresence",
     "title": "Busting Ghosts",
-    "order": 11,
+    "order": 12,
     "body": "Ghosts and monsters (all 'extras') use the same four Traits plus a Power rating with supernatural abilities. A ghost's Ectopresence is what you whittle down: a proton pack on ATTACK reduces it by 1 per hit. Once Ectopresence hits 0, two Ghostbusters use the CONTAINMENT stream to cage it and pop a Ghost Trap. Beware Proton Immunity — some beings shrug off the stream and must be beaten with weird science or their specific weakness."
   },
   {
     "key": "creation",
     "title": "Creating a Ghostbuster",
-    "order": 12,
+    "order": 13,
     "body": "Fill out a Personnel File: Name & Alias, description and Tags (a physical tag and a personality tag), a Goal (Sex, Wealth, Fame, Soulless Science, Serving Humanity…), your four Traits (12 points, 1–5 each), one Talent per Trait, gear, and 20 Brownie Points. Then give some thought to who your star actually is — the point of the game is to tell a funny, satisfying story, so a distinctive voice and manner matter as much as the numbers."
   }
 ];

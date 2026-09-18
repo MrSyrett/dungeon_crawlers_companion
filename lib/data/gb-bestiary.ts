@@ -148,6 +148,88 @@ export const GB_BESTIARY = [
     "description": "Lucretia's daughter, a gorgeous, sultry practicing witch (she hasn't got it quite right yet) with no time for all the men, studies and revelations the writers have in store."
   },
   {
+    "name": "Ghostly Minions",
+    "role": "Psychics transformed into ghosts",
+    "entityType": "Ectoplasmic · Intelligent",
+    "brains": 3,
+    "muscles": 0,
+    "moves": 0,
+    "cool": 2,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Read Palms",
+        "value": 6
+      },
+      {
+        "trait": "Cool",
+        "name": "Boondoggle Customers",
+        "value": 5
+      }
+    ],
+    "power": 3,
+    "powers": [
+      "PKE Analysis",
+      "Poltergeist",
+      "Slime",
+      "Terrorize"
+    ],
+    "goal": "Be Human Again",
+    "tags": "Lots of 'I can't help myself... I don't have a choice' excuses; pleads not to be put in the Grid.",
+    "description": "Palmists, mediums and crackpots kidnapped by a Mad Scientist and turned ghostly. Each has a 1-in-6 chance for any one listed ability.",
+    "ectopresence": 3
+  },
+  {
+    "name": "Gozer the Gozerian",
+    "role": "Ancient world-conquering demon",
+    "entityType": "Physical · Intelligent",
+    "brains": 6,
+    "muscles": 8,
+    "moves": 7,
+    "cool": 7,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Multiverse Trivia",
+        "value": 9
+      },
+      {
+        "trait": "Muscles",
+        "name": "Intimidate",
+        "value": 11
+      },
+      {
+        "trait": "Moves",
+        "name": "Acrobatics",
+        "value": 10
+      },
+      {
+        "trait": "Cool",
+        "name": "Ignore Puny Humans",
+        "value": 10
+      }
+    ],
+    "power": 12,
+    "powers": [
+      "Dematerialize",
+      "Dematerialize Object",
+      "Dimensional Transfer",
+      "Flight",
+      "Frog 'n' Prince (Greater)",
+      "Invisibility",
+      "Physical Immunity (Greater)",
+      "Proton Immunity",
+      "Read Mind",
+      "Summon Pests",
+      "Teleport",
+      "Terrorize"
+    ],
+    "goal": "Take Over the World",
+    "tags": "Utter confidence; contemptuous dismissal of mortals.",
+    "description": "The shape-shifting Gozerian; chooses the form of its destructor. A Demon-Class metaspecter.",
+    "weaknesses": "Subject to Backlash if the dimensional-transfer spell is interrupted."
+  },
+  {
     "name": "Kathleen",
     "role": "Vengeful Convertible",
     "brains": 2,
@@ -219,6 +301,124 @@ export const GB_BESTIARY = [
     "description": "A typical everyday non-riding lawn mower until Kathleen brings it to life; then it charges the cityscape hunting high grass, house pets and human feet."
   },
   {
+    "name": "Really Old Guys",
+    "role": "Doddering alien monsters from beyond the stars",
+    "entityType": "Physical · Intelligent",
+    "brains": 4,
+    "muscles": 6,
+    "moves": 5,
+    "cool": 5,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Forget Important Things",
+        "value": 7
+      },
+      {
+        "trait": "Muscles",
+        "name": "Gobble Humans",
+        "value": 9
+      },
+      {
+        "trait": "Moves",
+        "name": "Gossip Shrilly",
+        "value": 8
+      },
+      {
+        "trait": "Cool",
+        "name": "Creep People Out",
+        "value": 8
+      }
+    ],
+    "power": 8,
+    "powers": [
+      "Animate",
+      "Control Mind",
+      "Flight",
+      "Growing",
+      "Make Illusion",
+      "Physical Immunity (Greater)",
+      "Possess",
+      "Proton Immunity",
+      "Read Mind",
+      "Slime",
+      "Summon Pests",
+      "Terrorize"
+    ],
+    "goal": "Destruction of Earth, then Retirement",
+    "tags": "Arthritic shambling; hard-of-hearing conversations with minions.",
+    "description": "Ancient evils settling into monstrous retirement — but they have to destroy all human life first. Choose any four of their listed abilities."
+  },
+  {
+    "name": "Rei, Priest of Uert-Hekeu",
+    "role": "Ancient Egyptian sorcerer-mummy",
+    "entityType": "Physical · Intelligent",
+    "brains": 4,
+    "muscles": 9,
+    "moves": 4,
+    "cool": 6,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Egyptian Trivia",
+        "value": 7
+      },
+      {
+        "trait": "Muscles",
+        "name": "Smash Inanimate Objects",
+        "value": 12
+      },
+      {
+        "trait": "Moves",
+        "name": "Silent Shamble",
+        "value": 7
+      },
+      {
+        "trait": "Cool",
+        "name": "Be Unmoved",
+        "value": 9
+      }
+    ],
+    "power": 10,
+    "powers": [
+      "Frog 'n' Prince (Greater)",
+      "Make Illusion",
+      "Terrorize"
+    ],
+    "goal": "Restoring the Old Egyptian Kingdom",
+    "tags": "Bandages of a mummy, bright eyes, mouth not showing; followed by a persistent cloud of moths that eat his bandages (the only things immune to his abilities).",
+    "description": "A Third-Dynasty priest of the magic-goddess Uert-Hekeu, mummified and reawakened after 2,000 years — the rulebook's Dangerous-class Sample Beastie."
+  },
+  {
+    "name": "Scottish Spook",
+    "role": "Bagpiping ancestral spook",
+    "entityType": "Ectoplasmic · Intelligent",
+    "brains": 1,
+    "muscles": 0,
+    "moves": 0,
+    "cool": 1,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Find Relatives",
+        "value": 4
+      },
+      {
+        "trait": "Cool",
+        "name": "Play Bagpipes",
+        "value": 4
+      }
+    ],
+    "power": 2,
+    "powers": [
+      "Proton Immunity"
+    ],
+    "goal": "Restore Family Honor",
+    "tags": "Scottish accent so thick you could cut it with a Claymore.",
+    "description": "Laird Ronald MacDonald, a centuries-old coward. Proton packs only 'catch the bagpipes' — they are repeaters and return the next night.",
+    "ectopresence": 2
+  },
+  {
     "name": "Spartacus Kane",
     "role": "Angst Vampire",
     "brains": 2,
@@ -259,6 +459,47 @@ export const GB_BESTIARY = [
     "description": "The great-great-granduncle of Lucretia's dead husband; bitten around 1800, he wanders wracked with guilt, convinced his vampirism causes the family's curses (really it's his pretentiousness)."
   },
   {
+    "name": "Suits of Armor",
+    "role": "Lonely bachelor knight ghosts",
+    "entityType": "Physical · Intelligent",
+    "brains": 1,
+    "muscles": 5,
+    "moves": 3,
+    "cool": 3,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Misunderstand Modern Speech",
+        "value": 4
+      },
+      {
+        "trait": "Muscles",
+        "name": "Bash Things with Maces",
+        "value": 8
+      },
+      {
+        "trait": "Moves",
+        "name": "Ride Horse",
+        "value": 6
+      },
+      {
+        "trait": "Cool",
+        "name": "Stride Menacingly",
+        "value": 6
+      }
+    ],
+    "power": 6,
+    "powers": [
+      "Physical Immunity (Greater)",
+      "Proton Immunity"
+    ],
+    "goal": "Nightly Companionship",
+    "tags": "Medieval speech patterns; quick temper.",
+    "description": "Three museum suits of armor from different medieval periods, bearing maces and other Ghostbuster-crushing weapons.",
+    "ectopresence": 12,
+    "weaknesses": "Inactive in daytime."
+  },
+  {
     "name": "Tarquin Kane",
     "role": "Stylish Werewolf",
     "brains": 3,
@@ -297,6 +538,25 @@ export const GB_BESTIARY = [
     "description": "Lucretia's son, a dark, brooding fashion-plate who lives only to shed his lycanthropy so he'll stop shredding expensive designer outfits and scaring off dates."
   },
   {
+    "name": "The Librarian Ghost",
+    "role": "Book stacker and card flinger",
+    "entityType": "Ectoplasmic · Mindless",
+    "brains": 0,
+    "muscles": 0,
+    "moves": 0,
+    "cool": 0,
+    "talents": [],
+    "power": 5,
+    "powers": [
+      "Invisibility",
+      "Terrorize"
+    ],
+    "goal": "Have the Library to Herself",
+    "tags": "Shushes noisemakers; dislikes card files and the Dewey Decimal System; terrorizes attackers.",
+    "description": "The old librarian ghost of the New York Public Library from the first movie.",
+    "ectopresence": 6
+  },
+  {
     "name": "The Reconstituted Man",
     "role": "Frankenstein Monster",
     "brains": 1,
@@ -333,5 +593,185 @@ export const GB_BESTIARY = [
     "goal": "For No One to Notice Him",
     "tags": "Walks stiff-legged, shrinks from fire, absently crushes young girls",
     "description": "Sewn together from stolen corpses and spare auto parts. Huge, terrifying, misunderstood and lonesome — he just wants to be left alone and to find a mate."
+  },
+  {
+    "name": "The Spud (Slimer)",
+    "role": "Glutton ghost — undead stomach with teeth",
+    "entityType": "Ectoplasmic · Mindless",
+    "brains": 0,
+    "muscles": 0,
+    "moves": 0,
+    "cool": 0,
+    "talents": [],
+    "power": 2,
+    "powers": [
+      "Slime"
+    ],
+    "goal": "Eat Everything",
+    "tags": "Slobbers; crams its face with food.",
+    "description": "The green free-roaming vapor famous for sliming the hotel hallway.",
+    "ectopresence": 5
+  },
+  {
+    "name": "The Stay-Puft Marshmallow Man",
+    "role": "Ten-story cartoon world-destroyer",
+    "entityType": "Physical · Mindless",
+    "brains": 0,
+    "muscles": 10,
+    "moves": 8,
+    "cool": 0,
+    "talents": [
+      {
+        "trait": "Muscles",
+        "name": "Smash Buildings",
+        "value": 13
+      },
+      {
+        "trait": "Moves",
+        "name": "Stride Menacingly",
+        "value": 11
+      }
+    ],
+    "power": 8,
+    "powers": [
+      "Growing",
+      "Growing (Again)",
+      "Terrorize"
+    ],
+    "goal": "Destroy All Humans",
+    "tags": "Steps on anything smaller than itself (practically everything); beams cheerfully as it destroys the world.",
+    "description": "The chosen form of the destructor — a giant sailor-suited marshmallow mascot."
+  },
+  {
+    "name": "Thu-thu",
+    "role": "Just-awakened volcano god",
+    "entityType": "Ectoplasmic · Mindless",
+    "brains": 0,
+    "muscles": 0,
+    "moves": 0,
+    "cool": 0,
+    "talents": [],
+    "power": 10,
+    "powers": [
+      "Growing",
+      "Materialize",
+      "Terrorize"
+    ],
+    "goal": "Have Sacrificial Munchies Until the End of Time",
+    "tags": "Flies around roaring, shaking the lava, and terrorizing sacrifices.",
+    "description": "National deity of Ralyeh — a gigantic, slimy, lava-colored volcano god with a slack-jawed grin he likes to drop sacrifices into.",
+    "ectopresence": 20
+  },
+  {
+    "name": "Uncle Ferg",
+    "role": "Joe Normal — just a little dead",
+    "entityType": "Ectoplasmic · Intelligent",
+    "brains": 3,
+    "muscles": 0,
+    "moves": 0,
+    "cool": 4,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Make Plans for Everyone Else",
+        "value": 6
+      },
+      {
+        "trait": "Cool",
+        "name": "Resist Terrorize",
+        "value": 7
+      }
+    ],
+    "power": 5,
+    "powers": [
+      "Invisibility",
+      "Materialize"
+    ],
+    "goal": "Clean Things Up and Lead a Happy American Life",
+    "tags": "Glad-handing, back-slapping cheerfulness; loud clothes — golfing pants, screaming ties.",
+    "description": "Everyone's nightmare of an unflappable, oh-so-nice nerd relative — who happens to be dead.",
+    "ectopresence": 8
+  },
+  {
+    "name": "Vinz Clortho, the Key-Master",
+    "role": "Keymaster of Gozer",
+    "entityType": "Physical · Intelligent",
+    "brains": 1,
+    "muscles": 7,
+    "moves": 5,
+    "cool": 1,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Find Human Host",
+        "value": 4
+      },
+      {
+        "trait": "Muscles",
+        "name": "Run",
+        "value": 10
+      },
+      {
+        "trait": "Moves",
+        "name": "Jazzercise",
+        "value": 8
+      },
+      {
+        "trait": "Cool",
+        "name": "Talk to Animals",
+        "value": 4
+      }
+    ],
+    "power": 10,
+    "powers": [
+      "Dematerialize",
+      "Frog 'n' Prince (Lesser)",
+      "Possess",
+      "Terrorize"
+    ],
+    "goal": "Sex (Ritual)",
+    "tags": "Canine sniffs and snuffles; mimics people; fetches slippers; utterly uncomprehending of the world.",
+    "description": "The Terror Dog that possesses Louis Tully; Gozer's other herald."
+  },
+  {
+    "name": "Zuul, the Gate-Keeper",
+    "role": "Gatekeeper of Gozer",
+    "entityType": "Physical · Intelligent",
+    "brains": 5,
+    "muscles": 7,
+    "moves": 5,
+    "cool": 4,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Find Human Host",
+        "value": 8
+      },
+      {
+        "trait": "Muscles",
+        "name": "Wrestle",
+        "value": 10
+      },
+      {
+        "trait": "Moves",
+        "name": "Seduce",
+        "value": 8
+      },
+      {
+        "trait": "Cool",
+        "name": "Flex and Seethe",
+        "value": 7
+      }
+    ],
+    "power": 10,
+    "powers": [
+      "Dematerialize",
+      "Frog 'n' Prince (Lesser)",
+      "Possess",
+      "Terrorize"
+    ],
+    "goal": "Sex (Ritual)",
+    "tags": "Flexes, seethes and demonstrates ardently dangerous-looking lust in a human host; otherwise animal-predatory.",
+    "description": "The Terror Dog that possesses Dana Barrett; one of Gozer's two heralds. Changes a possessed body into the likeness of its own."
   }
 ] as unknown as GbBestiary[];

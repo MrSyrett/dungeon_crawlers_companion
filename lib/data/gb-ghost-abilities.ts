@@ -1,0 +1,151 @@
+// GENERATED FILE - do not edit by hand.
+// Source: data/gb/parts/*.json - regenerate with: node scripts/build-gb-data.mjs
+
+import type { GbGhostAbility } from "./gb-types";
+
+export const GB_GHOST_ABILITIES = [
+  {
+    "name": "Animate",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Bring inanimate objects to life. Roll Power for the max number of objects animated (doubled on a Ghost). Attacking objects' combined Muscles equals the ghost's Power."
+  },
+  {
+    "name": "Control Mind",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Enslave a human's will without possessing the body — Power vs the target's Cool. The target may roll Cool again to break free (a Ghost on either roll locks it in)."
+  },
+  {
+    "name": "Creature Feature",
+    "category": "Both",
+    "requiresPower": false,
+    "description": "Shapeshift. Lesser = one fixed animal/monster form; Greater = any form. The new form's natural gear (flight, horns) transfers, but not its Traits."
+  },
+  {
+    "name": "Dematerialize Object",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Make a whole object vanish; difficulty scales with its size. It reappears somewhere dramatic about five minutes per Power point later."
+  },
+  {
+    "name": "Dematerialize Self",
+    "category": "Lesser",
+    "requiresPower": true,
+    "description": "A physical entity turns vaporous like a ghost — immune to physical harm, with a temporary Ectopresence equal to its Muscles. Proton packs hit that Ectopresence."
+  },
+  {
+    "name": "Dimensional Transfer",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Open portals and travel between dimensions — the world-conquering trick (Gozer's calling card)."
+  },
+  {
+    "name": "Flight",
+    "category": "Lesser",
+    "requiresPower": true,
+    "description": "Fly instead of walk, as many hexes per Turn as its Power. Every ectoplasmic entity gets this ability for free."
+  },
+  {
+    "name": "Frog 'n' Prince",
+    "category": "Both",
+    "requiresPower": true,
+    "description": "Turn things or people into other things. Roll Power as a range-5, increment-1 attack (dodgeable). Lesser = one preset change (reverts after 5 min x Power); Greater = any object, permanent until a story action reverses it."
+  },
+  {
+    "name": "Growing",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Grow larger. Each level gives +3 Muscles, +1 Moves (speed only), and lowers the difficulty to hit it with ranged weapons by one; growing entities cannot Dodge. One level = 30-60 ft."
+  },
+  {
+    "name": "Invisibility",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Turn invisible at will (takes a full Combat Turn). Engaging an invisible entity in melee or fire is a Lots-of-difficulty Brains roll. Taken twice, it is permanent (until painted/floured)."
+  },
+  {
+    "name": "Make Illusion",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Create illusory objects, people or ghosts — Power vs the illusion's difficulty. A viewer disbelieves by matching Brains vs the ghost's Power."
+  },
+  {
+    "name": "Materialize",
+    "category": "Lesser",
+    "requiresPower": true,
+    "description": "Take physical form; uses Power in place of Muscles and Moves. A materialized ghost takes proton damage but no physical damage, and reverts after a few seconds."
+  },
+  {
+    "name": "Murphy",
+    "category": "Both",
+    "requiresPower": true,
+    "description": "Make things go wrong — machines fail, lights die, proton packs misfire. Lesser forces an extra Ghost Die roll (a Ghost = the mishap); Greater targets a specific device (Power vs a difficulty)."
+  },
+  {
+    "name": "Physical Immunity",
+    "category": "Both",
+    "requiresPower": false,
+    "description": "Very hard to hurt. Lesser subtracts 5 from every damage roll; Greater subtracts 20 (near-invincible — such a monster must have exploitable Weaknesses)."
+  },
+  {
+    "name": "PKE Analysis",
+    "category": "Lesser",
+    "requiresPower": true,
+    "description": "Sense psychokinetic energy like a PKE meter and analyze its 'flavor' (Power vs a difficulty). Bearers lose two Cool dice when resisting Terrorize."
+  },
+  {
+    "name": "Poltergeist",
+    "category": "Both",
+    "requiresPower": true,
+    "description": "Move objects at a distance and hurl them at Ghostbusters (Power vs Muscles). Lesser moves objects only; Greater can toss living things around."
+  },
+  {
+    "name": "Possess",
+    "category": "Lesser",
+    "requiresPower": true,
+    "description": "Take over a person's body — Power vs the victim's Brains. The ghost uses the host's Muscles/Moves but its own Power for Brains- and Cool-related rolls, with no access to the host's memories."
+  },
+  {
+    "name": "Proton Immunity",
+    "category": "Both",
+    "requiresPower": false,
+    "description": "Immune to proton pack attacks — the stream has no effect. Physical entities take it as Lesser, ectoplasmic ones as Greater."
+  },
+  {
+    "name": "Read Mind",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Read a person's thoughts and near-future plans — Power vs Brains. The target may resist by matching Cool vs the ghost's Power."
+  },
+  {
+    "name": "Shrinking",
+    "category": "Lesser",
+    "requiresPower": true,
+    "description": "Become smaller. Each level gives -2 Muscles, -1 Moves, raises the difficulty to hit it with ranged weapons by one level, and adds +3 dice to sneak."
+  },
+  {
+    "name": "Slime",
+    "category": "Lesser",
+    "requiresPower": true,
+    "description": "Coat one target per attack in ectoplasm (range 1, increment 1, Very Little difficulty). A slimed target's Cool hits count as 0 and it is grossly hindered until wiped off."
+  },
+  {
+    "name": "Summon Pests",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Summon and control one type of pest — roach hordes, swooping bats, clouds of flies, surly people — difficulty by number and annoyance."
+  },
+  {
+    "name": "Teleport",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Instantly transport itself and cargo without crossing the space between; difficulty rises with distance and carried weight."
+  },
+  {
+    "name": "Terrorize",
+    "category": "Greater",
+    "requiresPower": true,
+    "description": "Evoke paralyzing fear — Power vs every viewer's Cool. Those who fail panic and flee (or freeze) for at least an hour. Works even with eyes closed."
+  }
+] as unknown as GbGhostAbility[];

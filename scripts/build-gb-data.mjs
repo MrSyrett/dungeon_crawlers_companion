@@ -24,6 +24,9 @@ const ENTITIES = [
   { key: "equipment",    constName: "GB_EQUIPMENT",    type: "GbEquipment",  base: "gb-equipment" },
   { key: "powers",       constName: "GB_POWERS",       type: "GbPower",      base: "gb-powers",       keepOrder: true },
   { key: "bestiary",     constName: "GB_BESTIARY",     type: "GbBestiary",   base: "gb-bestiary" },
+  { key: "ghost-abilities",  constName: "GB_GHOST_ABILITIES",  type: "GbGhostAbility",  base: "gb-ghost-abilities" },
+  { key: "ghost-weaknesses", constName: "GB_GHOST_WEAKNESSES", type: "GbGhostWeakness", base: "gb-ghost-weaknesses" },
+  { key: "ghost-toughness",  constName: "GB_GHOST_TOUGHNESS",  type: "GbToughness",     base: "gb-ghost-toughness", keepOrder: true },
   { key: "rules",        constName: "GB_RULES",        type: "GbRule",       base: "gb-rules",        keepOrder: true },
 ];
 

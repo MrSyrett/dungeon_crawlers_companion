@@ -32,15 +32,40 @@ export interface GbDifficulty {
 
 export interface GbEquipment {
   name: string;
-  category: string;
+  category: string;            // "Weapon (ranged)" | "Weapon (melee)" | "Gear"
   hands: string;
-  muscles: number;
+  muscles: number;             // encumbrance / carry cost
+  rangeMax?: number | null;    // ranged weapons: max range in hexes
+  rangeIncrement?: number | null; // hexes per +1 UHM difficulty level
+  toHit?: string;              // bonus to-hit dice, e.g. "+2"
+  damage?: string;             // bonus damage dice, e.g. "+6"
+  special?: string;            // A / S2 / G* / effect notes
   description: string;
 }
 
 export interface GbPower {
   name: string;
   description: string;
+}
+
+export interface GbGhostAbility {
+  name: string;
+  category: string;            // "Lesser" | "Greater" | "Both"
+  requiresPower: boolean;
+  description: string;
+}
+
+export interface GbGhostWeakness {
+  name: string;
+  description: string;
+}
+
+export interface GbToughness {
+  toughness: string;
+  power: string;
+  abilities: string;
+  ectopresence: string;
+  brainsCool: string;
 }
 
 export interface GbBestiaryTalent {
@@ -52,14 +77,15 @@ export interface GbBestiaryTalent {
 export interface GbBestiary {
   name: string;
   role: string;
+  entityType?: string;         // "Physical · Intelligent" etc.
   brains: number;
   muscles: number;
   moves: number;
   cool: number;
   talents: GbBestiaryTalent[];
   power?: number;
-  powers?: string[];
-  ectopresence?: number;
+  powers?: string[];           // special abilities
+  ectopresence?: number;       // ghostly "health" — trapped at 0
   weaknesses?: string;
   goal: string;
   tags: string;

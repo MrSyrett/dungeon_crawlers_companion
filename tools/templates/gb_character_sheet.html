@@ -78,6 +78,15 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .spend-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
 .spend-row label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800;}
 .spend-row input{width:44px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:5px;padding:4px;background:var(--input-bg);}
+.injury-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.injury-num{font-family:'Share Tech Mono';font-weight:700;font-size:32px;color:var(--gb-dk);line-height:1;}
+.injury-of{font-size:11px;color:var(--muted);}
+.injury-status{font-family:'Barlow Condensed';font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gb-dk);}
+.injury-status.warn{color:var(--amber);}.injury-status.bad{color:var(--red);}
+.injury-btns{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-left:auto;}
+.injury-btns button{background:var(--box);border:1px solid var(--input-border);border-radius:5px;padding:5px 9px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';font-size:12px;}
+.injury-btns input{width:38px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:4px;padding:4px;background:var(--input-bg);}
+.gm-dmg{color:var(--gb-dk);font-weight:700;}
 textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:60px;background:#fff;}
 .addrow{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
 .addrow select,.addrow input{border:1px solid var(--input-border);border-radius:5px;padding:5px;font-family:inherit;font-size:13px;background:#fff;}
@@ -208,6 +217,19 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
             <div id="traits"></div>
           </div>
           <div class="card">
+            <h3>Injury <span class="injury-status" id="injury-status">Unharmed</span></h3>
+            <div class="injury-wrap">
+              <div class="injury-num" id="injury-down">0</div>
+              <div class="injury-of">Trait points down</div>
+              <div class="injury-btns">
+                <input id="f-hit" type="number" value="1" min="1">
+                <button onclick="takeHit()">Take Hit</button>
+                <button onclick="healOne()">Heal 1</button>
+                <button class="rollbtn small" onclick="healAll()">Full</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
             <h3>Brownie Points</h3>
             <div class="bp-wrap">
               <div class="pill"><button onclick="bumpBP(-1)">−</button><span class="bp-num" id="bp">20</span><button onclick="bumpBP(1)">+</button></div>
@@ -328,26 +350,54 @@ function renderGear(){
   if(!S.gear.length){host.innerHTML='<div class="empty">No gear.</div>';}
   S.gear.forEach(function(g,i){
     var el=document.createElement('div');el.className='gear-row';
-    el.innerHTML='<span>'+esc(g.name)+'</span><span style="display:flex;gap:8px;align-items:center;"><span class="gm">'+esc(g.hands||'')+(g.muscles?' · '+g.muscles+' Mus':'')+'</span><button class="row-x" onclick="delGear('+i+')">✕</button></span>';
+    var stat='';
+    if(g.damage){ stat+='<span class="gm-dmg">dmg '+esc(g.damage)+(g.special?' '+esc(g.special):'')+'</span>'; if(g.rangeMax)stat+=' <span class="gm">rng '+g.rangeMax+'/'+(g.rangeIncrement||'')+'</span>'; }
+    stat+=' <span class="gm">'+esc(g.hands||'')+(g.muscles?' · '+g.muscles+' Mus':'')+'</span>';
+    el.innerHTML='<span>'+esc(g.name)+'</span><span style="display:flex;gap:8px;align-items:center;">'+stat+'<button class="row-x" onclick="delGear('+i+')">✕</button></span>';
     host.appendChild(el);
   });
   renderCarry();
 }
 function renderBP(){$('bp').textContent=S.bp;}
+/* ── Injury / health: damage lowers Current Traits (UHM), tracked here ── */
+function curVal(k){ var c=S.current[k]; return (c==null||c==='')?num(S.traits[k]):num(c); }
+function injuryTotal(){ return TKEYS.reduce(function(a,k){ return a+Math.max(0,num(S.traits[k])-curVal(k)); },0); }
+function injuryStatus(down){
+  if(TKEYS.every(function(k){return curVal(k)<=0;})) return {t:'Helpless',c:'bad'};
+  if(down<=0) return {t:'Unharmed',c:''};
+  if(down<=1) return {t:'Shaken Up',c:''};
+  if(down<=2) return {t:'Hurt',c:'warn'};
+  if(down<=3) return {t:'Badly Hurt',c:'warn'};
+  if(down<=4) return {t:'Basket Case',c:'bad'};
+  return {t:'Hospital',c:'bad'};
+}
+function renderInjury(){ var down=injuryTotal(), s=injuryStatus(down); $('injury-down').textContent=down; var el=$('injury-status'); el.textContent=s.t; el.className='injury-status'+(s.c?' '+s.c:''); }
+function takeHit(){
+  var n=Math.max(1,num($('f-hit').value));
+  for(var i=0;i<n;i++){ var best=null,bv=-1; TKEYS.forEach(function(k){ var c=curVal(k); if(c>bv){bv=c;best=k;} }); if(best==null||bv<=0)break; S.current[best]=bv-1; }
+  renderTraits();renderInjury();scheduleAutosave();
+  addLog((S.name||'Ghostbuster')+' · Injury','−'+n+' Trait','now '+injuryTotal()+' down', injuryTotal()>=5?'fumble':'normal');
+}
+function healOne(){
+  var best=null,worst=99; TKEYS.forEach(function(k){ var c=curVal(k); if(num(S.traits[k])-c>0 && c<worst){worst=c;best=k;} });
+  if(best==null)return; var nv=Math.min(num(S.traits[best]),curVal(best)+1); S.current[best]=(nv>=num(S.traits[best])?null:nv);
+  renderTraits();renderInjury();scheduleAutosave();
+}
+function healAll(){ TKEYS.forEach(function(k){ S.current[k]=null; }); renderTraits();renderInjury();scheduleAutosave(); addLog((S.name||'Ghostbuster')+' · Healed','✓','full recovery','crit'); }
 function renderAll(){
-  renderTraits();renderGear();renderBP();
+  renderTraits();renderGear();renderBP();renderInjury();
   $('f-name').value=S.name||'';$('f-alias').value=S.alias||'';$('d-goal').textContent=S.goal||'—';
   $('f-tagp').value=S.tagPhysical||'';$('f-tagper').value=S.tagPersonality||'';$('f-notes').value=S.notes||'';
   refreshWizardButtons();
 }
 
 /* live-play actions */
-function setCurrent(k,v){S.current[k]=(v===''?null:num(v));renderTraits();scheduleAutosave();}
+function setCurrent(k,v){S.current[k]=(v===''?null:num(v));renderTraits();renderInjury();scheduleAutosave();}
 function bumpBP(d){S.bp=Math.max(0,S.bp+d);renderBP();scheduleAutosave();}
 function setBP(n){S.bp=n;renderBP();scheduleAutosave();}
 function clampSpend(){var v=Math.max(0,num($('f-spend').value));if(v>S.bp)v=S.bp;$('f-spend').value=v;}
 function onIdent(){S.name=$('f-name').value;S.alias=$('f-alias').value;syncDocTitle();refreshWizardButtons();scheduleAutosave();}
-function addGear(){var n=$('gear-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;});S.gear.push({name:n,hands:e?e.hands:'',muscles:e?e.muscles:0});renderGear();scheduleAutosave();}
+function addGear(){var n=$('gear-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;})||{};S.gear.push({name:n,hands:e.hands||'',muscles:e.muscles||0,category:e.category||'',damage:e.damage||'',toHit:e.toHit||'',rangeMax:e.rangeMax||null,rangeIncrement:e.rangeIncrement||null,special:e.special||''});renderGear();scheduleAutosave();}
 function addGearFree(){var n=($('gear-free').value||'').trim();if(!n)return;S.gear.push({name:n,hands:'',muscles:0});$('gear-free').value='';renderGear();scheduleAutosave();}
 function delGear(i){S.gear.splice(i,1);renderGear();scheduleAutosave();}
 
@@ -490,7 +540,11 @@ function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:
 function setTab(t){['gear','tags','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('gb_tab',t);}catch(e){}}
 function setDefaultTab(){var t='gear';try{t=localStorage.getItem('gb_tab')||'gear';}catch(e){}if(!$('pane-'+t))t='gear';setTab(t);}
 function initPickers(){
-  var gp=$('gear-pick');gp.innerHTML='';EQUIP.forEach(function(e){var o=document.createElement('option');o.value=e.name;o.textContent=e.name+(e.muscles?' ('+e.muscles+' Mus)':'');gp.appendChild(o);});
+  var gp=$('gear-pick');gp.innerHTML='';
+  var cats={};EQUIP.forEach(function(e){(cats[e.category||'Gear']=cats[e.category||'Gear']||[]).push(e);});
+  ['Weapon (ranged)','Weapon (melee)','Gear'].forEach(function(cat){ if(!cats[cat])return; var og=document.createElement('optgroup');og.label=cat;
+    cats[cat].forEach(function(e){var o=document.createElement('option');o.value=e.name;o.textContent=e.name+(e.damage?' ('+e.damage+(e.rangeMax?' · '+e.rangeMax+'hex':'')+')':e.muscles?' ('+e.muscles+' Mus)':'');og.appendChild(o);});
+    gp.appendChild(og); });
   var dp=$('diffpick');dp.innerHTML='<option value="">Difficulty…</option>';DIFFS.forEach(function(dd){if(dd.low!=null){var o=document.createElement('option');o.value=dd.high||dd.low;o.textContent=dd.name+' ('+dd.range+')';dp.appendChild(o);}});
 }
 function autoLoad(){
