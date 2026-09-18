@@ -217,6 +217,17 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
             <div id="traits"></div>
           </div>
           <div class="card">
+            <h3>Brownie Points</h3>
+            <div class="bp-wrap">
+              <div class="pill"><button onclick="bumpBP(-1)">−</button><span class="bp-num" id="bp">20</span><button onclick="bumpBP(1)">+</button></div>
+              <button class="rollbtn small" onclick="setBP(20)">Reset 20</button>
+            </div>
+            <div class="spend-row"><label>Extra dice this roll</label><input id="f-spend" type="number" value="0" min="0" oninput="clampSpend()"></div>
+          </div>
+        </div>
+        <!-- RIGHT: Injury → Gear | Tags | Notes tabs -->
+        <div class="col">
+          <div class="card">
             <h3>Injury <span class="injury-status" id="injury-status">Unharmed</span></h3>
             <div class="injury-wrap">
               <div class="injury-num" id="injury-down">0</div>
@@ -229,17 +240,6 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
               </div>
             </div>
           </div>
-          <div class="card">
-            <h3>Brownie Points</h3>
-            <div class="bp-wrap">
-              <div class="pill"><button onclick="bumpBP(-1)">−</button><span class="bp-num" id="bp">20</span><button onclick="bumpBP(1)">+</button></div>
-              <button class="rollbtn small" onclick="setBP(20)">Reset 20</button>
-            </div>
-            <div class="spend-row"><label>Extra dice this roll</label><input id="f-spend" type="number" value="0" min="0" oninput="clampSpend()"></div>
-          </div>
-        </div>
-        <!-- RIGHT: Gear | Tags | Notes tabs -->
-        <div class="col">
           <div>
             <div class="subtabs">
               <button id="tb-gear" class="on" onclick="setTab('gear')">Gear</button>
