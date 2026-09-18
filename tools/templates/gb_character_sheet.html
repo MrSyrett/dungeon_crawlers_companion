@@ -139,6 +139,43 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .dice-btn:hover{background:var(--gb);color:#12180a;}
 .dice-btn.mini{flex:0 0 auto;padding:8px 12px;background:#1e2916;color:#c3dea8;border-color:#33471f;}
 .dice-btn.mini:hover{background:#33471f;color:#fff;}
+/* SW-style build-a-pool tray */
+.dice-pool-display{background:#182014;border:1px solid #2b3620;border-radius:4px;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:13px;color:#c3dea8;text-align:center;min-height:34px;display:flex;align-items:center;justify-content:center;}
+.dice-btns{display:flex;gap:5px;flex-wrap:wrap;}
+.dice-btns .dice-btn{flex:1;min-width:44px;padding:8px 0;}
+.dice-btn.clear{background:#1e2916;color:#c3dea8;border-color:#33471f;}
+.dice-btn.roll{background:var(--ecto);color:#12180a;border-color:var(--ecto);flex:1.4;}
+.dice-btn.roll:hover{background:#c8f06a;color:#12180a;}
+.tray-note{font-size:10px;color:#7d8a68;font-family:'Barlow Condensed',sans-serif;letter-spacing:.03em;line-height:1.3;}
+/* Injury per-trait rows */
+.inj-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--rule);}
+.inj-row:last-child{border-bottom:none;}
+.inj-name{font-family:'Barlow Condensed';font-weight:700;font-size:15px;}
+.inj-val{font-family:'Share Tech Mono';font-weight:700;font-size:16px;min-width:52px;text-align:center;}
+.inj-val .dn{color:var(--red);font-size:11px;}
+.inj-btn{width:26px;height:26px;border:1px solid var(--input-border);background:var(--box);border-radius:5px;font-weight:800;cursor:pointer;font-size:15px;line-height:1;}
+.inj-btn.dmg{color:var(--red);}.inj-btn.heal{color:var(--gb-dk);}
+.inj-btn:disabled{opacity:.35;cursor:default;}
+/* Shop / picker modal */
+#pk-overlay{z-index:1100;}
+.pk-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:7px;flex-shrink:0;border-bottom:1px solid #2b3620;}
+.pk-filterrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.pk-filterrow select{flex:1;min-width:130px;}
+.pk-carry{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:#a6e05a;white-space:nowrap;}
+.pk-carry.over{color:#e2796f;}
+.pk-customrow{display:flex;gap:6px;}
+.pk-customrow input{flex:1;}
+.brow-list{padding:4px 12px;overflow-y:auto;}
+.brow-item{display:flex;align-items:flex-start;gap:10px;padding:9px 2px;border-bottom:1px solid #232b18;}
+.brow-main{flex:1;min-width:0;}
+.brow-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#eef4e2;}
+.brow-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:#a6e05a;margin-left:8px;font-weight:400;}
+.brow-meta{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#8f9c78;letter-spacing:.03em;text-transform:uppercase;margin-top:1px;}
+.brow-desc{font-size:11.5px;color:#b6c79a;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.brow-add{flex-shrink:0;background:var(--gb);color:#12180a;border:none;border-radius:4px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.brow-add:hover{background:#a6e05a;}
+.brow-add.have{background:transparent;color:#8f9c78;border:1px solid #33471f;}
+.brow-empty{padding:14px 4px;font-size:12px;color:#8f9c78;}
 
 /* Toast + modals */
 #roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(12,16,8,.94);border:2px solid var(--gb);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.7);}
@@ -178,6 +215,15 @@ body.dark{--bg:#0e120a;--paper:#181e11;--ink:#e9f0dc;--muted:#93a17c;--rule:#2c3
 body.dark .sheet{border-color:#33471f;}
 body.dark .card,body.dark .trait,body.dark .subwrap{background:#181e11;color:var(--ink);}
 body.dark .cur input,body.dark .addrow select,body.dark .addrow input,body.dark textarea,body.dark .pill,body.dark .spend-row input{background:#111a0c;color:var(--ink);}
+/* dark-mode readability: brighten the green text-accents (--gb-dk is too dim on dark cards) */
+body.dark .card h3,body.dark .card h4,body.dark .tval,body.dark .talent-row .pool,body.dark .carry,body.dark .gm-dmg,body.dark .injury-num{color:#9ed94a;}
+body.dark .card h3{border-bottom-color:#33471f;}
+body.dark .injury-status{color:#9ed94a;}
+body.dark .injury-status.warn{color:var(--amber);}
+body.dark .injury-status.bad{color:#e88;}
+body.dark .inj-btn,body.dark .injury-btns button,body.dark .pill button,body.dark .lv-step{background:#1e2614;color:var(--ink);}
+body.dark .inj-btn.dmg{color:#e88;}body.dark .inj-btn.heal{color:#9ed94a;}
+body.dark .carry.over,body.dark .pk-carry.over{color:#e88;}
 
 .roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
 @media(max-width:768px){
@@ -203,9 +249,8 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
         <div class="logo"><b>Ghostbusters</b><span>International · Personnel File</span></div>
         <div class="lockrow"><div class="lockfield"><label>Goal</label><div class="lv" id="d-goal">—</div></div></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end;">
         <div class="f"><label>Name</label><input id="f-name" placeholder="Ghostbuster" oninput="onIdent()"></div>
-        <div class="f"><label>Alias (player)</label><input id="f-alias" placeholder="Your name" oninput="onIdent()"></div>
       </div>
     </div>
     <div class="body">
@@ -228,17 +273,8 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
         <!-- RIGHT: Injury → Gear | Tags | Notes tabs -->
         <div class="col">
           <div class="card">
-            <h3>Injury <span class="injury-status" id="injury-status">Unharmed</span></h3>
-            <div class="injury-wrap">
-              <div class="injury-num" id="injury-down">0</div>
-              <div class="injury-of">Trait points down</div>
-              <div class="injury-btns">
-                <input id="f-hit" type="number" value="1" min="1">
-                <button onclick="takeHit()">Take Hit</button>
-                <button onclick="healOne()">Heal 1</button>
-                <button class="rollbtn small" onclick="healAll()">Full</button>
-              </div>
-            </div>
+            <h3 style="gap:8px;">Injury <span class="injury-status" id="injury-status">Unharmed</span> <button class="rollbtn small" style="margin-left:auto;" onclick="healAll()">Full Recovery</button></h3>
+            <div id="injury"></div>
           </div>
           <div>
             <div class="subtabs">
@@ -248,10 +284,9 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
             </div>
             <div class="subwrap">
               <div id="pane-gear" class="subpane on">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4 style="margin:0;">Gear</h4><span class="carry" id="carry"></span></div>
-                <div class="addrow">
-                  <select id="gear-pick"></select><button class="addbtn" onclick="addGear()">+ Add</button>
-                  <input id="gear-free" placeholder="custom item" style="flex:1;min-width:100px;"><button class="addbtn" onclick="addGearFree()">+</button>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;">
+                  <button class="addbtn" onclick="openGearShop()">🛒 Add Gear</button>
+                  <span class="carry" id="carry"></span>
                 </div>
                 <div id="gear"></div>
               </div>
@@ -286,8 +321,15 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click a Trait or Talent to roll its dice pool</div></div>
   <div class="dice-tray">
-    <div class="tray-row"><span class="tray-label">Difficulty</span><input class="tray-input" id="tension" type="number" placeholder="TN"><select class="tray-sel" id="diffpick" onchange="pickDiff()"></select></div>
-    <div class="tray-row"><button class="dice-btn" onclick="rollRaw(3)">Roll 3d6</button><button class="dice-btn mini" onclick="rollRaw(1)">1d6</button></div>
+    <div class="dice-pool-display" id="gb-pool">Empty — tap +1d to build a pool</div>
+    <div class="dice-btns">
+      <button class="dice-btn" onclick="poolAdd(1)">+1d</button>
+      <button class="dice-btn" onclick="poolAdd(2)">+2d</button>
+      <button class="dice-btn" onclick="poolAdd(3)">+3d</button>
+      <button class="dice-btn clear" onclick="poolClear()">Clear</button>
+      <button class="dice-btn roll" onclick="poolRoll()">Roll</button>
+    </div>
+    <div class="tray-note">One die in the pool is the Ghost Die — a 6 on it counts 0.</div>
   </div>
 </div>
 </div>
@@ -296,6 +338,19 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Ghostbusters — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✦ Advance Ghostbuster</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div><div class="modal-ft"><span id="levelup-note" class="m-hint" style="margin:0;flex:1;"></span><button class="m-btn" onclick="closeLevelUp()">Done</button></div></div></div>
+<!-- Shop / picker (gear · talents · goals) -->
+<div id="pk-overlay" class="ov" onclick="if(event.target===this)closePk()"><div class="modal wide" style="max-height:90vh;">
+  <div class="modal-hd"><div class="ttl" id="pk-title">Add</div><button class="x" onclick="closePk()">✕</button></div>
+  <div class="pk-controls">
+    <input id="pk-search" class="m-input" placeholder="Search…" oninput="renderPk()">
+    <div class="pk-filterrow">
+      <select id="pk-cat" class="m-input" onchange="renderPk()" style="display:none;"></select>
+      <span id="pk-carry" class="pk-carry"></span>
+    </div>
+    <div id="pk-customrow" class="pk-customrow" style="display:none;"><input id="pk-custom" class="m-input" placeholder="Custom…" onkeydown="if(event.key==='Enter')pkCustom()"><button class="m-btn" onclick="pkCustom()">Add Custom</button></div>
+  </div>
+  <div class="modal-bd brow-list" id="pk-body"></div>
+</div></div>
 
 <script>
 function $(id){return document.getElementById(id);}
@@ -371,22 +426,27 @@ function injuryStatus(down){
   if(down<=4) return {t:'Basket Case',c:'bad'};
   return {t:'Hospital',c:'bad'};
 }
-function renderInjury(){ var down=injuryTotal(), s=injuryStatus(down); $('injury-down').textContent=down; var el=$('injury-status'); el.textContent=s.t; el.className='injury-status'+(s.c?' '+s.c:''); }
-function takeHit(){
-  var n=Math.max(1,num($('f-hit').value));
-  for(var i=0;i<n;i++){ var best=null,bv=-1; TKEYS.forEach(function(k){ var c=curVal(k); if(c>bv){bv=c;best=k;} }); if(best==null||bv<=0)break; S.current[best]=bv-1; }
-  renderTraits();renderInjury();scheduleAutosave();
-  addLog((S.name||'Ghostbuster')+' · Injury','−'+n+' Trait','now '+injuryTotal()+' down', injuryTotal()>=5?'fumble':'normal');
+function renderInjury(){
+  var down=injuryTotal(), s=injuryStatus(down);
+  var el=$('injury-status'); el.textContent=(down>0?down+' down · ':'')+s.t; el.className='injury-status'+(s.c?' '+s.c:'');
+  var host=$('injury'); if(!host)return; host.innerHTML='';
+  TKEYS.forEach(function(k){
+    var cur=curVal(k), max=num(S.traits[k]), dn=max-cur;
+    var row=document.createElement('div'); row.className='inj-row';
+    row.innerHTML='<span class="inj-name">'+k+'</span>'+
+      '<button class="inj-btn dmg" title="Take a hit to '+k+'" onclick="injTake(\''+k+'\')"'+(cur<=0?' disabled':'')+'>−</button>'+
+      '<span class="inj-val">'+cur+'<span style="color:var(--muted)">/'+max+'</span>'+(dn>0?' <span class="dn">−'+dn+'</span>':'')+'</span>'+
+      '<button class="inj-btn heal" title="Heal '+k+'" onclick="injHeal(\''+k+'\')"'+(dn<=0?' disabled':'')+'>+</button>';
+    host.appendChild(row);
+  });
 }
-function healOne(){
-  var best=null,worst=99; TKEYS.forEach(function(k){ var c=curVal(k); if(num(S.traits[k])-c>0 && c<worst){worst=c;best=k;} });
-  if(best==null)return; var nv=Math.min(num(S.traits[best]),curVal(best)+1); S.current[best]=(nv>=num(S.traits[best])?null:nv);
-  renderTraits();renderInjury();scheduleAutosave();
-}
+function injTake(k){ var cur=curVal(k); if(cur<=0)return; S.current[k]=cur-1; renderTraits();renderInjury();scheduleAutosave();
+  addLog((S.name||'Ghostbuster')+' · Injury','−1 '+k,'now '+injuryTotal()+' down', injuryTotal()>=5?'fumble':'normal'); }
+function injHeal(k){ var cur=curVal(k), max=num(S.traits[k]); if(cur>=max)return; var nv=cur+1; S.current[k]=(nv>=max?null:nv); renderTraits();renderInjury();scheduleAutosave(); }
 function healAll(){ TKEYS.forEach(function(k){ S.current[k]=null; }); renderTraits();renderInjury();scheduleAutosave(); addLog((S.name||'Ghostbuster')+' · Healed','✓','full recovery','crit'); }
 function renderAll(){
   renderTraits();renderGear();renderBP();renderInjury();
-  $('f-name').value=S.name||'';$('f-alias').value=S.alias||'';$('d-goal').textContent=S.goal||'—';
+  $('f-name').value=S.name||'';$('d-goal').textContent=S.goal||'—';
   $('f-tagp').value=S.tagPhysical||'';$('f-tagper').value=S.tagPersonality||'';$('f-notes').value=S.notes||'';
   refreshWizardButtons();
 }
@@ -396,40 +456,30 @@ function setCurrent(k,v){S.current[k]=(v===''?null:num(v));renderTraits();render
 function bumpBP(d){S.bp=Math.max(0,S.bp+d);renderBP();scheduleAutosave();}
 function setBP(n){S.bp=n;renderBP();scheduleAutosave();}
 function clampSpend(){var v=Math.max(0,num($('f-spend').value));if(v>S.bp)v=S.bp;$('f-spend').value=v;}
-function onIdent(){S.name=$('f-name').value;S.alias=$('f-alias').value;syncDocTitle();refreshWizardButtons();scheduleAutosave();}
-function addGear(){var n=$('gear-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;})||{};S.gear.push({name:n,hands:e.hands||'',muscles:e.muscles||0,category:e.category||'',damage:e.damage||'',toHit:e.toHit||'',rangeMax:e.rangeMax||null,rangeIncrement:e.rangeIncrement||null,special:e.special||''});renderGear();scheduleAutosave();}
-function addGearFree(){var n=($('gear-free').value||'').trim();if(!n)return;S.gear.push({name:n,hands:'',muscles:0});$('gear-free').value='';renderGear();scheduleAutosave();}
+function onIdent(){S.name=$('f-name').value;syncDocTitle();refreshWizardButtons();scheduleAutosave();}
 function delGear(i){S.gear.splice(i,1);renderGear();scheduleAutosave();}
 
-/* ═══ DICE — the Ghost Die ═══ */
+/* ═══ DICE — the Ghost Die (GM sets Difficulty; the sheet just rolls) ═══ */
 function d6(){return Math.floor(Math.random()*6)+1;}
-function pickDiff(){var v=$('diffpick').value;if(v!=='')$('tension').value=v;}
 function spendBP(){var s=Math.max(0,Math.min(S.bp,num($('f-spend').value)));if(s>0){S.bp-=s;renderBP();$('f-spend').value=0;}return s;}
-function rollPool(label,baseDice){
+function rollDice(label,baseDice){
   var extra=spendBP();
   var n=Math.max(1,baseDice+extra);
   var normals=[]; for(var i=0;i<n-1;i++)normals.push(d6());
   var ghost=d6(); var isGhost=(ghost===6);
   var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
-  var tn=num($('tension').value);
-  var beat=tn?(sum>=tn):null;
-  var type=(beat===true)?'crit':(beat===false)?'fumble':(isGhost?'ghost':'normal');
-  var outcome=tn?((beat?' ✓':' ✗')+' vs '+tn):'';
-  if(isGhost)outcome+=' 👻';
   var faces=normals.concat([ghost]);
   var detail=n+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'')+(extra?' · +'+extra+' BP':'');
-  addLog((S.name||'Ghostbuster')+' · '+label, sum+outcome, detail, type);
+  addLog((S.name||'Ghostbuster')+' · '+label, sum+(isGhost?' 👻':''), detail, isGhost?'ghost':'normal');
 }
-function rollTrait(k){rollPool(k+' ('+tval(k)+'d)', tval(k));}
-function rollTalent(k){var nm=(S.talents[k]&&S.talents[k].name)||'talent';rollPool(k+' · '+nm+' ('+(tval(k)+3)+'d)', tval(k)+3);}
-function rollRaw(nd){
-  var normals=[];for(var i=0;i<nd-1;i++)normals.push(d6());
-  var ghost=d6();var isGhost=(ghost===6);
-  var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
-  var faces=normals.concat([ghost]);
-  var detail=nd+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'');
-  addLog(nd+'d6'+(isGhost?' 👻':''), sum, detail, isGhost?'ghost':'normal');
-}
+function rollTrait(k){rollDice(k+' ('+tval(k)+'d)', tval(k));}
+function rollTalent(k){var nm=(S.talents[k]&&S.talents[k].name)||'talent';rollDice(k+' · '+nm+' ('+(tval(k)+3)+'d)', tval(k)+3);}
+/* Build-a-pool dice tray */
+var _pool=0;
+function renderPool(){ var el=$('gb-pool'); if(!el)return; el.textContent=_pool>0?(_pool+'d6 pool — one is the Ghost Die'):'Empty — tap +1d to build a pool'; }
+function poolAdd(n){ _pool+=n; renderPool(); }
+function poolClear(){ _pool=0; renderPool(); }
+function poolRoll(){ var n=_pool||1; _pool=0; renderPool(); rollDice(n+'d6 pool', n); }
 
 /* ═══ CANONICAL ROLL LOG + TOAST ═══ */
 function showRollToast(label,result,detail,type){
@@ -477,24 +527,23 @@ function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); }
 function renderLevelUp(){
   var pts=TKEYS.reduce(function(a,k){return a+num(S.traits[k]);},0);
   $('levelup-note').textContent='Trait points: '+pts+' · 30 Brownie = +1 Trait';
-  var h='<div class="m-lbl">Goal</div><select class="m-input" id="lv-goal" onchange="lvGoal(this.value)"><option value="">— none —</option>'+GOALS.map(function(g){return '<option value="'+esc(g.name)+'"'+(S.goal===g.name?' selected':'')+'>'+esc(g.name)+'</option>';}).join('')+'</select>';
+  var h='<div class="m-lbl">Goal</div><div class="lv-row" style="grid-template-columns:1fr auto;"><span>'+(S.goal?esc(S.goal):'<span style="color:var(--muted)">—</span>')+'</span><button class="m-btn" onclick="lvPickGoal()">Choose</button></div>';
   h+='<div class="m-lbl">Traits (1–9) &amp; Talents</div>';
   TKEYS.forEach(function(k){
     var tl=S.talents[k]||{name:''};
     h+='<div class="lv-row"><span>'+k+'</span><button class="lv-step" onclick="lvTrait(\''+k+'\',-1)"'+(num(S.traits[k])<=1?' disabled':'')+'>−</button><span class="lv-val">'+num(S.traits[k])+'</span><button class="lv-step" onclick="lvTrait(\''+k+'\',1)"'+(num(S.traits[k])>=9?' disabled':'')+'>+</button></div>';
-    h+='<div style="display:flex;gap:6px;margin:4px 0 8px;"><input class="m-input" list="lvtl-'+k+'" placeholder="'+k+' talent" value="'+esc(tl.name)+'" oninput="lvTalent(\''+k+'\',this.value)" style="flex:1;"></div>';
+    h+='<div class="lv-row" style="grid-template-columns:1fr auto;padding:2px 0 8px;border:none;"><span style="font-size:12px;"><span style="color:var(--muted)">Talent:</span> '+(tl.name?esc(tl.name):'<span style="color:var(--muted)">none</span>')+'</span><button class="m-btn ghost" onclick="lvPickTalent(\''+k+'\')">Choose</button></div>';
   });
   $('levelup-body').innerHTML=h;
-  if(!$('lvtl-Brains')){TKEYS.forEach(function(k){var dl=document.createElement('datalist');dl.id='lvtl-'+k;TALENTS.filter(function(t){return t.trait===k;}).forEach(function(t){var o=document.createElement('option');o.value=t.name;dl.appendChild(o);});document.body.appendChild(dl);});}
 }
 function lvCommit(){renderAll();scheduleAutosave();}
-function lvGoal(v){S.goal=v;$('d-goal').textContent=v||'—';scheduleAutosave();}
 function lvTrait(k,d){S.traits[k]=clamp(num(S.traits[k])+d,1,9);renderLevelUp();lvCommit();}
-function lvTalent(k,v){if(!S.talents[k])S.talents[k]={};S.talents[k].name=v;renderTraits();scheduleAutosave();}
+function lvPickTalent(k){ openTalentPickerTo(k, function(){ return S.talents[k]&&S.talents[k].name; }, function(name){ if(!S.talents[k])S.talents[k]={}; S.talents[k].name=name; renderTraits(); renderLevelUp(); scheduleAutosave(); }); }
+function lvPickGoal(){ openGoalPickerTo(function(){ return S.goal; }, function(name){ S.goal=name; $('d-goal').textContent=name||'—'; renderLevelUp(); scheduleAutosave(); }); }
 
 /* theme / persistence */
 function scheduleAutosave(){if(!_ready)return;if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},600);}
-function collectSheet(){S.name=($('f-name').value||'').trim();S.alias=$('f-alias').value;return Object.assign({},S,{system:'GB',campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
+function collectSheet(){S.name=($('f-name').value||'').trim();return Object.assign({},S,{system:'GB',campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
 function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('gb_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({gb_sheet:json});else if(window.__ddState!==undefined)window.__ddState['gb_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)addLog('Sheet Saved','✓',data.name||'Unnamed','normal');}
 function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)try{window.__ddSaveTitle(n);}catch(e){}}
 function applySheet(o){o=o||{};S=Object.assign(blankState(),o);if(!S.traits)S.traits=blankState().traits;if(!S.talents)S.talents=blankState().talents;if(!S.current)S.current=blankState().current;renderAll();setDefaultTab();if(typeof campaignRestore==='function'&&o.campaign!==undefined)campaignRestore(o.campaign);if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}scheduleAutosave();}
@@ -539,14 +588,71 @@ function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:
 /* tabs / init */
 function setTab(t){['gear','tags','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('gb_tab',t);}catch(e){}}
 function setDefaultTab(){var t='gear';try{t=localStorage.getItem('gb_tab')||'gear';}catch(e){}if(!$('pane-'+t))t='gear';setTab(t);}
-function initPickers(){
-  var gp=$('gear-pick');gp.innerHTML='';
-  var cats={};EQUIP.forEach(function(e){(cats[e.category||'Gear']=cats[e.category||'Gear']||[]).push(e);});
-  ['Weapon (ranged)','Weapon (melee)','Gear'].forEach(function(cat){ if(!cats[cat])return; var og=document.createElement('optgroup');og.label=cat;
-    cats[cat].forEach(function(e){var o=document.createElement('option');o.value=e.name;o.textContent=e.name+(e.damage?' ('+e.damage+(e.rangeMax?' · '+e.rangeMax+'hex':'')+')':e.muscles?' ('+e.muscles+' Mus)':'');og.appendChild(o);});
-    gp.appendChild(og); });
-  var dp=$('diffpick');dp.innerHTML='<option value="">Difficulty…</option>';DIFFS.forEach(function(dd){if(dd.low!=null){var o=document.createElement('option');o.value=dd.high||dd.low;o.textContent=dd.name+' ('+dd.range+')';dp.appendChild(o);}});
+function initPickers(){ renderPool(); }
+
+/* ═══ SHOP / PICKER (gear · talents · goals) — reused by the sheet, builder and leveler ═══ */
+var _pk=null;
+function openPickerCfg(cfg){ _pk=cfg; var o=$('pk-overlay'); o.classList.add('open'); if($('pk-search'))$('pk-search').value='';
+  var cat=$('pk-cat'); if(cfg.cats&&cfg.cats.length){ cat.style.display=''; cat.innerHTML='<option value="">All</option>'+cfg.cats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join(''); } else cat.style.display='none';
+  var cr=$('pk-customrow'); cr.style.display=cfg.custom?'flex':'none'; if(cfg.custom)$('pk-custom').value='';
+  $('pk-title').textContent=cfg.title||'Add';
+  renderPk();
 }
+function closePk(){ $('pk-overlay').classList.remove('open'); _pk=null; }
+function renderPk(){
+  if(!_pk)return;
+  var carry=$('pk-carry'); if(_pk.carry){ var c=_pk.carry(); carry.textContent=c.text; carry.className='pk-carry'+(c.over?' over':''); } else carry.textContent='';
+  var q=($('pk-search').value||'').toLowerCase().trim(), cat=($('pk-cat').value||'');
+  var items=_pk.items().filter(function(it){
+    if(cat && (it.cat||'')!==cat) return false;
+    if(q && (it.name+' '+(it.meta||'')+' '+(it.desc||'')).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  var host=$('pk-body'); host.innerHTML='';
+  if(!items.length){ host.innerHTML='<div class="brow-empty">No matches.</div>'; return; }
+  items.forEach(function(it){
+    var have=_pk.isHave&&_pk.isHave(it);
+    var row=document.createElement('div'); row.className='brow-item';
+    row.innerHTML='<div class="brow-main"><div class="brow-name">'+esc(it.name)+(it.cost?'<span class="brow-cost">'+esc(it.cost)+'</span>':'')+'</div>'+
+      (it.meta?'<div class="brow-meta">'+esc(it.meta)+'</div>':'')+
+      (it.desc?'<div class="brow-desc">'+esc(it.desc)+'</div>':'')+'</div>'+
+      '<button class="brow-add'+(have?' have':'')+'">'+(have?'✓':(_pk.addLabel||'Add'))+'</button>';
+    var btn=row.querySelector('.brow-add');
+    if(!have) btn.onclick=function(){ _pk.onAdd(it); if(_pk&&_pk.multi){ renderPk(); } else closePk(); };
+    host.appendChild(row);
+  });
+}
+function pkCustom(){ var v=($('pk-custom').value||'').trim(); if(!v||!_pk||!_pk.custom)return; _pk.custom(v); if(_pk&&_pk.multi){ $('pk-custom').value=''; renderPk(); } else closePk(); }
+
+/* Gear shop — adds items to a target array (sheet S.gear by default) */
+function gearItems(){ return EQUIP.map(function(e){ return {
+  name:e.name, cat:e.category, cost:(e.damage?e.damage:'')+(e.rangeMax?' · '+e.rangeMax+'hex':''),
+  meta:(e.hands||'?')+' hand · '+(e.muscles||0)+' Mus'+(e.special?' · '+e.special:''),
+  desc:e.description, _e:e }; }); }
+function gearAddTo(arr, it){ var e=it._e||{}; arr.push({name:e.name,hands:e.hands||'',muscles:e.muscles||0,category:e.category||'',damage:e.damage||'',toHit:e.toHit||'',rangeMax:e.rangeMax||null,rangeIncrement:e.rangeIncrement||null,special:e.special||''}); }
+function carryOf(arr, mus){ var c=arr.reduce(function(a,g){return a+(parseFloat(g.muscles)||0);},0); return {text:'Carry '+c+' / '+mus+' Muscles', over:c>mus}; }
+function openGearShop(){
+  openPickerCfg({ title:'🛒 Gear Shop', multi:true, addLabel:'Add', cats:['Weapon (ranged)','Weapon (melee)','Gear'],
+    items:gearItems, carry:function(){ return carryOf(S.gear, num(S.traits.Muscles)); },
+    custom:function(v){ S.gear.push({name:v,hands:'',muscles:0}); renderGear(); scheduleAutosave(); },
+    onAdd:function(it){ gearAddTo(S.gear, it); renderGear(); scheduleAutosave(); } });
+}
+/* Talent picker — writes to a target object's .name */
+function talentItems(k){ return function(){ return TALENTS.filter(function(t){return t.trait===k;}).map(function(t){ return {name:t.name, meta:k+' talent', desc:t.description||''}; }); }; }
+function openTalentPickerTo(k, cur, onPick){
+  openPickerCfg({ title:k+' Talent', addLabel:'Pick', items:talentItems(k),
+    isHave:function(it){ return cur()===it.name; },
+    custom:function(v){ onPick(v); }, onAdd:function(it){ onPick(it.name); } });
+}
+function openTalentPicker(k){ openTalentPickerTo(k, function(){ return S.talents[k]&&S.talents[k].name; }, function(name){ if(!S.talents[k])S.talents[k]={}; S.talents[k].name=name; renderTraits(); scheduleAutosave(); }); }
+/* Goal picker */
+function goalItems(){ return function(){ return GOALS.map(function(g){ return {name:g.name, desc:g.description||''}; }); }; }
+function openGoalPickerTo(cur, onPick){
+  openPickerCfg({ title:'Goal', addLabel:'Pick', items:goalItems(),
+    isHave:function(it){ return cur()===it.name; },
+    custom:function(v){ onPick(v); }, onAdd:function(it){ onPick(it.name); } });
+}
+function openGoalPicker(){ openGoalPickerTo(function(){ return S.goal; }, function(name){ S.goal=name; $('d-goal').textContent=name||'—'; renderAll(); scheduleAutosave(); }); }
 function autoLoad(){
   var saved=null;
   if(window.__ddState!==undefined)saved=window.__ddState['gb_sheet']||null;else{try{saved=localStorage.getItem('gb_sheet');}catch(e){}}

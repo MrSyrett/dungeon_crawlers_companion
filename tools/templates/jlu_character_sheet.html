@@ -203,6 +203,13 @@ body.dark{--bg:#0f1626;--paper:#182339;--ink:#e8eefb;--muted:#93a1c4;--rule:#2b3
 body.dark .sheet{border-color:#33456c;}
 body.dark .card,body.dark .subwrap,body.dark .lim{background:#182339;color:var(--ink);}
 body.dark .stat,body.dark .cond,body.dark .pill,body.dark .pw-head,body.dark textarea,body.dark .lim input,body.dark .addrow select,body.dark .addrow input{background:#111a2c;color:var(--ink);}
+/* dark-mode readability: brighten the blue text-accents (--jlu-dk is too dim on dark cards) */
+body.dark .card h3,body.dark .card h4,body.dark .attr-row .aval,body.dark .stat .big,body.dark .dmg-str,body.dark .abil b,body.dark .pax-total,body.dark .resolve-num,body.dark .pw-head .gr{color:#7db0f0;}
+body.dark .card h3{border-bottom-color:#2b3a58;}
+body.dark .cond.on{background:#1a2a4d;border-color:var(--jlu);}
+body.dark .cond.on.warn{background:#3a1f22;border-color:var(--red);}
+body.dark .pill button{background:#1f2c47;color:var(--ink);}
+body.dark .stat.click:hover{background:#1a2a4d;}
 
 .roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
 @media(max-width:768px){
@@ -239,23 +246,12 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
     </div>
     <div class="body">
       <div class="grid2">
-        <!-- LEFT: Attributes → Conditions → PAX -->
+        <!-- LEFT: Attributes → Resolve → PAX -->
         <div class="col">
           <div class="card">
             <h3>Attributes</h3>
             <div id="attrs"></div>
           </div>
-          <div class="card">
-            <h3>Conditions</h3>
-            <div class="cond-track" id="conds"></div>
-          </div>
-          <div class="card">
-            <h3>PAX Budget <span id="pax-avail" class="pax-total">—</span></h3>
-            <div id="paxlines"></div>
-          </div>
-        </div>
-        <!-- RIGHT: Resolve → Combat → tabs -->
-        <div class="col">
           <div class="card">
             <h3>Resolve <span id="resolve-cap" style="font-size:10px;color:var(--muted);font-weight:600;"></span></h3>
             <div class="resolve-wrap">
@@ -263,6 +259,17 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
               <div class="res-of">of <b id="resolve-max">—</b> max</div>
               <button class="rollbtn g" onclick="restResolve()">Full</button>
             </div>
+          </div>
+          <div class="card">
+            <h3>PAX Budget <span id="pax-avail" class="pax-total">—</span></h3>
+            <div id="paxlines"></div>
+          </div>
+        </div>
+        <!-- RIGHT: Conditions → Combat → tabs -->
+        <div class="col">
+          <div class="card">
+            <h3>Conditions</h3>
+            <div class="cond-track" id="conds"></div>
           </div>
           <div class="card">
             <h3>Combat</h3>

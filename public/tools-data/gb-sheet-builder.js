@@ -1,26 +1,21 @@
 // Ghostbusters character builder — the "Create" button on the Personnel File.
-// Walks creation: assign 12 Trait points (1–5 each), pick one Talent per Trait,
-// choose a Goal, and take starting Gear. Hands the finished Ghostbuster to
-// applySheet(). Uses the sheet globals (GB_* data, $, esc, applySheet,
-// collectSheet, saveSheet, syncDocTitle, addLog) — load AFTER the sheet script.
+// Walks creation: assign 12 Trait points (starting at 1 each), pick one Talent
+// per Trait (real pickers, not fill-ins), choose a Goal (with a Custom option),
+// and shop for starting Gear. Hands the finished Ghostbuster to applySheet().
+// Reuses the sheet's shared pickers (openTalentPickerTo / openGoalPickerTo /
+// openPickerCfg + gearItems/gearAddTo/carryOf) — load AFTER the sheet script.
 (function () {
   'use strict';
   var STEPS = ['Traits', 'Talents', 'Goal', 'Gear'];
   var TKEYS = ['Brains', 'Muscles', 'Moves', 'Cool'];
   var BUDGET = 12, MIN = 1, MAX = 5;
 
-  function G(x) { return (typeof x !== 'undefined' && Array.isArray(x)) ? x : []; }
-  function talents() { return G(typeof GB_TALENTS !== 'undefined' ? GB_TALENTS : undefined); }
-  function goals() { return G(typeof GB_GOALS !== 'undefined' ? GB_GOALS : undefined); }
-  function equip() { return G(typeof GB_EQUIPMENT !== 'undefined' ? GB_EQUIPMENT : undefined); }
-  function goalObj(n) { return goals().find(function (g) { return g.name === n; }) || null; }
-
   var step = 0, _lastStep = -1, ov = null;
-  var name = '', alias = '';
-  var traits = { Brains: 3, Muscles: 3, Moves: 3, Cool: 3 };
+  var name = '';
+  var traits = { Brains: 1, Muscles: 1, Moves: 1, Cool: 1 };
   var talent = { Brains: '', Muscles: '', Moves: '', Cool: '' };
   var goal = '';
-  var gearPick = {};   // {name: true}
+  var gear = [];
 
   function spent() { return TKEYS.reduce(function (a, k) { return a + traits[k]; }, 0); }
 
@@ -54,7 +49,6 @@
       var left = BUDGET - spent();
       note.textContent = 'Points left: ' + left;
       var h = '<div class="m-lbl">Name</div><input class="m-input" id="gbb-name" value="' + esc(name) + '" placeholder="Ghostbuster">'
-        + '<div class="m-lbl">Alias (player)</div><input class="m-input" id="gbb-alias" value="' + esc(alias) + '" placeholder="Your name">'
         + '<div class="m-lbl">Traits — spend ' + BUDGET + ' points, 1–5 each</div><div style="display:flex;flex-direction:column;gap:4px;">';
       TKEYS.forEach(function (k) {
         var v = traits[k];
@@ -66,7 +60,6 @@
       });
       b.innerHTML = h + '</div>';
       $('gbb-name').addEventListener('input', function () { name = this.value; });
-      $('gbb-alias').addEventListener('input', function () { alias = this.value; });
       b.querySelectorAll('button[data-k]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var k = btn.dataset.k, d = parseInt(btn.dataset.d, 10), nv = traits[k] + d;
@@ -76,56 +69,73 @@
       });
     } else if (step === 1) {
       note.textContent = 'One Talent per Trait';
-      var hh = '<p class="m-hint">A Talent is a specialty inside a Trait — roll 3 extra dice when it applies. Pick one for each.</p>';
+      var hh = '<div style="display:flex;flex-direction:column;gap:8px;">';
       TKEYS.forEach(function (k) {
-        var list = talents().filter(function (t) { return t.trait === k; });
-        hh += '<div class="m-lbl">' + k + ' (' + traits[k] + 'd → ' + (traits[k] + 3) + 'd with talent)</div>'
-          + '<input class="m-input gbb-tal" list="gbbtl-' + k + '" data-k="' + k + '" value="' + esc(talent[k]) + '" placeholder="e.g. ' + esc(list.length ? list[0].name : '') + '">'
-          + '<datalist id="gbbtl-' + k + '">' + list.map(function (t) { return '<option value="' + esc(t.name) + '">'; }).join('') + '</datalist>';
+        hh += '<div class="lv-row" style="grid-template-columns:auto 1fr auto;gap:10px;">'
+          + '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;color:#eef;min-width:64px;">' + k + '</span>'
+          + '<span style="font-size:13px;color:' + (talent[k] ? '#a6e05a' : '#8f9c78') + ';">' + (talent[k] ? esc(talent[k]) : 'none') + '</span>'
+          + '<button class="m-btn ghost gbb-tal" data-k="' + k + '">Choose</button></div>';
       });
-      b.innerHTML = hh;
-      b.querySelectorAll('.gbb-tal').forEach(function (inp) { inp.addEventListener('input', function () { talent[inp.dataset.k] = inp.value; }); });
+      b.innerHTML = hh + '</div>';
+      b.querySelectorAll('.gbb-tal').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var k = btn.dataset.k;
+          openTalentPickerTo(k, function () { return talent[k]; }, function (nm) { talent[k] = nm; render(); });
+        });
+      });
     } else if (step === 2) {
       note.textContent = goal ? goal : 'Pick a Goal';
-      var gs = goals();
-      b.innerHTML = '<p class="m-hint">Your Goal is what drives your Ghostbuster — it earns Brownie Points when you pursue it.</p>'
+      var gs = (typeof GOALS !== 'undefined' && Array.isArray(GOALS)) ? GOALS : [];
+      var hh2 = '<div class="pk-customrow" style="margin-bottom:10px;"><input class="m-input" id="gbb-goal-custom" placeholder="Custom goal…" style="flex:1;"><button class="m-btn" id="gbb-goal-add">Set</button></div>'
         + '<div style="display:flex;flex-direction:column;gap:7px;">'
         + gs.map(function (g) {
           return '<div class="gbb-goal" data-g="' + esc(g.name) + '" style="border:1px solid ' + (goal === g.name ? '#8bc53f' : '#2b3620') + ';background:' + (goal === g.name ? '#233617' : '#0f150a') + ';border-radius:6px;padding:9px 11px;cursor:pointer;">'
             + '<b style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;color:#eef;">' + esc(g.name) + '</b>'
             + (g.description ? '<div style="font-size:11px;color:#a9c07f;margin-top:3px;">' + esc(g.description) + '</div>' : '') + '</div>';
         }).join('') + '</div>';
+      b.innerHTML = hh2;
+      $('gbb-goal-custom').value = (goal && !gs.some(function (g) { return g.name === goal; })) ? goal : '';
+      $('gbb-goal-add').addEventListener('click', function () { var v = ($('gbb-goal-custom').value || '').trim(); if (v) { goal = v; render(); } });
       b.querySelectorAll('.gbb-goal').forEach(function (c) { c.addEventListener('click', function () { goal = c.dataset.g; render(); }); });
     } else {
-      note.textContent = 'Starting gear';
-      var eq = equip();
-      b.innerHTML = '<p class="m-hint">Tick the gear you start with — add more from the sheet later. Watch your Muscles carry limit.</p>'
-        + '<div style="display:flex;flex-direction:column;gap:5px;">' + eq.map(function (e) {
-          return '<label style="display:flex;gap:8px;align-items:center;font-size:13px;color:#ddd;border:1px solid #2b3620;border-radius:5px;padding:7px 9px;cursor:pointer;">'
-            + '<input type="checkbox" class="gbb-gear" data-n="' + esc(e.name) + '"' + (gearPick[e.name] ? ' checked' : '') + '>'
-            + '<span>' + esc(e.name) + (e.muscles ? ' <span style="color:#a9c07f;font-size:11px;">' + e.muscles + ' Mus</span>' : '') + (e.hands ? ' <span style="color:#a9c07f;font-size:11px;">· ' + esc(e.hands) + '</span>' : '') + '</span></label>';
-        }).join('') + '</div>';
-      b.querySelectorAll('.gbb-gear').forEach(function (c) { c.addEventListener('change', function () { if (c.checked) gearPick[c.dataset.n] = true; else delete gearPick[c.dataset.n]; }); });
+      note.textContent = gear.length + ' item' + (gear.length === 1 ? '' : 's');
+      var mus = traits.Muscles, carry = gear.reduce(function (a, g) { return a + (parseFloat(g.muscles) || 0); }, 0);
+      var hh3 = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;">'
+        + '<button class="m-btn" id="gbb-shop">🛒 Open Shop</button>'
+        + '<span class="pk-carry' + (carry > mus ? ' over' : '') + '">Carry ' + carry + ' / ' + mus + ' Muscles</span></div>'
+        + '<div style="display:flex;flex-direction:column;gap:5px;">';
+      if (!gear.length) hh3 += '<div class="brow-empty">No gear yet — open the shop.</div>';
+      gear.forEach(function (g, i) {
+        hh3 += '<div class="gear-row" style="background:#182014;border-color:#2b3620;color:#dde;">'
+          + '<span>' + esc(g.name) + '</span><span style="display:flex;gap:8px;align-items:center;">'
+          + '<span class="gm" style="color:#8f9c78;">' + (g.damage ? 'dmg ' + esc(g.damage) + ' · ' : '') + esc(g.hands || '?') + ' · ' + (g.muscles || 0) + ' Mus</span>'
+          + '<button class="row-x" style="color:#df8a8a;" data-i="' + i + '">✕</button></span></div>';
+      });
+      b.innerHTML = hh3 + '</div>';
+      $('gbb-shop').addEventListener('click', function () {
+        openPickerCfg({
+          title: '🛒 Gear Shop', multi: true, addLabel: 'Add', cats: ['Weapon (ranged)', 'Weapon (melee)', 'Gear'],
+          items: gearItems, carry: function () { var c = gear.reduce(function (a, g) { return a + (parseFloat(g.muscles) || 0); }, 0); return { text: 'Carry ' + c + ' / ' + traits.Muscles + ' Muscles', over: c > traits.Muscles }; },
+          custom: function (v) { gear.push({ name: v, hands: '', muscles: 0 }); render(); },
+          onAdd: function (it) { gearAddTo(gear, it); render(); }
+        });
+      });
+      b.querySelectorAll('.row-x').forEach(function (btn) { btn.addEventListener('click', function () { gear.splice(parseInt(btn.dataset.i, 10), 1); render(); }); });
     }
     if (keep) b.scrollTop = bScroll;
     _lastStep = step; ov.classList.add('open');
   }
 
-  function readStep0() { if ($('gbb-name')) name = $('gbb-name').value; if ($('gbb-alias')) alias = $('gbb-alias').value; }
+  function readName() { if ($('gbb-name')) name = $('gbb-name').value; }
 
   function finish() {
-    var eq = equip();
-    var gear = Object.keys(gearPick).filter(function (n) { return gearPick[n]; }).map(function (n) {
-      var e = eq.find(function (x) { return x.name === n; }) || {};
-      return { name: n, hands: e.hands || '', muscles: e.muscles || 0 };
-    });
     var built = {
-      system: 'GB', _built: true, name: name || '', alias: alias || '', goal: goal || '',
+      system: 'GB', _built: true, name: name || '', goal: goal || '',
       notes: '', tagPhysical: '', tagPersonality: '',
       traits: { Brains: traits.Brains, Muscles: traits.Muscles, Moves: traits.Moves, Cool: traits.Cool },
       current: { Brains: null, Muscles: null, Moves: null, Cool: null },
       talents: { Brains: { name: talent.Brains }, Muscles: { name: talent.Muscles }, Moves: { name: talent.Moves }, Cool: { name: talent.Cool } },
-      bp: 20, gear: gear
+      bp: 20, gear: gear.slice()
     };
     var prev = (typeof collectSheet === 'function') ? collectSheet() : {};
     built.campaign = prev.campaign || null;
@@ -136,13 +146,13 @@
   }
 
   window.GBB = {
-    launch: function () { step = 0; name = ''; alias = ''; traits = { Brains: 3, Muscles: 3, Moves: 3, Cool: 3 }; talent = { Brains: '', Muscles: '', Moves: '', Cool: '' }; goal = ''; gearPick = {}; _lastStep = -1; render(); },
+    launch: function () { step = 0; name = ''; traits = { Brains: 1, Muscles: 1, Moves: 1, Cool: 1 }; talent = { Brains: '', Muscles: '', Moves: '', Cool: '' }; goal = ''; gear = []; _lastStep = -1; render(); },
     close: function () { if (ov) ov.classList.remove('open'); },
     next: function () {
-      if (step === 0) { readStep0(); if (spent() !== BUDGET) { $('gbb-note').textContent = 'Spend exactly ' + BUDGET + ' points — ' + (BUDGET - spent()) + ' left'; return; } }
+      if (step === 0) { readName(); if (spent() !== BUDGET) { $('gbb-note').textContent = 'Spend exactly ' + BUDGET + ' points — ' + (BUDGET - spent()) + ' left'; return; } }
       if (step === STEPS.length - 1) { finish(); this.close(); return; }
       step++; render();
     },
-    back: function () { if (step === 0) readStep0(); if (step > 0) { step--; render(); } }
+    back: function () { if (step === 0) readName(); if (step > 0) { step--; render(); } }
   };
 })();
