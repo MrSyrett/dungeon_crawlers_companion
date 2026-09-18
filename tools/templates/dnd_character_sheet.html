@@ -85,50 +85,63 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tray-note{font-size:10px;color:#5a5050;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;line-height:1.3;}
 
 /* SHEET */
-.sheet{background:var(--paper);border:2px solid var(--border);max-width:1000px;margin:0 auto;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+.sheet{background:#e6e1d9;border:3px solid var(--border);border-radius:14px;overflow:hidden;max-width:1000px;margin:0 auto;position:relative;box-shadow:0 12px 36px rgba(0,0,0,.2);}
 .sheet::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
 .sheet>*{position:relative;z-index:1;}
-.section-bar{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.16em;text-transform:uppercase;padding:5px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.section-bar.red{background:var(--dnd);}
-.section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:none;color:rgba(255,255,255,.8);}
-.section-bar .sb-note b{color:#fff;}
-.hdr-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.38);color:#fff;border-radius:3px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
-.hdr-btn:hover{background:rgba(255,255,255,.28);}
+.card{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(30,22,18,.07);}
+.ability-col,.sc-skills,.sc-conditions,.sc-defenses,.sc-prof,.mc-combat,.mc-attacks,.mc-tabs{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(30,22,18,.07);}
+.section-bar{position:relative;background:transparent;color:var(--dnd-dk);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.15em;text-transform:uppercase;padding:9px 13px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--dnd-lt);}
+.section-bar.red{background:transparent;color:var(--dnd-dk);}
+.section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:none;color:var(--muted);}
+.section-bar .sb-note b{color:var(--dnd-dk);}
+.hdr-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd-dk);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.hdr-btn:hover{background:var(--dnd-lt);}
 .hdr-right{display:flex;align-items:center;gap:8px;}
 
-/* HEADER */
-.hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--dnd);}
-.hdr-logo{background:var(--section-hdr);padding:10px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;gap:2px;}
-.hdr-logo .dnd-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;line-height:.9;color:#fff;letter-spacing:.02em;text-align:center;}
-.hdr-logo .dnd-sub{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#f0c0a0;letter-spacing:.18em;text-transform:uppercase;margin-top:3px;}
-.hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);border-left:2px solid var(--border);}
-.hdr-field{padding:5px 8px 6px;border-right:1px solid rgba(255,255,255,.22);border-bottom:1px solid rgba(255,255,255,.22);min-width:0;}
-.hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.78);margin-bottom:2px;}
-.hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid rgba(255,255,255,.5);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
-.hdr-field select{font-size:13px;cursor:pointer;}
-.hdr-field select option{color:#111;background:#fff;}
-.hdr-field input::placeholder{color:rgba(255,255,255,.45);font-weight:500;}
-.hdr-field.lastcol{border-right:none;}
-.hdr-field input.managed{opacity:.92;cursor:default;}
+/* HEADER — game name + character name on the top line; the rest in a row underneath */
+.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,var(--dnd-dk),var(--dnd));color:#fff;padding:14px 18px;}
+.hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
+.hdr-logo{min-width:0;}
+.hdr-logo .lg-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;line-height:.9;color:#fff;letter-spacing:.02em;text-transform:uppercase;}
+.hdr-logo .lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;color:#f0cf8a;letter-spacing:.24em;text-transform:uppercase;margin-top:3px;}
+.hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
+.hdr-field,.lockfield{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.14);border-radius:7px;min-width:0;}
+.hdr-field{padding:3px 10px 4px;}
+.lockfield{flex:1 1 0;padding:3px 8px 4px;background:rgba(255,255,255,.12);}
+.hdr-field label,.lockfield label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.8);}
+.hdr-field label{font-size:9px;margin-bottom:1px;}
+.lockfield label{font-size:8px;letter-spacing:.1em;margin-bottom:0;}
+.hdr-field .hdr-val,.hdr-field .hdr-ro,.lockfield .hdr-val,.lockfield .hdr-ro{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#fff;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-field .hdr-val,.hdr-field .hdr-ro{font-size:15px;min-height:19px;padding:1px 0;}
+.name-primary .hdr-val,.name-primary .hdr-ro{font-size:17px;}
+.lockfield .hdr-val,.lockfield .hdr-ro{font-size:13px;min-height:0;}
+.hdr-field input,.hdr-field select,.lockfield input,.lockfield select{width:100%;background:transparent;border:none;outline:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:1px 0;}
+.name-primary input{font-size:17px;}
+.hdr-field input,.hdr-field select{font-size:15px;}
+.lockfield input,.lockfield select{font-size:13px;}
+.hdr-field select option,.lockfield select option{color:#111;background:#fff;}
+.hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,255,255,.5);font-weight:500;}
+.hdr-field input.managed,.lockfield input.managed{opacity:.92;cursor:default;}
 
 /* BODY */
-.body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
-.left-region{width:452px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
-.left-top{display:flex;align-items:stretch;border-bottom:1px solid var(--rule);}
-.ability-col{width:158px;flex-shrink:0;border-right:1px solid var(--rule);display:flex;flex-direction:column;}
-.skills-col{flex:1;min-width:0;display:flex;flex-direction:column;}
+.body-row{display:flex;flex-wrap:wrap;gap:14px;padding:16px;align-items:flex-start;}
+.left-region{width:452px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.left-top{display:flex;align-items:flex-start;gap:14px;}
+.ability-col{width:158px;flex-shrink:0;display:flex;flex-direction:column;}
+.skills-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;}
 /* Skills grows to fill so the bottom of Conditions lines up with the bottom of Abilities. */
 .sc-skills{display:flex;flex-direction:column;flex:1;min-height:0;}
 .sc-skills .skills-wrap{flex:1;display:flex;flex-direction:column;}
 .sc-skills .skill-row{flex:1 1 auto;}
 .sc-prof .blk{border-bottom:none;}
-.main-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+.main-col{flex:1;display:flex;flex-direction:column;min-width:0;gap:14px;}
 
 /* TABS */
-.tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-bottom:2px solid var(--border);flex-wrap:wrap;}
-.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
-.tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--dnd);background:rgba(155,27,34,.25);}
+.tabs-bar{display:flex;gap:0;background:var(--box);border-bottom:2px solid var(--dnd-lt);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:9px 10px;background:transparent;color:var(--muted);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.on{color:var(--dnd-dk);border-bottom-color:var(--dnd);background:var(--dnd-lt);}
 .tab-btn.no-cast{opacity:.38;}
 .comp-hint{padding:6px 10px 2px;font-family:'Barlow',sans-serif;font-size:11.5px;color:var(--muted);line-height:1.45;}
 #companions-list{padding:4px 10px 10px;display:flex;flex-direction:column;gap:8px;}
@@ -160,7 +173,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cond-chip:hover{border-color:var(--dnd);}
 .cond-chip.on{background:var(--dnd);color:#fff;border-color:var(--dnd-dk);}
 .cond-chip .ci{opacity:.6;margin-left:4px;font-size:9px;}
-.sc-defenses{margin-top:8px;}
+.sc-defenses{}
 .def-chip{border:1px solid var(--rule);border-radius:14px;background:var(--box);padding:4px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);cursor:pointer;user-select:none;text-transform:capitalize;}
 .def-chip:hover{border-color:var(--dnd);}
 .def-chip .dm{margin-left:4px;font-size:9px;font-weight:800;opacity:.85;}
@@ -480,16 +493,18 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
 .roll-log{transition:width .2s ease;}
 .roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
 @media (max-width:1040px){
-  .body-row{flex-wrap:wrap;}
-  .left-region{width:100%;border-right:none;border-bottom:2px solid var(--border);}
+  .body-row{flex-direction:column;align-items:stretch;}
+  .left-region{width:100%;}
   .main-col{width:100%;}
+  .hdr-top{grid-template-columns:1fr;gap:9px;}
 }
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
   /* iOS zooms the page when a focused input is <16px — keep picker/spellbook search at 16px so the menu opens at its proper size */
   input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
-  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--dnd);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--dnd);border-radius:14px 14px 0 0;z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .log-header{border-radius:14px 14px 0 0;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
   .roll-log:not(.collapsed) .log-entries{max-height:calc(100vh - 250px);max-height:calc(100dvh - 250px);}
   #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;}
@@ -516,8 +531,9 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   .sc-skills .skill-row{flex:none;}
   .mc-attacks{order:4;border-bottom:1px solid var(--rule);padding-bottom:4px;}
   .sc-conditions{order:5;border-bottom:1px solid var(--rule);}
-  .sc-prof{order:6;border-bottom:1px solid var(--rule);}
-  .mc-tabs{order:7;}
+  .sc-defenses{order:6;border-bottom:1px solid var(--rule);}
+  .sc-prof{order:7;border-bottom:1px solid var(--rule);}
+  .mc-tabs{order:8;}
   .ability-col .abil-list{display:grid;grid-template-columns:repeat(3,1fr);}
   .abil-box{margin:6px 4px;}
   .combat-strip{grid-template-columns:1fr;}
@@ -601,6 +617,15 @@ select option{background:var(--input-bg);color:var(--ink);}
 .lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
+/* ── Gold-standard skin: dark cards + rounded controls ── */
+body.dark .sheet{border-color:#44444d;background:#121215;}
+body.dark .card,body.dark .ability-col,body.dark .sc-skills,body.dark .sc-conditions,body.dark .sc-defenses,body.dark .sc-prof,body.dark .mc-combat,body.dark .mc-attacks,body.dark .mc-tabs{background:#22222a;border-color:#3a3a41;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+body.dark .tabs-bar{background:#1a1a1f;}
+.small-btn,.hdr-btn,.rest-btn,.hp-adj-btn,.mini-roll,.equip-btn,.attune-btn,.cast-btn,.sneak-btn,.upcast-btn,.atk-mastery,.mana-mini,.slot-col-lbl,.slot-reset,.res-reset-btn,.brow-add,.m-btn,.lb-btn,.fl-btn,.dice-clear-btn,.dice-roll-btn,.dice-btn{border-radius:6px;}
+.hp-hd input,.hp-sub input,.pick-sel,.fld textarea,.notes-box textarea,.tray-input,.tray-select{border-radius:6px;}
+.log-clear,.log-action-btn{border-radius:6px;}
+.log-entry{border-radius:8px;}
+#log-collapse-btn{border-radius:6px 0 0 6px;}
 </style>
 </head>
 <body>
@@ -612,20 +637,21 @@ select option{background:var(--input-bg);color:var(--ink);}
 
   <!-- HEADER -->
   <div class="hdr-row">
-    <div class="hdr-logo">
-      <div class="dnd-word">D&amp;D</div>
-      <div class="dnd-sub">2024</div>
-      <div id="nimble-badge" class="nimble-badge" onclick="openNimbleRules()" title="Nimble 5e mode is on — click for the rules summary" style="display:none;">⚡ NIMBLE</div>
+    <div class="hdr-top">
+      <div class="hdr-logo">
+        <div class="lg-word">Dungeons &amp; Dragons</div><div class="lg-sub">2024 Character Sheet</div>
+        <div id="nimble-badge" class="nimble-badge" onclick="openNimbleRules()" title="Nimble 5e mode is on — click for the rules summary" style="display:none;">⚡ NIMBLE</div>
+      </div>
+      <div class="hdr-field name-primary"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
     </div>
-    <div class="hdr-fields">
-      <div class="hdr-field wide" style="grid-column:span 4;"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><input type="text" id="f-class" list="dl-classes" placeholder="Fighter" oninput="onClassChange()"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Subclass</label><input type="text" id="f-subclass" list="dl-subclasses" placeholder="—" oninput="onSubclassChange()"></div>
-      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Level</label><input type="number" id="f-level" min="1" max="20" value="1" oninput="onLevelChange()"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Species</label><input type="text" id="f-species" list="dl-species" placeholder="Human" oninput="onSpeciesChange()"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Background</label><input type="text" id="f-background" list="dl-backgrounds" placeholder="Soldier"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Alignment</label><input type="text" id="f-alignment" list="dl-align" placeholder="Neutral Good"></div>
-      <div class="hdr-field lastcol" style="grid-column:span 3;"><label>Rest</label><span class="rest-btns hdr-rest"><button class="rest-btn" onclick="shortRest()" title="Short Rest — regain Pact slots">Short Rest</button><button class="rest-btn" onclick="longRest()" title="Long Rest — full HP, all slots, clear death saves">Long Rest</button></span></div>
+    <div class="hdr-metarow">
+      <div class="lockfield" style="flex:1.3 1 0;"><label>Class</label><input type="text" id="f-class" list="dl-classes" placeholder="Fighter" oninput="onClassChange()"></div>
+      <div class="lockfield" style="flex:1.3 1 0;"><label>Subclass</label><input type="text" id="f-subclass" list="dl-subclasses" placeholder="—" oninput="onSubclassChange()"></div>
+      <div class="lockfield" style="flex:.6 1 0;"><label>Level</label><input type="number" id="f-level" min="1" max="20" value="1" oninput="onLevelChange()"></div>
+      <div class="lockfield" style="flex:1.1 1 0;"><label>Species</label><input type="text" id="f-species" list="dl-species" placeholder="Human" oninput="onSpeciesChange()"></div>
+      <div class="lockfield" style="flex:1.1 1 0;"><label>Background</label><input type="text" id="f-background" list="dl-backgrounds" placeholder="Soldier"></div>
+      <div class="lockfield" style="flex:1.1 1 0;"><label>Alignment</label><input type="text" id="f-alignment" list="dl-align" placeholder="Neutral Good"></div>
+      <div class="lockfield" style="flex:1.4 1 0;"><label>Rest</label><span class="rest-btns hdr-rest"><button class="rest-btn" onclick="shortRest()" title="Short Rest — regain Pact slots">Short Rest</button><button class="rest-btn" onclick="longRest()" title="Long Rest — full HP, all slots, clear death saves">Long Rest</button></span></div>
     </div>
   </div>
 

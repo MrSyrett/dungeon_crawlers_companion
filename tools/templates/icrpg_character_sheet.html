@@ -66,34 +66,46 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .dice-btn.roll{flex:0 0 auto;padding:6px 18px;font-weight:700;letter-spacing:.06em;}
 
 /* SHEET */
-.sheet{background:var(--paper);border:2px solid var(--border);max-width:1040px;margin:0 auto;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+.sheet{background:#eae6dc;border:3px solid var(--border);border-radius:14px;overflow:hidden;max-width:1040px;margin:0 auto;position:relative;box-shadow:0 12px 36px rgba(0,0,0,.2);}
 .sheet::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
 .sheet>*{position:relative;z-index:1;}
-.section-bar{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.18em;text-transform:uppercase;padding:5px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.section-bar.accent{background:var(--icrpg);}
-.section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.08em;text-transform:none;color:rgba(255,255,255,.75);}
+.card{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(30,20,10,.07);}
+.section-bar{position:relative;background:transparent;color:var(--icrpg-dk);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.16em;text-transform:uppercase;padding:9px 13px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--icrpg-lt);}
+.section-bar.accent{background:transparent;color:var(--icrpg-dk);}
+.section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.08em;text-transform:none;color:var(--muted);}
 .hdr-right{display:flex;align-items:center;gap:8px;}
-.hdr-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
-.hdr-btn:hover{background:rgba(255,255,255,.3);}
+.hdr-btn{background:transparent;border:1px solid var(--icrpg);color:var(--icrpg-dk);border-radius:6px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.hdr-btn:hover{background:var(--icrpg-lt);}
 
-/* HEADER */
-.hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--section-hdr);}
-.hdr-logo{padding:10px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;gap:2px;border-right:2px solid #3a2c22;}
-.hdr-logo .lg-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:34px;line-height:.9;color:var(--icrpg);letter-spacing:.02em;}
-.hdr-logo .lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#b09a86;text-align:center;}
-.hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);}
-.hdr-field{padding:5px 8px 6px;border-right:1px solid #3a2c22;border-bottom:1px solid #3a2c22;min-width:0;}
-.hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#e0a060;margin-bottom:2px;}
-.hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid #4a3a2c;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
-.hdr-field select{font-size:14px;cursor:pointer;}
-.hdr-field select option{color:#111;background:#fff;}
-.hdr-field input::placeholder{color:#6a5a4a;font-weight:500;}
-.hdr-field.lastcol{border-right:none;}
+/* HEADER — game name + character name on the top line; the rest in a row underneath */
+.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,var(--icrpg-dk),var(--icrpg));color:#fff;padding:14px 18px;}
+.hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
+.hdr-logo{min-width:0;}
+.hdr-logo .lg-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;line-height:.95;color:#fff;letter-spacing:.02em;text-transform:uppercase;}
+.hdr-logo .lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#a9d6f7;margin-top:3px;}
+.hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
+.hdr-field,.lockfield{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.14);border-radius:7px;min-width:0;}
+.hdr-field{padding:3px 10px 4px;}
+.lockfield{flex:1 1 0;padding:3px 8px 4px;background:rgba(255,255,255,.12);}
+.hdr-field label,.lockfield label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.85);}
+.hdr-field label{font-size:9px;margin-bottom:1px;}
+.lockfield label{font-size:8px;letter-spacing:.1em;margin-bottom:0;}
+.hdr-field .hdr-val,.hdr-field .hdr-ro,.lockfield .hdr-val,.lockfield .hdr-ro{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#fff;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-field .hdr-val,.hdr-field .hdr-ro{font-size:15px;min-height:19px;padding:1px 0;}
+.name-primary .hdr-val,.name-primary .hdr-ro{font-size:17px;}
+.lockfield .hdr-val,.lockfield .hdr-ro{font-size:13px;min-height:0;}
+.hdr-field input,.hdr-field select,.lockfield input,.lockfield select{width:100%;background:transparent;border:none;outline:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:1px 0;}
+.name-primary input{font-size:17px;}
+.hdr-field input,.hdr-field select{font-size:15px;}
+.lockfield input,.lockfield select{font-size:13px;}
+.hdr-field select option,.lockfield select option{color:#111;background:#fff;}
+.hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,255,255,.55);font-weight:500;}
 
 /* BODY */
-.body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
-.stats-col{width:380px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
-.center-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+.body-row{display:flex;gap:14px;padding:16px;align-items:flex-start;}
+.stats-col{width:360px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.center-col{flex:1;display:flex;flex-direction:column;min-width:0;gap:14px;}
 
 /* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule);}
@@ -160,10 +172,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .sheet-foot{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 
 /* TABS */
-.tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
-.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
-.tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--icrpg);background:rgba(200,80,30,.28);}
+.tabs-bar{display:flex;gap:0;background:var(--box);border-bottom:2px solid var(--icrpg-lt);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:9px 10px;background:transparent;color:var(--muted);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.on{color:var(--icrpg-dk);border-bottom-color:var(--icrpg);background:var(--icrpg-lt);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;}
 
@@ -291,13 +303,14 @@ body.spec-on .sk-spec-cell{display:table-cell;}
 
 .roll-log{transition:width .2s ease;}
 .roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
-@media (max-width:900px){.body-row{flex-direction:column;}.stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}}
+@media (max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
   /* iOS zooms the page when a focused input is <16px — keep picker search at 16px so the menu opens at its proper size */
   input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
-  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--icrpg);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--icrpg);border-radius:14px 14px 0 0;z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .log-header{border-radius:14px 14px 0 0;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
   .roll-log:not(.collapsed) .log-entries{max-height:calc(100vh - 300px);max-height:calc(100dvh - 300px);}
   #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;}
@@ -373,6 +386,16 @@ select option{background:var(--input-bg);color:var(--ink);}
 .lvl-step:hover:not(:disabled){border-color:var(--icrpg);color:#fff;}
 .lvl-step:disabled{opacity:.3;cursor:default;}
 .tag-pill{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--icrpg-dk);background:var(--box);border:1px solid var(--rule);border-radius:3px;padding:1px 5px;white-space:nowrap;}
+/* ── Gold-standard skin: dark cards + rounded controls ── */
+body.dark .sheet{border-color:#544a50;background:#161216;}
+body.dark .card{background:#241e24;border-color:#463c40;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+body.dark .tabs-bar{background:#1a161a;}
+.stat-cell input,.vbig input,.vline input,.eff-tbl input,.notes-box textarea{border-radius:6px;}
+.small-btn,.hdr-btn,.brow-add,.m-btn,.tile-pick,.wound-track button,.a-row button,.a-attr button,.a-rk{border-radius:6px;}
+#advancement-panel input,#magic-panel input{border-radius:6px;}
+.log-clear,.log-action-btn,.tray-input,.tray-select,.tray-toggle,.dice-btn{border-radius:6px;}
+.log-entry{border-radius:8px;}
+#log-collapse-btn{border-radius:6px 0 0 6px;}
 </style>
 
 </head>
@@ -383,28 +406,32 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div class="sheet">
 
   <div class="hdr-row">
-    <div class="hdr-logo"><div class="lg-word">ICRPG</div><div class="lg-sub">Index Card RPG</div></div>
-    <div class="hdr-fields">
-      <div class="hdr-field wide" style="grid-column:span 3;"><label>Character name</label><input type="text" id="f-name" placeholder="Name"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>World</label>
-        <select id="f-world" onchange="onWorld()"><option value="">— choose a world —</option></select></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Life Form</label>
-        <select id="f-lifeform" onchange="onLifeForm()"><option value="">— life form —</option></select></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Type</label>
-        <select id="f-type" onchange="onType()"><option value="">— type —</option></select></div>
-      <div class="hdr-field lastcol" style="grid-column:span 1;"><label>Milestones</label><input type="number" id="f-level" value="1" min="0" oninput="scheduleAutosave()"></div>
+    <div class="hdr-top">
+      <div class="hdr-logo"><div class="lg-word">Index Card RPG</div><div class="lg-sub">Character Sheet</div></div>
+      <div class="hdr-field name-primary"><label>Character name</label><input type="text" id="f-name" placeholder="Name"></div>
+    </div>
+    <div class="hdr-metarow">
+      <div class="lockfield" style="flex:1.5 1 0;"><label>World</label><select id="f-world" onchange="onWorld()"><option value="">— choose a world —</option></select></div>
+      <div class="lockfield" style="flex:1.5 1 0;"><label>Life Form</label><select id="f-lifeform" onchange="onLifeForm()"><option value="">— life form —</option></select></div>
+      <div class="lockfield" style="flex:1.2 1 0;"><label>Type</label><select id="f-type" onchange="onType()"><option value="">— type —</option></select></div>
+      <div class="lockfield" style="flex:.8 1 0;"><label>Milestones</label><input type="number" id="f-level" value="1" min="0" oninput="scheduleAutosave()"></div>
     </div>
   </div>
 
   <div class="body-row">
     <div class="stats-col">
+      <div class="card">
       <div class="section-bar accent"><span>Stats</span><span class="sb-note">click a stat to roll d20 + STAT vs TARGET</span></div>
       <div class="stats-grid icrpg" id="stats-grid"></div>
+      </div>
+      <div class="card">
       <div class="section-bar"><span>Effort</span><span class="sb-note">roll after a hit to measure it</span></div>
       <table class="eff-tbl"><tbody id="effort-body"></tbody></table>
+      </div>
     </div>
 
     <div class="center-col">
+      <div class="card">
       <div class="section-bar accent"><span>Status</span></div>
       <div class="vitals" style="grid-template-columns:1fr;">
         <div class="vital wide">
@@ -436,7 +463,9 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="vline"><label style="display:flex;gap:4px;align-items:center;cursor:pointer;"><input type="checkbox" id="f-dying" onchange="scheduleAutosave()"> <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--red);">Dying</span></label></div>
         </div>
       </div>
+      </div>
 
+      <div class="card tabs-card">
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="abilities" onclick="setTab('abilities')">Abilities</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
@@ -480,6 +509,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="tab-panel" id="tab-notes">
         <div class="section-bar"><span>Notes</span></div>
         <div class="notes-box"><textarea id="f-notes"></textarea></div>
+      </div>
       </div>
     </div>
   </div>
