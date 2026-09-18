@@ -523,6 +523,10 @@ body.dark .section-bar::after{background:#544c54;}
   .stats-col,.center-col{width:100%;}
   .hdr-top{grid-template-columns:1fr;gap:9px;}
 }
+
+/* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>

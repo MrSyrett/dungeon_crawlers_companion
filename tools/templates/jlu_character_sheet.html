@@ -256,6 +256,10 @@ body.dark .stat.click:hover{background:#1a2a4d;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+
+/* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
 </head>
 <body>

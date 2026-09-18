@@ -304,6 +304,10 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
 .tln-head .tln-name{flex:1 1 auto;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;color:var(--yz-dk);}
 .tln-head .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
 .tln-card .tln-desc{width:100%;margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;line-height:1.4;color:var(--ink);border:1px solid var(--rule);border-radius:6px;background:var(--input-bg);padding:5px 7px;resize:vertical;outline:none;}
+
+/* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
 </head>
 <body>

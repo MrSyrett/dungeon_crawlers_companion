@@ -376,6 +376,10 @@ body.dark .section-bar,body.dark .section-bar.blue,body.dark .tab-btn.on,body.da
 .log-clear,.log-action-btn,.tray-select,.tray-input,.tray-step,.dice-roll-btn{border-radius:6px;}
 .log-entry{border-radius:8px;}
 #log-collapse-btn{border-radius:6px 0 0 6px;}
+
+/* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
 </head>
 <body>

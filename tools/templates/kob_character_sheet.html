@@ -375,6 +375,10 @@ body.dark .section-bar.teal{color:#5fd0d0;}
 #log-collapse-btn{border-radius:6px 0 0 6px;}
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
+
+/* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
 </head>
 <body data-book="bikes">

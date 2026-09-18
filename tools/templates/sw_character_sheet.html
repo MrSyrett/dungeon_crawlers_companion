@@ -279,7 +279,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   #log-collapse-btn::after{content:"\25B2 Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
   .hdr-row{flex-direction:column;}
-  .hdr-logo{border-right:none;border-bottom:2px solid #333;}
+  .hdr-logo{border-right:none;}
   .hdr-fields{grid-template-columns:1fr 1fr;}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
@@ -397,6 +397,10 @@ body.dark .tabs-bar{background:#1a1d24;}
 .log-clear,.log-action-btn,.dice-btn,.tray-input,.tray-select{border-radius:6px;}
 .log-entry{border-radius:8px;}
 #log-collapse-btn{border-radius:6px 0 0 6px;}
+
+/* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
 </head>
 <body>

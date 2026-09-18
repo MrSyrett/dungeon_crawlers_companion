@@ -330,6 +330,10 @@ body.dark .a-tile .atv{color:#f0888e;}
   #log-collapse-btn::after{content:"\25B2 Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
 }
+
+/* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
+@media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
+@media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
 </head>
 <body>
