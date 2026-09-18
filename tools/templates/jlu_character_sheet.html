@@ -16,6 +16,7 @@
 <script src="/tools-data/jlu-traits.js"></script>
 <script src="/tools-data/jlu-equipment.js"></script>
 <script src="/tools-data/jlu-conditions.js"></script>
+<script src="/tools-data/jlu-statuses.js"></script>
 <script src="/tools-data/jlu-limitations.js"></script>
 <script src="/tools-data/jlu-rules.js"></script>
 <style>
@@ -87,6 +88,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stat .big{font-family:'Share Tech Mono';font-weight:700;font-size:24px;color:var(--jlu-dk);}
 .stat .sub{font-size:10px;color:var(--muted);}
 .dmg-row{margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.dr-field{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:5px;}
+.dr-field input{width:46px;text-align:center;font-family:'Share Tech Mono',monospace;font-weight:700;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);color:var(--ink);padding:3px;outline:none;}
+.status-track{display:flex;flex-wrap:wrap;gap:5px;}
+.status-chip{padding:4px 11px;border:1px solid var(--rule);border-radius:14px;background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .12s,border-color .12s,color .12s;}
+.status-chip:hover{border-color:var(--jlu);color:var(--jlu-dk);}
+.status-chip.on{background:#c0392b;border-color:#8f291d;color:#fff;}
+body.dark .status-chip.on{background:#c0392b;border-color:#e2796f;color:#fff;}
 .dmg-str{font-family:'Share Tech Mono';font-weight:700;font-size:15px;color:var(--jlu-dk);}
 .rollbtn{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:6px 12px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';letter-spacing:.05em;}
 .rollbtn.g{background:var(--green);}
@@ -296,8 +304,11 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
             </div>
           </div>
           <div class="card">
-            <h3>PAX Budget <span id="pax-avail" class="pax-total">—</span></h3>
-            <div id="paxlines"></div>
+            <h3>Plot Points</h3>
+            <div class="resolve-wrap">
+              <div class="pill"><button onclick="bumpPlot(-1)">−</button><span class="resolve-num" id="plot-cur">0</span><button onclick="bumpPlot(1)">+</button></div>
+              <div class="res-of">spend to twist fate</div>
+            </div>
           </div>
         </div>
         <!-- RIGHT: Conditions → Combat → tabs -->
@@ -307,9 +318,14 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
             <div class="cond-track" id="conds"></div>
           </div>
           <div class="card">
+            <h3>Statuses <span style="font-size:10px;color:var(--muted);font-weight:600;">tap to toggle</span></h3>
+            <div class="status-track" id="statuses"></div>
+          </div>
+          <div class="card">
             <h3>Combat</h3>
             <div class="statgrid" id="combat"></div>
             <div class="dmg-row">
+              <span class="dr-field" title="Damage Reduction — subtract from incoming damage (armor, Kryptonian, Enhanced Resistance)">DR <input id="f-dr" type="number" value="0" oninput="S.dr=num(this.value);scheduleAutosave()"></span>
               <span class="dmg-str" id="dmg-str">—</span>
               <button class="rollbtn" onclick="rollDamage()">Roll Damage</button>
             </div>
@@ -393,7 +409,7 @@ function G(x){return Array.isArray(x)?x:[];}
 var TIERS=G(window.JLU_TIERS), ATTRS=G(window.JLU_ATTRIBUTES), ORIGINS=G(window.JLU_ORIGINS),
     ARCHES=G(window.JLU_ARCHETYPES), POWERS=G(window.JLU_POWERS), KNOW=G(window.JLU_KNOWLEDGE),
     TRAITSD=G(window.JLU_TRAITS), EQUIP=G(window.JLU_EQUIPMENT), CONDS=G(window.JLU_CONDITIONS),
-    LIMS=G(window.JLU_LIMITATIONS);
+    STATUSES=G(window.JLU_STATUSES), LIMS=G(window.JLU_LIMITATIONS);
 var ATTR_KEYS=['potency','accuracy','agility','resistance','mind','spirit'];
 function tierObj(k){for(var i=0;i<TIERS.length;i++)if(TIERS[i].key===k)return TIERS[i];return TIERS.find(function(t){return t.playable;})||TIERS[0];}
 function powerObj(n){return POWERS.find(function(p){return p.name===n;});}
@@ -404,8 +420,8 @@ function archObj(n){return ARCHES.find(function(a){return a.name===n;});}
 function blankState(){
   return {name:'',secret:'',tier:'',origin:'',arch:'',
     attrs:{potency:0,accuracy:0,agility:0,resistance:0,mind:0,spirit:0},
-    resBuy:0, resCur:0, condLevel:0,
-    ddie:'1d6', datt:'Potency', dmod:0,
+    resBuy:0, resCur:0, condLevel:0, plot:0, statuses:[],
+    ddie:'1d6', datt:'Potency', dmod:0, dr:0,
     defMod:0, atkMod:0, blkMod:0, dodMod:0,
     paxTotal:null,
     powers:[], knowledge:[], traits:[], limitations:[], equipment:[],
@@ -499,9 +515,23 @@ function renderCombat(){
     host.appendChild(d);
   });
   $('dmg-str').textContent=S.ddie+' + '+S.datt+(num(S.dmod)?' + '+num(S.dmod):'');
+  var dre=$('f-dr'); if(dre)dre.value=num(S.dr);
+}
+function renderPlot(){ var el=$('plot-cur'); if(el)el.textContent=num(S.plot); }
+function bumpPlot(d){ S.plot=Math.max(0,num(S.plot)+d); renderPlot(); scheduleAutosave(); }
+function renderStatuses(){
+  var host=$('statuses'); if(!host)return; host.innerHTML='';
+  if(!S.statuses)S.statuses=[];
+  STATUSES.forEach(function(s){
+    var on=S.statuses.indexOf(s.name)>=0;
+    var el=document.createElement('button'); el.type='button';
+    el.className='status-chip'+(on?' on':''); el.title=s.effect||''; el.textContent=s.name;
+    el.onclick=function(){ var i=S.statuses.indexOf(s.name); if(i>=0)S.statuses.splice(i,1); else S.statuses.push(s.name); renderStatuses(); scheduleAutosave(); };
+    host.appendChild(el);
+  });
 }
 function renderPax(){
-  var host=$('paxlines');host.innerHTML='';
+  var host=$('paxlines');if(!host)return;host.innerHTML='';
   if(!S.tier){host.innerHTML='<div class="empty">Use Create to build a Hero.</div>';$('pax-avail').textContent='—';$('pax-avail').className='pax-total';return;}
   var sp=paxSpent(), avail=paxAvailable(), tot=paxAwarded();
   host.innerHTML+='<div class="pax-line"><span>Awarded (Tier '+S.tier+')</span><span>'+tot+'</span></div>';
@@ -553,7 +583,7 @@ function renderEquip(){
     host.appendChild(el);});
 }
 function renderAll(){
-  renderIdentity();renderAttrs();renderResolve();renderConds();renderCombat();renderPax();
+  renderIdentity();renderAttrs();renderResolve();renderConds();renderStatuses();renderPlot();renderCombat();renderPax();
   renderPowers();renderKnowledge();renderTraits();renderLimitations();renderEquip();
   $('f-weak').value=S.weakness||'';$('f-soul').value=S.soul||'';$('f-notes').value=S.notes||'';
   refreshWizardButtons();
