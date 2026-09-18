@@ -238,6 +238,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .mini .m-val{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--dnd-dk);}
 .mini.click{cursor:pointer;}.mini.click:hover{background:var(--dnd-lt);}
 .insp-box{margin:6px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:5px 8px;}
+.insp-btn{display:block;width:calc(100% - 16px);margin:6px 8px;padding:7px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--box);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .12s,color .12s,border-color .12s;}
+.insp-btn:hover{border-color:#c8a020;color:var(--ink);}
+.insp-btn.on{background:#c8a020;border-color:#c8a020;color:#1a1a1a;}
 .insp-box .ib-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);}
 .chk-lg{width:20px;height:20px;cursor:pointer;accent-color:var(--dnd);}
 
@@ -670,10 +673,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
           <div class="ability-col">
             <div class="section-bar red"><span>Abilities</span></div>
             <div class="abil-list" id="abil-list"></div>
-            <div class="insp-box">
-              <span class="ib-lbl">Inspiration</span>
-              <input type="checkbox" id="f-inspiration" class="chk-lg" onchange="scheduleAutosave()">
-            </div>
+            <button type="button" id="insp-btn" class="insp-btn" onclick="this.classList.toggle('on');scheduleAutosave()" title="Inspiration — tap to toggle">Inspiration</button>
           </div>
           <div class="sc-prof">
             <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
@@ -2913,7 +2913,7 @@ function collectSheet(){
     scores, saveProf, skillProf,
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
     speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), mageArmor: !!($('f-mage-armor') && $('f-mage-armor').checked), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
-    inspiration: $('f-inspiration').checked, deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
+    inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
     customFeatures, addedFeats, resourceUsed, customResources, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
@@ -2935,7 +2935,7 @@ function applySheet(d){
   { const ma = $('f-mage-armor'); if(ma) ma.checked = !!d.mageArmor; } set('f-ac-temp', d.acTemp || '');
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
   set('f-hd-left', d.hdLeft != null ? d.hdLeft : hitDiceTotal());
-  $('f-inspiration').checked = !!d.inspiration;
+  $('insp-btn').classList.toggle('on', !!d.inspiration);
   deathSucc = d.deathSucc || 0; deathFail = d.deathFail || 0;
   activeConditions = d.activeConditions || []; defenses = d.defenses || {}; companions = Array.isArray(d.companions) ? d.companions : []; exhaustion = d.exhaustion || 0; _tab = d.tab || _tab;
   set('f-proficiencies', d.proficiencies); set('f-notes', d.notes);
