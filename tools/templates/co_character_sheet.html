@@ -65,33 +65,45 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .dice-btn:hover{background:var(--co-dk);}
 
 /* Sheet card */
-.sheet{background:var(--paper);border:2px solid var(--border);max-width:1040px;margin:0 auto;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
-.section-bar{background:var(--section-hdr);color:white;font-family:'Cinzel',serif;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.section-bar.accent{background:var(--co);}
-.section-bar .sb-note{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:none;color:rgba(255,255,255,.78);}
+.sheet{background:#e5ebe8;border:3px solid var(--border);border-radius:14px;overflow:hidden;max-width:1040px;margin:0 auto;position:relative;box-shadow:0 12px 36px rgba(0,0,0,.2);}
+.card{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(15,25,22,.07);}
+.section-bar{position:relative;background:transparent;color:var(--co-dk);font-family:'Cinzel',serif;font-weight:700;font-size:13px;letter-spacing:.13em;text-transform:uppercase;padding:9px 13px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--co-lt);}
+.section-bar.accent{background:transparent;color:var(--co-dk);}
+.section-bar .sb-note{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:none;color:var(--muted);}
 .hdr-right{display:flex;align-items:center;gap:8px;}
-.hdr-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
-.hdr-btn:hover{background:rgba(255,255,255,.3);}
+.hdr-btn{background:transparent;border:1px solid var(--co);color:var(--co-dk);border-radius:6px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.hdr-btn:hover{background:var(--co-lt);}
 
-/* Header */
-.hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--section-hdr);}
-.hdr-logo{padding:10px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:150px;gap:2px;border-right:2px solid #2a3b36;}
-.hdr-logo .lg-word{font-family:'Cinzel',serif;font-weight:800;font-size:22px;line-height:1;color:var(--co);letter-spacing:.02em;text-align:center;}
-.hdr-logo .lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#8ba79f;text-align:center;}
-.hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);}
-.hdr-field{padding:5px 8px 6px;border-right:1px solid #2a3b36;border-bottom:1px solid #2a3b36;min-width:0;}
-.hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#5fd3b0;margin-bottom:2px;}
-.hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid #37514a;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
-.hdr-field select{font-size:15px;cursor:pointer;}
-.hdr-field .hdr-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;padding:3px 0 2px;border-bottom:1px solid #37514a;min-height:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hdr-field select option{color:#111;background:#fff;}
-.hdr-field input::placeholder{color:#5a6f68;font-weight:500;}
-.hdr-field.lastcol{border-right:none;}
+/* Header — game name + investigator name on the top line; the rest in a row underneath */
+.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,var(--co-dk),var(--co));color:#fff;padding:14px 18px;}
+.hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
+.hdr-logo{min-width:0;}
+.hdr-logo .lg-word{font-family:'Cinzel',serif;font-weight:800;font-size:25px;line-height:1;color:#fff;letter-spacing:.02em;}
+.hdr-logo .lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:#edc978;margin-top:3px;}
+.hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
+.hdr-field,.lockfield{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.13);border-radius:7px;min-width:0;}
+.hdr-field{padding:3px 10px 4px;}
+.lockfield{flex:1 1 0;padding:3px 8px 4px;background:rgba(255,255,255,.11);}
+.hdr-field label,.lockfield label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.82);}
+.hdr-field label{font-size:9px;margin-bottom:1px;}
+.lockfield label{font-size:8px;letter-spacing:.12em;margin-bottom:0;}
+.hdr-field .hdr-val,.hdr-field .hdr-ro,.lockfield .hdr-val,.lockfield .hdr-ro{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#fff;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-field .hdr-val,.hdr-field .hdr-ro{font-size:15px;min-height:19px;padding:1px 0;}
+.name-primary .hdr-val,.name-primary .hdr-ro{font-size:17px;}
+.lockfield .hdr-val,.lockfield .hdr-ro{font-size:13px;min-height:0;}
+.hdr-field input,.hdr-field select,.lockfield input,.lockfield select{width:100%;background:transparent;border:none;outline:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:1px 0;}
+.name-primary input{font-size:17px;}
+.hdr-field input,.hdr-field select{font-size:15px;}
+.lockfield input,.lockfield select{font-size:13px;}
+.hdr-field select option,.lockfield select option{color:#111;background:#fff;}
+.hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,255,255,.5);font-weight:500;}
+.hdr-field .hdr-val:empty::after,.hdr-field .hdr-val.dim,.lockfield .hdr-val:empty::after,.lockfield .hdr-val.dim{color:rgba(255,255,255,.5);font-weight:500;}
 
 /* Body */
-.body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
-.stats-col{width:380px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
-.center-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+.body-row{display:flex;gap:14px;padding:16px;align-items:flex-start;}
+.stats-col{width:360px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.center-col{flex:1;display:flex;flex-direction:column;min-width:0;gap:14px;}
 .blk{padding:10px;}
 
 /* Drives & Actions — fused per-drive blocks (official CO layout, our style) */
@@ -150,10 +162,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .mtrack .scarslot{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--ink);outline:none;padding:2px 0;}
 
 /* Tabs */
-.tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
-.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
-.tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--co);background:rgba(47,165,149,.28);}
+.tabs-bar{display:flex;gap:0;background:var(--box);border-bottom:2px solid var(--co-lt);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:9px 10px;background:transparent;color:var(--muted);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.on{color:var(--co-dk);border-bottom-color:var(--co);background:var(--co-lt);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;}
 
@@ -245,7 +257,7 @@ body.dark{--bg:#0c1512;--paper:#12201c;--ink:#e7efeb;--muted:#8ba39c;--rule:#2b4
 body.dark .sheet{border-color:#3a544c;}
 body.dark .pip,body.dark .dot,body.dark .diamond,body.dark .mbox,body.dark .rpip{background:var(--input-bg);}
 
-@media(max-width:900px){.body-row{flex-direction:column;}.stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}.hdr-fields{grid-template-columns:repeat(6,1fr);}}
+@media(max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
 /* Desktop collapse: shrink the log to zero width. Declared BEFORE the mobile
    query so the mobile width:100% overrides it (source order wins on ties). */
 .roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
@@ -255,13 +267,25 @@ body.dark .pip,body.dark .dot,body.dark .diamond,body.dark .mbox,body.dark .rpip
      absolutely-positioned child at bottom:100%) rides above the sheet edge and
      stays on-screen when collapsed — the transform makes the log the tab's
      containing block, so the tab slides down with it and peeks at screen bottom. */
-  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--co);z-index:200;max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--co);border-radius:14px 14px 0 0;z-index:200;max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .log-header{border-radius:14px 14px 0 0;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
   #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;padding:0;}
   #log-collapse-btn::after{content:"\25B2 Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+/* ── Gold-standard skin: dark cards + rounded controls ── */
+body.dark .sheet{border-color:#3a544c;background:#0d1714;}
+body.dark .card{background:#16241f;border-color:#2b433c;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+body.dark .tabs-bar{background:#12201c;}
+body.dark .section-bar,body.dark .section-bar.accent,body.dark .subhead,body.dark .tab-btn.on,body.dark .hdr-btn{color:#5fd3b0;}
+.fld input,.fld textarea{border-radius:6px;}
+.small-btn,.hdr-btn,.brow-add,.m-btn,.gild-btns button{border-radius:6px;}
+.a-row button{border-radius:5px;}
+.log-clear,.log-action-btn,.tray-input,.tray-toggle,.dice-btn{border-radius:6px;}
+.log-entry{border-radius:8px;}
+#log-collapse-btn{border-radius:6px 0 0 6px;}
 </style>
 </head>
 <body>
@@ -271,25 +295,32 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 <div class="sheet">
 
   <div class="hdr-row">
-    <div class="hdr-logo"><div class="lg-word">Candela Obscura</div><div class="lg-sub">Investigator Dossier</div></div>
-    <div class="hdr-fields">
-      <div class="hdr-field wide" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Investigator name"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Role</label><div class="hdr-val" id="f-role" title="Set with Create">—</div></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Specialty</label><div class="hdr-val" id="f-specialty" title="Set with Create">—</div></div>
-      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
+    <div class="hdr-top">
+      <div class="hdr-logo"><div class="lg-word">Candela Obscura</div><div class="lg-sub">Investigator Dossier</div></div>
+      <div class="hdr-field name-primary"><label>Name</label><input type="text" id="f-name" placeholder="Investigator name"></div>
+    </div>
+    <div class="hdr-metarow">
+      <div class="lockfield" style="flex:1.5 1 0;"><label>Role</label><div class="hdr-val" id="f-role" title="Set with Create">—</div></div>
+      <div class="lockfield" style="flex:1.5 1 0;"><label>Specialty</label><div class="hdr-val" id="f-specialty" title="Set with Create">—</div></div>
+      <div class="lockfield"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
     </div>
   </div>
 
   <div class="body-row">
     <div class="stats-col">
+      <div class="card">
       <div class="section-bar accent"><span>Drives &amp; Actions</span></div>
       <div id="drive-blocks"></div>
+      </div>
     </div>
 
     <div class="center-col">
+      <div class="card">
       <div class="section-bar accent"><span>Marks &amp; Scars</span></div>
       <div class="marks" id="marks"></div>
+      </div>
 
+      <div class="card tabs-card">
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="abilities" onclick="setTab('abilities')">Abilities</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
@@ -325,6 +356,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
       <div class="tab-panel" id="tab-notes">
         <div class="section-bar"><span>Notes</span></div>
         <div class="blk"><div class="fld"><textarea id="f-notes" rows="7"></textarea></div></div>
+      </div>
       </div>
     </div>
   </div>
