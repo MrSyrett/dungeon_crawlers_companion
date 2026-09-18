@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session" | "icrpg-character" | "icrpg-session" | "co-character" | "co-session" | "yze-character" | "yze-session" | "mmrpg-character" | "mmrpg-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session" | "icrpg-character" | "icrpg-session" | "co-character" | "co-session" | "yze-character" | "yze-session" | "mmrpg-character" | "mmrpg-session" | "jlu-character" | "jlu-session";
 
 export type ToolKind = "character" | "session";
 
@@ -243,9 +243,27 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "mmrpg_session_prep_builder.html",
     keys: ["mmrpg_session"],
   },
+  "jlu-character": {
+    id: "jlu-character",
+    system: "JLU",
+    systemName: "Justice League Unlimited",
+    kind: "character",
+    label: "Hero Sheet",
+    file: "jlu_character_sheet.html",
+    keys: ["jlu_sheet"],
+  },
+  "jlu-session": {
+    id: "jlu-session",
+    system: "JLU",
+    systemName: "Justice League Unlimited",
+    kind: "session",
+    label: "Session Prep",
+    file: "jlu_session_prep_builder.html",
+    keys: ["jlu_session"],
+  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "yze-character", "yze-session", "mmrpg-character", "mmrpg-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "yze-character", "yze-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

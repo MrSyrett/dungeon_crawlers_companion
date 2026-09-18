@@ -1,0 +1,156 @@
+[
+  {
+    "name": "Street Thug",
+    "role": "Minion",
+    "tier": "E",
+    "attributes": { "potency": 1, "accuracy": -1, "agility": 1, "resistance": 1, "spirit": 0, "mind": -3 },
+    "defense": 10,
+    "attacks": [ { "name": "Pistol", "bonus": 2, "damage": "1d6+1" } ],
+    "abilities": [ { "name": "Just a Minion", "text": "A minion is defeated upon suffering any amount of Damage." } ]
+  },
+  {
+    "name": "Parademon",
+    "role": "Minion",
+    "tier": "D",
+    "attributes": { "potency": 3, "accuracy": 1, "agility": 1, "resistance": 3, "spirit": 0, "mind": -1 },
+    "resolve": 10,
+    "defense": 11,
+    "attacks": [ { "name": "Fists / Simple Weapon", "bonus": 4, "damage": "1d6+3", "type": "Physical", "range": "Melee" } ],
+    "powers": [ "Super Strength 1", "Flight 1" ],
+    "abilities": [ { "name": "Darkseid Is", "text": "When defeated, its body explodes, dealing 1d6 energy damage to all Adjacent." } ]
+  },
+  {
+    "name": "Cybernetic Tyrannosaurus",
+    "role": "Brute",
+    "tier": "C",
+    "attributes": { "potency": 9, "accuracy": 3, "agility": -1, "resistance": 9, "spirit": 0, "mind": -3 },
+    "resolve": 18,
+    "defense": 20,
+    "attacks": [ { "name": "Fangs / Claws", "bonus": 10, "damage": "2d6+9", "type": "Physical", "range": "Melee" } ],
+    "powers": [ "Super Strength 2", "Enhanced Resistance 2", "Exoskeleton 1 (Armored Defense, Integrated Weaponry – Laser)" ],
+    "abilities": [ { "name": "Relentless Strength", "text": "The Brute's first Damage roll in a Turn is made with Advantage." } ]
+  },
+  {
+    "name": "LexCorp Tactical Android",
+    "role": "General",
+    "tier": "C",
+    "attributes": { "potency": 6, "accuracy": 6, "agility": 3, "resistance": 6, "spirit": 3, "mind": 3 },
+    "resolve": 18,
+    "defense": 18,
+    "attacks": [ { "name": "Energy Blast", "bonus": 10, "damage": "1d6+6", "type": "Energy", "range": "Ranged" } ],
+    "powers": [ "Super Strength 1", "Enhanced Resistance 1", "Energy Blast 2" ],
+    "abilities": [ { "name": "Tactical Movement", "text": "At the beginning of its turn, the General may move 1 ally by 1 Distance." } ]
+  },
+  {
+    "name": "Metal Sentinel",
+    "role": "Brute",
+    "tier": "C",
+    "attributes": { "potency": 6, "accuracy": 1, "agility": 0, "resistance": 9, "spirit": 0, "mind": -1 },
+    "resolve": 18,
+    "defense": 20,
+    "attacks": [ { "name": "Metal Fists", "bonus": 8, "damage": "2d6+6", "type": "Physical", "range": "Melee" } ],
+    "powers": [ "Enhanced Resistance 2", "Body Metamorphosis 1 (Hardened)", "Super Strength 1" ],
+    "abilities": [
+      { "name": "Relentless Strength", "text": "The Brute's first Damage roll in a Turn is made with Advantage." },
+      { "name": "Harden", "text": "May spend 1 Resolve to increase its Damage Reduction by +1 per Round." }
+    ]
+  },
+  {
+    "name": "Captain Boomerang",
+    "role": "Villain",
+    "tier": "C",
+    "origin": "Human",
+    "realName": "George “Digger” Harkness",
+    "attributes": { "potency": 3, "accuracy": 9, "agility": 6, "resistance": 3, "spirit": 6, "mind": 3 },
+    "resolve": 36,
+    "defense": 18,
+    "damageReduction": "1 (2 against projectiles)",
+    "attacks": [ { "name": "Boomerang", "bonus": 15, "damage": "2d6+8", "type": "Physical", "range": "Distant" } ],
+    "powers": [ "Marksman 3 (Favorite Weapon, Special Ammunition, Ricochet Shot, Improved Special Ammunition)" ],
+    "equipment": [ "Kevlar Suit", "Smoke Bomb", "Grappling Gun", "Boomerangs", "Tracker" ],
+    "abilities": [
+      { "name": "Villain", "text": "Gains 1 Action (not counting toward the Round's action total) at the end of each Hero's Turn." },
+      { "name": "Guaranteed Return", "text": "Once per Round, when he misses an Attack, at the end of the turn he may re-attack the same target, dealing half Damage on a hit." }
+    ],
+    "description": "A sarcastic, opportunistic mercenary and excellent marksman with a lethal arsenal of trick boomerangs. Predictable in negotiations and easily destabilized by a good taunt.",
+    "conditionBoxes": 7
+  },
+  {
+    "name": "Talon",
+    "role": "Villain (Furtive)",
+    "tier": "C",
+    "origin": "Human",
+    "attributes": { "potency": 6, "accuracy": 9, "agility": 9, "resistance": 6, "spirit": 6, "mind": 6 },
+    "resolve": 35,
+    "defense": 20,
+    "damageReduction": "3",
+    "attacks": [
+      { "name": "Fists", "bonus": 10, "damage": "2d6+6", "type": "Physical" },
+      { "name": "Katana", "bonus": 12, "damage": "2d6+8", "type": "Physical" },
+      { "name": "Throwing Daggers", "bonus": 8, "damage": "1d6+6", "range": "Close" }
+    ],
+    "powers": [ "Martial Master 3 (Acrobatic Fighter, Precise Strike, Fists of Steel, Body Fortification)", "Swordsman 2 (Precise Attack, Sudden Charge, Barrage of Blows)" ],
+    "knowledge": [ "Subterfuge" ],
+    "traits": [ "Affiliation (Court of Owls)" ],
+    "abilities": [
+      { "name": "Villain", "text": "Gains +1 Action (not counting toward the total) at the end of each Hero's turn." },
+      { "name": "Gift from the Court", "text": "At the start of the Round, choose one piece of Gear from the Equipment list; use it once until end of Round." },
+      { "name": "Shadow Strike", "text": "When hidden in shadows, gains +1 die on Damage rolls." }
+    ],
+    "description": "An elite, resurrected assassin of the Court of Owls — a silent killer, skilled fighter and relentless tracker.",
+    "conditionBoxes": 7
+  },
+  {
+    "name": "Captain Cold",
+    "role": "Villain (Genius)",
+    "tier": "C",
+    "origin": "Human",
+    "realName": "Leonard Snart",
+    "attributes": { "potency": 6, "accuracy": 9, "agility": 6, "resistance": 3, "spirit": 12, "mind": 9 },
+    "resolve": 62,
+    "defense": 20,
+    "attacks": [ { "name": "Ice Blast", "bonus": 15, "damage": "2d6+15", "type": "Ice", "range": "Close" } ],
+    "powers": [ "Energy Blast G2 (Ice)", "Elemental Manipulation G2 (Ice)", "Marksman 3 (Favorite Weapon, Ricochet Shot, Instinctive Shooter, Barrage of Shots)" ],
+    "knowledge": [ "Tech" ],
+    "traits": [ "Pocket Gadgets" ],
+    "equipment": [ "Cold Gun (grants Energy Blast and Elemental Manipulation while wielded)" ],
+    "abilities": [
+      { "name": "Villain", "text": "Gains 1 Action (not counting toward the Round limit) at the end of each Hero's turn." },
+      { "name": "All Part of the Plan", "text": "Once per Scene, when targeted, declare it was all part of the plan to negate the incoming hit." },
+      { "name": "Cold Aura", "text": "+2 Defense (already included) and half damage from cold attacks." },
+      { "name": "Ice Age", "text": "Once per Campaign, destroy the Cold Gun to absorb its powers, becoming a Meta-Human with +4 Defense and 15 Resolve — a Tier B threat." },
+      { "name": "Practical Knowledge", "text": "At the start of the Scene, choose one ability from a Knowledge to have until the Scene ends." },
+      { "name": "Speedster Hunter", "text": "Deals +1 Damage Die to characters with the Speed Force." }
+    ],
+    "description": "A brilliant, methodical criminal whose Cold Gun grants a suite of ice-manipulation abilities — but he is entirely dependent on it.",
+    "conditionBoxes": 7
+  },
+  {
+    "name": "Robin (Damian Wayne)",
+    "role": "Anti-Hero",
+    "tier": "C",
+    "origin": "Human",
+    "realName": "Damian Wayne",
+    "attributes": { "potency": 6, "accuracy": 6, "agility": 6, "resistance": 6, "spirit": 3, "mind": 6 },
+    "resolve": 25,
+    "defense": 22,
+    "attacks": [
+      { "name": "Katana", "bonus": 11, "damage": "1d6+7", "type": "Physical" },
+      { "name": "Martial Strikes", "bonus": 7, "damage": "1d6+6", "type": "Physical" }
+    ],
+    "powers": [ "Swordsman G2 (Singular Weapon [Katana], Precise Strike, Violent Attack, Parry Blow)", "Martial Master G2 (Acrobatic Fighter, Precise Strike, Acrobatic Kicks)" ],
+    "knowledge": [ "Strategy", "Tech", "Subterfuge" ],
+    "traits": [ "Nepobaby (Affiliation: Bat-Family)", "Pocket Gadgets" ],
+    "equipment": [ "Katana (Martial Weapon)", "Smoke Bomb" ],
+    "archetypeSkills": [
+      { "name": "Dirty Boxing", "text": "Once per Round, when you hit, spend 2 Resolve and an Action to deal +2 Damage per Tier." },
+      { "name": "I Follow Other Rules", "text": "Once per Issue, when you do something morally questionable, use one of the Editor's Editorial Points as if it were a Plot Point." }
+    ],
+    "limitations": [
+      { "name": "Bad Reputation", "text": "In Rescue scenes, the Resolve cost of abilities increases by 2." },
+      { "name": "Paranoia", "text": "Damian distrusts everything and everyone around him." }
+    ],
+    "description": "Son of Bruce Wayne and Talia al Ghul, raised as the ultimate weapon of the League of Assassins — arrogant, violent and incredibly skilled, a hero in constant inner conflict. Usable as a pregen Hero.",
+    "conditionBoxes": 4
+  }
+]

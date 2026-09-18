@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- BUILD: JLU Hero Sheet — 2026-09-18 -->
+<script>window.__BUILD__="JLU Hero Sheet — 2026-09-18";</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Justice League Unlimited Hero Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="/tools-data/jlu-tiers.js"></script>
+<script src="/tools-data/jlu-attributes.js"></script>
+<script src="/tools-data/jlu-origins.js"></script>
+<script src="/tools-data/jlu-archetypes.js"></script>
+<script src="/tools-data/jlu-powers.js"></script>
+<script src="/tools-data/jlu-knowledge.js"></script>
+<script src="/tools-data/jlu-traits.js"></script>
+<script src="/tools-data/jlu-equipment.js"></script>
+<script src="/tools-data/jlu-conditions.js"></script>
+<script src="/tools-data/jlu-limitations.js"></script>
+<style>
+/* ═══ Justice League Unlimited hero sheet ═══ Framed card + two-column body +
+   tabs + sticky Roll Log, matching the ICRPG / YZE / Candela sheets. Accent
+   --jlu (heroic blue). Core: d20 + Attribute + bonus vs Tension; one Resolve
+   pool for HP and powers; PAX budget auto-tallied from the build. */
+:root{
+  --bg:#dbe3ef;--paper:#f6f8fc;--ink:#111726;--muted:#586074;--rule:#c3cbdb;
+  --jlu:#2f6fed;--jlu-dk:#1c49a8;--jlu-lt:#dbe6ff;--gild:#c99a2e;--red:#c23a2f;--green:#2f8f5b;--gold:#e2b23a;
+  --border:#182238;--section-hdr:#152238;--box:#e9eef8;--input-bg:#fff;--input-border:#828da6;
+  --log-bg:#0b1220;--log-text:#eef2fb;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+.app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:40px 16px 24px;}
+.sheet{max-width:1120px;margin:0 auto;background:var(--paper);border:3px solid var(--border);border-radius:10px;box-shadow:0 10px 34px rgba(12,22,44,.28);overflow:hidden;}
+/* Header */
+.hdr{background:linear-gradient(120deg,var(--jlu-dk),var(--jlu));color:#fff;padding:14px 18px;display:grid;grid-template-columns:1.4fr 1fr auto;gap:14px;align-items:end;}
+.hdr .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:.06em;line-height:.92;text-transform:uppercase;}
+.hdr .logo b{display:block;font-size:30px;}
+.hdr .logo span{display:block;font-size:12px;letter-spacing:.34em;color:var(--gold);}
+.f{display:flex;flex-direction:column;gap:2px;}
+.f label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;opacity:.85;font-weight:700;}
+.hdr input,.hdr select{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 7px;border-radius:5px;font-family:inherit;font-size:14px;font-weight:600;}
+.hdr input::placeholder{color:rgba(255,255,255,.6);}
+.hdr select option{color:#111;}
+.tierbar{display:flex;gap:4px;}
+.tierbar button{width:26px;height:26px;border-radius:5px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.1);color:#fff;font-weight:800;font-family:'Barlow Condensed';cursor:pointer;font-size:14px;}
+.tierbar button.on{background:var(--gold);color:#20140a;border-color:var(--gold);}
+.tierbar button:disabled{opacity:.4;cursor:not-allowed;}
+/* Tabs */
+.tabs{display:flex;gap:0;background:var(--section-hdr);padding:0 8px;}
+.tabs button{background:none;border:none;color:#aeb9d2;font-family:'Barlow Condensed';font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;cursor:pointer;border-bottom:3px solid transparent;}
+.tabs button.on{color:#fff;border-bottom-color:var(--gold);}
+.body{padding:16px;}
+.tabpane{display:none;}
+.tabpane.on{display:block;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr;}.hdr{grid-template-columns:1fr;}}
+.card{background:#fff;border:1.5px solid var(--rule);border-radius:8px;padding:12px;}
+.card h3{font-family:'Barlow Condensed';font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--jlu-dk);border-bottom:2px solid var(--jlu-lt);padding-bottom:5px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;}
+/* Attributes */
+.attr-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--rule);}
+.attr-row .an{font-family:'Barlow Condensed';font-weight:700;font-size:16px;letter-spacing:.04em;}
+.attr-row .stepper{display:flex;align-items:center;gap:3px;}
+.attr-row .stepper button{width:22px;height:22px;border:1px solid var(--input-border);background:var(--box);border-radius:4px;font-weight:800;cursor:pointer;}
+.attr-row .aval{width:44px;text-align:center;font-family:'Share Tech Mono';font-weight:700;font-size:16px;}
+.attr-row .roll{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:5px 9px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';font-size:13px;letter-spacing:.05em;}
+/* stat boxes */
+.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.stat{background:var(--box);border:1.5px solid var(--rule);border-radius:7px;padding:7px;text-align:center;}
+.stat .lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.stat .big{font-family:'Share Tech Mono';font-weight:700;font-size:24px;color:var(--jlu-dk);}
+.stat .sub{font-size:10px;color:var(--muted);}
+.mini{width:38px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:4px;padding:2px;}
+.rollbtn{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:6px 10px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';letter-spacing:.05em;}
+.rollbtn.alt{background:var(--jlu-dk);}
+.rollbtn.g{background:var(--green);}
+/* resolve */
+.resolve-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.resolve-num{font-family:'Share Tech Mono';font-weight:700;font-size:34px;color:var(--jlu-dk);}
+.pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--input-border);border-radius:20px;padding:3px 8px;background:#fff;}
+.pill button{border:none;background:var(--box);width:22px;height:22px;border-radius:50%;font-weight:800;cursor:pointer;}
+/* conditions track */
+.cond-track{display:flex;gap:5px;flex-wrap:wrap;}
+.cond{flex:1;min-width:78px;border:1.5px solid var(--rule);border-radius:6px;padding:6px 4px;text-align:center;cursor:pointer;background:#fff;position:relative;}
+.cond .cn{font-family:'Barlow Condensed';font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.03em;}
+.cond .cx{font-size:9px;color:var(--muted);}
+.cond.on{background:var(--jlu-lt);border-color:var(--jlu);}
+.cond.on.warn{background:#fbe3df;border-color:var(--red);}
+/* PAX budget */
+.pax-line{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--rule);font-size:13px;}
+.pax-total{font-weight:800;color:var(--jlu-dk);}
+.pax-neg{color:var(--red);font-weight:800;}
+/* pickers / lists */
+.addrow{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.addrow select,.addrow input{border:1px solid var(--input-border);border-radius:5px;padding:5px;font-family:inherit;font-size:13px;background:#fff;}
+.addbtn{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:5px 11px;font-weight:800;cursor:pointer;}
+.pw{border:1.5px solid var(--rule);border-radius:7px;margin-bottom:9px;overflow:hidden;}
+.pw-head{display:flex;justify-content:space-between;align-items:center;background:var(--box);padding:6px 9px;gap:8px;}
+.pw-head .pn{font-family:'Barlow Condensed';font-weight:800;font-size:15px;}
+.pw-head .cat{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.pw-body{padding:8px 10px;font-size:12.5px;}
+.abil{padding:5px 0;border-bottom:1px dashed var(--rule);}
+.abil:last-child{border-bottom:none;}
+.abil b{color:var(--jlu-dk);}
+.abil .meta{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.chip{display:inline-block;background:var(--jlu-lt);border:1px solid var(--jlu);border-radius:14px;padding:2px 9px;margin:2px;font-size:12px;}
+.chip button{border:none;background:none;color:var(--red);font-weight:800;cursor:pointer;margin-left:3px;}
+.row-x{border:none;background:none;color:var(--muted);cursor:pointer;font-weight:800;}
+textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:70px;background:#fff;}
+.gradesel{border:1px solid var(--input-border);border-radius:4px;padding:2px 4px;font-family:inherit;}
+/* Roll log */
+.log{width:320px;flex-shrink:0;position:sticky;top:0;height:100vh;background:var(--log-bg);color:var(--log-text);display:flex;flex-direction:column;}
+.log h2{font-family:'Barlow Condensed';font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:14px;padding:12px 14px;border-bottom:1px solid #223;display:flex;justify-content:space-between;align-items:center;}
+.log .entries{flex:1;overflow-y:auto;padding:8px 12px;}
+.roll-entry{border-bottom:1px solid #1b2740;padding:7px 0;}
+.roll-label{font-size:11px;color:#9fb0d6;}
+.roll-result{font-family:'Share Tech Mono';font-size:20px;font-weight:700;}
+.roll-result.crit{color:var(--gold);}
+.roll-result.fail{color:#e2796f;}
+.roll-detail{font-size:11px;color:#8794b8;}
+.tension-row{padding:8px 12px;border-bottom:1px solid #223;display:flex;align-items:center;gap:8px;font-size:12px;}
+.tension-row input{width:52px;background:#16213a;border:1px solid #2a3a5c;color:#fff;border-radius:4px;padding:3px;text-align:center;font-family:'Share Tech Mono';}
+.advbtns button{background:#16213a;border:1px solid #2a3a5c;color:#cdd8f0;border-radius:4px;padding:3px 7px;cursor:pointer;font-size:11px;font-weight:700;}
+.advbtns button.on{background:var(--jlu);border-color:var(--jlu);color:#fff;}
+.toolbar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-top:1px solid #223;flex-wrap:wrap;}
+.toolbar button,.toolbar label{background:#16213a;border:1px solid #2a3a5c;color:#cdd8f0;border-radius:5px;padding:5px 9px;cursor:pointer;font-size:11px;font-weight:700;}
+@media(max-width:960px){.log{display:none;}}
+.hint{font-size:11px;color:var(--muted);margin:2px 0 8px;}
+.dupwarn{color:var(--red);font-size:11px;font-weight:700;}
+body.dark{--bg:#0f1626;--paper:#182339;--ink:#e8eefb;--muted:#93a1c4;--rule:#2b3a58;--box:#1f2c47;--input-bg:#111a2c;--input-border:#3a4c72;--section-hdr:#0c1424;}
+body.dark .card,body.dark .hdr select option{background:#182339;color:var(--ink);}
+body.dark .mini,body.dark .addrow select,body.dark .addrow input,body.dark textarea,body.dark .aval{background:#111a2c;color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="app-wrap">
+<div class="sheet-wrap">
+  <div class="sheet">
+    <div class="hdr">
+      <div style="display:flex;gap:14px;align-items:end;">
+        <div class="logo"><b>Justice League</b><span>Unlimited · Hero Sheet</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="f"><label>Hero Name</label><input id="f-name" placeholder="Codename" oninput="onIdent()"></div>
+        <div class="f"><label>Secret Identity</label><input id="f-secret" placeholder="Civilian name" oninput="onIdent()"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;">
+        <div class="f"><label>Tier</label><div class="tierbar" id="tierbar"></div></div>
+        <div class="f" style="width:150px;"><label>Origin</label><select id="f-origin" onchange="onBuild()"></select></div>
+        <div class="f" style="width:150px;"><label>Archetype</label><select id="f-arch" onchange="onBuild()"></select></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button id="tb-hero" class="on" onclick="setTab('hero')">Hero</button>
+      <button id="tb-powers" onclick="setTab('powers')">Powers</button>
+      <button id="tb-skills" onclick="setTab('skills')">Skills &amp; Gear</button>
+      <button id="tb-notes" onclick="setTab('notes')">Notes</button>
+    </div>
+    <div class="body">
+      <!-- HERO -->
+      <div id="pane-hero" class="tabpane on">
+        <div class="grid2">
+          <div class="card">
+            <h3>Attributes <span style="font-size:9px;color:var(--muted);">5 PAX = +3 · Tier limit <span id="attr-lim">+6</span></span></h3>
+            <div id="attrs"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="card">
+              <h3>Resolve <span id="resolve-cap" style="font-size:10px;color:var(--muted);"></span></h3>
+              <div class="resolve-wrap">
+                <div class="pill"><button onclick="bumpResolve(-1)">−</button><span class="resolve-num" id="resolve-cur">12</span><button onclick="bumpResolve(1)">+</button></div>
+                <div style="font-size:12px;color:var(--muted);">of <b id="resolve-max">12</b> max</div>
+                <button class="rollbtn g" onclick="restResolve()">Full</button>
+              </div>
+              <div class="hint">Base (Tier) + Spirit + bought. Spending powers & taking hits reduce current Resolve.</div>
+              <div class="f" style="flex-direction:row;gap:6px;align-items:center;"><label style="color:var(--muted)">Bought (+1 = 2 PAX)</label><input class="mini" id="f-resbuy" type="number" value="0" oninput="onBuild()"></div>
+            </div>
+            <div class="card">
+              <h3>Conditions</h3>
+              <div class="cond-track" id="conds"></div>
+              <div class="hint">Click to set your level. Penalties apply automatically to d20 rolls.</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid2" style="margin-top:14px;">
+          <div class="card">
+            <h3>Combat</h3>
+            <div class="statgrid" id="combat"></div>
+            <div style="margin-top:10px;display:flex;gap:10px;align-items:end;flex-wrap:wrap;">
+              <div class="f"><label style="color:var(--muted)">Damage Die</label>
+                <select id="f-ddie" class="gradesel" onchange="onBuild()"><option>1d6</option><option>1d8</option><option>1d12</option></select></div>
+              <div class="f"><label style="color:var(--muted)">Damage Attr</label>
+                <select id="f-datt" class="gradesel" onchange="onBuild()"><option>Potency</option><option>Spirit</option></select></div>
+              <div class="f"><label style="color:var(--muted)">Dmg Mod</label><input class="mini" id="f-dmod" type="number" value="0" oninput="onBuild()"></div>
+              <button class="rollbtn" onclick="rollDamage()">Roll Damage</button>
+              <div style="font-size:12px;">= <b id="dmg-str">1d6</b></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>PAX Budget <span id="pax-avail" class="pax-total">40</span></h3>
+            <div id="paxlines"></div>
+            <div class="hint">Auto-tallied from your build. Adjust the awarded total as your Hero advances.</div>
+            <div class="f" style="flex-direction:row;gap:6px;align-items:center;margin-top:6px;"><label style="color:var(--muted)">PAX awarded (Tier + earned)</label><input class="mini" id="f-paxtotal" type="number" oninput="onBuild()"></div>
+          </div>
+        </div>
+      </div>
+      <!-- POWERS -->
+      <div id="pane-powers" class="tabpane">
+        <div class="card">
+          <h3>Powers &amp; Techniques</h3>
+          <div class="addrow">
+            <select id="pw-pick"></select>
+            <button class="addbtn" onclick="addPower()">+ Add Power</button>
+            <span id="pw-kit" class="hint" style="margin:0;align-self:center;"></span>
+          </div>
+          <div id="powers"></div>
+        </div>
+      </div>
+      <!-- SKILLS -->
+      <div id="pane-skills" class="tabpane">
+        <div class="grid3">
+          <div class="card"><h3>Knowledge <span style="font-size:9px;color:var(--muted)">4 PAX</span></h3>
+            <div class="addrow"><select id="kn-pick"></select><button class="addbtn" onclick="addKnowledge()">+</button></div>
+            <div id="knowledge"></div>
+          </div>
+          <div class="card"><h3>Traits <span style="font-size:9px;color:var(--muted)">4 PAX</span></h3>
+            <div class="addrow"><select id="tr-pick"></select><button class="addbtn" onclick="addTrait()">+</button></div>
+            <div id="traits"></div>
+          </div>
+          <div class="card"><h3>Limitations</h3>
+            <div class="addrow"><select id="lm-pick"></select><button class="addbtn" onclick="addLimitation()">+</button></div>
+            <div id="limitations"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;"><h3>Equipment <span style="font-size:9px;color:var(--muted)">weapons · gear · materials</span></h3>
+          <div class="addrow"><select id="eq-pick"></select><button class="addbtn" onclick="addEquip()">+ Add</button>
+            <input id="eq-free" placeholder="…or type a custom item" style="flex:1;min-width:120px;"><button class="addbtn" onclick="addEquipFree()">+ Custom</button></div>
+          <div id="equipment"></div>
+        </div>
+      </div>
+      <!-- NOTES -->
+      <div id="pane-notes" class="tabpane">
+        <div class="grid2">
+          <div class="card"><h3>Weakness (Limitation hook)</h3><textarea id="f-weak" oninput="S.weakness=this.value;scheduleAutosave()"></textarea></div>
+          <div class="card"><h3>Soul (who your Hero is)</h3><textarea id="f-soul" oninput="S.soul=this.value;scheduleAutosave()"></textarea></div>
+        </div>
+        <div class="card" style="margin-top:14px;"><h3>Notes</h3><textarea id="f-notes" style="min-height:160px;" oninput="S.notes=this.value;scheduleAutosave()"></textarea></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ROLL LOG -->
+<div class="log">
+  <h2>Roll Log <button class="row-x" style="color:#8794b8" onclick="clearLog()">clear</button></h2>
+  <div class="tension-row">
+    <span>Tension</span><input id="tension" type="number" placeholder="TN" oninput="renderTension()">
+    <span class="advbtns" style="margin-left:auto;display:flex;gap:4px;">
+      <button id="adv-a" onclick="setAdv('adv')">Adv</button>
+      <button id="adv-n" class="on" onclick="setAdv('none')">Flat</button>
+      <button id="adv-d" onclick="setAdv('dis')">Dis</button>
+    </span>
+  </div>
+  <div class="entries" id="entries"></div>
+  <div class="toolbar">
+    <button onclick="rollD20Test('','',0)">d20</button>
+    <button onclick="quickRoll(6)">d6</button>
+    <button onclick="quickRoll(8)">d8</button>
+    <button onclick="quickRoll(12)">d12</button>
+    <button id="campaign-btn" onclick="openCampaign()">Campaign</button>
+    <button onclick="setDarkMode(!document.body.classList.contains('dark'))" id="dm-toggle">Dark</button>
+    <button onclick="exportSheet()">Export</button>
+    <label>Import<input type="file" accept="application/json" style="display:none" onchange="importSheet(this)"></label>
+  </div>
+</div>
+</div>
+<script>
+/* ═══ helpers ═══ */
+function $(id){return document.getElementById(id);}
+function num(v){v=parseInt(v,10);return isNaN(v)?0:v;}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function G(x){return Array.isArray(x)?x:[];}
+var TIERS=G(window.JLU_TIERS), ATTRS=G(window.JLU_ATTRIBUTES), ORIGINS=G(window.JLU_ORIGINS),
+    ARCHES=G(window.JLU_ARCHETYPES), POWERS=G(window.JLU_POWERS), KNOW=G(window.JLU_KNOWLEDGE),
+    TRAITS=G(window.JLU_TRAITS), EQUIP=G(window.JLU_EQUIPMENT), CONDS=G(window.JLU_CONDITIONS),
+    LIMS=G(window.JLU_LIMITATIONS);
+var ATTR_KEYS=['potency','accuracy','agility','resistance','mind','spirit'];
+function tierObj(k){for(var i=0;i<TIERS.length;i++)if(TIERS[i].key===k)return TIERS[i];return TIERS.find(function(t){return t.playable;})||TIERS[0];}
+function powerObj(n){return POWERS.find(function(p){return p.name===n;});}
+function originObj(n){return ORIGINS.find(function(o){return o.name===n;});}
+
+/* ═══ state ═══ */
+function blankState(){
+  var s={name:'',secret:'',tier:'D',origin:'',arch:'',
+    attrs:{potency:0,accuracy:0,agility:0,resistance:0,mind:0,spirit:0},
+    resBuy:0, resCur:12, condLevel:0,
+    ddie:'1d6', datt:'Potency', dmod:0,
+    defBase:null, blkBase:10, dodBase:10, atkMod:0, defMod:0, blkMod:0, dodMod:0,
+    paxTotal:null,
+    powers:[], knowledge:[], traits:[], limitations:[], equipment:[],
+    weakness:'', soul:'', notes:''};
+  return s;
+}
+var S=blankState(), _adv='none', _ready=false, _saveTimer=null;
+
+/* ═══ derived ═══ */
+function attrVal(k){return num(S.attrs[k]);}
+function condPenalty(){ // Scratched -2, Injured -4
+  if(S.condLevel===2)return -2; if(S.condLevel===3)return -4; return 0;
+}
+function condDisadv(){return S.condLevel>=4;} // Wounded
+function resolveMax(){var t=tierObj(S.tier);return num(t.resolve)+attrVal('spirit')+num(S.resBuy);}
+function defenseTotal(){var t=tierObj(S.tier);var base=(S.defBase==null?num(t.defense):num(S.defBase));return base+num(S.defMod);}
+function attackTotal(){var t=tierObj(S.tier);return num(t.attackBonus)+attrVal('accuracy')+num(S.atkMod);}
+function blockTotal(){return num(S.blkBase)+attrVal('resistance')+num(S.blkMod);}
+function dodgeTotal(){return num(S.dodBase)+attrVal('agility')+num(S.dodMod);}
+function inKit(power){var o=originObj(S.origin); if(!o)return true; var kit=o.powerKit||[];
+  if(kit.indexOf('Any Superpower')>=0 && power.category==='Superpower')return true;
+  return kit.indexOf(power.name)>=0 || kit.indexOf(power.category)>=0;}
+/* PAX tally */
+function paxSpent(){
+  var lines=[], total=0;
+  var ap=0; ATTR_KEYS.forEach(function(k){ ap+= (attrVal(k)/3)*5; });
+  if(ap){lines.push({l:'Attributes',v:ap});total+=ap;}
+  var rp=num(S.resBuy)*2; if(rp){lines.push({l:'Resolve bought',v:rp});total+=rp;}
+  var pp=0; S.powers.forEach(function(p){var po=powerObj(p.name);if(!po)return;var per=num(po.paxPerGrade);var mult=inKit(po)?1:2;pp+=per*num(p.grade)*mult;});
+  if(pp){lines.push({l:'Powers',v:pp});total+=pp;}
+  var kp=S.knowledge.length*4; if(kp){lines.push({l:'Knowledge',v:kp});total+=kp;}
+  var tp=S.traits.length*4; if(tp){lines.push({l:'Traits',v:tp});total+=tp;}
+  return {lines:lines,total:total};
+}
+function paxAvailable(){var t=tierObj(S.tier);var tot=(S.paxTotal==null?num(t.pax):num(S.paxTotal));return tot-paxSpent().total;}
+
+/* ═══ renders ═══ */
+function renderTierbar(){
+  var bar=$('tierbar');bar.innerHTML='';
+  TIERS.forEach(function(t){
+    var b=document.createElement('button');b.textContent=t.key;
+    if(!t.playable)b.disabled=true;
+    if(S.tier===t.key)b.className='on';
+    b.title=t.name+' — '+t.label;
+    b.onclick=function(){S.tier=t.key;if(S.paxTotal==null)0;onBuild();};
+    bar.appendChild(b);
+  });
+}
+function renderAttrs(){
+  var t=tierObj(S.tier); $('attr-lim').textContent='+'+(t.attrLimit||6);
+  var host=$('attrs');host.innerHTML='';
+  ATTRS.forEach(function(a){
+    var k=a.name.toLowerCase(); var v=attrVal(k);
+    var row=document.createElement('div');row.className='attr-row';
+    row.innerHTML='<span class="an" title="'+esc(a.summary)+'">'+a.name+'</span>'+
+      '<div class="stepper"><button onclick="stepAttr(\''+k+'\',-3)">−</button><span class="aval">'+(v>=0?'+':'')+v+'</span><button onclick="stepAttr(\''+k+'\',3)">+</button></div>'+
+      '<span></span>'+
+      '<button class="roll" onclick="rollD20Test(\''+a.name+'\',\''+k+'\',0)">Test</button>';
+    host.appendChild(row);
+  });
+}
+function renderResolve(){
+  var mx=resolveMax(); if(S.resCur>mx)S.resCur=mx;
+  $('resolve-max').textContent=mx; $('resolve-cur').textContent=S.resCur;
+  var t=tierObj(S.tier);
+  $('resolve-cap').textContent='('+num(t.resolve)+' base + '+attrVal('spirit')+' Spirit'+(num(S.resBuy)?' + '+num(S.resBuy)+' bought':'')+')';
+  $('f-resbuy').value=S.resBuy;
+}
+function renderConds(){
+  var host=$('conds');host.innerHTML='';
+  CONDS.forEach(function(c){
+    var el=document.createElement('div');el.className='cond'+(S.condLevel>=c.order&&c.order>0?' on':'')+(c.order>=4?' warn':'');
+    if(c.order===0&&S.condLevel===0)el.className='cond on';
+    el.title=c.effect;
+    el.innerHTML='<div class="cn">'+c.name+'</div><div class="cx">'+(c.order===2?'−2':c.order===3?'−4':c.order===4?'Disadv':c.order===5?'Out':'')+'</div>';
+    el.onclick=function(){S.condLevel=(S.condLevel===c.order)?c.order-1:c.order;if(S.condLevel<0)S.condLevel=0;renderConds();scheduleAutosave();};
+    host.appendChild(el);
+  });
+}
+function renderCombat(){
+  var host=$('combat');
+  var cells=[
+    {lbl:'Defense',val:defenseTotal(),sub:'vs attacks',roll:null},
+    {lbl:'Attack',val:(attackTotal()>=0?'+':'')+attackTotal(),sub:'d20 + Accuracy',roll:'atk'},
+    {lbl:'Block',val:blockTotal(),sub:'+ Resistance',roll:'blk'},
+    {lbl:'Dodge',val:dodgeTotal(),sub:'+ Agility',roll:'dod'}
+  ];
+  host.innerHTML='';
+  cells.forEach(function(c){
+    var d=document.createElement('div');d.className='stat';
+    d.innerHTML='<div class="lbl">'+c.lbl+'</div><div class="big">'+c.val+'</div><div class="sub">'+c.sub+'</div>';
+    if(c.roll){d.style.cursor='pointer';d.onclick=function(){
+      if(c.roll==='atk')rollD20Test('Attack','accuracy',num(tierObj(S.tier).attackBonus)+num(S.atkMod));
+      else if(c.roll==='blk')rollD20Test('Block','resistance',num(S.blkMod));
+      else if(c.roll==='dod')rollD20Test('Dodge','agility',num(S.dodMod));
+    };}
+    host.appendChild(d);
+  });
+  $('dmg-str').textContent=S.ddie+' + '+S.datt+(num(S.dmod)?' + '+num(S.dmod):'');
+  $('f-ddie').value=S.ddie;$('f-datt').value=S.datt;$('f-dmod').value=S.dmod;
+}
+function renderPax(){
+  var t=tierObj(S.tier); var sp=paxSpent(); var avail=paxAvailable();
+  $('f-paxtotal').value=(S.paxTotal==null?num(t.pax):S.paxTotal);
+  var host=$('paxlines');host.innerHTML='';
+  var tot=(S.paxTotal==null?num(t.pax):num(S.paxTotal));
+  host.innerHTML+='<div class="pax-line"><span>Awarded (Tier '+S.tier+')</span><span>'+tot+'</span></div>';
+  sp.lines.forEach(function(l){host.innerHTML+='<div class="pax-line"><span>'+l.l+'</span><span>−'+l.v+'</span></div>';});
+  host.innerHTML+='<div class="pax-line"><span class="pax-total">Available</span><span class="'+(avail<0?'pax-neg':'pax-total')+'">'+avail+'</span></div>';
+  $('pax-avail').textContent=avail;$('pax-avail').className=avail<0?'pax-neg':'pax-total';
+}
+function renderPowerPicker(){
+  var sel=$('pw-pick');sel.innerHTML='';
+  var groups={};
+  POWERS.forEach(function(p){(groups[p.category]=groups[p.category]||[]).push(p);});
+  Object.keys(groups).forEach(function(cat){
+    var og=document.createElement('optgroup');og.label=cat;
+    groups[cat].forEach(function(p){var o=document.createElement('option');o.value=p.name;o.textContent=p.name+(p.paxPerGrade?' ('+p.paxPerGrade+' PAX)':'');og.appendChild(o);});
+    sel.appendChild(og);
+  });
+  var o=originObj(S.origin);
+  $('pw-kit').textContent=o?('Kit: '+(o.powerKit||[]).join(', ')+(o.canBuyOutsideKit?' · others cost ×2':' · kit only')):'';
+}
+function renderPowers(){
+  var host=$('powers');host.innerHTML='';
+  if(!S.powers.length){host.innerHTML='<div class="hint">No powers yet. Add one above — its abilities appear by Grade.</div>';}
+  S.powers.forEach(function(p,i){
+    var po=powerObj(p.name);if(!po)return;
+    var out=inKit(po)?'':' <span class="dupwarn">(outside kit ×2)</span>';
+    var maxG=Math.max(1,(po.grades||[]).reduce(function(m,g){return Math.max(m,g.grade);},1));
+    var tierLim=tierObj(S.tier).powerLimit||2;
+    var gsel='';for(var g=1;g<=Math.max(maxG,tierLim);g++){gsel+='<option value="'+g+'"'+(num(p.grade)===g?' selected':'')+'>Grade '+g+'</option>';}
+    var el=document.createElement('div');el.className='pw';
+    var body='';
+    (po.grades||[]).forEach(function(gr){
+      if(gr.grade>num(p.grade))return;
+      body+='<div style="font-weight:800;color:var(--jlu-dk);font-size:11px;letter-spacing:.08em;margin:5px 0 2px;">GRADE '+gr.grade+(gr.activationCost?' · Activation '+gr.activationCost:'')+'</div>';
+      (gr.abilities||[]).forEach(function(a){
+        var meta=[a.passive?'Passive':'',a.activation||'',a.cost?('Cost '+a.cost):''].filter(Boolean).join(' · ');
+        body+='<div class="abil"><b>'+esc(a.name)+'</b>'+(meta?' <span class="meta">'+esc(meta)+'</span>':'')+'<br>'+esc(a.text)+'</div>';
+      });
+    });
+    if(po.note)body+='<div class="hint" style="margin-top:6px;">'+esc(po.note)+'</div>';
+    if(!(po.grades||[]).length)body+='<div class="hint">'+esc(po.summary)+(po.note?' — '+esc(po.note):'')+'</div>';
+    el.innerHTML='<div class="pw-head"><div><div class="pn">'+esc(po.name)+out+'</div><div class="cat">'+esc(po.category)+(po.chooseElement?' · choose element':'')+'</div></div>'+
+      '<div style="display:flex;gap:8px;align-items:center;"><select class="gradesel" onchange="setGrade('+i+',this.value)">'+gsel+'</select><button class="row-x" onclick="delPower('+i+')">✕</button></div></div>'+
+      '<div class="pw-body">'+body+'</div>';
+    host.appendChild(el);
+  });
+}
+function renderChips(host,arr,delFn,titleFn){
+  host.innerHTML='';
+  if(!arr.length){host.innerHTML='<div class="hint">None yet.</div>';return;}
+  arr.forEach(function(x,i){var c=document.createElement('span');c.className='chip';c.title=titleFn?titleFn(x):'';c.innerHTML=esc(typeof x==='string'?x:(x.name||''))+'<button onclick="'+delFn+'('+i+')">✕</button>';host.appendChild(c);});
+}
+function renderKnowledge(){renderChips($('knowledge'),S.knowledge,'delKnowledge',function(n){var k=KNOW.find(function(x){return x.name===n;});return k?k.summary:'';});}
+function renderTraits(){renderChips($('traits'),S.traits,'delTrait',function(n){var t=TRAITS.find(function(x){return x.name===n;});return t?t.text:'';});}
+function renderLimitations(){
+  var host=$('limitations');host.innerHTML='';
+  if(!S.limitations.length){host.innerHTML='<div class="hint">None yet.</div>';return;}
+  S.limitations.forEach(function(l,i){var el=document.createElement('div');el.style.cssText='border:1px solid var(--rule);border-radius:6px;padding:6px;margin-bottom:6px;';
+    el.innerHTML='<div style="display:flex;justify-content:space-between;"><b>'+esc(l.type)+'</b><button class="row-x" onclick="delLimitation('+i+')">✕</button></div><input placeholder="describe the trigger…" value="'+esc(l.note||'')+'" style="width:100%;border:1px solid var(--input-border);border-radius:4px;padding:3px;margin-top:3px;" oninput="S.limitations['+i+'].note=this.value;scheduleAutosave()">';
+    host.appendChild(el);});
+}
+function renderEquip(){
+  var host=$('equipment');host.innerHTML='';
+  if(!S.equipment.length){host.innerHTML='<div class="hint">None yet.</div>';return;}
+  S.equipment.forEach(function(e,i){var el=document.createElement('div');el.style.cssText='border:1px solid var(--rule);border-radius:6px;padding:6px;margin-bottom:6px;font-size:12.5px;';
+    el.innerHTML='<div style="display:flex;justify-content:space-between;"><b>'+esc(e.name)+'</b> <button class="row-x" onclick="delEquip('+i+')">✕</button></div>'+(e.note?'<div style="color:var(--muted)">'+esc(e.note)+'</div>':'');
+    host.appendChild(el);});
+}
+function fillPicker(sel,arr,fmt){sel.innerHTML='';arr.forEach(function(x){var o=document.createElement('option');o.value=x.name;o.textContent=fmt?fmt(x):x.name;sel.appendChild(o);});}
+
+function renderAll(){
+  renderTierbar();renderAttrs();renderResolve();renderConds();renderCombat();renderPax();
+  renderPowerPicker();renderPowers();renderKnowledge();renderTraits();renderLimitations();renderEquip();renderTension();
+  $('f-name').value=S.name||'';$('f-secret').value=S.secret||'';
+  $('f-origin').value=S.origin||'';$('f-arch').value=S.arch||'';
+  $('f-weak').value=S.weakness||'';$('f-soul').value=S.soul||'';$('f-notes').value=S.notes||'';
+}
+
+/* ═══ actions ═══ */
+function stepAttr(k,d){var t=tierObj(S.tier);var lim=(t.attrLimit||99);var v=attrVal(k)+d;if(v<-3)v=-3;if(v>lim&&d>0){addLog('Attribute','cap','Tier '+S.tier+' limit is +'+lim+' (powers can exceed it)','fail');}S.attrs[k]=v;onBuild();}
+function bumpResolve(d){S.resCur=clamp(S.resCur+d,0,resolveMax());renderResolve();scheduleAutosave();}
+function restResolve(){S.resCur=resolveMax();renderResolve();scheduleAutosave();addLog('Resolve','full','recovered to '+resolveMax(),'normal');}
+function addPower(){var n=$('pw-pick').value;if(!n)return;if(S.powers.some(function(p){return p.name===n;})){addLog('Power','dup',n+' already added','fail');return;}S.powers.push({name:n,grade:1});onBuild();setTab('powers');}
+function setGrade(i,g){S.powers[i].grade=num(g);onBuild();}
+function delPower(i){S.powers.splice(i,1);onBuild();}
+function addKnowledge(){var n=$('kn-pick').value;if(n&&S.knowledge.indexOf(n)<0){S.knowledge.push(n);onBuild();}}
+function delKnowledge(i){S.knowledge.splice(i,1);onBuild();}
+function addTrait(){var n=$('tr-pick').value;if(n&&S.traits.indexOf(n)<0){S.traits.push(n);onBuild();}}
+function delTrait(i){S.traits.splice(i,1);onBuild();}
+function addLimitation(){var n=$('lm-pick').value;if(n){S.limitations.push({type:n,note:''});renderLimitations();scheduleAutosave();}}
+function delLimitation(i){S.limitations.splice(i,1);renderLimitations();scheduleAutosave();}
+function addEquip(){var n=$('eq-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;});S.equipment.push({name:n,note:e?(e.cost+' · '+e.text):''});renderEquip();scheduleAutosave();}
+function addEquipFree(){var n=($('eq-free').value||'').trim();if(!n)return;S.equipment.push({name:n,note:''});$('eq-free').value='';renderEquip();scheduleAutosave();}
+function delEquip(i){S.equipment.splice(i,1);renderEquip();scheduleAutosave();}
+function onIdent(){S.name=$('f-name').value;S.secret=$('f-secret').value;syncDocTitle();scheduleAutosave();}
+function onBuild(){
+  S.origin=$('f-origin').value;S.arch=$('f-arch').value;
+  S.resBuy=num($('f-resbuy').value);S.ddie=$('f-ddie').value;S.datt=$('f-datt').value;S.dmod=num($('f-dmod').value);
+  var pt=$('f-paxtotal').value; S.paxTotal=(pt===''?null:num(pt));
+  renderAll();scheduleAutosave();
+}
+
+/* ═══ dice ═══ */
+function d(n){return Math.floor(Math.random()*n)+1;}
+function setAdv(a){_adv=a;['a','n','d'].forEach(function(x){$('adv-'+x).classList.remove('on');});$('adv-'+(a==='adv'?'a':a==='dis'?'d':'n')).classList.add('on');}
+function rollD20Test(label,attrKey,extra){
+  var mod=attrKey?attrVal(attrKey):0; mod+=num(extra); mod+=condPenalty();
+  var adv=_adv; if(condDisadv()){adv=(adv==='adv')?'none':'dis';}
+  var r1=d(20),r2=d(20),pick=r1,other=null;
+  if(adv==='adv'){pick=Math.max(r1,r2);other=Math.min(r1,r2);}
+  else if(adv==='dis'){pick=Math.min(r1,r2);other=Math.max(r1,r2);}
+  var total=pick+mod;
+  var tn=num($('tension').value);
+  var cls=(pick===20)?'crit':(pick===1)?'fail':'';
+  var outcome=tn?(total>=tn?' ✓ vs '+tn:' ✗ vs '+tn):'';
+  var detail='d20['+pick+(other!=null?'/'+other:'')+']'+(mod?(mod>0?' +'+mod:' '+mod):'')+(condPenalty()?' (cond)':'');
+  addLog((label||'Test')+(attrKey?' · '+attrKey:''), (total)+outcome, detail, cls);
+}
+function rollDamage(){
+  var faces=num(S.ddie.replace('1d',''))||6; var r=d(faces); var attr=attrVal(S.datt.toLowerCase()); var tot=r+attr+num(S.dmod);
+  addLog('Damage', tot, S.ddie+'['+r+'] + '+S.datt+'('+(attr>=0?'+':'')+attr+')'+(num(S.dmod)?' +'+num(S.dmod):''), r===faces?'crit':'');
+}
+function quickRoll(faces){var r=d(faces);addLog('d'+faces,r,'',r===faces?'crit':r===1?'fail':'');}
+function renderTension(){/* hook for future UI */}
+
+/* ═══ roll log + campaign (compatible with other sheets) ═══ */
+var _campaign=null,_campaignTimer=null,_campaignLastId=null,_campaignClientKey='jlu-'+Math.random().toString(36).slice(2);
+function addLog(label,result,detail,cls){
+  var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';
+  div.innerHTML='<div class="roll-label">'+esc(S.name||'Hero')+' · '+esc(label)+'</div><div class="roll-result '+(cls||'')+'">'+esc(result)+'</div>'+(detail?'<div class="roll-detail">'+esc(detail)+'</div>':'');
+  entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);entries.scrollTop=0;
+  if(_campaign)campaignPush(label,result,detail);
+}
+function clearLog(){$('entries').innerHTML='';}
+function campaignPush(label,result,detail){try{fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:S.name||'Hero',label:label,result:String(result),detail:detail||''})});}catch(e){}}
+function campaignAddRemote(roll){var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';div.innerHTML='<div class="roll-label"><span style="color:#c9a05a">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div><div class="roll-detail">'+esc(roll.detail||'')+'</div>';entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);}
+async function campaignPoll(){if(!_campaign)return;try{var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''),{credentials:'same-origin'});if(!r.ok)return;var data=await r.json();(data.rolls||[]).forEach(function(roll){if(roll.clientKey!==_campaignClientKey)campaignAddRemote(roll);});if(data.last)_campaignLastId=data.last;}catch(e){}}
+function campaignStartPolling(){if(_campaignTimer)clearInterval(_campaignTimer);campaignPoll();_campaignTimer=setInterval(campaignPoll,document.hidden?20000:4000);}
+function openCampaign(){var code=prompt('Enter campaign code to join (or leave blank to leave):');if(code===null)return;if(!code){_campaign=null;if(_campaignTimer)clearInterval(_campaignTimer);$('campaign-btn').textContent='Campaign';scheduleAutosave();return;}joinCampaign(code.trim());}
+async function joinCampaign(code){try{var r=await fetch('/api/campaigns/join',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})});if(!r.ok){addLog('Campaign','✗','Could not join','fail');return;}var d2=await r.json();_campaign={id:d2.id,code:code,name:d2.name||'Campaign'};$('campaign-btn').textContent='● '+(d2.name||code);campaignStartPolling();scheduleAutosave();}catch(e){addLog('Campaign','✗','Error joining','fail');}}
+function campaignRestore(saved){if(saved&&saved.id){_campaign=saved;$('campaign-btn').textContent='● '+(saved.name||'Campaign');campaignStartPolling();}}
+
+/* ═══ tabs / theme / persistence ═══ */
+function setTab(t){['hero','powers','skills','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('jlu_tab',t);}catch(e){}}
+function setDefaultTab(){var t='hero';try{t=localStorage.getItem('jlu_tab')||'hero';}catch(e){}if(!$('pane-'+t))t='hero';setTab(t);}
+function setDarkMode(on){document.body.classList.toggle('dark',on);$('dm-toggle').textContent=on?'Light':'Dark';try{localStorage.setItem('jlu_dark',on?'1':'0');}catch(e){}}
+function scheduleAutosave(){if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},400);}
+function collect(){S.campaign=_campaign;return S;}
+function saveSheet(quiet){var json;try{json=JSON.stringify(collect());}catch(e){return;}try{localStorage.setItem('jlu_sheet',json);}catch(e){}if(window.__ddState!==undefined)window.__ddState['jlu_sheet']=json;if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}}
+function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n);}
+function applySheet(o){S=Object.assign(blankState(),o||{});if(!S.attrs)S.attrs=blankState().attrs;renderAll();if(S.campaign)campaignRestore(S.campaign);}
+function exportSheet(){var blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(S.name||'jlu-hero').replace(/\s+/g,'_')+'.json';a.click();}
+function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑',f.name,'normal');}catch(e){addLog('Import failed','✗','Not a valid sheet','fail');}};r.readAsText(f);input.value='';}
+window.addEventListener('beforeunload',function(){if(_ready)try{saveSheet(true);}catch(e){}});
+
+/* ═══ init ═══ */
+function initPickers(){
+  fillPicker($('f-origin'),ORIGINS);
+  fillPicker($('f-arch'),ARCHES);
+  fillPicker($('kn-pick'),KNOW,function(k){return k.name+' (4 PAX)';});
+  fillPicker($('tr-pick'),TRAITS,function(t){return t.name+' ('+t.cost+' PAX)';});
+  fillPicker($('lm-pick'),LIMS);
+  fillPicker($('eq-pick'),EQUIP,function(e){return e.name+' — '+e.cost;});
+}
+function autoLoad(){
+  var saved=null;
+  if(window.__ddState!==undefined)saved=window.__ddState['jlu_sheet']||null;else{try{saved=localStorage.getItem('jlu_sheet');}catch(e){}}
+  try{if(localStorage.getItem('jlu_dark')==='1')setDarkMode(true);}catch(e){}
+  if(saved){try{applySheet(JSON.parse(saved));}catch(e){renderAll();}}else{renderAll();}
+  setDefaultTab();_ready=true;
+}
+initPickers();
+autoLoad();
+</script>
+</body>
+</html>

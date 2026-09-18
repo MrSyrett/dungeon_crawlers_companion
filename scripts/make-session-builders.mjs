@@ -83,6 +83,13 @@ const SYSTEMS = [
     chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Villains/NPCs", mobsHeading: "Villains &amp; NPCs",
     mob: "Villain", boss: "Threat", npc: "NPC", typePh: "THUG // Rank 1 · Melee +2", titlePh: "e.g. The Symbiote Outbreak", subtitlePh: "e.g. A Marvel Multiverse one-shot for Rank 3 heroes",
   },
+  {
+    file: "jlu_session_prep_builder.html", key: "jlu_session", ls: "jlu_builder_v1", cfg: "jlu", random: "Random Villain",
+    name: "Justice League Unlimited", title: "Session Prep Builder — Justice League Unlimited",
+    accent: "#2f6fed", accentDark: "#1c49a8", red: "#c23a2f", redDark: "#7a1510", highlight: "#e2b23a", boxBg: "#dbe6ff",
+    chapter: "Issue", chapterPh: "Issue #1", session: "Issue", mobs: "Villains/NPCs", mobsHeading: "Villains &amp; Threats",
+    mob: "Villain", boss: "Threat", npc: "NPC", typePh: "STREET THUG // Tier E · Minion", titlePh: "e.g. Lines of Defense", subtitlePh: "e.g. A JLU one-shot for Tier C heroes",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -246,6 +253,38 @@ const SB_CONFIG = {
     ].filter(Boolean).join('\\n'),
   }; }, sub: m => 'Rank ' + (m.rank ?? '') + (m.origin ? ' · ' + m.origin : '') + (m.source && m.source !== 'core' ? ' · ' + m.source : '') },
 };`,
+  jlu: `const _jlSgn = v => v == null ? '' : ((v >= 0 ? '+' : '') + v);
+const SB_CONFIG = {
+  typePlaceholder: 'STREET THUG // Tier E · Minion',
+  hp: null,
+  rows: [
+    [{ key:'pot', label:'POT' }, { key:'acc', label:'ACC' }, { key:'agi', label:'AGI' }, { key:'res', label:'RES' }, { key:'spi', label:'SPI' }, { key:'mnd', label:'MND' }],
+    [{ key:'resolve', label:'RESOLVE' }, { key:'defense', label:'DEFENSE' }, { key:'dr', label:'DR' }],
+    [{ key:'powers', label:'POWERS', ph:'Super Strength 1 · Flight 1' }],
+  ],
+  abilitiesLabel: 'Attacks & Abilities', abilitiesPlaceholder: 'One per line — Attack: name +bonus, XdY+Z (type) · Ability: …',
+  mobs: { placeholder: 'Search the JLU Bestiary (minions, threats & villains)…', pool: () => (typeof JLU_BESTIARY !== 'undefined' && Array.isArray(JLU_BESTIARY)) ? JLU_BESTIARY : [], toCard: m => {
+    const A = m.attributes || {};
+    const role = String(m.role || '');
+    const sbtype = /minion|brute|general/i.test(role) ? 'mob' : /villain/i.test(role) ? 'boss' : 'npc';
+    return {
+    sbtype: sbtype, name: m.name || '',
+    type: ['TIER ' + (m.tier || ''), role].filter(Boolean).join(' // '),
+    flavor: [m.realName && m.realName !== m.name ? m.realName : '', m.origin || ''].filter(Boolean).join(' · '),
+    pot: _jlSgn(A.potency), acc: _jlSgn(A.accuracy), agi: _jlSgn(A.agility), res: _jlSgn(A.resistance), spi: _jlSgn(A.spirit), mnd: _jlSgn(A.mind),
+    resolve: String(m.resolve ?? ''), defense: String(m.defense ?? ''), dr: String(m.damageReduction || ''),
+    powers: (m.powers || []).join(' · '),
+    abilities: [
+      ...((m.attacks || []).map(a => 'Attack: ' + a.name + ' ' + _jlSgn(a.bonus) + ', ' + a.damage + (a.type ? ' (' + a.type + ')' : ''))),
+      ...((m.abilities || []).map(a => a.name + ': ' + a.text)),
+      ...((m.archetypeSkills || []).map(a => a.name + ': ' + a.text)),
+      (m.knowledge && m.knowledge.length) ? 'Knowledge: ' + m.knowledge.join(', ') : '',
+      (m.traits && m.traits.length) ? 'Traits: ' + m.traits.join(', ') : '',
+      (m.equipment && m.equipment.length) ? 'Equipment: ' + m.equipment.join(', ') : '',
+      ...((m.limitations || []).map(a => 'Limitation — ' + a.name + ': ' + a.text)),
+    ].filter(Boolean).join('\\n'),
+  }; }, sub: m => 'Tier ' + (m.tier || '') + ' · ' + (m.role || '') },
+};`,
 };
 const MOB_DATA = {
   ace: '<script src="/tools-data/ace-extras.js"></script>',
@@ -258,6 +297,7 @@ const MOB_DATA = {
   co: '',
   yze: '',
   mmrpg: '<script src="/tools-data/mmrpg-characters.js"></script>',
+  jlu: '<script src="/tools-data/jlu-bestiary.js"></script>',
 };
 
 function rep(s, a, b, all = true) {

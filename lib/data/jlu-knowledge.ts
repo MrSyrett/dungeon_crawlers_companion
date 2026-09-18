@@ -1,0 +1,83 @@
+// GENERATED FILE - do not edit by hand.
+// Source: data/jlu/parts/*.json - regenerate with: node scripts/build-jlu-data.mjs
+
+import type { JluKnowledge } from "./jlu-types";
+
+export const JLU_KNOWLEDGE = [
+  {
+    "name": "Acrobatics",
+    "cost": 4,
+    "summary": "You practically fly through the city — leaping, climbing and tumbling.",
+    "abilities": [
+      {
+        "name": "Climbing",
+        "text": "When climbing any surface, leaping over buildings, or moving acrobatically, gain Advantage on your Test."
+      },
+      {
+        "name": "Acrobatic Jump",
+        "text": "Once per Issue, gain an automatic success on an unbelievable feat of jumping or aerial movement."
+      },
+      {
+        "name": "Free Running",
+        "text": "When crossing an area with obstacles (rooftops, walls, gaps), reduce the Tension by 5 to reach your destination quickly."
+      }
+    ]
+  },
+  {
+    "name": "Strategy",
+    "cost": 4,
+    "summary": "A master of tactics and planning who foresees movements and elaborate maneuvers.",
+    "abilities": [
+      {
+        "name": "Plan B",
+        "text": "Once per Issue, when you fail a Test, describe your backup plan and reroll, keeping the second result."
+      },
+      {
+        "name": "Maneuver Number 7!",
+        "text": "At the start of a Scene, choose one Attribute on a target character; they gain a bonus equal to your Tier on their next roll with it."
+      },
+      {
+        "name": "Tactical Analysis",
+        "text": "Once per Issue, quickly analyze a target to discover one of: a Weakness, their Resolve, one Attribute, or the first action they'll take."
+      }
+    ]
+  },
+  {
+    "name": "Subterfuge",
+    "cost": 4,
+    "summary": "The art of not being seen and always having an ace up your sleeve.",
+    "abilities": [
+      {
+        "name": "Slip By",
+        "text": "On Agility Tests to sneak around, gain Advantage."
+      },
+      {
+        "name": "Escapist",
+        "text": "Once per Issue, if imprisoned or handcuffed, you may escape automatically."
+      },
+      {
+        "name": "Unaware Strike",
+        "text": "Once per Scene, when damaging a target unaware of you, roll 1 additional Tier Damage Die."
+      }
+    ]
+  },
+  {
+    "name": "Tech",
+    "cost": 4,
+    "summary": "Expert in electronics, programming and advanced devices.",
+    "abilities": [
+      {
+        "name": "Hacker",
+        "text": "With the right tools, break into sophisticated systems: Advantage on hacking and code-breaking Tests."
+      },
+      {
+        "name": "Tech Rat",
+        "text": "Spend a Scene studying a technological item to completely understand how it works."
+      },
+      {
+        "name": "Technological Gadget",
+        "text": "At the start of the Issue, choose one Gear item to receive; use it by the end of the Issue."
+      }
+    ]
+  }
+] as unknown as JluKnowledge[];

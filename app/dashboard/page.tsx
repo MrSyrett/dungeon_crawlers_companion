@@ -156,6 +156,14 @@ const MMRPG_REFERENCE: { href: string; label: string }[] = [
   { href: "/mmrpg/characters", label: "Characters" },
 ];
 
+const JLU_REFERENCE: { href: string; label: string }[] = [
+  { href: "/jlu/powers", label: "Powers" },
+  { href: "/jlu/origins", label: "Origins & Archetypes" },
+  { href: "/jlu/gear", label: "Gear & Traits" },
+  { href: "/jlu/bestiary", label: "Bestiary" },
+  { href: "/jlu/rules", label: "Rules" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -170,6 +178,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   CO: CO_REFERENCE,
   YZE: YZE_REFERENCE,
   MMRPG: MMRPG_REFERENCE,
+  JLU: JLU_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

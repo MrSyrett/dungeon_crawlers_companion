@@ -29,6 +29,8 @@
   --yze: #16bdd6;
   /* Marvel Multiverse RPG accent — Marvel red. */
   --mmrpg: #EC1D24;
+  /* Justice League Unlimited accent — heroic DC blue. */
+  --jlu: #2f6fed;
 }
 
 @theme inline {
@@ -49,6 +51,7 @@
   --color-candela: var(--candela);
   --color-yze: var(--yze);
   --color-mmrpg: var(--mmrpg);
+  --color-jlu: var(--jlu);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

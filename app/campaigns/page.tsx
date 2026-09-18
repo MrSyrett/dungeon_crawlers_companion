@@ -99,6 +99,20 @@ function readCharMeta(
         level: Number.isFinite(rank) && rank > 0 ? rank : null,
       };
     }
+    const jlu = blob?.jlu_sheet;
+    if (typeof jlu === "string") {
+      const s = JSON.parse(jlu) as { name?: unknown; origin?: unknown; arch?: unknown; tier?: unknown };
+      const bits = [
+        typeof s.tier === "string" && s.tier ? `Tier ${s.tier}` : "",
+        typeof s.origin === "string" ? s.origin : "",
+        typeof s.arch === "string" ? s.arch : "",
+      ].filter(Boolean);
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls: bits.join(" · "),
+        level: null,
+      };
+    }
     const dcc = blob?.dcc_sheet;
     if (typeof dcc === "string") {
       const s = JSON.parse(dcc) as { header?: Record<string, unknown> };

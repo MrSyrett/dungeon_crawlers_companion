@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -37,6 +37,10 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // twelve skills, roll D6 pools where each 6 is a success, push at a cost.
   { key: "YZE", name: "Year Zero Engine", short: "YZE", accent: "var(--yze)" },
   { key: "MMRPG", name: "Marvel Multiverse RPG", short: "Marvel", accent: "var(--mmrpg)" },
+  // Justice League Unlimited RPG (Quickstart) — DC's d20 super-hero system:
+  // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
+  // narrative layer (Plot Points / Editorial Points / the Crisis Die).
+  { key: "JLU", name: "Justice League Unlimited", short: "JLU", accent: "var(--jlu)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";
