@@ -350,7 +350,7 @@ for (const S of SYSTEMS) {
   s = rep(s, "--section-hdr: #C0392B;", `--section-hdr: ${S.red};`);
   // page paper + preview-area background (per system; defaults match the DCC base)
   s = rep(s, "--paper: #ffffff;", `--paper: ${S.paper || "#ffffff"};`);
-  s = rep(s, "--preview-bg: #6b5030;", `--preview-bg: ${S.previewBg || "#6b5030"};`);
+  s = rep(s, "--preview-bg: #26262a;", `--preview-bg: ${S.previewBg || "#26262a"};`);
   // storage keys (server blob key + standalone localStorage key)
   s = rep(s, "'dcc_session'", `'${S.key}'`);
   s = rep(s, "'dcw_builder_v5'", `'${S.ls}'`);

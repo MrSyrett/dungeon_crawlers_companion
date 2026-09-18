@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Session Prep Builder — Year Zero Engine</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <!-- html2canvas + jsPDF (~550KB) load on demand in loadExportLibs() when an
      export button is first clicked, instead of blocking first paint here. -->
 <script>
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
     --accent-red: #b82018; --accent-red-dark: #7a1510;
     --muted: #555; --rule: #d8d0c0; --box-bg: #dbeff4; --read-bg: #2a1a08;
     --read-text: #ffffff; --highlight: #5fd6ea; --green: #2d6a2d; --blue-npc: #1a4a8a;
-    --section-hdr: #b82018; --table-hdr: #4a4a4a; --preview-bg: #6b5030;
+    --section-hdr: #b82018; --table-hdr: #4a4a4a; --preview-bg: #26262a;
     /* UI (sidebar) stays dark */
     --ui-bg: #1c1c1e; --ui-panel: #2a2a2d; --ui-border: #3a3a3e;
     --ui-text: #e8e4dc; --ui-muted: #888; --ui-accent: #16bdd6; --ui-highlight: #5fd6ea;
@@ -149,11 +149,17 @@ document.addEventListener("DOMContentLoaded", function() {
   .page.dark-mode .p2-footer p { color: #888; }
   .page.dark-mode .map-placeholder { background: #2a2a2e; color: var(--accent); border-color: var(--accent); }
   .page.dark-mode .columns { color: #d0ccc4; }
+  .page.dark-mode .sl.gold { color: #d4a836; border-bottom-color: #d4a836; }
+  .page.dark-mode .sl.sl-green { color: #6fce7a; border-bottom-color: #6fce7a; }
+  .page.dark-mode .rt-block .sl .rt-die { color: #9a968e; }
+  .page.dark-mode .loc-tag { color: #9a968e; }
+  .page.dark-mode .entry-meta { color: var(--accent); }
+  .page.dark-mode .p2-footer p { color: #9a968e; }
 
   /* PREVIEW */
   .preview-area { flex: 1; overflow: auto; background: var(--preview-bg); padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
   .preview-area::-webkit-scrollbar { width: 6px; height: 6px; }
-  .preview-area::-webkit-scrollbar-thumb { background: #4a3520; border-radius: 3px; }
+  .preview-area::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 3px; }
 
   /* PAGES */
   .page { background: var(--paper); width: 816px; min-width: 816px; min-height: 1056px; padding: 0; border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,0.42); flex-shrink: 0; display: flex; flex-direction: column; }
@@ -547,7 +553,7 @@ body.flow-mode .page + .page {
     <div class="tab-panel" id="tab-maps">
       <div class="section-divider">Maps</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
-        <select id="mapgen-rooms" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+        <select id="mapgen-rooms" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Barlow',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="5" selected>5 Rooms</option>
           <option value="8">8 Rooms</option>
           <option value="10">10 Rooms</option>
@@ -555,19 +561,19 @@ body.flow-mode .page + .page {
           <option value="15">15 Rooms</option>
           <option value="20">20 Rooms</option>
         </select>
-        <select id="mapgen-size" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+        <select id="mapgen-size" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Barlow',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="1">Tiny rooms</option><option value="2">Small rooms</option>
           <option value="3" selected>Medium rooms</option><option value="4">Large rooms</option><option value="5">Huge rooms</option>
         </select>
-        <select id="mapgen-layout" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+        <select id="mapgen-layout" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Barlow',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="1">Tight layout</option><option value="2">Cozy layout</option>
           <option value="3" selected>Balanced layout</option><option value="4">Sprawling layout</option><option value="5">Vast layout</option>
         </select>
-        <select id="mapgen-entrances" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+        <select id="mapgen-entrances" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Barlow',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="0">0 entrances</option><option value="1">1 entrance</option><option value="2" selected>2 entrances</option>
           <option value="3">3 entrances</option><option value="4">4 entrances</option><option value="5">5 entrances</option><option value="6">6 entrances</option>
         </select>
-        <select id="mapgen-type" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;" title="Dungeon: rooms + corridors + doors. Castle: dungeon with round towers. Cave: organic caverns, no doors. Islands: separate land masses. Building: rooms joined by shared walls. Dwelling: one structure, rooms nested inside.">
+        <select id="mapgen-type" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Barlow',sans-serif;font-size:10px;padding:4px 6px;outline:none;" title="Dungeon: rooms + corridors + doors. Castle: dungeon with round towers. Cave: organic caverns, no doors. Islands: separate land masses. Building: rooms joined by shared walls. Dwelling: one structure, rooms nested inside.">
           <option value="dungeon" selected>Dungeon</option><option value="castle">Castle</option>
           <option value="crypt">Crypt</option><option value="mine">Mine</option>
           <option value="cave">Cave</option><option value="nest">Nest</option>
@@ -577,10 +583,10 @@ body.flow-mode .page + .page {
           <option value="islands">Islands</option>
           <option value="ship">Ship</option>
         </select>
-        <select id="mapgen-gridint" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+        <select id="mapgen-gridint" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Barlow',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="0" selected>Grid: everywhere</option><option value="1">Grid: interior only</option>
         </select>
-        <select id="mapgen-look" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+        <select id="mapgen-look" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Barlow',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="light" selected>Light</option><option value="dark">Dark</option>
         </select>
       </div>
@@ -2015,7 +2021,7 @@ function exportHTML() {
 body{background:#3a2a1a !important;}
 `:'';
   const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${escH(state.title||'Adventure')}</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>${css}
 body{font-family:'Barlow',sans-serif;background:#888 !important;display:flex !important;flex-direction:row !important;align-items:flex-start !important;padding:20px !important;gap:20px !important;min-height:100vh !important;height:auto !important;overflow:auto !important;color:inherit !important;}
 .page{width:816px;min-width:816px;height:1056px;max-height:1056px;overflow:hidden !important;padding:0 !important;box-shadow:0 4px 24px rgba(0,0,0,0.4);flex-shrink:0;display:flex;flex-direction:column;}

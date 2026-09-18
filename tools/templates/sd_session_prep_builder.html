@@ -32,7 +32,7 @@
   /* SIDEBAR */
   .sidebar { width: 320px; min-width: 320px; background: var(--ui-panel); border-right: 1px solid var(--ui-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.25s, min-width 0.25s; }
   .sidebar { width: 320px; min-width: 320px; background: var(--ui-panel); border-right: 1px solid var(--ui-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.25s, min-width 0.25s; }
-  .sidebar.collapsed { width: 0px; min-width: 0; overflow: hidden; }
+  .sidebar.collapsed { width: 42px; min-width: 42px; overflow: hidden; }
   .sidebar-pull-tab {
     position: fixed; top: 50%; left: 320px; transform: translateY(-50%);
     width: 28px; height: 72px; background: var(--ui-accent); border: none;
@@ -161,6 +161,8 @@
   .page.dark-mode .p2-footer p { color: #888; }
   .page.dark-mode .map-placeholder { background: #2a2a2e; color: #F7941D; border-color: #F7941D; }
   .page.dark-mode .columns { color: #d0ccc4; }
+  .page.dark-mode .sl.gold { color: #d4a836; border-bottom-color: #d4a836; }
+  .page.dark-mode .rt-block .sl .rt-die { color: #9a968e; }
   /* Random encounter roll table + flowchart arrows were staying black on the
      dark page. These beat the inline colors set when the table is rendered. */
   .page.dark-mode .randenc-table td { color: #d0ccc4 !important; }
@@ -2626,7 +2628,7 @@ function toggleSidebar() {
       setPullTabMobile(pullTab, collapsed);
       pullTab.textContent = collapsed ? '▼' : '▲';
     } else {
-      pullTab.style.left = collapsed ? '0px' : '320px';
+      pullTab.style.left = collapsed ? '42px' : '320px';
       pullTab.textContent = collapsed ? '▶' : '◀';
     }
   }
@@ -2655,7 +2657,7 @@ window.addEventListener('resize', function() {
   } else {
     pullTab.style.top    = '';
     pullTab.style.bottom = '';
-    pullTab.style.left   = collapsed ? '0px' : '320px';
+    pullTab.style.left   = collapsed ? '42px' : '320px';
     pullTab.textContent  = collapsed ? '▶' : '◀';
   }
 });
