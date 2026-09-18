@@ -296,30 +296,29 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
             <div id="attrs"></div>
           </div>
           <div class="card">
-            <h3>Resolve <span id="resolve-cap" style="font-size:10px;color:var(--muted);font-weight:600;"></span></h3>
-            <div class="resolve-wrap">
-              <div class="pill"><button onclick="bumpResolve(-1)">−</button><span class="resolve-num" id="resolve-cur">—</span><button onclick="bumpResolve(1)">+</button></div>
-              <div class="res-of">of <b id="resolve-max">—</b> max</div>
-              <button class="rollbtn g" onclick="restResolve()">Full</button>
-            </div>
-          </div>
-          <div class="card">
             <h3>Plot Points</h3>
             <div class="resolve-wrap">
               <div class="pill"><button onclick="bumpPlot(-1)">−</button><span class="resolve-num" id="plot-cur">0</span><button onclick="bumpPlot(1)">+</button></div>
-              <div class="res-of">spend to twist fate</div>
             </div>
           </div>
+          <div class="card">
+            <h3>Statuses</h3>
+            <div class="status-track" id="statuses"></div>
+          </div>
         </div>
-        <!-- RIGHT: Conditions → Combat → tabs -->
+        <!-- RIGHT: Conditions → Resolve → Combat → tabs -->
         <div class="col">
           <div class="card">
             <h3>Conditions</h3>
             <div class="cond-track" id="conds"></div>
           </div>
           <div class="card">
-            <h3>Statuses <span style="font-size:10px;color:var(--muted);font-weight:600;">tap to toggle</span></h3>
-            <div class="status-track" id="statuses"></div>
+            <h3>Resolve <span id="resolve-cap" style="font-size:10px;color:var(--muted);font-weight:600;"></span></h3>
+            <div class="resolve-wrap">
+              <div class="pill"><button onclick="bumpResolve(-1)">−</button><span class="resolve-num" id="resolve-cur">—</span><button onclick="bumpResolve(1)">+</button></div>
+              <div class="res-of">of <b id="resolve-max">—</b> max</div>
+              <button class="rollbtn g" onclick="restResolve()">Full</button>
+            </div>
           </div>
           <div class="card">
             <h3>Combat</h3>
@@ -498,15 +497,15 @@ function renderConds(){
 function renderCombat(){
   var host=$('combat');
   var cells=[
-    {lbl:'Defense',val:defenseTotal(),sub:'vs attacks',roll:null},
-    {lbl:'Attack',val:(attackTotal()>=0?'+':'')+attackTotal(),sub:'d20 + Accuracy',roll:'atk'},
-    {lbl:'Block',val:blockTotal(),sub:'+ Resistance',roll:'blk'},
-    {lbl:'Dodge',val:dodgeTotal(),sub:'+ Agility',roll:'dod'}
+    {lbl:'Defense',val:defenseTotal(),roll:null},
+    {lbl:'Attack',val:(attackTotal()>=0?'+':'')+attackTotal(),roll:'atk'},
+    {lbl:'Block',val:blockTotal(),roll:'blk'},
+    {lbl:'Dodge',val:dodgeTotal(),roll:'dod'}
   ];
   host.innerHTML='';
   cells.forEach(function(c){
     var d=document.createElement('div');d.className='stat'+(c.roll?' click':'');
-    d.innerHTML='<div class="lbl">'+c.lbl+'</div><div class="big">'+(S.tier?c.val:'—')+'</div><div class="sub">'+c.sub+'</div>';
+    d.innerHTML='<div class="lbl">'+c.lbl+'</div><div class="big">'+(S.tier?c.val:'—')+'</div>';
     if(c.roll){d.onclick=function(){
       if(c.roll==='atk')rollD20Test('Attack','accuracy',num(tierObj(S.tier).attackBonus)+num(S.atkMod));
       else if(c.roll==='blk')rollD20Test('Block','resistance',num(S.blkMod));
