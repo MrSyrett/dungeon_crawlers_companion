@@ -92,10 +92,6 @@ body.dark .tval.hurt{color:#f0b84a;}
 .spend-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
 .spend-row label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800;}
 .spend-row input{width:44px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:5px;padding:4px;background:var(--input-bg);}
-.hospital-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--gb-dk);}
-.hospital-unit{font-size:11px;color:var(--muted);}
-.status-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px;}
-.status-note b{color:var(--gb-dk);}
 .injury-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .injury-num{font-family:'Share Tech Mono';font-weight:700;font-size:32px;color:var(--gb-dk);line-height:1;}
 .injury-of{font-size:11px;color:var(--muted);}
@@ -301,12 +297,15 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
     </div>
     <div class="body">
       <div class="grid2">
-        <!-- LEFT: Traits/Talents → Brownie Points -->
+        <!-- LEFT: Traits & Talents -->
         <div class="col">
           <div class="card">
             <h3>Traits &amp; Talents</h3>
             <div id="traits"></div>
           </div>
+        </div>
+        <!-- RIGHT: Brownie Points → Gear | Tags | Notes tabs -->
+        <div class="col">
           <div class="card">
             <h3>Brownie Points</h3>
             <div class="bp-wrap">
@@ -314,18 +313,6 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
               <button class="rollbtn small" onclick="setBP(20)">Reset 20</button>
             </div>
             <div class="spend-row"><label>Extra dice this roll</label><input id="f-spend" type="number" value="0" min="0" oninput="clampSpend()"></div>
-          </div>
-        </div>
-        <!-- RIGHT: Status → Gear | Tags | Notes tabs -->
-        <div class="col">
-          <div class="card">
-            <h3>Status</h3>
-            <div class="bp-wrap">
-              <span class="hospital-lbl">Hospital</span>
-              <div class="pill"><button onclick="bumpHospital(-1)">−</button><span class="bp-num" id="hospital">0</span><button onclick="bumpHospital(1)">+</button></div>
-              <span class="hospital-unit">weeks</span>
-            </div>
-            <div class="status-note">No health track — getting hurt costs <b>Brownie Points</b> and hospital time. Spend 1 Brownie Point at the time of the accident to cut recovery by a week.</div>
           </div>
           <div>
             <div class="subtabs">
@@ -415,7 +402,7 @@ var TKEYS=['Brains','Muscles','Moves','Cool'];
 
 function blankState(){
   return { name:'', alias:'', goal:'', notes:'', tagPhysical:'', tagPersonality:'',
-    residence:'', phone:'', telex:'', hospital:0,
+    residence:'', phone:'', telex:'',
     traits:{Brains:3,Muscles:3,Moves:3,Cool:3},
     talents:{Brains:{name:''},Muscles:{name:''},Moves:{name:''},Cool:{name:''}},
     bp:20, gear:[], _built:false };
@@ -464,10 +451,8 @@ function renderGear(){
   renderCarry();
 }
 function renderBP(){$('bp').textContent=S.bp;}
-function renderStatus(){ var el=$('hospital'); if(el)el.textContent=num(S.hospital); }
-function bumpHospital(d){ S.hospital=Math.max(0,num(S.hospital)+d); renderStatus(); scheduleAutosave(); }
 function renderAll(){
-  renderTraits();renderGear();renderBP();renderStatus();
+  renderTraits();renderGear();renderBP();
   $('f-name').value=S.name||'';$('d-goal').textContent=S.goal||'—';
   var r=$('f-res');if(r)r.value=S.residence||'';var p=$('f-phone');if(p)p.value=S.phone||'';var t=$('f-telex');if(t)t.value=S.telex||'';
   $('f-tagp').value=S.tagPhysical||'';$('f-tagper').value=S.tagPersonality||'';$('f-notes').value=S.notes||'';
