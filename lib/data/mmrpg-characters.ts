@@ -392,6 +392,102 @@ export const MMRPG_CHARACTERS = [
     "id": "abyss-secret-wars"
   },
   {
+    "name": "ADAM WARLOCK",
+    "realName": "Adam Warlock",
+    "rank": 6,
+    "health": 150,
+    "focus": 150,
+    "karma": 6,
+    "abilities": {
+      "melee": 5,
+      "agility": 5,
+      "resilience": 5,
+      "vigilance": 4,
+      "ego": 9,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 36
+    },
+    "occupation": "Adventurer, Outsider",
+    "origin": "Weird Science",
+    "teams": "Guardians of the Galaxy, Infinity Watch",
+    "base": "Mobile",
+    "features": "White eyes and bright",
+    "history": "Adam Warlock was created by a group of evil geneticists known only as the Enclave. This shadowy organization sought to create the perfect human being—an all-powerful creature they could use to control the world. They succeeded in creating a very powerful creature, just not one that they could control. Adam Warlock emerged from his biomechanical cocoon a fully grown adult. He instantly sensed the evil in the hearts of his creators and destroyed them. Then he set offacross the cosmos to find his purpose. In the years since his birth, Warlock has been at the center of several galaxy-spanning conflicts. He has contended with forces that threatened to consume all of existence, including the mad titan Thanos and the insatiable Hunger. Warlock has, on several occasions, died fighting for justice only to rise again, stronger than before. Warlock’s already considerable powers are frequently augmented by the Soul Stone, one of the six Infinity Gems. Although Warlock currently lacks a fully powered Soul Stone, he is still regarded as one of the toughest beings in the known universe.",
+    "personality": "Warlock’s early days were filled with anger and confusion. He had incredible power but only the most basic grasp of right and wrong. Years passed before he could form a coherent identity for himself. Only then was he ready to become the hero the world knows today. The modern Warlock is a humble and determined warrior. He seeks to preserve life across the universe and to defeat evil wherever it may be.",
+    "traits": [
+      "Battle Ready",
+      "Connections: Outsiders",
+      "Connections: Super Heroes",
+      "Determination",
+      "Enduring Constitution",
+      "Extra Occupation",
+      "Fearless",
+      "Fresh Eyes",
+      "Iron Will",
+      "Situational Awareness",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Heroic",
+      "Public Identity",
+      "Sorcerous"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Grab",
+          "Supernova"
+        ]
+      },
+      {
+        "set": "Magic",
+        "names": [
+          "Astral Form",
+          "Sense Supernatural"
+        ]
+      },
+      {
+        "set": "Magic (Sorcery)",
+        "names": [
+          "Bolts of Balthakk",
+          "Images of Ikonn",
+          "Shield of the Seraphim (20 points to shatter)",
+          "Summon Portal"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Brilliance 1",
+          "Discipline 3",
+          "Environmental Protection",
+          "Flight 2",
+          "Mighty 1",
+          "Sturdy 3",
+          "Uncanny 1",
+          "Wisdom"
+        ]
+      }
+    ],
+    "id": "adam-warlock",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "AGATHA HARKNESS",
     "realName": "Agatha Harkness",
     "rank": 5,
@@ -610,6 +706,71 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "AGENT SUM",
+    "realName": "Hui Lin",
+    "rank": 1,
+    "health": 30,
+    "focus": 10,
+    "karma": 1,
+    "abilities": {
+      "melee": 1,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 0,
+      "ego": 0,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Spy",
+    "origin": "Unknown",
+    "teams": "S.H.I.E.L.D.",
+    "base": "Mobile",
+    "features": "Facial scar",
+    "history": "Born to a family of Chinese peasants in the mid-fourteenth century, Hui Lin grew up with no prospects in life. At the ripe age of forty, he took a fall offa horse and cracked his head wide open. The fall should have killed Hui, but within minutes, his head had fully healed, leaving nothing but a small scar behind. Horrified and confused, he fled his little village into the countryside. From that day forward, Hui stopped aging. He spent the next several centuries living the quiet life, only emerging into the world on the rare occasions that he found a cause worth fighting for. Going by the name of David Sum, Hui joined S.H.I.E.L.D. sometime in the late twentieth century. He’s been a top-ranking member of the organization ever since, maintaining ties with S.H.I.E.L.D. leadership even after its dissolution.",
+    "personality": "As a veteran of numerous wars, Agent Sum is a bit self-serious, if not outright world-weary. He has too often found himself as the lone survivor of a devastating attack.",
+    "traits": [
+      "Combat Expert",
+      "Connections: Espionage",
+      "Leverage"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Mysterious",
+      "Secret Identity",
+      "Signature Weapon: Pistol"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Healing Factor"
+        ]
+      }
+    ],
+    "id": "agent-sum",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "ALEPH",
     "realName": "Varies",
     "rank": 3,
@@ -787,6 +948,65 @@ export const MMRPG_CHARACTERS = [
       "Mjolnir"
     ],
     "id": "all-father-thor-avengers-expansion"
+  },
+  {
+    "name": "ALPHA PRIMITIVE",
+    "realName": "Varies",
+    "rank": 1,
+    "health": 60,
+    "focus": 40,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 0,
+      "ego": 0,
+      "logic": -2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "Weird Science",
+    "teams": "Servants and defenders of the Inhuman",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Thousands of years ago, a brilliant but cruel geneticist appeared before the ruling council of Inhuman society. This geneticist argued that to turn their society into a true paradise, the Inhumans of the future would need docile, unintelligent attendants who could take care of their every physical want. To that end, he claimed he could breed a genetically perfect servant. The ruling council approved the geneticist’s request. Within a few years, hundreds of his creations—which he dubbed Alpha Primitives—had joined Inhuman society. At first, the Alpha Primitives were everything the geneticist had promised: unintelligent, physically strong and largely obedient. Even after the fall of the old Inhuman society and the rise of the Royal Family, the Alpha Primitives continued to provide their labor freely and without complaint. However, deep down, beneath all their societal and genetic programming, some part of each Alpha Primitive yearns to be free. Across the last several decades, bloody Alpha Primitive rebellions have wracked the foundations of Inhuman society. With the recent collapse of New Attilan, most of the remaining Alpha Primitives have scattered to the winds.",
+    "personality": "Most Alpha Primitives are kind, but they have the vocabulary of a young child. They can speak in simple sentences and follow simple instructions, but they would be lost if asked to assemble anything more complex than a cardboard box. However, when pushed to the breaking point, Alpha Primitives have been known to exhibit sudden flashes of incredible intelligence. Their rebellions have been organized and swift .",
+    "traits": [
+      "Battle Ready",
+      "Connections: Military (Inhuman Royal Guard)",
+      "Enhanced Physique",
+      "Situational Awareness",
+      "Weird"
+    ],
+    "tags": [
+      "Backup",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 1",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "alpha-primitive",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "AMERICA CHAVEZ",
@@ -1025,6 +1245,75 @@ export const MMRPG_CHARACTERS = [
       "Techno-Organic Wings"
     ],
     "id": "angel-x-men-expansion"
+  },
+  {
+    "name": "ANNABELLE RIGGS",
+    "realName": "Annabelle Riggs",
+    "rank": 2,
+    "health": 30,
+    "focus": 60,
+    "karma": 2,
+    "abilities": {
+      "melee": 2,
+      "agility": 1,
+      "resilience": 1,
+      "vigilance": 2,
+      "ego": 0,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Special Training",
+    "teams": "Asgardians of the Galaxy,",
+    "base": "New York City",
+    "features": "None",
+    "history": "Archaeologist Annabelle Riggs asked her old friend and associate—the Hero for Hire Misty Knight—for her assistance in retrieving a handful of stolen artifacts. As part of this work, Knight recovered a powerful Asgardian totem capable of reviving the dead, and shortly thereafter, Viking zombies began attacking Riggs’ place of work. Soon enough, Riggs and Knight were caught up in an evil plot to revive some of Asgard’s fiercest foes. The two eventually managed to end those vile plans, but not before Riggs was fatally wounded. As a reward for Riggs’ heroic efforts, Valkyrie (Brunnhilde) merged her essence with that of the fallen archaeologist. Now Valkyrie could transform into Riggs at will—and vice versa—but the pair could never exist in the same space. While one of them adventured in the real world, the other was forced to reside in a pocket dimension. During the War of the Realms, Malekith slew Valkyrie, leaving Riggs barred from returning to reality. With the help of the Asgardians of the Galaxy, Riggs escaped Limbo and returned to rejoin the fight. Afterward, she retired as an adventurer and returned to her old archaeology position.",
+    "personality": "Although she fashions herself an intrepid explorer in the vein of Indiana Jones, Annabelle Riggs is actually something of a shy and awkward bookworm. When she’s not adventuring, she mostly keeps to herself and her studies. However, she still keeps an old Valkyrie weapon on hand, just in case. Her teammate and girlfriend, Ren Kimura, is more important to her than anyone else on the planet. ANNABELLE RIGGS",
+    "traits": [
+      "Connections: Super Heroes",
+      "Determination",
+      "Fearless",
+      "Font of Information",
+      "Quick Learner"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Iconic Weapon: Valkyrie spear [+1 Melee damage multiplier; range is reach +1]",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Fast Attacks",
+          "Hit & Run",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Keep Moving"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Deadpool Role-Plays the Marvel Universe",
+    "id": "annabelle-riggs"
   },
   {
     "name": "ANNIHILATION WAVE BUG",
@@ -1691,6 +1980,164 @@ export const MMRPG_CHARACTERS = [
     "id": "arkon-avengers-expansion"
   },
   {
+    "name": "ARMORED HYDRA AGENT",
+    "realName": "Varies",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 6,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 4
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 24
+    },
+    "occupation": "Military",
+    "origin": "High Tech: Battle Suit, Special Training",
+    "teams": "Hydra",
+    "base": "Secret",
+    "features": "None",
+    "history": "As a terrorist organization, Hydra uses most of its many recruits (Hydra Agents) as cannon fodder. But sometimes, Hydra will spend the resources upgrading an agent to be their tank on the battlefield. Hydra reverse-engineers the technology of heroes and villains, like Iron Man, War Machine, Iron Monger, Titanium Man and others, to create their own specialized armor. While this new armor may not be as dependable as those superbeings, it can still create a shock troop who can carry out the heaviest Hydra missions.",
+    "personality": "While Armored Hydra Agents remain anonymous members of the terrorist organization, they have an elevated status among their peers. Like all Hydra agents, they are fanatical, mean and merciless. ARMORED HYDRA AGENT",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Military (Hydra)",
+      "Determination",
+      "Extraordinary Origin",
+      "Piloting",
+      "Situational Awareness",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Extreme Appearance (in battle suit)",
+      "Secret Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Discipline 1",
+          "Flight 2",
+          "Mighty 1",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Blast",
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Covering Fire",
+          "Double Tap",
+          "Headshot",
+          "Kill Zone",
+          "Return Fire",
+          "Snap Shooting",
+          "Stopping Power",
+          "Suppressive Fire",
+          "Weapons Blazing"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Enter Hydra",
+    "id": "armored-hydra-agent"
+  },
+  {
+    "name": "ARNIM ZOLA",
+    "realName": "Arnim Zola",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 1,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 6
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal, Scientist",
+    "origin": "High Tech: Android",
+    "teams": "Hydra",
+    "base": "Mobile",
+    "features": "Humanoid robot with a",
+    "history": "Arnim Zola was once a brilliant Nazi scientist who, in order to protect himself from the dangers of his own creations, transferred his mind into a robotic body he made. Atop this body he mounted an experimental “ESP Box”—a device designed to amplify his own brain waves. The ESP Box worked better than Zola ever could have expected, granting him a slew of telepathic powers. His renown in fascist circles skyrocketed, and after the fall of the Third Reich, Zola joined with the Red Skull and several other fanatical fascists to form the latest incarnation of the terrorist group Hydra. In the years since, Zola has always been a top-ranking member of Hydra High Command. He forms the backbone of the evil organization’s scientific efforts, and has been personally responsible for the creation of many of their most powerful villains. Doughboy, Man-Fish, Primus and the Black Knights (A.K.A. the Fenris Twins) all owe their existence to the dastardly inventions of Zola. Zola is not a skilled fighter, but his ESP Box allows him to hold his own in battles against the likes of Captain America and the Falcon.",
+    "personality": "Like most of Hydra’s leaders, Arnim Zola is a committed fascist and megalomaniac. His complete disregard for the lives of others has been made apparent by his many horrific and torturous experiments. Zola is single-mindedly determined to continue his terrible research, and he will let no one stand in his way.",
+    "traits": [
+      "Abrasive",
+      "Connections: Criminal",
+      "Extra Occupation",
+      "Font of Information",
+      "Inventor",
+      "Scientific Expertise",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "A.I.",
+      "Black Market Access",
+      "Extreme Appearance",
+      "Lab Access",
+      "Public Identity",
+      "Streetwise",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Electricity)",
+        "names": [
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Command",
+          "ESP",
+          "Information Upload",
+          "Machine Telepathy",
+          "Telepathic Blast",
+          "Telepathic Link",
+          "Telepathic Network"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 3",
+          "Uncanny 2"
+        ]
+      }
+    ],
+    "id": "arnim-zola",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "ASKANI",
     "realName": "Rachel “Ray” Anne Summers",
     "rank": 5,
@@ -2091,6 +2538,61 @@ export const MMRPG_CHARACTERS = [
     "powers": [],
     "id": "average-civilian",
     "genre": "core"
+  },
+  {
+    "name": "BANK ROBBER",
+    "realName": "Varies",
+    "rank": 1,
+    "health": 30,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal",
+    "origin": "High-Tech",
+    "teams": "Bank robbery gang",
+    "base": "Varies",
+    "features": "Varies",
+    "history": "This group of criminals desperately needed cash, so they decided to rob a bank.",
+    "personality": "This group of bank robbers lucked into finding a cache of super-tech weapons that were intended for delivery to an A.I.M. base. They decided to use these new super guns to rob a bank. They’re ultimately cowards, looking for a quick buck. They would rather go to jail than face down superhumans for too long. That said, they are desperate, and they think their new guns will allow them to get away with just about anything.",
+    "traits": [
+      "Connections: Criminal",
+      "Fearless",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Streetwise"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Evasion"
+        ]
+      },
+      {
+        "set": "Elemental Control (Force)",
+        "names": [
+          "Elemental Burst"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Revenge of the Super-Skrull",
+    "id": "bank-robber"
   },
   {
     "name": "BANSHEE",
@@ -2735,6 +3237,97 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "beetle-spider-verse-expansion"
+  },
+  {
+    "name": "BETA RAY BILL",
+    "realName": "Beta Ray Bill",
+    "rank": 5,
+    "health": 240,
+    "focus": 90,
+    "karma": 5,
+    "abilities": {
+      "melee": 8,
+      "agility": 3,
+      "resilience": 8,
+      "vigilance": 2,
+      "ego": 4,
+      "logic": 0
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 6
+    },
+    "occupation": "Adventurer, Outsider",
+    "origin": "Alien, High Tech: Cybernetics, Mythic:",
+    "teams": "Annihilators, Guardians of the Galaxy",
+    "base": "Mobile",
+    "features": "Bright orange skin,",
+    "history": "Years ago, the demonic Surtur of Muspelheim unleashed his minions upon the planet of Korbin. Korbinite civilization was annihilated, and the few who survived fled across the cosmos. Korbinite scientists performed torturous experiments upon their own people, hoping to create a champion capable of fighting the demons. Only one subject named Bill survived the transformation, but even his newfound powers were not enough to hold back the demons. All hope was lost until a chance encounter with Thor Odinson led Bill into an alliance with Asgard. Impressed by Bill’s strength, Odin himself granted the Korbinite a hammer with a set of powers to match Thor’s own. Together, Bill and Thor pushed the demons back into Muspelheim. Much later, Bill invaded Muspelheim and defeated Surtur once and for all. He abandoned Odin’s gifts and claimed Surtur’s Twilight Sword as his own. Although he is still revered in Asgard, Bill now focuses most of his energies on caring for his people.",
+    "personality": "Beta Ray Bill’s noble and serious demeanor matches well with those of the gods of Asgard. The Asgardians accept him as one of their own—more so than his fellow Korbinites, who are largely frightened by his monstrous form. Bill can use his sword to disguise himself as a regular Korbinite, and he tends to stay in this disguise when among his own.",
+    "traits": [
+      "Battle Ready",
+      "Big (reach 2)",
+      "Connections: Super Heroes",
+      "Connections: Outsiders",
+      "Enhanced Physique",
+      "Extra Occupation",
+      "Extraordinary Origin (2)",
+      "Fearless",
+      "Fresh Eyes",
+      "God Heritage (via Twilight Sword)",
+      "Stranger",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Alternate Form (regular Korbinite form)",
+      "Black Market Access",
+      "Extreme Appearance",
+      "Heroic",
+      "Public Identity",
+      "Supernatural",
+      "Worshipped (as Thor)"
+    ],
+    "powers": [
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Focused Fury",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Crushing Grip",
+          "Jump 1",
+          "Ground Shaking Stomp",
+          "Immovable",
+          "Quick Toss",
+          "Smash"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Discipline 2",
+          "Iconic Weapon: Twilight Sword [Adds elemental fire effect to melee attacks.]",
+          "Inspiration",
+          "Mighty 4",
+          "Sturdy 2"
+        ]
+      }
+    ],
+    "id": "beta-ray-bill",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "BEYONDERS",
@@ -4305,6 +4898,80 @@ export const MMRPG_CHARACTERS = [
     "id": "blastaar-secret-wars"
   },
   {
+    "name": "BLINDSPOT",
+    "realName": "Samuel “Sam” Chung",
+    "rank": 2,
+    "health": 30,
+    "focus": 60,
+    "karma": 2,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 1,
+      "vigilance": 2,
+      "ego": 0,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "High-Tech, Special Training",
+    "teams": "The Hand",
+    "base": "NYC",
+    "features": "Black eyes with glow-",
+    "history": "When Sam Chung was just a boy, he and his family emigrated from China to the United States. With a prodigious mind and a strong admiration for the super heroes of New York City, Chung spent much of his childhood working on designs for an invisibility suit. As soon as he was able, Chung built his suit and began to fight crime on the streets of New York’s Chinatown under the codename Blindspot. Later, the super villain Muse tore out his eyes. They were eventually replaced with mystic counterparts, but his new glowing eyes have made maintaining his secret identity difficult.",
+    "personality": "Chung is a bit of a loner and a cynic. His mentor, Daredevil, is one of the few people on Earth he genuinely admires. As an undocumented immigrant, Chung displays trepidation around law-enforcement officers.",
+    "traits": [
+      "Connections: Super Heroes",
+      "Determination",
+      "Extraordinary Origin",
+      "Fearless",
+      "Inventor",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Heroic",
+      "Hunted",
+      "Mentor: Daredevil (Matt Murdock)",
+      "Secret Identity",
+      "Signature Weapon: Steel pole (club)"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Counterstrike Technique",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Illusion",
+        "names": [
+          "Invisibility"
+        ]
+      }
+    ],
+    "id": "blindspot",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "BLINK (Earth-295)",
     "realName": "Clarice Ferguson",
     "rank": 4,
@@ -4904,6 +5571,78 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Secret Wars",
     "id": "builder-secret-wars"
+  },
+  {
+    "name": "BULLDOZER",
+    "realName": "Henry Camp",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 4,
+      "agility": 4,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "Magic",
+    "teams": "Wrecking Crew",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Abandoned on a trash heap when he was just 2 days old, Henry Camp grew up in an orphanage. Following a dishonorable discharge from the U.S. Army, he turned to a life of crime. After being picked up on burglary charges multiple times, he was sentenced to an extended stay on Ryker’s Island. In prison, Camp met Dirk Garthwaite, A.K.A. the villainous Wrecker. Along with a couple of other inmates, Camp helped Garthwaite escape from Ryker’s. In exchange, Garthwaite granted Camp and his compatriots a portion of his own super-powers. Together, they formed the super-villain group known as the Wrecking Crew, and they’ve been in each other’s orbits ever since. At times when Henry Camp is not available, his daughter, Marci Camp, takes his place in the Wrecking Crew as the new Bulldozer.",
+    "personality": "Henry Camp’s outwardly cool and tough demeanor conceals an inner bitterness. He harbors a burning resentment toward the government, society and the world at large, stemming from how they all failed him his entire life. It is this resentment that drives him forward in his criminal activities.",
+    "traits": [
+      "Battle Ready",
+      "Berserker",
+      "Connections: Military",
+      "Determination",
+      "Signature Attack: Ram",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Public Identity",
+      "Supernatural",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Defense Stance"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Quick Toss",
+          "Smash"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 2",
+          "Sturdy 3"
+        ]
+      }
+    ],
+    "id": "bulldozer",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "BULLSEYE",
@@ -6528,6 +7267,67 @@ export const MMRPG_CHARACTERS = [
     "id": "chasm-spider-verse-expansion"
   },
   {
+    "name": "CLAIRE DIXON",
+    "realName": "Claire Dixon",
+    "rank": 1,
+    "health": 30,
+    "focus": 30,
+    "karma": 1,
+    "abilities": {
+      "melee": 3,
+      "agility": 0,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 0,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Law Enforcer",
+    "origin": "Weird Science",
+    "teams": "F.B.I.",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Claire Dixon was the head of the F.B.I.’s Anti-Symbiote Task Force, until the day she was forcibly bonded to a symbiote of her own. Under the influence of the dark creature, she wrought chaos against her former allies. As the super villain Raze, she slaughtered members of her own unit. Eventually, Venom himself intervened to separate her from the alien slime. Following the separation, Claire discovered that she had retained a portion of the symbiote’s power. Vowing to make up for the evils she committed as Raze, Claire took a leave of absence from the F.B.I. and set out to become a super hero.",
+    "personality": "Claire takes her job as a government agent very seriously, and she has a strong sense of justice. Although she used to harbor an almost fanatical hatred of all things alien, her interactions with Venom have led her to soften her stance on symbiotes.",
+    "traits": [
+      "Enduring Constitution",
+      "Interrogation",
+      "Investigation",
+      "Weird"
+    ],
+    "tags": [
+      "Authority",
+      "Backup",
+      "Heroic",
+      "Public Identity",
+      "Signature Weapon: Pistol"
+    ],
+    "powers": [
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 1",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "claire-dixon",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "CLEA",
     "realName": "Clea",
     "rank": 6,
@@ -6605,6 +7405,218 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "clea",
     "genre": "core"
+  },
+  {
+    "name": "CLOAK",
+    "realName": "Tyrone Johnson",
+    "rank": 3,
+    "health": 60,
+    "focus": 120,
+    "karma": 3,
+    "abilities": {
+      "melee": 5,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 4,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant, Weird Science",
+    "teams": "Savage Avengers, X-Men",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Tyrone Johnson grew up in a poor neighborhood in south Boston where, despite a significant stutter, he excelled in school. As a well-respected member of his community, he had no intention of leaving his hometown—until the day he watched his best friend get gunned down in the street by a trigger-happy cop. Terrified and racked with guilt over his inability to prevent his friend’s death, Johnson fled for New York. At a bus station in Manhattan, he and fellow runaway Tandy Bowen were kidnapped by Maggia goons. The Maggia injected Johnson, Bowen and a number of other teenagers with an experimental narcotic. While this drug killed most of the runaways, it reacted with something lying dormant in Johnson and Bowen. Johnson gained a metaphysical connection to a dimension of darkness, while Bowen tapped into the power of light. Under the codenames of Cloak and Dagger, Johnson and Bowen took their revenge on the Maggia. Since then, they have worked to protect young people across the world. They frequently fight with Mister Negative, a super villain created by the same narcotic that empowered them.",
+    "personality": "Years of adventuring have softened Cloak’s naturally anxious personality. He spends most of his time in the form of his heroic alter ego, scouring the world for people to protect. Serious and soft -spoken, Cloak no longer stutters—except on the few occasions he returns to his old identity and becomes fully tangible.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Extraordinary Origin",
+      "Fearless",
+      "Sneaky",
+      "Situational Awareness",
+      "Surprising Power: Teleport Other",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Secret Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Phasing",
+        "names": [
+          "Partial Phase",
+          "Phase Self",
+          "Quick Phase"
+        ]
+      },
+      {
+        "set": "Teleportation",
+        "names": [
+          "Blink",
+          "Teleport 2",
+          "Teleport Blind",
+          "Teleport Object",
+          "Teleport Other",
+          "Teleport Together"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Iconic Weapon: The Cloak (Can imprison grabbed opponents in the Darkforce dimension, during which time Cloak automatically makes a free Ego attack against them on his turn each round. To escape, imprisoned creatures must succeed on an Ego check against Cloak’s Ego defense.)"
+        ]
+      }
+    ],
+    "id": "cloak",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
+    "name": "COLE NORTH",
+    "realName": "Cole North",
+    "rank": 2,
+    "health": 30,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Law Enforcer",
+    "origin": "Special Training",
+    "teams": "Fist, NYPD",
+    "base": "NYC",
+    "features": "None",
+    "history": "Cole North was once a revered detective in the Chicago Police Department. Then, for reasons unknown, he took a transfer to the New York Police Department. His first task in New York was to investigate a murder supposedly committed by Daredevil (Matt Murdock). North took to that case the same way he does with all his cases: with dogged determination. In a matter of days, he tracked Daredevil down, beat him up and arrested him. Unfortunately, North’s incredible and public defeat of Daredevil only made the hero’s subsequent escape from custody all the more humiliating for the NYPD. For a while after that, North harbored a grudge against all costumed super heroes. However, recent events have begun to push him into closer cooperation with the hero he once called an enemy.",
+    "personality": "North is a serious, by-the-book cop. He has trouble understanding why his fellow officers would willingly allow costumed vigilantes to act freely within their city. Although he would typically prefer to avoid violence, North is more than capable of it. He is a highly trained boxer and a serious bodybuilder. North’s status as the most muscular cop in New York has granted him a level of respect within the NYPD typically reserved for much older officers.",
+    "traits": [
+      "Determination",
+      "Fearless",
+      "Interrogation",
+      "Investigation",
+      "Presence"
+    ],
+    "tags": [
+      "Authority",
+      "Backup",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Chain Strikes",
+          "Do This All Day",
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration",
+          "Mighty 1 COLE NORTH"
+        ]
+      }
+    ],
+    "id": "cole-north",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
+    "name": "COLLEEN WING",
+    "realName": "Colleen Wing",
+    "rank": 2,
+    "health": 30,
+    "focus": 60,
+    "karma": 2,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Investigator",
+    "origin": "Special Training",
+    "teams": "Heroes for Hire, Nightwing Restorations",
+    "base": "NYC",
+    "features": "None",
+    "history": "With her mother dead and her father busy, Colleen Wing grew up in the custody of her grandfather: Kenji Ozawa, the head of the Japanese Secret Service. As a combat veteran, Ozawa was eager to tutor Wing in the art of sword fighting, training her to be a world-class expert with the katana. As an adult, Wing moved to New York City, where she met Misty Knight, who soon became her best friend and her partner in their private investigation business, Nightwing Restorations Ltd. They often join Luke Cage and Iron Fist (Danny Rand) to round out their team, known as the Heroes for Hire. Wing later learned that her mother had been the leader of the Nail, a faction of the ninja clan called the Hand. For a short while, she led a new incarnation of the Nail, but later betrayed them when she couldn’t stomach their harsh methods.",
+    "personality": "Wing is a bit more socially reserved than Misty Knight, but the women have more in common than not. Both are thrill-seeking daredevils with a cool head for combat.",
+    "traits": [
+      "Beguiling",
+      "Connections: Police",
+      "Determination",
+      "Fearless",
+      "Interrogation",
+      "Investigation"
+    ],
+    "tags": [
+      "Headquarters: Nightwing Restorations Ltd.",
+      "Heroic",
+      "Public Identity",
+      "Signature Weapon: Sword"
+    ],
+    "powers": [
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      }
+    ],
+    "id": "colleen-wing",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "COLOSSUS",
@@ -7121,6 +8133,103 @@ export const MMRPG_CHARACTERS = [
     "id": "count-nefaria-avengers-expansion"
   },
   {
+    "name": "CRIMSON SURFER",
+    "realName": "Johann Shmidt",
+    "rank": 6,
+    "health": 150,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 5,
+      "agility": 6,
+      "resilience": 5,
+      "vigilance": 4,
+      "ego": 7,
+      "logic": 3
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 36
+    },
+    "occupation": "Leader",
+    "origin": "Special Training, Weird Science",
+    "teams": "Hydra",
+    "base": "Mobile",
+    "features": "Body covered in",
+    "history": "The Crimson Surfer started out the same way as Earth-616’s Red Skull. Adolf Hitler—declaring that he could turn anyone into the ideal Nazi soldier—selected a random bellboy by the name of Johann Shmidt to be his next secret agent. After World War II, the crimson-headed Shmidt carried the mad führer’s dream of a worldwide Nazi government into the modern age. This is where his fate and that of his Earth-616 counterpart diverge, as he successfully led Hydra to take over the world. At some point, Kang the Devourer targeted the timeline of this Red Skull for destruction. Much like Norrin Radd made a deal with Galactus in the universe of Earth-616 to save his people, the Red Skull presented himself to the Devourer and offered to become his herald. He did it only to save his own skin, though, and for the Devourer to grant him a portion of his Power Cosmic. This gave him powers comparable to those of Earth- 616’s Silver Surfer and transformed him into the Crimson Surfer—after which, he helped oversee the destruction of his own universe’s timeline.",
+    "personality": "Shmidt is a fascist zealot, a madman and a master propagandist who deftly recruits crowds of bigots. Gaining the Power Cosmic has only heightened Shmidt’s megalomania. If he did not have to serve Kang the Devourer, the Crimson Surfer would already be scouring the universe, forcing as many worlds under his boot as he possibly could. He constantly looks for ways to betray the Devourer and take the rest of his power too.",
+    "traits": [
+      "Combat Expert",
+      "Combat Reflexes",
+      "Determination",
+      "Enduring Constitution",
+      "Extraordinary Origin",
+      "Inventor",
+      "Presence",
+      "Public Speaking",
+      "Weird"
+    ],
+    "tags": [
+      "Authority",
+      "Backup",
+      "Black Market Access",
+      "Extreme Appearance",
+      "Hunted",
+      "Powerful",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Infusion",
+          "Elemental Protection 2 (20 points to shatter)",
+          "Elemental Reinforcement"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Covering Fire",
+          "Double Tap",
+          "Return Fire",
+          "Snap Shooting",
+          "Stopping Power",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Keep Moving",
+          "On Your Feet"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Discipline 2",
+          "Environmental Protection",
+          "Iconic Weapon: Crimson surf oard [Summonable by Crimson Surfer. Grants Flight 2.]",
+          "Inspiration",
+          "Mighty 2",
+          "Sturdy 2 Note: The Crimson Surfer’s powers are not identical to those of the Silver Surfer and are, in fact, weaker. This is because Kang the Devourer does not trust Shmidt with that much power and so gave him less of it."
+        ]
+      }
+    ],
+    "id": "crimson-surfer",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "CROSSBONES",
     "realName": "Brock Rumlow",
     "rank": 3,
@@ -7181,6 +8290,77 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "crossbones",
     "genre": "core"
+  },
+  {
+    "name": "CRYSTAL",
+    "realName": "Crystalia Amaquelin",
+    "rank": 4,
+    "health": 90,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 2,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 6,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 24
+    },
+    "occupation": "Adventurer",
+    "origin": "Inhuman",
+    "teams": "Fantastic Four, House of Agon, Universal",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Crystal was born in the Inhuman city of Attilan into a family of royal nutritionists. Just like her older sister, Medusa, Crystal was exposed to the Terrigen Mist as a baby. Subsequently, she gained the power to control the four classical elements: earth, air, fire and water. As young girls, Crystal and Medusa were inseparable. Sadly, war and chaos conspired to tear them apart when Crystal was just eight years old. Crystal spent her youth traveling the world, searching for Medusa. By the time they finally reunited, Crystal had grown into a young woman. Crystal accompanied her sister back to Attilan, and in time, both became prominent members of the royal court. Medusa became queen of the Inhumans, while Crystal became an important ambassador and royal advisor. Even after the bulk of Inhuman society was destroyed by Black Bolt, Crystal remained close to the Royal Family, providing whatever help she could to assist her sister in rebuilding their kingdom.",
+    "personality": "Having spent her youth traveling the world, Crystal is far more outgoing and personable than most Inhumans. She’s the only member of the Inhuman royal court to have had a number of significant romantic relationships outside of Inhuman society. She dated the Human Torch (Johnny Storm) and was even briefly married to Quicksilver. Together, they had one child, a girl named Luna. Even more than Medusa, Crystal is headstrong. She relishes adventure and never hesitates to rush into the most dangerous situations.",
+    "traits": [
+      "Beguiling",
+      "Combat Expert",
+      "Connections: Super Heroes",
+      "Dealmaker",
+      "Determination",
+      "Fearless"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Inhuman Genes",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Air/Earth/Fire/Ice/Water)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Grab",
+          "Elemental Prison",
+          "Elemental Protection 3 (30 points to shatter)",
+          "Elemental Push",
+          "Elemental Reinforcement",
+          "Elemental Sphere",
+          "Elemental Suffocation"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Discipline 3",
+          "Flight 1",
+          "Sturdy 2"
+        ]
+      }
+    ],
+    "id": "crystal",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "CYCLOPS",
@@ -7418,6 +8598,147 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "cypher-x-men-expansion"
+  },
+  {
+    "name": "DAGGER",
+    "realName": "Tandy Bowen",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Mutant, Weird Science",
+    "teams": "Savage Avengers, X-Men",
+    "base": "Mobile",
+    "features": "Crescent moon mark",
+    "history": "Tandy Bowen was born into a cold and distant family of wealthy socialites. As a teenager, she became fed up with her affluent but unloving life in Ohio and ran away from home. At a bus station in Manhattan, she ran into another teenage runaway: a penniless boy named Tyrone Johnson. She and Tyrone had only just begun commiserating over their mutual homelessness when they were kidnapped by Maggia goons. The Maggia injected Bowen, Johnson and other teenagers with an experimental narcotic. While this drug killed most of the runaways, it reacted with something lying dormant in Johnson and Bowen. Johnson gained a metaphysical connection to a dimension of darkness, while Bowen tapped into the power of light. Under the codenames Cloak and Dagger, Johnson and Bowen took their revenge on the Maggia. Since then, they have worked to protect young people across the world. They frequently fight with Mister Negative, a super villain created by the same narcotic that empowered them.",
+    "personality": "Dagger’s personality contrasts sharply with that of her partner. While Cloak is serious, demure and soft -spoken, Dagger is friendly and outgoing. Cloak prefers to fight evasively, while Dagger attacks head-on. Despite their differences, Dagger is connected to Cloak by their powers and their mutual desire to protect the young and innocent. Dagger is one of the few people who can enter Cloak’s Darkforce dimension unharmed.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Extraordinary Origin",
+      "Fearless",
+      "Presence",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Hounded",
+      "Krakoan",
+      "Secret Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Fast Hands",
+          "Point-Blank Parry",
+          "Return Fire",
+          "Slow-Motion Shoot-Dodge",
+          "Snap Shooting",
+          "Sniping",
+          "Stopping Power",
+          "Suppressive Fire",
+          "Weapons Blazing"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Iconic Weapon: Light daggers [act as regular ranged weapons, but inflict Focus damage rather than Health damage]",
+          "Slow-Motion Dodge"
+        ]
+      }
+    ],
+    "id": "dagger",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
+    "name": "DAKOTA NORTH",
+    "realName": "Dakota North",
+    "rank": 1,
+    "health": 30,
+    "focus": 30,
+    "karma": 1,
+    "abilities": {
+      "melee": 0,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 0,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Investigator",
+    "origin": "Special Training",
+    "teams": "Dakota North Investigations",
+    "base": "Dakota North Investigations",
+    "features": "None",
+    "history": "As the daughter of a cold and distant C.I.A. agent, Dakota North grew up hearing only whispers of her father’s world-spanning escapades. Despite her father’s protests, Dakota became determined to understand what his work was really all about. She became a world-famous child model, but from her teen years onward, she spent every day training, preparing for the day when she would enter the world of adventuring herself. On the day of her eighteenth birthday, Dakota founded Dakota North Investigations—a private detective agency based out of New York City. Using her connections in the fashion industry, the business quickly took off . Over the course of the next few years, she opened three more branches of the investigative company in major cities across the United States. In her time as a P.I., Dakota North has solved serial murders, thwarted terrorist attacks and assisted several other investigative super heroes in their escapades. Few other P.I.s in the world are as respected as Dakota North.",
+    "personality": "Dakota North is a no-nonsense woman of action. She would not hesitate for a moment to jump through a window or to take a bullet for a client.",
+    "traits": [
+      "Connections: Police",
+      "Determination",
+      "Interrogation",
+      "Investigation",
+      "Skeptical"
+    ],
+    "tags": [
+      "Headquarters: Dakota North Investigations",
+      "Heroic",
+      "Public Identity",
+      "Rich",
+      "Streetwise",
+      "Signature Weapon: Pistol"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Defense Stance"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1"
+        ]
+      }
+    ],
+    "id": "dakota-north",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "DAREDEVIL",
@@ -7709,6 +9030,171 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "deadpool",
     "genre": "core"
+  },
+  {
+    "name": "DEADPOOL-BOT 2000",
+    "realName": "None",
+    "rank": 5,
+    "health": 240,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 7,
+      "agility": 4,
+      "resilience": 8,
+      "vigilance": 4,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "High Tech: Android",
+    "teams": "None",
+    "base": "Bagalia",
+    "features": "Giant",
+    "history": "When A.I.M. decided that nothing could possibly go wrong with creating an A.I. to train mercenaries, they evaluated a number of assassins, henchmen and hired guns. They even downloaded the thought patterns of a few of them—including Deadpool. Deadpool’s thought patterns corrupted the A.I., which started calling itself M.A.D.E.M. (Murderous Application Designed Exclusively for Mayhem). It created a number of hideous challenges to train—or slaughter— mercenaries. Among these creations was the Deadpool-Bot 2000.",
+    "personality": "This clattering, clunky robot believes itself to be Deadpool, and—like 90% of the comic creators in the world—it believes its own hype. It taunts opponents, cracks bad jokes and runs its mechanical mouth during battle… and pretty much all other times too. DEADPOOL-BOT 2000",
+    "traits": [
+      "Abrasive",
+      "Big",
+      "Bloodthirsty",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Super Villains",
+      "Fearless",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "A.I.",
+      "Black Market Access",
+      "Extreme Appearance",
+      "Public Identity",
+      "Signature Weapon: Giant swords"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Mighty 1",
+          "Sturdy 2",
+          "Uncanny 2",
+          "Wisecracker"
+        ]
+      },
+      {
+        "set": "Elemental Control (Fire)",
+        "names": [
+          "Elemental Burst (Fire)"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Chain Strikes",
+          "Do This All Day",
+          "Fast Strikes",
+          "Grappling Technique"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Hit & Run",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Smash"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Deadpool Role-Plays the Marvel Universe",
+    "id": "deadpool-bot-2000"
+  },
+  {
+    "name": "DEMOLISHER",
+    "realName": "Laura Lopez",
+    "rank": 2,
+    "health": 60,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 1,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal",
+    "origin": "Special Training",
+    "teams": "Wrecking Crew",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Unlike the core four members of the Wrecking Crew, Laura Lopez joined the criminal organization long after its initial formation. She had been training to be muscle for Wilson Fisk, but the Kingpin believed that her incredible talents could be made better use of elsewhere. He introduced her to the Wrecker, and she’s been part of the crew ever since. Little is known about the Demolisher’s early life. She presumably has some history in the professional bodybuilding scene because—unlike the other members of Wrecking Crew—she does not rely on the Wrecker’s magic. Instead, her strength arises from years of hard work and training.",
+    "personality": "Lopez is the youngest member of the Wrecking Crew, and as such, she is less hardheaded and jaded than her compatriots. She truly enjoys the thrill of battle and isn’t above cracking a joke in the midst of a life-or-death situation. She’s also the only woman on the team, which she is always aware of.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Criminal",
+      "Determination",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Public Identity",
+      "Signature Weapon: Ball and chain (throwable club)",
+      "Streetwise",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Defense Stance"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Hit & Run",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 1",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "demolisher",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "DESTINY",
@@ -8410,6 +9896,82 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "domino-x-men-expansion"
+  },
+  {
+    "name": "DOOMBOT",
+    "realName": "Varies",
+    "rank": 3,
+    "health": 90,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 3,
+      "logic": 3
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 15
+    },
+    "occupation": "Military",
+    "origin": "High Tech: Android",
+    "teams": "Allies of Doctor Doom",
+    "base": "Latveria",
+    "features": "Robotic body, usually",
+    "history": "Victor von Doom is an ambitious and intelligent man with more enemies than he can count. By the end of his college years, Doom realized that, if he wanted to survive the coming decades, he would need trained body doubles. Unwilling to settle for using regular men, Doom began prototyping robots that could act in his place. The first of these Doombots were impressive but flimsy, barely able to fight for themselves. Ever undeterred by defeat, Doom continued to rebuild and rework his bots until they became a force to be reckoned with. The modern Doombots are among the toughest and most fearsome androids on the planet Earth. A single Doombot can contend with the likes of Spider-Man, and Doom’s enemies are rarely lucky enough to be faced with just a single bot. Doom has been known to deploy entire armies of Doombots to deal with his archrivals in the Fantastic Four, or to put down peasant uprisings in his home country of Latveria.",
+    "personality": "The A.I. that runs the Doombots is both sophisticated and limited. When Doom himself is not available, they are capable of emulating his personality almost exactly, to the point where they begin to believe that they themselves are the real Doom. However, when Doom is present, the Doombots shiftinto a mode more resembling that of mindless zombies. They follow Doom’s orders to the letter, with no comments or complaints.",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Connections: Military (Doombot army)",
+      "Font of Information",
+      "Presence",
+      "Situational Awareness",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "A.I.",
+      "Extreme Appearance",
+      "Linguist: English, German, Hungarian, Latverian, Romani",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Defense Stance"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Discipline 1",
+          "Flight 1",
+          "Mighty 1",
+          "Sturdy 2",
+          "Uncanny 1"
+        ]
+      }
+    ],
+    "id": "doombot",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "DOOP",
@@ -9133,6 +10695,78 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "echo",
     "genre": "core"
+  },
+  {
+    "name": "EGGHEAD",
+    "realName": "Elihas Starr",
+    "rank": 2,
+    "health": 30,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 0,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 2,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal, Scientist",
+    "origin": "High Tech",
+    "teams": "Masters of Evil",
+    "base": "NYC",
+    "features": "Unusually large,",
+    "history": "For attempting to smuggle atomic secrets out of his own government-backed laboratory, Elihas Starr was fired from his job and became a pariah in the scientific community. Unfortunately for humanity, this served only to drive Starr further down the criminal path. Shortly after Starr was fired, a group of upperclass criminals contacted him. Impressed by his supposed intellect, they hired Starr to defeat the scientist/crimefighter Ant-Man (Hank Pym). Starr’s initial attempts at this were, by and large, catastrophic failures, but that did not matter to him. He had gotten a taste for the thrill of supervillainy, and he was never going back. Despite repeatedly being beaten, locked in jail and—on at least one occasion—killed outright, Starr has continued to menace the scientific world. Under the codename Egghead, he plots the destruction of all legitimate scientists, particularly Hank Pym and his heroic proteges.",
+    "personality": "Egghead is a delusional egomaniac who believes he is the smartest man in the world. In reality, he is nothing more than a mediocre scientist with a decent head for on-the-fly inventions. He can be reasoned with, but only insofar as he can be flattered. Though Egghead may make an exception for the right price, he prefers criminal assignments that allow him to face offagainst important scientists like Hank Pym and Tony Stark. He wants nothing more than to prove himself in a battle of wits with those whom he believes are his intellectual rivals. He never succeeds.",
+    "traits": [
+      "Abrasive",
+      "Connections: Criminal",
+      "Extra Occupation",
+      "Inventor",
+      "Scientific Expertise",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Lab Access",
+      "Public Identity",
+      "Signature Weapon: Egg bombs (frag grenades)",
+      "Streetwise",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Blast",
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Brilliance 2",
+          "Discipline 1",
+          "Inspiration"
+        ]
+      }
+    ],
+    "id": "egghead",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "EGO THE LIVING PLANET",
@@ -10366,6 +12000,84 @@ export const MMRPG_CHARACTERS = [
     "id": "fantomex-x-men-expansion"
   },
   {
+    "name": "FENRIS",
+    "realName": "Andrea and Andreas von Strucker",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 4,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 4,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 15
+    },
+    "occupation": "Military",
+    "origin": "Mutant, Weird Science",
+    "teams": "Hellfire Trading Company, Hydra",
+    "base": "Krakoa",
+    "features": "None",
+    "history": "Decades ago, fascist leader Baron von Strucker forced his pregnant wife to undergo experimental treatments developed by the brilliant but evil Dr. Arnim Zola. The genomes of the twin embryos were modified to include a number of unusual genes, including the X-Gene of mutant fame. Andrea and Andreas von Strucker displayed few symptoms of this meddling at birth, but as young adults their powers began to emerge. The twins could fly, perform incredible feats of acrobatics, and shoot blasts of energy from their fists—but only while in direct contact with each other. Under the codename Fenris, the twins went into business for themselves as super-powered mercenaries. They have spent most of their adult lives menacing the rest of mutantkind, attacking super heroes for profit and pleasure. Although the Fenris Twins were granted permission to live on Krakoa—despite the artificial nature of their mutant status—most other mutants do not regard them with respect. As the Black Knights of the Hellfire Club, they act as personal bodyguards for the villainous Sebastian Shaw.",
+    "personality": "The Fenris Twins are almost comically spoiled. They grew up in the lap of luxury, their every whim attended to by a squadron of servants. From a young age, they were taught to understand that they were better than other people and to violently oppose any who gainsaid that idea. Like their father, both of the Fenris Twins are committed fascists and white supremacists. However, their first and greatest loyalty is to money. They do terrible things not out of a commitment to an ideology but out of a desire to maintain their opulent lifestyle.",
+    "traits": [
+      "Abrasive",
+      "Battle Ready",
+      "Connections: Military (Hydra)",
+      "Determination",
+      "Extraordinary Origin",
+      "Situational Awareness",
+      "Weird"
+    ],
+    "tags": [
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "Villainous",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Blast (adjacent)",
+          "Elemental Burst (adjacent)",
+          "Elemental Push (adjacent)",
+          "Elemental Ricochet (adjacent)"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Point-Blank Parry",
+          "Return Fire",
+          "Snap Shooting",
+          "Stopping Power",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Discipline 1",
+          "Flight 1 (adjacent) Note: The Fenris Twins are two mechanically identical characters. They can move separately, but several of their abilities work only when the twins are close enough to touch. These powers bear the label “(adjacent).”"
+        ]
+      }
+    ],
+    "id": "fenris",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "FORGE",
     "realName": "Unknown",
     "rank": 4,
@@ -10489,6 +12201,72 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Secret Wars",
     "id": "sw-rx-franklin-richards"
+  },
+  {
+    "name": "FROG-MAN",
+    "realName": "Eugene Paul Patilio",
+    "rank": 1,
+    "health": 30,
+    "focus": 10,
+    "karma": 1,
+    "abilities": {
+      "melee": 1,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 0,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 5
+    },
+    "occupation": "Adventurer",
+    "origin": "High Tech: Battle Suit",
+    "teams": "Action Pack, Space Friends",
+    "base": "NYC",
+    "features": "None",
+    "history": "Vincent Patilio was a penniless inventor who thought he could make a quick buck by building a super-suit that would allow him to make a quick escape from any heist. Donning a frog-themed costume, Vincent Patilio made his debut upon the world stage as the villain Leap-Frog. He was almost immediately arrested by Daredevil. From then on, Vincent’s life only got worse. Despite having sworn offcrime, the public continued to see him as little more than a petty menace. He and his son Eugene fell further and further into poverty. Eventually, Eugene became sick of people bad-mouthing his father. He dug up his dad’s old suit and vowed to clear the name of frog-themed adventurers everywhere. Under the title of Frog- Man, he wages a one-amphibian war on crime.",
+    "personality": "Eugene has a good heart, but his own bumbling and awkward nature has kept him from achieving his dreams. Despite having been an adventurer for a few years, he has yet to make much of a name for himself. He often falls back on his old job as a busboy to make rent.",
+    "traits": [
+      "Connections: Super Heroes",
+      "Fearless",
+      "Honest",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance (in suit)",
+      "Heroic",
+      "Poor",
+      "Secret Identity"
+    ],
+    "powers": [
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Hit & Run"
+        ]
+      },
+      {
+        "set": "Spider-Powers",
+        "names": [
+          "Jump 1",
+          "Spider-Dodge"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "frog-man",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "GALACTUS",
@@ -11251,6 +13029,90 @@ export const MMRPG_CHARACTERS = [
     "id": "giant-man-avengers-expansion"
   },
   {
+    "name": "GIGANTO",
+    "realName": "Giganto",
+    "rank": 5,
+    "health": 210,
+    "focus": 210,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 6,
+      "resilience": 7,
+      "vigilance": 6,
+      "ego": 0,
+      "logic": 0
+    },
+    "speed": {
+      "run": 120,
+      "climb": 60,
+      "swim": 60,
+      "jump": 60
+    },
+    "occupation": "Outsider",
+    "origin": "Monstrous",
+    "teams": "None",
+    "base": "Subterranea",
+    "features": "Giant, scaly bipedal",
+    "history": "Members of the Deviant race created huge mutates to aid them in their battles against the Eternals. When their plot was discovered, the mutates were abandoned on Monster Island and the tunnels below. They were later found and now serve the Mole Man. Giganto, one of the largest of these mutates, became Mole Man’s greatest defender and weapon. A large, powerful, semi-reptilian creature that can burrow through the earth with ease, Giganto was used by Mole Man in one of his first attacks on the surface world, undermining power plants and even cities. He and the Mole Man were defeated by the Fantastic Four in their first adventure.",
+    "personality": "Giganto is basically a wild animal that has a certain amount of affection for and subservience to the Mole Man. He has a similar looking female mate, and the two were present during a scheme to control the Inorganic Technotroid, though the artificial being was “born” within the hands of Giganto’s mate, thus imprinting her as its “mother.” GIGANTO",
+    "traits": [
+      "Battle Ready",
+      "Clueless",
+      "Combat Reflexes",
+      "Connections: Outsiders",
+      "Enduring Constitution",
+      "Fresh Eyes",
+      "Monster",
+      "Stranger",
+      "Unusual Size: Gigantic"
+    ],
+    "tags": [
+      "Extreme Appearance",
+      "Headquarters: Subterranea",
+      "Mute",
+      "Mysterious"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Heightened Senses 1",
+          "Mighty 4",
+          "Sturdy 3"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Blunt)",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Focused Fury",
+          "Furious Attacks",
+          "Hit & Run",
+          "Unstoppable Assault",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Quick Toss",
+          "Smash",
+          "Unrelenting Smash"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Fantastic Four: From the Depths",
+    "id": "giganto"
+  },
+  {
     "name": "GLADIATOR",
     "realName": "Kallark",
     "rank": 6,
@@ -11408,6 +13270,169 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Secret Wars",
     "id": "sw-rx-god-emperor-doom"
+  },
+  {
+    "name": "GORGON",
+    "realName": "Gorgon Petragon",
+    "rank": 4,
+    "health": 150,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 7,
+      "agility": 3,
+      "resilience": 5,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 6
+    },
+    "occupation": "Military",
+    "origin": "Inhuman",
+    "teams": "House of Agon, Inhuman Royal Guard",
+    "base": "Mobile",
+    "features": "Hooved feet",
+    "history": "Born into an offshoot of the royal House of Agon, Gorgon Petragon was taught from a young age to revere and respect Inhuman royalty. As a young man, he befriended the future Inhuman king, Black Bolt, pledging his loyalty to the young prince. In the years since, Gorgon has never strayed far from Black Bolt or his queen, Medusa. As the head of the Inhuman Royal Guard and the personal bodyguard of the royals themselves, Gorgon has been entrusted with the protection and preservation of the House of Agon. This is a job he takes with deadly seriousness, one he continued to perform even after Black Bolt was forced to kill the bulk of the Inhuman population. If he can be convinced that doing so would be in the Royal Family’s best interests, Gorgon has sometimes been known to work against the royals’ wishes. On multiple occasions, the Inhuman villain Maximus has used this fact to manipulate Gorgon into attacking those he was sworn to protect.",
+    "personality": "Gorgon’s unflinching loyalty to the House of Agon is both his greatest strength and his greatest weakness. He stops at nothing to ensure the safety of the Inhuman Royal Family. In times of relative unity, this dedication has been an immense boon for the royals. In times of division and confusion, Gorgon can be as much a danger as an asset.",
+    "traits": [
+      "Battle Ready",
+      "Big (reach 2)",
+      "Combat Expert",
+      "Connections: Military (Inhuman Royal Guard)",
+      "Determination",
+      "Fearless",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Extreme Appearance",
+      "Inhuman Genes",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Jump 1",
+          "Quick Toss",
+          "Smash",
+          "Unrelenting Smash"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brawling",
+          "Inspiration",
+          "Mighty 3",
+          "Sturdy 3"
+        ]
+      }
+    ],
+    "id": "gorgon",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
+    "name": "GORGON (TOMI SHISHIDO)",
+    "realName": "Tomi Shishido",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 1,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Assassin",
+    "origin": "Mutant",
+    "teams": "Great Captains of Krakoa, the Hand, Hydra",
+    "base": "Mobile",
+    "features": "Glowing yellow eyes,",
+    "history": "Unlike most mutants, Tomi Shishido’s powers began to manifest almost immediately after his birth. As a mere toddler, Shishido had the skills to rival the world’s greatest artists. His intelligence advanced so quickly and erratically that by the time he was a teenager, something fundamental within his psyche could no longer bear the strain. He became increasingly despondent and, eventually, violent. At the age of eighteen, Shishido killed his entire family. Shortly thereafter, he took control of the Hand and merged the ninja organization’s already considerable resources with those of Hydra. As the mighty Gorgon—high commander of both Hydra and the Hand—Shishido committed himself to sowing death and destruction across the globe. For the good of mutantkind, the founders of Krakoa convinced Shishido to put aside his evil ways. However, few doubt that he could return to his old patterns under different circumstances. As a man who cares deeply about the well-being of Japan, Wolverine (Logan) keeps tabs on Shishido. He has already foiled Gorgon’s plots for world domination several times, and if and when the time comes, he will be prepared to do so again.",
+    "personality": "Unlike most members of Hydra, Gorgon is not a fascist. Rather, he is an extreme nihilist. He sees the world as only a cruel joke played by an unloving god. In his heart, he desires nothing more than to wipe the slate clean and destroy all of creation. Hydra and the Hand are simply means to that end. Rumors hold that—like the monster of Greek myth from which he takes his name—Gorgon can turn a person to stone with a single glance. However, no one has witnessed this happen for a long time, and it may be that Gorgon himself is the source of these rumors.",
+    "traits": [
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Criminal",
+      "Font of Information",
+      "Signature Attack: Focused Fury",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Hounded",
+      "Krakoan",
+      "Public Identity",
+      "Streetwise",
+      "Villainous",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Focused Fury",
+          "Riposte",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "Borrow Senses",
+          "ESP",
+          "Telepathic Link"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brawling",
+          "Brilliance 2",
+          "Healing Factor",
+          "Mighty 1"
+        ]
+      }
+    ],
+    "id": "gorgon-tomi-shishido",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "GORR THE GOD BUTCHER",
@@ -11938,6 +13963,84 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "GROWING MAN",
+    "realName": "Varies",
+    "rank": 4,
+    "health": 150,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 2,
+      "resilience": 5,
+      "vigilance": 2,
+      "ego": 4,
+      "logic": 1
+    },
+    "speed": {
+      "run": 4,
+      "climb": 2,
+      "swim": 2,
+      "jump": 4
+    },
+    "occupation": "Outsider",
+    "origin": "High Tech: Android",
+    "teams": "Ally to Kang the Conqueror, Hydra",
+    "base": "Mobile",
+    "features": "Robotic humanoid with",
+    "history": "As part of his usual plans to cement himself as ruler of the known multiverse, Kang the Conqueror created the world’s first stimuloid: an artificial human with the ability to absorb kinetic energy and turn it into mass. Kang proudly named his creation the Growing Man, and he buried it in Earth’s ancient past for safekeeping. In the early twenty-first century, a group of archaeologists working out of Manhattan inadvertently uncovered this stimuloid, awakening it much earlier than Kang had wished. Without the guidance of his creator, the Growing Man embarked on a wild rampage that drew Kang to that period of time. In the end, it took Thor himself to stop both the Growing Man and Kang himself. Kang has rebuilt the Growing Man several times, only to see the stimuloid defeated again and again. He long ago abandoned any hope that the Growing Man would be his ultimate weapon, and these days he mostly uses the android as a bodyguard.",
+    "personality": "The Growing Man is intelligent, but only at the level of a toddler. Though he does not really understand why, he has an instinctive loyalty to his creator. Nothing bothers him more than the idea that Kang may have betrayed or otherwise abandoned him. The Growing Man’s control over his own powers is limited, and a slow and steady beating can force him into a spiral of uncontrollable growth. Whenever the Growing Man is in the field, Kang carries a “De-Energizer” gun capable of instantly reverting the stimuloid to his default size of small.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Outsiders",
+      "Determination",
+      "Fearless",
+      "Fresh Eyes",
+      "Small",
+      "Stranger",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "A.I.",
+      "Extreme Appearance",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Resize",
+        "names": [
+          "Grow 4",
+          "Growing Attack",
+          "Macrodimensional Travel"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Jump 1",
+          "Quick Toss",
+          "Smash",
+          "Unrelenting Smash"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Energy Absorption",
+          "Mighty 3 Note: Whenever possible, the Growing Man uses the Energy Absorption power as a reaction. Every time he successfully uses this power, he automatically grows one size. He cannot willingly return to his default size."
+        ]
+      }
+    ],
+    "id": "growing-man",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "GUARDIAN",
     "realName": "James MacDonald Hudson",
     "rank": 4,
@@ -12083,6 +14186,77 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "gwenpool-avengers-expansion"
+  },
+  {
+    "name": "H.E.R.B.I.E. (SECURITY UNIT)",
+    "realName": "Humanoid Experimental Robot, B-type, Integrated Electronics",
+    "rank": 2,
+    "health": 30,
+    "focus": 30,
+    "karma": 2,
+    "abilities": {
+      "melee": 0,
+      "agility": 3,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 0,
+      "logic": 3
+    },
+    "speed": {
+      "run": 4,
+      "climb": 2,
+      "swim": 2,
+      "jump": 2,
+      "flight": 8
+    },
+    "occupation": "Educator, Scientist",
+    "origin": "High-Tech: Android",
+    "teams": "Fantastic Four",
+    "base": "New York City",
+    "features": "Child-sized metallic",
+    "history": "The first prototype H.E.R.B.I.E. was created by Mister Fantastic (Reed Richards) of the Fantastic Four to aid in the search for Galactus and to act as his personal laboratory assistant. H.E.R.B.I.E. was designed to be smart, helpful and generally cheerful. Incredibly, he actually turned out to be all those things. In fact, the H.E.R.B.I.E. project was such a success that Richards slowly began to produce more H.E.R.B.I.E.s. Within a few years, H.E.R.B.I.E. units were running almost all of the day-to-day activities at the Fantastic Four’s headquarters. H.E.R.B.I.E. units sometimes accompany the Fantastic Four on their adventures across time and space. However, the average H.E.R.B.I.E.’s duties are far more pedestrian. For example, a specialized H.E.R.B.I.E. unit often acts as the personal caretaker to Richards’ two children, Franklin and Valeria.",
+    "personality": "For the most part, H.E.R.B.I.E. units are thoughtful and chipper. Built with a heroic spirit, they are quick to offer a hand in assistance to any who need one. Some H.E.R.B.I.E.s, particularly those assigned to menial and boring tasks, harbor some resentment for their creator, but they rarely let it show. Only a select few H.E.R.B.I.E. units have ever chosen to leave the Fantastic Four behind.",
+    "traits": [
+      "Connections: Community",
+      "Extra Occupation",
+      "Font of Information",
+      "Inventor",
+      "Presence",
+      "Scientific Expertise",
+      "Small",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "A.I.",
+      "Extreme Appearance",
+      "Heroic",
+      "Lab Access",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Flight 1",
+          "Iconic Item: Opti-Blaster (works like a regular pistol, but blinds the target on a Fantastic success)",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Return Fire",
+          "Snap Shooting",
+          "Sniping",
+          "Suppressive Fire"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Fantastic Four: From the Depths",
+    "id": "h-e-r-b-i-e-security-unit"
   },
   {
     "name": "HALLOWS’ EVE",
@@ -12601,6 +14775,79 @@ export const MMRPG_CHARACTERS = [
     "id": "hawkeye-earth-1610-avengers-expansion"
   },
   {
+    "name": "HAWKEYE (KATE BISHOP)",
+    "realName": "Katherine Elizabeth “Kate” Bishop",
+    "rank": 2,
+    "health": 60,
+    "focus": 60,
+    "karma": 2,
+    "abilities": {
+      "melee": 1,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 0,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Investigator",
+    "origin": "Special Training",
+    "teams": "West Coast Avengers, Young Avengers",
+    "base": "Mobile",
+    "features": "None",
+    "history": "When Kate Bishop was a young girl, she was kidnapped by a super villain named El Matador. After being rescued by the Avengers, she developed an abiding admiration for the team, especially Hawkeye (Clint Barton), who fought for justice despite his lack of super-powers. Bishop decided to follow in Hawkeye’s footsteps. As a teenager, she adopted Hawkeye’s codename and began fighting crime as a member of the Young Avengers, with whom she has had numerous adventures. In the years since taking on the codename Hawkeye, she has worked several times with the original Hawkeye, who has made her his official protege, and she even took over ownership of his dog, Lucky. She recently started her own detective agency: Hawkeye Investigations.",
+    "personality": "Despite her outwardly casual and sometimes flighty attitude, Bishop has a strong and determined sense of justice. She wouldn’t hesitate to put herself in harm’s way to save another, even if it risked certain death.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Police",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Fearless",
+      "Interrogation",
+      "Investigation"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Mentor: Hawkeye (Clint Barton)",
+      "Public Identity",
+      "Signature Weapon: Bow and arrow"
+    ],
+    "powers": [
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Stopping Power",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Defense Stance"
+        ]
+      }
+    ],
+    "id": "hawkeye-kate-bishop",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "HELA",
     "realName": "Hela",
     "rank": 6,
@@ -12913,6 +15160,151 @@ export const MMRPG_CHARACTERS = [
       "High Evolutionary’s Armor"
     ],
     "id": "high-evolutionary-avengers-expansion"
+  },
+  {
+    "name": "HIT-MONKEY",
+    "realName": "None",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 6,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 0,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Assassin",
+    "origin": "Special Training",
+    "teams": "Mercs for Money, S.T.A.K.E.",
+    "base": "Mobile",
+    "features": "Small Japa-",
+    "history": "As a young macaque, Hit-Monkey grew up among a tribe of his species hidden deep within the mountains of Japan. Life was peaceful until, one day, a dying hit man stumbled into the tribe’s territory. Hit-Monkey demanded that the murderous man be cast back out into the snowy wastes, but the other macaques refused to listen. Determined to have his way, Hit-Monkey lashed out at the tribe’s leader, injuring him. As punishment, the leader sent Hit-Monkey into exile. On the same day that exile began, a group of hired mercenaries came to the mountainside, looking for the hit man. They slaughtered him—along with every one of the macaques protecting him. Filled with rage upon discovering the fate of his tribe, Hit-Monkey took up the dead man’s weapons and destroyed the mercenaries. He then set out for vengeance upon the men who’d hired those killers. In short order, Hit-Monkey had his revenge, but it brought him little solace, as he had no home to return to. To keep on living, he became a hit man himself. In the years since, Hit-Monkey has taken on and defeated some of the best mercenaries on the planet, including Deadpool. Many consider him the greatest contract killer to ever live. The upper echelons of the underworld utter his name only in hushed whispers.",
+    "personality": "Although Hit-Monkey understands human speech, he cannot speak any human language. He can communicate only with normal simian grunts and screeches. He has a hair-trigger temper, and in the heat of battle, he all but perpetually screams. HIT-MONKEY",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Criminal",
+      "Determination",
+      "Free Running",
+      "Signature Attack: Dance of Death",
+      "Small"
+    ],
+    "tags": [
+      "Extreme Appearance",
+      "Mute (can only make monkey noises)",
+      "Public Identity",
+      "Streetwise"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Combat Trickery",
+          "Evasion",
+          "Slow-Motion Dodge"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Fast Strikes",
+          "Grappling Technique"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Dance of Death",
+          "Double Tap",
+          "Slow-Motion Shoot-Dodge",
+          "Snap Shooting",
+          "Suppressive Fire",
+          "Weapons Blazing"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Deadpool Role-Plays the Marvel Universe",
+    "id": "hit-monkey"
+  },
+  {
+    "name": "HIVE",
+    "realName": "Hive",
+    "rank": 3,
+    "health": 120,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 3,
+      "agility": 1,
+      "resilience": 4,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 3
+    },
+    "speed": {
+      "run": 10,
+      "climb": 6,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "Weird Science",
+    "teams": "Hydra",
+    "base": "Mobile",
+    "features": "Humanoid hive of",
+    "history": "The Hive is a living bioweapon, the result of experiments performed by Hydra researchers on some of the world’s deadliest creatures. These maniacal scientists sought to create a living monster that was also a physical representation of everything Hydra stands for. In the many-tentacled Hive, they found their champion. Just like Hydra, the Hive is conniving, amoral and parasitic. It can survive only by regularly bonding with a host—that it takes over entirely—and feeding upon innocent people. If leftisolated for an extended period, the Hive dissolves back down into its original form: a pathetic and squirming pile of prehensile appendages. The Hive’s innate loyalty to Hydra as an organization is the only thing that keeps it in check. For high-ranking members of Hydra, the Hive has been known to sacrifice pieces of itself, merging with its allies in order to extend their lifespans.",
+    "personality": "Although the Hive is thought to be intelligent, it cannot speak any known human language. It can understand English, but its own speech consists of a garbled mess of undersea squeals and eldritch burbling. A few select members of Hydra have learned to decipher this language, and they serve as the Hive’s handlers. The Hive needs to feed on a new human only once every few years, but it prefers to feast on a daily basis. It can bond with persons of any gender, but it tends to present as male.",
+    "traits": [
+      "Battle Ready",
+      "Connections: Military (Hydra)",
+      "Enduring Constitution",
+      "Fresh Eyes",
+      "Monster",
+      "Situational Awareness",
+      "Weird"
+    ],
+    "tags": [
+      "Extreme Appearance",
+      "Mute (can only speak in eldritch gibberish)",
+      "Public Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Plasticity",
+        "names": [
+          "Bounce Back",
+          "Coiling Crush",
+          "Extended Reach 2",
+          "Flexible Bones 2",
+          "Reverse Punch",
+          "Rubberneck",
+          "Slip Free",
+          "Stilt Steps"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Additional Limbs",
+          "Mighty 2",
+          "Uncanny 1"
+        ]
+      }
+    ],
+    "id": "hive",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "HOBGOBLIN",
@@ -13552,6 +15944,75 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "HYDRA OFFICER",
+    "realName": "Varies",
+    "rank": 2,
+    "health": 60,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "Special Training",
+    "teams": "Hydra",
+    "base": "Secret",
+    "features": "The green-and-yellow",
+    "history": "Hydra tends to treat its lowest-level recruits (Hydra Agents) as cannon fodder, foot soldiers who can be spent or lost without hesitation. After all, there never seems to be a lack of disaffected people looking to join up with the fascist organization to do their part for world domination. As the Hydra oath goes, “Cut off a limb and two more shall take its place!” Those agents who survive long enough—or are ambitious enough—find themselves promoted to positions of leadership within their hierarchical organization. Often they’re the leaders of independent cells sequestered from the rest of Hydra for operational security, and the fact that they’ve survived to that point means (at least to them) that they must be doing something right.",
+    "personality": "While Hydra agents like to follow orders, Hydra officers have developed a taste for giving them. They like to shout at their underlings and boss them around, and many of them harbor aspirations of one day becoming the Supreme Hydra themselves. They tend to be mean and merciless—to outsiders, to their subordinates and most especially to those they see as rivals. Many of them see the fact that they’ve risen in the ranks as the proof of their superiority, and because of this, they tend to be cocky as well. HYDRA OFFICER",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Military (Hydra)",
+      "Determination",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Secret Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Combat Trickery",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Suppressive Fire",
+          "Weapons Blazing"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Keep Moving"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Enter Hydra",
+    "id": "hydra-officer"
+  },
+  {
     "name": "HYDRO-MAN",
     "realName": "Morris “Morrie” Bench",
     "rank": 4,
@@ -13632,6 +16093,87 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "hydro-man-spider-verse-expansion"
+  },
+  {
+    "name": "HYPERION",
+    "realName": "Marcus “Marc” Milton",
+    "rank": 5,
+    "health": 180,
+    "focus": 90,
+    "karma": 5,
+    "abilities": {
+      "melee": 6,
+      "agility": 2,
+      "resilience": 6,
+      "vigilance": 3,
+      "ego": 5,
+      "logic": 3
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Eternal",
+    "teams": "Alpha Flight, Avengers, Squadron Supreme",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Marcus Milton was born in an alternate universe—Earth-13034—as the sole survivor of a dying world of Eternals. His people sent him to Earth, where he was raised by a humble family of ordinary people. Under the codename Hyperion, Milton worked to make that Earth into a utopia. Sadly, his home, his family and every other member of his universe were destroyed by the incursion of another reality, leaving him—once again—the sole survivor. Hyperion was pulled from the void of his dead universe to Earth-616 by a group of A.I.M. scientists experimenting with multiversal travel. The Avengers freed Hyperion from A.I.M. containment, and for a while, he traveled with them on their adventures. However, he eventually tired of hero work, abandoned his identity as Hyperion and took up a job as a trucker, hoping to learn more about his new home. Events outside of his control have occasionally forced Milton to return to his super-hero identity, but he continues to spend most of his time living on the road.",
+    "personality": "Milton struggles with his identity. He is not even the first version of himself to be pulled from another universe into Earth-616. The original Hyperion—Mark Milton of Earth-712—died shortly after this Milton’s arrival. Having survived so much death and destruction, Milton sometimes feels like fighting for justice may be a futile effort when, at any second, his whole world could be destroyed or reset. Still, he can’t help but answer the call to action when he sees a person in need.",
+    "traits": [
+      "Beguiling",
+      "Big (reach 2)",
+      "Combat Expert",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Font of Information",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Eternally Immortal",
+      "Heroic",
+      "Mahd Wy’ry",
+      "Secret Identity"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Blast",
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Quick Toss",
+          "Smash"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Brilliance 1",
+          "Discipline 2",
+          "Environmental Protection",
+          "Flight 2",
+          "Mighty 3",
+          "Sturdy 3"
+        ]
+      }
+    ],
+    "id": "hyperion",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "ICEMAN",
@@ -13861,6 +16403,74 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "immortus-avengers-expansion"
+  },
+  {
+    "name": "INHUMAN ROYAL GUARD",
+    "realName": "Varies",
+    "rank": 2,
+    "health": 60,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 1,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military",
+    "origin": "Inhuman",
+    "teams": "Inhuman Royal Guard",
+    "base": "New Attilan",
+    "features": "Varies",
+    "history": "The Inhuman Royal Guard has existed in one form or another since the dawn of the Inhuman monarchy itself. For thousands of years, they have been charged with the protection and preservation of the Royal Family. It is a duty that most of its members treat with deadly importance. The Royal Guard has always been led by offshoots of the Royal Family itself. The most recent commander of the guard was Gorgon Petragon, cousin to both the king and the queen. The few who have obtained significant ranks within the Royal Guard have earned the privilege of direct proximity to ultimate power. Inhuman children grow up dreaming of gaining so much as a temporary position within the guard’s lowliest ranks. Early incarnations of the guard wielded spears and swords, and on ceremonial occasions the modern guard has been known to return to these implements. However, when out and about on duty, members of the current guard carry energy pistols and wear suits of gray cyber-armor. They are crack shots who shoot first and ask questions later.",
+    "personality": "While the leaders of the Royal Guard have distinct and boisterous personalities, the rankand-file members of the institution are often indistinguishable from normal humans. Some of them have undergone Terrigenesis and acquired low-level super-powers, but many others have chosen to forgo the mists and strengthen themselves in more traditional ways. When in the presence of royalty, members of the guard are expected to maintain complete and reverent silence. Much of a guard’s regular duties can be summed up in a single sentence: stand still and look intimidating.",
+    "traits": [
+      "Battle Ready",
+      "Connections: Military (Inhumans)",
+      "First Aid",
+      "Situational Awareness",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Inhuman Genes",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Blast",
+          "Elemental Burst"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Snap Shooting",
+          "Suppressive Fire"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Discipline 1",
+          "Mighty 1",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "inhuman-royal-guard",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "INNER DEMON",
@@ -14374,6 +16984,76 @@ export const MMRPG_CHARACTERS = [
     "id": "iron-man-mysterium-armor-avengers-expansion"
   },
   {
+    "name": "IRONHEART",
+    "realName": "Riri Williams",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 1,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 15
+    },
+    "occupation": "Engineer",
+    "origin": "High Tech: Battle Suit",
+    "teams": "Champions, Underground",
+    "base": "Mobile",
+    "features": "None",
+    "history": "As a shy kid from the south side of Chicago, Riri Williams had few prospects and even fewer friends. However, as a certified child genius, Williams earned a full ride to M.I.T. at the age of 11. Lacking the skills to make friends there—and surrounded by students twice her age—her first two years at the institute passed uneventfully. She withdrew into her studies, rarely speaking to anyone save for her parents and her childhood friend Natalie Washington. In the summer of her sophomore year, Williams’ social circle shrank even further when both her stepfather and Natalie were killed in a senseless drive-by shooting. Determined to avenge the deaths of her loved ones, Williams built a battle suit in the style of Iron Man (Tony Stark). Her escapades in this initial prototype drew the attention and admiration of Stark himself, who offered Williams the mentorship and resources she needed to build a new suit and become a fullfledged super hero. As Ironheart, Williams has everything she ever wanted, including the opportunities to make friends. She often fights as part of the Champions, a team of young super heroes ready to help save the world.",
+    "personality": "As a young girl, Williams could not have been any more timid and awkward, but as she matured into a young adult, she learned how to speak her mind with confidence. As such, she’s made friends both within the super hero community and without. What little free time she has she spends listening to hip-hop and poring over circuit diagrams.",
+    "traits": [
+      "Determination",
+      "Gearhead",
+      "Inventor",
+      "Quick Learner",
+      "Situational Awareness",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Extreme Appearance (in battle suit)",
+      "Heroic",
+      "Lab Access",
+      "Mentor: Tony Stark",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Push"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Brilliance 2",
+          "Discipline 1",
+          "Environmental Protection",
+          "Flight 2",
+          "Might 1",
+          "Sturdy 2"
+        ]
+      }
+    ],
+    "id": "ironheart",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "ISCA THE UNBEATEN",
     "realName": "Isca",
     "rank": 3,
@@ -14442,6 +17122,65 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "isca-the-unbeaten-x-men-expansion"
+  },
+  {
+    "name": "J. JONAH JAMESON",
+    "realName": "John Jonah Jameson Jr.",
+    "rank": 1,
+    "health": 10,
+    "focus": 30,
+    "karma": 1,
+    "abilities": {
+      "melee": 1,
+      "agility": 0,
+      "resilience": 0,
+      "vigilance": 1,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Journalist",
+    "origin": "Special Training",
+    "teams": "The Daily Bugle, TNM",
+    "base": "NYC",
+    "features": "None",
+    "history": "Determined to make the world a better place, J. Jonah Jameson spent his childhood studying the art of journalism. As a mere high school student, he wriggled his way into a position as a junior reporter with the Daily Bugle. Jameson’s stellar reporting on civil rights issues, alongside his thrilling exposés on organized crime, rocketed him to the top of the paper’s lineup. Eventually, Jameson found the resources to buy the Daily Bugle and install himself as the editor in chief. Practically overnight, Jameson turned the Bugle from a failing local rag into an internationally respected news organization. More than anything, Jameson is renowned for his editorial stance against costumed super heroes. As a man dedicated to the truth, he despises anyone whom he believes has something to hide. He has a particular sore spot for Spider-Man, who operates in the Bugle’s direct vicinity. Jameson lost control of the Daily Bugle and was forced to get a job as a regular reporter again. He even became mayor of New York City for a while. He has since returned to his first love: the news.",
+    "personality": "While he can come offas charming on camera, Jameson’s employees know him as the gruffand abrasive man he really is. Although he retains the strong sense of justice he had in his youth, years of dangerous reporting work have turned Jameson into an angry cynic. He spends his days alternately shouting at his reporters to work harder and brooding in his office, scheming ways to keep his latest venture in the black. Jameson has a softspot for his son, John Jameson (A.K.A. Man-Wolf), whose heroics as an astronaut earned him worldwide recognition.",
+    "traits": [
+      "Abrasive",
+      "Audience",
+      "Connections: Sources",
+      "Determination",
+      "Public Speaking",
+      "Pundit",
+      "Skeptical"
+    ],
+    "tags": [
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Banging Heads"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration"
+        ]
+      }
+    ],
+    "id": "j-jonah-jameson",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "J2",
@@ -15207,6 +17946,92 @@ export const MMRPG_CHARACTERS = [
     ]
   },
   {
+    "name": "KANG THE CONQUEROR",
+    "realName": "Nathaniel Richards",
+    "rank": 5,
+    "health": 90,
+    "focus": 210,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 6,
+      "ego": 5,
+      "logic": 6
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Leader",
+    "origin": "High Tech",
+    "teams": "Anachronauts, Council of Kangs",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Nathaniel Richards grew up in the near-utopian environment of the 30th century of Earth-6311. As an adult, he became sick of luxury and became determined to live a life of adventure in a more interesting era. Disguising himself as the Pharaoh Rama-Tut, he built a time machine and set about conquering ancient Egypt. The Avengers put a quick end to his reign, but Richards remained undeterred. He conquered the war-torn 40th century and returned to the Avengers’ era equipped with the greatest weaponry the future could offer. As Kang the Conqueror, Richards has attempted many times to take down Earth’s mightiest heroes. He has faced many defeats, but his powers over time have always allowed him to return and try again. Kang is not above meddling in anyone’s timeline, even his own. As a result, his early life has become shrouded in mystery and divergence, including other identities like those of Iron Lad and the Scarlet Centurion. Several alternate Kangs from across the Multiverse have had adventuring careers to rival his own. His future timeline is just as convoluted, often due to him trying to avoid becoming the more peaceful Immortus.",
+    "personality": "Kang is a megalomaniac and a narcissist of the highest order. He believes he's the most important being in existence, and he goes to great lengths to prove it. He often speaks in the style of ancient Greco-Roman conquerors.",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Combat Reflexes",
+      "Font of Information",
+      "Presence",
+      "Public Speaking",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Authority",
+      "Powerful",
+      "Secret Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Protection 2 (20 points to shatter)"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Omniversal Travel (Time)",
+        "names": [
+          "Time Portal",
+          "Time Travel",
+          "Time Travel Other",
+          "Time Travel Together"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 2",
+          "Discipline 2",
+          "Mighty 2",
+          "Sturdy 2"
+        ]
+      }
+    ],
+    "id": "kang-the-conqueror",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "KAR MA",
     "realName": "Xuân Cao Manh",
     "rank": 3,
@@ -15281,6 +18106,89 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "kar-ma-x-men-expansion"
+  },
+  {
+    "name": "KARNAK",
+    "realName": "Karnak Mander-Azur",
+    "rank": 4,
+    "health": 90,
+    "focus": 120,
+    "karma": 4,
+    "abilities": {
+      "melee": 5,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Educator",
+    "origin": "Inhuman, Special Training",
+    "teams": "House of Agon, Universal Inhumans",
+    "base": "Mobile",
+    "features": "Numerous face tattoos",
+    "history": "Karnak was born into a prominent family of Inhuman geneticists, an offshoot of the royal House of Agon. When Karnak was just a boy, his brother Triton was exposed to the Terrigen Mist and mutated into a fishlike creature incapable of surviving on dry land. Subsequently, Karnak’s parents forbade him from ever touching the mists. Unwilling to be leftbehind by the other members of the Royal Family, Karnak embarked on a course of specialized and mysterious training. With the help of his strong Inhuman genes, Karnak quickly became an expert in combat. He can break most barriers and defeat most opponents in a single punch, given a chance to analyze their weaknesses. Karnak’s skill in combat makes him an invaluable asset to Black Bolt and the rest of the Inhuman Royal Family, though he’s not as attached to the royals as many of the other members of their court. In recent years, he has dedicated much of his time to educating the next generation of warriors.",
+    "personality": "More so than any of the other Inhuman royals, Karnak is ruthless in combat. He does not hesitate to kill an opponent, especially one he considers inferior. Outside of combat, he is equally single-minded. He spends much of his free time meditating on the nature of existence. He cares for the other members of the House of Agon, but only in a distant, brooding manner.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Community",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Extraordinary Origin",
+      "Fearless",
+      "Font of Information",
+      "Presence",
+      "Signature Attack: Exploit"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Inhuman Genes",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Brace for Impact",
+          "Counterstrike Technique",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep",
+          "Regain Focus",
+          "Unflappable Poise",
+          "Untouchable Position"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Focused Fury",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Iconic Weapon: Karnak’s hands (act as melee weapons)",
+          "Mighty 2",
+          "Sturdy 2"
+        ]
+      }
+    ],
+    "id": "karnak",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "KATE PRYDE",
@@ -16662,6 +19570,156 @@ export const MMRPG_CHARACTERS = [
     "id": "lockheed-x-men-expansion"
   },
   {
+    "name": "LOCKJAW",
+    "realName": "Lockjaw",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 5,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Inhuman, Weird Science",
+    "teams": "House of Agon, Pet Avengers",
+    "base": "Mobile",
+    "features": "Giant bulldog with",
+    "history": "Lockjaw is the final result of a series of experiments on animals performed by Inhuman geneticists. He was implanted with Inhuman genes and exposed to the Terrigen Mist while still in the womb. As a result, he later grew to an immense size and gained the ability to teleport nearly unlimited distances. The data from the experiments on Lockjaw was used to give the future Inhuman king Black Bolt his own powers. Mere days after Black Bolt was born, the young prince developed an attachment to the dog who had been mutated in the same manner as himself. Soon enough, Lockjaw had become the official pet of the Inhuman Royal Family. Lockjaw accompanies the royals on nearly all of their adventures. Although his combat abilities are limited, his powers of teleportation make him an indispensable teammate. In the rare event that the Inhuman royals are outmatched by an opponent, they can always cling to Lockjaw and teleport away.",
+    "personality": "Although more intelligent and observant than an average bulldog, Lockjaw is still an animal. He whines, barks, begs and behaves like any other dog. Lockjaw can be rambunctious, and he has been known to run offon his own adventures from time to time. However, he is, above all else, loyal to Black Bolt. Any who make themselves an enemy of the Inhuman king must also contend with his dog.",
+    "traits": [
+      "Big (reach 2)",
+      "Connections: Super Heroes",
+      "Extraordinary Origin",
+      "Fearless",
+      "Situational Awareness",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Inhuman Genes",
+      "Mute (can only bark)",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Omniversal Travel (Dimensional)",
+        "names": [
+          "Dimensional Travel",
+          "Dimensional Travel Together"
+        ]
+      },
+      {
+        "set": "Omniversal Travel (Multiversal)",
+        "names": [
+          "Multiversal Travel",
+          "Multiversal Travel Together"
+        ]
+      },
+      {
+        "set": "Teleportation",
+        "names": [
+          "Blink",
+          "Teleport 2",
+          "Teleport Blind",
+          "Teleport Object",
+          "Teleport Together"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 1",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "lockjaw",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
+    "name": "LOGOS",
+    "realName": "Logos",
+    "rank": 2,
+    "health": 30,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 1,
+      "resilience": 1,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Leader",
+    "origin": "Mutant",
+    "teams": "Personal advisor to Rama-Tut Kang",
+    "base": "Ancient Egypt",
+    "features": "None",
+    "history": "Having been born into a wealthy Egyptian family, Logos was raised from birth to act as an advisor within the pharaoh’s royal court. His brilliant mind and his preternatural ability to sense what others are thinking brought Logos prestige and renown. However, he obtained the status of grand vizier only after Kang’s arrival. When Kang first arrived in Egypt, he slaughtered most of the last pharaoh’s court. Logos is one of the few who Kang chose to spare. Although he does not know it himself, Logos is a mutant, one of the earliest. He is a brilliant advisor, but Logos’ mutant status is the main reason Kang kept him around. Kang has been on the lookout for Apocalypse since the moment he set foot on Egyptian soil. Some part of him believes that by retaining control over one mutant, he can somehow draw in another.",
+    "personality": "Logos was raised to have unquestioning loyalty to the pharaoh. However, Kang’s brutality has shaken his resolve. Logos remains committed to Kang’s service, and he treats any threats to the pharaoh’s well-being with deadly seriousness. However, he would be willing to assist an investigation into Kang’s true origins.",
+    "traits": [
+      "Dealmaker",
+      "Legal Eagle",
+      "Presence"
+    ],
+    "tags": [
+      "Authority",
+      "Hounded (outside ancient Egypt)",
+      "Krakoan",
+      "Powerful (within ancient Egypt)",
+      "Public Identity",
+      "X-Gene"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Telepathy",
+        "names": [
+          "ESP",
+          "Mind Interrogation",
+          "Mind Reading",
+          "Telepathic Link"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Combat Trickery",
+          "Inspiration"
+        ]
+      }
+    ],
+    "id": "logos",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "LOKI",
     "realName": "Loki Laufeyson",
     "rank": 5,
@@ -17045,6 +20103,76 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "MADAME MASQUE",
+    "realName": "Giuletta Kristina Nefaria",
+    "rank": 2,
+    "health": 60,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal, Spy",
+    "origin": "Special Training",
+    "teams": "Maggia",
+    "base": "Mobile",
+    "features": "Scarred face beneath",
+    "history": "As a baby, Giuletta Nefaria was discarded by her father Count Nefaria—the one-time leader of the Maggia. She spent her youth believing she was the daughter of a pair of wealthy Wall Street financiers. It was only after the death of her adoptive parents that Luchino re-entered Giuletta’s life. Sensing potential in the young woman, Luchino coerced his daughter into joining the Maggia. He gave her special training in combat and forced her to act as a Maggia spy under the codename of Madame Masque. Although she eventually separated herself from her toxic father, Giuletta has continued to work as a Maggia agent.",
+    "personality": "Unlike a lot of mafiosos, Madame Masque is not driven primarily by greed. She works for the Maggia because it’s the only way she knows to make a sound living. A well-conceived moral argument could convince her to compromise her criminal ways.",
+    "traits": [
+      "Beguiling",
+      "Connections: Criminal",
+      "Connections: Espionage",
+      "Determination",
+      "Extra Occupation",
+      "Leverage"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Secret Identity",
+      "Streetwise",
+      "Weapon: Submachine gun"
+    ],
+    "powers": [
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Point-Blank Parry",
+          "Snap Shooting"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Counterstrike Technique",
+          "Fast Strikes"
+        ]
+      }
+    ],
+    "id": "madame-masque",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "MADAME MONSTROSITY",
     "realName": "Melodia Stillwell",
     "rank": 3,
@@ -17201,6 +20329,71 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "madame-web-spider-verse-expansion"
+  },
+  {
+    "name": "MADDY CHO",
+    "realName": "Madame Curie “Maddy” Cho",
+    "rank": 1,
+    "health": 10,
+    "focus": 30,
+    "karma": 1,
+    "abilities": {
+      "melee": 0,
+      "agility": 1,
+      "resilience": 0,
+      "vigilance": 1,
+      "ego": 0,
+      "logic": 3
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Scientist",
+    "origin": "Special Training",
+    "teams": "Olympus Group",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Despite having an intellect to rival the world’s top scientists, Maddy Cho spends most of her time acting as a caretaker for her younger brother Amadeus—the boy better known as Brawn. Maddy is one of the few people in the world who Amadeus truly respects. Her calm maturity helps to temper her brother’s fiery and often unstable personality. Maddy is, ostensibly, a student, but her vast intellect makes school a minimal concern. She spends most of her time either looking after her brother or working on some self-driven scientific project. She jumps at any opportunity to study mysterious scientific phenomena.",
+    "personality": "Although she’s just a teenager herself, Maddy has a very serious personality. Since the death of their parents, she’s had to act more and more as a mother to her younger brother. Only on the rare occasions that she’s separated from Amadeus does Maddy relax her typically stern demeanor.",
+    "traits": [
+      "Determination",
+      "Font of Information",
+      "Inventor",
+      "Scientific Expertise"
+    ],
+    "tags": [
+      "Heroic",
+      "Lab Access",
+      "Public Identity",
+      "Signature Weapon: Pistol"
+    ],
+    "powers": [
+      {
+        "set": "Tactics",
+        "names": [
+          "Keep Moving"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Suppressive Fire"
+        ]
+      }
+    ],
+    "id": "maddy-cho",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "MADELYNE PRYOR",
@@ -17391,6 +20584,65 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "maestro-avengers-expansion"
+  },
+  {
+    "name": "MAGGIA TOUGH",
+    "realName": "Varies",
+    "rank": 1,
+    "health": 10,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 1,
+      "resilience": 0,
+      "vigilance": 1,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal",
+    "origin": "Special Training",
+    "teams": "None",
+    "base": "Varies",
+    "features": "Any",
+    "history": "Born out of European crime syndicates that date back centuries, the modern Maggia are less a singular entity and more a group of criminal families who occasionally aid one another. They have no hidden bases or Helicarriers. They’re a bunch of racketeers who scratch each other’s backs. Unlike Hydra or other fanatical criminal organizations, Maggia toughs are motivated primarily by profit, not political ideology. Their pursuit of money often leads them to commit heinous crimes and even bankroll super villains, but they can be persuaded down more righteous paths—for the right price.",
+    "personality": "Many members of the Maggia are suit-wearing wiseguys. Most high-ranking members gain their status by being born into one crime family or another. Regular toughs, on the other hand, come from all sorts of places. New recruits tend to be poor youths with few scruples, folks happy to join up with a well-established criminal outfit.",
+    "traits": [
+      "Abrasive",
+      "Connections: Criminal",
+      "Determination"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Public Identity",
+      "Streetwise",
+      "Signature"
+    ],
+    "powers": [
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Fast Attacks",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Suppressive Fire"
+        ]
+      }
+    ],
+    "id": "maggia-tough",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "MAGIK",
@@ -18284,6 +21536,76 @@ export const MMRPG_CHARACTERS = [
     "id": "mantis-secret-wars"
   },
   {
+    "name": "MARIA HILL",
+    "realName": "Maria Hill",
+    "rank": 2,
+    "health": 60,
+    "focus": 60,
+    "karma": 2,
+    "abilities": {
+      "melee": 1,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Law Enforcer",
+    "origin": "Special Training",
+    "teams": "Force Works, S.H.I.E.L.D.",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Having gotten a taste of action on a tour of duty with the US Marine Corps, a young Maria Hill joined up with S.H.I.E.L.D. the moment she was able. Her determination to succeed and her natural ability to make hard decisions propelled her through the ranks of the organization. Within a few years, she became the right hand of S.H.I.E.L.D. director Nick Fury Sr. Soon after, she replaced Fury. Although supported by her subordinates, many of Hill’s actions as director of S.H.I.E.L.D. remain controversial. The foundation of Pleasant Hill— an artificial-town prison designed to reform super villains through brainwashing—caused an international outcry. For her role in overseeing that project, Hill was booted from S.H.I.E.L.D. The organization itself dissolved shortly thereafter. Despite her notoriety, Hill has found a second life as an agent for the CIA. She is wholly committed to the cause of making the world a safer place for regular people.",
+    "personality": "Hill’s ability to make tough calls makes her a strong leader, but it’s also her greatest flaw. Like many members of S.H.I.E.L.D., her knack for working within ethical gray areas gets her in trouble as often as it helps her succeed. If she can be convinced that doing so is for the greater good, Hill can steel herself to commit atrocious deeds. Despite her headstrong and driven nature, Hill is not above cracking the occasional joke. Her social circle consists almost entirely of former S.H.I.E.L.D. agents.",
+    "traits": [
+      "Combat Expert",
+      "Determination",
+      "Interrogation",
+      "Investigation",
+      "Presence"
+    ],
+    "tags": [
+      "Authority",
+      "Backup",
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Sniping"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Change of Plans",
+          "Keep Moving"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Inspiration"
+        ]
+      }
+    ],
+    "id": "maria-hill",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "MARTINEX",
     "realName": "Martinex T’Naga",
     "rank": 4,
@@ -18684,6 +22006,137 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "maximus",
     "genre": "core"
+  },
+  {
+    "name": "MAY PARKER",
+    "realName": "Maybelle “May” Parker-Jameson",
+    "rank": 1,
+    "health": 10,
+    "focus": 60,
+    "karma": 1,
+    "abilities": {
+      "melee": 0,
+      "agility": 0,
+      "resilience": 0,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "None",
+    "origin": "None",
+    "teams": "Howard T. Duck Private Investigations,",
+    "base": "NYC",
+    "features": "None",
+    "history": "May Parker’s early life was, for the most part, unremarkable. She was born into a poor and religious family that placed a high value on decency and responsibility. As an adult, she began dating a carnival barker named Ben Parker. Ben was just as poor as May, if not more so, but he was kind and thoughtful. May valued that more than any riches in the world. Unable to have children themselves, Ben and May devoted their energies toward helping out with their nephew, Peter Parker. After Peter’s parents died in a tragic plane crash, he came to live with his aunt and uncle full-time. Ben and May treated Peter like their own son, which only made it all the more difficult for the boy when, a few short years later, Ben was gunned down in a robbery. Ben’s tragic death inspired Peter to become the world-renowned super hero Spider-Man. For many years Peter hid this fact from his aunt, but May eventually discovered her nephew’s secret identity. Although she was wary at first, May has come to accept who Peter is and even appreciate his heroics. At one point, she married J. Jonah Jameson’s father, Jay, but he has since passed away.",
+    "personality": "Although she’s getting up there in years, May Parker believes she can still take care of herself. She is a proud woman, and she resents the idea that she would need help with basic tasks. However, her increasingly ailing state has forced her, bit by bit, to accept more and more assistance. May’s greatest fear is that she will become a burden on Peter, the one person on Earth who she cares the most about.",
+    "traits": [
+      "Fearless",
+      "Glibness",
+      "Honest",
+      "Investigation",
+      "Out of Shape"
+    ],
+    "tags": [
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Inspiration"
+        ]
+      }
+    ],
+    "id": "may-parker",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
+    "name": "MEDUSA",
+    "realName": "Medusalith Amaquelin-Boltagon",
+    "rank": 4,
+    "health": 90,
+    "focus": 90,
+    "karma": 4,
+    "abilities": {
+      "melee": 5,
+      "agility": 6,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 6
+    },
+    "occupation": "Leader",
+    "origin": "Inhuman",
+    "teams": "Frightful Four, House of Agon, Universal",
+    "base": "Mobile",
+    "features": "Long, freely controlla-",
+    "history": "Medusalith Amaquelin was born in the Inhuman city of Attilan into a family of royal nutritionists. As an infant, she was exposed to the Terrigen Mist and subsequently gained the power to control strands of her hair as if they were superstrong tendrils emerging from her head. At a young age, Medusa developed close friendships with core members of the Inhuman Royal Family, particularly her second cousin, the Inhuman prince Black Bolt. Medusa later helped Black Bolt overthrow the cruel rulers of Attilan and establish himself as the king of all Inhumans. As the years drew on, Medusa and Black Bolt grew closer and were married. Together, they’ve had one child, a boy named Ahura. Following the tragic events wherein Black Bolt was forced to kill the bulk of the Inhuman population, Medusa and her husband began to grow apart. Although they remain close friends, they have functionally separated.",
+    "personality": "Medusa has exactly the personality one would expect of a powerful queen. She is headstrong, righteously vindictive and often a bit pompous. Her self-confidence makes her an effective ruler and team leader, though in more interpersonal settings it can cause troubles. Even more than Black Bolt, Medusa takes her role as an Inhuman leader with deadly seriousness. She is determined to live up to the title of queen, no matter the personal cost.",
+    "traits": [
+      "Combat Reflexes",
+      "Iron Will",
+      "Presence",
+      "Public Speaking",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Authority",
+      "Inhuman Genes",
+      "Powerful",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Plasticity",
+        "names": [
+          "Extended Reach 1"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Jump 1",
+          "Quick Toss"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Change of Plans",
+          "Keep Moving",
+          "On Your Feet"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Additional Limbs",
+          "Inspiration",
+          "Mighty 3",
+          "Sturdy 3"
+        ]
+      }
+    ],
+    "id": "medusa",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "MELINDA MAY",
@@ -19298,6 +22751,80 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "MOCKINGBIRD",
+    "realName": "Barbara “Bobbi” Morse",
+    "rank": 2,
+    "health": 60,
+    "focus": 60,
+    "karma": 2,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 0,
+      "logic": 2
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Scientist",
+    "origin": "Special Training, Weird Science",
+    "teams": "Avengers, S.H.I.E.L.D., West Coast Avengers",
+    "base": "Mobile",
+    "features": "None",
+    "history": "As a young but up-and-coming name in the world of biological science, Bobbi Morse was recruited by S.H.I.E.L.D. to act both as an agent and an on-staffscientist. Under the codename Mockingbird, she fought to keep the world safe from all manners of nefarious threats. Morse eventually left S.H.I.E.L.D. to become an independent adventurer. In the years since, she has been an invaluable member of countless super-hero teams. Most famously, she has been a regular partner to the hero Hawkeye, to whom she was briefly married. For a long while, she was thought to be dead, killed by Mephisto while she was on a mission with the West Coast Avengers. It turned out that she had been kidnapped and replaced with a Skrull impersonator who had died in her place.",
+    "personality": "Much like her ex-husband, Hawkeye (Clint Barton), years of adventuring have tempered Morse’s attitude toward danger. Threats that would have terrified her in her early days now elicit little more than an eye roll or a pained groan from her. Her years terrorizing the Skrulls as the Robed Witch—while temporarily escaped on their home planet—contributed to that.",
+    "traits": [
+      "Connections: Super Heroes",
+      "Determination",
+      "Extraordinary Origin",
+      "Extra Occupation",
+      "Fearless",
+      "Inventor",
+      "Scientific Expertise",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Lab Access",
+      "Public Identity",
+      "Signature Weapon: Fighting batons (clubs)"
+    ],
+    "powers": [
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Chain Strikes",
+          "Do This All Day",
+          "Fast Strikes"
+        ]
+      }
+    ],
+    "id": "mockingbird",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "MOIRA MACTAGGERT",
     "realName": "Moira Ann Kinross MacTaggert",
     "rank": 1,
@@ -19456,6 +22983,80 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "mojo-x-men-expansion"
+  },
+  {
+    "name": "MOLE MAN",
+    "realName": "Harvey Elder",
+    "rank": 2,
+    "health": 60,
+    "focus": 150,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 0,
+      "resilience": 2,
+      "vigilance": 5,
+      "ego": -3,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Scientist",
+    "origin": "Weird Science",
+    "teams": "None",
+    "base": "Subterranea",
+    "features": "None",
+    "history": "Despite his genius, Harvey Elder was shunned by society for his homely appearance. Desperate to find his place in the world, he searched far and wide, following rumors of an underground civilization that would accept him. He eventually stumbled upon Monster Island and explored the caverns beneath until finally discovering a tunnel into Subterranea. Despite being caught in an earthquake and blinded by the mystic Valley of Diamonds, he found abandoned Deviant technology and used it to lead many monsters and the underground race of Moloids. Carving out his own domain, Elder became obsessed with getting revenge on the surface world, but the Fantastic Four thwarted his first attempts. Over the years, other Subterranean leaders like Tyrannus have threatened Elder’s dominance. The Mole Man now stands in an uneasy truce with the surface world he resents, but he is all too willing to attack any who endanger his world.",
+    "personality": "Harvey Elder is deeply insecure about his looks and his stature and tries to make up for it with the power he now possesses. While this makes him angry and even unhinged most of the time, he can be kind and even helpful to those who others would deem monstrous— including the many giant beasts he lives with underground. MOLE MAN",
+    "traits": [
+      "Inventor",
+      "Loner",
+      "Out of Shape",
+      "Scientific Expertise",
+      "Weird"
+    ],
+    "tags": [
+      "Backup",
+      "Headquarters: Subterranea",
+      "Lab Access",
+      "Vision Issues"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Heightened Senses 2",
+          "Iconic Item: Staff (Mole Man's staff acts as a remote control for the many Deviant technologies available to him in his Subterranean lair, as long as they have been prepared ahead of time.)",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Blunt)",
+        "names": [
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Battle Plan",
+          "Keep Moving"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Fantastic Four: From the Depths",
+    "id": "mole-man"
   },
   {
     "name": "MOLECULE MAN",
@@ -20628,6 +24229,90 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "NICK FURY SR.",
+    "realName": "Nicholas Joseph “Nick” Fury Sr.",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 4,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 3,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer, Law Enforcer",
+    "origin": "Special Training, Weird Science",
+    "teams": "C.I.A, S.H.I.E.L.D., Howling Commandos",
+    "base": "Mobile",
+    "features": "Eye patch, various",
+    "history": "As a stringent anti-fascist, Fury was among the first in his neighborhood to join the fight against the Axis Powers during World War II. He soon became a sergeant and was eventually appointed to lead a covert attack squadron of “Howling Commandos” through the European theater. Late in the war, Fury took a stray piece of shrapnel to the face. The injury permanently blinded him in one eye and lefthim on the edge of death. To save his life, government scientists injected him with the experimental Infinity Formula. Miraculously, Fury made a quick recovery and finished out the war in style. Shortly thereafter, Fury was tapped to lead the newly established UN peacekeeping force S.H.I.E.L.D. His run as the organization’s director remains legendary. Fury later left S.H.I.E.L.D. but continued working on his own to keep the world safe, no matter the costs. He recently took over for the Watcher (Uatu) as the one keeping watch over the Earth, but he’s since moved on to helping protect the entirety of the Multiverse.",
+    "personality": "The serum in Nick Fury’s blood slows his aging to a crawl. This has allowed him to act as a hero across several decades, but it has not kept him from being stuck in the past. Nick Fury is, by most modern standards, a conservative old grump. He left Earth behind, in large part, because he was looking for new challenges.",
+    "traits": [
+      "Connections: Super Heroes",
+      "Determination",
+      "Extra Occupation",
+      "Extraordinary Origin",
+      "Fearless",
+      "Glibness",
+      "Interrogation",
+      "Investigation",
+      "Weird"
+    ],
+    "tags": [
+      "Authority",
+      "Backup",
+      "Black Market Access",
+      "Heroic",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Slow-Motion Shoot-Dodge",
+          "Snap Shooting",
+          "Sniping",
+          "Weapons Blazing"
+        ]
+      },
+      {
+        "set": "Tactics",
+        "names": [
+          "Change of Plans",
+          "Keep Moving"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Inspiration",
+          "Slow-Motion Dodge"
+        ]
+      }
+    ],
+    "id": "nick-fury-sr",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "NIGHT NURSE",
     "realName": "Linda Carter",
     "rank": 1,
@@ -20846,6 +24531,81 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men '97",
     "id": "nightcrawler-xmen97"
+  },
+  {
+    "name": "NIGHTHAWK",
+    "realName": "Kyle Richmond",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 4,
+      "agility": 1,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 3
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 15
+    },
+    "occupation": "Tycoon",
+    "origin": "High Tech, Weird Science",
+    "teams": "Avengers, Defenders, Squadron Sinister",
+    "base": "NYC",
+    "features": "None",
+    "history": "Kyle Richmond was once just a scrawny, spoiled college kid who believed that his family’s wealth could get him out of any jam. Then he got into a drunk driving accident that lefthim badly injured and—worse yet—confined his girlfriend to a wheelchair. Racked with guilt, Richmond dropped out of school and spent the next few years wandering around the United States, looking for something that could bring meaning back into his life. An interdimensional being known as the Grandmaster took note of Richmond’s plight. In exchange for Richmond helping found a team of super villains, the Grandmaster offered him a serum that made him superhumanly powerful whenever the moon shone. Richmond accepted the serum, but his conscience eventually got the better of him. Within a few months, he turned against his own super-villain team. In the years since, Richmond has done his best to earn the trust of the super-hero community and has served as a member of both the Avengers and the Defenders.",
+    "personality": "Kyle Richmond’s childhood as a lonely rich kid led him to a life of excessive thrill-seeking. However, years of adventuring have shaped his youthful hotheadedness into a more balanced vigilance. The missteps of his past weigh heavily upon his mind. Nighthawk’s ability to fly comes not from his innate superhuman strength, but from a custom jetpack he designed.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Celebrities",
+      "Extraordinary Origin",
+      "Famous",
+      "Tech Reliance",
+      "Weakness: Sunlight (Nighthawk loses his damage reduction during the day)",
+      "Weird"
+    ],
+    "tags": [
+      "Heroic",
+      "Lab Access",
+      "Rich",
+      "Secret Identity"
+    ],
+    "powers": [
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Fast Attacks",
+          "Hit & Run",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brawling",
+          "Brilliance 1",
+          "Flight 2",
+          "Mighty 2",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "nighthawk",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "NIGHTMASK",
@@ -21699,6 +25459,80 @@ export const MMRPG_CHARACTERS = [
     "id": "old-man-logan-earth-214923-x-men-expansion"
   },
   {
+    "name": "PALADIN",
+    "realName": "Unknown",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 2,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 3,
+      "logic": 0
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Unknown",
+    "teams": "Heroes for Hire, Villains for Hire",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Paladin’s past is a secret to everyone except maybe the man himself, and he isn’t forthcoming with details. S.H.I.E.L.D.’s archives on Paladin date back only as far as a few years ago when, during a mission to capture the Purple Man, he fought with Daredevil. Although Paladin was already a moderately well-established mercenary by this point, no one knows for sure what jobs he had completed before facing offagainst the Man Without Fear. Although Paladin ultimately failed to capture the Purple Man, his ability to hold his own against Daredevil made him famous overnight. Job offers came pouring in, from both super heroes and super villains. For a while, Paladin sold his services exclusively to the highest bidder. Some days he was a hero, and other days he was a villain. He is one of the few people who can truthfully claim to have fought on both sides of the superhuman Civil War. As the years drew on, though, Paladin’s duplicitousness began to gnaw at his conscience. There was no single moment of reform and repentance, but slowly, he stopped accepting villainous jobs. These days, he works primarily as an independent hero for hire.",
+    "personality": "Ninety percent amoral mercenary and ten percent big-hearted softy, Paladin has a strangely charming aura. He’s had a number of romantic relationships within the super-hero community, most notably with the Wasp. Even his enemies regard him as a gentleman and a consummate professional. Paladin’s need to make money exists in perpetual conflict with his conscience. He has, on several occasions, dropped well-paying assassination jobs at the last moment because he couldn’t bear to kill his target. PALADIN",
+    "traits": [
+      "Combat Expert",
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Mysterious",
+      "Secret Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Iconic Weapon: Stun gun [ranged weapon; deals electricity damage, stunning target on a Fantastic success]",
+          "Slow-Motion Dodge",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Point-Blank Parry",
+          "Slow-Motion Shoot-Dodge",
+          "Snap Shooting",
+          "Sniping",
+          "Weapons Blazing"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Deadpool Role-Plays the Marvel Universe",
+    "id": "paladin"
+  },
+  {
     "name": "PATRIOT",
     "realName": "Elijah “Eli” Bradley",
     "rank": 3,
@@ -21779,6 +25613,99 @@ export const MMRPG_CHARACTERS = [
     "id": "patriot-avengers-expansion"
   },
   {
+    "name": "PHOENIX (MAYA LOPEZ)",
+    "realName": "Maya Lopez",
+    "rank": 6,
+    "health": 150,
+    "focus": 150,
+    "karma": 6,
+    "abilities": {
+      "melee": 6,
+      "agility": 5,
+      "resilience": 5,
+      "vigilance": 4,
+      "ego": 8,
+      "logic": 2
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 36
+    },
+    "occupation": "Entertainer",
+    "origin": "Mythic, Special Training",
+    "teams": "Avengers, Daughters of Liberty",
+    "base": "Mobile",
+    "features": "White handprint",
+    "history": "When Maya Lopez was a child, her father was gunned down by his own boss: the Kingpin (Wilson Fisk). Seeing the young girl’s potential, Fisk took her in, giving her special training and eventually tricking her into believing that Daredevil had killed her father. Eventually, Lopez discovered the Kingpin’s deception and turned on him. Her quest for vengeance resolved, she became a tireless fighter for justice around the world. Under the codename Echo, she fought to keep the streets of Hell’s Kitchen safe. Recently, Echo took part in a contest held by the Phoenix Force, a primordial entity of fire and instability older than the universe itself. The Phoenix Force gathered heroes from around the globe and pitted them against each other to determine who would best serve as a host for its unfathomable power. Echo lost her bout to the Sub-Mariner (Namor). However, the Phoenix Force admired Echo’s unflinching determination in battle and decided to take her as its host anyway. With the power of the Phoenix Force within her, Maya Lopez has quickly advanced from a neighborhood vigilante to a defender of entire worlds.",
+    "personality": "As a deaf woman and a member of the Cheyenne Nation, Lopez’s life has been full of struggles. Despite it all, she generally manages to stay upbeat. She has a particular love for the theatrical arts, having become a concert pianist and an expert dancer. The Phoenix Force has, at times, threatened to turn Lopez into an unstoppable berserker. However, her strong sense of right and wrong helps her keep the primordial entity under control.",
+    "traits": [
+      "Battle Ready",
+      "Berserker",
+      "Combat Reflexes",
+      "Determination",
+      "Extraordinary Origin",
+      "Famous",
+      "Fearless",
+      "Free Running",
+      "Presence",
+      "Public Speaking"
+    ],
+    "tags": [
+      "Auditory Issues",
+      "Heroic",
+      "Public Identity",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Fire)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Protection 2",
+          "Elemental Reinforcement",
+          "Supernova"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Chain Strikes",
+          "Counterstrike Technique",
+          "Defense Stance",
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Power Control",
+        "names": [
+          "Clone Moves"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Combat Trickery",
+          "Discipline 2",
+          "Environmental Protection",
+          "Flight 2",
+          "Mighty 2",
+          "Sturdy 3"
+        ]
+      }
+    ],
+    "id": "phoenix-maya-lopez",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "PHOTON",
     "realName": "Monica Rambeau",
     "rank": 5,
@@ -21848,6 +25775,76 @@ export const MMRPG_CHARACTERS = [
     ],
     "id": "photon",
     "genre": "core"
+  },
+  {
+    "name": "PILEDRIVER",
+    "realName": "Brian Phillip Calusky",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 5
+    },
+    "occupation": "Criminal",
+    "origin": "Magic",
+    "teams": "Wrecking Crew",
+    "base": "Mobile",
+    "features": "Giant hands",
+    "history": "As a teenager in the countryside, Brian Calusky turned to a life of crime more out of boredom than anything else. Calusky’s initial infractions were minor, but over the course of a decade, he managed to build himself a solid rap sheet. Eventually, he was sentenced to an extended stay in the maximum-security prison on Ryker’s Island. It was at Ryker’s that Calusky met the super villain Wrecker. Along with a couple other inmates, Calusky helped the Wrecker escape from Ryker’s. Out of gratitude, the Wrecker granted his allies a portion of his own powers, and together, they formed the Wrecking Crew. Calusky has been with the super-villain group ever since. At one point, he mentored his son, Rick Calusky, who become the criminal known as Excavator.",
+    "personality": "Outside of the Wrecker himself, Piledriver might be the most unhinged member of the Wrecking Crew. He can be utterly reckless, both in a battle and outside of it. Unlike his allies, Piledriver prefers to fight without weapons or armor, smashing his opponents with his giant bare fists.",
+    "traits": [
+      "Battle Ready",
+      "Combat Reflexes",
+      "Connections: Criminal",
+      "Fearless"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Public Identity",
+      "Streetwise",
+      "Supernatural",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Brawling",
+          "Inspiration",
+          "Mighty 2",
+          "Sturdy 1",
+          "Wisecracker"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Immovable",
+          "Jump 1",
+          "Quick Toss",
+          "Smash"
+        ]
+      }
+    ],
+    "id": "piledriver",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "POLARIS",
@@ -22705,6 +26702,91 @@ export const MMRPG_CHARACTERS = [
     "id": "quake-avengers-expansion"
   },
   {
+    "name": "QUASAR",
+    "realName": "Wendell Elvis Vaughn",
+    "rank": 6,
+    "health": 120,
+    "focus": 210,
+    "karma": 6,
+    "abilities": {
+      "melee": 7,
+      "agility": 4,
+      "resilience": 4,
+      "vigilance": 6,
+      "ego": 8,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 30
+    },
+    "occupation": "Military",
+    "origin": "Magic",
+    "teams": "Guardians of the Galaxy, S.H.I.E.L.D.",
+    "base": "Mobile",
+    "features": "None",
+    "history": "As a young man, Wendell Vaughn successfully completed the special-agent training course at S.H.I.E.L.D. Academy only to be rejected for field duty by higher-ups who believed he was too kind and caring to be a serious agent. Instead, Vaughn was assigned to guard duty outside the containment chamber of the legendary Quantum Bands, mystic artifacts designed to protect life throughout the universe. These bands contain such incredible power that they annihilated most people who attempted to wield them. Vaughn performed his duties diligently until the day an A.I.M. attack overran the base where he was stationed. Desperate to escape the slaughter, Vaughn took a chance and donned the Quantum Bands. Incredibly, the kindness in his heart soothed the cosmic energies within the bands and transformed him into Quasar, Protector of the Universe. As Quasar, Vaughn has achieved things beyond his wildest dreams and gone places S.H.I.E.L.D. could never have taken him. He has helped to end galaxy-spanning wars and fought with evil creatures the size of planets. Today, he numbers among the most powerful heroes in existence.",
+    "personality": "Quasar wields phenomenal power, but he prefers to solve his problems peacefully whenever possible. He treats defeated enemies gracefully, with an eye toward reform. On at least one occasion, Quasar has faked his own death to peacefully satisfy a vengeful opponent. If Quasar has a flaw, it is his tendency to defer to established authority. He has assisted in many of S.H.I.E.L.D.’s operations, not all of them strictly ethical.",
+    "traits": [
+      "Battle Ready",
+      "Combat Expert",
+      "Connections: Military",
+      "Determination",
+      "Enduring Constitution",
+      "Fearless",
+      "Glibness",
+      "Iron Will",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Heroic",
+      "Public Identity",
+      "Sorcerous",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Form",
+          "Elemental Grab",
+          "Elemental Prison",
+          "Elemental Protection 2 (20 points to shatter)",
+          "Elemental Push",
+          "Elemental Reinforcement",
+          "Elemental Sphere",
+          "Supernova"
+        ]
+      },
+      {
+        "set": "Teleportation",
+        "names": [
+          "Blink",
+          "Teleport 2"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Environmental Protection",
+          "Discipline 3",
+          "Flight 2",
+          "Mighty 3",
+          "Sturdy 3"
+        ]
+      }
+    ],
+    "id": "quasar",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "QUEEN GOBLIN",
     "realName": "Ashley Kafk a",
     "rank": 4,
@@ -22950,6 +27032,90 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "radioactive-man-avengers-expansion"
+  },
+  {
+    "name": "RAMA-TUT",
+    "realName": "Nathaniel Richards",
+    "rank": 4,
+    "health": 90,
+    "focus": 150,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 4,
+      "logic": 5
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Leader",
+    "origin": "High Tech",
+    "teams": "Anachronauts, Council of Kangs",
+    "base": "Ancient Egypt",
+    "features": "None",
+    "history": "Nathaniel Richards grew up in the near-utopian environment of the thirtieth century (Earth- 6311). As an adult he became sick of his luxurious existence and decided to live a life of adventure in a more interesting era. Disguising himself as the Pharaoh Rama-Tut, Richards built a time machine and set about conquering ancient Egypt. As the supreme ruler of Egyptian civilization, Richards sought to secure his reign over all the Earth. As such, he is constantly on the lookout for any who may have the power to oppose him, particularly the mutant conqueror known as Apocalypse. He does not yet know it, but Apocalypse will be the least of his worries. He later takes on a number of other identities, the most famous of which is Kang the Conqueror.",
+    "personality": "Richards is a megalomaniac and a narcissist of the highest order. He believes himself to be the most important being in existence, and he will go to any length to prove his own importance. He often speaks in the style of the old Greco-Roman conquerors. Richards is not above meddling in anyone’s timeline, even his own. As a result, his early life has become shrouded in mystery and divergence. A number of alternate versions of him from across the Multiverse have had adventuring careers to rival Richards’ own.",
+    "traits": [
+      "Battle Ready",
+      "Combat Reflexes",
+      "Font of Information",
+      "Presence",
+      "Public Speaking",
+      "Tech Reliance"
+    ],
+    "tags": [
+      "Authority",
+      "Powerful",
+      "Secret Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Protection 1 (10 points to shatter)"
+        ]
+      },
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Defense Stance",
+          "Fast Strikes"
+        ]
+      },
+      {
+        "set": "Omniversal Travel (Time)",
+        "names": [
+          "Time Portal",
+          "Time Travel",
+          "Time Travel Other",
+          "Time Travel Together"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brilliance 1",
+          "Discipline 2",
+          "Disguise",
+          "Mighty 1",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "rama-tut",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "RED GOBLIN",
@@ -23426,6 +27592,74 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "rek-rap-spider-verse-expansion"
+  },
+  {
+    "name": "REN KIMURA",
+    "realName": "Ren Kimura",
+    "rank": 2,
+    "health": 60,
+    "focus": 30,
+    "karma": 2,
+    "abilities": {
+      "melee": 3,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 1,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Entertainer",
+    "origin": "Inhuman",
+    "teams": "Asgardians of the Galaxy,",
+    "base": "New York City",
+    "features": "None",
+    "history": "Growing up, Ren Kimura wanted to be a dancer. Unfortunately, her parents never approved of her aspirations or—for that matter—her homosexuality. She was forced to take up dancing (and dating) in secret, regularly sneaking away from home to spend long hours practicing at a local dance studio. Because of this, Kimura was at the dance studio—not safe at home— when the Terrigen Bomb detonated over New York City. The Terrigen Mist activated the Inhuman DNA lurking inside her genes, transforming her arms into twisted masses of metal wire. With effort, Kimura discovered that she could make the wires float through the air like dancing ribbons, able to slice distant targets to pieces. That night, super villains invaded New York City, looking to kidnap the newly awakened Inhumans. Kimura would have fallen prey to them were it not for the intervention of the Fearless Defenders. Kimura joined the Defenders and fell deeply in love with one of her new teammates: Annabelle Riggs. Even after the Defenders fell apart, Riggs and Kimura stuck together. They became part of the Asgardians of the Galaxy, and later, Riggs helped Kimura form her own dance studio. Although they’ve officially retired from the adventuring business, they remain ready to answer any call to action.",
+    "personality": "Despite their mutual affection, Riggs and Kimura have diametrically opposed personalities. Riggs is bookish, shy and more than a little awkward, while Kimura is as outgoing and charming as a person can be. She adores the stage and the spotlight. REN KIMURA",
+    "traits": [
+      "Combat Reflexes",
+      "Famous",
+      "Glibness",
+      "Presence",
+      "Public Speaking"
+    ],
+    "tags": [
+      "Heroic",
+      "Inhuman Genes",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Combat Trickery",
+          "Iconic Weapon: Razor arms [hands act as melee weapons; +1 Melee damage multiplier]",
+          "Inspiration"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Fast Attacks",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Plasticity",
+        "names": [
+          "Extended Reach 2"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Deadpool Role-Plays the Marvel Universe",
+    "id": "ren-kimura"
   },
   {
     "name": "REPTIL",
@@ -25613,6 +29847,82 @@ export const MMRPG_CHARACTERS = [
     "genre": "core"
   },
   {
+    "name": "SHE-HULK (LYRA)",
+    "realName": "Lyra",
+    "rank": 3,
+    "health": 90,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 5,
+      "agility": 2,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 18
+    },
+    "occupation": "Adventurer",
+    "origin": "Weird Science: Gamma Mutate",
+    "teams": "A.R.M.O.R., Avengers Academy",
+    "base": "Mobile",
+    "features": "Green skin",
+    "history": "On Earth-8009, massive environmental and military disasters long ago rendered the vast majority of humanity infertile. The survivors underwent experimental body modifications, granting them longer lives and incredible powers, and in the ensuing chaos, society stratified along strict gender lines, with the men of the world making perpetual war against the women. In an attempt to gain the upper hand, one of the leaders of the female resistance—Thundra—stole some skin cells from the Hulk of Earth-616 and used his DNA to impregnate herself. Her daughter, Lyra, was the first person naturally born on the planet in decades. When Lyra was just 16, her handlers sent her to Earth-616 so she could obtain fertile male DNA in much the same way her mother had. She was supposed to obtain cells from Norman Osborn, but once she saw how evil he was, she refused to complete her mission. Her handlers generously released her from her duties, allowing her to stay on Earth-616 and train with its heroes. Over the years, Lyra has been tutored by many of Earth’s greatest warriors, but she considers the original She-Hulk (Jennifer Walters) her number-one mentor. The pair are good friends, and Lyra sometimes uses the She-Hulk codename in honor of Walters.",
+    "personality": "When not in combat, Lyra has the personality of a normal, peppy teenage girl. In battle, she acts much more like a traditional stoic warrior. As opposed to most gamma mutates, Lyra’s powers get weaker as she gets angrier. To keep herself in top form, she forces herself to roll with the punches, literally and figuratively. SHE-HULK (LYRA)",
+    "traits": [
+      "Big",
+      "Connections: Super Heroes",
+      "Determination",
+      "Fearless",
+      "Iron Will",
+      "Weird"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Extreme Appearance",
+      "Green Door",
+      "Heroic",
+      "Immunity: Gamma Radiation",
+      "Public Identity",
+      "Radioactive"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 2",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Power Control",
+        "names": [
+          "Power Slider (Serenity)"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Jump 2",
+          "Quick Toss",
+          "Smash"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Deadpool Role-Plays the Marvel Universe",
+    "id": "she-hulk-lyra"
+  },
+  {
     "name": "SHIFT",
     "realName": "Shi“",
     "rank": 3,
@@ -26348,6 +30658,91 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "X-Men Expansion",
     "id": "silver-samurai-x-men-expansion"
+  },
+  {
+    "name": "SILVER SURFER",
+    "realName": "Norrin Radd",
+    "rank": 6,
+    "health": 180,
+    "focus": 210,
+    "karma": 6,
+    "abilities": {
+      "melee": 3,
+      "agility": 5,
+      "resilience": 6,
+      "vigilance": 6,
+      "ego": 8,
+      "logic": 3
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "flight": 36
+    },
+    "occupation": "Adventurer, Outsider",
+    "origin": "Alien, Weird Science",
+    "teams": "Annihilators, Defenders",
+    "base": "Mobile",
+    "features": "Body covered in",
+    "history": "Norrin Radd was an ordinary man born on the utopian planet of Zenn-La. Fascinated by the opportunities provided by space, Radd endeavored to explore the cosmos. He was well on his way to achieving his dream when Galactus arrived on his planet. Despite the best efforts of Zenn-La’s leaders, none of their weapons could drive Galactus away. In a last-ditch effort to save his people, Radd boarded a spaceship and made a deal with the planet-eater. In exchange for sparing Zenn-La, Radd became Galactus’ herald, imbued with a portion of Galactus’ Power Cosmic, which transformed him into the Silver Surfer. The Silver Surfer served Galactus faithfully until the day he arrived on Earth. Radd took pity on the people of Earth and fought Galactus on their behalf. Galactus ultimately spared the planet and stripped Radd of his position. As a free agent, Radd has spent most of his subsequent years wandering the cosmos. His adventures have taken him across the universe and made him central in the fate of countless worlds.",
+    "personality": "The Silver Surfer regrets his time serving Galactus, and he often misses the people of Zenn-La he leftbehind. In addition, he is racked with guilt for all those he couldn’t save. The Silver Surfer does his best to act as a hero, but decades of tragic escapades have worn him down. The primary thing that keeps him going is his love for life itself.",
+    "traits": [
+      "Battle Ready",
+      "Combat Reflexes",
+      "Connections: Outsiders",
+      "Connections: Super Heroes",
+      "Enduring Constitution",
+      "Extra Occupation",
+      "Extraordinary Origin",
+      "Fearless",
+      "Fresh Eyes",
+      "Situational Awareness",
+      "Stranger",
+      "Weird"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Black Market Access",
+      "Chaotic",
+      "Extreme Appearance",
+      "Public Identity"
+    ],
+    "powers": [
+      {
+        "set": "Elemental Control (Energy)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Form",
+          "Elemental Protection 4 (40 points to shatter)",
+          "Elemental Reinforcement"
+        ]
+      },
+      {
+        "set": "Magic (Chaos Set)",
+        "names": [
+          "Powerful Hex (represents his Power Cosmic)"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Discipline 4",
+          "Environmental Protection",
+          "Healing Factor",
+          "Heightened Senses 2",
+          "Iconic Weapon: Cosmic Surfboard [Summonable by Silver Surfer. Grants Flight 2]",
+          "Mighty 2",
+          "Sturdy 4"
+        ]
+      }
+    ],
+    "id": "silver-surfer",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "SILVERMANE",
@@ -29536,6 +33931,72 @@ export const MMRPG_CHARACTERS = [
     "id": "stegron-spider-verse-expansion"
   },
   {
+    "name": "STICK",
+    "realName": "Unknown",
+    "rank": 2,
+    "health": 30,
+    "focus": 60,
+    "karma": 2,
+    "abilities": {
+      "melee": 3,
+      "agility": 2,
+      "resilience": 1,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Magic, Special Training",
+    "teams": "Chaste, Fist",
+    "base": "NYC",
+    "features": "None",
+    "history": "Born both blind and penniless, Stick took up martial arts at a young age to survive. He found that he had a natural talent for fighting, and soon enough he had drawn the attention and mentorship of the mystic martial arts master Yao (A.K.A. the Ancient One). The next several decades of Stick’s life were spent in the shadows, during which he became the leader of the Chaste, an elite organization of ninjas created to counter the insidious clan of the Hand. Stick’s life was full of thrills and adventures, but as he got older, life in the shadows started to wear on him. He took a young blind boy named Matt Murdock under his wing to train as his heir. He taught the boy to fight and to develop his radarlike senses, which compensated for his blindness. Within a few years, Murdock’s abilities began to rival Stick’s. As the super hero Daredevil, Murdock uses the training Stick gave him for the betterment of humanity. Stick died years ago, saving Daredevil and Black Widow from the Hand. He has returned to life occasionally since.",
+    "personality": "Stick is a gruffand disagreeable old man whose training methods often verge upon outright cruelty. He is hard on everyone, but none more than Matt Murdock. Stick cares deeply for Murdock but that care often translates to harsh treatment. Stick’s life has been hard, and he had to become hard to get through it. He fears that his star pupil lacks that same hardness, and that it may one day get him killed.",
+    "traits": [
+      "Abrasive",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extraordinary Origin",
+      "Fearless"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Public Identity",
+      "Supernatural",
+      "Vision Issues"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Chain Strikes",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Leg Sweep"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Heightened Senses 2",
+          "Mighty 1"
+        ]
+      }
+    ],
+    "id": "stick",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "STINGER",
     "realName": "Cassandra “Cassie” Lang",
     "rank": 3,
@@ -30161,6 +34622,97 @@ export const MMRPG_CHARACTERS = [
     "id": "sunspot-xmen97"
   },
   {
+    "name": "SUPER-SKRULL",
+    "realName": "Kl’rt",
+    "rank": 5,
+    "health": 90,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 7,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 3,
+      "ego": 6,
+      "logic": 3
+    },
+    "speed": {
+      "run": 10,
+      "climb": 6,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military; Spy",
+    "origin": "Alien: Skrull",
+    "teams": "Kree-Skrull Alliance; Children of Lost",
+    "base": "Abandoned Safehouse",
+    "features": "Green-skinned alien",
+    "history": "Kl’rt is an experienced soldier of the Skrull Empire. He was imbued with super powers by the Skrull Emperor Dorrek in a plot to gain revenge against the Fantastic Four, and dubbed the “Super-Skrull.” While he would occasionally have the upper hand in these conflicts, he was regularly defeated by the team. He fell out of favor with the government and was exiled, becoming a free agent and often having an on-again, off-again relationship with both the inhabitants of Earth and his home race. Eventually, after the Skrull Empire had crumbled into factions, he joined the group devoted to seeking an heir to Emperor Dorrek VIII — Hulkling. The Super- Skrull revealed the truth of Hulkling’s origin and his own role in killing Hulkling’s “mother.” As punishment, Kl’rt was forbidden from taking another life and relegated to diplomatic duty.",
+    "personality": "Kl’rt is arrogant, often considering himself to be the most powerful warrior of his kind, and possibly the entire galaxy. He is also extremely loyal to the ideals of the Skrull empire, even when his race has repeatedly turned their backs on him. He has grown to loathe the superhumans of Earth due to his repeated defeats, but his recent punishment by his emperor is forcing him to re-evaluate this hatred. He isn’t adverse to tricking humans into doing his dirty work for him, however.",
+    "traits": [
+      "Battle Ready",
+      "Combat Reflexes",
+      "Connections: Espionage, Military (Kree-Skrull Alliance)",
+      "Extra Occupation",
+      "Interrogation",
+      "Iron Will",
+      "Leverage",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Alien Heritage",
+      "Black Market Access",
+      "Extreme Appearance (in their natural form)",
+      "Obligation: Emperor Hulkling",
+      "Secret Identity (when disguised)"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Disguise",
+          "Shape-Shift"
+        ]
+      },
+      {
+        "set": "Plasticity",
+        "names": [
+          "Extended Reach 2",
+          "Flexible Bones 2",
+          "Slip Free",
+          "Stilt Steps"
+        ]
+      },
+      {
+        "set": "Elemental Control (Fire, Force)",
+        "names": [
+          "Elemental Barrier",
+          "Elemental Burst",
+          "Elemental Push"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Crushing Grip",
+          "Ground-Shaking Stomp",
+          "Smash"
+        ]
+      },
+      {
+        "set": "Illusion",
+        "names": [
+          "Extend Invisibility",
+          "Invisibility"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Revenge of the Super-Skrull",
+    "id": "super-skrull"
+  },
+  {
     "name": "SUPERGIANT",
     "realName": "Supergiant",
     "rank": 5,
@@ -30402,6 +34954,84 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "swarm-spider-verse-expansion"
+  },
+  {
+    "name": "SWORD MASTER",
+    "realName": "Lin Lie",
+    "rank": 3,
+    "health": 60,
+    "focus": 90,
+    "karma": 3,
+    "abilities": {
+      "melee": 4,
+      "agility": 3,
+      "resilience": 2,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 1
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Magic, Special Training",
+    "teams": "Agents of Atlas",
+    "base": "Mobile",
+    "features": "Dragon insignia on",
+    "history": "One year after Lin Lie’s father and brother mysteriously disappeared, Lie was attacked at his home in Shanghai by a deliveryman—who turned out to be one of the demons who had kidnapped his missing kin. In a last-ditch effort to ward offthe hellish creature, Lie took hold of his father’s old sword and lashed out. To his surprise, the demon disappeared. The blade once belonged to Fu Xi, one of China’s three legendary sovereigns, and as Xi’s descendant, Lie was one of a select few who could wield it against demons. Determined to save his family, Lie took on the codename of Sword Master and embarked on a global demon-killing spree. After months of adventures, Lie finally encountered a demon he could not defeat. This fearsome creature shattered the legendary blade, embedding the shards within Lie’s body. He would have perished had it not been for the intervention of the dragon spirit Shou-Lao. The serpent imbued Lie with chi power, transforming him into the latest incarnation of Iron Fist. Lie’s search for his family continues, but now he must juggle that quest with the responsibility of being the new Iron Fist.",
+    "personality": "In his heart, Lin Lie is still just a kid from Shanghai. He is young and insecure and constantly questions whether he deserves the power he has been given. Only with the constant support of those around him has Lie been able to build and maintain the confidence to carry on.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extraordinary Origin",
+      "Fearless",
+      "Signature Attack: Focused Strike"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Heroic",
+      "Mentor: Iron Fist (Danny Rand)",
+      "Mentor: Shang-Chi",
+      "Public Identity",
+      "Supernatural",
+      "Young"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Chain Strikes",
+          "Counterstrike Technique",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Focused Strike",
+          "Leg Sweep",
+          "Reverse-Momentum Throw"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Mighty 2"
+        ]
+      }
+    ],
+    "id": "sword-master",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "SWORDSMAN",
@@ -31262,6 +35892,86 @@ export const MMRPG_CHARACTERS = [
     "id": "terrax-secret-wars"
   },
   {
+    "name": "TERROR",
+    "realName": "Unknown, sometimes goes by “Shreck”",
+    "rank": 3,
+    "health": 90,
+    "focus": 120,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 3,
+      "vigilance": 4,
+      "ego": 0,
+      "logic": 3
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Adventurer",
+    "origin": "Magic: Demonic",
+    "teams": "Mercs for Money, Terror Inc.",
+    "base": "New York City",
+    "features": "Patchwork",
+    "history": "Terror hails from Earth-88194, a world that resembles Earth-616 in some superficial ways but lacks costumed super heroes. In their place, Earth-88194 has the Shadow Dwellers, a mysterious and immortal offshoot of humanity that manipulates world affairs from behind the scenes. Terror is not one of these Shadow Dwellers. Instead, he claims to have been a caveman who heroically defended his tribe of early humans from a demon. Unfortunately, before he could kill the demon, it inflicted a terrible curse upon him: He would live forever, but in a constant state of decay. Terror spent the subsequent centuries wandering the planet, harvesting new parts for himself from corpses as the old bits decayed and fell away. Sometime during the medieval era, he met the love of his life, a knight named Talita. When she died, he sealed her le arm in iron and attached it to himself. It is the one part of his body that he has refused to ever replace. In the modern era, Terror became a mercenary, first on Earth-88194, then later on Earth-616. Currently he lives in New York City, where he operates a private detective/mercenary business under the name of Terror Inc.",
+    "personality": "Terror’s personality largely resembles that of a classic P.I. He’s hardnosed and ruthless but not exactly cruel. However, the fine details of who Terror is shi constantly, as he absorbs a bit of the knowledge and personality of the people whose body parts he attaches to himself. TERROR",
+    "traits": [
+      "Combat Expert",
+      "Connections: Super Heroes",
+      "Fearless",
+      "Interrogation",
+      "Investigation"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Cursed",
+      "Extreme Appearance",
+      "Public Identity",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Healing Factor",
+          "Iconic Weapon: Head spikes [can extrude green spikes from his head that can be broken off and used as knives]",
+          "Mighty 1"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Sharp)",
+        "names": [
+          "Fast Attacks",
+          "Riposte",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Power Control",
+        "names": [
+          "Copy Ability",
+          "Copy Power",
+          "Copy Trait"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Suppressive Fire"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Deadpool Role-Plays the Marvel Universe",
+    "id": "terror"
+  },
+  {
     "name": "THANOS",
     "realName": "Thanos",
     "rank": 6,
@@ -31501,6 +36211,81 @@ export const MMRPG_CHARACTERS = [
     "equipment": [
       "Skurge's Battle-Ax"
     ]
+  },
+  {
+    "name": "THE HOOD",
+    "realName": "Parker Davis Robbins",
+    "rank": 2,
+    "health": 30,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 1,
+      "agility": 3,
+      "resilience": 1,
+      "vigilance": 3,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "flight": 10
+    },
+    "occupation": "Criminal",
+    "origin": "Magic: Sorcery",
+    "teams": "Illuminati",
+    "base": "Mobile",
+    "features": "None",
+    "history": "With a pregnant wife at home and an ailing mother in the hospital, Parker Robbins turned to a life of crime to make ends meet. Offa tip from his cousin, Robbins broke into a warehouse that was supposed to contain a large shipment of valuable foreign goods. Robbins found no such riches. What he discovered instead was a summoning circle and a terrifying cloaked demon spawned from the depths of hell. More out of panic than malice, Robbins riddled the demon with bullets. In a frenzy, he stole the creature’s clothes and made offinto the night. Only after the fact did Robbins realize that the garments had special powers. Using them, he could turn invisible, walk on air and even shoot bolts of lightning from his hands. Under the codename of the Hood, Robbins set out to turn his newly found powers toward the pursuit of personal profit. He found that he had a talent for villainy and, after a few rocky capers, his crimes began to pay for themselves. Today, the Hood oversees a crime syndicate worthy of the Kingpin himself.",
+    "personality": "Despite his many crimes, Robbins still sees himself as basically a good person, a misunderstood man of the people. He rarely flaunts his wealth, stowing most of it away for the future benefit of an infant son he hardly ever sees. Largely estranged from his family, Robbins spends most of his time drinking heavily and skulking around his own gambling dens.",
+    "traits": [
+      "Connections: Criminal",
+      "Glibness",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Secret Identity",
+      "Sorcerous",
+      "Streetwise",
+      "Supernatural",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Illusion",
+        "names": [
+          "Invisibility"
+        ]
+      },
+      {
+        "set": "Magic (Sorcery Set)",
+        "names": [
+          "Bolts of Balthakk"
+        ]
+      },
+      {
+        "set": "Ranged Weapons",
+        "names": [
+          "Double Tap",
+          "Snap Shooting",
+          "Stopping Power",
+          "Weapons Blazing"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Flight 1 Note: The night he got his powers, Parker Robbins was approached in an alleyway by a recruiter for Hydra. On Earth-616, Robbins beat this recruiter senseless. On Earth-56438, he accepted the offer."
+        ]
+      }
+    ],
+    "id": "the-hood",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "THE MAKER",
@@ -32212,6 +36997,80 @@ export const MMRPG_CHARACTERS = [
     "id": "thor-of-higher-avalon-secret-wars"
   },
   {
+    "name": "THUNDERBALL",
+    "realName": "Eliot Augustus Franklin",
+    "rank": 3,
+    "health": 120,
+    "focus": 60,
+    "karma": null,
+    "abilities": {
+      "melee": 4,
+      "agility": 1,
+      "resilience": 4,
+      "vigilance": 2,
+      "ego": 0,
+      "logic": 4
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Scientist",
+    "origin": "Magic",
+    "teams": "Illuminati (the Hood’s), Wrecking Crew",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Eliot Franklin was a world-renowned physicist who seemed to be living the dream—until the day he invented a miniature gamma bomb. The bomb’s design was brilliant, but as his reward, Franklin’s employers fired him and patented the bomb in their own names instead of his. Franklin tried to steal back his invention but was caught and sent to prison, where he wound up alongside Dirk Garthwaite, the super villain known as the Wrecker. Franklin and a couple of his fellow inmates helped break Garthwaite out of prison, and in exchange, Garthwaite granted them each a portion of his own powers. Together, these escapees formed the Wrecking Crew. For most of his criminal career, Franklin has worked with the Wrecking Crew, but he did join the Hood’s version of the Illuminati for a while too.",
+    "personality": "Thunderball is known for being smarter and more restrained than the rest of the Wrecking Crew and has occasionally contested the Wrecker for the group’s leadership. He has stayed with the crew largely so that he can continue to fund his research into gamma radiation. If any member of the crew can be reasoned with, it’s Thunderball.",
+    "traits": [
+      "Fearless",
+      "Font of Information",
+      "Inventor",
+      "Scientific Expertise",
+      "Skeptical"
+    ],
+    "tags": [
+      "Lab Access",
+      "Public Identity",
+      "Supernatural",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Crushing Grip",
+          "Immovable",
+          "Quick Toss"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 1",
+          "Brilliance 2",
+          "Iconic Weapon: Thunderball and chain [Throwable club. Automatically returns to thrower.]",
+          "Mighty 1",
+          "Sturdy 1"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Fast Attacks",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      }
+    ],
+    "id": "thunderball",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
+  },
+  {
     "name": "THUNDERSTRIKE (EARTH-982)",
     "realName": "Kevin “Kev” Masterson",
     "rank": 3,
@@ -32290,6 +37149,82 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "thunderstrike-earth-982-avengers-expansion"
+  },
+  {
+    "name": "TIGRA",
+    "realName": "Greer Grant Nelson",
+    "rank": 3,
+    "health": 90,
+    "focus": 60,
+    "karma": 3,
+    "abilities": {
+      "melee": 3,
+      "agility": 5,
+      "resilience": 3,
+      "vigilance": 2,
+      "ego": 1,
+      "logic": 1
+    },
+    "speed": {
+      "run": 6,
+      "climb": 3,
+      "swim": 3,
+      "jump": 6
+    },
+    "occupation": "Adventurer",
+    "origin": "Mythic, Weird Science",
+    "teams": "Defenders, West Coast Avengers",
+    "base": "Mobile",
+    "features": "Body covered with",
+    "history": "As a newly widowed woman in need of a steady income, Greer Nelson took a job working as a laboratory assistant for the kind but mysterious Dr. Joanne Tumolo, who was researching cats as a means of developing physical conditioning treatments for eccentric health club owner Malcolm Donalbain. However, when Tumolo discovered that Donalbain planned on using her treatments for evil, she abandoned her bizarre benefactor and made Nelson her primary test subject. The experimental treatments gave Nelson catlike reflexes and agility. Under the codename the Cat, Nelson embarked on a short stint as a costumed crimefighter, using her abilities to defeat Donalbain once and for all. After sustaining a critical injury in a fight with Hydra, Nelson discovered Tumolo’s true identity. Her beloved boss was not merely a professor with an interest in feline physiology but part of an ancient and underground race of super-powered cat-people. To save her assistant’s life, Tumolo was forced to transform Nelson into a full-fledged cat-person too. Nelson quickly came to appreciate her new form, and she returned to her crimefighting career under the new codename Tigra.",
+    "personality": "Tigra makes the most of her powers with her fierce determination. She fights with a ferocity bordering on savagery when forced to it. Although she has been part of both the Avengers and the Defenders, Tigra is often not shown the same level of respect as her peers in the superhero community. A part of her resents the lack of recognition, but she never lets that stop her.",
+    "traits": [
+      "Combat Reflexes",
+      "Connections: Super Heroes",
+      "Determination",
+      "Extraordinary Origin",
+      "Fearless",
+      "Weird"
+    ],
+    "tags": [
+      "Alternate Form (Tigra form)",
+      "Black Market Access",
+      "Extreme Appearance (in alternate form)",
+      "Heroic",
+      "Public Identity",
+      "Supernatural"
+    ],
+    "powers": [
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Exploit",
+          "Fast Attacks",
+          "Furious Attacks",
+          "Hit & Run",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Jump 1"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Brawling",
+          "Heightened Senses 2",
+          "Mighty 2",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "tigra",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "TINKERER",
@@ -32723,6 +37658,93 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "id": "trapster-avengers-expansion"
+  },
+  {
+    "name": "TRICEPHALOUS",
+    "realName": "Tricephalous",
+    "rank": 5,
+    "health": 120,
+    "focus": 210,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 5,
+      "resilience": 4,
+      "vigilance": 6,
+      "ego": 4,
+      "logic": 0
+    },
+    "speed": {
+      "run": 30,
+      "climb": 15,
+      "swim": 15,
+      "flight": 36
+    },
+    "occupation": "Outsider",
+    "origin": "Monstrous",
+    "teams": "None",
+    "base": "Subterranea",
+    "features": "Three-headed green",
+    "history": "Members of the Deviant race created huge mutates to aid them in their battles against the Eternals. When this plot was discovered, the mutates were abandoned on Monster Island and the tunnels below. They were later found and now serve the Mole Man. Tricephalous is a three-headed winged reptilian Deviant mutate. One of Mole Man’s leading defenders, Tricephalous has battled his master’s foes numerous times, including the Fantastic Four on their first adventure.",
+    "personality": "Tricephalous acts as a defender and steed for the Mole Man. There appears to be more than one member of its race in Subterranea and Monster Island, as similar looking multiheaded monsters have been seen in the Mole Man’s territories. TRICEPHALOUS",
+    "traits": [
+      "Battle Ready",
+      "Clueless",
+      "Connections: Outsiders",
+      "Fresh Eyes",
+      "Monster",
+      "Situational Awareness",
+      "Stranger",
+      "Unusual Size: Huge",
+      "Weird"
+    ],
+    "tags": [
+      "Headquarters: Subterranea",
+      "Mysterious"
+    ],
+    "powers": [
+      {
+        "set": "Basic",
+        "names": [
+          "Accuracy 2",
+          "Additional Limbs",
+          "Environmental Protection",
+          "Flight 2",
+          "Group Flight",
+          "Heightened Senses 1",
+          "Mighty 2",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Elemental Control (Fire)",
+        "names": [
+          "Elemental Barrage",
+          "Elemental Blast",
+          "Elemental Burst",
+          "Elemental Push"
+        ]
+      },
+      {
+        "set": "Melee Weapons (Blunt)",
+        "names": [
+          "Fast Attacks",
+          "Vicious Attack"
+        ]
+      },
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Clobber",
+          "Ground-Shaking Stomp",
+          "Immovable",
+          "Smash"
+        ]
+      }
+    ],
+    "genre": "core",
+    "source": "Fantastic Four: From the Depths",
+    "id": "tricephalous"
   },
   {
     "name": "U.S.AGENT",
@@ -33791,6 +38813,74 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Secret Wars",
     "id": "victorious-secret-wars"
+  },
+  {
+    "name": "VIPER",
+    "realName": "Ophelia Sarkissian",
+    "rank": 2,
+    "health": 30,
+    "focus": 90,
+    "karma": null,
+    "abilities": {
+      "melee": 2,
+      "agility": 3,
+      "resilience": 1,
+      "vigilance": 2,
+      "ego": 2,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Military, Spy",
+    "origin": "Special Training",
+    "teams": "Hellfire Club, Hydra, Serpent Squad",
+    "base": "Mobile",
+    "features": "Artificial fangs",
+    "history": "Orphaned or abandoned shortly after birth, Ophelia Sarkissian was taken in by the terrorist group Hydra when she was just an infant. She took to the organization’s training, and by the time she was in her preteens, she developed an unusual aptitude for combat. Before her twentieth birthday, she earned her way into Hydra’s inner circle. Under the codename of Viper, she took charge of the organization’s most insidious and clandestine operations. Renowned for her ruthlessness in combat, Viper has gone toe to toe with the likes of Captain America (Steve Rogers) and Wolverine (Logan). Although she occasionally works as a private mercenary, she is rarely far from Hydra. The organization is the closest thing she has to a family, and it is the one place in the world where she is respected and loved unconditionally. Her unflinching loyalty to Hydra is emotional as much as it is ideological. Sarkissian is a woman of many aliases and identities. Viper may be the codename she uses the most, but at other times she has been known as Madame Hydra, Madame Viper, the White Warrior Princess, or simply Ms. Sarkissian.",
+    "personality": "Above all, Sarkissian is cold and conniving, and as a leader she makes for an extremely harsh mistress. She cares for interpersonal relationships only insofar as she can use them to advance her own interests. She once clawed her way into a sham marriage with Wolverine (Logan)—a man she personally hated—solely so that she could obtain a favorable political position within a foreign court.",
+    "traits": [
+      "Battle Ready",
+      "Beguiling",
+      "Connections: Espionage",
+      "Connections: Military (Hydra)",
+      "Determination",
+      "Extra Occupation",
+      "Leverage",
+      "Situational Awareness"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Secret Identity",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Martial Arts",
+        "names": [
+          "Attack Stance",
+          "Chain Strikes",
+          "Counterstrike Technique",
+          "Defense Stance",
+          "Do This All Day",
+          "Fast Strikes",
+          "Reverse-Momentum Throw"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Combat Trickery",
+          "Sturdy 1"
+        ]
+      }
+    ],
+    "id": "viper",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "VISION",
@@ -36028,6 +41118,79 @@ export const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Spider-Verse Expansion",
     "id": "wraith-earth-1048-spider-verse-expansion"
+  },
+  {
+    "name": "WRECKER",
+    "realName": "Dirk Garthwaite",
+    "rank": 3,
+    "health": 150,
+    "focus": 30,
+    "karma": null,
+    "abilities": {
+      "melee": 6,
+      "agility": 2,
+      "resilience": 5,
+      "vigilance": 1,
+      "ego": 1,
+      "logic": 0
+    },
+    "speed": {
+      "run": 5,
+      "climb": 3,
+      "swim": 3,
+      "jump": 3
+    },
+    "occupation": "Criminal",
+    "origin": "Magic",
+    "teams": "Wrecking Crew",
+    "base": "Mobile",
+    "features": "None",
+    "history": "Dirk Garthwaite was just a small-time thief with a crowbar until the day he was accidentally granted magical powers originally meant for Loki. As the Wrecker, Garthwaite used his new powers to embark on a one-man crime spree across New York City, and it took the intervention of Thor to end his villainous rampage. Garthwaite wound up serving time in Ryker’s Island. He eventually escaped, but only with the help of a few of his fellow inmates. Out of gratitude, he granted a portion of his own power to each of them, and they formed the nefarious Wrecking Crew. Under the Wrecker’s leadership, the Wrecking Crew has committed countless crimes, often in the employ of smarter, more ambitious or more powerful villains.",
+    "personality": "Even before he had powers, Garthwaite was prone to fits of anger and violence. Most people consider him an impulsive man in need of some serious psychiatric help. He is admired by the other members of his crew—if by no one else.",
+    "traits": [
+      "Abrasive",
+      "Berserker",
+      "Connections: Criminal",
+      "Gullible"
+    ],
+    "tags": [
+      "Black Market Access",
+      "Public Identity",
+      "Streetwise",
+      "Supernatural",
+      "Villainous"
+    ],
+    "powers": [
+      {
+        "set": "Super-Strength",
+        "names": [
+          "Banging Heads",
+          "Clobber",
+          "Crushing Grip",
+          "Immovable",
+          "Smash"
+        ]
+      },
+      {
+        "set": "Basic",
+        "names": [
+          "Iconic Weapon: Magic crowbar [Throwable club. Automatically returns to thrower.]",
+          "Mighty 2",
+          "Sturdy 2"
+        ]
+      },
+      {
+        "set": "Melee Weapons",
+        "names": [
+          "Fast Attacks",
+          "Vicious Attack",
+          "Whirling Frenzy"
+        ]
+      }
+    ],
+    "id": "wrecker",
+    "genre": "core",
+    "source": "The Cataclysm of Kang"
   },
   {
     "name": "YONDU UDONTA",
