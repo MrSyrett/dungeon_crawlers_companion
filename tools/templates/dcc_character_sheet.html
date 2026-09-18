@@ -448,12 +448,12 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 body.dark .sheet{border-color:#4a4a52;}
 
 /* 3 — header banner: game name + character name on top, meta underneath */
-.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,#7a140f,#c0251e);padding:14px 18px 15px;border-bottom:none;}
-body.dark .hdr-row{background:linear-gradient(120deg,#7a140f,#c0251e);}
+.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,#dd2a1f,#ef4436);padding:14px 18px 15px;border-bottom:none;}
+body.dark .hdr-row{background:linear-gradient(120deg,#dd2a1f,#ef4436);}
 .hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
 .hdr-logo{background:transparent;padding:0;min-width:0;display:block;align-items:flex-start;justify-content:flex-start;}
-.lg-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;line-height:1;color:#fff;text-transform:uppercase;letter-spacing:.02em;}
-.lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:#7fc0f5;margin-top:4px;}
+.lg-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;line-height:1;color:#141414;text-transform:uppercase;letter-spacing:.02em;}
+.lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:#f7c948;margin-top:4px;}
 .hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
 .hdr-field,.lockfield{border:1px solid rgba(255,255,255,.26);background:rgba(255,255,255,.10);border-radius:7px;min-width:0;padding:4px 9px;border-right:1px solid rgba(255,255,255,.26);}
 .hdr-field:nth-child(3),.hdr-field:nth-child(8){border-right:1px solid rgba(255,255,255,.26);}
@@ -542,7 +542,7 @@ body.dark .section-bar::after{background:#544c54;}
   <div class="hdr-row">
     <div class="hdr-top">
       <div class="hdr-logo">
-        <div class="lg-word">Dungeon Crawler Carl</div>
+        <div class="lg-word">Dungeon Crawler Carl RPG</div>
         <div class="lg-sub">Character Sheet</div>
       </div>
       <div class="hdr-field name-primary"><label>Character name</label><input type="text" id="f-name" placeholder="Character Name"></div>
@@ -1762,6 +1762,37 @@ function consumeSpellMana(row) {
   return true;
 }
 
+// ── AI FAVOR AUTOMATION ──
+// A weapon/skill that "grants AI Favor N" (Dungeon Crawler Carl's audience reward)
+// bumps the AI Favor tracker when its Attack or Skill is rolled. The amount is read
+// from the row's own Effects/Notes text if present, else looked up from the matching
+// rulebook entry's description (DCC_SKILLS / DCC_SPELLS).
+function aiFavorAmount(name, rowText) {
+  const rx = /AI\s*Favor[^0-9+-]*\+?\s*(\d+)/i;
+  let m = String(rowText || '').match(rx);
+  if(m) return parseInt(m[1], 10) || 0;
+  const key = String(name || '').replace(/\s*\(spell\)\s*$/i, '').trim();
+  if(!key) return 0;
+  const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const lk = key.toLowerCase(), nk = norm(key);
+  const look = arr => (arr && arr.length) ? (arr.find(e => String(e.name).toLowerCase() === lk) || arr.find(e => norm(e.name) === nk)) : null;
+  const e = look(typeof DCC_SKILLS !== 'undefined' ? DCC_SKILLS : null)
+         || look(typeof DCC_SPELLS !== 'undefined' ? DCC_SPELLS : null);
+  if(e) { const d = String(e.desc || '').match(rx); if(d) return parseInt(d[1], 10) || 0; }
+  return 0;
+}
+function addAiFavor(n, name) {
+  if(!n) return;
+  const el = document.getElementById('dr-aifavor');
+  if(!el) return;
+  let cur = parseInt(String(el.value).replace(/[^0-9-]/g, ''), 10);
+  if(isNaN(cur)) cur = 0;
+  el.value = String(cur + n);
+  try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+  scheduleAutosave();
+  addLog('AI Favor', '+' + n, (name ? name + ' — ' : '') + 'now ' + (cur + n), 'crit');
+}
+
 function rollAttack(btn) {
   const row = btn.closest('tr');
   if(!consumeSpellMana(row)) return;
@@ -1801,6 +1832,7 @@ function rollAttack(btn) {
 
   addLog(`${name}` + (hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''), resultStr, detailStr, type);
   markSkillForAttack(row);   // attack skills also mark their Skills-list entry for advancement
+  addAiFavor(aiFavorAmount(name, inputs[3] ? inputs[3].value : ''), name);
 }
 
 // Find the Skills-list row that matches an attack (by stored source or by name,
@@ -1847,6 +1879,7 @@ function rollSkill(btn) {
   // Using a skill marks it for advancement (Core p.169).
   const chk = row.querySelector('input[type="checkbox"]');
   if(chk && !chk.checked) { chk.checked = true; try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
+  addAiFavor(aiFavorAmount(name, inputs[3] ? inputs[3].value : ''), name);
 }
 
 // ── SKILL ADVANCEMENT ──
