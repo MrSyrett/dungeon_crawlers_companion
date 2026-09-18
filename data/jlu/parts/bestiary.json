@@ -3,56 +3,170 @@
     "name": "Street Thug",
     "role": "Minion",
     "tier": "E",
-    "attributes": { "potency": 1, "accuracy": -1, "agility": 1, "resistance": 1, "spirit": 0, "mind": -3 },
+    "attributes": {
+      "potency": 1,
+      "accuracy": -1,
+      "agility": 1,
+      "resistance": 1,
+      "spirit": 0,
+      "mind": -3
+    },
     "defense": 10,
-    "attacks": [ { "name": "Pistol", "bonus": 2, "damage": "1d6+1" } ],
-    "abilities": [ { "name": "Just a Minion", "text": "A minion is defeated upon suffering any amount of Damage." } ]
+    "attacks": [
+      {
+        "name": "Pistol",
+        "bonus": 2,
+        "damage": "1d6+1"
+      }
+    ],
+    "abilities": [
+      {
+        "name": "Just a Minion",
+        "text": "A minion is defeated upon suffering any amount of Damage."
+      }
+    ]
   },
   {
     "name": "Parademon",
     "role": "Minion",
     "tier": "D",
-    "attributes": { "potency": 3, "accuracy": 1, "agility": 1, "resistance": 3, "spirit": 0, "mind": -1 },
+    "attributes": {
+      "potency": 3,
+      "accuracy": 1,
+      "agility": 1,
+      "resistance": 3,
+      "spirit": 0,
+      "mind": -1
+    },
     "resolve": 10,
     "defense": 11,
-    "attacks": [ { "name": "Fists / Simple Weapon", "bonus": 4, "damage": "1d6+3", "type": "Physical", "range": "Melee" } ],
-    "powers": [ "Super Strength 1", "Flight 1" ],
-    "abilities": [ { "name": "Darkseid Is", "text": "When defeated, its body explodes, dealing 1d6 energy damage to all Adjacent." } ]
+    "attacks": [
+      {
+        "name": "Fists / Simple Weapon",
+        "bonus": 4,
+        "damage": "1d6+3",
+        "type": "Physical",
+        "range": "Melee"
+      }
+    ],
+    "powers": [
+      "Super Strength 1",
+      "Flight 1"
+    ],
+    "abilities": [
+      {
+        "name": "Darkseid Is",
+        "text": "When defeated, its body explodes, dealing 1d6 energy damage to all Adjacent."
+      }
+    ]
   },
   {
     "name": "Cybernetic Tyrannosaurus",
     "role": "Brute",
     "tier": "C",
-    "attributes": { "potency": 9, "accuracy": 3, "agility": -1, "resistance": 9, "spirit": 0, "mind": -3 },
+    "attributes": {
+      "potency": 9,
+      "accuracy": 3,
+      "agility": -1,
+      "resistance": 9,
+      "spirit": 0,
+      "mind": -3
+    },
     "resolve": 18,
     "defense": 20,
-    "attacks": [ { "name": "Fangs / Claws", "bonus": 10, "damage": "2d6+9", "type": "Physical", "range": "Melee" } ],
-    "powers": [ "Super Strength 2", "Enhanced Resistance 2", "Exoskeleton 1 (Armored Defense, Integrated Weaponry – Laser)" ],
-    "abilities": [ { "name": "Relentless Strength", "text": "The Brute's first Damage roll in a Turn is made with Advantage." } ]
+    "attacks": [
+      {
+        "name": "Fangs / Claws",
+        "bonus": 10,
+        "damage": "2d6+9",
+        "type": "Physical",
+        "range": "Melee"
+      }
+    ],
+    "powers": [
+      "Super Strength 2",
+      "Enhanced Resistance 2",
+      "Exoskeleton 1 (Armored Defense, Integrated Weaponry – Laser)"
+    ],
+    "abilities": [
+      {
+        "name": "Relentless Strength",
+        "text": "The Brute's first Damage roll in a Turn is made with Advantage."
+      }
+    ]
   },
   {
     "name": "LexCorp Tactical Android",
     "role": "General",
     "tier": "C",
-    "attributes": { "potency": 6, "accuracy": 6, "agility": 3, "resistance": 6, "spirit": 3, "mind": 3 },
+    "attributes": {
+      "potency": 6,
+      "accuracy": 6,
+      "agility": 3,
+      "resistance": 6,
+      "spirit": 3,
+      "mind": 3
+    },
     "resolve": 18,
     "defense": 18,
-    "attacks": [ { "name": "Energy Blast", "bonus": 10, "damage": "1d6+6", "type": "Energy", "range": "Ranged" } ],
-    "powers": [ "Super Strength 1", "Enhanced Resistance 1", "Energy Blast 2" ],
-    "abilities": [ { "name": "Tactical Movement", "text": "At the beginning of its turn, the General may move 1 ally by 1 Distance." } ]
+    "attacks": [
+      {
+        "name": "Energy Blast",
+        "bonus": 10,
+        "damage": "1d6+6",
+        "type": "Energy",
+        "range": "Ranged"
+      }
+    ],
+    "powers": [
+      "Super Strength 1",
+      "Enhanced Resistance 1",
+      "Energy Blast 2"
+    ],
+    "abilities": [
+      {
+        "name": "Tactical Movement",
+        "text": "At the beginning of its turn, the General may move 1 ally by 1 Distance."
+      }
+    ]
   },
   {
     "name": "Metal Sentinel",
     "role": "Brute",
     "tier": "C",
-    "attributes": { "potency": 6, "accuracy": 1, "agility": 0, "resistance": 9, "spirit": 0, "mind": -1 },
+    "attributes": {
+      "potency": 6,
+      "accuracy": 1,
+      "agility": 0,
+      "resistance": 9,
+      "spirit": 0,
+      "mind": -1
+    },
     "resolve": 18,
     "defense": 20,
-    "attacks": [ { "name": "Metal Fists", "bonus": 8, "damage": "2d6+6", "type": "Physical", "range": "Melee" } ],
-    "powers": [ "Enhanced Resistance 2", "Body Metamorphosis 1 (Hardened)", "Super Strength 1" ],
+    "attacks": [
+      {
+        "name": "Metal Fists",
+        "bonus": 8,
+        "damage": "2d6+6",
+        "type": "Physical",
+        "range": "Melee"
+      }
+    ],
+    "powers": [
+      "Enhanced Resistance 2",
+      "Body Metamorphosis 1 (Hardened)",
+      "Super Strength 1"
+    ],
     "abilities": [
-      { "name": "Relentless Strength", "text": "The Brute's first Damage roll in a Turn is made with Advantage." },
-      { "name": "Harden", "text": "May spend 1 Resolve to increase its Damage Reduction by +1 per Round." }
+      {
+        "name": "Relentless Strength",
+        "text": "The Brute's first Damage roll in a Turn is made with Advantage."
+      },
+      {
+        "name": "Harden",
+        "text": "May spend 1 Resolve to increase its Damage Reduction by +1 per Round."
+      }
     ]
   },
   {
@@ -61,16 +175,45 @@
     "tier": "C",
     "origin": "Human",
     "realName": "George “Digger” Harkness",
-    "attributes": { "potency": 3, "accuracy": 9, "agility": 6, "resistance": 3, "spirit": 6, "mind": 3 },
+    "attributes": {
+      "potency": 3,
+      "accuracy": 9,
+      "agility": 6,
+      "resistance": 3,
+      "spirit": 6,
+      "mind": 3
+    },
     "resolve": 36,
     "defense": 18,
     "damageReduction": "1 (2 against projectiles)",
-    "attacks": [ { "name": "Boomerang", "bonus": 15, "damage": "2d6+8", "type": "Physical", "range": "Distant" } ],
-    "powers": [ "Marksman 3 (Favorite Weapon, Special Ammunition, Ricochet Shot, Improved Special Ammunition)" ],
-    "equipment": [ "Kevlar Suit", "Smoke Bomb", "Grappling Gun", "Boomerangs", "Tracker" ],
+    "attacks": [
+      {
+        "name": "Boomerang",
+        "bonus": 15,
+        "damage": "2d6+8",
+        "type": "Physical",
+        "range": "Distant"
+      }
+    ],
+    "powers": [
+      "Marksman 3 (Favorite Weapon, Special Ammunition, Ricochet Shot, Improved Special Ammunition)"
+    ],
+    "equipment": [
+      "Kevlar Suit",
+      "Smoke Bomb",
+      "Grappling Gun",
+      "Boomerangs",
+      "Tracker"
+    ],
     "abilities": [
-      { "name": "Villain", "text": "Gains 1 Action (not counting toward the Round's action total) at the end of each Hero's Turn." },
-      { "name": "Guaranteed Return", "text": "Once per Round, when he misses an Attack, at the end of the turn he may re-attack the same target, dealing half Damage on a hit." }
+      {
+        "name": "Villain",
+        "text": "Gains 1 Action (not counting toward the Round's action total) at the end of each Hero's Turn."
+      },
+      {
+        "name": "Guaranteed Return",
+        "text": "Once per Round, when he misses an Attack, at the end of the turn he may re-attack the same target, dealing half Damage on a hit."
+      }
     ],
     "description": "A sarcastic, opportunistic mercenary and excellent marksman with a lethal arsenal of trick boomerangs. Predictable in negotiations and easily destabilized by a good taunt.",
     "conditionBoxes": 7
@@ -80,22 +223,60 @@
     "role": "Villain (Furtive)",
     "tier": "C",
     "origin": "Human",
-    "attributes": { "potency": 6, "accuracy": 9, "agility": 9, "resistance": 6, "spirit": 6, "mind": 6 },
+    "attributes": {
+      "potency": 6,
+      "accuracy": 9,
+      "agility": 9,
+      "resistance": 6,
+      "spirit": 6,
+      "mind": 6
+    },
     "resolve": 35,
     "defense": 20,
     "damageReduction": "3",
     "attacks": [
-      { "name": "Fists", "bonus": 10, "damage": "2d6+6", "type": "Physical" },
-      { "name": "Katana", "bonus": 12, "damage": "2d6+8", "type": "Physical" },
-      { "name": "Throwing Daggers", "bonus": 8, "damage": "1d6+6", "range": "Close" }
+      {
+        "name": "Fists",
+        "bonus": 10,
+        "damage": "2d6+6",
+        "type": "Physical"
+      },
+      {
+        "name": "Katana",
+        "bonus": 12,
+        "damage": "2d6+8",
+        "type": "Physical"
+      },
+      {
+        "name": "Throwing Daggers",
+        "bonus": 8,
+        "damage": "1d6+6",
+        "range": "Close"
+      }
     ],
-    "powers": [ "Martial Master 3 (Acrobatic Fighter, Precise Strike, Fists of Steel, Body Fortification)", "Swordsman 2 (Precise Attack, Sudden Charge, Barrage of Blows)" ],
-    "knowledge": [ "Subterfuge" ],
-    "traits": [ "Affiliation (Court of Owls)" ],
+    "powers": [
+      "Martial Master 3 (Acrobatic Fighter, Precise Strike, Fists of Steel, Body Fortification)",
+      "Swordsman 2 (Precise Attack, Sudden Charge, Barrage of Blows)"
+    ],
+    "knowledge": [
+      "Subterfuge"
+    ],
+    "traits": [
+      "Affiliation (Court of Owls)"
+    ],
     "abilities": [
-      { "name": "Villain", "text": "Gains +1 Action (not counting toward the total) at the end of each Hero's turn." },
-      { "name": "Gift from the Court", "text": "At the start of the Round, choose one piece of Gear from the Equipment list; use it once until end of Round." },
-      { "name": "Shadow Strike", "text": "When hidden in shadows, gains +1 die on Damage rolls." }
+      {
+        "name": "Villain",
+        "text": "Gains +1 Action (not counting toward the total) at the end of each Hero's turn."
+      },
+      {
+        "name": "Gift from the Court",
+        "text": "At the start of the Round, choose one piece of Gear from the Equipment list; use it once until end of Round."
+      },
+      {
+        "name": "Shadow Strike",
+        "text": "When hidden in shadows, gains +1 die on Damage rolls."
+      }
     ],
     "description": "An elite, resurrected assassin of the Court of Owls — a silent killer, skilled fighter and relentless tracker.",
     "conditionBoxes": 7
@@ -106,21 +287,64 @@
     "tier": "C",
     "origin": "Human",
     "realName": "Leonard Snart",
-    "attributes": { "potency": 6, "accuracy": 9, "agility": 6, "resistance": 3, "spirit": 12, "mind": 9 },
+    "attributes": {
+      "potency": 6,
+      "accuracy": 9,
+      "agility": 6,
+      "resistance": 3,
+      "spirit": 12,
+      "mind": 9
+    },
     "resolve": 62,
     "defense": 20,
-    "attacks": [ { "name": "Ice Blast", "bonus": 15, "damage": "2d6+15", "type": "Ice", "range": "Close" } ],
-    "powers": [ "Energy Blast G2 (Ice)", "Elemental Manipulation G2 (Ice)", "Marksman 3 (Favorite Weapon, Ricochet Shot, Instinctive Shooter, Barrage of Shots)" ],
-    "knowledge": [ "Tech" ],
-    "traits": [ "Pocket Gadgets" ],
-    "equipment": [ "Cold Gun (grants Energy Blast and Elemental Manipulation while wielded)" ],
+    "attacks": [
+      {
+        "name": "Ice Blast",
+        "bonus": 15,
+        "damage": "2d6+15",
+        "type": "Ice",
+        "range": "Close"
+      }
+    ],
+    "powers": [
+      "Energy Blast G2 (Ice)",
+      "Elemental Manipulation G2 (Ice)",
+      "Marksman 3 (Favorite Weapon, Ricochet Shot, Instinctive Shooter, Barrage of Shots)"
+    ],
+    "knowledge": [
+      "Tech"
+    ],
+    "traits": [
+      "Pocket Gadgets"
+    ],
+    "equipment": [
+      "Cold Gun (grants Energy Blast and Elemental Manipulation while wielded)"
+    ],
     "abilities": [
-      { "name": "Villain", "text": "Gains 1 Action (not counting toward the Round limit) at the end of each Hero's turn." },
-      { "name": "All Part of the Plan", "text": "Once per Scene, when targeted, declare it was all part of the plan to negate the incoming hit." },
-      { "name": "Cold Aura", "text": "+2 Defense (already included) and half damage from cold attacks." },
-      { "name": "Ice Age", "text": "Once per Campaign, destroy the Cold Gun to absorb its powers, becoming a Meta-Human with +4 Defense and 15 Resolve — a Tier B threat." },
-      { "name": "Practical Knowledge", "text": "At the start of the Scene, choose one ability from a Knowledge to have until the Scene ends." },
-      { "name": "Speedster Hunter", "text": "Deals +1 Damage Die to characters with the Speed Force." }
+      {
+        "name": "Villain",
+        "text": "Gains 1 Action (not counting toward the Round limit) at the end of each Hero's turn."
+      },
+      {
+        "name": "All Part of the Plan",
+        "text": "Once per Scene, when targeted, declare it was all part of the plan to negate the incoming hit."
+      },
+      {
+        "name": "Cold Aura",
+        "text": "+2 Defense (already included) and half damage from cold attacks."
+      },
+      {
+        "name": "Ice Age",
+        "text": "Once per Campaign, destroy the Cold Gun to absorb its powers, becoming a Meta-Human with +4 Defense and 15 Resolve — a Tier B threat."
+      },
+      {
+        "name": "Practical Knowledge",
+        "text": "At the start of the Scene, choose one ability from a Knowledge to have until the Scene ends."
+      },
+      {
+        "name": "Speedster Hunter",
+        "text": "Deals +1 Damage Die to characters with the Speed Force."
+      }
     ],
     "description": "A brilliant, methodical criminal whose Cold Gun grants a suite of ice-manipulation abilities — but he is entirely dependent on it.",
     "conditionBoxes": 7
@@ -131,26 +355,249 @@
     "tier": "C",
     "origin": "Human",
     "realName": "Damian Wayne",
-    "attributes": { "potency": 6, "accuracy": 6, "agility": 6, "resistance": 6, "spirit": 3, "mind": 6 },
+    "attributes": {
+      "potency": 6,
+      "accuracy": 6,
+      "agility": 6,
+      "resistance": 6,
+      "spirit": 3,
+      "mind": 6
+    },
     "resolve": 25,
     "defense": 22,
     "attacks": [
-      { "name": "Katana", "bonus": 11, "damage": "1d6+7", "type": "Physical" },
-      { "name": "Martial Strikes", "bonus": 7, "damage": "1d6+6", "type": "Physical" }
+      {
+        "name": "Katana",
+        "bonus": 11,
+        "damage": "1d6+7",
+        "type": "Physical"
+      },
+      {
+        "name": "Martial Strikes",
+        "bonus": 7,
+        "damage": "1d6+6",
+        "type": "Physical"
+      }
     ],
-    "powers": [ "Swordsman G2 (Singular Weapon [Katana], Precise Strike, Violent Attack, Parry Blow)", "Martial Master G2 (Acrobatic Fighter, Precise Strike, Acrobatic Kicks)" ],
-    "knowledge": [ "Strategy", "Tech", "Subterfuge" ],
-    "traits": [ "Nepobaby (Affiliation: Bat-Family)", "Pocket Gadgets" ],
-    "equipment": [ "Katana (Martial Weapon)", "Smoke Bomb" ],
+    "powers": [
+      "Swordsman G2 (Singular Weapon [Katana], Precise Strike, Violent Attack, Parry Blow)",
+      "Martial Master G2 (Acrobatic Fighter, Precise Strike, Acrobatic Kicks)"
+    ],
+    "knowledge": [
+      "Strategy",
+      "Tech",
+      "Subterfuge"
+    ],
+    "traits": [
+      "Nepobaby (Affiliation: Bat-Family)",
+      "Pocket Gadgets"
+    ],
+    "equipment": [
+      "Katana (Martial Weapon)",
+      "Smoke Bomb"
+    ],
     "archetypeSkills": [
-      { "name": "Dirty Boxing", "text": "Once per Round, when you hit, spend 2 Resolve and an Action to deal +2 Damage per Tier." },
-      { "name": "I Follow Other Rules", "text": "Once per Issue, when you do something morally questionable, use one of the Editor's Editorial Points as if it were a Plot Point." }
+      {
+        "name": "Dirty Boxing",
+        "text": "Once per Round, when you hit, spend 2 Resolve and an Action to deal +2 Damage per Tier."
+      },
+      {
+        "name": "I Follow Other Rules",
+        "text": "Once per Issue, when you do something morally questionable, use one of the Editor's Editorial Points as if it were a Plot Point."
+      }
     ],
     "limitations": [
-      { "name": "Bad Reputation", "text": "In Rescue scenes, the Resolve cost of abilities increases by 2." },
-      { "name": "Paranoia", "text": "Damian distrusts everything and everyone around him." }
+      {
+        "name": "Bad Reputation",
+        "text": "In Rescue scenes, the Resolve cost of abilities increases by 2."
+      },
+      {
+        "name": "Paranoia",
+        "text": "Damian distrusts everything and everyone around him."
+      }
     ],
     "description": "Son of Bruce Wayne and Talia al Ghul, raised as the ultimate weapon of the League of Assassins — arrogant, violent and incredibly skilled, a hero in constant inner conflict. Usable as a pregen Hero.",
     "conditionBoxes": 4
+  },
+  {
+    "name": "Lobo",
+    "role": "Villain (Immortal Monster)",
+    "tier": "A",
+    "origin": "Czarnian",
+    "realName": "The Main Man",
+    "attributes": {
+      "potency": 18,
+      "accuracy": 9,
+      "agility": 9,
+      "resistance": 12,
+      "spirit": 6,
+      "mind": 3
+    },
+    "resolve": 100,
+    "defense": 28,
+    "damageReduction": "3",
+    "conditionBoxes": 5,
+    "attacks": [
+      {
+        "name": "Chain-Hook",
+        "bonus": 15,
+        "damage": "1d8+18",
+        "type": "Physical",
+        "range": "Near"
+      },
+      {
+        "name": "Smash",
+        "bonus": 20,
+        "damage": "1d8+18",
+        "type": "Physical",
+        "range": "Adjacent"
+      }
+    ],
+    "powers": [
+      "Extreme Regeneration 5",
+      "Super Strength 4",
+      "Enhanced Senses (Tracking Smell) 5",
+      "Enhanced Resistance 3"
+    ],
+    "knowledge": [
+      "World of Crime",
+      "Survival",
+      "Piloting"
+    ],
+    "traits": [
+      "Tough as Nails",
+      "Immortal",
+      "Special Vehicle (Space motorcycle)"
+    ],
+    "limitations": [
+      "Code of Conduct — The Written Word: Lobo will never violate the explicit, signed terms of a mercenary contract once his credits have cleared on Oa."
+    ],
+    "abilities": [
+      {
+        "name": "Acyclic Action",
+        "text": "Gains 1 extra independent Action executed immediately at the end of any individual Hero's turn, used solely to pursue or strike the character currently holding the asset."
+      },
+      {
+        "name": "Extreme Regeneration",
+        "text": "Regains 5 Resolve at the beginning of every Round."
+      },
+      {
+        "name": "Enhanced Senses (Passive)",
+        "text": "+6 bonus to any tracking test made using his sense of smell."
+      },
+      {
+        "name": "He Does Not Stay Down!",
+        "text": "If the Main Man is Defeated, he returns to Wounded with half his Resolve points."
+      },
+      {
+        "name": "It Tickles! (Reaction)",
+        "text": "When hit by a critical hit or high-intensity energy blast, he spends 3 Resolve to instantly ignore any Stunned or Slowed status the attack would impose."
+      },
+      {
+        "name": "The Chain-Drag (1 Action)",
+        "text": "Launches his hook at a target within Near range (+15 to hit). On a hit, instead of damage, the target makes an Opposed Potency Test vs Lobo's Potency (+12); on a failure they are pulled into Adjacent range and land Prone."
+      },
+      {
+        "name": "It's Only Business",
+        "text": "At the start of an Issue, one (or all) of the Heroes becomes the target of one of Lobo's contracts. Lobo gains Advantage on Attack rolls and +1 damage die against that target until it is Defeated."
+      },
+      {
+        "name": "Frag 'Em All",
+        "text": "Once per Round, makes a free attack against anyone who enters his Close distance."
+      },
+      {
+        "name": "The Main Man Rule",
+        "text": "Cannot be permanently defeated by reducing his Resolve to 0. Every time he marks Defeated, he stands up the next Round with 50 Resolve and all conditions cleared — the Heroes must find a narrative solution to resolve the clash."
+      }
+    ],
+    "description": "The Main Man — an intergalactic Czarnian bounty hunter who cares only for fulfilling his contracts and the credits involved. His regeneration is among the most powerful in the universe, making him virtually immortal; more a force of nature than a villain. From the 'A Czarnian and a Half' Quickstart expansion."
+  },
+  {
+    "name": "Autonomous Construct",
+    "role": "Minion",
+    "tier": "D",
+    "attributes": {
+      "potency": 6,
+      "accuracy": 3,
+      "agility": 3,
+      "resistance": 3,
+      "spirit": 0,
+      "mind": -3
+    },
+    "resolve": 10,
+    "defense": 12,
+    "attacks": [
+      {
+        "name": "Gatling-Laser Arm",
+        "bonus": 6,
+        "damage": "1d6+3",
+        "type": "Energy",
+        "range": "Near"
+      }
+    ],
+    "abilities": [
+      {
+        "name": "Civilian Protocol (Passive)",
+        "text": "Unless actively blocked by a Hero's physical frame, cover, or a force field, the Sentinel prioritizes firing on pinned scientists rather than attacking the Heroes."
+      },
+      {
+        "name": "Minion Life",
+        "text": "Defeated upon receiving any Damage."
+      }
+    ],
+    "description": "A CADMUS heavy-duty automated defense sentinel. From the 'A Czarnian and a Half' Quickstart expansion."
+  },
+  {
+    "name": "Cadmus Shock Troopers",
+    "role": "Group",
+    "tier": "C",
+    "origin": "Human",
+    "attributes": {
+      "potency": 9,
+      "accuracy": 6,
+      "agility": 3,
+      "resistance": 6,
+      "spirit": 0,
+      "mind": 0
+    },
+    "resolve": 45,
+    "defense": 18,
+    "damageReduction": "3",
+    "conditionBoxes": 5,
+    "attacks": [
+      {
+        "name": "Strike",
+        "bonus": 12,
+        "damage": "2d8+9",
+        "type": "Physical",
+        "range": "Adjacent"
+      },
+      {
+        "name": "Energy Gun",
+        "bonus": 9,
+        "damage": "1d8+6",
+        "type": "Energy",
+        "range": "Near"
+      }
+    ],
+    "abilities": [
+      {
+        "name": "Barrage of Attacks",
+        "text": "A Group hits every target within the area it occupies with its Attacks."
+      },
+      {
+        "name": "Group Damage",
+        "text": "While the Group has more than half its total Resolve, its Damage Die is increased one step (1d6 to 1d8) above the normal value for its Tier."
+      },
+      {
+        "name": "Frontline Casualties",
+        "text": "Whenever the Group loses half of its current Resolve (22), reduce the area it occupies by one category; repeat each time it again loses half its remaining Resolve."
+      },
+      {
+        "name": "Relentless Strength (Passive)",
+        "text": "The trooper's first successful close-range Strike each turn is automatically executed with Advantage."
+      }
+    ],
+    "description": "A CADMUS corporate kill-squad deployed to sterilize the block, operating as a Group. From the 'A Czarnian and a Half' Quickstart expansion."
   }
 ]

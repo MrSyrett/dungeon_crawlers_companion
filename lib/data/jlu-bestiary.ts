@@ -5,6 +5,94 @@ import type { JluBestiary } from "./jlu-types";
 
 export const JLU_BESTIARY = [
   {
+    "name": "Autonomous Construct",
+    "role": "Minion",
+    "tier": "D",
+    "attributes": {
+      "potency": 6,
+      "accuracy": 3,
+      "agility": 3,
+      "resistance": 3,
+      "spirit": 0,
+      "mind": -3
+    },
+    "resolve": 10,
+    "defense": 12,
+    "attacks": [
+      {
+        "name": "Gatling-Laser Arm",
+        "bonus": 6,
+        "damage": "1d6+3",
+        "type": "Energy",
+        "range": "Near"
+      }
+    ],
+    "abilities": [
+      {
+        "name": "Civilian Protocol (Passive)",
+        "text": "Unless actively blocked by a Hero's physical frame, cover, or a force field, the Sentinel prioritizes firing on pinned scientists rather than attacking the Heroes."
+      },
+      {
+        "name": "Minion Life",
+        "text": "Defeated upon receiving any Damage."
+      }
+    ],
+    "description": "A CADMUS heavy-duty automated defense sentinel. From the 'A Czarnian and a Half' Quickstart expansion."
+  },
+  {
+    "name": "Cadmus Shock Troopers",
+    "role": "Group",
+    "tier": "C",
+    "origin": "Human",
+    "attributes": {
+      "potency": 9,
+      "accuracy": 6,
+      "agility": 3,
+      "resistance": 6,
+      "spirit": 0,
+      "mind": 0
+    },
+    "resolve": 45,
+    "defense": 18,
+    "damageReduction": "3",
+    "conditionBoxes": 5,
+    "attacks": [
+      {
+        "name": "Strike",
+        "bonus": 12,
+        "damage": "2d8+9",
+        "type": "Physical",
+        "range": "Adjacent"
+      },
+      {
+        "name": "Energy Gun",
+        "bonus": 9,
+        "damage": "1d8+6",
+        "type": "Energy",
+        "range": "Near"
+      }
+    ],
+    "abilities": [
+      {
+        "name": "Barrage of Attacks",
+        "text": "A Group hits every target within the area it occupies with its Attacks."
+      },
+      {
+        "name": "Group Damage",
+        "text": "While the Group has more than half its total Resolve, its Damage Die is increased one step (1d6 to 1d8) above the normal value for its Tier."
+      },
+      {
+        "name": "Frontline Casualties",
+        "text": "Whenever the Group loses half of its current Resolve (22), reduce the area it occupies by one category; repeat each time it again loses half its remaining Resolve."
+      },
+      {
+        "name": "Relentless Strength (Passive)",
+        "text": "The trooper's first successful close-range Strike each turn is automatically executed with Advantage."
+      }
+    ],
+    "description": "A CADMUS corporate kill-squad deployed to sterilize the block, operating as a Group. From the 'A Czarnian and a Half' Quickstart expansion."
+  },
+  {
     "name": "Captain Boomerang",
     "role": "Villain",
     "tier": "C",
@@ -190,6 +278,99 @@ export const JLU_BESTIARY = [
         "text": "At the beginning of its turn, the General may move 1 ally by 1 Distance."
       }
     ]
+  },
+  {
+    "name": "Lobo",
+    "role": "Villain (Immortal Monster)",
+    "tier": "A",
+    "origin": "Czarnian",
+    "realName": "The Main Man",
+    "attributes": {
+      "potency": 18,
+      "accuracy": 9,
+      "agility": 9,
+      "resistance": 12,
+      "spirit": 6,
+      "mind": 3
+    },
+    "resolve": 100,
+    "defense": 28,
+    "damageReduction": "3",
+    "conditionBoxes": 5,
+    "attacks": [
+      {
+        "name": "Chain-Hook",
+        "bonus": 15,
+        "damage": "1d8+18",
+        "type": "Physical",
+        "range": "Near"
+      },
+      {
+        "name": "Smash",
+        "bonus": 20,
+        "damage": "1d8+18",
+        "type": "Physical",
+        "range": "Adjacent"
+      }
+    ],
+    "powers": [
+      "Extreme Regeneration 5",
+      "Super Strength 4",
+      "Enhanced Senses (Tracking Smell) 5",
+      "Enhanced Resistance 3"
+    ],
+    "knowledge": [
+      "World of Crime",
+      "Survival",
+      "Piloting"
+    ],
+    "traits": [
+      "Tough as Nails",
+      "Immortal",
+      "Special Vehicle (Space motorcycle)"
+    ],
+    "limitations": [
+      "Code of Conduct — The Written Word: Lobo will never violate the explicit, signed terms of a mercenary contract once his credits have cleared on Oa."
+    ],
+    "abilities": [
+      {
+        "name": "Acyclic Action",
+        "text": "Gains 1 extra independent Action executed immediately at the end of any individual Hero's turn, used solely to pursue or strike the character currently holding the asset."
+      },
+      {
+        "name": "Extreme Regeneration",
+        "text": "Regains 5 Resolve at the beginning of every Round."
+      },
+      {
+        "name": "Enhanced Senses (Passive)",
+        "text": "+6 bonus to any tracking test made using his sense of smell."
+      },
+      {
+        "name": "He Does Not Stay Down!",
+        "text": "If the Main Man is Defeated, he returns to Wounded with half his Resolve points."
+      },
+      {
+        "name": "It Tickles! (Reaction)",
+        "text": "When hit by a critical hit or high-intensity energy blast, he spends 3 Resolve to instantly ignore any Stunned or Slowed status the attack would impose."
+      },
+      {
+        "name": "The Chain-Drag (1 Action)",
+        "text": "Launches his hook at a target within Near range (+15 to hit). On a hit, instead of damage, the target makes an Opposed Potency Test vs Lobo's Potency (+12); on a failure they are pulled into Adjacent range and land Prone."
+      },
+      {
+        "name": "It's Only Business",
+        "text": "At the start of an Issue, one (or all) of the Heroes becomes the target of one of Lobo's contracts. Lobo gains Advantage on Attack rolls and +1 damage die against that target until it is Defeated."
+      },
+      {
+        "name": "Frag 'Em All",
+        "text": "Once per Round, makes a free attack against anyone who enters his Close distance."
+      },
+      {
+        "name": "The Main Man Rule",
+        "text": "Cannot be permanently defeated by reducing his Resolve to 0. Every time he marks Defeated, he stands up the next Round with 50 Resolve and all conditions cleared — the Heroes must find a narrative solution to resolve the clash."
+      }
+    ],
+    "description": "The Main Man — an intergalactic Czarnian bounty hunter who cares only for fulfilling his contracts and the credits involved. His regeneration is among the most powerful in the universe, making him virtually immortal; more a force of nature than a villain. From the 'A Czarnian and a Half' Quickstart expansion."
   },
   {
     "name": "Metal Sentinel",
