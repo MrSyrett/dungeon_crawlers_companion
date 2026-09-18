@@ -453,6 +453,64 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 .lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
+
+/* ══════════ GOLD-STANDARD SKIN (Shadowdark — black & gold) ══════════ */
+/* 1 — framed sheet */
+.sheet{border:3px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 12px 36px rgba(20,20,28,.20);max-width:1000px;}
+body.dark .sheet{border-color:#444;}
+
+/* 3 — header banner: gothic wordmark + gold subtitle on top, meta underneath */
+.hdr-row{background:linear-gradient(120deg,#0a0a0a,#262626);padding:14px 18px 15px;display:flex;flex-direction:column;gap:10px;}
+.hdr-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.hdr-logo{flex:0 0 auto;}
+.lg-word{font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:34px;line-height:.9;color:#fff;}
+.lg-sub{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-top:4px;}
+.hdr-top .name-primary{flex:0 1 340px;}
+.hdr-top .title-auto{flex:0 0 auto;display:flex;align-items:center;gap:6px;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;align-items:stretch;}
+.hdr-field,.lockfield{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.08);border-radius:7px;min-width:0;padding:4px 9px;}
+.hdr-metarow .lockfield{flex:1 1 0;}
+.hdr-field label,.lockfield label{display:block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.66);margin-bottom:2px;}
+.hdr-field input,.lockfield input{width:100%;border:none;border-bottom:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:#fff;outline:none;padding:0;}
+.hdr-field.name-primary input{font-size:16px;font-weight:700;}
+.lockfield input{font-size:12px;}
+.hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,255,255,.42);}
+body.dark .hdr-field input,body.dark .lockfield input{color:#fff;}
+.rest-cell{flex:1.1 1 0;display:flex;align-items:stretch;min-width:76px;}
+.hdr-rest-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:7px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;}
+.hdr-rest-btn:hover{background:rgba(255,255,255,.2);}
+
+/* 2 — each section is its own card; the columns hold them in gapped flex */
+.main-body{display:flex;gap:14px;padding:16px;border-bottom:none;align-items:flex-start;}
+.left-col{width:296px;flex-shrink:0;border-right:none;display:flex;flex-direction:column;gap:14px;background:transparent;border:none;box-shadow:none;}
+.main-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;background:transparent;border:none;box-shadow:none;}
+.card{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(20,22,30,.07);}
+body.dark .card{background:#1c1c1e;border-color:#333;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+
+/* 1 — section header strips → transparent gold-accent text + inset divider */
+.sl{background:transparent;color:#8a6d0e;position:relative;min-height:0;padding:8px 12px 7px;letter-spacing:.16em;}
+.sl::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:1px;background:#e6dcc0;}
+body.dark .sl{color:#e0c060;}
+body.dark .sl::after{background:#3a3320;}
+
+/* 4 — rounding niceties + roll-log controls */
+.hpac-input,.hpac-max,.xp-input,.coin-input{border-radius:5px;}
+#shop-body button,#spellshop-body button{border-radius:5px;}
+.log-clear,.log-action-btn,.dice-btn,.dice-roll-btn,.dice-clear-btn{border-radius:6px;}
+.log-entry{border-radius:8px;}
+#log-collapse-btn{border-radius:6px 0 0 6px;}
+
+/* 6 — collapse: existing 768 media stacks the columns; order the cards */
+@media(max-width:768px){
+  .main-body{padding:8px;gap:8px;align-items:stretch;}
+  .hdr-top{gap:9px;}
+  .hdr-metarow > *{flex:1 1 42%!important;}
+  .sd-vitals-card{order:1;}
+  .sd-abilities{order:2;}
+  .sd-attacks-card{order:3;}
+  .sd-trackers{order:4;}
+  .sd-tabs-card{order:5;}
+}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -464,28 +522,25 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 <div class="sheet-wrap">
 <div class="sheet">
 
-  <!-- TITLE -->
-  <div class="sheet-title">
-    <div class="sheet-title-text">Shadowdark</div>
-    <div class="sheet-title-actions">
+  <!-- HEADER BANNER -->
+  <div class="hdr-row">
+    <div class="hdr-top">
+      <div class="hdr-logo">
+        <div class="lg-word">Shadowdark</div>
+        <div class="lg-sub">Character Sheet</div>
+      </div>
       <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Also locks the Talents box (the wizards write it). Turn off to handle AC, talents and these items by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
-      <button onclick="takeRest()" style="padding:6px 14px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#1a2e3a';this.style.color='#6ac8df'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button>
+      <div class="hdr-field name-primary"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
     </div>
-  </div>
-
-  <!-- HEADER FIELDS ROW 1 -->
-  <div class="hdr-fields">
-    <div class="hdr-field"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
-    <div class="hdr-field"><label>Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
-    <div class="hdr-field"><label>Class</label><input type="text" id="f-class" placeholder="Fighter, Wizard..."></div>
-    <div class="hdr-field"><label>Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
-  </div>
-  <div class="hdr-fields hdr-fields-2">
-    <div class="hdr-field"><label>Alignment</label><input type="text" id="f-alignment" placeholder="Lawful / Neutral / Chaotic"></div>
-    <div class="hdr-field"><label>Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
-    <div class="hdr-field"><label>Deity</label><input type="text" id="f-deity" placeholder=""></div>
-    <div class="hdr-field" style="display:flex;align-items:center;gap:6px;">
-      <div style="flex:1;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:18px;font-weight:900;"></div>
+    <div class="hdr-metarow">
+      <div class="lockfield" style="flex:1.3 1 0;"><label>Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
+      <div class="lockfield" style="flex:1.3 1 0;"><label>Class</label><input type="text" id="f-class" placeholder="Fighter, Wizard..."></div>
+      <div class="lockfield"><label>Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
+      <div class="lockfield" style="flex:1.6 1 0;"><label>Alignment</label><input type="text" id="f-alignment" placeholder="Lawful / Neutral / Chaotic"></div>
+      <div class="lockfield"><label>Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
+      <div class="lockfield"><label>Deity</label><input type="text" id="f-deity" placeholder=""></div>
+      <div class="lockfield" style="flex:.5 1 0;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:16px;font-weight:900;"></div>
+      <div class="rest-cell"><button onclick="takeRest()" class="hdr-rest-btn" title="Rest — heal and recover"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button></div>
     </div>
   </div>
 
@@ -494,20 +549,26 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 
     <!-- LEFT COL: Ability Scores (single column) + Trackers -->
     <div class="left-col">
-      <div class="sl">Ability Scores</div>
-      <div class="stats-grid" id="stats-grid"></div>
-
-      <div class="sl">
-        <span>Trackers</span>
-        <button class="trk-add" onclick="openTrackerPicker()" title="Add a tracker">+</button>
+      <div class="card sd-abilities">
+        <div class="sl">Ability Scores</div>
+        <div class="stats-grid" id="stats-grid"></div>
       </div>
-      <div class="trk-box" id="trk-list"></div>
+
+      <div class="card sd-trackers">
+        <div class="sl">
+          <span>Trackers</span>
+          <button class="trk-add" onclick="openTrackerPicker()" title="Add a tracker">+</button>
+        </div>
+        <div class="trk-box" id="trk-list"></div>
+      </div>
     </div><!-- end left-col -->
 
     <!-- MAIN COL: combat tiles → attacks → tabs -->
     <div class="main-col">
 
-      <!-- COMBAT TILES: HP / AC / XP / Luck -->
+      <!-- VITALS: HP / AC / XP / Luck -->
+      <div class="card sd-vitals-card">
+      <div class="sl">Vitals</div>
       <div class="sd-vitals">
         <div class="sd-vital">
           <span class="sv-lbl">HP</span>
@@ -546,8 +607,10 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         <div class="st-pips" id="stress-pips"></div>
         <span class="st-pen" id="stress-pen"></span>
       </div>
+      </div><!-- end vitals card -->
 
       <!-- ATTACKS -->
+      <div class="card sd-attacks-card">
       <div class="attacks-section-wrap">
         <div class="sl">Attacks</div>
         <table class="attacks-table">
@@ -565,8 +628,10 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <tbody id="attacks-body"></tbody>
         </table>
       </div>
+      </div><!-- end attacks card -->
 
       <!-- TABS: Spells / Talents / Gear -->
+      <div class="card sd-tabs-card">
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
@@ -575,15 +640,15 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 
       <!-- SPELLS TAB -->
       <div class="tab-panel" id="tab-spells">
-        <div class="sl"><span>Spells</span><label style="display:flex;align-items:center;gap:4px;text-transform:uppercase;color:#aaa;margin-left:auto;">Cast Mod
-          <select id="spell-stat" onchange="saveSheet(false)" style="background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;padding:1px 4px;outline:none;">
+        <div class="sl"><span>Spells</span><label style="display:flex;align-items:center;gap:4px;text-transform:uppercase;color:var(--muted);margin-left:auto;">Cast Mod
+          <select id="spell-stat" onchange="saveSheet(false)" style="background:var(--input-bg);border:1px solid var(--rule);border-radius:5px;color:var(--ink);padding:1px 4px;outline:none;">
             <option value="">—</option>
             <option value="int">INT</option>
             <option value="wis">WIS</option>
             <option value="cha">CHA</option>
           </select>
-          <input type="text" id="spell-gbonus" placeholder="+0" title="Global bonus to all casting checks" style="width:26px;background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;padding:1px 2px;outline:none;text-align:center;" onchange="saveSheet(false)">
-        </label><button onclick="_spellShopMode=null;openSpellShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg> Spellbook</button></div>
+          <input type="text" id="spell-gbonus" placeholder="+0" title="Global bonus to all casting checks" style="width:26px;background:var(--input-bg);border:1px solid var(--rule);border-radius:5px;color:var(--ink);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;padding:1px 2px;outline:none;text-align:center;" onchange="saveSheet(false)">
+        </label><button onclick="_spellShopMode=null;openSpellShop()" style="padding:3px 12px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">Spellbook</button></div>
         <div id="spells-list"></div>
       </div>
 
@@ -605,7 +670,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         </div>
         <div class="sl"><span>Equipment</span>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
-            <button onclick="openShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">+ Item</button>
+            <button onclick="openShop()" style="padding:3px 12px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;border-radius:6px;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">+ Item</button>
           </div></div>
         <div id="gear-list"></div>
 
@@ -614,6 +679,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <div id="inventory-list" class="inv-list"></div>
         </div>
       </div>
+      </div><!-- end tabs card -->
 
     </div><!-- end main-col -->
 
@@ -4616,7 +4682,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 
 <!-- ═══ ITEM SHOP ═══ -->
 <div id="shop-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #c8a020;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #c8a020;border-radius:14px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.6);max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#c8a020;line-height:1;">Item Shop</div>
@@ -4793,7 +4859,7 @@ function shopRender() {
   // Tabs
   const tabBar = document.getElementById('shop-tabs');
   tabBar.innerHTML = SHOP_TABS.map(t=>
-    '<button onclick="shopSetTab(\''+t.id+'\')" style="flex:1;padding:8px 4px;background:'+(_shopTab===t.id?'#c8a020':'#141414')+';color:'+(_shopTab===t.id?'#1a1a1a':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">'+t.label+'</button>'
+    '<button onclick="shopSetTab(\''+t.id+'\')" style="flex:1;padding:8px 4px;background:'+(_shopTab===t.id?'rgba(200,160,32,.20)':'transparent')+';color:'+(_shopTab===t.id?'#fff':'rgba(255,255,255,.5)')+';border:none;border-bottom:3px solid '+(_shopTab===t.id?'#c8a020':'transparent')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">'+t.label+'</button>'
   ).join('');
 
   // Magic subtabs
@@ -5128,7 +5194,7 @@ function openSpellPick(kind) {
 
 <!-- ═══ SPELL LEARN SHOP ═══ -->
 <div id="spellshop-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #5a3a8a;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #5a3a8a;border-radius:14px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.6);max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div id="spellshop-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#b89ae0;line-height:1;">Spellbook</div>
       <button onclick="closeSpellShop()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -5249,7 +5315,7 @@ function spellShopSetTier(t) { _spellShopTier = t; spellShopRender(); }
 function spellShopRender() {
   const tabBar = document.getElementById('spellshop-tabs');
   tabBar.innerHTML = ['1','2','3','4','5'].map(t=>
-    '<button onclick="spellShopSetTier(\''+t+'\')" style="flex:1;padding:8px 4px;background:'+(_spellShopTier===t?'#5a3a8a':'#141414')+';color:'+(_spellShopTier===t?'#fff':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">Tier '+t+'</button>'
+    '<button onclick="spellShopSetTier(\''+t+'\')" style="flex:1;padding:8px 4px;background:'+(_spellShopTier===t?'rgba(122,90,170,.32)':'transparent')+';color:'+(_spellShopTier===t?'#fff':'rgba(255,255,255,.5)')+';border:none;border-bottom:3px solid '+(_spellShopTier===t?'#7a5aaa':'transparent')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">Tier '+t+'</button>'
   ).join('');
 
   // Caster filter checkboxes
