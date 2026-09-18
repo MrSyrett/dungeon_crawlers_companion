@@ -128,7 +128,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .body-row{display:flex;flex-wrap:wrap;gap:14px;padding:16px;align-items:flex-start;}
 .left-region{width:452px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
 .left-top{display:flex;align-items:flex-start;gap:14px;}
-.ability-col{width:158px;flex-shrink:0;display:flex;flex-direction:column;}
+.lt-left{width:190px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.ability-col{width:100%;flex-shrink:0;display:flex;flex-direction:column;}
 .skills-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;}
 /* Skills grows to fill so the bottom of Conditions lines up with the bottom of Abilities. */
 .sc-skills{display:flex;flex-direction:column;flex:1;min-height:0;}
@@ -256,7 +257,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cbt{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:6px 4px;text-align:center;}
 .cbt .c-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.1;}
 .cbt .c-val{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--dnd-dk);line-height:1.1;}
-.cbt input{width:100%;border:none;background:transparent;font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;}
+.cbt input{width:100%;max-width:74px;margin:2px auto 0;display:block;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;padding:1px 0;}
 .cbt.click{cursor:pointer;}.cbt.click:hover{background:var(--dnd-lt);}
 .ac-tile .ac-fx{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:1px;}
 .ac-tile .ac-chk{display:inline-flex;align-items:center;gap:2px;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;}
@@ -439,7 +440,7 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
 /* MODALS */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
 .ov.open{display:flex;}
-.modal{background:#1c1614;border:2px solid var(--dnd);border-radius:6px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#ece3d6;font-family:'Barlow',sans-serif;}
+.modal{background:#20202a;border:2px solid #3a3a41;border-radius:12px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e9e7e3;font-family:'Barlow',sans-serif;}
 .modal.wide{max-width:860px;}
 .modal-hd{background:#0c0908;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .modal-hd .ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;letter-spacing:.1em;text-transform:uppercase;color:#f0a37f;line-height:1;}
@@ -523,7 +524,7 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
      with display:contents so their inner sections become siblings that order
      freely. */
   .body-row{flex-direction:column;flex-wrap:nowrap;}
-  .left-region,.left-top,.skills-col,.main-col{display:contents;}
+  .left-region,.left-top,.lt-left,.skills-col,.main-col{display:contents;}
   .mc-combat{order:1;}
   .ability-col{order:2;width:100%;border-right:none;border-bottom:1px solid var(--rule);}
   .sc-skills{order:3;border-bottom:1px solid var(--rule);display:block;flex:0 1 auto;}
@@ -618,6 +619,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
 /* ── Gold-standard skin: dark cards + rounded controls ── */
+body.dark .hdr-row{background:linear-gradient(120deg,#7a1119,#9b1b22);}
 body.dark .sheet{border-color:#44444d;background:#121215;}
 body.dark .card,body.dark .ability-col,body.dark .sc-skills,body.dark .sc-conditions,body.dark .sc-defenses,body.dark .sc-prof,body.dark .mc-combat,body.dark .mc-attacks,body.dark .mc-tabs{background:#22222a;border-color:#3a3a41;box-shadow:0 2px 8px rgba(0,0,0,.3);}
 body.dark .tabs-bar{background:#1a1a1f;}
@@ -660,12 +662,18 @@ body.dark .tabs-bar{background:#1a1a1f;}
     <!-- LEFT REGION: abilities + skills, then proficiencies + conditions -->
     <div class="left-region">
       <div class="left-top">
-        <div class="ability-col">
-          <div class="section-bar red"><span>Abilities</span></div>
-          <div class="abil-list" id="abil-list"></div>
-          <div class="insp-box">
-            <span class="ib-lbl">Inspiration</span>
-            <input type="checkbox" id="f-inspiration" class="chk-lg" onchange="scheduleAutosave()">
+        <div class="lt-left">
+          <div class="ability-col">
+            <div class="section-bar red"><span>Abilities</span></div>
+            <div class="abil-list" id="abil-list"></div>
+            <div class="insp-box">
+              <span class="ib-lbl">Inspiration</span>
+              <input type="checkbox" id="f-inspiration" class="chk-lg" onchange="scheduleAutosave()">
+            </div>
+          </div>
+          <div class="sc-prof">
+            <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
+            <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
           </div>
         </div>
         <div class="skills-col">
@@ -687,10 +695,6 @@ body.dark .tabs-bar{background:#1a1a1f;}
             <div class="cond-wrap" id="defenses-list"></div>
           </div>
         </div>
-      </div>
-      <div class="sc-prof">
-        <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
-        <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
       </div>
     </div>
 
@@ -769,7 +773,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
 
       <!-- SPELLS TAB -->
       <div class="tab-panel" id="tab-spells">
-        <div class="section-bar"><span>Spellcasting</span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">📖 Spellbook</button></span></div>
+        <div class="section-bar"><span>Spellcasting</span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">Spellbook</button></span></div>
         <div id="conc-bar" class="conc-bar" style="display:none;"></div>
         <div id="spell-block" style="display:none;">
           <div class="spell-head">
@@ -801,7 +805,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
 
       <!-- EQUIPMENT TAB -->
       <div class="tab-panel" id="tab-equipment">
-        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><span class="attune-count-lbl" title="Magic items you're attuned to (max 3)">Attuned <b id="attune-count">0/3</b></span><button class="hdr-btn" onclick="openStore()">🛒 Item Store</button></span></div>
+        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><span class="attune-count-lbl" title="Magic items you're attuned to (max 3)">Attuned <b id="attune-count">0/3</b></span><button class="hdr-btn" onclick="openStore()">Item Store</button></span></div>
         <div class="blk" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Coins</span>
           <label style="font-size:11px;color:var(--muted);">GP <input id="f-gp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>

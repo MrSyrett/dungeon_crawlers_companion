@@ -303,7 +303,7 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
 .tln-head{display:flex;align-items:center;gap:8px;}
 .tln-head .tln-name{flex:1 1 auto;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;color:var(--yz-dk);}
 .tln-head .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
-.tln-card .tln-desc{margin-top:4px;font-size:12px;line-height:1.4;color:var(--ink);}
+.tln-card .tln-desc{width:100%;margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;line-height:1.4;color:var(--ink);border:1px solid var(--rule);border-radius:6px;background:var(--input-bg);padding:5px 7px;resize:vertical;outline:none;}
 </style>
 </head>
 <body>
@@ -387,7 +387,7 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
         <div class="alien-only" id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Your career offers three — pick one at creation.</div>
         <div class="section-bar"><span>Story</span></div>
         <div class="blk" id="traits-blk"></div>
-        <div class="subhead" style="padding-left:0;">Relationships <button class="hdr-btn" style="background:var(--yz);border-color:var(--yz-dk);color:#04232a;" onclick="addRelRow()">＋ Add</button></div>
+        <div class="section-bar"><span>Relationships</span><span class="hdr-right"><button class="hdr-btn" onclick="addRelRow()">＋ Add</button></span></div>
         <div class="blk" style="padding-top:2px;"><div id="relationships"></div></div>
         <div class="blk" style="padding-top:0;"><div class="fld"><label>Appearance</label><textarea id="f-appearance" rows="2"></textarea></div></div>
       </div>

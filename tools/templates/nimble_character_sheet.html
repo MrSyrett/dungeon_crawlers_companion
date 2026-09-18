@@ -155,7 +155,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .vline{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);}
 .vline input{width:40px;height:22px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;color:var(--ink);outline:none;}
 .pips{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap;}
-.pip{width:22px;height:22px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;}
+.pip{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;}
 .pip.wound.on{background:var(--red);color:#fff;}
 .pip.act{border-radius:50%;background:var(--nim);color:#fff;}
 .pip.act.spent{background:transparent;color:var(--muted);}
@@ -379,6 +379,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
 /* ── Gold-standard skin: dark cards + rounded controls ── */
+body.dark .hdr-row{background:linear-gradient(120deg,#1f6f46,#2f9b63);}
 body.dark .sheet{border-color:#4a524d;background:#121613;}
 body.dark .card{background:#242a26;border-color:#3a423d;box-shadow:0 2px 8px rgba(0,0,0,.3);}
 body.dark .tabs-bar{background:#1a201c;}

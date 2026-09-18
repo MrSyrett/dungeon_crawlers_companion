@@ -387,6 +387,11 @@ select option{background:var(--input-bg);color:var(--ink);}
 .lvl-step:disabled{opacity:.3;cursor:default;}
 .tag-pill{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--icrpg-dk);background:var(--box);border:1px solid var(--rule);border-radius:3px;padding:1px 5px;white-space:nowrap;}
 /* ── Gold-standard skin: dark cards + rounded controls ── */
+/* Keep the banner its rich theme colour in dark mode (the --dk var brightens, washing out white text) */
+body.dark .hdr-row{background:linear-gradient(120deg,#8a3712,#c8501e);}
+/* No native number spinners — the sheet has its own steppers */
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 body.dark .sheet{border-color:#544a50;background:#161216;}
 body.dark .card{background:#241e24;border-color:#463c40;box-shadow:0 2px 8px rgba(0,0,0,.3);}
 body.dark .tabs-bar{background:#1a161a;}
