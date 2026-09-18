@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- BUILD: JLU Hero Sheet — 2026-09-18 -->
-<script>window.__BUILD__="JLU Hero Sheet — 2026-09-18";</script>
+<!-- BUILD: JLU Hero Sheet — 2026-09-18c -->
+<script>window.__BUILD__="JLU Hero Sheet — 2026-09-18c";</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Justice League Unlimited Hero Sheet</title>
@@ -17,11 +17,13 @@
 <script src="/tools-data/jlu-equipment.js"></script>
 <script src="/tools-data/jlu-conditions.js"></script>
 <script src="/tools-data/jlu-limitations.js"></script>
+<script src="/tools-data/jlu-rules.js"></script>
 <style>
-/* ═══ Justice League Unlimited hero sheet ═══ Framed card + two-column body +
-   tabs + sticky Roll Log, matching the ICRPG / YZE / Candela sheets. Accent
-   --jlu (heroic blue). Core: d20 + Attribute + bonus vs Tension; one Resolve
-   pool for HP and powers; PAX budget auto-tallied from the build. */
+/* ═══ Justice League Unlimited hero sheet ═══ House standard: basic info on top;
+   Attributes → Conditions → PAX on the LEFT; Resolve → Combat → tabs on the
+   RIGHT; the shared canonical Roll Log (identical to every sheet except the dice
+   tray). Builder/Leveler-set fields render LOCKED (click to roll, never edit);
+   Create builds, Level advances. Accent --jlu (heroic blue). */
 :root{
   --bg:#dbe3ef;--paper:#f6f8fc;--ink:#111726;--muted:#586074;--rule:#c3cbdb;
   --jlu:#2f6fed;--jlu-dk:#1c49a8;--jlu-lt:#dbe6ff;--gild:#c99a2e;--red:#c23a2f;--green:#2f8f5b;--gold:#e2b23a;
@@ -34,51 +36,54 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .sheet-wrap{flex:1;overflow-y:auto;padding:40px 16px 24px;}
 .sheet{max-width:1120px;margin:0 auto;background:var(--paper);border:3px solid var(--border);border-radius:10px;box-shadow:0 10px 34px rgba(12,22,44,.28);overflow:hidden;}
 /* Header */
-.hdr{background:linear-gradient(120deg,var(--jlu-dk),var(--jlu));color:#fff;padding:14px 18px;display:grid;grid-template-columns:1.4fr 1fr auto;gap:14px;align-items:end;}
+.hdr{background:linear-gradient(120deg,var(--jlu-dk),var(--jlu));color:#fff;padding:14px 18px;display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:center;}
 .hdr .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:.06em;line-height:.92;text-transform:uppercase;}
-.hdr .logo b{display:block;font-size:30px;}
-.hdr .logo span{display:block;font-size:12px;letter-spacing:.34em;color:var(--gold);}
+.hdr .logo b{display:block;font-size:26px;}
+.hdr .logo span{display:block;font-size:11px;letter-spacing:.32em;color:var(--gold);}
 .f{display:flex;flex-direction:column;gap:2px;}
 .f label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;opacity:.85;font-weight:700;}
-.hdr input,.hdr select{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 7px;border-radius:5px;font-family:inherit;font-size:14px;font-weight:600;}
+.hdr input{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 7px;border-radius:5px;font-family:inherit;font-size:14px;font-weight:600;width:100%;}
 .hdr input::placeholder{color:rgba(255,255,255,.6);}
-.hdr select option{color:#111;}
-.tierbar{display:flex;gap:4px;}
-.tierbar button{width:26px;height:26px;border-radius:5px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.1);color:#fff;font-weight:800;font-family:'Barlow Condensed';cursor:pointer;font-size:14px;}
-.tierbar button.on{background:var(--gold);color:#20140a;border-color:var(--gold);}
-.tierbar button:disabled{opacity:.4;cursor:not-allowed;}
-/* Tabs */
-.tabs{display:flex;gap:0;background:var(--section-hdr);padding:0 8px;}
-.tabs button{background:none;border:none;color:#aeb9d2;font-family:'Barlow Condensed';font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:10px 16px;cursor:pointer;border-bottom:3px solid transparent;}
-.tabs button.on{color:#fff;border-bottom-color:var(--gold);}
+.lockrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.lockfield{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:4px 9px;min-width:64px;}
+.lockfield label{display:block;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:800;}
+.lockfield .lv{font-family:'Barlow Condensed';font-weight:700;font-size:15px;color:#fff;line-height:1.15;}
 .body{padding:16px;}
-.tabpane{display:none;}
-.tabpane.on{display:block;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.col{display:flex;flex-direction:column;gap:14px;}
 @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr;}.hdr{grid-template-columns:1fr;}}
 .card{background:#fff;border:1.5px solid var(--rule);border-radius:8px;padding:12px;}
 .card h3{font-family:'Barlow Condensed';font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--jlu-dk);border-bottom:2px solid var(--jlu-lt);padding-bottom:5px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;}
-/* Attributes */
-.attr-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--rule);}
+.card h4{font-family:'Barlow Condensed';font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--jlu-dk);margin:2px 0 6px;}
+/* Sub-tabs */
+.subtabs{display:flex;gap:0;background:var(--section-hdr);border-radius:8px 8px 0 0;padding:0 6px;overflow:hidden;}
+.subtabs button{flex:1;background:none;border:none;color:#aeb9d2;font-family:'Barlow Condensed';font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+.subtabs button.on{color:#fff;border-bottom-color:var(--gold);}
+.subwrap{border:1.5px solid var(--rule);border-top:none;border-radius:0 0 8px 8px;background:#fff;padding:12px;}
+.subpane{display:none;}
+.subpane.on{display:block;}
+/* Attributes (locked; click to roll) */
+.attr-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--rule);}
 .attr-row .an{font-family:'Barlow Condensed';font-weight:700;font-size:16px;letter-spacing:.04em;}
-.attr-row .stepper{display:flex;align-items:center;gap:3px;}
-.attr-row .stepper button{width:22px;height:22px;border:1px solid var(--input-border);background:var(--box);border-radius:4px;font-weight:800;cursor:pointer;}
-.attr-row .aval{width:44px;text-align:center;font-family:'Share Tech Mono';font-weight:700;font-size:16px;}
-.attr-row .roll{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:5px 9px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';font-size:13px;letter-spacing:.05em;}
-/* stat boxes */
+.attr-row .aval{font-family:'Share Tech Mono';font-weight:700;font-size:18px;color:var(--jlu-dk);min-width:38px;text-align:center;}
+.attr-row .roll{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:5px 11px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';font-size:13px;letter-spacing:.05em;}
+.attr-row .roll:hover{background:var(--jlu-dk);}
+/* stat boxes (locked; click to roll) */
 .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .stat{background:var(--box);border:1.5px solid var(--rule);border-radius:7px;padding:7px;text-align:center;}
+.stat.click{cursor:pointer;}.stat.click:hover{border-color:var(--jlu);background:var(--jlu-lt);}
 .stat .lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;}
 .stat .big{font-family:'Share Tech Mono';font-weight:700;font-size:24px;color:var(--jlu-dk);}
 .stat .sub{font-size:10px;color:var(--muted);}
-.mini{width:38px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:4px;padding:2px;}
-.rollbtn{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:6px 10px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';letter-spacing:.05em;}
-.rollbtn.alt{background:var(--jlu-dk);}
+.dmg-row{margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.dmg-str{font-family:'Share Tech Mono';font-weight:700;font-size:15px;color:var(--jlu-dk);}
+.rollbtn{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:6px 12px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';letter-spacing:.05em;}
 .rollbtn.g{background:var(--green);}
 /* resolve */
 .resolve-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .resolve-num{font-family:'Share Tech Mono';font-weight:700;font-size:34px;color:var(--jlu-dk);}
+.res-of{font-size:12px;color:var(--muted);}
 .pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--input-border);border-radius:20px;padding:3px 8px;background:#fff;}
 .pill button{border:none;background:var(--box);width:22px;height:22px;border-radius:50%;font-weight:800;cursor:pointer;}
 /* conditions track */
@@ -92,286 +97,330 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .pax-line{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--rule);font-size:13px;}
 .pax-total{font-weight:800;color:var(--jlu-dk);}
 .pax-neg{color:var(--red);font-weight:800;}
-/* pickers / lists */
-.addrow{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
-.addrow select,.addrow input{border:1px solid var(--input-border);border-radius:5px;padding:5px;font-family:inherit;font-size:13px;background:#fff;}
-.addbtn{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:5px 11px;font-weight:800;cursor:pointer;}
+/* locked lists */
 .pw{border:1.5px solid var(--rule);border-radius:7px;margin-bottom:9px;overflow:hidden;}
 .pw-head{display:flex;justify-content:space-between;align-items:center;background:var(--box);padding:6px 9px;gap:8px;}
 .pw-head .pn{font-family:'Barlow Condensed';font-weight:800;font-size:15px;}
+.pw-head .gr{font-family:'Share Tech Mono';font-size:12px;color:var(--jlu-dk);font-weight:700;}
 .pw-head .cat{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
 .pw-body{padding:8px 10px;font-size:12.5px;}
 .abil{padding:5px 0;border-bottom:1px dashed var(--rule);}
 .abil:last-child{border-bottom:none;}
 .abil b{color:var(--jlu-dk);}
 .abil .meta{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
-.chip{display:inline-block;background:var(--jlu-lt);border:1px solid var(--jlu);border-radius:14px;padding:2px 9px;margin:2px;font-size:12px;}
-.chip button{border:none;background:none;color:var(--red);font-weight:800;cursor:pointer;margin-left:3px;}
+.chip{display:inline-block;background:var(--jlu-lt);border:1px solid var(--jlu);border-radius:14px;padding:3px 10px;margin:2px;font-size:12px;font-weight:600;}
+.empty{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0;}
+.lim{border:1px solid var(--rule);border-radius:6px;padding:6px;margin-bottom:6px;}
+.lim input{width:100%;border:1px solid var(--input-border);border-radius:4px;padding:3px;margin-top:3px;font-family:inherit;font-size:12px;background:var(--input-bg);}
+/* gear picker */
+.addrow{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.addrow select,.addrow input{border:1px solid var(--input-border);border-radius:5px;padding:5px;font-family:inherit;font-size:13px;background:#fff;}
+.addbtn{background:var(--jlu);color:#fff;border:none;border-radius:5px;padding:5px 11px;font-weight:800;cursor:pointer;}
+.gear-row{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--rule);border-radius:6px;padding:5px 8px;margin-bottom:5px;font-size:12.5px;gap:8px;}
+.gear-row .gm{color:var(--muted);font-size:11px;}
 .row-x{border:none;background:none;color:var(--muted);cursor:pointer;font-weight:800;}
 textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:70px;background:#fff;}
-.gradesel{border:1px solid var(--input-border);border-radius:4px;padding:2px 4px;font-family:inherit;}
-/* Roll log */
-.log{width:320px;flex-shrink:0;position:sticky;top:0;height:100vh;background:var(--log-bg);color:var(--log-text);display:flex;flex-direction:column;}
-.log h2{font-family:'Barlow Condensed';font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:14px;padding:12px 14px;border-bottom:1px solid #223;display:flex;justify-content:space-between;align-items:center;}
-.log .entries{flex:1;overflow-y:auto;padding:8px 12px;}
-.roll-entry{border-bottom:1px solid #1b2740;padding:7px 0;}
-.roll-label{font-size:11px;color:#9fb0d6;}
-.roll-result{font-family:'Share Tech Mono';font-size:20px;font-weight:700;}
-.roll-result.crit{color:var(--gold);}
-.roll-result.fail{color:#e2796f;}
-.roll-detail{font-size:11px;color:#8794b8;}
-.tension-row{padding:8px 12px;border-bottom:1px solid #223;display:flex;align-items:center;gap:8px;font-size:12px;}
-.tension-row input{width:52px;background:#16213a;border:1px solid #2a3a5c;color:#fff;border-radius:4px;padding:3px;text-align:center;font-family:'Share Tech Mono';}
-.advbtns button{background:#16213a;border:1px solid #2a3a5c;color:#cdd8f0;border-radius:4px;padding:3px 7px;cursor:pointer;font-size:11px;font-weight:700;}
-.advbtns button.on{background:var(--jlu);border-color:var(--jlu);color:#fff;}
-.toolbar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-top:1px solid #223;flex-wrap:wrap;}
-.toolbar button,.toolbar label{background:#16213a;border:1px solid #2a3a5c;color:#cdd8f0;border-radius:5px;padding:5px 9px;cursor:pointer;font-size:11px;font-weight:700;}
-@media(max-width:960px){.log{display:none;}}
-.hint{font-size:11px;color:var(--muted);margin:2px 0 8px;}
-.dupwarn{color:var(--red);font-size:11px;font-weight:700;}
+
+/* ═══ Canonical Roll Log (shared shell; only the dice tray is JLU-specific) ═══ */
+.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--jlu);position:sticky;top:0;height:100vh;overflow:hidden;}
+#log-collapse-btn{position:fixed;right:290px;top:50%;transform:translateY(-50%);z-index:201;background:var(--jlu);color:#fff;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+#log-collapse-btn::after{content:"\25C0";}
+.roll-log.collapsed #log-collapse-btn{right:0;}
+.roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
+.log-header{padding:12px 14px 10px;background:var(--jlu);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.14em;color:#fff;}
+.log-clear{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.35);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:2px;}
+.log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #1a2338;}
+.log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:2px;}
+.log-action-btn.wizard{background:#13294f;color:#7db0f0;border:1px solid #1c49a8;}
+.log-action-btn.wizard:hover{background:#1c49a8;color:#fff;}
+.log-action-btn.rules{background:#1a2233;color:#c3d2ea;border:1px solid #2f3f5a;}
+.log-action-btn.export{background:#1a2733;color:#6aabdf;border:1px solid #1a4a8a;}
+.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
+.dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
+.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.85);}
+.dm-toggle-btn{width:36px;height:18px;background:#13294f;border:1px solid #1c49a8;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.dm-toggle-btn.on{background:#7db0f0;border-color:var(--jlu-dk);}
+.dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:left .2s;}
+.dm-toggle-btn.on::after{left:20px;background:#1c49a8;}
+.log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
+.log-entry{background:#141c2e;border:1px solid #26314a;border-radius:3px;padding:8px 10px;}
+.log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9fb0d6;margin-bottom:2px;}
+.log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
+.log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8794b8;margin-top:3px;line-height:1.4;word-break:break-word;}
+.log-entry.crit .roll-result{color:var(--gold);}.log-entry.fumble .roll-result{color:#e2796f;}
+.log-entry.crit{border-color:#b58a20;}.log-entry.fumble{border-color:#8a3a34;}
+.log-entry.remote{border-left:3px solid #c88a5a;background:#1a1c22;}
+.log-hint{color:#565f78;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
+.dice-tray{border-top:1px solid #1a2338;padding:10px;display:flex;flex-direction:column;gap:7px;background:#080d17;}
+.tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.tray-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9fb0d6;flex-shrink:0;}
+.tray-input{background:#141c2e;border:1px solid #26314a;color:#eef;font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;border-radius:3px;outline:none;width:52px;text-align:center;}
+.tray-toggle{background:#141c2e;border:1px solid #26314a;color:#aebada;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border-radius:3px;cursor:pointer;}
+.tray-toggle.on{background:#13294f;color:#7db0f0;border-color:#1c49a8;}
+.dice-btn{flex:1;padding:9px 0;background:var(--jlu);border:1px solid var(--jlu-dk);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border-radius:3px;}
+.dice-btn:hover{background:var(--jlu-dk);}
+.dice-btn.mini{flex:0 0 auto;padding:8px 12px;background:#1a2233;color:#c3d2ea;border-color:#2f3f5a;}
+.dice-btn.mini:hover{background:#2f3f5a;color:#fff;}
+
+/* Toast + modals */
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(8,13,23,.94);border:2px solid var(--jlu);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.7);}
+#roll-toast.show{display:block;}
+#roll-toast.crit{border-color:var(--gold);}#roll-toast.fumble{border-color:#e0776f;}
+#roll-toast .t-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9fb0d6;margin-bottom:3px;}
+#roll-toast .t-result{font-family:'Oswald',serif;font-size:24px;font-weight:800;color:#fff;line-height:1;}
+#roll-toast .t-detail{font-size:11px;color:#aebada;margin-top:3px;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
+.ov.open{display:flex;}
+.modal{background:#141c2e;border:2px solid var(--jlu);border-radius:6px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e6ecf7;font-family:'Barlow',sans-serif;}
+.modal.wide{max-width:820px;}
+.modal-hd{background:#0b1220;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-hd .ttl{font-family:'Oswald',sans-serif;font-weight:700;font-size:17px;letter-spacing:.08em;text-transform:uppercase;color:#7db0f0;line-height:1;}
+.modal-hd .x{background:transparent;border:none;color:#8ba0c0;font-size:20px;cursor:pointer;padding:0 4px;}
+.modal-bd{padding:14px 16px;overflow-y:auto;}
+.modal-ft{padding:10px 16px;border-top:1px solid #26314a;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;align-items:center;}
+.m-btn{padding:9px 14px;border:none;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--jlu);color:#fff;}
+.m-btn:hover{background:var(--jlu-dk);}
+.m-btn.ghost{background:#1f2a40;color:#bcd;border:1px solid #34435f;}
+.m-btn.warn{background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;}
+.m-btn:disabled{opacity:.4;cursor:default;}
+.m-hint{font-size:12px;color:#aebada;margin:0 0 12px;line-height:1.5;}
+.m-input{width:100%;padding:9px 10px;background:#0d1526;border:1px solid #26314a;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;}
+.m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#7db0f0;margin:12px 0 5px;}
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#7db0f0;margin:12px 0 3px;}
+.rules-list p{font-size:12px;line-height:1.5;color:#cdd;}
+.builder-chip{background:#141c2e;border:1px solid #26314a;color:#dde;border-radius:12px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
+.builder-chip:hover{border-color:var(--jlu);}
+.builder-chip.sel{background:#13294f;border-color:var(--jlu);color:#7db0f0;}
+/* leveler rows */
+.lv-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid #1a2338;color:#dde;font-size:13px;}
+.lv-step{width:26px;height:24px;background:#1f2a40;border:1px solid #34435f;color:#ddd;border-radius:3px;cursor:pointer;font-weight:700;}
+.lv-step:disabled{opacity:.35;cursor:default;}
+.lv-val{font-family:'Share Tech Mono';font-size:14px;color:#7db0f0;min-width:34px;text-align:center;}
+.lv-x{background:none;border:none;color:#df8a8a;cursor:pointer;font-weight:800;}
+
 body.dark{--bg:#0f1626;--paper:#182339;--ink:#e8eefb;--muted:#93a1c4;--rule:#2b3a58;--box:#1f2c47;--input-bg:#111a2c;--input-border:#3a4c72;--section-hdr:#0c1424;}
-body.dark .card,body.dark .hdr select option{background:#182339;color:var(--ink);}
-body.dark .mini,body.dark .addrow select,body.dark .addrow input,body.dark textarea,body.dark .aval{background:#111a2c;color:var(--ink);}
+body.dark .sheet{border-color:#33456c;}
+body.dark .card,body.dark .subwrap,body.dark .lim{background:#182339;color:var(--ink);}
+body.dark .stat,body.dark .cond,body.dark .pill,body.dark .pw-head,body.dark textarea,body.dark .lim input,body.dark .addrow select,body.dark .addrow input{background:#111a2c;color:var(--ink);}
+
+.roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+@media(max-width:768px){
+  .sheet-wrap{padding:12px 12px 16px;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--jlu);z-index:200;max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
+  #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;padding:0;}
+  #log-collapse-btn::after{content:"\25B2 Log";}
+  .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
+}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 </style>
 </head>
 <body>
+<div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
 <div class="app-wrap">
 <div class="sheet-wrap">
   <div class="sheet">
     <div class="hdr">
-      <div style="display:flex;gap:14px;align-items:end;">
-        <div class="logo"><b>Justice League</b><span>Unlimited · Hero Sheet</span></div>
+      <div>
+        <div class="logo"><b>Justice League Unlimited</b><span>Hero Sheet</span></div>
+        <div class="lockrow">
+          <div class="lockfield"><label>Tier</label><div class="lv" id="d-tier">—</div></div>
+          <div class="lockfield" style="flex:1;"><label>Origin</label><div class="lv" id="d-origin">—</div></div>
+          <div class="lockfield" style="flex:1;"><label>Archetype</label><div class="lv" id="d-arch">—</div></div>
+        </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;">
         <div class="f"><label>Hero Name</label><input id="f-name" placeholder="Codename" oninput="onIdent()"></div>
         <div class="f"><label>Secret Identity</label><input id="f-secret" placeholder="Civilian name" oninput="onIdent()"></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;">
-        <div class="f"><label>Tier</label><div class="tierbar" id="tierbar"></div></div>
-        <div class="f" style="width:150px;"><label>Origin</label><select id="f-origin" onchange="onBuild()"></select></div>
-        <div class="f" style="width:150px;"><label>Archetype</label><select id="f-arch" onchange="onBuild()"></select></div>
-      </div>
-    </div>
-    <div class="tabs">
-      <button id="tb-hero" class="on" onclick="setTab('hero')">Hero</button>
-      <button id="tb-powers" onclick="setTab('powers')">Powers</button>
-      <button id="tb-skills" onclick="setTab('skills')">Skills &amp; Gear</button>
-      <button id="tb-notes" onclick="setTab('notes')">Notes</button>
     </div>
     <div class="body">
-      <!-- HERO -->
-      <div id="pane-hero" class="tabpane on">
-        <div class="grid2">
+      <div class="grid2">
+        <!-- LEFT: Attributes → Conditions → PAX -->
+        <div class="col">
           <div class="card">
-            <h3>Attributes <span style="font-size:9px;color:var(--muted);">5 PAX = +3 · Tier limit <span id="attr-lim">+6</span></span></h3>
+            <h3>Attributes</h3>
             <div id="attrs"></div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:14px;">
-            <div class="card">
-              <h3>Resolve <span id="resolve-cap" style="font-size:10px;color:var(--muted);"></span></h3>
-              <div class="resolve-wrap">
-                <div class="pill"><button onclick="bumpResolve(-1)">−</button><span class="resolve-num" id="resolve-cur">12</span><button onclick="bumpResolve(1)">+</button></div>
-                <div style="font-size:12px;color:var(--muted);">of <b id="resolve-max">12</b> max</div>
-                <button class="rollbtn g" onclick="restResolve()">Full</button>
-              </div>
-              <div class="hint">Base (Tier) + Spirit + bought. Spending powers & taking hits reduce current Resolve.</div>
-              <div class="f" style="flex-direction:row;gap:6px;align-items:center;"><label style="color:var(--muted)">Bought (+1 = 2 PAX)</label><input class="mini" id="f-resbuy" type="number" value="0" oninput="onBuild()"></div>
-            </div>
-            <div class="card">
-              <h3>Conditions</h3>
-              <div class="cond-track" id="conds"></div>
-              <div class="hint">Click to set your level. Penalties apply automatically to d20 rolls.</div>
-            </div>
+          <div class="card">
+            <h3>Conditions</h3>
+            <div class="cond-track" id="conds"></div>
+          </div>
+          <div class="card">
+            <h3>PAX Budget <span id="pax-avail" class="pax-total">—</span></h3>
+            <div id="paxlines"></div>
           </div>
         </div>
-        <div class="grid2" style="margin-top:14px;">
+        <!-- RIGHT: Resolve → Combat → tabs -->
+        <div class="col">
+          <div class="card">
+            <h3>Resolve <span id="resolve-cap" style="font-size:10px;color:var(--muted);font-weight:600;"></span></h3>
+            <div class="resolve-wrap">
+              <div class="pill"><button onclick="bumpResolve(-1)">−</button><span class="resolve-num" id="resolve-cur">—</span><button onclick="bumpResolve(1)">+</button></div>
+              <div class="res-of">of <b id="resolve-max">—</b> max</div>
+              <button class="rollbtn g" onclick="restResolve()">Full</button>
+            </div>
+          </div>
           <div class="card">
             <h3>Combat</h3>
             <div class="statgrid" id="combat"></div>
-            <div style="margin-top:10px;display:flex;gap:10px;align-items:end;flex-wrap:wrap;">
-              <div class="f"><label style="color:var(--muted)">Damage Die</label>
-                <select id="f-ddie" class="gradesel" onchange="onBuild()"><option>1d6</option><option>1d8</option><option>1d12</option></select></div>
-              <div class="f"><label style="color:var(--muted)">Damage Attr</label>
-                <select id="f-datt" class="gradesel" onchange="onBuild()"><option>Potency</option><option>Spirit</option></select></div>
-              <div class="f"><label style="color:var(--muted)">Dmg Mod</label><input class="mini" id="f-dmod" type="number" value="0" oninput="onBuild()"></div>
+            <div class="dmg-row">
+              <span class="dmg-str" id="dmg-str">—</span>
               <button class="rollbtn" onclick="rollDamage()">Roll Damage</button>
-              <div style="font-size:12px;">= <b id="dmg-str">1d6</b></div>
             </div>
           </div>
-          <div class="card">
-            <h3>PAX Budget <span id="pax-avail" class="pax-total">40</span></h3>
-            <div id="paxlines"></div>
-            <div class="hint">Auto-tallied from your build. Adjust the awarded total as your Hero advances.</div>
-            <div class="f" style="flex-direction:row;gap:6px;align-items:center;margin-top:6px;"><label style="color:var(--muted)">PAX awarded (Tier + earned)</label><input class="mini" id="f-paxtotal" type="number" oninput="onBuild()"></div>
+          <div>
+            <div class="subtabs">
+              <button id="tb-powers" class="on" onclick="setTab('powers')">Powers</button>
+              <button id="tb-skills" onclick="setTab('skills')">Skills &amp; Gear</button>
+              <button id="tb-notes" onclick="setTab('notes')">Notes</button>
+            </div>
+            <div class="subwrap">
+              <div id="pane-powers" class="subpane on"><div id="powers"></div></div>
+              <div id="pane-skills" class="subpane">
+                <div class="grid3">
+                  <div><h4>Knowledge</h4><div id="knowledge"></div></div>
+                  <div><h4>Traits</h4><div id="traits"></div></div>
+                  <div><h4>Limitations</h4><div id="limitations"></div></div>
+                </div>
+                <div style="margin-top:14px;"><h4>Equipment</h4>
+                  <div class="addrow"><select id="eq-pick"></select><button class="addbtn" onclick="addEquip()">+ Add</button>
+                    <input id="eq-free" placeholder="custom item" style="flex:1;min-width:120px;"><button class="addbtn" onclick="addEquipFree()">+</button></div>
+                  <div id="equipment"></div>
+                </div>
+              </div>
+              <div id="pane-notes" class="subpane">
+                <div class="grid2">
+                  <div><h4>Weakness</h4><textarea id="f-weak" oninput="S.weakness=this.value;scheduleAutosave()"></textarea></div>
+                  <div><h4>Soul</h4><textarea id="f-soul" oninput="S.soul=this.value;scheduleAutosave()"></textarea></div>
+                </div>
+                <div style="margin-top:14px;"><h4>Notes</h4><textarea id="f-notes" style="min-height:150px;" oninput="S.notes=this.value;scheduleAutosave()"></textarea></div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- POWERS -->
-      <div id="pane-powers" class="tabpane">
-        <div class="card">
-          <h3>Powers &amp; Techniques</h3>
-          <div class="addrow">
-            <select id="pw-pick"></select>
-            <button class="addbtn" onclick="addPower()">+ Add Power</button>
-            <span id="pw-kit" class="hint" style="margin:0;align-self:center;"></span>
-          </div>
-          <div id="powers"></div>
-        </div>
-      </div>
-      <!-- SKILLS -->
-      <div id="pane-skills" class="tabpane">
-        <div class="grid3">
-          <div class="card"><h3>Knowledge <span style="font-size:9px;color:var(--muted)">4 PAX</span></h3>
-            <div class="addrow"><select id="kn-pick"></select><button class="addbtn" onclick="addKnowledge()">+</button></div>
-            <div id="knowledge"></div>
-          </div>
-          <div class="card"><h3>Traits <span style="font-size:9px;color:var(--muted)">4 PAX</span></h3>
-            <div class="addrow"><select id="tr-pick"></select><button class="addbtn" onclick="addTrait()">+</button></div>
-            <div id="traits"></div>
-          </div>
-          <div class="card"><h3>Limitations</h3>
-            <div class="addrow"><select id="lm-pick"></select><button class="addbtn" onclick="addLimitation()">+</button></div>
-            <div id="limitations"></div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:14px;"><h3>Equipment <span style="font-size:9px;color:var(--muted)">weapons · gear · materials</span></h3>
-          <div class="addrow"><select id="eq-pick"></select><button class="addbtn" onclick="addEquip()">+ Add</button>
-            <input id="eq-free" placeholder="…or type a custom item" style="flex:1;min-width:120px;"><button class="addbtn" onclick="addEquipFree()">+ Custom</button></div>
-          <div id="equipment"></div>
-        </div>
-      </div>
-      <!-- NOTES -->
-      <div id="pane-notes" class="tabpane">
-        <div class="grid2">
-          <div class="card"><h3>Weakness (Limitation hook)</h3><textarea id="f-weak" oninput="S.weakness=this.value;scheduleAutosave()"></textarea></div>
-          <div class="card"><h3>Soul (who your Hero is)</h3><textarea id="f-soul" oninput="S.soul=this.value;scheduleAutosave()"></textarea></div>
-        </div>
-        <div class="card" style="margin-top:14px;"><h3>Notes</h3><textarea id="f-notes" style="min-height:160px;" oninput="S.notes=this.value;scheduleAutosave()"></textarea></div>
       </div>
     </div>
   </div>
 </div>
-<!-- ROLL LOG -->
-<div class="log">
-  <h2>Roll Log <button class="row-x" style="color:#8794b8" onclick="clearLog()">clear</button></h2>
-  <div class="tension-row">
-    <span>Tension</span><input id="tension" type="number" placeholder="TN" oninput="renderTension()">
-    <span class="advbtns" style="margin-left:auto;display:flex;gap:4px;">
-      <button id="adv-a" onclick="setAdv('adv')">Adv</button>
-      <button id="adv-n" class="on" onclick="setAdv('none')">Flat</button>
-      <button id="adv-d" onclick="setAdv('dis')">Dis</button>
-    </span>
+<!-- ═══ CANONICAL ROLL LOG ═══ -->
+<div class="roll-log">
+  <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-actions">
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #26314a;background:transparent;color:#9fb0d6;" title="Campaign">🔗</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="if(window.JLUB)JLUB.launch();" title="Character Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this Hero" style="display:none;">Level</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="entries" id="entries"></div>
-  <div class="toolbar">
-    <button onclick="rollD20Test('','',0)">d20</button>
-    <button onclick="quickRoll(6)">d6</button>
-    <button onclick="quickRoll(8)">d8</button>
-    <button onclick="quickRoll(12)">d12</button>
-    <button id="campaign-btn" onclick="openCampaign()">Campaign</button>
-    <button onclick="setDarkMode(!document.body.classList.contains('dark'))" id="dm-toggle">Dark</button>
-    <button onclick="exportSheet()">Export</button>
-    <label>Import<input type="file" accept="application/json" style="display:none" onchange="importSheet(this)"></label>
+  <div class="log-entries" id="log-entries"><div class="log-hint">Click an attribute or combat stat to roll</div></div>
+  <div class="dice-tray">
+    <div class="tray-row"><span class="tray-label">Tension</span><input class="tray-input" id="tension" type="number" placeholder="TN"><span class="tray-toggle" id="adv-a" onclick="setAdv('adv')">Adv</span><span class="tray-toggle on" id="adv-n" onclick="setAdv('none')">Flat</span><span class="tray-toggle" id="adv-d" onclick="setAdv('dis')">Dis</span></div>
+    <div class="tray-row"><button class="dice-btn" onclick="rollD20Test('','',0)">Roll d20 Test</button></div>
+    <div class="tray-row"><span class="tray-label">Quick</span><button class="dice-btn mini" onclick="quickRoll(6)">d6</button><button class="dice-btn mini" onclick="quickRoll(8)">d8</button><button class="dice-btn mini" onclick="quickRoll(12)">d12</button></div>
   </div>
 </div>
 </div>
+
+<!-- Modals -->
+<div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">JLU — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✦ Advance Hero</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div><div class="modal-ft"><span id="levelup-note" class="m-hint" style="margin:0;flex:1;"></span><button class="m-btn" onclick="closeLevelUp()">Done</button></div></div></div>
+
 <script>
 /* ═══ helpers ═══ */
 function $(id){return document.getElementById(id);}
 function num(v){v=parseInt(v,10);return isNaN(v)?0:v;}
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function G(x){return Array.isArray(x)?x:[];}
 var TIERS=G(window.JLU_TIERS), ATTRS=G(window.JLU_ATTRIBUTES), ORIGINS=G(window.JLU_ORIGINS),
     ARCHES=G(window.JLU_ARCHETYPES), POWERS=G(window.JLU_POWERS), KNOW=G(window.JLU_KNOWLEDGE),
-    TRAITS=G(window.JLU_TRAITS), EQUIP=G(window.JLU_EQUIPMENT), CONDS=G(window.JLU_CONDITIONS),
+    TRAITSD=G(window.JLU_TRAITS), EQUIP=G(window.JLU_EQUIPMENT), CONDS=G(window.JLU_CONDITIONS),
     LIMS=G(window.JLU_LIMITATIONS);
 var ATTR_KEYS=['potency','accuracy','agility','resistance','mind','spirit'];
 function tierObj(k){for(var i=0;i<TIERS.length;i++)if(TIERS[i].key===k)return TIERS[i];return TIERS.find(function(t){return t.playable;})||TIERS[0];}
 function powerObj(n){return POWERS.find(function(p){return p.name===n;});}
 function originObj(n){return ORIGINS.find(function(o){return o.name===n;});}
+function archObj(n){return ARCHES.find(function(a){return a.name===n;});}
 
 /* ═══ state ═══ */
 function blankState(){
-  var s={name:'',secret:'',tier:'D',origin:'',arch:'',
+  return {name:'',secret:'',tier:'',origin:'',arch:'',
     attrs:{potency:0,accuracy:0,agility:0,resistance:0,mind:0,spirit:0},
-    resBuy:0, resCur:12, condLevel:0,
+    resBuy:0, resCur:0, condLevel:0,
     ddie:'1d6', datt:'Potency', dmod:0,
-    defBase:null, blkBase:10, dodBase:10, atkMod:0, defMod:0, blkMod:0, dodMod:0,
+    defMod:0, atkMod:0, blkMod:0, dodMod:0,
     paxTotal:null,
     powers:[], knowledge:[], traits:[], limitations:[], equipment:[],
     weakness:'', soul:'', notes:''};
-  return s;
 }
-var S=blankState(), _adv='none', _ready=false, _saveTimer=null;
+var S=blankState(), _adv='none', _ready=false, _saveTimer=null, _toastTimer=null;
 
 /* ═══ derived ═══ */
+function built(){ return !!(S.tier || S.powers.length || ATTR_KEYS.some(function(k){return num(S.attrs[k])!==0;})); }
 function attrVal(k){return num(S.attrs[k]);}
-function condPenalty(){ // Scratched -2, Injured -4
-  if(S.condLevel===2)return -2; if(S.condLevel===3)return -4; return 0;
-}
-function condDisadv(){return S.condLevel>=4;} // Wounded
+function condPenalty(){ if(S.condLevel===2)return -2; if(S.condLevel===3)return -4; return 0; }
+function condDisadv(){return S.condLevel>=4;}
 function resolveMax(){var t=tierObj(S.tier);return num(t.resolve)+attrVal('spirit')+num(S.resBuy);}
-function defenseTotal(){var t=tierObj(S.tier);var base=(S.defBase==null?num(t.defense):num(S.defBase));return base+num(S.defMod);}
+function defenseTotal(){var t=tierObj(S.tier);return num(t.defense)+num(S.defMod);}
 function attackTotal(){var t=tierObj(S.tier);return num(t.attackBonus)+attrVal('accuracy')+num(S.atkMod);}
-function blockTotal(){return num(S.blkBase)+attrVal('resistance')+num(S.blkMod);}
-function dodgeTotal(){return num(S.dodBase)+attrVal('agility')+num(S.dodMod);}
+function blockTotal(){return 10+attrVal('resistance')+num(S.blkMod);}
+function dodgeTotal(){return 10+attrVal('agility')+num(S.dodMod);}
 function inKit(power){var o=originObj(S.origin); if(!o)return true; var kit=o.powerKit||[];
   if(kit.indexOf('Any Superpower')>=0 && power.category==='Superpower')return true;
   return kit.indexOf(power.name)>=0 || kit.indexOf(power.category)>=0;}
-/* PAX tally */
 function paxSpent(){
   var lines=[], total=0;
   var ap=0; ATTR_KEYS.forEach(function(k){ ap+= (attrVal(k)/3)*5; });
   if(ap){lines.push({l:'Attributes',v:ap});total+=ap;}
-  var rp=num(S.resBuy)*2; if(rp){lines.push({l:'Resolve bought',v:rp});total+=rp;}
-  var pp=0; S.powers.forEach(function(p){var po=powerObj(p.name);if(!po)return;var per=num(po.paxPerGrade);var mult=inKit(po)?1:2;pp+=per*num(p.grade)*mult;});
+  var rp=num(S.resBuy)*2; if(rp){lines.push({l:'Resolve',v:rp});total+=rp;}
+  var pp=0, freeUsed=false;
+  S.powers.forEach(function(p){var po=powerObj(p.name);if(!po)return;var per=num(po.paxPerGrade);var mult=inKit(po)?1:2;var c=per*num(p.grade)*mult; if(!freeUsed&&inKit(po)){freeUsed=true;c=Math.max(0,c-per);} pp+=c;});
   if(pp){lines.push({l:'Powers',v:pp});total+=pp;}
   var kp=S.knowledge.length*4; if(kp){lines.push({l:'Knowledge',v:kp});total+=kp;}
   var tp=S.traits.length*4; if(tp){lines.push({l:'Traits',v:tp});total+=tp;}
   return {lines:lines,total:total};
 }
-function paxAvailable(){var t=tierObj(S.tier);var tot=(S.paxTotal==null?num(t.pax):num(S.paxTotal));return tot-paxSpent().total;}
+function paxAwarded(){var t=tierObj(S.tier);return (S.paxTotal==null?num(t.pax):num(S.paxTotal));}
+function paxAvailable(){return paxAwarded()-paxSpent().total;}
 
-/* ═══ renders ═══ */
-function renderTierbar(){
-  var bar=$('tierbar');bar.innerHTML='';
-  TIERS.forEach(function(t){
-    var b=document.createElement('button');b.textContent=t.key;
-    if(!t.playable)b.disabled=true;
-    if(S.tier===t.key)b.className='on';
-    b.title=t.name+' — '+t.label;
-    b.onclick=function(){S.tier=t.key;if(S.paxTotal==null)0;onBuild();};
-    bar.appendChild(b);
-  });
+/* ═══ renders (locked display) ═══ */
+function renderIdentity(){
+  $('d-tier').textContent=S.tier?(S.tier+' — '+tierObj(S.tier).name):'—';
+  $('d-origin').textContent=S.origin||'—';
+  $('d-arch').textContent=S.arch||'—';
+  $('f-name').value=S.name||'';$('f-secret').value=S.secret||'';
 }
 function renderAttrs(){
-  var t=tierObj(S.tier); $('attr-lim').textContent='+'+(t.attrLimit||6);
   var host=$('attrs');host.innerHTML='';
   ATTRS.forEach(function(a){
     var k=a.name.toLowerCase(); var v=attrVal(k);
     var row=document.createElement('div');row.className='attr-row';
     row.innerHTML='<span class="an" title="'+esc(a.summary)+'">'+a.name+'</span>'+
-      '<div class="stepper"><button onclick="stepAttr(\''+k+'\',-3)">−</button><span class="aval">'+(v>=0?'+':'')+v+'</span><button onclick="stepAttr(\''+k+'\',3)">+</button></div>'+
-      '<span></span>'+
+      '<span class="aval">'+(v>=0?'+':'')+v+'</span>'+
       '<button class="roll" onclick="rollD20Test(\''+a.name+'\',\''+k+'\',0)">Test</button>';
     host.appendChild(row);
   });
 }
 function renderResolve(){
   var mx=resolveMax(); if(S.resCur>mx)S.resCur=mx;
-  $('resolve-max').textContent=mx; $('resolve-cur').textContent=S.resCur;
+  $('resolve-max').textContent=S.tier?mx:'—'; $('resolve-cur').textContent=S.tier?S.resCur:'—';
   var t=tierObj(S.tier);
-  $('resolve-cap').textContent='('+num(t.resolve)+' base + '+attrVal('spirit')+' Spirit'+(num(S.resBuy)?' + '+num(S.resBuy)+' bought':'')+')';
-  $('f-resbuy').value=S.resBuy;
+  $('resolve-cap').textContent=S.tier?('('+num(t.resolve)+' + '+attrVal('spirit')+' Spirit'+(num(S.resBuy)?' + '+num(S.resBuy):'')+')'):'';
 }
 function renderConds(){
   var host=$('conds');host.innerHTML='';
   CONDS.forEach(function(c){
     var el=document.createElement('div');el.className='cond'+(S.condLevel>=c.order&&c.order>0?' on':'')+(c.order>=4?' warn':'');
     if(c.order===0&&S.condLevel===0)el.className='cond on';
-    el.title=c.effect;
-    el.innerHTML='<div class="cn">'+c.name+'</div><div class="cx">'+(c.order===2?'−2':c.order===3?'−4':c.order===4?'Disadv':c.order===5?'Out':'')+'</div>';
+    el.title=c.effect||'';
+    el.innerHTML='<div class="cn">'+esc(c.name)+'</div><div class="cx">'+(c.order===2?'−2':c.order===3?'−4':c.order===4?'Disadv':c.order===5?'Out':'')+'</div>';
     el.onclick=function(){S.condLevel=(S.condLevel===c.order)?c.order-1:c.order;if(S.condLevel<0)S.condLevel=0;renderConds();scheduleAutosave();};
     host.appendChild(el);
   });
@@ -386,9 +435,9 @@ function renderCombat(){
   ];
   host.innerHTML='';
   cells.forEach(function(c){
-    var d=document.createElement('div');d.className='stat';
-    d.innerHTML='<div class="lbl">'+c.lbl+'</div><div class="big">'+c.val+'</div><div class="sub">'+c.sub+'</div>';
-    if(c.roll){d.style.cursor='pointer';d.onclick=function(){
+    var d=document.createElement('div');d.className='stat'+(c.roll?' click':'');
+    d.innerHTML='<div class="lbl">'+c.lbl+'</div><div class="big">'+(S.tier?c.val:'—')+'</div><div class="sub">'+c.sub+'</div>';
+    if(c.roll){d.onclick=function(){
       if(c.roll==='atk')rollD20Test('Attack','accuracy',num(tierObj(S.tier).attackBonus)+num(S.atkMod));
       else if(c.roll==='blk')rollD20Test('Block','resistance',num(S.blkMod));
       else if(c.roll==='dod')rollD20Test('Dodge','agility',num(S.dodMod));
@@ -396,39 +445,21 @@ function renderCombat(){
     host.appendChild(d);
   });
   $('dmg-str').textContent=S.ddie+' + '+S.datt+(num(S.dmod)?' + '+num(S.dmod):'');
-  $('f-ddie').value=S.ddie;$('f-datt').value=S.datt;$('f-dmod').value=S.dmod;
 }
 function renderPax(){
-  var t=tierObj(S.tier); var sp=paxSpent(); var avail=paxAvailable();
-  $('f-paxtotal').value=(S.paxTotal==null?num(t.pax):S.paxTotal);
   var host=$('paxlines');host.innerHTML='';
-  var tot=(S.paxTotal==null?num(t.pax):num(S.paxTotal));
+  if(!S.tier){host.innerHTML='<div class="empty">Use Create to build a Hero.</div>';$('pax-avail').textContent='—';$('pax-avail').className='pax-total';return;}
+  var sp=paxSpent(), avail=paxAvailable(), tot=paxAwarded();
   host.innerHTML+='<div class="pax-line"><span>Awarded (Tier '+S.tier+')</span><span>'+tot+'</span></div>';
   sp.lines.forEach(function(l){host.innerHTML+='<div class="pax-line"><span>'+l.l+'</span><span>−'+l.v+'</span></div>';});
   host.innerHTML+='<div class="pax-line"><span class="pax-total">Available</span><span class="'+(avail<0?'pax-neg':'pax-total')+'">'+avail+'</span></div>';
   $('pax-avail').textContent=avail;$('pax-avail').className=avail<0?'pax-neg':'pax-total';
 }
-function renderPowerPicker(){
-  var sel=$('pw-pick');sel.innerHTML='';
-  var groups={};
-  POWERS.forEach(function(p){(groups[p.category]=groups[p.category]||[]).push(p);});
-  Object.keys(groups).forEach(function(cat){
-    var og=document.createElement('optgroup');og.label=cat;
-    groups[cat].forEach(function(p){var o=document.createElement('option');o.value=p.name;o.textContent=p.name+(p.paxPerGrade?' ('+p.paxPerGrade+' PAX)':'');og.appendChild(o);});
-    sel.appendChild(og);
-  });
-  var o=originObj(S.origin);
-  $('pw-kit').textContent=o?('Kit: '+(o.powerKit||[]).join(', ')+(o.canBuyOutsideKit?' · others cost ×2':' · kit only')):'';
-}
 function renderPowers(){
   var host=$('powers');host.innerHTML='';
-  if(!S.powers.length){host.innerHTML='<div class="hint">No powers yet. Add one above — its abilities appear by Grade.</div>';}
-  S.powers.forEach(function(p,i){
+  if(!S.powers.length){host.innerHTML='<div class="empty">No powers — set from Create or Level.</div>';return;}
+  S.powers.forEach(function(p){
     var po=powerObj(p.name);if(!po)return;
-    var out=inKit(po)?'':' <span class="dupwarn">(outside kit ×2)</span>';
-    var maxG=Math.max(1,(po.grades||[]).reduce(function(m,g){return Math.max(m,g.grade);},1));
-    var tierLim=tierObj(S.tier).powerLimit||2;
-    var gsel='';for(var g=1;g<=Math.max(maxG,tierLim);g++){gsel+='<option value="'+g+'"'+(num(p.grade)===g?' selected':'')+'>Grade '+g+'</option>';}
     var el=document.createElement('div');el.className='pw';
     var body='';
     (po.grades||[]).forEach(function(gr){
@@ -439,68 +470,47 @@ function renderPowers(){
         body+='<div class="abil"><b>'+esc(a.name)+'</b>'+(meta?' <span class="meta">'+esc(meta)+'</span>':'')+'<br>'+esc(a.text)+'</div>';
       });
     });
-    if(po.note)body+='<div class="hint" style="margin-top:6px;">'+esc(po.note)+'</div>';
-    if(!(po.grades||[]).length)body+='<div class="hint">'+esc(po.summary)+(po.note?' — '+esc(po.note):'')+'</div>';
-    el.innerHTML='<div class="pw-head"><div><div class="pn">'+esc(po.name)+out+'</div><div class="cat">'+esc(po.category)+(po.chooseElement?' · choose element':'')+'</div></div>'+
-      '<div style="display:flex;gap:8px;align-items:center;"><select class="gradesel" onchange="setGrade('+i+',this.value)">'+gsel+'</select><button class="row-x" onclick="delPower('+i+')">✕</button></div></div>'+
+    if(!(po.grades||[]).length&&po.summary)body+='<div class="abil">'+esc(po.summary)+'</div>';
+    el.innerHTML='<div class="pw-head"><div><span class="pn">'+esc(po.name)+'</span> <span class="gr">Grade '+num(p.grade)+'</span><div class="cat">'+esc(po.category||'')+(inKit(po)?'':' · outside kit')+'</div></div></div>'+
       '<div class="pw-body">'+body+'</div>';
     host.appendChild(el);
   });
 }
-function renderChips(host,arr,delFn,titleFn){
+function renderChips(host,arr,titleFn){
   host.innerHTML='';
-  if(!arr.length){host.innerHTML='<div class="hint">None yet.</div>';return;}
-  arr.forEach(function(x,i){var c=document.createElement('span');c.className='chip';c.title=titleFn?titleFn(x):'';c.innerHTML=esc(typeof x==='string'?x:(x.name||''))+'<button onclick="'+delFn+'('+i+')">✕</button>';host.appendChild(c);});
+  if(!arr.length){host.innerHTML='<div class="empty">None.</div>';return;}
+  arr.forEach(function(x){var c=document.createElement('span');c.className='chip';c.title=titleFn?titleFn(x):'';c.textContent=(typeof x==='string'?x:(x.name||''));host.appendChild(c);});
 }
-function renderKnowledge(){renderChips($('knowledge'),S.knowledge,'delKnowledge',function(n){var k=KNOW.find(function(x){return x.name===n;});return k?k.summary:'';});}
-function renderTraits(){renderChips($('traits'),S.traits,'delTrait',function(n){var t=TRAITS.find(function(x){return x.name===n;});return t?t.text:'';});}
+function renderKnowledge(){renderChips($('knowledge'),S.knowledge,function(n){var k=KNOW.find(function(x){return x.name===n;});return k?k.summary:'';});}
+function renderTraits(){renderChips($('traits'),S.traits,function(n){var t=TRAITSD.find(function(x){return x.name===n;});return t?t.text:'';});}
 function renderLimitations(){
   var host=$('limitations');host.innerHTML='';
-  if(!S.limitations.length){host.innerHTML='<div class="hint">None yet.</div>';return;}
-  S.limitations.forEach(function(l,i){var el=document.createElement('div');el.style.cssText='border:1px solid var(--rule);border-radius:6px;padding:6px;margin-bottom:6px;';
-    el.innerHTML='<div style="display:flex;justify-content:space-between;"><b>'+esc(l.type)+'</b><button class="row-x" onclick="delLimitation('+i+')">✕</button></div><input placeholder="describe the trigger…" value="'+esc(l.note||'')+'" style="width:100%;border:1px solid var(--input-border);border-radius:4px;padding:3px;margin-top:3px;" oninput="S.limitations['+i+'].note=this.value;scheduleAutosave()">';
+  if(!S.limitations.length){host.innerHTML='<div class="empty">None.</div>';return;}
+  S.limitations.forEach(function(l,i){var el=document.createElement('div');el.className='lim';
+    el.innerHTML='<b>'+esc(l.type)+'</b><input placeholder="trigger…" value="'+esc(l.note||'')+'" oninput="S.limitations['+i+'].note=this.value;scheduleAutosave()">';
     host.appendChild(el);});
 }
 function renderEquip(){
   var host=$('equipment');host.innerHTML='';
-  if(!S.equipment.length){host.innerHTML='<div class="hint">None yet.</div>';return;}
-  S.equipment.forEach(function(e,i){var el=document.createElement('div');el.style.cssText='border:1px solid var(--rule);border-radius:6px;padding:6px;margin-bottom:6px;font-size:12.5px;';
-    el.innerHTML='<div style="display:flex;justify-content:space-between;"><b>'+esc(e.name)+'</b> <button class="row-x" onclick="delEquip('+i+')">✕</button></div>'+(e.note?'<div style="color:var(--muted)">'+esc(e.note)+'</div>':'');
+  if(!S.equipment.length){host.innerHTML='<div class="empty">None.</div>';return;}
+  S.equipment.forEach(function(e,i){var el=document.createElement('div');el.className='gear-row';
+    el.innerHTML='<span><b>'+esc(e.name)+'</b>'+(e.note?' <span class="gm">'+esc(e.note)+'</span>':'')+'</span><button class="row-x" onclick="delEquip('+i+')">✕</button>';
     host.appendChild(el);});
 }
-function fillPicker(sel,arr,fmt){sel.innerHTML='';arr.forEach(function(x){var o=document.createElement('option');o.value=x.name;o.textContent=fmt?fmt(x):x.name;sel.appendChild(o);});}
-
 function renderAll(){
-  renderTierbar();renderAttrs();renderResolve();renderConds();renderCombat();renderPax();
-  renderPowerPicker();renderPowers();renderKnowledge();renderTraits();renderLimitations();renderEquip();renderTension();
-  $('f-name').value=S.name||'';$('f-secret').value=S.secret||'';
-  $('f-origin').value=S.origin||'';$('f-arch').value=S.arch||'';
+  renderIdentity();renderAttrs();renderResolve();renderConds();renderCombat();renderPax();
+  renderPowers();renderKnowledge();renderTraits();renderLimitations();renderEquip();
   $('f-weak').value=S.weakness||'';$('f-soul').value=S.soul||'';$('f-notes').value=S.notes||'';
+  refreshWizardButtons();
 }
 
-/* ═══ actions ═══ */
-function stepAttr(k,d){var t=tierObj(S.tier);var lim=(t.attrLimit||99);var v=attrVal(k)+d;if(v<-3)v=-3;if(v>lim&&d>0){addLog('Attribute','cap','Tier '+S.tier+' limit is +'+lim+' (powers can exceed it)','fail');}S.attrs[k]=v;onBuild();}
-function bumpResolve(d){S.resCur=clamp(S.resCur+d,0,resolveMax());renderResolve();scheduleAutosave();}
-function restResolve(){S.resCur=resolveMax();renderResolve();scheduleAutosave();addLog('Resolve','full','recovered to '+resolveMax(),'normal');}
-function addPower(){var n=$('pw-pick').value;if(!n)return;if(S.powers.some(function(p){return p.name===n;})){addLog('Power','dup',n+' already added','fail');return;}S.powers.push({name:n,grade:1});onBuild();setTab('powers');}
-function setGrade(i,g){S.powers[i].grade=num(g);onBuild();}
-function delPower(i){S.powers.splice(i,1);onBuild();}
-function addKnowledge(){var n=$('kn-pick').value;if(n&&S.knowledge.indexOf(n)<0){S.knowledge.push(n);onBuild();}}
-function delKnowledge(i){S.knowledge.splice(i,1);onBuild();}
-function addTrait(){var n=$('tr-pick').value;if(n&&S.traits.indexOf(n)<0){S.traits.push(n);onBuild();}}
-function delTrait(i){S.traits.splice(i,1);onBuild();}
-function addLimitation(){var n=$('lm-pick').value;if(n){S.limitations.push({type:n,note:''});renderLimitations();scheduleAutosave();}}
-function delLimitation(i){S.limitations.splice(i,1);renderLimitations();scheduleAutosave();}
+/* ═══ live-play actions ═══ */
+function bumpResolve(d){if(!S.tier)return;S.resCur=clamp(S.resCur+d,0,resolveMax());renderResolve();scheduleAutosave();}
+function restResolve(){if(!S.tier)return;S.resCur=resolveMax();renderResolve();scheduleAutosave();addLog('Resolve','full','recovered to '+resolveMax(),'normal');}
 function addEquip(){var n=$('eq-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;});S.equipment.push({name:n,note:e?(e.cost+' · '+e.text):''});renderEquip();scheduleAutosave();}
 function addEquipFree(){var n=($('eq-free').value||'').trim();if(!n)return;S.equipment.push({name:n,note:''});$('eq-free').value='';renderEquip();scheduleAutosave();}
 function delEquip(i){S.equipment.splice(i,1);renderEquip();scheduleAutosave();}
-function onIdent(){S.name=$('f-name').value;S.secret=$('f-secret').value;syncDocTitle();scheduleAutosave();}
-function onBuild(){
-  S.origin=$('f-origin').value;S.arch=$('f-arch').value;
-  S.resBuy=num($('f-resbuy').value);S.ddie=$('f-ddie').value;S.datt=$('f-datt').value;S.dmod=num($('f-dmod').value);
-  var pt=$('f-paxtotal').value; S.paxTotal=(pt===''?null:num(pt));
-  renderAll();scheduleAutosave();
-}
+function onIdent(){S.name=$('f-name').value;S.secret=$('f-secret').value;syncDocTitle();refreshWizardButtons();scheduleAutosave();}
 
 /* ═══ dice ═══ */
 function d(n){return Math.floor(Math.random()*n)+1;}
@@ -508,71 +518,167 @@ function setAdv(a){_adv=a;['a','n','d'].forEach(function(x){$('adv-'+x).classLis
 function rollD20Test(label,attrKey,extra){
   var mod=attrKey?attrVal(attrKey):0; mod+=num(extra); mod+=condPenalty();
   var adv=_adv; if(condDisadv()){adv=(adv==='adv')?'none':'dis';}
-  var r1=d(20),r2=d(20),pick=r1,other=null;
-  if(adv==='adv'){pick=Math.max(r1,r2);other=Math.min(r1,r2);}
-  else if(adv==='dis'){pick=Math.min(r1,r2);other=Math.max(r1,r2);}
+  var r1=d(20),r2=d(20),pick=r1;
+  if(adv==='adv'){pick=Math.max(r1,r2);} else if(adv==='dis'){pick=Math.min(r1,r2);}
   var total=pick+mod;
   var tn=num($('tension').value);
-  var cls=(pick===20)?'crit':(pick===1)?'fail':'';
+  var type=(pick===20)?'crit':(pick===1)?'fumble':'normal';
   var outcome=tn?(total>=tn?' ✓ vs '+tn:' ✗ vs '+tn):'';
-  var detail='d20['+pick+(other!=null?'/'+other:'')+']'+(mod?(mod>0?' +'+mod:' '+mod):'')+(condPenalty()?' (cond)':'');
-  addLog((label||'Test')+(attrKey?' · '+attrKey:''), (total)+outcome, detail, cls);
+  var dtxt=(adv==='adv')?('d20['+r1+','+r2+'→'+pick+' adv]'):(adv==='dis')?('d20['+r1+','+r2+'→'+pick+' dis]'):('d20:'+pick);
+  var detail=dtxt+(mod?(mod>0?' +'+mod:' '+mod):'')+(condPenalty()?' (cond)':'');
+  addLog((S.name||'Hero')+' · '+(label||'Test')+(attrKey?' · '+attrKey:''), total+outcome, detail, type);
 }
 function rollDamage(){
   var faces=num(S.ddie.replace('1d',''))||6; var r=d(faces); var attr=attrVal(S.datt.toLowerCase()); var tot=r+attr+num(S.dmod);
-  addLog('Damage', tot, S.ddie+'['+r+'] + '+S.datt+'('+(attr>=0?'+':'')+attr+')'+(num(S.dmod)?' +'+num(S.dmod):''), r===faces?'crit':'');
+  addLog((S.name||'Hero')+' · Damage', tot, S.ddie+':'+r+' + '+S.datt+'('+(attr>=0?'+':'')+attr+')'+(num(S.dmod)?' +'+num(S.dmod):''), r===faces?'crit':'normal');
 }
-function quickRoll(faces){var r=d(faces);addLog('d'+faces,r,'',r===faces?'crit':r===1?'fail':'');}
-function renderTension(){/* hook for future UI */}
+function quickRoll(faces){var r=d(faces);addLog('d'+faces,r,'d'+faces+':'+r,r===faces?'crit':r===1?'fumble':'normal');}
 
-/* ═══ roll log + campaign (compatible with other sheets) ═══ */
-var _campaign=null,_campaignTimer=null,_campaignLastId=null,_campaignClientKey='jlu-'+Math.random().toString(36).slice(2);
-function addLog(label,result,detail,cls){
-  var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';
-  div.innerHTML='<div class="roll-label">'+esc(S.name||'Hero')+' · '+esc(label)+'</div><div class="roll-result '+(cls||'')+'">'+esc(result)+'</div>'+(detail?'<div class="roll-detail">'+esc(detail)+'</div>':'');
-  entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);entries.scrollTop=0;
-  if(_campaign)campaignPush(label,result,detail);
+/* ═══ CANONICAL ROLL LOG + TOAST ═══ */
+function showRollToast(label,result,detail,type){
+  if(window.innerWidth>768){ var log=document.querySelector('.roll-log'); if(!log||!log.classList.contains('collapsed'))return; }
+  var t=$('roll-toast'); if(!t)return; t.className='show'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
+  t.querySelector('.t-label').textContent=label; t.querySelector('.t-result').textContent=result; t.querySelector('.t-detail').textContent=detail;
+  if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
 }
-function clearLog(){$('entries').innerHTML='';}
-function campaignPush(label,result,detail){try{fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:S.name||'Hero',label:label,result:String(result),detail:detail||''})});}catch(e){}}
-function campaignAddRemote(roll){var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';div.innerHTML='<div class="roll-label"><span style="color:#c9a05a">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div><div class="roll-detail">'+esc(roll.detail||'')+'</div>';entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);}
-async function campaignPoll(){if(!_campaign)return;try{var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''),{credentials:'same-origin'});if(!r.ok)return;var data=await r.json();(data.rolls||[]).forEach(function(roll){if(roll.clientKey!==_campaignClientKey)campaignAddRemote(roll);});if(data.last)_campaignLastId=data.last;}catch(e){}}
-function campaignStartPolling(){if(_campaignTimer)clearInterval(_campaignTimer);campaignPoll();_campaignTimer=setInterval(campaignPoll,document.hidden?20000:4000);}
-function openCampaign(){var code=prompt('Enter campaign code to join (or leave blank to leave):');if(code===null)return;if(!code){_campaign=null;if(_campaignTimer)clearInterval(_campaignTimer);$('campaign-btn').textContent='Campaign';scheduleAutosave();return;}joinCampaign(code.trim());}
-async function joinCampaign(code){try{var r=await fetch('/api/campaigns/join',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})});if(!r.ok){addLog('Campaign','✗','Could not join','fail');return;}var d2=await r.json();_campaign={id:d2.id,code:code,name:d2.name||'Campaign'};$('campaign-btn').textContent='● '+(d2.name||code);campaignStartPolling();scheduleAutosave();}catch(e){addLog('Campaign','✗','Error joining','fail');}}
-function campaignRestore(saved){if(saved&&saved.id){_campaign=saved;$('campaign-btn').textContent='● '+(saved.name||'Campaign');campaignStartPolling();}}
+function addLog(label,result,detail,type){
+  type=type||'normal';
+  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
+  var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
+  div.innerHTML='<div class="roll-label">'+esc(label)+'</div><div class="roll-result">'+esc(result)+'</div>'+(detail?'<div class="roll-detail">'+esc(detail)+'</div>':'');
+  if(typeof campaignBroadcast==='function') campaignBroadcast(label,result,detail,type);
+  entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
+  showRollToast(label,result,detail,type);
+}
+function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click an attribute or combat stat to roll</div>'; }
+function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
+document.querySelector('.log-header').addEventListener('click',function(e){ if(window.innerWidth<=768&&!e.target.closest('button,.dm-toggle-btn'))toggleLogCollapse(); });
+(function(){ if(window.innerWidth<=768)document.querySelector('.roll-log').classList.add('collapsed'); })();
+function setDarkMode(on){ document.body.classList.toggle('dark',on); $('dm-toggle').classList.toggle('on',on); try{ localStorage.setItem('jlu_dark',on?'1':'0'); }catch(e){} }
+function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
+
+/* ═══ Rules ═══ */
+function openRules(){
+  var R=G(window.JLU_RULES);
+  var h='';
+  if(R.length){ h+=R.map(function(q){ return '<p><b>'+esc(q.title)+'.</b> '+esc(q.body||q.text)+'</p>'; }).join(''); }
+  else{
+    h+='<h4>The Test</h4><p>Roll d20 + Attribute + bonuses vs the Tension. Nat 20 Crit, nat 1 Fumble. Advantage keeps the higher of two dice; Disadvantage the lower.</p>';
+    h+='<h4>Resolve</h4><p>One pool for Hit Points and Power fuel. Every Activation costs at least 1 Resolve.</p>';
+    h+='<h4>Conditions</h4><p>Scratched −2, Injured −4, Wounded Disadvantage, Out. Penalties apply automatically.</p>';
+    h+='<h4>PAX</h4><p>Attributes 5 PAX per +3; Powers their PAX-per-Grade (×2 outside Kit); Knowledge & Traits 4 each; +1 Resolve 2 PAX.</p>';
+  }
+  $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
+}
+function closeRules(){ $('rules-overlay').classList.remove('open'); }
+
+/* ═══ Leveler (advancement) — the only place stats change after Create ═══ */
+function refreshWizardButtons(){ var b=$('build-btn'), l=$('level-btn'); var has=built(); if(b)b.style.display=has?'none':''; if(l)l.style.display=has?'':'none'; }
+function openLevelUp(){ if(!built()){ if(window.JLUB)JLUB.launch(); return; } renderLevelUp(); $('levelup-overlay').classList.add('open'); }
+function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); }
+function renderLevelUp(){
+  var lim=tierObj(S.tier).attrLimit||6, avail=paxAvailable();
+  $('levelup-note').textContent='PAX available: '+avail+' / '+paxAwarded();
+  var h='<div class="m-lbl">PAX Awarded (Tier + earned)</div><input class="m-input" id="lv-awarded" type="number" value="'+paxAwarded()+'" oninput="lvAwarded(this.value)" style="width:120px;">';
+  h+='<div class="m-lbl">Attributes — 5 PAX per +3 (cap +'+lim+')</div>';
+  ATTR_KEYS.forEach(function(k){
+    var name=k.charAt(0).toUpperCase()+k.slice(1), v=attrVal(k);
+    h+='<div class="lv-row"><span>'+name+'</span><button class="lv-step" onclick="lvAttr(\''+k+'\',-3)"'+(v<=0?' disabled':'')+'>−</button><span class="lv-val">'+(v>=0?'+':'')+v+'</span><button class="lv-step" onclick="lvAttr(\''+k+'\',3)"'+(v>=lim?' disabled':'')+'>+</button></div>';
+  });
+  h+='<div class="m-lbl">Resolve bought — 2 PAX each (+1 max)</div>';
+  h+='<div class="lv-row"><span>Bought Resolve</span><button class="lv-step" onclick="lvResBuy(-1)"'+(num(S.resBuy)<=0?' disabled':'')+'>−</button><span class="lv-val">'+num(S.resBuy)+'</span><button class="lv-step" onclick="lvResBuy(1)">+</button></div>';
+  h+='<div class="m-lbl">Powers</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-pw" style="flex:1;"></select><button class="m-btn" onclick="lvAddPower()">Add</button></div>';
+  S.powers.forEach(function(p,i){ var po=powerObj(p.name)||{}; var maxG=Math.max(1,(po.grades||[]).reduce(function(m,g){return Math.max(m,g.grade);},1));
+    h+='<div class="lv-row"><span>'+esc(p.name)+(inKit(po)?'':' <span style="color:#df8a8a">×2</span>')+'</span><button class="lv-step" onclick="lvGrade('+i+',-1)"'+(num(p.grade)<=1?' disabled':'')+'>−</button><span class="lv-val">G'+num(p.grade)+'</span><button class="lv-step" onclick="lvGrade('+i+',1)"'+(num(p.grade)>=maxG?' disabled':'')+'>+</button><button class="lv-x" onclick="lvDelPower('+i+')">✕</button></div>';
+  });
+  h+='<div class="m-lbl">Knowledge — 4 PAX each</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-kn" style="flex:1;"></select><button class="m-btn" onclick="lvAddKnow()">Add</button></div>';
+  S.knowledge.forEach(function(n,i){ h+='<div class="lv-row"><span>'+esc(n)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelKnow('+i+')">✕</button></div>'; });
+  h+='<div class="m-lbl">Traits — 4 PAX each</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-tr" style="flex:1;"></select><button class="m-btn" onclick="lvAddTrait()">Add</button></div>';
+  S.traits.forEach(function(n,i){ h+='<div class="lv-row"><span>'+esc(n)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelTrait('+i+')">✕</button></div>'; });
+  h+='<div class="m-lbl">Limitations</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-lm" style="flex:1;"></select><button class="m-btn" onclick="lvAddLim()">Add</button></div>';
+  S.limitations.forEach(function(l,i){ h+='<div class="lv-row"><span>'+esc(l.type)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelLim('+i+')">✕</button></div>'; });
+  $('levelup-body').innerHTML=h;
+  fillSel('lv-pw',POWERS.filter(function(p){return !S.powers.some(function(x){return x.name===p.name;});}),function(p){return p.name+' ('+p.paxPerGrade+' PAX'+(inKit(p)?'':' ×2')+')';});
+  fillSel('lv-kn',KNOW.filter(function(k){return S.knowledge.indexOf(k.name)<0;}),function(k){return k.name;});
+  fillSel('lv-tr',TRAITSD.filter(function(t){return S.traits.indexOf(t.name)<0;}),function(t){return t.name;});
+  fillSel('lv-lm',LIMS,function(l){return l.name;});
+}
+function fillSel(id,arr,fmt){var sel=$(id);if(!sel)return;sel.innerHTML='';arr.forEach(function(x){var o=document.createElement('option');o.value=x.name;o.textContent=fmt?fmt(x):x.name;sel.appendChild(o);});}
+function lvCommit(){renderAll();renderLevelUp();scheduleAutosave();}
+function lvAwarded(v){S.paxTotal=(String(v).trim()===''?null:num(v));lvCommit();}
+function lvAttr(k,d){var lim=tierObj(S.tier).attrLimit||6;var v=attrVal(k)+d;if(v<0)v=0;if(v>lim)v=lim;S.attrs[k]=v;lvCommit();}
+function lvResBuy(d){S.resBuy=Math.max(0,num(S.resBuy)+d);lvCommit();}
+function lvAddPower(){var n=$('lv-pw').value;if(!n||S.powers.some(function(p){return p.name===n;}))return;S.powers.push({name:n,grade:1});lvCommit();}
+function lvGrade(i,d){var p=S.powers[i];if(!p)return;p.grade=Math.max(1,num(p.grade)+d);lvCommit();}
+function lvDelPower(i){S.powers.splice(i,1);lvCommit();}
+function lvAddKnow(){var n=$('lv-kn').value;if(n&&S.knowledge.indexOf(n)<0){S.knowledge.push(n);lvCommit();}}
+function lvDelKnow(i){S.knowledge.splice(i,1);lvCommit();}
+function lvAddTrait(){var n=$('lv-tr').value;if(n&&S.traits.indexOf(n)<0){S.traits.push(n);lvCommit();}}
+function lvDelTrait(i){S.traits.splice(i,1);lvCommit();}
+function lvAddLim(){var n=$('lv-lm').value;if(n){S.limitations.push({type:n,note:''});lvCommit();}}
+function lvDelLim(i){S.limitations.splice(i,1);lvCommit();}
 
 /* ═══ tabs / theme / persistence ═══ */
-function setTab(t){['hero','powers','skills','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('jlu_tab',t);}catch(e){}}
-function setDefaultTab(){var t='hero';try{t=localStorage.getItem('jlu_tab')||'hero';}catch(e){}if(!$('pane-'+t))t='hero';setTab(t);}
-function setDarkMode(on){document.body.classList.toggle('dark',on);$('dm-toggle').textContent=on?'Light':'Dark';try{localStorage.setItem('jlu_dark',on?'1':'0');}catch(e){}}
-function scheduleAutosave(){if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},400);}
-function collect(){S.campaign=_campaign;return S;}
-function saveSheet(quiet){var json;try{json=JSON.stringify(collect());}catch(e){return;}try{localStorage.setItem('jlu_sheet',json);}catch(e){}if(window.__ddState!==undefined)window.__ddState['jlu_sheet']=json;if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}}
-function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n);}
-function applySheet(o){S=Object.assign(blankState(),o||{});if(!S.attrs)S.attrs=blankState().attrs;renderAll();if(S.campaign)campaignRestore(S.campaign);}
-function exportSheet(){var blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(S.name||'jlu-hero').replace(/\s+/g,'_')+'.json';a.click();}
-function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑',f.name,'normal');}catch(e){addLog('Import failed','✗','Not a valid sheet','fail');}};r.readAsText(f);input.value='';}
-window.addEventListener('beforeunload',function(){if(_ready)try{saveSheet(true);}catch(e){}});
+function setTab(t){['powers','skills','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('jlu_tab',t);}catch(e){}}
+function setDefaultTab(){var t='powers';try{t=localStorage.getItem('jlu_tab')||'powers';}catch(e){}if(!$('pane-'+t))t='powers';setTab(t);}
+function scheduleAutosave(){if(!_ready)return;if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},600);}
+function collectSheet(){S.name=($('f-name').value||'').trim();S.secret=$('f-secret').value;return Object.assign({},S,{system:'JLU',campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
+function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('jlu_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({jlu_sheet:json});else if(window.__ddState!==undefined)window.__ddState['jlu_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)addLog('Sheet Saved','✓',data.name||'Unnamed','normal');}
+function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)try{window.__ddSaveTitle(n);}catch(e){}}
+function applySheet(o){o=o||{};S=Object.assign(blankState(),o);if(!S.attrs)S.attrs=blankState().attrs;renderAll();setDefaultTab();if(typeof campaignRestore==='function'&&o.campaign!==undefined)campaignRestore(o.campaign);if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}scheduleAutosave();}
+window.applySheet=applySheet;
+function exportSheet(){var data=collectSheet();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((data.name||'jlu-hero').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'jlu-hero')+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);addLog('Sheet Exported','↓',a.download,'normal');}
+function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑',f.name,'normal');}catch(e){addLog('Import failed','✗','Not a valid sheet','fumble');}};r.readAsText(f);input.value='';}
+var _pageReady=false;setTimeout(function(){_pageReady=true;},2000);
+function autoSaveOnExit(){if(!_ready)return;try{saveSheet(true);}catch(e){}try{syncDocTitle();}catch(e){}}
+window.addEventListener('beforeunload',autoSaveOnExit);window.addEventListener('pagehide',autoSaveOnExit);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')autoSaveOnExit();});
+
+/* ═══ CAMPAIGN LINK — same contract as the other sheets ═══ */
+var _campaign=null; var _campaignClientKey='ck-'+Math.random().toString(36).slice(2,12); var _campaignLastId=0; var _campaignTimer=null;
+var CAMPAIGN_SKIP_LABELS=new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Character Built']);
+function campaignPlayerName(){ return ($('f-name').value||'').trim()||'Hero'; }
+function campaignUpdateBtn(){ var btn=$('campaign-btn'); if(!btn)return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#13294f'; btn.style.color='#7db0f0'; btn.style.borderColor='#1c49a8'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#9fb0d6'; btn.style.borderColor='#26314a'; } }
+function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
+function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
+function campaignRenderModal(){
+  var body=$('campaign-body');
+  if(_campaign) body.innerHTML='<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0b1220;border:1px solid #1c49a8;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#7db0f0;">'+esc(_campaign.name)+'</div><div style="font-size:11px;color:#9fb0d6;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">'+esc(_campaign.code)+'</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
+  else body.innerHTML='<p class="m-hint">Enter a join code from your GM to connect this sheet.</p><div class="m-lbl">Join a Campaign</div><div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" class="m-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:.15em;"><button class="m-btn" onclick="campaignJoin()">Join</button></div><div id="campaign-error" style="font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
+}
+function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
+async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','🔗','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','🔗','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
+function campaignAddRemote(roll){
+  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
+  var div=document.createElement('div'); div.className='log-entry remote'+(roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
+  div.innerHTML='<div class="roll-label"><span style="color:#c88a5a;">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div><div class="roll-detail">'+esc(roll.detail||'')+'</div>';
+  entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
+}
+async function campaignPoll(){ if(!_campaign)return; try{ var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''),{credentials:'same-origin'}); if(!r.ok)return; var data=await r.json(); (data.rolls||[]).forEach(function(roll){ if(roll.clientKey!==_campaignClientKey)campaignAddRemote(roll); }); if(data.last)_campaignLastId=data.last; }catch(e){} }
+function campaignPollDelay(){ return document.hidden?20000:4000; }
+function campaignStartPolling(){ if(_campaignTimer)clearInterval(_campaignTimer); campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); }
+document.addEventListener('visibilitychange',function(){ if(!_campaign||!_campaignTimer)return; clearInterval(_campaignTimer); if(!document.hidden)campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); });
+function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:saved.id,code:saved.code,name:saved.name||'Campaign'}; campaignStartPolling(); } else campaignLeaveSilent(); campaignUpdateBtn(); }
 
 /* ═══ init ═══ */
 function initPickers(){
-  fillPicker($('f-origin'),ORIGINS);
-  fillPicker($('f-arch'),ARCHES);
-  fillPicker($('kn-pick'),KNOW,function(k){return k.name+' (4 PAX)';});
-  fillPicker($('tr-pick'),TRAITS,function(t){return t.name+' ('+t.cost+' PAX)';});
-  fillPicker($('lm-pick'),LIMS);
-  fillPicker($('eq-pick'),EQUIP,function(e){return e.name+' — '+e.cost;});
+  fillSel('eq-pick',EQUIP,function(e){return e.name+' — '+e.cost;});
 }
 function autoLoad(){
   var saved=null;
   if(window.__ddState!==undefined)saved=window.__ddState['jlu_sheet']||null;else{try{saved=localStorage.getItem('jlu_sheet');}catch(e){}}
   try{if(localStorage.getItem('jlu_dark')==='1')setDarkMode(true);}catch(e){}
-  if(saved){try{applySheet(JSON.parse(saved));}catch(e){renderAll();}}else{renderAll();}
-  setDefaultTab();_ready=true;
+  if(saved){try{applySheet(JSON.parse(saved));}catch(e){renderAll();setDefaultTab();}}else{renderAll();setDefaultTab();}
+  _ready=true;
 }
 initPickers();
 autoLoad();
 </script>
+<script src="/tools-data/jlu-sheet-builder.js"></script>
+<script src="/tools-data/dice-anim.js"></script>
 </body>
 </html>

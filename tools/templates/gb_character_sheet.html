@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- BUILD: GB Personnel File — 2026-09-18 -->
-<script>window.__BUILD__="GB Personnel File — 2026-09-18";</script>
+<!-- BUILD: GB Personnel File — 2026-09-18c -->
+<script>window.__BUILD__="GB Personnel File — 2026-09-18c";</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ghostbusters Personnel File</title>
@@ -12,13 +12,17 @@
 <script src="/tools-data/gb-goals.js"></script>
 <script src="/tools-data/gb-equipment.js"></script>
 <script src="/tools-data/gb-difficulties.js"></script>
+<script src="/tools-data/gb-rules.js"></script>
 <style>
-/* ═══ Ghostbusters "Personnel File" ═══ Framed card + sticky Roll Log, matching
-   the ICRPG / YZE sheets. Accent --gb (ecto slime). Roll d6 pools vs a
-   Difficulty; one die is always the Ghost Die (a 6 on it = Ghost, counts 0). */
+/* ═══ Ghostbusters "Personnel File" ═══ House standard: basic info on top; Traits
+   & Talents + Brownie Points on the LEFT; Gear / Tags / Notes tabs on the RIGHT;
+   the shared canonical Roll Log (identical to every sheet except the dice tray).
+   Builder/Leveler-set fields (Traits, Talents, Goal) render LOCKED; the Current
+   value + Brownie Points stay live. Accent --gb (ecto slime). One die in every
+   pool is the Ghost Die — a 6 on it counts 0. */
 :root{
   --bg:#1c2116;--paper:#f4f6ee;--ink:#161a12;--muted:#5b6350;--rule:#c7cdb8;
-  --gb:#8bc53f;--gb-dk:#5f8f24;--gb-lt:#e7f3d2;--ecto:#b6e34a;--red:#c23a2f;--purple:#7a3fb0;--amber:#e2a53a;
+  --gb:#8bc53f;--gb-dk:#5f8f24;--gb-lt:#e7f3d2;--ecto:#b6e34a;--red:#c23a2f;--purple:#7a3fb0;--amber:#e2a53a;--gold:#e2b23a;
   --border:#20281a;--section-hdr:#20281a;--box:#eaeee0;--input-bg:#fff;--input-border:#8a927a;
   --log-bg:#12160e;--log-text:#eef4e2;
 }
@@ -27,147 +31,254 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
 .sheet-wrap{flex:1;overflow-y:auto;padding:40px 16px 24px;}
 .sheet{max-width:1060px;margin:0 auto;background:var(--paper);border:3px solid var(--border);border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.4);overflow:hidden;}
-.hdr{background:linear-gradient(120deg,var(--gb-dk),var(--gb));color:#12180a;padding:14px 18px;display:grid;grid-template-columns:1.3fr 1fr;gap:14px;align-items:end;}
+.hdr{background:linear-gradient(120deg,var(--gb-dk),var(--gb));color:#12180a;padding:14px 18px;display:grid;grid-template-columns:1.3fr 1fr;gap:14px;align-items:center;}
 .hdr .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:.04em;line-height:.9;text-transform:uppercase;}
-.hdr .logo b{display:block;font-size:26px;}
+.hdr .logo b{display:block;font-size:24px;}
 .hdr .logo span{display:block;font-size:11px;letter-spacing:.3em;color:#22300c;}
+.lockrow{display:flex;gap:8px;margin-top:8px;}
+.lockfield{background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.2);border-radius:5px;padding:4px 9px;flex:1;}
+.lockfield label{display:block;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#3a4a1a;font-weight:800;}
+.lockfield .lv{font-family:'Barlow Condensed';font-weight:700;font-size:15px;color:#161a12;line-height:1.15;}
 .f{display:flex;flex-direction:column;gap:2px;}
 .f label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;opacity:.8;}
-.hdr input,.hdr select{background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.25);color:#161a12;padding:5px 7px;border-radius:5px;font-family:inherit;font-size:14px;font-weight:600;}
+.hdr input{background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.25);color:#161a12;padding:5px 7px;border-radius:5px;font-family:inherit;font-size:14px;font-weight:600;width:100%;}
 .body{padding:16px;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+.col{display:flex;flex-direction:column;gap:14px;}
 @media(max-width:860px){.grid2{grid-template-columns:1fr;}.hdr{grid-template-columns:1fr;}}
-.card{background:#fff;border:1.5px solid var(--rule);border-radius:8px;padding:12px;margin-bottom:14px;}
+.card{background:#fff;border:1.5px solid var(--rule);border-radius:8px;padding:12px;}
 .card h3{font-family:'Barlow Condensed';font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gb-dk);border-bottom:2px solid var(--gb-lt);padding-bottom:5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
-/* traits */
+.card h4{font-family:'Barlow Condensed';font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gb-dk);margin:2px 0 6px;}
+/* Sub-tabs */
+.subtabs{display:flex;gap:0;background:var(--section-hdr);border-radius:8px 8px 0 0;padding:0 6px;overflow:hidden;}
+.subtabs button{flex:1;background:none;border:none;color:#b6c79a;font-family:'Barlow Condensed';font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;padding:9px 8px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+.subtabs button.on{color:#fff;border-bottom-color:var(--ecto);}
+.subwrap{border:1.5px solid var(--rule);border-top:none;border-radius:0 0 8px 8px;background:#fff;padding:12px;}
+.subpane{display:none;}
+.subpane.on{display:block;}
+/* traits (locked value + talent; live Current + Roll) */
 .trait{border:1.5px solid var(--rule);border-radius:8px;padding:9px;margin-bottom:10px;background:var(--box);}
 .trait-top{display:flex;align-items:center;gap:8px;}
 .trait-top .tn{font-family:'Barlow Condensed';font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:.03em;flex:1;}
-.stepper{display:flex;align-items:center;gap:3px;}
-.stepper button{width:22px;height:22px;border:1px solid var(--input-border);background:#fff;border-radius:4px;font-weight:800;cursor:pointer;}
-.tval{width:34px;text-align:center;font-family:'Share Tech Mono';font-weight:700;font-size:18px;}
+.tval{font-family:'Share Tech Mono';font-weight:700;font-size:20px;color:var(--gb-dk);min-width:26px;text-align:center;}
 .rollbtn{background:var(--gb-dk);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';font-size:14px;letter-spacing:.05em;}
 .rollbtn.small{padding:4px 8px;font-size:12px;}
 .talent-row{display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:7px;border-top:1px dashed var(--rule);}
 .talent-row .lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;}
-.talent-row input{flex:1;border:1px solid var(--input-border);border-radius:4px;padding:4px 6px;font-family:inherit;font-size:13px;background:#fff;}
+.talent-row .tname{flex:1;font-family:'Barlow Condensed';font-weight:700;font-size:15px;}
 .talent-row .pool{font-family:'Share Tech Mono';font-size:12px;color:var(--gb-dk);font-weight:700;white-space:nowrap;}
 .cur{display:flex;align-items:center;gap:4px;}
-.cur input{width:30px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:4px;padding:2px;}
+.cur input{width:34px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:4px;padding:2px;background:var(--input-bg);}
+.cur .lbl{font-size:8px;letter-spacing:.1em;color:var(--muted);font-weight:800;}
 /* brownie + carry */
 .bp-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .bp-num{font-family:'Share Tech Mono';font-weight:700;font-size:36px;color:var(--gb-dk);}
 .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--input-border);border-radius:22px;padding:3px 9px;background:#fff;}
 .pill button{border:none;background:var(--box);width:24px;height:24px;border-radius:50%;font-weight:800;cursor:pointer;font-size:15px;}
-.hint{font-size:11px;color:var(--muted);margin:3px 0;}
-.spend-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
-.spend-row input{width:44px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:5px;padding:4px;}
-textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:52px;background:#fff;}
+.spend-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.spend-row label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800;}
+.spend-row input{width:44px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:5px;padding:4px;background:var(--input-bg);}
+textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:60px;background:#fff;}
 .addrow{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
 .addrow select,.addrow input{border:1px solid var(--input-border);border-radius:5px;padding:5px;font-family:inherit;font-size:13px;background:#fff;}
 .addbtn{background:var(--gb-dk);color:#fff;border:none;border-radius:5px;padding:5px 10px;font-weight:800;cursor:pointer;}
 .gear-row{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--rule);border-radius:6px;padding:5px 8px;margin-bottom:5px;font-size:12.5px;gap:8px;}
 .gear-row .gm{color:var(--muted);font-size:11px;white-space:nowrap;}
 .row-x{border:none;background:none;color:var(--muted);cursor:pointer;font-weight:800;}
-.carry{font-family:'Share Tech Mono';font-weight:700;}
+.carry{font-family:'Share Tech Mono';font-weight:700;font-size:12px;}
 .carry.over{color:var(--red);}
-/* roll log */
-.log{width:320px;flex-shrink:0;position:sticky;top:0;height:100vh;background:var(--log-bg);color:var(--log-text);display:flex;flex-direction:column;}
-.log h2{font-family:'Barlow Condensed';font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:14px;padding:12px 14px;border-bottom:1px solid #263019;display:flex;justify-content:space-between;align-items:center;}
-.log .entries{flex:1;overflow-y:auto;padding:8px 12px;}
-.roll-entry{border-bottom:1px solid #24301a;padding:7px 0;}
-.roll-label{font-size:11px;color:#a9c07f;}
-.roll-result{font-family:'Share Tech Mono';font-size:20px;font-weight:700;}
-.roll-result.win{color:var(--ecto);}
-.roll-result.ghost{color:#c78be6;}
-.roll-result.fail{color:#e2796f;}
-.roll-detail{font-size:11px;color:#8f9c78;}
-.dice-vis{margin-top:3px;display:flex;gap:3px;flex-wrap:wrap;}
-.die{width:22px;height:22px;border-radius:4px;background:#eef4e2;color:#161a12;font-family:'Share Tech Mono';font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;border:1px solid #445;}
-.die.ghostdie{background:#4a2d63;color:#eabfff;border-color:#7a3fb0;}
-.die.ghosted{background:#7a3fb0;color:#fff;}
-.tension-row{padding:8px 12px;border-bottom:1px solid #263019;display:flex;align-items:center;gap:8px;font-size:12px;}
-.tension-row input{width:52px;background:#1a2411;border:1px solid #34451f;color:#fff;border-radius:4px;padding:3px;text-align:center;font-family:'Share Tech Mono';}
-.tension-row select{background:#1a2411;border:1px solid #34451f;color:#cfe0b0;border-radius:4px;padding:3px;font-size:11px;flex:1;}
-.toolbar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-top:1px solid #263019;flex-wrap:wrap;}
-.toolbar button,.toolbar label{background:#1a2411;border:1px solid #34451f;color:#cfe0b0;border-radius:5px;padding:5px 9px;cursor:pointer;font-size:11px;font-weight:700;}
-@media(max-width:960px){.log{display:none;}}
+.empty{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0;}
+
+/* ═══ Canonical Roll Log (shared shell; only the dice tray is GB-specific) ═══ */
+.roll-log{width:290px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--gb);position:sticky;top:0;height:100vh;overflow:hidden;}
+#log-collapse-btn{position:fixed;right:290px;top:50%;transform:translateY(-50%);z-index:201;background:var(--gb);color:#12180a;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+#log-collapse-btn::after{content:"\25C0";}
+.roll-log.collapsed #log-collapse-btn{right:0;}
+.roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
+.log-header{padding:12px 14px 10px;background:var(--gb);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.14em;color:#12180a;}
+.log-clear{background:rgba(0,0,0,.2);border:1px solid rgba(0,0,0,.35);color:#12180a;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:2px;}
+.log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #232b18;}
+.log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:2px;}
+.log-action-btn.wizard{background:#233617;color:#a6e05a;border:1px solid #3e5f24;}
+.log-action-btn.wizard:hover{background:#3e5f24;color:#fff;}
+.log-action-btn.rules{background:#1e2916;color:#c3dea8;border:1px solid #33471f;}
+.log-action-btn.export{background:#1a2733;color:#6aabdf;border:1px solid #1a4a8a;}
+.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
+.dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
+.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(18,24,10,.8);}
+.dm-toggle-btn{width:36px;height:18px;background:#233617;border:1px solid #3e5f24;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.dm-toggle-btn.on{background:#a6e05a;border-color:var(--gb-dk);}
+.dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:left .2s;}
+.dm-toggle-btn.on::after{left:20px;background:#3e5f24;}
+.log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
+.log-entry{background:#182014;border:1px solid #2b3620;border-radius:3px;padding:8px 10px;}
+.log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a9c07f;margin-bottom:2px;}
+.log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
+.log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8f9c78;margin-top:3px;line-height:1.4;word-break:break-word;}
+.log-entry.crit .roll-result{color:var(--ecto);}.log-entry.fumble .roll-result{color:#e2796f;}
+.log-entry.crit{border-color:#5f8f24;}.log-entry.fumble{border-color:#8a3a34;}
+.log-entry.ghost .roll-result{color:#c78be6;}.log-entry.ghost{border-color:#5a3e7a;}
+.log-entry.remote{border-left:3px solid #c88a5a;background:#1f1c18;}
+.log-hint{color:#59614a;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
+.dice-tray{border-top:1px solid #232b18;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0c0f08;}
+.tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.tray-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a9c07f;flex-shrink:0;}
+.tray-input{background:#182014;border:1px solid #2b3620;color:#eef;font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;border-radius:3px;outline:none;width:52px;text-align:center;}
+.tray-sel{background:#182014;border:1px solid #2b3620;color:#cfe0b0;border-radius:3px;padding:5px 4px;font-family:'Barlow Condensed',sans-serif;font-size:11px;flex:1;min-width:90px;}
+.dice-btn{flex:1;padding:9px 0;background:var(--gb-dk);border:1px solid #3e5f24;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border-radius:3px;}
+.dice-btn:hover{background:var(--gb);color:#12180a;}
+.dice-btn.mini{flex:0 0 auto;padding:8px 12px;background:#1e2916;color:#c3dea8;border-color:#33471f;}
+.dice-btn.mini:hover{background:#33471f;color:#fff;}
+
+/* Toast + modals */
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(12,16,8,.94);border:2px solid var(--gb);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.7);}
+#roll-toast.show{display:block;}
+#roll-toast.crit{border-color:var(--ecto);}#roll-toast.fumble{border-color:#e0776f;}#roll-toast.ghost{border-color:var(--purple);}
+#roll-toast .t-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#a9c07f;margin-bottom:3px;}
+#roll-toast .t-result{font-family:'Oswald',serif;font-size:24px;font-weight:800;color:#fff;line-height:1;}
+#roll-toast .t-detail{font-size:11px;color:#c3dea8;margin-top:3px;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
+.ov.open{display:flex;}
+.modal{background:#182014;border:2px solid var(--gb);border-radius:6px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e6efdc;font-family:'Barlow',sans-serif;}
+.modal.wide{max-width:820px;}
+.modal-hd{background:#0f150a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-hd .ttl{font-family:'Oswald',sans-serif;font-weight:700;font-size:17px;letter-spacing:.08em;text-transform:uppercase;color:#a6e05a;line-height:1;}
+.modal-hd .x{background:transparent;border:none;color:#8ba07a;font-size:20px;cursor:pointer;padding:0 4px;}
+.modal-bd{padding:14px 16px;overflow-y:auto;}
+.modal-ft{padding:10px 16px;border-top:1px solid #2b3620;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;align-items:center;}
+.m-btn{padding:9px 14px;border:none;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--gb-dk);color:#fff;}
+.m-btn:hover{background:var(--gb);color:#12180a;}
+.m-btn.ghost{background:#232f1b;color:#cdd;border:1px solid #3a4a2a;}
+.m-btn.warn{background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;}
+.m-btn:disabled{opacity:.4;cursor:default;}
+.m-hint{font-size:12px;color:#a9c07f;margin:0 0 12px;line-height:1.5;}
+.m-input{width:100%;padding:9px 10px;background:#0f150a;border:1px solid #2b3620;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;}
+.m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#a6e05a;margin:12px 0 5px;}
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#a6e05a;margin:12px 0 3px;}
+.rules-list p{font-size:12px;line-height:1.5;color:#cdd;}
+.builder-chip{background:#182014;border:1px solid #2b3620;color:#dde;border-radius:12px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
+.builder-chip:hover{border-color:var(--gb);}
+.builder-chip.sel{background:#233617;border-color:var(--gb);color:#a6e05a;}
+.lv-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #232b18;color:#dde;font-size:13px;}
+.lv-step{width:26px;height:24px;background:#232f1b;border:1px solid #3a4a2a;color:#ddd;border-radius:3px;cursor:pointer;font-weight:700;}
+.lv-step:disabled{opacity:.35;cursor:default;}
+.lv-val{font-family:'Share Tech Mono';font-size:14px;color:#a6e05a;min-width:26px;text-align:center;}
+
 body.dark{--bg:#0e120a;--paper:#181e11;--ink:#e9f0dc;--muted:#93a17c;--rule:#2c3720;--box:#1e2614;--input-bg:#111a0c;--input-border:#3a4a28;}
-body.dark .card,body.dark .trait{background:#181e11;color:var(--ink);}
-body.dark .talent-row input,body.dark .addrow select,body.dark .addrow input,body.dark textarea,body.dark .tval,body.dark .cur input{background:#111a0c;color:var(--ink);}
+body.dark .sheet{border-color:#33471f;}
+body.dark .card,body.dark .trait,body.dark .subwrap{background:#181e11;color:var(--ink);}
+body.dark .cur input,body.dark .addrow select,body.dark .addrow input,body.dark textarea,body.dark .pill,body.dark .spend-row input{background:#111a0c;color:var(--ink);}
+
+.roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+@media(max-width:768px){
+  .sheet-wrap{padding:12px 12px 16px;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--gb);z-index:200;max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
+  #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;padding:0;}
+  #log-collapse-btn::after{content:"\25B2 Log";}
+  .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
+}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 </style>
 </head>
 <body>
+<div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
 <div class="app-wrap">
 <div class="sheet-wrap">
   <div class="sheet">
     <div class="hdr">
-      <div class="logo"><b>Ghostbusters</b><span>International · Personnel File</span></div>
+      <div>
+        <div class="logo"><b>Ghostbusters</b><span>International · Personnel File</span></div>
+        <div class="lockrow"><div class="lockfield"><label>Goal</label><div class="lv" id="d-goal">—</div></div></div>
+      </div>
       <div style="display:flex;flex-direction:column;gap:6px;">
-        <div style="display:flex;gap:8px;"><div class="f" style="flex:1;"><label>Name</label><input id="f-name" placeholder="Ghostbuster" oninput="onIdent()"></div>
-        <div class="f" style="flex:1;"><label>Alias (player)</label><input id="f-alias" placeholder="Your name" oninput="onIdent()"></div></div>
-        <div class="f"><label>Goal</label><select id="f-goal" onchange="S.goal=this.value;scheduleAutosave()"></select></div>
+        <div class="f"><label>Name</label><input id="f-name" placeholder="Ghostbuster" oninput="onIdent()"></div>
+        <div class="f"><label>Alias (player)</label><input id="f-alias" placeholder="Your name" oninput="onIdent()"></div>
       </div>
     </div>
     <div class="body">
       <div class="grid2">
-        <div>
+        <!-- LEFT: Traits/Talents → Brownie Points -->
+        <div class="col">
           <div class="card">
-            <h3>Traits &amp; Talents <span style="font-size:9px;color:var(--muted)">1–5 each · 12 pts · talent = +3 dice</span></h3>
+            <h3>Traits &amp; Talents</h3>
             <div id="traits"></div>
           </div>
-        </div>
-        <div>
           <div class="card">
             <h3>Brownie Points</h3>
             <div class="bp-wrap">
               <div class="pill"><button onclick="bumpBP(-1)">−</button><span class="bp-num" id="bp">20</span><button onclick="bumpBP(1)">+</button></div>
               <button class="rollbtn small" onclick="setBP(20)">Reset 20</button>
             </div>
-            <div class="hint">Spend 1 = +1 die on a roll (decide before rolling). Also rewrite fate, or trade 30 → +1 Trait.</div>
-            <div class="spend-row"><span class="talent-row" style="border:none;padding:0;margin:0;"><span class="lbl">Extra dice to spend this roll</span></span><input id="f-spend" type="number" value="0" min="0" oninput="clampSpend()"><span class="hint" style="margin:0">deducted from BP when you roll</span></div>
+            <div class="spend-row"><label>Extra dice this roll</label><input id="f-spend" type="number" value="0" min="0" oninput="clampSpend()"></div>
           </div>
-          <div class="card">
-            <h3>Gear <span class="carry" id="carry"></span></h3>
-            <div class="addrow">
-              <select id="gear-pick"></select><button class="addbtn" onclick="addGear()">+ Add</button>
-              <input id="gear-free" placeholder="…custom item" style="flex:1;min-width:100px;"><button class="addbtn" onclick="addGearFree()">+</button>
+        </div>
+        <!-- RIGHT: Gear | Tags | Notes tabs -->
+        <div class="col">
+          <div>
+            <div class="subtabs">
+              <button id="tb-gear" class="on" onclick="setTab('gear')">Gear</button>
+              <button id="tb-tags" onclick="setTab('tags')">Tags</button>
+              <button id="tb-notes" onclick="setTab('notes')">Notes</button>
             </div>
-            <div id="gear"></div>
-            <div class="hint">Try not to carry more Muscles points of gear than your Muscles Trait.</div>
+            <div class="subwrap">
+              <div id="pane-gear" class="subpane on">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4 style="margin:0;">Gear</h4><span class="carry" id="carry"></span></div>
+                <div class="addrow">
+                  <select id="gear-pick"></select><button class="addbtn" onclick="addGear()">+ Add</button>
+                  <input id="gear-free" placeholder="custom item" style="flex:1;min-width:100px;"><button class="addbtn" onclick="addGearFree()">+</button>
+                </div>
+                <div id="gear"></div>
+              </div>
+              <div id="pane-tags" class="subpane">
+                <h4>Physical</h4>
+                <textarea id="f-tagp" oninput="S.tagPhysical=this.value;scheduleAutosave()"></textarea>
+                <h4 style="margin-top:10px;">Personality</h4>
+                <textarea id="f-tagper" oninput="S.tagPersonality=this.value;scheduleAutosave()"></textarea>
+              </div>
+              <div id="pane-notes" class="subpane">
+                <h4>Description &amp; Notes</h4>
+                <textarea id="f-notes" style="min-height:150px;" oninput="S.notes=this.value;scheduleAutosave()"></textarea>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="grid2">
-        <div class="card"><h3>Tags — Physical</h3><textarea id="f-tagp" placeholder="walks with a limp, southern drawl, heavily muscled…" oninput="S.tagPhysical=this.value;scheduleAutosave()"></textarea></div>
-        <div class="card"><h3>Tags — Personality</h3><textarea id="f-tagper" placeholder="afraid of women, loves animals, fanatic about baseball…" oninput="S.tagPersonality=this.value;scheduleAutosave()"></textarea></div>
-      </div>
-      <div class="card"><h3>Description &amp; Notes</h3><textarea id="f-notes" style="min-height:90px;" placeholder="sex, hair, height; medical history; who your star really is…" oninput="S.notes=this.value;scheduleAutosave()"></textarea></div>
     </div>
   </div>
 </div>
-<!-- ROLL LOG -->
-<div class="log">
-  <h2>Roll Log <button class="row-x" style="color:#8f9c78" onclick="clearLog()">clear</button></h2>
-  <div class="tension-row">
-    <span>Diff.</span><input id="tension" type="number" placeholder="TN">
-    <select id="diffpick" onchange="pickDiff()"></select>
+<!-- ═══ CANONICAL ROLL LOG ═══ -->
+<div class="roll-log">
+  <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-actions">
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2b3620;background:transparent;color:#a9c07f;" title="Campaign">🔗</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="if(window.GBB)GBB.launch();" title="Character Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this character" style="display:none;">Level</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-  <div class="entries" id="entries"></div>
-  <div class="toolbar">
-    <button onclick="rollRaw(1)">1d6</button>
-    <button onclick="rollRaw(3)">3d6</button>
-    <button onclick="setDarkMode(!document.body.classList.contains('dark'))" id="dm-toggle">Dark</button>
-    <button id="campaign-btn" onclick="openCampaign()">Campaign</button>
-    <button onclick="exportSheet()">Export</button>
-    <label>Import<input type="file" accept="application/json" style="display:none" onchange="importSheet(this)"></label>
+  <div class="log-entries" id="log-entries"><div class="log-hint">Click a Trait or Talent to roll its dice pool</div></div>
+  <div class="dice-tray">
+    <div class="tray-row"><span class="tray-label">Difficulty</span><input class="tray-input" id="tension" type="number" placeholder="TN"><select class="tray-sel" id="diffpick" onchange="pickDiff()"></select></div>
+    <div class="tray-row"><button class="dice-btn" onclick="rollRaw(3)">Roll 3d6</button><button class="dice-btn mini" onclick="rollRaw(1)">1d6</button></div>
   </div>
 </div>
 </div>
+
+<!-- Modals -->
+<div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Ghostbusters — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✦ Advance Ghostbuster</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div><div class="modal-ft"><span id="levelup-note" class="m-hint" style="margin:0;flex:1;"></span><button class="m-btn" onclick="closeLevelUp()">Done</button></div></div></div>
+
 <script>
 function $(id){return document.getElementById(id);}
 function num(v){v=parseInt(v,10);return isNaN(v)?0:v;}
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function G(x){return Array.isArray(x)?x:[];}
 var TRAITS=G(window.GB_TRAITS), TALENTS=G(window.GB_TALENTS), GOALS=G(window.GB_GOALS),
@@ -178,51 +289,43 @@ function blankState(){
   return { name:'', alias:'', goal:'', notes:'', tagPhysical:'', tagPersonality:'',
     traits:{Brains:2,Muscles:2,Moves:2,Cool:2},
     current:{Brains:null,Muscles:null,Moves:null,Cool:null},
-    talents:{Brains:{name:'',value:''},Muscles:{name:'',value:''},Moves:{name:'',value:''},Cool:{name:'',value:''}},
-    bp:20, gear:[] };
+    talents:{Brains:{name:''},Muscles:{name:''},Moves:{name:''},Cool:{name:''}},
+    bp:20, gear:[], _built:false };
 }
-var S=blankState(), _ready=false, _saveTimer=null;
+var S=blankState(), _ready=false, _saveTimer=null, _toastTimer=null;
 
+function built(){ return !!(S._built || S.gear.length || S.goal || TKEYS.some(function(k){return num(S.traits[k])!==2;}) || TKEYS.some(function(k){return S.talents[k]&&S.talents[k].name;})); }
 function tval(k){ var c=S.current[k]; return (c===null||c===''||c===undefined)?num(S.traits[k]):num(c); }
 function carryTotal(){ return S.gear.reduce(function(a,g){return a+(parseFloat(g.muscles)||0);},0); }
 
-/* renders */
+/* renders (locked value + talent; live Current + Roll) */
 function renderTraits(){
   var host=$('traits');host.innerHTML='';
   TKEYS.forEach(function(k){
     var t=TRAITS.find(function(x){return x.name===k;})||{summary:''};
-    var tl=S.talents[k]||{name:'',value:''};
+    var tl=S.talents[k]||{name:''};
     var pool=tval(k)+3;
     var el=document.createElement('div');el.className='trait';
     el.innerHTML=
       '<div class="trait-top"><span class="tn" title="'+esc(t.summary)+'">'+k+'</span>'+
-      '<div class="stepper"><button onclick="stepTrait(\''+k+'\',-1)">−</button><span class="tval">'+num(S.traits[k])+'</span><button onclick="stepTrait(\''+k+'\',1)">+</button></div>'+
-      '<span class="cur" title="Current (reduced) value"><span class="lbl" style="font-size:8px">CUR</span><input type="number" placeholder="'+num(S.traits[k])+'" value="'+(S.current[k]==null?'':S.current[k])+'" oninput="setCurrent(\''+k+'\',this.value)"></span>'+
+      '<span class="tval">'+num(S.traits[k])+'</span>'+
+      '<span class="cur" title="Current (reduced) value"><span class="lbl">CUR</span><input type="number" placeholder="'+num(S.traits[k])+'" value="'+(S.current[k]==null?'':S.current[k])+'" oninput="setCurrent(\''+k+'\',this.value)"></span>'+
       '<button class="rollbtn" onclick="rollTrait(\''+k+'\')">Roll '+tval(k)+'d</button></div>'+
       '<div class="talent-row"><span class="lbl">Talent</span>'+
-      '<input list="tl-'+k+'" placeholder="e.g. '+esc(defaultTalent(k))+'" value="'+esc(tl.name)+'" oninput="setTalentName(\''+k+'\',this.value)">'+
+      '<span class="tname">'+(tl.name?esc(tl.name):'<span class="empty" style="padding:0;">—</span>')+'</span>'+
       '<span class="pool">'+pool+'d</span>'+
-      '<button class="rollbtn small" onclick="rollTalent(\''+k+'\')">Roll</button></div>';
+      '<button class="rollbtn small" onclick="rollTalent(\''+k+'\')"'+(tl.name?'':' disabled style="opacity:.4;"')+'>Roll</button></div>';
     host.appendChild(el);
   });
-  // datalists for talent autocompletion
-  if(!$('tl-Brains')){
-    TKEYS.forEach(function(k){
-      var dl=document.createElement('datalist');dl.id='tl-'+k;
-      TALENTS.filter(function(t){return t.trait===k;}).forEach(function(t){var o=document.createElement('option');o.value=t.name;dl.appendChild(o);});
-      document.body.appendChild(dl);
-    });
-  }
   renderCarry();
 }
-function defaultTalent(k){var l=TALENTS.filter(function(t){return t.trait===k;});return l.length?l[0].name:'';}
 function renderCarry(){
   var el=$('carry'); if(!el)return; var c=carryTotal(), m=num(S.traits.Muscles);
   el.textContent=c+' / '+m+' Muscles'; el.className='carry'+(c>m?' over':'');
 }
 function renderGear(){
   var host=$('gear');host.innerHTML='';
-  if(!S.gear.length){host.innerHTML='<div class="hint">No gear yet.</div>';}
+  if(!S.gear.length){host.innerHTML='<div class="empty">No gear.</div>';}
   S.gear.forEach(function(g,i){
     var el=document.createElement('div');el.className='gear-row';
     el.innerHTML='<span>'+esc(g.name)+'</span><span style="display:flex;gap:8px;align-items:center;"><span class="gm">'+esc(g.hands||'')+(g.muscles?' · '+g.muscles+' Mus':'')+'</span><button class="row-x" onclick="delGear('+i+')">✕</button></span>';
@@ -233,18 +336,17 @@ function renderGear(){
 function renderBP(){$('bp').textContent=S.bp;}
 function renderAll(){
   renderTraits();renderGear();renderBP();
-  $('f-name').value=S.name||'';$('f-alias').value=S.alias||'';$('f-goal').value=S.goal||'';
+  $('f-name').value=S.name||'';$('f-alias').value=S.alias||'';$('d-goal').textContent=S.goal||'—';
   $('f-tagp').value=S.tagPhysical||'';$('f-tagper').value=S.tagPersonality||'';$('f-notes').value=S.notes||'';
+  refreshWizardButtons();
 }
 
-/* actions */
-function stepTrait(k,d){S.traits[k]=clamp(num(S.traits[k])+d,1,9);renderTraits();scheduleAutosave();}
+/* live-play actions */
 function setCurrent(k,v){S.current[k]=(v===''?null:num(v));renderTraits();scheduleAutosave();}
-function setTalentName(k,v){S.talents[k].name=v;scheduleAutosave();}
 function bumpBP(d){S.bp=Math.max(0,S.bp+d);renderBP();scheduleAutosave();}
 function setBP(n){S.bp=n;renderBP();scheduleAutosave();}
 function clampSpend(){var v=Math.max(0,num($('f-spend').value));if(v>S.bp)v=S.bp;$('f-spend').value=v;}
-function onIdent(){S.name=$('f-name').value;S.alias=$('f-alias').value;syncDocTitle();scheduleAutosave();}
+function onIdent(){S.name=$('f-name').value;S.alias=$('f-alias').value;syncDocTitle();refreshWizardButtons();scheduleAutosave();}
 function addGear(){var n=$('gear-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;});S.gear.push({name:n,hands:e?e.hands:'',muscles:e?e.muscles:0});renderGear();scheduleAutosave();}
 function addGearFree(){var n=($('gear-free').value||'').trim();if(!n)return;S.gear.push({name:n,hands:'',muscles:0});$('gear-free').value='';renderGear();scheduleAutosave();}
 function delGear(i){S.gear.splice(i,1);renderGear();scheduleAutosave();}
@@ -261,55 +363,133 @@ function rollPool(label,baseDice){
   var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
   var tn=num($('tension').value);
   var beat=tn?(sum>=tn):null;
-  var cls=isGhost?(beat===false?'fail':'ghost'):(beat===true?'win':(beat===false?'fail':''));
+  var type=(beat===true)?'crit':(beat===false)?'fumble':(isGhost?'ghost':'normal');
   var outcome=tn?((beat?' ✓':' ✗')+' vs '+tn):'';
-  if(isGhost)outcome+=' 👻 GHOST!';
-  var dice=normals.map(function(v){return '<span class="die">'+v+'</span>';}).join('')+
-    '<span class="die ghostdie'+(isGhost?' ghosted':'')+'">'+(isGhost?'👻':ghost)+'</span>';
-  var det=(label)+' · '+n+'d6'+(extra?' ('+extra+' BP)':'');
-  addLog(det, sum+outcome, dice, cls);
+  if(isGhost)outcome+=' 👻';
+  var faces=normals.concat([ghost]);
+  var detail=n+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'')+(extra?' · +'+extra+' BP':'');
+  addLog((S.name||'Ghostbuster')+' · '+label, sum+outcome, detail, type);
 }
 function rollTrait(k){rollPool(k+' ('+tval(k)+'d)', tval(k));}
-function rollTalent(k){var nm=(S.talents[k].name||'talent');rollPool(k+' · '+nm+' ('+(tval(k)+3)+'d)', tval(k)+3);}
+function rollTalent(k){var nm=(S.talents[k]&&S.talents[k].name)||'talent';rollPool(k+' · '+nm+' ('+(tval(k)+3)+'d)', tval(k)+3);}
 function rollRaw(nd){
   var normals=[];for(var i=0;i<nd-1;i++)normals.push(d6());
   var ghost=d6();var isGhost=(ghost===6);
   var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
-  var dice=normals.map(function(v){return '<span class="die">'+v+'</span>';}).join('')+'<span class="die ghostdie'+(isGhost?' ghosted':'')+'">'+(isGhost?'👻':ghost)+'</span>';
-  addLog(nd+'d6'+(isGhost?' 👻':''), sum, dice, isGhost?'ghost':'');
+  var faces=normals.concat([ghost]);
+  var detail=nd+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'');
+  addLog(nd+'d6'+(isGhost?' 👻':''), sum, detail, isGhost?'ghost':'normal');
 }
 
-/* ═══ roll log + campaign ═══ */
-var _campaign=null,_campaignTimer=null,_campaignLastId=null,_campaignClientKey='gb-'+Math.random().toString(36).slice(2);
-function addLog(label,result,diceHtml,cls){
-  var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';
-  div.innerHTML='<div class="roll-label">'+esc(S.name||'Ghostbuster')+' · '+esc(label)+'</div><div class="roll-result '+(cls||'')+'">'+esc(result)+'</div>'+(diceHtml?'<div class="dice-vis">'+diceHtml+'</div>':'');
-  entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);entries.scrollTop=0;
-  if(_campaign)campaignPush(label,result);
+/* ═══ CANONICAL ROLL LOG + TOAST ═══ */
+function showRollToast(label,result,detail,type){
+  if(window.innerWidth>768){ var log=document.querySelector('.roll-log'); if(!log||!log.classList.contains('collapsed'))return; }
+  var t=$('roll-toast'); if(!t)return; t.className='show'+(type==='crit'?' crit':type==='fumble'?' fumble':type==='ghost'?' ghost':'');
+  t.querySelector('.t-label').textContent=label; t.querySelector('.t-result').textContent=result; t.querySelector('.t-detail').textContent=detail;
+  if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
 }
-function clearLog(){$('entries').innerHTML='';}
-function campaignPush(label,result){try{fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:S.name||'Ghostbuster',label:label,result:String(result),detail:''})});}catch(e){}}
-function campaignAddRemote(roll){var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';div.innerHTML='<div class="roll-label"><span style="color:#c9c05a">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div>';entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);}
-async function campaignPoll(){if(!_campaign)return;try{var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''),{credentials:'same-origin'});if(!r.ok)return;var data=await r.json();(data.rolls||[]).forEach(function(roll){if(roll.clientKey!==_campaignClientKey)campaignAddRemote(roll);});if(data.last)_campaignLastId=data.last;}catch(e){}}
-function campaignStartPolling(){if(_campaignTimer)clearInterval(_campaignTimer);campaignPoll();_campaignTimer=setInterval(campaignPoll,document.hidden?20000:4000);}
-function openCampaign(){var code=prompt('Enter campaign code to join (blank to leave):');if(code===null)return;if(!code){_campaign=null;if(_campaignTimer)clearInterval(_campaignTimer);$('campaign-btn').textContent='Campaign';scheduleAutosave();return;}joinCampaign(code.trim());}
-async function joinCampaign(code){try{var r=await fetch('/api/campaigns/join',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})});if(!r.ok){addLog('Campaign','✗','',' fail');return;}var d2=await r.json();_campaign={id:d2.id,code:code,name:d2.name||'Campaign'};$('campaign-btn').textContent='● '+(d2.name||code);campaignStartPolling();scheduleAutosave();}catch(e){}}
-function campaignRestore(saved){if(saved&&saved.id){_campaign=saved;$('campaign-btn').textContent='● '+(saved.name||'Campaign');campaignStartPolling();}}
+function addLog(label,result,detail,type){
+  type=type||'normal';
+  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
+  var cls=type==='crit'?' crit':type==='fumble'?' fumble':type==='ghost'?' ghost':'';
+  var div=document.createElement('div'); div.className='log-entry'+cls;
+  div.innerHTML='<div class="roll-label">'+esc(label)+'</div><div class="roll-result">'+esc(result)+'</div>'+(detail?'<div class="roll-detail">'+esc(detail)+'</div>':'');
+  if(typeof campaignBroadcast==='function') campaignBroadcast(label,result,detail,type);
+  entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
+  showRollToast(label,result,detail,type);
+}
+function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a Trait or Talent to roll its dice pool</div>'; }
+function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
+document.querySelector('.log-header').addEventListener('click',function(e){ if(window.innerWidth<=768&&!e.target.closest('button,.dm-toggle-btn'))toggleLogCollapse(); });
+(function(){ if(window.innerWidth<=768)document.querySelector('.roll-log').classList.add('collapsed'); })();
+function setDarkMode(on){ document.body.classList.toggle('dark',on); $('dm-toggle').classList.toggle('on',on); try{ localStorage.setItem('gb_dark',on?'1':'0'); }catch(e){} }
+function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
+
+/* ═══ Rules ═══ */
+function openRules(){
+  var R=G(window.GB_RULES);
+  var h='';
+  if(R.length){ h+=R.map(function(q){ return '<p><b>'+esc(q.title)+'.</b> '+esc(q.body||q.text)+'</p>'; }).join(''); }
+  else{
+    h+='<h4>The Task Roll</h4><p>Roll dice equal to your Trait (or Talent). Sum them; meet or beat the Difficulty.</p>';
+    h+='<h4>The Ghost Die</h4><p>One die per pool is the Ghost Die. A 6 on it counts 0 and something ghostly happens.</p>';
+    h+='<h4>Talents</h4><p>Each Trait has one Talent. When it applies, roll 3 extra dice.</p>';
+    h+='<h4>Brownie Points</h4><p>Spend 1 before a roll for +1 die. 30 buys a permanent +1 Trait.</p>';
+  }
+  $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
+}
+function closeRules(){ $('rules-overlay').classList.remove('open'); }
+
+/* ═══ Leveler — the only place Traits/Talents/Goal change after Create ═══ */
+function refreshWizardButtons(){ var b=$('build-btn'), l=$('level-btn'); var has=built(); if(b)b.style.display=has?'none':''; if(l)l.style.display=has?'':'none'; }
+function openLevelUp(){ if(!built()){ if(window.GBB)GBB.launch(); return; } renderLevelUp(); $('levelup-overlay').classList.add('open'); }
+function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); }
+function renderLevelUp(){
+  var pts=TKEYS.reduce(function(a,k){return a+num(S.traits[k]);},0);
+  $('levelup-note').textContent='Trait points: '+pts+' · 30 Brownie = +1 Trait';
+  var h='<div class="m-lbl">Goal</div><select class="m-input" id="lv-goal" onchange="lvGoal(this.value)"><option value="">— none —</option>'+GOALS.map(function(g){return '<option value="'+esc(g.name)+'"'+(S.goal===g.name?' selected':'')+'>'+esc(g.name)+'</option>';}).join('')+'</select>';
+  h+='<div class="m-lbl">Traits (1–9) &amp; Talents</div>';
+  TKEYS.forEach(function(k){
+    var tl=S.talents[k]||{name:''};
+    h+='<div class="lv-row"><span>'+k+'</span><button class="lv-step" onclick="lvTrait(\''+k+'\',-1)"'+(num(S.traits[k])<=1?' disabled':'')+'>−</button><span class="lv-val">'+num(S.traits[k])+'</span><button class="lv-step" onclick="lvTrait(\''+k+'\',1)"'+(num(S.traits[k])>=9?' disabled':'')+'>+</button></div>';
+    h+='<div style="display:flex;gap:6px;margin:4px 0 8px;"><input class="m-input" list="lvtl-'+k+'" placeholder="'+k+' talent" value="'+esc(tl.name)+'" oninput="lvTalent(\''+k+'\',this.value)" style="flex:1;"></div>';
+  });
+  $('levelup-body').innerHTML=h;
+  if(!$('lvtl-Brains')){TKEYS.forEach(function(k){var dl=document.createElement('datalist');dl.id='lvtl-'+k;TALENTS.filter(function(t){return t.trait===k;}).forEach(function(t){var o=document.createElement('option');o.value=t.name;dl.appendChild(o);});document.body.appendChild(dl);});}
+}
+function lvCommit(){renderAll();scheduleAutosave();}
+function lvGoal(v){S.goal=v;$('d-goal').textContent=v||'—';scheduleAutosave();}
+function lvTrait(k,d){S.traits[k]=clamp(num(S.traits[k])+d,1,9);renderLevelUp();lvCommit();}
+function lvTalent(k,v){if(!S.talents[k])S.talents[k]={};S.talents[k].name=v;renderTraits();scheduleAutosave();}
 
 /* theme / persistence */
-function setDarkMode(on){document.body.classList.toggle('dark',on);$('dm-toggle').textContent=on?'Light':'Dark';try{localStorage.setItem('gb_dark',on?'1':'0');}catch(e){}}
-function scheduleAutosave(){if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},400);}
-function collect(){S.campaign=_campaign;return S;}
-function saveSheet(){var json;try{json=JSON.stringify(collect());}catch(e){return;}try{localStorage.setItem('gb_sheet',json);}catch(e){}if(window.__ddState!==undefined)window.__ddState['gb_sheet']=json;if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}}
-function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n);}
-function applySheet(o){S=Object.assign(blankState(),o||{});if(!S.traits)S.traits=blankState().traits;if(!S.talents)S.talents=blankState().talents;if(!S.current)S.current=blankState().current;renderAll();if(S.campaign)campaignRestore(S.campaign);}
-function exportSheet(){var blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(S.name||'ghostbuster').replace(/\s+/g,'_')+'.json';a.click();}
-function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑','','');}catch(e){addLog('Import failed','✗','','fail');}};r.readAsText(f);input.value='';}
-window.addEventListener('beforeunload',function(){if(_ready)try{saveSheet(true);}catch(e){}});
+function scheduleAutosave(){if(!_ready)return;if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},600);}
+function collectSheet(){S.name=($('f-name').value||'').trim();S.alias=$('f-alias').value;return Object.assign({},S,{system:'GB',campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
+function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('gb_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({gb_sheet:json});else if(window.__ddState!==undefined)window.__ddState['gb_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)addLog('Sheet Saved','✓',data.name||'Unnamed','normal');}
+function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)try{window.__ddSaveTitle(n);}catch(e){}}
+function applySheet(o){o=o||{};S=Object.assign(blankState(),o);if(!S.traits)S.traits=blankState().traits;if(!S.talents)S.talents=blankState().talents;if(!S.current)S.current=blankState().current;renderAll();setDefaultTab();if(typeof campaignRestore==='function'&&o.campaign!==undefined)campaignRestore(o.campaign);if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}scheduleAutosave();}
+window.applySheet=applySheet;
+function exportSheet(){var data=collectSheet();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((data.name||'ghostbuster').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'ghostbuster')+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);addLog('Sheet Exported','↓',a.download,'normal');}
+function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑',f.name,'normal');}catch(e){addLog('Import failed','✗','Not a valid sheet','fumble');}};r.readAsText(f);input.value='';}
+var _pageReady=false;setTimeout(function(){_pageReady=true;},2000);
+function autoSaveOnExit(){if(!_ready)return;try{saveSheet(true);}catch(e){}try{syncDocTitle();}catch(e){}}
+window.addEventListener('beforeunload',autoSaveOnExit);window.addEventListener('pagehide',autoSaveOnExit);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')autoSaveOnExit();});
 
-/* init */
+/* ═══ CAMPAIGN LINK — same contract as the other sheets ═══ */
+var _campaign=null; var _campaignClientKey='ck-'+Math.random().toString(36).slice(2,12); var _campaignLastId=0; var _campaignTimer=null;
+var CAMPAIGN_SKIP_LABELS=new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Character Built']);
+function campaignPlayerName(){ return ($('f-name').value||'').trim()||'Ghostbuster'; }
+function campaignUpdateBtn(){ var btn=$('campaign-btn'); if(!btn)return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#233617'; btn.style.color='#a6e05a'; btn.style.borderColor='#3e5f24'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#a9c07f'; btn.style.borderColor='#2b3620'; } }
+function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
+function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
+function campaignRenderModal(){
+  var body=$('campaign-body');
+  if(_campaign) body.innerHTML='<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0f150a;border:1px solid #3e5f24;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#a6e05a;">'+esc(_campaign.name)+'</div><div style="font-size:11px;color:#a9c07f;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">'+esc(_campaign.code)+'</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
+  else body.innerHTML='<p class="m-hint">Enter a join code from your GM to connect this sheet.</p><div class="m-lbl">Join a Campaign</div><div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" class="m-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:.15em;"><button class="m-btn" onclick="campaignJoin()">Join</button></div><div id="campaign-error" style="font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
+}
+function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
+async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','🔗','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','🔗','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
+function campaignAddRemote(roll){
+  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
+  var div=document.createElement('div'); div.className='log-entry remote'+(roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':roll.type==='ghost'?' ghost':'');
+  div.innerHTML='<div class="roll-label"><span style="color:#c88a5a;">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div><div class="roll-detail">'+esc(roll.detail||'')+'</div>';
+  entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
+}
+async function campaignPoll(){ if(!_campaign)return; try{ var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''),{credentials:'same-origin'}); if(!r.ok)return; var data=await r.json(); (data.rolls||[]).forEach(function(roll){ if(roll.clientKey!==_campaignClientKey)campaignAddRemote(roll); }); if(data.last)_campaignLastId=data.last; }catch(e){} }
+function campaignPollDelay(){ return document.hidden?20000:4000; }
+function campaignStartPolling(){ if(_campaignTimer)clearInterval(_campaignTimer); campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); }
+document.addEventListener('visibilitychange',function(){ if(!_campaign||!_campaignTimer)return; clearInterval(_campaignTimer); if(!document.hidden)campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); });
+function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:saved.id,code:saved.code,name:saved.name||'Campaign'}; campaignStartPolling(); } else campaignLeaveSilent(); campaignUpdateBtn(); }
+
+/* tabs / init */
+function setTab(t){['gear','tags','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('gb_tab',t);}catch(e){}}
+function setDefaultTab(){var t='gear';try{t=localStorage.getItem('gb_tab')||'gear';}catch(e){}if(!$('pane-'+t))t='gear';setTab(t);}
 function initPickers(){
-  var g=$('f-goal');g.innerHTML='<option value="">— pick a Goal —</option>';GOALS.forEach(function(x){var o=document.createElement('option');o.value=x.name;o.textContent=x.name;o.title=x.description;g.appendChild(o);});
   var gp=$('gear-pick');gp.innerHTML='';EQUIP.forEach(function(e){var o=document.createElement('option');o.value=e.name;o.textContent=e.name+(e.muscles?' ('+e.muscles+' Mus)':'');gp.appendChild(o);});
   var dp=$('diffpick');dp.innerHTML='<option value="">Difficulty…</option>';DIFFS.forEach(function(dd){if(dd.low!=null){var o=document.createElement('option');o.value=dd.high||dd.low;o.textContent=dd.name+' ('+dd.range+')';dp.appendChild(o);}});
 }
@@ -317,11 +497,13 @@ function autoLoad(){
   var saved=null;
   if(window.__ddState!==undefined)saved=window.__ddState['gb_sheet']||null;else{try{saved=localStorage.getItem('gb_sheet');}catch(e){}}
   try{if(localStorage.getItem('gb_dark')==='1')setDarkMode(true);}catch(e){}
-  if(saved){try{applySheet(JSON.parse(saved));}catch(e){renderAll();}}else{renderAll();}
+  if(saved){try{applySheet(JSON.parse(saved));}catch(e){renderAll();setDefaultTab();}}else{renderAll();setDefaultTab();}
   _ready=true;
 }
 initPickers();
 autoLoad();
 </script>
+<script src="/tools-data/gb-sheet-builder.js"></script>
+<script src="/tools-data/dice-anim.js"></script>
 </body>
 </html>
