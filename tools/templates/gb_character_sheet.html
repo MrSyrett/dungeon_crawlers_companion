@@ -73,13 +73,15 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .trait-top{display:flex;align-items:center;gap:8px;}
 .trait-top .tn{font-family:'Barlow Condensed';font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:.03em;flex:1;}
 .tval{font-family:'Share Tech Mono';font-weight:700;font-size:20px;color:var(--gb-dk);min-width:26px;text-align:center;}
+.tval.hurt{color:var(--amber);}
+body.dark .tval.hurt{color:#f0b84a;}
 .rollbtn{background:var(--gb-dk);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';font-size:14px;letter-spacing:.05em;}
 .rollbtn.small{padding:4px 8px;font-size:12px;}
 .talent-row{display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:7px;border-top:1px dashed var(--rule);}
 .talent-row .lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;}
 .talent-row .tname{flex:1;font-family:'Barlow Condensed';font-weight:700;font-size:15px;}
 .talent-row .pool{font-family:'Share Tech Mono';font-size:12px;color:var(--gb-dk);font-weight:700;white-space:nowrap;}
-.cur{display:flex;align-items:center;gap:4px;}
+.cur{display:flex;flex-direction:column;align-items:center;gap:1px;}
 .cur input{width:34px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:4px;padding:2px;background:var(--input-bg);}
 .cur .lbl{font-size:8px;letter-spacing:.1em;color:var(--muted);font-weight:800;}
 /* brownie + carry */
@@ -168,6 +170,26 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .inj-btn{width:26px;height:26px;border:1px solid var(--input-border);background:var(--box);border-radius:5px;font-weight:800;cursor:pointer;font-size:15px;line-height:1;}
 .inj-btn.dmg{color:var(--red);}.inj-btn.heal{color:var(--gb-dk);}
 .inj-btn:disabled{opacity:.35;cursor:default;}
+/* Injury: labeled level buttons (like SW wounds) + constrained penalty popup */
+.gb-injury-track{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;}
+.gb-injury-track button{flex:1 1 0;min-width:62px;padding:7px 4px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;border-radius:5px;line-height:1.1;transition:background .12s,border-color .12s,color .12s;}
+.gb-injury-track button:hover{border-color:var(--gb);color:var(--gb-dk);}
+.gb-injury-track button.on{background:var(--amber);color:#3a2600;border-color:#b07a12;}
+.gb-injury-track button.on.crit{background:var(--red);color:#fff;border-color:#7a1c14;}
+.ij-head{font-family:'Barlow',sans-serif;font-size:12.5px;color:#cfe0bd;line-height:1.5;margin-bottom:10px;}
+.ij-head b{color:#a6e05a;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+.ij-count{float:right;font-family:'Share Tech Mono',monospace;font-weight:700;color:#e2796f;padding-left:8px;}
+.ij-count.ok{color:#a6e05a;}
+.ij-row{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed #2b3620;}
+.ij-row:last-child{border-bottom:none;}
+.ij-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:#e6efdc;}
+.ij-val{font-family:'Share Tech Mono',monospace;font-weight:700;font-size:17px;min-width:66px;text-align:center;color:#e6efdc;}
+.ij-val .dn{color:#e2796f;font-size:12px;}
+.ij-btn{width:42px;height:36px;border:1px solid #3a4a28;border-radius:6px;background:#223018;color:#dbe8cc;font-size:19px;font-weight:800;cursor:pointer;line-height:1;}
+.ij-btn.dmg:hover:not(:disabled){background:var(--red);border-color:var(--red);color:#fff;}
+.ij-btn.heal:hover:not(:disabled){background:var(--gb);border-color:var(--gb);color:#12180a;}
+.ij-btn:disabled{opacity:.3;cursor:default;}
+.m-btn:disabled{opacity:.4;cursor:default;background:#3a4a28;color:#8ba07a;}
 /* Shop / picker modal */
 #pk-overlay{z-index:1100;}
 .pk-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:7px;flex-shrink:0;border-bottom:1px solid #2b3620;}
@@ -295,14 +317,14 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
           </div>
           <div>
             <div class="subtabs">
-              <button id="tb-gear" class="on" onclick="setTab('gear')">Gear</button>
+              <button id="tb-gear" class="on" onclick="setTab('gear')">Tools</button>
               <button id="tb-tags" onclick="setTab('tags')">Tags</button>
               <button id="tb-notes" onclick="setTab('notes')">Notes</button>
             </div>
             <div class="subwrap">
               <div id="pane-gear" class="subpane on">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;">
-                  <button class="addbtn" onclick="openGearShop()">🛒 Add Gear</button>
+                  <button class="addbtn" onclick="openGearShop()">+ Add Tool</button>
                   <span class="carry" id="carry"></span>
                 </div>
                 <div id="gear"></div>
@@ -355,6 +377,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Ghostbusters — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✦ Advance Ghostbuster</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div><div class="modal-ft"><span id="levelup-note" class="m-hint" style="margin:0;flex:1;"></span><button class="m-btn" onclick="closeLevelUp()">Done</button></div></div></div>
+<div id="injury-overlay" class="ov" onclick="if(event.target===this)closeInjury()"><div class="modal"><div class="modal-hd"><div class="ttl">Set Injury</div><button class="x" onclick="closeInjury()">✕</button></div><div class="modal-bd" id="injury-body"></div><div class="modal-ft"><span id="injury-note" class="m-hint" style="margin:0;flex:1;font-size:11px;color:#8ba07a;"></span><button class="m-btn" id="injury-done" onclick="injuryDone()">Done</button></div></div></div>
 <!-- Shop / picker (gear · talents · goals) -->
 <div id="pk-overlay" class="ov" onclick="if(event.target===this)closePk()"><div class="modal wide" style="max-height:90vh;">
   <div class="modal-hd"><div class="ttl" id="pk-title">Add</div><button class="x" onclick="closePk()">✕</button></div>
@@ -398,13 +421,12 @@ function renderTraits(){
   TKEYS.forEach(function(k){
     var t=TRAITS.find(function(x){return x.name===k;})||{summary:''};
     var tl=S.talents[k]||{name:''};
-    var pool=tval(k)+3;
+    var cur=tval(k), base=num(S.traits[k]), dn=base-cur, pool=cur+3;
     var el=document.createElement('div');el.className='trait';
     el.innerHTML=
       '<div class="trait-top"><span class="tn" title="'+esc(t.summary)+'">'+k+'</span>'+
-      '<span class="tval">'+num(S.traits[k])+'</span>'+
-      '<span class="cur" title="Current (reduced) value"><span class="lbl">CUR</span><input type="number" placeholder="'+num(S.traits[k])+'" value="'+(S.current[k]==null?'':S.current[k])+'" oninput="setCurrent(\''+k+'\',this.value)"></span>'+
-      '<button class="rollbtn" onclick="rollTrait(\''+k+'\')">Roll '+tval(k)+'d</button></div>'+
+      '<span class="tval'+(dn>0?' hurt':'')+'"'+(dn>0?' title="Injured — reduced by '+dn+' (normally '+base+')"':'')+'>'+cur+'</span>'+
+      '<button class="rollbtn" onclick="rollTrait(\''+k+'\')">Roll</button></div>'+
       '<div class="talent-row"><span class="lbl">Talent</span>'+
       '<span class="tname">'+(tl.name?esc(tl.name):'<span class="empty" style="padding:0;">—</span>')+'</span>'+
       '<span class="pool">'+pool+'d</span>'+
@@ -419,7 +441,7 @@ function renderCarry(){
 }
 function renderGear(){
   var host=$('gear');host.innerHTML='';
-  if(!S.gear.length){host.innerHTML='<div class="empty">No gear.</div>';}
+  if(!S.gear.length){host.innerHTML='<div class="empty">No tools.</div>';}
   S.gear.forEach(function(g,i){
     var el=document.createElement('div');el.className='gear-row';
     var stat='';
@@ -443,20 +465,61 @@ function injuryStatus(down){
   if(down<=4) return {t:'Basket Case',c:'bad'};
   return {t:'Hospital',c:'bad'};
 }
+var _injLevels=[{n:0,l:'Unharmed'},{n:1,l:'Shaken Up'},{n:2,l:'Hurt'},{n:3,l:'Badly Hurt'},{n:4,l:'Basket Case'},{n:5,l:'Hospital'}];
+var _injTarget=0, _injAlloc={Brains:0,Muscles:0,Moves:0,Cool:0};
+function injCapacity(){ return TKEYS.reduce(function(a,k){return a+num(S.traits[k]);},0); }
+function injAllocSum(){ return TKEYS.reduce(function(a,k){return a+_injAlloc[k];},0); }
 function renderInjury(){
   var down=injuryTotal(), s=injuryStatus(down);
-  var el=$('injury-status'); el.textContent=(down>0?down+' down · ':'')+s.t; el.className='injury-status'+(s.c?' '+s.c:'');
-  var host=$('injury'); if(!host)return; host.innerHTML='';
-  TKEYS.forEach(function(k){
-    var cur=curVal(k), max=num(S.traits[k]), dn=max-cur;
-    var row=document.createElement('div'); row.className='inj-row';
-    row.innerHTML='<span class="inj-name">'+k+'</span>'+
-      '<button class="inj-btn dmg" title="Take a hit to '+k+'" onclick="injTake(\''+k+'\')"'+(cur<=0?' disabled':'')+'>−</button>'+
-      '<span class="inj-val">'+cur+'<span style="color:var(--muted)">/'+max+'</span>'+(dn>0?' <span class="dn">−'+dn+'</span>':'')+'</span>'+
-      '<button class="inj-btn heal" title="Heal '+k+'" onclick="injHeal(\''+k+'\')"'+(dn<=0?' disabled':'')+'>+</button>';
-    host.appendChild(row);
-  });
+  var el=$('injury-status'); if(el){ el.textContent=(down>0?down+' down · ':'')+s.t; el.className='injury-status'+(s.c?' '+s.c:''); }
+  var host=$('injury');
+  if(host){
+    var cap=injCapacity();
+    host.innerHTML='<div class="gb-injury-track">'+_injLevels.map(function(lv){
+      if(lv.n>cap) return '';
+      var on=lv.n>0 && down>=lv.n, crit=on && lv.n>=4;
+      return '<button class="'+(on?'on'+(crit?' crit':''):'')+'" onclick="openInjuryLevel('+lv.n+')" title="Set injury to '+lv.l+'">'+lv.l+'</button>';
+    }).join('')+'</div>';
+  }
 }
+function openInjuryLevel(n){
+  var cap=injCapacity();
+  _injTarget=Math.min(n,cap);
+  TKEYS.forEach(function(k){ _injAlloc[k]=Math.max(0,num(S.traits[k])-curVal(k)); });
+  var sum=injAllocSum();
+  while(sum>_injTarget){ for(var i=TKEYS.length-1;i>=0 && sum>_injTarget;i--){ if(_injAlloc[TKEYS[i]]>0){_injAlloc[TKEYS[i]]--;sum--;} } }
+  var ov=$('injury-overlay'); if(!ov)return; ov.classList.add('open'); renderInjuryBody();
+}
+function injSet(k,d){
+  var base=num(S.traits[k]), sum=injAllocSum();
+  if(d>0){ if(sum>=_injTarget||_injAlloc[k]>=base) return; _injAlloc[k]++; }
+  else { if(_injAlloc[k]<=0) return; _injAlloc[k]--; }
+  renderInjuryBody();
+}
+function renderInjuryBody(){
+  var body=$('injury-body'); if(!body)return;
+  var lvl=_injLevels.find(function(x){return x.n===_injTarget;})||{l:''};
+  var sum=injAllocSum();
+  var head='<div class="ij-head"><span class="ij-count'+(sum===_injTarget?' ok':'')+'">'+sum+' / '+_injTarget+'</span><b>'+esc(lvl.l)+'</b> — assign '+_injTarget+' penalty point'+(_injTarget===1?'':'s')+' by lowering your Traits.</div>';
+  var rows=TKEYS.map(function(k){
+    var base=num(S.traits[k]), pen=_injAlloc[k], res=base-pen;
+    return '<div class="ij-row"><div class="ij-name">'+k+'</div>'+
+      '<button class="ij-btn dmg" title="Add a penalty to '+k+'" onclick="injSet(\''+k+'\',1)"'+((sum>=_injTarget||pen>=base)?' disabled':'')+'>−</button>'+
+      '<span class="ij-val">'+res+'<span style="color:#8ba07a">/'+base+'</span>'+(pen>0?' <span class="dn">−'+pen+'</span>':'')+'</span>'+
+      '<button class="ij-btn heal" title="Remove a penalty from '+k+'" onclick="injSet(\''+k+'\',-1)"'+(pen<=0?' disabled':'')+'>+</button></div>';
+  }).join('');
+  body.innerHTML=head+rows;
+  var note=$('injury-note'); if(note) note.textContent = (sum===_injTarget) ? 'Ready — press Done' : ((_injTarget-sum)+' point'+((_injTarget-sum)===1?'':'s')+' left to assign');
+  var done=$('injury-done'); if(done) done.disabled = (sum!==_injTarget);
+}
+function injuryDone(){
+  TKEYS.forEach(function(k){ var base=num(S.traits[k]); S.current[k]=(_injAlloc[k]>0? base-_injAlloc[k] : null); });
+  renderTraits(); renderInjury(); scheduleAutosave();
+  var down=injuryTotal();
+  addLog((S.name||'Ghostbuster')+' · Injury', down>0?(down+' down'):'Unharmed', injuryStatus(down).t, down>=4?'fumble':(down===0?'crit':'normal'));
+  closeInjury();
+}
+function closeInjury(){ var ov=$('injury-overlay'); if(ov) ov.classList.remove('open'); }
 function injTake(k){ var cur=curVal(k); if(cur<=0)return; S.current[k]=cur-1; renderTraits();renderInjury();scheduleAutosave();
   addLog((S.name||'Ghostbuster')+' · Injury','−1 '+k,'now '+injuryTotal()+' down', injuryTotal()>=5?'fumble':'normal'); }
 function injHeal(k){ var cur=curVal(k), max=num(S.traits[k]); if(cur>=max)return; var nv=cur+1; S.current[k]=(nv>=max?null:nv); renderTraits();renderInjury();scheduleAutosave(); }
