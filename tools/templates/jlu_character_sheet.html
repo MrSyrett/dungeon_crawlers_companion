@@ -192,6 +192,28 @@ textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;paddi
 .builder-chip{background:#141c2e;border:1px solid #26314a;color:#dde;border-radius:12px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
 .builder-chip:hover{border-color:var(--jlu);}
 .builder-chip.sel{background:#13294f;border-color:var(--jlu);color:#7db0f0;}
+/* Shop / picker modal */
+#pk-overlay{z-index:1100;}
+.pk-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:7px;flex-shrink:0;border-bottom:1px solid #26314a;}
+.pk-filterrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.pk-filterrow select{flex:1;min-width:130px;}
+.pk-carry{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:#7db0f0;white-space:nowrap;}
+.pk-carry.over{color:#e2796f;}
+.pk-customrow{display:flex;gap:6px;}
+.pk-customrow input{flex:1;}
+.brow-list{padding:4px 12px;overflow-y:auto;}
+.brow-item{display:flex;align-items:flex-start;gap:10px;padding:9px 2px;border-bottom:1px solid #232b18;}
+.brow-item{border-bottom:1px solid #202b42;}
+.brow-main{flex:1;min-width:0;}
+.brow-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#eef2fb;}
+.brow-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:#7db0f0;margin-left:8px;font-weight:400;}
+.brow-meta{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9fb0d6;letter-spacing:.03em;text-transform:uppercase;margin-top:1px;}
+.brow-desc{font-size:11.5px;color:#aebada;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.brow-add{flex-shrink:0;background:var(--jlu);color:#fff;border:none;border-radius:4px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.brow-add:hover{background:var(--jlu-dk);}
+.brow-add.have{background:transparent;color:#8ba0c0;border:1px solid #34435f;}
+.brow-add:disabled{opacity:.4;cursor:default;background:transparent;color:#8ba0c0;border:1px solid #34435f;}
+.brow-empty{padding:14px 4px;font-size:12px;color:#8ba0c0;}
 /* leveler rows */
 .lv-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid #1a2338;color:#dde;font-size:13px;}
 .lv-step{width:26px;height:24px;background:#1f2a40;border:1px solid #34435f;color:#ddd;border-radius:3px;cursor:pointer;font-weight:700;}
@@ -293,9 +315,8 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
                   <div><h4>Traits</h4><div id="traits"></div></div>
                   <div><h4>Limitations</h4><div id="limitations"></div></div>
                 </div>
-                <div style="margin-top:14px;"><h4>Equipment</h4>
-                  <div class="addrow"><select id="eq-pick"></select><button class="addbtn" onclick="addEquip()">+ Add</button>
-                    <input id="eq-free" placeholder="custom item" style="flex:1;min-width:120px;"><button class="addbtn" onclick="addEquipFree()">+</button></div>
+                <div style="margin-top:14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;"><h4 style="margin:0;">Equipment</h4><button class="addbtn" onclick="openGearShop()">🛒 Buy Gear</button></div>
                   <div id="equipment"></div>
                 </div>
               </div>
@@ -338,6 +359,16 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">JLU — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✦ Advance Hero</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div><div class="modal-ft"><span id="levelup-note" class="m-hint" style="margin:0;flex:1;"></span><button class="m-btn" onclick="closeLevelUp()">Done</button></div></div></div>
+<!-- Gear shop -->
+<div id="pk-overlay" class="ov" onclick="if(event.target===this)closePk()"><div class="modal wide" style="max-height:90vh;">
+  <div class="modal-hd"><div class="ttl" id="pk-title">🛒 Buy Gear</div><button class="x" onclick="closePk()">✕</button></div>
+  <div class="pk-controls">
+    <input id="pk-search" class="m-input" placeholder="Search gear…" oninput="renderPk()">
+    <div class="pk-filterrow"><select id="pk-cat" class="m-input" onchange="renderPk()" style="display:none;"></select><span id="pk-carry" class="pk-carry"></span></div>
+    <div id="pk-customrow" class="pk-customrow" style="display:none;"><input id="pk-custom" class="m-input" placeholder="Custom item…" onkeydown="if(event.key==='Enter')pkCustom()"><button class="m-btn" onclick="pkCustom()">Add</button></div>
+  </div>
+  <div class="modal-bd brow-list" id="pk-body"></div>
+</div></div>
 
 <script>
 /* ═══ helpers ═══ */
@@ -392,8 +423,11 @@ function paxSpent(){
   if(pp){lines.push({l:'Powers',v:pp});total+=pp;}
   var kp=S.knowledge.length*4; if(kp){lines.push({l:'Knowledge',v:kp});total+=kp;}
   var tp=S.traits.length*4; if(tp){lines.push({l:'Traits',v:tp});total+=tp;}
+  var ep=0; S.equipment.forEach(function(e){ ep+=equipCost(e); }); if(ep){lines.push({l:'Equipment',v:ep});total+=ep;}
   return {lines:lines,total:total};
 }
+function paxOf(cost){ var m=String(cost==null?'':cost).match(/\d+/); return m?parseInt(m[0],10):0; }
+function equipCost(e){ if(e&&e.paxCost!=null)return num(e.paxCost); var d=EQUIP.find(function(x){return x.name===(e&&e.name);}); return d?paxOf(d.cost):0; }
 function paxAwarded(){var t=tierObj(S.tier);return (S.paxTotal==null?num(t.pax):num(S.paxTotal));}
 function paxAvailable(){return paxAwarded()-paxSpent().total;}
 
@@ -499,9 +533,10 @@ function renderLimitations(){
 }
 function renderEquip(){
   var host=$('equipment');host.innerHTML='';
-  if(!S.equipment.length){host.innerHTML='<div class="empty">None.</div>';return;}
+  if(!S.equipment.length){host.innerHTML='<div class="empty">None — Buy Gear to spend PAX.</div>';return;}
   S.equipment.forEach(function(e,i){var el=document.createElement('div');el.className='gear-row';
-    el.innerHTML='<span><b>'+esc(e.name)+'</b>'+(e.note?' <span class="gm">'+esc(e.note)+'</span>':'')+'</span><button class="row-x" onclick="delEquip('+i+')">✕</button>';
+    var c=equipCost(e);
+    el.innerHTML='<span><b>'+esc(e.name)+'</b>'+(c?' <span class="gm" style="color:var(--jlu-dk);font-weight:700;">'+c+' PAX</span>':'')+(e.note?' <span class="gm">'+esc(e.note)+'</span>':'')+'</span><button class="row-x" onclick="delEquip('+i+')">✕</button>';
     host.appendChild(el);});
 }
 function renderAll(){
@@ -514,9 +549,44 @@ function renderAll(){
 /* ═══ live-play actions ═══ */
 function bumpResolve(d){if(!S.tier)return;S.resCur=clamp(S.resCur+d,0,resolveMax());renderResolve();scheduleAutosave();}
 function restResolve(){if(!S.tier)return;S.resCur=resolveMax();renderResolve();scheduleAutosave();addLog('Resolve','full','recovered to '+resolveMax(),'normal');}
-function addEquip(){var n=$('eq-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;});S.equipment.push({name:n,note:e?(e.cost+' · '+e.text):''});renderEquip();scheduleAutosave();}
-function addEquipFree(){var n=($('eq-free').value||'').trim();if(!n)return;S.equipment.push({name:n,note:''});$('eq-free').value='';renderEquip();scheduleAutosave();}
-function delEquip(i){S.equipment.splice(i,1);renderEquip();scheduleAutosave();}
+function gearAddTo(arr, e){ arr.push({name:e.name, note:e.text||'', paxCost:paxOf(e.cost), category:e.category||'Gear'}); }
+function delEquip(i){S.equipment.splice(i,1);renderEquip();renderPax();scheduleAutosave();}
+
+/* ═══ GEAR SHOP (PAX-aware) — reused by the sheet, builder and leveler ═══ */
+var _pk=null;
+function openPickerCfg(cfg){ _pk=cfg; var o=$('pk-overlay'); o.classList.add('open'); if($('pk-search'))$('pk-search').value='';
+  var cat=$('pk-cat'); if(cfg.cats&&cfg.cats.length>1){ cat.style.display=''; cat.innerHTML='<option value="">All</option>'+cfg.cats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join(''); } else cat.style.display='none';
+  var cr=$('pk-customrow'); cr.style.display=cfg.custom?'flex':'none'; if(cfg.custom)$('pk-custom').value='';
+  $('pk-title').textContent=cfg.title||'Add'; renderPk(); }
+function closePk(){ $('pk-overlay').classList.remove('open'); _pk=null; }
+function renderPk(){
+  if(!_pk)return;
+  var carry=$('pk-carry'); if(_pk.carry){ var c=_pk.carry(); carry.textContent=c.text; carry.className='pk-carry'+(c.over?' over':''); } else carry.textContent='';
+  var q=($('pk-search').value||'').toLowerCase().trim(), cat=($('pk-cat').value||'');
+  var items=_pk.items().filter(function(it){ if(cat&&(it.cat||'')!==cat)return false; if(q&&(it.name+' '+(it.meta||'')+' '+(it.desc||'')).toLowerCase().indexOf(q)<0)return false; return true; });
+  var host=$('pk-body'); host.innerHTML='';
+  if(!items.length){ host.innerHTML='<div class="brow-empty">No matches.</div>'; return; }
+  items.forEach(function(it){
+    var can=_pk.canAdd?_pk.canAdd(it):true;
+    var row=document.createElement('div'); row.className='brow-item';
+    row.innerHTML='<div class="brow-main"><div class="brow-name">'+esc(it.name)+(it.cost?'<span class="brow-cost">'+esc(it.cost)+'</span>':'')+'</div>'+
+      (it.meta?'<div class="brow-meta">'+esc(it.meta)+'</div>':'')+(it.desc?'<div class="brow-desc">'+esc(it.desc)+'</div>':'')+'</div>'+
+      '<button class="brow-add"'+(can?'':' disabled title="Not enough PAX"')+'>'+(can?(_pk.addLabel||'Add'):'✕')+'</button>';
+    var btn=row.querySelector('.brow-add');
+    if(can) btn.onclick=function(){ _pk.onAdd(it); if(_pk&&_pk.multi){ renderPk(); } else closePk(); };
+    host.appendChild(row);
+  });
+}
+function pkCustom(){ var v=($('pk-custom').value||'').trim(); if(!v||!_pk||!_pk.custom)return; _pk.custom(v); if(_pk&&_pk.multi){ $('pk-custom').value=''; renderPk(); } else closePk(); }
+function gearItems(){ return EQUIP.map(function(e){ var c=paxOf(e.cost); return {name:e.name, cat:e.category||'Gear', cost:(c?c+' PAX':'free'), meta:e.category||'Gear', desc:e.text, _e:e, _cost:c}; }); }
+function gearCats(){ var s={}; EQUIP.forEach(function(e){ s[e.category||'Gear']=1; }); return Object.keys(s); }
+function openGearShop(){
+  openPickerCfg({ title:'🛒 Buy Gear', multi:true, addLabel:'Buy', cats:gearCats(), items:gearItems,
+    carry:function(){ var a=paxAvailable(); return {text:'PAX left '+a+' / '+paxAwarded(), over:a<0}; },
+    canAdd:function(it){ return paxAvailable()>=it._cost; },
+    custom:function(v){ S.equipment.push({name:v,note:'',paxCost:0,category:'Gear'}); renderEquip();renderPax();scheduleAutosave();lvRefresh(); },
+    onAdd:function(it){ gearAddTo(S.equipment,it._e); renderEquip();renderPax();scheduleAutosave();lvRefresh(); } });
+}
 function onIdent(){S.name=$('f-name').value;S.secret=$('f-secret').value;syncDocTitle();refreshWizardButtons();scheduleAutosave();}
 
 /* ═══ dice ═══ */
@@ -604,6 +674,8 @@ function renderLevelUp(){
   S.traits.forEach(function(n,i){ h+='<div class="lv-row"><span>'+esc(n)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelTrait('+i+')">✕</button></div>'; });
   h+='<div class="m-lbl">Limitations</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-lm" style="flex:1;"></select><button class="m-btn" onclick="lvAddLim()">Add</button></div>';
   S.limitations.forEach(function(l,i){ h+='<div class="lv-row"><span>'+esc(l.type)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelLim('+i+')">✕</button></div>'; });
+  h+='<div class="m-lbl">Equipment — spend PAX</div><div style="margin-bottom:6px;"><button class="m-btn" onclick="openGearShop()">🛒 Buy Gear</button></div>';
+  S.equipment.forEach(function(e,i){ var c=equipCost(e); h+='<div class="lv-row"><span>'+esc(e.name)+(c?' <span style="color:#7db0f0">'+c+' PAX</span>':'')+'</span><span></span><span></span><button class="lv-x" onclick="lvDelEquip('+i+')">✕</button></div>'; });
   $('levelup-body').innerHTML=h;
   fillSel('lv-pw',POWERS.filter(function(p){return !S.powers.some(function(x){return x.name===p.name;});}),function(p){return p.name+' ('+p.paxPerGrade+' PAX'+(inKit(p)?'':' ×2')+')';});
   fillSel('lv-kn',KNOW.filter(function(k){return S.knowledge.indexOf(k.name)<0;}),function(k){return k.name;});
@@ -624,6 +696,8 @@ function lvAddTrait(){var n=$('lv-tr').value;if(n&&S.traits.indexOf(n)<0){S.trai
 function lvDelTrait(i){S.traits.splice(i,1);lvCommit();}
 function lvAddLim(){var n=$('lv-lm').value;if(n){S.limitations.push({type:n,note:''});lvCommit();}}
 function lvDelLim(i){S.limitations.splice(i,1);lvCommit();}
+function lvDelEquip(i){S.equipment.splice(i,1);lvCommit();}
+function lvRefresh(){ if($('levelup-overlay').classList.contains('open'))renderLevelUp(); }
 
 /* ═══ tabs / theme / persistence ═══ */
 function setTab(t){['powers','skills','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('jlu_tab',t);}catch(e){}}
@@ -672,9 +746,7 @@ document.addEventListener('visibilitychange',function(){ if(!_campaign||!_campai
 function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:saved.id,code:saved.code,name:saved.name||'Campaign'}; campaignStartPolling(); } else campaignLeaveSilent(); campaignUpdateBtn(); }
 
 /* ═══ init ═══ */
-function initPickers(){
-  fillSel('eq-pick',EQUIP,function(e){return e.name+' — '+e.cost;});
-}
+function initPickers(){}
 function autoLoad(){
   var saved=null;
   if(window.__ddState!==undefined)saved=window.__ddState['jlu_sheet']||null;else{try{saved=localStorage.getItem('jlu_sheet');}catch(e){}}

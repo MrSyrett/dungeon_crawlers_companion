@@ -6,7 +6,7 @@
 // addLog, tierObj, originObj, powerObj) — load AFTER the sheet script.
 (function () {
   'use strict';
-  var STEPS = ['Tier', 'Identity', 'Attributes', 'Powers'];
+  var STEPS = ['Tier', 'Identity', 'Attributes', 'Powers', 'Gear'];
   var ATTR_ORDER = ['potency', 'accuracy', 'agility', 'resistance', 'mind', 'spirit'];
   var ATTR_NAME = { potency: 'Potency', accuracy: 'Accuracy', agility: 'Agility', resistance: 'Resistance', mind: 'Mind', spirit: 'Spirit' };
 
@@ -23,6 +23,9 @@
   var tier = '', origin = '', arch = '', name = '', secret = '';
   var attrs = {};                 // {key: value in multiples of 3}
   var chosenPowers = {};          // {powerName: true}
+  var boughtGear = [];            // [{name, note, paxCost, category}]
+  function paxNum(c) { var m = String(c == null ? '' : c).match(/\d+/); return m ? parseInt(m[0], 10) : 0; }
+  function equipPax() { return boughtGear.reduce(function (a, e) { return a + (e.paxCost || 0); }, 0); }
 
   function tierPax() { var t = tObj(tier); return t ? (parseInt(t.pax, 10) || 0) : 0; }
   function attrLimit() { var t = tObj(tier); return t ? (t.attrLimit || 6) : 6; }
@@ -42,7 +45,7 @@
     });
     return n;
   }
-  function paxSpent() { return attrPax() + powerPax(); }
+  function paxSpent() { return attrPax() + powerPax() + equipPax(); }
   function paxLeft() { return tierPax() - paxSpent(); }
 
   function ensure() {
@@ -126,7 +129,7 @@
           var v = (attrs[k] || 0) + d; if (v < 0) v = 0; if (v > lim) v = lim; attrs[k] = v; if (!v) delete attrs[k]; render();
         });
       });
-    } else {
+    } else if (step === 3) {
       var o = oObj(origin);
       var kit = o ? (o.powerKit || []) : [];
       // Resolve the Kit into concrete power objects (skip the "Any Superpower" wildcard).
@@ -157,6 +160,31 @@
           c.addEventListener('change', function () { if (c.checked) chosenPowers[c.dataset.n] = true; else delete chosenPowers[c.dataset.n]; render(); });
         });
       }
+    } else {
+      // Gear — buy equipment with leftover PAX (uses the sheet's shared shop modal).
+      note.textContent = 'PAX left: ' + paxLeft() + ' / ' + tierPax();
+      var carry = boughtGear.reduce(function (a, e) { return a + (e.paxCost || 0); }, 0);
+      var hh2 = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;">'
+        + '<button class="m-btn" id="jlub-shop">🛒 Buy Gear</button>'
+        + '<span style="font-family:\'Share Tech Mono\',monospace;font-size:12px;color:' + (paxLeft() < 0 ? '#df8a8a' : '#7db0f0') + ';">PAX left ' + paxLeft() + ' / ' + tierPax() + '</span></div>'
+        + '<div style="display:flex;flex-direction:column;gap:5px;">';
+      if (!boughtGear.length) hh2 += '<div class="brow-empty" style="color:#8ba0c0;">No gear — Buy Gear to spend leftover PAX (optional).</div>';
+      boughtGear.forEach(function (e, i) {
+        hh2 += '<div class="gear-row" style="background:#141c2e;border-color:#26314a;color:#dde;">'
+          + '<span>' + esc(e.name) + (e.paxCost ? ' <span style="color:#7db0f0;">' + e.paxCost + ' PAX</span>' : '') + '</span>'
+          + '<button class="row-x" style="color:#df8a8a;" data-i="' + i + '">✕</button></div>';
+      });
+      b.innerHTML = hh2 + '</div>';
+      $('jlub-shop').addEventListener('click', function () {
+        openPickerCfg({
+          title: '🛒 Buy Gear', multi: true, addLabel: 'Buy', cats: (typeof gearCats === 'function' ? gearCats() : null), items: gearItems,
+          carry: function () { return { text: 'PAX left ' + paxLeft() + ' / ' + tierPax(), over: paxLeft() < 0 }; },
+          canAdd: function (it) { return paxLeft() >= it._cost; },
+          custom: function (v) { boughtGear.push({ name: v, note: '', paxCost: 0, category: 'Gear' }); render(); },
+          onAdd: function (it) { var e = it._e || {}; boughtGear.push({ name: e.name, note: e.text || '', paxCost: paxNum(e.cost), category: e.category || 'Gear' }); render(); }
+        });
+      });
+      b.querySelectorAll('.row-x').forEach(function (btn) { btn.addEventListener('click', function () { boughtGear.splice(parseInt(btn.dataset.i, 10), 1); render(); }); });
     }
     if (keep) b.scrollTop = bScroll;
     _lastStep = step; ov.classList.add('open');
@@ -181,6 +209,7 @@
     };
     ATTR_ORDER.forEach(function (k) { built.attrs[k] = attrs[k] || 0; });
     Object.keys(chosenPowers).forEach(function (nm) { if (chosenPowers[nm]) built.powers.push({ name: nm, grade: 1 }); });
+    built.equipment = boughtGear.map(function (e) { return { name: e.name, note: e.note || '', paxCost: e.paxCost || 0, category: e.category || 'Gear' }; });
     var t = tObj(built.tier);
     built.resCur = (t ? (parseInt(t.resolve, 10) || 0) : 0) + (built.attrs.spirit || 0);
     var prev = (typeof collectSheet === 'function') ? collectSheet() : {};
@@ -192,7 +221,7 @@
   }
 
   window.JLUB = {
-    launch: function () { step = 0; tier = ''; origin = ''; arch = ''; name = ''; secret = ''; attrs = {}; chosenPowers = {}; _lastStep = -1; render(); },
+    launch: function () { step = 0; tier = ''; origin = ''; arch = ''; name = ''; secret = ''; attrs = {}; chosenPowers = {}; boughtGear = []; _lastStep = -1; render(); },
     close: function () { if (ov) ov.classList.remove('open'); },
     next: function () {
       if (step === 0 && !tier) { $('jlub-note').textContent = 'Pick a Tier first'; return; }
