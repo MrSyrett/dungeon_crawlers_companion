@@ -126,7 +126,8 @@ body.dark .status-chip.on{background:#c0392b;border-color:#e2796f;color:#fff;}
 .abil:last-child{border-bottom:none;}
 .abil b{color:var(--jlu-dk);}
 .abil .meta{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
-.chip{display:inline-block;background:var(--jlu-lt);border:1px solid var(--jlu);border-radius:14px;padding:3px 10px;margin:2px;font-size:12px;font-weight:600;}
+.chip{display:inline-block;background:var(--jlu-lt);border:1px solid var(--jlu);border-radius:14px;padding:3px 10px;margin:2px;font-size:12px;font-weight:600;color:var(--jlu-dk);}
+body.dark .chip{background:#1b2a4a;border-color:#3a5aa0;color:#cfe0ff;}
 .empty{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0;}
 .lim{border:1px solid var(--rule);border-radius:6px;padding:6px;margin-bottom:6px;}
 .lim input{width:100%;border:1px solid var(--input-border);border-radius:4px;padding:3px;margin-top:3px;font-family:inherit;font-size:12px;background:var(--input-bg);}
@@ -344,7 +345,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
                   <div><h4>Limitations</h4><div id="limitations"></div></div>
                 </div>
                 <div style="margin-top:14px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;"><h4 style="margin:0;">Equipment</h4><button class="addbtn" onclick="openGearShop()">🛒 Buy Gear</button></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;"><h4 style="margin:0;">Equipment</h4><button class="addbtn" onclick="openGearShop()">Buy Gear</button></div>
                   <div id="equipment"></div>
                 </div>
               </div>
@@ -389,7 +390,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✦ Advance Hero</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div><div class="modal-ft"><span id="levelup-note" class="m-hint" style="margin:0;flex:1;"></span><button class="m-btn" onclick="closeLevelUp()">Done</button></div></div></div>
 <!-- Gear shop -->
 <div id="pk-overlay" class="ov" onclick="if(event.target===this)closePk()"><div class="modal wide" style="max-height:90vh;">
-  <div class="modal-hd"><div class="ttl" id="pk-title">🛒 Buy Gear</div><button class="x" onclick="closePk()">✕</button></div>
+  <div class="modal-hd"><div class="ttl" id="pk-title">Buy Gear</div><button class="x" onclick="closePk()">✕</button></div>
   <div class="pk-controls">
     <input id="pk-search" class="m-input" placeholder="Search gear…" oninput="renderPk()">
     <div class="pk-filterrow"><select id="pk-cat" class="m-input" onchange="renderPk()" style="display:none;"></select><span id="pk-carry" class="pk-carry"></span></div>
@@ -670,7 +671,7 @@ function pkCustom(){ var v=($('pk-custom').value||'').trim(); if(!v||!_pk||!_pk.
 function gearItems(){ return EQUIP.map(function(e){ var c=paxOf(e.cost); return {name:e.name, cat:e.category||'Gear', cost:(c?c+' PAX':'free'), meta:e.category||'Gear', desc:e.text, _e:e, _cost:c}; }); }
 function gearCats(){ var s={}; EQUIP.forEach(function(e){ s[e.category||'Gear']=1; }); return Object.keys(s); }
 function openGearShop(){
-  openPickerCfg({ title:'🛒 Buy Gear', multi:true, addLabel:'Buy', cats:gearCats(), items:gearItems,
+  openPickerCfg({ title:'Buy Gear', multi:true, addLabel:'Buy', cats:gearCats(), items:gearItems,
     carry:function(){ var a=paxAvailable(); return {text:'PAX left '+a+' / '+paxAwarded(), over:a<0}; },
     canAdd:function(it){ return paxAvailable()>=it._cost; },
     custom:function(v){ S.equipment.push({name:v,note:'',paxCost:0,category:'Gear'}); renderEquip();renderPax();scheduleAutosave();lvRefresh(); },
