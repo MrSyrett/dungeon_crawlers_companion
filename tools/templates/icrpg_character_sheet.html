@@ -426,11 +426,11 @@ body.dark .tabs-bar{background:#1a161a;}
   <div class="body-row">
     <div class="stats-col">
       <div class="card">
-      <div class="section-bar accent"><span>Stats</span><span class="sb-note">click a stat to roll d20 + STAT vs TARGET</span></div>
+      <div class="section-bar accent"><span>Stats</span></div>
       <div class="stats-grid icrpg" id="stats-grid"></div>
       </div>
       <div class="card">
-      <div class="section-bar"><span>Effort</span><span class="sb-note">roll after a hit to measure it</span></div>
+      <div class="section-bar"><span>Effort</span></div>
       <table class="eff-tbl"><tbody id="effort-body"></tbody></table>
       </div>
     </div>
@@ -440,7 +440,7 @@ body.dark .tabs-bar{background:#1a161a;}
       <div class="section-bar accent"><span>Status</span></div>
       <div class="vitals" style="grid-template-columns:1fr;">
         <div class="vital wide">
-          <div class="vlbl"><span>Hearts &amp; HP</span><small>each Heart = 10 HP</small></div>
+          <div class="vlbl"><span>Hearts &amp; HP</span></div>
           <div class="vbig" style="margin-top:2px;">
             <input type="number" id="f-hp" value="10" oninput="onHp()"> <span style="color:var(--muted);font-size:20px;">/</span>
             <input type="number" id="f-hpmax" value="10" oninput="onHp()">
@@ -451,11 +451,11 @@ body.dark .tabs-bar{background:#1a161a;}
       </div>
       <div class="combat-grid four">
         <div class="vital">
-          <div class="vlbl"><span>Target</span><small>set by the GM</small></div>
+          <div class="vlbl"><span>Target</span></div>
           <div class="vbig"><input type="number" id="f-target" value="12" oninput="scheduleAutosave()"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Defense</span><small>CON + armor</small></div>
+          <div class="vlbl"><span>Defense</span></div>
           <div class="vbig"><span class="calc" id="def-val" title="Enemies roll d20 vs your Defense">10</span></div>
         </div>
         <div class="vital">
@@ -518,7 +518,7 @@ body.dark .tabs-bar{background:#1a161a;}
       </div>
     </div>
   </div>
-  <div class="sheet-foot"><span>Roll d20 + STAT vs one TARGET. Beat it and you succeed; measure it with EFFORT.</span><span id="foot-build"></span></div>
+  <div class="sheet-foot"><span>Index Card RPG</span><span id="foot-build"></span></div>
 </div>
 </div>
 
