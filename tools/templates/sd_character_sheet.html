@@ -466,7 +466,7 @@ body.dark .sheet{border-color:#444;}
 .lg-word{font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:34px;line-height:.9;color:#fff;}
 .lg-sub{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-top:4px;}
 .hdr-top .name-primary{flex:0 1 340px;}
-.hdr-top .title-auto{flex:0 0 auto;display:flex;align-items:center;gap:6px;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.hdr-top .title-auto{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;gap:6px;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
 .hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;align-items:stretch;}
 .hdr-field,.lockfield{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.08);border-radius:7px;min-width:0;padding:4px 9px;}
 .hdr-metarow .lockfield{flex:1 1 0;}
@@ -504,6 +504,9 @@ body.dark .sl::after{background:#3a3320;}
 @media(max-width:768px){
   .main-body{padding:8px;gap:8px;align-items:stretch;}
   .hdr-top{gap:9px;}
+  .hdr-top .name-primary{flex:1 1 100%;order:2;}
+  .hdr-top .title-auto{font-size:12px;}
+  .hdr-top .title-auto .sw-toggle{transform:scale(1.5);margin:0 4px;}
   .hdr-metarow > *{flex:1 1 42%!important;}
   .sd-vitals-card{order:1;}
   .sd-abilities{order:2;}

@@ -552,8 +552,8 @@ body.dark .section-bar::after{background:#544c54;}
       <div class="lockfield" style="flex:.6 1 0;"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
       <div class="lockfield" style="flex:2 1 0;"><label>Rest</label>
         <div style="display:flex;gap:4px;">
-          <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short Rest</button>
-          <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long Rest</button>
+          <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short</button>
+          <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long</button>
         </div>
       </div>
     </div>
@@ -2991,8 +2991,8 @@ syncLinkedAttacks();
   .atk-roll-btn { font-size: 9px; padding: 2px 4px; }
   #hotlist-grid { grid-template-columns: repeat(2,1fr) !important; }
   .hotlist-card { min-height: 70px; }
-  .tabs-row { overflow-x: auto; }
-  .tab-btn { flex-shrink: 0; font-size: 10px; padding: 8px 10px; white-space: nowrap; }
+  .tabs-row { overflow-x: visible; }
+  .tab-btn { flex: 1 1 0; min-width: 0; font-size: 9px; padding: 7px 2px; white-space: normal; line-height: 1.12; letter-spacing: .03em; }
   .tab-panel { padding: 8px; }
   /* ── Skills on mobile ──
      The desktop row is 7 cells, and the last cell bundles delete + advancement

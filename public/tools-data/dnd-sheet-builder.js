@@ -342,7 +342,7 @@
     const base = finalScores();
     let h = '<p class="m-hint">Your levels grant <b>' + n + '</b> Ability Score Improvement' + (n>1?"s":"") + ' (each can be a feat instead). Allocate them below.</p>';
     st.advances.forEach((av, i) => {
-      h += '<div style="border:1px solid #443c38;border-radius:6px;padding:8px 10px;margin-bottom:8px;">';
+      h += '<div style="border:1px solid #3a3a41;border-radius:6px;padding:8px 10px;margin-bottom:8px;">';
       h += '<span class="m-lbl">Improvement ' + (i+1) + '</span>';
       h += '<div class="dndb-seg" style="margin:4px 0 8px;"><button class="dndb-seg-btn' + (av.mode!=="feat"?" on":"") + '" data-advmode="asi" data-i="' + i + '">Ability Scores</button><button class="dndb-seg-btn' + (av.mode==="feat"?" on":"") + '" data-advmode="feat" data-i="' + i + '">Feat</button></div>';
       if (av.mode === "feat") {
@@ -628,16 +628,16 @@
   const css = document.createElement("style");
   css.textContent =
     ".dndb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0;}" +
-    ".dndb-card{border:1px solid #443c38;border-radius:6px;background:#241c1a;padding:8px 10px;cursor:pointer;transition:.1s;}" +
+    ".dndb-card{border:1px solid #3a3a41;border-radius:6px;background:#28282e;padding:8px 10px;cursor:pointer;transition:.1s;}" +
     ".dndb-card:hover{border-color:#9b1b22;}" +
-    ".dndb-card.on{border-color:#e08a70;background:#3a201a;box-shadow:0 0 0 1px #e08a70 inset;}" +
+    ".dndb-card.on{border-color:#e08a70;background:#33333c;box-shadow:0 0 0 1px #e08a70 inset;}" +
     ".dndb-card.small{padding:6px 8px;}.dndb-card.disabled{opacity:.5;cursor:default;}" +
     ".dc-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#f0e0d6;letter-spacing:.02em;}" +
     ".dc-sub{font-size:10px;color:#a99e90;margin-top:2px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.03em;text-transform:uppercase;}" +
     ".dc-sub.dc-plain{text-transform:none;letter-spacing:0;font-size:12px;color:#cdc3b6;line-height:1.4;}" +
     ".dndb-note{font-size:12px;color:#cdc3b6;line-height:1.5;margin-top:8px;border-left:3px solid #9b1b22;padding:4px 0 4px 10px;}" +
-    ".dndb-seg{display:flex;gap:0;border:1px solid #443c38;border-radius:5px;overflow:hidden;margin-bottom:12px;}" +
-    ".dndb-seg-btn{flex:1;padding:8px;background:#1c1614;color:#a99e90;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;}" +
+    ".dndb-seg{display:flex;gap:0;border:1px solid #3a3a41;border-radius:5px;overflow:hidden;margin-bottom:12px;}" +
+    ".dndb-seg-btn{flex:1;padding:8px;background:#202027;color:#a99e90;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;}" +
     ".dndb-seg-btn.on{background:#9b1b22;color:#fff;}" +
     ".dndb-abil-rows{display:flex;flex-direction:column;gap:6px;margin:8px 0;}" +
     ".dndb-abil-row{display:flex;align-items:center;gap:10px;}" +
@@ -646,7 +646,7 @@
     ".dndb-pm{width:30px;height:30px;background:#9b1b22;color:#fff;border:none;border-radius:4px;font-size:16px;cursor:pointer;}" +
     ".dndb-pb-head{font-size:13px;color:#cdc3b6;margin-bottom:6px;}.dndb-pb-head b{color:#e08a70;}" +
     ".dndb-totals,.dr-scores{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}" +
-    ".drs{border:1px solid #443c38;border-radius:6px;background:#241c1a;padding:5px 8px;text-align:center;min-width:52px;}" +
+    ".drs{border:1px solid #3a3a41;border-radius:6px;background:#28282e;padding:5px 8px;text-align:center;min-width:52px;}" +
     ".drs-a{display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;color:#a99e90;letter-spacing:.06em;}" +
     ".drs-v{display:block;font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:#f0e0d6;}" +
     ".drs-m{display:block;font-family:'Share Tech Mono',monospace;font-size:11px;color:#e08a70;}" +
@@ -654,7 +654,7 @@
     ".dndb-card.spellpick .sp-pick-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}" +
     ".sp-pick-i{background:transparent;border:none;color:#8ad4ff;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;}" +
     ".sp-pick-i:hover{color:#c8e8ff;}" +
-    ".sp-pick-desc{font-size:11px;color:#cdc3b6;line-height:1.45;margin-top:5px;border-top:1px solid #3a2f2a;padding-top:5px;}" +
+    ".sp-pick-desc{font-size:11px;color:#cdc3b6;line-height:1.45;margin-top:5px;border-top:1px solid #3a3a41;padding-top:5px;}" +
     ".dndb-mc-rows{display:flex;flex-direction:column;gap:6px;margin:6px 0;}" +
     ".dndb-mc-row{display:flex;align-items:center;gap:8px;}" +
     ".dndb-mc-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:#ece3d6;}" +
