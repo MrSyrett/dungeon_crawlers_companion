@@ -1,4 +1,4 @@
-// Star Wars (WEG 1e) character builder — the ✨ Build button on the sheet.
+// Star Wars (WEG 1e) character builder — the Build button on the sheet.
 // Walks the core rulebook's creation steps: pick a template, spend 7D of
 // skill dice (no more than 2D on one skill), fill in the details and take the
 // template's equipment. Uses the sheet's globals (SW_* data, toCode/fromCode,

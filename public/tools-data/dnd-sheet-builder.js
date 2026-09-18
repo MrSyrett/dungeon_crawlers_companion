@@ -114,7 +114,7 @@
     ov.className = "ov"; ov.id = "dndb-overlay";
     ov.innerHTML =
       '<div class="modal wide" style="max-width:720px;">' +
-        '<div class="modal-hd"><div class="ttl">✨ Character Builder <span id="dndb-step" style="color:#8ad4ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="DNDB.close()">✕</button></div>' +
+        '<div class="modal-hd"><div class="ttl">Character Builder <span id="dndb-step" style="color:#8ad4ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="DNDB.close()">✕</button></div>' +
         '<div class="modal-bd" id="dndb-body"></div>' +
         '<div class="modal-ft"><div><button class="m-btn ghost" id="dndb-back" onclick="DNDB.back()">← Back</button></div>' +
         '<div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="DNDB.close()">Cancel</button><button class="m-btn" id="dndb-next" onclick="DNDB.next()">Next →</button></div></div>' +
@@ -172,7 +172,7 @@
          '<label style="flex:1 1 220px;"><span class="m-lbl">Character name</span><input type="text" id="dndb-name" class="m-input" placeholder="Aelric Thornwood" value="' + esc(st.name) + '"></label>' +
          '<label><span class="m-lbl">Level</span> <input type="number" id="dndb-level" class="m-input" style="width:80px;" min="1" max="20" value="' + st.level + '"></label>' +
          '</div>';
-    h += '<div class="dndb-nimble' + (st.nimble ? " on" : "") + '" id="dndb-nimble"><div class="dnb-main"><span class="dnb-check">' + (st.nimble ? "✓" : "") + '</span><div><div class="dnb-ttl">⚡ Nimble 5e mode</div><div class="dnb-sub">Faster play: no attack rolls (the damage die decides hit/miss/crit), Mana instead of spell slots, 3 Actions a turn, a Defend reaction. Abilities &amp; skills stay standard 5e. You can turn this on or off later on the sheet.</div></div></div></div>';
+    h += '<div class="dndb-nimble' + (st.nimble ? " on" : "") + '" id="dndb-nimble"><div class="dnb-main"><span class="dnb-check">' + (st.nimble ? "✓" : "") + '</span><div><div class="dnb-ttl">Nimble 5e mode</div><div class="dnb-sub">Faster play: no attack rolls (the damage die decides hit/miss/crit), Mana instead of spell slots, 3 Actions a turn, a Defend reaction. Abilities &amp; skills stay standard 5e. You can turn this on or off later on the sheet.</div></div></div></div>';
     h += '<div class="dndb-grid">';
     D.classes().forEach((c) => {
       const cast = c.spellcasting && c.spellcasting !== "none" ? c.spellcasting + " caster" : "martial";
@@ -422,7 +422,7 @@
     }
     const c2 = clsData(); const eq = c2 && c2.startingEquipment ? c2.startingEquipment : [];
     h += '<div class="dr-line">Starting gear: <b>' + esc(st.equipChoice === "gold" ? ((String(eq[1] || "").match(/(\d+)\s*GP/i) || [])[1] || "0") + " GP" : "Equipment package") + '</b></div>';
-    if (st.nimble) h += '<div class="dr-line">Rules: <b>⚡ Nimble 5e mode</b> — no attack rolls, Mana casting, 3 Actions</div>';
+    if (st.nimble) h += '<div class="dr-line">Rules: <b>Nimble 5e mode</b> — no attack rolls, Mana casting, 3 Actions</div>';
     h += "</div>";
     return h;
   }
@@ -616,7 +616,7 @@
     if (typeof window.renderFeatures === "function") window.renderFeatures();
     if (typeof window.renderSpells === "function") window.renderSpells();
     if (typeof window.saveSheet === "function") window.saveSheet(true);
-    if (typeof window.addLog === "function") window.addLog("Character Built", "✨", (st.name || st.cls || "Character") + " — " + (st.cls || "") + " " + st.level, "normal");
+    if (typeof window.addLog === "function") window.addLog("Character Built", "", (st.name || st.cls || "Character") + " — " + (st.cls || "") + " " + st.level, "normal");
     close();
   }
   function norm(s) { return String(s == null ? "" : s).trim().toLowerCase(); }

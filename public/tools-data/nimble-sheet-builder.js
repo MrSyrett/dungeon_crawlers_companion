@@ -43,7 +43,7 @@
   function ensureModal() {
     if ($("nimb-overlay")) return;
     const ov = document.createElement("div"); ov.id = "nimb-overlay"; ov.className = "ov";
-    ov.innerHTML = '<div class="modal wide" style="max-width:880px;"><div class="modal-hd"><div class="ttl">✨ Hero Builder <span id="nimb-step" style="color:#8ad4ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="NIMB.close()">&#10005;</button></div><div class="modal-bd" id="nimb-body"></div><div class="modal-ft"><div><button class="m-btn ghost" id="nimb-back" onclick="NIMB.back()">← Back</button></div><div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="NIMB.close()">Cancel</button><button class="m-btn" id="nimb-next" onclick="NIMB.next()">Next →</button></div></div></div>';
+    ov.innerHTML = '<div class="modal wide" style="max-width:880px;"><div class="modal-hd"><div class="ttl">Hero Builder <span id="nimb-step" style="color:#8ad4ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="NIMB.close()">&#10005;</button></div><div class="modal-bd" id="nimb-body"></div><div class="modal-ft"><div><button class="m-btn ghost" id="nimb-back" onclick="NIMB.back()">← Back</button></div><div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="NIMB.close()">Cancel</button><button class="m-btn" id="nimb-next" onclick="NIMB.next()">Next →</button></div></div></div>';
     // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
     document.body.appendChild(ov);
     const css = document.createElement("style");
@@ -187,7 +187,7 @@
     if (typeof lookupTraits === "function") lookupTraits();
     if (typeof saveSheet === "function") saveSheet(true);
     if (typeof syncDocTitle === "function") syncDocTitle();
-    if (typeof addLog === "function") addLog("Hero Builder", "✨", "Built " + (st.name || "a hero") + " — " + st.ancestry.name + " " + c.name, "crit");
+    if (typeof addLog === "function") addLog("Hero Builder", "", "Built " + (st.name || "a hero") + " — " + st.ancestry.name + " " + c.name, "crit");
     close();
   }
   window.NIMB = { launch, close, next, back };

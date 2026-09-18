@@ -649,7 +649,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
     <div class="hdr-top">
       <div class="hdr-logo">
         <div class="lg-word">Dungeons &amp; Dragons</div><div class="lg-sub">2024 Character Sheet</div>
-        <div id="nimble-badge" class="nimble-badge" onclick="openNimbleRules()" title="Nimble 5e mode is on — click for the rules summary" style="display:none;">⚡ NIMBLE</div>
+        <div id="nimble-badge" class="nimble-badge" onclick="openNimbleRules()" title="Nimble 5e mode is on — click for the rules summary" style="display:none;">NIMBLE</div>
       </div>
       <div class="hdr-field name-primary"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
     </div>
@@ -856,7 +856,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
     </div>
   </div>
   <div class="log-actions">
-    <button class="log-action-btn campaign" id="campaign-btn" onclick="openCampaign()" title="Campaign" aria-label="Campaign">🔗</button>
+    <button class="log-action-btn campaign" id="campaign-btn" onclick="openCampaign()" title="Campaign" aria-label="Campaign">Link</button>
     <button class="log-action-btn wizard" id="build-btn" onclick="DNDB&&DNDB.launch()" title="Character Builder">Create</button>
     <button class="log-action-btn wizard" id="levelup-btn" onclick="DNDLU&&DNDLU.launch()" title="Level Up" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Rules Glossary">Rules</button>
@@ -912,7 +912,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
 <!-- SPELLBOOK MODAL -->
 <div id="book-overlay" class="ov" onclick="if(event.target===this)closeBook()">
   <div class="modal" style="max-width:640px;">
-    <div class="modal-hd"><div class="ttl">📖 Spellbook</div><button class="x" onclick="closeBook()">&#10005;</button></div>
+    <div class="modal-hd"><div class="ttl">Spellbook</div><button class="x" onclick="closeBook()">&#10005;</button></div>
     <div class="brow-controls">
       <input id="book-search" class="m-input" placeholder="Search spells…" oninput="renderBook()">
       <div class="brow-filters">
@@ -928,7 +928,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
 <!-- ITEM STORE MODAL -->
 <div id="store-overlay" class="ov" onclick="if(event.target===this)closeStore()">
   <div class="modal" style="max-width:640px;">
-    <div class="modal-hd"><div class="ttl">🛒 Item Store</div><span class="brow-coins" id="store-coins"></span><button class="x" onclick="closeStore()">&#10005;</button></div>
+    <div class="modal-hd"><div class="ttl">Item Store</div><span class="brow-coins" id="store-coins"></span><button class="x" onclick="closeStore()">&#10005;</button></div>
     <div class="brow-tabs" id="store-tabs"></div>
     <div class="brow-controls"><input id="store-search" class="m-input" placeholder="Search items…" oninput="renderStore()"><label class="brow-check" id="store-prof-wrap"><input type="checkbox" id="store-prof" onchange="renderStore()"> Only gear I'm proficient with</label></div>
     <div class="modal-bd brow-list" id="store-body"></div>
@@ -1000,7 +1000,7 @@ let _lastRoll = null;
 // decides hit/miss/crit, exploding on a crit), 3 Actions a turn, a Defend
 // reaction (reduce damage by AC−8), Mana in place of spell slots, and 2-Action
 // leveled spells. Abilities & skills stay standard 5e; the broader table rules
-// are surfaced in the ⚡ reference panel (openNimbleRules).
+// are surfaced in the reference panel (openNimbleRules).
 function defaultOptions(){ return { nimble:false }; }
 let options = defaultOptions();
 let manaUsed = 0;      // Mana spent this "day" (max derived from caster level/type)
@@ -1246,8 +1246,8 @@ function adjustHP(sign){
     if(before > 0 && cur === 0){                 // just dropped to 0
       const overkill = dmg - before;             // damage beyond what brought you to 0
       setUnconscious(true); deathSucc = 0; deathFail = 0;
-      if(max > 0 && overkill >= max){ deathFail = 3; renderDeath(); addLog('Massive Damage', '☠', 'Overflow ' + overkill + ' ≥ max HP — instant death', 'fumble'); }
-      else { renderDeath(); addLog('Downed', '☠', 'At 0 HP — Unconscious, roll Death Saves', 'fumble'); }
+      if(max > 0 && overkill >= max){ deathFail = 3; renderDeath(); addLog('Massive Damage', 'Down', 'Overflow ' + overkill + ' ≥ max HP — instant death', 'fumble'); }
+      else { renderDeath(); addLog('Downed', 'Down', 'At 0 HP — Unconscious, roll Death Saves', 'fumble'); }
     } else if(before === 0 && dmg > 0){           // taking damage while already down
       tickDeathDamage(dmg, max);
     }
@@ -1258,7 +1258,7 @@ function adjustHP(sign){
 function tickDeathDamage(dmg, max){
   const inc = (max > 0 && dmg >= max) ? 3 : 1;
   deathFail = Math.min(3, deathFail + inc); renderDeath();
-  addLog('Death Save', '☠', 'Damage at 0 HP — ' + (inc >= 2 ? 'instant death' : 'a failure') + ' (' + deathFail + '/3)' + (deathFail >= 3 ? ' — the character dies.' : ''), 'fumble');
+  addLog('Death Save', 'Down', 'Damage at 0 HP — ' + (inc >= 2 ? 'instant death' : 'a failure') + ' (' + deathFail + '/3)' + (deathFail >= 3 ? ' — the character dies.' : ''), 'fumble');
 }
 function setUnconscious(on){
   const has = activeCond('Unconscious');
@@ -1475,7 +1475,7 @@ function nimbleRollDamage(expr, flatMod, mode){
   const others = []; let oSum = 0;
   for(let i = 1; i < nDice; i++){ const f = rd(); others.push(f); oSum += f; }
   const total = pSum + oSum + flatMod;
-  const detail = 'primary d' + sides + '(' + chain.join('+') + ')' + (crit ? ' 💥' : '') + (others.length ? ' +' + others.join('+') : '') + (flatMod ? ' ' + sgn(flatMod) : '');
+  const detail = 'primary d' + sides + '(' + chain.join('+') + ')' + (crit ? '' : '') + (others.length ? ' +' + others.join('+') : '') + (flatMod ? ' ' + sgn(flatMod) : '');
   return { hit:true, crit, total, detail };
 }
 // Nimble 5e attack: no roll to hit. The weapon's primary damage die decides
@@ -1547,7 +1547,7 @@ const NIMBLE_RULES_HTML =
   '</ul>';
 function openNimbleRules(){
   if(!$('desc-overlay')) return;
-  $('desc-title').textContent = '⚡ Nimble 5e Mode';
+  $('desc-title').textContent = 'Nimble 5e Mode';
   $('desc-body').innerHTML = NIMBLE_RULES_HTML;
   $('desc-overlay').classList.add('open');
 }
@@ -3016,9 +3016,9 @@ async function campaignJoin(){
   try { const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 404){ campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign = await r.json(); campaignConnected(); }
   catch(e){ campaignError('Could not join — are you signed in to the app?'); }
 }
-function campaignConnected(){ _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', '🔗', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave(){ const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', '🔗', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave(){ const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Claimed']);
 function campaignBroadcast(label, result, detail, type){
   if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return;
@@ -3063,7 +3063,7 @@ function renderFoundLoot(roll){
     const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
-  div.innerHTML = '<div class="fl-head">🎁 ' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  div.innerHTML = '<div class="fl-head">' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
   return div;
 }
 function renderSystemEntry(roll){
@@ -3112,8 +3112,8 @@ function renderLootBoxEntry(roll){
   if(mode === 'named'){ forLabel = to ? '<div class="lb-for">For: ' + esc(to) + '</div>' : ''; const mine = to && me && to.toLowerCase() === me.toLowerCase(); btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : mine ? '<button class="lb-btn lb-open">Open</button>' : '<button class="lb-btn" disabled>' + (to ? 'For ' + esc(to) : 'Not for you') + '</button>'; }
   else if(mode === 'claim'){ btn = opened ? '<button class="lb-btn" disabled>You claimed this ✓</button>' : claimedBy ? '<button class="lb-btn" disabled>Claimed by ' + esc(claimedBy) + '</button>' : '<button class="lb-btn lb-claim">Claim</button>'; }
   else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
-  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">🔒 Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
-  div.innerHTML = '<div class="lb-head">🎁 ' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
+  div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
   return div;
 }
 function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html){ const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
@@ -3136,7 +3136,7 @@ $('log-entries').addEventListener('click', function(e){
 // A claimed drop goes into the equipment table.
 function claimLootItem(it){
   addInvRow({ name: (it.item || '?') + (it.notes ? ' — ' + it.notes : ''), qty: (it.qty != null && it.qty !== '' ? num(it.qty) : 1) });
-  addLog('Claimed', '🎁', it.item || 'Item', 'normal'); return true;
+  addLog('Claimed', 'Loot', it.item || 'Item', 'normal'); return true;
 }
 async function campaignPoll(){
   if(!_campaign) return;

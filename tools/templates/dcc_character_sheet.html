@@ -890,7 +890,7 @@ body.dark .section-bar::after{background:#544c54;}
     </div>
   </div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">Link</button>
     <button id="dccw-launch-btn" class="log-action-btn" onclick="DCCW.launch()" title="Character Wizard" aria-label="Character Wizard" style="border:1px solid #b82018;background:transparent;color:#f0a8a3;line-height:1;">Create</button>
     <button class="log-action-btn" onclick="openRules()" style="border:1px solid #2f4a2f;background:#1e2a1e;color:#b8d8b8;" title="Quick rules" aria-label="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">Export</button>
@@ -3373,7 +3373,7 @@ function campaignPlayerName() {
 function campaignUpdateBtn() {
   const btn = document.getElementById('campaign-btn');
   if(!btn) return;
-  btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';   // icon only; name/state conveyed via tooltip + colour
+  btn.textContent = 'Link';   // text label; connection state conveyed via tooltip + colour
   if(_campaign) {
     btn.title = 'Campaign: ' + _campaign.name;
     btn.setAttribute('aria-label', 'Campaign: ' + _campaign.name);
@@ -3531,7 +3531,7 @@ function renderNormalRemote(roll){
 function renderAchievementEntry(roll){
   const div = document.createElement('div');
   div.className = 'log-entry remote log-achievement';
-  div.innerHTML = '<div class="ach-banner">🏆 '+_lootEsc(roll.label||'NEW ACHIEVEMENT')+'</div>'
+  div.innerHTML = '<div class="ach-banner">'+_lootEsc(roll.label||'NEW ACHIEVEMENT')+'</div>'
     + (roll.result?'<div class="ach-name">'+_lootEsc(roll.result)+'</div>':'')
     + (roll.detail?'<div class="ach-snark">'+_lootEsc(roll.detail)+'</div>':'');
   return div;
@@ -3577,8 +3577,8 @@ function renderLootBoxEntry(roll){
   // whole point is the surprise. Once opened, _lootReveal() swaps in the list.
   const contentsHtml = opened
     ? (itemsHtml ? '<ul class="lb-items">'+itemsHtml+'</ul>' : '')
-    : '<div class="lb-sealed">🔒 Contents hidden until '+(mode==='claim'?'claimed':'opened')+'.</div>';
-  div.innerHTML = '<div class="lb-head">🎁 '+_lootEsc(roll.label||'LOOT BOX')+'</div>'
+    : '<div class="lb-sealed">Contents hidden until '+(mode==='claim'?'claimed':'opened')+'.</div>';
+  div.innerHTML = '<div class="lb-head">'+_lootEsc(roll.label||'LOOT BOX')+'</div>'
     + (roll.result?'<div class="lb-name">'+_lootEsc(roll.result)+'</div>':'')
     + forLabel
     + (p.note?'<div class="lb-desc">'+_lootEsc(p.note)+'</div>':'')
@@ -3637,7 +3637,7 @@ function renderFoundLoot(roll){
     const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + _lootEsc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + _lootEsc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
-  div.innerHTML = '<div class="fl-head">🎁 ' + _lootEsc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + _lootEsc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + _lootEsc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + _lootEsc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  div.innerHTML = '<div class="fl-head">' + _lootEsc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + _lootEsc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + _lootEsc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + _lootEsc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
   return div;
 }
 function _flRenderSystemEntryUnused(roll){

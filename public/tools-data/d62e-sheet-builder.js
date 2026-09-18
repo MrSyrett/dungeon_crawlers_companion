@@ -209,7 +209,7 @@
     const tlist = templates().filter(templateGenreOk);
     let h = '<p class="m-hint">Start from a <b>template</b> (fixed attributes, recommended skills) and add 7D of skills — or build <b>a la carte</b>, assigning 12D of attributes yourself. Change the genre back on the Options step.</p>';
     h += '<div class="tpl-list">'
-      + '<div class="tpl-card' + (mode === 'alacarte' ? ' sel' : '') + '" data-alacarte="1"><b>⚙ A la carte</b><small>Assign 12D of attributes yourself, then 7D of skills.</small></div>'
+      + '<div class="tpl-card' + (mode === 'alacarte' ? ' sel' : '') + '" data-alacarte="1"><b>A la carte</b><small>Assign 12D of attributes yourself, then 7D of skills.</small></div>'
       + tlist.map(t =>
         '<div class="tpl-card' + (mode === 'template' && tpl && tpl.name === t.name ? ' sel' : '') + '" data-t="' + esc(t.name) + '"><b>' + esc(t.name) + '</b><small>' + Object.keys(t.attributes).map(a => a.slice(0, 3).toUpperCase() + ' ' + code(t.attributes[a])).join(' · ') + (t.archetype ? '<br>' + esc(t.archetype) : '') + ' · ' + esc(t.genre || 'core') + '</small></div>').join('')
       + '</div>';

@@ -73,7 +73,7 @@
     ov.className = "ov";
     ov.innerHTML =
       '<div class="modal wide" style="max-width:820px;">' +
-      '<div class="modal-hd"><div class="ttl">✨ Hero Builder <span id="aceb-step" style="color:#8ac0ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="ACEB.close()">&#10005;</button></div>' +
+      '<div class="modal-hd"><div class="ttl">Hero Builder <span id="aceb-step" style="color:#8ac0ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="ACEB.close()">&#10005;</button></div>' +
       '<div class="modal-bd" id="aceb-body"></div>' +
       '<div class="modal-ft"><div><button class="m-btn ghost" id="aceb-back" onclick="ACEB.back()">← Back</button></div>' +
       '<div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="ACEB.close()">Cancel</button><button class="m-btn" id="aceb-next" onclick="ACEB.next()">Next →</button></div></div>' +
@@ -422,7 +422,7 @@
     if (typeof applySheet === "function") applySheet(data);
     if (typeof saveSheet === "function") saveSheet(true);
     if (typeof syncDocTitle === "function") syncDocTitle();
-    if (typeof addLog === "function") addLog("Hero Builder", "✨", msg, "crit");
+    if (typeof addLog === "function") addLog("Hero Builder", "", msg, "crit");
     close();
   }
 

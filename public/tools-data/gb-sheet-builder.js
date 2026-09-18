@@ -16,6 +16,7 @@
   var talent = { Brains: '', Muscles: '', Moves: '', Cool: '' };
   var goal = '';
   var gear = [];
+  var gearQ = '';   // inline gear-picker search
 
   function spent() { return TKEYS.reduce(function (a, k) { return a + traits[k]; }, 0); }
 
@@ -98,32 +99,61 @@
       $('gbb-goal-add').addEventListener('click', function () { var v = ($('gbb-goal-custom').value || '').trim(); if (v) { goal = v; render(); } });
       b.querySelectorAll('.gbb-goal').forEach(function (c) { c.addEventListener('click', function () { goal = c.dataset.g; render(); }); });
     } else {
+      // Gear — inline, ACE-style: browse and tap to add/remove, right on the page.
       note.textContent = gear.length + ' item' + (gear.length === 1 ? '' : 's');
-      var mus = traits.Muscles, carry = gear.reduce(function (a, g) { return a + (parseFloat(g.muscles) || 0); }, 0);
-      var hh3 = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;">'
-        + '<button class="m-btn" id="gbb-shop">🛒 Open Shop</button>'
-        + '<span class="pk-carry' + (carry > mus ? ' over' : '') + '">Carry ' + carry + ' / ' + mus + ' Muscles</span></div>'
-        + '<div style="display:flex;flex-direction:column;gap:5px;">';
-      if (!gear.length) hh3 += '<div class="brow-empty">No gear yet — open the shop.</div>';
-      gear.forEach(function (g, i) {
-        hh3 += '<div class="gear-row" style="background:#182014;border-color:#2b3620;color:#dde;">'
-          + '<span>' + esc(g.name) + '</span><span style="display:flex;gap:8px;align-items:center;">'
-          + '<span class="gm" style="color:#8f9c78;">' + (g.damage ? 'dmg ' + esc(g.damage) + ' · ' : '') + esc(g.hands || '?') + ' · ' + (g.muscles || 0) + ' Mus</span>'
-          + '<button class="row-x" style="color:#df8a8a;" data-i="' + i + '">✕</button></span></div>';
-      });
-      b.innerHTML = hh3 + '</div>';
-      $('gbb-shop').addEventListener('click', function () {
-        openPickerCfg({
-          title: '🛒 Gear Shop', multi: true, addLabel: 'Add', cats: ['Weapon (ranged)', 'Weapon (melee)', 'Gear'],
-          items: gearItems, carry: function () { var c = gear.reduce(function (a, g) { return a + (parseFloat(g.muscles) || 0); }, 0); return { text: 'Carry ' + c + ' / ' + traits.Muscles + ' Muscles', over: c > traits.Muscles }; },
-          custom: function (v) { gear.push({ name: v, hands: '', muscles: 0 }); render(); },
-          onAdd: function (it) { gearAddTo(gear, it); render(); }
-        });
-      });
-      b.querySelectorAll('.row-x').forEach(function (btn) { btn.addEventListener('click', function () { gear.splice(parseInt(btn.dataset.i, 10), 1); render(); }); });
+      var mus = traits.Muscles, carry0 = gear.reduce(function (a, g) { return a + (parseFloat(g.muscles) || 0); }, 0);
+      b.innerHTML = '<p class="m-hint">Tap items to add or remove them. You can comfortably carry three.</p>'
+        + '<div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">'
+        + '<input class="m-input" id="gbb-gear-q" placeholder="Search gear…" value="' + esc(gearQ) + '" style="flex:1;min-width:120px;">'
+        + '<span class="pk-carry' + (carry0 > mus ? ' over' : '') + '" id="gbb-carry" style="white-space:nowrap;">Carry ' + carry0 + ' / ' + mus + '</span>'
+        + '</div>'
+        + '<div id="gbb-gear-lists"></div>'
+        + '<div class="m-lbl" style="margin-top:10px;">Custom item</div>'
+        + '<div class="pk-customrow"><input class="m-input" id="gbb-gear-custom" placeholder="Add your own…" style="flex:1;"><button class="m-btn" id="gbb-gear-add">Add</button></div>';
+      var qEl = $('gbb-gear-q'); if (qEl) qEl.addEventListener('input', function () { gearQ = qEl.value; paintGbGear(); });
+      var addEl = $('gbb-gear-add'); if (addEl) addEl.addEventListener('click', function () { var v = ($('gbb-gear-custom').value || '').trim(); if (v) { gear.push({ name: v, hands: '', muscles: 0 }); $('gbb-gear-custom').value = ''; paintGbGear(); } });
+      var cEl = $('gbb-gear-custom'); if (cEl) cEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addEl.click(); } });
+      paintGbGear();
     }
     if (keep) b.scrollTop = bScroll;
     _lastStep = step; ov.classList.add('open');
+  }
+
+  function syncGbCarry() {
+    var el = $('gbb-carry');
+    if (el) { var mus = traits.Muscles, c = gear.reduce(function (a, g) { return a + (parseFloat(g.muscles) || 0); }, 0); el.textContent = 'Carry ' + c + ' / ' + mus; el.className = 'pk-carry' + (c > mus ? ' over' : ''); }
+    var note = $('gbb-note'); if (note && step === STEPS.length - 1) note.textContent = gear.length + ' item' + (gear.length === 1 ? '' : 's');
+  }
+  function paintGbGear() {
+    var host = $('gbb-gear-lists'); if (!host) return;
+    var items = (typeof gearItems === 'function') ? gearItems() : [];
+    var q = (gearQ || '').toLowerCase().trim();
+    var owned = gear.map(function (g) { return g.name; });
+    var cats = ['Weapon (ranged)', 'Weapon (melee)', 'Gear'];
+    var html = '';
+    cats.forEach(function (cat) {
+      var list = items.filter(function (it) { return (it.cat || 'Gear') === cat && (!q || (it.name + ' ' + (it.desc || '') + ' ' + (it.meta || '')).toLowerCase().indexOf(q) >= 0); });
+      if (!list.length) return;
+      html += '<div class="m-lbl">' + esc(cat) + '</div><div style="display:flex;flex-direction:column;gap:5px;margin-bottom:4px;">';
+      list.forEach(function (it) {
+        var on = owned.indexOf(it.name) >= 0;
+        html += '<div class="gbb-gcard" data-gear="' + esc(it.name) + '" style="border:1px solid ' + (on ? '#8bc53f' : '#2b3620') + ';background:' + (on ? '#233617' : '#0f150a') + ';border-radius:6px;padding:7px 10px;cursor:pointer;">'
+          + '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;"><b style="color:#eef;font-size:13px;">' + (on ? '✓ ' : '') + esc(it.name) + '</b><span class="gm" style="color:#8f9c78;font-size:11px;white-space:nowrap;">' + esc(it.meta || '') + (it.cost ? ' · ' + esc(it.cost) : '') + '</span></div>'
+          + (it.desc ? '<div style="color:#a9c07f;font-size:11px;margin-top:2px;">' + esc(it.desc) + '</div>' : '')
+          + '</div>';
+      });
+      html += '</div>';
+    });
+    host.innerHTML = html || '<div class="brow-empty">No matches.</div>';
+    host.querySelectorAll('[data-gear]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var n = el.dataset.gear, i = owned.indexOf(n);
+        if (i >= 0) { var gi = -1; for (var j = 0; j < gear.length; j++) { if (gear[j].name === n) { gi = j; break; } } if (gi >= 0) gear.splice(gi, 1); }
+        else { var itm = null; for (var k = 0; k < items.length; k++) { if (items[k].name === n) { itm = items[k]; break; } } if (itm) gearAddTo(gear, itm); }
+        paintGbGear(); syncGbCarry();
+      });
+    });
+    syncGbCarry();
   }
 
   function readName() { if ($('gbb-name')) name = $('gbb-name').value; }
@@ -134,7 +164,7 @@
       notes: '', tagPhysical: '', tagPersonality: '',
       traits: { Brains: traits.Brains, Muscles: traits.Muscles, Moves: traits.Moves, Cool: traits.Cool },
       talents: { Brains: { name: talent.Brains }, Muscles: { name: talent.Muscles }, Moves: { name: talent.Moves }, Cool: { name: talent.Cool } },
-      residence: '', phone: '', telex: '',
+
       bp: 20, gear: gear.slice()
     };
     var prev = (typeof collectSheet === 'function') ? collectSheet() : {};
@@ -146,7 +176,7 @@
   }
 
   window.GBB = {
-    launch: function () { step = 0; name = ''; traits = { Brains: 1, Muscles: 1, Moves: 1, Cool: 1 }; talent = { Brains: '', Muscles: '', Moves: '', Cool: '' }; goal = ''; gear = []; _lastStep = -1; render(); },
+    launch: function () { step = 0; name = ''; traits = { Brains: 1, Muscles: 1, Moves: 1, Cool: 1 }; talent = { Brains: '', Muscles: '', Moves: '', Cool: '' }; goal = ''; gear = []; gearQ = ''; _lastStep = -1; render(); },
     close: function () { if (ov) ov.classList.remove('open'); },
     next: function () {
       if (step === 0) { readName(); if (spent() !== BUDGET) { $('gbb-note').textContent = 'Spend exactly ' + BUDGET + ' points — ' + (BUDGET - spent()) + ' left'; return; } }

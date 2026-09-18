@@ -429,7 +429,7 @@
       + (shown.length ? shown.map(function (o) {
         var on = B._focus === o.name;
         var meta = kind === 'power' ? ((o.powerSet && o.powerSet !== 'None' ? o.powerSet : 'Basic')) : '';
-        var lock = (kind === 'power' && !accessible(o)) ? '<span style="font-size:10px;color:#8a6a6a;">🔒 ' + E(shortPrereq(o)) + '</span>' : '';
+        var lock = (kind === 'power' && !accessible(o)) ? '<span style="font-size:10px;color:#8a6a6a;">' + E(shortPrereq(o)) + '</span>' : '';
         return '<button onclick="window.MMRPGB.focusItem(\'' + jq(o.name) + '\')" style="width:100%;text-align:left;border:none;border-bottom:1px solid #201319;background:' + (on ? '#1f1418' : 'transparent') + ';color:#e6dcde;padding:7px 8px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center;">'
           + '<span>' + E(o.name) + '</span><span style="display:flex;gap:8px;align-items:center;">' + lock + (meta ? '<span style="font-size:10px;color:#8a8e98;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;">' + E(meta) + '</span>' : '') + '</span></button>';
       }).join('') : '<p class="m-hint" style="padding:8px;color:#7a7e88;">No matches' + (kind === 'power' && !B._showLocked ? ' you can access — try “Show locked”.' : '.') + '</p>')

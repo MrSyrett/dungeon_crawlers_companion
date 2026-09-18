@@ -368,7 +368,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #26314a;background:transparent;color:#9fb0d6;" title="Campaign">🔗</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #26314a;background:transparent;color:#9fb0d6;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.JLUB)JLUB.launch();" title="Character Builder">Create</button>
     <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this Hero" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
@@ -884,9 +884,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','🔗','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','🔗','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();

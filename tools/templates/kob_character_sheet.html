@@ -294,7 +294,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
-  /* Spread the 4 stat controls across the full width; the ⚡ Power column
+  /* Spread the 4 stat controls across the full width; the Power column
      (Capes only) collapses to nothing in the default book so there's no dead
      space on the right. */
   .stat-row,.stats-head{grid-template-columns:minmax(96px,1.4fr) minmax(70px,1.1fr) 44px minmax(64px,1.1fr) min-content;gap:8px;padding-left:8px;padding-right:8px;}
@@ -328,7 +328,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
 
 }
 @media (max-width:480px){
-  /* Narrow phones: the Capes ⚡ Power column pushed the stat row past 360px.
+  /* Narrow phones: the Capes Power column pushed the stat row past 360px.
      Tighten the grid mins + gap so all controls fit with no sideways scroll,
      while keeping every control ≥40px in its smaller dimension. */
   .stat-row,.stats-head{grid-template-columns:minmax(70px,1.3fr) minmax(58px,1fr) 32px minmax(54px,1fr) min-content;gap:6px;}
@@ -393,7 +393,7 @@ body.dark .section-bar.teal{color:#5fd0d0;}
     <div class="hdr-top">
       <div class="hdr-logo">
         <div class="lg-word">Kids on Bikes</div><div class="lg-sub">Character Sheet</div>
-        <div id="nsbu-badge" class="nsbu-badge" onclick="openRules()" title="Never Stop Blowing Up mode is on — click for the rules" style="display:none;">💥 NEVER STOP BLOWING UP</div>
+        <div id="nsbu-badge" class="nsbu-badge" onclick="openRules()" title="Never Stop Blowing Up mode is on — click for the rules" style="display:none;">NEVER STOP BLOWING UP</div>
       </div>
       <div class="hdr-field name-primary"><label>First name / nickname</label><input type="text" id="f-name" placeholder="Billy"></div>
     </div>
@@ -571,7 +571,7 @@ body.dark .section-bar.teal{color:#5fd0d0;}
     </div>
   </div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="KOBB.launch()" title="Character Builder" aria-label="Character Builder">Create</button>
     <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Level Up — spend Turbo Tokens on abilities" aria-label="Level Up" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">Rules</button>
@@ -610,7 +610,7 @@ body.dark .section-bar.teal{color:#5fd0d0;}
 
 <div id="ability-overlay" class="ov" onclick="if(event.target===this)closeAbilityPicker()">
   <div class="modal" style="max-width:560px;">
-    <div class="modal-hd"><div class="ttl">💥 Level Up — Buy Abilities</div><button class="x" onclick="closeAbilityPicker()">&#10005;</button></div>
+    <div class="modal-hd"><div class="ttl">Level Up — Buy Abilities</div><button class="x" onclick="closeAbilityPicker()">&#10005;</button></div>
     <div class="brow-controls"><input id="ability-search" class="m-input" placeholder="Search abilities…" oninput="renderAbilityPicker()"></div>
     <div class="modal-bd brow-list" id="ability-body"></div>
   </div>
@@ -619,7 +619,7 @@ body.dark .section-bar.teal{color:#5fd0d0;}
 <!-- CAPES: Growth (Level Up) -->
 <div id="growth-overlay" class="ov" onclick="if(event.target===this)closeGrowth()">
   <div class="modal" style="max-width:600px;">
-    <div class="modal-hd"><div class="ttl">✨ Growth</div><button class="x" onclick="closeGrowth()">&#10005;</button></div>
+    <div class="modal-hd"><div class="ttl">Growth</div><button class="x" onclick="closeGrowth()">&#10005;</button></div>
     <div class="modal-bd" id="growth-body"></div>
   </div>
 </div>
@@ -683,12 +683,12 @@ function buildStats() {
   stats.forEach(s => {
     const row = document.createElement('div');
     row.className = 'stat-row';
-    // Every book gets a ½ Prepared-Action button. Non-NSBU also gets the ⚡ Power
+    // Every book gets a ½ Prepared-Action button. Non-NSBU also gets the Power
     // button (Capes-only via CSS); NSBU replaces Power with just the ½ button.
     const halfBtn = `<button class="stat-roll plan" onclick="planStat('${s.id}')" title="Prepared Action: take half the die value">½</button>`;
     const btn = nsbuOn()
       ? halfBtn
-      : `<button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button>` + halfBtn;
+      : `<button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">Pow</button>` + halfBtn;
     row.innerHTML =
       `<div class="stat-name" onclick="rollStat('${s.id}')" title="${nsbuOn() ? 'Roll ' + s.id + ' — blows up on a max' : 'Roll ' + s.id}">${s.id}</div>` +
       `<input type="hidden" id="die-${s.id}" value="${defDie}">` +
@@ -774,7 +774,7 @@ function renderStress() {
     const c = document.createElement('div');
     c.className = 'stress-cell' + (i <= stress ? ' on' + (i <= 4 ? ' ok' : i <= 9 ? ' mild' : '') : '');
     c.textContent = i;
-    c.onclick = () => { stress = (i === stress) ? i - 1 : i; recalc(); if(stress >= 13) addLog('Stress 13', '💥', 'Get outta here! You must leave the fight.', 'fumble'); scheduleAutosave(); };
+    c.onclick = () => { stress = (i === stress) ? i - 1 : i; recalc(); if(stress >= 13) addLog('Stress 13', 'Boom', 'Get outta here! You must leave the fight.', 'fumble'); scheduleAutosave(); };
     track.appendChild(c);
   }
   $('stress-val').textContent = stress;
@@ -867,7 +867,7 @@ function nsbuRollStat(id) {
   const finalDie = DICE[idx];
   if(idx !== startIdx) { $('die-' + id).value = String(finalDie); recalc(); }
   total += bonus;
-  let detail = parts.join(' ') + (bonus ? ' ' + (bonus > 0 ? '+' : '') + bonus : '') + (blew ? ' · 💥 BLOW UP ×' + blew + ' → d' + finalDie : '');
+  let detail = parts.join(' ') + (bonus ? ' ' + (bonus > 0 ? '+' : '') + bonus : '') + (blew ? ' · BLOW UP ×' + blew + ' → d' + finalDie : '');
   const j = judge(total, tn);
   let type = blew ? 'crit' : j.type;
   if(tn && j.type === 'fumble') { at += 1; renderAT(); scheduleAutosave(); }
@@ -894,8 +894,8 @@ function renderInjury() {
     '<button class="inj-cell' + (i === injury ? ' on lv' + i : '') + '" onclick="setInjury(' + i + ')" title="' + esc(lbl) + '">' + esc(lbl) + '</button>'
   ).join('');
 }
-function setInjury(n) { const prev = injury; injury = (n === injury && n > 0) ? n - 1 : n; renderInjury(); if(injury !== prev) { if(injury === 3) { at += 10; renderAT(); addLog('Adrenalized', '💥', 'Injury: Adrenalized — gain 10 Turbo Tokens. Fail a Tough Check now and you\'re Incapacitated or Dead.', 'fumble'); } else addLog('Injury', injury ? '🩸' : '✚', injury ? NSBU_INJURY[injury] + (injury === 2 ? ' — Turbo Tokens cost double to Blow Up' : '') : 'Recovered — Healthy', injury ? 'fumble' : 'normal'); } scheduleAutosave(); }
-function nsbuInjury(delta, why) { const prev = injury; injury = Math.max(0, Math.min(3, injury + delta)); if(injury !== prev) { renderInjury(); if(injury === 3) { at += 10; renderAT(); } addLog('Injury', injury === 3 ? '💥' : '🩸', (why ? why + ' — ' : '') + NSBU_INJURY[injury] + (injury === 3 ? ' (gain 10 Turbo Tokens!)' : injury === 2 ? ' (Turbo costs double to Blow Up)' : ''), 'fumble'); scheduleAutosave(); } }
+function setInjury(n) { const prev = injury; injury = (n === injury && n > 0) ? n - 1 : n; renderInjury(); if(injury !== prev) { if(injury === 3) { at += 10; renderAT(); addLog('Adrenalized', 'Boom', 'Injury: Adrenalized — gain 10 Turbo Tokens. Fail a Tough Check now and you\'re Incapacitated or Dead.', 'fumble'); } else addLog('Injury', injury ? '' : '✚', injury ? NSBU_INJURY[injury] + (injury === 2 ? ' — Turbo Tokens cost double to Blow Up' : '') : 'Recovered — Healthy', injury ? 'fumble' : 'normal'); } scheduleAutosave(); }
+function nsbuInjury(delta, why) { const prev = injury; injury = Math.max(0, Math.min(3, injury + delta)); if(injury !== prev) { renderInjury(); if(injury === 3) { at += 10; renderAT(); } addLog('Injury', injury === 3 ? 'Boom' : '', (why ? why + ' — ' : '') + NSBU_INJURY[injury] + (injury === 3 ? ' (gain 10 Turbo Tokens!)' : injury === 2 ? ' (Turbo costs double to Blow Up)' : ''), 'fumble'); scheduleAutosave(); } }
 function fearNote() { const f = $('f-fear').value.trim(); return f ? 'fear: ' + f + '? −1 to −3' : ''; }
 function planStat(id) {
   const half = dieOf(id) / 2 + bonusOf(id);
@@ -1191,7 +1191,7 @@ function openRules() {
     let h = '';
     // NSBU rules lead the panel when the mode is on.
     if(nsbuOn() && typeof KOB_NSBU !== 'undefined') {
-      h += '<h4 style="color:#ffb02e;">💥 Never Stop Blowing Up</h4>';
+      h += '<h4 style="color:#ffb02e;">Never Stop Blowing Up</h4>';
       KOB_NSBU.rules.forEach(r => { h += '<h4>' + esc(r.title) + '</h4><p>' + esc(r.text) + '</p>'; });
       h += '<hr style="border:none;border-top:1px solid var(--rule);margin:14px 0;"><p class="hint">Kids on Bikes core reference:</p>';
     }
@@ -1378,9 +1378,9 @@ async function campaignJoin() {
   try { const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 404) { campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign = await r.json(); campaignConnected(); }
   catch(e) { campaignError('Could not join — are you signed in to the app?'); }
 }
-function campaignConnected() { _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', '🔗', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
+function campaignConnected() { _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
 function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', '🔗', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Character Builder','Relationship question']);
 function campaignBroadcast(label, result, detail, type) {
   if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return;
@@ -1429,7 +1429,7 @@ function renderFoundLoot(roll){
     const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
-  div.innerHTML = '<div class="fl-head">🎁 ' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  div.innerHTML = '<div class="fl-head">' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
   return div;
 }
 function renderSystemEntry(roll){
@@ -1485,8 +1485,8 @@ function renderLootBoxEntry(roll){
   } else if(mode === 'claim') {
     btn = opened ? '<button class="lb-btn" disabled>You claimed this ✓</button>' : claimedBy ? '<button class="lb-btn" disabled>Claimed by ' + esc(claimedBy) + '</button>' : '<button class="lb-btn lb-claim">Claim</button>';
   } else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
-  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">🔒 Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
-  div.innerHTML = '<div class="lb-head">🎁 ' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
+  div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
   return div;
 }
 function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
@@ -1511,7 +1511,7 @@ document.getElementById('log-entries').addEventListener('click', function(e) {
 function claimLootItem(it){
   const bag = $('f-bag'); const line = (it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + it.qty : '') + (it.notes ? ' — ' + it.notes : '');
   bag.value = (bag.value.trim() ? bag.value.replace(/\s+$/, '') + '\n' : '') + line;
-  addLog('Claimed', '🎁', it.item || 'Item', 'normal'); return true;
+  addLog('Claimed', 'Loot', it.item || 'Item', 'normal'); return true;
 }
 async function campaignPoll() {
   if(!_campaign) return;

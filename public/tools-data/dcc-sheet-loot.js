@@ -162,7 +162,7 @@
     }
     ov.innerHTML =
       '<div class="dccl-modal" role="dialog" aria-label="Loot Box">' +
-        '<div class="dccl-head"><h3>🎁 Loot Box</h3><button class="dccl-x" onclick="DCCLoot.close()" aria-label="Close">✕</button></div>' +
+        '<div class="dccl-head"><h3>Loot Box</h3><button class="dccl-x" onclick="DCCLoot.close()" aria-label="Close">✕</button></div>' +
         '<div class="dccl-bar"><select onchange="DCCLoot.setTier(this.value)">' + opts + '</select>' +
           '<button class="dccl-btn primary" onclick="DCCLoot.roll()">🎲 Roll</button></div>' +
         body +

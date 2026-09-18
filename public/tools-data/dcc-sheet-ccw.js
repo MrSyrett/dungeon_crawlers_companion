@@ -1265,7 +1265,7 @@
     try {
       if (typeof addLog === "function") {
         if (upgrade) addLog("Level Up", "⬆ Floor 3", nm + " → Lvl " + upgradeLevel(), "normal");
-        else addLog("New Character", "✨ Wizard", (W.basics.name || "Crawler") + " · " + W.race, "normal");
+        else addLog("New Character", "Wizard", (W.basics.name || "Crawler") + " · " + W.race, "normal");
       }
     } catch (e) {}
     close();

@@ -358,12 +358,12 @@
   function parseDice(detail){ detail=String(detail==null?'':detail); if(/[<>{]/.test(detail)) return [];
     var out=[], s=detail;
     // wave = which "throw" a die belongs to: 0 = the initial dice, 1+ = exploding
-    // follow-ups (→ chains and ⚡ crits) that appear one after another.
+    // follow-ups (→ chains and crits) that appear one after another.
     function push(sides,v,wave,color){ var ds=mapDie(sides,v); for(var i=0;i<ds.length;i++){ ds[i].wave=wave||0; if(color) ds[i].color=color; } out=out.concat(ds); }
-    // faces of one die group: split on → / ⚡ so the first is wave 0 and each
+    // faces of one die group: split on → / so the first is wave 0 and each
     // explosion is the next wave (strip =totals and brackets first).
     function pushChain(sides,part,color){ part=part.replace(/=\s*\d+/g,' ').replace(/[\[\]]/g,' ');
-      var toks=part.split(/→|->|⚡/), w=0;
+      var toks=part.split(/→|->|/), w=0;
       toks.forEach(function(t){ var m=t.match(/\d+/); if(m){ push(sides,+m[0],w,color); w++; } }); }
     // 1) Advantage/disadvantage d20 — ALWAYS show both dice (adv[a,b]→k / d20[a,b→k adv] / d20(a,b ▲ k))
     s=s.replace(/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*\d+/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});
@@ -376,14 +376,14 @@
     s=s.replace(/✦\s*\[\s*([0-9→>\- ]+?)\s*\]/g,function(_,g){ pushChain(6,g,WILD_COLOR); return ' '; });
     // 3) Parenthesised dice — NdX(v) / NdX(v+v) / NdX(v,v)  (trays, damage/heal, GM); all wave 0
     s=s.replace(/(\d*)d(\d+)\s*\(\s*([0-9+,\s]*?)\s*\)/gi,function(_,n,sides,inner){(inner.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x,0);});return ' ';});
-    // 4) Colon dice WITH a count — ace "3d6: [6→2] + 4 + 5", nimble "2d6: 4+5 ⚡6"
-    //    Split the pool on '+' into base dice; within each, → / ⚡ are explosion waves.
-    s=s.replace(/(\d+)d(\d+)\s*:\s*([0-9→+,=⚡\s\[\]]+)/gi,function(_,n,sides,run){
+    // 4) Colon dice WITH a count — ace "3d6: [6→2] + 4 + 5", nimble "2d6: 4+56"
+    //    Split the pool on '+' into base dice; within each, → / are explosion waves.
+    s=s.replace(/(\d+)d(\d+)\s*:\s*([0-9→+,=\s\[\]]+)/gi,function(_,n,sides,run){
       run=run.replace(/\s[+-]\d+\s*$/,' ');                 // drop a trailing +bonus
       run.split('+').forEach(function(part){ pushChain(+sides,part); });
       return ' ';});
-    // 5) Colon dice WITHOUT a count — KoB "d8: 8→3", dnd "d20:14" (→ / ⚡ are explosion waves)
-    s=s.replace(/(^|[^0-9a-z])d(\d+)\s*:\s*(\d+(?:\s*[→,⚡]\s*\d+)*)/gi,function(_,pre,sides,run){
+    // 5) Colon dice WITHOUT a count — KoB "d8: 8→3", dnd "d20:14" (→ / are explosion waves)
+    s=s.replace(/(^|[^0-9a-z])d(\d+)\s*:\s*(\d+(?:\s*[→,]\s*\d+)*)/gi,function(_,pre,sides,run){
       pushChain(+sides, run.replace(/,/g,'→')); return ' ';});
     return out; }
   function parseGM(detail){ return parseDice(detail); }

@@ -289,10 +289,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
         <div class="hdr-field name-primary"><label>Name</label><input id="f-name" placeholder="Ghostbuster" oninput="onIdent()"></div>
       </div>
       <div class="hdr-metarow">
-        <div class="lockfield"><label>Goal</label><div class="hdr-val" id="d-goal">—</div></div>
-        <div class="lockfield"><label>Residence</label><input id="f-res" placeholder="—" oninput="S.residence=this.value;scheduleAutosave()"></div>
-        <div class="lockfield"><label>Phone</label><input id="f-phone" placeholder="—" oninput="S.phone=this.value;scheduleAutosave()"></div>
-        <div class="lockfield"><label>Telex</label><input id="f-telex" placeholder="—" oninput="S.telex=this.value;scheduleAutosave()"></div>
+        <div class="lockfield" style="margin-left:auto;"><label>Goal</label><div class="hdr-val" id="d-goal">—</div></div>
       </div>
     </div>
     <div class="body">
@@ -350,7 +347,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2b3620;background:transparent;color:#a9c07f;" title="Campaign">🔗</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2b3620;background:transparent;color:#a9c07f;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.GBB)GBB.launch();" title="Character Builder">Create</button>
     <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this character" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
@@ -402,7 +399,7 @@ var TKEYS=['Brains','Muscles','Moves','Cool'];
 
 function blankState(){
   return { name:'', alias:'', goal:'', notes:'', tagPhysical:'', tagPersonality:'',
-    residence:'', phone:'', telex:'',
+
     traits:{Brains:3,Muscles:3,Moves:3,Cool:3},
     talents:{Brains:{name:''},Muscles:{name:''},Moves:{name:''},Cool:{name:''}},
     bp:20, gear:[], _built:false };
@@ -454,7 +451,6 @@ function renderBP(){$('bp').textContent=S.bp;}
 function renderAll(){
   renderTraits();renderGear();renderBP();
   $('f-name').value=S.name||'';$('d-goal').textContent=S.goal||'—';
-  var r=$('f-res');if(r)r.value=S.residence||'';var p=$('f-phone');if(p)p.value=S.phone||'';var t=$('f-telex');if(t)t.value=S.telex||'';
   $('f-tagp').value=S.tagPhysical||'';$('f-tagper').value=S.tagPersonality||'';$('f-notes').value=S.notes||'';
   refreshWizardButtons();
 }
@@ -477,7 +473,7 @@ function rollDice(label,baseDice){
   var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
   var faces=normals.concat([ghost]);
   var detail=n+'d6('+faces.join(',')+')'+(isGhost?' · Ghost=0':'')+(extra?' · +'+extra+' BP':'');
-  addLog((S.name||'Ghostbuster')+' · '+label, sum+(isGhost?' 👻':''), detail, isGhost?'ghost':'normal');
+  addLog((S.name||'Ghostbuster')+' · '+label, sum+(isGhost?'':''), detail, isGhost?'ghost':'normal');
 }
 function rollTrait(k){rollDice(k+' ('+tval(k)+'d)', tval(k));}
 function rollTalent(k){var nm=(S.talents[k]&&S.talents[k].name)||'talent';rollDice(k+' · '+nm+' ('+(tval(k)+3)+'d)', tval(k)+3);}
@@ -576,9 +572,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','🔗','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','Link','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','🔗','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
@@ -639,7 +635,7 @@ function gearItems(){ return EQUIP.map(function(e){ return {
 function gearAddTo(arr, it){ var e=it._e||{}; arr.push({name:e.name,hands:e.hands||'',muscles:e.muscles||0,category:e.category||'',damage:e.damage||'',toHit:e.toHit||'',rangeMax:e.rangeMax||null,rangeIncrement:e.rangeIncrement||null,special:e.special||''}); }
 function carryOf(arr, mus){ var c=arr.reduce(function(a,g){return a+(parseFloat(g.muscles)||0);},0); return {text:'Carry '+c+' / '+mus+' Muscles', over:c>mus}; }
 function openGearShop(){
-  openPickerCfg({ title:'🛒 Gear Shop', multi:true, addLabel:'Add', cats:['Weapon (ranged)','Weapon (melee)','Gear'],
+  openPickerCfg({ title:'Gear Shop', multi:true, addLabel:'Add', cats:['Weapon (ranged)','Weapon (melee)','Gear'],
     items:gearItems, carry:function(){ return carryOf(S.gear, num(S.traits.Muscles)); },
     custom:function(v){ S.gear.push({name:v,hands:'',muscles:0}); renderGear(); scheduleAutosave(); },
     onAdd:function(it){ gearAddTo(S.gear, it); renderGear(); scheduleAutosave(); } });

@@ -477,7 +477,7 @@ body.dark .section-bar,body.dark .section-bar.blue,body.dark .tab-btn.on,body.da
       </div>
 
       <div class="tab-panel" id="tab-gear">
-        <div class="section-bar"><span>Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">🛒 Gear Store</button></span></div>
+        <div class="section-bar"><span>Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">Gear Store</button></span></div>
         <table class="gear-table"><tbody id="gear-body"></tbody></table>
         <div class="wealth-row">
           Buy <select id="wealth-tn"><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
@@ -507,7 +507,7 @@ body.dark .section-bar,body.dark .section-bar.blue,body.dark .tab-btn.on,body.da
     </div>
   </div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">Create</button>
     <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this Hero" aria-label="Advance this Hero" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">Rules</button>
@@ -569,7 +569,7 @@ body.dark .section-bar,body.dark .section-bar.blue,body.dark .tab-btn.on,body.da
 <!-- GEAR STORE (Gear) -->
 <div id="gearstore-overlay" class="ov" onclick="if(event.target===this)closeGearPicker()">
   <div class="modal" style="max-width:600px;">
-    <div class="modal-hd"><div class="ttl">🛒 Gear Store</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
+    <div class="modal-hd"><div class="ttl">Gear Store</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
     <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search gear…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button></div></div>
     <div class="modal-bd brow-list" id="gearstore-body"></div>
   </div>
@@ -587,7 +587,7 @@ body.dark .section-bar,body.dark .section-bar.blue,body.dark .tab-btn.on,body.da
 <!-- LEVEL UP -->
 <div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()">
   <div class="modal" style="max-width:520px;">
-    <div class="modal-hd"><div class="ttl">✨ Advancement</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div>
+    <div class="modal-hd"><div class="ttl">Advancement</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div>
     <div class="modal-bd" id="levelup-body"></div>
     <div class="modal-ft" style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button></div>
   </div>
@@ -737,7 +737,7 @@ function damage(n) {
   const before = hpCur;
   hpCur = Math.max(0, hpCur - n);
   recalc();
-  if(hpCur === 0 && before > 0) addLog('Knocked Out!', '💫', 'Health 0 — out of the action for five minutes, then back with 1 Health', 'fumble');
+  if(hpCur === 0 && before > 0) addLog('Knocked Out!', 'Out', 'Health 0 — out of the action for five minutes, then back with 1 Health', 'fumble');
   scheduleAutosave();
 }
 function heal(n) {
@@ -1366,11 +1366,11 @@ async function campaignJoin() {
 }
 function campaignConnected() {
   _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling();
-  addLog('Campaign', '🔗', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal');
+  addLog('Campaign', 'Link', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal');
   saveSheet(true);
 }
 function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
-function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', '🔗', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', 'Link', 'Left "' + name + '"', 'normal'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Roles','Hero Builder']);
 function campaignBroadcast(label, result, detail, type) {
   if(!_campaign) return;
@@ -1424,7 +1424,7 @@ function renderFoundLoot(roll){
     const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + esc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
-  div.innerHTML = '<div class="fl-head">🎁 ' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  div.innerHTML = '<div class="fl-head">' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
   return div;
 }
 function renderSystemEntry(roll){
@@ -1480,8 +1480,8 @@ function renderLootBoxEntry(roll){
   } else if(mode === 'claim') {
     btn = opened ? '<button class="lb-btn" disabled>You claimed this ✓</button>' : claimedBy ? '<button class="lb-btn" disabled>Claimed by ' + esc(claimedBy) + '</button>' : '<button class="lb-btn lb-claim">Claim</button>';
   } else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
-  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">🔒 Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
-  div.innerHTML = '<div class="lb-head">🎁 ' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
+  div.innerHTML = '<div class="lb-head">' + esc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + esc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + esc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
   return div;
 }
 function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
@@ -1513,7 +1513,7 @@ function claimLootItem(it){
   if((it.cat === 'Weapon' || (g && g.category === 'Weapon')) && typeof addAttackRow === 'function') {
     linkGearAttack(gearTr, { name: it.item, kind: /gun|pistol|rifle|bow|blaster|laser|thrown/i.test(it.item + ' ' + note) ? 'ranged' : 'melee', damage: g && g.damage != null ? String(g.damage) : '' });
   }
-  addLog('Claimed', '🎁', it.item, 'normal'); return true;
+  addLog('Claimed', 'Loot', it.item, 'normal'); return true;
 }
 async function campaignPoll() {
   if(!_campaign) return;

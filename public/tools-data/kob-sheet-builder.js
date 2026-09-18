@@ -52,7 +52,7 @@
     ov.id = "kobb-overlay"; ov.className = "ov";
     ov.innerHTML =
       '<div class="modal wide" style="max-width:840px;">' +
-      '<div class="modal-hd"><div class="ttl">✨ Character Builder <span id="kobb-step" style="color:#8ad4ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="KOBB.close()">&#10005;</button></div>' +
+      '<div class="modal-hd"><div class="ttl">Character Builder <span id="kobb-step" style="color:#8ad4ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="KOBB.close()">&#10005;</button></div>' +
       '<div class="modal-bd" id="kobb-body"></div>' +
       '<div class="modal-ft"><div><button class="m-btn ghost" id="kobb-back" onclick="KOBB.back()">← Back</button></div><div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="KOBB.close()">Cancel</button><button class="m-btn" id="kobb-next" onclick="KOBB.next()">Next →</button></div></div></div>';
     // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
@@ -117,7 +117,7 @@
   function rStart() {
     // NSBU is listed as one of the books (it's a Kids on Bikes hack).
     let cards = D.books().map((b) => '<div class="kb-card' + (!st.nsbu && st.book === b.key ? " on" : "") + '" data-bookpick="' + b.key + '"><b>' + esc(b.name) + "</b><small>" + esc(b.tagline) + "</small></div>").join("");
-    cards += '<div class="kb-card' + (st.nsbu ? " on" : "") + '" data-bookpick="nsbu" style="' + (st.nsbu ? "border-color:#ff8a1e;background:#2a1c08;" : "") + '"><b>💥 Never Stop Blowing Up</b><small>Dropout / Dimension 20\'s action-movie hack for Kids on Bikes: nine skills that <i>blow up</i> to bigger dice as you crit, Turbo Tokens, an injury track, and buyable Abilities.</small></div>';
+    cards += '<div class="kb-card' + (st.nsbu ? " on" : "") + '" data-bookpick="nsbu" style="' + (st.nsbu ? "border-color:#ff8a1e;background:#2a1c08;" : "") + '"><b>Never Stop Blowing Up</b><small>Dropout / Dimension 20\'s action-movie hack for Kids on Bikes: nine skills that <i>blow up</i> to bigger dice as you crit, Turbo Tokens, an injury track, and buyable Abilities.</small></div>';
     if (st.nsbu) {
       return (
         '<p class="m-hint">Pick your book. <b>Never Stop Blowing Up</b> runs off nine key skills — no Tropes or six-stat spread; next you\'ll pick 3 Abilities and name your Action Hero.</p>' +
@@ -230,7 +230,7 @@
       return '<p class="m-hint">Name your Action Hero. All nine skills start at d4 and blow up from there.</p>' +
         '<div class="kb-grid"><input class="m-input" data-k="name" placeholder="Name / handle" value="' + esc(st.name) + '" style="font-size:16px;"><input class="m-input" data-k="pronouns" placeholder="Pronouns" value="' + esc(st.pronouns) + '"></div>' +
         '<div class="kb-review" style="margin-top:14px;">' +
-        row("Variant", "💥 Never Stop Blowing Up") +
+        row("Variant", "Never Stop Blowing Up") +
         row("Skills", NSBU_SKILLS().map((s) => s + " d4").join(" · ")) +
         row("Abilities", esc(st.abilities.join(", ") || "—")) +
         row("Catchphrase", esc(st.catchphrase || "—")) +
@@ -317,7 +317,7 @@
     if (typeof applySheet === "function") applySheet(data);
     if (typeof saveSheet === "function") saveSheet(true);
     if (typeof syncDocTitle === "function") syncDocTitle();
-    if (typeof addLog === "function") addLog("Character Builder", "✨", "Built " + (st.name || "a character") + " — " + (st.trope ? st.trope.name : "from scratch") + " (" + bookLabel() + ")", "crit");
+    if (typeof addLog === "function") addLog("Character Builder", "", "Built " + (st.name || "a character") + " — " + (st.trope ? st.trope.name : "from scratch") + " (" + bookLabel() + ")", "crit");
     close();
   }
 
@@ -343,7 +343,7 @@
     if (typeof applySheet === "function") applySheet(data);
     if (typeof saveSheet === "function") saveSheet(true);
     if (typeof syncDocTitle === "function") syncDocTitle();
-    if (typeof addLog === "function") addLog("Character Builder", "💥", "Built " + (st.name || "an Action Hero") + " — Never Stop Blowing Up", "crit");
+    if (typeof addLog === "function") addLog("Character Builder", "Boom", "Built " + (st.name || "an Action Hero") + " — Never Stop Blowing Up", "crit");
     close();
   }
 

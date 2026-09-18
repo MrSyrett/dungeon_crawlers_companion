@@ -250,7 +250,7 @@
     return '<div class="uphdr">Rank Upgrades' + (haveRank ? ' <span class="upnow">(at Rank ' + rank + ')</span>' : "") + '</div>' +
       e.upgrades.map(function (u) {
         var on = haveRank && Number(u.rank) <= rank;
-        var mark = haveRank ? '<span class="upmark">' + (on ? "✓" : "🔒") + "</span> " : "";
+        var mark = haveRank ? '<span class="upmark">' + (on ? "✓" : "Locked") + "</span> " : "";
         return '<div class="uprow' + (on ? " on" : (haveRank ? " off" : "")) + '">' + mark + '<b>Rank ' + esc(u.rank) + ':</b> ' + esc(u.text) + '</div>';
       }).join("");
   }

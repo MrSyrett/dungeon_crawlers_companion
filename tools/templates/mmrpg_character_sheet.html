@@ -456,7 +456,7 @@ body.dark .a-tile .atv{color:#f0888e;}
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #34272b;background:transparent;color:#b8a0a2;" title="Campaign">🔗</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #34272b;background:transparent;color:#b8a0a2;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.MMRPGB)MMRPGB.launch();" title="Character Builder">Create</button>
     <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Getting Schooled — advance a rank" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
@@ -482,7 +482,7 @@ body.dark .a-tile .atv{color:#f0888e;}
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">d616 — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="info-overlay" class="ov" onclick="if(event.target===this)closeInfo()"><div class="modal"><div class="modal-hd"><div class="ttl" id="info-title">Info</div><button class="x" onclick="closeInfo()">✕</button></div><div class="modal-bd rules-list" id="info-body"></div></div></div>
-<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✨ Getting Schooled</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Getting Schooled</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 
 <script>
@@ -644,7 +644,7 @@ function renderDerived(){
   var lines=[['init','Initiative',init],['','Run',run],['','Climb',half],['','Swim',half],['','Jump',half]];
   var mv=grantedMovement();
   Object.keys(mv).forEach(function(mode){ lines.push(['',mode,hv(mv[mode])]); });
-  if(halved) lines.push(['cond','⚙ Blinded','½ speed']);
+  if(halved) lines.push(['cond','Blinded','½ speed']);
   host.innerHTML=lines.map(function(l){ return '<div class="spd '+l[0]+'"><span>'+l[1]+'</span><b>'+l[2]+'</b></div>'; }).join('');
 }
 // ── Attacks / Damage: the four damage abilities (Melee, Agility, Ego, Logic) ──
@@ -1356,9 +1356,9 @@ function campaignRenderModal(){
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
 async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in?'); } }
-function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); try{ syncMmrpgHomebrew(); }catch(e){} addLog('Campaign','🔗','Connected to "'+_campaign.name+'"','normal'); saveSheet(true); }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); try{ syncMmrpgHomebrew(); }catch(e){} addLog('Campaign','Link','Connected to "'+_campaign.name+'"','normal'); saveSheet(true); }
 function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
-function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','🔗','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','Link','Left "'+name+'"','normal'); saveSheet(true); }
 function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
 function campaignAddRemote(roll){
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();

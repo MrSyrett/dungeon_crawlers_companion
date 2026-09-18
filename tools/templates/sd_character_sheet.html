@@ -705,7 +705,7 @@ body.dark .sl::after{background:#3a3320;}
     <button class="log-clear" onclick="clearLog()">Clear</button>
   </div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign">Link</button>
     <button id="hdr-create-btn" class="log-action-btn" onclick="startCharWizard()" style="border:1px solid #7a5a00;background:transparent;color:#e8c84a;" title="Create character" aria-label="Create character">Create</button>
     <button class="log-action-btn" onclick="openRules()" style="border:1px solid #2f4a2f;background:#1e2a1e;color:#b8d8b8;" title="Quick rules" aria-label="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export sheet as JSON" aria-label="Export">Export</button>
@@ -2623,13 +2623,13 @@ function onHPChange(){
 }
 // HeroDark rules — folded into the Quick Rules panel while HeroDark mode is on.
 const HERODARK_QUICK_RULES = [
-  { title: '⚔ HeroDark — Hit Points & Talents', text: 'You begin with maximum HP at level 1. At each level-up you choose your talent rather than rolling it.' },
-  { title: '⚔ HeroDark — Skill Talents (even levels)', text: 'At every even level you also gain a Skill Talent: learn to use a new weapon or armor (added to your proficiencies), learn a new language, or gain a Skill — a write-in subject that grants advantage on rolls pertaining to it.' },
-  { title: '⚔ HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or spellcast). The sheet adds it automatically.' },
-  { title: '⚔ HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
-  { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing. The Exhausted status likewise applies −2 to your rolls while active.' },
-  { title: '⚔ HeroDark — Stress', text: 'Stress stacks in levels (track it on the sheet). Each level of Stress is a −2 penalty to ALL d20 rolls — checks, attacks, and spellcasting — folded in automatically. A rest clears one level. At Stress 6 you are out of the fight until you recover.' },
-  { title: '⚔ HeroDark — Defense (Evade & Armor)', text: "Attackers don't roll to hit you. When you're attacked, roll Evade (d20 + DEX, the button on your Defense tile) against the attacker's Attack DC — beat it and you avoid the hit entirely. If you're hit, your Armor soaks a flat amount off the damage (light 1, medium 2, heavy 3, plus a shield and any bonuses). Your own attacks against enemies still roll to hit as normal." },
+  { title: 'HeroDark — Hit Points & Talents', text: 'You begin with maximum HP at level 1. At each level-up you choose your talent rather than rolling it.' },
+  { title: 'HeroDark — Skill Talents (even levels)', text: 'At every even level you also gain a Skill Talent: learn to use a new weapon or armor (added to your proficiencies), learn a new language, or gain a Skill — a write-in subject that grants advantage on rolls pertaining to it.' },
+  { title: 'HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or spellcast). The sheet adds it automatically.' },
+  { title: 'HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
+  { title: 'HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing. The Exhausted status likewise applies −2 to your rolls while active.' },
+  { title: 'HeroDark — Stress', text: 'Stress stacks in levels (track it on the sheet). Each level of Stress is a −2 penalty to ALL d20 rolls — checks, attacks, and spellcasting — folded in automatically. A rest clears one level. At Stress 6 you are out of the fight until you recover.' },
+  { title: 'HeroDark — Defense (Evade & Armor)', text: "Attackers don't roll to hit you. When you're attacked, roll Evade (d20 + DEX, the button on your Defense tile) against the attacker's Attack DC — beat it and you avoid the hit entirely. If you're hit, your Armor soaks a flat amount off the damage (light 1, medium 2, heavy 3, plus a shield and any bonuses). Your own attacks against enemies still roll to hit as normal." },
 ];
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
@@ -5519,11 +5519,11 @@ function campaignUpdateBtn() {
   const btn = document.getElementById('campaign-btn');
   if(!btn) return;
   if(_campaign) {
-    btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
+    btn.textContent = 'Link';
     btn.title = 'Campaign: ' + _campaign.name + ' (' + _campaign.code + ')';
     btn.style.background = '#241f10'; btn.style.color = '#c8a020'; btn.style.borderColor = '#7a5a00';
   } else {
-    btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
+    btn.textContent = 'Link';
     btn.title = 'Link this sheet to a campaign';
     btn.style.background = 'transparent'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--rule)';
   }
@@ -5651,8 +5651,8 @@ function renderLootBoxEntry(roll){
   } else if(mode === 'claim') {
     btn = opened ? '<button class="lb-btn" disabled>You claimed this ✓</button>' : claimedBy ? '<button class="lb-btn" disabled>Claimed by ' + _flEsc(claimedBy) + '</button>' : '<button class="lb-btn lb-claim">Claim</button>';
   } else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
-  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">🔒 Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
-  div.innerHTML = '<div class="lb-head">🎁 ' + _flEsc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + _flEsc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + _flEsc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
+  div.innerHTML = '<div class="lb-head">' + _flEsc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + _flEsc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + _flEsc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
   return div;
 }
 function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
@@ -5764,7 +5764,7 @@ function renderFoundLoot(roll){
       : '<button class="fl-btn fl-claim" data-idx="'+i+'">Claim</button>';
     return '<li class="fl-item" data-idx="'+i+'"><span class="fl-item-name">'+label+'</span>'+btn+'</li>';
   }).join('');
-  div.innerHTML = '<div class="fl-head">🪙 '+_flEsc(roll.label||'FOUND LOOT')+'</div>'
+  div.innerHTML = '<div class="fl-head">'+_flEsc(roll.label||'FOUND LOOT')+'</div>'
     + (roll.result?'<div class="fl-name">'+_flEsc(roll.result)+'</div>':'')
     + (mode==='named'?'<div class="fl-for">For: '+_flEsc(to||'?')+'</div>':mode==='copies'?'<div class="fl-for">A copy for everyone</div>':'')
     + (p.note?'<div class="fl-desc">'+_flEsc(p.note)+'</div>':'')
