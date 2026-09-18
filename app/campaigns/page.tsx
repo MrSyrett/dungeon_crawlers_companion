@@ -113,6 +113,15 @@ function readCharMeta(
         level: null,
       };
     }
+    const gb = blob?.gb_sheet;
+    if (typeof gb === "string") {
+      const s = JSON.parse(gb) as { name?: unknown; goal?: unknown };
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls: typeof s.goal === "string" ? s.goal : "Ghostbuster",
+        level: null,
+      };
+    }
     const dcc = blob?.dcc_sheet;
     if (typeof dcc === "string") {
       const s = JSON.parse(dcc) as { header?: Record<string, unknown> };

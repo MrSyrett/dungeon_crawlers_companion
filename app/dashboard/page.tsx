@@ -164,6 +164,13 @@ const JLU_REFERENCE: { href: string; label: string }[] = [
   { href: "/jlu/rules", label: "Rules" },
 ];
 
+const GB_REFERENCE: { href: string; label: string }[] = [
+  { href: "/gb/rules", label: "Rules" },
+  { href: "/gb/talents", label: "Traits & Talents" },
+  { href: "/gb/gear", label: "Gear & Goals" },
+  { href: "/gb/bestiary", label: "Ghosts & Extras" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -179,6 +186,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   YZE: YZE_REFERENCE,
   MMRPG: MMRPG_REFERENCE,
   JLU: JLU_REFERENCE,
+  GB: GB_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

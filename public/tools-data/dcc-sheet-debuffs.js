@@ -25,6 +25,7 @@
   function field() { return document.getElementById(FIELD_ID); }
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function attr(s) { return esc(s).replace(/'/g, "&#39;"); }
+  function jsq(s) { return esc(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'"); }
 
   function known(name) {
     if (!haveData()) return null;
@@ -165,7 +166,7 @@
     });
     var rows = list.map(function (d) {
       var on = active.some(function (a) { return !a.custom && a.name === d.name; });
-      return '<div class="dccd-item ' + (on ? "on" : "") + '" onclick="DCCDebuffs.pick(\'' + attr(d.name) + '\')">' +
+      return '<div class="dccd-item ' + (on ? "on" : "") + '" onclick="DCCDebuffs.pick(\'' + jsq(d.name) + '\')">' +
         '<div><span class="nm">' + esc(d.name) + (on ? " ✓" : "") + '</span>' +
         '<span class="bd">' + (d.stackable ? "Stacks" : "Single") + '</span></div>' +
         '<div class="ef">' + esc(d.effect) + '</div>' +

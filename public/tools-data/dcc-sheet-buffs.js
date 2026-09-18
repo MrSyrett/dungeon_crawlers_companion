@@ -24,6 +24,7 @@
   function field() { return document.getElementById(FIELD_ID); }
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function attr(s) { return esc(s).replace(/'/g, "&#39;"); }
+  function jsq(s) { return esc(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'"); }
 
   function known(name) {
     if (!haveData()) return null;
@@ -175,7 +176,7 @@
   function itemHtml(b) {
     var on = active.some(function (a) { return !a.custom && a.name === b.name; });
     var blocked = b.kind === "external" && !on && externalFull();
-    var click = blocked ? "" : ' onclick="DCCBuffs.pick(\'' + attr(b.name) + '\')"';
+    var click = blocked ? "" : ' onclick="DCCBuffs.pick(\'' + jsq(b.name) + '\')"';
     return '<div class="dccb-item ' + (on ? "on" : "") + (blocked ? " blocked" : "") + '"' + click + '>' +
       '<div><span class="nm">' + esc(b.name) + (on ? " ✓" : "") + '</span>' +
       '<span class="bd">' + (b.kind === "external" ? "External" : "Internal") + '</span>' +

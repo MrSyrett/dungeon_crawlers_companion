@@ -1,0 +1,62 @@
+// GENERATED FILE - do not edit by hand.
+// Source: data/gb/parts/*.json - regenerate with: node scripts/build-gb-data.mjs
+
+const GB_EQUIPMENT = [
+  {
+    "name": "Beach Kit",
+    "category": "Utility",
+    "hands": "varies",
+    "muscles": 2,
+    "description": "A huge inflatable beach ball, volleyball net & ball, sunglasses, umbrella, boom box, suntan lotion, towels, Frisbee. What does it have to do with Ghostbusting? Beats us — but it sure seems popular."
+  },
+  {
+    "name": "Ecto Goggles / Ecto Visor",
+    "category": "Detection",
+    "hands": "1 hand (on head)",
+    "muscles": 0.5,
+    "description": "Headgear that lets a Ghostbuster see ectoplasmic and normally-invisible phenomena."
+  },
+  {
+    "name": "ECTO-1 Replivehicle",
+    "category": "Vehicle",
+    "hands": "—",
+    "muscles": 0,
+    "description": "A stylish fiberglas-bodied vehicle on a tubular-steel frame; seats three in comfort (six in desperate cramping). Generous cargo capacity for a full line of paranormal gear, flashing lights, and the big rooftop figure. About as inconspicuous as a moose in your refrigerator."
+  },
+  {
+    "name": "Flashlight",
+    "category": "Utility",
+    "hands": "1 hand (on belt)",
+    "muscles": 0.5,
+    "description": "For all those dark, dismal basements and clifftop mansions."
+  },
+  {
+    "name": "Geiger Counter",
+    "category": "Detection",
+    "hands": "1 hand (on belt)",
+    "muscles": 0.5,
+    "description": "Detects radioactive ghosts and monsters — and malfunctions in unlicensed nuclear accelerators."
+  },
+  {
+    "name": "Ghost Trap",
+    "category": "Capture",
+    "hands": "1 hand (on belt)",
+    "muscles": 0.5,
+    "description": "A small box that stores and transports one subdued ghost. A foot-pedal on a 12-foot tube opens it, projecting a cone of psychokinetic force. It takes a second to neutralize the ghost, so hold the specter with a containment stream or it may zoom away."
+  },
+  {
+    "name": "P.K.E. Meter",
+    "category": "Detection",
+    "hands": "1 hand (on belt)",
+    "muscles": 0.5,
+    "description": "Psychokinetic-energy meter for detecting, tracking and gauging supernatural activity."
+  },
+  {
+    "name": "Proton Pack",
+    "category": "Weapon",
+    "hands": "2 hands (on back)",
+    "muscles": 2,
+    "description": "A small, unlicensed nuclear accelerator — the Ghostbuster's basic weapon. On the ATTACK setting a hit lessens a ghost's Ectopresence by 1. On the CONTAINMENT setting it forms a proton-stream cage to hold and move a ghost — usually needs two Ghostbusters, and the ghost's Ectopresence must be 0 first."
+  }
+];
+if (typeof window !== 'undefined') { window.GB_EQUIPMENT = GB_EQUIPMENT; }

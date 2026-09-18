@@ -81,6 +81,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.yze { color: #16bdd6; }
   .group-head.mmrpg { color: #EC1D24; }
   .group-head.jlu { color: #2f6fed; }
+  .group-head.gb { color: #8bc53f; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -271,7 +272,8 @@ const PAGE = String.raw`<!doctype html>
             { key: "CO", name: "Candela Obscura", cls: "co" },
             { key: "YZE", name: "Year Zero Engine", cls: "yze" },
             { key: "MMRPG", name: "Marvel Multiverse RPG", cls: "mmrpg" },
-            { key: "JLU", name: "Justice League Unlimited", cls: "jlu" }
+            { key: "JLU", name: "Justice League Unlimited", cls: "jlu" },
+            { key: "GB", name: "Ghostbusters", cls: "gb" }
           ];
           var seen = {};
           var html = "";

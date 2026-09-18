@@ -1,0 +1,84 @@
+// GENERATED FILE - do not edit by hand.
+// Source: data/gb/parts/*.json - regenerate with: node scripts/build-gb-data.mjs
+
+const GB_DIFFICULTIES = [
+  {
+    "name": "Automatic Success",
+    "range": "no roll",
+    "low": null,
+    "high": null,
+    "examples": [
+      "Blasting a wall with a proton pack",
+      "Driving a car down a country road",
+      "Eating a meal",
+      "Using a pay phone"
+    ]
+  },
+  {
+    "name": "Very Little Difficulty",
+    "range": "1–3",
+    "low": 1,
+    "high": 3,
+    "examples": [
+      "Blasting a stationary ghost (Moves)",
+      "Driving a country road in fog (Moves)",
+      "Using a pay phone with no change (Brains)"
+    ]
+  },
+  {
+    "name": "Some Difficulty",
+    "range": "4–8",
+    "low": 4,
+    "high": 8,
+    "examples": [
+      "Blasting a slow ghost (Moves)",
+      "Parallel parking a big car (Moves)",
+      "Figuring out the IRS short form (Brains)"
+    ]
+  },
+  {
+    "name": "A Good Amount of Difficulty",
+    "range": "9–13",
+    "low": 9,
+    "high": 13,
+    "examples": [
+      "Blasting a moving ghost (Moves)",
+      "Driving in Manhattan (Moves)",
+      "Picking up an attractive person in a bar (Cool)"
+    ]
+  },
+  {
+    "name": "Lots of Difficulty",
+    "range": "14–18",
+    "low": 14,
+    "high": 18,
+    "examples": [
+      "Blasting an agile ghost (Moves)",
+      "Parking a limo (Moves)",
+      "Figuring out the IRS self-employment schedule (Brains)"
+    ]
+  },
+  {
+    "name": "A Whole Lot of Difficulty",
+    "range": "19–29",
+    "low": 19,
+    "high": 29,
+    "examples": [
+      "A ghost at long range (Moves)",
+      "Driving a freeway at rush hour (Moves)",
+      "Getting a famous person on the phone (Cool)"
+    ]
+  },
+  {
+    "name": "More Difficulty Than You Can Imagine",
+    "range": "30+",
+    "low": 30,
+    "high": null,
+    "examples": [
+      "Blasting a ghost with your eyes shut (Moves)",
+      "Winning the Indy 500 in a Honda Civic (Moves)",
+      "Picking up a buffalo (Muscles)"
+    ]
+  }
+];
+if (typeof window !== 'undefined') { window.GB_DIFFICULTIES = GB_DIFFICULTIES; }

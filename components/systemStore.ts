@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -41,6 +41,10 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
   // narrative layer (Plot Points / Editorial Points / the Crisis Die).
   { key: "JLU", name: "Justice League Unlimited", short: "JLU", accent: "var(--jlu)" },
+  // Ghostbusters International (West End Games, 1989) — the proto-D6 system:
+  // four Traits (Brains/Muscles/Moves/Cool), Talents, the Ghost Die, and
+  // Brownie Points. Roll a pool of d6 vs a Difficulty; one die is the Ghost Die.
+  { key: "GB", name: "Ghostbusters", short: "GB", accent: "var(--gb)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

@@ -90,6 +90,13 @@ const SYSTEMS = [
     chapter: "Issue", chapterPh: "Issue #1", session: "Issue", mobs: "Villains/NPCs", mobsHeading: "Villains &amp; Threats",
     mob: "Villain", boss: "Threat", npc: "NPC", typePh: "STREET THUG // Tier E · Minion", titlePh: "e.g. Lines of Defense", subtitlePh: "e.g. A JLU one-shot for Tier C heroes",
   },
+  {
+    file: "gb_session_prep_builder.html", key: "gb_session", ls: "gb_builder_v1", cfg: "gb", random: "Random Extra",
+    name: "Ghostbusters", title: "Session Prep Builder — Ghostbusters",
+    accent: "#5f8f24", accentDark: "#446a17", red: "#c23a2f", redDark: "#7a1510", highlight: "#b6e34a", boxBg: "#e7f3d2",
+    chapter: "Scene", chapterPh: "Scene 1", session: "Adventure", mobs: "Ghosts/Extras", mobsHeading: "Ghosts &amp; Extras",
+    mob: "Ghost", boss: "Big Bad", npc: "Extra", typePh: "SLIMER // Class 5 Free-Roaming Vapor", titlePh: "e.g. The Kane House Haunting", subtitlePh: "e.g. A Ghostbusters one-shot",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -285,6 +292,30 @@ const SB_CONFIG = {
     ].filter(Boolean).join('\\n'),
   }; }, sub: m => 'Tier ' + (m.tier || '') + ' · ' + (m.role || '') },
 };`,
+  gb: `const SB_CONFIG = {
+  typePlaceholder: 'SLIMER // Class 5 Free-Roaming Vapor',
+  hp: null,
+  rows: [
+    [{ key:'brains', label:'BRAINS' }, { key:'muscles', label:'MUSCLES' }, { key:'moves', label:'MOVES' }, { key:'cool', label:'COOL' }, { key:'power', label:'POWER' }],
+    [{ key:'powers', label:'GHOST POWERS', ph:'Dematerialize · Proton Immunity' }],
+  ],
+  abilitiesLabel: 'Talents, Weaknesses & Tags', abilitiesPlaceholder: 'One per line — Talent: name value · Weakness: … · Goal: … · Tag: …',
+  mobs: { placeholder: 'Search the Ghostbusters bestiary (ghosts, monsters & extras)…', pool: () => (typeof GB_BESTIARY !== 'undefined' && Array.isArray(GB_BESTIARY)) ? GB_BESTIARY : [], toCard: m => {
+    const p = Number(m.power) || 0;
+    return {
+    sbtype: p >= 7 ? 'boss' : (p >= 1 ? 'mob' : 'npc'), name: m.name || '',
+    type: [(m.role || ''), (m.power != null ? 'Power ' + m.power : '')].filter(Boolean).join(' // '),
+    flavor: (m.description || '').slice(0, 120),
+    brains: String(m.brains ?? ''), muscles: String(m.muscles ?? ''), moves: String(m.moves ?? ''), cool: String(m.cool ?? ''), power: String(m.power ?? ''),
+    powers: (m.powers || []).join(' · '),
+    abilities: [
+      ...((m.talents || []).map(t => 'Talent: ' + t.name + ' ' + t.value)),
+      m.weaknesses ? 'Weakness: ' + m.weaknesses : '',
+      m.goal ? 'Goal: ' + m.goal : '',
+      m.tags ? 'Tags: ' + m.tags : '',
+    ].filter(Boolean).join('\\n'),
+  }; }, sub: m => (m.role || '') + (m.power != null ? ' · Power ' + m.power : '') },
+};`,
 };
 const MOB_DATA = {
   ace: '<script src="/tools-data/ace-extras.js"></script>',
@@ -298,6 +329,7 @@ const MOB_DATA = {
   yze: '',
   mmrpg: '<script src="/tools-data/mmrpg-characters.js"></script>',
   jlu: '<script src="/tools-data/jlu-bestiary.js"></script>',
+  gb: '<script src="/tools-data/gb-bestiary.js"></script>',
 };
 
 function rep(s, a, b, all = true) {

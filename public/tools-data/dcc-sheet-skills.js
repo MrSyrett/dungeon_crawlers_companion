@@ -19,6 +19,12 @@
 
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function attr(s) { return esc(s).replace(/'/g, "&#39;"); }
+  // For a value embedded inside a single-quoted JS string in an inline handler
+  // (onclick="fn('VALUE')"). attr() is wrong here: it turns ' into &#39;, which the
+  // HTML parser decodes back to ' BEFORE the JS runs, terminating the string early
+  // (e.g. the "Wrasslin'" skill). Backslash-escape the quote (and any backslash)
+  // instead; esc() still guards the surrounding double-quoted attribute.
+  function jsq(s) { return esc(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'"); }
   function haveData() {
     return typeof DCC_SKILLS !== "undefined" || typeof DCC_SPELLS !== "undefined" ||
       (Array.isArray(window.__DCC_HB_SKILLS) && window.__DCC_HB_SKILLS.length) ||
@@ -189,11 +195,11 @@
       : "";
     return '<div class="dccs-item' + (open ? " open" : "") + (addOpen ? " adding" : "") + '">' +
       '<div class="row">' +
-        '<div class="body" onclick="DCCSkills.pick(\'' + attr(e.kind) + '\',\'' + attr(e.name) + '\')" title="Add to your skills — rename it first if you like">' +
+        '<div class="body" onclick="DCCSkills.pick(\'' + jsq(e.kind) + '\',\'' + jsq(e.name) + '\')" title="Add to your skills — rename it first if you like">' +
           '<div class="nm">' + esc(e.name) + '</div>' +
           '<div class="mt">' + esc(metaLine(e)) + '</div>' +
         '</div>' +
-        '<button class="dccs-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCSkills.toggle(\'' + attr(e.kind) + '\',\'' + attr(e.name) + '\')">i</button>' +
+        '<button class="dccs-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCSkills.toggle(\'' + jsq(e.kind) + '\',\'' + jsq(e.name) + '\')">i</button>' +
       '</div>' + addBar + detail +
     '</div>';
   }

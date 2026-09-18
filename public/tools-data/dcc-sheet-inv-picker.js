@@ -17,6 +17,7 @@
 
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function attr(s) { return esc(s).replace(/'/g, "&#39;"); }
+  function jsq(s) { return esc(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'"); }
   function haveData() { return typeof DCC_ITEMS !== "undefined" && DCC_ITEMS.length; }
 
   // ── filter buckets (fewer, friendlier than the 9 raw categories) ─────────────
@@ -237,11 +238,11 @@
       : "";
     return '<div class="dcci-item' + (open ? " open" : "") + '">' +
       '<div class="row">' +
-        '<div class="body" onclick="DCCItems.add(\'' + attr(it.name) + '\')" title="Add to your inventory">' +
+        '<div class="body" onclick="DCCItems.add(\'' + jsq(it.name) + '\')" title="Add to your inventory">' +
           '<div class="nm">' + esc(it.name) + '</div>' +
           '<div class="mt">' + esc(metaLine(it)) + '</div>' +
         '</div>' +
-        '<button class="dcci-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCItems.toggle(\'' + attr(it.name) + '\')">i</button>' +
+        '<button class="dcci-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCItems.toggle(\'' + jsq(it.name) + '\')">i</button>' +
       '</div>' + detail +
     '</div>';
   }
@@ -287,11 +288,11 @@
     var detail = open ? '<div class="detail"><div class="ef">' + esc(sp.desc || "No description on file.") + '</div></div>' : "";
     return '<div class="dcci-item' + (open ? " open" : "") + '">' +
       '<div class="row">' +
-        '<div class="body" onclick="DCCItems.chooseSpell(\'' + attr(sp.name) + '\')" title="Write this spell on the item">' +
+        '<div class="body" onclick="DCCItems.chooseSpell(\'' + jsq(sp.name) + '\')" title="Write this spell on the item">' +
           '<div class="nm">' + esc(sp.name) + '</div>' +
           '<div class="mt">' + esc(spellMeta(sp)) + '</div>' +
         '</div>' +
-        '<button class="dcci-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCItems.toggleSpell(\'' + attr(sp.name) + '\')">i</button>' +
+        '<button class="dcci-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCItems.toggleSpell(\'' + jsq(sp.name) + '\')">i</button>' +
       '</div>' + detail +
     '</div>';
   }

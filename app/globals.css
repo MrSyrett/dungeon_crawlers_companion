@@ -31,6 +31,8 @@
   --mmrpg: #EC1D24;
   /* Justice League Unlimited accent — heroic DC blue. */
   --jlu: #2f6fed;
+  /* Ghostbusters accent — ectoplasm slime green. */
+  --gb: #8bc53f;
 }
 
 @theme inline {
@@ -52,6 +54,7 @@
   --color-yze: var(--yze);
   --color-mmrpg: var(--mmrpg);
   --color-jlu: var(--jlu);
+  --color-gb: var(--gb);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

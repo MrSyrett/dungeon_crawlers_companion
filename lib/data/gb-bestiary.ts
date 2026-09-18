@@ -1,0 +1,337 @@
+// GENERATED FILE - do not edit by hand.
+// Source: data/gb/parts/*.json - regenerate with: node scripts/build-gb-data.mjs
+
+import type { GbBestiary } from "./gb-types";
+
+export const GB_BESTIARY = [
+  {
+    "name": "Bulldozer (Animated)",
+    "role": "Animated Machine",
+    "brains": 0,
+    "muscles": 13,
+    "moves": 3,
+    "cool": 0,
+    "talents": [
+      {
+        "trait": "Muscles",
+        "name": "Crush Things",
+        "value": 16
+      },
+      {
+        "trait": "Moves",
+        "name": "Drive Self",
+        "value": 6
+      }
+    ],
+    "power": 2,
+    "powers": [
+      "Physical Immunity (G)"
+    ],
+    "weaknesses": "Takes damage from proton blasts",
+    "goal": "Put Things on Other Things",
+    "tags": "Puts things on other things (especially occupied cars)",
+    "description": "A treaded monster with a lifter scoop, brought to malevolent life by Kathleen's power."
+  },
+  {
+    "name": "Dr. Abraham Thistledown",
+    "role": "Mad Scientist",
+    "brains": 8,
+    "muscles": 1,
+    "moves": 2,
+    "cool": 4,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Medicine",
+        "value": 11
+      },
+      {
+        "trait": "Muscles",
+        "name": "Strap Victim to Table",
+        "value": 4
+      },
+      {
+        "trait": "Moves",
+        "name": "Sneak",
+        "value": 5
+      },
+      {
+        "trait": "Cool",
+        "name": "Argue Science",
+        "value": 7
+      }
+    ],
+    "power": 7,
+    "powers": [
+      "Control Mind",
+      "Hypnosis"
+    ],
+    "goal": "Revive Dead Wife",
+    "tags": "Doting and charming near his daughter; hollow-eyed, spectral and dangerous away from her",
+    "description": "A brilliant surgeon who lost his mind when his wife died; he preserved her body and fled to a mountaintop castle to work on reviving her."
+  },
+  {
+    "name": "Dr. Joshua Prism",
+    "role": "Invisible Man",
+    "brains": 4,
+    "muscles": 3,
+    "moves": 4,
+    "cool": 2,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Fail to Cure Self",
+        "value": 7
+      },
+      {
+        "trait": "Muscles",
+        "name": "Brawl",
+        "value": 5
+      },
+      {
+        "trait": "Moves",
+        "name": "Dodge",
+        "value": 7
+      },
+      {
+        "trait": "Cool",
+        "name": "Cackle Madly",
+        "value": 5
+      }
+    ],
+    "power": 4,
+    "powers": [
+      "Invisibility",
+      "Dematerialize"
+    ],
+    "goal": "Conquer the World or Be Cured (varies with time of day)",
+    "tags": "Tears off his clothes and concealing bandages at the slightest provocation; runs around flailing his arms as he disrobes",
+    "description": "A leading biochemist until 30 minutes ago, when he perfected his Invisibility Agent, injected it, went crazy, and set off to force Dr. Thistledown to concoct a cure."
+  },
+  {
+    "name": "Drusilla Kane",
+    "role": "Witch / Seductress",
+    "brains": 4,
+    "muscles": 1,
+    "moves": 4,
+    "cool": 4,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Predict Future",
+        "value": 7
+      },
+      {
+        "trait": "Muscles",
+        "name": "Wrestle",
+        "value": 4
+      },
+      {
+        "trait": "Moves",
+        "name": "Seduce",
+        "value": 7
+      },
+      {
+        "trait": "Cool",
+        "name": "Outclass Others",
+        "value": 7
+      }
+    ],
+    "power": 4,
+    "powers": [
+      "Control Mind",
+      "PKE Analysis",
+      "Read Mind"
+    ],
+    "goal": "Sex",
+    "tags": "Long, slow evaluation of men from beneath mostly-closed eyelids",
+    "description": "Lucretia's daughter, a gorgeous, sultry practicing witch (she hasn't got it quite right yet) with no time for all the men, studies and revelations the writers have in store."
+  },
+  {
+    "name": "Kathleen",
+    "role": "Vengeful Convertible",
+    "brains": 2,
+    "muscles": 7,
+    "moves": 5,
+    "cool": 4,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Spot Flyboy",
+        "value": 5
+      },
+      {
+        "trait": "Muscles",
+        "name": "Mash Victim",
+        "value": 10
+      },
+      {
+        "trait": "Moves",
+        "name": "Drive Self",
+        "value": 8
+      },
+      {
+        "trait": "Cool",
+        "name": "Look Cool",
+        "value": 7
+      }
+    ],
+    "power": 10,
+    "powers": [
+      "Animate",
+      "Physical Immunity (L)",
+      "Poltergeist",
+      "Proton Immunity",
+      "Summon Pests",
+      "Terrorize"
+    ],
+    "weaknesses": "Easily fooled by fake flyboys; susceptible to auto-crushing equipment and weird science; electricity-draining equipment can depower her",
+    "goal": "Live Happily Ever After with Flyboy",
+    "tags": "Headlights always seem to be looking at you; drives like a running back dodging defenders",
+    "description": "A pristine mid-50s blue Chevy convertible that resurrects unscratched no matter the damage, searching the city for her long-lost love, Flyboy Wheeler."
+  },
+  {
+    "name": "Lawn Mower (Animated)",
+    "role": "Animated Machine",
+    "brains": 0,
+    "muscles": 4,
+    "moves": 4,
+    "cool": 0,
+    "talents": [
+      {
+        "trait": "Muscles",
+        "name": "Mangle Grass, Pets, and Feet",
+        "value": 7
+      },
+      {
+        "trait": "Moves",
+        "name": "Dodge",
+        "value": 7
+      }
+    ],
+    "power": 1,
+    "powers": [
+      "Physical Immunity (G)"
+    ],
+    "weaknesses": "Takes damage from proton blasts",
+    "goal": "Rampaging Violence, and Neat Lawns",
+    "tags": "Rears up on its back wheels so you can see the spinning blade covered with the sap of its previous victims",
+    "description": "A typical everyday non-riding lawn mower until Kathleen brings it to life; then it charges the cityscape hunting high grass, house pets and human feet."
+  },
+  {
+    "name": "Spartacus Kane",
+    "role": "Angst Vampire",
+    "brains": 2,
+    "muscles": 6,
+    "moves": 3,
+    "cool": 5,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Reminisce Menacingly",
+        "value": 5
+      },
+      {
+        "trait": "Muscles",
+        "name": "Smash Feeble Furniture",
+        "value": 9
+      },
+      {
+        "trait": "Moves",
+        "name": "Twirl Cloak Menacingly",
+        "value": 6
+      },
+      {
+        "trait": "Cool",
+        "name": "Inspire Pity",
+        "value": 8
+      }
+    ],
+    "power": 4,
+    "powers": [
+      "Creature Features (L, changes into bat)",
+      "Dematerialize",
+      "Physical Immunity (L)"
+    ],
+    "weaknesses": "Classic vampire weaknesses",
+    "goal": "Be Rid of Imaginary Curse",
+    "tags": "Abrupt changes of pose: jerky cringe at sunrise, twirl and retwirl of cloak, sudden departures, spastic clamber into coffin",
+    "description": "The great-great-granduncle of Lucretia's dead husband; bitten around 1800, he wanders wracked with guilt, convinced his vampirism causes the family's curses (really it's his pretentiousness)."
+  },
+  {
+    "name": "Tarquin Kane",
+    "role": "Stylish Werewolf",
+    "brains": 3,
+    "muscles": 6,
+    "moves": 4,
+    "cool": 4,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Recognize Loved Ones Instantly and Not Eat Them",
+        "value": 5
+      },
+      {
+        "trait": "Muscles",
+        "name": "Mangle and Chew",
+        "value": 9
+      },
+      {
+        "trait": "Moves",
+        "name": "Display Fashion",
+        "value": 7
+      },
+      {
+        "trait": "Cool",
+        "name": "Brood in a Fantastically Sexy Manner",
+        "value": 7
+      }
+    ],
+    "power": 2,
+    "powers": [
+      "Creature Features (L)",
+      "Physical Immunity (L)"
+    ],
+    "goal": "Stylish Sex",
+    "tags": "Compulsive about neatness of clothes, constantly slicks hair back, never smiles, projects lust with eyes alone",
+    "description": "Lucretia's son, a dark, brooding fashion-plate who lives only to shed his lycanthropy so he'll stop shredding expensive designer outfits and scaring off dates."
+  },
+  {
+    "name": "The Reconstituted Man",
+    "role": "Frankenstein Monster",
+    "brains": 1,
+    "muscles": 8,
+    "moves": 2,
+    "cool": 1,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Misunderstand Intents",
+        "value": 4
+      },
+      {
+        "trait": "Muscles",
+        "name": "Break Through Walls",
+        "value": 11
+      },
+      {
+        "trait": "Moves",
+        "name": "Attract Attention",
+        "value": 5
+      },
+      {
+        "trait": "Cool",
+        "name": "Evoke Sympathy",
+        "value": 4
+      }
+    ],
+    "power": 1,
+    "powers": [
+      "Physical Immunity (G)",
+      "Proton Immunity"
+    ],
+    "goal": "For No One to Notice Him",
+    "tags": "Walks stiff-legged, shrinks from fire, absently crushes young girls",
+    "description": "Sewn together from stolen corpses and spare auto parts. Huge, terrifying, misunderstood and lonesome — he just wants to be left alone and to find a mate."
+  }
+] as unknown as GbBestiary[];

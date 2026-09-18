@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- BUILD: GB Personnel File — 2026-09-18 -->
+<script>window.__BUILD__="GB Personnel File — 2026-09-18";</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghostbusters Personnel File</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="/tools-data/gb-traits.js"></script>
+<script src="/tools-data/gb-talents.js"></script>
+<script src="/tools-data/gb-goals.js"></script>
+<script src="/tools-data/gb-equipment.js"></script>
+<script src="/tools-data/gb-difficulties.js"></script>
+<style>
+/* ═══ Ghostbusters "Personnel File" ═══ Framed card + sticky Roll Log, matching
+   the ICRPG / YZE sheets. Accent --gb (ecto slime). Roll d6 pools vs a
+   Difficulty; one die is always the Ghost Die (a 6 on it = Ghost, counts 0). */
+:root{
+  --bg:#1c2116;--paper:#f4f6ee;--ink:#161a12;--muted:#5b6350;--rule:#c7cdb8;
+  --gb:#8bc53f;--gb-dk:#5f8f24;--gb-lt:#e7f3d2;--ecto:#b6e34a;--red:#c23a2f;--purple:#7a3fb0;--amber:#e2a53a;
+  --border:#20281a;--section-hdr:#20281a;--box:#eaeee0;--input-bg:#fff;--input-border:#8a927a;
+  --log-bg:#12160e;--log-text:#eef4e2;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+.app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:40px 16px 24px;}
+.sheet{max-width:1060px;margin:0 auto;background:var(--paper);border:3px solid var(--border);border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.4);overflow:hidden;}
+.hdr{background:linear-gradient(120deg,var(--gb-dk),var(--gb));color:#12180a;padding:14px 18px;display:grid;grid-template-columns:1.3fr 1fr;gap:14px;align-items:end;}
+.hdr .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:.04em;line-height:.9;text-transform:uppercase;}
+.hdr .logo b{display:block;font-size:26px;}
+.hdr .logo span{display:block;font-size:11px;letter-spacing:.3em;color:#22300c;}
+.f{display:flex;flex-direction:column;gap:2px;}
+.f label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;opacity:.8;}
+.hdr input,.hdr select{background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.25);color:#161a12;padding:5px 7px;border-radius:5px;font-family:inherit;font-size:14px;font-weight:600;}
+.body{padding:16px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:860px){.grid2{grid-template-columns:1fr;}.hdr{grid-template-columns:1fr;}}
+.card{background:#fff;border:1.5px solid var(--rule);border-radius:8px;padding:12px;margin-bottom:14px;}
+.card h3{font-family:'Barlow Condensed';font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gb-dk);border-bottom:2px solid var(--gb-lt);padding-bottom:5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+/* traits */
+.trait{border:1.5px solid var(--rule);border-radius:8px;padding:9px;margin-bottom:10px;background:var(--box);}
+.trait-top{display:flex;align-items:center;gap:8px;}
+.trait-top .tn{font-family:'Barlow Condensed';font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:.03em;flex:1;}
+.stepper{display:flex;align-items:center;gap:3px;}
+.stepper button{width:22px;height:22px;border:1px solid var(--input-border);background:#fff;border-radius:4px;font-weight:800;cursor:pointer;}
+.tval{width:34px;text-align:center;font-family:'Share Tech Mono';font-weight:700;font-size:18px;}
+.rollbtn{background:var(--gb-dk);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-weight:800;cursor:pointer;font-family:'Barlow Condensed';font-size:14px;letter-spacing:.05em;}
+.rollbtn.small{padding:4px 8px;font-size:12px;}
+.talent-row{display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:7px;border-top:1px dashed var(--rule);}
+.talent-row .lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;}
+.talent-row input{flex:1;border:1px solid var(--input-border);border-radius:4px;padding:4px 6px;font-family:inherit;font-size:13px;background:#fff;}
+.talent-row .pool{font-family:'Share Tech Mono';font-size:12px;color:var(--gb-dk);font-weight:700;white-space:nowrap;}
+.cur{display:flex;align-items:center;gap:4px;}
+.cur input{width:30px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:4px;padding:2px;}
+/* brownie + carry */
+.bp-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.bp-num{font-family:'Share Tech Mono';font-weight:700;font-size:36px;color:var(--gb-dk);}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--input-border);border-radius:22px;padding:3px 9px;background:#fff;}
+.pill button{border:none;background:var(--box);width:24px;height:24px;border-radius:50%;font-weight:800;cursor:pointer;font-size:15px;}
+.hint{font-size:11px;color:var(--muted);margin:3px 0;}
+.spend-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.spend-row input{width:44px;text-align:center;font-family:'Share Tech Mono';border:1px solid var(--input-border);border-radius:5px;padding:4px;}
+textarea{width:100%;border:1px solid var(--input-border);border-radius:6px;padding:7px;font-family:inherit;font-size:13px;resize:vertical;min-height:52px;background:#fff;}
+.addrow{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.addrow select,.addrow input{border:1px solid var(--input-border);border-radius:5px;padding:5px;font-family:inherit;font-size:13px;background:#fff;}
+.addbtn{background:var(--gb-dk);color:#fff;border:none;border-radius:5px;padding:5px 10px;font-weight:800;cursor:pointer;}
+.gear-row{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--rule);border-radius:6px;padding:5px 8px;margin-bottom:5px;font-size:12.5px;gap:8px;}
+.gear-row .gm{color:var(--muted);font-size:11px;white-space:nowrap;}
+.row-x{border:none;background:none;color:var(--muted);cursor:pointer;font-weight:800;}
+.carry{font-family:'Share Tech Mono';font-weight:700;}
+.carry.over{color:var(--red);}
+/* roll log */
+.log{width:320px;flex-shrink:0;position:sticky;top:0;height:100vh;background:var(--log-bg);color:var(--log-text);display:flex;flex-direction:column;}
+.log h2{font-family:'Barlow Condensed';font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:14px;padding:12px 14px;border-bottom:1px solid #263019;display:flex;justify-content:space-between;align-items:center;}
+.log .entries{flex:1;overflow-y:auto;padding:8px 12px;}
+.roll-entry{border-bottom:1px solid #24301a;padding:7px 0;}
+.roll-label{font-size:11px;color:#a9c07f;}
+.roll-result{font-family:'Share Tech Mono';font-size:20px;font-weight:700;}
+.roll-result.win{color:var(--ecto);}
+.roll-result.ghost{color:#c78be6;}
+.roll-result.fail{color:#e2796f;}
+.roll-detail{font-size:11px;color:#8f9c78;}
+.dice-vis{margin-top:3px;display:flex;gap:3px;flex-wrap:wrap;}
+.die{width:22px;height:22px;border-radius:4px;background:#eef4e2;color:#161a12;font-family:'Share Tech Mono';font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;border:1px solid #445;}
+.die.ghostdie{background:#4a2d63;color:#eabfff;border-color:#7a3fb0;}
+.die.ghosted{background:#7a3fb0;color:#fff;}
+.tension-row{padding:8px 12px;border-bottom:1px solid #263019;display:flex;align-items:center;gap:8px;font-size:12px;}
+.tension-row input{width:52px;background:#1a2411;border:1px solid #34451f;color:#fff;border-radius:4px;padding:3px;text-align:center;font-family:'Share Tech Mono';}
+.tension-row select{background:#1a2411;border:1px solid #34451f;color:#cfe0b0;border-radius:4px;padding:3px;font-size:11px;flex:1;}
+.toolbar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-top:1px solid #263019;flex-wrap:wrap;}
+.toolbar button,.toolbar label{background:#1a2411;border:1px solid #34451f;color:#cfe0b0;border-radius:5px;padding:5px 9px;cursor:pointer;font-size:11px;font-weight:700;}
+@media(max-width:960px){.log{display:none;}}
+body.dark{--bg:#0e120a;--paper:#181e11;--ink:#e9f0dc;--muted:#93a17c;--rule:#2c3720;--box:#1e2614;--input-bg:#111a0c;--input-border:#3a4a28;}
+body.dark .card,body.dark .trait{background:#181e11;color:var(--ink);}
+body.dark .talent-row input,body.dark .addrow select,body.dark .addrow input,body.dark textarea,body.dark .tval,body.dark .cur input{background:#111a0c;color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="app-wrap">
+<div class="sheet-wrap">
+  <div class="sheet">
+    <div class="hdr">
+      <div class="logo"><b>Ghostbusters</b><span>International · Personnel File</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;gap:8px;"><div class="f" style="flex:1;"><label>Name</label><input id="f-name" placeholder="Ghostbuster" oninput="onIdent()"></div>
+        <div class="f" style="flex:1;"><label>Alias (player)</label><input id="f-alias" placeholder="Your name" oninput="onIdent()"></div></div>
+        <div class="f"><label>Goal</label><select id="f-goal" onchange="S.goal=this.value;scheduleAutosave()"></select></div>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid2">
+        <div>
+          <div class="card">
+            <h3>Traits &amp; Talents <span style="font-size:9px;color:var(--muted)">1–5 each · 12 pts · talent = +3 dice</span></h3>
+            <div id="traits"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>Brownie Points</h3>
+            <div class="bp-wrap">
+              <div class="pill"><button onclick="bumpBP(-1)">−</button><span class="bp-num" id="bp">20</span><button onclick="bumpBP(1)">+</button></div>
+              <button class="rollbtn small" onclick="setBP(20)">Reset 20</button>
+            </div>
+            <div class="hint">Spend 1 = +1 die on a roll (decide before rolling). Also rewrite fate, or trade 30 → +1 Trait.</div>
+            <div class="spend-row"><span class="talent-row" style="border:none;padding:0;margin:0;"><span class="lbl">Extra dice to spend this roll</span></span><input id="f-spend" type="number" value="0" min="0" oninput="clampSpend()"><span class="hint" style="margin:0">deducted from BP when you roll</span></div>
+          </div>
+          <div class="card">
+            <h3>Gear <span class="carry" id="carry"></span></h3>
+            <div class="addrow">
+              <select id="gear-pick"></select><button class="addbtn" onclick="addGear()">+ Add</button>
+              <input id="gear-free" placeholder="…custom item" style="flex:1;min-width:100px;"><button class="addbtn" onclick="addGearFree()">+</button>
+            </div>
+            <div id="gear"></div>
+            <div class="hint">Try not to carry more Muscles points of gear than your Muscles Trait.</div>
+          </div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Tags — Physical</h3><textarea id="f-tagp" placeholder="walks with a limp, southern drawl, heavily muscled…" oninput="S.tagPhysical=this.value;scheduleAutosave()"></textarea></div>
+        <div class="card"><h3>Tags — Personality</h3><textarea id="f-tagper" placeholder="afraid of women, loves animals, fanatic about baseball…" oninput="S.tagPersonality=this.value;scheduleAutosave()"></textarea></div>
+      </div>
+      <div class="card"><h3>Description &amp; Notes</h3><textarea id="f-notes" style="min-height:90px;" placeholder="sex, hair, height; medical history; who your star really is…" oninput="S.notes=this.value;scheduleAutosave()"></textarea></div>
+    </div>
+  </div>
+</div>
+<!-- ROLL LOG -->
+<div class="log">
+  <h2>Roll Log <button class="row-x" style="color:#8f9c78" onclick="clearLog()">clear</button></h2>
+  <div class="tension-row">
+    <span>Diff.</span><input id="tension" type="number" placeholder="TN">
+    <select id="diffpick" onchange="pickDiff()"></select>
+  </div>
+  <div class="entries" id="entries"></div>
+  <div class="toolbar">
+    <button onclick="rollRaw(1)">1d6</button>
+    <button onclick="rollRaw(3)">3d6</button>
+    <button onclick="setDarkMode(!document.body.classList.contains('dark'))" id="dm-toggle">Dark</button>
+    <button id="campaign-btn" onclick="openCampaign()">Campaign</button>
+    <button onclick="exportSheet()">Export</button>
+    <label>Import<input type="file" accept="application/json" style="display:none" onchange="importSheet(this)"></label>
+  </div>
+</div>
+</div>
+<script>
+function $(id){return document.getElementById(id);}
+function num(v){v=parseInt(v,10);return isNaN(v)?0:v;}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function G(x){return Array.isArray(x)?x:[];}
+var TRAITS=G(window.GB_TRAITS), TALENTS=G(window.GB_TALENTS), GOALS=G(window.GB_GOALS),
+    EQUIP=G(window.GB_EQUIPMENT), DIFFS=G(window.GB_DIFFICULTIES);
+var TKEYS=['Brains','Muscles','Moves','Cool'];
+
+function blankState(){
+  return { name:'', alias:'', goal:'', notes:'', tagPhysical:'', tagPersonality:'',
+    traits:{Brains:2,Muscles:2,Moves:2,Cool:2},
+    current:{Brains:null,Muscles:null,Moves:null,Cool:null},
+    talents:{Brains:{name:'',value:''},Muscles:{name:'',value:''},Moves:{name:'',value:''},Cool:{name:'',value:''}},
+    bp:20, gear:[] };
+}
+var S=blankState(), _ready=false, _saveTimer=null;
+
+function tval(k){ var c=S.current[k]; return (c===null||c===''||c===undefined)?num(S.traits[k]):num(c); }
+function carryTotal(){ return S.gear.reduce(function(a,g){return a+(parseFloat(g.muscles)||0);},0); }
+
+/* renders */
+function renderTraits(){
+  var host=$('traits');host.innerHTML='';
+  TKEYS.forEach(function(k){
+    var t=TRAITS.find(function(x){return x.name===k;})||{summary:''};
+    var tl=S.talents[k]||{name:'',value:''};
+    var pool=tval(k)+3;
+    var el=document.createElement('div');el.className='trait';
+    el.innerHTML=
+      '<div class="trait-top"><span class="tn" title="'+esc(t.summary)+'">'+k+'</span>'+
+      '<div class="stepper"><button onclick="stepTrait(\''+k+'\',-1)">−</button><span class="tval">'+num(S.traits[k])+'</span><button onclick="stepTrait(\''+k+'\',1)">+</button></div>'+
+      '<span class="cur" title="Current (reduced) value"><span class="lbl" style="font-size:8px">CUR</span><input type="number" placeholder="'+num(S.traits[k])+'" value="'+(S.current[k]==null?'':S.current[k])+'" oninput="setCurrent(\''+k+'\',this.value)"></span>'+
+      '<button class="rollbtn" onclick="rollTrait(\''+k+'\')">Roll '+tval(k)+'d</button></div>'+
+      '<div class="talent-row"><span class="lbl">Talent</span>'+
+      '<input list="tl-'+k+'" placeholder="e.g. '+esc(defaultTalent(k))+'" value="'+esc(tl.name)+'" oninput="setTalentName(\''+k+'\',this.value)">'+
+      '<span class="pool">'+pool+'d</span>'+
+      '<button class="rollbtn small" onclick="rollTalent(\''+k+'\')">Roll</button></div>';
+    host.appendChild(el);
+  });
+  // datalists for talent autocompletion
+  if(!$('tl-Brains')){
+    TKEYS.forEach(function(k){
+      var dl=document.createElement('datalist');dl.id='tl-'+k;
+      TALENTS.filter(function(t){return t.trait===k;}).forEach(function(t){var o=document.createElement('option');o.value=t.name;dl.appendChild(o);});
+      document.body.appendChild(dl);
+    });
+  }
+  renderCarry();
+}
+function defaultTalent(k){var l=TALENTS.filter(function(t){return t.trait===k;});return l.length?l[0].name:'';}
+function renderCarry(){
+  var el=$('carry'); if(!el)return; var c=carryTotal(), m=num(S.traits.Muscles);
+  el.textContent=c+' / '+m+' Muscles'; el.className='carry'+(c>m?' over':'');
+}
+function renderGear(){
+  var host=$('gear');host.innerHTML='';
+  if(!S.gear.length){host.innerHTML='<div class="hint">No gear yet.</div>';}
+  S.gear.forEach(function(g,i){
+    var el=document.createElement('div');el.className='gear-row';
+    el.innerHTML='<span>'+esc(g.name)+'</span><span style="display:flex;gap:8px;align-items:center;"><span class="gm">'+esc(g.hands||'')+(g.muscles?' · '+g.muscles+' Mus':'')+'</span><button class="row-x" onclick="delGear('+i+')">✕</button></span>';
+    host.appendChild(el);
+  });
+  renderCarry();
+}
+function renderBP(){$('bp').textContent=S.bp;}
+function renderAll(){
+  renderTraits();renderGear();renderBP();
+  $('f-name').value=S.name||'';$('f-alias').value=S.alias||'';$('f-goal').value=S.goal||'';
+  $('f-tagp').value=S.tagPhysical||'';$('f-tagper').value=S.tagPersonality||'';$('f-notes').value=S.notes||'';
+}
+
+/* actions */
+function stepTrait(k,d){S.traits[k]=clamp(num(S.traits[k])+d,1,9);renderTraits();scheduleAutosave();}
+function setCurrent(k,v){S.current[k]=(v===''?null:num(v));renderTraits();scheduleAutosave();}
+function setTalentName(k,v){S.talents[k].name=v;scheduleAutosave();}
+function bumpBP(d){S.bp=Math.max(0,S.bp+d);renderBP();scheduleAutosave();}
+function setBP(n){S.bp=n;renderBP();scheduleAutosave();}
+function clampSpend(){var v=Math.max(0,num($('f-spend').value));if(v>S.bp)v=S.bp;$('f-spend').value=v;}
+function onIdent(){S.name=$('f-name').value;S.alias=$('f-alias').value;syncDocTitle();scheduleAutosave();}
+function addGear(){var n=$('gear-pick').value;if(!n)return;var e=EQUIP.find(function(x){return x.name===n;});S.gear.push({name:n,hands:e?e.hands:'',muscles:e?e.muscles:0});renderGear();scheduleAutosave();}
+function addGearFree(){var n=($('gear-free').value||'').trim();if(!n)return;S.gear.push({name:n,hands:'',muscles:0});$('gear-free').value='';renderGear();scheduleAutosave();}
+function delGear(i){S.gear.splice(i,1);renderGear();scheduleAutosave();}
+
+/* ═══ DICE — the Ghost Die ═══ */
+function d6(){return Math.floor(Math.random()*6)+1;}
+function pickDiff(){var v=$('diffpick').value;if(v!=='')$('tension').value=v;}
+function spendBP(){var s=Math.max(0,Math.min(S.bp,num($('f-spend').value)));if(s>0){S.bp-=s;renderBP();$('f-spend').value=0;}return s;}
+function rollPool(label,baseDice){
+  var extra=spendBP();
+  var n=Math.max(1,baseDice+extra);
+  var normals=[]; for(var i=0;i<n-1;i++)normals.push(d6());
+  var ghost=d6(); var isGhost=(ghost===6);
+  var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
+  var tn=num($('tension').value);
+  var beat=tn?(sum>=tn):null;
+  var cls=isGhost?(beat===false?'fail':'ghost'):(beat===true?'win':(beat===false?'fail':''));
+  var outcome=tn?((beat?' ✓':' ✗')+' vs '+tn):'';
+  if(isGhost)outcome+=' 👻 GHOST!';
+  var dice=normals.map(function(v){return '<span class="die">'+v+'</span>';}).join('')+
+    '<span class="die ghostdie'+(isGhost?' ghosted':'')+'">'+(isGhost?'👻':ghost)+'</span>';
+  var det=(label)+' · '+n+'d6'+(extra?' ('+extra+' BP)':'');
+  addLog(det, sum+outcome, dice, cls);
+}
+function rollTrait(k){rollPool(k+' ('+tval(k)+'d)', tval(k));}
+function rollTalent(k){var nm=(S.talents[k].name||'talent');rollPool(k+' · '+nm+' ('+(tval(k)+3)+'d)', tval(k)+3);}
+function rollRaw(nd){
+  var normals=[];for(var i=0;i<nd-1;i++)normals.push(d6());
+  var ghost=d6();var isGhost=(ghost===6);
+  var sum=normals.reduce(function(a,b){return a+b;},0)+(isGhost?0:ghost);
+  var dice=normals.map(function(v){return '<span class="die">'+v+'</span>';}).join('')+'<span class="die ghostdie'+(isGhost?' ghosted':'')+'">'+(isGhost?'👻':ghost)+'</span>';
+  addLog(nd+'d6'+(isGhost?' 👻':''), sum, dice, isGhost?'ghost':'');
+}
+
+/* ═══ roll log + campaign ═══ */
+var _campaign=null,_campaignTimer=null,_campaignLastId=null,_campaignClientKey='gb-'+Math.random().toString(36).slice(2);
+function addLog(label,result,diceHtml,cls){
+  var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';
+  div.innerHTML='<div class="roll-label">'+esc(S.name||'Ghostbuster')+' · '+esc(label)+'</div><div class="roll-result '+(cls||'')+'">'+esc(result)+'</div>'+(diceHtml?'<div class="dice-vis">'+diceHtml+'</div>':'');
+  entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);entries.scrollTop=0;
+  if(_campaign)campaignPush(label,result);
+}
+function clearLog(){$('entries').innerHTML='';}
+function campaignPush(label,result){try{fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:S.name||'Ghostbuster',label:label,result:String(result),detail:''})});}catch(e){}}
+function campaignAddRemote(roll){var entries=$('entries');var div=document.createElement('div');div.className='roll-entry';div.innerHTML='<div class="roll-label"><span style="color:#c9c05a">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div>';entries.insertBefore(div,entries.firstChild);while(entries.children.length>60)entries.removeChild(entries.lastChild);}
+async function campaignPoll(){if(!_campaign)return;try{var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''),{credentials:'same-origin'});if(!r.ok)return;var data=await r.json();(data.rolls||[]).forEach(function(roll){if(roll.clientKey!==_campaignClientKey)campaignAddRemote(roll);});if(data.last)_campaignLastId=data.last;}catch(e){}}
+function campaignStartPolling(){if(_campaignTimer)clearInterval(_campaignTimer);campaignPoll();_campaignTimer=setInterval(campaignPoll,document.hidden?20000:4000);}
+function openCampaign(){var code=prompt('Enter campaign code to join (blank to leave):');if(code===null)return;if(!code){_campaign=null;if(_campaignTimer)clearInterval(_campaignTimer);$('campaign-btn').textContent='Campaign';scheduleAutosave();return;}joinCampaign(code.trim());}
+async function joinCampaign(code){try{var r=await fetch('/api/campaigns/join',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code})});if(!r.ok){addLog('Campaign','✗','',' fail');return;}var d2=await r.json();_campaign={id:d2.id,code:code,name:d2.name||'Campaign'};$('campaign-btn').textContent='● '+(d2.name||code);campaignStartPolling();scheduleAutosave();}catch(e){}}
+function campaignRestore(saved){if(saved&&saved.id){_campaign=saved;$('campaign-btn').textContent='● '+(saved.name||'Campaign');campaignStartPolling();}}
+
+/* theme / persistence */
+function setDarkMode(on){document.body.classList.toggle('dark',on);$('dm-toggle').textContent=on?'Light':'Dark';try{localStorage.setItem('gb_dark',on?'1':'0');}catch(e){}}
+function scheduleAutosave(){if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},400);}
+function collect(){S.campaign=_campaign;return S;}
+function saveSheet(){var json;try{json=JSON.stringify(collect());}catch(e){return;}try{localStorage.setItem('gb_sheet',json);}catch(e){}if(window.__ddState!==undefined)window.__ddState['gb_sheet']=json;if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}}
+function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n);}
+function applySheet(o){S=Object.assign(blankState(),o||{});if(!S.traits)S.traits=blankState().traits;if(!S.talents)S.talents=blankState().talents;if(!S.current)S.current=blankState().current;renderAll();if(S.campaign)campaignRestore(S.campaign);}
+function exportSheet(){var blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(S.name||'ghostbuster').replace(/\s+/g,'_')+'.json';a.click();}
+function importSheet(input){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{applySheet(JSON.parse(r.result));saveSheet(true);addLog('Imported','↑','','');}catch(e){addLog('Import failed','✗','','fail');}};r.readAsText(f);input.value='';}
+window.addEventListener('beforeunload',function(){if(_ready)try{saveSheet(true);}catch(e){}});
+
+/* init */
+function initPickers(){
+  var g=$('f-goal');g.innerHTML='<option value="">— pick a Goal —</option>';GOALS.forEach(function(x){var o=document.createElement('option');o.value=x.name;o.textContent=x.name;o.title=x.description;g.appendChild(o);});
+  var gp=$('gear-pick');gp.innerHTML='';EQUIP.forEach(function(e){var o=document.createElement('option');o.value=e.name;o.textContent=e.name+(e.muscles?' ('+e.muscles+' Mus)':'');gp.appendChild(o);});
+  var dp=$('diffpick');dp.innerHTML='<option value="">Difficulty…</option>';DIFFS.forEach(function(dd){if(dd.low!=null){var o=document.createElement('option');o.value=dd.high||dd.low;o.textContent=dd.name+' ('+dd.range+')';dp.appendChild(o);}});
+}
+function autoLoad(){
+  var saved=null;
+  if(window.__ddState!==undefined)saved=window.__ddState['gb_sheet']||null;else{try{saved=localStorage.getItem('gb_sheet');}catch(e){}}
+  try{if(localStorage.getItem('gb_dark')==='1')setDarkMode(true);}catch(e){}
+  if(saved){try{applySheet(JSON.parse(saved));}catch(e){renderAll();}}else{renderAll();}
+  _ready=true;
+}
+initPickers();
+autoLoad();
+</script>
+</body>
+</html>
