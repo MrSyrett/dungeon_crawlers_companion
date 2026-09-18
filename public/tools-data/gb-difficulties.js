@@ -9,75 +9,64 @@ const GB_DIFFICULTIES = [
     "high": null,
     "examples": [
       "Blasting a wall with a proton pack",
-      "Driving a car down a country road",
-      "Eating a meal",
-      "Using a pay phone"
+      "Sleeping soundly in your own bed",
+      "Driving a car",
+      "Eating a hotdog",
+      "Getting into an argument (New York City)",
+      "Using a pay phone",
+      "Paying sales tax"
     ]
   },
   {
-    "name": "Very Little Difficulty",
-    "range": "1–3",
-    "low": 1,
-    "high": 3,
+    "name": "Easy Job",
+    "range": "5+",
+    "low": 5,
+    "high": 5,
     "examples": [
-      "Blasting a stationary ghost (Moves)",
-      "Driving a country road in fog (Moves)",
-      "Using a pay phone with no change (Brains)"
-    ]
-  },
-  {
-    "name": "Some Difficulty",
-    "range": "4–8",
-    "low": 4,
-    "high": 8,
-    "examples": [
-      "Blasting a slow ghost (Moves)",
+      "Picking someone up in a singles bar (Moves)",
+      "Blasting a ghost point-blank (Moves)",
       "Parallel parking a big car (Moves)",
-      "Figuring out the IRS short form (Brains)"
+      "Eating three Big Macs (Muscles)",
+      "Figuring out Tax Form 1040EZ (Brains)"
     ]
   },
   {
-    "name": "A Good Amount of Difficulty",
-    "range": "9–13",
-    "low": 9,
-    "high": 13,
+    "name": "Normal Job",
+    "range": "10+",
+    "low": 10,
+    "high": 10,
     "examples": [
-      "Blasting a moving ghost (Moves)",
-      "Driving in Manhattan (Moves)",
-      "Picking up an attractive person in a bar (Cool)"
+      "Blasting a ghost with a proton pack (Moves)",
+      "Driving in Manhattan without getting lost (Brains)",
+      "Eating a whole pizza by yourself (Muscles)",
+      "Winning an argument (Cool)",
+      "Cheating the IRS (Brains)"
     ]
   },
   {
-    "name": "Lots of Difficulty",
-    "range": "14–18",
-    "low": 14,
-    "high": 18,
+    "name": "Hard Job",
+    "range": "20+",
+    "low": 20,
+    "high": 20,
     "examples": [
-      "Blasting an agile ghost (Moves)",
-      "Parking a limo (Moves)",
-      "Figuring out the IRS self-employment schedule (Brains)"
+      "Blasting a ghost at long range (Moves)",
+      "Driving the freeway at rush hour without losing your temper (Cool)",
+      "Winning an argument about politics (Cool)",
+      "Getting a famous person to talk to you on the phone (Cool)",
+      "Paying no taxes (Brains)"
     ]
   },
   {
-    "name": "A Whole Lot of Difficulty",
-    "range": "19–29",
-    "low": 19,
-    "high": 29,
-    "examples": [
-      "A ghost at long range (Moves)",
-      "Driving a freeway at rush hour (Moves)",
-      "Getting a famous person on the phone (Cool)"
-    ]
-  },
-  {
-    "name": "More Difficulty Than You Can Imagine",
+    "name": "Impossible Job",
     "range": "30+",
     "low": 30,
-    "high": null,
+    "high": 30,
     "examples": [
       "Blasting a ghost with your eyes shut (Moves)",
-      "Winning the Indy 500 in a Honda Civic (Moves)",
-      "Picking up a buffalo (Muscles)"
+      "Sleeping through a volcanic eruption (Cool)",
+      "Winning the Indianapolis 500 in a Honda Civic (Moves)",
+      "Eating a telephone (Muscles)",
+      "Winning an argument about religion (Cool)"
     ]
   }
 ];

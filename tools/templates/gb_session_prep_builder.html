@@ -1568,25 +1568,24 @@ const SB_CONFIG = {
   typePlaceholder: 'SLIMER // Class 5 Free-Roaming Vapor',
   hp: null,
   rows: [
-    [{ key:'brains', label:'BRAINS' }, { key:'muscles', label:'MUSCLES' }, { key:'moves', label:'MOVES' }, { key:'cool', label:'COOL' }, { key:'power', label:'POWER' }],
-    [{ key:'powers', label:'GHOST POWERS', ph:'Dematerialize · Proton Immunity' }],
+    [{ key:'brains', label:'BRAINS' }, { key:'muscles', label:'MUSCLES' }, { key:'moves', label:'MOVES' }, { key:'cool', label:'COOL' }, { key:'power', label:'POWER' }, { key:'ectopresence', label:'ECTO' }],
+    [{ key:'powers', label:'SPECIAL ABILITIES', ph:'Slime · Terrorize · Possess' }],
   ],
-  abilitiesLabel: 'Talents, Weaknesses & Tags', abilitiesPlaceholder: 'One per line — Talent: name value · Weakness: … · Goal: … · Tag: …',
+  abilitiesLabel: 'Talents, Goal & Tags', abilitiesPlaceholder: 'One per line — Talent: name value · Goal: … · Tag: …',
   mobs: { placeholder: 'Search the Ghostbusters bestiary (ghosts, monsters & extras)…', pool: () => (typeof GB_BESTIARY !== 'undefined' && Array.isArray(GB_BESTIARY)) ? GB_BESTIARY : [], toCard: m => {
     const p = Number(m.power) || 0;
     return {
     sbtype: p >= 7 ? 'boss' : (p >= 1 ? 'mob' : 'npc'), name: m.name || '',
     type: [(m.role || ''), (m.power != null ? 'Power ' + m.power : '')].filter(Boolean).join(' // '),
     flavor: (m.description || '').slice(0, 120),
-    brains: String(m.brains ?? ''), muscles: String(m.muscles ?? ''), moves: String(m.moves ?? ''), cool: String(m.cool ?? ''), power: String(m.power ?? ''),
+    brains: String(m.brains ?? ''), muscles: String(m.muscles ?? ''), moves: String(m.moves ?? ''), cool: String(m.cool ?? ''), power: String(m.power ?? ''), ectopresence: String(m.ectopresence ?? ''),
     powers: (m.powers || []).join(' · '),
     abilities: [
       ...((m.talents || []).map(t => 'Talent: ' + t.name + ' ' + t.value)),
-      m.weaknesses ? 'Weakness: ' + m.weaknesses : '',
       m.goal ? 'Goal: ' + m.goal : '',
       m.tags ? 'Tags: ' + m.tags : '',
     ].filter(Boolean).join('\n'),
-  }; }, sub: m => (m.role || '') + (m.power != null ? ' · Power ' + m.power : '') },
+  }; }, sub: m => (m.role || '') + (m.power != null ? ' · Power ' + m.power : '') + (m.ectopresence != null ? ' · Ecto ' + m.ectopresence : '') },
 };
 const _DCC_SIZE_NAMES = {1:'Tiny',2:'Small',3:'Petite',4:'Medium',5:'Large',6:'Huge',7:'Colossal',8:'Gargantuan'};
 // Map a DCC bestiary entry onto the stat-block card fields.

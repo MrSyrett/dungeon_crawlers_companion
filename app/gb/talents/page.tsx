@@ -9,7 +9,7 @@ const ORDER = ["Brains", "Muscles", "Moves", "Cool"];
 export default function GbTalentsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <GbHeader title="Traits & Talents" subtitle="Ghostbusters International · four Traits, one Talent each (+3 dice)" />
+      <GbHeader title="Traits & Talents" subtitle="Classic 1986 rules · four Traits, one Talent each (+3 dice)" />
       <TabRow active="/gb/talents" />
       <p className="mb-2 max-w-[72ch] text-[13px] leading-relaxed text-[var(--muted)]">
         Assign 12 points across the four Traits (1–5 each). Your Trait number is how many d6 you roll.

@@ -5,773 +5,549 @@ import type { GbBestiary } from "./gb-types";
 
 export const GB_BESTIARY = [
   {
-    "name": "Bulldozer (Animated)",
-    "role": "Animated Machine",
-    "brains": 0,
-    "muscles": 13,
-    "moves": 3,
-    "cool": 0,
-    "talents": [
-      {
-        "trait": "Muscles",
-        "name": "Crush Things",
-        "value": 16
-      },
-      {
-        "trait": "Moves",
-        "name": "Drive Self",
-        "value": 6
-      }
-    ],
-    "power": 2,
-    "powers": [
-      "Physical Immunity (G)"
-    ],
-    "weaknesses": "Takes damage from proton blasts",
-    "goal": "Put Things on Other Things",
-    "tags": "Puts things on other things (especially occupied cars)",
-    "description": "A treaded monster with a lifter scoop, brought to malevolent life by Kathleen's power."
-  },
-  {
-    "name": "Dr. Abraham Thistledown",
-    "role": "Mad Scientist",
-    "brains": 8,
-    "muscles": 1,
-    "moves": 2,
-    "cool": 4,
+    "name": "Carlton",
+    "role": "Doorman",
+    "kind": "npc",
+    "brains": 1,
+    "muscles": 7,
+    "moves": 1,
+    "cool": 3,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Medicine",
-        "value": 11
-      },
-      {
-        "trait": "Muscles",
-        "name": "Strap Victim to Table",
+        "name": "Ignorance",
         "value": 4
-      },
-      {
-        "trait": "Moves",
-        "name": "Sneak",
-        "value": 5
-      },
-      {
-        "trait": "Cool",
-        "name": "Argue Science",
-        "value": 7
-      }
-    ],
-    "power": 7,
-    "powers": [
-      "Control Mind",
-      "Hypnosis"
-    ],
-    "goal": "Revive Dead Wife",
-    "tags": "Doting and charming near his daughter; hollow-eyed, spectral and dangerous away from her",
-    "description": "A brilliant surgeon who lost his mind when his wife died; he preserved her body and fled to a mountaintop castle to work on reviving her."
-  },
-  {
-    "name": "Dr. Joshua Prism",
-    "role": "Invisible Man",
-    "brains": 4,
-    "muscles": 3,
-    "moves": 4,
-    "cool": 2,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Fail to Cure Self",
-        "value": 7
-      },
-      {
-        "trait": "Muscles",
-        "name": "Brawl",
-        "value": 5
-      },
-      {
-        "trait": "Moves",
-        "name": "Dodge",
-        "value": 7
-      },
-      {
-        "trait": "Cool",
-        "name": "Cackle Madly",
-        "value": 5
-      }
-    ],
-    "power": 4,
-    "powers": [
-      "Invisibility",
-      "Dematerialize"
-    ],
-    "goal": "Conquer the World or Be Cured (varies with time of day)",
-    "tags": "Tears off his clothes and concealing bandages at the slightest provocation; runs around flailing his arms as he disrobes",
-    "description": "A leading biochemist until 30 minutes ago, when he perfected his Invisibility Agent, injected it, went crazy, and set off to force Dr. Thistledown to concoct a cure."
-  },
-  {
-    "name": "Drusilla Kane",
-    "role": "Witch / Seductress",
-    "brains": 4,
-    "muscles": 1,
-    "moves": 4,
-    "cool": 4,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Predict Future",
-        "value": 7
-      },
-      {
-        "trait": "Muscles",
-        "name": "Wrestle",
-        "value": 4
-      },
-      {
-        "trait": "Moves",
-        "name": "Seduce",
-        "value": 7
-      },
-      {
-        "trait": "Cool",
-        "name": "Outclass Others",
-        "value": 7
-      }
-    ],
-    "power": 4,
-    "powers": [
-      "Control Mind",
-      "PKE Analysis",
-      "Read Mind"
-    ],
-    "goal": "Sex",
-    "tags": "Long, slow evaluation of men from beneath mostly-closed eyelids",
-    "description": "Lucretia's daughter, a gorgeous, sultry practicing witch (she hasn't got it quite right yet) with no time for all the men, studies and revelations the writers have in store."
-  },
-  {
-    "name": "Ghostly Minions",
-    "role": "Psychics transformed into ghosts",
-    "entityType": "Ectoplasmic · Intelligent",
-    "brains": 3,
-    "muscles": 0,
-    "moves": 0,
-    "cool": 2,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Read Palms",
-        "value": 6
-      },
-      {
-        "trait": "Cool",
-        "name": "Boondoggle Customers",
-        "value": 5
-      }
-    ],
-    "power": 3,
-    "powers": [
-      "PKE Analysis",
-      "Poltergeist",
-      "Slime",
-      "Terrorize"
-    ],
-    "goal": "Be Human Again",
-    "tags": "Lots of 'I can't help myself... I don't have a choice' excuses; pleads not to be put in the Grid.",
-    "description": "Palmists, mediums and crackpots kidnapped by a Mad Scientist and turned ghostly. Each has a 1-in-6 chance for any one listed ability.",
-    "ectopresence": 3
-  },
-  {
-    "name": "Gozer the Gozerian",
-    "role": "Ancient world-conquering demon",
-    "entityType": "Physical · Intelligent",
-    "brains": 6,
-    "muscles": 8,
-    "moves": 7,
-    "cool": 7,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Multiverse Trivia",
-        "value": 9
       },
       {
         "trait": "Muscles",
         "name": "Intimidate",
-        "value": 11
+        "value": 10
       },
       {
         "trait": "Moves",
-        "name": "Acrobatics",
-        "value": 10
+        "name": "Open Door",
+        "value": 4
       },
       {
         "trait": "Cool",
-        "name": "Ignore Puny Humans",
-        "value": 10
+        "name": "Infuriate",
+        "value": 6
       }
     ],
-    "power": 12,
-    "powers": [
-      "Dematerialize",
-      "Dematerialize Object",
-      "Dimensional Transfer",
-      "Flight",
-      "Frog 'n' Prince (Greater)",
-      "Invisibility",
-      "Physical Immunity (Greater)",
-      "Proton Immunity",
-      "Read Mind",
-      "Summon Pests",
-      "Teleport",
-      "Terrorize"
-    ],
-    "goal": "Take Over the World",
-    "tags": "Utter confidence; contemptuous dismissal of mortals.",
-    "description": "The shape-shifting Gozerian; chooses the form of its destructor. A Demon-Class metaspecter.",
-    "weaknesses": "Subject to Backlash if the dimensional-transfer spell is interrupted."
+    "goal": "Status",
+    "tags": "Always smiling, especially when he tells you to get lost or calls the cops",
+    "description": "A blue-grenadier-uniformed doorman who chases interesting people like Ghostbusters out of his building and has ECTO-1 towed whenever they double-park."
   },
   {
-    "name": "Kathleen",
-    "role": "Vengeful Convertible",
-    "brains": 2,
-    "muscles": 7,
-    "moves": 5,
-    "cool": 4,
+    "name": "Charlie",
+    "role": "Subway Ghost",
+    "kind": "ghost",
+    "power": 3,
+    "ectopresence": 4,
+    "powers": [
+      "Elbow Obnoxious Commuters"
+    ],
+    "goal": "Clean Up the Subways",
+    "tags": "Wanders from station to station in a three-piece suit, wailing about his demise",
+    "description": "Charlie died under an express train after falling asleep waiting 45 minutes for the F. Now he recreates his end and berates the MTA — and the tourist season is coming."
+  },
+  {
+    "name": "Clyde",
+    "role": "Deceased Doberman Pinscher",
+    "kind": "ghost",
+    "power": 2,
+    "ectopresence": 3,
+    "powers": [
+      "Chomp",
+      "Sneak Up"
+    ],
+    "goal": "Drive Marty Crazy",
+    "tags": "Loves to sneak up behind Marty and chomp him loudly on the seat of the pants",
+    "description": "In life Clyde guarded a gas station and slept all day; his ghost haunts the All-American Service Station, tormenting the man who ruined his sleep."
+  },
+  {
+    "name": "Conrad",
+    "role": "Hot Dog Vendor",
+    "kind": "npc",
+    "brains": 1,
+    "muscles": 3,
+    "moves": 2,
+    "cool": 6,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Spot Flyboy",
+        "name": "Cook Hot Dog",
+        "value": 4
+      },
+      {
+        "trait": "Muscles",
+        "name": "Lift",
+        "value": 6
+      },
+      {
+        "trait": "Moves",
+        "name": "Gossip",
         "value": 5
       },
       {
-        "trait": "Muscles",
-        "name": "Mash Victim",
-        "value": 10
-      },
-      {
-        "trait": "Moves",
-        "name": "Drive Self",
-        "value": 8
-      },
-      {
         "trait": "Cool",
-        "name": "Look Cool",
-        "value": 7
+        "name": "Borrow",
+        "value": 9
       }
     ],
-    "power": 10,
-    "powers": [
-      "Animate",
-      "Physical Immunity (L)",
-      "Poltergeist",
-      "Proton Immunity",
-      "Summon Pests",
-      "Terrorize"
-    ],
-    "weaknesses": "Easily fooled by fake flyboys; susceptible to auto-crushing equipment and weird science; electricity-draining equipment can depower her",
-    "goal": "Live Happily Ever After with Flyboy",
-    "tags": "Headlights always seem to be looking at you; drives like a running back dodging defenders",
-    "description": "A pristine mid-50s blue Chevy convertible that resurrects unscratched no matter the damage, searching the city for her long-lost love, Flyboy Wheeler."
+    "goal": "Serve Humanity",
+    "tags": "Soggy buns, old volatile onions; sees everything on the street",
+    "description": "Always on the corner day and night. His dogs are terrible but he knows what happens on the block, and he'll only tell you if you buy one and eat it right there."
   },
   {
-    "name": "Lawn Mower (Animated)",
-    "role": "Animated Machine",
-    "brains": 0,
-    "muscles": 4,
-    "moves": 4,
-    "cool": 0,
-    "talents": [
-      {
-        "trait": "Muscles",
-        "name": "Mangle Grass, Pets, and Feet",
-        "value": 7
-      },
-      {
-        "trait": "Moves",
-        "name": "Dodge",
-        "value": 7
-      }
-    ],
-    "power": 1,
-    "powers": [
-      "Physical Immunity (G)"
-    ],
-    "weaknesses": "Takes damage from proton blasts",
-    "goal": "Rampaging Violence, and Neat Lawns",
-    "tags": "Rears up on its back wheels so you can see the spinning blade covered with the sap of its previous victims",
-    "description": "A typical everyday non-riding lawn mower until Kathleen brings it to life; then it charges the cityscape hunting high grass, house pets and human feet."
-  },
-  {
-    "name": "Really Old Guys",
-    "role": "Doddering alien monsters from beyond the stars",
-    "entityType": "Physical · Intelligent",
-    "brains": 4,
-    "muscles": 6,
-    "moves": 5,
-    "cool": 5,
+    "name": "Dr. Jurgen Frankenfurter",
+    "role": "Maniacal Scientist",
+    "kind": "npc",
+    "brains": 10,
+    "muscles": 3,
+    "moves": 3,
+    "cool": 2,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Forget Important Things",
-        "value": 7
+        "name": "Biology",
+        "value": 13
       },
       {
         "trait": "Muscles",
-        "name": "Gobble Humans",
-        "value": 9
+        "name": "Grapple with Monster",
+        "value": 6
       },
       {
         "trait": "Moves",
-        "name": "Gossip Shrilly",
-        "value": 8
+        "name": "See",
+        "value": 6
       },
       {
         "trait": "Cool",
-        "name": "Creep People Out",
-        "value": 8
+        "name": "Rave",
+        "value": 5
       }
     ],
-    "power": 8,
-    "powers": [
-      "Animate",
-      "Control Mind",
-      "Flight",
-      "Growing",
-      "Make Illusion",
-      "Physical Immunity (Greater)",
-      "Possess",
-      "Proton Immunity",
-      "Read Mind",
-      "Slime",
-      "Summon Pests",
-      "Terrorize"
-    ],
-    "goal": "Destruction of Earth, then Retirement",
-    "tags": "Arthritic shambling; hard-of-hearing conversations with minions.",
-    "description": "Ancient evils settling into monstrous retirement — but they have to destroy all human life first. Choose any four of their listed abilities."
+    "goal": "Soulless Science",
+    "tags": "Often laughs maniacally; has shifty eyes",
+    "description": "Of the Malevolent Association of Demented Scientists — the most interesting person in any plot, because everything happens because of this character."
   },
   {
-    "name": "Rei, Priest of Uert-Hekeu",
-    "role": "Ancient Egyptian sorcerer-mummy",
-    "entityType": "Physical · Intelligent",
-    "brains": 4,
-    "muscles": 9,
+    "name": "Ernie Mellon",
+    "role": "Cab Driver",
+    "kind": "npc",
+    "brains": 3,
+    "muscles": 1,
+    "moves": 3,
+    "cool": 2,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Find Addresses",
+        "value": 6
+      },
+      {
+        "trait": "Muscles",
+        "name": "Brawl",
+        "value": 4
+      },
+      {
+        "trait": "Moves",
+        "name": "Drive Vehicle",
+        "value": 6
+      },
+      {
+        "trait": "Cool",
+        "name": "Street Talk",
+        "value": 5
+      }
+    ],
+    "goal": "Money",
+    "tags": "Knows all the shortcuts; drives recklessly; always smells like mustard",
+    "description": "A typical New York hack — fast, swift, and true, so long as you don't complain about his digestion."
+  },
+  {
+    "name": "Grrrauauff",
+    "role": "Hittite Dog God",
+    "kind": "ghost",
+    "power": 2,
+    "ectopresence": 3,
+    "powers": [
+      "Animate",
+      "Terrorize"
+    ],
+    "goal": "Kill Buyukbas",
+    "tags": "Animates an '84 Plymouth cab (car go woof, woof!); can't be harmed by proton beams unless manifested",
+    "description": "An ill-tempered minor Hittite god, dormant for millennia until a stolen idol woke him. He inhabits the body of a yellow cab, growling, barking and menacing everyone in reach."
+  },
+  {
+    "name": "Jake Westtree",
+    "role": "Cop / Tough Detective",
+    "kind": "npc",
+    "brains": 2,
+    "muscles": 5,
     "moves": 4,
     "cool": 6,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Egyptian Trivia",
-        "value": 7
+        "name": "Justify Acts of Unbelievable Brutality",
+        "value": 5
       },
       {
         "trait": "Muscles",
-        "name": "Smash Inanimate Objects",
-        "value": 12
+        "name": "Bust Heads",
+        "value": 8
       },
       {
         "trait": "Moves",
-        "name": "Silent Shamble",
+        "name": "Shoot .44 So Blood and Gore Splatters Everywhere",
         "value": 7
       },
       {
         "trait": "Cool",
-        "name": "Be Unmoved",
+        "name": "Narrow Eyes Menacingly",
         "value": 9
       }
     ],
-    "power": 10,
-    "powers": [
-      "Frog 'n' Prince (Greater)",
-      "Make Illusion",
-      "Terrorize"
-    ],
-    "goal": "Restoring the Old Egyptian Kingdom",
-    "tags": "Bandages of a mummy, bright eyes, mouth not showing; followed by a persistent cloud of moths that eat his bandages (the only things immune to his abilities).",
-    "description": "A Third-Dynasty priest of the magic-goddess Uert-Hekeu, mummified and reawakened after 2,000 years — the rulebook's Dangerous-class Sample Beastie."
+    "goal": "Teach Those Punks a Lesson",
+    "tags": "Face never changes expression; hates jobs involving ghosts",
+    "description": "A tight-lipped, bloodthirsty detective who'd rather pump six bullets into a crime boss than fill out the paperwork of arresting him."
   },
   {
-    "name": "Scottish Spook",
-    "role": "Bagpiping ancestral spook",
-    "entityType": "Ectoplasmic · Intelligent",
-    "brains": 1,
-    "muscles": 0,
-    "moves": 0,
-    "cool": 1,
+    "name": "Jerome Robert Carson (aka Joe Bob)",
+    "role": "Con Man",
+    "kind": "npc",
+    "brains": 5,
+    "muscles": 3,
+    "moves": 2,
+    "cool": 2,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Find Relatives",
-        "value": 4
+        "name": "Think Up Con",
+        "value": 8
+      },
+      {
+        "trait": "Muscles",
+        "name": "Run",
+        "value": 6
+      },
+      {
+        "trait": "Moves",
+        "name": "Disguise",
+        "value": 5
       },
       {
         "trait": "Cool",
-        "name": "Play Bagpipes",
-        "value": 4
+        "name": "Bluff",
+        "value": 5
       }
     ],
-    "power": 2,
-    "powers": [
-      "Proton Immunity"
-    ],
-    "goal": "Restore Family Honor",
-    "tags": "Scottish accent so thick you could cut it with a Claymore.",
-    "description": "Laird Ronald MacDonald, a centuries-old coward. Proton packs only 'catch the bagpipes' — they are repeaters and return the next night.",
-    "ectopresence": 2
+    "goal": "Rip People Off Without Danger",
+    "tags": "Always smoothing back his slick black hair; carries several ID cards under different names",
+    "description": "A con artist extraordinaire who fools the Ghostbusters into giving him money and comes back for more — he may show up disguised as an EPA agent."
   },
   {
-    "name": "Spartacus Kane",
-    "role": "Angst Vampire",
-    "brains": 2,
-    "muscles": 6,
+    "name": "Lt. Margaret Krompsky",
+    "role": "Cop",
+    "kind": "npc",
+    "brains": 4,
+    "muscles": 3,
     "moves": 3,
     "cool": 5,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Reminisce Menacingly",
-        "value": 5
+        "name": "Criminal Law",
+        "value": 7
       },
       {
         "trait": "Muscles",
-        "name": "Smash Feeble Furniture",
-        "value": 9
+        "name": "Grapple",
+        "value": 6
       },
       {
         "trait": "Moves",
-        "name": "Twirl Cloak Menacingly",
+        "name": "Ride Police Horse",
         "value": 6
       },
       {
         "trait": "Cool",
-        "name": "Inspire Pity",
+        "name": "Make Citizen Nervous",
         "value": 8
       }
     ],
-    "power": 4,
-    "powers": [
-      "Creature Features (L, changes into bat)",
-      "Dematerialize",
-      "Physical Immunity (L)"
-    ],
-    "weaknesses": "Classic vampire weaknesses",
-    "goal": "Be Rid of Imaginary Curse",
-    "tags": "Abrupt changes of pose: jerky cringe at sunrise, twirl and retwirl of cloak, sudden departures, spastic clamber into coffin",
-    "description": "The great-great-granduncle of Lucretia's dead husband; bitten around 1800, he wanders wracked with guilt, convinced his vampirism causes the family's curses (really it's his pretentiousness)."
+    "goal": "Enforce the Law",
+    "tags": "Thinks the Ghostbusters are lazy good-for-nothing slaggards; wants ECTO-1 moved",
+    "description": "A perfectly pressed cop who never lets anyone see her sweat, forever berating the 'Busters as careless jerks and keeping the adventure moving."
   },
   {
-    "name": "Suits of Armor",
-    "role": "Lonely bachelor knight ghosts",
-    "entityType": "Physical · Intelligent",
-    "brains": 1,
-    "muscles": 5,
+    "name": "Luigi Elgato",
+    "role": "Ghost of an Art Director",
+    "kind": "ghost",
+    "power": 3,
+    "ectopresence": 4,
+    "powers": [
+      "Slime (rubber cement)",
+      "Poltergeist"
+    ],
+    "goal": "Revenge",
+    "tags": "Leaves a trail of rubber cement; reorganizes the art department and hides supplies",
+    "description": "Luigi drowned in a cup of coffee trying to meet a tight deadline, and now haunts the art department where he met his end, gibbering 'Slap it down and get it out!'"
+  },
+  {
+    "name": "Madame Rosa",
+    "role": "Gypsy Palm Reader",
+    "kind": "npc",
+    "brains": 3,
+    "muscles": 3,
     "moves": 3,
-    "cool": 3,
+    "cool": 5,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Misunderstand Modern Speech",
-        "value": 4
+        "name": "Remember Old Television Programs",
+        "value": 6
       },
       {
         "trait": "Muscles",
-        "name": "Bash Things with Maces",
-        "value": 8
+        "name": "Run",
+        "value": 6
       },
       {
         "trait": "Moves",
-        "name": "Ride Horse",
+        "name": "Disguise",
         "value": 6
       },
       {
         "trait": "Cool",
-        "name": "Stride Menacingly",
-        "value": 6
+        "name": "Convince",
+        "value": 8
       }
     ],
-    "power": 6,
-    "powers": [
-      "Physical Immunity (Greater)",
-      "Proton Immunity"
-    ],
-    "goal": "Nightly Companionship",
-    "tags": "Medieval speech patterns; quick temper.",
-    "description": "Three museum suits of armor from different medieval periods, bearing maces and other Ghostbuster-crushing weapons.",
-    "ectopresence": 12,
-    "weaknesses": "Inactive in daytime."
+    "goal": "Money",
+    "tags": "Begins sentences with 'I see…'; drives a neon-signed van",
+    "description": "She really can read palms, but she'd rather bless your money and find out how much you have. A good, if greedy, information source."
   },
   {
-    "name": "Tarquin Kane",
-    "role": "Stylish Werewolf",
+    "name": "Margaret Mipsky, Ph.D.",
+    "role": "Research Scientist",
+    "kind": "npc",
+    "brains": 6,
+    "muscles": 2,
+    "moves": 3,
+    "cool": 2,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Bacteriology",
+        "value": 9
+      },
+      {
+        "trait": "Muscles",
+        "name": "Swim",
+        "value": 5
+      },
+      {
+        "trait": "Moves",
+        "name": "Brew Chemicals",
+        "value": 6
+      },
+      {
+        "trait": "Cool",
+        "name": "Convince",
+        "value": 5
+      }
+    ],
+    "goal": "Sex",
+    "tags": "Wraps male scientists around her finger by taking off her glasses and saying 'I'm so confused'",
+    "description": "The Sexy Female Scientist — brilliant, and disarmingly happy to let you think she needs rescuing."
+  },
+  {
+    "name": "Margaret O'Malley, R.N.",
+    "role": "Head Nurse",
+    "kind": "npc",
     "brains": 3,
-    "muscles": 6,
+    "muscles": 4,
     "moves": 4,
     "cool": 4,
     "talents": [
       {
         "trait": "Brains",
-        "name": "Recognize Loved Ones Instantly and Not Eat Them",
-        "value": 5
-      },
-      {
-        "trait": "Muscles",
-        "name": "Mangle and Chew",
-        "value": 9
-      },
-      {
-        "trait": "Moves",
-        "name": "Display Fashion",
-        "value": 7
-      },
-      {
-        "trait": "Cool",
-        "name": "Brood in a Fantastically Sexy Manner",
-        "value": 7
-      }
-    ],
-    "power": 2,
-    "powers": [
-      "Creature Features (L)",
-      "Physical Immunity (L)"
-    ],
-    "goal": "Stylish Sex",
-    "tags": "Compulsive about neatness of clothes, constantly slicks hair back, never smiles, projects lust with eyes alone",
-    "description": "Lucretia's son, a dark, brooding fashion-plate who lives only to shed his lycanthropy so he'll stop shredding expensive designer outfits and scaring off dates."
-  },
-  {
-    "name": "The Librarian Ghost",
-    "role": "Book stacker and card flinger",
-    "entityType": "Ectoplasmic · Mindless",
-    "brains": 0,
-    "muscles": 0,
-    "moves": 0,
-    "cool": 0,
-    "talents": [],
-    "power": 5,
-    "powers": [
-      "Invisibility",
-      "Terrorize"
-    ],
-    "goal": "Have the Library to Herself",
-    "tags": "Shushes noisemakers; dislikes card files and the Dewey Decimal System; terrorizes attackers.",
-    "description": "The old librarian ghost of the New York Public Library from the first movie.",
-    "ectopresence": 6
-  },
-  {
-    "name": "The Reconstituted Man",
-    "role": "Frankenstein Monster",
-    "brains": 1,
-    "muscles": 8,
-    "moves": 2,
-    "cool": 1,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Misunderstand Intents",
-        "value": 4
-      },
-      {
-        "trait": "Muscles",
-        "name": "Break Through Walls",
-        "value": 11
-      },
-      {
-        "trait": "Moves",
-        "name": "Attract Attention",
-        "value": 5
-      },
-      {
-        "trait": "Cool",
-        "name": "Evoke Sympathy",
-        "value": 4
-      }
-    ],
-    "power": 1,
-    "powers": [
-      "Physical Immunity (G)",
-      "Proton Immunity"
-    ],
-    "goal": "For No One to Notice Him",
-    "tags": "Walks stiff-legged, shrinks from fire, absently crushes young girls",
-    "description": "Sewn together from stolen corpses and spare auto parts. Huge, terrifying, misunderstood and lonesome — he just wants to be left alone and to find a mate."
-  },
-  {
-    "name": "The Spud (Slimer)",
-    "role": "Glutton ghost — undead stomach with teeth",
-    "entityType": "Ectoplasmic · Mindless",
-    "brains": 0,
-    "muscles": 0,
-    "moves": 0,
-    "cool": 0,
-    "talents": [],
-    "power": 2,
-    "powers": [
-      "Slime"
-    ],
-    "goal": "Eat Everything",
-    "tags": "Slobbers; crams its face with food.",
-    "description": "The green free-roaming vapor famous for sliming the hotel hallway.",
-    "ectopresence": 5
-  },
-  {
-    "name": "The Stay-Puft Marshmallow Man",
-    "role": "Ten-story cartoon world-destroyer",
-    "entityType": "Physical · Mindless",
-    "brains": 0,
-    "muscles": 10,
-    "moves": 8,
-    "cool": 0,
-    "talents": [
-      {
-        "trait": "Muscles",
-        "name": "Smash Buildings",
-        "value": 13
-      },
-      {
-        "trait": "Moves",
-        "name": "Stride Menacingly",
-        "value": 11
-      }
-    ],
-    "power": 8,
-    "powers": [
-      "Growing",
-      "Growing (Again)",
-      "Terrorize"
-    ],
-    "goal": "Destroy All Humans",
-    "tags": "Steps on anything smaller than itself (practically everything); beams cheerfully as it destroys the world.",
-    "description": "The chosen form of the destructor — a giant sailor-suited marshmallow mascot."
-  },
-  {
-    "name": "Thu-thu",
-    "role": "Just-awakened volcano god",
-    "entityType": "Ectoplasmic · Mindless",
-    "brains": 0,
-    "muscles": 0,
-    "moves": 0,
-    "cool": 0,
-    "talents": [],
-    "power": 10,
-    "powers": [
-      "Growing",
-      "Materialize",
-      "Terrorize"
-    ],
-    "goal": "Have Sacrificial Munchies Until the End of Time",
-    "tags": "Flies around roaring, shaking the lava, and terrorizing sacrifices.",
-    "description": "National deity of Ralyeh — a gigantic, slimy, lava-colored volcano god with a slack-jawed grin he likes to drop sacrifices into.",
-    "ectopresence": 20
-  },
-  {
-    "name": "Uncle Ferg",
-    "role": "Joe Normal — just a little dead",
-    "entityType": "Ectoplasmic · Intelligent",
-    "brains": 3,
-    "muscles": 0,
-    "moves": 0,
-    "cool": 4,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Make Plans for Everyone Else",
+        "name": "Evaluate Doctor",
         "value": 6
       },
       {
+        "trait": "Muscles",
+        "name": "Keep Patient In Bed",
+        "value": 7
+      },
+      {
+        "trait": "Moves",
+        "name": "Sniff Out Odors",
+        "value": 7
+      },
+      {
         "trait": "Cool",
-        "name": "Resist Terrorize",
+        "name": "Orate",
         "value": 7
       }
     ],
+    "goal": "Serve Humanity (whether they like it or not)",
+    "tags": "Barks information; carries the hospital regulations book",
+    "description": "A veteran of three wars who runs St. Pitfalz Hospital like a front line and likes to tell army stories about amputees."
+  },
+  {
+    "name": "Nick",
+    "role": "Late Drug-Crazed Motorcycle Maniac",
+    "kind": "ghost",
+    "power": 3,
+    "ectopresence": 4,
+    "powers": [
+      "Zip on Bike (Moves at speed 9)"
+    ],
+    "goal": "Die Before He Gets Old (already achieved)",
+    "tags": "Chase him down the highway at 95 MPH; rolls Power to keep pulling stupid stunts",
+    "description": "Nick wiped out doing 95 on the New York Thruway and now haunts the highways, popping wheelies, frightening motorists and making obscene gestures at cop cars."
+  },
+  {
+    "name": "Onionhead",
+    "role": "Class 5 Full-Roaming Vapor",
+    "kind": "ghost",
+    "power": 3,
+    "ectopresence": 4,
+    "powers": [
+      "Slime",
+      "Gobble Food",
+      "Dematerialize Object"
+    ],
+    "goal": "Eat Everything In Sight",
+    "tags": "The classic 'spud' — a disgusting, food-obsessed green blob that slimes anyone who gets close",
+    "description": "A repulsive free-roaming vapor with no interest in anything but food and mischief. Ugly, low, and easy to underestimate — right up until it slimes you."
+  },
+  {
+    "name": "Papa Joe",
+    "role": "Mafia Godfather",
+    "kind": "npc",
+    "brains": 6,
+    "muscles": 1,
+    "moves": 2,
+    "cool": 8,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Plotting",
+        "value": 9
+      },
+      {
+        "trait": "Muscles",
+        "name": "Fisticuffs",
+        "value": 4
+      },
+      {
+        "trait": "Moves",
+        "name": "Dodge",
+        "value": 5
+      },
+      {
+        "trait": "Cool",
+        "name": "Bargain (who could refuse?)",
+        "value": 11
+      }
+    ],
+    "goal": "Money",
+    "tags": "Speaks with an Italian accent; sits relaxed but with hands clenched",
+    "description": "Strict, jolly, and devoted to his 'people,' Papa Joe orders only terrible things and has scruples about exactly one kind of criminal activity — you never learn which."
+  },
+  {
+    "name": "Scooter MacBurnie",
+    "role": "Cab Driver",
+    "kind": "npc",
+    "brains": 2,
+    "muscles": 3,
+    "moves": 2,
+    "cool": 5,
+    "talents": [
+      {
+        "trait": "Brains",
+        "name": "Voodoo",
+        "value": 5
+      },
+      {
+        "trait": "Muscles",
+        "name": "Swim",
+        "value": 6
+      },
+      {
+        "trait": "Moves",
+        "name": "Dance",
+        "value": 5
+      },
+      {
+        "trait": "Cool",
+        "name": "Misunderstand Plain English",
+        "value": 8
+      }
+    ],
+    "goal": "Serve Humanity",
+    "tags": "Stares at you expressionlessly, says 'Yes, mon, yes,' and drives you nowhere in a fruitless attempt to get you where you want to go",
+    "description": "A cheerful Jamaican cabbie who knows nearly nothing about New York geography and takes you there forever."
+  },
+  {
+    "name": "Tammanung",
+    "role": "Indian War Chief",
+    "kind": "ghost",
     "power": 5,
+    "ectopresence": 8,
     "powers": [
-      "Invisibility",
-      "Materialize"
+      "Weapon Use",
+      "Terrorize",
+      "Rain Dance"
     ],
-    "goal": "Clean Things Up and Lead a Happy American Life",
-    "tags": "Glad-handing, back-slapping cheerfulness; loud clothes — golfing pants, screaming ties.",
-    "description": "Everyone's nightmare of an unflappable, oh-so-nice nerd relative — who happens to be dead.",
-    "ectopresence": 8
+    "goal": "Reclaim Ancestral Homeland",
+    "tags": "A 25-foot Indian in war headdress; speaks only his tribal tongue; needs a shaman's help to appease",
+    "description": "Massacred with his tribe three centuries ago, Tammanung returns each anniversary of the massacre to drive the inhabitants away, gathering strength between manifestations."
   },
   {
-    "name": "Vinz Clortho, the Key-Master",
-    "role": "Keymaster of Gozer",
-    "entityType": "Physical · Intelligent",
-    "brains": 1,
-    "muscles": 7,
-    "moves": 5,
-    "cool": 1,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Find Human Host",
-        "value": 4
-      },
-      {
-        "trait": "Muscles",
-        "name": "Run",
-        "value": 10
-      },
-      {
-        "trait": "Moves",
-        "name": "Jazzercise",
-        "value": 8
-      },
-      {
-        "trait": "Cool",
-        "name": "Talk to Animals",
-        "value": 4
-      }
-    ],
-    "power": 10,
+    "name": "The Ghost of Colonel Parkins",
+    "role": "Club Ghost",
+    "kind": "ghost",
+    "power": 3,
+    "ectopresence": 6,
     "powers": [
-      "Dematerialize",
-      "Frog 'n' Prince (Lesser)",
-      "Possess",
-      "Terrorize"
+      "Argue",
+      "Thrash the Young Blighters"
     ],
-    "goal": "Sex (Ritual)",
-    "tags": "Canine sniffs and snuffles; mimics people; fetches slippers; utterly uncomprehending of the world.",
-    "description": "The Terror Dog that possesses Louis Tully; Gozer's other herald."
+    "goal": "Restore the Millenium Club to an Exclusively Male Membership",
+    "tags": "Manifests as a form asleep in his old armchair; thrashes women members with a ghostly riding crop",
+    "description": "A Spanish-American War veteran who died in 1936, outraged that his gentlemen's club now admits women. He is being sued for harassment."
   },
   {
-    "name": "Zuul, the Gate-Keeper",
-    "role": "Gatekeeper of Gozer",
-    "entityType": "Physical · Intelligent",
-    "brains": 5,
-    "muscles": 7,
-    "moves": 5,
-    "cool": 4,
-    "talents": [
-      {
-        "trait": "Brains",
-        "name": "Find Human Host",
-        "value": 8
-      },
-      {
-        "trait": "Muscles",
-        "name": "Wrestle",
-        "value": 10
-      },
-      {
-        "trait": "Moves",
-        "name": "Seduce",
-        "value": 8
-      },
-      {
-        "trait": "Cool",
-        "name": "Flex and Seethe",
-        "value": 7
-      }
-    ],
-    "power": 10,
+    "name": "The Ghost of Mrs. Shmegegi",
+    "role": "Nagging Mother",
+    "kind": "ghost",
+    "power": 2,
+    "ectopresence": 3,
     "powers": [
-      "Dematerialize",
-      "Frog 'n' Prince (Lesser)",
-      "Possess",
-      "Terrorize"
+      "Nag (Power vs Cool — 'Ma, you're making me crazy!')"
     ],
-    "goal": "Sex (Ritual)",
-    "tags": "Flexes, seethes and demonstrates ardently dangerous-looking lust in a human host; otherwise animal-predatory.",
-    "description": "The Terror Dog that possesses Dana Barrett; one of Gozer's two heralds. Changes a possessed body into the likeness of its own."
+    "goal": "Get David to Find a Nice Jewish Girl and Settle Down",
+    "tags": "Won't let the Ghostbusters proton-pack her — she's David's mother, after all",
+    "description": "Mitzi Shmegegi nagged her son to his very deathbed and beyond, manifesting in his apartment to urge him to eat, settle down, and wear rubbers when it rains."
+  },
+  {
+    "name": "The Ghost of the Baldwin Theater",
+    "role": "Demolished Playhouse",
+    "kind": "ghost",
+    "power": 5,
+    "ectopresence": 76,
+    "powers": [
+      "Sing & Dance"
+    ],
+    "goal": "Put On The Best Darn Show This Burg Ever Seen",
+    "tags": "Ghostly chorus lines and divas belting musical numbers inside the office tower built on the theater's grave",
+    "description": "The elite razed the grand old Baldwin Theater to build luxury apartments; now the ghost of the theater stages nightly ghostly productions, appalling the residents."
   }
 ] as unknown as GbBestiary[];

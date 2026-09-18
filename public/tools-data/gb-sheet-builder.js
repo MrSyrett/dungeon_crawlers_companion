@@ -133,8 +133,8 @@
       system: 'GB', _built: true, name: name || '', goal: goal || '',
       notes: '', tagPhysical: '', tagPersonality: '',
       traits: { Brains: traits.Brains, Muscles: traits.Muscles, Moves: traits.Moves, Cool: traits.Cool },
-      current: { Brains: null, Muscles: null, Moves: null, Cool: null },
       talents: { Brains: { name: talent.Brains }, Muscles: { name: talent.Muscles }, Moves: { name: talent.Moves }, Cool: { name: talent.Cool } },
+      residence: '', phone: '', telex: '', hospital: 0,
       bp: 20, gear: gear.slice()
     };
     var prev = (typeof collectSheet === 'function') ? collectSheet() : {};

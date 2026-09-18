@@ -4,55 +4,35 @@
 const GB_POWERS = [
   {
     "name": "Ectopresence",
-    "description": "A ghost's supernatural 'hit points.' A proton pack on ATTACK reduces Ectopresence by 1 per hit; once it reaches 0 the ghost can be caught with a containment stream + ghost trap. (Not a Power ability per se — the rating that makes a ghost bustable.)"
+    "description": "A ghost's grip on our dimension — its supernatural 'hit points.' Weak spooks rate 1–5, formidable ones 6–10, and a few nightmares 100 or more. A proton pack on Attack knocks it down 1 per hit; at 0 the ghost can be trapped. Left alone, it regains 1 per hour."
   },
   {
-    "name": "Physical Immunity",
-    "description": "The being is unharmed by ordinary physical attacks. Rated (G) gaseous / (L) partial-ghostly, per the creature."
+    "name": "Power",
+    "description": "The number of dice (one is the Ghost Die) a ghost rolls to use a Special Ability or attempt any task. It's the ghost's equivalent of a Trait."
   },
   {
-    "name": "Proton Immunity",
-    "description": "Proton streams don't reduce this being's Ectopresence — you'll need weird science, its specific weakness, or another approach."
+    "name": "Proton Pack — Attack",
+    "description": "The main setting. A successful hit lowers the target ghost's Ectopresence by 1 (or by 2 if you roll double the difficulty, and so on). Only works on ghosts you can see or that have manifested."
   },
   {
-    "name": "Dematerialize",
-    "description": "Becomes intangible, passing through walls, floors and attacks at will."
+    "name": "Proton Pack — Containment",
+    "description": "Forms a proton-beam cage around a ghost whose Ectopresence is 0. At least two Ghostbusters must cooperate to steer it — usually over a Ghost Trap, which is then triggered."
   },
   {
-    "name": "Poltergeist",
-    "description": "Hurls objects, slams doors, and throws the environment around without being seen."
+    "name": "Never Cross the Beams",
+    "description": "Two proton beams meeting on Attack causes a catastrophic explosion. It only happens on purpose — or when two 'Busters fire the same target in one round and both fail their roll and both roll Ghosts."
   },
   {
-    "name": "Terrorize",
-    "description": "Radiates supernatural dread, forcing Cool rolls to keep acting."
+    "name": "Psychokinetic Energy (PKE)",
+    "description": "Egon's fifth force. Ghosts and psychic phenomena manipulate PKE; PKE meters detect it. If you can see a ghost, it can see you — and that may not be a good thing."
   },
   {
-    "name": "Control Mind",
-    "description": "Dominates or compels a victim's mind (often paired with Hypnosis or Read Mind)."
+    "name": "Ghost Trap",
+    "description": "Stores one subdued ghost. A Containment stream steers the ghost over the open trap; spring the foot-pedal and the field closes. Empty the trap into the franchise's Protection Grid."
   },
   {
-    "name": "Hypnosis",
-    "description": "Entrances a victim into a suggestible trance."
-  },
-  {
-    "name": "Read Mind",
-    "description": "Plucks thoughts and intentions straight from a target's head."
-  },
-  {
-    "name": "Animate",
-    "description": "Brings objects or corpses to life (e.g. a vengeful convertible or a rampaging lawn mower)."
-  },
-  {
-    "name": "Summon Pests",
-    "description": "Calls lesser spooks and 'house pests' to swarm the Ghostbusters."
-  },
-  {
-    "name": "Creature Features",
-    "description": "The being sports monstrous features — claws, fangs, a bat-form — giving bonus dice on relevant attacks. Rated (L)."
-  },
-  {
-    "name": "PKE Analysis",
-    "description": "The being senses and reads psychokinetic energy the way a Ghostbuster's PKE meter would."
+    "name": "Materialization",
+    "description": "Invisible or immaterial spooks can only be hit by proton beams when they take a manifested form. Some gadgets can reveal a ghostly aura to make it targetable."
   }
 ];
 if (typeof window !== 'undefined') { window.GB_POWERS = GB_POWERS; }

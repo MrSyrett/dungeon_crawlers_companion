@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default function GbRulesPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <GbHeader title="Rules" subtitle="Ghostbusters International · roll d6 pools vs a Difficulty · one die is the Ghost Die" />
+      <GbHeader title="Rules" subtitle="Classic 1986 rules · roll d6 equal to your Trait vs a Difficulty · one die is the Ghost Die" />
       <TabRow active="/gb/rules" />
 
       <SectionH>How the game works</SectionH>

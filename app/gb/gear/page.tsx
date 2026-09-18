@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default function GbGearPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <GbHeader title="Gear & Goals" subtitle="Ghostbusters International · the Big List, your Goal, and ghost Powers" />
+      <GbHeader title="Gear & Goals" subtitle="Classic 1986 rules · the gear, your Goal, and how busting works" />
       <TabRow active="/gb/gear" />
 
       {["Weapon (ranged)", "Weapon (melee)", "Gear"].map((cat) => {

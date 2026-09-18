@@ -3,82 +3,69 @@
 
 const GB_RULES = [
   {
-    "key": "task",
-    "title": "Doing Things (the Task Roll)",
+    "title": "The Test",
     "order": 1,
-    "body": "When your Ghostbuster wants to do something that could fail, the Ghostmaster assigns a Difficulty number and names the Trait or talent that applies. Roll a number of six-sided dice equal to your points in that Trait (or the talent). Add the dice up; if the total equals or beats the Difficulty, you succeed. Things you can't fail (opening beer cans, watching TV, sending out for pizza) need no roll. One of the dice you roll must always be the Ghost Die."
+    "body": "When your Ghostbuster tries something he might fail at, the Ghostmaster assigns a Difficulty and tells you which Trait or Talent applies. Roll that many six-sided dice, add them up, and meet or beat the Difficulty to succeed. Difficulty ladder: Automatic (no roll needed) · Easy 5 · Normal 10 · Hard 20 · Impossible 30 (it can go higher). Most tasks you attempt fall between 5 and 30."
   },
   {
-    "key": "traits",
     "title": "Traits",
     "order": 2,
-    "body": "Every Ghostbuster has four Traits: Brains, Muscles, Moves and Cool. The Traits number is how many dice you roll for a related task — more dice, better odds. At creation, assign at least 1 point to each Trait and no more than 5 to any one, for 12 points total (famous Ghostbusters sometimes break these limits). Traits can be temporarily reduced (the 'Current' value) by getting slimed, getting hurt, or carrying too much gear."
+    "body": "Every Ghostbuster has four Traits — Brains, Muscles, Moves, Cool. At creation you split 12 points among them: at least 1 in each, no more than 5 in any one. The number is how many dice you roll for actions using that Trait. Famous Ghostbusters have Traits above 5, earned through years of hard work."
   },
   {
-    "key": "talents",
     "title": "Talents",
     "order": 3,
-    "body": "A Talent is an area of special ability within a Trait. Each Ghostbuster has one talent per Trait. When a task falls under one of your talents, you roll 3 extra dice. (Egon's Brains talent is Physics, so designing a solar-powered flashlight lets him roll 10 dice instead of 7.) When a Trait is reduced, its talent drops by the same amount."
+    "body": "A Talent is a specialty within a Trait. Each Ghostbuster picks one Talent per Trait (four total). When a task falls under one of your Talents you roll three extra dice — Trait + 3. You may invent a Talent not on the lists (Viral Oncology, Bike Riding) if the Ghostmaster agrees."
   },
   {
-    "key": "ghost-die",
     "title": "The Ghost Die",
     "order": 4,
-    "body": "One of the dice you roll is always the Ghost Die. If it shows a number, add it in as normal. If it shows the Ghost, Something Bad Has Happened: the Ghost counts as a zero, and the Ghostmaster introduces a complication. You can still succeed (if the other dice meet the Difficulty) — you'll just also suffer some niggling annoyance; if you also fell short, you fail AND something bad happens. For ghosts (extras), the Ghost Die works in their favor: mishaps rebound to the spook's benefit."
+    "body": "One of the dice you roll is always the Ghost Die. If a number comes up, add it to the others as normal. If the ghost face comes up, that die counts as ZERO — and Something Bad Happens. Compare the other dice anyway: meet the Difficulty and you succeed but with a niggling annoyance; miss it and you get Big Time Trouble. The Ghost Die works against spooks too — a ghost that rolls a ghost has its own mishap."
   },
   {
-    "key": "brownie-points",
     "title": "Brownie Points",
     "order": 5,
-    "body": "New Ghostbusters start with 20 Brownie Points. Before you roll, spend Brownie Points to roll one extra die each (you can't spend them to re-roll). You lose them when you're injured or fined. Best of all, spend them to rewrite the script — describe (colorfully!) how your star pulls off an incredible feat or escapes certain doom, and the Ghostmaster sets the cost. You earn them back for completing jobs, acting in character and fulfilling your Goal. With 30 to spare you can buy +1 to a Trait; in a pinch you can trade a Trait point for 20 Brownie Points."
+    "body": "New Ghostbusters start with 20 Brownie Points (the ID card track runs 0–60). They're both a measure of how you're doing and a way to rewrite the script. Spend one before a roll to add a die (decide before you roll; you can't reroll failed dice). Spend them to cut the bad effects of getting hurt — each point cuts a week of hospital time — or to bail your Ghostbuster out of a terrible jam (describe it colorfully; dull or dumb rationales cost more). You earn them for doing the job and chasing your Goal."
   },
   {
-    "key": "opposed",
-    "title": "Opposed Rolls",
+    "title": "Advancement",
     "order": 6,
-    "body": "When someone is actively trying to stop you, it's an Opposed Roll: each side rolls its relevant Trait or talent dice and the higher total wins. Ties can stand or be re-rolled at the Ghostmaster's call."
+    "body": "When you have 30 or more Brownie Points and nothing better to do with them, you can buy a permanent +1 to one Trait for 30 points (Ghostmaster's okay). Trading a Trait point back gives you only 20 points. In a real emergency the Ghostmaster may let you drop a Trait point on the spot for 20 points to save your skin."
   },
   {
-    "key": "sequence",
-    "title": "Play Sequence",
+    "title": "Adventure Payout",
     "order": 7,
-    "body": "In hectic scenes, players announce actions in order of lowest Moves first (ties broken by lower Cool). Actions then resolve in reverse — highest Moves goes first — so the quick get to react to everyone else's plan. On your turn you may move and take one other action (fire a proton pack, read a PKE meter, and so on)."
+    "body": "Ghostbusters earn most of their Brownie Points by finishing the job. Botch it and the Ghostmaster returns HALF the points you spent during the game. Do the job satisfactorily and you get back everything you spent, plus a few more. Do an excellent job (save the day and amuse the Ghostmaster) and you're awarded up to half again as many as you spent."
   },
   {
-    "key": "combat",
-    "title": "Combat",
+    "title": "Opposed Tests",
     "order": 8,
-    "body": "Combat is just a task, resolved in Combat Turns (Movement then Combat, in Moves/Cool order). Brawling is Muscles vs Muscles — the winner's margin sets the damage. Ranged weapons list a code of max range / difficulty increment (e.g. proton pack 5/1, machine gun 100/15): every increment of hexes raises the shot's Difficulty one UHM level. A target may Dodge once per Turn by rolling Moves; a higher Dodge becomes the new to-hit number. Some weapons add to-hit or damage dice, hit adjacent hexes (A), are inaccurate (S2), or can rebound on a Ghost roll (G*). Knives and pistols do nothing to an immaterial ghost — that is what the proton pack is for."
+    "body": "When Ghostbusters come into conflict with someone else — arm-wrestling, an argument, a chase — each side rolls the appropriate Trait or Talent (Ghost Die included) and the high total wins. Ties are the Ghostmaster's call, or roll again. Rolling a ghost can cost you a contest you'd otherwise have won."
   },
   {
-    "key": "hurt",
-    "title": "Getting Hurt (UHM)",
+    "title": "Combat",
     "order": 9,
-    "body": "Ghostbusters don't ordinarily die — they get hurt, slimed and banged up. Damage lowers Traits: measure how much the attack beat the defense, then lower that many total Trait points (the UHM table): beat by 0-3 = 1 point (Very Little), 4-8 = 2 (Some), 9-13 = 3 (A Good Amount), 14-18 = 4 (Lots), 19-29 = 5 (Whole Lots — unconscious), 30+ = 6 (More Than You Can Imagine — straight to hospital). The player splits the loss among the four Traits however they like (talent dice are never lost); no Trait goes below 0. Track losses in the 'Current' column — that is your health. When every Trait hits 0 the Ghostbuster is helpless (can only 'laugh at danger'). Weapons add damage dice, and a Ghostbuster can spend Brownie Points to buy a loss down (never below 1 point)."
+    "body": "Hand-to-hand uses Muscles (Brawl, Grapple); a weapon adds dice — +1 (brass knuckles) up to +4 (chain saw). Ranged attacks use Moves (Fire Weapon): point-blank (≤10 ft) is Difficulty 5, normal range 10, long distance (50 ft+ pistol / 500 ft+ rifle) 20. Knives and pistols don't work on ghosts — that's what proton packs are for."
   },
   {
-    "key": "healing",
-    "title": "Healing Up",
+    "title": "Getting Hurt",
     "order": 10,
-    "body": "Lost Trait points come back slowly. Brownie Point substitution buys off a loss as it happens (it never does better than Very Little, and costs more BP than the point saved). The medicine talent lets a doctor roll medicine dice — the difficulty is one UHM level per Trait point the patient is down, and the level of success is how many points are restored (a patient can't revisit the doctor until healed or re-injured to the same total). Natural healing restores 1 point per week of rest. The Hospital takes any 'More Than You Can Imagine' casualty automatically and heals 1 point per day — then bills you like a phone book."
+    "body": "Ghostbusters don't ordinarily die, and there is no health track — getting hurt costs Brownie Points plus hospital time. Sample losses: a battle-axe nick 1 point (up to 10 if a part falls off), falls 1 point per story (max 5), fire and radioactivity 1 to ~20, drowning 1 per minute, poison 1 to 15. Spend Brownie Points at the time of the accident to cut hospital time by a week each. Only the truly reckless actually die."
   },
   {
-    "key": "equipment",
-    "title": "Carrying Equipment",
+    "title": "Equipment",
     "order": 11,
-    "body": "Each item has a Hands rating (how bulky — a '1½ hands' item is carried in one hand but used with two) and a Muscles rating (how heavy). You have two hands, two 'hands' worth on your belt, two on your back, and one on your head. Try not to carry more Muscles points of gear than your Muscles Trait, or you'll start to slow down — set up an equipment dump (usually ECTO-1) near the action."
+    "body": "A Ghostbuster can carry three items without penalty (up to Muscles items, but no other actions while overloaded). The basics: a Proton Pack (Attack setting lowers a ghost's Ectopresence by 1 per hit; Containment forms a beam-cage — needs two 'Busters and Ectopresence 0), a Ghost Trap (stores one subdued ghost), a PKE Meter (ghost-finder), and Ecto-Visors (see in the dark). NEVER cross the beams."
   },
   {
-    "key": "ectopresence",
     "title": "Busting Ghosts",
     "order": 12,
-    "body": "Ghosts and monsters (all 'extras') use the same four Traits plus a Power rating with supernatural abilities. A ghost's Ectopresence is what you whittle down: a proton pack on ATTACK reduces it by 1 per hit. Once Ectopresence hits 0, two Ghostbusters use the CONTAINMENT stream to cage it and pop a Ghost Trap. Beware Proton Immunity — some beings shrug off the stream and must be beaten with weird science or their specific weakness."
+    "body": "A ghost has a Power (dice it rolls), one or more Special Abilities, and usually an Ectopresence — its grip on our dimension. Hit it with a proton pack on Attack to knock its Ectopresence down 1 per hit; at 0, two Ghostbusters steer it with Containment beams over a Ghost Trap and spring the trap. Left alone, a ghost regains 1 Ectopresence per hour. Store captured ghosts in the franchise's Protection Grid."
   },
   {
-    "key": "creation",
     "title": "Creating a Ghostbuster",
     "order": 13,
-    "body": "Fill out a Personnel File: Name & Alias, description and Tags (a physical tag and a personality tag), a Goal (Sex, Wealth, Fame, Soulless Science, Serving Humanity…), your four Traits (12 points, 1–5 each), one Talent per Trait, gear, and 20 Brownie Points. Then give some thought to who your star actually is — the point of the game is to tell a funny, satisfying story, so a distinctive voice and manner matter as much as the numbers."
+    "body": "Decide who you are, split 12 points among the four Traits (1–5 each), pick one Talent per Trait, choose a Personal Goal (Sex, Wealth, Fame, Soulless Science, or Serving Humanity), and start with 20 Brownie Points. Add a picture, a name, and a personality — and you're ready to grab a proton pack and get those ghosts."
   }
 ];
 if (typeof window !== 'undefined') { window.GB_RULES = GB_RULES; }

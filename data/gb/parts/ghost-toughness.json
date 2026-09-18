@@ -1,44 +1,7 @@
 [
-  {
-    "toughness": "Pushover",
-    "power": "1-2",
-    "abilities": "1 (L)",
-    "ectopresence": "1-4",
-    "brainsCool": "1-3"
-  },
-  {
-    "toughness": "Day's Work",
-    "power": "3-4",
-    "abilities": "2 (1G,1L)",
-    "ectopresence": "5-8",
-    "brainsCool": "4-6"
-  },
-  {
-    "toughness": "Tough Nut",
-    "power": "5-6",
-    "abilities": "2 (G)",
-    "ectopresence": "9-12",
-    "brainsCool": "7-9"
-  },
-  {
-    "toughness": "Dangerous",
-    "power": "7-9",
-    "abilities": "3 (1G,2L)",
-    "ectopresence": "13-16",
-    "brainsCool": "10-12"
-  },
-  {
-    "toughness": "Demon Class",
-    "power": "10-12",
-    "abilities": "4+ (2G,2L)",
-    "ectopresence": "17-20",
-    "brainsCool": "13-15"
-  },
-  {
-    "toughness": "Superghost",
-    "power": "13+",
-    "abilities": "Lots",
-    "ectopresence": "21+",
-    "brainsCool": "16+"
-  }
+  { "toughness": "Nuisance", "power": "1–2", "abilities": "1", "ectopresence": "1–3", "brainsCool": "A quick point-and-shoot; a couple of proton hits and a trap." },
+  { "toughness": "Everyday Spook", "power": "2–3", "abilities": "1–2", "ectopresence": "3–5", "brainsCool": "The usual haunting — the bread and butter of the franchise." },
+  { "toughness": "Serious Haunt", "power": "3–5", "abilities": "2", "ectopresence": "5–10", "brainsCool": "Needs teamwork: wear down the Ectopresence, then contain." },
+  { "toughness": "Formidable", "power": "5–7", "abilities": "2–3", "ectopresence": "8–20", "brainsCool": "A real threat to a city block — expect casualties and hospital time." },
+  { "toughness": "Really Bad News", "power": "7+", "abilities": "3+", "ectopresence": "20–100+", "brainsCool": "Demons and eldritch horrors: immune to proton packs; defeat needs research and a unique gadget or ritual." }
 ]

@@ -2,29 +2,29 @@
   {
     "name": "Brains",
     "summary": "How smart and observant your Ghostbuster is.",
-    "high": "Brains 5+ can do calculus in their heads, write bug-free code, and speak languages like a native.",
-    "low": "Bozos have a hard time remembering their own names.",
-    "covers": "Knowledge of history, biology, chemistry, physics, linguistics, trivia and the occult — plus perception (seeing, hearing). Your Brains talent sets your specialty."
+    "high": "Brains 5+ do calculus in their heads, write bug-free code the first time, and speak foreign languages like a native.",
+    "low": "Bozos watch Lost in Space reruns and have a hard time remembering their own names.",
+    "covers": "In Ghostbusters, all smart folks know lots about lots of things — history, biology, chemistry, physics, linguistics, trivia and the occult — plus perception. Your Brains Talent is your particular specialty."
   },
   {
     "name": "Muscles",
     "summary": "How strong your Ghostbuster is.",
-    "high": "Muscles 5+ can rip phone books in half, intimidate extras by flexing, and throw EPA bureaucrats into the garbage.",
-    "low": "Weaklings can't carry much of anything except a tune.",
-    "covers": "Hand-to-hand fighting (brawl, grapple), lifting, breaking, intimidation — and how much gear you can carry."
+    "high": "Muscles 5+ rip phone books in half, intimidate punks at a glance, bite the caps off beer bottles, and throw bureaucrats into the garbage.",
+    "low": "Weaklings get their tongues caught on postage stamps.",
+    "covers": "Hand-to-hand fighting (Brawl, Grapple), lifting, breaking, climbing and intimidation — and roughly how much gear you can lug around."
   },
   {
     "name": "Moves",
     "summary": "How dexterous and physically adept your Ghostbuster is.",
-    "high": "Moves 5+ are better at shooting, catching, dodging, throwing, lock-picking, juggling and driving.",
-    "low": "Maladroits get caught in their zippers.",
-    "covers": "Firing weapons (including proton packs), dodging, driving, running, swimming, stealth — and the initiative order."
+    "high": "Moves 5+ are better at shooting proton packs, catching, dodging, driving, picking locks, juggling and creeping along ledges — and they flirt, disguise and dress up well.",
+    "low": "Maladroits get things caught in their zippers.",
+    "covers": "Firing weapons (including proton packs), dodging, driving, sneaking, disguise, and general physical finesse."
   },
   {
     "name": "Cool",
-    "summary": "How bold, brave and charismatic your Ghostbuster is.",
-    "high": "A real Cool 5+ dude keeps his pace even showing up at a black-tie ball in a chicken suit — and comes off looking good.",
-    "low": "A low-Cool Ghostbuster calls the FBI every time his toilet backs up.",
-    "covers": "Poise under pressure, social presence and attractiveness — acting, charm, bluff, con, seduction, facing danger."
+    "summary": "How bold, brave and brassy your Ghostbuster is.",
+    "high": "Cool 7 keeps its pace even showing up at a black-tie ball in a chicken suit — Cool people have aplomb and know their own capacities.",
+    "low": "A Ghostbuster with Cool 1 calls the FBI when his toilet backs up.",
+    "covers": "Nerve under pressure, fast-talk and persuasion (Bluff, Convince, Fast Talk), bargaining, and resisting a ghost's Terrorize."
   }
 ]

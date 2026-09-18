@@ -266,7 +266,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     system: "GB",
     systemName: "Ghostbusters",
     kind: "character",
-    label: "Personnel File",
+    label: "ID Card",
     file: "gb_character_sheet.html",
     keys: ["gb_sheet"],
   },

@@ -9,20 +9,12 @@ export const GB_TALENTS = [
     "trait": "Brains"
   },
   {
-    "name": "Act",
-    "trait": "Cool"
-  },
-  {
     "name": "Anthropology",
     "trait": "Brains"
   },
   {
     "name": "Archaeology",
     "trait": "Brains"
-  },
-  {
-    "name": "Arm Wrestle",
-    "trait": "Muscles"
   },
   {
     "name": "Astronomy",
@@ -57,10 +49,6 @@ export const GB_TALENTS = [
     "trait": "Brains"
   },
   {
-    "name": "Box",
-    "trait": "Muscles"
-  },
-  {
     "name": "Brawl",
     "trait": "Muscles"
   },
@@ -77,12 +65,8 @@ export const GB_TALENTS = [
     "trait": "Cool"
   },
   {
-    "name": "Bureaucracy",
+    "name": "Bureaucratics",
     "trait": "Brains"
-  },
-  {
-    "name": "Carry",
-    "trait": "Muscles"
   },
   {
     "name": "Catch",
@@ -101,20 +85,28 @@ export const GB_TALENTS = [
     "trait": "Muscles"
   },
   {
-    "name": "Con",
+    "name": "Convince",
     "trait": "Cool"
   },
   {
-    "name": "Deduction",
+    "name": "Deduce",
     "trait": "Brains"
+  },
+  {
+    "name": "Disguise",
+    "trait": "Moves"
   },
   {
     "name": "Dodge",
     "trait": "Moves"
   },
   {
-    "name": "Drive",
+    "name": "Drive Vehicle",
     "trait": "Moves"
+  },
+  {
+    "name": "Electrical Repair",
+    "trait": "Brains"
   },
   {
     "name": "Electronics",
@@ -138,7 +130,7 @@ export const GB_TALENTS = [
   },
   {
     "name": "Gossip",
-    "trait": "Cool"
+    "trait": "Moves"
   },
   {
     "name": "Grapple",
@@ -149,7 +141,7 @@ export const GB_TALENTS = [
     "trait": "Brains"
   },
   {
-    "name": "Hear",
+    "name": "Hair Styling",
     "trait": "Brains"
   },
   {
@@ -159,10 +151,6 @@ export const GB_TALENTS = [
   {
     "name": "History",
     "trait": "Brains"
-  },
-  {
-    "name": "Hold Breath",
-    "trait": "Muscles"
   },
   {
     "name": "Intimidate",
@@ -177,20 +165,12 @@ export const GB_TALENTS = [
     "trait": "Muscles"
   },
   {
-    "name": "Jump (Moves)",
-    "trait": "Moves"
-  },
-  {
-    "name": "Kick",
+    "name": "Kick Things Over",
     "trait": "Muscles"
   },
   {
     "name": "Library Science",
     "trait": "Brains"
-  },
-  {
-    "name": "Lie",
-    "trait": "Cool"
   },
   {
     "name": "Lift",
@@ -199,6 +179,10 @@ export const GB_TALENTS = [
   {
     "name": "Linguistics",
     "trait": "Brains"
+  },
+  {
+    "name": "Listen",
+    "trait": "Moves"
   },
   {
     "name": "Make Music",
@@ -253,35 +237,19 @@ export const GB_TALENTS = [
     "trait": "Cool"
   },
   {
-    "name": "Read",
-    "trait": "Brains"
-  },
-  {
-    "name": "Review",
-    "trait": "Brains"
-  },
-  {
-    "name": "Ride Horses",
-    "trait": "Moves"
-  },
-  {
     "name": "Rip Things Open",
     "trait": "Muscles"
   },
   {
     "name": "Run",
-    "trait": "Moves"
+    "trait": "Muscles"
   },
   {
     "name": "Seduce",
-    "trait": "Cool"
+    "trait": "Moves"
   },
   {
     "name": "See",
-    "trait": "Brains"
-  },
-  {
-    "name": "Ski",
     "trait": "Moves"
   },
   {
@@ -289,15 +257,15 @@ export const GB_TALENTS = [
     "trait": "Moves"
   },
   {
-    "name": "Smell",
-    "trait": "Brains"
-  },
-  {
     "name": "Sneak",
     "trait": "Moves"
   },
   {
-    "name": "Soap Opera Trivia",
+    "name": "Sniff",
+    "trait": "Moves"
+  },
+  {
+    "name": "Soap Opera Romances",
     "trait": "Brains"
   },
   {
@@ -305,35 +273,23 @@ export const GB_TALENTS = [
     "trait": "Brains"
   },
   {
-    "name": "Swim",
+    "name": "Strut",
     "trait": "Moves"
   },
   {
-    "name": "Taste",
-    "trait": "Brains"
+    "name": "Swim",
+    "trait": "Muscles"
+  },
+  {
+    "name": "Tell Fibs",
+    "trait": "Cool"
   },
   {
     "name": "Throw",
     "trait": "Moves"
   },
   {
-    "name": "Withstand Pain",
-    "trait": "Muscles"
-  },
-  {
-    "name": "Wrestle Alligators",
-    "trait": "Muscles"
-  },
-  {
-    "name": "Wrestle Men",
-    "trait": "Muscles"
-  },
-  {
-    "name": "Write",
-    "trait": "Brains"
-  },
-  {
-    "name": "Yank",
+    "name": "Wrestle",
     "trait": "Muscles"
   },
   {

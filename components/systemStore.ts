@@ -41,7 +41,7 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
   // narrative layer (Plot Points / Editorial Points / the Crisis Die).
   { key: "JLU", name: "Justice League Unlimited", short: "JLU", accent: "var(--jlu)" },
-  // Ghostbusters International (West End Games, 1989) — the proto-D6 system:
+  // Ghostbusters — the classic West End Games game (1986): 4 Traits, Talents, Brownie Points, Ghost Die:
   // four Traits (Brains/Muscles/Moves/Cool), Talents, the Ghost Die, and
   // Brownie Points. Roll a pool of d6 vs a Difficulty; one die is the Ghost Die.
   { key: "GB", name: "Ghostbusters", short: "GB", accent: "var(--gb)" },

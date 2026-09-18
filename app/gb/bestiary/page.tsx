@@ -13,7 +13,7 @@ const TRAIT_KEYS: [("brains" | "muscles" | "moves" | "cool"), string][] = [
 export default function GbBestiaryPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <GbHeader title="Ghosts & Extras" subtitle="Ghostbusters International · the spooks, monsters and weirdos you'll bust" />
+      <GbHeader title="Ghosts & Extras" subtitle="Classic 1986 rules · the spooks, monsters and weirdos you'll bust" />
       <TabRow active="/gb/bestiary" />
 
       <SectionH>The Roster</SectionH>
@@ -53,7 +53,7 @@ export default function GbBestiaryPage() {
         ))}
       </div>
 
-      <SectionH>Building a Ghost <span className="text-[11px] font-normal text-[var(--muted)]">— the Instant Trait Rate Table</span></SectionH>
+      <SectionH>Building a Ghost <span className="text-[11px] font-normal text-[var(--muted)]">— quick tiers for Power, Abilities &amp; Ectopresence</span></SectionH>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-[12px]">
           <thead>
@@ -62,7 +62,7 @@ export default function GbBestiaryPage() {
               <th className="border-b border-[var(--border)] px-2 py-1.5">Power</th>
               <th className="border-b border-[var(--border)] px-2 py-1.5">Special Abilities</th>
               <th className="border-b border-[var(--border)] px-2 py-1.5">Ectopresence</th>
-              <th className="border-b border-[var(--border)] px-2 py-1.5">Brains &amp; Cool</th>
+              <th className="border-b border-[var(--border)] px-2 py-1.5">Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -79,7 +79,7 @@ export default function GbBestiaryPage() {
         </table>
       </div>
 
-      <SectionH>Special Abilities <span className="text-[11px] font-normal text-[var(--muted)]">— L = Lesser · G = Greater</span></SectionH>
+      <SectionH>Ghostly Special Abilities <span className="text-[11px] font-normal text-[var(--muted)]">— Table I (roll 1–6) · Table II (stronger)</span></SectionH>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         {GB_GHOST_ABILITIES.map((a) => (
           <div key={a.name} className={cardCls}>
@@ -92,7 +92,7 @@ export default function GbBestiaryPage() {
         ))}
       </div>
 
-      <SectionH>Weaknesses <span className="text-[11px] font-normal text-[var(--muted)]">— every tough spook needs one</span></SectionH>
+      <SectionH>Really Bad News <span className="text-[11px] font-normal text-[var(--muted)]">— defeating demons, eldritch horrors &amp; other proton-proof entities</span></SectionH>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {GB_GHOST_WEAKNESSES.map((w) => (
           <div key={w.name} className={cardCls}>
