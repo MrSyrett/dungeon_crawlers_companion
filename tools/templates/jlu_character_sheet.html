@@ -324,7 +324,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
             <h3>Combat</h3>
             <div class="statgrid" id="combat"></div>
             <div class="dmg-row">
-              <span class="dr-field" title="Damage Reduction — subtract from incoming damage (armor, Kryptonian, Enhanced Resistance)">DR <input id="f-dr" type="number" value="0" oninput="S.dr=num(this.value);scheduleAutosave()"></span>
+              <span class="dr-field" title="Damage Reduction — subtract from incoming damage. Origin (Amazon Armor / Blood of Krypton) applies automatically; the box is any extra DR.">DR <b id="dr-total" style="color:var(--jlu-dk);">0</b> <span id="dr-origin-hint" style="font-size:9px;color:var(--muted);"></span> <input id="f-dr" type="number" value="0" title="Extra DR beyond Origin" oninput="S.dr=num(this.value);renderCombat();scheduleAutosave()"></span>
               <span class="dmg-str" id="dmg-str">—</span>
               <button class="rollbtn" onclick="rollDamage()">Roll Damage</button>
             </div>
@@ -336,7 +336,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
               <button id="tb-notes" onclick="setTab('notes')">Notes</button>
             </div>
             <div class="subwrap">
-              <div id="pane-powers" class="subpane on"><div id="powers"></div></div>
+              <div id="pane-powers" class="subpane on"><div id="archfeatures"></div><div id="powers"></div></div>
               <div id="pane-skills" class="subpane">
                 <div class="grid3">
                   <div><h4>Knowledge</h4><div id="knowledge"></div></div>
@@ -423,6 +423,7 @@ function blankState(){
     ddie:'1d6', datt:'Potency', dmod:0, dr:0,
     defMod:0, atkMod:0, blkMod:0, dodMod:0,
     paxTotal:null,
+    archAbilities:[], grantTraits:[],
     powers:[], knowledge:[], traits:[], limitations:[], equipment:[],
     weakness:'', soul:'', notes:''};
 }
@@ -430,27 +431,44 @@ var S=blankState(), _adv='none', _ready=false, _saveTimer=null, _toastTimer=null
 
 /* ═══ derived ═══ */
 function built(){ return !!(S.tier || S.powers.length || ATTR_KEYS.some(function(k){return num(S.attrs[k])!==0;})); }
-function attrVal(k){return num(S.attrs[k]);}
+function tierVal(){var t=tierObj(S.tier);return num(t.value);}
+/* ── Origin freebies (granted for free — no PAX) ── */
+function originGivesFreePower(){var o=originObj(S.origin);return !!o && o.name!=='Meta-Human';}   // Meta-Human's Limitless Potential: no free Power
+function originFreeTraitSlots(){return S.origin==='Human'?1:0;}   // Human Versatility: 1 free Simple Trait
+function originFreeKnowSlots(){return S.origin==='Human'?1:0;}    // Human Versatility: 1 free Knowledge
+function grantTraitNames(){return (S.grantTraits||[]);}
+function freeTraitCount(){return grantTraitNames().length + originFreeTraitSlots();}
+function freeKnowCount(){return originFreeKnowSlots();}
+function originAttrBonus(k){ return (S.origin==='Kryptonian' && k==='potency') ? tierVal() : 0; }  // Blood of Krypton
+function originDR(){ if(S.origin==='Kryptonian')return tierVal(); if(S.origin==='Amazon')return tierVal()+1; return 0; }  // Amazon Armor / Blood of Krypton
+function originAttackBonus(){ return S.origin==='Amazon' ? 2 : 0; }   // Amazon Sword +2 Attack
+function originDamageBonus(){ return S.origin==='Amazon' ? 1 : 0; }   // Amazon Sword +1 Damage
+function drTotal(){ return originDR() + num(S.dr); }
+function attrBase(k){return num(S.attrs[k]);}                          // bought points (PAX basis)
+function attrVal(k){return attrBase(k)+originAttrBonus(k);}            // effective (tests / combat)
 function condPenalty(){ if(S.condLevel===2)return -2; if(S.condLevel===3)return -4; return 0; }
 function condDisadv(){return S.condLevel>=4;}
 function resolveMax(){var t=tierObj(S.tier);return num(t.resolve)+attrVal('spirit')+num(S.resBuy);}
 function defenseTotal(){var t=tierObj(S.tier);return num(t.defense)+num(S.defMod);}
-function attackTotal(){var t=tierObj(S.tier);return num(t.attackBonus)+attrVal('accuracy')+num(S.atkMod);}
+function attackTotal(){var t=tierObj(S.tier);return num(t.attackBonus)+attrVal('accuracy')+num(S.atkMod)+originAttackBonus();}
 function blockTotal(){return 10+attrVal('resistance')+num(S.blkMod);}
 function dodgeTotal(){return 10+attrVal('agility')+num(S.dodMod);}
+function archAbilityCap(){return Math.max(2, 1+tierVal());}           // 2 at Tier D (value 1); +1 per Tier step
+function powerGradeCap(){var t=tierObj(S.tier);return num(t.powerLimit)||5;}
 function inKit(power){var o=originObj(S.origin); if(!o)return true; var kit=o.powerKit||[];
   if(kit.indexOf('Any Superpower')>=0 && power.category==='Superpower')return true;
   return kit.indexOf(power.name)>=0 || kit.indexOf(power.category)>=0;}
 function paxSpent(){
   var lines=[], total=0;
-  var ap=0; ATTR_KEYS.forEach(function(k){ ap+= (attrVal(k)/3)*5; });
+  var ap=0; ATTR_KEYS.forEach(function(k){ ap+= (attrBase(k)/3)*5; });   // bought points only
   if(ap){lines.push({l:'Attributes',v:ap});total+=ap;}
   var rp=num(S.resBuy)*2; if(rp){lines.push({l:'Resolve',v:rp});total+=rp;}
-  var pp=0, freeUsed=false;
+  var pp=0, freeUsed=!originGivesFreePower();   // Meta-Human gets no free grade
   S.powers.forEach(function(p){var po=powerObj(p.name);if(!po)return;var per=num(po.paxPerGrade);var mult=inKit(po)?1:2;var c=per*num(p.grade)*mult; if(!freeUsed&&inKit(po)){freeUsed=true;c=Math.max(0,c-per);} pp+=c;});
   if(pp){lines.push({l:'Powers',v:pp});total+=pp;}
-  var kp=S.knowledge.length*4; if(kp){lines.push({l:'Knowledge',v:kp});total+=kp;}
-  var tp=S.traits.length*4; if(tp){lines.push({l:'Traits',v:tp});total+=tp;}
+  var kFree=freeKnowCount(), tFree=freeTraitCount();
+  var kp=Math.max(0,S.knowledge.length-kFree)*4; if(kp){lines.push({l:'Knowledge',v:kp});total+=kp;}
+  var tp=Math.max(0,S.traits.length-tFree)*4; if(tp){lines.push({l:'Traits',v:tp});total+=tp;}
   var ep=0; S.equipment.forEach(function(e){ ep+=equipCost(e); }); if(ep){lines.push({l:'Equipment',v:ep});total+=ep;}
   return {lines:lines,total:total};
 }
@@ -469,9 +487,9 @@ function renderIdentity(){
 function renderAttrs(){
   var host=$('attrs');host.innerHTML='';
   ATTRS.forEach(function(a){
-    var k=a.name.toLowerCase(); var v=attrVal(k);
+    var k=a.name.toLowerCase(); var v=attrVal(k); var b=originAttrBonus(k);
     var row=document.createElement('div');row.className='attr-row';
-    row.innerHTML='<span class="an" title="'+esc(a.summary)+'">'+a.name+'</span>'+
+    row.innerHTML='<span class="an" title="'+esc(a.summary)+(b?' — includes +'+b+' from Origin':'')+'">'+a.name+(b?' <span style="color:var(--jlu-dk);font-size:9px;font-weight:800;">+'+b+'</span>':'')+'</span>'+
       '<span class="aval">'+(v>=0?'+':'')+v+'</span>'+
       '<button class="roll" onclick="rollD20Test(\''+a.name+'\',\''+k+'\',0)">Test</button>';
     host.appendChild(row);
@@ -513,8 +531,11 @@ function renderCombat(){
     };}
     host.appendChild(d);
   });
-  $('dmg-str').textContent=S.ddie+' + '+S.datt+(num(S.dmod)?' + '+num(S.dmod):'');
-  var dre=$('f-dr'); if(dre)dre.value=num(S.dr);
+  var dbon=num(S.dmod)+originDamageBonus();
+  $('dmg-str').textContent=S.ddie+' + '+S.datt+(dbon?' + '+dbon:'')+(originDamageBonus()?' (Sword)':'');
+  var dre=$('f-dr'); if(dre&&document.activeElement!==dre)dre.value=num(S.dr);
+  var dt=$('dr-total'); if(dt)dt.textContent=S.tier?drTotal():'—';
+  var dh=$('dr-origin-hint'); if(dh)dh.textContent=originDR()?('('+originDR()+' Origin + extra)'):'';
 }
 function renderPlot(){ var el=$('plot-cur'); if(el)el.textContent=num(S.plot); }
 function bumpPlot(d){ S.plot=Math.max(0,num(S.plot)+d); renderPlot(); scheduleAutosave(); }
@@ -537,6 +558,32 @@ function renderPax(){
   sp.lines.forEach(function(l){host.innerHTML+='<div class="pax-line"><span>'+l.l+'</span><span>−'+l.v+'</span></div>';});
   host.innerHTML+='<div class="pax-line"><span class="pax-total">Available</span><span class="'+(avail<0?'pax-neg':'pax-total')+'">'+avail+'</span></div>';
   $('pax-avail').textContent=avail;$('pax-avail').className=avail<0?'pax-neg':'pax-total';
+}
+function renderArchFeatures(){
+  var host=$('archfeatures'); if(!host)return; host.innerHTML='';
+  if(!S.tier){return;}
+  var html='';
+  // Archetype: chosen abilities + drawback
+  var a=archObj(S.arch);
+  if(a){
+    var chosen=(S.archAbilities||[]);
+    html+='<div class="pw"><div class="pw-head"><div><span class="pn">'+esc(a.name)+'</span> <span class="gr">Archetype</span><div class="cat">'+esc(a.summary||'')+'</div></div></div><div class="pw-body">';
+    if(chosen.length){
+      (a.abilities||[]).forEach(function(ab){ if(chosen.indexOf(ab.name)<0)return;
+        html+='<div class="abil"><b>'+esc(ab.name)+'</b><br>'+esc(ab.text)+'</div>'; });
+    } else { html+='<div class="abil" style="color:var(--muted);">No abilities chosen — pick '+archAbilityCap()+' in Create or Level.</div>'; }
+    if(a.drawback){ html+='<div class="abil" style="border-left:2px solid var(--jlu);"><b style="color:var(--jlu-dk);">Drawback · '+esc(a.drawback.name)+'</b><br>'+esc(a.drawback.text)+'</div>'; }
+    html+='</div></div>';
+  }
+  // Origin: features + limitation
+  var o=originObj(S.origin);
+  if(o){
+    html+='<div class="pw"><div class="pw-head"><div><span class="pn">'+esc(o.name)+'</span> <span class="gr">Origin</span><div class="cat">'+esc(o.summary||'')+'</div></div></div><div class="pw-body">';
+    (o.features||[]).forEach(function(f){ html+='<div class="abil"><b>'+esc(f.name)+'</b><br>'+esc(f.text)+'</div>'; });
+    if(o.limitation){ html+='<div class="abil" style="border-left:2px solid var(--jlu);"><b style="color:var(--jlu-dk);">Limitation</b><br>'+esc(o.limitation)+'</div>'; }
+    html+='</div></div>';
+  }
+  host.innerHTML=html;
 }
 function renderPowers(){
   var host=$('powers');host.innerHTML='';
@@ -583,7 +630,7 @@ function renderEquip(){
 }
 function renderAll(){
   renderIdentity();renderAttrs();renderResolve();renderConds();renderStatuses();renderPlot();renderCombat();renderPax();
-  renderPowers();renderKnowledge();renderTraits();renderLimitations();renderEquip();
+  renderArchFeatures();renderPowers();renderKnowledge();renderTraits();renderLimitations();renderEquip();
   $('f-weak').value=S.weakness||'';$('f-soul').value=S.soul||'';$('f-notes').value=S.notes||'';
   refreshWizardButtons();
 }
@@ -648,8 +695,8 @@ function rollD20Test(label,attrKey,extra){
   addLog((S.name||'Hero')+' · '+(label||'Test')+(attrKey?' · '+attrKey:''), total+outcome, detail, type);
 }
 function rollDamage(){
-  var faces=num(S.ddie.replace('1d',''))||6; var r=d(faces); var attr=attrVal(S.datt.toLowerCase()); var tot=r+attr+num(S.dmod);
-  addLog((S.name||'Hero')+' · Damage', tot, S.ddie+':'+r+' + '+S.datt+'('+(attr>=0?'+':'')+attr+')'+(num(S.dmod)?' +'+num(S.dmod):''), r===faces?'crit':'normal');
+  var faces=num(S.ddie.replace('1d',''))||6; var r=d(faces); var attr=attrVal(S.datt.toLowerCase()); var sword=originDamageBonus(); var tot=r+attr+num(S.dmod)+sword;
+  addLog((S.name||'Hero')+' · Damage', tot, S.ddie+':'+r+' + '+S.datt+'('+(attr>=0?'+':'')+attr+')'+(num(S.dmod)?' +'+num(S.dmod):'')+(sword?' +'+sword+' Sword':''), r===faces?'crit':'normal');
 }
 function quickRoll(faces){var r=d(faces);addLog('d'+faces,r,'d'+faces+':'+r,r===faces?'crit':r===1?'fumble':'normal');}
 
@@ -698,28 +745,53 @@ function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); }
 function renderLevelUp(){
   var lim=tierObj(S.tier).attrLimit||6, avail=paxAvailable();
   $('levelup-note').textContent='PAX available: '+avail+' / '+paxAwarded();
-  var h='<div class="m-lbl">PAX Awarded (Tier + earned)</div><input class="m-input" id="lv-awarded" type="number" value="'+paxAwarded()+'" oninput="lvAwarded(this.value)" style="width:120px;">';
+  // Tier advancement
+  var playT=TIERS.filter(function(t){return t.playable;});
+  var h='<div class="m-lbl">Tier — sets base stats, PAX, and caps</div><div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;flex-wrap:wrap;">'
+    + '<select class="m-input" id="lv-tier" onchange="lvTier(this.value)" style="max-width:220px;">'
+    + playT.map(function(t){return '<option value="'+esc(t.key)+'"'+(t.key===S.tier?' selected':'')+'>'+esc(t.key)+' — '+esc(t.name)+' ('+num(t.pax)+' PAX)</option>';}).join('')
+    + '</select><span class="m-hint" style="margin:0;">Attr cap +'+lim+' · Grade cap '+powerGradeCap()+'</span></div>';
+  h+='<div class="m-lbl">PAX Awarded (Tier + earned)</div><input class="m-input" id="lv-awarded" type="number" value="'+paxAwarded()+'" oninput="lvAwarded(this.value)" style="width:120px;">';
   h+='<div class="m-lbl">Attributes — 5 PAX per +3 (cap +'+lim+')</div>';
   ATTR_KEYS.forEach(function(k){
-    var name=k.charAt(0).toUpperCase()+k.slice(1), v=attrVal(k);
-    h+='<div class="lv-row"><span>'+name+'</span><button class="lv-step" onclick="lvAttr(\''+k+'\',-3)"'+(v<=0?' disabled':'')+'>−</button><span class="lv-val">'+(v>=0?'+':'')+v+'</span><button class="lv-step" onclick="lvAttr(\''+k+'\',3)"'+(v>=lim?' disabled':'')+'>+</button></div>';
+    var name=k.charAt(0).toUpperCase()+k.slice(1), v=attrBase(k), b=originAttrBonus(k);
+    h+='<div class="lv-row"><span>'+name+(b?' <span style="color:var(--jlu-dk);font-size:10px;">+'+b+' origin</span>':'')+'</span><button class="lv-step" onclick="lvAttr(\''+k+'\',-3)"'+(v<=0?' disabled':'')+'>−</button><span class="lv-val">'+(v>=0?'+':'')+v+'</span><button class="lv-step" onclick="lvAttr(\''+k+'\',3)"'+(v>=lim?' disabled':'')+'>+</button></div>';
   });
-  h+='<div class="m-lbl">Resolve bought — 2 PAX each (+1 max)</div>';
+  h+='<div class="m-lbl">Resolve bought — 2 PAX each</div>';
   h+='<div class="lv-row"><span>Bought Resolve</span><button class="lv-step" onclick="lvResBuy(-1)"'+(num(S.resBuy)<=0?' disabled':'')+'>−</button><span class="lv-val">'+num(S.resBuy)+'</span><button class="lv-step" onclick="lvResBuy(1)">+</button></div>';
-  h+='<div class="m-lbl">Powers</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-pw" style="flex:1;"></select><button class="m-btn" onclick="lvAddPower()">Add</button></div>';
-  S.powers.forEach(function(p,i){ var po=powerObj(p.name)||{}; var maxG=Math.max(1,(po.grades||[]).reduce(function(m,g){return Math.max(m,g.grade);},1));
+  // Archetype abilities (free — pick up to the Tier cap)
+  var a=archObj(S.arch);
+  if(a&&(a.abilities||[]).length){
+    var cap=archAbilityCap(), chosen=(S.archAbilities||[]);
+    h+='<div class="m-lbl">Archetype Abilities — choose '+cap+' ('+chosen.length+'/'+cap+', free)</div>';
+    (a.abilities||[]).forEach(function(ab,ix){
+      var on=chosen.indexOf(ab.name)>=0, full=chosen.length>=cap&&!on;
+      h+='<label class="lv-row" style="cursor:pointer;'+(full?'opacity:.45;':'')+'" title="'+esc(ab.text)+'"><span><input type="checkbox" onchange="lvToggleAbility('+ix+')"'+(on?' checked':'')+(full?' disabled':'')+' style="margin-right:6px;">'+esc(ab.name)+'</span><span></span><span></span><span></span></label>';
+    });
+  }
+  h+='<div class="m-lbl">Powers — Grade cap '+powerGradeCap()+' at Tier '+S.tier+(originObj(S.origin)&&!originObj(S.origin).canBuyOutsideKit?' · kit only':'')+'</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-pw" style="flex:1;"></select><button class="m-btn" onclick="lvAddPower()">Add</button></div>';
+  S.powers.forEach(function(p,i){ var po=powerObj(p.name)||{}; var dataMax=Math.max(1,(po.grades||[]).reduce(function(m,g){return Math.max(m,g.grade);},1)); var maxG=Math.min(dataMax,powerGradeCap());
     h+='<div class="lv-row"><span>'+esc(p.name)+(inKit(po)?'':' <span style="color:#df8a8a">×2</span>')+'</span><button class="lv-step" onclick="lvGrade('+i+',-1)"'+(num(p.grade)<=1?' disabled':'')+'>−</button><span class="lv-val">G'+num(p.grade)+'</span><button class="lv-step" onclick="lvGrade('+i+',1)"'+(num(p.grade)>=maxG?' disabled':'')+'>+</button><button class="lv-x" onclick="lvDelPower('+i+')">✕</button></div>';
   });
-  h+='<div class="m-lbl">Knowledge — 4 PAX each</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-kn" style="flex:1;"></select><button class="m-btn" onclick="lvAddKnow()">Add</button></div>';
-  S.knowledge.forEach(function(n,i){ h+='<div class="lv-row"><span>'+esc(n)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelKnow('+i+')">✕</button></div>'; });
-  h+='<div class="m-lbl">Traits — 4 PAX each</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-tr" style="flex:1;"></select><button class="m-btn" onclick="lvAddTrait()">Add</button></div>';
-  S.traits.forEach(function(n,i){ h+='<div class="lv-row"><span>'+esc(n)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelTrait('+i+')">✕</button></div>'; });
+  var kFree=freeKnowCount(), tFree=freeTraitCount();
+  h+='<div class="m-lbl">Knowledge — 4 PAX each'+(kFree?' ('+kFree+' free from Origin)':'')+'</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-kn" style="flex:1;"></select><button class="m-btn" onclick="lvAddKnow()">Add</button></div>';
+  S.knowledge.forEach(function(n,i){ h+='<div class="lv-row"><span>'+esc(n)+(i<kFree?' <span style="color:var(--jlu-dk);font-size:10px;">free</span>':'')+'</span><span></span><span></span><button class="lv-x" onclick="lvDelKnow('+i+')">✕</button></div>'; });
+  h+='<div class="m-lbl">Traits — 4 PAX each'+(tFree?' ('+tFree+' free from Origin)':'')+'</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-tr" style="flex:1;"></select><button class="m-btn" onclick="lvAddTrait()">Add</button></div>';
+  S.traits.forEach(function(n,i){ var gr=grantTraitNames().indexOf(n)>=0; h+='<div class="lv-row"><span>'+esc(n)+((gr||i<tFree)?' <span style="color:var(--jlu-dk);font-size:10px;">free</span>':'')+'</span><span></span><span></span><button class="lv-x"'+(gr?' disabled title="Granted by Origin"':' onclick="lvDelTrait('+i+')"')+'>✕</button></div>'; });
   h+='<div class="m-lbl">Limitations</div><div style="display:flex;gap:6px;margin-bottom:6px;"><select class="m-input" id="lv-lm" style="flex:1;"></select><button class="m-btn" onclick="lvAddLim()">Add</button></div>';
   S.limitations.forEach(function(l,i){ h+='<div class="lv-row"><span>'+esc(l.type)+'</span><span></span><span></span><button class="lv-x" onclick="lvDelLim('+i+')">✕</button></div>'; });
-  h+='<div class="m-lbl">Equipment — spend PAX</div><div style="margin-bottom:6px;"><button class="m-btn" onclick="openGearShop()">🛒 Buy Gear</button></div>';
-  S.equipment.forEach(function(e,i){ var c=equipCost(e); h+='<div class="lv-row"><span>'+esc(e.name)+(c?' <span style="color:#7db0f0">'+c+' PAX</span>':'')+'</span><span></span><span></span><button class="lv-x" onclick="lvDelEquip('+i+')">✕</button></div>'; });
+  h+='<div class="m-lbl">Equipment — spend PAX on Gear</div>';
+  var _lvCats=(typeof gearCats==='function')?gearCats():[];
+  h+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">'
+   + '<input class="m-input" id="lv-gear-q" placeholder="Search gear…" oninput="lvGearPaint()" style="flex:1;min-width:120px;">'
+   + ((_lvCats.length>1)?('<select class="m-input" id="lv-gear-cat" onchange="lvGearPaint()" style="max-width:150px;"><option value="">All categories</option>'+_lvCats.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select>'):'')
+   + '</div>';
+  h+='<div class="brow-list" id="lv-gear-list" style="max-height:200px;overflow:auto;border:1px solid var(--rule);border-radius:6px;"></div>';
+  h+='<div id="lv-gear-owned" style="display:flex;flex-direction:column;gap:5px;margin-top:6px;"></div>';
   $('levelup-body').innerHTML=h;
-  fillSel('lv-pw',POWERS.filter(function(p){return !S.powers.some(function(x){return x.name===p.name;});}),function(p){return p.name+' ('+p.paxPerGrade+' PAX'+(inKit(p)?'':' ×2')+')';});
+  lvGearPaint();
+  var canOutside=!originObj(S.origin)||originObj(S.origin).canBuyOutsideKit!==false;
+  fillSel('lv-pw',POWERS.filter(function(p){return !S.powers.some(function(x){return x.name===p.name;})&&(canOutside||inKit(p));}),function(p){return p.name+' ('+p.paxPerGrade+' PAX'+(inKit(p)?'':' ×2')+')';});
   fillSel('lv-kn',KNOW.filter(function(k){return S.knowledge.indexOf(k.name)<0;}),function(k){return k.name;});
   fillSel('lv-tr',TRAITSD.filter(function(t){return S.traits.indexOf(t.name)<0;}),function(t){return t.name;});
   fillSel('lv-lm',LIMS,function(l){return l.name;});
@@ -727,7 +799,18 @@ function renderLevelUp(){
 function fillSel(id,arr,fmt){var sel=$(id);if(!sel)return;sel.innerHTML='';arr.forEach(function(x){var o=document.createElement('option');o.value=x.name;o.textContent=fmt?fmt(x):x.name;sel.appendChild(o);});}
 function lvCommit(){renderAll();renderLevelUp();scheduleAutosave();}
 function lvAwarded(v){S.paxTotal=(String(v).trim()===''?null:num(v));lvCommit();}
-function lvAttr(k,d){var lim=tierObj(S.tier).attrLimit||6;var v=attrVal(k)+d;if(v<0)v=0;if(v>lim)v=lim;S.attrs[k]=v;lvCommit();}
+function lvTier(v){ if(!v||v===S.tier)return; S.tier=v; var lim=tierObj(v).attrLimit||6, gc=powerGradeCap();
+  ATTR_KEYS.forEach(function(k){ if(num(S.attrs[k])>lim)S.attrs[k]=lim; });   // clamp bought points to new cap
+  S.powers.forEach(function(p){ if(num(p.grade)>gc)p.grade=gc; });            // clamp grades to new Tier cap
+  if(S.resCur>resolveMax())S.resCur=resolveMax();                             // DR (origin) & Potency (Kryptonian) rescale automatically via derived helpers
+  lvCommit();
+}
+function lvToggleAbility(ix){ var a=archObj(S.arch); if(!a||!a.abilities||!a.abilities[ix])return; var name=a.abilities[ix].name;
+  if(!S.archAbilities)S.archAbilities=[]; var i=S.archAbilities.indexOf(name);
+  if(i>=0){S.archAbilities.splice(i,1);} else { if(S.archAbilities.length>=archAbilityCap())return; S.archAbilities.push(name); }
+  lvCommit();
+}
+function lvAttr(k,d){var lim=tierObj(S.tier).attrLimit||6;var v=attrBase(k)+d;if(v<0)v=0;if(v>lim)v=lim;S.attrs[k]=v;lvCommit();}
 function lvResBuy(d){S.resBuy=Math.max(0,num(S.resBuy)+d);lvCommit();}
 function lvAddPower(){var n=$('lv-pw').value;if(!n||S.powers.some(function(p){return p.name===n;}))return;S.powers.push({name:n,grade:1});lvCommit();}
 function lvGrade(i,d){var p=S.powers[i];if(!p)return;p.grade=Math.max(1,num(p.grade)+d);lvCommit();}
@@ -739,6 +822,35 @@ function lvDelTrait(i){S.traits.splice(i,1);lvCommit();}
 function lvAddLim(){var n=$('lv-lm').value;if(n){S.limitations.push({type:n,note:''});lvCommit();}}
 function lvDelLim(i){S.limitations.splice(i,1);lvCommit();}
 function lvDelEquip(i){S.equipment.splice(i,1);lvCommit();}
+function lvGearPaint(){
+  var host=$('lv-gear-list'); if(!host)return;
+  var q=(($('lv-gear-q')&&$('lv-gear-q').value)||'').toLowerCase().trim();
+  var cat=($('lv-gear-cat')&&$('lv-gear-cat').value)||'';
+  var items=gearItems().filter(function(it){ if(cat&&(it.cat||'')!==cat)return false; if(q&&(it.name+' '+(it.meta||'')+' '+(it.desc||'')).toLowerCase().indexOf(q)<0)return false; return true; });
+  host.innerHTML='';
+  if(!items.length){ host.innerHTML='<div class="brow-empty">No matches.</div>'; }
+  else items.forEach(function(it){
+    var can=paxAvailable()>=(it._cost||0);
+    var row=document.createElement('div'); row.className='brow-item';
+    row.innerHTML='<div class="brow-main"><div class="brow-name">'+esc(it.name)+(it.cost?'<span class="brow-cost">'+esc(it.cost)+'</span>':'')+'</div>'
+      +(it.meta?'<div class="brow-meta">'+esc(it.meta)+'</div>':'')+(it.desc?'<div class="brow-desc">'+esc(it.desc)+'</div>':'')+'</div>'
+      +'<button class="brow-add"'+(can?'':' disabled title="Not enough PAX"')+'>'+(can?'Buy':'✕')+'</button>';
+    var btn=row.querySelector('.brow-add');
+    if(can) btn.onclick=function(){ gearAddTo(S.equipment,it._e); renderEquip();renderPax();scheduleAutosave(); lvGearPaint(); };
+    host.appendChild(row);
+  });
+  var own=$('lv-gear-owned'); if(own){
+    own.innerHTML='';
+    if(!S.equipment.length){ own.innerHTML='<div class="brow-empty" style="color:#8ba0c0;">No gear yet — optional.</div>'; }
+    else S.equipment.forEach(function(e,i){
+      var c=equipCost(e); var r=document.createElement('div'); r.className='gear-row';
+      r.innerHTML='<span>'+esc(e.name)+(c?' <span style="color:#7db0f0">'+c+' PAX</span>':'')+'</span><button class="row-x" style="color:#df8a8a;background:none;border:none;cursor:pointer;font-size:13px;">✕</button>';
+      r.querySelector('.row-x').onclick=function(){ S.equipment.splice(i,1); renderEquip();renderPax();scheduleAutosave(); lvGearPaint(); };
+      own.appendChild(r);
+    });
+  }
+  var nt=$('levelup-note'); if(nt) nt.textContent='PAX available: '+paxAvailable()+' / '+paxAwarded();
+}
 function lvRefresh(){ if($('levelup-overlay').classList.contains('open'))renderLevelUp(); }
 
 /* ═══ tabs / theme / persistence ═══ */
