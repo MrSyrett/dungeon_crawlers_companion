@@ -11,6 +11,7 @@
 :root {
   --bg:#e8e4e0;--paper:#f5f3f0;--ink:#1a1a1a;--muted:#555;--rule:#b0a898;
   --red:#c0251e;--gold:#c8a020;--border:#2a2a2a;--section-hdr:#1a1a1a;
+  --dcc-dk:#9e1e18;--dcc-lt:#f2dad8;
   --box:#ede9e4;--input-bg:#fff;--input-border:#888;
   --log-bg:#111;--log-text:#e8e4dc;
 }
@@ -336,6 +337,7 @@ body.dark {
   --bg:#1a1a1e; --paper:#242428; --ink:#e8e4dc; --muted:#aaa; --rule:#3a3a42;
   --border:#4a4a52; --section-hdr:#0a0a0a; --box:#2e2e36; --input-bg:#1e1e24;
   --input-border:#4a4a52;
+  --dcc-dk:#eb8a83; --dcc-lt:#3a2422;
 }
 body.dark .sheet{border-color:#4a4a52;}
 body.dark .hdr-logo{background:#0a0a0a;}
@@ -439,6 +441,88 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 .fl-btn{flex:0 0 auto;background:#c8a020;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
 .fl-btn:hover:not(:disabled){background:#e0b83a;}
 .fl-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
+
+/* ══════════ GOLD-STANDARD SKIN (Dungeon Crawler Carl) ══════════ */
+/* 1 — framed sheet */
+.sheet{border:3px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 12px 36px rgba(20,20,28,.20);max-width:1000px;}
+body.dark .sheet{border-color:#4a4a52;}
+
+/* 3 — header banner: game name + character name on top, meta underneath */
+.hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,#7a140f,#c0251e);padding:14px 18px 15px;border-bottom:none;}
+body.dark .hdr-row{background:linear-gradient(120deg,#7a140f,#c0251e);}
+.hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
+.hdr-logo{background:transparent;padding:0;min-width:0;display:block;align-items:flex-start;justify-content:flex-start;}
+.lg-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;line-height:1;color:#fff;text-transform:uppercase;letter-spacing:.02em;}
+.lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:#7fc0f5;margin-top:4px;}
+.hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
+.hdr-field,.lockfield{border:1px solid rgba(255,255,255,.26);background:rgba(255,255,255,.10);border-radius:7px;min-width:0;padding:4px 9px;border-right:1px solid rgba(255,255,255,.26);}
+.hdr-field:nth-child(3),.hdr-field:nth-child(8){border-right:1px solid rgba(255,255,255,.26);}
+.hdr-field.name-primary{padding:5px 11px;}
+.hdr-metarow .lockfield{flex:1 1 0;}
+.hdr-field label,.lockfield label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.72);margin-bottom:2px;}
+.hdr-field input,.lockfield input{width:100%;border:none;background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:600;color:#fff;outline:none;padding:0;}
+body.dark .hdr-field input{color:#fff;border-bottom-color:transparent;}
+.hdr-field.name-primary input{font-size:17px;}
+.lockfield input{font-size:13px;}
+.hdr-field input::placeholder,.lockfield input::placeholder{color:rgba(255,255,255,.5);}
+.hdr-metarow .rest-btn{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.32);border-radius:5px;}
+.hdr-metarow .rest-btn:hover{background:rgba(255,255,255,.3);}
+
+/* 2 — card bubbles + gapped body */
+.sheet-body{padding:16px;display:flex;flex-direction:column;gap:14px;background:transparent;}
+.card{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(20,22,30,.07);}
+body.dark .card{background:#2a2a30;border-color:#3a3a42;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.body-row{display:flex;gap:14px;padding:0;border-bottom:none;align-items:flex-start;background:transparent;}
+.stats-col{width:200px;flex-shrink:0;border-right:none;display:flex;flex-direction:column;gap:14px;}
+.center-col{flex:1;display:flex;flex-direction:column;min-width:0;gap:14px;}
+
+/* section bars → transparent accent text + inset divider */
+.section-bar{position:relative;background:transparent;color:var(--dcc-dk);border-bottom:none;padding:7px 12px 6px;}
+.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--dcc-lt);}
+.section-bar.red{background:transparent;color:var(--dcc-dk);}
+#global-mod-toggle{background:var(--red);}
+
+/* hp / combat / attacks — drop the old hard dividers inside their cards */
+.hp-section{border-bottom:none;}
+.combat-section,.cond-row,.attacks-section{border-bottom:none;}
+.combat-side{border-left:1px solid var(--rule)!important;}
+
+/* dark bars inside cards → light accent */
+.skills-table th,.inv-table th,.comp-hdr{background:var(--box);color:var(--dcc-dk);}
+body.dark .skills-table th,body.dark .inv-table th,body.dark .comp-hdr{background:#22222a;color:var(--dcc-dk);}
+
+/* 4 — tabs become a card */
+.tabs-row{background:var(--box);border-bottom:2px solid var(--dcc-lt);}
+.tab-btn{color:var(--muted);border-right:1px solid var(--rule);}
+.tab-btn:hover:not(.active){color:var(--dcc-dk);background:var(--dcc-lt);}
+.tab-btn.active{background:var(--dcc-lt);color:var(--dcc-dk);border-bottom:2px solid var(--red);}
+body.dark .tabs-row{background:#22222a;}
+body.dark .tab-panel{background:transparent;}
+
+/* 4 — round the body + roll-log controls */
+.roll-btn,.add-btn,.evade-roll-btn,.atk-roll-btn,.skill-roll-btn,.skill-del-btn,.inv-del-btn,.mod-toggle,.rest-btn,#global-mod-toggle,.skill-info-btn,.hot-pin{border-radius:6px;}
+.notes-box,.comp-box,.gear-slot,.comp-acc textarea,.hotlist-card textarea,.skill-stat-sel,.skill-mod-input,.formula-total,.stat-input,.mana-input,.formula-input{border-radius:6px;}
+.log-clear,.log-action-btn,.dice-btn,.adv-btn,.dice-roll-btn,.dice-clear-btn{border-radius:6px;}
+.log-entry{border-radius:8px;}
+#log-collapse-btn{border-radius:6px 0 0 6px;}
+
+/* tweak pass — dark banner logo, rounded hotlist cells / pet pips / advancement mark */
+body.dark .hdr-logo{background:transparent;}
+body.dark .section-bar::after{background:#544c54;}
+.hotlist-card{border-radius:6px;}
+.comp-hb-pip{border-radius:5px;}
+.comp-stats input,.comp-box input,.comp-row input{border-radius:6px;}
+.comp-hb-val{border-radius:4px;}
+.skill-check{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);cursor:pointer;position:relative;vertical-align:middle;}
+.skill-check:checked{background:var(--red);border-color:var(--red);}
+.skill-check:checked::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-54%);color:#fff;font-size:12px;font-weight:900;line-height:1;}
+
+/* 6 — whole-sheet collapse */
+@media(max-width:1024px){
+  .body-row{flex-direction:column;align-items:stretch;}
+  .stats-col,.center-col{width:100%;}
+  .hdr-top{grid-template-columns:1fr;gap:9px;}
+}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -452,28 +536,33 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 
   <!-- HEADER -->
   <div class="hdr-row">
-    <div class="hdr-logo">
-      <div class="hdr-logo-text"><span>DCC</span>ROLEPLAYING<br>GAME</div>
+    <div class="hdr-top">
+      <div class="hdr-logo">
+        <div class="lg-word">Dungeon Crawler Carl</div>
+        <div class="lg-sub">Character Sheet</div>
+      </div>
+      <div class="hdr-field name-primary"><label>Character name</label><input type="text" id="f-name" placeholder="Character Name"></div>
     </div>
-    <div class="hdr-fields">
-      <div class="hdr-field" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Rest</label>
+    <div class="hdr-metarow">
+      <div class="lockfield" style="flex:1.4 1 0;"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
+      <div class="lockfield" style="flex:1.2 1 0;"><label>Class</label><input type="text" id="f-class"></div>
+      <div class="lockfield" style="flex:1.5 1 0;"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
+      <div class="lockfield"><label>Crawler #</label><input type="text" id="f-crawler"></div>
+      <div class="lockfield" style="flex:.6 1 0;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="text-align:center;"></div>
+      <div class="lockfield" style="flex:.6 1 0;"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
+      <div class="lockfield" style="flex:2 1 0;"><label>Rest</label>
         <div style="display:flex;gap:4px;">
           <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short Rest</button>
           <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long Rest</button>
         </div>
       </div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><input type="text" id="f-class"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Crawler #</label><input type="text" id="f-crawler"></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="text-align:center;"></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
     </div>
   </div>
 
+  <div class="sheet-body">
+
   <!-- HP BAR -->
-  <div class="hp-section">
+  <div class="hp-section card">
     <div class="hp-bar-wrap">
       <div class="hp-bar-label">Health Bar</div>
       <div class="hp-stack">
@@ -488,21 +577,21 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 
     <!-- STATS -->
     <div class="stats-col">
-      <div class="section-bar" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>Stats</span>
-        <button id="global-mod-toggle" onclick="toggleGlobalModSource()" style="background:var(--red);border:none;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;cursor:pointer;">ENH</button>
+      <div class="card">
+        <div class="section-bar" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Stats</span>
+          <button id="global-mod-toggle" onclick="toggleGlobalModSource()" style="background:var(--red);border:none;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;cursor:pointer;border-radius:6px;">ENH</button>
+        </div>
+        <div id="stats-list"></div>
       </div>
-      <div id="stats-list"></div>
     </div>
 
-    <!-- CENTER + RIGHT wrapper: flex column so hotlist fills space below -->
-    <div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+    <!-- CENTER -->
+    <div class="center-col">
 
-      <!-- TOP ROW: center-col + right-col side by side -->
-      <div style="display:flex;flex:0 0 auto;">
-
-        <!-- CENTER -->
-        <div class="center-col" style="flex:1;">
+      <!-- DEFENSE: Evade / DR / speeds / Mana + Buffs & Debuffs -->
+      <div class="card">
+        <div class="section-bar">Defense</div>
 
           <!-- EVADE / DR / EXTERNAL BUFFS -->
           <div class="combat-section" style="display:flex;gap:0;align-items:stretch;">
@@ -586,7 +675,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
           </div>
 
           <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
-          <div class="cond-row">
+          <div class="cond-row" style="border-top:1px solid var(--rule);">
             <div class="cond-stack">
               <div class="buffs-field cond-line">
                 <span class="mana-label cond-label">Buffs</span>
@@ -599,40 +688,40 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
             </div>
             <button type="button" class="rest-btn cond-roll" onclick="rollDoT()" title="Roll end-of-round damage for every active damage-over-time debuff (Blood Trail, Burned, Poisoned, Drowning, Sepsis).">Roll</button>
           </div>
+      </div><!-- end Defense card -->
 
-          <!-- ATTACKS -->
-          <div class="attacks-section">
-            <div class="section-bar">Attacks</div>
-            <table class="attacks-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th class="center">To Hit<span class="atk-sub">Rank</span></th>
-                  <th class="center">Stat Mod<span class="atk-sub">To Hit &amp; Dmg</span></th>
-                  <th class="center">Damage<span class="atk-sub">Dice</span></th>
-                  <th>Effects</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="attacks-body"></tbody>
-            </table>
-          </div>
+      <!-- ATTACKS -->
+      <div class="card">
+        <div class="attacks-section">
+          <div class="section-bar">Attacks</div>
+          <table class="attacks-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th class="center">To Hit<span class="atk-sub">Rank</span></th>
+                <th class="center">Stat Mod<span class="atk-sub">To Hit &amp; Dmg</span></th>
+                <th class="center">Damage<span class="atk-sub">Dice</span></th>
+                <th>Effects</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="attacks-body"></tbody>
+          </table>
+        </div>
+      </div><!-- end Attacks card -->
 
-        </div><!-- end center-col -->
-
-      </div><!-- end top row -->
-
-      <!-- HOTLIST fills remaining height below attacks -->
-      <div style="flex:1;border-top:1px solid var(--rule);min-height:120px;display:flex;flex-direction:column;">
-        <div class="section-bar red" style="flex-shrink:0;">Hotlist</div>
-        <div id="hotlist-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;flex:1;padding:8px 10px;"></div>
-      </div>
-
-    </div><!-- end center+right wrapper -->
+    </div><!-- end center-col -->
 
   </div><!-- end body-row -->
 
+  <!-- HOTLIST (full width) -->
+  <div class="card">
+    <div class="section-bar red">Hotlist</div>
+    <div id="hotlist-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px 10px;"></div>
+  </div>
+
   <!-- TABS -->
+  <div class="card tabs-card">
   <div class="tabs-row">
     <button class="tab-btn active" data-tab="skills" onclick="switchTab('skills')">Skills</button>
     <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">Inventory</button>
@@ -775,6 +864,9 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
       <div class="notes-box" style="grid-column:1/-1;"><label>Notes</label><textarea style="height:110px;" placeholder=""></textarea></div>
     </div>
   </div>
+
+  </div><!-- end tabs-card -->
+  </div><!-- end sheet-body -->
 
 </div><!-- end sheet -->
 </div><!-- end sheet-wrap -->
