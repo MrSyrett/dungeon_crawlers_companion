@@ -750,22 +750,20 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .npc-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 10px; padding: 10px 12px; min-width: 0; overflow: hidden; }
 .npc-card.defeated { opacity: 0.5; border-left-color: var(--muted); }
 .npc-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; min-width: 0; }
-.npc-name-input {
-  flex: 1; min-width: 0; background: transparent; border: none; color: var(--white);
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; padding: 2px 0;
-  text-overflow: ellipsis;
+/* Read-only creature name — matches the generator/prep card's name. */
+.npc-name {
+  flex: 1; min-width: 0; color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.04em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.npc-name-input:focus { border-bottom: 1px solid var(--mid); }
-.npc-tag-input { width: 70px; background: transparent; border: none; border-bottom: 1px dotted var(--border); color: var(--mid); font-size: 10px; text-align: right; padding: 2px 0; }
 .npc-del { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; flex-shrink: 0; }
 .npc-del:hover { color: var(--red-light); }
 
-.npc-hp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
-.npc-hp-input { width: 48px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; padding: 5px 2px; }
+.npc-hp-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.npc-hp-lbl { align-self: center; }
+.npc-hp-input { width: 46px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; padding: 5px 2px; }
 .npc-hp-slash { color: var(--muted); font-size: 13px; }
-/* +Status sits left, right after the HP boxes; the SD/DCC mode select takes the
-   right end of the same row (where +Status used to be). */
-.npc-hp-row .npc-mode-select, .npc-seg-setup .npc-mode-select { margin-left: auto; }
+.npc-hp-row .npc-hp-adjust { margin-left: auto; }
 /* Second HP line: the ±HP buttons left-aligned, with the tag field beside them. */
 .npc-hp-second { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
 .npc-hp-adjust { display: flex; gap: 3px; margin-left: 0; justify-content: flex-start; }
@@ -783,20 +781,28 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .npc-hp-bar-fill { height: 100%; transition: width 0.2s ease, background 0.2s ease; }
 /* Bestiary stat block carried onto a combat card. Same responsive-grid trick as
    the generator cards, so six ability mods stay readable in a quarter pane. */
-.npc-mon { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 7px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.npc-mon-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(52px, 1fr)); gap: 3px 8px; min-width: 0; }
+/* The bestiary stat block is rendered to read IDENTICALLY to the creature card
+   the generator / Adventure prep shows — same inline "LABEL value" cells, same
+   grid, same attack rows — so a monster looks the same whether you're browsing
+   it or running it. The only differences are interactive: abilities/attacks are
+   roll buttons, and HP is adjustable (handled above the block). */
+.npc-mon { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.npc-mon-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin: -2px 0 1px; overflow-wrap: anywhere; }
+.npc-mon-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)); gap: 3px 10px; min-width: 0; }
 .npc-mon-stat { display: flex; align-items: baseline; gap: 4px; font-size: 12px; color: var(--light); min-width: 0; }
 .npc-mon-stat > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.npc-mon-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
+.npc-mon-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
 .npc-mon-row { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--light); line-height: 1.45; min-width: 0; }
 .npc-mon-row > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-/* Rollable ability cells and attack buttons — they send to the Dice tray. */
-.npc-mon-roll { background: none; border: 1px solid transparent; cursor: pointer; padding: 1px 3px; text-align: left; font: inherit; }
+/* Ability cells: same inline cell, but a roll button (d20 + mod → Dice tray). */
+.npc-mon-roll { background: none; border: 1px solid transparent; border-radius: 4px; cursor: pointer; padding: 0 3px; margin: 0 -3px; text-align: left; font: inherit; }
 .npc-mon-roll:hover { border-color: var(--gold); background: var(--panel-2); }
 .npc-mon-roll:active { background: var(--border); }
-.npc-mon-atks { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.npc-mon-atk { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; font-size: 12px; color: var(--light); min-width: 0; }
-.npc-mon-atk-text { flex: 1 1 130px; min-width: 0; overflow-wrap: anywhere; }
+.npc-mon-roll > span:last-child { color: var(--white); }
+/* Attacks: a divider, an ATK label, then rows of "text  [to-hit / dmg]". */
+.npc-mon-atks { display: flex; flex-direction: column; gap: 3px; min-width: 0; border-top: 1px solid var(--border); padding-top: 6px; }
+.npc-mon-atk { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--light); line-height: 1.5; min-width: 0; }
+.npc-mon-atk-text { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
 .npc-mon-btn {
   flex-shrink: 0; background: var(--panel-2); border: 1px solid var(--border); color: var(--gold);
   font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
@@ -813,7 +819,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .npc-mon-trait-name { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--gold); }
 .npc-mon-traits .npc-mon-btn { margin: 0 1px; padding: 0 5px; min-width: 0; vertical-align: baseline; }
 .npc-mon-attack { min-width: 52px; }
-.pane.narrow .npc-mon-stats { grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap: 2px 6px; }
+.pane.narrow .npc-mon-stats { grid-template-columns: repeat(auto-fit, minmax(52px, 1fr)); gap: 3px; }
 
 /* Monster picker (Trackers → + Monster) */
 /* Bestiary picker is a popup overlay inside the Combat window — it never steals
@@ -1508,23 +1514,26 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   min-width: 0 !important; white-space: nowrap; letter-spacing: 0 !important;
   padding-left: 0 !important; padding-right: 0 !important;
 }
-/* ══ REORDER HANDLES (tracker + combat cards) ════════════════════════════ */
-.card-reorder { display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; flex-shrink: 0; }
-.card-move { flex: 0 0 auto; }
-.card-drag {
-  cursor: grab; color: var(--muted); font-size: 20px; line-height: 1;
-  padding: 2px 4px; user-select: none; touch-action: none;
+/* ══ REORDER GRIP (tracker + combat cards) ═══════════════════════════════ */
+.card-grip {
+  flex: 0 0 auto; background: transparent; border: 1px solid transparent; color: var(--muted);
+  cursor: grab; width: 22px; height: 26px; padding: 0; border-radius: 5px; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; touch-action: none;
 }
-.card-drag:active { cursor: grabbing; color: var(--gold); }
-.card-move {
-  background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
-  cursor: pointer; width: 34px; height: 28px; font-size: 12px; line-height: 1;
-  border-radius: 5px; display: flex; align-items: center; justify-content: center;
+.card-grip:hover { color: var(--gold); border-color: var(--border); background: var(--panel-2); }
+.card-grip:active { cursor: grabbing; }
+.tracker-card.dragging, .npc-card.dragging { opacity: 0.4; }
+/* Insert marker: a bright bar on the leading / trailing edge of the hovered card. */
+.tracker-card, .npc-card { position: relative; }
+.tracker-card.drop-before::before, .npc-card.drop-before::before,
+.tracker-card.drop-after::after, .npc-card.drop-after::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 4px;
+  background: var(--gold); box-shadow: 0 0 8px var(--gold); z-index: 3;
 }
-.card-move:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
-.card-move:disabled { opacity: 0.3; cursor: default; }
-.tracker-card.dragging, .npc-card.dragging { opacity: 0.45; }
-.tracker-card.drop-target, .npc-card.drop-target { outline: 2px dashed var(--gold); outline-offset: 2px; }
+.tracker-card.drop-before::before, .npc-card.drop-before::before { left: 0; }
+.tracker-card.drop-after::after, .npc-card.drop-after::after { right: 0; }
+.tracker-card.drop-before, .npc-card.drop-before,
+.tracker-card.drop-after, .npc-card.drop-after { outline: 1px solid var(--gold); outline-offset: -1px; }
 
 /* ══ DICE: hard-lock the tray to ONE row, whatever the width ══════════════ */
 .dice-btn-row, .pane.narrow .dice-btn-row {
@@ -2692,7 +2701,7 @@ GMScenes.renderPins();
         <div class="cbt-tracker-list"></div>
         <div class="cbt-empty cbt-trackers-empty">
           <div class="cbt-empty-text">Nothing tracked yet</div>
-          <div class="cbt-empty-sub">Add timers, round trackers, or combatants &mdash; use &#9650;&#9660; to reorder</div>
+          <div class="cbt-empty-sub">Add timers, round trackers, or combatants &mdash; drag the grip to reorder</div>
         </div>
       </div>
     </div>
@@ -5372,67 +5381,64 @@ function init_trackers(root) {
     return colors[Math.min(3, Math.floor((index * 4) / total))];
   }
 
-  // ── Reordering ──
-  function moveItem(id, delta) {
-    const i = items.findIndex(x => x.id === id);
-    const j = i + delta;
-    if(i < 0 || j < 0 || j >= items.length) return;
-    [items[i], items[j]] = [items[j], items[i]];
+  // ── Reordering (drag-and-drop, insert semantics) ──
+  // Cards live in a wrapping grid, so ▲▼ no longer map to what the GM sees. A
+  // grip handle drags a card and drops it into another card's slot, shifting the
+  // rest along (classic reorder-by-insert). The grip toggles the card's
+  // `draggable` flag so text selection inside the inputs still works normally.
+  let dragId = null;
+  function gripHtml() {
+    return `<button class="card-grip" title="Drag to reorder" aria-label="Drag to reorder"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9 5.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0Zm0 6.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0Zm0 6.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0ZM18.2 5.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0Zm0 6.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0Zm0 6.5a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0Z"/></svg></button>`;
+  }
+  function clearDropMarks() {
+    list.querySelectorAll('.drop-before, .drop-after').forEach(el => el.classList.remove('drop-before', 'drop-after'));
+  }
+  // Insert-before when the pointer is in the leading half of the target card
+  // (left half in a row; the grid flows left-to-right then wraps).
+  function isBeforeTarget(e, card) {
+    const r = card.getBoundingClientRect();
+    return e.clientX < r.left + r.width / 2;
+  }
+  function moveBeside(movedId, targetId, before) {
+    if(movedId === targetId) return;
+    const from = items.findIndex(x => x.id === movedId);
+    if(from < 0) return;
+    const [moved] = items.splice(from, 1);
+    let target = items.findIndex(x => x.id === targetId);
+    if(target < 0) { items.splice(from, 0, moved); return; }   // target vanished — undo
+    items.splice(before ? target : target + 1, 0, moved);
     render();
+    if(window.__ddScheduleSave) window.__ddScheduleSave();
   }
-  function reorderHtml(item, idx) {
-    const first = idx === 0, last = idx === items.length - 1;
-    // Stacked ▲▼ in one narrow column — keeps the delete button on the card
-    return `
-      <div class="card-reorder">
-        <button class="card-move card-up" ${first ? 'disabled' : ''} title="Move up">&#9650;</button>
-        <button class="card-move card-down" ${last ? 'disabled' : ''} title="Move down">&#9660;</button>
-      </div>`;
-  }
-  function wireReorder(card, item) {
-    card.querySelector('.card-up')?.addEventListener('click', () => moveItem(item.id, -1));
-    card.querySelector('.card-down')?.addEventListener('click', () => moveItem(item.id, +1));
-  }
-
-  // ── Tag field + Status list (NPC cards) ──
-  // The tag sits on the same row as the + Status button; statuses stack below.
-  function statusListHtml(entity, opts) {
-    const withAdd = !opts || opts.withAddButton !== false;
-    // The tag sits inline beside the HP adjust buttons for standard-mode cards;
-    // only render it here (in the status bar) when that inline spot isn't used.
-    const withTag = !opts || opts.withTag !== false;
-    const rows = (entity.statuses || []).map(s => `
-      <div class="status-row" data-status-id="${s.id}">
-        <input type="checkbox" class="status-check" ${s.checked ? 'checked' : ''}>
-        <input type="text" class="status-text" value="${escAttr(s.text)}" placeholder="Status, condition, recharge...">
-        <button class="status-del" title="Remove">&#10005;</button>
-      </div>
-    `).join('');
-    return `
-      <div class="status-bar">
-        ${withAdd ? '<button class="btn small ghost status-add">+ Status</button>' : ''}
-        ${withTag ? `<input type="text" class="npc-tag-input" value="${escAttr(entity.tag || '')}" placeholder="Tag (elite, minion, ...)">` : ''}
-      </div>
-      <div class="status-list">${rows}</div>`;
-  }
-  function wireStatusList(card, entity) {
-    if(!entity.statuses) entity.statuses = [];
-    if(!entity._nextStatusId) entity._nextStatusId = 1;
-    card.querySelector('.npc-tag-input')?.addEventListener('input', e => { entity.tag = e.target.value; });
-    card.querySelectorAll('.status-row').forEach(row => {
-      const id = parseInt(row.dataset.statusId);
-      const st = entity.statuses.find(x => x.id === id);
-      if(!st) return;
-      row.querySelector('.status-check').addEventListener('change', e => { st.checked = e.target.checked; });
-      row.querySelector('.status-text').addEventListener('input',  e => { st.text = e.target.value; });
-      row.querySelector('.status-del').addEventListener('click', () => {
-        entity.statuses = entity.statuses.filter(x => x.id !== id);
-        render();
-      });
+  function wireDrag(card, item) {
+    const grip = card.querySelector('.card-grip');
+    if(grip) {
+      const arm = () => { card.draggable = true; };
+      grip.addEventListener('mousedown', arm);
+      grip.addEventListener('touchstart', arm, { passive: true });
+    }
+    card.addEventListener('dragstart', e => {
+      dragId = item.id;
+      card.classList.add('dragging');
+      if(e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(item.id)); } catch(_){} }
     });
-    card.querySelector('.status-add')?.addEventListener('click', () => {
-      entity.statuses.push({ id: entity._nextStatusId++, checked: false, text: '' });
-      render();
+    card.addEventListener('dragend', () => { card.draggable = false; card.classList.remove('dragging'); clearDropMarks(); dragId = null; });
+    card.addEventListener('dragover', e => {
+      if(dragId == null || dragId === item.id) return;
+      e.preventDefault();
+      if(e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      const before = isBeforeTarget(e, card);
+      clearDropMarks();
+      card.classList.add(before ? 'drop-before' : 'drop-after');
+    });
+    card.addEventListener('dragleave', e => { if(e.target === card) card.classList.remove('drop-before', 'drop-after'); });
+    card.addEventListener('drop', e => {
+      if(dragId == null || dragId === item.id) return;
+      e.preventDefault();
+      const before = isBeforeTarget(e, card);
+      const moved = dragId;
+      clearDropMarks();
+      moveBeside(moved, item.id, before);
     });
   }
 
@@ -5530,9 +5536,7 @@ function init_trackers(root) {
       : monStat(st.label, st.val)).join('');
     const lines = (g.lines || []).map(l => `<div class="npc-mon-atk"><span class="npc-mon-label">${escAttr(l.label)}</span><span class="npc-mon-atk-text">${escAttr(l.text)}</span>` +
       (l.roll ? `<button class="npc-mon-btn npc-mon-roll" data-roll="${escAttr(l.roll)}" data-rolllabel="${escAttr(l.label)}" title="Roll ${escAttr(l.roll)}">${escAttr(l.roll)}</button>` : '') + '</div>').join('');
-    const statsOpen = n.statsOpen !== false;
-    const stats = `<button class="npc-mon-stats-btn">${statsOpen ? '&#9662;' : '&#9656;'} Stats</button>` +
-      (statsOpen ? `<div class="npc-mon-stats-wrap"><div class="npc-mon-stats">${chips}</div></div>` : '');
+    const stats = `<div class="npc-mon-stats">${chips}</div>`;
     // MMRPG traits/tags/powers as clickable chips (detail popovers) — replaces the
     // plain text lines used on the browse cards.
     const infoChip = (nm, kind) => `${escAttr(nm)}<button class="mmrpg-info" data-ik="${kind}" data-in="${escAttr(nm)}" title="Details" aria-label="Show details">&#9432;</button>`;
@@ -5543,8 +5547,7 @@ function init_trackers(root) {
       : '';
     const atks = (lines || mchips) ? `<div class="npc-mon-atks" style="min-width:0;max-width:100%;">${mchips}${lines}</div>` : '';
     const traits = (g.notes || []).length
-      ? `<button class="npc-mon-traits-btn">${n.traitsOpen ? '&#9662;' : '&#9656;'} Notes</button>` +
-        (n.traitsOpen ? `<div class="npc-mon-traits">${g.notes.map(t => '<div>' + escAttr(t) + '</div>').join('')}</div>` : '')
+      ? `<div class="npc-mon-traits"><span class="npc-mon-label">Notes</span>${g.notes.map(t => '<div>' + escAttr(t) + '</div>').join('')}</div>`
       : '';
     return `<div class="npc-mon">${stats}${atks}${traits}</div>`;
   }
@@ -5552,9 +5555,9 @@ function init_trackers(root) {
   function dccMonsterBlockHtml(n) {
     const mo = n.dmon;
     if(!mo) return '';
+    const sub = mo.role ? `<div class="npc-mon-sub">${escAttr(mo.role)}</div>` : '';
     const meta = [
       (mo.level !== '' && mo.level != null) ? monStat('LV', mo.level) : '',
-      mo.role ? monStat('Role', mo.role) : '',
       (mo.size !== '' && mo.size != null) ? monStat('Size', mo.size) : '',
       (mo.tags && mo.tags.length) ? monStat('Tags', mo.tags.join(', ')) : ''
     ].join('');
@@ -5571,13 +5574,7 @@ function init_trackers(root) {
       return monRollStat(abbr, modStr);
     };
     const abil = ['STR','INT','CON','DEX','CHA'].map(k => statCell(k, k)).join('');
-    const statsOpen = n.statsOpen !== false;
-    const stats = `<button class="npc-mon-stats-btn">${statsOpen ? '&#9662;' : '&#9656;'} Stats</button>` +
-      (statsOpen ? `<div class="npc-mon-stats-wrap">
-        <div class="npc-mon-stats">${meta}</div>
-        <div class="npc-mon-stats">${def}</div>
-        <div class="npc-mon-stats">${abil}</div>
-      </div>` : '');
+    const stats = `<div class="npc-mon-stats">${meta}</div><div class="npc-mon-stats">${def}</div><div class="npc-mon-stats">${abil}</div>`;
     // Attacks — each rolls to-hit + damage into the dice tray (reusing the
     // .npc-mon-attack wiring). Riders/effects sit under the roll button.
     const atks = (mo.attacks || []).map(a => {
@@ -5594,10 +5591,9 @@ function init_trackers(root) {
     }).join('');
     const atkBlock = atks ? `<div class="npc-mon-atks"><span class="npc-mon-label">ATK</span>${atks}</div>` : '';
     const traits = (mo.notes && mo.notes.length)
-      ? `<button class="npc-mon-traits-btn">${n.traitsOpen ? '&#9662;' : '&#9656;'} Traits</button>` +
-        (n.traitsOpen ? `<div class="npc-mon-traits">${mo.notes.map(t => `<div class="npc-mon-trait">${escAttr(t)}</div>`).join('')}</div>` : '')
+      ? `<div class="npc-mon-traits"><span class="npc-mon-label">Traits</span>${mo.notes.map(t => `<div class="npc-mon-trait">${escAttr(t)}</div>`).join('')}</div>`
       : '';
-    return `<div class="npc-mon">${stats}${atkBlock}${traits}</div>`;
+    return `<div class="npc-mon">${sub}${stats}${atkBlock}${traits}</div>`;
   }
 
   function monStat(label, val) {
@@ -5612,6 +5608,7 @@ function init_trackers(root) {
     return `<button class="npc-mon-stat npc-mon-roll" data-roll="1d20${/^[+-]/.test(mod) ? mod : '+' + mod}" data-rolllabel="${escAttr(label)} check" title="Roll d20 ${escAttr(mod)}">
       <span class="npc-mon-label">${escAttr(label)}</span><span>${escAttr(mod)}</span></button>`;
   }
+
 
   // Monster attack lines read like:
   //   "1 club +0 (1d4) or 1 shortbow (far) +1 (1d4)"
@@ -5692,32 +5689,24 @@ function init_trackers(root) {
   function monsterBlockHtml(n) {
     const mo = n.mon;
     if(!mo) return '';
-    // HP is deliberately absent: the bar above already shows it, and dropping it
-    // leaves room for Type on the same line.
+    // Creature type reads as a subtitle under the name (like a printed stat
+    // block) rather than a cramped grid cell where a word like "Monster" wraps.
+    const sub = mo.ctype ? `<div class="npc-mon-sub">${escAttr(mo.ctype)}</div>` : '';
+    // HP is deliberately absent: the bar above already shows it.
     const head = [monStat('AC', mo.ac), monStat('MV', mo.mv),
-                  monStat('LV', mo.lv), monStat('AL', mo.al), monStat('Type', mo.ctype)].join('');
+                  monStat('LV', mo.lv), monStat('AL', mo.al)].join('');
     const abil = [monRollStat('STR', mo.s), monRollStat('DEX', mo.d), monRollStat('CON', mo.c),
                   monRollStat('INT', mo.i), monRollStat('WIS', mo.w), monRollStat('CHA', mo.ch)].join('');
     const atk = mo.atk
       ? `<div class="npc-mon-atks"><span class="npc-mon-label">ATK</span>${attackRowsHtml(n.name || 'Monster', mo.atk)}</div>` : '';
-    // Stats (AC/MV/LV/AL/Type + ability mods) fold away to save space in a
-    // crowded initiative list. Open by default; the state is per-combatant and
-    // is saved. Attacks are deliberately left outside this fold — they stay
-    // visible so they're always one tap from the dice tray.
-    const statsOpen = n.statsOpen !== false;
-    const stats = `<button class="npc-mon-stats-btn">${statsOpen ? '&#9662;' : '&#9656;'} Stats</button>` +
-      (statsOpen ? `<div class="npc-mon-stats-wrap">
-        <div class="npc-mon-stats">${head}</div>
-        <div class="npc-mon-stats">${abil}</div>
-      </div>` : '');
-    // Traits can run to a paragraph, which makes a combat list hard to scan, so
-    // they fold away. The open/closed state is per-combatant and is saved.
+    // The full block is always visible so a monster reads exactly like its
+    // Adventure-prep / generator card.
+    const stats = `<div class="npc-mon-stats">${head}</div><div class="npc-mon-stats">${abil}</div>`;
     const traits = mo.notes
-      ? `<button class="npc-mon-traits-btn">${n.traitsOpen ? '&#9662;' : '&#9656;'} Traits</button>` +
-        (n.traitsOpen ? `<div class="npc-mon-traits">${traitsHtml(n.name || 'Monster', mo.notes)}</div>` : '')
+      ? `<div class="npc-mon-traits"><span class="npc-mon-label">Traits</span>${traitsHtml(n.name || 'Monster', mo.notes)}</div>`
       : '';
     return `<div class="npc-mon">
-        ${stats}
+        ${sub}${stats}
         ${atk}${traits}
       </div>`;
   }
@@ -5764,7 +5753,7 @@ function init_trackers(root) {
 
     card.innerHTML = `
       <div class="tracker-top">
-        ${reorderHtml(t, idx)}
+        ${gripHtml()}
         <input type="text" class="tracker-name-input" value="${escAttr(t.name)}" placeholder="Tracker name...">
         ${displayHtml}
         <button class="tracker-collapse" title="${collapsed ? 'Show controls' : 'Hide controls'}" aria-expanded="${!collapsed}">${collapsed ? '&#9662;' : '&#9652;'}</button>
@@ -5814,14 +5803,6 @@ function init_trackers(root) {
     const card = document.createElement('div');
     card.dataset.id = n.id;
     const mode = n.hpMode || 'standard';
-    // SD/DCC mode select rides the right end of the HP row (bestiary monsters
-    // are always standard, so they don't get one).
-    const modeSelectHtml = (n.mon || n.dmon || n.gmon) ? '' : `<select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
-        <option value="standard" ${mode==='standard'?'selected':''}>SD</option>
-        <option value="dcc"      ${mode==='dcc'     ?'selected':''}>DCC</option>
-        <option value="ace"      ${mode==='ace'     ?'selected':''}>ACE</option>
-        <option value="sw"       ${mode==='sw'      ?'selected':''}>SW</option>
-      </select>`;
     let hpBlockHtml = '', defeated = false;
 
     if(mode === 'standard') {
@@ -5829,20 +5810,16 @@ function init_trackers(root) {
       defeated = n.hpCurrent <= 0;
       hpBlockHtml = `
         <div class="npc-hp-row">
+          <span class="npc-mon-label npc-hp-lbl">HP</span>
           <input type="number" class="npc-hp-input npc-hp-current" value="${n.hpCurrent}">
           <span class="npc-hp-slash">/</span>
           <input type="number" class="npc-hp-input npc-hp-max" value="${n.hpMax}">
-          <button class="btn small ghost status-add">+ Status</button>
-          ${modeSelectHtml}
-        </div>
-        <div class="npc-hp-second">
           <div class="npc-hp-adjust">
             <button class="npc-hp-btn dmg npc-dmg5" title="-5 HP">&minus;5</button>
             <button class="npc-hp-btn dmg npc-dmg1" title="-1 HP">&minus;1</button>
             <button class="npc-hp-btn heal npc-heal1" title="+1 HP">+1</button>
             <button class="npc-hp-btn heal npc-heal5" title="+5 HP">+5</button>
           </div>
-          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (elite, minion, ...)">
         </div>
         <div class="npc-hp-bar-track"><div class="npc-hp-bar-fill" style="width:${pct}%;background:${npcHpColor(pct)};"></div></div>
       `;
@@ -5857,10 +5834,6 @@ function init_trackers(root) {
         <div class="npc-seg-setup">
           <span class="npc-mon-label" style="align-self:center;">Health</span>
           <input type="number" class="npc-hp-input npc-ace-max" min="1" max="40" value="${max}" title="Max Health">
-          <button class="btn small ghost status-add">+ Status</button>
-        </div>
-        <div class="npc-hp-second">
-          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (mook, villain, ...)">
         </div>
         <div class="npc-seg-row">${pips}</div>
       `;
@@ -5875,10 +5848,6 @@ function init_trackers(root) {
         <div class="npc-seg-setup">
           <span class="npc-mon-label" style="align-self:center;">Wounds</span>
           <span style="font-size:11px;color:var(--muted);align-self:center;">${w === 'none' ? 'unhurt' : w === 'stunned' ? '−1D this round and next' : w === 'wounded' ? '−1D to everything' : w === 'incapacitated' ? 'unconscious' : 'mortally wounded — roll each round'}</span>
-          <button class="btn small ghost status-add">+ Status</button>
-        </div>
-        <div class="npc-hp-second">
-          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (trooper, officer, ...)">
         </div>
         <div class="npc-seg-row">${track}</div>
       `;
@@ -5893,14 +5862,10 @@ function init_trackers(root) {
           </button>`).join('');
       hpBlockHtml = `
         <div class="npc-seg-setup">
+          <span class="npc-mon-label" style="align-self:center;">HP</span>
           <input type="number" class="npc-seg-count-input" min="1" max="40" value="${segCount}" title="Segments">
           <span class="npc-hp-slash">/</span>
           <input type="number" class="npc-seg-hp-input" min="1" value="${segHp}" title="HP per segment">
-          <button class="btn small ghost status-add">+ Status</button>
-          ${modeSelectHtml}
-        </div>
-        <div class="npc-hp-second">
-          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (elite, minion, ...)">
         </div>
         <div class="npc-seg-row">${segHtml}</div>
       `;
@@ -5909,23 +5874,16 @@ function init_trackers(root) {
     card.className = 'npc-card' + (defeated ? ' defeated' : '');
     card.innerHTML = `
       <div class="npc-top">
-        ${reorderHtml(n, idx)}
-        <input type="text" class="npc-name-input" value="${escAttr(n.name)}" placeholder="NPC / Monster name...">
+        ${gripHtml()}
+        <span class="npc-name" title="${escAttr(n.name)}">${escAttr(n.name || 'Monster')}</span>
         <button class="npc-del" title="Remove">&#10005;</button>
       </div>
       ${hpBlockHtml}
       ${defeated ? '<div class="npc-defeated-tag">Defeated</div>' : ''}
       ${n.dmon ? dccMonsterBlockHtml(n) : n.gmon ? xsMonsterBlockHtml(n) : monsterBlockHtml(n)}
-      ${statusListHtml(n, { withAddButton: false, withTag: false })}
     `;
 
-    card.querySelector('.npc-name-input').addEventListener('input', e => { n.name = e.target.value; });
     card.querySelector('.npc-del').addEventListener('click', () => { items = items.filter(x => x.id !== n.id); render(); });
-    card.querySelector('.npc-mode-select')?.addEventListener('change', e => {
-      if(e.target.value === mode) return;
-      n.hpMode = e.target.value;
-      render();
-    });
 
     if(mode === 'standard') {
       card.querySelector('.npc-hp-current').addEventListener('change', e => { n.hpCurrent = parseInt(e.target.value) || 0; render(); });
@@ -5991,15 +5949,6 @@ function init_trackers(root) {
         }
       });
     });
-    card.querySelector('.npc-mon-stats-btn')?.addEventListener('click', () => {
-      n.statsOpen = (n.statsOpen === false);
-      render();
-    });
-    card.querySelector('.npc-mon-traits-btn')?.addEventListener('click', () => {
-      n.traitsOpen = !n.traitsOpen;
-      render();
-    });
-    wireStatusList(card, n);
     return card;
   }
 
@@ -6060,7 +6009,7 @@ function init_trackers(root) {
         <span class="mon-pick-item-meta">${meta}</span>
       </button>`;
     }).join('');
-    return (rows || (pickerSource === 'kob' ? '<div class="mon-pick-empty">Kids on Bikes has no bestiary — add a Blank combatant and fill it in.</div>' : '<div class="mon-pick-empty">No monster matches that search.</div>')) +
+    return (rows || (pickerSource === 'kob' ? '<div class="mon-pick-empty">Kids on Bikes has no bestiary — build creatures in Homebrew to pull them in here.</div>' : '<div class="mon-pick-empty">No monster matches that search.</div>')) +
       (found.length > 60 ? `<div class="mon-pick-empty">Showing 60 of ${found.length} &mdash; keep typing to narrow it down.</div>` : '');
   }
 
@@ -6118,9 +6067,6 @@ function init_trackers(root) {
             ${types.map(t => `<option value="${escAttr(t)}" ${t === pickerType ? 'selected' : ''}>${escAttr(t)}</option>`).join('')}
           </select>
         </div>
-        <div class="mon-pick-add-row">
-          <button class="btn small ghost mon-pick-blank cbt-add-npc" title="Add an empty combatant">＋ Blank Combatant</button>
-        </div>
         <div class="mon-pick-list">${pickerRowsHtml()}</div>
       </div>`;
     // Overlay within the Combat window so it never pushes the cards around.
@@ -6160,7 +6106,7 @@ function init_trackers(root) {
     empty.classList.toggle('show', items.length === 0 && !pickerOpen);
     items.forEach((it, idx) => {
       const card = it.type === 'npc' ? buildNpcCard(it, idx) : buildTrackerCard(it, idx);
-      wireReorder(card, it);
+      wireDrag(card, it);
       list.appendChild(card);
     });
   }
@@ -6208,12 +6154,6 @@ function init_trackers(root) {
       items.push({ id: nextId++, type: 'tracker', name: '', kind: 'rounds', rounds: 1, totalSeconds: 60, remainingSeconds: 60, running: false });
       // The Timer button lives inside the picker — close it so the new tracker
       // card is visible instead of staying under the open picker.
-      if(pickerEl) closePicker();
-      else render();
-    } else if(btn.classList.contains('cbt-add-npc')) {
-      items.push({ id: nextId++, type: 'npc', name: '', tag: '', hpMode: 'standard', hpCurrent: 10, hpMax: 10, statuses: [] });
-      // The Blank button lives inside the monster picker — close it so the new
-      // combatant card is visible instead of staying under the open picker.
       if(pickerEl) closePicker();
       else render();
     } else if(btn.classList.contains('cbt-add-monster')) {
@@ -10553,8 +10493,7 @@ window.init_gen = function(root) {
 
 /* ── Mobile ── */
 @media (max-width: 760px) {
-  .card-drag { font-size: 22px; padding: 4px 6px; }
-  .card-move { width: 40px; height: 36px; font-size: 13px; }
+  .card-grip { width: 30px; height: 34px; font-size: 16px; }
 
   .npc-seg { height: 42px; min-width: 32px; }
   .npc-seg-num { font-size: 14px; }
@@ -10613,15 +10552,6 @@ window.init_gen = function(root) {
   .card-select { font-size: 14px; padding: 9px 8px; min-height: 44px; }
   .status-bar { gap: 10px; margin-top: 10px; }
   .status-bar .npc-tag-input { font-size: 14px; padding: 8px 0; }
-}
-/* ══ REORDER CONTROLS — compact stacked arrows ═══════════════════════════
-   Drag-to-reorder is gone; ▲▼ stack in one narrow column so the delete
-   button still fits on the card in a phone-width pane. */
-.card-reorder { flex-direction: column; gap: 2px; }
-.card-drag { display: none; }
-.card-move { width: 22px; height: 16px; font-size: 8px; border-radius: 3px; padding: 0; }
-@media (max-width: 760px) {
-  .card-move { width: 28px; height: 20px; font-size: 9px; }
 }
 /* ══ COMPACT CHROME ══════════════════════════════════════════════════════
    Slims the top bar and the generator control strip so more of the screen
