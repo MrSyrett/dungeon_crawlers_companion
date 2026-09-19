@@ -339,6 +339,25 @@ function rep(s, a, b, all = true) {
   return all ? s.split(a).join(b) : s.replace(a, b);
 }
 
+// Masthead banner per system, read from each character sheet's header
+// (.hdr-row background gradient, .lg-word color+weight, .lg-sub color).
+// [bannerA, bannerB, titleColor, titleWeight, subColor]
+const BANNERS = {
+  dcc:    ["#dd2a1f", "#ef4436", "#141414", 900, "#f7c948"],
+  ace:    ["#d8b92a", "#f4d84a", "#1a1a1a", 900, "#1d6f9a"],
+  kob:    ["#5c3596", "#7c4dbd", "#ffffff", 900, "#f0d27a"],
+  nimble: ["#1f6f46", "#2f9b63", "#ffffff", 900, "#f0d27a"],
+  sw:     ["#0a0a0a", "#1f1f1f", "#f6d21e", 900, "#8fbaf0"],
+  dnd:    ["#7a1119", "#9b1b22", "#ffffff", 900, "#f0cf8a"],
+  d62e:   ["#9a4d18", "#e07b39", "#ffffff", 900, "#a9d6f7"],
+  icrpg:  ["#8a3712", "#c8501e", "#ffffff", 900, "#a9d6f7"],
+  co:     ["#1c6b60", "#2fa595", "#ffffff", 800, "#edc978"],
+  yze:    ["#0d8299", "#16bdd6", "#04232a", 700, "#2e2170"],
+  mmrpg:  ["#b3141a", "#ec1d24", "#ffffff", 700, "#7fc0f5"],
+  jlu:    ["#1c49a8", "#2f6fed", "#ffffff", 900, "#e2b23a"],
+  gb:     ["#5f8f24", "#8bc53f", "#12180a", 900, "#5e2b90"],
+};
+
 for (const S of SYSTEMS) {
   let s = base;
   s = rep(s, "<title>Session Prep Builder — Dungeon Crawler Carl RPG</title>", `<title>${S.title}</title>`);
@@ -357,6 +376,10 @@ for (const S of SYSTEMS) {
   // display/heading font — match the system's character sheet (Cinzel, Oswald, …)
   s = rep(s, "--font-display: 'Barlow Condensed', sans-serif;", `--font-display: ${S.displayFont || "'Barlow Condensed', sans-serif"};`);
   if (S.fontExtra) s = rep(s, "css2?family=Barlow+Condensed:wght@400;600;700;800;900", `css2?${S.fontExtra}family=Barlow+Condensed:wght@400;600;700;800;900`);
+  // masthead banner — match the system's character-sheet header
+  const B = BANNERS[S.cfg] || BANNERS.dcc;
+  s = rep(s, "--banner-a: #dd2a1f; --banner-b: #ef4436; --title-color: #141414; --title-weight: 900; --sub-color: #f7c948;",
+    `--banner-a: ${B[0]}; --banner-b: ${B[1]}; --title-color: ${B[2]}; --title-weight: ${B[3]}; --sub-color: ${B[4]};`);
   // storage keys (server blob key + standalone localStorage key)
   s = rep(s, "'dcc_session'", `'${S.key}'`);
   s = rep(s, "'dcw_builder_v5'", `'${S.ls}'`);

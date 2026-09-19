@@ -35,6 +35,8 @@ document.addEventListener("DOMContentLoaded", function() {
     --read-text: #ffffff; --highlight: #ffd23f; --green: #2d6a2d; --blue-npc: #1a4a8a;
     --section-hdr: #b3141a; --table-hdr: #4a4a4a; --preview-bg: #26262a;
     --font-display: 'Oswald', sans-serif;
+    /* Masthead banner — ported from the system's character-sheet header (.hdr-row/.lg-word/.lg-sub) */
+    --banner-a: #b3141a; --banner-b: #ec1d24; --title-color: #ffffff; --title-weight: 700; --sub-color: #7fc0f5;
     /* UI (sidebar) stays dark */
     --ui-bg: #1c1c1e; --ui-panel: #2a2a2d; --ui-border: #3a3a3e;
     --ui-text: #e8e4dc; --ui-muted: #888; --ui-accent: #EC1D24; --ui-highlight: #ffd23f;
@@ -118,12 +120,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
   /* Page dark mode */
   .page.dark-mode { background: #1a1a1e; }
-  .page.dark-mode .adventure-subtitle { color: #1a1a1a; }
-  .page.dark-mode .header-meta { color: #1a1a1a; }
-  .page.dark-mode .header-meta span { color: #1a1a1a; }
-  .page.dark-mode .page-banner { background: linear-gradient(120deg, var(--accent-dark), var(--accent)); }
-  .page.dark-mode .page-bottom-band { background: linear-gradient(120deg, var(--accent-dark), var(--accent)); }
-  .page.dark-mode .adventure-title { color: #1a1a1a; }
+  .page.dark-mode .adventure-subtitle { color: var(--sub-color); }
+  .page.dark-mode .header-meta { color: var(--title-color); }
+  .page.dark-mode .header-meta span { color: var(--title-color); }
+  .page.dark-mode .page-banner { background: linear-gradient(120deg, var(--banner-a), var(--banner-b)); }
+  .page.dark-mode .page-bottom-band { background: linear-gradient(120deg, var(--banner-a), var(--banner-b)); }
+  .page.dark-mode .adventure-title { color: var(--title-color); }
   .page.dark-mode .p-text { color: #d0ccc4; }
   .page.dark-mode .entry-name { color: #e8e4dc; }
   .page.dark-mode .entry-desc { color: #c8c4bc; }
@@ -168,14 +170,14 @@ document.addEventListener("DOMContentLoaded", function() {
   .page-two { display: flex; flex-direction: column; }
 
   /* DCW cyan banner header */
-  .page-banner { background: linear-gradient(120deg, var(--accent-dark), var(--accent)); padding: 10px 36px 8px; display: flex; justify-content: space-between; align-items: center; }
-  .adventure-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; text-transform: uppercase; letter-spacing: 0.04em; }
-  .adventure-subtitle { font-family: var(--font-display); font-size: 13px; font-weight: 400; color: white; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-  .header-meta { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.85); line-height: 1.7; }
+  .page-banner { background: linear-gradient(120deg, var(--banner-a), var(--banner-b)); padding: 10px 36px 8px; display: flex; justify-content: space-between; align-items: center; }
+  .adventure-title { font-family: var(--font-display); font-size: 28px; font-weight: var(--title-weight); color: var(--title-color); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }
+  .adventure-subtitle { font-family: var(--font-display); font-size: 13px; font-weight: 800; color: var(--sub-color); text-transform: uppercase; letter-spacing: 0.14em; margin-top: 2px; }
+  .header-meta { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--title-color); opacity: 0.8; line-height: 1.7; }
   .header-meta span { display: block; }
 
   /* Page bottom band */
-  .page-bottom-band { background: linear-gradient(120deg, var(--accent-dark), var(--accent)); height: 12px; margin-top: auto; }
+  .page-bottom-band { background: linear-gradient(120deg, var(--banner-a), var(--banner-b)); height: 12px; margin-top: auto; }
 
   .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
