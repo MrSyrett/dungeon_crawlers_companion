@@ -1178,6 +1178,23 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-die.has { border-color: var(--gold); color: var(--gold); }
 .dice-count { position: absolute; top: -6px; right: -5px; background: var(--gold); color: #1a1a1a; border-radius: 8px; min-width: 16px; height: 16px; line-height: 16px; font-size: 10px; font-weight: 900; font-family: 'Montserrat', sans-serif; }
 .dice-pool { flex-shrink: 0; padding: 4px 10px 8px; background: rgba(0,0,0,0.25); }
+/* ── Per-system trays (mirror each character sheet's dice tray) — controls only, no labels/notes ── */
+.gmt { display: flex; flex-direction: column; gap: 6px; }
+.gmt-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.gmt-num, .gmt-txt, .gmt-sel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--light); font-family: 'Share Tech Mono', monospace; font-size: 15px; padding: 7px 6px; outline: none; }
+.gmt-num { width: 52px; text-align: center; -moz-appearance: textfield; }
+.gmt-num::-webkit-outer-spin-button, .gmt-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.gmt-txt { min-width: 90px; }
+.gmt-num:focus, .gmt-txt:focus, .gmt-sel:focus { border-color: var(--gold); }
+.gmt-step { width: 34px; padding: 8px 0; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--light); cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; line-height: 1; flex-shrink: 0; }
+.gmt-step:hover { border-color: var(--gold); color: var(--gold); }
+.gmt-step:active { transform: scale(0.94); }
+.gmt-roll { flex: 1; min-width: 90px; padding: 9px 12px; background: var(--gold); color: #1a1a1a; border: none; border-radius: 6px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.gmt-roll:hover { filter: brightness(1.1); }
+.gmt-btn { padding: 8px 10px; background: var(--panel); color: var(--light); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .04em; flex-shrink: 0; }
+.gmt-btn:hover { border-color: var(--gold); }
+.gmt-btn.on { background: #1a3a1a; border-color: #2d7a2d; color: #6dbf6d; }
+.dice-pool-row.sys { gap: 6px; }
 .dice-pool-label-row { padding: 0 0 6px; }
 .dice-pool-label { display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dice-pool-row { display: flex; align-items: center; gap: 5px; }
@@ -12338,11 +12355,26 @@ function init_dice(root) {
     return Object.entries(pool).filter(([, n]) => n > 0).map(([d, n]) => n + 'd' + d).join(' + ');
   }
 
+  // ── Per-system trays ──
+  // Each system's character sheet has its own dice tray with its own mechanics.
+  // The GM tray mirrors the sheet's tray 1:1 so a GM can coach a player through
+  // it and results read identically. GM_TRAYS maps a system key → a renderer
+  // that fills the tray (trayEl) and wires its own Roll button; un-ported systems
+  // fall back to the generic polyhedral pool below.
+  function curSys() { return String(window.GM_SYSTEM || '').toUpperCase(); }
+  function sysTray() { return GM_TRAYS[curSys()]; }
+
+  function renderTray() {
+    const sys = sysTray();
+    if(sys) { try { sys(); return; } catch(e) {} }
+    renderGenericTray();
+  }
+
   // Tap a die to add it to the pool (right-click removes one); the pool reads
   // out above the dice, and Roll throws the lot — the same tray the sheets have.
-  function renderTray() {
+  function renderGenericTray() {
     const label = poolLabel();
-    let h = '<div class="dice-pool-label-row"><span class="dice-pool-label">' + (label || 'Tap dice to build a roll') + '</span></div>';
+    let h = label ? '<div class="dice-pool-label-row"><span class="dice-pool-label">' + label + '</span></div>' : '';
     h += '<div class="dice-btn-row">';
     DICE.forEach(d => {
       const n = pool[d] || 0;
@@ -12356,11 +12388,29 @@ function init_dice(root) {
     });
   }
 
-  // Under the dice: ADV / DIS · ✕ (clear pool) · Roll, plus the hide-from-campaign eye when linked.
+  // The GM-only campaign share/hide roll toggle, shown under every tray when a
+  // campaign is linked (players never see this control).
+  function hideEyeRow() {
+    const camp = GMCamp.get(); if(!camp) return '';
+    const hidden = GMCamp.isHidden();
+    return '<button class="dice-hide-btn' + (hidden ? ' on' : '') + '" title="' + (hidden ? 'Rolls hidden from players — click to share' : 'Rolls shared with players — click to hide') + '">' + (hidden ? ICO_EYE_OFF : ICO_EYE) + '</button>';
+  }
+  function wireHideEye() {
+    const hideBtn = poolEl.querySelector('.dice-hide-btn');
+    if(hideBtn) hideBtn.onclick = () => { GMCamp.toggleHide(); renderPool(); };
+  }
+
+  // Under the dice: for the generic pool it's ADV / DIS · ✕ · Roll; for a system
+  // tray (which carries its own Roll button) it's just the campaign share eye.
   function renderPool() {
-    const camp = GMCamp.get(), hidden = GMCamp.isHidden();
+    if(sysTray()) {
+      const eye = hideEyeRow();
+      poolEl.innerHTML = eye ? '<div class="dice-pool-row sys">' + eye + '</div>' : '';
+      wireHideEye();
+      return;
+    }
     let h = '<div class="dice-pool-row">';
-    if(camp) h += '<button class="dice-hide-btn' + (hidden ? ' on' : '') + '" title="' + (hidden ? 'Rolls hidden from the campaign — click to share' : 'Rolls shared with the campaign — click to hide') + '">' + (hidden ? ICO_EYE_OFF : ICO_EYE) + '</button>';
+    h += hideEyeRow();
     h += '<button class="dice-advbtn' + (advMode === 'adv' ? ' on-adv' : '') + '" data-m="adv" title="Advantage (d20)">▲ ADV</button>';
     h += '<button class="dice-advbtn' + (advMode === 'dis' ? ' on-dis' : '') + '" data-m="dis" title="Disadvantage (d20)">▼ DIS</button>';
     h += '<button class="dice-pool-clear" title="Clear pool">✕</button>';
@@ -12370,8 +12420,7 @@ function init_dice(root) {
     poolEl.querySelectorAll('.dice-advbtn').forEach(b => { b.onclick = () => { advMode = advMode === b.dataset.m ? 'none' : b.dataset.m; renderPool(); }; });
     poolEl.querySelector('.dice-roll-go').onclick = doRoll;
     poolEl.querySelector('.dice-pool-clear').onclick = () => { pool = {}; advMode = 'none'; renderTray(); renderPool(); };
-    const hideBtn = poolEl.querySelector('.dice-hide-btn');
-    if(hideBtn) hideBtn.onclick = () => { GMCamp.toggleHide(); renderPool(); };
+    wireHideEye();
   }
 
   function doRoll() {
@@ -12379,6 +12428,49 @@ function init_dice(root) {
     if(!dice.length) return;
     rollCore(dice, 0, advMode, null);
   }
+
+  function escGm(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+  // A tactile dice-count stepper: [−] N [+]. Shared by the pool-based systems.
+  function stepperHtml(id, val, min, max) {
+    return '<button class="gmt-step" data-step="' + id + '" data-dir="-1">−</button>'
+      + '<input class="gmt-num" id="' + id + '" type="number" min="' + min + '" max="' + max + '" value="' + val + '">'
+      + '<button class="gmt-step" data-step="' + id + '" data-dir="1">+</button>';
+  }
+  function wireStepper(id, min, max, onset) {
+    const inp = trayEl.querySelector('#' + id);
+    const clamp = v => Math.max(min, Math.min(max, v));
+    const set = v => { const c = clamp(v); inp.value = c; if(onset) onset(c); };
+    if(inp) inp.oninput = () => { const c = clamp(parseInt(inp.value, 10) || min); if(onset) onset(c); };
+    trayEl.querySelectorAll('.gmt-step[data-step="' + id + '"]').forEach(b => {
+      b.onclick = () => set((parseInt(inp.value, 10) || min) + parseInt(b.dataset.dir, 10));
+    });
+  }
+
+  // ════════ YZE — Year Zero Engine (D6 pool: each 6 a success, each 1 a bane) ════════
+  let _yz = { pool: 5 };
+  function yzCount(rolls) { let s = 0, b = 0; rolls.forEach(v => { if(v === 6) s++; else if(v === 1) b++; }); return { s, b }; }
+  function yzTier(s) { return s >= 2 ? { t: 'SUCCESS ×' + s, type: 'crit' } : s === 1 ? { t: 'SUCCESS', type: 'crit' } : { t: 'FAILURE', type: 'fumble' }; }
+  function renderYZETray() {
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('yz-pool', _yz.pool, 1, 20)
+      + '<button class="gmt-roll" id="yz-roll">Roll</button></div></div>';
+    wireStepper('yz-pool', 1, 20, v => { _yz.pool = v; });
+    trayEl.querySelector('#yz-roll').onclick = yzRoll;
+  }
+  function yzRoll() {
+    const size = Math.max(1, Math.min(20, parseInt((trayEl.querySelector('#yz-pool') || {}).value, 10) || 1));
+    _yz.pool = size;
+    const base = []; for(let i = 0; i < size; i++) base.push(d6());
+    const c = yzCount(base), tier = yzTier(c.s);
+    gmDiceAnim(base.map(v => ({ sides: 6, v })));
+    const detail = size + 'd6(' + base.join(',') + ') · ' + c.s + ' succ' + (c.b ? ' · ' + c.b + ' bane' + (c.b > 1 ? 's' : '') : '');
+    gmLog('YZE pool', c.s + ' · ' + tier.t, detail, tier.type);
+  }
+
+  // Registry of system-specific trays. Systems absent here use the generic pool.
+  const GM_TRAYS = {
+    YZE: renderYZETray,
+  };
 
   // The rolling mechanic itself, so the tray's Roll button and other tools
   // (a monster's attack or ability check) produce identical entries.
@@ -12413,6 +12505,13 @@ function init_dice(root) {
       detail: detailParts.join(' '),
       total, crit, nat
     };
+    return pushEntry(entry);
+  }
+
+  // Shared tail: drop a finished entry into the log and out to the campaign.
+  // Every roller — the generic pool, the per-system trays, and external rolls —
+  // funnels through here so the log + broadcast behave identically.
+  function pushEntry(entry) {
     log.unshift(entry);
     if(log.length > 100) log.length = 100;
     renderLog();
@@ -12420,9 +12519,22 @@ function init_dice(root) {
     return entry;
   }
 
+  // A per-system tray logs a resolved roll. `result` is the headline (a number
+  // or short text like "2 · SUCCESS ×2"); `type` colours it: 'crit' = success/
+  // hit (green), 'fumble' = failure/miss (red), 'normal' = neutral.
+  function gmLog(label, result, detail, type) {
+    return pushEntry({ label: label, total: result, detail: detail,
+      crit: type === 'crit' ? 'crit' : type === 'fumble' ? 'fumble' : '', nat: '', adv: 'none' });
+  }
+  function d6() { return 1 + Math.floor(Math.random() * 6); }
+  function dN(sides) { return 1 + Math.floor(Math.random() * sides); }
+  function gmDiceAnim(rolls) {
+    try { if(window.DiceAnim && window.DiceAnim.play) window.DiceAnim.play(rolls.map(r => ({ sides: r.sides || 6, display: String(r.v != null ? r.v : r) })), 'normal'); } catch(e) {}
+  }
+
   function renderLog() {
     if(!log.length) {
-      logEl.innerHTML = '<div class="dice-log-hint">Tap dice and roll, or click a stat on a tracker card — results appear here</div>';
+      logEl.innerHTML = '';
       return;
     }
     const esc = v => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -12635,9 +12747,10 @@ function init_dice(root) {
   // Follow the active system: swap the die set to match its sheet's tray. The
   // pool is cleared because its die sizes may no longer be offered.
   document.addEventListener('gm-system-change', () => {
-    const next = diceForSystem(window.GM_SYSTEM);
-    if(next.join(',') === DICE.join(',')) return;
-    DICE = next; pool = {};
+    // Swap to the new system's tray (or generic die set) and reset transient
+    // per-tray state so a half-built roll doesn't carry across systems.
+    DICE = diceForSystem(window.GM_SYSTEM);
+    pool = {}; advMode = 'none';
     renderTray(); renderPool();
   });
 
