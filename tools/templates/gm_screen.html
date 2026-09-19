@@ -63,7 +63,7 @@ body::before {
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   padding: 0 16px;
-  height: 56px;
+  height: 84px;
 }
 .topbar::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
@@ -101,6 +101,10 @@ body::before {
    middle (scroll if crowded), scenes + clock + window button on the right. */
 #gmc-topbar { gap: 10px; }
 #gmc-topbar .session-controls { margin-left: 0; padding-left: 0; border-left: none; flex-shrink: 0; }
+/* Import / Export stacked vertically */
+.io-stack { display: flex; flex-direction: column; gap: 3px; }
+.io-btn { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-start; padding: 3px 8px; min-height: 0; }
+.io-btn span { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
 #gmc-topbar #gmc-party-bubbles { flex: 1 1 auto; min-width: 60px; }
 #gmc-topbar .scene-strip { margin-left: 0; }
 #gmc-topbar .tel-clock { padding: 0 12px; }
@@ -649,7 +653,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .cbt-empty-sub { font-size: 11px; color: var(--muted); text-align: center; max-width: 220px; }
 
 /* Tracker card */
-.tracker-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 10px 12px; }
+.tracker-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 10px; padding: 10px 12px; min-width: 0; overflow: hidden; }
 .tracker-card.timer-type { border-left-color: #6a9fc8; }
 .tracker-card.expired { border-left-color: var(--red); opacity: 0.6; }
 .tracker-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -707,12 +711,13 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .tracker-collapse:hover { color: var(--white); }
 
 /* NPC card */
-.npc-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--red); padding: 10px 12px; }
+.npc-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 10px; padding: 10px 12px; min-width: 0; overflow: hidden; }
 .npc-card.defeated { opacity: 0.5; border-left-color: var(--muted); }
-.npc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.npc-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; min-width: 0; }
 .npc-name-input {
-  flex: 1; background: transparent; border: none; color: var(--white);
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; padding: 2px 0;
+  flex: 1; min-width: 0; background: transparent; border: none; color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; padding: 2px 0;
+  text-overflow: ellipsis;
 }
 .npc-name-input:focus { border-bottom: 1px solid var(--mid); }
 .npc-tag-input { width: 70px; background: transparent; border: none; border-bottom: 1px dotted var(--border); color: var(--mid); font-size: 10px; text-align: right; padding: 2px 0; }
@@ -779,6 +784,8 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
    the card list's space. */
 .mon-pick { position: absolute; inset: 0; z-index: 30; margin: 0; padding: 16px; border: none; background: rgba(6,8,12,.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; }
 .mon-pick-card { width: min(560px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 8px; background: var(--panel); border: 1px solid var(--accent-dim); border-radius: 12px; padding: 12px; box-shadow: 0 24px 70px rgba(0,0,0,.6); min-height: 0; }
+.mon-pick-head { display: flex; align-items: center; gap: 8px; }
+.mon-pick-title { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--white); }
 .mon-pick-controls { display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
 /* Timer + Blank buttons under the picker controls — the single "+" toolbar
    button opens this picker, so all "add" actions (timer, blank combatant, or a
@@ -879,6 +886,9 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 /* The Marvel generator's inline Generate is redundant now the toolbar button
    shows for it — keep the roll action consistently in the toolbar. */
 .gen-inline-roll { display: none; }
+/* Loot/treasure builders roll from the toolbar button now — hide the redundant
+   inline roll button in their options. */
+.ai-roll-tier, .ai-fl-roll, .xs-tr-roll { display: none; }
 .gen-label {
   font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
@@ -1629,15 +1639,21 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .gmc-round-next:hover{filter:brightness(1.08)}
 .gmc-round-next:active{transform:translateY(1px)}
 .party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
-.bubble{display:flex;align-items:center;gap:7px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:999px;padding:4px 11px 4px 5px;cursor:pointer;transition:all .12s;flex:0 0 auto}
+/* Rounded-square party bubbles that mirror the Party Card header. */
+.bubble{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:11px;padding:6px 9px;cursor:pointer;transition:all .12s;flex:0 0 auto;max-width:230px}
 .bubble:hover{border-color:var(--accent-dim);box-shadow:0 0 0 1px var(--accent-dim)}
 .bubble.bloodied{border-color:var(--red-light);box-shadow:0 0 8px rgba(214,58,48,.35)}
 .bubble.down{opacity:.5;filter:grayscale(.4)}
-.bub-av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:10px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-.bub-mini{display:flex;flex-direction:column;gap:2px;min-width:44px}
-.bub-nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:var(--white);line-height:1;white-space:nowrap}
-.bub-hpb{height:5px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden}
-.bub-hpb>i{display:block;height:100%;border-radius:3px}
+.bub-av{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:12px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.bub-mini{display:flex;flex-direction:column;gap:3px;min-width:52px;flex:1;min-width:0}
+.bub-nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12.5px;color:var(--white);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bub-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bub-hpb{height:9px;border-radius:4px;background:rgba(0,0,0,.5);overflow:hidden;position:relative;border:1px solid var(--border)}
+.bub-hpb>i{display:block;height:100%;border-radius:4px}
+.bub-hpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:7.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.bub-ac{flex-shrink:0;text-align:center;border-radius:6px;background:var(--panel-2);border:1px solid var(--border);padding:2px 7px;align-self:center}
+.bub-ac .l{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7px;letter-spacing:.05em;color:var(--muted);display:block;line-height:1}
+.bub-ac .v{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:var(--white);line-height:1.1}
 .timer{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-left:2px solid #6a9fc8;border-radius:8px;padding:4px 10px;cursor:pointer;flex:0 0 auto}
 .timer:hover{border-color:var(--accent-dim)}
 .timer.zero{border-left-color:var(--red-light)}
@@ -1838,11 +1854,13 @@ body[data-cview="free"] .cst-log-rail{display:none}
     </select>
     <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
     <a class="btn small ghost vtt-launch" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg> VTT</a>
-    <button class="btn small ghost" id="save-btn" onclick="saveSession()" title="Save session" aria-label="Save session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg></button>
-    <label class="btn small ghost" title="Load session" aria-label="Load a saved session" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-      <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg>
-      <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
-    </label>
+    <div class="io-stack">
+      <button class="btn small ghost io-btn" id="save-btn" onclick="saveSession()" title="Export / save session" aria-label="Export session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg><span>Export</span></button>
+      <label class="btn small ghost io-btn" title="Import / load session" aria-label="Import a saved session" style="cursor:pointer;">
+        <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg><span>Import</span>
+        <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
+      </label>
+    </div>
   </div>
 
   <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Link a campaign to see your party</div></div>
@@ -2447,15 +2465,13 @@ GMScenes.renderPins();
     <!-- ZONE 3 — COMMAND BAR: modes + quick tools (spans the left column only) -->
     <footer class="bottom-bar" id="bottom-bar">
       <div class="bb-modes">
-        <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
+        <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')" title="Free layout — add/remove your own windows"><span class="cm-ico">⊞</span><span class="cm-name">Free</span></button>
         <button class="cmode-tab" data-mode="prep"      type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
         <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
         <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
-        <button class="cmode-tab" data-mode="downtime"  type="button" onclick="setConsoleMode('downtime')"><span class="cm-ico">☕</span><span class="cm-name">Downtime</span></button>
-        <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')" title="Free layout — add/remove your own windows"><span class="cm-ico">⊞</span><span class="cm-name">Free</span></button>
+        <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
       </div>
       <div class="bb-quick" id="bb-quick">
-        <span class="bb-lbl">Quick&nbsp;Tools</span>
         <button class="qbtn" type="button" onclick="openTool('gen')"><span class="qi">☉</span>Generators</button>
         <button class="qbtn" type="button" onclick="openTool('timers')"><span class="qi">⏱</span>Timers</button>
         <button class="qbtn" type="button" onclick="openTool('music')"><span class="qi">♪</span>Music</button>
@@ -2496,28 +2512,28 @@ GMScenes.renderPins();
 .pty-empty-sub { font-family:'Montserrat',sans-serif; font-size:11px; max-width:340px; line-height:1.5; }
 .pty-card { border:1px solid var(--border); background:var(--panel-2); }
 .pty-card-hd { display:flex; align-items:center; gap:10px; padding:8px 10px; cursor:pointer; background:var(--panel); border-bottom:1px solid var(--border); }
-.pty-name { font-family:'Montserrat',sans-serif; font-weight:900; font-size:13px; color:var(--gold); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.pty-sub { font-family:'Montserrat',sans-serif; font-size:10px; color:var(--muted); }
-.pty-chip { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; color:var(--light); border:1px solid var(--border); padding:2px 6px; white-space:nowrap; }
-.pty-chip b { color:var(--white); }
+.pty-name { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:15px; letter-spacing:.02em; color:var(--gold); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pty-sub { font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+.pty-chip { font-family:'Barlow Condensed',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.03em; color:var(--light); border:1px solid var(--border); padding:2px 7px; white-space:nowrap; }
+.pty-chip b { color:var(--white); font-family:'Share Tech Mono',monospace; font-size:11px; }
 .pty-trk { display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; }
-.pty-trk-chip { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:800; padding:1px 7px; border-radius:9px; white-space:nowrap; background:#7a2d2d; border:1px solid #df6a6a; color:#ffdede; }
+.pty-trk-chip { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:800; letter-spacing:.05em; padding:1px 7px; border-radius:9px; white-space:nowrap; background:#7a2d2d; border:1px solid #df6a6a; color:#ffdede; }
 .pty-trk-chip.good { background:#7a5a00; border-color:#c8a020; color:#ffe9a8; }
-.pty-x { background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:11px; line-height:1; padding:2px 5px; }
-.pty-x:hover { color:#df6a6a; border-color:#7a2d2d; }
+.pty-x { background:transparent; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:11px; line-height:1; padding:2px 6px; flex-shrink:0; }
+.pty-x:hover { color:#ff6a5c; border-color:var(--red-light); }
 .pty-card-bd { padding:10px; display:none; }
 .pty-card.open .pty-card-bd { display:block; }
 .pty-stats { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:10px; }
 .pty-stat { border:1px solid var(--border); text-align:center; padding:4px 2px; }
-.pty-stat-lbl { font-family:'Montserrat',sans-serif; font-size:8px; font-weight:900; letter-spacing:.1em; color:var(--muted); }
+.pty-stat-lbl { font-family:'Barlow Condensed',sans-serif; font-size:8.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
 .pty-stat-mod { font-family:'Share Tech Mono',monospace; font-size:16px; color:var(--white); }
-.pty-stat-val { font-family:'Montserrat',sans-serif; font-size:9px; color:var(--muted); }
+.pty-stat-val { font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:9px; letter-spacing:.02em; color:var(--muted); }
 .pty-sec { margin-top:8px; }
-.pty-sec-h { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:3px; margin-bottom:5px; }
+.pty-sec-h { font-family:'Barlow Condensed',sans-serif; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:3px; margin-bottom:5px; }
 .pty-sec-toggle { cursor:pointer; user-select:none; display:flex; align-items:center; gap:5px; }
 .pty-sec-toggle:hover { color:var(--white); }
 .pty-sec-chev { font-size:8px; opacity:.8; }
-.pty-line { font-family:'Montserrat',sans-serif; font-size:11px; color:var(--light); line-height:1.6; }
+.pty-line { font-family:'Barlow',sans-serif; font-size:11.5px; color:var(--light); line-height:1.6; }
 .pty-line .dim { color:var(--muted); }
 .pty-line .lost { color:#df6a6a; text-decoration:line-through; }
 .pty-lost { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:900; letter-spacing:.08em; color:#ff6a6a; border:1px solid #7a2d2d; background:#3a1414; border-radius:3px; padding:0 4px; margin-left:5px; vertical-align:middle; text-decoration:none; }
@@ -3805,6 +3821,9 @@ GMScenes.renderPins();
     <div class="toolbar-tpl" style="display:none">
       <button class="btn small primary tmr-add-time" type="button" title="Add a countdown clock">＋ Time</button>
       <button class="btn small ghost tmr-add-round" type="button" title="Add a round countdown">＋ Rounds</button>
+      <div class="toolbar-spacer"></div>
+      <button class="btn small ghost tmr-next-round" type="button" title="Advance all round countdowns by one">Next Round ›</button>
+      <button class="btn small ghost tmr-reset-rounds" type="button" title="Reset all round countdowns">Reset Rounds</button>
     </div>
     <div class="tmr-body">
       <div class="tmr-empty">
@@ -3821,7 +3840,6 @@ GMScenes.renderPins();
     <div class="toolbar-tpl" style="display:none"></div>
     <div class="msg-body">
       <div class="ai-section ai-party-msg">
-        <div class="ai-sec-title">Message to the Roll Log</div>
         <div class="ai-row">
           <select class="ai-select ai-msg-type">
             <option value="system">💬 Message</option>
@@ -4243,16 +4261,18 @@ GM_MOBILE_MQ.addEventListener('change', () => renderWindows());
 const CONSOLE_STATIONS = ['adv','map','cbt','log'];
 const STATION_TOOL   = { adv:'adventure', map:'maps', cbt:'trackers', log:'dice' };
 const STATION_TITLES = { adv:'Adventure', map:'Maps', cbt:'Combat', log:'Roll Log' };
-// Each mode is a visibility map over the four stations. The center wrapper
+// Each mode is a visibility map over the four stations. `tools` overrides which
+// tool a station hosts in that mode, `titles` its header text. The center wrapper
 // (#cst-center) is shown whenever either of its subs (map / cbt) is visible.
 const CONSOLE_MODES = {
-  master:   { adv:1, map:1, cbt:1, log:1 },   // everything — the home layout
-  prep:     { adv:1, map:0, cbt:0, log:0 },   // adventure fills, planning
+  prep:     { adv:1, map:1, cbt:1, log:0,   // adventure + Generators + Music (planning)
+              tools:{ map:'gen', cbt:'music' }, titles:{ map:'Generators', cbt:'Music' } },
   explore:  { adv:1, map:1, cbt:0, log:1 },   // adventure + MAP (combat hidden) + roll log
   combat:   { adv:1, map:0, cbt:1, log:1 },   // adventure + COMBAT (map hidden) + roll log
-  downtime: { adv:1, map:0, cbt:0, log:1 },   // adventure + roll log
+  master:   { adv:1, map:1, cbt:1, log:1 },   // everything — the home layout
 };
 let consoleMode = 'master';
+function stationToolFor(cfg, st){ return (cfg.tools && cfg.tools[st]) || STATION_TOOL[st]; }
 
 function mountStation(stationId, tool) {
   const content = document.getElementById('cst-' + stationId + '-content');
@@ -4299,12 +4319,17 @@ function renderConsole(mode) {
   if(ws) ws.style.display = '';
   if(free) free.style.display = 'none';
 
-  ensureStationsMounted();
-
-  // Show / hide each station for this mode.
+  // Show / hide each station for this mode, and mount its (possibly per-mode)
+  // tool. Mounting only the visible stations keeps hidden ones untouched.
   CONSOLE_STATIONS.forEach(st => {
     const el = document.getElementById('cst-' + st);
-    if(el) el.classList.toggle('collapsed', !cfg[st]);
+    const visible = !!cfg[st];
+    if(el) el.classList.toggle('collapsed', !visible);
+    if(visible) {
+      mountStation(st, stationToolFor(cfg, st));
+      const titleEl = document.getElementById('cst-' + st + '-title');
+      if(titleEl) titleEl.textContent = (cfg.titles && cfg.titles[st]) || STATION_TITLES[st];
+    }
   });
   // The center wrapper collapses when both of its subs are hidden.
   const centerVis = !!(cfg.map || cfg.cbt);
@@ -4388,10 +4413,15 @@ function renderPartyStrip(roster){
     const down = pct != null && pct <= 0;
     const bloodied = pct != null && pct > 0 && pct <= 40;
     const barW = pct==null ? 100 : Math.max(4,pct);
+    const hpText = pc.hp || '';
     return '<div class="bubble'+(down?' down':'')+(bloodied?' bloodied':'')+'" onclick="charPop('+i+')" title="'+esc2(pc.name)+'">'
       + '<div class="bub-av">'+esc2(gmcInitials(pc.name).toUpperCase())+'</div>'
-      + '<div class="bub-mini"><div class="bub-nm">'+esc2(pc.name)+'</div>'
-      + '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i></div></div>'
+      + '<div class="bub-mini">'
+        + '<div class="bub-nm">'+esc2(pc.name)+'</div>'
+        + (pc.sub ? '<div class="bub-sub">'+esc2(pc.sub)+'</div>' : '')
+        + (hpText ? '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span></div>' : '')
+      + '</div>'
+      + (pc.ac ? '<div class="bub-ac"><span class="l">'+esc2(pc.acLabel||'AC')+'</span><span class="v">'+esc2(pc.ac)+'</span></div>' : '')
       + '</div>';
   }).join('');
 }
@@ -4430,7 +4460,7 @@ function renderScenes(){
   if(!el || !window.GMScenes) return;
   const list = GMScenes.list() || [];
   if(!list.length){ el.innerHTML = ''; return; }
-  el.innerHTML = '<span class="scn-lbl">Scenes</span>' + list.map(sc => {
+  el.innerHTML = list.map(sc => {
     const on = GMScenes.isPlaying(sc.id);
     return '<button class="scene'+(on?' playing':'')+'" type="button" data-scene="'+esc2(sc.id)+'">'
       + '<span class="sdot"></span>'+esc2(sc.name)+'</button>';
@@ -4565,7 +4595,7 @@ function charPop(i){
   // No synced card yet — fall back to a compact live-stats card.
   const pct = gmcHpPct(p.hp);
   const barW = pct==null ? 100 : Math.max(4,pct);
-  const sub = [p.sub, p.ac ? ('AC '+p.ac) : ''].filter(Boolean).join(' · ');
+  const sub = [p.sub, p.ac ? ((p.acLabel||'AC')+' '+p.ac) : ''].filter(Boolean).join(' · ');
   const html = ''
     + '<div class="pchar-hd"><div class="pchar-av">'+esc2(gmcInitials(title).toUpperCase())+'</div>'
     + '<div><div class="pchar-nm">'+esc2(title)+'</div>'+(sub?'<div class="pchar-sub">'+esc2(sub)+'</div>':'')+'</div></div>'
@@ -4587,14 +4617,7 @@ function gmcTick(){
   try { renderTimers(); } catch(e) {}
   try { renderScenes(); } catch(e) {}
   try { gmcUpdateRound(); } catch(e) {}
-  // auto-flip to Combat when initiative starts, back to Explore when it clears
-  if(gmcAutoCombat && document.body.dataset.cview==='console'){
-    const st = gmcTrackerState();
-    const items = (st && st.items) || [];
-    const foes = items.filter(i=>i.type==='npc');
-    if((consoleMode==='explore'||consoleMode==='master') && foes.length>0 && !gmcAutoedFight){ gmcAutoedFight = true; renderConsole('combat'); }
-    else if(consoleMode==='combat' && items.length===0){ gmcAutoedFight = false; renderConsole('explore'); }
-  }
+  // (Modes only change when the GM clicks — no automatic swapping.)
 }
 setInterval(gmcTick, 1000);
 
@@ -4676,6 +4699,8 @@ function syncToolbar(slot, toolNode) {
     // timers
     ['.tmr-add-time',  '.tmr-add-time'],
     ['.tmr-add-round', '.tmr-add-round'],
+    ['.tmr-next-round', '.tmr-next-round'],
+    ['.tmr-reset-rounds', '.tmr-reset-rounds'],
   ];
 
   pairs.forEach(([cloneSelector, liveSelector]) => {
@@ -5980,13 +6005,16 @@ function init_trackers(root) {
     pickerEl.className = 'mon-pick';
     pickerEl.innerHTML = `
       <div class="mon-pick-card">
+        <div class="mon-pick-head">
+          <span class="mon-pick-title">Bestiary</span>
+          <button class="pop-x mon-pick-close" type="button" aria-label="Close">✕</button>
+        </div>
         <div class="mon-pick-controls">
           <input type="text" class="mon-pick-search" placeholder="Search the bestiary..." value="${escAttr(pickerQuery)}">
           <select class="mon-pick-type">
             <option value="">${pickerSource === 'dcc' ? 'Any Role' : pickerSource === 'nim' ? 'Any Family' : pickerSource === 'sw' ? 'Any Group' : 'Any Type'}</option>
             ${types.map(t => `<option value="${escAttr(t)}" ${t === pickerType ? 'selected' : ''}>${escAttr(t)}</option>`).join('')}
           </select>
-          <button class="btn small ghost mon-pick-close">Close</button>
         </div>
         <div class="mon-pick-add-row">
           <button class="btn small ghost mon-pick-blank cbt-add-npc" title="Add an empty combatant">＋ Blank Combatant</button>
@@ -9925,7 +9953,7 @@ window.init_gen = function(root) {
   function showGenPanel(name) {
     activeTab = name;
     panels.forEach(p => p.classList.toggle('active', p.dataset.panel === activeTab));
-    if(rollBtn) rollBtn.hidden = BUILDER_PANELS.indexOf(activeTab) >= 0;
+    if(rollBtn) rollBtn.hidden = false;   // toolbar Roll drives every panel now
     // Keep the live select and this window's toolbar clone in sync (scoped to
     // this .pane so a second Generators window keeps its own active tab)
     if(tabSelect) tabSelect.value = activeTab;
@@ -9948,6 +9976,15 @@ window.init_gen = function(root) {
   root.querySelectorAll('.gen-inline-roll').forEach(b => b.addEventListener('click', () => { if(rollBtn) rollBtn.click(); }));
 
   rollBtn.addEventListener('click', () => {
+    // Builder panels (loot box, treasure spreads, tables, henchmen) keep their own
+    // inline controls, but the toolbar Roll now drives their primary action too —
+    // so every generator rolls from the same top button.
+    if(BUILDER_PANELS.indexOf(activeTab) >= 0) {
+      const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
+      const primary = panel && (panel.querySelector('.ai-roll-tier, .ai-fl-roll, .xs-tr-roll') || panel.querySelector('.btn.primary:not(.gen-roll):not(.gen-inline-roll)') || panel.querySelector('button.btn:not(.gen-roll)'));
+      if(primary) primary.click();
+      return;
+    }
     if(activeTab==='npc') {
       const anc=root.querySelector('#gen-npc-ancestry').value;
       const wlth=root.querySelector('#gen-npc-wealth').value;
@@ -12705,6 +12742,80 @@ function init_party(root) {
     };
   }
 
+  // ── Candela Obscura: Actions (9, grouped under 3 Drives), Drives (max/cur +
+  //    resistances = ⌊max/3⌋), harm Marks (Body/Brain/Bleed), abilities & gear. ──
+  function coParty(d) {
+    const n = v => parseInt(v) || 0;
+    const acts = d.actions || {}, gild = d.gilded || {}, drv = d.drives || {}, resU = d.resUsed || {}, mk = d.marks || {}, sc = d.scars || {};
+    const DR = ['Nerve','Cunning','Intuition'], MK = ['Body','Brain','Bleed'];
+    const actList = Object.keys(acts).filter(k => n(acts[k]) > 0).sort((a,b) => n(acts[b]) - n(acts[a]))
+      .map(k => ({ id: k, val: n(acts[k]), gilded: !!gild[k] }));
+    const list = arr => (Array.isArray(arr) ? arr : []).filter(x => x && x.name).map(x => x.name);
+    return {
+      system: 'CO', name: d.name || 'Unnamed', role: d.role || '', specialty: d.specialty || d.class || '', pronouns: d.pronouns || '',
+      actions: actList,
+      drives: DR.filter(k => drv[k]).map(k => ({ id: k, max: n((drv[k]||{}).max), cur: n((drv[k]||{}).cur), resist: Math.floor(n((drv[k]||{}).max)/3), used: n(resU[k]) })),
+      marks: MK.map(k => ({ id: k, val: n(mk[k]), scar: sc[k] || '' })),
+      abilities: list(d.abilities), gear: list(d.gear),
+      catalyst: d.catalyst || '', question: d.question || '',
+    };
+  }
+
+  // ── Year Zero Engine: 4 attributes (STR/AGI/WITS/EMP), Health & Resolve
+  //    (max − damage), Stress, Armor, active Conditions, skills for the variant. ──
+  function yzeParty(d) {
+    const n = v => parseInt(v) || 0;
+    const A = d.attrs || {}, ATTR = ['STR','AGI','WITS','EMP'];
+    const health = d.health || {}, resolve = d.resolve || {}, variant = d.variant || 'yze';
+    const sk = d.skills || {};
+    const YZE_SK = ['Force','Melee','Stamina','Marksmanship','Mobility','Stealth','Crafting','Observation','Survival','Healing','Insight','Persuasion'];
+    const ALIEN_SK = ['Heavy Machinery','Close Combat','Stamina','Mobility','Ranged Combat','Piloting','Observation','Comtech','Survival','Command','Manipulation','Medical Aid'];
+    const skKeys = variant === 'alien' ? ALIEN_SK : YZE_SK;
+    const conds = d.conditions && typeof d.conditions === 'object' ? Object.keys(d.conditions).filter(k => d.conditions[k]) : [];
+    const list = arr => (Array.isArray(arr) ? arr : []).filter(x => x && x.name).map(x => x.name);
+    return {
+      system: 'YZE', name: d.name || 'Unnamed', archetype: (variant === 'alien' ? (d.career || d.archetype) : d.archetype) || d.class || '', variant,
+      attrs: ATTR.filter(k => A[k] != null).map(k => ({ id: k, val: n(A[k]) })),
+      hpCur: Math.max(0, n(health.max) - n(health.dmg)), hpMax: n(health.max),
+      resolveCur: Math.max(0, n(resolve.max) - n(resolve.dmg)), resolveMax: n(resolve.max),
+      stress: n(d.stress), armor: n(d.armor), xp: n(d.xp), conditions: conds,
+      skills: skKeys.filter(k => n(sk[k]) > 0).map(k => ({ id: k, val: n(sk[k]) })),
+      talents: list(d.talents), weapons: list(d.weapons), gear: list(d.gear),
+    };
+  }
+
+  // ── Ghostbusters: classless — four Traits (Brains/Muscles/Moves/Cool, one
+  //    Talent each), Brownie Points, a Goal, and gear. ──
+  function gbParty(d) {
+    const n = v => parseInt(v) || 0;
+    const T = d.traits || {}, tal = d.talents || {}, TK = ['Brains','Muscles','Moves','Cool'];
+    return {
+      system: 'GB', name: d.name || 'Unnamed', alias: d.alias || '', goal: d.goal || '',
+      tagPhysical: d.tagPhysical || '', tagPersonality: d.tagPersonality || '',
+      traits: TK.filter(k => T[k] != null).map(k => ({ id: k, val: n(T[k]) })),
+      talents: TK.filter(k => tal[k] && tal[k].name).map(k => ({ trait: k, name: tal[k].name })),
+      bp: n(d.bp),
+      gear: (Array.isArray(d.gear) ? d.gear : []).filter(x => x && x.name).map(x => x.name),
+    };
+  }
+
+  // ── Justice League Unlimited: six attributes, Resolve (cur/bought), Condition
+  //    level, Plot, DR, statuses, graded powers, traits, gear. ──
+  function jluParty(d) {
+    const n = v => parseInt(v) || 0;
+    const A = d.attrs || {}, AK = [['potency','POT'],['accuracy','ACC'],['agility','AGI'],['resistance','RES'],['mind','MND'],['spirit','SPR']];
+    const strList = arr => (Array.isArray(arr) ? arr : []).map(x => typeof x === 'string' ? x : (x && x.name)).filter(Boolean);
+    return {
+      system: 'JLU', name: d.name || 'Unnamed', secret: d.secret || '', tier: d.tier || '', origin: d.origin || '', arch: d.arch || '',
+      attrs: AK.filter(([k]) => A[k] != null).map(([k, id]) => ({ id, val: n(A[k]) })),
+      resolveCur: n(d.resCur), resolveMax: n(d.resBuy), condLevel: n(d.condLevel), plot: n(d.plot), dr: n(d.dr),
+      statuses: Array.isArray(d.statuses) ? d.statuses.filter(Boolean) : [],
+      powers: (Array.isArray(d.powers) ? d.powers : []).filter(x => x && x.name).map(x => ({ name: x.name, grade: n(x.grade) })),
+      traits: strList(d.traits), abilities: strList(d.archAbilities),
+      equipment: (Array.isArray(d.equipment) ? d.equipment : []).filter(x => x && x.name).map(x => x.name),
+    };
+  }
+
   // Build a Party-tool summary from a Nimble sheet (stats, skills, HP/wounds,
   // armor, mana, class features come straight from the saved blob).
   function nimParty(d) {
@@ -12810,6 +12921,10 @@ function init_party(root) {
     if(d && d.system === 'D62E') return d62eParty(d);
     if(d && d.system === 'ICRPG') return icrpgParty(d);
     if(d && d.system === 'MMRPG') return mmrpgParty(d);
+    if(d && d.system === 'CO') return coParty(d);
+    if(d && d.system === 'YZE') return yzeParty(d);
+    if(d && d.system === 'GB') return gbParty(d);
+    if(d && d.system === 'JLU') return jluParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
@@ -13269,6 +13384,119 @@ function init_party(root) {
     return h;
   }
 
+  // ── Candela Obscura ──
+  function cardHTMLCO(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [c.role, c.specialty].filter(Boolean).join(' · ');
+    const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
+    const totalMarks = c.marks.reduce((s, m) => s + m.val, 0);
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip"' + (totalMarks ? ' style="color:#ff8a6a;"' : '') + '>Marks <b>' + totalMarks + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    if(c.drives.length) h += '<div class="pty-stats" style="grid-template-columns:repeat(3,1fr)">' + c.drives.map(dr =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(dr.id) + '</div>'
+      + '<div class="pty-stat-mod">' + dr.cur + '/' + dr.max + '</div><div class="pty-stat-val">resist ' + dr.resist + (dr.used ? ' (−' + dr.used + ')' : '') + '</div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Harm — Marks</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + c.marks.map(m => cell(m.id, m.val + (m.scar ? ' · scar' : ''))).join('') + '</div></div>';
+    if(c.actions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Top Actions</div><div class="pty-line dim">'
+       + c.actions.slice(0, 6).map(a => esc(a.id) + ' ' + a.val + (a.gilded ? '✦' : '')).join(' · ') + '</div></div>';
+    if(c.abilities.length) h += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
+    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    if(c.catalyst) h += '<div class="pty-sec"><div class="pty-sec-h">Catalyst</div><div class="pty-line dim">' + esc(c.catalyst) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
+  // ── Year Zero Engine ──
+  function cardHTMLYZE(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [c.archetype, c.variant === 'alien' ? 'Alien' : '', c.xp ? 'XP ' + c.xp : ''].filter(Boolean).join(' · ');
+    const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
+    const hurt = c.hpMax > 0 && c.hpCur < c.hpMax;
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip"' + (hurt ? ' style="color:#ff6a6a;"' : '') + '>HP <b>' + esc(c.hpCur) + '/' + esc(c.hpMax) + '</b></span>'
+       + '<span class="pty-chip">Armor <b>' + esc(c.armor) + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats" style="grid-template-columns:repeat(4,1fr)">' + c.attrs.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
+      + '<div class="pty-stat-mod">' + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Resolve', c.resolveCur + '/' + c.resolveMax) + cell('Stress', c.stress) + '</div></div>';
+    if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
+    if(c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.id) + ' ' + s.val).join(' · ') + '</div></div>';
+    if(c.talents.length) h += '<div class="pty-sec"><div class="pty-sec-h">Talents</div><div class="pty-line dim">' + esc(c.talents.join(', ')) + '</div></div>';
+    if(c.weapons.length) h += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div><div class="pty-line dim">' + esc(c.weapons.join(', ')) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
+  // ── Ghostbusters ──
+  function cardHTMLGB(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [c.alias, c.tagPhysical].filter(Boolean).join(' · ');
+    const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip">Brownie Pts <b>' + esc(c.bp) + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats" style="grid-template-columns:repeat(4,1fr)">' + c.traits.map(s => {
+        const tal = c.talents.find(t => t.trait === s.id);
+        return '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
+          + '<div class="pty-stat-mod">' + s.val + '</div><div class="pty-stat-val">' + esc(tal ? tal.name : '') + '</div></div>';
+      }).join('') + '</div>';
+    if(c.goal) h += '<div class="pty-sec"><div class="pty-sec-h">Goal</div><div class="pty-line dim">' + esc(c.goal) + '</div></div>';
+    if(c.tagPersonality) h += '<div class="pty-sec"><div class="pty-sec-h">Personality</div><div class="pty-line dim">' + esc(c.tagPersonality) + '</div></div>';
+    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
+  // ── Justice League Unlimited ──
+  function cardHTMLJLU(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [c.secret, c.tier, c.arch].filter(Boolean).join(' · ');
+    const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip"' + (c.condLevel ? ' style="color:#ff8a6a;"' : '') + '>Resolve <b>' + esc(c.resolveCur) + '/' + esc(c.resolveMax) + '</b></span>'
+       + '<span class="pty-chip">DR <b>' + esc(c.dr) + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats" style="grid-template-columns:repeat(6,1fr)">' + c.attrs.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
+      + '<div class="pty-stat-mod">' + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Condition', c.condLevel) + cell('Plot', c.plot) + '</div></div>';
+    if(c.statuses.length) h += '<div class="pty-sec"><div class="pty-sec-h">Statuses</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.statuses.join(', ')) + '</div></div>';
+    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + c.powers.map(p => esc(p.name) + (p.grade ? ' G' + p.grade : '')).join(', ') + '</div></div>';
+    if(c.abilities.length) h += '<div class="pty-sec"><div class="pty-sec-h">Archetype Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
+    if(c.traits.length) h += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + esc(c.traits.join(', ')) + '</div></div>';
+    if(c.equipment.length) h += '<div class="pty-sec"><div class="pty-sec-h">Equipment</div><div class="pty-line dim">' + esc(c.equipment.join(', ')) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTML(entry) {
     const c = entry.sheet;
     if(c.system === 'SW') return cardHTMLSW(entry);
@@ -13279,6 +13507,10 @@ function init_party(root) {
     if(c.system === 'D62E') return cardHTMLD62E(entry);
     if(c.system === 'ICRPG') return cardHTMLICRPG(entry);
     if(c.system === 'MMRPG') return cardHTMLMMRPG(entry);
+    if(c.system === 'CO') return cardHTMLCO(entry);
+    if(c.system === 'YZE') return cardHTMLYZE(entry);
+    if(c.system === 'GB') return cardHTMLGB(entry);
+    if(c.system === 'JLU') return cardHTMLJLU(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const open = openIds.has(entry.id);
     const hp = c.hpCur !== '' ? esc(c.hpCur) + '/' + c.hpMax : String(c.hpMax);
@@ -13373,13 +13605,17 @@ function init_party(root) {
       const roster = Array.from(listEl.querySelectorAll('.pty-card')).map(card => {
         const name = ((card.querySelector('.pty-name') || {}).textContent || '').trim();
         const sub  = ((card.querySelector('.pty-sub')  || {}).textContent || '').trim();
-        let hp = '', ac = '';
+        // Read the first "vital" chip (HP / Health / Resolve / …) and the first
+        // "defense" chip (AC / Armor / DEF / DR) — labels vary by system.
+        let hp = '', ac = '', acLabel = 'AC';
+        const VITAL = /^(HP|HEALTH|VITALITY|WOUNDS|RESOLVE)\b/i;
+        const DEF = /^(AC|ARMOR|ARMOUR|DEF|DEFENSE|DEFENCE|DR)\b/i;
         card.querySelectorAll('.pty-card-hd .pty-chip').forEach(ch => {
           const t = (ch.textContent || '').trim();
-          if(/^HP/i.test(t)) hp = t.replace(/^HP\s*/i, '').trim();
-          else if(/^AC/i.test(t) && !ac) ac = t.replace(/^AC\s*/i, '').trim();
+          if(!hp && VITAL.test(t)) hp = t.replace(VITAL, '').trim();
+          else if(!ac && DEF.test(t)) { acLabel = (t.match(DEF)[1] || 'AC').toUpperCase().slice(0, 3); ac = t.replace(DEF, '').trim(); }
         });
-        return { name, sub, hp, ac };
+        return { name, sub, hp, ac, acLabel };
       }).filter(x => x.name);
       window.GM_ROSTER = roster;
       document.dispatchEvent(new CustomEvent('gm-roster', { detail: roster }));
@@ -14229,7 +14465,17 @@ function init_timers(root) {
     if(any){ render(); if(window.__ddScheduleSave) window.__ddScheduleSave(); }
     return any;
   };
+  root._resetRounds = () => {
+    let any = false;
+    timers.forEach(t => { if(t.kind === 'round' && t.remainingRounds !== t.totalRounds){ t.remainingRounds = t.totalRounds; any = true; } });
+    if(any){ render(); if(window.__ddScheduleSave) window.__ddScheduleSave(); }
+    return any;
+  };
   root._hasRoundTimers = () => timers.some(t => t.kind === 'round');
+  const nrBtn = root.querySelector('.tmr-next-round');
+  if(nrBtn) nrBtn.addEventListener('click', () => { root._stepRounds(); try { renderTimers(); } catch(e){} });
+  const rrBtn = root.querySelector('.tmr-reset-rounds');
+  if(rrBtn) rrBtn.addEventListener('click', () => { root._resetRounds(); try { renderTimers(); } catch(e){} });
 
   root._getState = () => ({ timers });
   root._setState = (st) => {
