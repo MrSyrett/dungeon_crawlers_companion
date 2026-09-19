@@ -1622,6 +1622,24 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
   .cstation.collapsed{min-height:0!important}
   .cmode-tab{min-width:0;padding:6px 12px}
 }
+
+/* ── Map / VTT station ── */
+.vtt-bar{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--panel-2);border-bottom:1px solid var(--border);flex-shrink:0}
+.vtt-url-input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:12px;padding:5px 8px;outline:none;font-family:'Barlow',sans-serif}
+.vtt-url-input:focus{border-color:var(--accent-dim);box-shadow:0 0 0 2px var(--glow)}
+.vtt-body{flex:1;position:relative;display:flex;min-height:0;background:#0a0c10}
+.vtt-frame-wrap{flex:1;min-height:0;display:block}
+.vtt-frame{width:100%;height:100%;border:0;display:block;background:#0a0c10}
+.vtt-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:26px}
+.vtt-empty-icon{color:var(--accent);opacity:.85}
+.vtt-empty-icon svg{width:32px;height:32px}
+.vtt-empty-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--light)}
+.vtt-empty-sub{font-size:12px;line-height:1.6;color:var(--muted);max-width:360px}
+.vtt-empty-sub b{color:var(--light)}
+.vtt-hint{position:absolute;left:8px;right:8px;bottom:8px;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:rgba(10,14,20,.94);border:1px solid var(--accent-dim);box-shadow:0 4px 16px rgba(0,0,0,.5);z-index:3}
+.vtt-hint-txt{flex:1;font-size:11px;color:var(--light)}
+.vtt-hint-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 5px;line-height:1}
+.vtt-hint-x:hover{color:var(--white)}
 </style>
 </head>
 <body>
@@ -3631,6 +3649,32 @@ GMScenes.renderPins();
   </div>
 </template>
 
+<template id="tpl-vtt">
+  <div class="tool-instance vtt-tool" data-tool="vtt">
+    <div class="vtt-bar">
+      <input type="text" class="vtt-url-input" placeholder="Owlbear Rodeo room URL…" spellcheck="false">
+      <button class="btn small primary vtt-load" type="button">Load</button>
+      <button class="btn small ghost vtt-reload" type="button" title="Reload the map">↻</button>
+      <div class="toolbar-spacer"></div>
+      <button class="btn small ghost vtt-popout" type="button" title="Open the map in its own window (great for a second monitor)">Pop Out ↗</button>
+      <a class="btn small ghost vtt-newtab" href="#" target="_blank" rel="noreferrer" title="Open in a new browser tab" style="text-decoration:none;">Tab ↗</a>
+    </div>
+    <div class="vtt-body">
+      <div class="vtt-empty">
+        <div class="vtt-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg></div>
+        <div class="vtt-empty-title">No Map Linked</div>
+        <div class="vtt-empty-sub">Paste your Owlbear Rodeo room link above and press <b>Load</b> to show the map right here. If it stays blank, Owlbear is blocking in-page embedding — use <b>Pop Out</b> to run it in its own window on a second screen.</div>
+      </div>
+      <div class="vtt-frame-wrap" style="display:none;"></div>
+      <div class="vtt-hint" style="display:none;">
+        <span class="vtt-hint-txt">Map blank? Owlbear may block in-page embedding —</span>
+        <button class="btn small primary vtt-popout2" type="button">Pop Out ↗</button>
+        <button class="vtt-hint-x" type="button" title="Dismiss">✕</button>
+      </div>
+    </div>
+  </div>
+</template>
+
 
 <!-- DCC data layer — bestiary, items, and loot tables for the DCC generators
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
@@ -3722,8 +3766,8 @@ function isMobileView() { return GM_MOBILE_MQ.matches; }
 function normalizeTool(t) { return t === 'combat' ? 'trackers' : t; }
 
 // Tool catalog (order = the tool-picker menu order)
-const TOOL_ORDER = ['adventure','maps','trackers','notes','music','gen','party','rules','dice'];
-const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', rules:'Rulebooks', dice:'Roll Log' };
+const TOOL_ORDER = ['adventure','maps','trackers','notes','music','gen','party','rules','dice','vtt'];
+const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
 
 // ── Dynamic windows ───────────────────────────────────────────────────────
 // The GM screen is a row of independent "windows" (columns). Each window shows
@@ -3938,8 +3982,8 @@ const CONSOLE_STATIONS = ['spine','stage','side','log','map'];
 const STATION_TITLES = { spine:'Encounter', stage:'Stage', side:'Tools', log:'Roll Log', map:'Map · VTT' };
 const CONSOLE_MODES = {
   prep:     { stations:{ stage:{tool:'adventure'}, side:{tool:'gen'} } },
-  explore:  { stations:{ spine:{tool:'trackers', rail:true}, stage:{tool:'adventure'}, log:{tool:'dice'} } },
-  combat:   { stations:{ spine:{tool:'trackers'}, stage:{tool:'adventure'}, log:{tool:'dice'} } },
+  explore:  { stations:{ spine:{tool:'trackers', rail:true}, stage:{tool:'adventure'}, map:{tool:'vtt'}, log:{tool:'dice'} } },
+  combat:   { stations:{ spine:{tool:'trackers'}, stage:{tool:'adventure'}, map:{tool:'vtt'}, log:{tool:'dice'} } },
   downtime: { stations:{ side:{tool:'party'}, stage:{tool:'notes'}, log:{tool:'dice'} } },
 };
 let consoleMode = 'explore';
@@ -13390,6 +13434,68 @@ function wireAiConsole(root) {
 window.wireAiConsole = wireAiConsole;
 window.init_party = init_party;
 window.init_rules = init_rules;
+
+// ── VTT / Map station: embed a virtual-tabletop room (Owlbear Rodeo, etc.) in
+//    a panel, with a pop-out-to-window fallback for hosts that block embedding. ──
+function init_vtt(root) {
+  const urlIn   = root.querySelector('.vtt-url-input');
+  const loadBtn = root.querySelector('.vtt-load');
+  const reload  = root.querySelector('.vtt-reload');
+  const popBtn  = root.querySelector('.vtt-popout');
+  const pop2    = root.querySelector('.vtt-popout2');
+  const newtab  = root.querySelector('.vtt-newtab');
+  const empty   = root.querySelector('.vtt-empty');
+  const wrap    = root.querySelector('.vtt-frame-wrap');
+  const hint    = root.querySelector('.vtt-hint');
+  const hintX   = root.querySelector('.vtt-hint-x');
+  let url = '';
+  let hintDismissed = false;
+
+  function popWin() { if(url) window.open(url, 'gmvtt', 'width=1500,height=950,menubar=no,toolbar=no'); }
+
+  function showEmpty() {
+    if(empty) empty.style.display = 'flex';
+    if(wrap)  { wrap.style.display = 'none'; wrap.innerHTML = ''; }
+    if(hint)  hint.style.display = 'none';
+  }
+  function mount() {
+    if(!url) { showEmpty(); return; }
+    if(empty) empty.style.display = 'none';
+    if(wrap)  { wrap.style.display = 'block'; wrap.innerHTML = ''; }
+    const f = document.createElement('iframe');
+    f.className = 'vtt-frame';
+    f.setAttribute('allow', 'clipboard-write; fullscreen; microphone; camera; autoplay');
+    f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    f.src = url;
+    wrap.appendChild(f);
+    if(hint) hint.style.display = hintDismissed ? 'none' : 'flex';
+  }
+  function setUrl(u, load) {
+    url = (u || '').trim();
+    if(urlIn)  urlIn.value = url;
+    if(newtab) newtab.href = url || '#';
+    if(!url) { showEmpty(); return; }
+    if(load !== false) mount();
+    if(window.__ddScheduleSave) window.__ddScheduleSave();
+  }
+
+  if(loadBtn) loadBtn.addEventListener('click', () => setUrl(urlIn.value, true));
+  if(urlIn)   urlIn.addEventListener('keydown', e => { if(e.key === 'Enter') setUrl(urlIn.value, true); });
+  if(reload)  reload.addEventListener('click', () => { if(url) mount(); });
+  if(popBtn)  popBtn.addEventListener('click', popWin);
+  if(pop2)    pop2.addEventListener('click', popWin);
+  if(hintX)   hintX.addEventListener('click', () => { hintDismissed = true; if(hint) hint.style.display = 'none'; });
+
+  // Prefill from the campaign's linked VTT room, if any (don't auto-load).
+  try {
+    const cu = (typeof GMCamp !== 'undefined' && GMCamp.vttUrl) ? GMCamp.vttUrl() : '';
+    if(cu) setUrl(cu, false);
+  } catch(e) {}
+
+  root._getState = () => ({ url });
+  root._setState = (s) => { if(s && s.url) setUrl(s.url, true); };
+}
+window.init_vtt = init_vtt;
 </script>
 
 <!-- In-page URL prompt. Replaces window.prompt(), which desktop wrappers built
