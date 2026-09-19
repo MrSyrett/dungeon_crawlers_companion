@@ -1581,33 +1581,57 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--acce
 .ai-input, .ai-select { border-radius: 6px; }
 .ai-cat-item .ai-cat-tier { color: var(--accent); }
 
-/* ═══════════════════ GM CONSOLE — mode bar + stations ═══════════════════ */
+/* ═══════════════════ GM CONSOLE — 3-zone layout ═══════════════════ */
 body:not([data-cview="free"]) #add-window-btn{display:none}
 
-.cmode-bar{flex-shrink:0;display:flex;align-items:stretch;background:linear-gradient(180deg,#0f1218,#0a0c10);border-bottom:1px solid var(--border);position:relative;z-index:2}
-.cmode-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 18px;cursor:pointer;border:none;border-right:1px solid var(--border);background:transparent;position:relative;transition:background .15s;min-width:92px}
-.cmode-tab:hover{background:rgba(36,211,238,.05)}
-.cm-ico{font-size:13px;line-height:1;color:var(--muted);transition:color .15s}
-.cm-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);transition:color .15s}
-.cmode-tab.active .cm-ico,.cmode-tab.active .cm-name{color:var(--accent)}
-.cmode-tab.active{background:linear-gradient(180deg,rgba(36,211,238,.1),transparent)}
-.cmode-tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 0 10px var(--glow)}
-.cmode-free{margin-left:4px}
-.cmode-free .cm-ico,.cmode-free .cm-name{opacity:.85}
-.cmode-status{flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* ── ZONE 1b: Monitor bar — party bubbles + timers + scenes + clock ── */
+.gmc-telemetry{flex-shrink:0;display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#12151b,#0a0c10);border-bottom:1px solid var(--border);position:relative;z-index:2;min-height:56px;padding:0 4px}
+.gmc-telemetry::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--accent) 25%,var(--accent-2) 75%,transparent);opacity:.55;box-shadow:0 0 12px var(--glow)}
+#gmc-party-bubbles{display:flex;align-items:center;gap:6px;padding:6px 8px;overflow-x:auto;min-width:0;flex:0 1 auto}
+#gmc-timers{display:flex;align-items:center;gap:6px;padding:6px 0}
+#gmc-timers:empty{display:none}
+.party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
+.bubble{display:flex;align-items:center;gap:7px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:999px;padding:4px 11px 4px 5px;cursor:pointer;transition:all .12s;flex:0 0 auto}
+.bubble:hover{border-color:var(--accent-dim);box-shadow:0 0 0 1px var(--accent-dim)}
+.bubble.bloodied{border-color:var(--red-light);box-shadow:0 0 8px rgba(214,58,48,.35)}
+.bubble.down{opacity:.5;filter:grayscale(.4)}
+.bub-av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:10px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.bub-mini{display:flex;flex-direction:column;gap:2px;min-width:44px}
+.bub-nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:var(--white);line-height:1;white-space:nowrap}
+.bub-hpb{height:5px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden}
+.bub-hpb>i{display:block;height:100%;border-radius:3px}
+.timer{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-left:2px solid #6a9fc8;border-radius:8px;padding:4px 10px;cursor:pointer;flex:0 0 auto}
+.timer:hover{border-color:var(--accent-dim)}
+.timer.zero{border-left-color:var(--red-light)}
+.timer .tv{font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;color:#6a9fc8;line-height:1}
+.timer.zero .tv{color:var(--red-light)}
+.timer .tl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.scene-strip{display:flex;align-items:center;gap:5px;margin-left:auto;padding:6px 6px;overflow-x:auto}
+.scene-strip:empty{display:none}
+.scn-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:2px;white-space:nowrap}
+.scene{display:flex;align-items:center;gap:5px;background:var(--panel-2);border:1px solid var(--border);border-radius:7px;padding:4px 9px;color:var(--light);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex:0 0 auto}
+.scene:hover{border-color:var(--accent-dim);color:var(--white)}
+.scene.playing{border-color:var(--accent);color:var(--accent);background:rgba(36,211,238,.08)}
+.scene .sdot{width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.scene.playing .sdot{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.tel-clock{margin-left:auto;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:6px 16px;border-left:1px solid var(--border);flex-shrink:0}
+.scene-strip + .tel-clock{margin-left:0}
+.tel-clbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tel-time{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--accent)}
+body[data-cview="free"] .gmc-telemetry,body[data-cview="free"] .bottom-bar{display:none}
 
+/* ── ZONE 2: Canvas — Adventure | (Map / Combat) | Roll Log ── */
 .console-workspace{position:relative;z-index:1;flex:1;display:flex;min-height:0;overflow:hidden}
 .cstation{display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--black);border-right:2px solid var(--border);transition:flex-basis .3s cubic-bezier(.4,0,.2,1),opacity .25s;flex:0 0 auto}
 .cstation:last-child{border-right:none}
-.cstation.collapsed{flex-basis:0!important;min-width:0!important;opacity:0;border-width:0!important;pointer-events:none}
-#cst-spine{flex-basis:340px}
-#cst-stage{flex:1 1 auto;flex-basis:auto}
-#cst-side{flex-basis:340px}
-#cst-map{flex-basis:300px}
-#cst-log{flex-basis:270px}
-#cst-spine[data-size="rail"]{flex-basis:210px}
-#cst-stage[data-size="ref"]{flex:0 1 auto;flex-basis:440px}
-#cst-log[data-size="narrow"]{flex-basis:220px}
+.cstation.collapsed{flex:0 0 0!important;min-width:0!important;opacity:0;border-width:0!important;pointer-events:none;overflow:hidden}
+#cst-adv{flex:0 0 auto;flex-basis:360px}
+#cst-center{flex:1 1 auto;flex-basis:auto}
+#cst-log{flex:0 0 auto;flex-basis:300px}
+.cstation-center{padding:0}
+.csub{display:flex;flex-direction:column;min-height:0;flex:1 1 0;border-bottom:2px solid var(--border);overflow:hidden;transition:flex .3s,opacity .25s}
+.csub:last-child{border-bottom:none}
+.csub.collapsed{flex:0 0 0!important;opacity:0;border-width:0!important;pointer-events:none;overflow:hidden}
 
 .cst-head{display:flex;align-items:center;gap:8px;padding:7px 10px;background:linear-gradient(180deg,#20242c,#171a20);border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(36,211,238,.3);flex-shrink:0;position:relative}
 .cst-head::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2) 60%,transparent);opacity:.5;pointer-events:none}
@@ -1616,51 +1640,59 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .cst-toolbar{margin-left:auto;display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden}
 .cst-content{flex:1;min-height:0;display:flex;position:relative;overflow:hidden}
 
+/* ── ZONE 3: Bottom Command bar — modes + quick tools + dice ── */
+.bottom-bar{flex-shrink:0;display:flex;align-items:stretch;min-height:58px;background:linear-gradient(180deg,#101319,#0a0c10);border-top:2px solid var(--border);box-shadow:0 -2px 0 rgba(36,211,238,.25),0 -6px 16px rgba(0,0,0,.4);position:relative;z-index:5}
+.bb-modes{display:flex;align-items:stretch;border-right:1px solid var(--border);flex-shrink:0}
+.cmode-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 16px;cursor:pointer;border:none;border-right:1px solid var(--border);background:transparent;position:relative;transition:background .15s;min-width:78px}
+.cmode-tab:hover{background:rgba(36,211,238,.05)}
+.cm-ico{font-size:14px;line-height:1;color:var(--muted);transition:color .15s}
+.cm-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:color .15s}
+.cmode-tab.active .cm-ico,.cmode-tab.active .cm-name{color:var(--accent)}
+.cmode-tab.active{background:linear-gradient(180deg,rgba(36,211,238,.1),transparent)}
+.cmode-tab.active::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 0 10px var(--glow)}
+.bb-quick{flex:1;display:flex;align-items:center;gap:8px;padding:0 14px;overflow-x:auto}
+.bb-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:2px;white-space:nowrap;flex-shrink:0}
+.qbtn{display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);color:var(--light);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.qbtn:hover{border-color:var(--accent-dim);background:rgba(36,211,238,.08);color:var(--white)}
+.qbtn .qi{font-size:14px}
+.bb-dice{display:flex;align-items:center;gap:5px;padding:0 14px;border-left:1px solid var(--border);flex-shrink:0}
+.qdie{width:34px;height:34px;border-radius:8px;background:var(--panel-2);border:1px solid var(--border);color:var(--light);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.qdie:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 10px var(--glow)}
+
+/* ── Popups / drawers ── */
+.pop-scrim{position:fixed;inset:0;z-index:50;background:rgba(4,6,10,.6);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center}
+.pop-scrim.show{display:flex}
+.popup{width:min(520px,94vw);max-height:82vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#161922,#101319);border:1px solid var(--accent-dim);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.65),0 0 0 1px rgba(36,211,238,.15);overflow:hidden}
+.popup.wide{width:min(760px,96vw)}
+.pop-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(36,211,238,.06),transparent);flex-shrink:0}
+.pop-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--white)}
+.pop-x{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mid);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.pop-x:hover{color:#ff6a5c;border-color:var(--red-light)}
+.pop-body{padding:16px;overflow-y:auto}
+.pop-body.tool-host{padding:0;display:flex;flex-direction:column;min-height:0}
+.pop-body.tool-host > *{flex:1;min-height:min(64vh,520px);max-height:100%;width:100%}
+.pop-scrim.drawer{align-items:flex-end;justify-content:stretch}
+.pop-scrim.drawer .popup{width:100%;max-width:none;border-radius:16px 16px 0 0;border-bottom:none;max-height:70vh;margin:0}
+.pchar-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pchar-av{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:16px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.pchar-nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;color:var(--white)}
+.pchar-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.psec-h{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:10px 0 6px}
+.pline{font-size:13px;color:var(--light);line-height:1.6}
+.hpctl{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.hpbar{flex:1;height:16px;border-radius:8px;background:rgba(0,0,0,.5);overflow:hidden;position:relative;border:1px solid var(--border)}
+.hpbar>i{display:block;height:100%}
+.hpbar .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000}
+
 @media (max-width:760px){
   .console-workspace{flex-direction:column;overflow-x:hidden;overflow-y:auto}
   .cstation{flex:0 0 auto!important;flex-basis:auto!important;min-height:70vh;border-right:none;border-bottom:3px solid var(--border)}
   .cstation.collapsed{min-height:0!important}
-  .cmode-tab{min-width:0;padding:6px 12px}
+  .cstation-center{min-height:0}
+  #cst-center:not(.collapsed){min-height:80vh}
+  .cmode-tab{min-width:0;padding:0 11px}
+  .bb-lbl{display:none}
 }
-
-/* ── Telemetry band: campaign identity + party strip + clock ── */
-.gmc-telemetry{flex-shrink:0;display:flex;align-items:stretch;background:linear-gradient(180deg,#12151b,#0c0e12);border-bottom:1px solid var(--border);position:relative;z-index:2}
-.gmc-telemetry::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--accent) 30%,var(--accent-2) 70%,transparent);opacity:.4}
-.tel-brand{display:flex;flex-direction:column;justify-content:center;gap:1px;padding:6px 16px;min-width:190px;max-width:230px;border-right:1px solid var(--border)}
-.tel-camp{font-family:'Cinzel',serif;font-weight:700;font-size:14px;color:var(--white);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tel-sys{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.party-strip{flex:1;display:flex;align-items:center;gap:7px;padding:6px 12px;overflow-x:auto;min-width:0}
-.party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
-.pcard{flex:0 0 auto;min-width:148px;max-width:210px;display:flex;flex-direction:column;gap:4px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:9px;padding:6px 9px}
-.pcard.down{opacity:.5;filter:grayscale(.4)}
-.pcard.bloodied{border-color:var(--red);box-shadow:0 0 10px rgba(214,58,48,.3)}
-.pc-row1{display:flex;align-items:center;gap:7px;min-width:0}
-.pc-av{width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:11px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-.pc-nm{min-width:0;flex:1}
-.pc-nm .n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--white);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pc-nm .s{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pc-row2{display:flex;align-items:center;gap:6px}
-.pc-hpb{flex:1;height:11px;border-radius:6px;background:rgba(0,0,0,.5);overflow:hidden;position:relative;border:1px solid var(--border)}
-.pc-hpb > i{display:block;height:100%;border-radius:6px}
-.pc-hpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
-.pc-ac{flex-shrink:0;text-align:center;border-radius:5px;background:var(--panel-2);border:1px solid var(--border);padding:1px 6px}
-.pc-ac .l{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7px;letter-spacing:.05em;color:var(--muted);display:block;line-height:1}
-.pc-ac .v{font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;color:var(--white);line-height:1.1}
-.tel-clock{margin-left:auto;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:6px 16px;border-left:1px solid var(--border)}
-.tel-clbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.tel-time{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--accent)}
-body[data-cview="free"] .gmc-telemetry{display:none}
-
-/* status line + auto pill in the mode bar */
-.cmode-status .cst-stat{display:inline-flex;align-items:baseline;gap:6px;padding:0 14px;border-right:1px solid var(--border)}
-.cmode-status .cst-stat .k{font-size:8.5px;letter-spacing:.12em}
-.cmode-status .cst-stat .v{font-size:13px;color:var(--white)}
-.cmode-status .cst-stat .v.mono{font-family:'Share Tech Mono',monospace;color:var(--accent)}
-.cmode-status .cst-stat .v.hot{color:var(--red-light)}
-.auto-pill{margin-left:14px;display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:rgba(36,211,238,.08);border:1px solid var(--accent-dim);border-radius:999px;padding:3px 10px;cursor:pointer}
-.auto-pill.off{color:var(--muted);border-color:var(--border);background:transparent}
-.auto-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
-.auto-pill.off .auto-dot{background:var(--muted);box-shadow:none}
 
 /* ── Map / VTT station ── */
 .vtt-bar{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--panel-2);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -2291,34 +2323,75 @@ GMScenes.renderPins();
 })();
 </script>
 
-<!-- ═══ MODE BAR (the "pages" — like Resolve workspaces) ═══ -->
-<!-- ═══ TELEMETRY BAND — campaign identity + always-on party strip + clock ═══ -->
+<!-- ═══ ZONE 1b — MONITOR ROW: party bubbles + timers + scenes + clock ═══ -->
 <div class="gmc-telemetry" id="gmc-telemetry">
-  <div class="tel-brand"><div class="tel-camp" id="tel-camp">Dungeon Crawler's Companion</div><div class="tel-sys" id="tel-sys">GM Console</div></div>
-  <div class="party-strip" id="gmc-party-strip"><div class="party-empty" id="party-empty">Link a campaign to see your party's live HP &amp; AC here</div></div>
+  <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Link a campaign to see your party</div></div>
+  <div class="mon-group" id="gmc-timers"></div>
+  <div class="scene-strip" id="gmc-scenes"></div>
   <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
 </div>
 
-<div class="cmode-bar" id="cmode-bar">
-  <button class="cmode-tab" data-mode="prep"     type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
-  <button class="cmode-tab" data-mode="explore"  type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
-  <button class="cmode-tab" data-mode="combat"   type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
-  <button class="cmode-tab" data-mode="downtime" type="button" onclick="setConsoleMode('downtime')"><span class="cm-ico">☕</span><span class="cm-name">Downtime</span></button>
-  <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')"><span class="cm-ico">▦</span><span class="cm-name">Free</span></button>
-  <div class="cmode-status" id="cmode-status"></div>
-</div>
-
-<!-- ═══ CONSOLE WORKSPACE (stations reflow by mode) ═══ -->
+<!-- ═══ ZONE 2 — CANVAS: Adventure | (Map + Combat) | Roll Log ═══ -->
 <div class="console-workspace" id="console-workspace">
-  <aside class="cstation" id="cst-spine"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-spine-title">Encounter</span><div class="cst-toolbar" id="cst-spine-toolbar"></div></div><div class="cst-content" id="cst-spine-content"></div></aside>
-  <main class="cstation" id="cst-stage"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-stage-title">Stage</span><div class="cst-toolbar" id="cst-stage-toolbar"></div></div><div class="cst-content" id="cst-stage-content"></div></main>
-  <aside class="cstation" id="cst-side"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-side-title">Tools</span><div class="cst-toolbar" id="cst-side-toolbar"></div></div><div class="cst-content" id="cst-side-content"></div></aside>
-  <aside class="cstation" id="cst-map"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Map · VTT</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div><div class="cst-content" id="cst-map-content"></div></aside>
-  <aside class="cstation" id="cst-log"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div><div class="cst-content" id="cst-log-content"></div></aside>
+  <aside class="cstation" id="cst-adv">
+    <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
+    <div class="cst-content" id="cst-adv-content"></div>
+  </aside>
+  <main class="cstation cstation-center" id="cst-center">
+    <section class="csub" id="cst-map">
+      <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Map · VTT</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
+      <div class="cst-content" id="cst-map-content"></div>
+    </section>
+    <section class="csub" id="cst-cbt">
+      <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-cbt-title">Combat</span><div class="cst-toolbar" id="cst-cbt-toolbar"></div></div>
+      <div class="cst-content" id="cst-cbt-content"></div>
+    </section>
+  </main>
+  <aside class="cstation" id="cst-log">
+    <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div>
+    <div class="cst-content" id="cst-log-content"></div>
+  </aside>
 </div>
 
-<!-- ═══ MAIN AREA (Free mode — dynamic windows) ═══ -->
+<!-- ═══ ZONE 3 — BOTTOM BAR: modes + quick tools + dice ═══ -->
+<footer class="bottom-bar" id="bottom-bar">
+  <div class="bb-modes">
+    <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
+    <button class="cmode-tab" data-mode="prep"      type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
+    <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
+    <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
+    <button class="cmode-tab" data-mode="downtime"  type="button" onclick="setConsoleMode('downtime')"><span class="cm-ico">☕</span><span class="cm-name">Downtime</span></button>
+  </div>
+  <div class="bb-quick" id="bb-quick">
+    <span class="bb-lbl">Quick&nbsp;Tools</span>
+    <button class="qbtn" type="button" onclick="openTool('gen')"><span class="qi">☉</span>Generators</button>
+    <button class="qbtn" type="button" onclick="openTool('music')"><span class="qi">♪</span>Music</button>
+    <button class="qbtn" type="button" onclick="openTool('notes')"><span class="qi">✎</span>Notes</button>
+    <button class="qbtn" type="button" onclick="openTool('party')"><span class="qi">💬</span>Message</button>
+    <button class="qbtn" type="button" onclick="openTool('rules')"><span class="qi">📖</span>Rulebooks</button>
+  </div>
+  <div class="bb-dice" id="bb-dice">
+    <span class="bb-lbl">Dice</span>
+    <button class="qdie" type="button" data-die="4">d4</button>
+    <button class="qdie" type="button" data-die="6">d6</button>
+    <button class="qdie" type="button" data-die="8">d8</button>
+    <button class="qdie" type="button" data-die="10">d10</button>
+    <button class="qdie" type="button" data-die="12">d12</button>
+    <button class="qdie" type="button" data-die="20">d20</button>
+    <button class="qdie" type="button" data-die="100">d%</button>
+  </div>
+</footer>
+
+<!-- ═══ Free mode (dormant fallback) ═══ -->
 <div class="main-area" id="main-area" style="display:none;"></div>
+
+<!-- ═══ Popup / drawer (quick tools + monitor details) ═══ -->
+<div class="pop-scrim" id="gmc-scrim">
+  <div class="popup" id="gmc-popup">
+    <div class="pop-head"><span class="pop-ttl" id="gmc-pop-ttl">Tool</span><button class="pop-x" type="button" onclick="closeGmcPop()">✕</button></div>
+    <div class="pop-body" id="gmc-pop-body"></div>
+  </div>
+</div>
 
 
 <style>
@@ -3878,12 +3951,18 @@ function ensureToolWindow(toolType) {
   // Console view: route to the station that hosts the tool (e.g. a monster sent
   // to the tracker lands in the spine), rather than spawning a hidden window.
   if(document.body.dataset.cview === 'console') {
-    const STATION_FOR = { trackers:'spine', dice:'log', gen:'side', party:'side', vtt:'map', adventure:'stage', maps:'stage', notes:'stage', rules:'stage' };
+    const STATION_FOR = { trackers:'cbt', dice:'log', vtt:'map', adventure:'adv' };
     for(const st of CONSOLE_STATIONS) {
       const cache = gmNodes['cst-' + st];
       if(cache && cache.active === toolType) return cache.byTool[toolType];
     }
-    return getWinNode('cst-' + (STATION_FOR[toolType] || 'stage'), toolType);
+    // Tools without a dedicated station (gen/party/notes/maps/rules) open as a
+    // popup drawer instead, but generated content still needs a live node —
+    // reuse the popup instance so what the GM sees is what gets updated.
+    const st = STATION_FOR[toolType];
+    if(st){ if(consoleMode==='combat' && toolType==='adventure'){/* adv hidden in combat, still update its node */} return getWinNode('cst-' + st, toolType); }
+    if(!gmcPopNodes[toolType]) gmcPopNodes[toolType] = buildToolNode(toolType);
+    return gmcPopNodes[toolType];
   }
   let w = gmWindows.find(x => x.tool === toolType);
   if(!w) w = addWindow(toolType);
@@ -4042,20 +4121,28 @@ function setWindowTool(id, tool) {
 GM_MOBILE_MQ.addEventListener('change', () => renderWindows());
 
 // ══════════════════════════════════════════════════════════════════════════
-// GM CONSOLE — modes / stations. Tools stop being user-arranged windows and
-// become fixed "stations" that reflow by MODE (Prep / Explore / Combat /
-// Downtime), like Resolve pages. "Free" mode falls back to the window system.
-// Station tool nodes reuse the same per-id instance cache as windows (getWinNode).
+// GM CONSOLE — 3-ZONE LAYOUT. Fixed stations that reflow by MODE (Master /
+// Prep / Explore / Combat / Downtime) like DaVinci Resolve pages or Premiere
+// workspaces — a mode only shows/hides canvas stations; the top Monitor bar
+// and bottom Command bar stay fixed. "Free" mode falls back to the old add/
+// remove window system. Station tool nodes reuse the per-id instance cache
+// used by windows (getWinNode), so each station keeps its own live state.
+//
+//   Canvas: [ Adventure ] | [ Map·VTT / Combat (center stack) ] | [ Roll Log ]
 // ══════════════════════════════════════════════════════════════════════════
-const CONSOLE_STATIONS = ['spine','stage','side','log','map'];
-const STATION_TITLES = { spine:'Encounter', stage:'Stage', side:'Tools', log:'Roll Log', map:'Map · VTT' };
+const CONSOLE_STATIONS = ['adv','map','cbt','log'];
+const STATION_TOOL   = { adv:'adventure', map:'vtt', cbt:'trackers', log:'dice' };
+const STATION_TITLES = { adv:'Adventure', map:'Map · VTT', cbt:'Combat', log:'Roll Log' };
+// Each mode is a visibility map over the four stations. The center wrapper
+// (#cst-center) is shown whenever either of its subs (map / cbt) is visible.
 const CONSOLE_MODES = {
-  prep:     { stations:{ stage:{tool:'adventure'}, side:{tool:'gen'} } },
-  explore:  { stations:{ spine:{tool:'trackers', rail:true}, stage:{tool:'adventure'}, map:{tool:'vtt'}, log:{tool:'dice'} } },
-  combat:   { stations:{ spine:{tool:'trackers'}, stage:{tool:'adventure'}, map:{tool:'vtt'}, log:{tool:'dice'} } },
-  downtime: { stations:{ side:{tool:'party'}, stage:{tool:'notes'}, log:{tool:'dice'} } },
+  master:   { adv:1, map:1, cbt:1, log:1 },   // everything — the home layout
+  prep:     { adv:1, map:0, cbt:0, log:0 },   // adventure fills, planning
+  explore:  { adv:1, map:1, cbt:0, log:1 },   // adventure + map + roll log
+  combat:   { adv:0, map:1, cbt:1, log:1 },   // map + combat + roll log
+  downtime: { adv:1, map:0, cbt:0, log:1 },   // adventure + roll log
 };
-let consoleMode = 'explore';
+let consoleMode = 'master';
 
 function mountStation(stationId, tool) {
   const content = document.getElementById('cst-' + stationId + '-content');
@@ -4077,35 +4164,46 @@ function mountStation(stationId, tool) {
   }
 }
 
+// Mount every station's fixed tool exactly once. Modes then only show/hide —
+// the tool instances (and their state) persist across mode switches.
+let _stationsMounted = false;
+function ensureStationsMounted() {
+  if(_stationsMounted) return;
+  CONSOLE_STATIONS.forEach(st => mountStation(st, STATION_TOOL[st]));
+  _stationsMounted = true;
+}
+
 function renderConsole(mode) {
   if(mode === 'free') { setFreeView(); return; }
-  const cfg = CONSOLE_MODES[mode];
-  if(!cfg) return;
-  consoleMode = mode;
+  const cfg = CONSOLE_MODES[mode] || CONSOLE_MODES.master;
+  consoleMode = CONSOLE_MODES[mode] ? mode : 'master';
   document.body.dataset.cview = 'console';
-  document.body.dataset.cmode = mode;
+  document.body.dataset.cmode = consoleMode;
   const ws = document.getElementById('console-workspace');
   const free = document.getElementById('main-area');
   if(ws) ws.style.display = '';
   if(free) free.style.display = 'none';
 
+  ensureStationsMounted();
+
+  // Show / hide each station for this mode.
   CONSOLE_STATIONS.forEach(st => {
     const el = document.getElementById('cst-' + st);
-    if(!el) return;
-    const conf = cfg.stations[st];
-    if(conf && conf.tool) {
-      el.classList.remove('collapsed');
-      el.dataset.size = conf.rail ? 'rail' : (conf.size || 'norm');
-      mountStation(st, conf.tool);
-      const t = document.getElementById('cst-' + st + '-title');
-      if(t) t.textContent = (st === 'spine' || st === 'log' || st === 'map') ? STATION_TITLES[st] : (TOOL_LABELS[conf.tool] || STATION_TITLES[st]);
-    } else {
-      el.classList.add('collapsed');
-    }
+    if(el) el.classList.toggle('collapsed', !cfg[st]);
   });
+  // The center wrapper collapses when both of its subs are hidden.
+  const centerVis = !!(cfg.map || cfg.cbt);
+  const center = document.getElementById('cst-center');
+  if(center) center.classList.toggle('collapsed', !centerVis);
 
-  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
-  try { renderStatusLine(); } catch(e) {}
+  // Let a side station fill the canvas when the center is gone (Prep/Downtime),
+  // otherwise clear the override so the CSS flex-basis governs.
+  const adv = document.getElementById('cst-adv');
+  const log = document.getElementById('cst-log');
+  if(adv) adv.style.flex = (!centerVis && cfg.adv) ? '1 1 auto' : '';
+  if(log) log.style.flex = (!centerVis && !cfg.adv && cfg.log) ? '1 1 auto' : '';
+
+  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === consoleMode));
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
@@ -4122,20 +4220,24 @@ function setFreeView() {
     const cache = gmNodes['cst-' + st];
     if(cache) Object.values(cache.byTool).forEach(n => { if(n.parentElement) instancePool.appendChild(n); });
   });
+  _stationsMounted = false;
   if(!gmWindows.length) DEFAULT_WINDOWS.forEach(t => gmWindows.push({ id: newWinId(), tool: t }));
   renderWindows();
-  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === 'free'));
+  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('add-window-btn') && (document.getElementById('add-window-btn').style.display = '');
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
 function setConsoleMode(mode) { renderConsole(mode); }
 
-// ── Telemetry: campaign identity, always-on party strip, session clock,
-//    mode status line, and auto-flip to Combat when initiative starts. ──
+// ══════════════════════════════════════════════════════════════════════════
+// ZONE 1b — MONITOR BAR: party bubbles, timers, auto-pinned scenes, clock.
+// ZONE 3 quick-tool + character/timer POPUPS.
+// ══════════════════════════════════════════════════════════════════════════
 let gmcAutoCombat = true;
 let gmcAutoedFight = false;
 let gmcRestored = false;   // true once a saved layout has been restored, so bootstrap won't override it
+let gmcRoster = [];        // last published roster (so a bubble click can open its detail)
 const gmcStart = Date.now();
 
 function gmcInitials(name){
@@ -4158,59 +4260,148 @@ function gmcHpColor(pct){
   if(pct<=75) return '#c8a020';
   return '#4caf50';
 }
+function esc2(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ── Party BUBBLES — always-on, click a bubble for its detail popup. ──
 function renderPartyStrip(roster){
-  const strip = document.getElementById('gmc-party-strip');
-  if(!strip) return;
+  const el = document.getElementById('gmc-party-bubbles');
+  if(!el) return;
   roster = roster || window.GM_ROSTER || [];
-  if(!roster.length){ strip.innerHTML = '<div class="party-empty">Link a campaign to see your party’s live HP &amp; AC here</div>'; return; }
-  strip.innerHTML = roster.map(pc => {
+  gmcRoster = roster;
+  if(!roster.length){ el.innerHTML = '<div class="party-empty" id="party-empty">Link a campaign to see your party</div>'; return; }
+  el.innerHTML = roster.map((pc,i) => {
     const pct = gmcHpPct(pc.hp);
     const down = pct != null && pct <= 0;
     const bloodied = pct != null && pct > 0 && pct <= 40;
-    const barW = pct==null ? 100 : pct;
-    const hpText = pc.hp || '';
-    return '<div class="pcard'+(down?' down':'')+(bloodied?' bloodied':'')+'">'
-      + '<div class="pc-row1"><div class="pc-av">'+esc2(gmcInitials(pc.name).toUpperCase())+'</div>'
-      + '<div class="pc-nm"><div class="n">'+esc2(pc.name)+'</div>'+(pc.sub?'<div class="s">'+esc2(pc.sub)+'</div>':'')+'</div></div>'
-      + '<div class="pc-row2"><div class="pc-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i>'+(hpText?'<div class="pc-hpt">'+esc2(hpText)+'</div>':'')+'</div>'
-      + (pc.ac?'<div class="pc-ac"><span class="l">AC</span><span class="v">'+esc2(pc.ac)+'</span></div>':'')+'</div>'
+    const barW = pct==null ? 100 : Math.max(4,pct);
+    return '<div class="bubble'+(down?' down':'')+(bloodied?' bloodied':'')+'" onclick="charPop('+i+')" title="'+esc2(pc.name)+'">'
+      + '<div class="bub-av">'+esc2(gmcInitials(pc.name).toUpperCase())+'</div>'
+      + '<div class="bub-mini"><div class="bub-nm">'+esc2(pc.name)+'</div>'
+      + '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i></div></div>'
       + '</div>';
   }).join('');
 }
-function esc2(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 document.addEventListener('gm-roster', e => renderPartyStrip(e.detail));
 
+// ── Timers — mirror any running tracker timers into the monitor bar. ──
+function renderTimers(){
+  const el = document.getElementById('gmc-timers');
+  if(!el) return;
+  const st = gmcTrackerState();
+  const items = (st && st.items) || [];
+  const timers = items.filter(it => it && it.kind === 'timer');
+  if(!timers.length){ el.innerHTML = ''; return; }
+  el.innerHTML = timers.map(t => {
+    const secs = t.remainingSeconds != null ? t.remainingSeconds : (t.totalSeconds || 0);
+    const m = Math.floor(Math.max(0,secs)/60), s = Math.max(0,secs)%60;
+    const zero = secs <= 0;
+    return '<div class="timer'+(zero?' zero':'')+'" onclick="setConsoleMode(\'combat\')" title="Open in Combat">'
+      + '<div><div class="tl">'+esc2(t.name||'Timer')+'</div>'
+      + '<div class="tv">'+m+':'+String(s).padStart(2,'0')+'</div></div></div>';
+  }).join('');
+}
+
+// ── Scenes — auto-pin every scene as a one-tap toggle in the monitor bar. ──
+function renderScenes(){
+  const el = document.getElementById('gmc-scenes');
+  if(!el || !window.GMScenes) return;
+  const list = GMScenes.list() || [];
+  if(!list.length){ el.innerHTML = ''; return; }
+  el.innerHTML = '<span class="scn-lbl">Scenes</span>' + list.map(sc => {
+    const on = GMScenes.isPlaying(sc.id);
+    return '<button class="scene'+(on?' playing':'')+'" type="button" data-scene="'+esc2(sc.id)+'">'
+      + '<span class="sdot"></span>'+esc2(sc.name)+'</button>';
+  }).join('');
+}
+function wireScenes(){
+  const el = document.getElementById('gmc-scenes');
+  if(!el || el._wired) return; el._wired = true;
+  el.addEventListener('click', e => {
+    const btn = e.target.closest('[data-scene]');
+    if(!btn || !window.GMScenes) return;
+    GMScenes.toggle(parseInt(btn.dataset.scene, 10));
+    renderScenes();
+  });
+}
+
 function gmcTrackerState(){
-  const cache = gmNodes['cst-spine'];
+  const cache = gmNodes['cst-cbt'];
   const node = cache && cache.byTool && cache.byTool['trackers'];
   if(node && node._getState){ try { return node._getState(); } catch(e){} }
   return null;
 }
-function renderStatusLine(){
-  const el = document.getElementById('cmode-status');
-  if(!el) return;
-  const mode = consoleMode;
-  let html = '';
-  const roster = window.GM_ROSTER || [];
-  const stat = (k,v,cls)=> '<span class="cst-stat"><span class="k">'+k+'</span><span class="v '+(cls||'')+'">'+v+'</span></span>';
-  if(mode === 'combat'){
-    const st = gmcTrackerState();
-    const items = (st && st.items) || [];
-    const foes = items.filter(i=>i.type==='npc');
-    const up = foes.filter(f=> (f.hpCurrent==null && f.hpCur==null) ? true : ((f.hpCurrent!=null?f.hpCurrent:f.hpCur) > 0)).length;
-    html = stat('Round', (st&&st.round)||1, 'mono') + stat('Foes Up', up+' / '+foes.length, foes.length&&up<foes.length?'hot':'');
-  } else if(mode === 'explore'){
-    html = stat('Party', roster.length ? roster.length+' linked' : '—') + stat('Scene', 'Exploration');
-  } else if(mode === 'prep'){
-    html = stat('Mode', 'Prep') + stat('Party', roster.length? roster.length+' linked':'—');
-  } else if(mode === 'downtime'){
-    html = stat('Mode', 'Downtime');
+
+// ══════════════════════════════════════════════════════════════════════════
+// POPUPS / DRAWERS — quick tools mount a real live tool instance; character &
+// timer taps render a lightweight detail card.
+// ══════════════════════════════════════════════════════════════════════════
+function showGmcPop(title, html, opts){
+  opts = opts || {};
+  const ttl = document.getElementById('gmc-pop-ttl');
+  const body = document.getElementById('gmc-pop-body');
+  const pop = document.getElementById('gmc-popup');
+  const scrim = document.getElementById('gmc-scrim');
+  if(ttl) ttl.textContent = title || '';
+  if(body){
+    body.classList.toggle('tool-host', !!opts.toolHost);
+    if(html != null) body.innerHTML = html;
   }
-  const autoOff = gmcAutoCombat ? '' : ' off';
-  html += '<span class="auto-pill'+autoOff+'" id="gmc-auto" title="Auto-switch to Combat when initiative starts"><span class="auto-dot"></span>Auto '+(gmcAutoCombat?'on':'off')+'</span>';
-  el.innerHTML = html;
-  const ap = document.getElementById('gmc-auto');
-  if(ap) ap.onclick = ()=>{ gmcAutoCombat = !gmcAutoCombat; renderStatusLine(); };
+  if(pop) pop.classList.toggle('wide', !!opts.wide);
+  if(scrim){ scrim.classList.toggle('drawer', !!opts.drawer); scrim.classList.add('show'); }
+}
+function closeGmcPop(){
+  const scrim = document.getElementById('gmc-scrim');
+  if(scrim) scrim.classList.remove('show');
+  // detach any mounted tool node back to the pool so it can be reopened.
+  const body = document.getElementById('gmc-pop-body');
+  if(body && body.classList.contains('tool-host')){
+    Array.from(body.children).forEach(n => { if(instancePool) instancePool.appendChild(n); });
+  }
+}
+
+// Quick tools open a real, live tool instance in a bottom drawer.
+const POP_TOOL = { gen:'gen', music:'music', notes:'notes', party:'party', rules:'rules', cbt:'trackers' };
+const gmcPopNodes = {};
+function openTool(k){
+  const tool = normalizeTool(POP_TOOL[k] || k);
+  const body = document.getElementById('gmc-pop-body');
+  if(!body) return;
+  if(!gmcPopNodes[tool]) gmcPopNodes[tool] = buildToolNode(tool);
+  const node = gmcPopNodes[tool];
+  showGmcPop(TOOL_LABELS[tool] || tool, null, { drawer:true, toolHost:true });
+  body.innerHTML = '';
+  node.classList.add('active');
+  body.appendChild(node);
+}
+
+function charPop(i){
+  const p = gmcRoster[i] || (window.GM_ROSTER||[])[i];
+  if(!p) return;
+  const pct = gmcHpPct(p.hp);
+  const barW = pct==null ? 100 : Math.max(4,pct);
+  const sub = [p.sub, p.ac ? ('AC '+p.ac) : ''].filter(Boolean).join(' · ');
+  const html = ''
+    + '<div class="pchar-hd"><div class="pchar-av">'+esc2(gmcInitials(p.name).toUpperCase())+'</div>'
+    + '<div><div class="pchar-nm">'+esc2(p.name)+'</div>'+(sub?'<div class="pchar-sub">'+esc2(sub)+'</div>':'')+'</div></div>'
+    + '<div class="hpctl"><div class="hpbar"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i>'
+    + '<div class="t">'+esc2(p.hp||'—')+'</div></div></div>'
+    + '<div class="pline" style="color:var(--muted)">Live HP &amp; AC from the linked campaign. Open the Party tool for full controls and conditions.</div>'
+    + '<div style="margin-top:12px"><button class="qbtn" type="button" onclick="openTool(\'party\')"><span class="qi">👥</span> Open Party Tool</button></div>';
+  showGmcPop(p.name, html, { drawer:true });
+}
+
+// ── Bottom-bar dice: one-tap a die → straight into the Roll Log. ──
+function wireBottomDice(){
+  document.querySelectorAll('#bb-dice .qdie').forEach(b => {
+    if(b._wired) return; b._wired = true;
+    b.addEventListener('click', () => {
+      const sides = parseInt(b.dataset.die, 10);
+      try {
+        const node = getWinNode('cst-log', 'dice');
+        if(node && node._quickRoll) node._quickRoll(sides);
+      } catch(e) {}
+    });
+  });
 }
 
 function gmcTick(){
@@ -4221,15 +4412,17 @@ function gmcTick(){
   // system label
   const sysEl = document.getElementById('tel-sys');
   if(sysEl){ const sys = (typeof window.GM_SYSTEM==='string'?window.GM_SYSTEM:''); sysEl.textContent = (sys? sys+' · ':'') + 'GM Console'; }
-  // auto-combat off tracker contents
+  // monitor-bar timers + scenes reflect live tool state
+  try { renderTimers(); } catch(e) {}
+  try { renderScenes(); } catch(e) {}
+  // auto-flip to Combat when initiative starts, back to Explore when it clears
   if(gmcAutoCombat && document.body.dataset.cview==='console'){
     const st = gmcTrackerState();
     const items = (st && st.items) || [];
     const foes = items.filter(i=>i.type==='npc');
-    if(consoleMode==='explore' && foes.length>0 && !gmcAutoedFight){ gmcAutoedFight = true; renderConsole('combat'); }
+    if((consoleMode==='explore'||consoleMode==='master') && foes.length>0 && !gmcAutoedFight){ gmcAutoedFight = true; renderConsole('combat'); }
     else if(consoleMode==='combat' && items.length===0){ gmcAutoedFight = false; renderConsole('explore'); }
   }
-  if(document.body.dataset.cview==='console') renderStatusLine();
 }
 setInterval(gmcTick, 1000);
 
@@ -10967,11 +11160,13 @@ window.addEventListener('pageshow', function(e) {
 // CONSOLE in Explore mode; Free mode + saved windows are available on demand.
 function gmBootstrapWindows() {
   // Don't override a layout the server shim already restored (mode/view/stations).
-  if(!gmcRestored) renderConsole(consoleMode || 'explore');
-  // Pre-create the Party instance so its campaign sync runs and the masthead
-  // party strip is populated even before the GM opens Downtime.
-  try { getWinNode('cst-side', 'party'); } catch(e) {}
-  try { renderPartyStrip(); renderStatusLine(); } catch(e) {}
+  if(!gmcRestored) renderConsole('master');
+  // Pre-create the Party instance so its campaign sync runs and the monitor-bar
+  // party bubbles populate even before the GM opens the Party drawer. The same
+  // instance is reused when they tap "Message"/Party.
+  try { gmcPopNodes['party'] = gmcPopNodes['party'] || buildToolNode('party'); } catch(e) {}
+  try { renderPartyStrip(); renderTimers(); renderScenes(); } catch(e) {}
+  try { wireScenes(); wireBottomDice(); } catch(e) {}
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gmBootstrapWindows);
 else gmBootstrapWindows();
@@ -11092,19 +11287,25 @@ function serializeConsole() {
 }
 function restoreConsole(c) {
   gmcRestored = true;
-  if(!c) { renderConsole('explore'); return; }
-  // Rebuild station instances + their state before mounting.
-  Object.entries(c.stations || {}).forEach(([st, conf]) => {
+  if(!c) { renderConsole('master'); return; }
+  // Restore each tool's saved state into its NEW home station, regardless of
+  // which (possibly older-scheme) station it was saved under. Only the four
+  // fixed console tools carry over; everything else lives in popups now.
+  const TOOL_STATION = { adventure:'adv', vtt:'map', trackers:'cbt', dice:'log' };
+  Object.values(c.stations || {}).forEach(conf => {
     if(!conf) return;
     Object.entries(conf.tools || {}).forEach(([t, state]) => {
-      const node = getWinNode('cst-' + st, t);
+      const tool = normalizeTool(t);
+      const st = TOOL_STATION[tool];
+      if(!st) return;
+      const node = getWinNode('cst-' + st, tool);
       if(node._setState) { try { node._setState(state); } catch(e) {} }
     });
-    if(conf.tool) { const cache = gmNodes['cst-' + st]; if(cache) cache.active = conf.tool; getWinNode('cst-' + st, conf.tool); }
   });
   if(typeof c.auto === 'boolean') gmcAutoCombat = c.auto;
+  const mode = CONSOLE_MODES[c.mode] ? c.mode : 'master';
   if(c.view === 'free') setFreeView();
-  else renderConsole(c.mode || 'explore');
+  else renderConsole(mode);
 }
 
 window.__gmScreenGetState = function() {
@@ -11983,6 +12184,9 @@ function init_dice(root) {
     }
     return out.reverse();
   }
+  // One-tap roll from the bottom Command bar dice: throw a single die of the
+  // given size straight into this log (shares the campaign broadcast).
+  root._quickRoll = (sides) => { const n = parseInt(sides, 10); if(n) return rollCore([[n, 1]], 0, 'none', null); };
   root._getState = () => ({ log });
   root._setState = (s) => {
     if(!s) return;
