@@ -66,6 +66,7 @@ const SYSTEMS = [
     file: "co_session_prep_builder.html", key: "co_session", ls: "co_builder_v1", cfg: "co", random: "Random Threat",
     name: "Candela Obscura", title: "Session Prep Builder — Candela Obscura",
     accent: "#2fa595", accentDark: "#1c6b60", red: "#b82018", redDark: "#7a1510", highlight: "#6fe0d2", boxBg: "#0f221f",
+    displayFont: "'Cinzel', serif", fontExtra: "family=Cinzel:wght@600;700;800&",
     chapter: "Scene", chapterPh: "Scene 1", session: "Assignment", mobs: "Threats/NPCs", mobsHeading: "Threats &amp; Phenomena",
     mob: "Threat", boss: "Phenomenon", npc: "NPC", typePh: "PHENOMENON // FLARE // BLEED", titlePh: "e.g. The Hallowharbor Exsanguinations", subtitlePh: "e.g. A Candela Obscura assignment for one circle",
   },
@@ -73,6 +74,7 @@ const SYSTEMS = [
     file: "yze_session_prep_builder.html", key: "yze_session", ls: "yze_builder_v1", cfg: "yze", random: "Random Adversary",
     name: "Year Zero Engine", title: "Session Prep Builder — Year Zero Engine",
     accent: "#16bdd6", accentDark: "#0d8299", red: "#b82018", redDark: "#7a1510", highlight: "#5fd6ea", boxBg: "#dbeff4",
+    displayFont: "'Oswald', sans-serif", fontExtra: "family=Oswald:wght@500;600;700&",
     chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Adversaries/NPCs", mobsHeading: "Adversaries &amp; NPCs",
     mob: "Adversary", boss: "Threat", npc: "NPC", typePh: "GRUNT // STR 3 · MELEE 2", titlePh: "e.g. The Cold Below", subtitlePh: "e.g. A Year Zero Engine one-shot",
   },
@@ -80,6 +82,7 @@ const SYSTEMS = [
     file: "mmrpg_session_prep_builder.html", key: "mmrpg_session", ls: "mmrpg_builder_v1", cfg: "mmrpg", random: "Random Villain",
     name: "Marvel Multiverse RPG", title: "Session Prep Builder — Marvel Multiverse RPG",
     accent: "#EC1D24", accentDark: "#b3141a", red: "#b3141a", redDark: "#7a1510", highlight: "#ffd23f", boxBg: "#fbe0e1",
+    displayFont: "'Oswald', sans-serif", fontExtra: "family=Oswald:wght@500;600;700&",
     chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Villains/NPCs", mobsHeading: "Villains &amp; NPCs",
     mob: "Villain", boss: "Threat", npc: "NPC", typePh: "THUG // Rank 1 · Melee +2", titlePh: "e.g. The Symbiote Outbreak", subtitlePh: "e.g. A Marvel Multiverse one-shot for Rank 3 heroes",
   },
@@ -351,6 +354,9 @@ for (const S of SYSTEMS) {
   // page paper + preview-area background (per system; defaults match the DCC base)
   s = rep(s, "--paper: #ffffff;", `--paper: ${S.paper || "#ffffff"};`);
   s = rep(s, "--preview-bg: #26262a;", `--preview-bg: ${S.previewBg || "#26262a"};`);
+  // display/heading font — match the system's character sheet (Cinzel, Oswald, …)
+  s = rep(s, "--font-display: 'Barlow Condensed', sans-serif;", `--font-display: ${S.displayFont || "'Barlow Condensed', sans-serif"};`);
+  if (S.fontExtra) s = rep(s, "css2?family=Barlow+Condensed:wght@400;600;700;800;900", `css2?${S.fontExtra}family=Barlow+Condensed:wght@400;600;700;800;900`);
   // storage keys (server blob key + standalone localStorage key)
   s = rep(s, "'dcc_session'", `'${S.key}'`);
   s = rep(s, "'dcw_builder_v5'", `'${S.ls}'`);

@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
     --muted: #555; --rule: #d8d0c0; --box-bg: #f3ddc9; --read-bg: #2a1a08;
     --read-text: #ffffff; --highlight: #f0c020; --green: #2d6a2d; --blue-npc: #1a4a8a;
     --section-hdr: #c0392b; --table-hdr: #4a4a4a; --preview-bg: #26262a;
+    --font-display: 'Barlow Condensed', sans-serif;
     /* UI (sidebar) stays dark */
     --ui-bg: #1c1c1e; --ui-panel: #2a2a2d; --ui-border: #3a3a3e;
     --ui-text: #e8e4dc; --ui-muted: #888; --ui-accent: #e07b39; --ui-highlight: #f0c020;
@@ -54,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
   .collapse-btn:hover { color: var(--ui-accent); }
   .sidebar-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
   .sidebar-header { padding: 16px; border-bottom: 2px solid var(--ui-accent); background: var(--ui-bg); }
-  .sidebar-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-accent); }
+  .sidebar-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-accent); }
   .sidebar-sub { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--ui-muted); letter-spacing: 0.1em; margin-top: 2px; }
   .sidebar-tabs { display: flex; border-bottom: 1px solid var(--ui-border); }
   .tab-btn { flex: 1; padding: 8px 2px; background: none; border: none; color: var(--ui-muted); font-family: 'Share Tech Mono', monospace; font-size: 7.5px; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
@@ -76,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
   input[type="text"]:focus, textarea:focus { border-color: var(--ui-accent); }
   textarea { min-height: 60px; line-height: 1.5; }
   textarea.short { min-height: 40px; }
-  .section-divider { position: relative; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ui-accent); background: transparent; padding: 8px 2px 6px; margin: 16px 0 9px; border-left: none; }
+  .section-divider { position: relative; font-family: var(--font-display); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ui-accent); background: transparent; padding: 8px 2px 6px; margin: 16px 0 9px; border-left: none; }
   .section-divider::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: color-mix(in srgb, var(--ui-accent) 32%, transparent); }
   .section-divider.green { color: #5bc98f; }
   .section-divider.green::after { background: rgba(91,201,143,0.32); }
@@ -85,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function() {
   .entity-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
   .entity-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 8px; padding: 8px; }
   .entity-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .entity-name-input { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; background: none; border: none; border-bottom: 1px solid var(--ui-border); color: var(--ui-text); padding: 2px 0; width: 180px; outline: none; }
+  .entity-name-input { font-family: var(--font-display); font-size: 13px; font-weight: 700; text-transform: uppercase; background: none; border: none; border-bottom: 1px solid var(--ui-border); color: var(--ui-text); padding: 2px 0; width: 180px; outline: none; }
   .entity-name-input:focus { border-bottom-color: var(--ui-accent); }
   .btn-remove { background: none; border: none; color: var(--ui-muted); cursor: pointer; font-size: 14px; line-height: 1; padding: 2px 4px; border-radius: 2px; }
   .btn-remove:hover { color: var(--ui-accent); }
@@ -93,9 +94,9 @@ document.addEventListener("DOMContentLoaded", function() {
   .btn-add:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
   .location-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-left: 3px solid var(--accent-red); border-radius: 8px; padding: 8px; margin-bottom: 6px; }
   .sidebar-footer { padding: 10px 12px; border-top: 1px solid var(--ui-border); display: flex; gap: 8px; }
-  .btn-primary { flex: 1; background: var(--ui-accent); border: none; color: white; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px; border-radius: 6px; cursor: pointer; }
+  .btn-primary { flex: 1; background: var(--ui-accent); border: none; color: white; font-family: var(--font-display); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px; border-radius: 6px; cursor: pointer; }
   .btn-primary:hover { background: var(--accent-dark); }
-  .btn-secondary { flex: 1; background: none; border: 1px solid var(--ui-border); color: var(--ui-text); font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px; border-radius: 6px; cursor: pointer; }
+  .btn-secondary { flex: 1; background: none; border: 1px solid var(--ui-border); color: var(--ui-text); font-family: var(--font-display); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px; border-radius: 6px; cursor: pointer; }
   .btn-secondary:hover { border-color: var(--ui-text); }
   .save-indicator { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--ui-muted); letter-spacing: 0.08em; text-align: center; padding: 4px; transition: color 0.3s; }
   .save-indicator.saved { color: #4caf7d; }
@@ -168,8 +169,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   /* DCW cyan banner header */
   .page-banner { background: linear-gradient(120deg, var(--accent-dark), var(--accent)); padding: 10px 36px 8px; display: flex; justify-content: space-between; align-items: center; }
-  .adventure-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; text-transform: uppercase; letter-spacing: 0.04em; }
-  .adventure-subtitle { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 400; color: white; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+  .adventure-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; text-transform: uppercase; letter-spacing: 0.04em; }
+  .adventure-subtitle { font-family: var(--font-display); font-size: 13px; font-weight: 400; color: white; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
   .header-meta { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.85); line-height: 1.7; }
   .header-meta span { display: block; }
 
@@ -179,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function() {
   .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
   /* Section labels - GMT style: bold condensed orange-red, underlined with orange */
-  .sl { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--section-hdr); background: none; padding: 0 0 2px 0; margin-bottom: 6px; display: block; border-bottom: 2px solid var(--accent); }
+  .sl { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--section-hdr); background: none; padding: 0 0 2px 0; margin-bottom: 6px; display: block; border-bottom: 2px solid var(--accent); }
   .sl.dark { color: var(--ink); border-bottom-color: var(--ink); }
   .sl.sl-green { color: var(--green); border-bottom-color: var(--green); }
   .sl.gold { color: #7a5a00; border-bottom-color: #c89020; }
@@ -196,21 +197,21 @@ document.addEventListener("DOMContentLoaded", function() {
   /* NPC/mob blocks - grey-green GMT boxes */
   .npc-block { background: var(--box-bg); border: none; border-left: 4px solid var(--blue-npc); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
   .mob-block { background: var(--box-bg); border: none; border-left: 4px solid var(--accent-red); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
-  .entry-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 1px; }
+  .entry-name { font-family: var(--font-display); font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 1px; }
   .entry-meta { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--accent-dark); letter-spacing: 0.06em; margin-bottom: 4px; }
   .entry-desc { font-size: 9px; color: var(--ink); line-height: 1.55; }
 
   .location-block { margin-bottom: 9px; padding-bottom: 9px; border-bottom: 1px solid var(--rule); break-inside: avoid; column-break-inside: avoid; }
   .location-block:last-child { border-bottom: none; }
   .p-section { margin-bottom: 12px; break-inside: avoid; column-break-inside: avoid; }
-  .loc-name { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .loc-name { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
   .loc-tag { font-family: 'Share Tech Mono', monospace; font-size: 7.5px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 3px; }
   .loc-desc { font-size: 9px; color: var(--ink); line-height: 1.55; margin-top: 3px; }
 
   .clue-item { font-size: 9px; color: var(--ink); margin-bottom: 5px; padding: 5px 9px 5px 11px; border-left: 3px solid var(--accent); border-radius: 7px; background: #fdf5e8; line-height: 1.5; }
   .hook-item { background: #fdf8ec; }
   .reward-stats { color: var(--ink); }
-  .clue-hdr { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--ink); }
+  .clue-hdr { font-family: var(--font-display); font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--ink); }
   .rt-block .sl .rt-die { font-family: 'Share Tech Mono', monospace; font-size: 8px; font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: 0; }
   .rt-table { width: 100%; border-collapse: collapse; font-size: 9px; color: var(--ink); margin-top: 3px; }
   .rt-table td { border: 1px solid var(--rule); padding: 2px 6px; vertical-align: top; line-height: 1.4; }
@@ -221,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function() {
   .p-footer { border-top: 2px solid var(--accent); margin-top: 14px; padding-top: 10px; }
   .flowchart { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 4px; }
   .flow-node { padding: 4px 7px; border-radius: 2px; text-align: center; flex: 1 1 auto; min-width: 64px; max-width: 100%; }
-  .flow-name { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 600; text-transform: uppercase; overflow-wrap: anywhere; }
+  .flow-name { font-family: var(--font-display); font-size: 9px; font-weight: 600; text-transform: uppercase; overflow-wrap: anywhere; }
   .flow-arrow { color: var(--accent); font-size: 11px; font-weight: 700; }
 
   .map-container { margin-bottom: 14px; }
@@ -233,12 +234,12 @@ document.addEventListener("DOMContentLoaded", function() {
   .statblocks { display: flex; gap: 12px; flex-wrap: wrap; }
   .stat-block { background: var(--box-bg); border: none; border-top: 4px solid var(--accent-red); border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.09); overflow: hidden; padding: 8px 10px; width: calc(50% - 6px); flex: 0 0 calc(50% - 6px); }
   .stat-block.full-width { width: 100%; flex: 0 0 100%; border-top-color: var(--blue-npc); }
-  .sb-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 1px; }
+  .sb-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink); margin-bottom: 1px; }
   .sb-type { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--accent-dark); letter-spacing: 0.06em; margin-bottom: 6px; }
   .sb-hp-row { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
   .hp-pip { width: 17px; height: 17px; border: 1px solid rgba(0,0,0,0.2); border-radius: 2px; font-family: 'Share Tech Mono', monospace; font-size: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; }
   .sb-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
-  .sb-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 0.08em; color: white; background: var(--table-hdr); padding: 3px 4px; text-align: center; font-weight: 700; }
+  .sb-table th { font-family: var(--font-display); font-size: 9px; letter-spacing: 0.08em; color: white; background: var(--table-hdr); padding: 3px 4px; text-align: center; font-weight: 700; }
   .sb-table td { padding: 2px 4px; text-align: center; color: var(--ink); background: rgba(255,255,255,0.6); border: 0.5px solid rgba(0,0,0,0.12); font-family: 'Share Tech Mono', monospace; font-size: 8px; }
   .sb-divider { border: none; border-top: 1px solid rgba(0,0,0,0.15); margin: 5px 0; }
   .sb-ability { font-size: 8.5px; color: var(--ink); margin-bottom: 4px; line-height: 1.5; }
@@ -357,7 +358,7 @@ document.addEventListener("DOMContentLoaded", function() {
         justify-content: center;
         box-shadow: 2px 0 8px rgba(0,0,0,0.3);
         writing-mode: vertical-rl;
-        font-family: 'Barlow Condensed', sans-serif;
+        font-family: var(--font-display);
         font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.12em;
@@ -397,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function() {
         height: 30px;
         align-items: center;
         justify-content: center;
-        font-family: 'Barlow Condensed', sans-serif;
+        font-family: var(--font-display);
         font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.1em;
@@ -612,7 +613,7 @@ body.flow-mode .page + .page {
   <div class="sidebar-footer" style="display:flex; flex-wrap:nowrap; gap:6px;">
     <button class="btn-secondary" onclick="clearAll()" style="flex:1;">Clear</button>
     <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export HTML</button>
-    <label for="f-import" class="btn-secondary" style="flex:1; text-align:center; cursor:pointer; padding:8px; font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">↑ Import HTML</label>
+    <label for="f-import" class="btn-secondary" style="flex:1; text-align:center; cursor:pointer; padding:8px; font-family:var(--font-display); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">↑ Import HTML</label>
     <button class="btn-secondary" onclick="savePDF()" id="pdf-btn" style="flex:1;">Save PDF</button>
     <input type="file" id="f-import" accept=".html" style="display:none" onchange="importHTML(this)">
   </div>
@@ -1812,7 +1813,7 @@ function renderPreview() {
       const c=_typeC[l.type]||_typeC.combat;
       const displayName = l.name || l.tag || '';
       const showTag = l.tag && l.name;
-      sections.push('<div class="location-block"><div class="loc-name" style="color:'+c+';border-bottom:1.5px solid '+c+';padding-bottom:1px;font-family:Barlow Condensed,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">'+escH(displayName)+'</div>'+(showTag?'<div class="loc-tag">'+escH(l.tag)+'</div>':'')+(l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')+(l.desc?'<p class="loc-desc">'+fmtText(l.desc)+'</p>':'')+'</div>');
+      sections.push('<div class="location-block"><div class="loc-name" style="color:'+c+';border-bottom:1.5px solid '+c+';padding-bottom:1px;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">'+escH(displayName)+'</div>'+(showTag?'<div class="loc-tag">'+escH(l.tag)+'</div>':'')+(l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')+(l.desc?'<p class="loc-desc">'+fmtText(l.desc)+'</p>':'')+'</div>');
     });
 
     // Full NPC / Mob stat blocks after the encounters
@@ -1864,7 +1865,7 @@ function renderPreview() {
     const overflowLocs = (state.locations||[]).slice(p1LocCount);
     locsEl2.innerHTML = overflowLocs.map(l=>`
       <div class="location-block">
-        <div class="loc-name" style="color:${typeColors[l.type]||typeColors.combat};border-bottom:1.5px solid ${typeColors[l.type]||typeColors.combat};padding-bottom:1px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">${escH(l.name||l.tag||'')}</div>
+        <div class="loc-name" style="color:${typeColors[l.type]||typeColors.combat};border-bottom:1.5px solid ${typeColors[l.type]||typeColors.combat};padding-bottom:1px;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">${escH(l.name||l.tag||'')}</div>
         ${l.tag&&l.name?`<div class="loc-tag">${escH(l.tag)}</div>`:''}
         ${l.readaloud?`<div class="read-aloud"><p>${fmtText(l.readaloud)}</p></div>`:''}
         ${l.desc?`<p class="loc-desc">${fmtText(l.desc)}</p>`:''}
