@@ -1687,10 +1687,13 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .gmc-round-btn:active{transform:translateY(1px)}
 .party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
 /* Rounded-square party bubbles that mirror the Party Card header. */
-.bubble{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:11px;padding:6px 9px;cursor:pointer;transition:all .12s;flex:0 0 auto;max-width:230px}
+.bubble{position:relative;display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:11px;padding:8px 9px 6px;cursor:pointer;transition:all .12s;flex:0 0 auto;max-width:230px;overflow:hidden}
+.bubble::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--accent)}
 .bubble:hover{border-color:var(--accent-dim);box-shadow:0 0 0 1px var(--accent-dim)}
 .bubble.bloodied{border-color:var(--red-light);box-shadow:0 0 8px rgba(214,58,48,.35)}
+.bubble.bloodied::before{background:var(--red-light)}
 .bubble.down{opacity:.5;filter:grayscale(.4)}
+.bubble.down::before{background:#555}
 .bub-av{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:12px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
 .bub-mini{display:flex;flex-direction:column;gap:3px;min-width:52px;flex:1;min-width:0}
 .bub-nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12.5px;color:var(--white);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2613,6 +2616,40 @@ GMScenes.renderPins();
 .pty-line { font-family:'Barlow',sans-serif; font-size:11.5px; color:var(--light); line-height:1.6; }
 .pty-line .dim { color:var(--muted); }
 .pty-line .lost { color:#df6a6a; text-decoration:line-through; }
+
+/* ── Player cards (.pcard) — the enemy-card visual language, read-only. The
+   header keeps the .pty-card-hd class so the existing collapse click still fires;
+   --tone is the party accent (cyan) so players read distinct from red enemies. ── */
+.pty-card.pcard { position:relative; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:12px; background:linear-gradient(180deg,var(--panel-2),var(--panel)); overflow:hidden; --tone:var(--accent); }
+.pty-card.pcard + .pty-card.pcard { margin-top:8px; }
+.pty-card.pcard .pty-card-hd { position:relative; align-items:flex-start; gap:8px; padding:10px 11px 9px; background:transparent; border-bottom:none; }
+.pty-card.pcard .pty-card-hd::before { content:''; position:absolute; inset:0; opacity:.12; background:var(--tone); pointer-events:none; }
+.pty-card.pcard .pty-card-hd::after { content:''; position:absolute; left:0; right:0; top:0; height:3px; background:var(--tone); }
+.pcard-title { position:relative; flex:1; min-width:0; }
+.pty-card.pcard .pty-name { position:relative; color:var(--white); font-size:16px; line-height:1.06; }
+.pcard-subrow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:3px; }
+.pcard-type { font-family:'Share Tech Mono',monospace; font-size:9.5px; letter-spacing:.05em; color:var(--tone); text-transform:uppercase; filter:brightness(1.35); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.pcard-chip { position:relative; display:inline-flex; align-items:baseline; gap:4px; border:1px solid var(--border); border-radius:5px; padding:1px 6px; background:var(--panel-2); flex-shrink:0; align-self:center; }
+.pcard-chip .l { font-family:'Barlow Condensed',sans-serif; font-size:8.5px; font-weight:800; letter-spacing:.06em; color:var(--muted); text-transform:uppercase; }
+.pcard-chip .v { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--white); }
+.pcard-chip.bad { border-color:var(--red-light); background:rgba(122,45,45,.18); }
+.pcard-chip.bad .v { color:#ff8a6a; }
+.pty-card.pcard .pty-x { position:relative; align-self:center; }
+.pty-card.pcard .pty-card-bd { padding:11px 12px 12px; }
+/* Read-only vital bar */
+.pcard-hp { margin-bottom:10px; }
+.pcard-hp-head { display:flex; align-items:baseline; gap:7px; margin-bottom:4px; }
+.pcard-hp-lab { font-family:'Barlow Condensed',sans-serif; font-size:9.5px; font-weight:800; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; }
+.pcard-hp-val { margin-left:auto; font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--white); }
+.pcard-hpbar { position:relative; height:11px; border-radius:6px; background:#0b0b0b; border:1px solid var(--border); overflow:hidden; }
+.pcard-hpbar > i { display:block; height:100%; border-radius:6px; }
+/* Flat stat strip — matches the combat card's .cc-abils (no bevel) */
+.pcard-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(40px,1fr)); gap:0; background:var(--panel-2); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:11px; }
+.pcard-stat { display:flex; flex-direction:column; align-items:center; gap:1px; padding:6px 2px; min-width:0; }
+.pcard-stat + .pcard-stat { border-left:1px solid var(--border); }
+.pcard-stat .l { font-family:'Barlow Condensed',sans-serif; font-size:8.5px; font-weight:800; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; white-space:nowrap; }
+.pcard-stat .m { font-family:'Share Tech Mono',monospace; font-size:15px; color:var(--white); }
+.pcard-stat .s { font-family:'Barlow Condensed',sans-serif; font-size:8.5px; color:var(--muted); }
 .pty-lost { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:900; letter-spacing:.08em; color:#ff6a6a; border:1px solid #7a2d2d; background:#3a1414; border-radius:3px; padding:0 4px; margin-left:5px; vertical-align:middle; text-decoration:none; }
 .pty-spell-info { background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:13px; line-height:1; padding:0 3px; vertical-align:middle; }
 .pty-spell-info:hover { color:var(--white); }
@@ -13429,14 +13466,47 @@ function init_party(root) {
     noteEl.style.color = isErr ? '#df6a6a' : '';
   }
 
+  // ── Shared player-card chrome (the enemy-card visual language, read-only) ──
+  // Every system builds its own parts; pcShell wraps them in the accent-band card.
+  // Viewed two ways: the compact monitor bubble, and this card self-contained in a
+  // popup (charPop) — so it carries full detail.
+  function pcShell(entry, o) {
+    const open = openIds.has(entry.id);
+    const chips = (o.chips || []).filter(Boolean).map(c =>
+      '<span class="pcard-chip' + (c.bad ? ' bad' : '') + '"><span class="l">' + esc(c.l) + '</span><span class="v">' + esc(c.v == null || c.v === '' ? '—' : c.v) + '</span></span>').join('');
+    return '<div class="pty-card pcard' + (open ? ' open' : '') + '" data-id="' + entry.id + '">'
+      + '<div class="pty-card-hd pcard-band"><div class="pcard-title"><div class="pty-name">' + esc(o.name || '—') + '</div>'
+      + '<div class="pcard-subrow"><span class="pcard-type">' + esc(o.sub || '') + '</span></div></div>'
+      + chips + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button></div>'
+      + '<div class="pty-card-bd">' + (o.body || '') + '</div></div>';
+  }
+  // A read-only vital bar (HP, Resolve, Vitality…). cur/max are shown as cur/max.
+  function pcHpBar(lab, cur, max, note) {
+    const mx = parseInt(max, 10) || 0;
+    const cr = (cur !== '' && cur != null && !isNaN(parseInt(cur, 10))) ? parseInt(cur, 10) : mx;
+    const pct = mx > 0 ? Math.max(0, Math.min(100, (cr / mx) * 100)) : 100;
+    const txt = (cur !== '' && cur != null ? esc(cur) + '/' : '') + esc(max);
+    return '<div class="pcard-hp"><div class="pcard-hp-head"><span class="pcard-hp-lab">' + esc(lab) + '</span><span class="pcard-hp-val">' + txt + (note ? ' · ' + esc(note) : '') + '</span></div>'
+      + '<div class="pcard-hpbar"><i style="width:' + pct + '%;background:' + gmcHpColor(pct) + ';"></i></div></div>';
+  }
+  // The flat stat strip (matches the combat card's .cc-abils). cells: [{l, m, s?}].
+  function pcStats(cells) {
+    if(!cells || !cells.length) return '';
+    return '<div class="pcard-stats">' + cells.map(c =>
+      '<div class="pcard-stat"><span class="l">' + esc(c.l) + '</span><span class="m">' + esc(c.m) + '</span>'
+      + (c.s != null && c.s !== '' ? '<span class="s">' + esc(c.s) + '</span>' : '') + '</div>').join('') + '</div>';
+  }
+  // A titled section, only when it has content.
+  function pcSec(title, body) { return body ? '<div class="pty-sec"><div class="pty-sec-h">' + esc(title) + '</div>' + body + '</div>' : ''; }
+
   // Party card for a Dungeon Crawler Carl character — its stat block and combat
   // math differ from Shadowdark, so it gets its own layout.
   function cardHTMLDCC(entry) {
     const c = entry.sheet;
     const open = openIds.has(entry.id);
-    const sub = ['LV ' + esc(c.level), c.floor ? 'Floor ' + esc(c.floor) : '',
+    const sub = ['LV ' + c.level, c.floor ? 'Floor ' + c.floor : '',
                  [c.race, c.cls].filter(Boolean).join(' '),
-                 c.crawler ? 'Crawler #' + esc(c.crawler) : ''].filter(Boolean).join(' · ');
+                 c.crawler ? 'Crawler #' + c.crawler : ''].filter(Boolean).join(' · ');
     const HPCOL = ['#c01e1e','#d23c0a','#dc6400','#c88200','#b49600','#96a000','#64aa00','#3caa00','#1e9614','#0a780a'];
     const pips = Array.isArray(c.hpPips) ? c.hpPips : [];
     const activeOf = i => pips.length ? (pips[i] !== 'false') : true;
@@ -13447,36 +13517,24 @@ function init_party(root) {
     const mana = (c.mana && (c.mana.current !== '' || c.mana.max !== '')) ? (esc(c.mana.current||'0')+'/'+esc(c.mana.max||'0')) : '';
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
 
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + sub + '</div></div>'
-       + '<span class="pty-chip">HP <b>' + hpPct + '%</b></span>'
-       + (mana ? '<span class="pty-chip">Mana <b>' + mana + '</b></span>' : '')
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
+    let segHtml = '';
+    for(let i=0;i<10;i++) segHtml += '<span style="flex:1;background:'+HPCOL[i]+';opacity:'+(activeOf(i)?'1':'.16')+';"></span>';
+    let body = '<div class="pcard-hp"><div class="pcard-hp-head"><span class="pcard-hp-lab">Hit Points</span><span class="pcard-hp-val">' + hpPct + '%</span></div>'
+      + '<div style="display:flex;gap:2px;height:11px;border-radius:6px;overflow:hidden;">' + segHtml + '</div></div>';
+    body += pcStats(c.stats.map(s => ({ l: s.abbr, m: (s.mod==null ? '—' : (s.mod>=0?'+':'')+s.mod), s: (s.enh||'—') + '/' + (s.unenh||'—') })));
+    body += '<div class="pty-line dim" style="margin:-4px 0 8px;font-size:9px;">Mods from ' + esc(c.modSource) + ' scores · Enh/Unenh shown</div>';
 
-    h += '<div class="pty-card-bd">';
-    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
-       + '<span class="pty-stat-lbl">HP</span>' + bar
-       + '<span class="pty-stat-lbl">' + hpPct + '%</span></div>';
-    h += '<div class="pty-stats">' + c.stats.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.abbr) + '</div>'
-      + '<div class="pty-stat-mod">' + (s.mod==null ? '—' : (s.mod>=0?'+':'')+s.mod) + '</div>'
-      + '<div class="pty-stat-val">' + esc(s.enh||'—') + '/' + esc(s.unenh||'—') + '</div></div>').join('') + '</div>';
-    h += '<div class="pty-line dim" style="margin:-4px 0 8px;font-size:9px;">Mods from ' + esc(c.modSource) + ' scores · Enh/Unenh shown</div>';
-
-    h += '<div class="pty-sec"><div class="pty-sec-h">Defense</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    body += '<div class="pty-sec"><div class="pty-sec-h">Defense</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Evade', c.evade.total) + cell('DR', c.dr.total)
        + cell('Move', c.evade.move) + cell('Step', c.evade.step)
        + cell('AI Favor', c.dr.aiFavor) + cell('Size', c.dr.size)
        + '</div></div>';
 
     if(c.buffs.length || (c.debuffs && c.debuffs.trim())) {
-      h += '<div class="pty-sec"><div class="pty-sec-h">Buffs &amp; Debuffs</div>';
-      if(c.buffs.length) h += '<div class="pty-line"><b>Buffs:</b> ' + c.buffs.map(esc).join(', ') + '</div>';
-      if(c.debuffs && c.debuffs.trim()) h += '<div class="pty-line"><b>Debuffs:</b> ' + esc(c.debuffs) + '</div>';
-      h += '</div>';
+      body += '<div class="pty-sec"><div class="pty-sec-h">Buffs &amp; Debuffs</div>';
+      if(c.buffs.length) body += '<div class="pty-line"><b>Buffs:</b> ' + c.buffs.map(esc).join(', ') + '</div>';
+      if(c.debuffs && c.debuffs.trim()) body += '<div class="pty-line"><b>Debuffs:</b> ' + esc(c.debuffs) + '</div>';
+      body += '</div>';
     }
 
     // A collapsible section: click the header to fold Skills / Attacks away.
@@ -13501,7 +13559,7 @@ function init_party(root) {
         ].filter(Boolean).join(' · ');
         return '<div class="pty-line"><b>' + esc(a.name || '—') + '</b>' + (bits ? ' ' + bits : '') + '</div>';
       }).join('');
-      h += secBlock('Attacks', c.attacks.length, rows);
+      body += secBlock('Attacks', c.attacks.length, rows);
     }
 
     if(c.skills && c.skills.length) {
@@ -13516,128 +13574,82 @@ function init_party(root) {
         return '<div class="pty-line"><b>' + esc(s.name) + '</b>' + info + ' <span class="dim">' + meta + '</span></div>'
              + (det ? '<div class="pty-spell-desc" data-desc="' + key + '" style="display:none;">' + det + '</div>' : '');
       }).join('');
-      h += secBlock('Skills', c.skills.length, rows);
+      body += secBlock('Skills', c.skills.length, rows);
     }
 
-    h += '</div></div>';
-    return h;
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'HP', v: hpPct + '%', bad: hpPct <= 40 }].concat(mana ? [{ l:'Mana', v: mana }] : []), body });
   }
 
   function cardHTMLACE(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [[c.trait, c.role].filter(Boolean).join(' '), c.role2, c.setting ? 'ACE! · ' + c.setting : 'ACE!'].filter(Boolean).join(' · ');
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip">HP <b>' + esc(c.hpCur) + '/' + esc(c.hpMax) + '</b></span>'
-       + '<span class="pty-chip">DEF <b>' + esc(c.defence) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.stats.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.abbr) + '</div>'
-      + '<div class="pty-stat-mod">' + s.val + 'd</div>'
-      + '<div class="pty-stat-val">' + (s.focus ? esc(s.focus) + ' ' + (s.val + 2) + 'd' : '—') + '</div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcHpBar('Health', c.hpCur, c.hpMax)
+      + pcStats(c.stats.map(s => ({ l: s.abbr, m: s.val + 'd', s: (s.focus ? esc(s.focus) + ' ' + (s.val + 2) + 'd' : '') })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Karma', c.karma) + cell('Defence', c.defence) + cell('Health', c.hpCur + '/' + c.hpMax)
        + (c.hpCur <= 0 && c.hpMax > 0 ? '<span class="pty-chip" style="color:#ff6a6a;">Knocked Out</span>' : '')
        + '</div></div>';
-    if(c.ability) h += '<div class="pty-sec"><div class="pty-sec-h">Role ability</div><div class="pty-line">' + esc(c.ability) + '</div></div>';
-    if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a =>
+    if(c.ability) body += '<div class="pty-sec"><div class="pty-sec-h">Role ability</div><div class="pty-line">' + esc(c.ability) + '</div></div>';
+    if(c.attacks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a =>
         '<div class="pty-line"><b>' + esc(a.name) + '</b> <span class="dim">' + esc(a.kind) + (a.damage ? ' · ' + esc(a.damage) + ' dmg' : '') + '</span></div>').join('') + '</div>';
-    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax) }, { l:'DEF', v: c.defence }], body });
   }
 
   function cardHTMLSW(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [c.species, c.template].filter(Boolean).join(' · ');
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip"' + (c.wound !== 'Unhurt' ? ' style="color:#ff6a6a;"' : '') + '>' + esc(c.wound) + '</span>'
-       + '<span class="pty-chip">FP <b>' + esc(c.forcePoints) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.attrs.map(a =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(a.id.slice(0,4).toUpperCase()) + '</div>'
-      + '<div class="pty-stat-mod">' + esc(a.code) + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcStats(c.attrs.map(a => ({ l: a.id.slice(0,4).toUpperCase(), m: a.code })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Force Pts', c.forcePoints) + (c.darkSide ? cell('Dark Side', c.darkSide) : '') + cell('Skill Pts', c.skillPoints) + cell('Armor', c.armor || 'none') + (c.credits ? cell('Credits', c.credits) : '')
        + '</div></div>';
-    if(c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + esc(s.code)).join(' · ') + '</div></div>';
-    if(c.weapons.length) h += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div>' + c.weapons.map(w => '<div class="pty-line"><b>' + esc(w.name) + '</b> <span class="dim">' + esc(w.damage) + (w.range ? ' · ' + esc(w.range) : '') + '</span></div>').join('') + '</div>';
-    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Force Powers</div><div class="pty-line dim">' + esc(c.powers.join(', ')) + '</div></div>';
-    if(c.ship) h += '<div class="pty-sec"><div class="pty-sec-h">Ship</div><div class="pty-line">' + esc(c.ship) + '</div></div>';
-    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.skills.length) body += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + esc(s.code)).join(' · ') + '</div></div>';
+    if(c.weapons.length) body += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div>' + c.weapons.map(w => '<div class="pty-line"><b>' + esc(w.name) + '</b> <span class="dim">' + esc(w.damage) + (w.range ? ' · ' + esc(w.range) : '') + '</span></div>').join('') + '</div>';
+    if(c.powers.length) body += '<div class="pty-sec"><div class="pty-sec-h">Force Powers</div><div class="pty-line dim">' + esc(c.powers.join(', ')) + '</div></div>';
+    if(c.ship) body += '<div class="pty-sec"><div class="pty-sec-h">Ship</div><div class="pty-line">' + esc(c.ship) + '</div></div>';
+    if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'Wound', v: c.wound, bad: c.wound !== 'Unhurt' }, { l:'FP', v: c.forcePoints }], body });
   }
 
   function cardHTMLD62E(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [c.template, c.genre].filter(Boolean).join(' · ');
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip"' + (c.wound !== 'Unhurt' ? ' style="color:#ff6a6a;"' : '') + '>' + esc(c.wound) + '</span>'
-       + '<span class="pty-chip">HP <b>' + esc(c.heroPoints) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.attrs.map(a =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(a.id.slice(0,4).toUpperCase()) + '</div>'
-      + '<div class="pty-stat-mod">' + esc(a.code) + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcStats(c.attrs.map(a => ({ l: a.id.slice(0,4).toUpperCase(), m: a.code })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Dodge', c.dodge) + cell('Parry', c.parry) + cell('Move', c.move || '—') + cell('Hero Pts', c.heroPoints) + cell('Armor', c.armor || 'none') + (c.wealth ? cell('Wealth', c.wealth) : '')
        + '</div></div>';
-    if(c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + esc(s.code)).join(' · ') + '</div></div>';
-    if(c.weapons.length) h += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div>' + c.weapons.map(w => '<div class="pty-line"><b>' + esc(w.name) + '</b> <span class="dim">' + esc(w.damage) + (w.range ? ' · ' + esc(w.range) : '') + '</span></div>').join('') + '</div>';
-    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + esc(c.powers.join(', ')) + '</div></div>';
-    if(c.perks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Perks &amp; Talents</div><div class="pty-line dim">' + esc(c.perks.join(', ')) + '</div></div>';
-    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.skills.length) body += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + esc(s.code)).join(' · ') + '</div></div>';
+    if(c.weapons.length) body += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div>' + c.weapons.map(w => '<div class="pty-line"><b>' + esc(w.name) + '</b> <span class="dim">' + esc(w.damage) + (w.range ? ' · ' + esc(w.range) : '') + '</span></div>').join('') + '</div>';
+    if(c.powers.length) body += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + esc(c.powers.join(', ')) + '</div></div>';
+    if(c.perks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Perks &amp; Talents</div><div class="pty-line dim">' + esc(c.perks.join(', ')) + '</div></div>';
+    if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'Wound', v: c.wound, bad: c.wound !== 'Unhurt' }, { l:'Hero', v: c.heroPoints }], body });
   }
 
   function cardHTMLICRPG(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const WORLD = { alfheim:'Alfheim', warpshell:'Warp Shell', ghostmountain:'Ghost Mountain', vigilantecity:'Vigilante City', bloodandsnow:'Blood & Snow' };
     const sub = [c.type, WORLD[c.world] || '', c.level ? 'Milestone ' + c.level : ''].filter(Boolean).join(' · ');
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip"' + (c.dying === 'yes' || c.dying === true ? ' style="color:#ff6a6a;"' : '') + '>HP <b>' + esc(c.hp) + '/' + esc(c.hpMax) + '</b></span>'
-       + '<span class="pty-chip">DEF <b>' + esc((c.defense >= 0 ? '+' : '') + c.defense) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.stats.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
-      + '<div class="pty-stat-mod">' + (s.val >= 0 ? '+' : '') + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    const dying = c.dying === 'yes' || c.dying === true;
+    let body = pcHpBar('Hit Points', c.hp, c.hpMax, dying ? 'DYING' : '')
+      + pcStats(c.stats.map(s => ({ l: s.id, m: (s.val >= 0 ? '+' : '') + s.val })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Defense', (c.defense >= 0 ? '+' : '') + c.defense) + cell('Armor', c.armor || 0) + (c.mastery ? cell('Mastery', c.mastery) : '') + (c.coin ? cell('Hero Coin', '✓') : '')
        + '</div></div>';
-    if(c.abilities.length) h += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
-    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
-    if(c.loot.length) h += '<div class="pty-sec"><div class="pty-sec-h">Loot</div><div class="pty-line dim">' + esc(c.loot.join(', ')) + '</div></div>';
-    if(c.story) h += '<div class="pty-sec"><div class="pty-sec-h">Story</div><div class="pty-line dim">' + esc(c.story) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.abilities.length) body += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
+    if(c.spells.length) body += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
+    if(c.loot.length) body += '<div class="pty-sec"><div class="pty-sec-h">Loot</div><div class="pty-line dim">' + esc(c.loot.join(', ')) + '</div></div>';
+    if(c.story) body += '<div class="pty-sec"><div class="pty-sec-h">Story</div><div class="pty-line dim">' + esc(c.story) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'HP', v: esc(c.hp) + '/' + esc(c.hpMax), bad: dying }, { l:'DEF', v: (c.defense >= 0 ? '+' : '') + c.defense }], body });
   }
 
   function cardHTMLMMRPG(entry) {
@@ -13650,89 +13662,57 @@ function init_party(root) {
     const sp = c.speed || { run: 0, half: 0 };
     // A clickable name that opens the shared MMRPG detail popover.
     const info = (nm, kind) => esc(nm) + '<button class="mmrpg-info" data-ik="' + kind + '" data-in="' + esc(nm) + '" title="Details" aria-label="Show details">ⓘ</button>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip"' + (hurt ? ' style="color:#ff6a6a;"' : '') + '>Health <b>' + esc(c.health.cur) + '/' + esc(c.health.max) + '</b></span>'
-       + '<span class="pty-chip"' + (foff ? ' style="color:#ffb15a;"' : '') + '>Focus <b>' + esc(c.focus.cur) + '/' + esc(c.focus.max) + '</b></span>'
-       + '<span class="pty-chip">Karma <b>' + esc(c.karma.cur) + '/' + esc(c.karma.max) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.abilities.map(a =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(a.id.slice(0,3).toUpperCase()) + '</div>'
-      + '<div class="pty-stat-mod">' + (a.mod >= 0 ? '+' : '') + a.mod + '</div><div class="pty-stat-val">def ' + esc(a.defense) + '</div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcHpBar('Health', c.health.cur, c.health.max)
+      + pcStats(c.abilities.map(a => ({ l: a.id.slice(0,3).toUpperCase(), m: (a.mod >= 0 ? '+' : '') + a.mod, s: 'def ' + a.defense })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Speed', 'Run ' + sp.run + ' · Climb/Swim ' + sp.half)
        + (c.healthDR ? cell('Health DR', c.healthDR) : '') + (c.focusDR ? cell('Focus DR', c.focusDR) : '')
        + '</div></div>';
-    if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
-    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + c.powers.map(nm => info(nm, 'power')).join(', ') + '</div></div>';
-    if(c.traits.length) h += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + c.traits.map(nm => info(nm, 'trait')).join(', ') + '</div></div>';
-    if(c.tags.length) h += '<div class="pty-sec"><div class="pty-sec-h">Tags</div><div class="pty-line dim">' + c.tags.map(nm => info(nm, 'tag')).join(', ') + '</div></div>';
-    if(c.teams) h += '<div class="pty-sec"><div class="pty-sec-h">Teams</div><div class="pty-line dim">' + esc(c.teams) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.conditions.length) body += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
+    if(c.powers.length) body += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + c.powers.map(nm => info(nm, 'power')).join(', ') + '</div></div>';
+    if(c.traits.length) body += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + c.traits.map(nm => info(nm, 'trait')).join(', ') + '</div></div>';
+    if(c.tags.length) body += '<div class="pty-sec"><div class="pty-sec-h">Tags</div><div class="pty-line dim">' + c.tags.map(nm => info(nm, 'tag')).join(', ') + '</div></div>';
+    if(c.teams) body += '<div class="pty-sec"><div class="pty-sec-h">Teams</div><div class="pty-line dim">' + esc(c.teams) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'Health', v: esc(c.health.cur) + '/' + esc(c.health.max), bad: hurt },
+              { l:'Focus', v: esc(c.focus.cur) + '/' + esc(c.focus.max) },
+              { l:'Karma', v: esc(c.karma.cur) + '/' + esc(c.karma.max) }], body });
   }
 
   function cardHTMLNIM(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = ['LV ' + c.level, [c.ancestry, c.cls].filter(Boolean).join(' '), c.subclass].filter(Boolean).join(' · ');
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip">HP <b>' + esc(c.hpCur) + '/' + esc(c.hpMax) + (c.temp ? '+' + esc(c.temp) : '') + '</b></span>'
-       + (c.wounds ? '<span class="pty-chip" style="color:#ff6a6a;">Wounds <b>' + esc(c.wounds) + '/' + esc(c.woundsMax) + '</b></span>' : '')
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.stats.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + (s.adv ? ' ▲' : s.dis ? ' ▼' : '') + '</div>'
-      + '<div class="pty-stat-mod">' + (s.val >= 0 ? '+' : '') + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcHpBar('Hit Points', c.hpCur, c.hpMax, (c.temp ? '+' + c.temp + ' temp' : '') + (c.wounds ? (c.temp ? ' · ' : '') + 'Wounds ' + c.wounds + '/' + c.woundsMax : ''))
+      + pcStats(c.stats.map(s => ({ l: esc(s.id) + (s.adv ? ' ▲' : s.dis ? ' ▼' : ''), m: (s.val >= 0 ? '+' : '') + s.val })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Hit Dice', c.hdCur + '/' + c.hdMax) + (c.manaMax ? cell('Mana', c.manaCur + '/' + c.manaMax) : '') + cell('Armor', [c.armor, c.shield].filter(Boolean).join(' + ') || 'unarmored')
        + '</div></div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + (s.val >= 0 ? '+' : '') + s.val).join(' · ') + '</div></div>';
-    if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b> <span class="dim">' + esc(a.damage) + (a.props ? ' · ' + esc(a.props) : '') + '</span></div>').join('') + '</div>';
-    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
-    if(c.picks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.picks.join(', ')) + '</div></div>';
-    if(c.inventory.length) h += '<div class="pty-sec"><div class="pty-sec-h">Inventory</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    body += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + (s.val >= 0 ? '+' : '') + s.val).join(' · ') + '</div></div>';
+    if(c.attacks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b> <span class="dim">' + esc(a.damage) + (a.props ? ' · ' + esc(a.props) : '') + '</span></div>').join('') + '</div>';
+    if(c.spells.length) body += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
+    if(c.picks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.picks.join(', ')) + '</div></div>';
+    if(c.inventory.length) body += '<div class="pty-sec"><div class="pty-sec-h">Inventory</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax) + (c.temp ? '+' + esc(c.temp) : '') }]
+        .concat(c.wounds ? [{ l:'Wounds', v: esc(c.wounds) + '/' + esc(c.woundsMax), bad: true }] : []), body });
   }
 
   function cardHTMLKOB(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [c.trope, c.age, c.bookName].filter(Boolean).join(' · ');
     const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip">AT <b>' + esc(c.at) + '</b></span>'
-       + (c.book === 'capes' ? '<span class="pty-chip">Stress <b>' + esc(c.stress) + '</b></span>' : '')
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.stats.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id.slice(0,3)) + '</div>'
-      + '<div class="pty-stat-mod">d' + s.die + '</div>'
-      + '<div class="pty-stat-val">' + (s.mod ? (s.mod > 0 ? '+' : '') + s.mod : '') + '</div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcStats(c.stats.map(s => ({ l: s.id.slice(0,3), m: 'd' + s.die, s: (s.mod ? (s.mod > 0 ? '+' : '') + s.mod : '') })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Adversity', c.at) + (c.book === 'capes' ? cell('Stress', c.stress + '/13') + cell('Power Die', c.powerDie ? 'd' + c.powerDie : 'none') + cell('GP', c.gp) : '')
        + (c.fear ? cell('Fear', c.fear) : '') + (c.knack ? cell('Knack', c.knack) : '')
        + '</div></div>';
-    if(c.strengths.length) h += '<div class="pty-sec"><div class="pty-sec-h">Strengths</div>' + c.strengths.map(s => '<div class="pty-line">' + esc(s) + '</div>').join('') + '</div>';
-    if(c.flaw) h += '<div class="pty-sec"><div class="pty-sec-h">Flaw</div><div class="pty-line">' + esc(c.flaw) + '</div></div>';
-    if(c.cape) h += '<div class="pty-sec"><div class="pty-sec-h">Cape &amp; Power</div><div class="pty-line">' + esc(c.cape) + '</div></div>';
-    if(c.ride) h += '<div class="pty-sec"><div class="pty-sec-h">' + (c.book === 'brooms' ? 'Broom, wand &amp; familiar' : 'Bike') + '</div><div class="pty-line dim">' + esc(c.ride) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.strengths.length) body += '<div class="pty-sec"><div class="pty-sec-h">Strengths</div>' + c.strengths.map(s => '<div class="pty-line">' + esc(s) + '</div>').join('') + '</div>';
+    if(c.flaw) body += '<div class="pty-sec"><div class="pty-sec-h">Flaw</div><div class="pty-line">' + esc(c.flaw) + '</div></div>';
+    if(c.cape) body += '<div class="pty-sec"><div class="pty-sec-h">Cape &amp; Power</div><div class="pty-line">' + esc(c.cape) + '</div></div>';
+    if(c.ride) body += '<div class="pty-sec"><div class="pty-sec-h">' + (c.book === 'brooms' ? 'Broom, wand &amp; familiar' : 'Bike') + '</div><div class="pty-line dim">' + esc(c.ride) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'AT', v: c.at }].concat(c.book === 'capes' ? [{ l:'Stress', v: c.stress }] : []), body });
   }
 
   // Look up a DND spell's compact details for a party-card info popover.
@@ -13764,18 +13744,24 @@ function init_party(root) {
     const sgn = v => (v >= 0 ? '+' : '') + v;
     const sub = ['LV ' + c.level, [c.species, c.cls].filter(Boolean).join(' '), c.alignment].filter(Boolean).join(' · ');
     const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip">AC <b>' + esc(c.ac || '—') + '</b></span>'
-       + '<span class="pty-chip">HP <b>' + (c.hpCur !== '' ? esc(c.hpCur) + '/' : '') + esc(c.hpMax) + (c.hpTemp ? '+' + esc(c.hpTemp) : '') + '</b></span>'
+    const hpMax = parseInt(c.hpMax, 10) || 0;
+    const hpCur = c.hpCur !== '' && c.hpCur != null ? (parseInt(c.hpCur, 10) || 0) : hpMax;
+    const pct = hpMax > 0 ? Math.max(0, Math.min(100, (hpCur / hpMax) * 100)) : 100;
+    const hpText = (c.hpCur !== '' && c.hpCur != null ? esc(c.hpCur) + '/' : '') + esc(c.hpMax) + (c.hpTemp ? ' +' + esc(c.hpTemp) : '');
+    let h = '<div class="pty-card pcard' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd pcard-band">'
+       + '<div class="pcard-title"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pcard-subrow"><span class="pcard-type">' + esc(sub) + '</span></div></div>'
+       + '<span class="pcard-chip"><span class="l">AC</span><span class="v">' + esc(c.ac || '—') + '</span></span>'
+       + '<span class="pcard-chip"><span class="l">HP</span><span class="v">' + hpText + '</span></span>'
        + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
        + '</div>';
     h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + c.stats.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
-      + '<div class="pty-stat-mod">' + sgn(s.mod) + '</div><div class="pty-stat-val">' + esc(s.score) + '</div></div>').join('') + '</div>';
+    h += '<div class="pcard-hp"><div class="pcard-hp-head"><span class="pcard-hp-lab">Hit Points</span><span class="pcard-hp-val">' + hpText + '</span></div>'
+       + '<div class="pcard-hpbar"><i style="width:' + pct + '%;background:' + gmcHpColor(pct) + ';"></i></div></div>';
+    h += '<div class="pcard-stats">' + c.stats.map(s =>
+        '<div class="pcard-stat"><span class="l">' + esc(s.id) + '</span>'
+      + '<span class="m">' + sgn(s.mod) + '</span><span class="s">' + esc(s.score) + '</span></div>').join('') + '</div>';
     h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Speed', c.speed || '—') + cell('Prof', sgn(c.pb)) + cell('Pass. Perc', c.passivePerc)
        + (c.hitdice ? cell('Hit Dice', (c.hdLeft !== '' ? c.hdLeft + ' × ' : '') + c.hitdice) : '')
@@ -13809,114 +13795,68 @@ function init_party(root) {
   // ── Candela Obscura ──
   function cardHTMLCO(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [c.role, c.specialty].filter(Boolean).join(' · ');
     const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
     const totalMarks = c.marks.reduce((s, m) => s + m.val, 0);
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip"' + (totalMarks ? ' style="color:#ff8a6a;"' : '') + '>Marks <b>' + totalMarks + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    if(c.drives.length) h += '<div class="pty-stats" style="grid-template-columns:repeat(3,1fr)">' + c.drives.map(dr =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(dr.id) + '</div>'
-      + '<div class="pty-stat-mod">' + dr.cur + '/' + dr.max + '</div><div class="pty-stat-val">resist ' + dr.resist + (dr.used ? ' (−' + dr.used + ')' : '') + '</div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Harm — Marks</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcStats(c.drives.map(dr => ({ l: dr.id, m: dr.cur + '/' + dr.max, s: 'resist ' + dr.resist + (dr.used ? ' (−' + dr.used + ')' : '') })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Harm — Marks</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + c.marks.map(m => cell(m.id, m.val + (m.scar ? ' · scar' : ''))).join('') + '</div></div>';
-    if(c.actions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Top Actions</div><div class="pty-line dim">'
+    if(c.actions.length) body += '<div class="pty-sec"><div class="pty-sec-h">Top Actions</div><div class="pty-line dim">'
        + c.actions.slice(0, 6).map(a => esc(a.id) + ' ' + a.val + (a.gilded ? '✦' : '')).join(' · ') + '</div></div>';
-    if(c.abilities.length) h += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
-    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
-    if(c.catalyst) h += '<div class="pty-sec"><div class="pty-sec-h">Catalyst</div><div class="pty-line dim">' + esc(c.catalyst) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.abilities.length) body += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
+    if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    if(c.catalyst) body += '<div class="pty-sec"><div class="pty-sec-h">Catalyst</div><div class="pty-line dim">' + esc(c.catalyst) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub, chips: [{ l:'Marks', v: totalMarks, bad: !!totalMarks }], body });
   }
 
   // ── Year Zero Engine ──
   function cardHTMLYZE(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [c.archetype, c.variant === 'alien' ? 'Alien' : '', c.xp ? 'XP ' + c.xp : ''].filter(Boolean).join(' · ');
     const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
     const hurt = c.hpMax > 0 && c.hpCur < c.hpMax;
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip"' + (hurt ? ' style="color:#ff6a6a;"' : '') + '>HP <b>' + esc(c.hpCur) + '/' + esc(c.hpMax) + '</b></span>'
-       + '<span class="pty-chip">Armor <b>' + esc(c.armor) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats" style="grid-template-columns:repeat(4,1fr)">' + c.attrs.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
-      + '<div class="pty-stat-mod">' + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcHpBar('Hit Points', c.hpCur, c.hpMax)
+      + pcStats(c.attrs.map(s => ({ l: s.id, m: s.val })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Resolve', c.resolveCur + '/' + c.resolveMax) + cell('Stress', c.stress) + '</div></div>';
-    if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
-    if(c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.id) + ' ' + s.val).join(' · ') + '</div></div>';
-    if(c.talents.length) h += '<div class="pty-sec"><div class="pty-sec-h">Talents</div><div class="pty-line dim">' + esc(c.talents.join(', ')) + '</div></div>';
-    if(c.weapons.length) h += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div><div class="pty-line dim">' + esc(c.weapons.join(', ')) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.conditions.length) body += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
+    if(c.skills.length) body += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.id) + ' ' + s.val).join(' · ') + '</div></div>';
+    if(c.talents.length) body += '<div class="pty-sec"><div class="pty-sec-h">Talents</div><div class="pty-line dim">' + esc(c.talents.join(', ')) + '</div></div>';
+    if(c.weapons.length) body += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div><div class="pty-line dim">' + esc(c.weapons.join(', ')) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax), bad: hurt }, { l:'Armor', v: c.armor }], body });
   }
 
   // ── Ghostbusters ──
   function cardHTMLGB(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [c.alias, c.tagPhysical].filter(Boolean).join(' · ');
-    const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip">Brownie Pts <b>' + esc(c.bp) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats" style="grid-template-columns:repeat(4,1fr)">' + c.traits.map(s => {
+    let body = pcStats(c.traits.map(s => {
         const tal = c.talents.find(t => t.trait === s.id);
-        return '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
-          + '<div class="pty-stat-mod">' + s.val + '</div><div class="pty-stat-val">' + esc(tal ? tal.name : '') + '</div></div>';
-      }).join('') + '</div>';
-    if(c.goal) h += '<div class="pty-sec"><div class="pty-sec-h">Goal</div><div class="pty-line dim">' + esc(c.goal) + '</div></div>';
-    if(c.tagPersonality) h += '<div class="pty-sec"><div class="pty-sec-h">Personality</div><div class="pty-line dim">' + esc(c.tagPersonality) + '</div></div>';
-    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
-    h += '</div></div>';
-    return h;
+        return { l: s.id, m: s.val, s: (tal ? tal.name : '') };
+      }));
+    if(c.goal) body += '<div class="pty-sec"><div class="pty-sec-h">Goal</div><div class="pty-line dim">' + esc(c.goal) + '</div></div>';
+    if(c.tagPersonality) body += '<div class="pty-sec"><div class="pty-sec-h">Personality</div><div class="pty-line dim">' + esc(c.tagPersonality) + '</div></div>';
+    if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub, chips: [{ l:'Brownie', v: c.bp }], body });
   }
 
   // ── Justice League Unlimited ──
   function cardHTMLJLU(entry) {
     const c = entry.sheet;
-    const open = openIds.has(entry.id);
     const sub = [c.secret, c.tier, c.arch].filter(Boolean).join(' · ');
     const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
-       + '<span class="pty-chip"' + (c.condLevel ? ' style="color:#ff8a6a;"' : '') + '>Resolve <b>' + esc(c.resolveCur) + '/' + esc(c.resolveMax) + '</b></span>'
-       + '<span class="pty-chip">DR <b>' + esc(c.dr) + '</b></span>'
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats" style="grid-template-columns:repeat(6,1fr)">' + c.attrs.map(s =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
-      + '<div class="pty-stat-mod">' + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
-    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+    let body = pcHpBar('Resolve', c.resolveCur, c.resolveMax, c.condLevel ? 'Condition ' + c.condLevel : '')
+      + pcStats(c.attrs.map(s => ({ l: s.id, m: s.val })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Condition', c.condLevel) + cell('Plot', c.plot) + '</div></div>';
-    if(c.statuses.length) h += '<div class="pty-sec"><div class="pty-sec-h">Statuses</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.statuses.join(', ')) + '</div></div>';
-    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + c.powers.map(p => esc(p.name) + (p.grade ? ' G' + p.grade : '')).join(', ') + '</div></div>';
-    if(c.abilities.length) h += '<div class="pty-sec"><div class="pty-sec-h">Archetype Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
-    if(c.traits.length) h += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + esc(c.traits.join(', ')) + '</div></div>';
-    if(c.equipment.length) h += '<div class="pty-sec"><div class="pty-sec-h">Equipment</div><div class="pty-line dim">' + esc(c.equipment.join(', ')) + '</div></div>';
-    h += '</div></div>';
-    return h;
+    if(c.statuses.length) body += '<div class="pty-sec"><div class="pty-sec-h">Statuses</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.statuses.join(', ')) + '</div></div>';
+    if(c.powers.length) body += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + c.powers.map(p => esc(p.name) + (p.grade ? ' G' + p.grade : '')).join(', ') + '</div></div>';
+    if(c.abilities.length) body += '<div class="pty-sec"><div class="pty-sec-h">Archetype Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
+    if(c.traits.length) body += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + esc(c.traits.join(', ')) + '</div></div>';
+    if(c.equipment.length) body += '<div class="pty-sec"><div class="pty-sec-h">Equipment</div><div class="pty-line dim">' + esc(c.equipment.join(', ')) + '</div></div>';
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'Resolve', v: esc(c.resolveCur) + '/' + esc(c.resolveMax), bad: !!c.condLevel }, { l:'DR', v: c.dr }], body });
   }
 
   function cardHTML(entry) {
@@ -13934,8 +13874,7 @@ function init_party(root) {
     if(c.system === 'GB') return cardHTMLGB(entry);
     if(c.system === 'JLU') return cardHTMLJLU(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
-    const open = openIds.has(entry.id);
-    const hp = c.hpCur !== '' ? esc(c.hpCur) + '/' + c.hpMax : String(c.hpMax);
+    const hpChip = c.hpCur !== '' ? c.hpCur + '/' + c.hpMax : String(c.hpMax);
     const line = [c.ancestry, c.cls].filter(Boolean).join(' ');
     const sub = [line ? 'LV ' + c.level + ' ' + line : 'LV ' + c.level, c.title, c.alignment].filter(Boolean).join(' · ');
 
@@ -13943,28 +13882,15 @@ function init_party(root) {
     // affliction. Mirrors the colouring on the player's own sheet.
     const GOOD_TRACKERS = ['light','focused','invisible'];
     const trkHTML = c.trackers.length
-      ? '<div class="pty-trk">' + c.trackers.map(t =>
+      ? '<div class="pty-trk" style="margin-bottom:10px;">' + c.trackers.map(t =>
           '<span class="pty-trk-chip' + (GOOD_TRACKERS.includes(t.toLowerCase()) ? ' good' : '') + '">'
           + esc(t) + '</span>').join('') + '</div>'
       : '';
 
-    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
-    h += '<div class="pty-card-hd">'
-       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
-       + '<div class="pty-sub">' + esc(sub) + '</div>' + trkHTML + '</div>'
-       + '<span class="pty-chip">AC <b>' + esc(c.ac) + '</b></span>'
-       + '<span class="pty-chip">HP <b>' + hp + '</b></span>'
-       + (c.luck ? '<span class="pty-chip">Luck <b>' + esc(c.luck) + '</b></span>' : '')
-       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
-       + '</div>';
+    let body = pcHpBar('Hit Points', c.hpCur, c.hpMax) + trkHTML
+      + pcStats(['STR','DEX','CON','INT','WIS','CHA'].map(k => ({ l:k, m: mod(c.stats[k]), s: c.stats[k] })));
 
-    h += '<div class="pty-card-bd">';
-    h += '<div class="pty-stats">' + ['STR','DEX','CON','INT','WIS','CHA'].map(k =>
-        '<div class="pty-stat"><div class="pty-stat-lbl">' + k + '</div>'
-      + '<div class="pty-stat-mod">' + mod(c.stats[k]) + '</div>'
-      + '<div class="pty-stat-val">' + esc(c.stats[k]) + '</div></div>').join('') + '</div>';
-
-    if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>'
+    if(c.attacks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>'
       + c.attacks.map(a => {
           const bonus = a.bonus !== '' ? (String(a.bonus).trim().charAt(0) === '-' ? a.bonus : '+' + String(a.bonus).replace(/^\+/, '')) : '';
           const bits = [
@@ -13976,7 +13902,7 @@ function init_party(root) {
             + (bits ? ' ' + bits : '') + '</div>';
         }).join('') + '</div>';
 
-    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div>'
+    if(c.spells.length) body += '<div class="pty-sec"><div class="pty-sec-h">Spells</div>'
       + c.spells.map((sp, i) => {
           const hasDesc = sp.desc && sp.desc.trim();
           const info = hasDesc
@@ -13990,24 +13916,24 @@ function init_party(root) {
             + '</div>';
         }).join('') + '</div>';
 
-    if(c.talents.length) h += '<div class="pty-sec"><div class="pty-sec-h">Talents &amp; Features</div>'
+    if(c.talents.length) body += '<div class="pty-sec"><div class="pty-sec-h">Talents &amp; Features</div>'
       + c.talents.map(t => '<div class="pty-line">' + esc(t) + '</div>').join('') + '</div>';
 
     const carried = c.gear.filter(g => !g.free), free = c.gear.filter(g => g.free);
     if(c.gear.length || c.coins.gp || c.coins.sp || c.coins.cp) {
       const coinStr = c.coins.gp + ' gp · ' + c.coins.sp + ' sp · ' + c.coins.cp + ' cp' + (c.xp ? ' · ' + c.xp + ' XP' : '');
-      h += '<div class="pty-sec"><div class="pty-sec-h pty-gear-h">'
+      body += '<div class="pty-sec"><div class="pty-sec-h pty-gear-h">'
          + '<span>Gear <span class="pty-slots">' + c.slotsUsed + '/' + c.slotsMax + '</span></span>'
          + '<span class="pty-coins">' + esc(coinStr) + '</span>'
          + '</div>';
-      h += '<div class="pty-line">' + (carried.length
+      body += '<div class="pty-line">' + (carried.length
         ? carried.map(g => esc(g.name) + (g.qty > 1 ? ' <span class="dim">×' + g.qty + '</span>' : '')).join(', ')
         : '<span class="dim">—</span>') + '</div>';
-      if(free.length) h += '<div class="pty-line dim">Free to carry: ' + free.map(g => esc(g.name)).join(', ') + '</div>';
-      h += '</div>';
+      if(free.length) body += '<div class="pty-line dim">Free to carry: ' + free.map(g => esc(g.name)).join(', ') + '</div>';
+      body += '</div>';
     }
-    h += '</div></div>';
-    return h;
+    return pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'AC', v: c.ac }, { l:'HP', v: hpChip }].concat(c.luck ? [{ l:'Luck', v: c.luck }] : []), body });
   }
 
   function render() {
@@ -14026,20 +13952,29 @@ function init_party(root) {
     try {
       const roster = Array.from(listEl.querySelectorAll('.pty-card')).map(card => {
         const name = ((card.querySelector('.pty-name') || {}).textContent || '').trim();
-        const sub  = ((card.querySelector('.pty-sub')  || {}).textContent || '').trim();
-        // Capture EVERY header chip as {label, value} (each is "Label <b>value</b>")
-        // so the Monitor bubble can show all of it. Then pick a primary "vital"
-        // chip for the HP bar and a "defense" chip for the AC box; the rest are
-        // rendered as extra chips on the bubble — nothing gets dropped.
+        const subEl = card.querySelector('.pty-sub') || card.querySelector('.pcard-type');
+        const sub  = ((subEl || {}).textContent || '').trim();
+        // Capture EVERY header chip as {label, value} so the Monitor bubble can
+        // show all of it. Two header formats: the old "Label <b>value</b>" pill
+        // (.pty-chip) and the redesigned split chip (.pcard-chip → .l + .v). Then
+        // pick a primary "vital" chip for the HP bar and a "defense" chip for the
+        // AC box; the rest render as extra chips — nothing gets dropped.
         const VITAL = /^(HP|HEALTH|VITALITY|WOUNDS|RESOLVE)\b/i;
         const DEF = /^(AC|ARMOR|ARMOUR|DEF|DEFENSE|DEFENCE|DR|SOAK|TOUGHNESS|AT)\b/i;
         const chips = [];
         let hp = '', ac = '', acLabel = 'AC', hpIdx = -1, acIdx = -1;
-        card.querySelectorAll('.pty-card-hd .pty-chip').forEach((ch, idx) => {
-          const b = ch.querySelector('b');
-          const value = b ? (b.textContent || '').trim() : '';
-          const full = (ch.textContent || '').trim();
-          const label = (b ? full.slice(0, full.length - value.length) : full).trim();
+        card.querySelectorAll('.pty-card-hd .pty-chip, .pty-card-hd .pcard-chip').forEach((ch, idx) => {
+          let label, value, full;
+          if(ch.classList.contains('pcard-chip')) {
+            label = ((ch.querySelector('.l') || {}).textContent || '').trim();
+            value = ((ch.querySelector('.v') || {}).textContent || '').trim();
+            full = (label + ' ' + value).trim();
+          } else {
+            const b = ch.querySelector('b');
+            value = b ? (b.textContent || '').trim() : '';
+            full = (ch.textContent || '').trim();
+            label = (b ? full.slice(0, full.length - value.length) : full).trim();
+          }
           chips.push({ label, value });
           if(hpIdx < 0 && VITAL.test(full)) { hp = value || full.replace(VITAL, '').trim(); hpIdx = idx; }
           else if(acIdx < 0 && DEF.test(full)) { ac = value || full.replace(DEF, '').trim(); acLabel = (label || 'AC').toUpperCase().slice(0, 4); acIdx = idx; }
