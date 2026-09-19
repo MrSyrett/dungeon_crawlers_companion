@@ -102,6 +102,11 @@ model Campaign {
   // Link to the table's virtual tabletop room (e.g. an Owlbear Rodeo room).
   // Stored as given; only ever http(s), validated before it's written.
   vttUrl    String?
+  // The game system this campaign runs (a SystemKey like "SD" | "DCC" | …).
+  // Drives the GM Screen's system automatically when the board is linked, so
+  // there's no separate system dropdown. Null = unset (GM Screen falls back to
+  // its last-used / default system).
+  system    String?
 
   owner User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   rolls CampaignRoll[]

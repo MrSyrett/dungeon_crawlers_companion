@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { isSystemKey } from "@/components/systemStore";
 
 // Delete a campaign you own.
 //
@@ -56,6 +57,23 @@ export async function setCampaignVttUrl(formData: FormData): Promise<void> {
   const vttUrl = raw.trim() ? safeVttUrl(raw) : null;
 
   await prisma.campaign.updateMany({ where: { id, ownerId: user.id }, data: { vttUrl } });
+  revalidatePath("/campaigns");
+  revalidatePath("/dashboard");
+}
+
+// Set (or clear) the game system a campaign runs. The GM Screen reads this when
+// the board is linked and switches its system automatically — no dropdown.
+export async function setCampaignSystem(formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const raw = String(formData.get("system") ?? "").trim();
+  const system = isSystemKey(raw) ? raw : null;
+
+  await prisma.campaign.updateMany({ where: { id, ownerId: user.id }, data: { system } });
   revalidatePath("/campaigns");
   revalidatePath("/dashboard");
 }

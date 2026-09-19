@@ -6,8 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { makeCode } from "@/lib/campaign-code";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import CopyCodeButton from "@/components/CopyCodeButton";
-import { deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
+import { deleteCampaign, renameCampaign, setCampaignVttUrl, setCampaignSystem } from "@/app/actions/campaigns";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
+import { SYSTEMS } from "@/components/systemStore";
 
 export const dynamic = "force-dynamic";
 
@@ -247,7 +248,7 @@ export default async function CampaignsPage() {
   const campaigns = await prisma.campaign.findMany({
     where: { ownerId: user.id },
     orderBy: { createdAt: "desc" },
-    select: { id: true, name: true, code: true, createdAt: true, vttUrl: true },
+    select: { id: true, name: true, code: true, createdAt: true, vttUrl: true, system: true },
   });
 
   const ids = campaigns.map((c) => c.id);
@@ -478,6 +479,30 @@ export default async function CampaignsPage() {
                     Rename
                   </button>
                 </form>
+
+                <form action={setCampaignSystem} className="mt-2 flex gap-2">
+                  <input type="hidden" name="id" value={c.id} />
+                  <select
+                    name="system"
+                    defaultValue={c.system ?? ""}
+                    aria-label={`Game system for ${c.name}`}
+                    className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--gold)]"
+                  >
+                    <option value="">No system set</option>
+                    {SYSTEMS.map((s) => (
+                      <option key={s.key} value={s.key}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">
+                    Save
+                  </button>
+                </form>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
+                  The GM Screen switches to this system automatically when you link this campaign — no
+                  separate system picker on the screen.
+                </p>
 
                 <form action={setCampaignVttUrl} className="mt-2 flex gap-2">
                   <input type="hidden" name="id" value={c.id} />

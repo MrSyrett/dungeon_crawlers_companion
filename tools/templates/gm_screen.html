@@ -1213,9 +1213,10 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-hide-btn.on { background: rgba(122,45,45,0.15); color: #df8a8a; border-color: #7a2d2d; }
 .dice-camp-panel { padding: 6px 0 2px; }
 /* System toggle (SD / DCC) — top bar, next to Campaign */
-.gm-sys-select { padding: 6px 8px; background: var(--panel-2); color: var(--white); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 12px; line-height: 1; white-space: nowrap; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; outline: none; }
-.gm-sys-select:hover { border-color: var(--mid); }
-.gm-sys-select option { background: var(--panel); color: var(--white); }
+/* Read-only system indicator (the linked campaign drives the system now). */
+.gm-sys-label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--panel-2); color: var(--white); border: 1px solid var(--border); border-radius: 4px; font-size: 12px; line-height: 1; white-space: nowrap; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.gm-sys-label .gm-sys-ico { color: var(--accent); display: inline-flex; font-size: 13px; }
+.gm-sys-label .gm-sys-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 /* Campaign link — top bar button + popover */
 #camp-btn.on { background: rgba(200,160,32,0.12); color: var(--gold); border-color: var(--gold); }
 #camp-popover {
@@ -1844,20 +1845,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 <!-- ═══ SINGLE TOP BAR — session controls + party monitors + scenes + clock ═══ -->
 <div class="topbar" id="gmc-topbar">
   <div class="session-controls">
-    <select class="gm-sys-select" id="gm-system-toggle" title="Game system — hides the other system's generators and bestiary" aria-label="Game system" onchange="setGmSystem(this.value)">
-      <option value="DCC">DCC</option>
-      <option value="SD">Shadowdark</option>
-      <option value="ACE">ACE!</option>
-      <option value="KOB">Kids on Bikes</option>
-      <option value="NIM">Nimble</option>
-      <option value="SW">Star Wars</option>
-      <option value="DND">D&amp;D</option>
-      <option value="D62E">D6 System 2e</option>
-      <option value="ICRPG">Index Card RPG</option>
-      <option value="MMRPG">Marvel Multiverse RPG</option>
-      <option value="CO">Candela Obscura</option>
-      <option value="YZE">Year Zero Engine</option>
-    </select>
+    <div class="gm-sys-label" id="gm-system-label" title="Game system — set by the linked campaign (Campaigns page)" aria-label="Game system"><span class="gm-sys-ico"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2 3 6.5v6c0 4.6 3.2 8.3 9 9.3 5.8-1 9-4.7 9-9.3v-6L12 2.2Z"/></svg></span><span class="gm-sys-name">—</span></div>
     <div class="camp-stack">
       <a class="btn small ghost vtt-launch io-btn" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg><span>VTT</span></a>
       <button class="btn small ghost io-btn" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
@@ -1911,22 +1899,29 @@ body[data-cview="free"] .cst-log-rail{display:none}
     MMRPG:['mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
     CO:  [],
     YZE: ['yzetables'],
+    JLU: [],
+    GB:  [],
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
+  // Display names for the top-bar system indicator (the GM Screen no longer has
+  // a system dropdown — the linked campaign drives it).
+  const SYS_LABEL = { SD:'Shadowdark', DCC:'DCC', ACE:'ACE!', KOB:'Kids on Bikes', NIM:'Nimble', SW:'Star Wars', DND:'D&D', D62E:'D6 System 2e', ICRPG:'Index Card RPG', MMRPG:'Marvel Multiverse', CO:'Candela Obscura', YZE:'Year Zero Engine', JLU:'Justice League', GB:'Ghostbusters' };
   // Systems an admin hid (Admin → Systems) — injected by the server before the
-  // page runs. Those are dropped from the system dropdown here too. Never let
-  // the visible set go empty (mirrors the server guard against hiding them all).
+  // page runs. Never let the visible set go empty (mirrors the server guard).
   const HIDDEN_SYS = (function () { try { return Array.isArray(window.__gmHiddenSystems__) ? window.__gmHiddenSystems__ : []; } catch (e) { return []; } })();
   const VISIBLE_KEYS = (function () { const v = SYS_KEYS.filter(k => HIDDEN_SYS.indexOf(k) < 0); return v.length ? v : SYS_KEYS; })();
   const DEFAULT_SYS = VISIBLE_KEYS.indexOf('DCC') >= 0 ? 'DCC' : VISIBLE_KEYS[0];
+  // The GM Screen's system now follows the linked campaign. With no campaign
+  // linked (personal board) it falls back to the last system used on this
+  // browser, then the default.
   function readSys() { try { const v = localStorage.getItem('gm_system'); return VISIBLE_KEYS.indexOf(v) >= 0 ? v : DEFAULT_SYS; } catch (e) { return DEFAULT_SYS; } }
   let SYS = readSys();
   window.GM_SYSTEM = SYS;
   window.GM_SYSTEM_KEYS = VISIBLE_KEYS;
-  // Hide the admin-hidden systems from every system-toggle <select>.
-  function hideToggleOptions(sel) {
-    [].slice.call(sel.options).forEach(o => { const h = HIDDEN_SYS.indexOf(o.value) >= 0; o.hidden = h; o.disabled = h; });
+  // Paint the read-only system indicator in the top bar.
+  function paintSysLabel() {
+    document.querySelectorAll('#gm-system-label .gm-sys-name').forEach(el => { el.textContent = SYS_LABEL[SYS] || SYS; });
   }
 
   function applyToSelect(sel) {
@@ -1946,16 +1941,17 @@ body[data-cview="free"] .cst-log-rail{display:none}
     (root || document).querySelectorAll('.gen-tab-select').forEach(applyToSelect);
   };
   window.setGmSystem = function (v) {
-    SYS = VISIBLE_KEYS.indexOf(v) >= 0 ? v : DEFAULT_SYS;
+    const key = String(v || '').toUpperCase();
+    SYS = VISIBLE_KEYS.indexOf(key) >= 0 ? key : DEFAULT_SYS;
     window.GM_SYSTEM = SYS;
     try { localStorage.setItem('gm_system', SYS); } catch (e) {}
-    document.querySelectorAll('#gm-system-toggle').forEach(s => { hideToggleOptions(s); s.value = SYS; });
+    paintSysLabel();
     window.applyGmSystemToGenerators(document);
     if (typeof window.setGmMonsterSource === 'function') window.setGmMonsterSource(SYS.toLowerCase());
     try { document.dispatchEvent(new CustomEvent('gm-system-change', { detail: SYS })); } catch (e) {}
   };
   function initSys() {
-    document.querySelectorAll('#gm-system-toggle').forEach(s => { hideToggleOptions(s); s.value = SYS; });
+    paintSysLabel();
     window.applyGmSystemToGenerators(document);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSys);
@@ -2093,6 +2089,16 @@ const GMCamp = (function() {
         campList = [];   // endpoint missing / not signed in — create & join still work
       }
     } catch(e) { campList = []; }
+    // Reconcile the linked campaign's system from the freshly-fetched list — a
+    // board saved before this feature (or connected from a lean object) carries
+    // no system on its own campaign object, so pick it up here and switch to it.
+    if(campaign && Array.isArray(campList)) {
+      const m = campList.find(c => String(c.id) === String(campaign.id));
+      if(m && m.system && m.system !== campaign.system) {
+        campaign.system = m.system;
+        if(typeof window.setGmSystem === 'function') window.setGmSystem(m.system);
+      }
+    }
     if(panelOpen) renderPanel();
     notify();                       // let the Launch VTT button resolve its URL
   }
@@ -2181,7 +2187,11 @@ const GMCamp = (function() {
     if(campaign) start(); else stop();
     renderBtn();
     notify();
-    if(campaign && campList === null) loadList();   // resolve this campaign's VTT link
+    // Drive the GM Screen's game system from the linked campaign (there's no
+    // system dropdown any more). If this campaign object doesn't carry a system
+    // yet, loadList() reconciles it from the account's campaign list below.
+    if(campaign && campaign.system && typeof window.setGmSystem === 'function') window.setGmSystem(campaign.system);
+    if(campaign && campList === null) loadList();   // resolve this campaign's VTT link + system
     if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 300);   // persist the link
   }
 
@@ -12271,7 +12281,23 @@ function init_dice(root) {
     queueRenderLog();
   });
 
-  const DICE = [2, 4, 6, 8, 10, 12, 20, 100];
+  // The tray's dice match each system's own character-sheet tray. Polyhedral
+  // systems get their sheet's die set; the d6-pool systems (Star Wars, Candela,
+  // YZE, Ghostbusters, ACE!, Marvel d616, D6 2e) build pools of d6 like their
+  // sheets do. Falls back to the standard polyhedral set.
+  const DICE_STD = [2, 4, 6, 8, 10, 12, 20, 100];
+  const DICE_BY_SYS = {
+    SD:   [2, 4, 6, 8, 10, 12, 20, 100],
+    DCC:  [2, 4, 6, 8, 10, 12, 20, 100],
+    DND:  [4, 6, 8, 10, 12, 20, 100],
+    NIM:  [4, 6, 8, 10, 12, 20],
+    ICRPG:[4, 6, 8, 10, 12, 20],
+    KOB:  [4, 6, 8, 10, 12, 20],
+    JLU:  [6, 8, 12],
+    SW:   [6], D62E: [6], CO: [6], YZE: [6], GB: [6], ACE: [6], MMRPG: [6],
+  };
+  function diceForSystem(sys) { return DICE_BY_SYS[String(sys || '').toUpperCase()] || DICE_STD; }
+  let DICE = diceForSystem(window.GM_SYSTEM);
   const ICO_EYE = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9Zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>';
   const ICO_EYE_OFF = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3 4.4 4.4 3l16.6 16.6-1.4 1.4-3.2-3.2A11 11 0 0 1 12 19c-5 0-9-4.5-10-7a13.6 13.6 0 0 1 4.3-5L3 4.4Zm5.4 5.4A4.5 4.5 0 0 0 14.2 15.6l-1.5-1.5a2.5 2.5 0 0 1-3.3-3.3L8.4 9.8ZM12 5c5 0 9 4.5 10 7a13.7 13.7 0 0 1-3.4 4.3l-1.5-1.5A11.7 11.7 0 0 0 19.7 12c-1-1.9-4-5-7.7-5-.9 0-1.7.2-2.5.4L8 5.8A9.9 9.9 0 0 1 12 5Z"/></svg>';
 
@@ -12572,6 +12598,15 @@ function init_dice(root) {
     renderLog();
     renderPool();
   };
+
+  // Follow the active system: swap the die set to match its sheet's tray. The
+  // pool is cleared because its die sizes may no longer be offered.
+  document.addEventListener('gm-system-change', () => {
+    const next = diceForSystem(window.GM_SYSTEM);
+    if(next.join(',') === DICE.join(',')) return;
+    DICE = next; pool = {};
+    renderTray(); renderPool();
+  });
 
   renderTray();
   renderPool();
