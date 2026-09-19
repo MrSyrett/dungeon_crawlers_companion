@@ -1580,6 +1580,48 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--acce
 .ai-sec-title { color: var(--accent); }
 .ai-input, .ai-select { border-radius: 6px; }
 .ai-cat-item .ai-cat-tier { color: var(--accent); }
+
+/* ═══════════════════ GM CONSOLE — mode bar + stations ═══════════════════ */
+body:not([data-cview="free"]) #add-window-btn{display:none}
+
+.cmode-bar{flex-shrink:0;display:flex;align-items:stretch;background:linear-gradient(180deg,#0f1218,#0a0c10);border-bottom:1px solid var(--border);position:relative;z-index:2}
+.cmode-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 18px;cursor:pointer;border:none;border-right:1px solid var(--border);background:transparent;position:relative;transition:background .15s;min-width:92px}
+.cmode-tab:hover{background:rgba(36,211,238,.05)}
+.cm-ico{font-size:13px;line-height:1;color:var(--muted);transition:color .15s}
+.cm-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);transition:color .15s}
+.cmode-tab.active .cm-ico,.cmode-tab.active .cm-name{color:var(--accent)}
+.cmode-tab.active{background:linear-gradient(180deg,rgba(36,211,238,.1),transparent)}
+.cmode-tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 0 10px var(--glow)}
+.cmode-free{margin-left:4px}
+.cmode-free .cm-ico,.cmode-free .cm-name{opacity:.85}
+.cmode-status{flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.console-workspace{position:relative;z-index:1;flex:1;display:flex;min-height:0;overflow:hidden}
+.cstation{display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--black);border-right:2px solid var(--border);transition:flex-basis .3s cubic-bezier(.4,0,.2,1),opacity .25s;flex:0 0 auto}
+.cstation:last-child{border-right:none}
+.cstation.collapsed{flex-basis:0!important;min-width:0!important;opacity:0;border-width:0!important;pointer-events:none}
+#cst-spine{flex-basis:340px}
+#cst-stage{flex:1 1 auto;flex-basis:auto}
+#cst-side{flex-basis:340px}
+#cst-map{flex-basis:300px}
+#cst-log{flex-basis:270px}
+#cst-spine[data-size="rail"]{flex-basis:210px}
+#cst-stage[data-size="ref"]{flex:0 1 auto;flex-basis:440px}
+#cst-log[data-size="narrow"]{flex-basis:220px}
+
+.cst-head{display:flex;align-items:center;gap:8px;padding:7px 10px;background:linear-gradient(180deg,#20242c,#171a20);border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(36,211,238,.3);flex-shrink:0;position:relative}
+.cst-head::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2) 60%,transparent);opacity:.5;pointer-events:none}
+.cst-tick{width:15px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));flex-shrink:0}
+.cst-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--white);white-space:nowrap}
+.cst-toolbar{margin-left:auto;display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden}
+.cst-content{flex:1;min-height:0;display:flex;position:relative;overflow:hidden}
+
+@media (max-width:760px){
+  .console-workspace{flex-direction:column;overflow-x:hidden;overflow-y:auto}
+  .cstation{flex:0 0 auto!important;flex-basis:auto!important;min-height:70vh;border-right:none;border-bottom:3px solid var(--border)}
+  .cstation.collapsed{min-height:0!important}
+  .cmode-tab{min-width:0;padding:6px 12px}
+}
 </style>
 </head>
 <body>
@@ -2185,9 +2227,27 @@ GMScenes.renderPins();
 })();
 </script>
 
-<!-- ═══ MAIN AREA ═══ -->
-<!-- Windows are built dynamically by renderWindows() -->
-<div class="main-area" id="main-area"></div>
+<!-- ═══ MODE BAR (the "pages" — like Resolve workspaces) ═══ -->
+<div class="cmode-bar" id="cmode-bar">
+  <button class="cmode-tab" data-mode="prep"     type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
+  <button class="cmode-tab" data-mode="explore"  type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
+  <button class="cmode-tab" data-mode="combat"   type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
+  <button class="cmode-tab" data-mode="downtime" type="button" onclick="setConsoleMode('downtime')"><span class="cm-ico">☕</span><span class="cm-name">Downtime</span></button>
+  <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')"><span class="cm-ico">▦</span><span class="cm-name">Free</span></button>
+  <div class="cmode-status" id="cmode-status"></div>
+</div>
+
+<!-- ═══ CONSOLE WORKSPACE (stations reflow by mode) ═══ -->
+<div class="console-workspace" id="console-workspace">
+  <aside class="cstation" id="cst-spine"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-spine-title">Encounter</span><div class="cst-toolbar" id="cst-spine-toolbar"></div></div><div class="cst-content" id="cst-spine-content"></div></aside>
+  <main class="cstation" id="cst-stage"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-stage-title">Stage</span><div class="cst-toolbar" id="cst-stage-toolbar"></div></div><div class="cst-content" id="cst-stage-content"></div></main>
+  <aside class="cstation" id="cst-side"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-side-title">Tools</span><div class="cst-toolbar" id="cst-side-toolbar"></div></div><div class="cst-content" id="cst-side-content"></div></aside>
+  <aside class="cstation" id="cst-map"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Map · VTT</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div><div class="cst-content" id="cst-map-content"></div></aside>
+  <aside class="cstation" id="cst-log"><div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div><div class="cst-content" id="cst-log-content"></div></aside>
+</div>
+
+<!-- ═══ MAIN AREA (Free mode — dynamic windows) ═══ -->
+<div class="main-area" id="main-area" style="display:none;"></div>
 
 
 <style>
@@ -3867,6 +3927,95 @@ function setWindowTool(id, tool) {
 
 // Rotating the phone / crossing the breakpoint re-applies narrow layout.
 GM_MOBILE_MQ.addEventListener('change', () => renderWindows());
+
+// ══════════════════════════════════════════════════════════════════════════
+// GM CONSOLE — modes / stations. Tools stop being user-arranged windows and
+// become fixed "stations" that reflow by MODE (Prep / Explore / Combat /
+// Downtime), like Resolve pages. "Free" mode falls back to the window system.
+// Station tool nodes reuse the same per-id instance cache as windows (getWinNode).
+// ══════════════════════════════════════════════════════════════════════════
+const CONSOLE_STATIONS = ['spine','stage','side','log','map'];
+const STATION_TITLES = { spine:'Encounter', stage:'Stage', side:'Tools', log:'Roll Log', map:'Map · VTT' };
+const CONSOLE_MODES = {
+  prep:     { stations:{ stage:{tool:'adventure'}, side:{tool:'gen'} } },
+  explore:  { stations:{ spine:{tool:'trackers', rail:true}, stage:{tool:'adventure'}, log:{tool:'dice'} } },
+  combat:   { stations:{ spine:{tool:'trackers'}, stage:{tool:'adventure'}, log:{tool:'dice'} } },
+  downtime: { stations:{ side:{tool:'party'}, stage:{tool:'notes'}, log:{tool:'dice'} } },
+};
+let consoleMode = 'explore';
+
+function mountStation(stationId, tool) {
+  const content = document.getElementById('cst-' + stationId + '-content');
+  const toolbarSlot = document.getElementById('cst-' + stationId + '-toolbar');
+  if(!content || !tool) return;
+  const node = getWinNode('cst-' + stationId, tool);   // per-station instance + state
+  const cache = gmNodes['cst-' + stationId];
+  if(cache) cache.active = tool;
+  if(node.parentElement !== content) content.appendChild(node);
+  Array.from(content.children).forEach(c => c.classList.toggle('active', c === node));
+  node.classList.add('active');
+  if(toolbarSlot) {
+    toolbarSlot.innerHTML = '';
+    const tpl = node.querySelector('.toolbar-tpl');
+    if(tpl) {
+      Array.from(tpl.children).forEach(ch => toolbarSlot.appendChild(ch.cloneNode(true)));
+      syncToolbar(toolbarSlot, node);
+    }
+  }
+}
+
+function renderConsole(mode) {
+  if(mode === 'free') { setFreeView(); return; }
+  const cfg = CONSOLE_MODES[mode];
+  if(!cfg) return;
+  consoleMode = mode;
+  document.body.dataset.cview = 'console';
+  document.body.dataset.cmode = mode;
+  const ws = document.getElementById('console-workspace');
+  const free = document.getElementById('main-area');
+  if(ws) ws.style.display = '';
+  if(free) free.style.display = 'none';
+
+  CONSOLE_STATIONS.forEach(st => {
+    const el = document.getElementById('cst-' + st);
+    if(!el) return;
+    const conf = cfg.stations[st];
+    if(conf && conf.tool) {
+      el.classList.remove('collapsed');
+      el.dataset.size = conf.rail ? 'rail' : (conf.size || 'norm');
+      mountStation(st, conf.tool);
+      const t = document.getElementById('cst-' + st + '-title');
+      if(t) t.textContent = (st === 'spine' || st === 'log' || st === 'map') ? STATION_TITLES[st] : (TOOL_LABELS[conf.tool] || STATION_TITLES[st]);
+    } else {
+      el.classList.add('collapsed');
+    }
+  });
+
+  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  if(window.__ddScheduleSave) window.__ddScheduleSave();
+}
+
+// Free mode = the add/remove window system (fallback + power users).
+function setFreeView() {
+  document.body.dataset.cview = 'free';
+  document.body.dataset.cmode = 'free';
+  const ws = document.getElementById('console-workspace');
+  const free = document.getElementById('main-area');
+  if(ws) ws.style.display = 'none';
+  if(free) free.style.display = '';
+  // detach station nodes so their tools are free to reuse
+  CONSOLE_STATIONS.forEach(st => {
+    const cache = gmNodes['cst-' + st];
+    if(cache) Object.values(cache.byTool).forEach(n => { if(n.parentElement) instancePool.appendChild(n); });
+  });
+  if(!gmWindows.length) DEFAULT_WINDOWS.forEach(t => gmWindows.push({ id: newWinId(), tool: t }));
+  renderWindows();
+  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === 'free'));
+  document.getElementById('add-window-btn') && (document.getElementById('add-window-btn').style.display = '');
+  if(window.__ddScheduleSave) window.__ddScheduleSave();
+}
+
+function setConsoleMode(mode) { renderConsole(mode); }
 
 
 // Load generated content into a tool WITHOUT pulling the current pane off the
@@ -10597,13 +10746,11 @@ function init_notes(root) {
 window.addEventListener('pageshow', function(e) {
   if(e.persisted) window.location.reload();
 });
-// Initial window layout. Deferred to DOMContentLoaded so every init_<tool> (some
-// defined in later script blocks) exists before we build the default windows.
-// The server shim may restore a saved layout first — if so, we don't override it.
+// Initial layout. Deferred to DOMContentLoaded so every init_<tool> (some defined
+// in later script blocks) exists before stations mount. Default view is the
+// CONSOLE in Explore mode; Free mode + saved windows are available on demand.
 function gmBootstrapWindows() {
-  if(gmWindows.length) { renderWindows(); return; }
-  DEFAULT_WINDOWS.forEach(t => gmWindows.push({ id: newWinId(), tool: t }));
-  renderWindows();
+  renderConsole(consoleMode || 'explore');
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gmBootstrapWindows);
 else gmBootstrapWindows();
