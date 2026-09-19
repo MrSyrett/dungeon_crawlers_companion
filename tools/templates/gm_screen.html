@@ -1618,7 +1618,9 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .scene-strip + .tel-clock{margin-left:0}
 .tel-clbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .tel-time{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--accent)}
-body[data-cview="free"] .gmc-telemetry,body[data-cview="free"] .bottom-bar{display:none}
+/* Free mode keeps the Monitor + Command bars — only the canvas swaps to windows. */
+.cmode-free{border-left:1px solid var(--border)}
+.cmode-free .cm-ico{opacity:.9}
 
 /* ── ZONE 2: Canvas — Adventure | (Map / Combat) | Roll Log ── */
 .console-workspace{position:relative;z-index:1;flex:1;display:flex;min-height:0;overflow:hidden}
@@ -2353,6 +2355,10 @@ GMScenes.renderPins();
   </aside>
 </div>
 
+<!-- ═══ Free mode canvas (add/remove windows) — shares the canvas slot with the
+     console workspace, so the Monitor + Command bars stay fixed around it. ═══ -->
+<div class="main-area" id="main-area" style="display:none;"></div>
+
 <!-- ═══ ZONE 3 — BOTTOM BAR: modes + quick tools + dice ═══ -->
 <footer class="bottom-bar" id="bottom-bar">
   <div class="bb-modes">
@@ -2361,6 +2367,7 @@ GMScenes.renderPins();
     <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
     <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
     <button class="cmode-tab" data-mode="downtime"  type="button" onclick="setConsoleMode('downtime')"><span class="cm-ico">☕</span><span class="cm-name">Downtime</span></button>
+    <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')" title="Free layout — add/remove your own windows"><span class="cm-ico">⊞</span><span class="cm-name">Free</span></button>
   </div>
   <div class="bb-quick" id="bb-quick">
     <span class="bb-lbl">Quick&nbsp;Tools</span>
@@ -2381,9 +2388,6 @@ GMScenes.renderPins();
     <button class="qdie" type="button" data-die="100">d%</button>
   </div>
 </footer>
-
-<!-- ═══ Free mode (dormant fallback) ═══ -->
-<div class="main-area" id="main-area" style="display:none;"></div>
 
 <!-- ═══ Popup / drawer (quick tools + monitor details) ═══ -->
 <div class="pop-scrim" id="gmc-scrim">
@@ -4223,7 +4227,7 @@ function setFreeView() {
   _stationsMounted = false;
   if(!gmWindows.length) DEFAULT_WINDOWS.forEach(t => gmWindows.push({ id: newWinId(), tool: t }));
   renderWindows();
-  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === 'free'));
   document.getElementById('add-window-btn') && (document.getElementById('add-window-btn').style.display = '');
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
