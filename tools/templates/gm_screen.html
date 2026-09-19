@@ -1623,6 +1623,45 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
   .cmode-tab{min-width:0;padding:6px 12px}
 }
 
+/* ── Telemetry band: campaign identity + party strip + clock ── */
+.gmc-telemetry{flex-shrink:0;display:flex;align-items:stretch;background:linear-gradient(180deg,#12151b,#0c0e12);border-bottom:1px solid var(--border);position:relative;z-index:2}
+.gmc-telemetry::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--accent) 30%,var(--accent-2) 70%,transparent);opacity:.4}
+.tel-brand{display:flex;flex-direction:column;justify-content:center;gap:1px;padding:6px 16px;min-width:190px;max-width:230px;border-right:1px solid var(--border)}
+.tel-camp{font-family:'Cinzel',serif;font-weight:700;font-size:14px;color:var(--white);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tel-sys{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.party-strip{flex:1;display:flex;align-items:center;gap:7px;padding:6px 12px;overflow-x:auto;min-width:0}
+.party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
+.pcard{flex:0 0 auto;min-width:148px;max-width:210px;display:flex;flex-direction:column;gap:4px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:9px;padding:6px 9px}
+.pcard.down{opacity:.5;filter:grayscale(.4)}
+.pcard.bloodied{border-color:var(--red);box-shadow:0 0 10px rgba(214,58,48,.3)}
+.pc-row1{display:flex;align-items:center;gap:7px;min-width:0}
+.pc-av{width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:11px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.pc-nm{min-width:0;flex:1}
+.pc-nm .n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--white);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-nm .s{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-row2{display:flex;align-items:center;gap:6px}
+.pc-hpb{flex:1;height:11px;border-radius:6px;background:rgba(0,0,0,.5);overflow:hidden;position:relative;border:1px solid var(--border)}
+.pc-hpb > i{display:block;height:100%;border-radius:6px}
+.pc-hpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.pc-ac{flex-shrink:0;text-align:center;border-radius:5px;background:var(--panel-2);border:1px solid var(--border);padding:1px 6px}
+.pc-ac .l{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7px;letter-spacing:.05em;color:var(--muted);display:block;line-height:1}
+.pc-ac .v{font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;color:var(--white);line-height:1.1}
+.tel-clock{margin-left:auto;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:6px 16px;border-left:1px solid var(--border)}
+.tel-clbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tel-time{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--accent)}
+body[data-cview="free"] .gmc-telemetry{display:none}
+
+/* status line + auto pill in the mode bar */
+.cmode-status .cst-stat{display:inline-flex;align-items:baseline;gap:6px;padding:0 14px;border-right:1px solid var(--border)}
+.cmode-status .cst-stat .k{font-size:8.5px;letter-spacing:.12em}
+.cmode-status .cst-stat .v{font-size:13px;color:var(--white)}
+.cmode-status .cst-stat .v.mono{font-family:'Share Tech Mono',monospace;color:var(--accent)}
+.cmode-status .cst-stat .v.hot{color:var(--red-light)}
+.auto-pill{margin-left:14px;display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:rgba(36,211,238,.08);border:1px solid var(--accent-dim);border-radius:999px;padding:3px 10px;cursor:pointer}
+.auto-pill.off{color:var(--muted);border-color:var(--border);background:transparent}
+.auto-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.auto-pill.off .auto-dot{background:var(--muted);box-shadow:none}
+
 /* ── Map / VTT station ── */
 .vtt-bar{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--panel-2);border-bottom:1px solid var(--border);flex-shrink:0}
 .vtt-url-input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-size:12px;padding:5px 8px;outline:none;font-family:'Barlow',sans-serif}
@@ -2246,6 +2285,13 @@ GMScenes.renderPins();
 </script>
 
 <!-- ═══ MODE BAR (the "pages" — like Resolve workspaces) ═══ -->
+<!-- ═══ TELEMETRY BAND — campaign identity + always-on party strip + clock ═══ -->
+<div class="gmc-telemetry" id="gmc-telemetry">
+  <div class="tel-brand"><div class="tel-camp" id="tel-camp">Dungeon Crawler's Companion</div><div class="tel-sys" id="tel-sys">GM Console</div></div>
+  <div class="party-strip" id="gmc-party-strip"><div class="party-empty" id="party-empty">Link a campaign to see your party's live HP &amp; AC here</div></div>
+  <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
+</div>
+
 <div class="cmode-bar" id="cmode-bar">
   <button class="cmode-tab" data-mode="prep"     type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
   <button class="cmode-tab" data-mode="explore"  type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
@@ -3816,6 +3862,16 @@ function getOrCreateInstance(toolType) {
 // Used when generated content (maps, adventures, monsters) needs to land in a tool.
 function ensureToolWindow(toolType) {
   toolType = normalizeTool(toolType);
+  // Console view: route to the station that hosts the tool (e.g. a monster sent
+  // to the tracker lands in the spine), rather than spawning a hidden window.
+  if(document.body.dataset.cview === 'console') {
+    const STATION_FOR = { trackers:'spine', dice:'log', gen:'side', party:'side', vtt:'map', adventure:'stage', maps:'stage', notes:'stage', rules:'stage' };
+    for(const st of CONSOLE_STATIONS) {
+      const cache = gmNodes['cst-' + st];
+      if(cache && cache.active === toolType) return cache.byTool[toolType];
+    }
+    return getWinNode('cst-' + (STATION_FOR[toolType] || 'stage'), toolType);
+  }
   let w = gmWindows.find(x => x.tool === toolType);
   if(!w) w = addWindow(toolType);
   return getWinNode(w.id, toolType);
@@ -4036,6 +4092,7 @@ function renderConsole(mode) {
   });
 
   document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  try { renderStatusLine(); } catch(e) {}
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
@@ -4060,6 +4117,107 @@ function setFreeView() {
 }
 
 function setConsoleMode(mode) { renderConsole(mode); }
+
+// ── Telemetry: campaign identity, always-on party strip, session clock,
+//    mode status line, and auto-flip to Combat when initiative starts. ──
+let gmcAutoCombat = true;
+let gmcAutoedFight = false;
+const gmcStart = Date.now();
+
+function gmcInitials(name){
+  const p = String(name||'').trim().split(/\s+/);
+  return ((p[0]||'')[0]||'') + (p.length>1 ? (p[p.length-1][0]||'') : (p[0]||'')[1]||'');
+}
+function gmcHpPct(hp){
+  if(!hp) return null;
+  let m = String(hp).match(/(\d+)\s*\/\s*(\d+)/);
+  if(m){ const a=+m[1], b=+m[2]; return b>0 ? Math.max(0,Math.min(100,Math.round(a/b*100))) : 0; }
+  m = String(hp).match(/(\d+)\s*%/);
+  if(m) return Math.max(0,Math.min(100,+m[1]));
+  return null;
+}
+function gmcHpColor(pct){
+  if(pct==null) return 'var(--accent-dim)';
+  if(pct<=0) return '#3a3a3a';
+  if(pct<=25) return '#d63a30';
+  if(pct<=50) return '#c08020';
+  if(pct<=75) return '#c8a020';
+  return '#4caf50';
+}
+function renderPartyStrip(roster){
+  const strip = document.getElementById('gmc-party-strip');
+  if(!strip) return;
+  roster = roster || window.GM_ROSTER || [];
+  if(!roster.length){ strip.innerHTML = '<div class="party-empty">Link a campaign to see your party’s live HP &amp; AC here</div>'; return; }
+  strip.innerHTML = roster.map(pc => {
+    const pct = gmcHpPct(pc.hp);
+    const down = pct != null && pct <= 0;
+    const bloodied = pct != null && pct > 0 && pct <= 40;
+    const barW = pct==null ? 100 : pct;
+    const hpText = pc.hp || '';
+    return '<div class="pcard'+(down?' down':'')+(bloodied?' bloodied':'')+'">'
+      + '<div class="pc-row1"><div class="pc-av">'+esc2(gmcInitials(pc.name).toUpperCase())+'</div>'
+      + '<div class="pc-nm"><div class="n">'+esc2(pc.name)+'</div>'+(pc.sub?'<div class="s">'+esc2(pc.sub)+'</div>':'')+'</div></div>'
+      + '<div class="pc-row2"><div class="pc-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i>'+(hpText?'<div class="pc-hpt">'+esc2(hpText)+'</div>':'')+'</div>'
+      + (pc.ac?'<div class="pc-ac"><span class="l">AC</span><span class="v">'+esc2(pc.ac)+'</span></div>':'')+'</div>'
+      + '</div>';
+  }).join('');
+}
+function esc2(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+document.addEventListener('gm-roster', e => renderPartyStrip(e.detail));
+
+function gmcTrackerState(){
+  const cache = gmNodes['cst-spine'];
+  const node = cache && cache.byTool && cache.byTool['trackers'];
+  if(node && node._getState){ try { return node._getState(); } catch(e){} }
+  return null;
+}
+function renderStatusLine(){
+  const el = document.getElementById('cmode-status');
+  if(!el) return;
+  const mode = consoleMode;
+  let html = '';
+  const roster = window.GM_ROSTER || [];
+  const stat = (k,v,cls)=> '<span class="cst-stat"><span class="k">'+k+'</span><span class="v '+(cls||'')+'">'+v+'</span></span>';
+  if(mode === 'combat'){
+    const st = gmcTrackerState();
+    const items = (st && st.items) || [];
+    const foes = items.filter(i=>i.type==='npc');
+    const up = foes.filter(f=> (f.hpCurrent==null && f.hpCur==null) ? true : ((f.hpCurrent!=null?f.hpCurrent:f.hpCur) > 0)).length;
+    html = stat('Round', (st&&st.round)||1, 'mono') + stat('Foes Up', up+' / '+foes.length, foes.length&&up<foes.length?'hot':'');
+  } else if(mode === 'explore'){
+    html = stat('Party', roster.length ? roster.length+' linked' : '—') + stat('Scene', 'Exploration');
+  } else if(mode === 'prep'){
+    html = stat('Mode', 'Prep') + stat('Party', roster.length? roster.length+' linked':'—');
+  } else if(mode === 'downtime'){
+    html = stat('Mode', 'Downtime');
+  }
+  const autoOff = gmcAutoCombat ? '' : ' off';
+  html += '<span class="auto-pill'+autoOff+'" id="gmc-auto" title="Auto-switch to Combat when initiative starts"><span class="auto-dot"></span>Auto '+(gmcAutoCombat?'on':'off')+'</span>';
+  el.innerHTML = html;
+  const ap = document.getElementById('gmc-auto');
+  if(ap) ap.onclick = ()=>{ gmcAutoCombat = !gmcAutoCombat; renderStatusLine(); };
+}
+
+function gmcTick(){
+  // session clock
+  const clk = document.getElementById('tel-clock');
+  if(clk){ const s = Math.floor((Date.now()-gmcStart)/1000); const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+    clk.textContent = h>0 ? (h+':'+String(m).padStart(2,'0')) : (m+':'+String(ss).padStart(2,'0')); }
+  // system label
+  const sysEl = document.getElementById('tel-sys');
+  if(sysEl){ const sys = (typeof window.GM_SYSTEM==='string'?window.GM_SYSTEM:''); sysEl.textContent = (sys? sys+' · ':'') + 'GM Console'; }
+  // auto-combat off tracker contents
+  if(gmcAutoCombat && document.body.dataset.cview==='console'){
+    const st = gmcTrackerState();
+    const items = (st && st.items) || [];
+    const foes = items.filter(i=>i.type==='npc');
+    if(consoleMode==='explore' && foes.length>0 && !gmcAutoedFight){ gmcAutoedFight = true; renderConsole('combat'); }
+    else if(consoleMode==='combat' && items.length===0){ gmcAutoedFight = false; renderConsole('explore'); }
+  }
+  if(document.body.dataset.cview==='console') renderStatusLine();
+}
+setInterval(gmcTick, 1000);
 
 
 // Load generated content into a tool WITHOUT pulling the current pane off the
@@ -10795,6 +10953,10 @@ window.addEventListener('pageshow', function(e) {
 // CONSOLE in Explore mode; Free mode + saved windows are available on demand.
 function gmBootstrapWindows() {
   renderConsole(consoleMode || 'explore');
+  // Pre-create the Party instance so its campaign sync runs and the masthead
+  // party strip is populated even before the GM opens Downtime.
+  try { getWinNode('cst-side', 'party'); } catch(e) {}
+  try { renderPartyStrip(); renderStatusLine(); } catch(e) {}
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gmBootstrapWindows);
 else gmBootstrapWindows();
@@ -12700,6 +12862,28 @@ function init_party(root) {
     listEl.style.display  = any ? 'flex' : 'none';
     listEl.innerHTML = chars.map(cardHTML).join('');
     if(any && !noteEl.textContent) status(chars.length + ' character' + (chars.length === 1 ? '' : 's'));
+    publishRoster();
+  }
+
+  // Publish a compact roster for the console masthead's always-on party strip.
+  // Reads the values the cards already render (name, HP/AC chips) so it stays
+  // system-agnostic. Fired on every render + sync.
+  function publishRoster() {
+    try {
+      const roster = Array.from(listEl.querySelectorAll('.pty-card')).map(card => {
+        const name = ((card.querySelector('.pty-name') || {}).textContent || '').trim();
+        const sub  = ((card.querySelector('.pty-sub')  || {}).textContent || '').trim();
+        let hp = '', ac = '';
+        card.querySelectorAll('.pty-card-hd .pty-chip').forEach(ch => {
+          const t = (ch.textContent || '').trim();
+          if(/^HP/i.test(t)) hp = t.replace(/^HP\s*/i, '').trim();
+          else if(/^AC/i.test(t) && !ac) ac = t.replace(/^AC\s*/i, '').trim();
+        });
+        return { name, sub, hp, ac };
+      }).filter(x => x.name);
+      window.GM_ROSTER = roster;
+      document.dispatchEvent(new CustomEvent('gm-roster', { detail: roster }));
+    } catch(e) {}
   }
 
   listEl.addEventListener('click', e => {
