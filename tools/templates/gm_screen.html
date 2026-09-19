@@ -685,8 +685,12 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .cbt-col { flex: 1; display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--border); overflow: hidden; }
 .cbt-col:last-child { border-right: none; }
 .cbt-npc-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-/* Combat cards tile side-by-side and wrap into a grid instead of full-width rows. */
-.cbt-tracker-list { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 10px; align-content: start; }
+/* Combat cards tile side-by-side and wrap into a grid instead of full-width rows.
+   In the wide Combat-mode centre we pin the grid to 3 roomy columns (was packing
+   4 thin ones on wide monitors); in the narrower Master/side layout it stays a
+   responsive auto-fill so cards don't get crushed. */
+.cbt-tracker-list { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 10px; align-content: start; align-items: start; }
+body[data-cmode="combat"] .cbt-tracker-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .cbt-tool { position: relative; }
 .cbt-empty { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 4px; padding: 30px; }
 .cbt-empty.show { display: flex; }
@@ -755,9 +759,11 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
    Toned header highlight across the TOP; AC/EV/DEF badge + optional tier badge;
    ability strip; ATK rows with dice buttons; bold-name traits. Only the HP zone
    changes shape between game systems (numeric bar, DCC/ACE pips, SW wounds). */
-.npc-card { position: relative; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; min-width: 0; --tone: var(--red); }
+.npc-card { position: relative; display: flex; flex-direction: column; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; min-width: 0; max-height: calc(100vh - 200px); --tone: var(--red); }
 .npc-card.defeated { opacity: 0.55; }
-.cc-band { position: relative; display: flex; align-items: flex-start; gap: 8px; padding: 10px 11px 9px; }
+/* The header stays pinned; the body scrolls when a stat-block is taller than the
+   card so nothing is clipped off the bottom. */
+.cc-band { position: relative; display: flex; align-items: flex-start; gap: 8px; padding: 10px 11px 9px; flex: 0 0 auto; }
 .cc-band::before { content: ''; position: absolute; inset: 0; opacity: 0.13; background: var(--tone); pointer-events: none; }
 .cc-band::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--tone); }
 .cc-band > .card-grip { position: relative; margin-top: 1px; }
@@ -771,7 +777,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .cc-badge { position: relative; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #0d0e10; background: var(--tone); padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
 .cc-x { position: relative; color: var(--muted); cursor: pointer; font-size: 12px; border: none; background: none; padding: 2px 4px; flex-shrink: 0; margin-top: 1px; }
 .cc-x:hover { color: var(--red-light); }
-.cc-body { padding: 11px 12px 12px; }
+.cc-body { padding: 11px 12px 12px; flex: 1 1 auto; overflow-y: auto; min-height: 0; }
 /* HP zone */
 .cc-hp { margin-bottom: 11px; }
 .cc-hp-head { display: flex; align-items: baseline; gap: 7px; margin-bottom: 5px; }
@@ -795,10 +801,12 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .cc-wound { flex: 1 1 auto; min-width: 44px; border: 1px solid var(--border); border-radius: 6px; background: #141414; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 9.5px; letter-spacing: 0.02em; text-transform: uppercase; padding: 6px 3px; cursor: pointer; text-align: center; }
 .cc-wound.on { color: #0d0e10; }
 /* Ability strip */
-.cc-abils { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 11px; }
-.cc-abil { background: var(--panel); display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; min-width: 0; }
+/* Flat stat strip — one recessed panel with hairline dividers, no per-cell bevel. */
+.cc-abils { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: 0; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 11px; }
+.cc-abil { background: transparent; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; min-width: 0; }
+.cc-abil + .cc-abil { border-left: 1px solid var(--border); }
 button.cc-abil { cursor: pointer; }
-button.cc-abil:hover { background: var(--panel-2); }
+button.cc-abil:hover { background: rgba(255,255,255,0.05); }
 .cc-abil .l { font-family: 'Barlow Condensed', sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: 0.05em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
 .cc-abil .v { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--white); }
 .cc-meta { font-size: 11px; color: var(--mid); margin: -3px 0 11px; line-height: 1.5; overflow-wrap: anywhere; }
@@ -1749,7 +1757,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .pop-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--white);flex-shrink:0}
 .pop-toolbar{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0;overflow-x:auto}
 .pop-toolbar:empty{display:none}
-.pop-head .pop-toolbar + .pop-x{margin-left:8px}
+.pop-head .pop-toolbar:not(:empty) + .pop-x{margin-left:8px}
 .pop-x{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mid);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .pop-x:hover{color:#ff6a5c;border-color:var(--red-light)}
 .pop-body{padding:16px;overflow-y:auto;flex:1 1 auto;min-height:0}
@@ -1924,6 +1932,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
   let SYS = readSys();
   window.GM_SYSTEM = SYS;
   window.GM_SYSTEM_KEYS = VISIBLE_KEYS;
+  window.SYS_LABEL = SYS_LABEL;   // friendly names for other tools (e.g. the prep picker)
   // Paint the read-only system indicator in the top bar.
   function paintSysLabel() {
     document.querySelectorAll('#gm-system-label .gm-sys-name').forEach(el => { el.textContent = SYS_LABEL[SYS] || SYS; });
@@ -2503,8 +2512,6 @@ GMScenes.renderPins();
     <!-- ZONE 3 — COMMAND BAR: modes + quick tools (spans the left column only) -->
     <footer class="bottom-bar" id="bottom-bar">
       <div class="bb-modes">
-        <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')" title="Free layout — add/remove your own windows"><span class="cm-ico">⊞</span><span class="cm-name">Free</span></button>
-        <button class="cmode-tab" data-mode="prep"      type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
         <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
         <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
         <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
@@ -4335,8 +4342,6 @@ const STATION_TITLES = { adv:'Adventure', map:'Maps', cbt:'Combat', log:'Roll Lo
 // tool a station hosts in that mode, `titles` its header text. The center wrapper
 // (#cst-center) is shown whenever either of its subs (map / cbt) is visible.
 const CONSOLE_MODES = {
-  prep:     { adv:1, map:0, cbt:1, log:1,   // Generators (left) + Combat (center) + Party (right)
-              tools:{ adv:'gen', log:'party' }, titles:{ adv:'Generators', log:'Party' } },
   explore:  { adv:1, map:1, cbt:0, log:1 },   // adventure + MAP (combat hidden) + roll log
   combat:   { adv:1, map:0, cbt:1, log:1 },   // adventure + COMBAT (map hidden) + roll log
   master:   { adv:1, map:1, cbt:1, log:1 },   // everything — the home layout
@@ -4379,7 +4384,8 @@ function ensureStationsMounted() {
 }
 
 function renderConsole(mode) {
-  if(mode === 'free') { setFreeView(); return; }
+  // Free & Prep modes were retired — fall back to the Master layout if an old
+  // saved state or stale caller asks for them.
   const cfg = CONSOLE_MODES[mode] || CONSOLE_MODES.master;
   consoleMode = CONSOLE_MODES[mode] ? mode : 'master';
   document.body.dataset.cview = 'console';
@@ -5280,9 +5286,21 @@ function loadPrepList(wrap) {
   list.innerHTML = '<div class="prep-picker-msg">Loading&hellip;</div>';
   fetch('/api/documents?kind=session', { credentials: 'same-origin' })
     .then(r => r.ok ? r.json() : Promise.reject(r.status))
-    .then(items => {
-      if(!Array.isArray(items) || items.length === 0) {
+    .then(allItems => {
+      // Only offer prep tied to the system this board is running (the linked
+      // campaign's system). A doc with no system recorded is always shown so
+      // older exports stay reachable. With no active system, show everything.
+      const sys = String(window.GM_SYSTEM || '').toUpperCase();
+      const items = sys
+        ? (Array.isArray(allItems) ? allItems : []).filter(it => !it.system || String(it.system).toUpperCase() === sys)
+        : allItems;
+      if(!Array.isArray(allItems) || allItems.length === 0) {
         list.innerHTML = '<div class="prep-picker-msg">No saved Session Prep sheets yet.<br>Create one from the dashboard first.</div>';
+        return;
+      }
+      if(!items.length) {
+        const label = (window.SYS_LABEL && window.SYS_LABEL[sys]) || sys;
+        list.innerHTML = '<div class="prep-picker-msg">No ' + label.replace(/[<>&]/g,'') + ' Session Prep sheets yet.<br>Only prep for the linked campaign’s system is shown here.</div>';
         return;
       }
       const esc = s => (s || '').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
@@ -11534,7 +11552,7 @@ window.addEventListener('pageshow', function(e) {
 });
 // Initial layout. Deferred to DOMContentLoaded so every init_<tool> (some defined
 // in later script blocks) exists before stations mount. Default view is the
-// CONSOLE in Explore mode; Free mode + saved windows are available on demand.
+// CONSOLE in Master mode (Explore/Combat/Master are the only modes now).
 function gmBootstrapWindows() {
   // Don't override a layout the server shim already restored (mode/view/stations).
   if(!gmcRestored) renderConsole('master');
@@ -11683,9 +11701,9 @@ function restoreConsole(c) {
     });
   });
   if(typeof c.auto === 'boolean') gmcAutoCombat = c.auto;
+  // Free & Prep were retired; any saved 'free' view or 'prep' mode restores as Master.
   const mode = CONSOLE_MODES[c.mode] ? c.mode : 'master';
-  if(c.view === 'free') setFreeView();
-  else renderConsole(mode);
+  renderConsole(mode);
 }
 
 // Quick-tool popups (Timers, Notes, …) live outside the stations, so serialize
