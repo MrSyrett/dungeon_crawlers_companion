@@ -25,6 +25,12 @@
   --green: #2d7a2d;
   --green-light: #4caf50;
   --amber: #c08020;
+  /* Electric accent — the GM Screen's signature (cyan → violet) */
+  --accent: #24d3ee;
+  --accent-2: #7b5cff;
+  --accent-dim: #0f7f93;
+  --glow: rgba(36,211,238,.45);
+  --glow-2: rgba(123,92,255,.40);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,11 +59,17 @@ body::before {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--dark);
-  border-bottom: 2px solid var(--border);
+  background: linear-gradient(180deg, #14171d, #0c0d11);
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   padding: 0 16px;
   height: 56px;
+}
+.topbar::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent) 25%, var(--accent-2) 75%, transparent);
+  opacity: .7; pointer-events: none;
+  box-shadow: 0 0 14px var(--glow);
 }
 
 .brand {
@@ -89,16 +101,34 @@ body::before {
    reclaim vertical space. Hidden on desktop; the mobile media query shows it. */
 #hdr-toggle { display: none; }
 
-/* Pane header — sits at top of each pane: dropdown left, action buttons right */
+/* Window header — dropdown left, toolbar middle, close button right */
 .pane-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
-  background: var(--panel-2);
-  border-bottom: 2px solid var(--red);
+  padding: 6px 8px 6px 10px;
+  background: linear-gradient(180deg, #20242c, #171a20);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(36,211,238,.35), 0 2px 10px rgba(0,0,0,.35);
   flex-shrink: 0;
+  position: relative;
 }
+.pane-header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2) 60%, transparent);
+  opacity: .55; pointer-events: none;
+}
+/* Close (remove window) button */
+.win-close {
+  flex: 0 0 auto; width: 26px; height: 26px; margin-left: auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.04); color: var(--mid);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 12px; line-height: 1; cursor: pointer;
+  transition: all .13s;
+}
+.win-close:hover { background: rgba(214,58,48,.16); color: #ff6a5c; border-color: #b82018; }
+.win-close:disabled { opacity: .25; cursor: default; }
 /* Toolbar slot: fills remaining space to the right of the dropdown */
 .pane-toolbar-slot {
   display: flex;
@@ -133,68 +163,63 @@ body::before {
 }
 .pane-select option { background: var(--panel-2); color: var(--white); }
 
-/* Split view toggle */
+/* Add-window control (replaces the old fixed split-view dropdown) */
 .view-controls { display: flex; align-items: center; gap: 6px; }
-.split-label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-right: 4px;
+.add-window-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 13px 0 11px;
+  background: linear-gradient(135deg, var(--accent-2, #7b5cff), var(--accent, #24d3ee));
+  color: #05121a; border: none; border-radius: 7px;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 13px;
+  letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 3px 12px rgba(36,211,238,.28);
+  transition: transform .12s, box-shadow .15s, filter .15s;
 }
-.split-select {
-  height: 32px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--white);
-  cursor: pointer;
-  padding: 0 8px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.split-select:hover { border-color: var(--muted); }
-.split-select option { background: var(--panel); color: var(--white); }
+.add-window-btn:hover { filter: brightness(1.08); box-shadow: 0 0 0 1px rgba(255,255,255,.14) inset, 0 4px 18px rgba(123,92,255,.42); }
+.add-window-btn:active { transform: translateY(1px); }
+.add-window-btn .aw-plus { font-size: 16px; font-weight: 900; line-height: 1; margin-top: -1px; }
+.add-window-btn:disabled { opacity: .4; cursor: default; filter: grayscale(.5); box-shadow: none; }
 
-/* ═══ MAIN AREA ═══ */
+/* ═══ MAIN AREA — a flexible row of windows (columns) ═══
+   Windows share the width evenly and never shrink below a usable min; once the
+   sum exceeds the viewport the row scrolls horizontally. Mobile stacks them. */
 .main-area {
   position: relative; z-index: 1;
   flex: 1;
   display: flex;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   min-height: 0;
+  scroll-snap-type: x proximity;
 }
 
 .pane {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 360px;
+  min-width: 360px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-right: 2px solid var(--border);
+  scroll-snap-align: start;
 }
 .pane:last-child { border-right: none; }
 
-/* Quad view — four equal vertical columns (stacks on mobile via the rule below) */
-.main-area.quad { display: flex; }
-.main-area.quad .pane { flex: 1; min-width: 0; }
+/* ── Grid mode: 5+ windows wrap into rows instead of thin columns ── */
+.main-area.as-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--gm-cols, 3), minmax(0, 1fr));
+  grid-auto-rows: minmax(360px, 1fr);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: none;
+}
+.main-area.as-grid .pane {
+  flex: none; min-width: 0;
+  border-right: 2px solid var(--border);
+  border-bottom: 2px solid var(--border);
+}
 
-/* The stack wrapper is transparent unless focus mode turns it into a column */
-.focus-stack { display: contents; }
-
-/* Focus view — one large pane on the left, two stacked on the right */
-.main-area.focus { display: flex; }
-.main-area.focus #pane-1 { flex: 1.6; min-width: 0; border-right: 2px solid var(--border); }
-.main-area.focus .focus-stack { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-.main-area.focus .focus-stack .pane { flex: 1; min-height: 0; border-right: none; border-bottom: 2px solid var(--border); }
-.main-area.focus .focus-stack .pane:last-child { border-bottom: none; }
-
-/* Mobile: every multi-pane layout becomes a single scrolling column */
+/* Mobile: windows stack into one vertical scroll */
 
 /* ── NARROW PANES ──
    Media queries measure the viewport, so a pane squeezed to 25% width in Four
@@ -254,11 +279,9 @@ body::before {
 .pane.narrow .nts-editor { font-size: 14px; padding: 12px 14px; }
 
 @media (max-width: 760px) {
-  .main-area.quad, .main-area.focus { flex-direction: column; overflow-y: auto; }
-  .main-area.quad .pane, .main-area.focus .pane { flex: 0 0 auto; min-height: 260px; border-right: none; border-bottom: 2px solid var(--border); }
-  .main-area.focus #pane-1 { flex: 0 0 auto; }
-  .main-area.focus .focus-stack { display: contents; }
-  .main-area.focus #pane-1 { border-right: none; }
+  .main-area { flex-direction: column; overflow-x: hidden; overflow-y: auto; }
+  .pane { flex: 0 0 auto; min-width: 0; min-height: 78vh; border-right: none; border-bottom: 3px solid var(--border); }
+  .pane:last-child { border-bottom: none; }
 }
 
 
@@ -329,10 +352,20 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: var(--black); }
-::-webkit-scrollbar-thumb { background: #2a2a2a; }
-::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+/* The window row's horizontal scrollbar gets the accent treatment */
+.main-area::-webkit-scrollbar-thumb { background: linear-gradient(90deg, var(--accent-dim), #34405a); border-radius: 5px; }
+.main-area::-webkit-scrollbar-thumb:hover { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+/* Tool-picker dropdown: subtle accent affordance */
+.pane-select { border-radius: 6px; transition: box-shadow .15s, background .15s; }
+.pane-select:hover { background: rgba(36,211,238,.08); }
+.pane-select:focus { box-shadow: 0 0 0 2px var(--glow); }
+/* Faintly light the window whose header/body is hovered */
+.pane { transition: box-shadow .2s; }
+.pane:focus-within { box-shadow: inset 0 2px 0 -1px var(--accent); }
 
 .toolbar-spacer { flex: 1; }
 .toolrow {
@@ -1429,6 +1462,68 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
+<style>
+/* ════════════════════════════════════════════════════════════════════════
+   CONSOLE SKIN — uniform electric makeover applied across every tool.
+   Placed last so it upgrades the shared primitives the tools are built from.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Buttons ── */
+.btn { border-radius: 6px; }
+.btn:hover { border-color: var(--accent-dim); color: var(--white); box-shadow: inset 0 0 0 1px rgba(36,211,238,.16); }
+.btn.primary { background: linear-gradient(135deg, var(--accent-2), var(--accent)); border-color: transparent; color: #06131a; box-shadow: 0 2px 10px rgba(36,211,238,.24); }
+.btn.primary:hover { filter: brightness(1.08); background: linear-gradient(135deg, var(--accent-2), var(--accent)); border-color: transparent; box-shadow: 0 3px 16px rgba(123,92,255,.42); }
+.btn.ghost { background: transparent; box-shadow: none; }
+.btn.ghost:hover { background: rgba(36,211,238,.09); border-color: var(--accent-dim); }
+
+/* ── Form controls ── */
+input[type="text"], input[type="number"], textarea, select, .gen-select {
+  background: var(--panel-2); border-radius: 6px;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus, .gen-select:focus {
+  border-color: var(--accent-dim); box-shadow: 0 0 0 2px var(--glow);
+}
+
+/* ── Section ticks & labels → accent ── */
+.bar-title::before { background: linear-gradient(90deg, var(--accent), var(--accent-2)); width: 20px; }
+.gen-card-tag { color: var(--accent); }
+
+/* ── Generator cards: rounded console panels with an accent edge ── */
+.gen-card {
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent-dim);
+  background: linear-gradient(180deg, #191c22, #141519);
+  box-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+
+/* ── Note tabs ── */
+.nts-tab.active { color: var(--accent); border-color: var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,.4), inset 0 -2px 0 rgba(36,211,238,.5); }
+
+/* ── Dice ── */
+.dice-die:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 12px var(--glow); }
+.dice-roll-go { background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: #06131a; border-radius: 6px; }
+.dice-roll-go:hover { filter: brightness(1.08); }
+
+/* ── Music / Party / Rulebook cards: rounded, consistent ── */
+.mus-section, .pty-card, .rul-card, .rul-entry { border-radius: 8px; }
+.mus-sec-head { border-bottom-color: var(--border); }
+
+/* ── Music tool: shift the gold accents onto the electric palette ── */
+.mus-section { border-left-color: var(--accent); }
+.mus-sfx-section { border-left-color: var(--accent-2); }
+.mus-scene-section { border-left-color: var(--accent-2); }
+.mus-btn.active { border-color: var(--accent); color: var(--accent); }
+input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--accent); }
+.mus-sfx.playing { border-color: var(--accent); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.mus-scene.playing, .mus-scene.playing .mus-scene-play { border-color: var(--accent); }
+.mus-scene.playing .mus-scene-play { color: var(--accent); }
+.mus-scene-pin.active { color: var(--accent); border-color: var(--accent); }
+.mus-sfx-mini.active { color: var(--accent); }
+
+/* ── Doc-viewer empty states pick up the accent CTA ── */
+.doc-empty-icon .dcc-ico { color: var(--accent); }
+</style>
 </head>
 <body>
 
@@ -1468,13 +1563,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   </div>
 
   <div class="view-controls">
-    <span class="split-label">View</span>
-    <select class="split-select" id="split-select" onchange="setSplit(parseInt(this.value))" title="Pane layout">
-      <option value="1">▮ Single</option>
-      <option value="2">▮▮ Split</option>
-      <option value="3">▮⊟ Focus</option>
-      <option value="4">▮▮▮▮ Four</option>
-    </select>
+    <button class="add-window-btn" id="add-window-btn" type="button" onclick="addWindow()" title="Add a window" aria-label="Add a window"><span class="aw-plus">＋</span> Window</button>
   </div>
 </div>
 
@@ -2040,81 +2129,8 @@ GMScenes.renderPins();
 </script>
 
 <!-- ═══ MAIN AREA ═══ -->
-<div class="main-area" id="main-area">
-  <div class="pane" id="pane-1">
-    <div class="pane-header" id="pane-1-header">
-      <select class="pane-select" id="pane-1-select" onchange="setPaneTool(1, this.value)">
-        <option value="adventure">Adventure</option>
-        <option value="maps">Maps</option>
-        <option value="trackers">Trackers</option>
-        <option value="notes">Notes</option>
-        <option value="music">Music</option>
-        <option value="gen">Generators</option>
-        <option value="party">Party</option>
-        <option value="rules">Rulebooks</option>
-        <option value="dice">Roll Log</option>
-      </select>
-      <div class="pane-toolbar-slot" id="pane-1-toolbar"></div>
-    </div>
-    <div class="pane-content" id="pane-1-content"></div>
-  </div>
-
-  <div class="focus-stack" id="focus-stack">
-  <div class="pane" id="pane-2" style="display:none;">
-    <div class="pane-header" id="pane-2-header">
-      <select class="pane-select pane-2-select" id="pane-2-select" onchange="setPaneTool(2, this.value)">
-        <option value="adventure">Adventure</option>
-        <option value="maps">Maps</option>
-        <option value="trackers" selected>Trackers</option>
-        <option value="notes">Notes</option>
-        <option value="music">Music</option>
-        <option value="gen">Generators</option>
-        <option value="party">Party</option>
-        <option value="rules">Rulebooks</option>
-        <option value="dice">Roll Log</option>
-      </select>
-      <div class="pane-toolbar-slot" id="pane-2-toolbar"></div>
-    </div>
-    <div class="pane-content" id="pane-2-content"></div>
-  </div>
-
-  <div class="pane" id="pane-3" style="display:none;">
-    <div class="pane-header" id="pane-3-header">
-      <select class="pane-select" id="pane-3-select" onchange="setPaneTool(3, this.value)">
-        <option value="adventure">Adventure</option>
-        <option value="maps">Maps</option>
-        <option value="trackers">Trackers</option>
-        <option value="notes" selected>Notes</option>
-        <option value="music">Music</option>
-        <option value="gen">Generators</option>
-        <option value="party">Party</option>
-        <option value="rules">Rulebooks</option>
-        <option value="dice">Roll Log</option>
-      </select>
-      <div class="pane-toolbar-slot" id="pane-3-toolbar"></div>
-    </div>
-    <div class="pane-content" id="pane-3-content"></div>
-  </div>
-
-  </div>
-  <div class="pane" id="pane-4" style="display:none;">
-    <div class="pane-header" id="pane-4-header">
-      <select class="pane-select" id="pane-4-select" onchange="setPaneTool(4, this.value)">
-        <option value="adventure">Adventure</option>
-        <option value="maps">Maps</option>
-        <option value="trackers">Trackers</option>
-        <option value="notes">Notes</option>
-        <option value="music">Music</option>
-        <option value="gen">Generators</option>
-        <option value="party">Party</option>
-        <option value="rules">Rulebooks</option>
-        <option value="dice" selected>Roll Log</option>
-      </select>
-      <div class="pane-toolbar-slot" id="pane-4-toolbar"></div>
-    </div>
-    <div class="pane-content" id="pane-4-content"></div>
-  </div>
-</div>
+<!-- Windows are built dynamically by renderWindows() -->
+<div class="main-area" id="main-area"></div>
 
 
 <style>
@@ -3580,107 +3596,220 @@ const instancePool = document.createElement('div');
 instancePool.style.cssText = 'position:fixed; top:0; left:-9999px; width:1px; height:1px; overflow:hidden;';
 document.body.appendChild(instancePool);
 
-const instances = {}; // toolType -> DOM node (singleton per tool type)
-let splitMode = 1;
-// On mobile the GM screen is locked to a single pane. splitPref remembers the
-// layout the user actually chose so it comes back when they return to desktop.
+const instances = {}; // legacy fallback: toolType -> detached node (used only when no window shows the tool)
+let splitMode = 1;     // legacy shims kept so any stray reference stays harmless
 let splitPref = 1;
 const GM_MOBILE_MQ = window.matchMedia('(max-width: 760px)');
 function isMobileView() { return GM_MOBILE_MQ.matches; }
-let paneTools = { 1: 'adventure', 2: 'trackers', 3: 'notes', 4: 'dice' };
 // Combat and Trackers were merged into one tool; old saves may still say 'combat'.
 function normalizeTool(t) { return t === 'combat' ? 'trackers' : t; }
 
-function getOrCreateInstance(toolType) {
+// Tool catalog (order = the tool-picker menu order)
+const TOOL_ORDER = ['adventure','maps','trackers','notes','music','gen','party','rules','dice'];
+const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', rules:'Rulebooks', dice:'Roll Log' };
+
+// ── Dynamic windows ───────────────────────────────────────────────────────
+// The GM screen is a row of independent "windows" (columns). Each window shows
+// one tool and keeps its own DOM instance + state, so the same tool can be open
+// in several windows at once. Windows can be added/removed freely.
+let gmWindows = [];          // [{ id, tool }] in left-to-right order
+const gmNodes = {};          // id -> { active, byTool: { toolType: node } }
+let winSeq = 0;
+function newWinId() { return 'w' + (++winSeq); }
+const DEFAULT_WINDOWS = ['adventure','trackers','dice'];
+const MAX_WINDOWS = 8;
+
+// Clone a fresh, initialized DOM instance of a tool from its <template>.
+function buildToolNode(toolType) {
   toolType = normalizeTool(toolType);
-  if(instances[toolType]) return instances[toolType];
   const tpl = document.getElementById('tpl-' + toolType);
   const node = tpl.content.firstElementChild.cloneNode(true);
-  instancePool.appendChild(node);
-  instances[toolType] = node;
+  instancePool.appendChild(node);   // init while attached (a couple of tools measure on init)
   const initFn = window['init_' + toolType];
-  if(initFn) {
-    initFn(node);
-  } else {
-    console.error('No init function found for tool: ' + toolType + ' (expected window.init_' + toolType + ')');
-  }
+  if(initFn) { try { initFn(node); } catch(e) { console.error('init failed for ' + toolType, e); } }
+  else console.error('No init function found for tool: ' + toolType);
   return node;
 }
 
-function setSplit(n) {
-  splitPref = n;
-  if(isMobileView()) n = 1;   // mobile: always one pane
-  splitMode = n;
-  const sel = document.getElementById('split-select');
-  if(sel) sel.value = String(n);
+// The node for a given tool inside a given window. Cached per (window, tool) so
+// switching a window's tool and switching back keeps that tool's in-window state.
+function getWinNode(winId, toolType) {
+  toolType = normalizeTool(toolType);
+  let cache = gmNodes[winId];
+  if(!cache) cache = gmNodes[winId] = { active: null, byTool: {} };
+  if(!cache.byTool[toolType]) cache.byTool[toolType] = buildToolNode(toolType);
+  return cache.byTool[toolType];
+}
+
+// Legacy/entry-point helper: return a live node for a tool, preferring a window
+// that already shows it. Falls back to a detached singleton (state restore, etc.).
+function getOrCreateInstance(toolType) {
+  toolType = normalizeTool(toolType);
+  const w = gmWindows.find(x => x.tool === toolType);
+  if(w) return getWinNode(w.id, toolType);
+  if(!instances[toolType]) instances[toolType] = buildToolNode(toolType);
+  return instances[toolType];
+}
+
+// Ensure some window is showing `toolType`, opening one if needed, and return its node.
+// Used when generated content (maps, adventures, monsters) needs to land in a tool.
+function ensureToolWindow(toolType) {
+  toolType = normalizeTool(toolType);
+  let w = gmWindows.find(x => x.tool === toolType);
+  if(!w) w = addWindow(toolType);
+  return getWinNode(w.id, toolType);
+}
+
+// Build a tool-picker <select> for a window.
+function buildToolSelect(w) {
+  const sel = document.createElement('select');
+  sel.className = 'pane-select';
+  sel.setAttribute('aria-label', 'Window tool');
+  TOOL_ORDER.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t; o.textContent = TOOL_LABELS[t];
+    if(t === w.tool) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', () => setWindowTool(w.id, sel.value));
+  return sel;
+}
+
+// Build one window column (header + content) — the tool node is mounted after.
+function buildWindowColumn(w) {
+  const col = document.createElement('div');
+  col.className = 'pane';
+  col.id = 'win-' + w.id;
+
+  const header = document.createElement('div');
+  header.className = 'pane-header';
+  header.appendChild(buildToolSelect(w));
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'pane-toolbar-slot';
+  toolbar.id = 'win-' + w.id + '-toolbar';
+  header.appendChild(toolbar);
+
+  const close = document.createElement('button');
+  close.className = 'win-close';
+  close.type = 'button';
+  close.title = 'Close window';
+  close.setAttribute('aria-label', 'Close window');
+  close.textContent = '✕';
+  close.addEventListener('click', () => removeWindow(w.id));
+  header.appendChild(close);
+
+  const content = document.createElement('div');
+  content.className = 'pane-content';
+  content.id = 'win-' + w.id + '-content';
+
+  col.appendChild(header);
+  col.appendChild(content);
+  return col;
+}
+
+// Mount a window's active tool node into its content area + clone its toolbar.
+function mountWindow(w) {
+  const content = document.getElementById('win-' + w.id + '-content');
+  const toolbarSlot = document.getElementById('win-' + w.id + '-toolbar');
+  if(!content) return;
+  const node = getWinNode(w.id, w.tool);
+  const cache = gmNodes[w.id];
+  if(cache) cache.active = w.tool;
+
+  if(node.parentElement !== content) content.appendChild(node);
+  Array.from(content.children).forEach(c => c.classList.toggle('active', c === node));
+  node.classList.add('active');
+
+  if(toolbarSlot) {
+    toolbarSlot.innerHTML = '';
+    const tpl = node.querySelector('.toolbar-tpl');
+    if(tpl) {
+      Array.from(tpl.children).forEach(child => toolbarSlot.appendChild(child.cloneNode(true)));
+      syncToolbar(toolbarSlot, node);
+    }
+  }
+}
+
+// Rebuild the whole window row (used on add/remove/restore).
+function renderWindows() {
   const area = document.getElementById('main-area');
-  if(area) {
-    area.classList.toggle('quad', n === 4);
-    area.classList.toggle('focus', n === 3);
+  if(!area) return;
+  if(gmWindows.length === 0) gmWindows.push({ id: newWinId(), tool: 'adventure' });
+  // Detach cached tool nodes back to the pool so innerHTML reset doesn't drop them.
+  Object.values(gmNodes).forEach(cache => {
+    Object.values(cache.byTool).forEach(n => { if(n.parentElement) instancePool.appendChild(n); });
+  });
+  area.innerHTML = '';
+  gmWindows.forEach(w => area.appendChild(buildWindowColumn(w)));
+
+  // Layout: up to 4 windows sit in a single row; 5+ wrap into a grid so they
+  // don't get too thin. Columns ≈ √count, capped at 4.
+  const count = gmWindows.length;
+  const gridMode = count > 4 && !isMobileView();
+  area.classList.toggle('as-grid', gridMode);
+  let cols = 0;
+  if(gridMode) { cols = Math.min(4, Math.ceil(Math.sqrt(count))); area.style.setProperty('--gm-cols', cols); }
+  else { area.style.removeProperty('--gm-cols'); }
+
+  const narrow = !isMobileView() && (gridMode ? cols >= 3 : count >= 3);
+  gmWindows.forEach(w => {
+    mountWindow(w);
+    const col = document.getElementById('win-' + w.id);
+    if(col) col.classList.toggle('narrow', narrow);
+  });
+  updateWindowChrome();
+}
+
+// Enable/disable the close buttons (never let the last window be closed) and the
+// add button (capped at MAX_WINDOWS).
+function updateWindowChrome() {
+  const only = gmWindows.length <= 1;
+  document.querySelectorAll('.win-close').forEach(b => { b.disabled = only; b.style.display = only ? 'none' : ''; });
+  const addBtn = document.getElementById('add-window-btn');
+  if(addBtn) {
+    const full = gmWindows.length >= MAX_WINDOWS;
+    addBtn.disabled = full;
+    addBtn.title = full ? 'Maximum of ' + MAX_WINDOWS + ' windows' : 'Add a window';
   }
-  // Panes 2-4 show only when the split calls for them
-  [2, 3, 4].forEach(p => {
-    const el = document.getElementById('pane-' + p);
-    if(el) el.style.display = (p <= n) ? 'flex' : 'none';
-  });
-  // Panes squeezed below the mobile breakpoint need the narrow layout (stacked
-  // trackers, wrapped toolbars): all four columns in Four mode, and the two
-  // stacked panes in Focus mode (pane 1 stays wide there).
-  [1, 2, 3, 4].forEach(p => {
-    const el = document.getElementById('pane-' + p);
-    if(!el) return;
-    const narrow = (n === 4) || (n === 3 && (p === 2 || p === 3));
-    el.classList.toggle('narrow', narrow);
-  });
-  // Multi-pane modes: no two panes may hold the same tool (one instance per tool)
-  if(n >= 3) dedupePaneTools(n);
-  for(let p = 1; p <= n; p++) renderPane(p);
+}
+
+function addWindow(tool) {
+  if(gmWindows.length >= MAX_WINDOWS) return null;
+  if(!tool) {
+    // default to the first tool not already open, else Generators
+    const open = new Set(gmWindows.map(w => w.tool));
+    tool = TOOL_ORDER.find(t => !open.has(t)) || 'gen';
+  }
+  const w = { id: newWinId(), tool: normalizeTool(tool) };
+  gmWindows.push(w);
+  renderWindows();
+  // scroll the new column into view on wide screens
+  const col = document.getElementById('win-' + w.id);
+  if(col && !isMobileView()) col.scrollIntoView({ behavior: 'smooth', inline: 'end', block: 'nearest' });
+  if(window.__ddScheduleSave) window.__ddScheduleSave();
+  return w;
+}
+
+function removeWindow(id) {
+  if(gmWindows.length <= 1) return;               // keep at least one
+  gmWindows = gmWindows.filter(w => w.id !== id);
+  const cache = gmNodes[id];
+  if(cache) { Object.values(cache.byTool).forEach(n => { if(n.parentElement) n.parentElement.removeChild(n); }); delete gmNodes[id]; }
+  renderWindows();
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
-// Rotating the phone / resizing across the breakpoint re-applies the layout:
-// collapse to one pane on mobile, restore the chosen split on desktop.
-GM_MOBILE_MQ.addEventListener('change', () => setSplit(splitPref));
-
-// Each tool has a single DOM instance, so it can only live in one pane.
-// If a duplicate is found, swap that pane to the first unused tool.
-function dedupePaneTools(count) {
-  const all = ['adventure','maps','trackers','notes','gen','party','rules','dice'];
-  const used = new Set();
-  for(let p = 1; p <= (count || 4); p++) {
-    let tool = paneTools[p];
-    if(!tool || used.has(tool)) {
-      tool = all.find(t => !used.has(t)) || tool;
-      paneTools[p] = tool;
-      const sel = document.getElementById('pane-' + p + '-select');
-      if(sel) sel.value = tool;
-    }
-    used.add(tool);
-  }
-}
-
-function setPaneTool(paneNum, tool) {
-  tool = normalizeTool(tool);
-  // A tool has one instance, so if a visible pane already shows it, swap the two.
-  const prev = paneTools[paneNum];
-  for(let p = 1; p <= splitMode; p++) {
-    if(p !== paneNum && paneTools[p] === tool) {
-      paneTools[p] = prev;
-      const sel = document.getElementById('pane-' + p + '-select');
-      if(sel) sel.value = prev;
-      paneTools[paneNum] = tool;
-      document.getElementById('pane-' + paneNum + '-select').value = tool;
-      renderPane(p);
-      renderPane(paneNum);
-      if(window.__ddScheduleSave) window.__ddScheduleSave();
-      return;
-    }
-  }
-  paneTools[paneNum] = tool;
-  document.getElementById('pane-' + paneNum + '-select').value = tool;
-  renderPane(paneNum);
+function setWindowTool(id, tool) {
+  const w = gmWindows.find(x => x.id === id);
+  if(!w) return;
+  w.tool = normalizeTool(tool);
+  mountWindow(w);
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
+
+// Rotating the phone / crossing the breakpoint re-applies narrow layout.
+GM_MOBILE_MQ.addEventListener('change', () => renderWindows());
 
 
 // Load generated content into a tool WITHOUT pulling the current pane off the
@@ -3710,55 +3839,11 @@ function migrateToolState(tools) {
   return tools;
 }
 
+// Push generated content (an adventure doc, a map image, …) into a tool,
+// opening a window for it if none is showing it.
 function loadIntoTool(tool, dataUrl, fileName) {
-  const genPane = parseInt(Object.keys(paneTools).find(k => paneTools[k] === 'gen') || 1);
-  let target = null;
-
-  for(let p = 1; p <= splitMode; p++) {
-    if(paneTools[p] === tool) { target = p; break; }
-  }
-  if(target === null && splitMode > 1) {
-    for(let p = 1; p <= splitMode; p++) {
-      if(p !== genPane) { target = p; break; }
-    }
-  }
-  if(target === null) target = genPane; // single view — nowhere else to put it
-
-  if(paneTools[target] !== tool) setPaneTool(target, tool);
-
-  setTimeout(() => {
-    const inst = instances[tool];
-    if(inst && inst._loadDataUrl) inst._loadDataUrl(dataUrl, fileName);
-  }, 150);
-}
-
-function renderPane(paneNum) {
-  const content = document.getElementById('pane-' + paneNum + '-content');
-  const toolbarSlot = document.getElementById('pane-' + paneNum + '-toolbar');
-  const tool = paneTools[paneNum];
-  const node = getOrCreateInstance(tool);
-
-  if(node.parentElement !== content) {
-    content.appendChild(node);
-  }
-
-  Array.from(content.children).forEach(child => {
-    child.classList.toggle('active', child === node);
-  });
-  node.classList.add('active');
-
-  // Clone the tool's toolbar template into the pane header toolbar slot
-  if(toolbarSlot) {
-    toolbarSlot.innerHTML = '';
-    const tpl = node.querySelector('.toolbar-tpl');
-    if(tpl) {
-      // Clone the children of the hidden div into the toolbar slot
-      Array.from(tpl.children).forEach(child => {
-        toolbarSlot.appendChild(child.cloneNode(true));
-      });
-      syncToolbar(toolbarSlot, node);
-    }
-  }
+  const node = ensureToolWindow(tool);
+  setTimeout(() => { if(node && node._loadDataUrl) node._loadDataUrl(dataUrl, fileName); }, 150);
 }
 
 // Wire cloned toolbar elements to the live tool instance elements.
@@ -4315,7 +4400,10 @@ function init_trackers(root) {
     return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
   }
   function updateRoundDisplay() {
-    document.querySelectorAll('.trk-round-num').forEach(el => { el.textContent = round; });
+    // Scope to THIS window (body + its cloned toolbar in the pane header) so two
+    // Tracker windows don't overwrite each other's round display.
+    const scope = root.closest('.pane') || document;
+    scope.querySelectorAll('.trk-round-num').forEach(el => { el.textContent = round; });
   }
   function npcHpColor(pct) {
     if(pct <= 0)  return '#3a3a3a';
@@ -5143,9 +5231,10 @@ function init_trackers(root) {
   function onClick(e) {
     const btn = e.target.closest('.trk-next-round, .trk-reset, .cbt-add-tracker, .cbt-add-npc, .cbt-add-monster, .cbt-reset');
     if(!btn) return;
-    const paneContent = root.closest('.pane-content');
-    const paneNum = paneContent ? paneContent.id.replace('pane-','').replace('-content','') : null;
-    const toolbarSlot = paneNum ? document.getElementById('pane-' + paneNum + '-toolbar') : null;
+    // Only react to buttons inside THIS window (its body, or its cloned toolbar
+    // in the same .pane header) — so duplicate Tracker windows stay independent.
+    const pane = root.closest('.pane');
+    const toolbarSlot = pane ? pane.querySelector('.pane-toolbar-slot') : null;
     if(!(root.contains(btn) || (toolbarSlot && toolbarSlot.contains(btn)))) return;
 
     if(btn.classList.contains('trk-next-round')) {
@@ -5217,7 +5306,7 @@ window.init_trackers = init_trackers;
 window.sendMonsterToTracker = function(m, src) {
   if(!m) return false;
   try {
-    const node = getOrCreateInstance('trackers');
+    const node = ensureToolWindow('trackers');
     if(node && typeof node._addMonster === 'function') { node._addMonster(m, src); return true; }
   } catch(e) {}
   return false;
@@ -8997,9 +9086,11 @@ window.init_gen = function(root) {
     activeTab = name;
     panels.forEach(p => p.classList.toggle('active', p.dataset.panel === activeTab));
     if(rollBtn) rollBtn.hidden = BUILDER_PANELS.indexOf(activeTab) >= 0;
-    // Keep the live select and any toolbar clones in sync
+    // Keep the live select and this window's toolbar clone in sync (scoped to
+    // this .pane so a second Generators window keeps its own active tab)
     if(tabSelect) tabSelect.value = activeTab;
-    document.querySelectorAll('.gen-tab-select').forEach(s => { s.value = activeTab; });
+    const scope = root.closest('.pane') || document;
+    scope.querySelectorAll('.gen-tab-select').forEach(s => { s.value = activeTab; });
   }
 
   if(tabSelect) {
@@ -10449,7 +10540,16 @@ function init_notes(root) {
 window.addEventListener('pageshow', function(e) {
   if(e.persisted) window.location.reload();
 });
-renderPane(1);
+// Initial window layout. Deferred to DOMContentLoaded so every init_<tool> (some
+// defined in later script blocks) exists before we build the default windows.
+// The server shim may restore a saved layout first — if so, we don't override it.
+function gmBootstrapWindows() {
+  if(gmWindows.length) { renderWindows(); return; }
+  DEFAULT_WINDOWS.forEach(t => gmWindows.push({ id: newWinId(), tool: t }));
+  renderWindows();
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gmBootstrapWindows);
+else gmBootstrapWindows();
 
 // ══════════════════════════════════════════
 // SESSION SAVE / LOAD
@@ -10457,24 +10557,67 @@ renderPane(1);
 // On load, restores state into each instance (creating them first if needed).
 // Note: Loaded media (PDFs, images) cannot be saved — only text/data state.
 // ══════════════════════════════════════════
+// Serialize the window layout + each window's per-tool state.
+function serializeWindows() {
+  return gmWindows.map(w => {
+    const cache = gmNodes[w.id];
+    const tools = {};
+    if(cache) Object.entries(cache.byTool).forEach(([t, node]) => {
+      if(node._getState) { try { tools[t] = node._getState(); } catch(e) {} }
+    });
+    return { tool: w.tool, tools };
+  });
+}
+
+// Rebuild the windows from a saved payload. Understands both the new
+// { windows:[...] } shape and legacy { paneTools, splitMode, tools } saves.
+function restoreWindows(data) {
+  let wins = null;
+  if(Array.isArray(data.windows) && data.windows.length) {
+    wins = data.windows.map(w => ({ tool: normalizeTool(w.tool || 'adventure'), tools: w.tools || {} }));
+  } else if(data.paneTools) {
+    const n = data.splitMode || 1;
+    const byType = data.tools ? (migrateToolState(data.tools), data.tools) : {};
+    wins = [];
+    for(let p = 1; p <= n; p++) {
+      const t = normalizeTool(data.paneTools[p]);
+      if(!t) continue;
+      const st = {}; if(byType[t] != null) st[t] = byType[t];
+      wins.push({ tool: t, tools: st });
+    }
+    if(!wins.length) wins = null;
+  }
+  if(!wins) return false;
+  if(wins.length > MAX_WINDOWS) wins = wins.slice(0, MAX_WINDOWS);
+
+  // Tear down current windows/nodes
+  Object.keys(gmNodes).forEach(id => {
+    Object.values(gmNodes[id].byTool).forEach(node => { if(node.parentElement) node.parentElement.removeChild(node); });
+    delete gmNodes[id];
+  });
+  gmWindows = [];
+
+  wins.forEach(w => {
+    const id = newWinId();
+    gmWindows.push({ id, tool: w.tool });
+    Object.entries(w.tools || {}).forEach(([t, state]) => {
+      const node = getWinNode(id, t);
+      if(node._setState) { try { node._setState(state); } catch(e) { console.warn('setState failed for', t, e); } }
+    });
+    getWinNode(id, w.tool);   // ensure the active tool exists even with no saved state
+  });
+  renderWindows();
+  return true;
+}
+
 function saveSession() {
   const data = {
     version: 1,
     saved: new Date().toISOString(),
-    paneTools,
-    splitMode: splitPref,
+    windows: serializeWindows(),
     campaign: GMCamp.serialize(),   // the link lives in the top bar, not in a tool
     scenes: (window.GMScenes ? GMScenes.serialize() : undefined),
-    tools: {}
   };
-
-  // Collect state from every instantiated tool
-  Object.entries(instances).forEach(([type, node]) => {
-    if(node._getState) {
-      try { data.tools[type] = node._getState(); } catch(e) {}
-    }
-  });
-
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -10493,33 +10636,9 @@ function loadSession(input) {
     try {
       const data = JSON.parse(e.target.result);
       if(!data.version) throw new Error('Unrecognised file');
-
-      // Restore the campaign link (older files kept it inside the dice tool)
       if(data.campaign) GMCamp.restore(data.campaign);
       if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
-
-      // Restore pane layout — all four panes, so Focus/Four views come back intact
-      if(data.paneTools) {
-        [1,2,3,4].forEach(p => { if(data.paneTools[p]) paneTools[p] = normalizeTool(data.paneTools[p]); });
-      }
-      setSplit(data.splitMode || splitPref || 1);
-      [1,2,3,4].forEach(p => { const sel = document.getElementById('pane-'+p+'-select'); if(sel && paneTools[p]) sel.value = paneTools[p]; });
-
-      // Restore each tool's state (instantiate it first if not yet created)
-      if(data.tools) {
-        migrateToolState(data.tools);
-        Object.entries(data.tools).forEach(([type, state]) => {
-          const node = getOrCreateInstance(type);
-          if(node._setState) {
-            try { node._setState(state); } catch(err) { console.warn('setState failed for', type, err); }
-          }
-        });
-      }
-
-      // Re-render panes so restored state is visible
-      renderPane(1);
-      for(let p = 2; p <= (data.splitMode || 1); p++) renderPane(p);
-
+      restoreWindows(data);
     } catch(err) {
       alert('Could not load session file: ' + err.message);
     }
@@ -10529,34 +10648,20 @@ function loadSession(input) {
 }
 
 // ── Server persistence hooks (used by the injected shim when running on Dungeon Crawler's Companion) ──
-// __gmScreenGetState: returns the full session state as a plain object
 window.__gmScreenGetState = function() {
-  const data = { version: 1, paneTools, splitMode: splitPref, campaign: GMCamp.serialize(), scenes: (window.GMScenes ? GMScenes.serialize() : undefined), tools: {} };
-  Object.entries(instances).forEach(([type, node]) => {
-    if(node._getState) try { data.tools[type] = node._getState(); } catch(e) {}
-  });
-  return data;
+  return {
+    version: 1,
+    windows: serializeWindows(),
+    campaign: GMCamp.serialize(),
+    scenes: (window.GMScenes ? GMScenes.serialize() : undefined),
+  };
 };
 
-// __gmScreenSetState: restores a previously saved state object
 window.__gmScreenSetState = function(data) {
   if(!data || !data.version) return;
   if(data.campaign) GMCamp.restore(data.campaign);
   if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
-  if(data.paneTools) {
-    [1,2,3,4].forEach(p => { if(data.paneTools[p]) paneTools[p] = normalizeTool(data.paneTools[p]); });
-  }
-  setSplit(data.splitMode || splitPref || 1);
-  [1,2,3,4].forEach(p => { const sel = document.getElementById('pane-'+p+'-select'); if(sel && paneTools[p]) sel.value = paneTools[p]; });
-  if(data.tools) {
-    migrateToolState(data.tools);
-    Object.entries(data.tools).forEach(([type, state]) => {
-      const node = getOrCreateInstance(type);
-      if(node._setState) try { node._setState(state); } catch(e) {}
-    });
-  }
-  renderPane(1);
-  for(let p = 2; p <= (data.splitMode || 1); p++) renderPane(p);
+  restoreWindows(data);
 };
 
 
