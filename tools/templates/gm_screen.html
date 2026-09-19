@@ -746,80 +746,75 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 }
 .tracker-collapse:hover { color: var(--white); }
 
-/* NPC card */
-.npc-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--red); border-radius: 10px; padding: 10px 12px; min-width: 0; overflow: hidden; }
-.npc-card.defeated { opacity: 0.5; border-left-color: var(--muted); }
-.npc-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; min-width: 0; }
-/* Read-only creature name — matches the generator/prep card's name. */
-.npc-name {
-  flex: 1; min-width: 0; color: var(--white);
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.04em;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.npc-del { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; flex-shrink: 0; }
-.npc-del:hover { color: var(--red-light); }
-
-.npc-hp-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
-.npc-hp-lbl { align-self: center; }
-.npc-hp-input { width: 46px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; padding: 5px 2px; }
-.npc-hp-slash { color: var(--muted); font-size: 13px; }
-.npc-hp-row .npc-hp-adjust { margin-left: auto; }
-/* Second HP line: the ±HP buttons left-aligned, with the tag field beside them. */
-.npc-hp-second { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
-.npc-hp-adjust { display: flex; gap: 3px; margin-left: 0; justify-content: flex-start; }
-.npc-tag-inline { flex: 1 1 90px; min-width: 0; text-align: left; }
-.npc-hp-btn {
-  width: 26px; height: 26px; background: var(--panel-2); border: 1px solid var(--border); color: var(--light);
-  cursor: pointer; font-size: 11px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-}
-.npc-hp-btn:hover { border-color: var(--mid); color: white; }
-.npc-hp-btn.dmg:hover { border-color: var(--red); color: var(--red-light); }
-.npc-hp-btn.heal:hover { border-color: var(--green); color: var(--green-light); }
-
-.npc-hp-bar-track { width: 100%; height: 8px; background: var(--panel-2); border: 1px solid var(--border); overflow: hidden; }
-.npc-hp-bar-fill { height: 100%; transition: width 0.2s ease, background 0.2s ease; }
-/* Bestiary stat block carried onto a combat card. Same responsive-grid trick as
-   the generator cards, so six ability mods stay readable in a quarter pane. */
-/* The bestiary stat block is rendered to read IDENTICALLY to the creature card
-   the generator / Adventure prep shows — same inline "LABEL value" cells, same
-   grid, same attack rows — so a monster looks the same whether you're browsing
-   it or running it. The only differences are interactive: abilities/attacks are
-   roll buttons, and HP is adjustable (handled above the block). */
-.npc-mon { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.npc-mon-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin: -2px 0 1px; overflow-wrap: anywhere; }
-.npc-mon-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)); gap: 3px 10px; min-width: 0; }
-.npc-mon-stat { display: flex; align-items: baseline; gap: 4px; font-size: 12px; color: var(--light); min-width: 0; }
-.npc-mon-stat > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.npc-mon-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
-.npc-mon-row { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--light); line-height: 1.45; min-width: 0; }
-.npc-mon-row > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-/* Ability cells: same inline cell, but a roll button (d20 + mod → Dice tray). */
-.npc-mon-roll { background: none; border: 1px solid transparent; border-radius: 4px; cursor: pointer; padding: 0 3px; margin: 0 -3px; text-align: left; font: inherit; }
-.npc-mon-roll:hover { border-color: var(--gold); background: var(--panel-2); }
-.npc-mon-roll:active { background: var(--border); }
-.npc-mon-roll > span:last-child { color: var(--white); }
-/* Attacks: a divider, an ATK label, then rows of "text  [to-hit / dmg]". */
-.npc-mon-atks { display: flex; flex-direction: column; gap: 3px; min-width: 0; border-top: 1px solid var(--border); padding-top: 6px; }
-.npc-mon-atk { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--light); line-height: 1.5; min-width: 0; }
-.npc-mon-atk-text { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
-.npc-mon-btn {
-  flex-shrink: 0; background: var(--panel-2); border: 1px solid var(--border); color: var(--gold);
-  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
-  padding: 2px 7px; cursor: pointer; min-width: 34px; text-align: center;
-}
-.npc-mon-btn:hover { border-color: var(--gold); color: var(--white); }
-.npc-mon-btn.dmg { color: var(--red); }
-.npc-mon-btn.dmg:hover { border-color: var(--red); color: var(--white); }
-.npc-mon-traits-btn { background: none; border: none; color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; padding: 0; text-align: left; }
-.npc-mon-stats-btn { background: none; border: none; color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; padding: 0; text-align: left; }
-.npc-mon-stats-wrap { display: flex; flex-direction: column; gap: 5px; }
-.npc-mon-traits { font-size: 12px; color: var(--light); line-height: 1.5; overflow-wrap: anywhere; display: flex; flex-direction: column; gap: 4px; }
-.npc-mon-trait { min-width: 0; }
-.npc-mon-trait-name { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--gold); }
-.npc-mon-traits .npc-mon-btn { margin: 0 1px; padding: 0 5px; min-width: 0; vertical-align: baseline; }
-.npc-mon-attack { min-width: 52px; }
-.pane.narrow .npc-mon-stats { grid-template-columns: repeat(auto-fit, minmax(52px, 1fr)); gap: 3px; }
+/* ═══ NPC / COMBAT CARD — one frame, per-system HP zone ═══
+   Toned header highlight across the TOP; AC/EV/DEF badge + optional tier badge;
+   ability strip; ATK rows with dice buttons; bold-name traits. Only the HP zone
+   changes shape between game systems (numeric bar, DCC/ACE pips, SW wounds). */
+.npc-card { position: relative; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; min-width: 0; --tone: var(--red); }
+.npc-card.defeated { opacity: 0.55; }
+.cc-band { position: relative; display: flex; align-items: flex-start; gap: 8px; padding: 10px 11px 9px; }
+.cc-band::before { content: ''; position: absolute; inset: 0; opacity: 0.13; background: var(--tone); pointer-events: none; }
+.cc-band::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--tone); }
+.cc-band > .card-grip { position: relative; margin-top: 1px; }
+.cc-title { position: relative; flex: 1; min-width: 0; }
+.cc-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.03em; color: var(--white); line-height: 1.06; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cc-subrow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.cc-type { font-family: 'Share Tech Mono', monospace; font-size: 9.5px; letter-spacing: 0.05em; color: var(--tone); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; filter: brightness(1.3); }
+.cc-defchip { display: inline-flex; align-items: baseline; gap: 4px; border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; background: var(--panel-2); flex-shrink: 0; }
+.cc-defchip .l { font-family: 'Barlow Condensed', sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; }
+.cc-defchip .v { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--white); }
+.cc-badge { position: relative; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #0d0e10; background: var(--tone); padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
+.cc-x { position: relative; color: var(--muted); cursor: pointer; font-size: 12px; border: none; background: none; padding: 2px 4px; flex-shrink: 0; margin-top: 1px; }
+.cc-x:hover { color: var(--red-light); }
+.cc-body { padding: 11px 12px 12px; }
+/* HP zone */
+.cc-hp { margin-bottom: 11px; }
+.cc-hp-head { display: flex; align-items: baseline; gap: 7px; margin-bottom: 5px; }
+.cc-hp-lab { font-family: 'Barlow Condensed', sans-serif; font-size: 9.5px; font-weight: 800; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+.cc-hp-note { font-size: 10px; color: var(--mid); margin-left: auto; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.02em; }
+.cc-hp-num { display: flex; align-items: center; gap: 8px; }
+.cc-hp-cur { width: 46px; text-align: center; background: transparent; border: none; border-bottom: 1px dashed var(--border); font-family: 'Share Tech Mono', monospace; font-size: 19px; color: var(--white); padding: 1px 0; }
+.cc-hp-cur:focus { outline: none; border-bottom-color: var(--gold); }
+.cc-hp-sep { font-family: 'Share Tech Mono', monospace; color: var(--muted); font-size: 13px; }
+.cc-hp-max { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--mid); }
+.cc-hp-bar { flex: 1; min-width: 30px; height: 11px; border-radius: 7px; background: #0b0b0b; border: 1px solid var(--border); overflow: hidden; }
+.cc-hp-bar > i { display: block; height: 100%; border-radius: 6px; transition: width 0.2s ease, background 0.2s ease; }
+.cc-hp-dmg { width: 50px; flex: 0 0 auto; background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px; color: var(--white); font-family: 'Share Tech Mono', monospace; font-size: 12px; text-align: center; padding: 5px 4px; }
+.cc-hp-dmg::placeholder { color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+.cc-hp-dmg:focus { outline: none; border-color: var(--gold); }
+.cc-pips { display: flex; flex-wrap: wrap; gap: 4px; }
+.cc-pip { min-width: 30px; flex: 1 1 auto; max-width: 54px; height: 26px; border-radius: 5px; border: 1px solid rgba(0,0,0,0.4); background: var(--seg-color, #4caf50); font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(0,0,0,0.6); font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: filter 0.15s; }
+.cc-pip:hover { filter: brightness(1.15); }
+.cc-pip.dead { background: #141414 !important; color: var(--muted); border-color: var(--border); }
+.cc-wounds { display: flex; gap: 4px; flex-wrap: wrap; }
+.cc-wound { flex: 1 1 auto; min-width: 44px; border: 1px solid var(--border); border-radius: 6px; background: #141414; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 9.5px; letter-spacing: 0.02em; text-transform: uppercase; padding: 6px 3px; cursor: pointer; text-align: center; }
+.cc-wound.on { color: #0d0e10; }
+/* Ability strip */
+.cc-abils { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 11px; }
+.cc-abil { background: var(--panel); display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; min-width: 0; }
+button.cc-abil { cursor: pointer; }
+button.cc-abil:hover { background: var(--panel-2); }
+.cc-abil .l { font-family: 'Barlow Condensed', sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: 0.05em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+.cc-abil .v { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--white); }
+.cc-meta { font-size: 11px; color: var(--mid); margin: -3px 0 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.cc-meta b { color: var(--light); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 0.04em; }
+/* Attacks + traits */
+.cc-sec { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; margin: 2px 0 6px; }
+.cc-atk { display: flex; align-items: center; gap: 8px; padding: 6px 0; min-width: 0; }
+.cc-atk + .cc-atk { border-top: 1px dashed var(--border); }
+.cc-atk-t { flex: 1; min-width: 0; font-size: 12.5px; color: var(--light); overflow-wrap: anywhere; }
+.cc-atk-t b { color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: 0.02em; }
+.cc-atk-t .ex { color: var(--mid); }
+.cc-atk-roll { flex: 0 0 auto; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--gold); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; cursor: pointer; white-space: nowrap; background: var(--panel-2); }
+.cc-atk-roll:hover { border-color: var(--gold); color: var(--white); }
+.cc-traits { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 9px; }
+.cc-trait { font-size: 12px; line-height: 1.55; color: var(--light); margin-top: 6px; overflow-wrap: anywhere; }
+.cc-trait:first-of-type { margin-top: 0; }
+.cc-trait-name { color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 0.02em; }
+.cc-diebtn { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; color: var(--gold); font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 0 5px; cursor: pointer; vertical-align: baseline; }
+.cc-diebtn:hover { border-color: var(--gold); color: var(--white); }
+.cc-defeated { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: 0.14em; color: var(--red-light); text-transform: uppercase; text-align: center; margin-top: 9px; border-top: 1px solid var(--border); padding-top: 8px; }
+.pane.narrow .cc-abils { grid-template-columns: repeat(auto-fit, minmax(42px, 1fr)); }
 
 /* Monster picker (Trackers → + Monster) */
 /* Bestiary picker is a popup overlay inside the Combat window — it never steals
@@ -843,53 +838,6 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .mon-pick-item-meta { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
 .mon-pick-empty { font-size: 12px; color: var(--muted); font-style: italic; padding: 8px 4px; }
 
-.npc-defeated-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
-
-/* Status checklist — shared by tracker and NPC cards */
-.status-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
-.status-row { display: flex; align-items: center; gap: 6px; }
-.status-check { width: 15px; height: 15px; accent-color: var(--gold); flex-shrink: 0; cursor: pointer; }
-.status-text {
-  flex: 1; background: transparent; border: none; border-bottom: 1px dotted var(--border);
-  color: var(--light); font-size: 11px; padding: 3px 2px;
-}
-.status-text:focus { border-bottom-color: var(--mid); }
-.status-row:has(.status-check:checked) .status-text { color: var(--muted); text-decoration: line-through; }
-.status-del { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 11px; padding: 2px 4px; flex-shrink: 0; }
-.status-del:hover { color: var(--red-light); }
-.status-add { margin-top: 6px; }
-
-/* NPC mode toggle */
-.npc-mode-toggle { display: flex; gap: 0; flex-shrink: 0; border: 1px solid var(--border); }
-.npc-mode-btn {
-  font-family: 'Barlow Condensed', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 0.06em;
-  text-transform: uppercase; padding: 4px 7px; background: var(--panel-2); border: none; color: var(--muted); cursor: pointer;
-}
-.npc-mode-btn.active.std-active { background: var(--green); color: white; }
-.npc-mode-btn.active.dcc-active { background: var(--amber); color: black; }
-
-/* DCC segment setup row */
-.npc-seg-setup { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
-.npc-seg-setup-label { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-.npc-seg-count-input, .npc-seg-hp-input { width: 44px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 12px; padding: 4px 2px; }
-
-/* DCC segments — click to toggle alive/dead */
-.npc-seg-row { display: flex; gap: 4px; flex-wrap: wrap; }
-.npc-seg {
-  flex: 1; min-width: 36px; height: 32px;
-  background: var(--seg-color, #4caf50);
-  border: 1px solid rgba(0,0,0,0.3);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity 0.15s, filter 0.15s;
-}
-.npc-seg:hover { filter: brightness(1.15); }
-.npc-seg.dead { background: #2a2a2a !important; border-color: var(--border); }
-.npc-seg-num {
-  font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: 700;
-  color: rgba(0,0,0,0.55);
-}
-.npc-seg.dead .npc-seg-num { color: var(--muted); }
 
 @media (max-width: 900px) {
   .cbt-body { flex-direction: column; overflow-y: auto; }
@@ -5529,85 +5477,136 @@ function init_trackers(root) {
     };
   }
   const SW_WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
-  function xsMonsterBlockHtml(n) {
-    const g = n.gmon; if(!g) return '';
-    const chips = (g.stats || []).map(st => st.roll
-      ? `<button class="npc-mon-stat npc-mon-roll" data-roll="${escAttr(st.roll)}" data-rolllabel="${escAttr(st.label)}" title="Roll ${escAttr(st.roll)}"><span class="npc-mon-label">${escAttr(st.label)}</span><span>${escAttr(st.val)}</span></button>`
-      : monStat(st.label, st.val)).join('');
-    const lines = (g.lines || []).map(l => `<div class="npc-mon-atk"><span class="npc-mon-label">${escAttr(l.label)}</span><span class="npc-mon-atk-text">${escAttr(l.text)}</span>` +
-      (l.roll ? `<button class="npc-mon-btn npc-mon-roll" data-roll="${escAttr(l.roll)}" data-rolllabel="${escAttr(l.label)}" title="Roll ${escAttr(l.roll)}">${escAttr(l.roll)}</button>` : '') + '</div>').join('');
-    const stats = `<div class="npc-mon-stats">${chips}</div>`;
-    // MMRPG traits/tags/powers as clickable chips (detail popovers) — replaces the
-    // plain text lines used on the browse cards.
-    const infoChip = (nm, kind) => `${escAttr(nm)}<button class="mmrpg-info" data-ik="${kind}" data-in="${escAttr(nm)}" title="Details" aria-label="Show details">&#9432;</button>`;
-    const chipRow = (label, arr, kind) => (arr && arr.length)
-      ? `<div class="npc-mon-atk"><span class="npc-mon-label">${label}</span><span class="npc-mon-atk-text">${arr.map(x => infoChip(x, kind)).join(', ')}</span></div>` : '';
-    const mchips = g.chips
-      ? chipRow('Traits', g.chips.traits, 'trait') + chipRow('Tags', g.chips.tags, 'tag') + chipRow('Powers', g.chips.powers, 'power')
-      : '';
-    const atks = (lines || mchips) ? `<div class="npc-mon-atks" style="min-width:0;max-width:100%;">${mchips}${lines}</div>` : '';
-    const traits = (g.notes || []).length
-      ? `<div class="npc-mon-traits"><span class="npc-mon-label">Notes</span>${g.notes.map(t => '<div>' + escAttr(t) + '</div>').join('')}</div>`
-      : '';
-    return `<div class="npc-mon">${stats}${atks}${traits}</div>`;
-  }
 
-  function dccMonsterBlockHtml(n) {
-    const mo = n.dmon;
-    if(!mo) return '';
-    const sub = mo.role ? `<div class="npc-mon-sub">${escAttr(mo.role)}</div>` : '';
-    const meta = [
-      (mo.level !== '' && mo.level != null) ? monStat('LV', mo.level) : '',
-      (mo.size !== '' && mo.size != null) ? monStat('Size', mo.size) : '',
-      (mo.tags && mo.tags.length) ? monStat('Tags', mo.tags.join(', ')) : ''
-    ].join('');
-    const def = [
-      monStat('Evade', mo.evade), monStat('DR', mo.dr),
-      monStat('Surprise', mo.surprise), monStat('Move', mo.move),
-      monStat('HP', mo.totalHp + ' (' + mo.slotCount + '×' + mo.slotHp + ')')
-    ].join('');
-    const S = mo.stats || {};
-    const statCell = (abbr, key) => {
-      const st = S[key]; if(!st) return '';
-      const mod = (st.mod != null ? st.mod : '');
-      const modStr = mod === '' ? '' : ((mod >= 0 ? '+' : '') + mod);
-      return monRollStat(abbr, modStr);
-    };
-    const abil = ['STR','INT','CON','DEX','CHA'].map(k => statCell(k, k)).join('');
-    const stats = `<div class="npc-mon-stats">${meta}</div><div class="npc-mon-stats">${def}</div><div class="npc-mon-stats">${abil}</div>`;
-    // Attacks — each rolls to-hit + damage into the dice tray (reusing the
-    // .npc-mon-attack wiring). Riders/effects sit under the roll button.
-    const atks = (mo.attacks || []).map(a => {
-      const hit = a.toHit ? String(a.toHit) : '';
-      const dmg = (a.damage && !/^no damage/i.test(String(a.damage))) ? String(a.damage) : '';
-      const face = [a.name, [hit, dmg].filter(Boolean).join(' / ')].filter(Boolean).join(': ');
-      const extra = [a.damageType, a.range].filter(Boolean).join(' · ');
-      const rider = a.rider ? `<div class="npc-mon-atk-text" style="opacity:.8">${escAttr(a.rider)}</div>` : '';
-      const face_ = face || 'attack';
-      const btn = (hit || dmg)
-        ? `<button class="npc-mon-btn npc-mon-attack" data-hit="${escAttr(hit)}" data-dmg="${escAttr(dmg)}" data-atkname="${escAttr(a.name || 'attack')}" title="Roll attack and damage">${escAttr(face_)}</button>`
-        : `<span class="npc-mon-atk-text">${escAttr(face_)}</span>`;
-      return `<div class="npc-mon-atk">${btn}${extra ? `<span class="npc-mon-atk-text" style="opacity:.7"> ${escAttr(extra)}</span>` : ''}${rider}</div>`;
+  // ══ Combat card renderer ════════════════════════════════════════════════
+  // Every system's monster is described the same way — a "view" — and one set of
+  // helpers renders it, so the card frame is identical and only the HP zone (in
+  // buildNpcCard) changes per system. Interactive bits keep the .npc-mon-roll /
+  // .npc-mon-attack / .mmrpg-info classes the existing handlers already wire.
+
+  // Threat tier from a DCC-style role → header tint + badge. Others: no badge.
+  function tierFromRole(role) {
+    const r = String(role || '').toLowerCase();
+    if(!r) return null;
+    if(/boss|nemesis|solo/.test(r))       return { label: role, tone: 'var(--boss, #7b5cff)' };
+    if(/elite|lieutenant|rival/.test(r))  return { label: role, tone: 'var(--gold)' };
+    if(/mob|minion|horde|grunt|mook/.test(r)) return { label: role, tone: 'var(--red)' };
+    return { label: role, tone: 'var(--gold)' };  // a named role we don't recognise → elite-ish
+  }
+  // Swap dice runs (2d6, 1d8+2) inside prose for roll buttons.
+  function ccDiceify(str) {
+    return escAttr(str).replace(/(\d*d\d+(?:\s*[+-]\s*\d+)?)/gi, (dice) =>
+      `<button class="cc-diebtn npc-mon-roll" data-roll="${dice.replace(/\s+/g, '')}" data-rolllabel="trait" title="Roll ${dice}">${dice}</button>`);
+  }
+  // Trait lines — bold a leading "Name." / "Name:" label, keep dice rollable.
+  function ccTraits(notes) {
+    const arr = Array.isArray(notes) ? notes : (notes ? [notes] : []);
+    const segs = [];
+    arr.forEach(t => splitTraits(t).forEach(s => segs.push(s)));
+    if(!segs.length) return '';
+    const rows = segs.map(s => {
+      let name = s.name, body = s.body;
+      if(!name) { const m = String(body).match(/^([A-Z][A-Za-z0-9'’\- ]{1,26}?)\.\s+(.+)$/s); if(m) { name = m[1]; body = m[2]; } }
+      return `<div class="cc-trait">${name ? `<span class="cc-trait-name">${escAttr(name)}.</span> ` : ''}${ccDiceify(body)}</div>`;
     }).join('');
-    const atkBlock = atks ? `<div class="npc-mon-atks"><span class="npc-mon-label">ATK</span>${atks}</div>` : '';
-    const traits = (mo.notes && mo.notes.length)
-      ? `<div class="npc-mon-traits"><span class="npc-mon-label">Traits</span>${mo.notes.map(t => `<div class="npc-mon-trait">${escAttr(t)}</div>`).join('')}</div>`
-      : '';
-    return `<div class="npc-mon">${sub}${stats}${atkBlock}${traits}</div>`;
+    return `<div class="cc-traits"><div class="cc-sec">Traits</div>${rows}</div>`;
+  }
+  // Ability strip. cells: [{ l, v, roll?, rolllabel? }]
+  function ccAbils(cells) {
+    const cs = (cells || []).filter(c => c && (c.v || c.v === 0) && String(c.v) !== '');
+    if(!cs.length) return '';
+    const inner = cs.map(c => {
+      const body = `<span class="l">${escAttr(c.l)}</span><span class="v">${escAttr(String(c.v))}</span>`;
+      return c.roll
+        ? `<button class="cc-abil npc-mon-roll" data-roll="${escAttr(c.roll)}" data-rolllabel="${escAttr(c.rolllabel || c.l)}" title="Roll ${escAttr(c.roll)}">${body}</button>`
+        : `<div class="cc-abil">${body}</div>`;
+    }).join('');
+    return `<div class="cc-abils">${inner}</div>`;
+  }
+  // Attack rows. list: [{ name, ex?, hit?, dmg?, roll?, rolllabel? }]
+  function ccAtks(list) {
+    const cs = (list || []).filter(Boolean);
+    if(!cs.length) return '';
+    const rows = cs.map(a => {
+      let btn = '';
+      if(a.hit || a.dmg) {
+        const face = [a.hit, a.dmg].filter(Boolean).join(' / ');
+        btn = `<button class="cc-atk-roll npc-mon-attack" data-hit="${escAttr(a.hit || '')}" data-dmg="${escAttr(a.dmg || '')}" data-atkname="${escAttr(a.name || 'attack')}" title="Roll attack and damage">\u{1F3B2} ${escAttr(face)}</button>`;
+      } else if(a.roll) {
+        btn = `<button class="cc-atk-roll npc-mon-roll" data-roll="${escAttr(a.roll)}" data-rolllabel="${escAttr(a.rolllabel || a.name || 'roll')}" title="Roll ${escAttr(a.roll)}">\u{1F3B2} ${escAttr(a.roll)}</button>`;
+      }
+      return `<div class="cc-atk"><span class="cc-atk-t"><b>${escAttr(a.name || 'Attack')}</b>${a.ex ? ` <span class="ex">${escAttr(a.ex)}</span>` : ''}</span>${btn}</div>`;
+    }).join('');
+    return `<div class="cc-sec">Attacks</div>${rows}`;
+  }
+  // "MV 40 fly 80 · AL C" meta line from [label,val] pairs.
+  function ccMeta(pairs) {
+    const parts = pairs.filter(p => p[1] || p[1] === 0).map(p => `<b>${escAttr(p[0])}</b> ${escAttr(String(p[1]))}`);
+    return parts.length ? `<div class="cc-meta">${parts.join(' · ')}</div>` : '';
   }
 
-  function monStat(label, val) {
-    if(!val && val !== 0) return '';
-    return `<div class="npc-mon-stat"><span class="npc-mon-label">${escAttr(label)}</span><span>${escAttr(String(val))}</span></div>`;
+  // ── Per-system views → { sub, def:{l,v}, tone, badge, meta, abils, atks, traits } ──
+  function sdView(n) {
+    const mo = n.mon;
+    const abils = ['STR','DEX','CON','INT','WIS','CHA'].map((k, i) => {
+      const v = [mo.s, mo.d, mo.c, mo.i, mo.w, mo.ch][i];
+      if(v === '' || v == null) return null;
+      const mod = String(v).trim();
+      return { l: k, v: mod, roll: `1d20${/^[+-]/.test(mod) ? mod : '+' + mod}`, rolllabel: `${k} check` };
+    });
+    const atks = parseAttacks(mo.atk).map(a => (!a.hit && !a.dmg) ? { name: a.text } : { name: a.name || 'Attack', hit: a.hit, dmg: a.dmg });
+    return {
+      sub: [mo.ctype, mo.lv ? 'LV ' + mo.lv : ''].filter(Boolean).join(' · '),
+      def: mo.ac ? { l: 'AC', v: mo.ac } : null, tone: 'var(--red)', badge: null,
+      meta: ccMeta([['MV', mo.mv], ['AL', mo.al]]), abils: ccAbils(abils), atks: ccAtks(atks), traits: ccTraits(mo.notes)
+    };
   }
-
-  // An ability cell that rolls d20 + its modifier into the Dice tray.
-  function monRollStat(label, val) {
-    if(!val && val !== 0) return '';
-    const mod = String(val).trim();
-    return `<button class="npc-mon-stat npc-mon-roll" data-roll="1d20${/^[+-]/.test(mod) ? mod : '+' + mod}" data-rolllabel="${escAttr(label)} check" title="Roll d20 ${escAttr(mod)}">
-      <span class="npc-mon-label">${escAttr(label)}</span><span>${escAttr(mod)}</span></button>`;
+  function dccView(n) {
+    const mo = n.dmon, S = mo.stats || {};
+    const abils = ['STR','INT','CON','DEX','CHA'].map(k => {
+      const st = S[k]; if(!st || st.mod == null) return null;
+      const mod = (st.mod >= 0 ? '+' : '') + st.mod;
+      return { l: k, v: mod, roll: `1d20${mod}`, rolllabel: `${k} check` };
+    });
+    const atks = (mo.attacks || []).map(a => {
+      const dmg = (a.damage && !/^no damage/i.test(String(a.damage))) ? String(a.damage) : '';
+      return { name: a.name || 'Attack', ex: [a.damageType, a.range, a.rider].filter(Boolean).join(' · '), hit: a.toHit ? String(a.toHit) : '', dmg };
+    });
+    const tier = tierFromRole(mo.role);
+    return {
+      sub: ['LV ' + mo.level, mo.size].filter(Boolean).join(' · '),
+      def: mo.evade ? { l: 'EV', v: mo.evade } : (mo.dr ? { l: 'DR', v: mo.dr } : null),
+      tone: tier ? tier.tone : 'var(--red)', badge: tier ? tier.label : null,
+      meta: ccMeta([['DR', mo.dr], ['Surprise', mo.surprise], ['Move', mo.move], ['Tags', (mo.tags || []).join(', ')]]),
+      abils: ccAbils(abils), atks: ccAtks(atks), traits: ccTraits(mo.notes)
+    };
   }
+  function xsView(n) {
+    const g = n.gmon;
+    // HP-like stats already live in the HP zone (pips / wounds), so drop them
+    // from the ability strip to avoid showing the same number twice.
+    const stats = (g.stats || []).slice().filter(st => !/^(health|hp|wounds?|stamina|rank)$/i.test(String(st.label || '')));
+    // Pull a defense-like stat up into the header badge (and out of the strip).
+    let def = null;
+    const di = stats.findIndex(st => /^(def|defen[cs]e|ac|armou?r|evade|dodge|toughness)$/i.test(String(st.label || '')));
+    if(di >= 0) { def = { l: stats[di].label, v: stats[di].val }; stats.splice(di, 1); }
+    const abils = stats.map(st => ({ l: st.label, v: st.val, roll: st.roll || '', rolllabel: st.label }));
+    const atks = (g.lines || []).map(l => ({ name: l.label || 'Attack', ex: l.text || '', roll: l.roll || '', rolllabel: l.label }));
+    // MMRPG chip rows (Traits / Tags / Powers with detail popovers) join the traits.
+    let chipRows = '';
+    if(g.chips) {
+      const infoChip = (nm, kind) => `${escAttr(nm)}<button class="mmrpg-info" data-ik="${kind}" data-in="${escAttr(nm)}" title="Details" aria-label="Show details">&#9432;</button>`;
+      const row = (label, arr, kind) => (arr && arr.length) ? `<div class="cc-trait"><span class="cc-trait-name">${label}:</span> ${arr.map(x => infoChip(x, kind)).join(', ')}</div>` : '';
+      chipRows = row('Traits', g.chips.traits, 'trait') + row('Tags', g.chips.tags, 'tag') + row('Powers', g.chips.powers, 'power');
+    }
+    let traits = ccTraits(g.notes);
+    if(chipRows) traits = traits ? traits.replace('</div>', chipRows + '</div>') : `<div class="cc-traits"><div class="cc-sec">Traits</div>${chipRows}</div>`;
+    return {
+      sub: n.tag || '', def: def, tone: 'var(--red)', badge: null,
+      meta: '', abils: ccAbils(abils), atks: ccAtks(atks), traits
+    };
+  }
+  function monView(n) { return n.dmon ? dccView(n) : n.gmon ? xsView(n) : sdView(n); }
 
 
   // Monster attack lines read like:
@@ -5656,59 +5655,6 @@ function init_trackers(root) {
       out.push({ name: mk.name, body: str.slice(mk.bodyAt, end).trim() });
     });
     return out;
-  }
-
-  function traitsHtml(monName, notes) {
-    return splitTraits(notes).map(tr => {
-      const label = (tr.name ? tr.name : 'trait');
-      // Escape first, then swap dice runs for buttons — dice contain no markup
-      // characters, so the substitution can't break the escaping.
-      const body = escAttr(tr.body).replace(/(\d*d\d+(?:\s*[+-]\s*\d+)?)/gi, (dice) =>
-        `<button class="npc-mon-btn npc-mon-roll" data-roll="${dice.replace(/\s+/g, '')}" data-rolllabel="${escAttr(label)}" title="Roll ${dice}">${dice}</button>`);
-      return `<div class="npc-mon-trait">${tr.name ? `<span class="npc-mon-trait-name">${escAttr(tr.name)}</span> ` : ''}${body}</div>`;
-    }).join('');
-  }
-
-  function attackRowsHtml(name, atk) {
-    const list_ = parseAttacks(atk);
-    if(!list_.length) return '';
-    return list_.map(a => {
-      if(!a.hit && !a.dmg) {
-        // A special ability with no bonus or dice — its damage, if any, lives in
-        // Traits, where it gets its own roll button.
-        return `<div class="npc-mon-atk"><span class="npc-mon-atk-text">${escAttr(a.text)}</span></div>`;
-      }
-      // To-hit and damage roll together, as the character sheet does it.
-      const face = [a.hit, a.dmg].filter(Boolean).join(' / ');
-      const btn = `<button class="npc-mon-btn npc-mon-attack" data-hit="${escAttr(a.hit || '')}" data-dmg="${escAttr(a.dmg || '')}"
-        data-atkname="${escAttr(a.name || 'attack')}" title="Roll attack and damage">${escAttr(face)}</button>`;
-      return `<div class="npc-mon-atk"><span class="npc-mon-atk-text">${escAttr(a.text)}</span>${btn}</div>`;
-    }).join('');
-  }
-
-  function monsterBlockHtml(n) {
-    const mo = n.mon;
-    if(!mo) return '';
-    // Creature type reads as a subtitle under the name (like a printed stat
-    // block) rather than a cramped grid cell where a word like "Monster" wraps.
-    const sub = mo.ctype ? `<div class="npc-mon-sub">${escAttr(mo.ctype)}</div>` : '';
-    // HP is deliberately absent: the bar above already shows it.
-    const head = [monStat('AC', mo.ac), monStat('MV', mo.mv),
-                  monStat('LV', mo.lv), monStat('AL', mo.al)].join('');
-    const abil = [monRollStat('STR', mo.s), monRollStat('DEX', mo.d), monRollStat('CON', mo.c),
-                  monRollStat('INT', mo.i), monRollStat('WIS', mo.w), monRollStat('CHA', mo.ch)].join('');
-    const atk = mo.atk
-      ? `<div class="npc-mon-atks"><span class="npc-mon-label">ATK</span>${attackRowsHtml(n.name || 'Monster', mo.atk)}</div>` : '';
-    // The full block is always visible so a monster reads exactly like its
-    // Adventure-prep / generator card.
-    const stats = `<div class="npc-mon-stats">${head}</div><div class="npc-mon-stats">${abil}</div>`;
-    const traits = mo.notes
-      ? `<div class="npc-mon-traits"><span class="npc-mon-label">Traits</span>${traitsHtml(n.name || 'Monster', mo.notes)}</div>`
-      : '';
-    return `<div class="npc-mon">
-        ${sub}${stats}
-        ${atk}${traits}
-      </div>`;
   }
 
   // ── Tracker card ──
@@ -5803,125 +5749,111 @@ function init_trackers(root) {
     const card = document.createElement('div');
     card.dataset.id = n.id;
     const mode = n.hpMode || 'standard';
+    const view = monView(n);
     let hpBlockHtml = '', defeated = false;
 
     if(mode === 'standard') {
       const pct = n.hpMax > 0 ? Math.max(0, Math.min(100, (n.hpCurrent / n.hpMax) * 100)) : 0;
       defeated = n.hpCurrent <= 0;
       hpBlockHtml = `
-        <div class="npc-hp-row">
-          <span class="npc-mon-label npc-hp-lbl">HP</span>
-          <input type="number" class="npc-hp-input npc-hp-current" value="${n.hpCurrent}">
-          <span class="npc-hp-slash">/</span>
-          <input type="number" class="npc-hp-input npc-hp-max" value="${n.hpMax}">
-          <div class="npc-hp-adjust">
-            <button class="npc-hp-btn dmg npc-dmg5" title="-5 HP">&minus;5</button>
-            <button class="npc-hp-btn dmg npc-dmg1" title="-1 HP">&minus;1</button>
-            <button class="npc-hp-btn heal npc-heal1" title="+1 HP">+1</button>
-            <button class="npc-hp-btn heal npc-heal5" title="+5 HP">+5</button>
+        <div class="cc-hp">
+          <div class="cc-hp-head"><span class="cc-hp-lab">Hit Points</span><span class="cc-hp-note">type dmg &middot; +n heals</span></div>
+          <div class="cc-hp-num">
+            <input type="number" class="cc-hp-cur" value="${n.hpCurrent}" title="Current HP">
+            <span class="cc-hp-sep">/</span><span class="cc-hp-max">${escAttr(String(n.hpMax))}</span>
+            <div class="cc-hp-bar"><i style="width:${pct}%;background:${npcHpColor(pct)};"></i></div>
+            <input type="text" class="cc-hp-dmg" inputmode="numeric" placeholder="dmg" title="Type damage (or +n to heal), then Enter">
           </div>
-        </div>
-        <div class="npc-hp-bar-track"><div class="npc-hp-bar-fill" style="width:${pct}%;background:${npcHpColor(pct)};"></div></div>
-      `;
+        </div>`;
     } else if(mode === 'ace') {
-      // ACE! Health pips: click a lost pip to heal up to it, a live one to take damage down to it.
       const max = Math.max(1, parseInt(n.hpMax, 10) || 1);
       if(typeof n.hpCurrent !== 'number') n.hpCurrent = max;
       defeated = n.hpCurrent <= 0;
       let pips = '';
-      for(let i = 1; i <= max; i++) pips += `<button class="npc-seg npc-ace-pip ${i > n.hpCurrent ? 'dead' : ''}" data-pip="${i}" style="--seg-color:#4caf50;" title="${i > n.hpCurrent ? 'Heal to ' + i : 'Damage down to ' + (i - 1)}"><span class="npc-seg-num">${i}</span></button>`;
+      for(let i = 1; i <= max; i++) pips += `<button class="cc-pip cc-ace-pip ${i > n.hpCurrent ? 'dead' : ''}" data-pip="${i}" style="--seg-color:#4caf50;" title="${i > n.hpCurrent ? 'Heal to ' + i : 'Damage down to ' + (i - 1)}">${i}</button>`;
       hpBlockHtml = `
-        <div class="npc-seg-setup">
-          <span class="npc-mon-label" style="align-self:center;">Health</span>
-          <input type="number" class="npc-hp-input npc-ace-max" min="1" max="40" value="${max}" title="Max Health">
-        </div>
-        <div class="npc-seg-row">${pips}</div>
-      `;
+        <div class="cc-hp">
+          <div class="cc-hp-head"><span class="cc-hp-lab">Health</span><span class="cc-hp-note">${n.hpCurrent} / ${max} &middot; tap a pip</span></div>
+          <div class="cc-pips">${pips}</div>
+        </div>`;
     } else if(mode === 'sw') {
-      // Star Wars wound track — same five states as the player sheet.
       const w = SW_WOUNDS.some(x => x[0] === n.wound) ? n.wound : 'none';
       n.wound = w;
       defeated = w === 'incapacitated' || w === 'mortal';
-      const colors = { none: '#4caf50', stunned: '#c8a020', wounded: '#c08020', incapacitated: '#b82018', mortal: '#6a1a12' };
-      const track = SW_WOUNDS.map(([k, lbl]) => `<button class="npc-seg npc-sw-wound ${k === w ? '' : 'dead'}" data-wound="${k}" style="--seg-color:${colors[k]};" title="${lbl}"><span class="npc-seg-num">${lbl}</span></button>`).join('');
+      const colors = { none: '#173a17', stunned: '#3a3410', wounded: '#c08020', incapacitated: '#7a1a12', mortal: '#4a0f0a' };
+      const fg = { none: '#7bbf7b', stunned: '#d6c04a', wounded: '#0d0e10', incapacitated: '#ffb4ac', mortal: '#ffb4ac' };
+      const idx2 = SW_WOUNDS.findIndex(x => x[0] === w);
+      const track = SW_WOUNDS.map(([k, lbl], i) => `<button class="cc-wound${i <= idx2 ? ' on' : ''}" data-wound="${k}" style="${i <= idx2 ? `background:${colors[k]};color:${fg[k]}` : ''}" title="${lbl}">${lbl}</button>`).join('');
+      const note = w === 'none' ? 'unhurt' : w === 'stunned' ? '−1D this round & next' : w === 'wounded' ? '−1D to everything' : w === 'incapacitated' ? 'unconscious' : 'mortally wounded';
       hpBlockHtml = `
-        <div class="npc-seg-setup">
-          <span class="npc-mon-label" style="align-self:center;">Wounds</span>
-          <span style="font-size:11px;color:var(--muted);align-self:center;">${w === 'none' ? 'unhurt' : w === 'stunned' ? '−1D this round and next' : w === 'wounded' ? '−1D to everything' : w === 'incapacitated' ? 'unconscious' : 'mortally wounded — roll each round'}</span>
-        </div>
-        <div class="npc-seg-row">${track}</div>
-      `;
+        <div class="cc-hp">
+          <div class="cc-hp-head"><span class="cc-hp-lab">Wounds</span><span class="cc-hp-note">${note}</span></div>
+          <div class="cc-wounds">${track}</div>
+        </div>`;
     } else {
-      const segCount = n.segCount || 10;
+      const segCount = n.segCount || (n.segments ? n.segments.length : 10);
       const segHp = n.segHp !== undefined ? n.segHp : 10;
       if(!n.segments || n.segments.length !== segCount) n.segments = Array.from({length: segCount}, () => true);
       defeated = n.segments.filter(Boolean).length === 0;
-      const segHtml = n.segments.map((alive, i) => `
-          <button class="npc-seg ${alive ? '' : 'dead'}" data-seg-idx="${i}" style="--seg-color:${dccSegColor(i, segCount)};" title="Segment ${i+1}${alive ? '' : ' (down)'}">
-            <span class="npc-seg-num">${segHp}</span>
-          </button>`).join('');
+      const alive = n.segments.filter(Boolean).length;
+      const segHtml = n.segments.map((a, i) => `<button class="cc-pip ${a ? '' : 'dead'}" data-seg-idx="${i}" style="--seg-color:${dccSegColor(i, segCount)};" title="Segment ${i+1}${a ? '' : ' (down)'}">${segHp}</button>`).join('');
       hpBlockHtml = `
-        <div class="npc-seg-setup">
-          <span class="npc-mon-label" style="align-self:center;">HP</span>
-          <input type="number" class="npc-seg-count-input" min="1" max="40" value="${segCount}" title="Segments">
-          <span class="npc-hp-slash">/</span>
-          <input type="number" class="npc-seg-hp-input" min="1" value="${segHp}" title="HP per segment">
-        </div>
-        <div class="npc-seg-row">${segHtml}</div>
-      `;
+        <div class="cc-hp">
+          <div class="cc-hp-head"><span class="cc-hp-lab">HP Segments</span><span class="cc-hp-note">${alive}/${segCount} up &middot; ${segHp} each</span></div>
+          <div class="cc-pips">${segHtml}</div>
+        </div>`;
     }
 
     card.className = 'npc-card' + (defeated ? ' defeated' : '');
+    card.style.setProperty('--tone', view.tone || 'var(--red)');
     card.innerHTML = `
-      <div class="npc-top">
+      <div class="cc-band">
         ${gripHtml()}
-        <span class="npc-name" title="${escAttr(n.name)}">${escAttr(n.name || 'Monster')}</span>
-        <button class="npc-del" title="Remove">&#10005;</button>
+        <div class="cc-title">
+          <div class="cc-name" title="${escAttr(n.name)}">${escAttr(n.name || 'Monster')}</div>
+          <div class="cc-subrow">
+            ${view.badge ? `<span class="cc-badge">${escAttr(view.badge)}</span>` : ''}
+            ${view.def ? `<span class="cc-defchip"><span class="l">${escAttr(view.def.l)}</span><span class="v">${escAttr(String(view.def.v))}</span></span>` : ''}
+            ${view.sub ? `<span class="cc-type">${escAttr(view.sub)}</span>` : ''}
+          </div>
+        </div>
+        <button class="cc-x npc-del" title="Remove">&#10005;</button>
       </div>
-      ${hpBlockHtml}
-      ${defeated ? '<div class="npc-defeated-tag">Defeated</div>' : ''}
-      ${n.dmon ? dccMonsterBlockHtml(n) : n.gmon ? xsMonsterBlockHtml(n) : monsterBlockHtml(n)}
-    `;
+      <div class="cc-body">
+        ${hpBlockHtml}
+        ${view.abils}
+        ${view.meta}
+        ${view.atks}
+        ${view.traits}
+        ${defeated ? '<div class="cc-defeated">Defeated</div>' : ''}
+      </div>`;
 
     card.querySelector('.npc-del').addEventListener('click', () => { items = items.filter(x => x.id !== n.id); render(); });
 
     if(mode === 'standard') {
-      card.querySelector('.npc-hp-current').addEventListener('change', e => { n.hpCurrent = parseInt(e.target.value) || 0; render(); });
-      card.querySelector('.npc-hp-max').addEventListener('change',     e => { n.hpMax = parseInt(e.target.value) || 0; render(); });
-      card.querySelector('.npc-hp-current').addEventListener('keydown', e => { if(e.key === 'Enter') e.target.blur(); });
-      card.querySelector('.npc-hp-max').addEventListener('keydown',     e => { if(e.key === 'Enter') e.target.blur(); });
-      card.querySelector('.npc-dmg5').addEventListener('click',  () => { n.hpCurrent = Math.max(0, n.hpCurrent - 5); render(); });
-      card.querySelector('.npc-dmg1').addEventListener('click',  () => { n.hpCurrent = Math.max(0, n.hpCurrent - 1); render(); });
-      card.querySelector('.npc-heal1').addEventListener('click', () => { n.hpCurrent = Math.min(n.hpMax, n.hpCurrent + 1); render(); });
-      card.querySelector('.npc-heal5').addEventListener('click', () => { n.hpCurrent = Math.min(n.hpMax, n.hpCurrent + 5); render(); });
+      const cur = card.querySelector('.cc-hp-cur');
+      cur.addEventListener('change', e => { n.hpCurrent = Math.max(0, parseInt(e.target.value) || 0); render(); });
+      cur.addEventListener('keydown', e => { if(e.key === 'Enter') e.target.blur(); });
+      const dmg = card.querySelector('.cc-hp-dmg');
+      const applyDmg = () => {
+        const raw = dmg.value.trim(); if(!raw) return;
+        const heal = raw[0] === '+';
+        const amt = Math.abs(parseInt(raw, 10) || 0);
+        if(amt) n.hpCurrent = heal ? Math.min(n.hpMax, n.hpCurrent + amt) : Math.max(0, n.hpCurrent - amt);
+        dmg.value = ''; render();
+      };
+      dmg.addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); applyDmg(); } });
+      dmg.addEventListener('blur', applyDmg);
     } else if(mode === 'ace') {
-      card.querySelectorAll('.npc-ace-pip').forEach(b => b.addEventListener('click', () => {
+      card.querySelectorAll('.cc-ace-pip').forEach(b => b.addEventListener('click', () => {
         const i = parseInt(b.dataset.pip, 10);
         n.hpCurrent = i > n.hpCurrent ? i : i - 1;
         render();
       }));
-      const mx = card.querySelector('.npc-ace-max');
-      mx.addEventListener('change', () => { n.hpMax = Math.max(1, Math.min(40, parseInt(mx.value, 10) || 1)); n.hpCurrent = Math.min(n.hpCurrent, n.hpMax); render(); });
-      mx.addEventListener('keydown', e => { if(e.key === 'Enter') e.target.blur(); });
     } else if(mode === 'sw') {
-      card.querySelectorAll('.npc-sw-wound').forEach(b => b.addEventListener('click', () => { n.wound = b.dataset.wound; render(); }));
+      card.querySelectorAll('.cc-wound').forEach(b => b.addEventListener('click', () => { n.wound = b.dataset.wound; render(); }));
     } else {
-      // Auto-apply: committing either box (blur / Enter / spinner) rebuilds the
-      // segments — same behaviour the Apply button had, minus the button.
-      const applySegSetup = () => {
-        const count = Math.max(1, Math.min(40, parseInt(card.querySelector('.npc-seg-count-input').value) || 1));
-        const hp = Math.max(1, parseInt(card.querySelector('.npc-seg-hp-input').value) || 1);
-        if(count === (n.segCount || 10) && hp === (n.segHp !== undefined ? n.segHp : 10)) return;
-        n.segCount = count; n.segHp = hp;
-        n.segments = Array.from({length: count}, () => true);
-        render();
-      };
-      ['.npc-seg-count-input', '.npc-seg-hp-input'].forEach(sel => {
-        const el = card.querySelector(sel);
-        el.addEventListener('change', applySegSetup);
-        el.addEventListener('keydown', e => { if(e.key === 'Enter') e.target.blur(); });
-      });
-      card.querySelectorAll('.npc-seg').forEach(seg => {
+      card.querySelectorAll('.cc-pip[data-seg-idx]').forEach(seg => {
         seg.addEventListener('click', () => {
           const i = parseInt(seg.dataset.segIdx);
           n.segments[i] = !n.segments[i];
