@@ -1189,8 +1189,10 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .gmt-step { width: 34px; padding: 8px 0; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--light); cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; line-height: 1; flex-shrink: 0; }
 .gmt-step:hover { border-color: var(--gold); color: var(--gold); }
 .gmt-step:active { transform: scale(0.94); }
-.gmt-roll { flex: 1; min-width: 90px; padding: 9px 12px; background: var(--gold); color: #1a1a1a; border: none; border-radius: 6px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.gmt-roll { flex: 0 0 auto; padding: 9px 16px; background: var(--gold); color: #1a1a1a; border: none; border-radius: 6px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .gmt-roll:hover { filter: brightness(1.1); }
+.gmt-die { flex: 1 1 auto; min-width: 44px; padding: 11px 0; }
+.gmt-kob { gap: 4px; }
 .gmt-btn { padding: 8px 10px; background: var(--panel); color: var(--light); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .04em; flex-shrink: 0; }
 .gmt-btn:hover { border-color: var(--gold); }
 .gmt-btn.on { background: #1a3a1a; border-color: #2d7a2d; color: #6dbf6d; }
@@ -12276,7 +12278,7 @@ function init_dice(root) {
   // ── Campaign link ──
   // The connection itself lives in GMCamp (top bar). The tray only sends its
   // rolls out and folds incoming ones into the log.
-  GMCamp.onChange(() => renderPool());   // link connected/left → show or hide the eye
+  GMCamp.onChange(() => { renderTray(); renderPool(); });   // link connected/left → show or hide the eye
   // Incoming rolls arrive in bursts (the poll replays the whole history when a
   // campaign link (re)activates), so coalesce to one renderLog() per frame
   // instead of rebuilding the 100-entry list once per roll.
@@ -12366,8 +12368,24 @@ function init_dice(root) {
 
   function renderTray() {
     const sys = sysTray();
-    if(sys) { try { sys(); return; } catch(e) {} }
+    if(sys) { try { sys(); injectTrayEye(); return; } catch(e) {} }
     renderGenericTray();
+  }
+
+  // The GM-only hide/show roll toggle sits as the left-most control on a system
+  // tray's row (players' sheets never have it). The generic tray keeps its eye in
+  // the pool row below (renderPool).
+  function injectTrayEye() {
+    const camp = GMCamp.get(); if(!camp) return;
+    const row = trayEl.querySelector('.gmt-row'); if(!row) return;
+    const hidden = GMCamp.isHidden();
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'dice-hide-btn' + (hidden ? ' on' : '');
+    btn.title = hidden ? 'Rolls hidden from players — click to share' : 'Rolls shared with players — click to hide';
+    btn.innerHTML = hidden ? ICO_EYE_OFF : ICO_EYE;
+    btn.onclick = () => { GMCamp.toggleHide(); renderTray(); };
+    row.insertBefore(btn, row.firstChild);
   }
 
   // Tap a die to add it to the pool (right-click removes one); the pool reads
@@ -12404,9 +12422,9 @@ function init_dice(root) {
   // tray (which carries its own Roll button) it's just the campaign share eye.
   function renderPool() {
     if(sysTray()) {
-      const eye = hideEyeRow();
-      poolEl.innerHTML = eye ? '<div class="dice-pool-row sys">' + eye + '</div>' : '';
-      wireHideEye();
+      // System trays carry their Roll button and the hide/show eye inline, so the
+      // pool row below is empty.
+      poolEl.innerHTML = '';
       return;
     }
     let h = '<div class="dice-pool-row">';
@@ -12447,19 +12465,21 @@ function init_dice(root) {
     });
   }
 
+  // Remembered per-tray counts so a roll doesn't reset what the GM dialed in.
+  const _tray = { yz: 5, wild: 4, ghost: 4, co: 2, mv: 0 };
+
   // ════════ YZE — Year Zero Engine (D6 pool: each 6 a success, each 1 a bane) ════════
-  let _yz = { pool: 5 };
   function yzCount(rolls) { let s = 0, b = 0; rolls.forEach(v => { if(v === 6) s++; else if(v === 1) b++; }); return { s, b }; }
   function yzTier(s) { return s >= 2 ? { t: 'SUCCESS ×' + s, type: 'crit' } : s === 1 ? { t: 'SUCCESS', type: 'crit' } : { t: 'FAILURE', type: 'fumble' }; }
   function renderYZETray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('yz-pool', _yz.pool, 1, 20)
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('yz-pool', _tray.yz, 1, 20)
       + '<button class="gmt-roll" id="yz-roll">Roll</button></div></div>';
-    wireStepper('yz-pool', 1, 20, v => { _yz.pool = v; });
+    wireStepper('yz-pool', 1, 20, v => { _tray.yz = v; });
     trayEl.querySelector('#yz-roll').onclick = yzRoll;
   }
   function yzRoll() {
     const size = Math.max(1, Math.min(20, parseInt((trayEl.querySelector('#yz-pool') || {}).value, 10) || 1));
-    _yz.pool = size;
+    _tray.yz = size;
     const base = []; for(let i = 0; i < size; i++) base.push(d6());
     const c = yzCount(base), tier = yzTier(c.s);
     gmDiceAnim(base.map(v => ({ sides: 6, v })));
@@ -12467,9 +12487,113 @@ function init_dice(root) {
     gmLog('YZE pool', c.s + ' · ' + tier.t, detail, tier.type);
   }
 
-  // Registry of system-specific trays. Systems absent here use the generic pool.
+  // ════════ WEG D6 — Star Wars / ACE! / D6 2e (pool of d6, last is the Wild Die) ════════
+  // The Wild Die explodes on a 6 (re-roll and add) and a 1 is a complication.
+  function renderWildTray() {
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('wd-n', _tray.wild, 1, 15)
+      + '<button class="gmt-roll" id="wd-roll">Roll</button></div></div>';
+    wireStepper('wd-n', 1, 15, v => { _tray.wild = v; });
+    trayEl.querySelector('#wd-roll').onclick = wildRoll;
+  }
+  function wildRoll() {
+    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 1));
+    _tray.wild = n;
+    const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
+    let w = d6(); const wildFaces = [w]; const complication = (w === 1); let guard = 0;
+    while(w === 6 && guard++ < 20) { w = d6(); wildFaces.push(w); }
+    const exploded = wildFaces[0] === 6;
+    const total = reg.reduce((a, b) => a + b, 0) + wildFaces.reduce((a, b) => a + b, 0);
+    gmDiceAnim(reg.concat(wildFaces).map(v => ({ sides: 6, v })));
+    const detail = '[' + reg.join(' ') + '] ✦[' + wildFaces.join('→') + ']';
+    const type = exploded ? 'crit' : complication ? 'fumble' : '';
+    const tag = exploded ? ' ✦' : complication ? ' ⚠' : '';
+    gmLog('D6 wild pool', total + tag, detail, type);
+  }
+
+  // ════════ Ghostbusters — like the wild pool, but one die is the Ghost Die ════════
+  // A 6 on the Ghost Die counts 0 and signals trouble (it never explodes).
+  function renderGhostTray() {
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('gh-n', _tray.ghost, 1, 15)
+      + '<button class="gmt-roll" id="gh-roll">Roll</button></div></div>';
+    wireStepper('gh-n', 1, 15, v => { _tray.ghost = v; });
+    trayEl.querySelector('#gh-roll').onclick = ghostRoll;
+  }
+  function ghostRoll() {
+    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#gh-n') || {}).value, 10) || 1));
+    _tray.ghost = n;
+    const normals = []; for(let i = 0; i < n - 1; i++) normals.push(d6());
+    const ghost = d6(), isGhost = (ghost === 6);
+    const sum = normals.reduce((a, b) => a + b, 0) + (isGhost ? 0 : ghost);
+    gmDiceAnim(normals.concat([ghost]).map(v => ({ sides: 6, v })));
+    const detail = n + 'd6(' + normals.concat([ghost]).join(',') + ')' + (isGhost ? ' · Ghost = 0' : '');
+    gmLog('Ghost pool', sum + (isGhost ? ' · 👻 GHOST' : ''), detail, isGhost ? 'fumble' : '');
+  }
+
+  // ════════ Candela Obscura — d6 pool, take the highest (0 dice → roll 2, take lowest) ════════
+  function coTier(high, sixes, zero) { if(!zero && sixes >= 2) return { t: 'CRITICAL', type: 'crit' }; if(high === 6) return { t: 'FULL SUCCESS', type: 'crit' }; if(high >= 4) return { t: 'MIXED', type: '' }; return { t: 'MISS', type: 'fumble' }; }
+  function renderCandelaTray() {
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('co-n', _tray.co, 0, 6)
+      + '<button class="gmt-roll" id="co-roll">Roll</button></div></div>';
+    wireStepper('co-n', 0, 6, v => { _tray.co = v; });
+    trayEl.querySelector('#co-roll').onclick = candelaRoll;
+  }
+  function candelaRoll() {
+    const n = Math.max(0, Math.min(6, parseInt((trayEl.querySelector('#co-n') || {}).value, 10) || 0));
+    _tray.co = n;
+    let rolls = [], zero = false;
+    if(n <= 0) { zero = true; rolls = [d6(), d6()]; } else { for(let i = 0; i < n; i++) rolls.push(d6()); }
+    gmDiceAnim(rolls.map(v => ({ sides: 6, v })));
+    const high = zero ? Math.min(rolls[0], rolls[1]) : Math.max.apply(null, rolls);
+    const sixes = rolls.filter(v => v === 6).length, t = coTier(high, sixes, zero);
+    gmLog('Candela' + (zero ? ' · 0d' : ''), high + ' · ' + t.t, (zero ? 'take lowest ' : '') + rolls.length + 'd6(' + rolls.join(',') + ')', t.type);
+  }
+
+  // ════════ Marvel Multiverse — d616 (3d6; the middle Marvel die shows 1 = 6 + Fantastic) ════════
+  function renderMarvelTray() {
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('mv-e', _tray.mv, -5, 5)
+      + '<button class="gmt-roll" id="mv-roll">Roll d616</button></div></div>';
+    wireStepper('mv-e', -5, 5, v => { _tray.mv = v; });
+    trayEl.querySelector('#mv-roll').onclick = marvelRoll;
+  }
+  function marvelRoll() {
+    const netE = Math.max(-5, Math.min(5, parseInt((trayEl.querySelector('#mv-e') || {}).value, 10) || 0));
+    _tray.mv = netE;
+    const dice = [{ v: d6(), marvel: false }, { v: d6(), marvel: true }, { v: d6(), marvel: false }];
+    const faceOf = x => (x.marvel && x.v === 1) ? 6 : x.v;
+    const cnt = Math.abs(netE);
+    for(let i = 0; i < cnt && i < 3; i++) {
+      let idx = 0, best = faceOf(dice[0]);
+      for(let j = 1; j < 3; j++) { const f = faceOf(dice[j]); if(netE > 0 ? f < best : f > best) { best = f; idx = j; } }
+      const nv = d6(), oldf = faceOf(dice[idx]), newf = faceOf({ v: nv, marvel: dice[idx].marvel });
+      if(netE > 0 ? newf > oldf : newf < oldf) dice[idx].v = nv;
+    }
+    const fantastic = (dice[1].v === 1), marvelVal = fantastic ? 6 : dice[1].v;
+    const sum = faceOf(dice[0]) + marvelVal + faceOf(dice[2]);
+    gmDiceAnim([dice[0].v, dice[1].v, dice[2].v].map(v => ({ sides: 6, v })));
+    const etTag = netE > 0 ? ' · ' + netE + ' edge' : netE < 0 ? ' · ' + (-netE) + ' trouble' : '';
+    const detail = 'd616(' + dice[0].v + ' | ✦' + dice[1].v + (fantastic ? '→6' : '') + ' | ' + dice[2].v + ')' + etTag;
+    gmLog('d616', sum + (fantastic ? ' · ✦ FANTASTIC' : ''), detail, fantastic ? 'crit' : '');
+  }
+
+  // ════════ Kids on Bikes — tap a die to roll it once (no pool, no adv/dis) ════════
+  function renderKOBTray() {
+    const dice = diceForSystem('KOB');
+    let h = '<div class="gmt"><div class="gmt-row gmt-kob">';
+    dice.forEach(d => { h += '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a d' + d + '">d' + d + '</button>'; });
+    h += '</div></div>';
+    trayEl.innerHTML = h;
+    trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => rollCore([[parseInt(b.dataset.d, 10), 1]], 0, 'none', null); });
+  }
+
+  // Registry of system-specific trays. Systems absent here (D&D, Shadowdark,
+  // Nimble, ICRPG, DCC, Justice League) use the shared generic pool tray.
   const GM_TRAYS = {
     YZE: renderYZETray,
+    SW: renderWildTray, ACE: renderWildTray, D62E: renderWildTray,
+    GB: renderGhostTray,
+    CO: renderCandelaTray,
+    MMRPG: renderMarvelTray,
+    KOB: renderKOBTray,
   };
 
   // The rolling mechanic itself, so the tray's Roll button and other tools
