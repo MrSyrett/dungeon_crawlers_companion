@@ -97,6 +97,15 @@ body::before {
 /* Topbar spacer */
 .topbar-spacer { flex: 1; }
 
+/* Single top bar hosting the party monitors: controls left, bubbles fill the
+   middle (scroll if crowded), scenes + clock + window button on the right. */
+#gmc-topbar { gap: 10px; }
+#gmc-topbar .session-controls { margin-left: 0; padding-left: 0; border-left: none; flex-shrink: 0; }
+#gmc-topbar #gmc-party-bubbles { flex: 1 1 auto; min-width: 60px; }
+#gmc-topbar .scene-strip { margin-left: 0; }
+#gmc-topbar .tel-clock { padding: 0 12px; }
+#gmc-topbar .view-controls { flex-shrink: 0; }
+
 /* Mobile-only handle that collapses the top bar (with its pinned scenes) to
    reclaim vertical space. Hidden on desktop; the mobile media query shows it. */
 #hdr-toggle { display: none; }
@@ -1666,6 +1675,11 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .pop-scrim.show{display:flex}
 .popup{width:min(520px,94vw);max-height:82vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#161922,#101319);border:1px solid var(--accent-dim);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.65),0 0 0 1px rgba(36,211,238,.15);overflow:hidden}
 .popup.wide{width:min(760px,96vw)}
+/* Full-height quick-tool window — fills the page vertically instead of a drawer. */
+.popup.tall{width:min(600px,96vw);height:96vh;max-height:96vh}
+/* Message composer only — hide the roster list/controls from the Party tool. */
+.pop-body.msg-only .pty-bar,.pop-body.msg-only .pty-empty,.pop-body.msg-only .pty-list{display:none!important}
+.pop-body.msg-only .ai-party-msg{border-bottom:none}
 .pop-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(36,211,238,.06),transparent);flex-shrink:0}
 .pop-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--white)}
 .pop-x{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mid);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -1727,14 +1741,8 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 <!-- Mobile-only: collapse/expand the top bar to reclaim space from pinned scenes -->
 <div id="hdr-toggle" role="button" tabindex="0"></div>
 
-<!-- ═══ TOP BAR ═══ -->
-<div class="topbar">
-  <div class="brand" style="min-width:140px;"></div>
-
-  <div class="topbar-spacer"></div>
-
-  <div class="scene-pins" id="scene-pins"></div>
-
+<!-- ═══ SINGLE TOP BAR — session controls + party monitors + scenes + clock ═══ -->
+<div class="topbar" id="gmc-topbar">
   <div class="session-controls">
     <select class="gm-sys-select" id="gm-system-toggle" title="Game system — hides the other system's generators and bestiary" aria-label="Game system" onchange="setGmSystem(this.value)">
       <option value="DCC">DCC</option>
@@ -1758,6 +1766,11 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
       <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
     </label>
   </div>
+
+  <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Link a campaign to see your party</div></div>
+  <div class="mon-group" id="gmc-timers"></div>
+  <div class="scene-strip" id="gmc-scenes"></div>
+  <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
 
   <div class="view-controls">
     <button class="add-window-btn" id="add-window-btn" type="button" onclick="addWindow()" title="Add a window" aria-label="Add a window"><span class="aw-plus">＋</span> Window</button>
@@ -2325,15 +2338,7 @@ GMScenes.renderPins();
 })();
 </script>
 
-<!-- ═══ ZONE 1b — MONITOR ROW: party bubbles + timers + scenes + clock ═══ -->
-<div class="gmc-telemetry" id="gmc-telemetry">
-  <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Link a campaign to see your party</div></div>
-  <div class="mon-group" id="gmc-timers"></div>
-  <div class="scene-strip" id="gmc-scenes"></div>
-  <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
-</div>
-
-<!-- ═══ ZONE 2 — CANVAS: Adventure | (Map + Combat) | Roll Log ═══ -->
+<!-- ═══ ZONE 2 — CANVAS: Adventure | (Maps + Combat) | Roll Log ═══ -->
 <div class="console-workspace" id="console-workspace">
   <aside class="cstation" id="cst-adv">
     <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
@@ -2341,7 +2346,7 @@ GMScenes.renderPins();
   </aside>
   <main class="cstation cstation-center" id="cst-center">
     <section class="csub" id="cst-map">
-      <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Map · VTT</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
+      <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Maps</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
       <div class="cst-content" id="cst-map-content"></div>
     </section>
     <section class="csub" id="cst-cbt">
@@ -2374,18 +2379,8 @@ GMScenes.renderPins();
     <button class="qbtn" type="button" onclick="openTool('gen')"><span class="qi">☉</span>Generators</button>
     <button class="qbtn" type="button" onclick="openTool('music')"><span class="qi">♪</span>Music</button>
     <button class="qbtn" type="button" onclick="openTool('notes')"><span class="qi">✎</span>Notes</button>
-    <button class="qbtn" type="button" onclick="openTool('party')"><span class="qi">💬</span>Message</button>
+    <button class="qbtn" type="button" onclick="openTool('message')"><span class="qi">💬</span>Message</button>
     <button class="qbtn" type="button" onclick="openTool('rules')"><span class="qi">📖</span>Rulebooks</button>
-  </div>
-  <div class="bb-dice" id="bb-dice">
-    <span class="bb-lbl">Dice</span>
-    <button class="qdie" type="button" data-die="4">d4</button>
-    <button class="qdie" type="button" data-die="6">d6</button>
-    <button class="qdie" type="button" data-die="8">d8</button>
-    <button class="qdie" type="button" data-die="10">d10</button>
-    <button class="qdie" type="button" data-die="12">d12</button>
-    <button class="qdie" type="button" data-die="20">d20</button>
-    <button class="qdie" type="button" data-die="100">d%</button>
   </div>
 </footer>
 
@@ -2614,7 +2609,7 @@ GMScenes.renderPins();
           </div>
         </div>
         <div class="mus-scene-list"></div>
-        <div class="mus-empty mus-scene-empty">Build a scene from several tracks that play together &mdash; set each track's loop and volume, then <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2a6.4 6.4 0 0 0-6.4 6.4c0 4.6 5.5 12 5.7 12.3a.9.9 0 0 0 1.4 0c.2-.3 5.7-7.7 5.7-12.3A6.4 6.4 0 0 0 12 2.2Zm0 4.1a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg> Pin it to the top bar for one-tap play.</div>
+        <div class="mus-empty mus-scene-empty">Build a scene from several tracks that play together &mdash; set each track's loop and volume. Every scene shows up in the top bar for one-tap play.</div>
       </div>
     </div>
     <input type="file" class="mus-file-music" accept="audio/*" multiple style="display:none">
@@ -3902,7 +3897,7 @@ function isMobileView() { return GM_MOBILE_MQ.matches; }
 function normalizeTool(t) { return t === 'combat' ? 'trackers' : t; }
 
 // Tool catalog (order = the tool-picker menu order)
-const TOOL_ORDER = ['adventure','maps','trackers','notes','music','gen','party','rules','dice','vtt'];
+const TOOL_ORDER = ['adventure','maps','trackers','notes','music','gen','party','rules','dice'];
 const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
 
 // ── Dynamic windows ───────────────────────────────────────────────────────
@@ -3955,7 +3950,7 @@ function ensureToolWindow(toolType) {
   // Console view: route to the station that hosts the tool (e.g. a monster sent
   // to the tracker lands in the spine), rather than spawning a hidden window.
   if(document.body.dataset.cview === 'console') {
-    const STATION_FOR = { trackers:'cbt', dice:'log', vtt:'map', adventure:'adv' };
+    const STATION_FOR = { trackers:'cbt', dice:'log', maps:'map', adventure:'adv' };
     for(const st of CONSOLE_STATIONS) {
       const cache = gmNodes['cst-' + st];
       if(cache && cache.active === toolType) return cache.byTool[toolType];
@@ -4135,8 +4130,8 @@ GM_MOBILE_MQ.addEventListener('change', () => renderWindows());
 //   Canvas: [ Adventure ] | [ Map·VTT / Combat (center stack) ] | [ Roll Log ]
 // ══════════════════════════════════════════════════════════════════════════
 const CONSOLE_STATIONS = ['adv','map','cbt','log'];
-const STATION_TOOL   = { adv:'adventure', map:'vtt', cbt:'trackers', log:'dice' };
-const STATION_TITLES = { adv:'Adventure', map:'Map · VTT', cbt:'Combat', log:'Roll Log' };
+const STATION_TOOL   = { adv:'adventure', map:'maps', cbt:'trackers', log:'dice' };
+const STATION_TITLES = { adv:'Adventure', map:'Maps', cbt:'Combat', log:'Roll Log' };
 // Each mode is a visibility map over the four stations. The center wrapper
 // (#cst-center) is shown whenever either of its subs (map / cbt) is visible.
 const CONSOLE_MODES = {
@@ -4348,9 +4343,10 @@ function showGmcPop(title, html, opts){
   if(ttl) ttl.textContent = title || '';
   if(body){
     body.classList.toggle('tool-host', !!opts.toolHost);
+    body.classList.toggle('msg-only', !!opts.msgOnly);
     if(html != null) body.innerHTML = html;
   }
-  if(pop) pop.classList.toggle('wide', !!opts.wide);
+  if(pop){ pop.classList.toggle('wide', !!opts.wide); pop.classList.toggle('tall', !!opts.tall); }
   if(scrim){ scrim.classList.toggle('drawer', !!opts.drawer); scrim.classList.add('show'); }
 }
 function closeGmcPop(){
@@ -4363,49 +4359,54 @@ function closeGmcPop(){
   }
 }
 
-// Quick tools open a real, live tool instance in a bottom drawer.
-const POP_TOOL = { gen:'gen', music:'music', notes:'notes', party:'party', rules:'rules', cbt:'trackers' };
+// Quick tools open a real, live tool instance as a FULL-HEIGHT window.
+// "message" is the Party tool's composer only (no roster cards).
+const POP_TOOL = { gen:'gen', music:'music', notes:'notes', message:'party', party:'party', rules:'rules', cbt:'trackers' };
 const gmcPopNodes = {};
 function openTool(k){
+  const isMsg = (k === 'message');
   const tool = normalizeTool(POP_TOOL[k] || k);
   const body = document.getElementById('gmc-pop-body');
   if(!body) return;
   if(!gmcPopNodes[tool]) gmcPopNodes[tool] = buildToolNode(tool);
   const node = gmcPopNodes[tool];
-  showGmcPop(TOOL_LABELS[tool] || tool, null, { drawer:true, toolHost:true });
+  showGmcPop(isMsg ? 'Message the Players' : (TOOL_LABELS[tool] || tool), null, { tall:true, toolHost:true, msgOnly:isMsg });
   body.innerHTML = '';
   node.classList.add('active');
   body.appendChild(node);
 }
 
+// A party bubble opens that character's actual Party-tool card (cloned so it
+// reads identically), expanded, in a full-height window.
 function charPop(i){
-  const p = gmcRoster[i] || (window.GM_ROSTER||[])[i];
-  if(!p) return;
+  const body = document.getElementById('gmc-pop-body');
+  if(!body) return;
+  const partyNode = gmcPopNodes['party'];
+  const cards = partyNode ? partyNode.querySelectorAll('.pty-list .pty-card') : [];
+  const src = cards[i];
+  const p = gmcRoster[i] || (window.GM_ROSTER||[])[i] || {};
+  const title = p.name || (src && src.querySelector('.pty-name') ? src.querySelector('.pty-name').textContent : 'Character');
+  if(src){
+    const clone = src.cloneNode(true);
+    clone.classList.add('open');                                   // show the full card body
+    const rm = clone.querySelector('[data-remove]'); if(rm) rm.remove();
+    showGmcPop(title, '', { tall:true });
+    body.classList.remove('tool-host','msg-only');
+    body.innerHTML = '';
+    body.appendChild(clone);
+    return;
+  }
+  // No synced card yet — fall back to a compact live-stats card.
   const pct = gmcHpPct(p.hp);
   const barW = pct==null ? 100 : Math.max(4,pct);
   const sub = [p.sub, p.ac ? ('AC '+p.ac) : ''].filter(Boolean).join(' · ');
   const html = ''
-    + '<div class="pchar-hd"><div class="pchar-av">'+esc2(gmcInitials(p.name).toUpperCase())+'</div>'
-    + '<div><div class="pchar-nm">'+esc2(p.name)+'</div>'+(sub?'<div class="pchar-sub">'+esc2(sub)+'</div>':'')+'</div></div>'
+    + '<div class="pchar-hd"><div class="pchar-av">'+esc2(gmcInitials(title).toUpperCase())+'</div>'
+    + '<div><div class="pchar-nm">'+esc2(title)+'</div>'+(sub?'<div class="pchar-sub">'+esc2(sub)+'</div>':'')+'</div></div>'
     + '<div class="hpctl"><div class="hpbar"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i>'
     + '<div class="t">'+esc2(p.hp||'—')+'</div></div></div>'
-    + '<div class="pline" style="color:var(--muted)">Live HP &amp; AC from the linked campaign. Open the Party tool for full controls and conditions.</div>'
-    + '<div style="margin-top:12px"><button class="qbtn" type="button" onclick="openTool(\'party\')"><span class="qi">👥</span> Open Party Tool</button></div>';
-  showGmcPop(p.name, html, { drawer:true });
-}
-
-// ── Bottom-bar dice: one-tap a die → straight into the Roll Log. ──
-function wireBottomDice(){
-  document.querySelectorAll('#bb-dice .qdie').forEach(b => {
-    if(b._wired) return; b._wired = true;
-    b.addEventListener('click', () => {
-      const sides = parseInt(b.dataset.die, 10);
-      try {
-        const node = getWinNode('cst-log', 'dice');
-        if(node && node._quickRoll) node._quickRoll(sides);
-      } catch(e) {}
-    });
-  });
+    + '<div class="pline" style="color:var(--muted)">Sync a character sheet (Party tool) to see the full card here.</div>';
+  showGmcPop(title, html, {});
 }
 
 function gmcTick(){
@@ -4642,7 +4643,7 @@ function initDocTool(root) {
     // Desktop: trust the layout's own "cramped pane" flag. It marks exactly the
     // 4-panel panes and the stacked Focus side panes as narrow; Single, Split,
     // and the Focus main pane are not, so they get the two-column layout.
-    const pane = root.closest('.pane');
+    const pane = root.closest('.pane, .csub, .cstation');
     if(pane) return pane.classList.contains('narrow');
     // No pane ancestor (unusual embedding): fall back to a conservative width.
     return frameWrap.clientWidth > 0 && frameWrap.clientWidth < 420;
@@ -5021,7 +5022,7 @@ function init_trackers(root) {
   function updateRoundDisplay() {
     // Scope to THIS window (body + its cloned toolbar in the pane header) so two
     // Tracker windows don't overwrite each other's round display.
-    const scope = root.closest('.pane') || document;
+    const scope = root.closest('.pane, .csub, .cstation') || document;
     scope.querySelectorAll('.trk-round-num').forEach(el => { el.textContent = round; });
   }
   function npcHpColor(pct) {
@@ -5852,8 +5853,8 @@ function init_trackers(root) {
     if(!btn) return;
     // Only react to buttons inside THIS window (its body, or its cloned toolbar
     // in the same .pane header) — so duplicate Tracker windows stay independent.
-    const pane = root.closest('.pane');
-    const toolbarSlot = pane ? pane.querySelector('.pane-toolbar-slot') : null;
+    const pane = root.closest('.pane, .csub, .cstation');
+    const toolbarSlot = pane ? pane.querySelector('.pane-toolbar-slot, .cst-toolbar') : null;
     if(!(root.contains(btn) || (toolbarSlot && toolbarSlot.contains(btn)))) return;
 
     if(btn.classList.contains('trk-next-round')) {
@@ -9708,7 +9709,7 @@ window.init_gen = function(root) {
     // Keep the live select and this window's toolbar clone in sync (scoped to
     // this .pane so a second Generators window keeps its own active tab)
     if(tabSelect) tabSelect.value = activeTab;
-    const scope = root.closest('.pane') || document;
+    const scope = root.closest('.pane, .csub, .cstation') || document;
     scope.querySelectorAll('.gen-tab-select').forEach(s => { s.value = activeTab; });
   }
 
@@ -10615,14 +10616,12 @@ function init_music(root) {
         '<div class="mus-scene-head">' +
           '<button class="mus-scene-play" title="Play / stop scene">'+(playing?'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><rect x="5.2" y="5.2" width="13.6" height="13.6" rx="2"/></svg>':'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg>')+'</button>' +
           '<input class="mus-scene-name" value="'+esc(sc.name)+'" placeholder="Scene name...">' +
-          '<button class="mus-scene-pin'+(sc.pinned?' active':'')+'" title="Pin to top bar"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2a6.4 6.4 0 0 0-6.4 6.4c0 4.6 5.5 12 5.7 12.3a.9.9 0 0 0 1.4 0c.2-.3 5.7-7.7 5.7-12.3A6.4 6.4 0 0 0 12 2.2Zm0 4.1a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg></button>' +
           '<button class="btn small ghost mus-scene-add" title="Add local audio files" aria-label="Add local audio files"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg></button>' +
           '<button class="btn small ghost mus-scene-add-url" title="Add a direct audio URL" aria-label="Add a direct audio URL"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>' +
           '<button class="mus-scene-del" title="Delete scene">&#10005;</button>' +
         '</div>' +
         '<div class="mus-scene-tracks">'+tracksHtml+'</div>';
       card.querySelector('.mus-scene-play').addEventListener('click', ()=> GMScenes.toggle(sc.id));
-      card.querySelector('.mus-scene-pin').addEventListener('click', ()=> GMScenes.togglePin(sc.id));
       card.querySelector('.mus-scene-del').addEventListener('click', ()=> GMScenes.removeScene(sc.id));
       card.querySelector('.mus-scene-name').addEventListener('input', e=> GMScenes.renameScene(sc.id, e.target.value));
       card.querySelector('.mus-scene-add').addEventListener('click', ()=>{ sceneFileTarget = sc.id; fileScene.click(); });
@@ -11170,7 +11169,7 @@ function gmBootstrapWindows() {
   // instance is reused when they tap "Message"/Party.
   try { gmcPopNodes['party'] = gmcPopNodes['party'] || buildToolNode('party'); } catch(e) {}
   try { renderPartyStrip(); renderTimers(); renderScenes(); } catch(e) {}
-  try { wireScenes(); wireBottomDice(); } catch(e) {}
+  try { wireScenes(); } catch(e) {}
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gmBootstrapWindows);
 else gmBootstrapWindows();
@@ -11295,7 +11294,7 @@ function restoreConsole(c) {
   // Restore each tool's saved state into its NEW home station, regardless of
   // which (possibly older-scheme) station it was saved under. Only the four
   // fixed console tools carry over; everything else lives in popups now.
-  const TOOL_STATION = { adventure:'adv', vtt:'map', trackers:'cbt', dice:'log' };
+  const TOOL_STATION = { adventure:'adv', maps:'map', vtt:'map', trackers:'cbt', dice:'log' };
   Object.values(c.stations || {}).forEach(conf => {
     if(!conf) return;
     Object.entries(conf.tools || {}).forEach(([t, state]) => {
