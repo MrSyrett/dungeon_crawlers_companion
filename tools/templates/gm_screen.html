@@ -4122,6 +4122,7 @@ function setConsoleMode(mode) { renderConsole(mode); }
 //    mode status line, and auto-flip to Combat when initiative starts. ──
 let gmcAutoCombat = true;
 let gmcAutoedFight = false;
+let gmcRestored = false;   // true once a saved layout has been restored, so bootstrap won't override it
 const gmcStart = Date.now();
 
 function gmcInitials(name){
@@ -10952,7 +10953,8 @@ window.addEventListener('pageshow', function(e) {
 // in later script blocks) exists before stations mount. Default view is the
 // CONSOLE in Explore mode; Free mode + saved windows are available on demand.
 function gmBootstrapWindows() {
-  renderConsole(consoleMode || 'explore');
+  // Don't override a layout the server shim already restored (mode/view/stations).
+  if(!gmcRestored) renderConsole(consoleMode || 'explore');
   // Pre-create the Party instance so its campaign sync runs and the masthead
   // party strip is populated even before the GM opens Downtime.
   try { getWinNode('cst-side', 'party'); } catch(e) {}
@@ -11025,6 +11027,7 @@ function saveSession() {
     version: 1,
     saved: new Date().toISOString(),
     windows: serializeWindows(),
+    console: serializeConsole(),
     campaign: GMCamp.serialize(),   // the link lives in the top bar, not in a tool
     scenes: (window.GMScenes ? GMScenes.serialize() : undefined),
   };
@@ -11049,6 +11052,7 @@ function loadSession(input) {
       if(data.campaign) GMCamp.restore(data.campaign);
       if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
       restoreWindows(data);
+      restoreConsole(data.console);
     } catch(err) {
       alert('Could not load session file: ' + err.message);
     }
@@ -11058,10 +11062,43 @@ function loadSession(input) {
 }
 
 // ── Server persistence hooks (used by the injected shim when running on Dungeon Crawler's Companion) ──
+// Console state: the active mode, auto-combat flag, and each station's tool
+// states (tracker, notes, the VTT room URL, …) so a reload comes back where you left.
+function serializeConsole() {
+  const stations = {};
+  CONSOLE_STATIONS.forEach(st => {
+    const cache = gmNodes['cst-' + st];
+    if(!cache) return;
+    const tools = {};
+    Object.entries(cache.byTool).forEach(([t, node]) => {
+      if(node._getState) { try { tools[t] = node._getState(); } catch(e) {} }
+    });
+    stations[st] = { tool: cache.active, tools };
+  });
+  return { view: document.body.dataset.cview || 'console', mode: consoleMode, auto: gmcAutoCombat, stations };
+}
+function restoreConsole(c) {
+  gmcRestored = true;
+  if(!c) { renderConsole('explore'); return; }
+  // Rebuild station instances + their state before mounting.
+  Object.entries(c.stations || {}).forEach(([st, conf]) => {
+    if(!conf) return;
+    Object.entries(conf.tools || {}).forEach(([t, state]) => {
+      const node = getWinNode('cst-' + st, t);
+      if(node._setState) { try { node._setState(state); } catch(e) {} }
+    });
+    if(conf.tool) { const cache = gmNodes['cst-' + st]; if(cache) cache.active = conf.tool; getWinNode('cst-' + st, conf.tool); }
+  });
+  if(typeof c.auto === 'boolean') gmcAutoCombat = c.auto;
+  if(c.view === 'free') setFreeView();
+  else renderConsole(c.mode || 'explore');
+}
+
 window.__gmScreenGetState = function() {
   return {
     version: 1,
     windows: serializeWindows(),
+    console: serializeConsole(),
     campaign: GMCamp.serialize(),
     scenes: (window.GMScenes ? GMScenes.serialize() : undefined),
   };
@@ -11071,7 +11108,8 @@ window.__gmScreenSetState = function(data) {
   if(!data || !data.version) return;
   if(data.campaign) GMCamp.restore(data.campaign);
   if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
-  restoreWindows(data);
+  restoreWindows(data);        // rebuilds Free-mode windows (clears gmNodes first)
+  restoreConsole(data.console); // then station instances + the active view/mode
 };
 
 
