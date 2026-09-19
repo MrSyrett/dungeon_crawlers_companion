@@ -11,7 +11,7 @@ function SaveHint() {
       className="ml-auto text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]"
       aria-live="polite"
     >
-      {pending ? "Saving…" : "Auto-saved"}
+      {pending ? "Saving…" : ""}
     </span>
   );
 }

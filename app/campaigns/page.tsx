@@ -482,9 +482,7 @@ export default async function CampaignsPage() {
 
                 <CampaignSystemSelect id={c.id} system={c.system ?? null} action={setCampaignSystem} />
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
-                  Pick a game system — it saves as you choose it. The GM Screen switches to this
-                  system automatically when you link this campaign, so there&apos;s no separate system
-                  picker on the screen.
+                  The GM Screen switches to this system automatically when you link this campaign.
                 </p>
 
                 <form action={setCampaignVttUrl} className="mt-2 flex gap-2">

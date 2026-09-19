@@ -19,7 +19,7 @@ function SaveHint() {
       className="shrink-0 self-center text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]"
       aria-live="polite"
     >
-      {pending ? "Saving…" : "Auto-saved"}
+      {pending ? "Saving…" : ""}
     </span>
   );
 }

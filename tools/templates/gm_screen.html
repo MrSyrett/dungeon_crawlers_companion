@@ -102,9 +102,14 @@ body::before {
 #gmc-topbar { gap: 10px; }
 #gmc-topbar .session-controls { margin-left: 0; padding-left: 0; border-left: none; flex-shrink: 0; }
 /* Import / Export stacked vertically */
-.io-stack, .camp-stack { display: flex; flex-direction: column; gap: 3px; }
-#gmc-topbar .camp-stack { flex-shrink: 0; }
+/* Left-side control cluster: a row of VTT · Export · Import with the Campaign
+   button below it. The spacer keeps the floating Home button from covering it. */
+.gmc-home-spacer { flex-shrink: 0; width: 86px; align-self: stretch; }
+.io-cluster { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; min-width: 0; }
+.io-row { display: flex; align-items: center; gap: 3px; }
 .io-btn { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-start; padding: 3px 8px; min-height: 0; }
+.camp-btn-wide { width: 100%; justify-content: center; }
+.camp-btn-wide .camp-btn-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .io-btn span { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
 #gmc-topbar #gmc-party-bubbles { flex: 1 1 auto; min-width: 60px; }
 #gmc-topbar .scene-strip { margin-left: 0; }
@@ -1214,9 +1219,6 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-camp-panel { padding: 6px 0 2px; }
 /* System toggle (SD / DCC) — top bar, next to Campaign */
 /* Read-only system indicator (the linked campaign drives the system now). */
-.gm-sys-label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--panel-2); color: var(--white); border: 1px solid var(--border); border-radius: 4px; font-size: 12px; line-height: 1; white-space: nowrap; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.gm-sys-label .gm-sys-ico { color: var(--accent); display: inline-flex; font-size: 13px; }
-.gm-sys-label .gm-sys-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 /* Campaign link — top bar button + popover */
 #camp-btn.on { background: rgba(200,160,32,0.12); color: var(--gold); border-color: var(--gold); }
 #camp-popover {
@@ -1659,6 +1661,9 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .bub-ac{flex-shrink:0;text-align:center;border-radius:6px;background:var(--panel-2);border:1px solid var(--border);padding:2px 7px;align-self:center}
 .bub-ac .l{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7px;letter-spacing:.05em;color:var(--muted);display:block;line-height:1}
 .bub-ac .v{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:var(--white);line-height:1.1}
+.bub-chips{display:flex;flex-wrap:wrap;gap:3px}
+.bub-chip{display:inline-flex;align-items:baseline;gap:2px;font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;color:var(--white);background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:1px 4px;line-height:1.2;white-space:nowrap}
+.bub-chip em{font-family:'Barlow Condensed',sans-serif;font-style:normal;font-weight:800;font-size:7px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
 .timer{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-left:2px solid #6a9fc8;border-radius:8px;padding:4px 10px;cursor:pointer;flex:0 0 auto}
 .timer:hover{border-color:var(--accent-dim)}
 .timer.zero{border-left-color:var(--red-light)}
@@ -1845,17 +1850,17 @@ body[data-cview="free"] .cst-log-rail{display:none}
 <!-- ═══ SINGLE TOP BAR — session controls + party monitors + scenes + clock ═══ -->
 <div class="topbar" id="gmc-topbar">
   <div class="session-controls">
-    <div class="gm-sys-label" id="gm-system-label" title="Game system — set by the linked campaign (Campaigns page)" aria-label="Game system"><span class="gm-sys-ico"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2 3 6.5v6c0 4.6 3.2 8.3 9 9.3 5.8-1 9-4.7 9-9.3v-6L12 2.2Z"/></svg></span><span class="gm-sys-name">—</span></div>
-    <div class="camp-stack">
-      <a class="btn small ghost vtt-launch io-btn" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg><span>VTT</span></a>
-      <button class="btn small ghost io-btn" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
-    </div>
-    <div class="io-stack">
-      <button class="btn small ghost io-btn" id="save-btn" onclick="saveSession()" title="Export / save session" aria-label="Export session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg><span>Export</span></button>
-      <label class="btn small ghost io-btn" title="Import / load session" aria-label="Import a saved session" style="cursor:pointer;">
-        <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg><span>Import</span>
-        <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
-      </label>
+    <div class="gmc-home-spacer" aria-hidden="true"></div>
+    <div class="io-cluster">
+      <div class="io-row">
+        <a class="btn small ghost vtt-launch io-btn" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg><span>VTT</span></a>
+        <button class="btn small ghost io-btn" id="save-btn" onclick="saveSession()" title="Export / save session" aria-label="Export session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg><span>Export</span></button>
+        <label class="btn small ghost io-btn" title="Import / load session" aria-label="Import a saved session" style="cursor:pointer;">
+          <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg><span>Import</span>
+          <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
+        </label>
+      </div>
+      <button class="btn small ghost io-btn camp-btn-wide" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> <span class="camp-btn-label">Campaign</span></button>
     </div>
   </div>
 
@@ -2067,7 +2072,11 @@ const GMCamp = (function() {
     const b = btn();
     if(!b) return;
     b.classList.toggle('on', !!campaign);
-    b.textContent = campaign ? ('' + campaign.code) : 'Campaign';
+    // Show the campaign NAME on the button (the icon stays); the code lives in
+    // the tooltip. Update the label span so we don't wipe the SVG.
+    const lbl = b.querySelector('.camp-btn-label');
+    if(lbl) lbl.textContent = campaign ? campaign.name : 'Campaign';
+    else b.textContent = campaign ? campaign.name : 'Campaign';
     b.title = campaign ? 'Campaign: ' + campaign.name + ' (' + campaign.code + ')' : 'Campaign link';
   }
 
@@ -4480,6 +4489,7 @@ function renderPartyStrip(roster){
         + '<div class="bub-nm">'+esc2(pc.name)+'</div>'
         + (pc.sub ? '<div class="bub-sub">'+esc2(pc.sub)+'</div>' : '')
         + (hpText ? '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span></div>' : '')
+        + (pc.extra && pc.extra.length ? '<div class="bub-chips">'+pc.extra.map(c=>'<span class="bub-chip">'+(c.label?'<em>'+esc2(c.label)+'</em>':'')+(c.value?esc2(c.value):'')+'</span>').join('')+'</div>' : '')
       + '</div>'
       + (pc.ac ? '<div class="bub-ac"><span class="l">'+esc2(pc.acLabel||'AC')+'</span><span class="v">'+esc2(pc.ac)+'</span></div>' : '')
       + '</div>';
@@ -4544,6 +4554,11 @@ function gmcTrackerState(){
   return null;
 }
 function gmcCombatNode(){
+  // Build-on-demand so the Monitor bar's round controls work even when the
+  // combat station was never mounted (a board saved in a combat-less mode, or
+  // a Free-mode board). sharedToolNode caches under gmNodes['cst-cbt'], so the
+  // combat station reuses this exact instance when it does mount.
+  try { const n = sharedToolNode('trackers'); if(n) return n; } catch(e){}
   const cache = gmNodes['cst-cbt'];
   return cache && cache.byTool && cache.byTool['trackers'];
 }
@@ -13732,17 +13747,25 @@ function init_party(root) {
       const roster = Array.from(listEl.querySelectorAll('.pty-card')).map(card => {
         const name = ((card.querySelector('.pty-name') || {}).textContent || '').trim();
         const sub  = ((card.querySelector('.pty-sub')  || {}).textContent || '').trim();
-        // Read the first "vital" chip (HP / Health / Resolve / …) and the first
-        // "defense" chip (AC / Armor / DEF / DR) — labels vary by system.
-        let hp = '', ac = '', acLabel = 'AC';
+        // Capture EVERY header chip as {label, value} (each is "Label <b>value</b>")
+        // so the Monitor bubble can show all of it. Then pick a primary "vital"
+        // chip for the HP bar and a "defense" chip for the AC box; the rest are
+        // rendered as extra chips on the bubble — nothing gets dropped.
         const VITAL = /^(HP|HEALTH|VITALITY|WOUNDS|RESOLVE)\b/i;
-        const DEF = /^(AC|ARMOR|ARMOUR|DEF|DEFENSE|DEFENCE|DR)\b/i;
-        card.querySelectorAll('.pty-card-hd .pty-chip').forEach(ch => {
-          const t = (ch.textContent || '').trim();
-          if(!hp && VITAL.test(t)) hp = t.replace(VITAL, '').trim();
-          else if(!ac && DEF.test(t)) { acLabel = (t.match(DEF)[1] || 'AC').toUpperCase().slice(0, 3); ac = t.replace(DEF, '').trim(); }
+        const DEF = /^(AC|ARMOR|ARMOUR|DEF|DEFENSE|DEFENCE|DR|SOAK|TOUGHNESS|AT)\b/i;
+        const chips = [];
+        let hp = '', ac = '', acLabel = 'AC', hpIdx = -1, acIdx = -1;
+        card.querySelectorAll('.pty-card-hd .pty-chip').forEach((ch, idx) => {
+          const b = ch.querySelector('b');
+          const value = b ? (b.textContent || '').trim() : '';
+          const full = (ch.textContent || '').trim();
+          const label = (b ? full.slice(0, full.length - value.length) : full).trim();
+          chips.push({ label, value });
+          if(hpIdx < 0 && VITAL.test(full)) { hp = value || full.replace(VITAL, '').trim(); hpIdx = idx; }
+          else if(acIdx < 0 && DEF.test(full)) { ac = value || full.replace(DEF, '').trim(); acLabel = (label || 'AC').toUpperCase().slice(0, 4); acIdx = idx; }
         });
-        return { name, sub, hp, ac, acLabel };
+        const extra = chips.filter((_, i) => i !== hpIdx && i !== acIdx && (chips[i].label || chips[i].value));
+        return { name, sub, hp, ac, acLabel, extra };
       }).filter(x => x.name);
       window.GM_ROSTER = roster;
       document.dispatchEvent(new CustomEvent('gm-roster', { detail: roster }));
