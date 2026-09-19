@@ -1675,6 +1675,13 @@ body[data-cview="free"] .gmc-telemetry{display:none}
 .vtt-empty-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--light)}
 .vtt-empty-sub{font-size:12px;line-height:1.6;color:var(--muted);max-width:360px}
 .vtt-empty-sub b{color:var(--light)}
+.vtt-launch{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:26px}
+.vtt-launch-badge{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 6px 20px rgba(36,211,238,.3)}
+.vtt-launch-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--white)}
+.vtt-launch-sub{font-size:12.5px;line-height:1.6;color:var(--muted);max-width:340px}
+.vtt-launch-actions{display:flex;gap:8px;margin-top:4px}
+.vtt-launch-actions .btn{padding:9px 16px}
+.vtt-launch-url{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent-dim);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.7}
 .vtt-hint{position:absolute;left:8px;right:8px;bottom:8px;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:rgba(10,14,20,.94);border:1px solid var(--accent-dim);box-shadow:0 4px 16px rgba(0,0,0,.5);z-index:3}
 .vtt-hint-txt{flex:1;font-size:11px;color:var(--light)}
 .vtt-hint-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 5px;line-height:1}
@@ -3709,14 +3716,20 @@ GMScenes.renderPins();
       <div class="vtt-empty">
         <div class="vtt-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg></div>
         <div class="vtt-empty-title">No Map Linked</div>
-        <div class="vtt-empty-sub">Paste your Owlbear Rodeo room link above and press <b>Load</b> to show the map right here. If it stays blank, Owlbear is blocking in-page embedding — use <b>Pop Out</b> to run it in its own window on a second screen.</div>
+        <div class="vtt-empty-sub">Paste a VTT room link above and press <b>Load</b>. Owlbear Rodeo blocks in-page embedding, so it opens as a <b>pop-out window</b> (great on a second screen); other VTTs that allow embedding show right here.</div>
+      </div>
+      <!-- Launch pad: shown for hosts that refuse embedding (Owlbear Rodeo) -->
+      <div class="vtt-launch" style="display:none;">
+        <div class="vtt-launch-badge"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg></div>
+        <div class="vtt-launch-title">Owlbear runs in its own window</div>
+        <div class="vtt-launch-sub">Owlbear Rodeo won't embed inside another page, so the live map opens as a pop-out — park it on a second monitor and it stays linked to this campaign.</div>
+        <div class="vtt-launch-actions">
+          <button class="btn primary vtt-popout2" type="button">Open the Map ↗</button>
+          <a class="btn ghost vtt-newtab2" href="#" target="_blank" rel="noreferrer" style="text-decoration:none;">New Tab ↗</a>
+        </div>
+        <div class="vtt-launch-url" id=""></div>
       </div>
       <div class="vtt-frame-wrap" style="display:none;"></div>
-      <div class="vtt-hint" style="display:none;">
-        <span class="vtt-hint-txt">Map blank? Owlbear may block in-page embedding —</span>
-        <button class="btn small primary vtt-popout2" type="button">Pop Out ↗</button>
-        <button class="vtt-hint-x" type="button" title="Dismiss">✕</button>
-      </div>
     </div>
   </div>
 </template>
@@ -13668,34 +13681,45 @@ function init_vtt(root) {
   const newtab  = root.querySelector('.vtt-newtab');
   const empty   = root.querySelector('.vtt-empty');
   const wrap    = root.querySelector('.vtt-frame-wrap');
-  const hint    = root.querySelector('.vtt-hint');
-  const hintX   = root.querySelector('.vtt-hint-x');
+  const launch  = root.querySelector('.vtt-launch');
+  const launchUrl = root.querySelector('.vtt-launch-url');
+  const newtab2 = root.querySelector('.vtt-newtab2');
   let url = '';
-  let hintDismissed = false;
+
+  // Hosts known to refuse in-page embedding (frame-ancestors) → use pop-out.
+  function isBlockedHost(u) { return /(^|\.)owlbear\.(rodeo|app)/i.test(u) || /\bowlbear\b/i.test(u); }
 
   function popWin() { if(url) window.open(url, 'gmvtt', 'width=1500,height=950,menubar=no,toolbar=no'); }
 
   function showEmpty() {
-    if(empty) empty.style.display = 'flex';
-    if(wrap)  { wrap.style.display = 'none'; wrap.innerHTML = ''; }
-    if(hint)  hint.style.display = 'none';
+    if(empty)  empty.style.display  = 'flex';
+    if(launch) launch.style.display = 'none';
+    if(wrap)   { wrap.style.display = 'none'; wrap.innerHTML = ''; }
+  }
+  function showLaunch() {
+    if(empty)  empty.style.display  = 'none';
+    if(wrap)   { wrap.style.display = 'none'; wrap.innerHTML = ''; }
+    if(launch) launch.style.display = 'flex';
+    if(launchUrl) launchUrl.textContent = url;
   }
   function mount() {
     if(!url) { showEmpty(); return; }
-    if(empty) empty.style.display = 'none';
-    if(wrap)  { wrap.style.display = 'block'; wrap.innerHTML = ''; }
+    if(isBlockedHost(url)) { showLaunch(); return; }   // Owlbear & co → pop-out only
+    if(empty)  empty.style.display  = 'none';
+    if(launch) launch.style.display = 'none';
+    if(wrap)   { wrap.style.display = 'block'; wrap.innerHTML = ''; }
     const f = document.createElement('iframe');
     f.className = 'vtt-frame';
     f.setAttribute('allow', 'clipboard-write; fullscreen; microphone; camera; autoplay');
     f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
     f.src = url;
     wrap.appendChild(f);
-    if(hint) hint.style.display = hintDismissed ? 'none' : 'flex';
   }
   function setUrl(u, load) {
     url = (u || '').trim();
-    if(urlIn)  urlIn.value = url;
-    if(newtab) newtab.href = url || '#';
+    if(urlIn)   urlIn.value = url;
+    if(newtab)  newtab.href = url || '#';
+    if(newtab2) newtab2.href = url || '#';
     if(!url) { showEmpty(); return; }
     if(load !== false) mount();
     if(window.__ddScheduleSave) window.__ddScheduleSave();
@@ -13706,7 +13730,6 @@ function init_vtt(root) {
   if(reload)  reload.addEventListener('click', () => { if(url) mount(); });
   if(popBtn)  popBtn.addEventListener('click', popWin);
   if(pop2)    pop2.addEventListener('click', popWin);
-  if(hintX)   hintX.addEventListener('click', () => { hintDismissed = true; if(hint) hint.style.display = 'none'; });
 
   // Prefill from the campaign's linked VTT room, if any (don't auto-load).
   try {
