@@ -1193,10 +1193,19 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .gmt-step { width: 34px; padding: 8px 0; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--light); cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; line-height: 1; flex-shrink: 0; }
 .gmt-step:hover { border-color: var(--gold); color: var(--gold); }
 .gmt-step:active { transform: scale(0.94); }
-.gmt-roll { flex: 0 0 auto; padding: 9px 16px; background: var(--gold); color: #1a1a1a; border: none; border-radius: 6px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+/* Roll button — identical styling to the standard tray's .dice-roll-go, just not stretched. */
+.gmt-roll { flex: 0 0 auto; padding: 6px 12px; background: var(--gold); color: #1a1a1a; border: none; border-radius: 4px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .gmt-roll:hover { filter: brightness(1.1); }
 .gmt-die { flex: 1 1 auto; min-width: 44px; padding: 11px 0; }
 .gmt-kob { gap: 4px; }
+/* Marvel edge/trouble counters (mirror the sheet's tray) */
+.gmt-mv { gap: 8px; flex-wrap: wrap; }
+.gmt-et { display: inline-flex; align-items: center; gap: 3px; }
+.gmt-etl { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.gmt-edge .gmt-etl { color: #e8c86a; }
+.gmt-trouble .gmt-etl { color: #e0776f; }
+.gmt-etv { font-family: 'Share Tech Mono', monospace; font-size: 14px; min-width: 15px; text-align: center; color: var(--light); }
+.gmt-mv .gmt-step { width: 26px; padding: 6px 0; font-size: 15px; }
 .gmt-btn { padding: 8px 10px; background: var(--panel); color: var(--light); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .04em; flex-shrink: 0; }
 .gmt-btn:hover { border-color: var(--gold); }
 .gmt-btn.on { background: #1a3a1a; border-color: #2d7a2d; color: #6dbf6d; }
@@ -12470,7 +12479,7 @@ function init_dice(root) {
   }
 
   // Remembered per-tray counts so a roll doesn't reset what the GM dialed in.
-  const _tray = { yz: 5, wild: 4, ghost: 4, co: 2, mv: 0 };
+  const _tray = { yz: 5, wild: 4, ghost: 4, co: 2, mvE: 0, mvT: 0 };
 
   // ════════ YZE — Year Zero Engine (D6 pool: each 6 a success, each 1 a bane) ════════
   function yzCount(rolls) { let s = 0, b = 0; rolls.forEach(v => { if(v === 6) s++; else if(v === 1) b++; }); return { s, b }; }
@@ -12486,7 +12495,6 @@ function init_dice(root) {
     _tray.yz = size;
     const base = []; for(let i = 0; i < size; i++) base.push(d6());
     const c = yzCount(base), tier = yzTier(c.s);
-    gmDiceAnim(base.map(v => ({ sides: 6, v })));
     const detail = size + 'd6(' + base.join(',') + ') · ' + c.s + ' succ' + (c.b ? ' · ' + c.b + ' bane' + (c.b > 1 ? 's' : '') : '');
     gmLog('YZE pool', c.s + ' · ' + tier.t, detail, tier.type);
   }
@@ -12507,8 +12515,8 @@ function init_dice(root) {
     while(w === 6 && guard++ < 20) { w = d6(); wildFaces.push(w); }
     const exploded = wildFaces[0] === 6;
     const total = reg.reduce((a, b) => a + b, 0) + wildFaces.reduce((a, b) => a + b, 0);
-    gmDiceAnim(reg.concat(wildFaces).map(v => ({ sides: 6, v })));
-    const detail = '[' + reg.join(' ') + '] ✦[' + wildFaces.join('→') + ']';
+    // Format matches the animation parser: "<n>D: [regular dice] ✦[wild→chain]".
+    const detail = n + 'D: [' + reg.join(' ') + '] ✦[' + wildFaces.join('→') + ']';
     const type = exploded ? 'crit' : complication ? 'fumble' : '';
     const tag = exploded ? ' ✦' : complication ? ' ⚠' : '';
     gmLog('D6 wild pool', total + tag, detail, type);
@@ -12528,7 +12536,6 @@ function init_dice(root) {
     const normals = []; for(let i = 0; i < n - 1; i++) normals.push(d6());
     const ghost = d6(), isGhost = (ghost === 6);
     const sum = normals.reduce((a, b) => a + b, 0) + (isGhost ? 0 : ghost);
-    gmDiceAnim(normals.concat([ghost]).map(v => ({ sides: 6, v })));
     const detail = n + 'd6(' + normals.concat([ghost]).join(',') + ')' + (isGhost ? ' · Ghost = 0' : '');
     gmLog('Ghost pool', sum + (isGhost ? ' · 👻 GHOST' : ''), detail, isGhost ? 'fumble' : '');
   }
@@ -12546,22 +12553,36 @@ function init_dice(root) {
     _tray.co = n;
     let rolls = [], zero = false;
     if(n <= 0) { zero = true; rolls = [d6(), d6()]; } else { for(let i = 0; i < n; i++) rolls.push(d6()); }
-    gmDiceAnim(rolls.map(v => ({ sides: 6, v })));
     const high = zero ? Math.min(rolls[0], rolls[1]) : Math.max.apply(null, rolls);
     const sixes = rolls.filter(v => v === 6).length, t = coTier(high, sixes, zero);
     gmLog('Candela' + (zero ? ' · 0d' : ''), high + ' · ' + t.t, (zero ? 'take lowest ' : '') + rolls.length + 'd6(' + rolls.join(',') + ')', t.type);
   }
 
   // ════════ Marvel Multiverse — d616 (3d6; the middle Marvel die shows 1 = 6 + Fantastic) ════════
+  // Separate Edge and Trouble counters like the sheet — they cancel to a net, and
+  // each net edge re-rolls the lowest die keeping the higher (trouble: the reverse).
+  function mvStep(kind, label, cls) {
+    return '<span class="gmt-et ' + cls + '"><span class="gmt-etl">' + label + '</span>'
+      + '<button class="gmt-step" data-mv="' + kind + '" data-dir="-1">−</button>'
+      + '<span class="gmt-etv" id="mv-' + kind + '">' + (kind === 'edge' ? _tray.mvE : _tray.mvT) + '</span>'
+      + '<button class="gmt-step" data-mv="' + kind + '" data-dir="1">+</button></span>';
+  }
   function renderMarvelTray() {
-    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('mv-e', _tray.mv, -5, 5)
-      + '<button class="gmt-roll" id="mv-roll">Roll d616</button></div></div>';
-    wireStepper('mv-e', -5, 5, v => { _tray.mv = v; });
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row gmt-mv">'
+      + mvStep('edge', 'Edge', 'gmt-edge') + mvStep('trouble', 'Trouble', 'gmt-trouble')
+      + '<button class="gmt-roll" id="mv-roll">Roll</button></div></div>';
+    trayEl.querySelectorAll('.gmt-step[data-mv]').forEach(b => {
+      b.onclick = () => {
+        const kind = b.dataset.mv, dir = parseInt(b.dataset.dir, 10);
+        if(kind === 'edge') _tray.mvE = Math.max(0, Math.min(9, (_tray.mvE || 0) + dir));
+        else _tray.mvT = Math.max(0, Math.min(9, (_tray.mvT || 0) + dir));
+        const el = trayEl.querySelector('#mv-' + kind); if(el) el.textContent = (kind === 'edge' ? _tray.mvE : _tray.mvT);
+      };
+    });
     trayEl.querySelector('#mv-roll').onclick = marvelRoll;
   }
   function marvelRoll() {
-    const netE = Math.max(-5, Math.min(5, parseInt((trayEl.querySelector('#mv-e') || {}).value, 10) || 0));
-    _tray.mv = netE;
+    const eE = _tray.mvE || 0, tT = _tray.mvT || 0, netE = eE - tT;
     const dice = [{ v: d6(), marvel: false }, { v: d6(), marvel: true }, { v: d6(), marvel: false }];
     const faceOf = x => (x.marvel && x.v === 1) ? 6 : x.v;
     const cnt = Math.abs(netE);
@@ -12573,9 +12594,9 @@ function init_dice(root) {
     }
     const fantastic = (dice[1].v === 1), marvelVal = fantastic ? 6 : dice[1].v;
     const sum = faceOf(dice[0]) + marvelVal + faceOf(dice[2]);
-    gmDiceAnim([dice[0].v, dice[1].v, dice[2].v].map(v => ({ sides: 6, v })));
-    const etTag = netE > 0 ? ' · ' + netE + ' edge' : netE < 0 ? ' · ' + (-netE) + ' trouble' : '';
-    const detail = 'd616(' + dice[0].v + ' | ✦' + dice[1].v + (fantastic ? '→6' : '') + ' | ' + dice[2].v + ')' + etTag;
+    const etTxt = (eE || tT) ? (' · ' + (eE ? eE + 'E' : '') + (tT ? tT + 'T' : '')) : '';
+    // "3d6(a,b,c)" so the parser animates all three; the Marvel die is the middle one.
+    const detail = '3d6(' + dice[0].v + ',' + dice[1].v + ',' + dice[2].v + ') · ✦' + (fantastic ? 'Marvel 1→6' : 'Marvel ' + dice[1].v) + etTxt;
     gmLog('d616', sum + (fantastic ? ' · ✦ FANTASTIC' : ''), detail, fantastic ? 'crit' : '');
   }
 
@@ -12655,10 +12676,10 @@ function init_dice(root) {
       crit: type === 'crit' ? 'crit' : type === 'fumble' ? 'fumble' : '', nat: '', adv: 'none' });
   }
   function d6() { return 1 + Math.floor(Math.random() * 6); }
-  function dN(sides) { return 1 + Math.floor(Math.random() * sides); }
-  function gmDiceAnim(rolls) {
-    try { if(window.DiceAnim && window.DiceAnim.play) window.DiceAnim.play(rolls.map(r => ({ sides: r.sides || 6, display: String(r.v != null ? r.v : r) })), 'normal'); } catch(e) {}
-  }
+  // Dice animation on the GM screen is driven by the roll log's detail string
+  // (dice-anim.js hooks GMCamp.broadcast and parses `entry.detail`), so each
+  // tray's detail is written in a parser-friendly format rather than animated
+  // by hand here.
 
   function renderLog() {
     if(!log.length) {
