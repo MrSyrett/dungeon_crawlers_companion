@@ -1631,14 +1631,19 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .cmode-free{border-left:1px solid var(--border)}
 .cmode-free .cm-ico{opacity:.9}
 
-/* ── ZONE 2: Canvas — Adventure | (Map / Combat) | Roll Log ── */
-.console-workspace{position:relative;z-index:1;flex:1;display:flex;min-height:0;overflow:hidden}
+/* ── ZONE 2: Canvas — [ left column: Adventure | (Map/Combat) + command bar ] | Roll Log rail ── */
+.console-main{position:relative;z-index:1;flex:1;display:flex;min-height:0;overflow:hidden}
+.console-left{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;min-width:0}
+.console-workspace{position:relative;flex:1;display:flex;min-height:0;overflow:hidden}
 .cstation{display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--black);border-right:2px solid var(--border);transition:flex-basis .3s cubic-bezier(.4,0,.2,1),opacity .25s;flex:0 0 auto}
 .cstation:last-child{border-right:none}
 .cstation.collapsed{flex:0 0 0!important;min-width:0!important;opacity:0;border-width:0!important;pointer-events:none;overflow:hidden}
 #cst-adv{flex:0 0 auto;flex-basis:360px}
 #cst-center{flex:1 1 auto;flex-basis:auto}
-#cst-log{flex:0 0 auto;flex-basis:300px}
+/* Roll Log runs the full page height on the right; command bar meets its left edge. */
+.cst-log-rail{flex:0 0 300px;border-right:none;border-left:2px solid var(--border)}
+.cst-log-rail.collapsed{border-width:0!important}
+body[data-cview="free"] .cst-log-rail{display:none}
 .cstation-center{padding:0}
 .csub{display:flex;flex-direction:column;min-height:0;flex:1 1 0;border-bottom:2px solid var(--border);overflow:hidden;transition:flex .3s,opacity .25s}
 .csub:last-child{border-bottom:none}
@@ -1681,12 +1686,18 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .pop-body.msg-only .pty-bar,.pop-body.msg-only .pty-empty,.pop-body.msg-only .pty-list{display:none!important}
 .pop-body.msg-only .ai-party-msg{border-bottom:none}
 .pop-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(36,211,238,.06),transparent);flex-shrink:0}
-.pop-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--white)}
-.pop-x{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mid);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.pop-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--white);flex-shrink:0}
+.pop-toolbar{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0;overflow-x:auto}
+.pop-toolbar:empty{display:none}
+.pop-head .pop-toolbar + .pop-x{margin-left:8px}
+.pop-x{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mid);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .pop-x:hover{color:#ff6a5c;border-color:var(--red-light)}
 .pop-body{padding:16px;overflow-y:auto}
 .pop-body.tool-host{padding:0;display:flex;flex-direction:column;min-height:0}
 .pop-body.tool-host > *{flex:1;min-height:min(64vh,520px);max-height:100%;width:100%}
+/* Compact tool (Message): size the window to the tool's natural height. */
+.pop-body:not(.tool-host) .msg-tool{height:auto;display:block}
+.pop-body .msg-body{display:flex;flex-direction:column;gap:0}
 .pop-scrim.drawer{align-items:flex-end;justify-content:stretch}
 .pop-scrim.drawer .popup{width:100%;max-width:none;border-radius:16px 16px 0 0;border-bottom:none;max-height:70vh;margin:0}
 .pchar-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -1700,12 +1711,47 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .hpbar>i{display:block;height:100%}
 .hpbar .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000}
 
+/* ── Timers tool (standalone) ── */
+.tmr-tool{display:flex;flex-direction:column;height:100%}
+.tmr-body{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.tmr-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);text-align:center;padding:24px}
+.tmr-empty-icon{font-size:34px;opacity:.6}
+.tmr-empty-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.12em;font-size:13px;color:var(--light)}
+.tmr-empty-sub{font-family:'Barlow',sans-serif;font-size:11px;max-width:320px;line-height:1.5}
+.tmr-list{display:flex;flex-direction:column;gap:10px}
+.tmr-card{border:1px solid var(--border);border-left:3px solid #6a9fc8;border-radius:10px;background:linear-gradient(180deg,#191c22,#141519);padding:9px 11px;display:flex;flex-direction:column;gap:8px}
+.tmr-card.round{border-left-color:var(--gold)}
+.tmr-card.expired{border-left-color:var(--red-light);box-shadow:0 0 10px rgba(214,58,48,.25)}
+.tmr-row1{display:flex;align-items:center;gap:8px}
+.tmr-name{flex:1;min-width:0;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;padding:5px 8px}
+.tmr-kind{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--border);color:var(--muted);flex-shrink:0}
+.tmr-kind.tm{color:#6a9fc8;border-color:#6a9fc8}
+.tmr-kind.rd{color:var(--gold);border-color:var(--gold)}
+.tmr-del{width:24px;height:24px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;flex-shrink:0}
+.tmr-del:hover{color:#ff6a5c;border-color:var(--red-light)}
+.tmr-row2{display:flex;align-items:center;gap:8px}
+.tmr-disp{flex:1;text-align:center;font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:700;color:#6a9fc8;line-height:1}
+.tmr-disp.round{color:var(--gold)}
+.tmr-disp .tmr-unit{font-size:12px;margin-left:4px;color:var(--muted)}
+.tmr-disp.zero{color:var(--red-light)}
+.tmr-toggle,.tmr-reset,.tmr-minus,.tmr-plus{width:38px;height:38px;border-radius:8px;background:var(--panel-2);border:1px solid var(--border);color:var(--light);font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0}
+.tmr-toggle:hover,.tmr-reset:hover,.tmr-minus:hover,.tmr-plus:hover{border-color:var(--accent);color:var(--accent)}
+.tmr-row3{display:flex;align-items:center;gap:6px}
+.tmr-setlbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tmr-min,.tmr-sec{width:52px;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;text-align:center}
+.tmr-colon{color:var(--muted);font-weight:700}
+.tmr-apply{margin-left:auto;padding:5px 12px;border-radius:6px;background:var(--panel-2);border:1px solid var(--border);color:var(--light);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.tmr-apply:hover{border-color:var(--accent);color:var(--accent)}
+.tracker-kind-tag{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--border);border-radius:6px;padding:3px 8px;white-space:nowrap}
+
 @media (max-width:760px){
-  .console-workspace{flex-direction:column;overflow-x:hidden;overflow-y:auto}
+  .console-main{flex-direction:column;overflow-x:hidden;overflow-y:auto}
+  .console-workspace{flex-direction:column;overflow-x:hidden;overflow-y:visible}
   .cstation{flex:0 0 auto!important;flex-basis:auto!important;min-height:70vh;border-right:none;border-bottom:3px solid var(--border)}
   .cstation.collapsed{min-height:0!important}
   .cstation-center{min-height:0}
   #cst-center:not(.collapsed){min-height:80vh}
+  .cst-log-rail{flex-basis:auto!important;min-height:70vh;border-left:none;border-top:3px solid var(--border)}
   .cmode-tab{min-width:0;padding:0 11px}
   .bb-lbl{display:none}
 }
@@ -2338,56 +2384,65 @@ GMScenes.renderPins();
 })();
 </script>
 
-<!-- ═══ ZONE 2 — CANVAS: Adventure | (Maps + Combat) | Roll Log ═══ -->
-<div class="console-workspace" id="console-workspace">
-  <aside class="cstation" id="cst-adv">
-    <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
-    <div class="cst-content" id="cst-adv-content"></div>
-  </aside>
-  <main class="cstation cstation-center" id="cst-center">
-    <section class="csub" id="cst-map">
-      <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Maps</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
-      <div class="cst-content" id="cst-map-content"></div>
-    </section>
-    <section class="csub" id="cst-cbt">
-      <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-cbt-title">Combat</span><div class="cst-toolbar" id="cst-cbt-toolbar"></div></div>
-      <div class="cst-content" id="cst-cbt-content"></div>
-    </section>
-  </main>
-  <aside class="cstation" id="cst-log">
+<!-- ═══ MAIN ROW: [ left column: canvas + command bar ] | [ Roll Log rail ] ═══ -->
+<div class="console-main" id="console-main">
+  <div class="console-left" id="console-left">
+
+    <!-- ZONE 2 — CANVAS: Adventure | (Maps + Combat) -->
+    <div class="console-workspace" id="console-workspace">
+      <aside class="cstation" id="cst-adv">
+        <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
+        <div class="cst-content" id="cst-adv-content"></div>
+      </aside>
+      <main class="cstation cstation-center" id="cst-center">
+        <section class="csub" id="cst-map">
+          <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Maps</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
+          <div class="cst-content" id="cst-map-content"></div>
+        </section>
+        <section class="csub" id="cst-cbt">
+          <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-cbt-title">Combat</span><div class="cst-toolbar" id="cst-cbt-toolbar"></div></div>
+          <div class="cst-content" id="cst-cbt-content"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Free mode canvas (add/remove windows) — shares the left column's canvas slot -->
+    <div class="main-area" id="main-area" style="display:none;"></div>
+
+    <!-- ZONE 3 — COMMAND BAR: modes + quick tools (spans the left column only) -->
+    <footer class="bottom-bar" id="bottom-bar">
+      <div class="bb-modes">
+        <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
+        <button class="cmode-tab" data-mode="prep"      type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
+        <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
+        <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
+        <button class="cmode-tab" data-mode="downtime"  type="button" onclick="setConsoleMode('downtime')"><span class="cm-ico">☕</span><span class="cm-name">Downtime</span></button>
+        <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')" title="Free layout — add/remove your own windows"><span class="cm-ico">⊞</span><span class="cm-name">Free</span></button>
+      </div>
+      <div class="bb-quick" id="bb-quick">
+        <span class="bb-lbl">Quick&nbsp;Tools</span>
+        <button class="qbtn" type="button" onclick="openTool('gen')"><span class="qi">☉</span>Generators</button>
+        <button class="qbtn" type="button" onclick="openTool('timers')"><span class="qi">⏱</span>Timers</button>
+        <button class="qbtn" type="button" onclick="openTool('music')"><span class="qi">♪</span>Music</button>
+        <button class="qbtn" type="button" onclick="openTool('notes')"><span class="qi">✎</span>Notes</button>
+        <button class="qbtn" type="button" onclick="openTool('message')"><span class="qi">💬</span>Message</button>
+        <button class="qbtn" type="button" onclick="openTool('rules')"><span class="qi">📖</span>Rulebooks</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Roll Log — full-height right rail; the command bar connects to its left edge -->
+  <aside class="cstation cst-log-rail" id="cst-log">
     <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div>
     <div class="cst-content" id="cst-log-content"></div>
   </aside>
 </div>
 
-<!-- ═══ Free mode canvas (add/remove windows) — shares the canvas slot with the
-     console workspace, so the Monitor + Command bars stay fixed around it. ═══ -->
-<div class="main-area" id="main-area" style="display:none;"></div>
-
-<!-- ═══ ZONE 3 — BOTTOM BAR: modes + quick tools + dice ═══ -->
-<footer class="bottom-bar" id="bottom-bar">
-  <div class="bb-modes">
-    <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
-    <button class="cmode-tab" data-mode="prep"      type="button" onclick="setConsoleMode('prep')"><span class="cm-ico">✎</span><span class="cm-name">Prep</span></button>
-    <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
-    <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
-    <button class="cmode-tab" data-mode="downtime"  type="button" onclick="setConsoleMode('downtime')"><span class="cm-ico">☕</span><span class="cm-name">Downtime</span></button>
-    <button class="cmode-tab cmode-free" data-mode="free" type="button" onclick="setConsoleMode('free')" title="Free layout — add/remove your own windows"><span class="cm-ico">⊞</span><span class="cm-name">Free</span></button>
-  </div>
-  <div class="bb-quick" id="bb-quick">
-    <span class="bb-lbl">Quick&nbsp;Tools</span>
-    <button class="qbtn" type="button" onclick="openTool('gen')"><span class="qi">☉</span>Generators</button>
-    <button class="qbtn" type="button" onclick="openTool('music')"><span class="qi">♪</span>Music</button>
-    <button class="qbtn" type="button" onclick="openTool('notes')"><span class="qi">✎</span>Notes</button>
-    <button class="qbtn" type="button" onclick="openTool('message')"><span class="qi">💬</span>Message</button>
-    <button class="qbtn" type="button" onclick="openTool('rules')"><span class="qi">📖</span>Rulebooks</button>
-  </div>
-</footer>
-
 <!-- ═══ Popup / drawer (quick tools + monitor details) ═══ -->
 <div class="pop-scrim" id="gmc-scrim">
   <div class="popup" id="gmc-popup">
-    <div class="pop-head"><span class="pop-ttl" id="gmc-pop-ttl">Tool</span><button class="pop-x" type="button" onclick="closeGmcPop()">✕</button></div>
+    <div class="pop-head"><span class="pop-ttl" id="gmc-pop-ttl">Tool</span><div class="pop-toolbar" id="gmc-pop-toolbar"></div><button class="pop-x" type="button" onclick="closeGmcPop()">✕</button></div>
     <div class="pop-body" id="gmc-pop-body"></div>
   </div>
 </div>
@@ -3711,6 +3766,43 @@ GMScenes.renderPins();
   </div>
 </template>
 
+<template id="tpl-timers">
+  <div class="tool-instance tmr-tool" data-tool="timers">
+    <div class="toolbar-tpl" style="display:none">
+      <button class="btn small primary tmr-add-time" type="button" title="Add a countdown clock">＋ Time</button>
+      <button class="btn small ghost tmr-add-round" type="button" title="Add a round countdown">＋ Rounds</button>
+    </div>
+    <div class="tmr-body">
+      <div class="tmr-empty">
+        <div class="tmr-empty-icon">⏱</div>
+        <div class="tmr-empty-title">No Timers Yet</div>
+        <div class="tmr-empty-sub">Add a <b>Time</b> countdown (e.g. a ritual clock) or a <b>Rounds</b> countdown to track when something goes off.</div>
+      </div>
+      <div class="tmr-list" style="display:none"></div>
+    </div>
+  </div>
+</template>
+<template id="tpl-message">
+  <div class="tool-instance msg-tool" data-tool="message">
+    <div class="toolbar-tpl" style="display:none"></div>
+    <div class="msg-body">
+      <div class="ai-section ai-party-msg">
+        <div class="ai-sec-title">Message to the Roll Log</div>
+        <div class="ai-row">
+          <select class="ai-select ai-msg-type">
+            <option value="system">💬 Message</option>
+            <option value="achievement" class="ai-dcc-only">🏆 New Achievement</option>
+          </select>
+          <button class="btn small ghost ai-snark-btn ai-dcc-only" type="button" title="Roll a random snarky line">🎲 Snark</button>
+        </div>
+        <input type="text" class="ai-input ai-msg-title" placeholder="Message header (optional)">
+        <textarea class="ai-input ai-msg-body" rows="4" placeholder="Your message to the players…"></textarea>
+        <button class="btn small primary ai-send-msg" type="button">Send Message</button>
+        <div class="ai-status ai-msg-status"></div>
+      </div>
+    </div>
+  </div>
+</template>
 <template id="tpl-party">
   <div class="tool-instance pty-tool" data-tool="party">
     <div class="toolbar-tpl" style="display:none">
@@ -3723,21 +3815,6 @@ GMScenes.renderPins();
       <button class="btn small ghost pty-clear" title="Clear" aria-label="Clear"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.5 2.6h5a1 1 0 0 1 1 1v1.2H8.5V3.6a1 1 0 0 1 1-1Z"/><path d="M4.5 5.8h15v2h-1.2l-.9 12.1a1.6 1.6 0 0 1-1.6 1.5H8.2a1.6 1.6 0 0 1-1.6-1.5L5.7 7.8H4.5Zm4.4 3.6.4 8.6h1.5l-.3-8.6Zm5.7 0-.3 8.6h1.5l.4-8.6Z"/></svg></button>
     </div>
     <div class="pty-body">
-      <!-- Message to the Roll Log (moved here from the old Message tool) -->
-      <div class="ai-section ai-party-msg">
-        <div class="ai-sec-title">Message to the Roll Log</div>
-        <div class="ai-row">
-          <select class="ai-select ai-msg-type">
-            <option value="system">💬 Message</option>
-            <option value="achievement" class="ai-dcc-only">🏆 New Achievement</option>
-          </select>
-          <button class="btn small ghost ai-snark-btn ai-dcc-only" type="button" title="Roll a random snarky line">🎲 Snark</button>
-        </div>
-        <input type="text" class="ai-input ai-msg-title" placeholder="Message header (optional)">
-        <textarea class="ai-input ai-msg-body" rows="3" placeholder="Your message to the players…"></textarea>
-        <button class="btn small primary ai-send-msg" type="button">Send Message</button>
-        <div class="ai-status ai-msg-status"></div>
-      </div>
       <div class="pty-bar">
         <span class="pty-note"></span>
       </div>
@@ -3897,8 +3974,8 @@ function isMobileView() { return GM_MOBILE_MQ.matches; }
 function normalizeTool(t) { return t === 'combat' ? 'trackers' : t; }
 
 // Tool catalog (order = the tool-picker menu order)
-const TOOL_ORDER = ['adventure','maps','trackers','notes','music','gen','party','rules','dice'];
-const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
+const TOOL_ORDER = ['adventure','maps','trackers','timers','notes','music','gen','party','message','rules','dice'];
+const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Combat', timers:'Timers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', message:'Message', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
 
 // ── Dynamic windows ───────────────────────────────────────────────────────
 // The GM screen is a row of independent "windows" (columns). Each window shows
@@ -4163,13 +4240,18 @@ function mountStation(stationId, tool) {
   }
 }
 
-// Mount every station's fixed tool exactly once. Modes then only show/hide —
-// the tool instances (and their state) persist across mode switches.
-let _stationsMounted = false;
+// Ensure every station's fixed tool is mounted in its content slot. Idempotent:
+// a station is (re)mounted only when its node isn't currently in place. This is
+// robust against a session restore that tears down gmNodes after the first
+// mount — otherwise the canvas would read empty until a Free-mode toggle.
 function ensureStationsMounted() {
-  if(_stationsMounted) return;
-  CONSOLE_STATIONS.forEach(st => mountStation(st, STATION_TOOL[st]));
-  _stationsMounted = true;
+  CONSOLE_STATIONS.forEach(st => {
+    const tool = STATION_TOOL[st];
+    const content = document.getElementById('cst-' + st + '-content');
+    const cache = gmNodes['cst-' + st];
+    const node = cache && cache.byTool && cache.byTool[tool];
+    if(!content || !node || !content.contains(node)) mountStation(st, tool);
+  });
 }
 
 function renderConsole(mode) {
@@ -4195,12 +4277,11 @@ function renderConsole(mode) {
   const center = document.getElementById('cst-center');
   if(center) center.classList.toggle('collapsed', !centerVis);
 
-  // Let a side station fill the canvas when the center is gone (Prep/Downtime),
-  // otherwise clear the override so the CSS flex-basis governs.
+  // In the left column, let Adventure fill the width when the center is gone
+  // (Prep / Downtime); otherwise clear the override so the CSS basis governs.
+  // The Roll Log is a fixed-width right rail and is never grown.
   const adv = document.getElementById('cst-adv');
-  const log = document.getElementById('cst-log');
   if(adv) adv.style.flex = (!centerVis && cfg.adv) ? '1 1 auto' : '';
-  if(log) log.style.flex = (!centerVis && !cfg.adv && cfg.log) ? '1 1 auto' : '';
 
   document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === consoleMode));
   if(window.__ddScheduleSave) window.__ddScheduleSave();
@@ -4214,12 +4295,12 @@ function setFreeView() {
   const free = document.getElementById('main-area');
   if(ws) ws.style.display = 'none';
   if(free) free.style.display = '';
-  // detach station nodes so their tools are free to reuse
+  // detach station nodes so their tools are free to reuse (ensureStationsMounted
+  // will re-mount them when a console mode is next shown).
   CONSOLE_STATIONS.forEach(st => {
     const cache = gmNodes['cst-' + st];
     if(cache) Object.values(cache.byTool).forEach(n => { if(n.parentElement) instancePool.appendChild(n); });
   });
-  _stationsMounted = false;
   if(!gmWindows.length) DEFAULT_WINDOWS.forEach(t => gmWindows.push({ id: newWinId(), tool: t }));
   renderWindows();
   document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === 'free'));
@@ -4282,19 +4363,28 @@ function renderPartyStrip(roster){
 }
 document.addEventListener('gm-roster', e => renderPartyStrip(e.detail));
 
-// ── Timers — mirror any running tracker timers into the monitor bar. ──
+// ── Timers — mirror the standalone Timers tool into the monitor bar. ──
+function gmcTimersState(){
+  const node = gmcPopNodes && gmcPopNodes['timers'];
+  if(node && node._getState){ try { return node._getState(); } catch(e){} }
+  return null;
+}
 function renderTimers(){
   const el = document.getElementById('gmc-timers');
   if(!el) return;
-  const st = gmcTrackerState();
-  const items = (st && st.items) || [];
-  const timers = items.filter(it => it && it.kind === 'timer');
+  const st = gmcTimersState();
+  const timers = (st && st.timers) || [];
   if(!timers.length){ el.innerHTML = ''; return; }
   el.innerHTML = timers.map(t => {
+    if(t.kind === 'round'){
+      const zero = t.remainingRounds <= 0;
+      return '<div class="timer'+(zero?' zero':'')+'" onclick="openTool(\'timers\')" title="Open Timers">'
+        + '<div><div class="tl">'+esc2(t.name||'Rounds')+'</div><div class="tv">'+t.remainingRounds+' rd</div></div></div>';
+    }
     const secs = t.remainingSeconds != null ? t.remainingSeconds : (t.totalSeconds || 0);
     const m = Math.floor(Math.max(0,secs)/60), s = Math.max(0,secs)%60;
     const zero = secs <= 0;
-    return '<div class="timer'+(zero?' zero':'')+'" onclick="setConsoleMode(\'combat\')" title="Open in Combat">'
+    return '<div class="timer'+(zero?' zero':'')+'" onclick="openTool(\'timers\')" title="Open Timers">'
       + '<div><div class="tl">'+esc2(t.name||'Timer')+'</div>'
       + '<div class="tv">'+m+':'+String(s).padStart(2,'0')+'</div></div></div>';
   }).join('');
@@ -4347,11 +4437,16 @@ function showGmcPop(title, html, opts){
     if(html != null) body.innerHTML = html;
   }
   if(pop){ pop.classList.toggle('wide', !!opts.wide); pop.classList.toggle('tall', !!opts.tall); }
+  // The toolbar area is cleared here; openTool repopulates it from the mounted tool.
+  const tb = document.getElementById('gmc-pop-toolbar');
+  if(tb) tb.innerHTML = '';
   if(scrim){ scrim.classList.toggle('drawer', !!opts.drawer); scrim.classList.add('show'); }
 }
 function closeGmcPop(){
   const scrim = document.getElementById('gmc-scrim');
   if(scrim) scrim.classList.remove('show');
+  const tb = document.getElementById('gmc-pop-toolbar');
+  if(tb) tb.innerHTML = '';
   // detach any mounted tool node back to the pool so it can be reopened.
   const body = document.getElementById('gmc-pop-body');
   if(body && body.classList.contains('tool-host')){
@@ -4359,21 +4454,36 @@ function closeGmcPop(){
   }
 }
 
+// Clone a mounted tool's toolbar into the popup header so its controls
+// (generator type/count/roll, notes actions, …) are usable from the window.
+function fillPopToolbar(node){
+  const tb = document.getElementById('gmc-pop-toolbar');
+  if(!tb || !node) return;
+  tb.innerHTML = '';
+  const tpl = node.querySelector('.toolbar-tpl');
+  if(tpl){
+    Array.from(tpl.children).forEach(ch => tb.appendChild(ch.cloneNode(true)));
+    try { syncToolbar(tb, node); } catch(e) {}
+  }
+}
+
 // Quick tools open a real, live tool instance as a FULL-HEIGHT window.
-// "message" is the Party tool's composer only (no roster cards).
-const POP_TOOL = { gen:'gen', music:'music', notes:'notes', message:'party', party:'party', rules:'rules', cbt:'trackers' };
+const POP_TOOL = { gen:'gen', timers:'timers', music:'music', notes:'notes', message:'message', party:'party', rules:'rules', cbt:'trackers' };
+const POP_WIDE = { gen:1, rules:1, music:1 };   // tools that read better in a wider window
 const gmcPopNodes = {};
 function openTool(k){
-  const isMsg = (k === 'message');
   const tool = normalizeTool(POP_TOOL[k] || k);
   const body = document.getElementById('gmc-pop-body');
   if(!body) return;
   if(!gmcPopNodes[tool]) gmcPopNodes[tool] = buildToolNode(tool);
   const node = gmcPopNodes[tool];
-  showGmcPop(isMsg ? 'Message the Players' : (TOOL_LABELS[tool] || tool), null, { tall:true, toolHost:true, msgOnly:isMsg });
+  // Message is a compact composer — size the window to the tool, not full height.
+  const compact = (tool === 'message');
+  showGmcPop(TOOL_LABELS[tool] || tool, null, { tall:!compact, toolHost:!compact, wide:!!POP_WIDE[k] });
   body.innerHTML = '';
   node.classList.add('active');
   body.appendChild(node);
+  fillPopToolbar(node);
 }
 
 // A party bubble opens that character's actual Party-tool card (cloned so it
@@ -4506,6 +4616,9 @@ function syncToolbar(slot, toolNode) {
     ['.pty-clear',     '.pty-clear'],
     // rulebooks
     ['.rul-refresh',   '.rul-refresh'],
+    // timers
+    ['.tmr-add-time',  '.tmr-add-time'],
+    ['.tmr-add-round', '.tmr-add-round'],
   ];
 
   pairs.forEach(([cloneSelector, liveSelector]) => {
@@ -5436,10 +5549,10 @@ function init_trackers(root) {
         <button class="tracker-del" title="Remove">&#10005;</button>
       </div>
       <div class="tracker-controls-row${collapsed ? ' collapsed' : ''}">
-        <select class="card-select tracker-type-select ${t.kind}-active" title="Tracker type">
+        ${t.kind === 'timer' ? `<select class="card-select tracker-type-select ${t.kind}-active" title="Tracker type">
           <option value="rounds" ${t.kind==='rounds'?'selected':''}>Rounds</option>
           <option value="timer"  ${t.kind==='timer' ?'selected':''}>Timer</option>
-        </select>
+        </select>` : `<span class="tracker-kind-tag">Round Tracker</span>`}
         ${controlsHtml}
       </div>
     `;
@@ -5447,7 +5560,8 @@ function init_trackers(root) {
     card.querySelector('.tracker-name-input').addEventListener('input', e => { t.name = e.target.value; });
     card.querySelector('.tracker-del').addEventListener('click', () => { items = items.filter(x => x.id !== t.id); render(); });
     card.querySelector('.tracker-collapse').addEventListener('click', () => { t.collapsed = !t.collapsed; render(); });
-    card.querySelector('.tracker-type-select').addEventListener('change', e => {
+    const typeSel = card.querySelector('.tracker-type-select');
+    if(typeSel) typeSel.addEventListener('change', e => {
       const kind = e.target.value;
       if(kind === t.kind) return;
       t.running = false;
@@ -11168,6 +11282,7 @@ function gmBootstrapWindows() {
   // party bubbles populate even before the GM opens the Party drawer. The same
   // instance is reused when they tap "Message"/Party.
   try { gmcPopNodes['party'] = gmcPopNodes['party'] || buildToolNode('party'); } catch(e) {}
+  try { gmcPopNodes['timers'] = gmcPopNodes['timers'] || buildToolNode('timers'); } catch(e) {}
   try { renderPartyStrip(); renderTimers(); renderScenes(); } catch(e) {}
   try { wireScenes(); } catch(e) {}
 }
@@ -11239,6 +11354,7 @@ function saveSession() {
     saved: new Date().toISOString(),
     windows: serializeWindows(),
     console: serializeConsole(),
+    popups: serializePopups(),
     campaign: GMCamp.serialize(),   // the link lives in the top bar, not in a tool
     scenes: (window.GMScenes ? GMScenes.serialize() : undefined),
   };
@@ -11264,6 +11380,7 @@ function loadSession(input) {
       if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
       restoreWindows(data);
       restoreConsole(data.console);
+      restorePopups(data.popups);
     } catch(err) {
       alert('Could not load session file: ' + err.message);
     }
@@ -11311,11 +11428,31 @@ function restoreConsole(c) {
   else renderConsole(mode);
 }
 
+// Quick-tool popups (Timers, Notes, …) live outside the stations, so serialize
+// their instances separately — Timers clocks and session Notes must survive a reload.
+const PERSIST_POPUPS = ['timers','notes','message','rules','gen'];
+function serializePopups() {
+  const out = {};
+  PERSIST_POPUPS.forEach(t => {
+    const n = gmcPopNodes[t];
+    if(n && n._getState) { try { out[t] = n._getState(); } catch(e) {} }
+  });
+  return out;
+}
+function restorePopups(p) {
+  if(!p) return;
+  Object.entries(p).forEach(([t, state]) => {
+    try { if(!gmcPopNodes[t]) gmcPopNodes[t] = buildToolNode(t); if(gmcPopNodes[t] && gmcPopNodes[t]._setState) gmcPopNodes[t]._setState(state); } catch(e) {}
+  });
+  try { renderTimers(); } catch(e) {}
+}
+
 window.__gmScreenGetState = function() {
   return {
     version: 1,
     windows: serializeWindows(),
     console: serializeConsole(),
+    popups: serializePopups(),
     campaign: GMCamp.serialize(),
     scenes: (window.GMScenes ? GMScenes.serialize() : undefined),
   };
@@ -11327,6 +11464,7 @@ window.__gmScreenSetState = function(data) {
   if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
   restoreWindows(data);        // rebuilds Free-mode windows (clears gmNodes first)
   restoreConsole(data.console); // then station instances + the active view/mode
+  restorePopups(data.popups);   // Timers / Notes / … quick-tool state
 };
 
 
@@ -12251,8 +12389,6 @@ function init_party(root) {
   const noteEl    = root.querySelector('.pty-note');
   const listEl    = root.querySelector('.pty-list');
   const emptyEl   = root.querySelector('.pty-empty');
-  // Wire the "Message to the Roll Log" composer now living at the top of this tool.
-  try { if(typeof wireAiConsole === 'function') wireAiConsole(root); } catch(e){}
 
   let chars = [];          // [{id, source, sheet}]
   let lastSync = null;
@@ -13308,9 +13444,17 @@ function init_rules(root) {
   const emptyEl    = root.querySelector('.rul-empty');
   const frameWrap  = root.querySelector('.rul-frame-wrap');
 
-  let books = [];        // [{file, title, url}] — from /api/rulebooks
+  let allBooks = [];     // every book the user may see — from /api/rulebooks
+  let books = [];        // filtered to the currently-selected game system
   let activeFile = '';   // which book is open (remembered across sessions)
   let loaded = false;
+
+  // Show only the books tied to the selected system ("BOTH" = every system).
+  function applyBookFilter() {
+    const sys = (typeof window.GM_SYSTEM === 'string' ? window.GM_SYSTEM : '');
+    books = allBooks.filter(b => !b.system || b.system === 'BOTH' || b.system === sys);
+    if(!books.some(b => b.file === activeFile)) activeFile = books.length ? books[0].file : '';
+  }
 
   const esc = t => String(t == null ? '' : t)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -13379,14 +13523,14 @@ function init_rules(root) {
       const r = await fetch('/api/rulebooks', { credentials: 'same-origin' });
       if(!r.ok) throw new Error(r.status);
       const data = await r.json();
-      books = (data.books || []).filter(b => b && b.url && b.file);
+      allBooks = (data.books || []).filter(b => b && b.url && b.file);
+      applyBookFilter();
       // Manual refresh means "re-read from the server" — drop every cached
       // viewer so the PDFs really reload. Quiet loads just prune viewers for
       // books that no longer exist.
       _bookFrames.forEach((el, file) => {
         if(!quiet || !books.some(b => b.file === file)) { el.remove(); _bookFrames.delete(file); }
       });
-      if(!books.some(b => b.file === activeFile)) activeFile = books.length ? books[0].file : '';
       loaded = true;
       noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
       render();
@@ -13407,6 +13551,14 @@ function init_rules(root) {
   });
 
   refreshBtn.addEventListener('click', () => load(false));
+
+  // Re-filter when the GM switches game system in the top bar.
+  document.addEventListener('gm-system-change', () => {
+    if(!loaded) return;
+    applyBookFilter();
+    noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
+    render();
+  });
 
   // Only the chosen book is worth saving — the PDFs live on the server.
   root._getState = () => ({ activeFile });
@@ -13581,10 +13733,12 @@ function wireAiConsole(root) {
     const msgBody   = root.querySelector('.ai-msg-body');
     const sendMsg   = root.querySelector('.ai-send-msg');
     const msgStatus = root.querySelector('.ai-msg-status');
-    // Make the section collapsible — the title toggles the body.
+    // Make the section collapsible — the title toggles the body. The standalone
+    // Message tool skips this (it IS the whole tool, so nothing to collapse into).
+    const isMsgTool = root.getAttribute && root.getAttribute('data-tool') === 'message';
     const msgSection = msgType.closest('.ai-section');
     const msgTitleEl = msgSection && msgSection.querySelector('.ai-sec-title');
-    if(msgSection && msgTitleEl && !msgSection.dataset.collapsibleWired){
+    if(!isMsgTool && msgSection && msgTitleEl && !msgSection.dataset.collapsibleWired){
       msgSection.dataset.collapsibleWired = '1';
       msgSection.classList.add('ai-collapsible');
       msgTitleEl.setAttribute('role','button');
@@ -13876,6 +14030,103 @@ function wireAiConsole(root) {
 window.wireAiConsole = wireAiConsole;
 window.init_party = init_party;
 window.init_rules = init_rules;
+
+// ── MESSAGE TOOL — the "Message to the Roll Log" composer as its own standalone
+//    tool (split out of the Party tool). Reuses wireAiConsole for the compose UI.
+function init_message(root) {
+  try { if(typeof wireAiConsole === 'function') wireAiConsole(root); } catch(e){}
+}
+window.init_message = init_message;
+
+// ── TIMERS TOOL — standalone countdown clocks and round countdowns (split out
+//    of the combined Combat Tracker). Time timers tick down live; round timers
+//    step manually. State feeds the top-bar timer chips.
+function init_timers(root) {
+  const listEl     = root.querySelector('.tmr-list');
+  const emptyEl    = root.querySelector('.tmr-empty');
+  const addTimeBtn = root.querySelector('.tmr-add-time');
+  const addRoundBtn= root.querySelector('.tmr-add-round');
+  let timers = [];
+  let nextId = 1;
+  const esc = t => String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const fmt = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
+  const save = () => { if(window.__ddScheduleSave) window.__ddScheduleSave(); };
+
+  function addTimer(kind){
+    if(kind === 'round') timers.push({ id:nextId++, kind:'round', name:'', totalRounds:3, remainingRounds:3 });
+    else timers.push({ id:nextId++, kind:'time', name:'', totalSeconds:180, remainingSeconds:180, running:false });
+    render(); save();
+  }
+  function findT(card){ const id = +card.dataset.id; return timers.find(x => x.id === id); }
+
+  function cardHtml(t){
+    if(t.kind === 'round'){
+      const zero = t.remainingRounds <= 0;
+      return `<div class="tmr-card round${zero?' expired':''}" data-id="${t.id}">
+        <div class="tmr-row1"><input class="tmr-name" placeholder="Round countdown…" value="${esc(t.name)}"><span class="tmr-kind rd">Rounds</span><button class="tmr-del" title="Remove">✕</button></div>
+        <div class="tmr-row2"><button class="tmr-minus" title="−1 round">−</button><div class="tmr-disp round${zero?' zero':''}">${t.remainingRounds}<span class="tmr-unit">rd</span></div><button class="tmr-plus" title="+1 round">+</button><button class="tmr-reset" title="Reset">↺</button></div>
+      </div>`;
+    }
+    const zero = t.remainingSeconds <= 0;
+    return `<div class="tmr-card time${zero?' expired':''}" data-id="${t.id}">
+      <div class="tmr-row1"><input class="tmr-name" placeholder="Timer…" value="${esc(t.name)}"><span class="tmr-kind tm">Time</span><button class="tmr-del" title="Remove">✕</button></div>
+      <div class="tmr-row2"><button class="tmr-toggle" title="Start / pause">${t.running?'⏸':'▶'}</button><div class="tmr-disp time${zero?' zero':''}">${fmt(t.remainingSeconds)}</div><button class="tmr-reset" title="Reset">↺</button></div>
+      <div class="tmr-row3"><span class="tmr-setlbl">Set</span><input type="number" class="tmr-min" min="0" max="999" value="${Math.floor(t.totalSeconds/60)}"><span class="tmr-colon">:</span><input type="number" class="tmr-sec" min="0" max="59" value="${t.totalSeconds%60}"><button class="tmr-apply">Set</button></div>
+    </div>`;
+  }
+  function render(){
+    const has = timers.length > 0;
+    if(emptyEl) emptyEl.style.display = has ? 'none' : '';
+    if(listEl){ listEl.style.display = has ? '' : 'none'; listEl.innerHTML = timers.map(cardHtml).join(''); listEl.querySelectorAll('.tmr-card').forEach(wireCard); }
+  }
+  function wireCard(card){
+    const t = findT(card); if(!t) return;
+    card.querySelector('.tmr-name').addEventListener('input', e => { t.name = e.target.value; save(); });
+    card.querySelector('.tmr-del').addEventListener('click', () => { timers = timers.filter(x => x !== t); render(); save(); });
+    card.querySelector('.tmr-reset').addEventListener('click', () => {
+      if(t.kind === 'round') t.remainingRounds = t.totalRounds;
+      else { t.remainingSeconds = t.totalSeconds; t.running = false; }
+      render(); save();
+    });
+    if(t.kind === 'round'){
+      card.querySelector('.tmr-minus').addEventListener('click', () => { t.remainingRounds = Math.max(0, t.remainingRounds - 1); render(); save(); });
+      card.querySelector('.tmr-plus').addEventListener('click', () => { t.remainingRounds += 1; if(t.remainingRounds > t.totalRounds) t.totalRounds = t.remainingRounds; render(); save(); });
+    } else {
+      card.querySelector('.tmr-toggle').addEventListener('click', () => { t.running = !t.running; render(); save(); });
+      card.querySelector('.tmr-apply').addEventListener('click', () => {
+        const m = parseInt(card.querySelector('.tmr-min').value) || 0, s = parseInt(card.querySelector('.tmr-sec').value) || 0;
+        t.totalSeconds = Math.max(0, m*60 + s); t.remainingSeconds = t.totalSeconds; t.running = false; render(); save();
+      });
+    }
+  }
+  // Live tick — decrement running time timers, updating only their display so a
+  // focused name/set input isn't clobbered by a full re-render.
+  setInterval(() => {
+    let any = false;
+    timers.forEach(t => { if(t.kind === 'time' && t.running && t.remainingSeconds > 0){ t.remainingSeconds -= 1; any = true; if(t.remainingSeconds <= 0) t.running = false; } });
+    if(any && listEl) timers.forEach(t => {
+      if(t.kind !== 'time') return;
+      const card = listEl.querySelector('.tmr-card[data-id="'+t.id+'"]'); if(!card) return;
+      const d = card.querySelector('.tmr-disp'); if(d){ d.textContent = fmt(t.remainingSeconds); d.classList.toggle('zero', t.remainingSeconds<=0); }
+      const tog = card.querySelector('.tmr-toggle'); if(tog) tog.textContent = t.running ? '⏸' : '▶';
+      card.classList.toggle('expired', t.remainingSeconds<=0);
+    });
+  }, 1000);
+
+  addTimeBtn.addEventListener('click', () => addTimer('time'));
+  addRoundBtn.addEventListener('click', () => addTimer('round'));
+
+  root._getState = () => ({ timers });
+  root._setState = (st) => {
+    if(st && Array.isArray(st.timers)){
+      timers = st.timers.map(t => ({ ...t, running: false }));
+      nextId = timers.reduce((m, t) => Math.max(m, t.id || 0), 0) + 1;
+      render();
+    }
+  };
+  render();
+}
+window.init_timers = init_timers;
 
 // ── VTT / Map station: embed a virtual-tabletop room (Owlbear Rodeo, etc.) in
 //    a panel, with a pop-out-to-window fallback for hosts that block embedding. ──
