@@ -102,7 +102,8 @@ body::before {
 #gmc-topbar { gap: 10px; }
 #gmc-topbar .session-controls { margin-left: 0; padding-left: 0; border-left: none; flex-shrink: 0; }
 /* Import / Export stacked vertically */
-.io-stack { display: flex; flex-direction: column; gap: 3px; }
+.io-stack, .camp-stack { display: flex; flex-direction: column; gap: 3px; }
+#gmc-topbar .camp-stack { flex-shrink: 0; }
 .io-btn { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-start; padding: 3px 8px; min-height: 0; }
 .io-btn span { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
 #gmc-topbar #gmc-party-bubbles { flex: 1 1 auto; min-width: 60px; }
@@ -531,7 +532,42 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 
 /* ═══ MUSIC / SOUNDBOARD TOOL ═══ */
-.mus-body { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 12px; }
+.mus-tool { container-type: inline-size; }
+.mus-shell { flex: 1; min-height: 0; display: flex; align-items: stretch; }
+.mus-body { flex: 1; min-width: 0; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 12px; }
+/* Sound Library — docked left column, part of the same window (no popup-on-popup) */
+.mus-library { display: none; flex-direction: column; width: 288px; flex-shrink: 0; min-height: 0; border-right: 1px solid var(--border); background: rgba(8,10,14,.35); }
+@container (min-width: 640px) { .mus-library { display: flex; } }
+.mus-tool .mus-library.mus-lib-hidden { display: none; }
+.mus-tool .mus-library.mus-lib-shown { display: flex; }
+.mus-lib-head { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.mus-lib-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 5px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mus-lib-refresh { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; padding: 4px 7px; line-height: 1; flex-shrink: 0; }
+.mus-lib-refresh:hover { color: #fff; border-color: var(--mid); }
+.mus-lib-search { margin: 8px 10px 0; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--light); padding: 7px 9px; font-size: 12px; }
+.mus-lib-search:focus { outline: none; border-color: var(--gold); }
+.mus-lib-cats, .mus-lib-subs { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 10px 0; flex-shrink: 0; }
+.mus-lib-subs:empty { display: none; }
+.mus-lib-subs { padding-top: 5px; }
+.mus-lib-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; color: var(--muted); padding: 3px 9px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.mus-lib-subs .mus-lib-chip { font-size: 10px; padding: 2px 8px; }
+.mus-lib-chip:hover { color: var(--light); }
+.mus-lib-chip.active { background: rgba(201,162,75,.15); border-color: var(--gold); color: var(--gold); }
+.mus-lib-list { flex: 1; overflow-y: auto; padding: 6px; min-height: 40px; }
+.mus-lib-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; cursor: grab; }
+.mus-lib-row:hover { background: var(--panel-2); }
+.mus-lib-row.dragging { opacity: 0.5; }
+.mus-lib-row.playing { background: rgba(201,162,75,.12); }
+.mus-lib-play { flex-shrink: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; color: var(--gold); cursor: pointer; font-size: 11px; padding: 0; }
+.mus-lib-play:hover { border-color: var(--gold); color: #fff; }
+.mus-lib-row.playing .mus-lib-play { border-color: var(--gold); color: var(--gold); }
+.mus-lib-meta { min-width: 0; flex: 1; }
+.mus-lib-name { font-size: 12px; color: var(--light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mus-lib-cat { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+.mus-lib-grip { flex-shrink: 0; color: var(--muted); font-size: 12px; opacity: 0.6; }
+.mus-lib-empty { padding: 22px 14px; text-align: center; color: var(--muted); font-size: 12px; font-family: 'Barlow Condensed', sans-serif; }
+.mus-lib-empty a { color: var(--gold); }
+.mus-lib-hint { padding: 8px 10px; border-top: 1px solid var(--border); font-size: 10px; line-height: 1.5; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; flex-shrink: 0; }
 .mus-section { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--gold); }
 .mus-sfx-section { border-left-color: #6a9fc8; }
 .mus-sec-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
@@ -1229,10 +1265,17 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 /* Campaign link — top bar button + popover */
 #camp-btn.on { background: rgba(200,160,32,0.12); color: var(--gold); border-color: var(--gold); }
 #camp-popover {
-  position: fixed; top: 46px; right: 12px; z-index: 400; width: 300px; max-width: calc(100vw - 24px);
-  background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
-  padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.55);
+  position: fixed; inset: 0; z-index: 400; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(4,6,10,.6); backdrop-filter: blur(2px); padding: 16px;
 }
+#camp-popover .camp-card {
+  width: min(420px, 94vw); max-height: 82vh; overflow-y: auto;
+  background: linear-gradient(180deg,#161922,#101319); border: 1px solid var(--accent-dim);
+  border-radius: 14px; padding: 14px; box-shadow: 0 24px 70px rgba(0,0,0,.65), 0 0 0 1px rgba(36,211,238,.15);
+}
+#camp-popover .camp-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+#camp-popover .camp-card-title { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--white); }
 #camp-popover .camp-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
 #camp-popover .camp-row:last-child { margin-bottom: 0; }
 #camp-popover input {
@@ -1259,7 +1302,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 #camp-popover .camp-item-code { font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: .12em; color: var(--muted); flex-shrink: 0; }
 #camp-popover .camp-item.active .camp-item-code { color: var(--gold); }
 #camp-popover .camp-sep { height: 1px; background: var(--border); margin: 8px 0; }
-@media (max-width: 760px) { #camp-popover { top: 54px; left: 12px; right: 12px; width: auto; } }
+@media (max-width: 760px) { #camp-popover .camp-card { width: 100%; } }
 .dice-camp-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
 .dice-log-entry.remote { border-left: 3px solid #8a7ac8; background: #1c1a24; }
 /* ══ ROUNDED BUTTONS ══════════════════════════════════════════════════════
@@ -1635,9 +1678,13 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .gmc-round-info{display:flex;flex-direction:column;align-items:center;line-height:1}
 .gmc-round-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .gmc-round-num{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);line-height:1.1}
-.gmc-round-next{padding:6px 12px;border-radius:8px;background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#06131a;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(36,211,238,.25);white-space:nowrap}
+.gmc-round-btns{display:flex;flex-direction:column;gap:3px}
+.gmc-round-btn{width:26px;height:17px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;border:none;cursor:pointer;padding:0}
+.gmc-round-next{background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#06131a;font-weight:900;box-shadow:0 2px 6px rgba(36,211,238,.25)}
+.gmc-round-reset{background:var(--panel-2);border:1px solid var(--border);color:var(--muted)}
+.gmc-round-reset:hover{color:var(--accent);border-color:var(--accent-dim)}
 .gmc-round-next:hover{filter:brightness(1.08)}
-.gmc-round-next:active{transform:translateY(1px)}
+.gmc-round-btn:active{transform:translateY(1px)}
 .party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
 /* Rounded-square party bubbles that mirror the Party Card header. */
 .bubble{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:11px;padding:6px 9px;cursor:pointer;transition:all .12s;flex:0 0 auto;max-width:230px}
@@ -1730,6 +1777,8 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .popup.wide{width:min(760px,96vw)}
 /* Full-height quick-tool window — fills the page vertically instead of a drawer. */
 .popup.tall{width:min(600px,96vw);height:96vh;max-height:96vh}
+/* xwide after tall so the extra width wins when a popup is both (Music) */
+.popup.xwide,.popup.tall.xwide{width:min(1060px,97vw)}
 /* Message composer only — hide the roster list/controls from the Party tool. */
 .pop-body.msg-only .pty-bar,.pop-body.msg-only .pty-empty,.pop-body.msg-only .pty-list{display:none!important}
 .pop-body.msg-only .ai-party-msg{border-bottom:none}
@@ -1852,8 +1901,10 @@ body[data-cview="free"] .cst-log-rail{display:none}
       <option value="CO">Candela Obscura</option>
       <option value="YZE">Year Zero Engine</option>
     </select>
-    <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
-    <a class="btn small ghost vtt-launch" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg> VTT</a>
+    <div class="camp-stack">
+      <a class="btn small ghost vtt-launch io-btn" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg><span>VTT</span></a>
+      <button class="btn small ghost io-btn" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
+    </div>
     <div class="io-stack">
       <button class="btn small ghost io-btn" id="save-btn" onclick="saveSession()" title="Export / save session" aria-label="Export session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg><span>Export</span></button>
       <label class="btn small ghost io-btn" title="Import / load session" aria-label="Import a saved session" style="cursor:pointer;">
@@ -1867,7 +1918,10 @@ body[data-cview="free"] .cst-log-rail{display:none}
   <div class="mon-group" id="gmc-timers"></div>
   <div class="gmc-round" id="gmc-round">
     <div class="gmc-round-info"><span class="gmc-round-lbl">Round</span><span class="gmc-round-num" id="gmc-round-num">1</span></div>
-    <button class="gmc-round-next" type="button" onclick="gmcNextRound()" title="Advance the round (steps combat + round timers)">Next&nbsp;›</button>
+    <div class="gmc-round-btns">
+      <button class="gmc-round-btn gmc-round-next" type="button" onclick="gmcNextRound()" title="Advance the round (steps combat + round timers)" aria-label="Next round">&rsaquo;</button>
+      <button class="gmc-round-btn gmc-round-reset" type="button" onclick="gmcResetRounds()" title="Reset the round counter and round timers" aria-label="Reset rounds">&#8635;</button>
+    </div>
   </div>
   <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
 
@@ -2060,7 +2114,7 @@ const GMCamp = (function() {
     const b = btn();
     if(!b) return;
     b.classList.toggle('on', !!campaign);
-    b.textContent = (campaign ? '' + campaign.code : 'Campaign') + ' ▾';
+    b.textContent = campaign ? ('' + campaign.code) : 'Campaign';
     b.title = campaign ? 'Campaign: ' + campaign.name + ' (' + campaign.code + ')' : 'Campaign link';
   }
 
@@ -2089,8 +2143,10 @@ const GMCamp = (function() {
   function renderPanel() {
     const el = pop();
     if(!el) return;
-    el.style.display = panelOpen ? 'block' : 'none';
+    el.style.display = panelOpen ? 'flex' : 'none';
     if(!panelOpen) return;
+    // Close when the scrim (not the card) is clicked.
+    el.onclick = e => { if(e.target === el) { panelOpen = false; renderPanel(); } };
 
     // ── The account's campaigns, as a pick-list ──
     let listHtml;
@@ -2108,12 +2164,18 @@ const GMCamp = (function() {
     }
 
     el.innerHTML =
-        listHtml
+        '<div class="camp-card">'
+      + '<div class="camp-card-head"><span class="camp-card-title">Campaign Link</span><button class="pop-x camp-close" type="button" aria-label="Close">✕</button></div>'
+      + listHtml
       + (campaign
           ? '<button class="camp-leave" style="background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;margin-top:8px;">Disconnect ' + esc(campaign.code) + '</button>'
           : '')
       + '<div class="camp-err"></div>'
-      + '<div class="camp-hint">Pick a campaign to connect this screen. Rolls sync both ways and linked players show in the Party tool. Campaigns are created and managed on the Campaigns page.</div>';
+      + '<div class="camp-hint">Pick a campaign to connect this screen. Rolls sync both ways and linked players show in the Party tool. Campaigns are created and managed on the Campaigns page.</div>'
+      + '</div>';
+
+    const closeBtn = el.querySelector('.camp-close');
+    if(closeBtn) closeBtn.onclick = () => { panelOpen = false; renderPanel(); };
 
     // Connect to a campaign the user picked from the list
     el.querySelectorAll('.camp-item').forEach(b => {
@@ -2659,10 +2721,24 @@ GMScenes.renderPins();
 <template id="tpl-music">
   <div class="tool-instance mus-tool" data-tool="music">
     <div class="toolbar-tpl" style="display:none">
+      <button class="btn small ghost mus-lib-toggle" title="Show / hide Sound Library" aria-label="Show / hide Sound Library"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg> Library</button>
       <div class="toolbar-spacer"></div>
       <button class="btn small ghost mus-stopall" title="Stop All" aria-label="Fade out and stop everything"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><rect x="5.2" y="5.2" width="13.6" height="13.6" rx="2"/></svg></button>
     </div>
-    <div class="mus-body">
+    <div class="mus-shell">
+      <aside class="mus-library">
+        <div class="mus-lib-head">
+          <span class="mus-lib-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg> <span>Sound Library</span></span>
+          <button class="mus-lib-refresh" title="Reload library" aria-label="Reload library"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.6a6.4 6.4 0 0 1 5.5 3.1H15.3v2.1h5.4V5.4h-2.1v1.9A8.5 8.5 0 0 0 3.6 11.2l2.1.3A6.4 6.4 0 0 1 12 5.6z"/><path d="M12 18.4a6.4 6.4 0 0 1-5.5-3.1h2.2v-2.1H3.3v5.4h2.1v-1.9A8.5 8.5 0 0 0 20.4 12.8l-2.1-.3A6.4 6.4 0 0 1 12 18.4z"/></svg></button>
+        </div>
+        <input class="mus-lib-search" type="text" placeholder="Search tracks…">
+        <div class="mus-lib-cats"></div>
+        <div class="mus-lib-subs"></div>
+        <div class="mus-lib-list"></div>
+        <div class="mus-lib-empty" style="display:none"></div>
+        <div class="mus-lib-hint">Drag a track onto Music, a Soundboard pad area, or a Scene &mdash; or press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg> to preview first.</div>
+      </aside>
+      <div class="mus-body">
       <div class="mus-section mus-music-section">
         <div class="mus-sec-head">
           <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M18 3.4 8.6 5.7a1 1 0 0 0-.8 1v8.9A3.3 3.3 0 1 0 9.6 18V9.3l7-1.7v5.2A3.3 3.3 0 1 0 18.4 15V4.4a1 1 0 0 0-.4-1Z"/></svg> <span class="mus-sec-label">Music</span></span>
@@ -2716,7 +2792,9 @@ GMScenes.renderPins();
         <div class="mus-scene-list"></div>
         <div class="mus-empty mus-scene-empty">Build a scene from several tracks that play together &mdash; set each track's loop and volume. Every scene shows up in the top bar for one-tap play.</div>
       </div>
+      </div>
     </div>
+    <audio class="mus-lib-preview" preload="none"></audio>
     <input type="file" class="mus-file-music" accept="audio/*" multiple style="display:none">
     <input type="file" class="mus-file-sfx" accept="audio/*" multiple style="display:none">
     <input type="file" class="mus-file-scene" accept="audio/*" multiple style="display:none">
@@ -4145,12 +4223,27 @@ function buildWindowColumn(w) {
   return col;
 }
 
+// The canonical, shared instance of a tool — the SAME node the console stations
+// and quick-tool popups use, so a Free-mode window shows the content the GM
+// already loaded elsewhere (and vice-versa). Console tools live in their fixed
+// station cache; everything else shares the popup instance.
+const TOOL_HOME = { adventure:'cst-adv', maps:'cst-map', trackers:'cst-cbt', dice:'cst-log' };
+function sharedToolNode(tool) {
+  tool = normalizeTool(tool);
+  if(TOOL_HOME[tool]) return getWinNode(TOOL_HOME[tool], tool);
+  if(!gmcPopNodes[tool]) gmcPopNodes[tool] = buildToolNode(tool);
+  return gmcPopNodes[tool];
+}
+
 // Mount a window's active tool node into its content area + clone its toolbar.
+// The FIRST window of a given tool reuses the shared instance (content synced
+// with the console); additional duplicate windows get their own instance.
 function mountWindow(w) {
   const content = document.getElementById('win-' + w.id + '-content');
   const toolbarSlot = document.getElementById('win-' + w.id + '-toolbar');
   if(!content) return;
-  const node = getWinNode(w.id, w.tool);
+  const firstOfTool = gmWindows.find(x => x.tool === w.tool) === w;
+  const node = firstOfTool ? sharedToolNode(w.tool) : getWinNode(w.id, w.tool);
   const cache = gmNodes[w.id];
   if(cache) cache.active = w.tool;
 
@@ -4177,6 +4270,7 @@ function renderWindows() {
   Object.values(gmNodes).forEach(cache => {
     Object.values(cache.byTool).forEach(n => { if(n.parentElement) instancePool.appendChild(n); });
   });
+  Object.values(gmcPopNodes).forEach(n => { if(n && n.parentElement) instancePool.appendChild(n); });
   area.innerHTML = '';
   gmWindows.forEach(w => area.appendChild(buildWindowColumn(w)));
 
@@ -4265,8 +4359,8 @@ const STATION_TITLES = { adv:'Adventure', map:'Maps', cbt:'Combat', log:'Roll Lo
 // tool a station hosts in that mode, `titles` its header text. The center wrapper
 // (#cst-center) is shown whenever either of its subs (map / cbt) is visible.
 const CONSOLE_MODES = {
-  prep:     { adv:1, map:1, cbt:1, log:0,   // adventure + Generators + Music (planning)
-              tools:{ map:'gen', cbt:'music' }, titles:{ map:'Generators', cbt:'Music' } },
+  prep:     { adv:1, map:0, cbt:1, log:1,   // Generators (left) + Combat (center) + Party (right)
+              tools:{ adv:'gen', log:'party' }, titles:{ adv:'Generators', log:'Party' } },
   explore:  { adv:1, map:1, cbt:0, log:1 },   // adventure + MAP (combat hidden) + roll log
   combat:   { adv:1, map:0, cbt:1, log:1 },   // adventure + COMBAT (map hidden) + roll log
   master:   { adv:1, map:1, cbt:1, log:1 },   // everything — the home layout
@@ -4415,7 +4509,6 @@ function renderPartyStrip(roster){
     const barW = pct==null ? 100 : Math.max(4,pct);
     const hpText = pc.hp || '';
     return '<div class="bubble'+(down?' down':'')+(bloodied?' bloodied':'')+'" onclick="charPop('+i+')" title="'+esc2(pc.name)+'">'
-      + '<div class="bub-av">'+esc2(gmcInitials(pc.name).toUpperCase())+'</div>'
       + '<div class="bub-mini">'
         + '<div class="bub-nm">'+esc2(pc.name)+'</div>'
         + (pc.sub ? '<div class="bub-sub">'+esc2(pc.sub)+'</div>' : '')
@@ -4497,6 +4590,14 @@ function gmcNextRound(){
   try { renderTimers(); } catch(e){}
   gmcUpdateRound();
 }
+function gmcResetRounds(){
+  const cbt = gmcCombatNode();
+  if(cbt && cbt._resetRound) { try { cbt._resetRound(); } catch(e){} }
+  const tmr = gmcPopNodes && gmcPopNodes['timers'];
+  if(tmr && tmr._resetRounds) { try { tmr._resetRounds(); } catch(e){} }
+  try { renderTimers(); } catch(e){}
+  gmcUpdateRound();
+}
 function gmcUpdateRound(){
   const el = document.getElementById('gmc-round-num');
   if(!el) return;
@@ -4522,7 +4623,7 @@ function showGmcPop(title, html, opts){
     body.classList.toggle('msg-only', !!opts.msgOnly);
     if(html != null) body.innerHTML = html;
   }
-  if(pop){ pop.classList.toggle('wide', !!opts.wide); pop.classList.toggle('tall', !!opts.tall); }
+  if(pop){ pop.classList.toggle('wide', !!opts.wide); pop.classList.toggle('xwide', !!opts.xwide); pop.classList.toggle('tall', !!opts.tall); }
   // The toolbar area is cleared here; openTool repopulates it from the mounted tool.
   const tb = document.getElementById('gmc-pop-toolbar');
   if(tb) tb.innerHTML = '';
@@ -4555,7 +4656,8 @@ function fillPopToolbar(node){
 
 // Quick tools open a real, live tool instance as a FULL-HEIGHT window.
 const POP_TOOL = { gen:'gen', timers:'timers', music:'music', notes:'notes', message:'message', party:'party', rules:'rules', cbt:'trackers' };
-const POP_WIDE = { gen:1, rules:1, music:1 };   // tools that read better in a wider window
+const POP_WIDE = { gen:1, rules:1 };   // tools that read better in a wider window
+const POP_XWIDE = { music:1 };          // music needs room for the Sound Library column too
 const gmcPopNodes = {};
 function openTool(k){
   const tool = normalizeTool(POP_TOOL[k] || k);
@@ -4565,7 +4667,7 @@ function openTool(k){
   const node = gmcPopNodes[tool];
   // Message is a compact composer — size the window to the tool, not full height.
   const compact = (tool === 'message');
-  showGmcPop(TOOL_LABELS[tool] || tool, null, { tall:!compact, toolHost:!compact, wide:!!POP_WIDE[k] });
+  showGmcPop(TOOL_LABELS[tool] || tool, null, { tall:!compact, toolHost:!compact, wide:!!POP_WIDE[k], xwide:!!POP_XWIDE[k] });
   body.innerHTML = '';
   node.classList.add('active');
   body.appendChild(node);
@@ -6131,6 +6233,7 @@ function init_trackers(root) {
     if(window.__ddScheduleSave) window.__ddScheduleSave();
   }
   root._nextRound = nextRound;
+  root._resetRound = () => { round = 1; updateRoundDisplay(); render(); if(window.__ddScheduleSave) window.__ddScheduleSave(); };
   root._getRound = () => round;
 
   render();
@@ -10816,11 +10919,21 @@ function init_music(root) {
     });
   }
 
+  // A library track being dragged, if any (data set by the library rows below).
+  function libDragData(e){
+    try { const raw = e.dataTransfer && e.dataTransfer.getData('application/x-dd-sound'); if(raw) return JSON.parse(raw); } catch(_){}
+    return null;
+  }
   function wireDrop(section, kind){
     if(!section) return;
     section.addEventListener('dragover', e=>{ e.preventDefault(); section.classList.add('mus-dragover'); });
     section.addEventListener('dragleave', e=>{ if(e.target===section) section.classList.remove('mus-dragover'); });
-    section.addEventListener('drop', e=>{ e.preventDefault(); section.classList.remove('mus-dragover'); if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) addFiles(e.dataTransfer.files, kind); });
+    section.addEventListener('drop', e=>{
+      e.preventDefault(); section.classList.remove('mus-dragover');
+      const lib = libDragData(e);
+      if(lib && lib.url){ if(kind==='sfx') root._addLibrarySfx(lib.name, lib.url); else root._addLibraryTrack(lib.name, lib.url); if(window.__ddScheduleSave) try{ window.__ddScheduleSave(); }catch(_){} return; }
+      if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) addFiles(e.dataTransfer.files, kind);
+    });
   }
 
   playBtn.addEventListener('click', togglePlay);
@@ -10895,6 +11008,8 @@ function init_music(root) {
       card.addEventListener('dragleave', e=>{ if(e.target===card) card.classList.remove('mus-dragover'); });
       card.addEventListener('drop', e=>{
         e.preventDefault(); card.classList.remove('mus-dragover');
+        const lib = libDragData(e);
+        if(lib && lib.url && window.GMScenes && typeof GMScenes.addLibraryTrack==='function'){ GMScenes.addLibraryTrack(sc.id, lib.name, lib.url); if(window.__ddScheduleSave) try{ window.__ddScheduleSave(); }catch(_){} return; }
         if(window.GMScenes && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length)
           GMScenes.addTrackFiles(sc.id, e.dataTransfer.files);
       });
@@ -10929,6 +11044,121 @@ function init_music(root) {
     if(title) title.addEventListener('click', toggle);
   });
   applyCollapsed();
+
+  // ── Sound Library (docked left column) ──────────────────────────────────
+  // Lists the admin Sound Library (/api/sounds) right inside the Music window so
+  // there's no popup-on-popup. Rows are draggable onto Music / Soundboard / a
+  // Scene, and the play button previews the track before it's added anywhere.
+  (function initLibrary(){
+    const lib     = root.querySelector('.mus-library');
+    const listEl  = root.querySelector('.mus-lib-list');
+    const catsEl  = root.querySelector('.mus-lib-cats');
+    const subsEl  = root.querySelector('.mus-lib-subs');
+    const searchEl= root.querySelector('.mus-lib-search');
+    const emptyEl = root.querySelector('.mus-lib-empty');
+    const preview = root.querySelector('.mus-lib-preview');
+    const toggleBtn = root.querySelector('.mus-lib-toggle');
+    const refreshBtn= root.querySelector('.mus-lib-refresh');
+    if(!lib || !listEl) return;
+
+    // Canonical display order (mirrors lib/sounds.ts) so chips read tidily.
+    const CAT_ORDER = ['Ambiance','Music','Scenes'];
+    const SUB_ORDER = ['Civilization','Lairs','Modern','Sci-fi','Ruins','Underground','Wilderness','Epic','Lighthearted','Mysterious','Peaceful','Somber','Tension','Action/Combat'];
+    let cache = null, activeCat = '__all__', activeSub = '__all__', query = '', previewUrl = null;
+
+    function orderBy(order, arr){
+      const known = order.filter(x=> arr.indexOf(x)>=0);
+      const extra = arr.filter(x=> x && order.indexOf(x)<0).sort();
+      return known.concat(extra).concat(arr.indexOf('')>=0?['']:[]);
+    }
+    function topCats(){ const set={}; (cache||[]).forEach(s=> set[s.category||'Music']=1); return orderBy(CAT_ORDER, Object.keys(set)); }
+    function subsFor(cat){ const set={}; (cache||[]).forEach(s=>{ if(cat!=='__all__' && (s.category||'Music')!==cat) return; set[s.subcategory||'']=1; }); return orderBy(SUB_ORDER, Object.keys(set)); }
+    function chip(label, key, active, attr){ return '<button class="mus-lib-chip'+(active?' active':'')+'" '+attr+'="'+esc(key)+'">'+esc(label)+'</button>'; }
+
+    function renderChips(){
+      let html = chip('All','__all__',activeCat==='__all__','data-cat');
+      topCats().forEach(c=> html += chip(c,c,activeCat===c,'data-cat'));
+      catsEl.innerHTML = html;
+      catsEl.querySelectorAll('.mus-lib-chip').forEach(el=> el.addEventListener('click', ()=>{ activeCat=el.getAttribute('data-cat'); activeSub='__all__'; render(); }));
+      const subs = subsFor(activeCat);
+      if(subs.length<=1){ subsEl.innerHTML=''; return; }
+      let sh = chip('All','__all__',activeSub==='__all__','data-sub');
+      subs.forEach(s=> sh += chip(s||'Unsorted', s||'__none__', activeSub===(s||'__none__'), 'data-sub'));
+      subsEl.innerHTML = sh;
+      subsEl.querySelectorAll('.mus-lib-chip').forEach(el=> el.addEventListener('click', ()=>{ activeSub=el.getAttribute('data-sub'); render(); }));
+    }
+
+    function stopPreview(){ try{ preview.pause(); }catch(_){} previewUrl=null; listEl.querySelectorAll('.mus-lib-row.playing').forEach(r=> r.classList.remove('playing')); }
+    function togglePreview(url, rowEl){
+      if(previewUrl===url){ stopPreview(); return; }
+      stopPreview();
+      try{ preview.src = normUrl(url); preview.play().catch(()=>{}); previewUrl=url; rowEl.classList.add('playing'); }catch(_){}
+    }
+    if(preview) preview.addEventListener('ended', stopPreview);
+
+    function render(){
+      if(!cache) return;
+      renderChips();
+      if(!cache.length){ listEl.innerHTML=''; emptyEl.style.display='block'; emptyEl.innerHTML='Your Sound Library is empty. <a href="/admin/sounds" target="_blank" rel="noreferrer">Add tracks &rarr;</a>'; return; }
+      const items = cache.filter(s=>{
+        const cat=s.category||'Music', sub=s.subcategory||'';
+        if(activeCat!=='__all__' && cat!==activeCat) return false;
+        if(activeSub!=='__all__' && sub!==(activeSub==='__none__'?'':activeSub)) return false;
+        if(query && ((s.label||'')+' '+cat+' '+sub).toLowerCase().indexOf(query)<0) return false;
+        return true;
+      });
+      if(!items.length){ listEl.innerHTML=''; emptyEl.style.display='block'; emptyEl.textContent='No tracks match.'; return; }
+      emptyEl.style.display='none';
+      listEl.innerHTML='';
+      items.forEach(s=>{
+        const row = document.createElement('div');
+        row.className = 'mus-lib-row' + (previewUrl===s.url ? ' playing' : '');
+        row.draggable = true;
+        const meta = esc(s.category||'Music') + (s.subcategory?' · '+esc(s.subcategory):'');
+        row.innerHTML =
+          '<button class="mus-lib-play" title="Preview">'+(previewUrl===s.url
+            ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><rect x="5.2" y="5.2" width="13.6" height="13.6" rx="2"/></svg>'
+            : '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg>')+'</button>' +
+          '<span class="mus-lib-meta"><div class="mus-lib-name">'+esc(s.label)+'</div><div class="mus-lib-cat">'+meta+'</div></span>' +
+          '<span class="mus-lib-grip" title="Drag onto Music, Soundboard, or a Scene">⠿</span>';
+        row.querySelector('.mus-lib-play').addEventListener('click', e=>{ e.stopPropagation(); togglePreview(s.url, row); });
+        row.addEventListener('dragstart', e=>{ row.classList.add('dragging'); try{ e.dataTransfer.setData('application/x-dd-sound', JSON.stringify({ name:s.label, url:s.url })); e.dataTransfer.effectAllowed='copy'; }catch(_){} });
+        row.addEventListener('dragend', ()=> row.classList.remove('dragging'));
+        listEl.appendChild(row);
+      });
+    }
+
+    function load(){
+      listEl.innerHTML=''; catsEl.innerHTML=''; subsEl.innerHTML='';
+      emptyEl.style.display='block'; emptyEl.textContent='Loading…';
+      fetch('/api/sounds',{headers:{'accept':'application/json'}})
+        .then(r=> r.json())
+        .then(d=>{ cache=(d&&d.sounds)||[]; render(); })
+        .catch(()=>{ emptyEl.style.display='block'; emptyEl.textContent='Could not load the library.'; });
+    }
+
+    if(searchEl) searchEl.addEventListener('input', ()=>{ query=searchEl.value.trim().toLowerCase(); render(); });
+    if(refreshBtn) refreshBtn.addEventListener('click', ()=>{ cache=null; load(); });
+    // null = follow the container query (shown when the window is wide enough);
+    // 'on'/'off' = explicit user override that wins in either context.
+    let libForced = null;
+    if(toggleBtn) toggleBtn.addEventListener('click', ()=>{
+      if(libForced === null){
+        // First click: flip whatever the GM currently sees.
+        let visible = false;
+        try { visible = root.ownerDocument.defaultView.getComputedStyle(lib).display !== 'none'; } catch(_){}
+        libForced = visible ? 'off' : 'on';
+      } else {
+        libForced = libForced === 'off' ? 'on' : 'off';
+      }
+      lib.classList.toggle('mus-lib-hidden', libForced==='off');
+      lib.classList.toggle('mus-lib-shown', libForced==='on');
+      toggleBtn.classList.toggle('active', libForced!=='off');
+    });
+    // Load once the library becomes visible (avoids a needless fetch in tiny
+    // free-mode windows where it's hidden), but always load on first open.
+    load();
+  })();
 
   root._getState = () => ({
     music: music.map(t=>({ name:t.name, url:isHttp(t.url)?t.url:null, loop:!!t.loop, vol:(typeof t.vol==='number'?t.vol:1) })),
