@@ -1687,26 +1687,26 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .gmc-round-btn:active{transform:translateY(1px)}
 .party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
 /* Rounded-square party bubbles that mirror the Party Card header. */
-.bubble{position:relative;display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:11px;padding:8px 9px 6px;cursor:pointer;transition:all .12s;flex:0 0 auto;max-width:230px;overflow:hidden}
+/* Party bubble — a consistent vertical 3-row stack: identity · health · stat chips. */
+.bubble{position:relative;display:flex;flex-direction:column;gap:5px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:11px;padding:8px 10px;cursor:pointer;transition:all .12s;flex:0 0 auto;width:176px;overflow:hidden}
 .bubble::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--accent)}
 .bubble:hover{border-color:var(--accent-dim);box-shadow:0 0 0 1px var(--accent-dim)}
 .bubble.bloodied{border-color:var(--red-light);box-shadow:0 0 8px rgba(214,58,48,.35)}
 .bubble.bloodied::before{background:var(--red-light)}
 .bubble.down{opacity:.5;filter:grayscale(.4)}
 .bubble.down::before{background:#555}
-.bub-av{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:12px;color:#06131a;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
-.bub-mini{display:flex;flex-direction:column;gap:3px;min-width:52px;flex:1;min-width:0}
-.bub-nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12.5px;color:var(--white);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bub-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bub-hpb{height:9px;border-radius:4px;background:rgba(0,0,0,.5);overflow:hidden;position:relative;border:1px solid var(--border)}
-.bub-hpb>i{display:block;height:100%;border-radius:4px}
-.bub-hpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:7.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
-.bub-ac{flex-shrink:0;text-align:center;border-radius:6px;background:var(--panel-2);border:1px solid var(--border);padding:2px 7px;align-self:center}
-.bub-ac .l{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7px;letter-spacing:.05em;color:var(--muted);display:block;line-height:1}
-.bub-ac .v{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:var(--white);line-height:1.1}
-.bub-chips{display:flex;flex-wrap:wrap;gap:3px}
-.bub-chip{display:inline-flex;align-items:baseline;gap:2px;font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;color:var(--white);background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:1px 4px;line-height:1.2;white-space:nowrap}
-.bub-chip em{font-family:'Barlow Condensed',sans-serif;font-style:normal;font-weight:800;font-size:7px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.bub-id{min-width:0;display:flex;flex-direction:column;gap:2px}
+.bub-nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--white);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bub-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bub-hpb{height:12px;border-radius:5px;background:rgba(0,0,0,.5);overflow:hidden;position:relative;border:1px solid var(--border)}
+.bub-hpb>i{display:block;height:100%;border-radius:5px}
+.bub-hpb.empty{background:rgba(255,255,255,.04)}
+.bub-hpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.bub-hpt-none{color:var(--muted);text-shadow:none}
+.bub-r3{display:flex;flex-wrap:wrap;gap:3px;min-height:16px}
+.bub-r3-empty{color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:9px;align-items:center}
+.bub-chip{display:inline-flex;align-items:baseline;gap:2px;font-family:'Share Tech Mono',monospace;font-size:8.5px;font-weight:700;color:var(--white);background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;line-height:1.3;white-space:nowrap}
+.bub-chip em{font-family:'Barlow Condensed',sans-serif;font-style:normal;font-weight:800;font-size:7.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
 .timer{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-left:2px solid #6a9fc8;border-radius:8px;padding:4px 10px;cursor:pointer;flex:0 0 auto}
 .timer:hover{border-color:var(--accent-dim)}
 .timer.zero{border-left-color:var(--red-light)}
@@ -4559,14 +4559,17 @@ function renderPartyStrip(roster){
     const bloodied = pct != null && pct > 0 && pct <= 40;
     const barW = pct==null ? 100 : Math.max(4,pct);
     const hpText = pc.hp || '';
+    // Row 3 = stat details: the defense/AC chip first, then everything else.
+    const chips = [];
+    if(pc.ac) chips.push({ label: pc.acLabel || 'AC', value: pc.ac });
+    (pc.extra || []).forEach(c => { if(c && (c.label || c.value)) chips.push(c); });
+    // Consistent 3-row stack: identity · health · stat chips.
     return '<div class="bubble'+(down?' down':'')+(bloodied?' bloodied':'')+'" onclick="charPop('+i+')" title="'+esc2(pc.name)+'">'
-      + '<div class="bub-mini">'
-        + '<div class="bub-nm">'+esc2(pc.name)+'</div>'
-        + (pc.sub ? '<div class="bub-sub">'+esc2(pc.sub)+'</div>' : '')
-        + (hpText ? '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span></div>' : '')
-        + (pc.extra && pc.extra.length ? '<div class="bub-chips">'+pc.extra.map(c=>'<span class="bub-chip">'+(c.label?'<em>'+esc2(c.label)+'</em>':'')+(c.value?esc2(c.value):'')+'</span>').join('')+'</div>' : '')
+      + '<div class="bub-id"><span class="bub-nm">'+esc2(pc.name)+'</span>'+(pc.sub?'<span class="bub-sub">'+esc2(pc.sub)+'</span>':'')+'</div>'
+      + '<div class="bub-hpb'+(hpText?'':' empty')+'">'
+        + (hpText ? '<i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span>' : '<span class="bub-hpt bub-hpt-none">—</span>')
       + '</div>'
-      + (pc.ac ? '<div class="bub-ac"><span class="l">'+esc2(pc.acLabel||'AC')+'</span><span class="v">'+esc2(pc.ac)+'</span></div>' : '')
+      + (chips.length ? '<div class="bub-r3">'+chips.map(c=>'<span class="bub-chip">'+(c.label?'<em>'+esc2(c.label)+'</em>':'')+(c.value?esc2(c.value):'')+'</span>').join('')+'</div>' : '<div class="bub-r3 bub-r3-empty">—</div>')
       + '</div>';
   }).join('');
 }
@@ -4763,6 +4766,24 @@ function charPop(i){
     + '<div class="pline" style="color:var(--muted)">Sync a character sheet (Party tool) to see the full card here.</div>';
   showGmcPop(title, html, {});
 }
+
+// A player card opened in the popup (charPop) is a clone that lives OUTSIDE the
+// Party tool's list, so the list's delegated click handler never sees it. Wire
+// the inline "ⓘ" spell/condition/skill detail toggles here so they work in the
+// popup too. (The MMRPG ⓘ popover is already handled document-wide.) Scoped to
+// the clicked button's own card so it toggles the popup's copy, not the list's.
+(function(){
+  const pb = document.getElementById('gmc-pop-body');
+  if(!pb) return;
+  pb.addEventListener('click', function(e){
+    const info = e.target.closest && e.target.closest('.pty-spell-info');
+    if(!info) return;
+    e.stopPropagation();
+    const scope = info.closest('.pty-card') || pb;
+    const desc = scope.querySelector('.pty-spell-desc[data-desc="' + (info.dataset.spell || '') + '"]');
+    if(desc) desc.style.display = desc.style.display === 'none' ? 'block' : 'none';
+  });
+})();
 
 function gmcTick(){
   // session clock
