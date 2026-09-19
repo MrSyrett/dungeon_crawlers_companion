@@ -400,8 +400,20 @@
   }
   // delegated open for a gear placed in markup (e.g. the GM dice tool toolbar)
   document.addEventListener('click', function(e){ var t=e.target; var g=t&&t.closest?t.closest('[data-da-gear]'):null; if(g){ e.preventDefault(); togglePop(g); } });
-  // GM screen: the dice tool is created on demand — drop a settings gear into it
-  function mountGmGear(root){ if(!root || !root.querySelector || root.querySelector('.da-gear-gm')) return;
+  // GM screen: the dice tool is created on demand — drop a settings gear into its
+  // toolbar, right beside the Clear Log button (it clones into the station/pop
+  // toolbar with the rest; the document-level [data-da-gear] handler opens it).
+  function mountGmGear(root){ if(!root || !root.querySelector) return;
+    var tb = root.querySelector('.toolbar-tpl');
+    if(tb){
+      if(tb.querySelector('.da-gear-tb')) return;
+      var b=document.createElement('button'); b.className='btn small ghost da-gear-tb'; b.type='button'; b.setAttribute('data-da-gear',''); b.title='Dice animation settings'; b.setAttribute('aria-label','Dice animation settings'); b.textContent='🎲';
+      var clear=tb.querySelector('.dice-clear');
+      if(clear) tb.insertBefore(b, clear); else tb.appendChild(b);
+      return;
+    }
+    // Fallback (no toolbar): the old floating gear.
+    if(root.querySelector('.da-gear-gm')) return;
     try{ if(getComputedStyle(root).position==='static') root.style.position='relative'; }catch(e){}
     var g=document.createElement('button'); g.className='da-gear-gm'; g.type='button'; g.setAttribute('data-da-gear',''); g.title='Dice animation settings'; g.setAttribute('aria-label','Dice animation settings'); g.textContent='🎲'; root.appendChild(g); }
   if(typeof window.init_dice==='function'){ var _idf=window.init_dice; window.init_dice=function(root){ var res=_idf.apply(this,arguments); try{ mountGmGear(root); }catch(e){} return res; }; }

@@ -465,6 +465,18 @@ input[type="number"] { -moz-appearance: textfield; }
   box-shadow: none;
   flex-shrink: 0;
 }
+/* Maps: a pan/zoom canvas — image anchored top-left, wheel zooms, drag pans. */
+.doc-frame-wrap.maps-mode {
+  padding: 0;
+  overflow: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background: #0c0d11;
+  cursor: grab;
+  touch-action: none;
+}
+.doc-frame-wrap.maps-mode.grabbing { cursor: grabbing; }
+.doc-frame-wrap.maps-mode .doc-image { user-select: none; -webkit-user-drag: none; }
 /* Zoomable HTML doc (session prep): wrap scrolls, scaler carries scaled size */
 .doc-frame-wrap.html-mode {
   padding: 0;
@@ -627,7 +639,10 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .cbt-body.cbt-single .cbt-col { flex: 1; border-right: none; }
 .cbt-col { flex: 1; display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--border); overflow: hidden; }
 .cbt-col:last-child { border-right: none; }
-.cbt-tracker-list, .cbt-npc-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.cbt-npc-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+/* Combat cards tile side-by-side and wrap into a grid instead of full-width rows. */
+.cbt-tracker-list { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 10px; align-content: start; }
+.cbt-tool { position: relative; }
 .cbt-empty { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 4px; padding: 30px; }
 .cbt-empty.show { display: flex; }
 .cbt-empty-text { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -760,7 +775,10 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .pane.narrow .npc-mon-stats { grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap: 2px 6px; }
 
 /* Monster picker (Trackers → + Monster) */
-.mon-pick { border: 1px solid var(--gold); background: var(--panel); padding: 8px 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* Bestiary picker is a popup overlay inside the Combat window — it never steals
+   the card list's space. */
+.mon-pick { position: absolute; inset: 0; z-index: 30; margin: 0; padding: 16px; border: none; background: rgba(6,8,12,.72); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; }
+.mon-pick-card { width: min(560px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 8px; background: var(--panel); border: 1px solid var(--accent-dim); border-radius: 12px; padding: 12px; box-shadow: 0 24px 70px rgba(0,0,0,.6); min-height: 0; }
 .mon-pick-controls { display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
 /* Timer + Blank buttons under the picker controls — the single "+" toolbar
    button opens this picker, so all "add" actions (timer, blank combatant, or a
@@ -769,7 +787,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .mon-pick-add-row > button { flex: 1 1 0; padding: 4px 0; font-size: 11px; letter-spacing: 0.08em; }
 .mon-pick-search { flex: 1 1 120px; min-width: 0; background: var(--panel-2); border: 1px solid var(--border); color: var(--white); font-size: 12px; padding: 5px 7px; outline: none; }
 .mon-pick-type { flex: 0 1 auto; min-width: 0; background: var(--panel-2); border: 1px solid var(--border); color: var(--white); font-size: 12px; padding: 5px 7px; outline: none; }
-.mon-pick-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; border-top: 1px solid var(--border); }
+.mon-pick-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; border-top: 1px solid var(--border); }
 .mon-pick-item { display: flex; align-items: baseline; gap: 8px; padding: 5px 4px; border-bottom: 1px solid var(--border); background: none; border-left: none; border-right: none; border-top: none; color: var(--light); font-size: 12px; text-align: left; cursor: pointer; min-width: 0; }
 .mon-pick-item:hover { background: var(--panel-2); color: var(--white); }
 .mon-pick-item-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
@@ -858,6 +876,9 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .gen-opts-toggle:hover { color: var(--light); }
 .gen-opts-chevron { font-size: 9px; line-height: 1; }
 .gen-controls.collapsed { display: none; }
+/* The Marvel generator's inline Generate is redundant now the toolbar button
+   shows for it — keep the roll action consistently in the toolbar. */
+.gen-inline-roll { display: none; }
 .gen-label {
   font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
@@ -1599,6 +1620,14 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 #gmc-party-bubbles{display:flex;align-items:center;gap:6px;padding:6px 8px;overflow-x:auto;min-width:0;flex:0 1 auto}
 #gmc-timers{display:flex;align-items:center;gap:6px;padding:6px 0}
 #gmc-timers:empty{display:none}
+/* Round control in the monitor bar (advances combat + round timers) */
+.gmc-round{display:flex;align-items:center;gap:8px;padding:0 10px;border-left:1px solid var(--border);flex-shrink:0}
+.gmc-round-info{display:flex;flex-direction:column;align-items:center;line-height:1}
+.gmc-round-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.gmc-round-num{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);line-height:1.1}
+.gmc-round-next{padding:6px 12px;border-radius:8px;background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#06131a;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(36,211,238,.25);white-space:nowrap}
+.gmc-round-next:hover{filter:brightness(1.08)}
+.gmc-round-next:active{transform:translateY(1px)}
 .party-empty{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;opacity:.7;white-space:nowrap}
 .bubble{display:flex;align-items:center;gap:7px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-radius:999px;padding:4px 11px 4px 5px;cursor:pointer;transition:all .12s;flex:0 0 auto}
 .bubble:hover{border-color:var(--accent-dim);box-shadow:0 0 0 1px var(--accent-dim)}
@@ -1638,7 +1667,7 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .cstation{display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--black);border-right:2px solid var(--border);transition:flex-basis .3s cubic-bezier(.4,0,.2,1),opacity .25s;flex:0 0 auto}
 .cstation:last-child{border-right:none}
 .cstation.collapsed{flex:0 0 0!important;min-width:0!important;opacity:0;border-width:0!important;pointer-events:none;overflow:hidden}
-#cst-adv{flex:0 0 auto;flex-basis:360px}
+#cst-adv{flex:0 0 auto;flex-basis:540px}
 #cst-center{flex:1 1 auto;flex-basis:auto}
 /* Roll Log runs the full page height on the right; command bar meets its left edge. */
 .cst-log-rail{flex:0 0 300px;border-right:none;border-left:2px solid var(--border)}
@@ -1672,6 +1701,9 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .qbtn:hover{border-color:var(--accent-dim);background:rgba(36,211,238,.08);color:var(--white)}
 .qbtn .qi{font-size:14px}
 .bb-dice{display:flex;align-items:center;gap:5px;padding:0 14px;border-left:1px solid var(--border);flex-shrink:0}
+/* Scene music buttons live in the command bar now, to the right of Quick Tools. */
+.bottom-bar .scene-strip{margin-left:0;border-left:1px solid var(--border);padding:0 12px;flex-shrink:0;max-width:42%;align-self:center}
+.bottom-bar .scene-strip:empty{display:none}
 .qdie{width:34px;height:34px;border-radius:8px;background:var(--panel-2);border:1px solid var(--border);color:var(--light);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qdie:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 10px var(--glow)}
 
@@ -1692,9 +1724,9 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .pop-head .pop-toolbar + .pop-x{margin-left:8px}
 .pop-x{margin-left:auto;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mid);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .pop-x:hover{color:#ff6a5c;border-color:var(--red-light)}
-.pop-body{padding:16px;overflow-y:auto}
+.pop-body{padding:16px;overflow-y:auto;flex:1 1 auto;min-height:0}
 .pop-body.tool-host{padding:0;display:flex;flex-direction:column;min-height:0}
-.pop-body.tool-host > *{flex:1;min-height:min(64vh,520px);max-height:100%;width:100%}
+.pop-body.tool-host > *{flex:1 1 auto;min-height:0;height:100%;max-height:100%;width:100%}
 /* Compact tool (Message): size the window to the tool's natural height. */
 .pop-body:not(.tool-host) .msg-tool{height:auto;display:block}
 .pop-body .msg-body{display:flex;flex-direction:column;gap:0}
@@ -1815,7 +1847,10 @@ body[data-cview="free"] .cst-log-rail{display:none}
 
   <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Link a campaign to see your party</div></div>
   <div class="mon-group" id="gmc-timers"></div>
-  <div class="scene-strip" id="gmc-scenes"></div>
+  <div class="gmc-round" id="gmc-round">
+    <div class="gmc-round-info"><span class="gmc-round-lbl">Round</span><span class="gmc-round-num" id="gmc-round-num">1</span></div>
+    <button class="gmc-round-next" type="button" onclick="gmcNextRound()" title="Advance the round (steps combat + round timers)">Next&nbsp;›</button>
+  </div>
   <div class="tel-clock"><div class="tel-clbl">Session</div><div class="tel-time" id="tel-clock">0:00</div></div>
 
   <div class="view-controls">
@@ -2428,6 +2463,7 @@ GMScenes.renderPins();
         <button class="qbtn" type="button" onclick="openTool('message')"><span class="qi">💬</span>Message</button>
         <button class="qbtn" type="button" onclick="openTool('rules')"><span class="qi">📖</span>Rulebooks</button>
       </div>
+      <div class="scene-strip" id="gmc-scenes"></div>
     </footer>
 
   </div>
@@ -2569,9 +2605,7 @@ GMScenes.renderPins();
 <template id="tpl-trackers">
   <div class="tool-instance cbt-tool trk-tool" data-tool="trackers">
     <div class="toolbar-tpl" style="display:none">
-      <button class="btn small primary cbt-add-monster" title="Add tracker, monster, or combatant" aria-label="Add">&#43;</button>
-      <button class="btn primary small trk-next-round" title="Next round" aria-label="Next round">&rarr;</button>
-      <span class="cbt-round-display"><span class="cbt-round-label">Round</span> <span class="trk-round-num">1</span></span>
+      <button class="btn small primary cbt-add-monster" title="Add a monster or combatant from the bestiary" aria-label="Add combatant">&#43; Add Combatant</button>
       <div class="toolbar-spacer"></div>
       <button class="btn small ghost trk-reset" title="Reset" aria-label="Reset trackers"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.6a6.4 6.4 0 0 1 5.5 3.1H15.3v2.1h5.4V5.4h-2.1v1.9A8.5 8.5 0 0 0 3.6 11.2l2.1.3A6.4 6.4 0 0 1 12 5.6z"/><path d="M12 18.4a6.4 6.4 0 0 1-5.5-3.1h2.2v-2.1H3.3v5.4h2.1v-1.9A8.5 8.5 0 0 0 20.4 12.8l-2.1-.3A6.4 6.4 0 0 1 12 18.4z"/></svg></button>
     </div>
@@ -4214,8 +4248,8 @@ const STATION_TITLES = { adv:'Adventure', map:'Maps', cbt:'Combat', log:'Roll Lo
 const CONSOLE_MODES = {
   master:   { adv:1, map:1, cbt:1, log:1 },   // everything — the home layout
   prep:     { adv:1, map:0, cbt:0, log:0 },   // adventure fills, planning
-  explore:  { adv:1, map:1, cbt:0, log:1 },   // adventure + map + roll log
-  combat:   { adv:0, map:1, cbt:1, log:1 },   // map + combat + roll log
+  explore:  { adv:1, map:1, cbt:0, log:1 },   // adventure + MAP (combat hidden) + roll log
+  combat:   { adv:1, map:0, cbt:1, log:1 },   // adventure + COMBAT (map hidden) + roll log
   downtime: { adv:1, map:0, cbt:0, log:1 },   // adventure + roll log
 };
 let consoleMode = 'master';
@@ -4419,6 +4453,28 @@ function gmcTrackerState(){
   if(node && node._getState){ try { return node._getState(); } catch(e){} }
   return null;
 }
+function gmcCombatNode(){
+  const cache = gmNodes['cst-cbt'];
+  return cache && cache.byTool && cache.byTool['trackers'];
+}
+
+// ── Round control (Monitor bar): advance the combat round + step round timers. ──
+function gmcNextRound(){
+  const cbt = gmcCombatNode();
+  if(cbt && cbt._nextRound) { try { cbt._nextRound(); } catch(e){} }
+  const tmr = gmcPopNodes && gmcPopNodes['timers'];
+  if(tmr && tmr._stepRounds) { try { tmr._stepRounds(); } catch(e){} }
+  try { renderTimers(); } catch(e){}
+  gmcUpdateRound();
+}
+function gmcUpdateRound(){
+  const el = document.getElementById('gmc-round-num');
+  if(!el) return;
+  const cbt = gmcCombatNode();
+  let r = 1;
+  if(cbt && cbt._getRound){ try { r = cbt._getRound() || 1; } catch(e){} }
+  el.textContent = r;
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // POPUPS / DRAWERS — quick tools mount a real live tool instance; character &
@@ -4527,9 +4583,10 @@ function gmcTick(){
   // system label
   const sysEl = document.getElementById('tel-sys');
   if(sysEl){ const sys = (typeof window.GM_SYSTEM==='string'?window.GM_SYSTEM:''); sysEl.textContent = (sys? sys+' · ':'') + 'GM Console'; }
-  // monitor-bar timers + scenes reflect live tool state
+  // monitor-bar timers + scenes + round reflect live tool state
   try { renderTimers(); } catch(e) {}
   try { renderScenes(); } catch(e) {}
+  try { gmcUpdateRound(); } catch(e) {}
   // auto-flip to Combat when initiative starts, back to Explore when it clears
   if(gmcAutoCombat && document.body.dataset.cview==='console'){
     const st = gmcTrackerState();
@@ -4757,6 +4814,9 @@ function initDocTool(root) {
     // 4-panel panes and the stacked Focus side panes as narrow; Single, Split,
     // and the Focus main pane are not, so they get the two-column layout.
     const pane = root.closest('.pane, .csub, .cstation');
+    // Console canvas stations are single-column columns — always render flow so
+    // session-prep text stays readable (never the shrunk two-column desktop layout).
+    if(pane && (pane.classList.contains('cstation') || pane.classList.contains('csub'))) return true;
     if(pane) return pane.classList.contains('narrow');
     // No pane ancestor (unusual embedding): fall back to a conservative width.
     return frameWrap.clientWidth > 0 && frameWrap.clientWidth < 420;
@@ -4828,6 +4888,39 @@ function initDocTool(root) {
     else if(mediaType === 'html') { zoom = Math.max(0.3, zoom - 0.15); applyZoom(); }
   });
 
+  // Maps: scroll-wheel to zoom (centred on the cursor) and drag to pan the map
+  // freely inside the tool, like a proper battle-map canvas.
+  if(isMaps) {
+    frameWrap.addEventListener('wheel', e => {
+      if(mediaType !== 'image' || !naturalW) return;
+      e.preventDefault();
+      const rect = frameWrap.getBoundingClientRect();
+      const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+      const imgX = (frameWrap.scrollLeft + cx) / zoom;
+      const imgY = (frameWrap.scrollTop + cy) / zoom;
+      zoom = Math.max(0.05, Math.min(8, zoom * (e.deltaY < 0 ? 1.12 : 1/1.12)));
+      applyZoom();
+      frameWrap.scrollLeft = imgX * zoom - cx;
+      frameWrap.scrollTop  = imgY * zoom - cy;
+    }, { passive: false });
+    let dragging = false, sx = 0, sy = 0, sl = 0, st = 0;
+    frameWrap.addEventListener('pointerdown', e => {
+      if(mediaType !== 'image') return;
+      dragging = true; sx = e.clientX; sy = e.clientY; sl = frameWrap.scrollLeft; st = frameWrap.scrollTop;
+      frameWrap.classList.add('grabbing');
+      try { frameWrap.setPointerCapture(e.pointerId); } catch(_) {}
+    });
+    frameWrap.addEventListener('pointermove', e => {
+      if(!dragging) return;
+      frameWrap.scrollLeft = sl - (e.clientX - sx);
+      frameWrap.scrollTop  = st - (e.clientY - sy);
+    });
+    const endDrag = e => { if(!dragging) return; dragging = false; frameWrap.classList.remove('grabbing'); try { frameWrap.releasePointerCapture(e.pointerId); } catch(_) {} };
+    frameWrap.addEventListener('pointerup', endDrag);
+    frameWrap.addEventListener('pointercancel', endDrag);
+    frameWrap.addEventListener('pointerleave', endDrag);
+  }
+
   // Keep an html doc filling the pane when it resizes (split changes, etc.)
   if(typeof ResizeObserver !== 'undefined') {
     let rzTimer = null;
@@ -4848,7 +4941,7 @@ function initDocTool(root) {
   function clearDoc() {
     frameWrap.innerHTML = '';
     frameWrap.style.display = 'none';
-    frameWrap.classList.remove('pdf-mode', 'html-mode');
+    frameWrap.classList.remove('pdf-mode', 'html-mode', 'maps-mode', 'grabbing');
     emptyEl.style.display = 'flex';
     controls.style.display = 'none';
     filenameEl.textContent = isMaps ? 'No map loaded' : 'No document loaded';
@@ -4936,6 +5029,8 @@ function initDocTool(root) {
       mediaType = 'image';
       zoomInBtn.style.display = '';
       zoomOutBtn.style.display = '';
+      // Maps anchor top-left so wheel-zoom + drag-pan math is exact.
+      if(isMaps) frameWrap.classList.add('maps-mode');
       const img = document.createElement('img');
       img.className = 'doc-image';
       img.style.width = 'auto';
@@ -5884,21 +5979,23 @@ function init_trackers(root) {
     pickerEl = document.createElement('div');
     pickerEl.className = 'mon-pick';
     pickerEl.innerHTML = `
-      <div class="mon-pick-controls">
-        <input type="text" class="mon-pick-search" placeholder="Search the bestiary..." value="${escAttr(pickerQuery)}">
-        <select class="mon-pick-type">
-          <option value="">${pickerSource === 'dcc' ? 'Any Role' : pickerSource === 'nim' ? 'Any Family' : pickerSource === 'sw' ? 'Any Group' : 'Any Type'}</option>
-          ${types.map(t => `<option value="${escAttr(t)}" ${t === pickerType ? 'selected' : ''}>${escAttr(t)}</option>`).join('')}
-        </select>
-        <button class="btn small ghost mon-pick-close">Close</button>
-      </div>
-      <div class="mon-pick-add-row">
-        <button class="btn small ghost mon-pick-timer cbt-add-tracker" title="Add a timer / round tracker"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.2 1.8h5.6v2H9.2z"/><path d="M18.5 6.9l1.3-1.3 1.3 1.3-1.4 1.4A8.2 8.2 0 1 1 12 4.6a8 8 0 0 1 4.6 1.4l1-1 .9.9ZM12.9 8.6h-1.8v4.9l3.6 2.2.95-1.55-2.75-1.65Z"/></svg> Timer</button>
-        <button class="btn small ghost mon-pick-blank cbt-add-npc" title="Add an empty combatant">Blank</button>
-      </div>
-      <div class="mon-pick-list">${pickerRowsHtml()}</div>`;
-    // Sits above the card list, outside the element render() rebuilds.
-    list.parentNode.insertBefore(pickerEl, list);
+      <div class="mon-pick-card">
+        <div class="mon-pick-controls">
+          <input type="text" class="mon-pick-search" placeholder="Search the bestiary..." value="${escAttr(pickerQuery)}">
+          <select class="mon-pick-type">
+            <option value="">${pickerSource === 'dcc' ? 'Any Role' : pickerSource === 'nim' ? 'Any Family' : pickerSource === 'sw' ? 'Any Group' : 'Any Type'}</option>
+            ${types.map(t => `<option value="${escAttr(t)}" ${t === pickerType ? 'selected' : ''}>${escAttr(t)}</option>`).join('')}
+          </select>
+          <button class="btn small ghost mon-pick-close">Close</button>
+        </div>
+        <div class="mon-pick-add-row">
+          <button class="btn small ghost mon-pick-blank cbt-add-npc" title="Add an empty combatant">＋ Blank Combatant</button>
+        </div>
+        <div class="mon-pick-list">${pickerRowsHtml()}</div>
+      </div>`;
+    // Overlay within the Combat window so it never pushes the cards around.
+    root.appendChild(pickerEl);
+    pickerEl.addEventListener('mousedown', e => { if(e.target === pickerEl) closePicker(); });
     pickerEl.querySelector('.mon-pick-search').addEventListener('input', e => {
       pickerQuery = e.target.value;
       refreshPickerRows();
@@ -5972,10 +6069,7 @@ function init_trackers(root) {
     if(!(root.contains(btn) || (toolbarSlot && toolbarSlot.contains(btn)))) return;
 
     if(btn.classList.contains('trk-next-round')) {
-      round += 1;
-      updateRoundDisplay();
-      items.forEach(it => { if(it.type === 'tracker' && it.kind === 'rounds') it.rounds = Math.max(0, it.rounds - 1); });
-      render();
+      nextRound();
     } else if(btn.classList.contains('trk-reset') || btn.classList.contains('cbt-reset')) {
       if(!confirm('Reset the round counter and clear all trackers and combatants?')) return;
       round = 1; items = [];
@@ -5998,6 +6092,18 @@ function init_trackers(root) {
     }
   }
   document.addEventListener('click', onClick);
+
+  // Advance the initiative round (also steps any legacy round-tracker cards).
+  // Exposed so the Monitor bar's Next-Round control can drive it.
+  function nextRound() {
+    round += 1;
+    updateRoundDisplay();
+    items.forEach(it => { if(it.type === 'tracker' && it.kind === 'rounds') it.rounds = Math.max(0, it.rounds - 1); });
+    render();
+    if(window.__ddScheduleSave) window.__ddScheduleSave();
+  }
+  root._nextRound = nextRound;
+  root._getRound = () => round;
 
   render();
   updateRoundDisplay();
@@ -9801,7 +9907,7 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen', 'mmrpgmonster'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -14115,6 +14221,15 @@ function init_timers(root) {
 
   addTimeBtn.addEventListener('click', () => addTimer('time'));
   addRoundBtn.addEventListener('click', () => addTimer('round'));
+
+  // Advance every round-countdown by one (driven by the Monitor bar Next-Round).
+  root._stepRounds = () => {
+    let any = false;
+    timers.forEach(t => { if(t.kind === 'round' && t.remainingRounds > 0){ t.remainingRounds -= 1; any = true; } });
+    if(any){ render(); if(window.__ddScheduleSave) window.__ddScheduleSave(); }
+    return any;
+  };
+  root._hasRoundTimers = () => timers.some(t => t.kind === 'round');
 
   root._getState = () => ({ timers });
   root._setState = (st) => {
