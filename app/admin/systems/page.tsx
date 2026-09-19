@@ -6,6 +6,7 @@ import { AdminNav } from "@/components/AdminNav";
 import { SYSTEMS } from "@/components/systemStore";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import { setSystemHidden } from "@/app/actions/systems";
+import { SystemVisibilityToggle } from "@/components/SystemVisibilityToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -72,28 +73,12 @@ export default async function AdminSystemsPage() {
                 </div>
               </div>
 
-              <form action={setSystemHidden} className="flex items-center gap-3">
-                <input type="hidden" name="key" value={s.key} />
-                {/* An unchecked checkbox is simply omitted from the form data, so
-                    the action reads "visible present = show, absent = hide". */}
-                <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
-                  <input
-                    type="checkbox"
-                    name="visible"
-                    value="on"
-                    defaultChecked={!isHidden}
-                    disabled={lastVisible}
-                    className="h-4 w-4"
-                  />
-                  Visible
-                </label>
-                <button
-                  disabled={lastVisible}
-                  className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[var(--border)] disabled:hover:text-[var(--muted)]"
-                >
-                  Save
-                </button>
-              </form>
+              <SystemVisibilityToggle
+                systemKey={s.key}
+                visible={!isHidden}
+                disabled={lastVisible}
+                action={setSystemHidden}
+              />
             </li>
           );
         })}

@@ -8,7 +8,7 @@ import { ConfirmButton } from "@/components/ConfirmButton";
 import CopyCodeButton from "@/components/CopyCodeButton";
 import { deleteCampaign, renameCampaign, setCampaignVttUrl, setCampaignSystem } from "@/app/actions/campaigns";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
-import { SYSTEMS } from "@/components/systemStore";
+import { CampaignSystemSelect } from "@/components/CampaignSystemSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -480,28 +480,11 @@ export default async function CampaignsPage() {
                   </button>
                 </form>
 
-                <form action={setCampaignSystem} className="mt-2 flex gap-2">
-                  <input type="hidden" name="id" value={c.id} />
-                  <select
-                    name="system"
-                    defaultValue={c.system ?? ""}
-                    aria-label={`Game system for ${c.name}`}
-                    className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--gold)]"
-                  >
-                    <option value="">No system set</option>
-                    {SYSTEMS.map((s) => (
-                      <option key={s.key} value={s.key}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
-                  <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">
-                    Save
-                  </button>
-                </form>
+                <CampaignSystemSelect id={c.id} system={c.system ?? null} action={setCampaignSystem} />
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
-                  The GM Screen switches to this system automatically when you link this campaign — no
-                  separate system picker on the screen.
+                  Pick a game system — it saves as you choose it. The GM Screen switches to this
+                  system automatically when you link this campaign, so there&apos;s no separate system
+                  picker on the screen.
                 </p>
 
                 <form action={setCampaignVttUrl} className="mt-2 flex gap-2">

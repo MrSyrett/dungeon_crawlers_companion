@@ -8,6 +8,7 @@ import type { RulebookSystem } from "@/lib/rulebooks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { AdminNav } from "@/components/AdminNav";
 import { SYSTEMS } from "@/components/systemStore";
+import { RulebookSettingsForm } from "@/components/RulebookSettingsForm";
 import {
   saveRulebookSettings,
   grantRulebookAccess,
@@ -122,34 +123,12 @@ export default async function AdminRulebooksPage({
                 </div>
                 <div className="mt-0.5 text-[11px] text-[var(--muted)]">{file}</div>
 
-                <form
+                <RulebookSettingsForm
+                  file={file}
+                  everyone={everyone}
+                  system={system}
                   action={saveRulebookSettings}
-                  className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[var(--border)] pt-3"
-                >
-                  <input type="hidden" name="file" value={file} />
-                  <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
-                    <input type="checkbox" name="everyone" defaultChecked={everyone} className="h-4 w-4" />
-                    Visible to everyone signed in
-                  </label>
-                  <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
-                    Shown on
-                    <select
-                      name="system"
-                      defaultValue={system}
-                      className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1.5 text-[13px] text-[var(--text)] outline-none focus:border-[var(--gold)]"
-                    >
-                      <option value="BOTH">All systems</option>
-                      {SYSTEMS.map((s) => (
-                        <option key={s.key} value={s.key}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button className="ml-auto shrink-0 rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">
-                    Save
-                  </button>
-                </form>
+                />
 
                 <div className="mt-3">
                   <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
