@@ -169,11 +169,17 @@ function extractDocTitle(tool: string, data: object): string | null {
       if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
     }
 
-    // Every session-prep tool keeps its blob under its registered key.
+    // Every session-prep tool keeps its blob under its registered key. A prep may
+    // be a single (legacy) chapter or a multi-chapter doc { chapters:[…] } — the
+    // adventure title is the first chapter's Title either way.
     const sessionKey = isToolId(tool) && TOOLS[tool].kind === "session" ? TOOLS[tool].keys[0] : null;
     if (sessionKey && typeof blob[sessionKey] === "string") {
-      const prep = JSON.parse(blob[sessionKey] as string) as { title?: unknown };
-      if (typeof prep.title === "string" && prep.title.trim()) return prep.title.trim();
+      const prep = JSON.parse(blob[sessionKey] as string) as {
+        title?: unknown;
+        chapters?: Array<{ title?: unknown }>;
+      };
+      const src = Array.isArray(prep.chapters) && prep.chapters.length ? prep.chapters[0] : prep;
+      if (src && typeof src.title === "string" && src.title.trim()) return src.title.trim();
     }
   } catch {
     // Malformed payloads simply keep the existing title

@@ -455,6 +455,11 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-full { flex-shrink: 0; }
 .advh-backbtn { position: absolute; top: 8px; left: 8px; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
 .advh-prose { font-size: 13px; color: var(--light); line-height: 1.6; overflow-wrap: anywhere; }
+/* Chapter switcher — one tab per chapter of a multi-chapter adventure. */
+.advh-chapters { display: flex; gap: 4px; padding: 7px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; background: linear-gradient(180deg,#1a1d24,#141821); }
+.advh-chap { flex: 0 0 auto; max-width: 160px; overflow: hidden; text-overflow: ellipsis; background: var(--panel-2); border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 5px 10px 6px; cursor: pointer; white-space: nowrap; }
+.advh-chap:hover { color: var(--light); }
+.advh-chap.on { color: var(--white); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel-2)); }
 .advh-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
 .advh-tab { flex: 0 0 auto; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
 .advh-tab:hover { color: var(--light); }
@@ -5557,7 +5562,10 @@ function wireSessionPrepLoader(root) {
     hub.style.display = 'none';
     body.appendChild(hub);
   }
-  let prep = null;         // parsed session-prep state
+  let prep = null;         // the active chapter's session-prep state
+  let prepChapters = [];   // all chapters in the loaded doc (>=1)
+  let prepActiveChapter = 0;
+  let prepMeta = null;     // { docTool, docId, docTitle } for the loaded doc
   let prepSys = '';        // system key (DND, SD, …) for statblock mapping
   let activeSec = 'overview';
 
@@ -5595,14 +5603,23 @@ function wireSessionPrepLoader(root) {
         const data = d && d.data && typeof d.data === 'object' ? d.data : {};
         const key = Object.keys(data).find(k => /_session$/.test(k));
         if(!key || typeof data[key] !== 'string') throw new Error('no session blob');
-        prep = JSON.parse(data[key]);
+        const raw = JSON.parse(data[key]);
+        // Multi-chapter docs hold { chapters:[…], active }; a legacy flat blob is
+        // a single chapter. Each chapter's Subtitle is its name in the switcher.
+        if(raw && Array.isArray(raw.chapters) && raw.chapters.length) {
+          prepChapters = raw.chapters;
+          prepActiveChapter = Math.min(Math.max(0, parseInt(raw.active, 10) || 0), prepChapters.length - 1);
+        } else {
+          prepChapters = [raw];
+          prepActiveChapter = 0;
+        }
         prepSys = String(d.system || doc.system || window.GM_SYSTEM || '').toUpperCase();
-        prep._docTool = doc.tool; prep._docId = doc.id; prep._docTitle = doc.title;
+        prepMeta = { docTool: doc.tool, docId: doc.id, docTitle: doc.title };
         // Remember which prep is loaded so a page refresh can restore the hub
         // (not just the printable preview).
         root._advPrepDoc = { id: doc.id, tool: doc.tool, title: doc.title, system: prepSys };
         activeSec = 'overview';
-        renderHub();
+        setPrepChapter(prepActiveChapter);
         // The auto-save that fired on the picker click snapshotted state BEFORE
         // this async load finished (so it missed _advPrepDoc). Persist again now
         // that the hub is loaded, so a refresh restores it.
@@ -5611,6 +5628,18 @@ function wireSessionPrepLoader(root) {
       .catch(() => { if(hub) hub.innerHTML = '<div class="advh-msg">Couldn’t load that adventure. <button class="btn small advh-retry">Try again</button></div>';
         const r = hub && hub.querySelector('.advh-retry'); if(r) r.addEventListener('click', () => loadPrep(doc)); });
   }
+
+  // Point the hub at one chapter and (re)render it.
+  function setPrepChapter(i){
+    if(!prepChapters.length) return;
+    prepActiveChapter = Math.min(Math.max(0, i), prepChapters.length - 1);
+    prep = prepChapters[prepActiveChapter] || {};
+    if(prepMeta) { prep._docTool = prepMeta.docTool; prep._docId = prepMeta.docId; prep._docTitle = prepMeta.docTitle; }
+    activeSec = 'overview';
+    renderHub();
+    try { if(window.__ddScheduleSave) window.__ddScheduleSave(); } catch(e) {}
+  }
+  function chapterName(ch, i){ return (ch && ch.subtitle && String(ch.subtitle).trim()) ? String(ch.subtitle).trim() : ('Chapter ' + (i + 1)); }
 
   // Scenes = locations (+ SD strongopen). Tables = rollTables/rolltables/tables
   // (+ SD randenc). Maps = maps[] (+ the legacy single mappath).
@@ -5634,17 +5663,26 @@ function wireSessionPrepLoader(root) {
   function renderHub(){
     if(!hub || !prep) return;
     const c = counts();
+    const multi = prepChapters.length > 1;
     const meta = [prep.floor, prep.session ? 'Session ' + prep.session : '', prep.players ? prep.players + ' players' : '', prep.duration].map(s => String(s || '').trim()).filter(Boolean).join(' · ');
     // Reorder per spec: Overview · Scenes · Notes · Clues · Loot · Tables · NPCs · Maps.
     const TABS = [['overview','Overview'],['scenes','Scenes'],['notes','Notes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
     // Text-only tabs (Overview / Notes) show no count badge, just dim when empty.
     const NOCOUNT = { overview: 1, notes: 1 };
+    // The adventure title is shared across chapters; the current chapter's name is
+    // its Subtitle (shown in the switcher when there's more than one chapter).
+    const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
     let h = '<div class="advh-head">'
-      + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(prep.title || prep._docTitle || 'Adventure') + '</div>'
-      + (prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
+      + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(advTitle) + '</div>'
+      + (!multi && prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
       + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
       + (meta ? '<div class="advh-meta">' + advEsc(meta) + '</div>' : '')
       + '</div>';
+    // Chapter switcher — one tab per chapter of the adventure.
+    if(multi) {
+      h += '<div class="advh-chapters">' + prepChapters.map((ch, i) =>
+        '<button class="advh-chap' + (i === prepActiveChapter ? ' on' : '') + '" data-chap="' + i + '" title="' + advEsc(chapterName(ch, i)) + '">' + advEsc(chapterName(ch, i)) + '</button>').join('') + '</div>';
+    }
     h += '<div class="advh-tabs">' + TABS.map(([k, l]) =>
       '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + '>' + l
       + (!NOCOUNT[k] && c[k] ? ' <span class="advh-n">' + c[k] + '</span>' : '') + '</button>').join('') + '</div>';
@@ -5754,6 +5792,7 @@ function wireSessionPrepLoader(root) {
 
   function wireHub(){
     hub.querySelectorAll('.advh-tab').forEach(b => b.addEventListener('click', () => { activeSec = b.dataset.sec; renderHub(); }));
+    hub.querySelectorAll('.advh-chap').forEach(b => b.addEventListener('click', () => { setPrepChapter(+b.dataset.chap); }));
     const full = hub.querySelector('.advh-full');
     if(full) full.addEventListener('click', () => {
       showPreview();
