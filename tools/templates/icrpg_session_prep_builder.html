@@ -63,11 +63,11 @@ document.addEventListener("DOMContentLoaded", function() {
   .chapter-tabs { display: flex; flex-wrap: nowrap; align-items: flex-end; padding: 8px 8px 0; background: var(--ui-bg); border-bottom: 1px solid var(--ui-border); overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
   .chapter-tabs::-webkit-scrollbar { height: 5px; }
   .chapter-tabs::-webkit-scrollbar-thumb { background: var(--ui-border); border-radius: 3px; }
-  .chapter-tab { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; margin-right: -9px; padding: 6px 17px 7px 11px; background: var(--ui-panel); color: var(--ui-muted); border: 1px solid var(--ui-border); border-bottom: none; border-radius: 7px 7px 0 0; cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; white-space: nowrap; position: relative; z-index: 1; transition: color .12s, background .12s; }
+  .chapter-tab { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; margin-right: -16px; padding: 6px 14px 7px 9px; background: var(--ui-panel); color: var(--ui-muted); border: 1px solid var(--ui-border); border-bottom: none; border-radius: 7px 7px 0 0; cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; white-space: nowrap; position: relative; z-index: 1; transition: color .12s, background .12s; }
   .chapter-tab:hover { color: var(--ui-text); z-index: 4; }
   .chapter-tab.active { color: var(--ui-accent); border-color: var(--ui-accent); border-bottom-color: var(--ui-panel); background: color-mix(in srgb, var(--ui-accent) 16%, var(--ui-panel)); z-index: 6; }
-  .chapter-tab-name { overflow: hidden; text-overflow: ellipsis; max-width: 68px; }
-  .chapter-tab.active .chapter-tab-name { max-width: 130px; }
+  .chapter-tab-name { overflow: hidden; text-overflow: ellipsis; max-width: 34px; }
+  .chapter-tab.active .chapter-tab-name { max-width: 90px; }
   .chapter-tab-x { flex-shrink: 0; color: var(--ui-muted); font-size: 10px; line-height: 1; border-radius: 3px; opacity: 0; width: 0; overflow: hidden; transition: opacity .12s; }
   .chapter-tab.active .chapter-tab-x, .chapter-tab:hover .chapter-tab-x { opacity: 1; width: auto; margin-left: 1px; }
   .chapter-tab-x:hover { color: #e06666; }
