@@ -432,6 +432,15 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 .doc-empty-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: var(--muted); }
 
+/* ── MAP TABS (Maps pane, multiple maps) ── */
+.map-tabs { display: flex; align-items: stretch; gap: 3px; padding: 5px 6px 0; background: linear-gradient(180deg,#20242c,#171a20); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
+.map-tab { display: inline-flex; align-items: center; gap: 6px; max-width: 170px; background: var(--panel-2); border: 1px solid var(--border); border-bottom: none; border-radius: 7px 7px 0 0; padding: 5px 7px 5px 9px; cursor: pointer; color: var(--muted); flex: 0 0 auto; }
+.map-tab:hover { color: var(--light); }
+.map-tab.active { background: var(--panel); color: var(--white); border-color: var(--accent-dim); box-shadow: inset 0 2px 0 var(--accent); }
+.map-tab-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.map-tab-x { flex-shrink: 0; background: transparent; border: 0; color: var(--muted); font-size: 12px; line-height: 1; padding: 1px 2px; border-radius: 4px; cursor: pointer; }
+.map-tab-x:hover { background: rgba(214,58,48,.25); color: #ff8a80; }
+
 /* ── ADVENTURE HUB (Adventure pane, loaded prep) ── */
 .adv-hub { flex: 1; min-height: 0; flex-direction: column; background: var(--panel); color: var(--text); }
 .advh-msg, .advh-empty { padding: 18px 14px; font-size: 12.5px; color: var(--muted); }
@@ -5233,7 +5242,9 @@ function initDocTool(root) {
     savedFileName = ''; savedDataUrl = '';
   }
 
-  clearBtn.addEventListener('click', clearDoc);
+  // On Maps, the ✕ button closes the CURRENT map's tab (drops just that map);
+  // on Adventure it clears the single loaded doc.
+  clearBtn.addEventListener('click', () => { if(isMaps && activeMapId != null) removeMap(activeMapId); else clearDoc(); });
 
   // Core loader — works from either a File object or a pre-existing data URL
   function loadFromDataUrl(dataUrl, fileName) {
@@ -5333,6 +5344,64 @@ function initDocTool(root) {
     }
   }
 
+  // ── Maps: hold several maps at once, each in its own removable tab ─────────
+  // The Maps pane keeps a list of loaded maps; the tab bar (above the viewer)
+  // switches between them and each tab's ✕ drops that map. Adventure stays a
+  // single-doc viewer — this whole block is maps-only.
+  let mapTabs = [];        // [{ id, name, dataUrl }]
+  let activeMapId = null;
+  let nextMapId = 1;
+  let mapTabsEl = null;
+  if(isMaps) {
+    mapTabsEl = document.createElement('div');
+    mapTabsEl.className = 'map-tabs';
+    mapTabsEl.style.display = 'none';
+    const bodyEl = root.querySelector('.doc-body');
+    if(bodyEl) root.insertBefore(mapTabsEl, bodyEl);
+    mapTabsEl.addEventListener('click', e => {
+      const x = e.target.closest('.map-tab-x');
+      if(x) { e.stopPropagation(); removeMap(+x.closest('.map-tab').dataset.id); return; }
+      const t = e.target.closest('.map-tab');
+      if(t) switchMap(+t.dataset.id);
+    });
+  }
+  function renderMapTabs() {
+    if(!mapTabsEl) return;
+    if(!mapTabs.length) { mapTabsEl.style.display = 'none'; mapTabsEl.innerHTML = ''; return; }
+    mapTabsEl.style.display = 'flex';
+    mapTabsEl.innerHTML = mapTabs.map(t =>
+      '<div class="map-tab' + (t.id === activeMapId ? ' active' : '') + '" data-id="' + t.id + '" title="' + advEsc(t.name) + '">'
+      + '<span class="map-tab-name">' + advEsc(t.name) + '</span>'
+      + '<button class="map-tab-x" type="button" aria-label="Remove map">✕</button></div>').join('');
+  }
+  function addMap(dataUrl, name) {
+    name = name || ('Map ' + nextMapId);
+    // Same image loaded twice → just focus the existing tab.
+    const existing = mapTabs.find(t => t.name === name && t.dataUrl === dataUrl);
+    if(existing) { switchMap(existing.id); return; }
+    const tab = { id: nextMapId++, name: name, dataUrl: dataUrl };
+    mapTabs.push(tab);
+    activeMapId = tab.id;
+    renderMapTabs();
+    loadFromDataUrl(dataUrl, tab.name);
+  }
+  function switchMap(id) {
+    const tab = mapTabs.find(t => t.id === id);
+    if(!tab || id === activeMapId) { if(tab) { activeMapId = id; renderMapTabs(); } return; }
+    activeMapId = id;
+    renderMapTabs();
+    loadFromDataUrl(tab.dataUrl, tab.name);
+  }
+  function removeMap(id) {
+    const i = mapTabs.findIndex(t => t.id === id);
+    if(i < 0) return;
+    const wasActive = mapTabs[i].id === activeMapId;
+    mapTabs.splice(i, 1);
+    if(!mapTabs.length) { activeMapId = null; renderMapTabs(); clearDoc(); return; }
+    renderMapTabs();
+    if(wasActive) { const next = mapTabs[Math.min(i, mapTabs.length - 1)]; activeMapId = next.id; renderMapTabs(); loadFromDataUrl(next.dataUrl, next.name); }
+  }
+
   fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if(!file) return;
@@ -5342,21 +5411,42 @@ function initDocTool(root) {
       filenameEl.textContent = file.name + ' too large to auto-save (will need reloading)';
     }
     const reader = new FileReader();
-    reader.onload = e => loadFromDataUrl(e.target.result, file.name);
+    reader.onload = e => { if(isMaps) addMap(e.target.result, file.name); else loadFromDataUrl(e.target.result, file.name); };
     reader.readAsDataURL(file);
+    fileInput.value = '';   // let the same file be re-picked into a new tab
   });
 
   // State hooks — save file data as base64 for files under 5MB (encoded).
   // Larger files (like big PDFs) must be reloaded each session.
   const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB base64 limit
 
-  root._getState = () => ({
-    fileName: savedFileName,
-    fileData: savedDataUrl && savedDataUrl.length < MAX_FILE_BYTES ? savedDataUrl : null,
-    fileTooLarge: savedDataUrl && savedDataUrl.length >= MAX_FILE_BYTES ? savedFileName : null,
-    zoom,
-  });
+  root._getState = () => {
+    // Maps persist every tab whose image fits the per-file save budget; the rest
+    // are dropped from the save (they'd need reloading anyway).
+    if(isMaps) {
+      const tabs = mapTabs
+        .map(t => ({ name: t.name, dataUrl: (t.dataUrl && t.dataUrl.length < MAX_FILE_BYTES) ? t.dataUrl : null }))
+        .filter(t => t.dataUrl);
+      const active = mapTabs.find(t => t.id === activeMapId);
+      return { maps: tabs, activeName: active ? active.name : '' };
+    }
+    return {
+      fileName: savedFileName,
+      fileData: savedDataUrl && savedDataUrl.length < MAX_FILE_BYTES ? savedDataUrl : null,
+      fileTooLarge: savedDataUrl && savedDataUrl.length >= MAX_FILE_BYTES ? savedFileName : null,
+      zoom,
+    };
+  };
   root._setState = (s) => {
+    if(isMaps) {
+      if(s && Array.isArray(s.maps) && s.maps.length) {
+        mapTabs = []; nextMapId = 1; activeMapId = null;
+        s.maps.forEach(m => { if(m && m.dataUrl) mapTabs.push({ id: nextMapId++, name: m.name || ('Map ' + nextMapId), dataUrl: m.dataUrl }); });
+        const act = mapTabs.find(t => t.name === s.activeName) || mapTabs[0];
+        if(act) { activeMapId = act.id; renderMapTabs(); loadFromDataUrl(act.dataUrl, act.name); }
+      }
+      return;
+    }
     if(s && s.fileData && s.fileName) {
       // For html docs the zoom is applied once the iframe fires 'load'
       // (see the html branch); for images the timeout below handles it.
@@ -5369,8 +5459,9 @@ function initDocTool(root) {
       filenameEl.textContent = s.fileTooLarge + ' (too large to auto-restore — reload manually)';
     }
   };
-  // Allow other tools to programmatically load an image into this doc viewer
-  root._loadDataUrl = (dataUrl, fileName) => loadFromDataUrl(dataUrl, fileName);
+  // Allow other tools to programmatically load a map/image in. Maps open it as a
+  // new tab; the single-doc Adventure viewer just replaces its content.
+  root._loadDataUrl = (dataUrl, fileName) => { if(isMaps) addMap(dataUrl, fileName); else loadFromDataUrl(dataUrl, fileName); };
 
   // Adventure pane also gets a "Session Prep" loader that pulls in a saved
   // session-prep document (preview-only) from the user's account.
