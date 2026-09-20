@@ -5563,6 +5563,10 @@ function wireSessionPrepLoader(root) {
         root._advPrepDoc = { id: doc.id, tool: doc.tool, title: doc.title, system: prepSys };
         activeSec = 'overview';
         renderHub();
+        // The auto-save that fired on the picker click snapshotted state BEFORE
+        // this async load finished (so it missed _advPrepDoc). Persist again now
+        // that the hub is loaded, so a refresh restores it.
+        try { if(window.__ddScheduleSave) window.__ddScheduleSave(); } catch(e) {}
       })
       .catch(() => { if(hub) hub.innerHTML = '<div class="advh-msg">Couldn’t load that adventure. <button class="btn small advh-retry">Try again</button></div>';
         const r = hub && hub.querySelector('.advh-retry'); if(r) r.addEventListener('click', () => loadPrep(doc)); });
