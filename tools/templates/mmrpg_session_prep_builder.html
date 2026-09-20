@@ -60,15 +60,18 @@ document.addEventListener("DOMContentLoaded", function() {
   .sidebar-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-accent); }
   .sidebar-sub { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--ui-muted); letter-spacing: 0.1em; margin-top: 2px; }
   /* Chapter tabs — one per chapter of the adventure. */
-  .chapter-tabs { display: flex; align-items: stretch; gap: 4px; padding: 8px 8px 0; background: var(--ui-bg); border-bottom: 1px solid var(--ui-border); overflow-x: auto; scrollbar-width: none; }
-  .chapter-tabs::-webkit-scrollbar { display: none; }
-  .chapter-tab { display: inline-flex; align-items: center; gap: 5px; max-width: 140px; flex: 0 0 auto; padding: 6px 8px 7px; background: var(--ui-panel); color: var(--ui-muted); border: 1px solid var(--ui-border); border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; white-space: nowrap; }
-  .chapter-tab:hover { color: var(--ui-text); }
-  .chapter-tab.active { color: var(--ui-accent); border-color: var(--ui-accent); border-bottom-color: var(--ui-panel); background: color-mix(in srgb, var(--ui-accent) 14%, var(--ui-panel)); }
-  .chapter-tab-name { overflow: hidden; text-overflow: ellipsis; }
-  .chapter-tab-x { flex-shrink: 0; color: var(--ui-muted); font-size: 10px; line-height: 1; padding: 0 1px; border-radius: 3px; }
+  .chapter-tabs { display: flex; flex-wrap: nowrap; align-items: flex-end; padding: 8px 8px 0; background: var(--ui-bg); border-bottom: 1px solid var(--ui-border); overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+  .chapter-tabs::-webkit-scrollbar { height: 5px; }
+  .chapter-tabs::-webkit-scrollbar-thumb { background: var(--ui-border); border-radius: 3px; }
+  .chapter-tab { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; margin-right: -9px; padding: 6px 17px 7px 11px; background: var(--ui-panel); color: var(--ui-muted); border: 1px solid var(--ui-border); border-bottom: none; border-radius: 7px 7px 0 0; cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; white-space: nowrap; position: relative; z-index: 1; transition: color .12s, background .12s; }
+  .chapter-tab:hover { color: var(--ui-text); z-index: 4; }
+  .chapter-tab.active { color: var(--ui-accent); border-color: var(--ui-accent); border-bottom-color: var(--ui-panel); background: color-mix(in srgb, var(--ui-accent) 16%, var(--ui-panel)); z-index: 6; }
+  .chapter-tab-name { overflow: hidden; text-overflow: ellipsis; max-width: 68px; }
+  .chapter-tab.active .chapter-tab-name { max-width: 130px; }
+  .chapter-tab-x { flex-shrink: 0; color: var(--ui-muted); font-size: 10px; line-height: 1; border-radius: 3px; opacity: 0; width: 0; overflow: hidden; transition: opacity .12s; }
+  .chapter-tab.active .chapter-tab-x, .chapter-tab:hover .chapter-tab-x { opacity: 1; width: auto; margin-left: 1px; }
   .chapter-tab-x:hover { color: #e06666; }
-  .chapter-add { flex: 0 0 auto; align-self: center; margin-bottom: 4px; padding: 5px 9px; background: none; border: 1px dashed var(--ui-border); border-radius: 6px; color: var(--ui-muted); font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; cursor: pointer; white-space: nowrap; }
+  .chapter-add { flex: 0 0 auto; align-self: center; margin-left: 16px; margin-bottom: 4px; padding: 5px 9px; background: none; border: 1px dashed var(--ui-border); border-radius: 6px; color: var(--ui-muted); font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; cursor: pointer; white-space: nowrap; }
   .chapter-add:hover { color: var(--ui-accent); border-color: var(--ui-accent); }
   .sidebar-tabs { display: flex; border-bottom: 1px solid var(--ui-border); }
   .tab-btn { flex: 1; padding: 8px 2px; background: none; border: none; color: var(--ui-muted); font-family: 'Share Tech Mono', monospace; font-size: 7.5px; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
@@ -811,6 +814,8 @@ function renderChapterTabs(){
     + (multi ? '<span class="chapter-tab-x" onclick="event.stopPropagation();deleteChapter('+i+')" title="Delete this chapter" role="button" aria-label="Delete chapter">✕</span>' : '')
     + '</button>'
   ).join('') + '<button type="button" class="chapter-add" onclick="addChapter()" title="Add a chapter">+ Chapter</button>';
+  const act = bar.querySelector('.chapter-tab.active');
+  if(act) act.scrollIntoView({ inline: 'nearest', block: 'nearest' });
 }
 function switchChapter(n){
   if(n === activeChapter || n < 0 || n >= chapters.length) return;

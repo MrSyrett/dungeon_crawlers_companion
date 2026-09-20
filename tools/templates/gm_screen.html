@@ -456,10 +456,12 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-backbtn { position: absolute; top: 8px; left: 8px; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
 .advh-prose { font-size: 13px; color: var(--light); line-height: 1.6; overflow-wrap: anywhere; }
 /* Chapter switcher — one tab per chapter of a multi-chapter adventure. */
-.advh-chapters { display: flex; gap: 4px; padding: 7px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; background: linear-gradient(180deg,#1a1d24,#141821); }
-.advh-chap { flex: 0 0 auto; max-width: 160px; overflow: hidden; text-overflow: ellipsis; background: var(--panel-2); border: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 5px 10px 6px; cursor: pointer; white-space: nowrap; }
-.advh-chap:hover { color: var(--light); }
-.advh-chap.on { color: var(--white); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel-2)); }
+.advh-chapters { display: flex; flex-wrap: nowrap; align-items: flex-end; padding: 7px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; background: linear-gradient(180deg,#1a1d24,#141821); }
+.advh-chapters::-webkit-scrollbar { height: 5px; }
+.advh-chapters::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.advh-chap { flex: 0 0 auto; max-width: 74px; margin-right: -9px; overflow: hidden; text-overflow: ellipsis; background: var(--panel-2); border: 1px solid var(--border); border-bottom: none; border-radius: 7px 7px 0 0; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 5px 16px 6px 10px; cursor: pointer; white-space: nowrap; position: relative; z-index: 1; }
+.advh-chap:hover { color: var(--light); z-index: 4; }
+.advh-chap.on { color: var(--white); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel-2)); z-index: 6; max-width: 150px; }
 .advh-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
 .advh-tab { flex: 0 0 auto; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
 .advh-tab:hover { color: var(--light); }
@@ -5793,6 +5795,8 @@ function wireSessionPrepLoader(root) {
   function wireHub(){
     hub.querySelectorAll('.advh-tab').forEach(b => b.addEventListener('click', () => { activeSec = b.dataset.sec; renderHub(); }));
     hub.querySelectorAll('.advh-chap').forEach(b => b.addEventListener('click', () => { setPrepChapter(+b.dataset.chap); }));
+    const onChap = hub.querySelector('.advh-chap.on');
+    if(onChap) onChap.scrollIntoView({ inline: 'nearest', block: 'nearest' });
     const full = hub.querySelector('.advh-full');
     if(full) full.addEventListener('click', () => {
       showPreview();
