@@ -432,6 +432,52 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 .doc-empty-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: var(--muted); }
 
+/* ── ADVENTURE HUB (Adventure pane, loaded prep) ── */
+.adv-hub { flex: 1; min-height: 0; flex-direction: column; background: var(--panel); color: var(--text); }
+.advh-msg, .advh-empty { padding: 18px 14px; font-size: 12.5px; color: var(--muted); }
+.advh-empty { font-style: italic; }
+.advh-head { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg,#20242c,#171a20); flex-shrink: 0; }
+.advh-titlerow { display: flex; align-items: flex-start; gap: 10px; }
+.advh-titlerow > div { flex: 1; min-width: 0; }
+.advh-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 17px; letter-spacing: .04em; color: var(--white); line-height: 1.1; }
+.advh-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--gold); letter-spacing: .04em; margin-top: 1px; }
+.advh-meta { font-family: 'Share Tech Mono', monospace; font-size: 10.5px; color: var(--muted); margin-top: 5px; }
+.advh-overview { font-size: 12px; color: var(--light); line-height: 1.5; margin-top: 8px; max-height: 88px; overflow-y: auto; }
+.advh-full { flex-shrink: 0; }
+.advh-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
+.advh-tab { flex: 0 0 auto; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
+.advh-tab:hover { color: var(--light); }
+.advh-tab.on { color: var(--white); border-bottom-color: var(--accent); }
+.advh-tab[data-empty="1"] { opacity: .45; }
+.advh-n { font-family: 'Share Tech Mono', monospace; font-size: 9.5px; color: var(--accent); }
+.advh-body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.advh-row { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: transparent; border: 0; color: var(--text); cursor: pointer; padding: 0; min-width: 0; }
+.advh-row-name { flex: 1; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; color: var(--white); letter-spacing: .02em; overflow-wrap: anywhere; }
+.advh-tag { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.advh-chev { color: var(--muted); font-size: 11px; flex-shrink: 0; }
+.advh-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.advh-scene, .advh-npc, .advh-table, .advh-card, .advh-map { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.advh-scene-hd, .advh-npc-hd, .advh-table-hd { }
+.advh-scene-body, .advh-npc-body { margin-top: 7px; }
+.advh-readaloud { border-left: 3px solid var(--gold); background: rgba(200,160,32,.08); padding: 7px 9px; border-radius: 0 6px 6px 0; font-size: 12.5px; line-height: 1.5; color: var(--light); font-style: italic; }
+.advh-desc { font-size: 12px; line-height: 1.5; color: var(--light); margin-top: 6px; overflow-wrap: anywhere; }
+.advh-desc.dim { color: var(--muted); }
+.advh-abils { font-size: 12px; line-height: 1.55; color: var(--light); margin-top: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.advh-npc-hd { display: flex; align-items: center; gap: 8px; }
+.advh-npc-name { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--white); cursor: pointer; text-align: left; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: .02em; padding: 0; overflow-wrap: anywhere; }
+.advh-badge { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 8.5px; letter-spacing: .06em; color: #0d0e10; border-radius: 4px; padding: 2px 5px; flex-shrink: 0; }
+.advh-send, .advh-map-send { flex-shrink: 0; white-space: nowrap; }
+.advh-card-h { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: .04em; color: var(--gold); text-transform: uppercase; }
+.advh-result { margin-top: 6px; padding: 7px 9px; border-radius: 6px; background: rgba(36,211,238,.1); border: 1px solid var(--accent-dim); font-size: 12.5px; color: var(--white); line-height: 1.45; }
+.advh-trows { margin-top: 6px; display: flex; flex-direction: column; }
+.advh-trow { display: flex; gap: 8px; font-size: 12px; color: var(--light); padding: 3px 4px; border-radius: 4px; line-height: 1.4; }
+.advh-trow.hit { background: rgba(36,211,238,.14); color: var(--white); }
+.advh-troll { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 34px; }
+.advh-map { display: flex; gap: 10px; align-items: center; }
+.advh-map-thumb { width: 72px; height: 54px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); flex-shrink: 0; }
+.advh-map-none { display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); background: var(--panel); }
+.advh-map-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+
 /* ── SESSION PREP PICKER (Adventure) ── */
 .prep-picker { position: fixed; inset: 0; z-index: 999999; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.72); padding: 20px; }
 .prep-picker.open { display: flex; }
@@ -5336,23 +5382,214 @@ function initDocTool(root) {
 // "Session Prep" button to its toolbar. Both open a picker of the user's saved
 // session-prep documents; choosing one loads it into this pane as a read-only
 // preview (the builder's editing sidebar is hidden by ?view=preview).
+const PREP_ICO = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg>';
+function advEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function advText(str){ return advEsc(str).replace(/\n/g, '<br>'); }
+
 function wireSessionPrepLoader(root) {
   const emptyEl = root.querySelector('.doc-empty');
   const toolbarTpl = root.querySelector('.toolbar-tpl');
+  const body = root.querySelector('.doc-body');
+  const frameWrap = root.querySelector('.doc-frame-wrap');
+
+  // The Adventure Hub lives beside the doc viewer in the same pane. It's the
+  // interactive command layer for a loaded prep; the doc viewer still shows the
+  // full printable preview when the GM clicks "Full prep".
+  let hub = root.querySelector('.adv-hub');
+  if(!hub && body) {
+    hub = document.createElement('div');
+    hub.className = 'adv-hub';
+    hub.style.display = 'none';
+    body.appendChild(hub);
+  }
+  let prep = null;         // parsed session-prep state
+  let prepSys = '';        // system key (DND, SD, …) for statblock mapping
+  let activeSec = 'scenes';
+
+  function showHub(){ if(emptyEl) emptyEl.style.display = 'none'; if(frameWrap) frameWrap.style.display = 'none'; if(hub) hub.style.display = 'flex'; }
+  function showPreview(){ if(hub) hub.style.display = 'none'; }   // doc viewer shows itself via _loadDataUrl
 
   function open() {
     openPrepPicker(function(doc) {
-      const url = '/tools/' + doc.tool + '/' + doc.id + '?view=preview';
-      const name = (doc.title || 'Session Prep') + '.html';
-      root._loadDataUrl(url, name);
+      loadPrep(doc);
     });
+  }
+
+  // Pull the chosen prep's blob and drive the hub from it.
+  function loadPrep(doc) {
+    if(hub) { showHub(); hub.innerHTML = '<div class="advh-msg">Loading &ldquo;' + advEsc(doc.title || 'adventure') + '&rdquo;&hellip;</div>'; }
+    fetch('/api/documents/' + doc.id, { credentials: 'same-origin' })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(d => {
+        const data = d && d.data && typeof d.data === 'object' ? d.data : {};
+        const key = Object.keys(data).find(k => /_session$/.test(k));
+        if(!key || typeof data[key] !== 'string') throw new Error('no session blob');
+        prep = JSON.parse(data[key]);
+        prepSys = String(d.system || doc.system || window.GM_SYSTEM || '').toUpperCase();
+        prep._docTool = doc.tool; prep._docId = doc.id; prep._docTitle = doc.title;
+        activeSec = 'scenes';
+        renderHub();
+      })
+      .catch(() => { if(hub) hub.innerHTML = '<div class="advh-msg">Couldn’t load that adventure. <button class="btn small advh-retry">Try again</button></div>';
+        const r = hub && hub.querySelector('.advh-retry'); if(r) r.addEventListener('click', () => loadPrep(doc)); });
+  }
+
+  // Scenes = locations (+ SD strongopen). Tables = rollTables/rolltables (+ SD randenc).
+  function scenes(){ return [].concat(prep.strongopen || [], prep.locations || []).filter(x => x && (x.name || x.readaloud || x.desc)); }
+  function tables(){
+    const t = [].concat(prep.rollTables || [], prep.rolltables || []);
+    (prep.randenc || []).forEach(r => { if(r && (r.header || r.text)) t.push({ title: r.header || 'Random Encounter', die: '', rows: [{ result: r.text }] }); });
+    return t.filter(Boolean);
+  }
+  function counts(){
+    return { scenes: scenes().length, npcs: (prep.statblocks || []).length, clues: (prep.clues || []).length,
+             loot: (prep.rewards || []).length, tables: tables().length, maps: (prep.maps || []).length };
+  }
+
+  function renderHub(){
+    if(!hub || !prep) return;
+    const c = counts();
+    const meta = [prep.floor, prep.session ? 'Session ' + prep.session : '', prep.players ? prep.players + ' players' : '', prep.duration].map(s => String(s || '').trim()).filter(Boolean).join(' · ');
+    const TABS = [['scenes','Scenes'],['npcs','NPCs'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['maps','Maps']];
+    let h = '<div class="advh-head">'
+      + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(prep.title || prep._docTitle || 'Adventure') + '</div>'
+      + (prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
+      + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
+      + (meta ? '<div class="advh-meta">' + advEsc(meta) + '</div>' : '')
+      + (prep.overview ? '<div class="advh-overview">' + advText(prep.overview) + '</div>' : '')
+      + '</div>';
+    h += '<div class="advh-tabs">' + TABS.map(([k, l]) =>
+      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + '>' + l + (c[k] ? ' <span class="advh-n">' + c[k] + '</span>' : '') + '</button>').join('') + '</div>';
+    h += '<div class="advh-body">' + sectionHtml(activeSec) + '</div>';
+    hub.innerHTML = h;
+    wireHub();
+  }
+
+  function sectionHtml(sec){
+    if(sec === 'scenes'){
+      const list = scenes();
+      if(!list.length) return '<div class="advh-empty">No scenes or encounters in this prep.</div>';
+      return list.map((s, i) => {
+        const typ = (s.type || '').toLowerCase();
+        const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
+        return '<div class="advh-scene" data-i="' + i + '">'
+          + '<button class="advh-row advh-scene-hd"><span class="advh-dot" style="background:' + dot + '"></span>'
+          + '<span class="advh-row-name">' + advEsc(s.name || 'Scene ' + (i + 1)) + '</span>'
+          + (s.tag ? '<span class="advh-tag">' + advEsc(s.tag) + '</span>' : '') + '<span class="advh-chev">▾</span></button>'
+          + '<div class="advh-scene-body" style="display:none;">'
+          + (s.readaloud ? '<div class="advh-readaloud">' + advText(s.readaloud) + '</div>' : '')
+          + (s.desc ? '<div class="advh-desc">' + advText(s.desc) + '</div>' : '')
+          + (!s.readaloud && !s.desc ? '<div class="advh-desc dim">No details recorded.</div>' : '')
+          + '</div></div>';
+      }).join('');
+    }
+    if(sec === 'npcs'){
+      const list = prep.statblocks || [];
+      if(!list.length) return '<div class="advh-empty">No NPCs, mobs, or bosses in this prep.</div>';
+      return list.map((sb, i) => {
+        const badge = (sb.sbtype || 'npc').toUpperCase();
+        const bcol = sb.sbtype === 'boss' ? '#7b5cff' : sb.sbtype === 'npc' ? '#c8a020' : '#d63a30';
+        return '<div class="advh-npc" data-i="' + i + '">'
+          + '<div class="advh-row advh-npc-hd">'
+          + '<span class="advh-badge" style="background:' + bcol + '">' + advEsc(badge) + '</span>'
+          + '<button class="advh-npc-name advh-row-name">' + advEsc(sb.name || 'Combatant') + (sb.type ? ' <span class="advh-tag">' + advEsc(sb.type) + '</span>' : '') + '</button>'
+          + '<button class="btn small primary advh-send" title="Add to the combat tracker">&rarr; Combat</button></div>'
+          + '<div class="advh-npc-body" style="display:none;">'
+          + (sb.flavor ? '<div class="advh-desc">' + advText(sb.flavor) + '</div>' : '')
+          + (sb.abilities ? '<div class="advh-abils">' + advText(sb.abilities) + '</div>' : '')
+          + (sb.notes ? '<div class="advh-desc dim">' + advText(sb.notes) + '</div>' : '')
+          + '</div></div>';
+      }).join('');
+    }
+    if(sec === 'clues'){
+      const list = prep.clues || [];
+      if(!list.length) return '<div class="advh-empty">No secrets or clues in this prep.</div>';
+      return list.map(cl => '<div class="advh-card"><div class="advh-card-h">' + advEsc(cl.header || 'Clue') + '</div>'
+        + (cl.text ? '<div class="advh-desc">' + advText(cl.text) + '</div>' : '') + '</div>').join('');
+    }
+    if(sec === 'loot'){
+      const list = prep.rewards || [];
+      if(!list.length) return '<div class="advh-empty">No loot or rewards in this prep.</div>';
+      return list.map(r => '<div class="advh-card"><div class="advh-card-h">' + advEsc(r.name || 'Reward') + '</div>'
+        + (r.flavor ? '<div class="advh-desc">' + advText(r.flavor) + '</div>' : '')
+        + (r.stats ? '<div class="advh-desc dim">' + advText(r.stats) + '</div>' : '') + '</div>').join('');
+    }
+    if(sec === 'tables'){
+      const list = tables();
+      if(!list.length) return '<div class="advh-empty">No roll tables in this prep.</div>';
+      return list.map((t, i) => {
+        const rows = (t.rows || []).map((row, ri) => {
+          const lab = row.roll || row.range || (ri + 1);
+          return '<div class="advh-trow" data-ri="' + ri + '"><span class="advh-troll">' + advEsc(String(lab)) + '</span><span>' + advText(row.result || '') + '</span></div>';
+        }).join('');
+        return '<div class="advh-table" data-i="' + i + '"><div class="advh-row advh-table-hd">'
+          + '<span class="advh-row-name">' + advEsc(t.title || 'Table') + (t.die ? ' <span class="advh-tag">' + advEsc(t.die) + '</span>' : '') + '</span>'
+          + (t.rows && t.rows.length ? '<button class="btn small advh-roll">🎲 Roll</button>' : '') + '</div>'
+          + '<div class="advh-result" style="display:none;"></div>'
+          + '<div class="advh-trows">' + rows + '</div></div>';
+      }).join('');
+    }
+    if(sec === 'maps'){
+      const list = prep.maps || [];
+      if(!list.length) return '<div class="advh-empty">No maps in this prep.</div>';
+      return list.map((mp, i) => '<div class="advh-map" data-i="' + i + '">'
+        + (mp.src && mp.src !== '__has_map__' ? '<img class="advh-map-thumb" src="' + advEsc(mp.src) + '" alt="">' : '<div class="advh-map-thumb advh-map-none">No image</div>')
+        + '<div class="advh-map-main"><div class="advh-row-name">' + advEsc(mp.title || 'Map ' + (i + 1)) + '</div>'
+        + (mp.src && mp.src !== '__has_map__' ? '<button class="btn small primary advh-map-send">&rarr; Maps</button>' : '<span class="advh-desc dim">Stored without image data.</span>') + '</div></div>').join('');
+    }
+    return '';
+  }
+
+  function wireHub(){
+    hub.querySelectorAll('.advh-tab').forEach(b => b.addEventListener('click', () => { activeSec = b.dataset.sec; renderHub(); }));
+    const full = hub.querySelector('.advh-full');
+    if(full) full.addEventListener('click', () => {
+      showPreview();
+      root._loadDataUrl('/tools/' + prep._docTool + '/' + prep._docId + '?view=preview', (prep._docTitle || 'Session Prep') + '.html');
+    });
+    // Scene / NPC accordions.
+    hub.querySelectorAll('.advh-scene-hd').forEach(b => b.addEventListener('click', () => {
+      const bd = b.parentElement.querySelector('.advh-scene-body'); if(bd) bd.style.display = bd.style.display === 'none' ? 'block' : 'none';
+      const ch = b.querySelector('.advh-chev'); if(ch) ch.textContent = (bd && bd.style.display === 'none') ? '▾' : '▴';
+    }));
+    hub.querySelectorAll('.advh-npc-name').forEach(b => b.addEventListener('click', () => {
+      const bd = b.closest('.advh-npc').querySelector('.advh-npc-body'); if(bd) bd.style.display = bd.style.display === 'none' ? 'block' : 'none';
+    }));
+    // → Combat: send the prepped statblock into the tracker.
+    hub.querySelectorAll('.advh-send').forEach(b => b.addEventListener('click', () => {
+      const i = +b.closest('.advh-npc').dataset.i;
+      const sb = (prep.statblocks || [])[i];
+      if(sb && typeof window.sendPrepNpcToTracker === 'function' && window.sendPrepNpcToTracker(sb, prepSys)) {
+        b.textContent = '✓ Added'; b.disabled = true;
+        setTimeout(() => { b.textContent = '→ Combat'; b.disabled = false; }, 1400);
+      }
+    }));
+    // Roll a table row → show inline.
+    hub.querySelectorAll('.advh-roll').forEach(b => b.addEventListener('click', () => {
+      const box = b.closest('.advh-table'); const i = +box.dataset.i; const t = tables()[i];
+      const rows = (t.rows || []); if(!rows.length) return;
+      const pick = Math.floor(Math.random() * rows.length); const row = rows[pick];
+      box.querySelectorAll('.advh-trow').forEach(tr => tr.classList.toggle('hit', +tr.dataset.ri === pick));
+      const res = box.querySelector('.advh-result');
+      if(res){ res.style.display = 'block'; res.innerHTML = '<span class="advh-troll">' + advEsc(String(row.roll || row.range || (pick + 1))) + '</span> ' + advText(row.result || ''); }
+    }));
+    // Send a map image to the Maps station.
+    hub.querySelectorAll('.advh-map-send').forEach(b => b.addEventListener('click', () => {
+      const i = +b.closest('.advh-map').dataset.i; const mp = (prep.maps || [])[i];
+      if(mp && mp.src && mp.src !== '__has_map__'){
+        try {
+          const node = (typeof ensureToolWindow === 'function') ? ensureToolWindow('maps') : null;
+          if(node && typeof node._loadDataUrl === 'function'){ node._loadDataUrl(mp.src, (mp.title || 'Map') + '.png'); b.textContent = '✓ Sent'; setTimeout(() => b.textContent = '→ Maps', 1400); }
+        } catch(e) {}
+      }
+    }));
   }
 
   if(emptyEl && !emptyEl.querySelector('.doc-load-prep')) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'btn primary small doc-load-prep';
-    b.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg> Load Session Prep';
+    b.innerHTML = PREP_ICO + ' Load Session Prep';
     b.style.marginTop = '4px';
     b.addEventListener('click', open);
     emptyEl.appendChild(b);
@@ -5364,7 +5601,7 @@ function wireSessionPrepLoader(root) {
     const tb = document.createElement('button');
     tb.type = 'button';
     tb.className = 'btn small doc-load-prep';
-    tb.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg>';
+    tb.innerHTML = PREP_ICO;
     tb.title = 'Load Session Prep';
     tb.setAttribute('aria-label', 'Load Session Prep');
     tb.addEventListener('click', open);
@@ -6301,6 +6538,16 @@ function init_trackers(root) {
     return item;
   };
 
+  // Used by the Adventure Hub's "→ Combat" buttons: a prepped statblock becomes a
+  // generic combatant (per-system fields mapped via prepStatblockToItem).
+  root._addPrepNpc = (sb, sys) => {
+    if(!sb || typeof window.prepStatblockToItem !== 'function') return null;
+    const item = window.prepStatblockToItem(sb, sys, nextId++);
+    items.push(item);
+    render();
+    return item;
+  };
+
   root._getState = () => ({ round, items });
   root._setState = (st) => {
     if(!st) return;
@@ -6329,6 +6576,15 @@ window.sendMonsterToTracker = function(m, src) {
   try {
     const node = ensureToolWindow('trackers');
     if(node && typeof node._addMonster === 'function') { node._addMonster(m, src); return true; }
+  } catch(e) {}
+  return false;
+};
+// Send a prepped Adventure statblock into the combat tracker (Adventure Hub).
+window.sendPrepNpcToTracker = function(sb, sys) {
+  if(!sb) return false;
+  try {
+    const node = ensureToolWindow('trackers');
+    if(node && typeof node._addPrepNpc === 'function') { node._addPrepNpc(sb, sys); return true; }
   } catch(e) {}
   return false;
 };
@@ -8622,6 +8878,70 @@ function xsMonSummary(src, m) {
   }
   return out;
 }
+
+// ── Session-Prep statblock → combat combatant ─────────────────────────────
+// The Adventure Hub sends a prepped NPC/Mob/Boss into the combat tracker. A prep
+// statblock (`{name, sbtype, type, flavor, hpval, hpcount, <stat keys…>, abilities,
+// notes}`) has per-system stat keys, so this maps them into the same generic
+// `gmon` view the bestiary combatants use (xsView renders it). PREP_SB_FIELDS
+// mirrors each system's SB_CONFIG rows: which keys are ability stats, which is
+// the defense (auto-pulled into the header by xsView's regex), which carries HP,
+// which go on the meta line, and which become detail lines.
+const PREP_SB_FIELDS = {
+  DCC:  { stats:[['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']], meta:[['level','LV'],['evade','Evade'],['dr','DR'],['move','Move'],['surprise','Surprise']], hp:'pips' },
+  SD:   { stats:[['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']], def:['hpval','AC'], meta:[['level','LV'],['evade','Evade'],['dr','DR'],['move','Move']], hp:'hpcount' },
+  DND:  { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['cr','CR'],['speed','Speed']], hp:'hp' },
+  ACE:  { stats:[['smarts','SMA'],['moves','MOV'],['style','STY'],['brawn','BRA'],['power','POW']], def:['defence','DEF'], lines:[['focuses','Focuses']], hp:'health' },
+  NIM:  { stats:[], def:['armor','Armor'], meta:[['level','LV'],['size','Size'],['saves','Saves']], hp:'hp' },
+  SW:   { stats:[['dex','DEX'],['kno','KNO'],['mec','MEC'],['per','PER'],['str','STR'],['tec','TEC']], def:['armor','Armor'], meta:[['move','Move'],['force','Force']], hp:'health' },
+  D62E: { stats:[['agi','AGI'],['bra','BRA'],['kno','KNO'],['per','PER']], meta:[['dodge','Dodge'],['parry','Parry'],['move','Move']], hp:'health' },
+  ICRPG:{ stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['def','DEF'], meta:[['tier','Tier'],['hearts','Hearts']], hp:'hp' },
+  MMRPG:{ stats:[['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']], meta:[['rank','Rank'],['focus','Focus']], lines:[['powers','Powers']], hp:'health' },
+  JLU:  { stats:[['pot','POT'],['acc','ACC'],['agi','AGI'],['res','RES'],['spi','SPI'],['mnd','MND']], def:['defense','DEF'], meta:[['dr','DR'],['resolve','Resolve']], lines:[['powers','Powers']], hp:'resolve' },
+  GB:   { stats:[['brains','Brains'],['muscles','Muscles'],['moves','Moves'],['cool','Cool']], meta:[['power','Power'],['ectopresence','Ecto']], lines:[['powers','Powers']], hp:'ectopresence' },
+  KOB:  { stats:[['brains','Brains'],['brawn','Brawn'],['fight','Fight'],['flight','Flight'],['charm','Charm'],['grit','Grit']], meta:[['age','Age'],['at','AT'],['fear','Fear']], hp:null },
+  CO:   { stats:[], meta:[['stakes','Stakes'],['harm','Harm'],['aspect','Aspect']], hp:null },
+  YZE:  { stats:[['str','STR'],['agi','AGI'],['wits','WITS'],['emp','EMP']], def:['armor','Armor'], lines:[['skills','Skills']], hp:'health' },
+};
+function prepStatblockHp(sb, cfg) {
+  if(!cfg) return 10;
+  if(cfg.hp === 'pips') { const v = parseInt(sb.hpval, 10) || 0, c = parseInt(sb.hpcount, 10) || 0; return (v * c) || 10; }
+  if(cfg.hp) { const m = String(sb[cfg.hp] == null ? '' : sb[cfg.hp]).match(/-?\d+/); if(m) return Math.max(1, parseInt(m[0], 10)); }
+  // GB with no explicit ecto: fall back to Muscles×3 like the GB bestiary card.
+  if(sb.muscles != null) { const mu = parseInt(sb.muscles, 10); if(mu) return mu * 3; }
+  return 10;   // wound/pool systems with no numeric HP get a plain knock-down counter
+}
+function prepStatblockToItem(sb, sys, id) {
+  const cfg = PREP_SB_FIELDS[String(sys || '').toUpperCase()] || PREP_SB_FIELDS.SD;
+  const val = k => { const v = sb[k]; return (v == null ? '' : String(v)).trim(); };
+  const stats = [];
+  (cfg.stats || []).forEach(([k, l]) => { const v = val(k); if(v !== '') stats.push({ label: l, val: v }); });
+  // Defense stat: labelled so xsView's regex lifts it into the header badge.
+  if(cfg.def) { const v = val(cfg.def[0]); if(v !== '') stats.push({ label: cfg.def[1], val: v }); }
+  const meta = [];
+  (cfg.meta || []).forEach(([k, l]) => { const v = val(k); if(v !== '') meta.push([l, v]); });
+  const lines = [];
+  (cfg.lines || []).forEach(([k, l]) => { const v = val(k); if(v !== '') lines.push({ label: l, text: v }); });
+  // Freeform "abilities" box → one detail line each (dice runs stay rollable via ccDiceify in the card).
+  String(sb.abilities || '').split('\n').map(s => s.trim()).filter(Boolean).forEach(a => {
+    const c = a.indexOf(':'), md = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/i.exec(a);
+    if(c > 0 && c < 32) lines.push({ label: a.slice(0, c), text: a.slice(c + 1).trim(), roll: md ? md[1].replace(/\s+/g, '') : '' });
+    else lines.push({ label: 'Ability', text: a, roll: md ? md[1].replace(/\s+/g, '') : '' });
+  });
+  const notes = [sb.type, sb.flavor, sb.notes].map(s => String(s || '').trim()).filter(Boolean);
+  const hp = prepStatblockHp(sb, cfg);
+  const roleTone = sb.sbtype === 'boss' ? 'var(--boss, #7b5cff)' : sb.sbtype === 'npc' ? 'var(--gold)' : 'var(--red)';
+  return {
+    id: id, type: 'npc',
+    name: sb.name || 'Combatant',
+    tag: sb.type || (sb.sbtype ? sb.sbtype.toUpperCase() : ''),
+    tone: sb.sbtype === 'npc' ? 'var(--gold)' : (sb.sbtype === 'boss' ? roleTone : 'var(--red)'),
+    hpMode: 'standard', hpCurrent: hp, hpMax: hp, wound: 'none',
+    statuses: [], statsOpen: true, traitsOpen: false,
+    gmon: { src: 'prep', stats: stats, lines: lines, notes: notes, meta: meta, page: '', chips: null }
+  };
+}
+window.prepStatblockToItem = prepStatblockToItem;
 // The tracker (a separate script) uses these too.
 window.xsBestiary = xsBestiary; window.xsMonType = xsMonType; window.xsMonTypes = xsMonTypes; window.xsMonSummary = xsMonSummary;
 function xsMonGenCard(src, m, opts) {
