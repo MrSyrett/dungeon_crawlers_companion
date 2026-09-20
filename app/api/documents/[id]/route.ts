@@ -1,9 +1,41 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { getPlayUser } from "@/lib/vtt";
 import { CHARACTER_TOOL_IDS, TOOLS, isToolId } from "@/lib/tools";
 
 type Ctx = { params: Promise<{ id: string }> };
+
+// GET — one of the current user's documents, WITH its `data` blob.
+//
+// The list endpoint (/api/documents) deliberately omits `data`; the GM Screen's
+// Adventure Hub needs the actual session-prep state (statblocks, locations,
+// clues, rewards, tables, maps) for a chosen prep so it can push its contents
+// into the console's stations. Read-only, own docs only. Uses getPlayUser so it
+// also works when the console runs framed inside the Owlbear popover (same as
+// the "Load Session Prep" picker's list call).
+export async function GET(req: NextRequest, ctx: Ctx) {
+  const user = await getPlayUser(req);
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
+  const { id } = await ctx.params;
+  const doc = await prisma.document.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true, title: true, tool: true, updatedAt: true, data: true },
+  });
+  if (!doc) return new Response("Not found", { status: 404 });
+
+  const def = isToolId(doc.tool) ? TOOLS[doc.tool] : null;
+  return Response.json({
+    id: doc.id,
+    title: doc.title,
+    tool: doc.tool,
+    system: def?.system ?? null,
+    systemName: def?.systemName ?? null,
+    updatedAt: doc.updatedAt,
+    data: doc.data,
+  });
+}
 
 // Autosave from the injected tool shim, plus title edits.
 export async function PATCH(req: NextRequest, ctx: Ctx) {
