@@ -1175,6 +1175,15 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   /* Single-pane lock: the layout picker is meaningless on mobile */
   .view-controls { display: none !important; }
 
+  /* Mobile GM Screen = the single-pane view: hide the desktop command bar
+     (its modes + quick tools are reachable from the window's tool dropdown),
+     and let the one pane fill the screen. The monitor/top bar stays collapsible
+     via the "Show / Hide controls" toggle above it. */
+  #bottom-bar { display: none !important; }
+  body.gm-mobile .console-workspace { display: none !important; }
+  body.gm-mobile .main-area { flex: 1; min-height: 0; }
+  body.gm-mobile .console-left { min-height: 0; }
+
   .toolrow { padding: 10px 12px; gap: 10px; }
 
   /* ── Larger type + touch targets (min 44px tap area) ── */
@@ -2574,9 +2583,11 @@ GMScenes.renderPins();
   const KEY = 'dd_gmscreen_v1:hdrHidden';
   const toggle = document.getElementById('hdr-toggle');
   if(!toggle) return;
+  // Default to shown so the party monitor is visible on a phone; the GM can
+  // collapse it to reclaim space, and that choice is remembered.
   let hidden;
-  try { const v = localStorage.getItem(KEY); hidden = (v === null) ? true : (v === '1'); }
-  catch(e) { hidden = true; }
+  try { const v = localStorage.getItem(KEY); hidden = (v === null) ? false : (v === '1'); }
+  catch(e) { hidden = false; }
   function apply(){
     document.body.classList.toggle('hdr-hidden', hidden);
     toggle.innerHTML = hidden ? '&#9776;&nbsp; Show controls' : '&#10005;&nbsp; Hide controls';
@@ -4460,8 +4471,9 @@ function setWindowTool(id, tool) {
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
-// Rotating the phone / crossing the breakpoint re-applies narrow layout.
-GM_MOBILE_MQ.addEventListener('change', () => renderWindows());
+// Rotating the phone / crossing the breakpoint switches between the desktop
+// console and the mobile single-pane view.
+GM_MOBILE_MQ.addEventListener('change', () => applyResponsiveMode());
 
 // ══════════════════════════════════════════════════════════════════════════
 // GM CONSOLE — 3-ZONE LAYOUT. Fixed stations that reflow by MODE (Master /
@@ -4582,6 +4594,29 @@ function setFreeView() {
 }
 
 function setConsoleMode(mode) { renderConsole(mode); }
+
+// ── Mobile mode ────────────────────────────────────────────────────────────
+// Phones can't show four side-by-side stations, so on a narrow screen the GM
+// Screen collapses to the old single-pane view: the command bar is hidden (CSS),
+// the monitor/top bar stays collapsible (the hdr-toggle), and ONE window with a
+// tool dropdown lets the GM open any tool — same as the previous mobile mode.
+let _gmDesktopMode = 'master';   // console mode to return to when back on desktop
+function applyResponsiveMode() {
+  if(isMobileView()) {
+    if(!document.body.classList.contains('gm-mobile')) {
+      // Remember the desktop console mode so leaving mobile restores it.
+      if(document.body.dataset.cview === 'console') _gmDesktopMode = consoleMode;
+      document.body.classList.add('gm-mobile');
+    }
+    // Exactly one window; keep the current tool if there is one.
+    if(gmWindows.length > 1) gmWindows = [gmWindows[0]];
+    if(!gmWindows.length) gmWindows = [{ id: newWinId(), tool: 'adventure' }];
+    setFreeView();   // shows the single-pane canvas + its tool dropdown
+  } else if(document.body.classList.contains('gm-mobile')) {
+    document.body.classList.remove('gm-mobile');
+    renderConsole(CONSOLE_MODES[_gmDesktopMode] ? _gmDesktopMode : 'master');
+  }
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // ZONE 1b — MONITOR BAR: party bubbles, timers, auto-pinned scenes, clock.
@@ -12229,6 +12264,8 @@ function gmBootstrapWindows() {
   try { gmcPopNodes['timers'] = gmcPopNodes['timers'] || buildToolNode('timers'); } catch(e) {}
   try { renderPartyStrip(); renderTimers(); renderScenes(); } catch(e) {}
   try { wireScenes(); } catch(e) {}
+  // On a phone, collapse to the single-pane mobile view.
+  try { applyResponsiveMode(); } catch(e) {}
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gmBootstrapWindows);
 else gmBootstrapWindows();
@@ -12370,6 +12407,8 @@ function restoreConsole(c) {
   // Free & Prep were retired; any saved 'free' view or 'prep' mode restores as Master.
   const mode = CONSOLE_MODES[c.mode] ? c.mode : 'master';
   renderConsole(mode);
+  // Overlay the mobile single-pane view if we're on a narrow screen.
+  try { applyResponsiveMode(); } catch(e) {}
 }
 
 // Quick-tool popups (Timers, Notes, …) live outside the stations, so serialize
