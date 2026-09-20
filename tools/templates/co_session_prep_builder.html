@@ -2095,20 +2095,47 @@ function _withFixedLayout(capture) {
   return result;
 }
 
+// Render every chapter's pages into the live preview DOM in turn and collect
+// their HTML, so an export/print holds the whole multi-chapter adventure (not
+// just the chapter open in the editor). Each page keeps its own chapter's
+// dark-mode class. Must run inside _withFixedLayout (fixed pagination active).
+function _collectAllChapterPageHTML() {
+  const savedState = state;
+  const savedDark = document.getElementById('page-one') && document.getElementById('page-one').classList.contains('dark-mode');
+  let out = [];
+  for (let i = 0; i < chapters.length; i++) {
+    state = chapters[i];
+    renderPreview();
+    paginatePages();
+    const dark = !!state.darkMode;
+    document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', dark));
+    out = out.concat([...document.querySelectorAll('.preview-area .page')].filter(p => p.style.display !== 'none').map(p => p.outerHTML));
+  }
+  // Restore the chapter that was open in the editor.
+  state = savedState;
+  renderPreview();
+  paginatePages();
+  document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', !!savedDark));
+  return out;
+}
+
 function exportHTML() {
   readFields();
   _withFixedLayout(() => {
-  const isDark=document.getElementById('page-one').classList.contains('dark-mode');
-  // Collect all pages in order (including continuations)
-  const allPages=[...document.querySelectorAll('.preview-area .page')].map(p=>p.outerHTML).join('\n');
+  const advTitle = (chapters[0] && chapters[0].title) || state.title || 'Adventure';
+  const allDark = chapters.length > 0 && chapters.every(c => !!c.darkMode);
+  // Collect every chapter's pages in order (including continuations).
+  const allPages=_collectAllChapterPageHTML().join('\n');
   const css=document.querySelector('style').innerHTML;
-  const stateJson=JSON.stringify(state);
+  const stateJson=JSON.stringify({ chapters: chapters, active: activeChapter });
   const stateB64=btoa(unescape(encodeURIComponent(stateJson)));
-  const darkOverride=isDark?`
+  // Each page carries its own chapter's dark-mode class, so the page-background
+  // rule is always included; only the surround follows an all-dark book.
+  const darkOverride=`
 .page.dark-mode{background:#1a1a1e !important;}
-body{background:#3a2a1a !important;}
-`:'';
-  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${escH(state.title||'Adventure')}</title>
+${allDark?'body{background:#3a2a1a !important;}':''}
+`;
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${escH(advTitle)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>${css}
 body{font-family:'Barlow',sans-serif;background:#888 !important;display:flex !important;flex-direction:row !important;align-items:flex-start !important;padding:20px !important;gap:20px !important;min-height:100vh !important;height:auto !important;overflow:auto !important;color:inherit !important;}
@@ -2117,7 +2144,7 @@ body{font-family:'Barlow',sans-serif;background:#888 !important;display:flex !im
 .page-inner{overflow:hidden !important;flex:1;min-height:0;padding:20px 36px 16px;}
 .sidebar,.sidebar-header,.sidebar-tabs,.sidebar-footer,.save-indicator,.preview-area{all:unset !important;display:none !important;}
 ${darkOverride}
-@media print{body{background:${isDark?'#1a1a1e':'white'} !important;padding:0 !important;gap:0 !important;flex-direction:column !important;overflow:visible !important;}.page{box-shadow:none !important;page-break-after:always;}.page:last-child{page-break-after:avoid;}}
+@media print{body{background:${allDark?'#1a1a1e':'white'} !important;padding:0 !important;gap:0 !important;flex-direction:column !important;overflow:visible !important;}.page{box-shadow:none !important;page-break-after:always;}.page:last-child{page-break-after:avoid;}}
 </style></head><body>${allPages}
 <script>document.querySelectorAll('.sb-hp-row').forEach(row=>{const pips=row.querySelectorAll('.hp-pip');const total=pips.length;pips.forEach((pip,i)=>{const t=total===1?1:i/(total-1);let r,g,b=10;if(t<0.33){const s=t/0.33;r=170;g=Math.round(50*s);}else if(t<0.66){const s=(t-0.33)/0.33;r=170;g=Math.round(50+100*s);}else{const s=(t-0.66)/0.34;r=Math.round(170*(1-s));g=160;}pip.style.background=\`rgb(\${r},\${g},\${b})\`;pip.style.borderColor='rgba(0,0,0,0.3)';});});<\/script>
 <script id="spb-state" type="application/json" data-spb="${stateB64}"><\/script>
@@ -2125,7 +2152,7 @@ ${darkOverride}
   const blob=new Blob([html],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;
-  a.download=(state.title||'adventure').replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.html';
+  a.download=(advTitle||'adventure').replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.html';
   a.click();URL.revokeObjectURL(url);
   });
 }
@@ -2145,21 +2172,30 @@ function importHTML(input) {
     try {
       const decoded=decodeURIComponent(escape(atob(match[1])));
       const imported=JSON.parse(decoded);
-      state={...DEFAULT_STATE,...imported};
-      if(!Array.isArray(state.maps)) state.maps=[];
-      if(!Array.isArray(state.clues)) state.clues=[];
-      if(!Array.isArray(state.rewards)) state.rewards=[];
-      if(!Array.isArray(state.rollTables)) state.rollTables=[];
-      if(!Array.isArray(state.hooks)) state.hooks=[];
-      if(!Array.isArray(state.strongopen)) state.strongopen=[];
-      if(!Array.isArray(state.locations)) state.locations=[];
-      if(!Array.isArray(state.statblocks)) state.statblocks=[];
-      try {
-        const toSave={...state, mappath:"", maps:[]};
-        localStorage.setItem("co_builder_v1", JSON.stringify(toSave));
-      } catch(e) {}
+      // A file exported from this builder holds either a whole multi-chapter
+      // adventure ({chapters:[…], active}) or, from an older export, a single
+      // flat chapter. Restore every chapter so the full book comes back.
+      let incoming;
+      let incomingActive = 0;
+      if(imported && Array.isArray(imported.chapters) && imported.chapters.length){
+        incoming = imported.chapters;
+        incomingActive = Math.min(Math.max(0, parseInt(imported.active,10)||0), incoming.length - 1);
+      } else {
+        incoming = [imported];
+      }
+      const norm = (ch) => {
+        const s = {...DEFAULT_STATE, ...ch};
+        ['maps','clues','rewards','rollTables','hooks','strongopen','locations','statblocks'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
+        return s;
+      };
+      chapters = incoming.map(norm);
+      activeChapter = incomingActive;
+      state = chapters[activeChapter];
       buildSidebarFromState();
+      renderChapterTabs();
+      applyDarkModeInit();
       renderPreview();
+      saveState();                 // persist the whole book (all chapters)
       const ind=document.getElementById("save-indicator");
       if(ind){ ind.textContent="Imported ✓"; ind.classList.add("saved"); setTimeout(()=>{ ind.textContent="All changes saved"; ind.classList.remove("saved"); },2000); }
     } catch(err) {
@@ -2188,18 +2224,18 @@ function loadExportLibs() {
   return _exportLibsPromise;
 }
 function savePDF() {
+  readFields();
   if (renderTimer) renderNow();   // flush any pending debounced preview rebuild
   const btn=document.getElementById('pdf-btn');
   btn.textContent='⏳ Generating...';
   btn.disabled=true;
-  const filename=(state.title||'adventure').replace(/[^a-z0-9]/gi,'_').toLowerCase();
+  const advTitle=(chapters[0] && chapters[0].title) || state.title || 'adventure';
+  const filename=advTitle.replace(/[^a-z0-9]/gi,'_').toLowerCase();
 
   // Force the fixed print layout for the capture (so a phone-width, flow-mode
   // session still yields a correct paginated PDF), then restore the view mode
   // once the canvases are taken.
   loadExportLibs().then(() => _withFixedLayout(() => {
-    const pages=[...document.querySelectorAll('.preview-area .page')].filter(p=>p.style.display!=='none');
-
     // 1.5x JPEG lands around 1-2MB and looks the same on paper. JPEG has no
     // alpha, so each page is rasterized onto its own background color.
     const shot = (p) => html2canvas(p, {
@@ -2212,7 +2248,29 @@ function savePDF() {
       windowHeight: 1056
     });
 
-    return Promise.all(pages.map(shot)).then(canvases=>{
+    // Capture every chapter's pages in order into one PDF. Each chapter is
+    // rendered into the live preview DOM, captured, then the next replaces it.
+    const savedState = state;
+    const savedDark = document.getElementById('page-one') && document.getElementById('page-one').classList.contains('dark-mode');
+    const canvases=[];
+    const captureChapter = (i) => {
+      if (i >= chapters.length) return Promise.resolve();
+      state = chapters[i];
+      renderPreview();
+      paginatePages();
+      document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', !!state.darkMode));
+      const pages=[...document.querySelectorAll('.preview-area .page')].filter(p=>p.style.display!=='none');
+      return pages.reduce((chain,p)=>chain.then(()=>shot(p)).then(c=>{ canvases.push(c); }), Promise.resolve())
+        .then(()=>captureChapter(i+1));
+    };
+
+    return captureChapter(0).then(()=>{
+      // Restore the chapter that was open in the editor.
+      state = savedState;
+      renderPreview();
+      paginatePages();
+      document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', !!savedDark));
+
       const {jsPDF}=window.jspdf;
       const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'letter',compress:true});
       const pageW=pdf.internal.pageSize.getWidth();

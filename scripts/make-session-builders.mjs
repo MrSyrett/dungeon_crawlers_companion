@@ -383,7 +383,8 @@ for (const S of SYSTEMS) {
   // storage keys (server blob key + standalone localStorage key)
   s = rep(s, "'dcc_session'", `'${S.key}'`);
   s = rep(s, "'dcw_builder_v5'", `'${S.ls}'`);
-  s = rep(s, '"dcw_builder_v5"', `"${S.ls}"`);
+  // Double-quoted form only appears in older builders; tolerate its absence.
+  if (s.includes('"dcw_builder_v5"')) s = rep(s, '"dcw_builder_v5"', `"${S.ls}"`);
   // labels
   s = rep(s, '<label class="field-label">Floor</label><input type="text" id="f-floor" placeholder="01 OF 06"', `<label class="field-label">${S.chapter}</label><input type="text" id="f-floor" placeholder="${S.chapterPh}"`);
   s = rep(s, "'FLOOR: '+state.floor", `'${S.chapter.toUpperCase()}: '+state.floor`);
