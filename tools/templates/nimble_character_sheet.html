@@ -1147,7 +1147,7 @@ function collectSheet() {
     stats, saveAdv, saveDis, skillPts, skillTotals,
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
-    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions,
+    armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), armorScore: armorValue(), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions,
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),

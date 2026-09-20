@@ -858,7 +858,13 @@ function lvRefresh(){ if($('levelup-overlay').classList.contains('open'))renderL
 function setTab(t){['powers','skills','notes'].forEach(function(x){$('pane-'+x).classList.toggle('on',x===t);$('tb-'+x).classList.toggle('on',x===t);});try{localStorage.setItem('jlu_tab',t);}catch(e){}}
 function setDefaultTab(){var t='powers';try{t=localStorage.getItem('jlu_tab')||'powers';}catch(e){}if(!$('pane-'+t))t='powers';setTab(t);}
 function scheduleAutosave(){if(!_ready)return;if(_saveTimer)clearTimeout(_saveTimer);_saveTimer=setTimeout(function(){saveSheet(true);},600);}
-function collectSheet(){S.name=($('f-name').value||'').trim();S.secret=$('f-secret').value;return Object.assign({},S,{system:'JLU',campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
+function collectSheet(){S.name=($('f-name').value||'').trim();S.secret=$('f-secret').value;
+  // Derived values the GM Screen party card can't recompute (they need the Tier /
+  // Origin tables). Export them so the card + bubble read Resolve, Defense, Block,
+  // Dodge, Attack and DR correctly without shipping those tables to the screen.
+  var derived={resolveMax:resolveMax(),defense:defenseTotal(),attack:attackTotal(),block:blockTotal(),dodge:dodgeTotal(),dr:drTotal(),tierName:(S.tier?tierObj(S.tier).name:''),
+    attrVals:{potency:attrVal('potency'),accuracy:attrVal('accuracy'),agility:attrVal('agility'),resistance:attrVal('resistance'),mind:attrVal('mind'),spirit:attrVal('spirit')}};
+  return Object.assign({},S,{system:'JLU',derived:derived,campaign:(typeof _campaign!=='undefined'&&_campaign)?{id:_campaign.id,code:_campaign.code,name:_campaign.name}:null});}
 function saveSheet(quiet){var data=collectSheet(),json;try{json=JSON.stringify(data);}catch(e){return;}try{localStorage.setItem('jlu_sheet',json);}catch(e){}if(window.__ddSave)window.__ddSave({jlu_sheet:json});else if(window.__ddState!==undefined)window.__ddState['jlu_sheet']=json;if(window.__ddSaveTitle&&data.name)try{window.__ddSaveTitle(data.name);}catch(e){}if(!quiet)addLog('Sheet Saved','✓',data.name||'Unnamed','normal');}
 function syncDocTitle(){var n=($('f-name').value||'').trim();if(n&&window.__ddSaveTitle)try{window.__ddSaveTitle(n);}catch(e){}}
 function applySheet(o){o=o||{};S=Object.assign(blankState(),o);if(!S.attrs)S.attrs=blankState().attrs;renderAll();setDefaultTab();if(typeof campaignRestore==='function'&&o.campaign!==undefined)campaignRestore(o.campaign);if(window.__ddSaveTitle&&S.name)try{window.__ddSaveTitle(S.name);}catch(e){}scheduleAutosave();}

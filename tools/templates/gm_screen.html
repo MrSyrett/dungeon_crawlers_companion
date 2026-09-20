@@ -805,12 +805,11 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .cc-wound { flex: 1 1 auto; min-width: 44px; border: 1px solid var(--border); border-radius: 6px; background: #141414; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 9.5px; letter-spacing: 0.02em; text-transform: uppercase; padding: 6px 3px; cursor: pointer; text-align: center; }
 .cc-wound.on { color: #0d0e10; }
 /* Ability strip */
-/* Flat stat strip — one recessed panel with hairline dividers, no per-cell bevel. */
-.cc-abils { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: 0; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 11px; }
-.cc-abil { background: transparent; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; min-width: 0; }
-.cc-abil + .cc-abil { border-left: 1px solid var(--border); }
+/* Flat stat row — plain cells, no panel, no border, no dividers, no bevel. */
+.cc-abils { display: grid; grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); gap: 4px 2px; background: transparent; border: 0; border-radius: 0; margin-bottom: 11px; }
+.cc-abil { background: transparent; border: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 2px; min-width: 0; }
 button.cc-abil { cursor: pointer; }
-button.cc-abil:hover { background: rgba(255,255,255,0.05); }
+button.cc-abil:hover { background: rgba(255,255,255,0.05); border-radius: 6px; }
 .cc-abil .l { font-family: 'Barlow Condensed', sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: 0.05em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
 .cc-abil .v { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--white); }
 .cc-meta { font-size: 11px; color: var(--mid); margin: -3px 0 11px; line-height: 1.5; overflow-wrap: anywhere; }
@@ -1701,6 +1700,8 @@ body:not([data-cview="free"]) #add-window-btn{display:none}
 .bub-hpb{height:12px;border-radius:5px;background:rgba(0,0,0,.5);overflow:hidden;position:relative;border:1px solid var(--border)}
 .bub-hpb>i{display:block;height:100%;border-radius:5px}
 .bub-hpb.empty{background:rgba(255,255,255,.04)}
+.bub-hpb.bub-wound{background:rgba(192,128,32,.22);border-color:rgba(192,128,32,.55)}
+.bub-hpb.bub-wound .bub-hpt{color:#f0c674;text-shadow:none;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.04em;text-transform:uppercase}
 .bub-hpt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9)}
 .bub-hpt-none{color:var(--muted);text-shadow:none}
 .bub-r3{display:flex;flex-wrap:wrap;gap:3px;min-height:16px}
@@ -4522,6 +4523,7 @@ let gmcAutoCombat = true;
 let gmcAutoedFight = false;
 let gmcRestored = false;   // true once a saved layout has been restored, so bootstrap won't override it
 let gmcRoster = [];        // last published roster (so a bubble click can open its detail)
+let gmcCharPopIdx = null;  // which roster index the popup is showing (for live refresh)
 const gmcStart = Date.now();
 
 function gmcInitials(name){
@@ -4559,16 +4561,21 @@ function renderPartyStrip(roster){
     const bloodied = pct != null && pct > 0 && pct <= 40;
     const barW = pct==null ? 100 : Math.max(4,pct);
     const hpText = pc.hp || '';
+    const wound = pc.wound || '';   // wounds-as-health systems (SW, D62e) show status here
     // Row 3 = stat details: the defense/AC chip first, then everything else.
     const chips = [];
     if(pc.ac) chips.push({ label: pc.acLabel || 'AC', value: pc.ac });
     (pc.extra || []).forEach(c => { if(c && (c.label || c.value)) chips.push(c); });
+    // Health row: HP bar when we have an HP figure; otherwise a wound-status pill
+    // for wound systems; otherwise an empty dash.
+    let hpRow;
+    if(hpText) hpRow = '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span></div>';
+    else if(wound) hpRow = '<div class="bub-hpb bub-wound"><span class="bub-hpt">'+esc2(wound)+'</span></div>';
+    else hpRow = '<div class="bub-hpb empty"><span class="bub-hpt bub-hpt-none">—</span></div>';
     // Consistent 3-row stack: identity · health · stat chips.
     return '<div class="bubble'+(down?' down':'')+(bloodied?' bloodied':'')+'" onclick="charPop('+i+')" title="'+esc2(pc.name)+'">'
       + '<div class="bub-id"><span class="bub-nm">'+esc2(pc.name)+'</span>'+(pc.sub?'<span class="bub-sub">'+esc2(pc.sub)+'</span>':'')+'</div>'
-      + '<div class="bub-hpb'+(hpText?'':' empty')+'">'
-        + (hpText ? '<i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span>' : '<span class="bub-hpt bub-hpt-none">—</span>')
-      + '</div>'
+      + hpRow
       + (chips.length ? '<div class="bub-r3">'+chips.map(c=>'<span class="bub-chip">'+(c.label?'<em>'+esc2(c.label)+'</em>':'')+(c.value?esc2(c.value):'')+'</span>').join('')+'</div>' : '<div class="bub-r3 bub-r3-empty">—</div>')
       + '</div>';
   }).join('');
@@ -4692,6 +4699,7 @@ function showGmcPop(title, html, opts){
 function closeGmcPop(){
   const scrim = document.getElementById('gmc-scrim');
   if(scrim) scrim.classList.remove('show');
+  gmcCharPopIdx = null;   // popup closed — stop live-refreshing any character card
   const tb = document.getElementById('gmc-pop-toolbar');
   if(tb) tb.innerHTML = '';
   // detach any mounted tool node back to the pool so it can be reopened.
@@ -4752,6 +4760,7 @@ function charPop(i){
     body.classList.remove('tool-host','msg-only');
     body.innerHTML = '';
     body.appendChild(clone);
+    gmcCharPopIdx = i;   // remember it so live syncs refresh the open card
     return;
   }
   // No synced card yet — fall back to a compact live-stats card.
@@ -4766,6 +4775,28 @@ function charPop(i){
     + '<div class="pline" style="color:var(--muted)">Sync a character sheet (Party tool) to see the full card here.</div>';
   showGmcPop(title, html, {});
 }
+
+// When a live party sync republishes the roster, refresh an open character
+// popup in place so its HP/stats update without the user reopening it. Only
+// touches the DOM when the freshly-built card actually differs (avoids churn
+// and preserves any expanded ⓘ detail on an unchanged poll).
+function gmcRefreshCharPop(){
+  if(gmcCharPopIdx == null) return;
+  const body = document.getElementById('gmc-pop-body');
+  if(!body) return;
+  const open = body.querySelector('.pty-card.open');
+  if(!open) return;   // popup no longer showing a character card
+  const partyNode = gmcPopNodes['party'];
+  const cards = partyNode ? partyNode.querySelectorAll('.pty-list .pty-card') : [];
+  const src = cards[gmcCharPopIdx];
+  if(!src) return;
+  const clone = src.cloneNode(true);
+  clone.classList.add('open');
+  const rm = clone.querySelector('[data-remove]'); if(rm) rm.remove();
+  if(clone.outerHTML === open.outerHTML) return;   // nothing changed
+  open.replaceWith(clone);
+}
+document.addEventListener('gm-roster', gmcRefreshCharPop);
 
 // A player card opened in the popup (charPop) is a clone that lives OUTSIDE the
 // Party tool's list, so the list's delegated click handler never sees it. Wire
@@ -5606,7 +5637,7 @@ function init_trackers(root) {
       tag: sum.tag || '', hpMode: hpMode,
       hpCurrent: sum.hp, hpMax: sum.hp, wound: 'none',
       statuses: [], statsOpen: true, traitsOpen: false,
-      gmon: { src: src, stats: stats, lines: lines, notes: sum.notes, page: m.page || '', chips: chips }
+      gmon: { src: src, stats: stats, lines: lines, notes: sum.notes, meta: sum.meta || [], page: m.page || '', chips: chips }
     };
   }
   const SW_WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
@@ -5736,7 +5767,7 @@ function init_trackers(root) {
     if(chipRows) traits = traits ? traits.replace('</div>', chipRows + '</div>') : `<div class="cc-traits"><div class="cc-sec">Traits</div>${chipRows}</div>`;
     return {
       sub: n.tag || '', def: def, tone: 'var(--red)', badge: null,
-      meta: '', abils: ccAbils(abils), atks: ccAtks(atks), traits
+      meta: ccMeta(g.meta || []), abils: ccAbils(abils), atks: ccAtks(atks), traits
     };
   }
   function monView(n) { return n.dmon ? dccView(n) : n.gmon ? xsView(n) : sdView(n); }
@@ -5890,7 +5921,7 @@ function init_trackers(root) {
       defeated = n.hpCurrent <= 0;
       hpBlockHtml = `
         <div class="cc-hp">
-          <div class="cc-hp-head"><span class="cc-hp-lab">Hit Points</span><span class="cc-hp-note">type dmg &middot; +n heals</span></div>
+          <div class="cc-hp-head"><span class="cc-hp-lab">Hit Points</span></div>
           <div class="cc-hp-num">
             <input type="number" class="cc-hp-cur" value="${n.hpCurrent}" title="Current HP">
             <span class="cc-hp-sep">/</span><span class="cc-hp-max">${escAttr(String(n.hpMax))}</span>
@@ -5906,7 +5937,7 @@ function init_trackers(root) {
       for(let i = 1; i <= max; i++) pips += `<button class="cc-pip cc-ace-pip ${i > n.hpCurrent ? 'dead' : ''}" data-pip="${i}" style="--seg-color:#4caf50;" title="${i > n.hpCurrent ? 'Heal to ' + i : 'Damage down to ' + (i - 1)}">${i}</button>`;
       hpBlockHtml = `
         <div class="cc-hp">
-          <div class="cc-hp-head"><span class="cc-hp-lab">Health</span><span class="cc-hp-note">${n.hpCurrent} / ${max} &middot; tap a pip</span></div>
+          <div class="cc-hp-head"><span class="cc-hp-lab">Health</span></div>
           <div class="cc-pips">${pips}</div>
         </div>`;
     } else if(mode === 'sw') {
@@ -5917,10 +5948,9 @@ function init_trackers(root) {
       const fg = { none: '#7bbf7b', stunned: '#d6c04a', wounded: '#0d0e10', incapacitated: '#ffb4ac', mortal: '#ffb4ac' };
       const idx2 = SW_WOUNDS.findIndex(x => x[0] === w);
       const track = SW_WOUNDS.map(([k, lbl], i) => `<button class="cc-wound${i <= idx2 ? ' on' : ''}" data-wound="${k}" style="${i <= idx2 ? `background:${colors[k]};color:${fg[k]}` : ''}" title="${lbl}">${lbl}</button>`).join('');
-      const note = w === 'none' ? 'unhurt' : w === 'stunned' ? '−1D this round & next' : w === 'wounded' ? '−1D to everything' : w === 'incapacitated' ? 'unconscious' : 'mortally wounded';
       hpBlockHtml = `
         <div class="cc-hp">
-          <div class="cc-hp-head"><span class="cc-hp-lab">Wounds</span><span class="cc-hp-note">${note}</span></div>
+          <div class="cc-hp-head"><span class="cc-hp-lab">Wounds</span></div>
           <div class="cc-wounds">${track}</div>
         </div>`;
     } else {
@@ -5932,7 +5962,7 @@ function init_trackers(root) {
       const segHtml = n.segments.map((a, i) => `<button class="cc-pip ${a ? '' : 'dead'}" data-seg-idx="${i}" style="--seg-color:${dccSegColor(i, segCount)};" title="Segment ${i+1}${a ? '' : ' (down)'}">${segHp}</button>`).join('');
       hpBlockHtml = `
         <div class="cc-hp">
-          <div class="cc-hp-head"><span class="cc-hp-lab">HP Segments</span><span class="cc-hp-note">${alive}/${segCount} up &middot; ${segHp} each</span></div>
+          <div class="cc-hp-head"><span class="cc-hp-lab">HP Segments</span></div>
           <div class="cc-pips">${segHtml}</div>
         </div>`;
     }
@@ -6029,9 +6059,21 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg'];
-  function sysToSource(sys) { sys = String(sys || 'DCC').toLowerCase(); return sys === 'sd' ? 'sd' : XS_SOURCES.indexOf(sys) >= 0 ? sys : 'dcc'; }
-  let pickerSource = (window.GM_SYSTEM === 'SD') ? 'sd' : XS_SOURCES.indexOf(String(window.GM_SYSTEM || '').toLowerCase()) >= 0 ? String(window.GM_SYSTEM).toLowerCase() : (dccBestiary().length ? 'dcc' : 'sd');
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb'];
+  // Map a system to its bestiary source. Unknown systems keep their own key (so
+  // pickerMatches returns nothing and the picker says "No Combatants Found")
+  // rather than silently falling back to the DCC bestiary.
+  function sysToSource(sys) { sys = String(sys || 'DCC').toLowerCase(); return sys === 'sd' ? 'sd' : XS_SOURCES.indexOf(sys) >= 0 ? sys : (sys === 'dcc' ? 'dcc' : sys); }
+  let pickerSource = sysToSource(window.GM_SYSTEM);
+
+  // Does the current source actually have any creatures to pick? (kob is listed
+  // in XS_SOURCES but ships no bestiary, so this can be false for it too.)
+  function srcHasBestiary() {
+    if(XS_SOURCES.indexOf(pickerSource) >= 0) return (xsBestiary(pickerSource) || []).length > 0;
+    if(pickerSource === 'dcc') return dccBestiary().length > 0;
+    if(pickerSource === 'sd') return typeof allMonsters === 'function' && allMonsters().length > 0;
+    return false;
+  }
 
   function pickerMatches() {
     const q = pickerQuery.trim().toLowerCase();
@@ -6050,6 +6092,9 @@ function init_trackers(root) {
                (Array.isArray(m.tags) && m.tags.some(t => String(t).toLowerCase().includes(q)));
       });
     }
+    // Only 'sd' uses the shared allMonsters pool; a system with no bestiary of its
+    // own returns nothing here (→ "No Combatants Found").
+    if(pickerSource !== 'sd') return [];
     if(typeof allMonsters !== 'function') return [];
     return allMonsters().filter(m => {
       if(pickerType && (typeof monsterTypeOf === 'function') && monsterTypeOf(m.name) !== pickerType) return false;
@@ -6074,7 +6119,7 @@ function init_trackers(root) {
         <span class="mon-pick-item-meta">${meta}</span>
       </button>`;
     }).join('');
-    return (rows || (pickerSource === 'kob' ? '<div class="mon-pick-empty">Kids on Bikes has no bestiary — build creatures in Homebrew to pull them in here.</div>' : '<div class="mon-pick-empty">No monster matches that search.</div>')) +
+    return (rows || (!srcHasBestiary() ? '<div class="mon-pick-empty">No Combatants Found</div>' : '<div class="mon-pick-empty">No monster matches that search.</div>')) +
       (found.length > 60 ? `<div class="mon-pick-empty">Showing 60 of ${found.length} &mdash; keep typing to narrow it down.</div>` : '');
   }
 
@@ -8442,11 +8487,12 @@ function xsBestiary(src) {
   if(src === 'd62e') return ok(typeof D62E_CREATURES !== 'undefined' ? D62E_CREATURES : undefined);
   if(src === 'icrpg') return ok(typeof ICRPG_MONSTERS !== 'undefined' ? ICRPG_MONSTERS : undefined);
   if(src === 'mmrpg') return ok(typeof MMRPG_CHARACTERS !== 'undefined' ? MMRPG_CHARACTERS.filter(function(c){ return String(c.rank).toUpperCase() !== 'X'; }) : undefined);
+  if(src === 'gb') return ok(typeof GB_BESTIARY !== 'undefined' ? GB_BESTIARY : undefined);
   return [];
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
 // group, D6 2e kind, ICRPG tier).
-function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : src === 'mmrpg' ? ('Rank ' + m.rank) : (m.group || ''); }
+function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : src === 'mmrpg' ? ('Rank ' + m.rank) : src === 'gb' ? (m.kind === 'ghost' ? 'Ghost' : 'NPC') : (m.group || ''); }
 function xsMonTypes(src) { return [...new Set(xsBestiary(src).map(m => xsMonType(src, m)).filter(Boolean))]; }
 // Star Wars die codes are stored as pips (3D+2 = 11).
 function swPipsCode(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p / 3), r = p % 3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); }
@@ -8454,11 +8500,13 @@ function swPipsRoll(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p 
 // A uniform description of a creature for the tracker card and generator card:
 //   { stats:[{label,val,roll?}], lines:[{label,text,roll?}], notes:[string], hp:number, tag:string }
 function xsMonSummary(src, m) {
-  const out = { stats: [], lines: [], notes: [], hp: 10, tag: xsMonType(src, m) };
+  const out = { stats: [], lines: [], notes: [], meta: [], hp: 10, tag: xsMonType(src, m) };
   if(src === 'ace') {
     ['smarts','moves','style','brawn','power'].forEach(k => { if(m[k] != null) out.stats.push({ label: k.toUpperCase(), val: String(m[k]), roll: m[k] > 0 ? m[k] + 'd6' : '' }); });
     out.stats.push({ label: 'DEF', val: String(m.defence ?? '') }, { label: 'HEALTH', val: String(m.health ?? '') });
-    if((m.focuses || []).length) out.lines.push({ label: 'Focuses', text: m.focuses.join(', ') });
+    // Focuses are {stat, name} objects — render "Name (Stat)", not "[object Object]".
+    const focusTxt = (m.focuses || []).map(f => typeof f === 'string' ? f : [f && f.name, (f && f.stat) ? '(' + f.stat + ')' : ''].filter(Boolean).join(' ')).filter(Boolean).join(', ');
+    if(focusTxt) out.lines.push({ label: 'Focuses', text: focusTxt });
     (m.attacks || []).forEach(a => out.lines.push({ label: a.name || 'Attack', text: [a.dice != null ? a.dice + ' dice' : '', a.damage != null ? a.damage + ' dmg' : '', a.note || ''].filter(Boolean).join(' · '), roll: a.dice ? a.dice + 'd6' : '' }));
     out.notes = (m.notes || []).slice(); if(m.description) out.notes.unshift(m.description);
     out.hp = parseInt(m.health, 10) || 1;
@@ -8478,8 +8526,11 @@ function xsMonSummary(src, m) {
     out.hp = 0;   // no hit points in D6 — the tracker card carries a wound track instead
   } else if(src === 'dnd') {
     const A = m.abilities || {}; const amod = s => Math.floor(((+s || 10) - 10) / 2);
-    out.stats.push({ label: 'AC', val: String(m.ac ?? '') }, { label: 'HP', val: m.hp != null ? String(m.hp) : '' }, { label: 'CR', val: String(m.cr ?? '') }, { label: 'Speed', val: (m.speed || '').replace(/ ?ft\./g, '') });
+    // AC → header badge, HP → HP zone. CR and Speed belong on the meta line BELOW
+    // the ability strip, not crammed in front of the six ability scores.
+    out.stats.push({ label: 'AC', val: String(m.ac ?? '') }, { label: 'HP', val: m.hp != null ? String(m.hp) : '' });
     ['STR','DEX','CON','INT','WIS','CHA'].forEach(k => { if(A[k] != null) { const md = amod(A[k]); out.stats.push({ label: k, val: String(A[k]), roll: '1d20' + (md >= 0 ? '+' : '') + md }); } });
+    out.meta.push(['CR', m.cr != null ? String(m.cr) : ''], ['Speed', (m.speed || '').replace(/ ?ft\./g, '')]);
     if(m.savingThrows) out.lines.push({ label: 'Saves', text: m.savingThrows });
     if(m.skills) out.lines.push({ label: 'Skills', text: m.skills });
     ['damageResistances','damageImmunities','damageVulnerabilities','conditionImmunities'].forEach(k => { if(m[k]) out.lines.push({ label: k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).replace('Damage ', '').replace('Condition ', 'Cond. '), text: m[k] }); });
@@ -8497,7 +8548,13 @@ function xsMonSummary(src, m) {
     const A = m.attributes || {};
     Object.keys(A).forEach(k => { out.stats.push({ label: k.slice(0, 3).toUpperCase(), val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
     (m.skills || []).forEach(sk => { const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
-    (m.special || []).forEach(sp => out.lines.push({ label: 'Special', text: String(sp) }));
+    // Dodge / Parry are static defenses — surface them on the meta line under the
+    // attribute strip, not as generic "Special" lines. Everything else stays a line.
+    (m.special || []).forEach(sp => {
+      const md = /^\s*(Dodge|Parry)\s+(.+)$/i.exec(String(sp));
+      if(md) out.meta.push([md[1].charAt(0).toUpperCase() + md[1].slice(1).toLowerCase(), md[2].trim()]);
+      else out.lines.push({ label: 'Special', text: String(sp) });
+    });
     if(m.description) out.notes.push(m.description);
     out.notes.push([m.kind, m.genre && m.genre !== 'core' ? m.genre : ''].filter(Boolean).join(' · '));
     out.hp = 0;
@@ -8520,7 +8577,10 @@ function xsMonSummary(src, m) {
     [['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']].forEach(([k, l]) => {
       if(A[k] != null) out.stats.push({ label: l, val: sign(A[k]), roll: '3d6' + sign(A[k]) });
     });
-    out.stats.push({ label: 'Rank', val: String(m.rank ?? '') }, { label: 'Health', val: String(m.health ?? '') }, { label: 'Focus', val: String(m.focus ?? '') }, { label: 'Karma', val: m.karma == null ? '—' : String(m.karma) });
+    out.stats.push({ label: 'Rank', val: String(m.rank ?? '') }, { label: 'Health', val: String(m.health ?? '') });
+    // Focus and Karma are pools, not roll stats — put them on the meta line below
+    // the ability strip, on their own line.
+    out.meta.push(['Focus', m.focus == null ? '' : String(m.focus)], ['Karma', m.karma == null ? '' : String(m.karma)]);
     const defs = [['melee','Melee'],['agility','Agility'],['resilience','Resilience'],['vigilance','Vigilance'],['ego','Ego'],['logic','Logic']]
       .filter(([k]) => A[k] != null).map(([k, l]) => l + ' ' + (10 + A[k])).join(' · ');
     if(defs) out.lines.push({ label: 'Defenses', text: defs });
@@ -8542,6 +8602,23 @@ function xsMonSummary(src, m) {
     out.notes.push([m.origin, m.occupation].filter(Boolean).join(' · '));
     if(m.teams) out.notes.push('Teams: ' + m.teams);
     out.hp = parseInt(m.health, 10) || 1;
+  } else if(src === 'gb') {
+    // Ghostbusters (d6 pools). Ghosts have Power + Ectopresence; ordinary NPCs
+    // have the four Traits (Brains/Muscles/Moves/Cool) with Talents. There's no
+    // hit-point track in GB, so the tracker uses Ectopresence (ghosts) or Muscles
+    // (people) as a knock-down/banish counter.
+    if(m.kind === 'ghost') {
+      out.stats.push({ label: 'Power', val: String(m.power ?? ''), roll: m.power > 0 ? m.power + 'd6' : '' }, { label: 'Ecto', val: String(m.ectopresence ?? '') });
+      (m.powers || []).forEach(p => out.lines.push({ label: 'Power', text: String(p) }));
+      out.hp = (parseInt(m.ectopresence, 10) || 1) * 3;
+    } else {
+      [['brains','Brains'],['muscles','Muscles'],['moves','Moves'],['cool','Cool']].forEach(([k, l]) => { if(m[k] != null) out.stats.push({ label: l, val: String(m[k]), roll: m[k] > 0 ? m[k] + 'd6' : '' }); });
+      (m.talents || []).forEach(t => out.lines.push({ label: t.trait || 'Talent', text: (t.name || '') + (t.value != null ? ' ' + t.value : ''), roll: t.value ? t.value + 'd6' : '' }));
+      out.hp = (parseInt(m.muscles, 10) || 1) * 3;
+    }
+    if(m.goal) out.meta.push(['Goal', m.goal]);
+    if(m.tags) out.notes.push(String(m.tags));
+    if(m.description) out.notes.push(m.description);
   }
   return out;
 }
@@ -12327,6 +12404,7 @@ else syncHomebrewMonsters();
 <script src="/tools-data/mmrpg-powers.js"></script>
 <script src="/tools-data/mmrpg-traits.js"></script>
 <script src="/tools-data/mmrpg-tags.js"></script>
+<script src="/tools-data/gb-bestiary.js"></script>
 <script>
 
 
@@ -13165,8 +13243,10 @@ function init_party(root) {
       armor: (d.armor && d.armor.name) ? d.armor.name + (d.armor.protection ? ' (' + d.armor.protection + ')' : '') : '',
       weapons: (d.weapons || []).filter(w => w && w.name).map(w => ({ name: w.name, damage: w.damage || '', range: w.range || '' })),
       powers: (d.powers || []).filter(p => p && p.name).map(p => p.name),
-      perks: [].concat(d.perks || [], d.talents || []).filter(Boolean),
-      gear: (d.gear || []).filter(Boolean),
+      // Perks / talents / gear are saved as {name, note, …} rows — pull the name
+      // (older saves may hold plain strings), or they render as "[object Object]".
+      perks: [].concat(d.perks || [], d.talents || []).map(x => typeof x === 'string' ? x : (x && x.name) || '').filter(Boolean),
+      gear: (d.gear || []).map(x => typeof x === 'string' ? x : (x && x.name) || '').filter(Boolean),
       wealth: d.wealth || '',
     };
   }
@@ -13284,14 +13364,22 @@ function init_party(root) {
   function jluParty(d) {
     const n = v => parseInt(v) || 0;
     const A = d.attrs || {}, AK = [['potency','POT'],['accuracy','ACC'],['agility','AGI'],['resistance','RES'],['mind','MND'],['spirit','SPR']];
-    const strList = arr => (Array.isArray(arr) ? arr : []).map(x => typeof x === 'string' ? x : (x && x.name)).filter(Boolean);
+    const strList = arr => (Array.isArray(arr) ? arr : []).map(x => typeof x === 'string' ? x : (x && (x.name || x.type))).filter(Boolean);
+    // The sheet exports a `derived` block with the Tier/Origin-computed combat
+    // stats (Resolve max, Defense, Attack, Block, Dodge, DR) and effective
+    // attribute values — the party card can't recompute these without the tables.
+    // Older saves lack it; fall back to the raw bought points / bought resolve.
+    const dv = d.derived || {}, av = dv.attrVals || {};
     return {
-      system: 'JLU', name: d.name || 'Unnamed', secret: d.secret || '', tier: d.tier || '', origin: d.origin || '', arch: d.arch || '',
-      attrs: AK.filter(([k]) => A[k] != null).map(([k, id]) => ({ id, val: n(A[k]) })),
-      resolveCur: n(d.resCur), resolveMax: n(d.resBuy), condLevel: n(d.condLevel), plot: n(d.plot), dr: n(d.dr),
+      system: 'JLU', name: d.name || 'Unnamed', secret: d.secret || '', tier: d.tier || '', tierName: dv.tierName || '', origin: d.origin || '', arch: d.arch || '',
+      attrs: AK.filter(([k]) => A[k] != null || av[k] != null).map(([k, id]) => ({ id, val: (av[k] != null ? n(av[k]) : n(A[k])) })),
+      resolveCur: n(d.resCur), resolveMax: (dv.resolveMax != null ? n(dv.resolveMax) : n(d.resBuy)),
+      condLevel: n(d.condLevel), plot: n(d.plot),
+      defense: n(dv.defense), attack: n(dv.attack), block: n(dv.block), dodge: n(dv.dodge),
+      dr: (dv.dr != null ? n(dv.dr) : n(d.dr)),
       statuses: Array.isArray(d.statuses) ? d.statuses.filter(Boolean) : [],
       powers: (Array.isArray(d.powers) ? d.powers : []).filter(x => x && x.name).map(x => ({ name: x.name, grade: n(x.grade) })),
-      traits: strList(d.traits), abilities: strList(d.archAbilities),
+      traits: strList(d.traits), abilities: strList(d.archAbilities), knowledge: strList(d.knowledge), limitations: strList(d.limitations),
       equipment: (Array.isArray(d.equipment) ? d.equipment : []).filter(x => x && x.name).map(x => x.name),
     };
   }
@@ -13309,6 +13397,9 @@ function init_party(root) {
       skills: SK.map(([nm, st]) => ({ name: nm, val: (T[nm] != null) ? n(T[nm]) : n(S[st]) + n(K[nm]) })),
       hpCur: n(hp.cur), hpMax: n(hp.max), temp: n(hp.temp), wounds: n(d.wounds), woundsMax: n(d.woundsMax) || 6,
       hdCur: n(hd.cur), hdMax: n(hd.max), manaCur: n(mn.cur), manaMax: n(mn.max),
+      // Armor SCORE (the number the sheet computes), not the armor type name.
+      armorScore: (d.armorScore != null ? n(d.armorScore) : (n(S.DEX) + n(d.armorBonus))),
+      actions: (d.actions != null ? n(d.actions) : 3),
       armor: d.armor || '', shield: d.shield || '',
       attacks: (d.attacks || []).filter(a => a && a.name).map(a => ({ name: a.name, damage: a.damage || '', props: a.props || '' })),
       spells: (d.spells || []).filter(s => s && s.name).map(s => s.name + (s.tier ? ' (T' + s.tier + ')' : '')),
@@ -13495,7 +13586,12 @@ function init_party(root) {
     const open = openIds.has(entry.id);
     const chips = (o.chips || []).filter(Boolean).map(c =>
       '<span class="pcard-chip' + (c.bad ? ' bad' : '') + '"><span class="l">' + esc(c.l) + '</span><span class="v">' + esc(c.v == null || c.v === '' ? '—' : c.v) + '</span></span>').join('');
-    return '<div class="pty-card pcard' + (open ? ' open' : '') + '" data-id="' + entry.id + '">'
+    // Optional curated Monitor-bubble payload: the system decides exactly which
+    // stats the bubble shows (and whether its health row is an HP bar or a wound
+    // status), independent of the card's own header chips. publishRoster prefers
+    // it over scraping the header. Shape: { hp, wound, chips:[{label,value}] }.
+    const bub = o.bubble ? " data-pcbubble='" + esc(JSON.stringify(o.bubble)).replace(/'/g, '&#39;') + "'" : '';
+    return '<div class="pty-card pcard' + (open ? ' open' : '') + '" data-id="' + entry.id + '"' + bub + '>'
       + '<div class="pty-card-hd pcard-band"><div class="pcard-title"><div class="pty-name">' + esc(o.name || '—') + '</div>'
       + '<div class="pcard-subrow"><span class="pcard-type">' + esc(o.sub || '') + '</span></div></div>'
       + chips + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button></div>'
@@ -13599,7 +13695,9 @@ function init_party(root) {
     }
 
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'HP', v: hpPct + '%', bad: hpPct <= 40 }].concat(mana ? [{ l:'Mana', v: mana }] : []), body });
+      chips: [{ l:'HP', v: hpPct + '%', bad: hpPct <= 40 }].concat(mana ? [{ l:'Mana', v: mana }] : []), body,
+      bubble: { hp: hpPct + '%',
+        chips: [{ label:'Evade', value: c.evade.total }, { label:'DR', value: c.dr.total }, { label:'AI', value: c.dr.aiFavor || '—' }] } });
   }
 
   function cardHTMLACE(entry) {
@@ -13617,7 +13715,9 @@ function init_party(root) {
         '<div class="pty-line"><b>' + esc(a.name) + '</b> <span class="dim">' + esc(a.kind) + (a.damage ? ' · ' + esc(a.damage) + ' dmg' : '') + '</span></div>').join('') + '</div>';
     if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax) }, { l:'DEF', v: c.defence }], body });
+      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax) }, { l:'DEF', v: c.defence }], body,
+      bubble: { hp: esc(c.hpCur) + '/' + esc(c.hpMax),
+        chips: [{ label:'DEF', value: c.defence }, { label:'Karma', value: c.karma }] } });
   }
 
   function cardHTMLSW(entry) {
@@ -13634,7 +13734,9 @@ function init_party(root) {
     if(c.ship) body += '<div class="pty-sec"><div class="pty-sec-h">Ship</div><div class="pty-line">' + esc(c.ship) + '</div></div>';
     if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'Wound', v: c.wound, bad: c.wound !== 'Unhurt' }, { l:'FP', v: c.forcePoints }], body });
+      chips: [{ l:'Wound', v: c.wound, bad: c.wound !== 'Unhurt' }, { l:'FP', v: c.forcePoints }], body,
+      bubble: { wound: c.wound,
+        chips: [{ label:'Armor', value: c.armor || 'none' }, { label:'Skill', value: c.skillPoints }] } });
   }
 
   function cardHTMLD62E(entry) {
@@ -13651,7 +13753,9 @@ function init_party(root) {
     if(c.perks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Perks &amp; Talents</div><div class="pty-line dim">' + esc(c.perks.join(', ')) + '</div></div>';
     if(c.gear.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'Wound', v: c.wound, bad: c.wound !== 'Unhurt' }, { l:'Hero', v: c.heroPoints }], body });
+      chips: [{ l:'Wound', v: c.wound, bad: c.wound !== 'Unhurt' }, { l:'Hero', v: c.heroPoints }], body,
+      bubble: { wound: c.wound,
+        chips: [{ label:'Dodge', value: c.dodge }, { label:'Parry', value: c.parry }] } });
   }
 
   function cardHTMLICRPG(entry) {
@@ -13670,7 +13774,9 @@ function init_party(root) {
     if(c.loot.length) body += '<div class="pty-sec"><div class="pty-sec-h">Loot</div><div class="pty-line dim">' + esc(c.loot.join(', ')) + '</div></div>';
     if(c.story) body += '<div class="pty-sec"><div class="pty-sec-h">Story</div><div class="pty-line dim">' + esc(c.story) + '</div></div>';
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'HP', v: esc(c.hp) + '/' + esc(c.hpMax), bad: dying }, { l:'DEF', v: (c.defense >= 0 ? '+' : '') + c.defense }], body });
+      chips: [{ l:'HP', v: esc(c.hp) + '/' + esc(c.hpMax), bad: dying }, { l:'DEF', v: (c.defense >= 0 ? '+' : '') + c.defense }], body,
+      bubble: { hp: esc(c.hp) + '/' + esc(c.hpMax),
+        chips: [{ label:'DEF', value: (c.defense >= 0 ? '+' : '') + c.defense }, { label:'Armor', value: c.armor }] } });
   }
 
   function cardHTMLMMRPG(entry) {
@@ -13707,16 +13813,19 @@ function init_party(root) {
     let body = pcHpBar('Hit Points', c.hpCur, c.hpMax, (c.temp ? '+' + c.temp + ' temp' : '') + (c.wounds ? (c.temp ? ' · ' : '') + 'Wounds ' + c.wounds + '/' + c.woundsMax : ''))
       + pcStats(c.stats.map(s => ({ l: esc(s.id) + (s.adv ? ' ▲' : s.dis ? ' ▼' : ''), m: (s.val >= 0 ? '+' : '') + s.val })));
     body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
-       + cell('Hit Dice', c.hdCur + '/' + c.hdMax) + (c.manaMax ? cell('Mana', c.manaCur + '/' + c.manaMax) : '') + cell('Armor', [c.armor, c.shield].filter(Boolean).join(' + ') || 'unarmored')
+       + cell('Armor', c.armorScore) + cell('Actions', c.actions) + cell('Wounds', c.wounds + '/' + c.woundsMax)
+       + cell('Hit Dice', c.hdCur + '/' + c.hdMax) + (c.manaMax ? cell('Mana', c.manaCur + '/' + c.manaMax) : '')
        + '</div></div>';
     body += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + (s.val >= 0 ? '+' : '') + s.val).join(' · ') + '</div></div>';
     if(c.attacks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b> <span class="dim">' + esc(a.damage) + (a.props ? ' · ' + esc(a.props) : '') + '</span></div>').join('') + '</div>';
     if(c.spells.length) body += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
-    if(c.picks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.picks.join(', ')) + '</div></div>';
+    if(c.picks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Features</div><div class="pty-line dim">' + esc(c.picks.join(', ')) + '</div></div>';
     if(c.inventory.length) body += '<div class="pty-sec"><div class="pty-sec-h">Inventory</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax) + (c.temp ? '+' + esc(c.temp) : '') }]
-        .concat(c.wounds ? [{ l:'Wounds', v: esc(c.wounds) + '/' + esc(c.woundsMax), bad: true }] : []), body });
+      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax) + (c.temp ? '+' + esc(c.temp) : '') }, { l:'Armor', v: c.armorScore }]
+        .concat(c.wounds ? [{ l:'Wounds', v: esc(c.wounds) + '/' + esc(c.woundsMax), bad: true }] : []), body,
+      bubble: { hp: esc(c.hpCur) + '/' + esc(c.hpMax),
+        chips: [{ label:'Wounds', value: esc(c.wounds) + '/' + esc(c.woundsMax) }, { label:'Armor', value: c.armorScore }] } });
   }
 
   function cardHTMLKOB(entry) {
@@ -13769,7 +13878,10 @@ function init_party(root) {
     const hpCur = c.hpCur !== '' && c.hpCur != null ? (parseInt(c.hpCur, 10) || 0) : hpMax;
     const pct = hpMax > 0 ? Math.max(0, Math.min(100, (hpCur / hpMax) * 100)) : 100;
     const hpText = (c.hpCur !== '' && c.hpCur != null ? esc(c.hpCur) + '/' : '') + esc(c.hpMax) + (c.hpTemp ? ' +' + esc(c.hpTemp) : '');
-    let h = '<div class="pty-card pcard' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    const bubble = { hp: (c.hpCur !== '' && c.hpCur != null ? c.hpCur + '/' : '') + c.hpMax,
+      chips: [{ label:'AC', value: c.ac || '—' }, { label:'Speed', value: c.speed || '—' }, { label:'Pass', value: c.passivePerc }] };
+    const bubAttr = " data-pcbubble='" + esc(JSON.stringify(bubble)).replace(/'/g, '&#39;') + "'";
+    let h = '<div class="pty-card pcard' + (open ? ' open' : '') + '" data-id="' + entry.id + '"' + bubAttr + '>';
     h += '<div class="pty-card-hd pcard-band">'
        + '<div class="pcard-title"><div class="pty-name">' + esc(c.name) + '</div>'
        + '<div class="pcard-subrow"><span class="pcard-type">' + esc(sub) + '</span></div></div>'
@@ -13839,13 +13951,15 @@ function init_party(root) {
     let body = pcHpBar('Hit Points', c.hpCur, c.hpMax)
       + pcStats(c.attrs.map(s => ({ l: s.id, m: s.val })));
     body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
-       + cell('Resolve', c.resolveCur + '/' + c.resolveMax) + cell('Stress', c.stress) + '</div></div>';
+       + cell('Stress', c.stress) + cell('Armor', c.armor) + '</div></div>';
     if(c.conditions.length) body += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.conditions.join(', ')) + '</div></div>';
     if(c.skills.length) body += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.id) + ' ' + s.val).join(' · ') + '</div></div>';
     if(c.talents.length) body += '<div class="pty-sec"><div class="pty-sec-h">Talents</div><div class="pty-line dim">' + esc(c.talents.join(', ')) + '</div></div>';
     if(c.weapons.length) body += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div><div class="pty-line dim">' + esc(c.weapons.join(', ')) + '</div></div>';
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax), bad: hurt }, { l:'Armor', v: c.armor }], body });
+      chips: [{ l:'HP', v: esc(c.hpCur) + '/' + esc(c.hpMax), bad: hurt }, { l:'Armor', v: c.armor }], body,
+      bubble: { hp: esc(c.hpCur) + '/' + esc(c.hpMax),
+        chips: [{ label:'Stress', value: c.stress }, { label:'Armor', value: c.armor }] } });
   }
 
   // ── Ghostbusters ──
@@ -13865,19 +13979,27 @@ function init_party(root) {
   // ── Justice League Unlimited ──
   function cardHTMLJLU(entry) {
     const c = entry.sheet;
-    const sub = [c.secret, c.tier, c.arch].filter(Boolean).join(' · ');
+    const sub = [c.secret, c.tierName || c.tier, c.origin, c.arch].filter(Boolean).join(' · ');
     const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
     let body = pcHpBar('Resolve', c.resolveCur, c.resolveMax, c.condLevel ? 'Condition ' + c.condLevel : '')
       + pcStats(c.attrs.map(s => ({ l: s.id, m: s.val })));
+    // Combat line — the defenses a GM actually needs mid-scene.
+    body += '<div class="pty-sec"><div class="pty-sec-h">Combat</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Defense', c.defense) + cell('Attack', (c.attack >= 0 ? '+' : '') + c.attack) + cell('Block', c.block) + cell('Dodge', c.dodge) + cell('DR', c.dr)
+       + '</div></div>';
     body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
        + cell('Condition', c.condLevel) + cell('Plot', c.plot) + '</div></div>';
     if(c.statuses.length) body += '<div class="pty-sec"><div class="pty-sec-h">Statuses</div><div class="pty-line" style="color:#ff9a5a;">' + esc(c.statuses.join(', ')) + '</div></div>';
     if(c.powers.length) body += '<div class="pty-sec"><div class="pty-sec-h">Powers</div><div class="pty-line dim">' + c.powers.map(p => esc(p.name) + (p.grade ? ' G' + p.grade : '')).join(', ') + '</div></div>';
     if(c.abilities.length) body += '<div class="pty-sec"><div class="pty-sec-h">Archetype Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
     if(c.traits.length) body += '<div class="pty-sec"><div class="pty-sec-h">Traits</div><div class="pty-line dim">' + esc(c.traits.join(', ')) + '</div></div>';
+    if(c.knowledge && c.knowledge.length) body += '<div class="pty-sec"><div class="pty-sec-h">Knowledge</div><div class="pty-line dim">' + esc(c.knowledge.join(', ')) + '</div></div>';
+    if(c.limitations && c.limitations.length) body += '<div class="pty-sec"><div class="pty-sec-h">Limitations</div><div class="pty-line dim">' + esc(c.limitations.join(', ')) + '</div></div>';
     if(c.equipment.length) body += '<div class="pty-sec"><div class="pty-sec-h">Equipment</div><div class="pty-line dim">' + esc(c.equipment.join(', ')) + '</div></div>';
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'Resolve', v: esc(c.resolveCur) + '/' + esc(c.resolveMax), bad: !!c.condLevel }, { l:'DR', v: c.dr }], body });
+      chips: [{ l:'Resolve', v: esc(c.resolveCur) + '/' + esc(c.resolveMax), bad: !!c.condLevel }, { l:'DR', v: c.dr }], body,
+      bubble: { hp: esc(c.resolveCur) + '/' + esc(c.resolveMax),
+        chips: [{ label:'DEF', value: c.defense }, { label:'BLK', value: c.block }, { label:'DODGE', value: c.dodge }] } });
   }
 
   function cardHTML(entry) {
@@ -13954,14 +14076,30 @@ function init_party(root) {
       body += '</div>';
     }
     return pcShell(entry, { name: c.name, sub,
-      chips: [{ l:'AC', v: c.ac }, { l:'HP', v: hpChip }].concat(c.luck ? [{ l:'Luck', v: c.luck }] : []), body });
+      chips: [{ l:'AC', v: c.ac }, { l:'HP', v: hpChip }].concat(c.luck ? [{ l:'Luck', v: c.luck }] : []), body,
+      bubble: { hp: hpChip,
+        chips: [{ label:'AC', value: c.ac }, { label:'Slots', value: c.slotsUsed + '/' + c.slotsMax }].concat(c.luck ? [{ label:'Luck', value: c.luck }] : []) } });
   }
 
   function render() {
     const any = chars.length > 0;
     emptyEl.style.display = any ? 'none' : 'flex';
     listEl.style.display  = any ? 'flex' : 'none';
-    listEl.innerHTML = chars.map(cardHTML).join('');
+    // One malformed sheet must never blank the whole party. Build each card in
+    // isolation so a single throw becomes a small "couldn't render" card instead
+    // of an empty list + dead bubbles (and a stalled auto-refresh).
+    listEl.innerHTML = chars.map(entry => {
+      try { return cardHTML(entry); }
+      catch(e) {
+        const nm = (entry && entry.sheet && entry.sheet.name) || 'Character';
+        const sys = (entry && entry.sheet && entry.sheet.system) || '';
+        return '<div class="pty-card pcard" data-id="' + (entry && entry.id) + '">'
+          + '<div class="pty-card-hd pcard-band"><div class="pcard-title"><div class="pty-name">' + esc(nm) + '</div>'
+          + '<div class="pcard-subrow"><span class="pcard-type">' + esc(sys) + '</span></div></div>'
+          + '<button class="pty-x" data-remove="' + (entry && entry.id) + '" title="Remove">✕</button></div>'
+          + '<div class="pty-card-bd"><div class="pty-line dim">Couldn’t render this sheet.</div></div></div>';
+      }
+    }).join('');
     if(any && !noteEl.textContent) status(chars.length + ' character' + (chars.length === 1 ? '' : 's'));
     publishRoster();
   }
@@ -13975,6 +14113,19 @@ function init_party(root) {
         const name = ((card.querySelector('.pty-name') || {}).textContent || '').trim();
         const subEl = card.querySelector('.pty-sub') || card.querySelector('.pcard-type');
         const sub  = ((subEl || {}).textContent || '').trim();
+        // Preferred path: the card carries a curated bubble payload (data-pcbubble)
+        // — the system chose exactly what the Monitor bubble shows. Health row is
+        // an HP bar when `hp` is set, or a wound-status pill when `wound` is set
+        // (wounds-as-health systems like Star Wars / D62e).
+        const raw = card.getAttribute('data-pcbubble');
+        if(raw) {
+          try {
+            const bd = JSON.parse(raw.replace(/&#39;/g, "'"));
+            const bchips = (bd.chips || []).map(c => ({ label: c.label || c.l || '', value: c.value == null ? (c.v == null ? '' : c.v) : c.value }))
+                                            .filter(c => c.label || c.value);
+            return { name, sub, hp: bd.hp || '', wound: bd.wound || '', ac: '', acLabel: 'AC', extra: bchips };
+          } catch(e) { /* fall through to header scrape */ }
+        }
         // Capture EVERY header chip as {label, value} so the Monitor bubble can
         // show all of it. Two header formats: the old "Label <b>value</b>" pill
         // (.pty-chip) and the redesigned split chip (.pcard-chip → .l + .v). Then
@@ -14131,7 +14282,7 @@ function init_party(root) {
     if(document.hidden) return;
     const camp = (typeof window.__gmCampaign === 'function') ? window.__gmCampaign() : null;
     if(camp && camp.id) sync(true);
-  }, 30000);
+  }, 10000);
   setTimeout(() => {
     const camp = (typeof window.__gmCampaign === 'function') ? window.__gmCampaign() : null;
     if(camp && camp.id) sync(true);
