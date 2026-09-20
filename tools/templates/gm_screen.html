@@ -451,8 +451,9 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 17px; letter-spacing: .04em; color: var(--white); line-height: 1.1; }
 .advh-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--gold); letter-spacing: .04em; margin-top: 1px; }
 .advh-meta { font-family: 'Share Tech Mono', monospace; font-size: 10.5px; color: var(--muted); margin-top: 5px; }
-.advh-overview { font-size: 12px; color: var(--light); line-height: 1.5; margin-top: 8px; max-height: 88px; overflow-y: auto; }
 .advh-full { flex-shrink: 0; }
+.advh-backbtn { position: absolute; top: 8px; left: 8px; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.advh-prose { font-size: 13px; color: var(--light); line-height: 1.6; overflow-wrap: anywhere; }
 .advh-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
 .advh-tab { flex: 0 0 auto; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 9px; cursor: pointer; white-space: nowrap; }
 .advh-tab:hover { color: var(--light); }
@@ -464,10 +465,21 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-row-name { flex: 1; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; color: var(--white); letter-spacing: .02em; overflow-wrap: anywhere; }
 .advh-tag { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .advh-chev { color: var(--muted); font-size: 11px; flex-shrink: 0; }
-.advh-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.advh-scene, .advh-npc, .advh-table, .advh-card, .advh-map { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
-.advh-scene-hd, .advh-npc-hd, .advh-table-hd { }
-.advh-scene-body, .advh-npc-body { margin-top: 7px; }
+.advh-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; align-self: flex-start; }
+.advh-scene, .advh-table, .advh-card, .advh-map { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.advh-scene-body { margin-top: 7px; }
+/* Two-line collapsed scene row: name over subheader. */
+.advh-2l { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.advh-subhdr { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* NPC = the real read-only combat card. Collapsed shows only its banner. */
+.advh-npc { min-width: 0; }
+.advh-npc .npc-card { margin: 0; }
+.advh-npc .cc-band { cursor: pointer; }
+.advh-npc.advh-collapsed .cc-body { display: none; }
+.advh-ro .cc-hp-cur { cursor: default; opacity: .95; }
+.advh-ro .cc-atk-roll, .advh-ro .npc-mon-roll, .advh-ro .npc-mon-attack, .advh-ro .cc-diebtn, .advh-ro .cc-pip, .advh-ro .cc-ace-pip, .advh-ro .cc-wound, .advh-ro .cc-abil { pointer-events: none; }
+.advh-ro .cc-abil { cursor: default; }
+.advh-npc .advh-send { margin-left: 8px; }
 .advh-readaloud { border-left: 3px solid var(--gold); background: rgba(200,160,32,.08); padding: 7px 9px; border-radius: 0 6px 6px 0; font-size: 12.5px; line-height: 1.5; color: var(--light); font-style: italic; }
 .advh-desc { font-size: 12px; line-height: 1.5; color: var(--light); margin-top: 6px; overflow-wrap: anywhere; }
 .advh-desc.dim { color: var(--muted); }
@@ -5495,10 +5507,23 @@ function wireSessionPrepLoader(root) {
   }
   let prep = null;         // parsed session-prep state
   let prepSys = '';        // system key (DND, SD, …) for statblock mapping
-  let activeSec = 'scenes';
+  let activeSec = 'overview';
 
-  function showHub(){ if(emptyEl) emptyEl.style.display = 'none'; if(frameWrap) frameWrap.style.display = 'none'; if(hub) hub.style.display = 'flex'; }
-  function showPreview(){ if(hub) hub.style.display = 'none'; }   // doc viewer shows itself via _loadDataUrl
+  // A "← Hub" button that overlays the pane while the full printable prep is
+  // showing, so the GM can always get back to the interactive hub.
+  let backBtn = null;
+  if(body) {
+    backBtn = document.createElement('button');
+    backBtn.type = 'button';
+    backBtn.className = 'btn small advh-backbtn';
+    backBtn.innerHTML = '&larr; Hub';
+    backBtn.style.display = 'none';
+    backBtn.addEventListener('click', showHub);
+    body.appendChild(backBtn);
+  }
+
+  function showHub(){ if(emptyEl) emptyEl.style.display = 'none'; if(frameWrap) frameWrap.style.display = 'none'; if(backBtn) backBtn.style.display = 'none'; if(hub) hub.style.display = 'flex'; }
+  function showPreview(){ if(hub) hub.style.display = 'none'; if(backBtn && prep) backBtn.style.display = 'block'; }
 
   function open() {
     openPrepPicker(function(doc) {
@@ -5518,55 +5543,74 @@ function wireSessionPrepLoader(root) {
         prep = JSON.parse(data[key]);
         prepSys = String(d.system || doc.system || window.GM_SYSTEM || '').toUpperCase();
         prep._docTool = doc.tool; prep._docId = doc.id; prep._docTitle = doc.title;
-        activeSec = 'scenes';
+        activeSec = 'overview';
         renderHub();
       })
       .catch(() => { if(hub) hub.innerHTML = '<div class="advh-msg">Couldn’t load that adventure. <button class="btn small advh-retry">Try again</button></div>';
         const r = hub && hub.querySelector('.advh-retry'); if(r) r.addEventListener('click', () => loadPrep(doc)); });
   }
 
-  // Scenes = locations (+ SD strongopen). Tables = rollTables/rolltables (+ SD randenc).
+  // Scenes = locations (+ SD strongopen). Tables = rollTables/rolltables/tables
+  // (+ SD randenc). Maps = maps[] (+ the legacy single mappath).
   function scenes(){ return [].concat(prep.strongopen || [], prep.locations || []).filter(x => x && (x.name || x.readaloud || x.desc)); }
   function tables(){
-    const t = [].concat(prep.rollTables || [], prep.rolltables || []);
+    const t = [].concat(prep.rollTables || [], prep.rolltables || [], prep.tables || []);
     (prep.randenc || []).forEach(r => { if(r && (r.header || r.text)) t.push({ title: r.header || 'Random Encounter', die: '', rows: [{ result: r.text }] }); });
-    return t.filter(Boolean);
+    return t.filter(x => x && (x.title || (x.rows && x.rows.length)));
+  }
+  function maps(){
+    const m = (prep.maps || []).slice();
+    if(prep.mappath && prep.mappath !== '__has_map__') m.push({ title: 'Map', src: prep.mappath });
+    return m.filter(x => x && x.src);
   }
   function counts(){
-    return { scenes: scenes().length, npcs: (prep.statblocks || []).length, clues: (prep.clues || []).length,
-             loot: (prep.rewards || []).length, tables: tables().length, maps: (prep.maps || []).length };
+    return { overview: prep.overview ? 1 : 0, scenes: scenes().length, notes: (prep.notes && prep.notes.trim()) ? 1 : 0,
+             clues: (prep.clues || []).length, loot: (prep.rewards || []).length, tables: tables().length,
+             npcs: (prep.statblocks || []).length, maps: maps().length };
   }
 
   function renderHub(){
     if(!hub || !prep) return;
     const c = counts();
     const meta = [prep.floor, prep.session ? 'Session ' + prep.session : '', prep.players ? prep.players + ' players' : '', prep.duration].map(s => String(s || '').trim()).filter(Boolean).join(' · ');
-    const TABS = [['scenes','Scenes'],['npcs','NPCs'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['maps','Maps']];
+    // Reorder per spec: Overview · Scenes · Notes · Clues · Loot · Tables · NPCs · Maps.
+    const TABS = [['overview','Overview'],['scenes','Scenes'],['notes','Notes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
+    // Text-only tabs (Overview / Notes) show no count badge, just dim when empty.
+    const NOCOUNT = { overview: 1, notes: 1 };
     let h = '<div class="advh-head">'
       + '<div class="advh-titlerow"><div><div class="advh-title">' + advEsc(prep.title || prep._docTitle || 'Adventure') + '</div>'
       + (prep.subtitle ? '<div class="advh-sub">' + advEsc(prep.subtitle) + '</div>' : '') + '</div>'
       + '<button class="btn small advh-full" title="Open the full printable prep in this pane">Full prep</button></div>'
       + (meta ? '<div class="advh-meta">' + advEsc(meta) + '</div>' : '')
-      + (prep.overview ? '<div class="advh-overview">' + advText(prep.overview) + '</div>' : '')
       + '</div>';
     h += '<div class="advh-tabs">' + TABS.map(([k, l]) =>
-      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + '>' + l + (c[k] ? ' <span class="advh-n">' + c[k] + '</span>' : '') + '</button>').join('') + '</div>';
+      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + '>' + l
+      + (!NOCOUNT[k] && c[k] ? ' <span class="advh-n">' + c[k] + '</span>' : '') + '</button>').join('') + '</div>';
     h += '<div class="advh-body">' + sectionHtml(activeSec) + '</div>';
     hub.innerHTML = h;
     wireHub();
   }
 
   function sectionHtml(sec){
+    if(sec === 'overview'){
+      return prep.overview ? '<div class="advh-prose">' + advText(prep.overview) + '</div>' : '<div class="advh-empty">No overview written for this adventure.</div>';
+    }
+    if(sec === 'notes'){
+      return (prep.notes && prep.notes.trim()) ? '<div class="advh-prose">' + advText(prep.notes) + '</div>' : '<div class="advh-empty">No GM notes in this prep.</div>';
+    }
     if(sec === 'scenes'){
       const list = scenes();
       if(!list.length) return '<div class="advh-empty">No scenes or encounters in this prep.</div>';
       return list.map((s, i) => {
         const typ = (s.type || '').toLowerCase();
         const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
+        // Collapsed row is two lines: name on top, subheader (tag / type) below.
+        const sub = s.tag || (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
         return '<div class="advh-scene" data-i="' + i + '">'
           + '<button class="advh-row advh-scene-hd"><span class="advh-dot" style="background:' + dot + '"></span>'
-          + '<span class="advh-row-name">' + advEsc(s.name || 'Scene ' + (i + 1)) + '</span>'
-          + (s.tag ? '<span class="advh-tag">' + advEsc(s.tag) + '</span>' : '') + '<span class="advh-chev">▾</span></button>'
+          + '<span class="advh-2l"><span class="advh-row-name">' + advEsc(s.name || 'Scene ' + (i + 1)) + '</span>'
+          + '<span class="advh-subhdr">' + advEsc(sub || 'Scene') + '</span></span>'
+          + '<span class="advh-chev">▾</span></button>'
           + '<div class="advh-scene-body" style="display:none;">'
           + (s.readaloud ? '<div class="advh-readaloud">' + advText(s.readaloud) + '</div>' : '')
           + (s.desc ? '<div class="advh-desc">' + advText(s.desc) + '</div>' : '')
@@ -5577,20 +5621,8 @@ function wireSessionPrepLoader(root) {
     if(sec === 'npcs'){
       const list = prep.statblocks || [];
       if(!list.length) return '<div class="advh-empty">No NPCs, mobs, or bosses in this prep.</div>';
-      return list.map((sb, i) => {
-        const badge = (sb.sbtype || 'npc').toUpperCase();
-        const bcol = sb.sbtype === 'boss' ? '#7b5cff' : sb.sbtype === 'npc' ? '#c8a020' : '#d63a30';
-        return '<div class="advh-npc" data-i="' + i + '">'
-          + '<div class="advh-row advh-npc-hd">'
-          + '<span class="advh-badge" style="background:' + bcol + '">' + advEsc(badge) + '</span>'
-          + '<button class="advh-npc-name advh-row-name">' + advEsc(sb.name || 'Combatant') + (sb.type ? ' <span class="advh-tag">' + advEsc(sb.type) + '</span>' : '') + '</button>'
-          + '<button class="btn small primary advh-send" title="Add to the combat tracker">&rarr; Combat</button></div>'
-          + '<div class="advh-npc-body" style="display:none;">'
-          + (sb.flavor ? '<div class="advh-desc">' + advText(sb.flavor) + '</div>' : '')
-          + (sb.abilities ? '<div class="advh-abils">' + advText(sb.abilities) + '</div>' : '')
-          + (sb.notes ? '<div class="advh-desc dim">' + advText(sb.notes) + '</div>' : '')
-          + '</div></div>';
-      }).join('');
+      // Slots only — the read-only combat card is mounted into each in wireHub().
+      return list.map((sb, i) => '<div class="advh-npc advh-collapsed" data-i="' + i + '"></div>').join('');
     }
     if(sec === 'clues'){
       const list = prep.clues || [];
@@ -5621,7 +5653,7 @@ function wireSessionPrepLoader(root) {
       }).join('');
     }
     if(sec === 'maps'){
-      const list = prep.maps || [];
+      const list = maps();
       if(!list.length) return '<div class="advh-empty">No maps in this prep.</div>';
       return list.map((mp, i) => '<div class="advh-map" data-i="' + i + '">'
         + (mp.src && mp.src !== '__has_map__' ? '<img class="advh-map-thumb" src="' + advEsc(mp.src) + '" alt="">' : '<div class="advh-map-thumb advh-map-none">No image</div>')
@@ -5631,6 +5663,33 @@ function wireSessionPrepLoader(root) {
     return '';
   }
 
+  // Build a read-only combat card (identical to the tracker's) for a statblock.
+  function mountNpcCard(slot){
+    const i = +slot.dataset.i;
+    const sb = (prep.statblocks || [])[i];
+    if(!sb) return;
+    // Guarantee the tracker's card renderer exists (it's defined when a trackers
+    // instance is built) without opening a Free-mode window.
+    if(typeof window.buildNpcCard !== 'function' && typeof sharedToolNode === 'function') { try { sharedToolNode('trackers'); } catch(e) {} }
+    if(typeof window.buildNpcCard !== 'function' || typeof window.prepStatblockToItem !== 'function') {
+      slot.innerHTML = '<div class="advh-card"><div class="advh-card-h">' + advEsc(sb.name || 'NPC') + '</div>'
+        + (sb.abilities ? '<div class="advh-abils">' + advText(sb.abilities) + '</div>' : '') + '</div>';
+      return;
+    }
+    const item = window.prepStatblockToItem(sb, prepSys, i + 1);
+    let card; try { card = window.buildNpcCard(item, i); } catch(e) { card = null; }
+    if(!card) return;
+    card.classList.add('advh-ro');
+    // Strip the adjustable / removable bits — read-only in the hub.
+    card.querySelectorAll('.cc-hp-dmg, .npc-del').forEach(e => e.remove());
+    card.querySelectorAll('.cc-hp-cur').forEach(inp => { inp.readOnly = true; inp.disabled = true; inp.tabIndex = -1; });
+    // A → Combat action still lives on the banner (on-demand send).
+    const band = card.querySelector('.cc-band');
+    if(band) { const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small primary advh-send'; send.title = 'Add to the combat tracker'; send.innerHTML = '&rarr; Combat'; band.appendChild(send); }
+    slot.innerHTML = '';
+    slot.appendChild(card);
+  }
+
   function wireHub(){
     hub.querySelectorAll('.advh-tab').forEach(b => b.addEventListener('click', () => { activeSec = b.dataset.sec; renderHub(); }));
     const full = hub.querySelector('.advh-full');
@@ -5638,23 +5697,26 @@ function wireSessionPrepLoader(root) {
       showPreview();
       root._loadDataUrl('/tools/' + prep._docTool + '/' + prep._docId + '?view=preview', (prep._docTitle || 'Session Prep') + '.html');
     });
-    // Scene / NPC accordions.
+    // Scene accordion (2-line collapsed → read-aloud + notes).
     hub.querySelectorAll('.advh-scene-hd').forEach(b => b.addEventListener('click', () => {
       const bd = b.parentElement.querySelector('.advh-scene-body'); if(bd) bd.style.display = bd.style.display === 'none' ? 'block' : 'none';
       const ch = b.querySelector('.advh-chev'); if(ch) ch.textContent = (bd && bd.style.display === 'none') ? '▾' : '▴';
     }));
-    hub.querySelectorAll('.advh-npc-name').forEach(b => b.addEventListener('click', () => {
-      const bd = b.closest('.advh-npc').querySelector('.advh-npc-body'); if(bd) bd.style.display = bd.style.display === 'none' ? 'block' : 'none';
-    }));
-    // → Combat: send the prepped statblock into the tracker.
-    hub.querySelectorAll('.advh-send').forEach(b => b.addEventListener('click', () => {
-      const i = +b.closest('.advh-npc').dataset.i;
-      const sb = (prep.statblocks || [])[i];
-      if(sb && typeof window.sendPrepNpcToTracker === 'function' && window.sendPrepNpcToTracker(sb, prepSys)) {
-        b.textContent = '✓ Added'; b.disabled = true;
-        setTimeout(() => { b.textContent = '→ Combat'; b.disabled = false; }, 1400);
-      }
-    }));
+    // NPCs: mount the read-only combat card, banner toggles the full card.
+    hub.querySelectorAll('.advh-npc').forEach(slot => {
+      mountNpcCard(slot);
+      const band = slot.querySelector('.cc-band');
+      if(band) band.addEventListener('click', e => { if(e.target.closest('.advh-send')) return; slot.classList.toggle('advh-collapsed'); });
+      const send = slot.querySelector('.advh-send');
+      if(send) send.addEventListener('click', e => {
+        e.stopPropagation();
+        const i = +slot.dataset.i; const sb = (prep.statblocks || [])[i];
+        if(sb && typeof window.sendPrepNpcToTracker === 'function' && window.sendPrepNpcToTracker(sb, prepSys)) {
+          send.innerHTML = '✓ Added'; send.disabled = true;
+          setTimeout(() => { send.innerHTML = '&rarr; Combat'; send.disabled = false; }, 1400);
+        }
+      });
+    });
     // Roll a table row → show inline.
     hub.querySelectorAll('.advh-roll').forEach(b => b.addEventListener('click', () => {
       const box = b.closest('.advh-table'); const i = +box.dataset.i; const t = tables()[i];
@@ -5664,9 +5726,9 @@ function wireSessionPrepLoader(root) {
       const res = box.querySelector('.advh-result');
       if(res){ res.style.display = 'block'; res.innerHTML = '<span class="advh-troll">' + advEsc(String(row.roll || row.range || (pick + 1))) + '</span> ' + advText(row.result || ''); }
     }));
-    // Send a map image to the Maps station.
+    // Send a map image to the Maps station (opens as a new Maps tab).
     hub.querySelectorAll('.advh-map-send').forEach(b => b.addEventListener('click', () => {
-      const i = +b.closest('.advh-map').dataset.i; const mp = (prep.maps || [])[i];
+      const i = +b.closest('.advh-map').dataset.i; const mp = maps()[i];
       if(mp && mp.src && mp.src !== '__has_map__'){
         try {
           const node = (typeof ensureToolWindow === 'function') ? ensureToolWindow('maps') : null;
@@ -6638,6 +6700,10 @@ function init_trackers(root) {
     render();
     return item;
   };
+
+  // Expose the card renderer so the Adventure Hub can show a prepped NPC using
+  // the exact same combat-card visual (read-only — the hub strips the inputs).
+  window.buildNpcCard = buildNpcCard;
 
   root._getState = () => ({ round, items });
   root._setState = (st) => {
