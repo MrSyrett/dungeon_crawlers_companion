@@ -6136,16 +6136,21 @@ function init_trackers(root) {
     // MMRPG: the tracker card already shows Health (the HP track) and Rank (the
     // tag), so drop those two from the Stats chips to avoid listing them twice.
     // Traits/tags/powers move from text lines to clickable chips (detail popovers).
-    let stats = sum.stats, lines = sum.lines, chips = null;
+    let stats = sum.stats, lines = sum.lines, chips = null, tag = sum.tag || '';
     if(src === 'mmrpg') {
       stats = stats.filter(st => st.label !== 'Health' && st.label !== 'Rank');
       lines = lines.filter(l => !l.detail);
       chips = sum.mmrpgChips || null;
     }
+    // D&D: put the creature type + CR in the header type line (a compact stat-block
+    // "type line"), so they're not repeated in the Traits block below.
+    if(src === 'dnd') {
+      tag = [m.type || sum.tag, (m.cr != null && m.cr !== '') ? 'CR ' + m.cr : ''].filter(Boolean).join(' · ');
+    }
     return {
       id: nextId++, type: 'npc',
       name: m.name || 'Monster',
-      tag: sum.tag || '', hpMode: hpMode,
+      tag: tag, hpMode: hpMode,
       hpCurrent: sum.hp, hpMax: sum.hp, wound: 'none',
       statuses: [], statsOpen: true, traitsOpen: false,
       gmon: { src: src, stats: stats, lines: lines, notes: sum.notes, meta: sum.meta || [], page: m.page || '', chips: chips }
@@ -6252,7 +6257,9 @@ function init_trackers(root) {
       sub: ['LV ' + mo.level, mo.size].filter(Boolean).join(' · '),
       def: mo.evade ? { l: 'EV', v: mo.evade } : (mo.dr ? { l: 'DR', v: mo.dr } : null),
       tone: tier ? tier.tone : 'var(--red)', badge: tier ? tier.label : null,
-      meta: ccMeta([['DR', mo.dr], ['Surprise', mo.surprise], ['Move', mo.move], ['Tags', (mo.tags || []).join(', ')]]),
+      // DR is shown in the def badge when there's no Evade, so only repeat it on the
+      // meta line when Evade is what's occupying the badge (avoids DR in both places).
+      meta: ccMeta([['DR', mo.evade ? mo.dr : ''], ['Surprise', mo.surprise], ['Move', mo.move], ['Tags', (mo.tags || []).join(', ')]]),
       abils: ccAbils(abils), atks: ccAtks(atks), traits: ccTraits(mo.notes)
     };
   }
@@ -9081,7 +9088,9 @@ function xsMonSummary(src, m) {
     (m.bonusActions || []).forEach(a => out.lines.push({ label: 'Bonus — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
     (m.reactions || []).forEach(a => out.lines.push({ label: 'Reaction — ' + (a.name || ''), text: a.description || '' }));
     (m.legendaryActions || []).forEach(a => out.lines.push({ label: 'Legendary — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
-    out.notes.push([m.size, m.type, m.alignment].filter(Boolean).join(' · ') + (m.cr != null && m.cr !== '' ? ' · CR ' + m.cr : '') + (m.senses ? ' · ' + m.senses : ''));
+    // Creature type and CR live in the header type line (see xsMonsterItem), so keep only
+    // size, alignment and senses here — no duplicate type/CR in the Traits block.
+    { const nt = [m.size, m.alignment, m.senses].filter(Boolean).join(' · '); if(nt) out.notes.push(nt); }
     out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : 10;
   } else if(src === 'd62e') {
     // D6 System: attributes stored as pips (12 = 4D). No hit points — a wound
@@ -9185,8 +9194,10 @@ const PREP_SB_FIELDS = {
   ICRPG:{ stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['def','DEF'], meta:[['hearts','Hearts']], hp:'hp' },
   // MMRPG: Rank lives in the type line (header), so it's left off the meta line to avoid showing it twice.
   MMRPG:{ stats:[['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']], meta:[['focus','Focus']], hp:'health' },
-  JLU:  { stats:[['pot','POT'],['acc','ACC'],['agi','AGI'],['res','RES'],['spi','SPI'],['mnd','MND']], def:['defense','DEF'], meta:[['dr','DR'],['resolve','Resolve']], hp:'resolve' },
-  GB:   { stats:[['brains','Brains'],['muscles','Muscles'],['moves','Moves'],['cool','Cool']], meta:[['power','Power'],['ectopresence','Ecto']], hp:'ectopresence' },
+  // Resolve is the HP track, so it's left off the meta line (would just repeat the HP number).
+  JLU:  { stats:[['pot','POT'],['acc','ACC'],['agi','AGI'],['res','RES'],['spi','SPI'],['mnd','MND']], def:['defense','DEF'], meta:[['dr','DR']], hp:'resolve' },
+  // Ecto is the HP track, so it's left off the meta line (would just repeat the HP number).
+  GB:   { stats:[['brains','Brains'],['muscles','Muscles'],['moves','Moves'],['cool','Cool']], meta:[['power','Power']], hp:'ectopresence' },
   KOB:  { stats:[['brains','Brains'],['brawn','Brawn'],['fight','Fight'],['flight','Flight'],['charm','Charm'],['grit','Grit']], meta:[['age','Age'],['at','AT'],['fear','Fear']], hp:null },
   CO:   { stats:[], meta:[['stakes','Stakes'],['harm','Harm'],['aspect','Aspect']], hp:null },
   YZE:  { stats:[['str','STR'],['agi','AGI'],['wits','WITS'],['emp','EMP']], def:['armor','Armor'], lines:[['skills','Skills']], hp:'health' },
@@ -9217,7 +9228,9 @@ function prepStatblockToItem(sb, sys, id) {
     if(c > 0 && c < 32) lines.push({ label: a.slice(0, c), text: a.slice(c + 1).trim(), roll: md ? md[1].replace(/\s+/g, '') : '' });
     else lines.push({ label: 'Ability', text: a, roll: md ? md[1].replace(/\s+/g, '') : '' });
   });
-  const notes = [sb.type, sb.flavor, sb.notes].map(s => String(s || '').trim()).filter(Boolean);
+  // sb.type is already shown as the card's header type line (tag), so it's left out of
+  // the notes/Traits block to avoid repeating the type line there.
+  const notes = [sb.flavor, sb.notes].map(s => String(s || '').trim()).filter(Boolean);
   const hp = prepStatblockHp(sb, cfg);
   const roleTone = sb.sbtype === 'boss' ? 'var(--boss, #7b5cff)' : sb.sbtype === 'npc' ? 'var(--gold)' : 'var(--red)';
   return {
