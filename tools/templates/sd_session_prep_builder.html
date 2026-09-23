@@ -98,7 +98,10 @@
   .section-divider.gold::after { background: color-mix(in srgb, var(--ui-highlight) 34%, transparent); }
   .entity-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
   .entity-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 8px; padding: 8px; }
-  .entity-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .entity-card.dragging { opacity: 0.55; box-shadow: 0 6px 18px rgba(0,0,0,0.45); cursor: grabbing; }
+  .entity-list.drag-active .entity-card { transition: transform 0.12s ease; }
+  .entity-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: grab; touch-action: none; }
+  .entity-card-header:active { cursor: grabbing; }
   .entity-name-input { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; background: none; border: none; border-bottom: 1px solid var(--ui-border); color: var(--ui-text); padding: 2px 0; width: 180px; outline: none; }
   .entity-name-input:focus { border-bottom-color: var(--ui-accent); }
   .btn-move { background:none;border:none;color:var(--ui-muted);cursor:pointer;font-size:11px;line-height:1;padding:2px 2px;border-radius:2px;width:18px;text-align:center; }
@@ -177,12 +180,6 @@
   .page.dark-mode .columns { color: #d0ccc4; }
   .page.dark-mode .sl.gold { color: #d4a836; border-bottom-color: #d4a836; }
   .page.dark-mode .rt-block .sl .rt-die { color: #9a968e; }
-  /* Random encounter roll table + flowchart arrows were staying black on the
-     dark page. These beat the inline colors set when the table is rendered. */
-  .page.dark-mode .randenc-table td { color: #d0ccc4 !important; }
-  .page.dark-mode .randenc-text { color: #d0ccc4 !important; }
-  .page.dark-mode .randenc-num { color: #6ec46e !important; }
-  .page.dark-mode .randenc-table tr { border-bottom-color: #3a3a3e !important; }
   .page.dark-mode .flow-arrow { color: #F7941D; }
 
 
@@ -480,40 +477,6 @@ body.flow-mode .page + .page {
         <textarea id="f-overview" placeholder="Brief summary of the adventure..." oninput="autosave()"></textarea>
       </div>
       <button class="btn-add" style="width:100%;border-color:#e8c84a;color:#e8c84a;margin-top:4px;" onclick="randOverview()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random</button>
-      <div class="section-divider" style="border-left-color:#1a7a1a;">Random Encounters</div>
-      <div style="display:flex;gap:6px;margin-bottom:6px;">
-        <select id="randenc-type" style="flex:1;background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="random_all">Random (All)</option>
-          <optgroup label="── Events ──">
-            <option value="happens">Something Happens!</option>
-            <option value="trap">Trap</option>
-            <option value="hazard">Hazard</option>
-          </optgroup>
-          <optgroup label="── Biomes ──">
-            <option value="Arctic">Arctic</option>
-            <option value="Cave">Cave</option>
-            <option value="Deep Tunnels">Deep Tunnels</option>
-            <option value="Desert">Desert</option>
-            <option value="Forest">Forest</option>
-            <option value="Grassland">Grassland</option>
-            <option value="Jungle">Jungle</option>
-            <option value="Mountain">Mountain</option>
-            <option value="Ocean">Ocean</option>
-            <option value="River & Coast">River & Coast</option>
-            <option value="Ruins">Ruins</option>
-            <option value="Swamp">Swamp</option>
-          </optgroup>
-        </select>
-        <select id="randenc-count" style="width:60px;background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="1">×1</option>
-          <option value="4" selected>×4</option>
-          <option value="6">×6</option>
-          <option value="8">×8</option>
-          <option value="10">×10</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="addRandEnc()">+ Add Entry</button><button class="btn-add" style="flex:1;border-color:#e8c84a;color:#e8c84a;" onclick="randRandEncBatch()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random</button></div>
-      <div id="randenc-list" class="entity-list" style="margin-top:8px;"></div>
       <div class="section-divider gold">Secrets & Clues</div>
       <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="addClue()">+ Add Clue</button><button class="btn-add" style="flex:1;border-color:#e8c84a;color:#e8c84a;" onclick="randClue()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random</button></div>
       <div id="clues-list" class="entity-list" style="margin-top:8px;"></div>
@@ -758,7 +721,7 @@ const DEFAULT_STATE = {
   darkMode:false,
   title:'', subtitle:'', floor:'', session:'', players:'', duration:'',
   overview:'', mappath:'', maps:[],
-  randenc:[], clues:[], rewards:[], strongopen:[], locations:[], statblocks:[], notes:'', rolltables:[]
+  clues:[], rewards:[], strongopen:[], locations:[], statblocks:[], notes:'', rolltables:[]
 };
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 // Multi-chapter: a doc holds an ordered list of chapters, each a full prep
@@ -1293,10 +1256,6 @@ function readFields() {
   state.players=v('f-players'); state.duration=v('f-duration');
   state.overview=v('f-overview');
   state.maps = collectMaps();
-  state.randenc=[...document.querySelectorAll('#randenc-list .entity-card')].map(c=>({
-    header:c.querySelector('.randenc-hdr-input')?.value.trim()||'',
-    text:c.querySelector('.randenc-text-input')?.value.trim()||''
-  })).filter(e=>e.header||e.text);
   state.clues=[...document.querySelectorAll('#clues-list .entity-card')].map(c=>({
     header:c.querySelector('.clue-hdr-input')?.value.trim()||'',
     text:c.querySelector('.clue-text-input')?.value.trim()||''
@@ -1362,8 +1321,6 @@ function buildSidebarFromState() {
   // Rebuild maps list
   const _el_maps_list=document.getElementById('maps-list'); if(_el_maps_list) _el_maps_list.innerHTML='';
   (state.maps||[]).forEach(m=>addMap(m));
-  const _el_randenc_list=document.getElementById('randenc-list'); if(_el_randenc_list) _el_randenc_list.innerHTML='';
-  (state.randenc||[]).forEach(e=>addRandEnc(e));
   const _el_clues_list=document.getElementById('clues-list'); if(_el_clues_list) _el_clues_list.innerHTML='';
   state.clues.forEach(c=>addClue(c));
   const _el_rewards_list=document.getElementById('rewards-list'); if(_el_rewards_list) _el_rewards_list.innerHTML='';
@@ -1379,36 +1336,6 @@ function buildSidebarFromState() {
   (state.rolltables||[]).forEach(t=>addRollTable(t));
 }
 
-// ── Random Encounters roll table ──────────────────────────────────────────
-function addRandEnc(data={}) {
-  const list=document.getElementById('randenc-list');
-  if(!list) return;
-  const div=document.createElement('div'); div.className='entity-card';
-  div.innerHTML=`
-    <div class="entity-card-header">
-      <span class="field-label gold" style="margin:0">Entry</span>
-      <div style="display:flex;align-items:center;gap:0;flex-shrink:0;"><button class="btn-move" onclick="moveCard(this,-1)" title="Move up">↑</button><button class="btn-move" onclick="moveCard(this,1)" title="Move down">↓</button><button class="btn-remove" onclick="this.closest('.entity-card').remove();autosave()">✕</button></div>
-    </div>
-    <div class="field-group">
-      <label class="field-label gold">Header</label>
-      <input type="text" class="randenc-hdr-input" placeholder="Encounter type..." value="${escA(data.header||'')}" oninput="autosave()">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Detail</label>
-      <textarea class="randenc-text-input short" placeholder="Encounter detail..." oninput="autosave()">${escH(data.text||'')}</textarea>
-    </div>`;
-  list.appendChild(div);
-}
-
-function randRandEncBatch() {
-  const type  = document.getElementById('randenc-type')?.value || 'random_all';
-  const count = parseInt(document.getElementById('randenc-count')?.value) || 4;
-  for(let i=0;i<count;i++){
-    const e = _spbGenEncEntry(type);
-    addRandEnc({ header: '', text: e.text });
-  }
-  autosave();
-}
 
 function addRollTable(data={}) {
   const list=document.getElementById('rolltables-list');
@@ -2228,23 +2155,6 @@ function renderPreview() {
     // Overview
     sections.push('<div class="p-section"><div class="sl">Overview</div><p class="p-text">'+fmtText(state.overview)+'</p></div>');
 
-    // Random Encounters roll table
-    if((state.randenc||[]).length){
-      let h='<div class="p-section"><div class="sl" style="color:#f8f8f6;background:#0a0a0a;padding:3px 8px;">Random Encounters</div>';
-      h+='<table class="randenc-table" style="width:100%;border-collapse:collapse;font-size:9px;">';
-      (state.randenc||[]).forEach((e,i)=>{
-        h+='<tr style="border-bottom:1px solid var(--rule);">'
-          +'<td class="randenc-num" style="width:22px;padding:3px 4px;font-family:Montserrat,sans-serif;font-weight:900;text-align:center;color:#1a7a1a;vertical-align:top;">'+(i+1)+'</td>'
-          +'<td style="padding:3px 4px;">'
-          +(e.header?'<div class="clue-hdr">'+escH(e.header)+'</div>':'')
-          +(e.text?'<div class="randenc-text" style="font-size:9px;line-height:1.5;color:var(--ink);">'+fmtText(e.text)+'</div>':'')
-          +'</td>'
-          +'</tr>';
-      });
-      h+='</table></div>';
-      sections.push(h);
-    }
-
     // Secrets & Clues
     if((state.clues||[]).length){
       let h='<div class="p-section"><div class="sl" style="color:#f8f8f6;background:#0a0a0a;padding:3px 8px;">Secrets &amp; Clues</div>';
@@ -2606,7 +2516,7 @@ function importHTML(input) {
       }
       const norm = (ch) => {
         const s = {...DEFAULT_STATE, ...ch};
-        ['maps','clues','rewards','hooks','randenc','strongopen','locations','statblocks','rolltables'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
+        ['maps','clues','rewards','hooks','strongopen','locations','statblocks','rolltables'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
         return s;
       };
       chapters = incoming.map(norm);
@@ -2854,6 +2764,42 @@ function clearAll() {
   _lists.forEach(function(id){ const el=document.getElementById(id); if(el) el.innerHTML=''; });
   saveState();buildSidebarFromState();renderPreview();
 }
+
+// ── Drag-to-reorder entity cards within their list ───────────────────────────
+// Delegated pointer drag: press-and-drag any card (by a non-field area — the
+// header shows a grab cursor) to reorder it within its own .entity-list. Works
+// on mouse and touch, needs no per-card markup, and saves the new order.
+(function(){
+  let dragEl=null, list=null, startY=0, moved=false, pid=null;
+  function isField(el){ return el.closest('input,textarea,select,button,a,[contenteditable="true"]'); }
+  function cards(){ return [...list.children].filter(c => c.classList && c.classList.contains('entity-card') && c!==dragEl); }
+  function onDown(e){
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    const card = e.target.closest && e.target.closest('.entity-card');
+    if(!card) return;
+    const lst = card.parentElement;
+    if(!lst || !lst.classList.contains('entity-list')) return;
+    if(isField(e.target)) return;                 // let inputs/buttons/labels work
+    dragEl=card; list=lst; startY=e.clientY; moved=false; pid=e.pointerId;
+    window.addEventListener('pointermove', onMove, {passive:false});
+    window.addEventListener('pointerup', onUp, {once:true});
+    window.addEventListener('pointercancel', onUp, {once:true});
+  }
+  function onMove(e){
+    if(!dragEl) return;
+    if(!moved){ if(Math.abs(e.clientY-startY) < 5) return; moved=true; dragEl.classList.add('dragging'); list.classList.add('drag-active'); try{ dragEl.setPointerCapture(pid); }catch(_){} }
+    e.preventDefault();
+    let placed=false;
+    for(const c of cards()){ const r=c.getBoundingClientRect(); if(e.clientY < r.top + r.height/2){ list.insertBefore(dragEl, c); placed=true; break; } }
+    if(!placed) list.appendChild(dragEl);
+  }
+  function onUp(){
+    window.removeEventListener('pointermove', onMove);
+    if(dragEl && moved){ dragEl.classList.remove('dragging'); if(list) list.classList.remove('drag-active'); try{ typeof autosave==='function' && autosave(); }catch(_){} }
+    dragEl=null; list=null; moved=false; pid=null;
+  }
+  window.addEventListener('pointerdown', onDown);
+})();
 
 loadState();buildSidebarFromState();renderChapterTabs();applyFlowMode();renderPreview();applyDarkModeInit();
 // Init pull-tab position

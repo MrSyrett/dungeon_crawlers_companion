@@ -174,6 +174,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cond-chip:hover{border-color:var(--dnd);}
 .cond-chip.on{background:var(--dnd);color:#fff;border-color:var(--dnd-dk);}
 .cond-chip .ci{opacity:.6;margin-left:4px;font-size:9px;}
+.cond-add,.def-add{border-style:dashed !important;background:transparent !important;color:var(--dnd) !important;}
+.cond-add:hover,.def-add:hover{background:var(--box) !important;}
+.add-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:60vh;}
+.add-grid .m-hint{flex:0 0 100%;}
 .sc-defenses{}
 .def-chip{border:1px solid var(--rule);border-radius:14px;background:var(--box);padding:4px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);cursor:pointer;user-select:none;text-transform:capitalize;}
 .def-chip:hover{border-color:var(--dnd);}
@@ -675,10 +679,6 @@ body.dark .tabs-bar{background:#1a1a1f;}
             <div class="abil-list" id="abil-list"></div>
             <button type="button" id="insp-btn" class="insp-btn" onclick="this.classList.toggle('on');scheduleAutosave()" title="Inspiration — tap to toggle">Inspiration</button>
           </div>
-          <div class="sc-prof">
-            <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
-            <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
-          </div>
         </div>
         <div class="skills-col">
           <div class="sc-skills">
@@ -804,6 +804,8 @@ body.dark .tabs-bar{background:#1a1a1f;}
         <div class="add-row">
           <select class="pick-sel" id="feat-pick" onchange="if(this.value){addFeatByName(this.value);this.value='';}"><option value="">Add a Feat…</option></select>
         </div>
+        <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
+        <div class="blk" style="border-bottom:none;"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
       </div>
 
       <!-- EQUIPMENT TAB -->
@@ -940,6 +942,14 @@ body.dark .tabs-bar{background:#1a1a1f;}
   <div class="modal">
     <div class="modal-hd"><div class="ttl" id="desc-title">—</div><button class="x" onclick="closeDesc()">&#10005;</button></div>
     <div class="modal-bd desc-modal-body" id="desc-body"></div>
+  </div>
+</div>
+
+<!-- ADD CONDITION / DAMAGE DEFENSE PICKER -->
+<div id="add-overlay" class="ov" onclick="if(event.target===this)closeAddPicker()">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hd"><div class="ttl" id="add-title">Add</div><button class="x" onclick="closeAddPicker()">&#10005;</button></div>
+    <div class="modal-bd"><div class="cond-wrap add-grid" id="add-body" style="border-top:none;padding:0;"></div></div>
   </div>
 </div>
 
@@ -2790,14 +2800,23 @@ const NIMBLE_CONDITIONS = [
   { name:'Dying', description:'Nimble 5e: at 0 HP you\'re Dying, not Unconscious — you still get 1 Action on your turn. Roll death saves as your table uses them; being healed above 0 HP ends it.' },
   { name:'Dazed', description:'Nimble 5e: a Dazed creature has 1 fewer Action next turn. It stacks — each stack strips more agency (slow, then incapacitate); a monster fully stacked is out of the fight. Clears one stack at the end of the turn.' },
 ];
+// The full condition list (minus Exhaustion, which has its own tracker),
+// used by the add-picker. Nimble mode adds its two extra conditions.
+function availableConditions(){
+  let conds = D.conditions().filter(c => norm(c.name) !== 'exhaustion');
+  if(nimbleOn()){ const have = new Set(conds.map(c => norm(c.name))); conds = NIMBLE_CONDITIONS.filter(c => !have.has(norm(c.name))).concat(conds); }
+  return conds;
+}
+function condDesc(name){ const c = availableConditions().find(x => norm(x.name) === norm(name)); return c ? c.description : ''; }
+// Only the conditions the character actually has are shown; a "+ Add" chip opens
+// the picker. Exhaustion keeps its own always-visible pip tracker above.
 function renderConditions(){
   const box = $('conditions-list'); if(!box) return;
-  let conds = D.conditions().filter(c => norm(c.name) !== 'exhaustion');   // exhaustion has its own 6-level pip tracker
-  if(nimbleOn()){ const have = new Set(conds.map(c => norm(c.name))); conds = NIMBLE_CONDITIONS.filter(c => !have.has(norm(c.name))).concat(conds); }
-  box.innerHTML = conds.map(c => {
-    const on = activeConditions.some(x => norm(x) === norm(c.name));
-    return '<span class="cond-chip' + (on ? ' on' : '') + '" title="' + esc(c.description) + '" onclick="toggleCondition(\'' + esc(c.name).replace(/'/g,"\\'") + '\')" oncontextmenu="condInfo(\'' + esc(c.name).replace(/'/g,"\\'") + '\');return false;">' + esc(c.name) + '</span>';
-  }).join('');
+  const esc2 = s => esc(s).replace(/'/g,"\\'");
+  const chips = activeConditions.map(name =>
+    '<span class="cond-chip on" title="' + esc(condDesc(name)) + '" onclick="toggleCondition(\'' + esc2(name) + '\')" oncontextmenu="condInfo(\'' + esc2(name) + '\');return false;">' + esc(name) + '</span>'
+  ).join('');
+  box.innerHTML = chips + '<span class="cond-chip cond-add" title="Add a condition" onclick="openCondPicker()">+ Add</span>';
   renderExhaustion();
 }
 function toggleCondition(name){
@@ -2815,11 +2834,34 @@ const DEF_MARK = { resist: '½', immune: '0', vuln: '×2' };
 const DEF_NEXT = { '': 'resist', resist: 'immune', immune: 'vuln', vuln: '' };
 function fillDamageTypes(){ const sel = $('f-dmg-type'); if(!sel || sel.options.length) return;
   sel.insertAdjacentHTML('beforeend', '<option value="">Damage type…</option>' + DAMAGE_TYPES.map(t => '<option value="' + t + '">' + t.charAt(0).toUpperCase() + t.slice(1) + '</option>').join('')); }
+// Only the damage types the character has a defense for are shown; tapping a chip
+// cycles resistance › immunity › vulnerability › off, and a "+ Add" chip opens the
+// picker to add a new one.
 function renderDefenses(){ const box = $('defenses-list'); if(!box) return;
-  box.innerHTML = DAMAGE_TYPES.map(t => { const st = defenses[t] || ''; const mk = st ? '<span class="dm">' + DEF_MARK[st] + '</span>' : '';
-    return '<span class="def-chip' + (st ? ' ' + st : '') + '" title="' + t + ' — tap to cycle resistance › immunity › vulnerability" onclick="cycleDefense(\'' + t + '\')">' + t + mk + '</span>'; }).join(''); }
+  const chips = Object.keys(defenses).map(t => { const st = defenses[t] || ''; const mk = st ? '<span class="dm">' + DEF_MARK[st] + '</span>' : '';
+    return '<span class="def-chip' + (st ? ' ' + st : '') + '" title="' + t + ' — tap to cycle resistance › immunity › vulnerability › remove" onclick="cycleDefense(\'' + t + '\')">' + t + mk + '</span>'; }).join('');
+  box.innerHTML = chips + '<span class="def-chip def-add" title="Add a damage defense" onclick="openDefPicker()">+ Add</span>'; }
 function cycleDefense(t){ const next = DEF_NEXT[defenses[t] || '']; if(next) defenses[t] = next; else delete defenses[t];
   renderDefenses(); scheduleAutosave(); }
+// ── Add-picker modal (shared by Conditions and Damage Defenses) ──────────────
+let _addMode = null;
+function openCondPicker(){ _addMode = 'cond'; const t = $('add-title'); if(t) t.textContent = 'Add Condition'; renderAddPicker(); const ov = $('add-overlay'); if(ov) ov.classList.add('open'); }
+function openDefPicker(){ _addMode = 'def'; const t = $('add-title'); if(t) t.textContent = 'Add Damage Defense'; renderAddPicker(); const ov = $('add-overlay'); if(ov) ov.classList.add('open'); }
+function closeAddPicker(){ const ov = $('add-overlay'); if(ov) ov.classList.remove('open'); }
+function renderAddPicker(){
+  const box = $('add-body'); if(!box) return;
+  if(_addMode === 'cond'){
+    box.innerHTML = '<p class="m-hint" style="margin:0 0 8px;">Tap to add or remove. Right-click a condition on the sheet for its rules.</p>' +
+      availableConditions().map(c => { const on = activeConditions.some(x => norm(x) === norm(c.name));
+        return '<span class="cond-chip' + (on ? ' on' : '') + '" title="' + esc(c.description) + '" onclick="pickCond(\'' + esc(c.name).replace(/'/g,"\\'") + '\')">' + esc(c.name) + '</span>'; }).join('');
+  } else {
+    box.innerHTML = '<p class="m-hint" style="margin:0 0 8px;">Tap to add (starts at resistance). Cycle or remove from the chip on the sheet.</p>' +
+      DAMAGE_TYPES.map(t => { const on = !!defenses[t]; const mk = on ? '<span class="dm">' + DEF_MARK[defenses[t]] + '</span>' : '';
+        return '<span class="def-chip' + (on ? ' ' + defenses[t] : '') + '" onclick="pickDef(\'' + t + '\')">' + t + mk + '</span>'; }).join('');
+  }
+}
+function pickCond(name){ toggleCondition(name); renderAddPicker(); }   // toggleCondition re-renders the sheet + autosaves
+function pickDef(t){ if(defenses[t]) delete defenses[t]; else defenses[t] = 'resist'; renderDefenses(); scheduleAutosave(); renderAddPicker(); }
 // Apply the character's defense for a damage type to a raw amount.
 function applyDefense(amt, type){ const st = type ? defenses[norm(type)] : null;
   if(st === 'resist') return { dmg: Math.floor(amt / 2), note: 'resistant ½ · ' };

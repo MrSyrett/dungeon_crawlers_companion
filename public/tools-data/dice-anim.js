@@ -363,7 +363,7 @@
     // faces of one die group: split on → / so the first is wave 0 and each
     // explosion is the next wave (strip =totals and brackets first).
     function pushChain(sides,part,color){ part=part.replace(/=\s*\d+/g,' ').replace(/[\[\]]/g,' ');
-      var toks=part.split(/→|->|/), w=0;
+      var toks=part.split(/→|->/), w=0;
       toks.forEach(function(t){ var m=t.match(/\d+/); if(m){ push(sides,+m[0],w,color); w++; } }); }
     // 1) Advantage/disadvantage d20 — ALWAYS show both dice (adv[a,b]→k / d20[a,b→k adv] / d20(a,b ▲ k))
     s=s.replace(/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*\d+/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});

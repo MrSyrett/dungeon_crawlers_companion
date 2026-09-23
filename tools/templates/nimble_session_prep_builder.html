@@ -101,7 +101,10 @@ document.addEventListener("DOMContentLoaded", function() {
   .section-divider.gold::after { background: color-mix(in srgb, var(--ui-highlight) 32%, transparent); }
   .entity-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
   .entity-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 8px; padding: 8px; }
-  .entity-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .entity-card.dragging { opacity: 0.55; box-shadow: 0 6px 18px rgba(0,0,0,0.45); cursor: grabbing; }
+  .entity-list.drag-active .entity-card { transition: transform 0.12s ease; }
+  .entity-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: grab; touch-action: none; }
+  .entity-card-header:active { cursor: grabbing; }
   .entity-name-input { font-family: var(--font-display); font-size: 13px; font-weight: 700; text-transform: uppercase; background: none; border: none; border-bottom: 1px solid var(--ui-border); color: var(--ui-text); padding: 2px 0; width: 180px; outline: none; }
   .entity-name-input:focus { border-bottom-color: var(--ui-accent); }
   .btn-remove { background: none; border: none; color: var(--ui-muted); cursor: pointer; font-size: 14px; line-height: 1; padding: 2px 4px; border-radius: 2px; }
@@ -2356,6 +2359,42 @@ function clearAll() {
 
   saveState();buildSidebarFromState();renderPreview();
 }
+
+// ── Drag-to-reorder entity cards within their list ───────────────────────────
+// Delegated pointer drag: press-and-drag any card (by a non-field area — the
+// header shows a grab cursor) to reorder it within its own .entity-list. Works
+// on mouse and touch, needs no per-card markup, and saves the new order.
+(function(){
+  let dragEl=null, list=null, startY=0, moved=false, pid=null;
+  function isField(el){ return el.closest('input,textarea,select,button,a,[contenteditable="true"]'); }
+  function cards(){ return [...list.children].filter(c => c.classList && c.classList.contains('entity-card') && c!==dragEl); }
+  function onDown(e){
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    const card = e.target.closest && e.target.closest('.entity-card');
+    if(!card) return;
+    const lst = card.parentElement;
+    if(!lst || !lst.classList.contains('entity-list')) return;
+    if(isField(e.target)) return;                 // let inputs/buttons/labels work
+    dragEl=card; list=lst; startY=e.clientY; moved=false; pid=e.pointerId;
+    window.addEventListener('pointermove', onMove, {passive:false});
+    window.addEventListener('pointerup', onUp, {once:true});
+    window.addEventListener('pointercancel', onUp, {once:true});
+  }
+  function onMove(e){
+    if(!dragEl) return;
+    if(!moved){ if(Math.abs(e.clientY-startY) < 5) return; moved=true; dragEl.classList.add('dragging'); list.classList.add('drag-active'); try{ dragEl.setPointerCapture(pid); }catch(_){} }
+    e.preventDefault();
+    let placed=false;
+    for(const c of cards()){ const r=c.getBoundingClientRect(); if(e.clientY < r.top + r.height/2){ list.insertBefore(dragEl, c); placed=true; break; } }
+    if(!placed) list.appendChild(dragEl);
+  }
+  function onUp(){
+    window.removeEventListener('pointermove', onMove);
+    if(dragEl && moved){ dragEl.classList.remove('dragging'); if(list) list.classList.remove('drag-active'); try{ typeof autosave==='function' && autosave(); }catch(_){} }
+    dragEl=null; list=null; moved=false; pid=null;
+  }
+  window.addEventListener('pointerdown', onDown);
+})();
 
 loadState();buildSidebarFromState();renderChapterTabs();applyFlowMode();renderPreview();applyDarkModeInit();
 </script>

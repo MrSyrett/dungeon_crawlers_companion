@@ -296,7 +296,7 @@
     let h = '<p class="m-hint">You are automatically proficient in your background skills. Choose your class skills.</p>';
     if (bgSkills.length) h += '<div class="dndb-note">From ' + esc(b.name) + ': <b>' + esc(bgSkills.join(", ")) + '</b></div>';
     if (c) {
-      const from = c.proficiencies && c.proficiencies.skillsFrom ? c.proficiencies.skillsFrom : D.skills().map((s) => s.name);
+      const from = c.proficiencies && c.proficiencies.skillsFrom && c.proficiencies.skillsFrom.length ? c.proficiencies.skillsFrom : D.skills().map((s) => s.name);
       const n = c.proficiencies && c.proficiencies.skillsChoose ? c.proficiencies.skillsChoose : 2;
       h += '<span class="m-lbl">Choose ' + n + ' from ' + esc(c.name) + ' <span id="dndb-sk-count" style="color:#8ad4ff;"></span></span><div class="dndb-grid">';
       from.forEach((s) => { const dis = bgSkills.map((x)=>x.toLowerCase()).includes(s.toLowerCase()); h += '<div class="dndb-card small' + (st.classSkills.includes(s) ? " on" : "") + (dis ? " disabled" : "") + '" data-sk="' + esc(s) + '" data-max="' + n + '"><div class="dc-title">' + esc(s) + (dis ? " ✓bg" : "") + '</div></div>'; });
