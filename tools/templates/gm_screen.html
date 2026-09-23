@@ -777,7 +777,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 /* The list is a size-container, so its column count follows its OWN width — the
    Master station, the Combat centre and the Combat popup all behave the same. */
 .cbt-trackers-col { container-type: inline-size; container-name: cbtcol; }
-.cbt-tracker-list { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; align-content: start; align-items: start; }
+.cbt-tracker-list { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); grid-auto-rows: max-content; gap: 10px; align-content: start; align-items: start; }
 /* Once there's room, cap at 3 roomy columns (never 4); narrower contexts fall back to 1–2. */
 @container cbtcol (min-width: 740px) { .cbt-tracker-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .cbt-tool { position: relative; }
