@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function() {
   .read-aloud p { color: white; font-size: 9px; font-style: italic; line-height: 1.65; }
 
   /* Flavor text on stat blocks also cyan */
-  .sb-flavor { font-size: 8.5px; font-style: italic; color: white; background: #00AEEF; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px; border: none; border-radius: 7px; }
+  .sb-flavor { font-size: 8.5px; font-style: italic; color: white; background: #00AEEF; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px 6px 10px; border: none; border-left: 4px solid #0082B3; border-radius: 7px; }
   .sb-npc-notes { font-size: 8.5px; color: var(--ink); line-height: 1.6; }
   .page.dark-mode .sb-npc-notes { color: #b0aca4; }
 
@@ -648,8 +648,8 @@ body.flow-mode .page + .page {
   </div>
   <div class="save-indicator" id="save-indicator">All changes saved</div>
   <div class="sidebar-footer" style="display:flex; flex-wrap:nowrap; gap:6px;">
-    <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export</button>
     <label for="f-import" class="btn-secondary" style="flex:1; text-align:center; cursor:pointer; padding:8px; font-family:var(--font-display); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Import</label>
+    <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export</button>
     <button class="btn-secondary" onclick="savePDF()" id="pdf-btn" style="flex:1;">PDF</button>
     <input type="file" id="f-import" accept=".html" style="display:none" onchange="importHTML(this)">
   </div>
@@ -1730,9 +1730,8 @@ const SB_CONFIG = {
   rows: [
     [{ key:'pot', label:'POT' }, { key:'acc', label:'ACC' }, { key:'agi', label:'AGI' }, { key:'res', label:'RES' }, { key:'spi', label:'SPI' }, { key:'mnd', label:'MND' }],
     [{ key:'resolve', label:'RESOLVE' }, { key:'defense', label:'DEFENSE' }, { key:'dr', label:'DR' }],
-    [{ key:'powers', label:'POWERS', ph:'Super Strength 1 · Flight 1' }],
   ],
-  abilitiesLabel: 'Attacks & Abilities', abilitiesPlaceholder: 'One per line — Attack: name +bonus, XdY+Z (type) · Ability: …',
+  abilitiesLabel: 'Attacks, Powers & Abilities', abilitiesPlaceholder: 'One per line — Attack: name +bonus, XdY+Z (type) · Power: … · Ability: …',
   mobs: { placeholder: 'Search the JLU Bestiary (minions, threats & villains)…', pool: () => (typeof JLU_BESTIARY !== 'undefined' && Array.isArray(JLU_BESTIARY)) ? JLU_BESTIARY : [], toCard: m => {
     const A = m.attributes || {};
     const role = String(m.role || '');
@@ -1743,16 +1742,22 @@ const SB_CONFIG = {
     flavor: [m.realName && m.realName !== m.name ? m.realName : '', m.origin || ''].filter(Boolean).join(' · '),
     pot: _jlSgn(A.potency), acc: _jlSgn(A.accuracy), agi: _jlSgn(A.agility), res: _jlSgn(A.resistance), spi: _jlSgn(A.spirit), mnd: _jlSgn(A.mind),
     resolve: String(m.resolve ?? ''), defense: String(m.defense ?? ''), dr: String(m.damageReduction || ''),
-    powers: (m.powers || []).join(' · '),
-    abilities: [
-      ...((m.attacks || []).map(a => 'Attack: ' + a.name + ' ' + _jlSgn(a.bonus) + ', ' + a.damage + (a.type ? ' (' + a.type + ')' : ''))),
-      ...((m.abilities || []).map(a => a.name + ': ' + a.text)),
-      ...((m.archetypeSkills || []).map(a => a.name + ': ' + a.text)),
-      (m.knowledge && m.knowledge.length) ? 'Knowledge: ' + m.knowledge.join(', ') : '',
-      (m.traits && m.traits.length) ? 'Traits: ' + m.traits.join(', ') : '',
-      (m.equipment && m.equipment.length) ? 'Equipment: ' + m.equipment.join(', ') : '',
-      ...((m.limitations || []).map(a => 'Limitation — ' + a.name + ': ' + a.text)),
-    ].filter(Boolean).join('\n'),
+    abilities: (function(){
+      const combat = [
+        ...((m.attacks || []).map(a => 'Attack: ' + a.name + ' ' + _jlSgn(a.bonus) + ', ' + a.damage + (a.type ? ' (' + a.type + ')' : ''))),
+        (m.powers && m.powers.length) ? 'Powers: ' + m.powers.join(' · ') : '',
+        ...((m.abilities || []).map(a => a.name + ': ' + a.text)),
+        ...((m.archetypeSkills || []).map(a => a.name + ': ' + a.text)),
+      ].filter(Boolean);
+      const desc = [
+        (m.knowledge && m.knowledge.length) ? 'Knowledge: ' + m.knowledge.join(', ') : '',
+        (m.traits && m.traits.length) ? 'Traits: ' + m.traits.join(', ') : '',
+        (m.equipment && m.equipment.length) ? 'Equipment: ' + m.equipment.join(', ') : '',
+        ...((m.limitations || []).map(a => 'Limitation — ' + a.name + ': ' + a.text)),
+      ].filter(Boolean);
+      // "---" renders as a thin divider, keeping Powers/attacks apart from the descriptive lines.
+      return [...combat, ...(combat.length && desc.length ? ['---'] : []), ...desc].join('\n');
+    })(),
   }; }, sub: m => 'Tier ' + (m.tier || '') + ' · ' + (m.role || '') },
 };
 const _DCC_SIZE_NAMES = {1:'Tiny',2:'Small',3:'Petite',4:'Medium',5:'Large',6:'Huge',7:'Colossal',8:'Gargantuan'};

@@ -117,7 +117,7 @@ const SB_CONFIGS = {
     sbtype: /boss|villain|monster/i.test(m.type||'') ? 'boss' : /npc|ally|civilian/i.test(m.type||'') ? 'npc' : 'mob',
     name: m.name || '', type: [String(m.type||'Extra').toUpperCase(), m.setting && m.setting !== 'core' ? String(m.setting).toUpperCase() : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     smarts: String(m.smarts ?? ''), moves: String(m.moves ?? ''), style: String(m.style ?? ''), brawn: String(m.brawn ?? ''), power: m.power != null ? String(m.power) : '',
-    health: String(m.health ?? ''), defence: String(m.defence ?? ''), focuses: (m.focuses||[]).join(', '),
+    health: String(m.health ?? ''), defence: String(m.defence ?? ''), focuses: (m.focuses||[]).map(f => typeof f === 'string' ? f : [f && f.name, (f && f.stat) ? '(' + f.stat + ')' : ''].filter(Boolean).join(' ')).filter(Boolean).join(', '),
     abilities: [...(m.attacks||[]).map(a => a.name + ': ' + [a.dice != null ? a.dice + ' dice' : '', a.damage != null ? a.damage + ' damage' : '', a.note || ''].filter(Boolean).join(', ')), ...(m.notes||[])].join('\\n'),
   }), sub: m => String(m.type||'') + (m.setting && m.setting !== 'core' ? ' · ' + m.setting : '') },
 };`,
@@ -134,8 +134,9 @@ const SB_CONFIGS = {
   icrpg: `const SB_CONFIG = {
   typePlaceholder: 'GRUNT // ALFHEIM',
   hp: null,
+  // Tier rides in the type line ("MONSTER // <tier> // <world>"), so no duplicate stat box.
   rows: [
-    [{ key:'tier', label:'TIER' }, { key:'hearts', label:'HEARTS' }, { key:'hp', label:'HP' }, { key:'def', label:'DEF', th:'Defense' }],
+    [{ key:'hearts', label:'HEARTS' }, { key:'hp', label:'HP' }, { key:'def', label:'DEF', th:'Defense' }],
     [{ key:'str', label:'STR', ph:'+0' }, { key:'dex', label:'DEX', ph:'+0' }, { key:'con', label:'CON', ph:'+0' }, { key:'int', label:'INT', ph:'+0' }, { key:'wis', label:'WIS', ph:'+0' }, { key:'cha', label:'CHA', ph:'+0' }],
   ],
   abilitiesLabel: 'Attacks & Abilities', abilitiesPlaceholder: 'One per line — ATK: Claw d6 · Ability: effect',
@@ -150,13 +151,14 @@ const SB_CONFIGS = {
   nimble: `const SB_CONFIG = {
   typePlaceholder: 'MINION // KOBOLDS // SMALL',
   hp: null,
+  // Size rides in the type line ("… // <SIZE>"), so no duplicate stat box.
   rows: [
-    [{ key:'level', label:'LVL', th:'Level' }, { key:'size', label:'SIZE' }, { key:'hp', label:'HP' }, { key:'armor', label:'ARMOR' }, { key:'saves', label:'SAVES' }],
+    [{ key:'level', label:'LVL', th:'Level' }, { key:'hp', label:'HP' }, { key:'armor', label:'ARMOR' }, { key:'saves', label:'SAVES' }],
   ],
   abilitiesLabel: 'Abilities', abilitiesPlaceholder: 'One per line — Name: effect',
   mobs: { placeholder: 'Search the Nimble Bestiary…', pool: () => (typeof NIMBLE_MONSTERS !== 'undefined' && Array.isArray(NIMBLE_MONSTERS)) ? NIMBLE_MONSTERS : [], toCard: m => ({
     sbtype: m.legendary ? 'boss' : 'mob', name: m.name || '',
-    type: [m.legendary ? 'LEGENDARY' : m.minion ? 'MINION' : 'MONSTER', String(m.family||'').toUpperCase(), String(m.size||'').toUpperCase()].filter(Boolean).join(' // '), flavor: '',
+    type: [...new Set([m.legendary ? 'LEGENDARY' : m.minion ? 'MINION' : 'MONSTER', String(m.family||'').toUpperCase(), String(m.size||'').toUpperCase()].filter(Boolean))].join(' // '), flavor: '',
     level: String(m.level ?? ''), size: m.size || '', hp: m.hp != null ? String(m.hp) : (m.minion ? '1' : ''), armor: m.armor || '', saves: m.saves || '',
     abilities: [...(m.abilities||[]).map(a => a.name + ': ' + a.text), m.familyTrait ? 'Family trait: ' + m.familyTrait : ''].filter(Boolean).join('\\n'),
   }), sub: m => (m.family || '') + ' · L' + m.level + (m.legendary ? ' · legendary' : m.minion ? ' · minion' : '') },
@@ -277,9 +279,8 @@ const SB_CONFIG = {
   rows: [
     [{ key:'pot', label:'POT' }, { key:'acc', label:'ACC' }, { key:'agi', label:'AGI' }, { key:'res', label:'RES' }, { key:'spi', label:'SPI' }, { key:'mnd', label:'MND' }],
     [{ key:'resolve', label:'RESOLVE' }, { key:'defense', label:'DEFENSE' }, { key:'dr', label:'DR' }],
-    [{ key:'powers', label:'POWERS', ph:'Super Strength 1 · Flight 1' }],
   ],
-  abilitiesLabel: 'Attacks & Abilities', abilitiesPlaceholder: 'One per line — Attack: name +bonus, XdY+Z (type) · Ability: …',
+  abilitiesLabel: 'Attacks, Powers & Abilities', abilitiesPlaceholder: 'One per line — Attack: name +bonus, XdY+Z (type) · Power: … · Ability: …',
   mobs: { placeholder: 'Search the JLU Bestiary (minions, threats & villains)…', pool: () => (typeof JLU_BESTIARY !== 'undefined' && Array.isArray(JLU_BESTIARY)) ? JLU_BESTIARY : [], toCard: m => {
     const A = m.attributes || {};
     const role = String(m.role || '');
@@ -290,35 +291,42 @@ const SB_CONFIG = {
     flavor: [m.realName && m.realName !== m.name ? m.realName : '', m.origin || ''].filter(Boolean).join(' · '),
     pot: _jlSgn(A.potency), acc: _jlSgn(A.accuracy), agi: _jlSgn(A.agility), res: _jlSgn(A.resistance), spi: _jlSgn(A.spirit), mnd: _jlSgn(A.mind),
     resolve: String(m.resolve ?? ''), defense: String(m.defense ?? ''), dr: String(m.damageReduction || ''),
-    powers: (m.powers || []).join(' · '),
-    abilities: [
-      ...((m.attacks || []).map(a => 'Attack: ' + a.name + ' ' + _jlSgn(a.bonus) + ', ' + a.damage + (a.type ? ' (' + a.type + ')' : ''))),
-      ...((m.abilities || []).map(a => a.name + ': ' + a.text)),
-      ...((m.archetypeSkills || []).map(a => a.name + ': ' + a.text)),
-      (m.knowledge && m.knowledge.length) ? 'Knowledge: ' + m.knowledge.join(', ') : '',
-      (m.traits && m.traits.length) ? 'Traits: ' + m.traits.join(', ') : '',
-      (m.equipment && m.equipment.length) ? 'Equipment: ' + m.equipment.join(', ') : '',
-      ...((m.limitations || []).map(a => 'Limitation — ' + a.name + ': ' + a.text)),
-    ].filter(Boolean).join('\\n'),
+    abilities: (function(){
+      const combat = [
+        ...((m.attacks || []).map(a => 'Attack: ' + a.name + ' ' + _jlSgn(a.bonus) + ', ' + a.damage + (a.type ? ' (' + a.type + ')' : ''))),
+        (m.powers && m.powers.length) ? 'Powers: ' + m.powers.join(' · ') : '',
+        ...((m.abilities || []).map(a => a.name + ': ' + a.text)),
+        ...((m.archetypeSkills || []).map(a => a.name + ': ' + a.text)),
+      ].filter(Boolean);
+      const desc = [
+        (m.knowledge && m.knowledge.length) ? 'Knowledge: ' + m.knowledge.join(', ') : '',
+        (m.traits && m.traits.length) ? 'Traits: ' + m.traits.join(', ') : '',
+        (m.equipment && m.equipment.length) ? 'Equipment: ' + m.equipment.join(', ') : '',
+        ...((m.limitations || []).map(a => 'Limitation — ' + a.name + ': ' + a.text)),
+      ].filter(Boolean);
+      // "---" renders as a thin divider, keeping Powers/attacks apart from the descriptive lines.
+      return [...combat, ...(combat.length && desc.length ? ['---'] : []), ...desc].join('\\n');
+    })(),
   }; }, sub: m => 'Tier ' + (m.tier || '') + ' · ' + (m.role || '') },
 };`,
   gb: `const SB_CONFIG = {
   typePlaceholder: 'SLIMER // Class 5 Free-Roaming Vapor',
   hp: null,
+  // Power rides in the stat grid (it's a rollable die pool), so it's dropped from the type line;
+  // Special Abilities are listed in the freeform section below, not a stat box.
   rows: [
     [{ key:'brains', label:'BRAINS' }, { key:'muscles', label:'MUSCLES' }, { key:'moves', label:'MOVES' }, { key:'cool', label:'COOL' }, { key:'power', label:'POWER' }, { key:'ectopresence', label:'ECTO' }],
-    [{ key:'powers', label:'SPECIAL ABILITIES', ph:'Slime · Terrorize · Possess' }],
   ],
-  abilitiesLabel: 'Talents, Goal & Tags', abilitiesPlaceholder: 'One per line — Talent: name value · Goal: … · Tag: …',
+  abilitiesLabel: 'Special Abilities, Talents & Tags', abilitiesPlaceholder: 'One per line — Special: name · Talent: name value · Goal: … · Tag: …',
   mobs: { placeholder: 'Search the Ghostbusters bestiary (ghosts, monsters & extras)…', pool: () => (typeof GB_BESTIARY !== 'undefined' && Array.isArray(GB_BESTIARY)) ? GB_BESTIARY : [], toCard: m => {
     const p = Number(m.power) || 0;
     return {
     sbtype: p >= 7 ? 'boss' : (p >= 1 ? 'mob' : 'npc'), name: m.name || '',
-    type: [(m.role || ''), (m.power != null ? 'Power ' + m.power : '')].filter(Boolean).join(' // '),
+    type: (m.role || ''),
     flavor: (m.description || '').slice(0, 120),
     brains: String(m.brains ?? ''), muscles: String(m.muscles ?? ''), moves: String(m.moves ?? ''), cool: String(m.cool ?? ''), power: String(m.power ?? ''), ectopresence: String(m.ectopresence ?? ''),
-    powers: (m.powers || []).join(' · '),
     abilities: [
+      (m.powers && m.powers.length) ? 'Special Abilities: ' + (m.powers || []).join(' · ') : '',
       ...((m.talents || []).map(t => 'Talent: ' + t.name + ' ' + t.value)),
       m.goal ? 'Goal: ' + m.goal : '',
       m.tags ? 'Tags: ' + m.tags : '',

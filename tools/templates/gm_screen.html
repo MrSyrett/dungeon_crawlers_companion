@@ -9108,7 +9108,8 @@ function xsMonSummary(src, m) {
     (m.attacks || []).forEach(a => out.lines.push({ label: 'Attack', text: String(a) }));
     (m.abilities || []).forEach(a => out.lines.push({ label: 'Ability', text: String(a) }));
     if(m.desc) out.notes.push(m.desc);
-    out.notes.push([m.tier, m.world && m.world !== 'core' ? m.world : ''].filter(Boolean).join(' · '));
+    // Tier already rides in the tag/type line, so keep only the world here.
+    if(m.world && m.world !== 'core') out.notes.push(String(m.world));
     out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : (m.hearts != null ? m.hearts * 10 : 10);
   } else if(src === 'mmrpg') {
     // Marvel Multiverse RPG (d616): roll 3d6 + ability vs a Target Number. Each
@@ -9178,14 +9179,14 @@ const PREP_SB_FIELDS = {
   // DND: CR belongs in the type line (header), so it's dropped from the meta line to avoid the duplicate.
   DND:  { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['speed','Speed']], hp:'hp' },
   ACE:  { stats:[['smarts','SMA'],['moves','MOV'],['style','STY'],['brawn','BRA'],['power','POW']], def:['defence','DEF'], lines:[['focuses','Focuses']], hp:'health' },
-  NIM:  { stats:[], def:['armor','Armor'], meta:[['level','LV'],['size','Size'],['saves','Saves']], hp:'hp' },
+  NIM:  { stats:[], def:['armor','Armor'], meta:[['level','LV'],['saves','Saves']], hp:'hp' },
   SW:   { stats:[['dex','DEX'],['kno','KNO'],['mec','MEC'],['per','PER'],['str','STR'],['tec','TEC']], def:['armor','Armor'], meta:[['move','Move'],['force','Force']], hp:'health' },
   D62E: { stats:[['agi','AGI'],['bra','BRA'],['kno','KNO'],['per','PER']], meta:[['dodge','Dodge'],['parry','Parry'],['move','Move']], hp:'health' },
-  ICRPG:{ stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['def','DEF'], meta:[['tier','Tier'],['hearts','Hearts']], hp:'hp' },
+  ICRPG:{ stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['def','DEF'], meta:[['hearts','Hearts']], hp:'hp' },
   // MMRPG: Rank lives in the type line (header), so it's left off the meta line to avoid showing it twice.
-  MMRPG:{ stats:[['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']], meta:[['focus','Focus']], lines:[['powers','Powers']], hp:'health' },
-  JLU:  { stats:[['pot','POT'],['acc','ACC'],['agi','AGI'],['res','RES'],['spi','SPI'],['mnd','MND']], def:['defense','DEF'], meta:[['dr','DR'],['resolve','Resolve']], lines:[['powers','Powers']], hp:'resolve' },
-  GB:   { stats:[['brains','Brains'],['muscles','Muscles'],['moves','Moves'],['cool','Cool']], meta:[['power','Power'],['ectopresence','Ecto']], lines:[['powers','Powers']], hp:'ectopresence' },
+  MMRPG:{ stats:[['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']], meta:[['focus','Focus']], hp:'health' },
+  JLU:  { stats:[['pot','POT'],['acc','ACC'],['agi','AGI'],['res','RES'],['spi','SPI'],['mnd','MND']], def:['defense','DEF'], meta:[['dr','DR'],['resolve','Resolve']], hp:'resolve' },
+  GB:   { stats:[['brains','Brains'],['muscles','Muscles'],['moves','Moves'],['cool','Cool']], meta:[['power','Power'],['ectopresence','Ecto']], hp:'ectopresence' },
   KOB:  { stats:[['brains','Brains'],['brawn','Brawn'],['fight','Fight'],['flight','Flight'],['charm','Charm'],['grit','Grit']], meta:[['age','Age'],['at','AT'],['fear','Fear']], hp:null },
   CO:   { stats:[], meta:[['stakes','Stakes'],['harm','Harm'],['aspect','Aspect']], hp:null },
   YZE:  { stats:[['str','STR'],['agi','AGI'],['wits','WITS'],['emp','EMP']], def:['armor','Armor'], lines:[['skills','Skills']], hp:'health' },
@@ -9211,6 +9212,7 @@ function prepStatblockToItem(sb, sys, id) {
   (cfg.lines || []).forEach(([k, l]) => { const v = val(k); if(v !== '') lines.push({ label: l, text: v }); });
   // Freeform "abilities" box → one detail line each (dice runs stay rollable via ccDiceify in the card).
   String(sb.abilities || '').split('\n').map(s => s.trim()).filter(Boolean).forEach(a => {
+    if(/^[-–—]{3,}$/.test(a)) return;   // a "---" divider line is layout-only; skip it on the compact card
     const c = a.indexOf(':'), md = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/i.exec(a);
     if(c > 0 && c < 32) lines.push({ label: a.slice(0, c), text: a.slice(c + 1).trim(), roll: md ? md[1].replace(/\s+/g, '') : '' });
     else lines.push({ label: 'Ability', text: a, roll: md ? md[1].replace(/\s+/g, '') : '' });
