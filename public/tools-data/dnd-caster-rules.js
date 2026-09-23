@@ -13,6 +13,12 @@
   const TABLES = () => window.DND_TABLES || null;
   const classByName = (n) => CLASSES().find((c) => norm(c.name) === norm(n)) || null;
   const isCasterClass = (c) => !!(c && c.spellcasting && c.spellcasting !== "none");
+  // Some classes prepare/learn spells from another class's list — Artificer draws
+  // from the Wizard spell list. Spells in the data are tagged by class in their
+  // `classes` array, so we resolve the picker's class to the list it should read.
+  const SPELL_LIST_ALIAS = { artificer: "wizard" };
+  const spellListName = (className) => SPELL_LIST_ALIAS[norm(className)] || norm(className);
+  const spellInList = (spell, className) => (spell && spell.classes || []).some((n) => norm(n) === spellListName(className));
 
   // ── ASI / feat levels ──────────────────────────────────────────────────
   const ASI_LEVELS = { Fighter: [4,6,8,12,14,16,19], Rogue: [4,8,10,12,16,19] };
@@ -89,7 +95,7 @@
   }
 
   window.DNDCALC = {
-    num, norm, esc, classByName, isCasterClass,
+    num, norm, esc, classByName, isCasterClass, spellListName, spellInList,
     ASI_LEVELS, ASI_DEFAULT, grantsASI, asiLevelsUpTo,
     shortCastTime, spellDmgStr, spellTags, spellCard,
     tableRow, colAt, cantripsAt, preparedAt,

@@ -14,6 +14,10 @@
   const ABIL_NAME = { STR:"Strength", DEX:"Dexterity", CON:"Constitution", INT:"Intelligence", WIS:"Wisdom", CHA:"Charisma" };
   // Shared caster/spell/ASI math (window.DNDCALC, loaded before this script).
   const RULES = () => window.DNDCALC || {};
+  // Match a spell to the class's spell list, honoring aliases (Artificer→Wizard).
+  const _spellInList = (s, className) => RULES().spellInList
+    ? RULES().spellInList(s, className)
+    : (s.classes || []).some((n) => norm(n) === norm(className));
 
   const D = {
     classes: () => window.DND_CLASSES || [], feats: () => window.DND_FEATS || [],
@@ -186,13 +190,13 @@
     let h = '<p class="m-hint">Your ' + esc(lu.targetCls) + ' learns new magic at this level.</p>';
     if(ctx.newCantrips > 0){
       h += '<span class="m-lbl">New cantrips — choose ' + ctx.newCantrips + ' <span style="color:#8ad4ff;">(' + lu.pickedCantrips.length + '/' + ctx.newCantrips + ')</span></span><div class="dndb-grid">';
-      D.spells().filter((s) => s.level===0 && (s.classes||[]).some((n)=>norm(n)===norm(c.name)) && !known.has(norm(s.name))).sort((a,b)=>a.name.localeCompare(b.name))
+      D.spells().filter((s) => s.level===0 && _spellInList(s, c.name) && !known.has(norm(s.name))).sort((a,b)=>a.name.localeCompare(b.name))
         .forEach((s) => h += spellCard(s, "cantrip", ctx.newCantrips));
       h += "</div>";
     }
     if(ctx.newSpells > 0 && ctx.maxSL >= 1){
       h += '<span class="m-lbl">New spells — choose ' + ctx.newSpells + ' (up to level ' + ctx.maxSL + ') <span style="color:#8ad4ff;">(' + lu.pickedSpells.length + '/' + ctx.newSpells + ')</span></span><div class="dndb-grid">';
-      D.spells().filter((s) => s.level>=1 && s.level<=ctx.maxSL && (s.classes||[]).some((n)=>norm(n)===norm(c.name)) && !known.has(norm(s.name))).sort((a,b)=>(a.level-b.level)||a.name.localeCompare(b.name))
+      D.spells().filter((s) => s.level>=1 && s.level<=ctx.maxSL && _spellInList(s, c.name) && !known.has(norm(s.name))).sort((a,b)=>(a.level-b.level)||a.name.localeCompare(b.name))
         .forEach((s) => h += spellCard(s, "spell", ctx.newSpells));
       h += "</div>";
     }

@@ -2624,19 +2624,23 @@ function savePDF() {
   // Force the fixed print layout for the capture (so a phone-width, flow-mode
   // session still yields a correct paginated PDF), then restore the view mode
   // once the canvases are taken.
+  let _pdfFirstErr = null, _pdfFailPages = 0;
   loadExportLibs().then(() => _withFixedLayout(() => {
     // Lossless PNG at 2x was producing 25MB+ files. 1.5x JPEG is visually the
     // same on paper and lands around 1-2MB. JPEG has no alpha, so each page is
     // rasterized onto its own background color (works in light and dark mode).
+    // allowTaint stays FALSE so a cross-origin image (e.g. a map linked by URL
+    // rather than uploaded) can't taint the canvas and make toDataURL throw.
     const shot = (p) => html2canvas(p, {
       scale: 1.5,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       logging: false,
       backgroundColor: getComputedStyle(p).backgroundColor || '#ffffff'
     });
 
-    // Capture every chapter's pages in order into one PDF.
+    // Capture every chapter's pages in order into one PDF. A page that fails to
+    // capture is skipped (its error recorded) so one bad page can't kill the PDF.
     const savedState = state;
     const savedDark = document.getElementById('page-one') && document.getElementById('page-one').classList.contains('dark-mode');
     const canvases=[];
@@ -2647,8 +2651,10 @@ function savePDF() {
       paginatePages();
       document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', !!state.darkMode));
       const pages=[...document.querySelectorAll('.preview-area .page')].filter(p=>p.style.display!=='none');
-      return pages.reduce((chain,p)=>chain.then(()=>shot(p)).then(c=>{ canvases.push(c); }), Promise.resolve())
-        .then(()=>captureChapter(i+1));
+      return pages.reduce((chain,p)=>chain.then(()=>shot(p)).then(
+        c=>{ try{ c.toDataURL('image/jpeg',0.85); canvases.push(c); }catch(e){ if(!_pdfFirstErr)_pdfFirstErr=e; _pdfFailPages++; } },
+        e=>{ if(!_pdfFirstErr)_pdfFirstErr=e; _pdfFailPages++; }
+      ), Promise.resolve()).then(()=>captureChapter(i+1));
     };
 
     return captureChapter(0).then(()=>{
@@ -2656,6 +2662,8 @@ function savePDF() {
       renderPreview();
       paginatePages();
       document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', !!savedDark));
+
+      if(!canvases.length){ throw (_pdfFirstErr || new Error('no pages could be rendered')); }
 
       const {jsPDF}=window.jspdf;
       const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'letter',compress:true});
@@ -2676,8 +2684,11 @@ function savePDF() {
   })).then(()=>{
     btn.textContent='Save PDF';
     btn.disabled=false;
+    if(_pdfFailPages){ alert(_pdfFailPages + ' page(s) could not be rendered and were skipped — this is usually a map added by external link rather than uploaded as a file. The rest of the PDF was saved.'); }
   }).catch(err=>{
-    alert('PDF generation failed: '+err.message);
+    console.error('Save PDF failed:', err);
+    const msg = (err && (err.message || err.name)) || (typeof err === 'string' ? err : 'unknown error — open the browser console for details');
+    alert('PDF generation failed: ' + msg);
     btn.textContent='Save PDF';
     btn.disabled=false;
   });

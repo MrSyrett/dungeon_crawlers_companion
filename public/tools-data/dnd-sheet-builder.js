@@ -100,7 +100,8 @@
   }
   function spellsFor(minL, maxL) {
     const nm = st.cls;
-    return D.spells().filter((s) => s.level >= minL && s.level <= maxL && (s.classes || []).includes(nm))
+    const inList = (window.DNDCALC && window.DNDCALC.spellInList) ? window.DNDCALC.spellInList : (s, c) => (s.classes || []).includes(c);
+    return D.spells().filter((s) => s.level >= minL && s.level <= maxL && inList(s, nm))
       .sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name));
   }
   function fightingStyles() { return D.feats().filter((f) => (f.category || "") === "Fighting Style"); }
