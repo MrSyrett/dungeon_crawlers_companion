@@ -59,20 +59,32 @@ document.addEventListener("DOMContentLoaded", function() {
   .sidebar-header { padding: 16px; border-bottom: 2px solid var(--ui-accent); background: var(--ui-bg); }
   .sidebar-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ui-accent); }
   .sidebar-sub { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--ui-muted); letter-spacing: 0.1em; margin-top: 2px; }
-  /* Chapter tabs — one per chapter of the adventure. */
-  .chapter-tabs { display: flex; flex-wrap: nowrap; align-items: flex-end; padding: 8px 8px 0; background: var(--ui-bg); border-bottom: 1px solid var(--ui-border); overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
-  .chapter-tabs::-webkit-scrollbar { height: 5px; }
-  .chapter-tabs::-webkit-scrollbar-thumb { background: var(--ui-border); border-radius: 3px; }
-  .chapter-tab { display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; margin-right: -16px; padding: 6px 14px 7px 9px; background: var(--ui-panel); color: var(--ui-muted); border: 1px solid var(--ui-border); border-bottom: none; border-radius: 7px 7px 0 0; cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; white-space: nowrap; position: relative; z-index: 1; transition: color .12s, background .12s; }
-  .chapter-tab:hover { color: var(--ui-text); z-index: 4; }
-  .chapter-tab.active { color: var(--ui-accent); border-color: var(--ui-accent); border-bottom-color: var(--ui-panel); background: color-mix(in srgb, var(--ui-accent) 16%, var(--ui-panel)); z-index: 6; }
-  .chapter-tab-name { overflow: hidden; text-overflow: ellipsis; max-width: 34px; }
-  .chapter-tab.active .chapter-tab-name { max-width: 90px; }
-  .chapter-tab-x { flex-shrink: 0; color: var(--ui-muted); font-size: 10px; line-height: 1; border-radius: 3px; opacity: 0; width: 0; overflow: hidden; transition: opacity .12s; }
-  .chapter-tab.active .chapter-tab-x, .chapter-tab:hover .chapter-tab-x { opacity: 1; width: auto; margin-left: 1px; }
-  .chapter-tab-x:hover { color: #e06666; }
-  .chapter-add { flex: 0 0 auto; align-self: center; margin-left: 16px; margin-bottom: 4px; padding: 5px 9px; background: none; border: 1px dashed var(--ui-border); border-radius: 6px; color: var(--ui-muted); font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.03em; cursor: pointer; white-space: nowrap; }
-  .chapter-add:hover { color: var(--ui-accent); border-color: var(--ui-accent); }
+  /* Chapters — a collapsible outline (table of contents) of the adventure. */
+  .chapter-outline { background: var(--ui-bg); border-bottom: 1px solid var(--ui-border); }
+  .co-head { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; user-select: none; }
+  .co-head .caret { color: var(--ui-muted); font-size: 10px; transition: transform .15s; }
+  .chapter-outline.collapsed .co-head .caret { transform: rotate(-90deg); }
+  .co-head .ttl { font-family: var(--font-display); font-weight: 800; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ui-text); }
+  .co-head .cnt { color: var(--ui-muted); font-size: 11px; }
+  .co-add { margin-left: auto; font-family: var(--font-display); font-weight: 800; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ui-accent); background: none; border: 1px dashed var(--ui-border); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
+  .co-add:hover { border-color: var(--ui-accent); }
+  .co-list { max-height: 34vh; overflow-y: auto; scrollbar-width: thin; padding-bottom: 4px; }
+  .chapter-outline.collapsed .co-list { display: none; }
+  .co-row { display: flex; align-items: center; gap: 7px; padding: 6px 12px; cursor: pointer; border-left: 2px solid transparent; }
+  .co-row:hover { background: var(--ui-panel); }
+  .co-row.active { background: color-mix(in srgb, var(--ui-accent) 12%, var(--ui-bg)); border-left-color: var(--ui-accent); }
+  .co-grip { color: var(--ui-muted); cursor: grab; font-size: 12px; flex: 0 0 auto; touch-action: none; }
+  .co-grip:active { cursor: grabbing; }
+  .co-row.dragging { opacity: 0.4; }
+  .co-row.drop-before { box-shadow: inset 0 3px 0 0 var(--ui-accent); }
+  .co-row.drop-after { box-shadow: inset 0 -3px 0 0 var(--ui-accent); }
+  .co-n { font-family: var(--font-display); font-weight: 800; font-size: 10px; color: var(--ui-muted); width: 14px; text-align: center; flex: 0 0 auto; }
+  .co-name { font-family: var(--font-display); font-weight: 700; font-size: 13px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em; }
+  .co-row.active .co-name { color: var(--ui-accent); }
+  .co-x { color: var(--ui-muted); font-size: 11px; opacity: 0; padding: 0 3px; flex: 0 0 auto; }
+  .co-row:hover .co-x { opacity: 0.7; }
+  .co-x:hover { color: #e06666; }
+  .co-name-input { font-family: var(--font-display); font-weight: 700; font-size: 13px; background: var(--ui-bg); border: 1px solid var(--ui-accent); border-radius: 4px; color: var(--ui-text); padding: 1px 5px; flex: 1; outline: none; min-width: 0; }
   .sidebar-tabs { display: flex; border-bottom: 1px solid var(--ui-border); }
   .tab-btn { flex: 1; padding: 8px 2px; background: none; border: none; color: var(--ui-muted); font-family: 'Share Tech Mono', monospace; font-size: 7.5px; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
   .tab-btn.active { color: var(--ui-accent); border-bottom-color: var(--ui-accent); background: color-mix(in srgb, var(--ui-accent) 12%, transparent); }
@@ -115,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function() {
   .btn-remove:hover { color: var(--ui-accent); }
   .btn-add { width: 100%; background: none; border: 1px dashed var(--ui-border); border-radius: 6px; color: var(--ui-muted); font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px; cursor: pointer; transition: all 0.15s; margin-top: 2px; }
   .btn-add:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
-  .location-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-left: 3px solid var(--accent-red); border-radius: 8px; padding: 8px; margin-bottom: 6px; }
+  .location-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-left: 3px solid var(--accent-red); border-radius: 8px; padding: 8px; }
   .sidebar-footer { padding: 10px 12px; border-top: 1px solid var(--ui-border); display: flex; gap: 8px; }
   .btn-primary { flex: 1; background: var(--ui-accent); border: none; color: white; font-family: var(--font-display); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px; border-radius: 6px; cursor: pointer; }
   .btn-primary:hover { background: var(--accent-dark); }
@@ -243,10 +255,6 @@ document.addEventListener("DOMContentLoaded", function() {
   .page.dark-mode .rt-table .rt-roll { color: var(--accent); }
 
   .p-footer { border-top: 2px solid var(--accent); margin-top: 14px; padding-top: 10px; }
-  .flowchart { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 4px; }
-  .flow-node { padding: 4px 7px; border-radius: 2px; text-align: center; flex: 1 1 auto; min-width: 64px; max-width: 100%; }
-  .flow-name { font-family: var(--font-display); font-size: 9px; font-weight: 600; text-transform: uppercase; overflow-wrap: anywhere; }
-  .flow-arrow { color: var(--accent); font-size: 11px; font-weight: 700; }
 
   .map-container { margin-bottom: 14px; }
   .map-container img { width: 100%; height: auto; display: block; border: 2px solid var(--accent); }
@@ -519,7 +527,7 @@ body.flow-mode .page + .page {
     </div>
   </div>
   <!-- Chapters: each tab is a self-contained chapter of this adventure. -->
-  <div class="chapter-tabs" id="chapter-tabs"></div>
+  <div class="chapter-outline" id="chapter-tabs"></div>
   <div class="sidebar-tabs">
     <button class="tab-btn active" onclick="switchTab('basics')">Basics</button>
     <button class="tab-btn" onclick="switchTab('encounters')">Encounters</button>
@@ -571,7 +579,7 @@ body.flow-mode .page + .page {
     <!-- ENCOUNTERS -->
     <div class="tab-panel" id="tab-encounters">
       <div class="section-divider">Encounters & Locations</div>
-      <div id="locations-list"></div>
+      <div id="locations-list" class="entity-list"></div>
       <button class="btn-add" onclick="addLocation()">+ Add Location / Encounter</button>
     </div>
 
@@ -665,7 +673,6 @@ body.flow-mode .page + .page {
         <div id="p1-left" style="flex:1;min-width:0;overflow:hidden;"></div>
         <div id="p1-right" style="flex:1;min-width:0;overflow:hidden;"></div>
       </div>
-      <div class="p-footer" style="flex-shrink:0;"><div class="flowchart" id="p-flowchart"></div></div>
     </div>
     <div class="page-bottom-band"></div>
   </div>
@@ -684,7 +691,6 @@ body.flow-mode .page + .page {
     </div>
     <div class="page-inner">
       <div id="p-locations" style="column-count:2;column-gap:14px;column-fill:auto;flex:1;min-height:0;overflow:hidden;"></div>
-      <div class="p-footer" style="flex-shrink:0;"><div class="flowchart" id="p-flowchart-2"></div></div>
     </div>
     <div class="page-bottom-band"></div>
   </div>
@@ -811,18 +817,53 @@ function syncDocTitle() {
 // A tab per chapter (labelled by its Subtitle, the chapter's name); + Chapter
 // adds a fresh prep instance; each tab loads that chapter into the editor.
 function chapterLabel(ch, i){ return (ch && ch.subtitle && ch.subtitle.trim()) ? ch.subtitle.trim() : ('Chapter ' + (i+1)); }
+let chaptersCollapsed = false;
+// The chapters outline: a collapsible table of contents. Click a row to open
+// that chapter, drag its ⠿ grip to reorder, double-click the name to rename
+// (the name IS the chapter's Subtitle), ✕ to delete, + Add to add one.
 function renderChapterTabs(){
   const bar = document.getElementById('chapter-tabs');
   if(!bar) return;
   const multi = chapters.length > 1;
-  bar.innerHTML = chapters.map((ch,i) =>
-    '<button type="button" class="chapter-tab'+(i===activeChapter?' active':'')+'" onclick="switchChapter('+i+')" title="'+escA(chapterLabel(ch,i))+'">'
-    + '<span class="chapter-tab-name">'+escH(chapterLabel(ch,i))+'</span>'
-    + (multi ? '<span class="chapter-tab-x" onclick="event.stopPropagation();deleteChapter('+i+')" title="Delete this chapter" role="button" aria-label="Delete chapter">✕</span>' : '')
-    + '</button>'
-  ).join('') + '<button type="button" class="chapter-add" onclick="addChapter()" title="Add a chapter" aria-label="Add a chapter">+</button>';
-  const act = bar.querySelector('.chapter-tab.active');
-  if(act) act.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+  bar.className = 'chapter-outline' + (chaptersCollapsed ? ' collapsed' : '');
+  bar.innerHTML =
+    '<div class="co-head" onclick="toggleChapters(event)">'
+      + '<span class="caret">▾</span>'
+      + '<span class="ttl">Chapters</span>'
+      + '<span class="cnt">('+chapters.length+')</span>'
+      + '<button type="button" class="co-add" onclick="event.stopPropagation();addChapter()" title="Add a chapter">+ Add</button>'
+    + '</div>'
+    + '<div class="co-list" id="chapter-list">'
+    + chapters.map((ch,i) =>
+        '<div class="co-row'+(i===activeChapter?' active':'')+'" data-ci="'+i+'" onclick="switchChapter('+i+')" title="'+escA(chapterLabel(ch,i))+'">'
+        + '<span class="co-grip" data-cgrip title="Drag to reorder">⠿</span>'
+        + '<span class="co-n">'+(i+1)+'</span>'
+        + '<span class="co-name" ondblclick="event.stopPropagation();renameChapterInline(this,'+i+')">'+escH(chapterLabel(ch,i))+'</span>'
+        + (multi ? '<span class="co-x" onclick="event.stopPropagation();deleteChapter('+i+')" title="Delete this chapter" role="button" aria-label="Delete chapter">✕</span>' : '')
+        + '</div>'
+      ).join('')
+    + '</div>';
+  const act = bar.querySelector('.co-row.active');
+  if(act) act.scrollIntoView({ block: 'nearest' });
+}
+function toggleChapters(e){ if(e && e.target && e.target.closest && e.target.closest('.co-add')) return; chaptersCollapsed = !chaptersCollapsed; renderChapterTabs(); }
+// Inline-rename a chapter (its name is its Subtitle). Updates the live Subtitle
+// field too when it's the active chapter.
+function renameChapterInline(nameEl, i){
+  if(!chapters[i]) return;
+  const inp = document.createElement('input');
+  inp.className = 'co-name-input';
+  inp.value = chapters[i].subtitle || '';
+  inp.placeholder = 'Chapter ' + (i+1);
+  nameEl.replaceWith(inp); inp.focus(); inp.select();
+  let done = false;
+  const commit = () => { if(done) return; done = true;
+    chapters[i].subtitle = inp.value.trim();
+    if(i === activeChapter){ const sf = document.getElementById('f-subtitle'); if(sf) sf.value = chapters[i].subtitle; }
+    renderChapterTabs(); renderPreview(); saveState();
+  };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', ev => { if(ev.key === 'Enter'){ inp.blur(); } else if(ev.key === 'Escape'){ done = true; renderChapterTabs(); } });
 }
 function switchChapter(n){
   if(n === activeChapter || n < 0 || n >= chapters.length) return;
@@ -854,6 +895,34 @@ function deleteChapter(n){
   renderPreview();
   saveState();
 }
+// Reorder chapters (from the outline grip). Keeps the same chapter active.
+function moveChapter(from, target, before){
+  if(from === target || from < 0 || from >= chapters.length) return;
+  const activeObj = chapters[activeChapter];
+  const [m] = chapters.splice(from, 1);
+  if(from < target) target--;
+  if(!before) target++;
+  target = Math.max(0, Math.min(chapters.length, target));
+  chapters.splice(target, 0, m);
+  activeChapter = chapters.indexOf(activeObj);
+  state = chapters[activeChapter];
+  renderChapterTabs();
+  renderPreview();
+  saveState();
+}
+// Drag-to-reorder chapter rows in the outline (grip → HTML5 drag, like the
+// entity-card lists). Reorders the chapters array and keeps the active chapter.
+(function(){
+  let dragEl=null, dragFrom=null, dragList=null;
+  function clearMarks(){ document.querySelectorAll('.co-row.drop-before,.co-row.drop-after').forEach(el=>el.classList.remove('drop-before','drop-after')); }
+  function armRow(e){ const g=e.target.closest && e.target.closest('[data-cgrip]'); if(!g) return; const r=g.closest('.co-row'); if(r) r.draggable=true; }
+  document.addEventListener('mousedown', armRow);
+  document.addEventListener('touchstart', armRow, {passive:true});
+  document.addEventListener('dragstart', e=>{ const r=e.target.closest && e.target.closest('.co-row'); if(!r || !r.draggable) return; dragEl=r; dragFrom=+r.dataset.ci; dragList=r.parentElement; r.classList.add('dragging'); if(e.dataTransfer){ e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain','ch'); }catch(_){} } });
+  document.addEventListener('dragover', e=>{ if(!dragEl) return; const r=e.target.closest && e.target.closest('.co-row'); if(!r || r===dragEl || r.parentElement!==dragList) return; e.preventDefault(); if(e.dataTransfer) e.dataTransfer.dropEffect='move'; const rc=r.getBoundingClientRect(); const before=e.clientY < rc.top + rc.height/2; clearMarks(); r.classList.add(before?'drop-before':'drop-after'); });
+  document.addEventListener('drop', e=>{ if(!dragEl) return; const r=e.target.closest && e.target.closest('.co-row'); if(r && r!==dragEl && r.parentElement===dragList){ e.preventDefault(); const rc=r.getBoundingClientRect(); const before=e.clientY < rc.top + rc.height/2; moveChapter(dragFrom, +r.dataset.ci, before); } clearMarks(); });
+  document.addEventListener('dragend', ()=>{ if(dragEl){ dragEl.draggable=false; dragEl.classList.remove('dragging'); } clearMarks(); dragEl=null; dragFrom=null; dragList=null; });
+})();
 
 // ── SAVE ON EXIT / BACKGROUND ──
 function saveOnExit() {
@@ -979,9 +1048,6 @@ function paginatePages() {
             const fill=(bucket,col)=>{ (bucket||[]).forEach(k=>{const cl=k.cloneNode(true);cl.style.display='';cl.removeAttribute('data-paginated-hidden');col.appendChild(cl);}); };
             fill(buckets[i], cLeft);
             fill(buckets[i+1], cRight);
-            const fc=document.createElement('div');fc.className='p-footer';fc.style.flexShrink='0';
-            fc.innerHTML='<div class="flowchart">'+(document.getElementById('p-flowchart')?.innerHTML||'')+'</div>';
-            cp.querySelector('.page-inner').appendChild(fc);
             after.insertAdjacentElement('afterend',cp); after=cp;
           }
         }
@@ -1070,13 +1136,6 @@ function measureAndPaginateColumn(containerId, maxH, key, isDark, preview, sourc
       cl.removeAttribute('data-paginated-hidden');
       cc.appendChild(cl);
     });
-    if(key==='p1'||key==='p2') {
-      const fcId = key==='p1'?'p-flowchart':'p-flowchart-2';
-      const fc = document.createElement('div');
-      fc.className='p-footer'; fc.style.flexShrink='0';
-      fc.innerHTML='<div class="flowchart">'+(document.getElementById(fcId)?.innerHTML||'')+'</div>';
-      cp.querySelector('.page-inner').appendChild(fc);
-    }
     cp.querySelectorAll('.sb-hp-row').forEach(row=>{
       const pips=row.querySelectorAll('.hp-pip');const tot=pips.length;
       pips.forEach((pip,i)=>{
@@ -1147,16 +1206,6 @@ function runColumnPagination(container, maxColH, key, isDark, preview, sourcePag
       clone.removeAttribute('data-paginated-hidden');
       contContainer.appendChild(clone);
     });
-
-    // Add flowchart footer to overview (p1) and encounter (p2) continuation pages
-    if(key==='p1' || key==='p2') {
-      const fcSourceId = key==='p1' ? 'p-flowchart' : 'p-flowchart-2';
-      const fc = document.createElement('div');
-      fc.className = 'p-footer';
-      fc.style.flexShrink = '0';
-      fc.innerHTML = '<div class="flowchart">'+(document.getElementById(fcSourceId)?.innerHTML||'')+'</div>';
-      contPage.querySelector('.page-inner').appendChild(fc);
-    }
 
     insertAfter.insertAdjacentElement('afterend', contPage);
     insertAfter = contPage;
@@ -1622,7 +1671,7 @@ function collectMaps() {
 
 function addLocation(data={}) {
   const list=document.getElementById('locations-list');
-  const div=document.createElement('div'); div.className='location-card';
+  const div=document.createElement('div'); div.className='entity-card location-card';
   const type=data.type||'combat';
   const typeColors={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
   div.style.borderLeftColor=typeColors[type]||typeColors.combat;
@@ -1962,34 +2011,6 @@ function renderPreview() {
     if(pageTwo) pageTwo.style.display = overflowLocs.length ? '' : 'none';
   }
 
-  // Flowchart - render on both page 1 and page 2
-  const renderFlowchart = (fcId) => {
-    const fc=document.getElementById(fcId);
-    if(!fc) return;
-    const locNodes=state.locations.map(l=>({name:l.name||l.tag||'Encounter',type:l.type||'combat'}));
-    const allNodes=[...locNodes];
-    if(!allNodes.length){fc.innerHTML='';return;}
-    const typeNodeColors={
-      combat:{bg:'#C0392B',txt:'white'},
-      exploration:{bg:'#2d6a2d',txt:'white'},
-      npc:{bg:'#1a4a8a',txt:'white'},
-    };
-    // Scale nodes down when there are many to prevent overflow
-    const n=allNodes.length;
-    const nodePad  = n>12 ? '2px 3px' : n>8 ? '3px 5px' : '4px 7px';
-    const nameSz   = n>12 ? '7px'  : n>8 ? '8px'  : '9px';
-    const arrowSz  = n>12 ? '8px'  : n>8 ? '9px'  : '11px';
-    const nameLen  = n>12 ? 10 : n>8 ? 12 : 14;
-    fc.innerHTML=allNodes.map((node,i)=>{
-      const c=typeNodeColors[node.type]||typeNodeColors.combat;
-      return `<div class="flow-node" style="background:${c.bg};padding:${nodePad};">
-        <div class="flow-name" style="color:${c.txt};font-size:${nameSz};">${escH(node.name.substring(0,nameLen))}</div>
-      </div>${i<allNodes.length-1?`<div class="flow-arrow" style="font-size:${arrowSz};">→</div>`:''}`;
-    }).join('');
-  };
-  renderFlowchart('p-flowchart');
-  renderFlowchart('p-flowchart-2');
-
   // Maps - render each map on page 3. Rebuilding this section re-escapes the
   // base64 srcs and forces the browser to re-decode every image, so it only
   // happens when the map set actually changed (cheap signature: title + src
@@ -2257,7 +2278,11 @@ function savePDF() {
       logging: false,
       backgroundColor: getComputedStyle(p).backgroundColor || '#ffffff',
       windowWidth: 816,
-      windowHeight: 1056
+      windowHeight: 1056,
+      // Flatten the sheet's rounded corners in the PDF only (they look off on
+      // paper). The onclone runs on html2canvas's copy, so the on-screen preview
+      // keeps its rounded page corners; section rounding inside the page stays.
+      onclone: (doc) => { doc.querySelectorAll('.page').forEach(pg => { pg.style.borderRadius = '0'; }); }
     });
 
     // Capture every chapter's pages in order into one PDF. Each chapter is
@@ -2265,7 +2290,10 @@ function savePDF() {
     // A page that fails to capture is skipped (its error recorded) so one bad
     // page can't kill the entire PDF.
     const savedState = state;
-    const savedDark = document.getElementById('page-one') && document.getElementById('page-one').classList.contains('dark-mode');
+    // Export the whole book in the ONE mode you're currently in — the active
+    // chapter's dark/light setting — not each chapter's own (which produced
+    // mixed light+dark PDFs).
+    const savedDark = !!(savedState && savedState.darkMode);
     const canvases=[];
     // renderPreview() paginates on a double requestAnimationFrame; wait for that
     // to settle before capturing, or the async re-pagination detaches a page
@@ -2279,7 +2307,7 @@ function savePDF() {
       renderPreview();
       return raf2().then(() => {
         paginatePages();
-        document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', !!state.darkMode));
+        document.querySelectorAll('.preview-area .page').forEach(p => p.classList.toggle('dark-mode', savedDark));
         const pages=[...document.querySelectorAll('.preview-area .page')].filter(p=>p.style.display!=='none');
         return pages.reduce((chain,p)=>chain.then(()=>shot(p)).then(
           c=>{ try{ c.toDataURL('image/jpeg',0.85); canvases.push(c); }catch(e){ if(!_pdfFirstErr)_pdfFirstErr=e; _pdfFailPages++; } },
