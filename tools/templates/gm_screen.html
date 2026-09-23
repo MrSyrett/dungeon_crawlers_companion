@@ -5576,7 +5576,7 @@ function wireSessionPrepLoader(root) {
   let prep = null;         // the active chapter's session-prep state
   let prepChapters = [];   // all chapters in the loaded doc (>=1)
   let prepActiveChapter = 0;
-  let prepChaptersCollapsed = false;   // chapters outline collapsed state
+  let prepChaptersCollapsed = true;   // chapters outline starts collapsed
   let prepMeta = null;     // { docTool, docId, docTitle } for the loaded doc
   let prepSys = '';        // system key (DND, SD, …) for statblock mapping
   let activeSec = 'overview';
@@ -6267,15 +6267,21 @@ function init_trackers(root) {
     if(di >= 0) { def = { l: stats[di].label, v: stats[di].val }; stats.splice(di, 1); }
     const abils = stats.map(st => ({ l: st.label, v: st.val, roll: st.roll || '', rolllabel: st.label }));
     const atks = (g.lines || []).map(l => ({ name: l.label || 'Attack', ex: l.text || '', roll: l.roll || '', rolllabel: l.label }));
-    // MMRPG chip rows (Traits / Tags / Powers with detail popovers) join the traits.
-    let chipRows = '';
+    // MMRPG chip rows (Traits / Tags with detail popovers) join the traits block;
+    // Powers get their own separated section below so they don't read as one long
+    // undifferentiated list.
+    let chipRows = '', powerSec = '';
     if(g.chips) {
       const infoChip = (nm, kind) => `${escAttr(nm)}<button class="mmrpg-info" data-ik="${kind}" data-in="${escAttr(nm)}" title="Details" aria-label="Show details">&#9432;</button>`;
       const row = (label, arr, kind) => (arr && arr.length) ? `<div class="cc-trait"><span class="cc-trait-name">${label}:</span> ${arr.map(x => infoChip(x, kind)).join(', ')}</div>` : '';
-      chipRows = row('Traits', g.chips.traits, 'trait') + row('Tags', g.chips.tags, 'tag') + row('Powers', g.chips.powers, 'power');
+      chipRows = row('Traits', g.chips.traits, 'trait') + row('Tags', g.chips.tags, 'tag');
+      if(g.chips.powers && g.chips.powers.length) {
+        powerSec = `<div class="cc-traits"><div class="cc-sec">Powers</div><div class="cc-trait">${g.chips.powers.map(x => infoChip(x, 'power')).join(', ')}</div></div>`;
+      }
     }
     let traits = ccTraits(g.notes);
     if(chipRows) traits = traits ? traits.replace('</div>', chipRows + '</div>') : `<div class="cc-traits"><div class="cc-sec">Traits</div>${chipRows}</div>`;
+    traits += powerSec;
     return {
       sub: n.tag || '', def: def, tone: 'var(--red)', badge: null,
       meta: ccMeta(g.meta || []), abils: ccAbils(abils), atks: ccAtks(atks), traits
@@ -9060,11 +9066,12 @@ function xsMonSummary(src, m) {
     out.hp = 0;   // no hit points in D6 — the tracker card carries a wound track instead
   } else if(src === 'dnd') {
     const A = m.abilities || {}; const amod = s => Math.floor(((+s || 10) - 10) / 2);
-    // AC → header badge, HP → HP zone. CR and Speed belong on the meta line BELOW
-    // the ability strip, not crammed in front of the six ability scores.
+    // AC → header badge, HP → HP zone. CR rides in the type line (like a printed
+    // stat block's "Challenge" line), so only Speed goes on the meta line below the
+    // ability strip — the six ability scores stay uncluttered.
     out.stats.push({ label: 'AC', val: String(m.ac ?? '') }, { label: 'HP', val: m.hp != null ? String(m.hp) : '' });
     ['STR','DEX','CON','INT','WIS','CHA'].forEach(k => { if(A[k] != null) { const md = amod(A[k]); out.stats.push({ label: k, val: String(A[k]), roll: '1d20' + (md >= 0 ? '+' : '') + md }); } });
-    out.meta.push(['CR', m.cr != null ? String(m.cr) : ''], ['Speed', (m.speed || '').replace(/ ?ft\./g, '')]);
+    out.meta.push(['Speed', (m.speed || '').replace(/ ?ft\./g, '')]);
     if(m.savingThrows) out.lines.push({ label: 'Saves', text: m.savingThrows });
     if(m.skills) out.lines.push({ label: 'Skills', text: m.skills });
     ['damageResistances','damageImmunities','damageVulnerabilities','conditionImmunities'].forEach(k => { if(m[k]) out.lines.push({ label: k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).replace('Damage ', '').replace('Condition ', 'Cond. '), text: m[k] }); });
@@ -9074,7 +9081,7 @@ function xsMonSummary(src, m) {
     (m.bonusActions || []).forEach(a => out.lines.push({ label: 'Bonus — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
     (m.reactions || []).forEach(a => out.lines.push({ label: 'Reaction — ' + (a.name || ''), text: a.description || '' }));
     (m.legendaryActions || []).forEach(a => out.lines.push({ label: 'Legendary — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
-    out.notes.push([m.size, m.type, m.alignment].filter(Boolean).join(' · ') + (m.senses ? ' · ' + m.senses : ''));
+    out.notes.push([m.size, m.type, m.alignment].filter(Boolean).join(' · ') + (m.cr != null && m.cr !== '' ? ' · CR ' + m.cr : '') + (m.senses ? ' · ' + m.senses : ''));
     out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : 10;
   } else if(src === 'd62e') {
     // D6 System: attributes stored as pips (12 = 4D). No hit points — a wound
@@ -9168,13 +9175,15 @@ function xsMonSummary(src, m) {
 const PREP_SB_FIELDS = {
   DCC:  { stats:[['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']], meta:[['level','LV'],['evade','Evade'],['dr','DR'],['move','Move'],['surprise','Surprise']], hp:'pips' },
   SD:   { stats:[['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']], def:['hpval','AC'], meta:[['level','LV'],['evade','Evade'],['dr','DR'],['move','Move']], hp:'hpcount' },
-  DND:  { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['cr','CR'],['speed','Speed']], hp:'hp' },
+  // DND: CR belongs in the type line (header), so it's dropped from the meta line to avoid the duplicate.
+  DND:  { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['speed','Speed']], hp:'hp' },
   ACE:  { stats:[['smarts','SMA'],['moves','MOV'],['style','STY'],['brawn','BRA'],['power','POW']], def:['defence','DEF'], lines:[['focuses','Focuses']], hp:'health' },
   NIM:  { stats:[], def:['armor','Armor'], meta:[['level','LV'],['size','Size'],['saves','Saves']], hp:'hp' },
   SW:   { stats:[['dex','DEX'],['kno','KNO'],['mec','MEC'],['per','PER'],['str','STR'],['tec','TEC']], def:['armor','Armor'], meta:[['move','Move'],['force','Force']], hp:'health' },
   D62E: { stats:[['agi','AGI'],['bra','BRA'],['kno','KNO'],['per','PER']], meta:[['dodge','Dodge'],['parry','Parry'],['move','Move']], hp:'health' },
   ICRPG:{ stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['def','DEF'], meta:[['tier','Tier'],['hearts','Hearts']], hp:'hp' },
-  MMRPG:{ stats:[['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']], meta:[['rank','Rank'],['focus','Focus']], lines:[['powers','Powers']], hp:'health' },
+  // MMRPG: Rank lives in the type line (header), so it's left off the meta line to avoid showing it twice.
+  MMRPG:{ stats:[['melee','MEL'],['agility','AGI'],['resilience','RES'],['vigilance','VIG'],['ego','EGO'],['logic','LOG']], meta:[['focus','Focus']], lines:[['powers','Powers']], hp:'health' },
   JLU:  { stats:[['pot','POT'],['acc','ACC'],['agi','AGI'],['res','RES'],['spi','SPI'],['mnd','MND']], def:['defense','DEF'], meta:[['dr','DR'],['resolve','Resolve']], lines:[['powers','Powers']], hp:'resolve' },
   GB:   { stats:[['brains','Brains'],['muscles','Muscles'],['moves','Moves'],['cool','Cool']], meta:[['power','Power'],['ectopresence','Ecto']], lines:[['powers','Powers']], hp:'ectopresence' },
   KOB:  { stats:[['brains','Brains'],['brawn','Brawn'],['fight','Fight'],['flight','Flight'],['charm','Charm'],['grit','Grit']], meta:[['age','Age'],['at','AT'],['fear','Fear']], hp:null },

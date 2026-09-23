@@ -227,7 +227,9 @@ document.addEventListener("DOMContentLoaded", function() {
   .read-aloud p { color: white; font-size: 9px; font-style: italic; line-height: 1.65; }
 
   /* Flavor text on stat blocks also cyan */
-  .sb-flavor { font-size: 8.5px; font-style: italic; color: white; background: #00AEEF; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px; border: none; }
+  .sb-flavor { font-size: 8.5px; font-style: italic; color: white; background: #00AEEF; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px; border: none; border-radius: 7px; }
+  .sb-npc-notes { font-size: 8.5px; color: var(--ink); line-height: 1.6; }
+  .page.dark-mode .sb-npc-notes { color: #b0aca4; }
 
   /* NPC/mob blocks - grey-green GMT boxes */
   .npc-block { background: var(--box-bg); border: none; border-left: 4px solid var(--blue-npc); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
@@ -273,6 +275,8 @@ document.addEventListener("DOMContentLoaded", function() {
   .sb-table th { font-family: var(--font-display); font-size: 9px; letter-spacing: 0.08em; color: white; background: var(--table-hdr); padding: 3px 4px; text-align: center; font-weight: 700; }
   .sb-table td { padding: 2px 4px; text-align: center; color: var(--ink); background: rgba(255,255,255,0.6); border: 0.5px solid rgba(0,0,0,0.12); font-family: 'Share Tech Mono', monospace; font-size: 8px; }
   .sb-divider { border: none; border-top: 1px solid rgba(0,0,0,0.15); margin: 5px 0; }
+  .sb-ability-sep { border: none; border-top: 1px dashed rgba(0,0,0,0.18); margin: 5px 0 5px; width: 55%; }
+  .page.dark-mode .sb-ability-sep { border-top-color: rgba(255,255,255,0.18); }
   .sb-ability { font-size: 8.5px; color: var(--ink); margin-bottom: 4px; line-height: 1.5; }
   .sb-warning { background: rgba(255,255,255,0.5); border: 1px solid var(--blue-npc); border-left: 3px solid var(--blue-npc); padding: 4px 8px; font-family: 'Share Tech Mono', monospace; font-size: 8px; color: var(--blue-npc); letter-spacing: 0.05em; margin-bottom: 7px; }
   .sb-notes { font-size: 8.5px; color: var(--ink); line-height: 1.6; column-count: 2; column-gap: 16px; }
@@ -644,10 +648,9 @@ body.flow-mode .page + .page {
   </div>
   <div class="save-indicator" id="save-indicator">All changes saved</div>
   <div class="sidebar-footer" style="display:flex; flex-wrap:nowrap; gap:6px;">
-    <button class="btn-secondary" onclick="clearAll()" style="flex:1;">Clear</button>
-    <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export HTML</button>
-    <label for="f-import" class="btn-secondary" style="flex:1; text-align:center; cursor:pointer; padding:8px; font-family:var(--font-display); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">↑ Import HTML</label>
-    <button class="btn-secondary" onclick="savePDF()" id="pdf-btn" style="flex:1;">Save PDF</button>
+    <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export</button>
+    <label for="f-import" class="btn-secondary" style="flex:1; text-align:center; cursor:pointer; padding:8px; font-family:var(--font-display); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Import</label>
+    <button class="btn-secondary" onclick="savePDF()" id="pdf-btn" style="flex:1;">PDF</button>
     <input type="file" id="f-import" accept=".html" style="display:none" onchange="importHTML(this)">
   </div>
   <button class="sidebar-tab" onclick="toggleSidebar()" aria-label="Toggle controls"><span class="sidebar-tab-arrow">▼</span></button>
@@ -817,7 +820,7 @@ function syncDocTitle() {
 // A tab per chapter (labelled by its Subtitle, the chapter's name); + Chapter
 // adds a fresh prep instance; each tab loads that chapter into the editor.
 function chapterLabel(ch, i){ return (ch && ch.subtitle && ch.subtitle.trim()) ? ch.subtitle.trim() : ('Chapter ' + (i+1)); }
-let chaptersCollapsed = false;
+let chaptersCollapsed = true;   // start collapsed; the ▾ header expands it
 // The chapters outline: a collapsible table of contents. Click a row to open
 // that chapter, drag its ⠿ grip to reorder, double-click the name to rename
 // (the name IS the chapter's Subtitle), ✕ to delete, + Add to add one.
@@ -2060,6 +2063,9 @@ function buildSB(s) {
   const hpCount=SB_CONFIG.hp ? (parseInt(s.hpcount)||1) : 0;
   let pips=''; for(let i=0;i<hpCount;i++) pips+=`<div class="hp-pip">${escH(s.hpval||'1')}</div>`;
   const abilities=(s.abilities||'').split('\n').filter(Boolean).map(a=>{
+    // A line of three-or-more dashes/em-dashes becomes a thin sub-divider (used to
+    // set Powers apart from Traits/Tags on imported Marvel stat blocks).
+    if(/^[-–—]{3,}$/.test(a.trim())) return '<hr class="sb-ability-sep">';
     const idx=a.indexOf(':');
     return idx>0?`<div class="sb-ability"><strong>${escH(a.slice(0,idx))}:</strong> ${escH(a.slice(idx+1).trim())}</div>`:`<div class="sb-ability">${escH(a)}</div>`;
   }).join('');
@@ -2078,7 +2084,7 @@ function buildSB(s) {
       ${s.flavor?`<div class="sb-flavor">${fmtText(s.flavor)}</div>`:''}
       ${pips?`<div class="sb-hp-row">${pips}</div>`:``}${tables}
       ${abilities?`<hr class="sb-divider">${abilities}`:''}
-      ${s.isnpc&&s.notes?`<hr class="sb-divider"><div style="font-size:8.5px;color:var(--ink);line-height:1.6">${fmtText(s.notes)}</div>`:''}`;
+      ${s.isnpc&&s.notes?`<hr class="sb-divider"><div class="sb-npc-notes">${fmtText(s.notes)}</div>`:''}`;
   }
   return div;
 }

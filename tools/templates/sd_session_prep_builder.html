@@ -235,7 +235,7 @@
   .read-aloud p { color: #f4edd8; font-size: 9px; font-style: italic; line-height: 1.65; }
 
   /* Flavor text on stat blocks also cyan */
-  .sb-flavor { font-size: 8.5px; font-style: italic; color: #f4edd8; background: #2a1a08; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px; border: none; }
+  .sb-flavor { font-size: 8.5px; font-style: italic; color: #f4edd8; background: #2a1a08; line-height: 1.5; margin-bottom: 7px; padding: 6px 8px; border: none; border-radius: 7px; }
 
   /* NPC/mob blocks - grey-green GMT boxes */
   .npc-block { background: var(--box-bg); border: none; border-left: 4px solid var(--blue-npc); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 7px 9px 7px 10px; margin-bottom: 6px; }
@@ -272,6 +272,8 @@
   .sb-stat-line { font-size: 9px; color: var(--ink); margin-bottom: 3px; line-height: 1.45; font-family: 'Montserrat', sans-serif; }
   .sb-stat-line strong { font-weight: 700; font-family: 'Montserrat', sans-serif; font-size: 7.5px; letter-spacing: 0.04em; }
   .sb-divider { border: none; border-top: 1px solid var(--accent-red); margin: 5px 0; }
+  .sb-ability-sep { border: none; border-top: 1px dashed rgba(0,0,0,0.18); margin: 5px 0; width: 55%; }
+  .page.dark-mode .sb-ability-sep { border-top-color: rgba(255,255,255,0.18); }
   .sb-score-table { width: 100%; border-collapse: collapse; margin: 4px 0 5px; }
   .sb-score-table th { font-family: 'Montserrat', sans-serif; font-size: 8px; font-weight: 700; color: #0a0a0a; font-weight: 700; text-align: center; padding: 2px; background: none; border: none; }
   .sb-score-table td { font-family: 'Montserrat', sans-serif; font-size: 9px; text-align: center; color: var(--ink); border: none; padding: 1px 2px; }
@@ -634,11 +636,10 @@ body.flow-mode .page + .page {
   </div>
   <div class="save-indicator" id="save-indicator">All changes saved</div>
   <div class="sidebar-footer" style="display:flex;flex-wrap:wrap;gap:6px;">
-    <button class="btn-secondary" onclick="clearAll()" style="flex:1;">Clear</button>
-    <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export HTML</button>
-    <label for="f-import" class="btn-secondary" style="flex:1;text-align:center;cursor:pointer;padding:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">↑ Import HTML
+    <button class="btn-primary" onclick="exportHTML()" style="flex:1;">Export</button>
+    <label for="f-import" class="btn-secondary" style="flex:1;text-align:center;cursor:pointer;padding:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Import
     </label>
-    <button class="btn-secondary" onclick="savePDF()" id="pdf-btn" style="flex:1;">Save PDF</button>
+    <button class="btn-secondary" onclick="savePDF()" id="pdf-btn" style="flex:1;">PDF</button>
     <input type="file" id="f-import" accept=".html" style="display:none" onchange="importHTML(this)">
   </div>
 </div>
@@ -794,7 +795,7 @@ function syncDocTitle() {
 
 // ── CHAPTERS ────────────────────────────────────────────────────────────────
 function chapterLabel(ch, i){ return (ch && ch.subtitle && ch.subtitle.trim()) ? ch.subtitle.trim() : ('Chapter ' + (i+1)); }
-let chaptersCollapsed = false;
+let chaptersCollapsed = true;   // start collapsed; the ▾ header expands it
 // The chapters outline: a collapsible table of contents. Click a row to open
 // that chapter, drag its ⠿ grip to reorder, double-click the name to rename
 // (the name IS the chapter's Subtitle), ✕ to delete, + Add to add one.
@@ -2382,6 +2383,7 @@ function buildSB(s) {
   // Abilities
   if(s.abilities) {
     s.abilities.split('\n').filter(Boolean).forEach(line => {
+      if(/^[-–—]{3,}$/.test(line.trim())) { html += '<hr class="sb-ability-sep">'; return; }
       const ci = line.indexOf(':');
       if(ci < 0 || ci === line.length - 1) {
         html += '<span class="sb-section-label">' + escH(line.replace(':','')) + '</span>';
