@@ -233,7 +233,7 @@ function DocList({
       </div>
 
       {docs.length === 0 ? (
-        <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">No saved {def.label.toLowerCase()}s yet.</p>
+        <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">No saved {def.kind === "character" ? "characters" : "adventures"} yet.</p>
       ) : (
         <ul className="divide-y divide-[var(--border)]">
           {docs.map((doc) => (
