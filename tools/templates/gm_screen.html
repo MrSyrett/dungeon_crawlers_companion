@@ -909,6 +909,8 @@ button.cc-abil:hover { background: rgba(255,255,255,0.05); border-radius: 6px; }
 .cc-atk-roll { flex: 0 0 auto; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--gold); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; cursor: pointer; white-space: nowrap; background: var(--panel-2); }
 .cc-atk-roll:hover { border-color: var(--gold); color: var(--white); }
 .cc-traits { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 9px; }
+.cc-readaloud { border-left: 3px solid var(--gold); background: rgba(200,160,32,.08); border-radius: 0 6px 6px 0; padding: 6px 10px; margin-top: 10px; font-size: 12px; line-height: 1.55; color: var(--light); font-style: italic; overflow-wrap: anywhere; }
+.cc-readaloud .cc-diebtn { font-style: normal; }
 .cc-trait { font-size: 12px; line-height: 1.55; color: var(--light); margin-top: 6px; overflow-wrap: anywhere; }
 .cc-trait:first-of-type { margin-top: 0; }
 .cc-trait-name { color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 0.02em; }
@@ -6191,6 +6193,14 @@ function init_trackers(root) {
     }).join('');
     return `<div class="cc-traits"><div class="cc-sec">Traits</div>${rows}</div>`;
   }
+  // The creature's descriptive notes/flavor render as a read-aloud box (like the
+  // Adventure Hub scenes), since that's the read-aloud text the card pulls from.
+  function ccReadAloud(notes) {
+    const arr = Array.isArray(notes) ? notes : (notes ? [notes] : []);
+    const parts = arr.map(s => String(s || '').trim()).filter(Boolean);
+    if(!parts.length) return '';
+    return `<div class="cc-readaloud">${parts.map(p => ccDiceify(p)).join('<br>')}</div>`;
+  }
   // Ability strip. cells: [{ l, v, roll?, rolllabel? }]
   function ccAbils(cells) {
     const cs = (cells || []).filter(c => c && (c.v || c.v === 0) && String(c.v) !== '');
@@ -6215,9 +6225,18 @@ function init_trackers(root) {
       } else if(a.roll) {
         btn = `<button class="cc-atk-roll npc-mon-roll" data-roll="${escAttr(a.roll)}" data-rolllabel="${escAttr(a.rolllabel || a.name || 'roll')}" title="Roll ${escAttr(a.roll)}">\u{1F3B2} ${escAttr(a.roll)}</button>`;
       }
-      return `<div class="cc-atk"><span class="cc-atk-t"><b>${escAttr(a.name || 'Attack')}</b>${a.ex ? ` <span class="ex">${escAttr(a.ex)}</span>` : ''}</span>${btn}</div>`;
+      // A generic fallback label ("Attack"/"Ability"/"Special") isn't a real title — the
+      // content is the row text. So a titled entry shows its bold name + text; a titleless
+      // one shows just its text (no fake heading); an entry with neither keeps the label
+      // so a bare roll button still has something next to it.
+      const nm = (a.name && !/^(attack|ability|special)$/i.test(String(a.name).trim())) ? a.name : '';
+      let body;
+      if(nm) body = `<b>${escAttr(nm)}</b>${a.ex ? ` <span class="ex">${escAttr(a.ex)}</span>` : ''}`;
+      else if(a.ex) body = escAttr(a.ex);
+      else body = `<b>${escAttr(a.name || 'Ability')}</b>`;
+      return `<div class="cc-atk"><span class="cc-atk-t">${body}</span>${btn}</div>`;
     }).join('');
-    return `<div class="cc-sec">Attacks</div>${rows}`;
+    return `<div class="cc-sec">Abilities</div>${rows}`;
   }
   // "MV 40 fly 80 · AL C" meta line from [label,val] pairs.
   function ccMeta(pairs) {
@@ -6238,7 +6257,7 @@ function init_trackers(root) {
     return {
       sub: [mo.ctype, mo.lv ? 'LV ' + mo.lv : ''].filter(Boolean).join(' · '),
       def: mo.ac ? { l: 'AC', v: mo.ac } : null, tone: 'var(--red)', badge: null,
-      meta: ccMeta([['MV', mo.mv], ['AL', mo.al]]), abils: ccAbils(abils), atks: ccAtks(atks), traits: ccTraits(mo.notes)
+      meta: ccMeta([['MV', mo.mv], ['AL', mo.al]]), abils: ccAbils(abils), atks: ccAtks(atks), traits: ccReadAloud(mo.notes)
     };
   }
   function dccView(n) {
@@ -6260,7 +6279,7 @@ function init_trackers(root) {
       // DR is shown in the def badge when there's no Evade, so only repeat it on the
       // meta line when Evade is what's occupying the badge (avoids DR in both places).
       meta: ccMeta([['DR', mo.evade ? mo.dr : ''], ['Surprise', mo.surprise], ['Move', mo.move], ['Tags', (mo.tags || []).join(', ')]]),
-      abils: ccAbils(abils), atks: ccAtks(atks), traits: ccTraits(mo.notes)
+      abils: ccAbils(abils), atks: ccAtks(atks), traits: ccReadAloud(mo.notes)
     };
   }
   function xsView(n) {
@@ -6273,22 +6292,20 @@ function init_trackers(root) {
     const di = stats.findIndex(st => /^(def|defen[cs]e|ac|armou?r|evade|dodge|toughness)$/i.test(String(st.label || '')));
     if(di >= 0) { def = { l: stats[di].label, v: stats[di].val }; stats.splice(di, 1); }
     const abils = stats.map(st => ({ l: st.label, v: st.val, roll: st.roll || '', rolllabel: st.label }));
-    const atks = (g.lines || []).map(l => ({ name: l.label || 'Attack', ex: l.text || '', roll: l.roll || '', rolllabel: l.label }));
-    // MMRPG chip rows (Traits / Tags with detail popovers) join the traits block;
-    // Powers get their own separated section below so they don't read as one long
-    // undifferentiated list.
-    let chipRows = '', powerSec = '';
+    const atks = (g.lines || []).map(l => ({ name: l.label || '', ex: l.text || '', roll: l.roll || '', rolllabel: l.label }));
+    // MMRPG has real game traits/tags (clickable chips) and powers — those keep their
+    // own labelled sections. The descriptive notes render below as a read-aloud box.
+    let chipSec = '', powerSec = '';
     if(g.chips) {
       const infoChip = (nm, kind) => `${escAttr(nm)}<button class="mmrpg-info" data-ik="${kind}" data-in="${escAttr(nm)}" title="Details" aria-label="Show details">&#9432;</button>`;
       const row = (label, arr, kind) => (arr && arr.length) ? `<div class="cc-trait"><span class="cc-trait-name">${label}:</span> ${arr.map(x => infoChip(x, kind)).join(', ')}</div>` : '';
-      chipRows = row('Traits', g.chips.traits, 'trait') + row('Tags', g.chips.tags, 'tag');
+      const chipRows = row('Traits', g.chips.traits, 'trait') + row('Tags', g.chips.tags, 'tag');
+      if(chipRows) chipSec = `<div class="cc-traits"><div class="cc-sec">Traits &amp; Tags</div>${chipRows}</div>`;
       if(g.chips.powers && g.chips.powers.length) {
         powerSec = `<div class="cc-traits"><div class="cc-sec">Powers</div><div class="cc-trait">${g.chips.powers.map(x => infoChip(x, 'power')).join(', ')}</div></div>`;
       }
     }
-    let traits = ccTraits(g.notes);
-    if(chipRows) traits = traits ? traits.replace('</div>', chipRows + '</div>') : `<div class="cc-traits"><div class="cc-sec">Traits</div>${chipRows}</div>`;
-    traits += powerSec;
+    const traits = chipSec + powerSec + ccReadAloud(g.notes);
     return {
       sub: n.tag || '', def: def, tone: 'var(--red)', badge: null,
       meta: ccMeta(g.meta || []), abils: ccAbils(abils), atks: ccAtks(atks), traits
