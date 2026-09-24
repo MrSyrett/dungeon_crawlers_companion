@@ -244,7 +244,12 @@ document.addEventListener("DOMContentLoaded", function() {
   .p-section { margin-bottom: 12px; break-inside: avoid; column-break-inside: avoid; }
   .loc-name { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
   .loc-tag { font-family: 'Share Tech Mono', monospace; font-size: 7.5px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 3px; }
+  .loc-dq { font-size: 9px; font-style: italic; color: var(--ink); line-height: 1.5; margin-bottom: 4px; opacity: 0.92; }
+  .loc-dq::before { content: '\201C'; }
+  .loc-dq::after { content: '\201D'; }
   .loc-desc { font-size: 9px; color: var(--ink); line-height: 1.55; margin-top: 3px; }
+  .loc-lbl { font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 8px; }
+  .page.dark-mode .loc-dq { color: #b0aca4; }
 
   .clue-item { font-size: 9px; color: var(--ink); margin-bottom: 5px; padding: 5px 9px 5px 11px; border-left: 3px solid var(--accent); border-radius: 7px; background: #fdf5e8; line-height: 1.5; }
   .hook-item { background: #fdf8ec; }
@@ -1358,6 +1363,8 @@ function readFields() {
     tag:c.querySelector('.loc-tag-input')?.value.trim()||'',
     readaloud:c.querySelector('.loc-ra-input')?.value.trim()||'',
     desc:c.querySelector('.loc-desc-input')?.value.trim()||'',
+    consequences:c.querySelector('.loc-consequences-input')?.value.trim()||'',
+    notes:c.querySelector('.loc-notes-input')?.value.trim()||'',
     type:c.querySelector('.loc-type-input:checked')?.value||'combat'
   })).filter(l=>l.name);
   state.statblocks=[...document.querySelectorAll('#statblocks-list .entity-card')].map(c=>({
@@ -1706,16 +1713,24 @@ function addLocation(data={}) {
       </div>
     </div>
     <div class="field-group">
-      <label class="field-label">Tag Line</label>
-      <input type="text" class="loc-tag-input" placeholder="e.g. Combat // 2 Enemies" value="${escA(data.tag||'')}" oninput="autosave()">
+      <label class="field-label">Dramatic Question</label>
+      <input type="text" class="loc-tag-input" placeholder="The goal &amp; tension in one line, e.g. Open the door before the room floods" value="${escA(data.tag||'')}" oninput="autosave()">
     </div>
     <div class="field-group">
       <label class="field-label accent">Read-Aloud Text</label>
       <textarea class="loc-ra-input" placeholder="Text to read aloud to players..." oninput="autosave()">${escH(data.readaloud||'')}</textarea>
     </div>
     <div class="field-group">
-      <label class="field-label">GM Notes</label>
-      <textarea class="loc-desc-input short" placeholder="GM-only notes..." oninput="autosave()">${escH(data.desc||'')}</textarea>
+      <label class="field-label">Interactions</label>
+      <textarea class="loc-desc-input short" placeholder="What players can interact with and what happens when they do..." oninput="autosave()">${escH(data.desc||'')}</textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Consequences</label>
+      <textarea class="loc-consequences-input short" placeholder="What happens if the heroes succeed — or don't..." oninput="autosave()">${escH(data.consequences||'')}</textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes</label>
+      <textarea class="loc-notes-input short" placeholder="Anything else the GM should keep handy..." oninput="autosave()">${escH(data.notes||'')}</textarea>
     </div>`;
   list.appendChild(div);
 }
@@ -1723,6 +1738,17 @@ function addLocation(data={}) {
 function updateLocCardColor(radio) {
   const colors={combat:'#C0392B',exploration:'#2d6a2d',npc:'#1a4a8a'};
   radio.closest('.location-card').style.borderLeftColor=colors[radio.value]||colors.combat;
+}
+
+// Inner body of an encounter/scene block in the preview & PDF: read-aloud plus
+// the labeled Interactions / Consequences / Notes sections (Dramatic Question is
+// rendered above this, next to the name).
+function locBlockInner(l){
+  const sec=(label,val)=>(val&&String(val).trim())?'<p class="loc-desc"><strong class="loc-lbl">'+escH(label)+':</strong> '+fmtText(val)+'</p>':'';
+  return (l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')
+    + sec('Interactions', l.desc)
+    + sec('Consequences', l.consequences)
+    + sec('Notes', l.notes);
 }
 
 // ── Stat-block schema ─────────────────────────────────────────────────────────
@@ -2004,7 +2030,7 @@ function renderPreview() {
       const c=_typeC[l.type]||_typeC.combat;
       const displayName = l.name || l.tag || '';
       const showTag = l.tag && l.name;
-      sections.push('<div class="location-block"><div class="loc-name" style="color:'+c+';border-bottom:1.5px solid '+c+';padding-bottom:1px;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">'+escH(displayName)+'</div>'+(showTag?'<div class="loc-tag">'+escH(l.tag)+'</div>':'')+(l.readaloud?'<div class="read-aloud"><p>'+fmtText(l.readaloud)+'</p></div>':'')+(l.desc?'<p class="loc-desc">'+fmtText(l.desc)+'</p>':'')+'</div>');
+      sections.push('<div class="location-block"><div class="loc-name" style="color:'+c+';border-bottom:1.5px solid '+c+';padding-bottom:1px;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">'+escH(displayName)+'</div>'+(showTag?'<div class="loc-dq">'+escH(l.tag)+'</div>':'')+locBlockInner(l)+'</div>');
     });
 
     // Full NPC / Mob stat blocks after the encounters
@@ -2057,9 +2083,8 @@ function renderPreview() {
     locsEl2.innerHTML = overflowLocs.map(l=>`
       <div class="location-block">
         <div class="loc-name" style="color:${typeColors[l.type]||typeColors.combat};border-bottom:1.5px solid ${typeColors[l.type]||typeColors.combat};padding-bottom:1px;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px;">${escH(l.name||l.tag||'')}</div>
-        ${l.tag&&l.name?`<div class="loc-tag">${escH(l.tag)}</div>`:''}
-        ${l.readaloud?`<div class="read-aloud"><p>${fmtText(l.readaloud)}</p></div>`:''}
-        ${l.desc?`<p class="loc-desc">${fmtText(l.desc)}</p>`:''}
+        ${l.tag&&l.name?`<div class="loc-dq">${escH(l.tag)}</div>`:''}
+        ${locBlockInner(l)}
       </div>`).join('');
     // Hide page 2 entirely when nothing overflowed
     if(pageTwo) pageTwo.style.display = overflowLocs.length ? '' : 'none';

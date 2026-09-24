@@ -486,6 +486,11 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; align-self: flex-start; }
 .advh-scene, .advh-table, .advh-card, .advh-map { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .advh-scene-body { margin-top: 7px; }
+.advh-scene-dq { font-style: italic; font-size: 12.5px; line-height: 1.5; color: var(--white); margin-bottom: 8px; overflow-wrap: anywhere; }
+.advh-scene-dq::before { content: '\201C'; }
+.advh-scene-dq::after { content: '\201D'; }
+.advh-scene-sec { margin-top: 8px; }
+.advh-scene-lbl { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 10px; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; margin-bottom: 2px; }
 /* Two-line collapsed scene row: name over subheader. */
 .advh-2l { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .advh-subhdr { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -5761,7 +5766,7 @@ function wireSessionPrepLoader(root) {
 
   // Scenes = locations (+ SD strongopen). Tables = rollTables/rolltables/tables
   // (+ SD randenc). Maps = maps[] (+ the legacy single mappath).
-  function scenes(){ return [].concat(prep.strongopen || [], prep.locations || []).filter(x => x && (x.name || x.readaloud || x.desc)); }
+  function scenes(){ return [].concat(prep.strongopen || [], prep.locations || []).filter(x => x && (x.name || x.readaloud || x.desc || x.tag || x.consequences || x.notes)); }
   function tables(){
     const t = [].concat(prep.rollTables || [], prep.rolltables || [], prep.tables || []);
     (prep.randenc || []).forEach(r => { if(r && (r.header || r.text)) t.push({ title: r.header || 'Random Encounter', die: '', rows: [{ result: r.text }] }); });
@@ -5826,17 +5831,24 @@ function wireSessionPrepLoader(root) {
       return list.map((s, i) => {
         const typ = (s.type || '').toLowerCase();
         const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
-        // Collapsed row is two lines: name on top, subheader (tag / type) below.
+        // Collapsed row is two lines: name on top, the Dramatic Question (or type) below.
         const sub = s.tag || (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
+        const scnSec = (label, val) => (val && String(val).trim())
+          ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advText(val) + '</div></div>'
+          : '';
+        const hasBody = s.readaloud || s.desc || s.consequences || s.notes;
         return '<div class="advh-scene" data-i="' + i + '">'
           + '<button class="advh-row advh-scene-hd"><span class="advh-dot" style="background:' + dot + '"></span>'
           + '<span class="advh-2l"><span class="advh-row-name">' + advEsc(s.name || 'Scene ' + (i + 1)) + '</span>'
           + '<span class="advh-subhdr">' + advEsc(sub || 'Scene') + '</span></span>'
           + '<span class="advh-chev">▾</span></button>'
           + '<div class="advh-scene-body" style="display:none;">'
+          + (s.tag ? '<div class="advh-scene-dq">' + advEsc(s.tag) + '</div>' : '')
           + (s.readaloud ? '<div class="advh-readaloud">' + advText(s.readaloud) + '</div>' : '')
-          + (s.desc ? '<div class="advh-desc">' + advText(s.desc) + '</div>' : '')
-          + (!s.readaloud && !s.desc ? '<div class="advh-desc dim">No details recorded.</div>' : '')
+          + scnSec('Interactions', s.desc)
+          + scnSec('Consequences', s.consequences)
+          + scnSec('Notes', s.notes)
+          + (!hasBody ? '<div class="advh-desc dim">No details recorded.</div>' : '')
           + '</div></div>';
       }).join('');
     }
