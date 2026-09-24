@@ -5832,7 +5832,8 @@ function wireSessionPrepLoader(root) {
         const typ = (s.type || '').toLowerCase();
         const dot = typ === 'combat' ? '#d63a30' : typ === 'npc' ? '#c8a020' : 'var(--accent)';
         // Collapsed row is two lines: name on top, the Dramatic Question (or type) below.
-        const sub = s.tag || (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
+        const typName = typ === 'npc' ? 'Social' : (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
+        const sub = s.tag || typName;
         const scnSec = (label, val) => (val && String(val).trim())
           ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advText(val) + '</div></div>'
           : '';
