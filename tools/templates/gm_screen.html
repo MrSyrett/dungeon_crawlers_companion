@@ -1947,6 +1947,22 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .tmr-apply{margin-left:auto;padding:5px 12px;border-radius:6px;background:var(--panel-2);border:1px solid var(--border);color:var(--light);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .tmr-apply:hover{border-color:var(--accent);color:var(--accent)}
 .tracker-kind-tag{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--border);border-radius:6px;padding:3px 8px;white-space:nowrap}
+/* Ticks tracker (a labelled row of tick boxes — Alarm Level, NPC Mood, …) */
+.tmr-card.ticks{border-left-color:#5bbf9a}
+.tmr-kind.tk{color:#5bbf9a;border-color:#5bbf9a}
+.tmr-count{width:52px;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;text-align:center}
+.tmr-ticks{flex-wrap:wrap;gap:6px}
+.tmr-tickcount{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted)}
+.tmr-tick{flex:0 0 auto;border:1px solid var(--border);border-radius:4px;background:var(--panel);cursor:pointer;padding:0;transition:background .1s,border-color .1s}
+.tmr-tick:hover{border-color:#5bbf9a}
+.tmr-tick.on{background:#5bbf9a;border-color:#5bbf9a}
+.tmr-ticks .tmr-tick{width:22px;height:22px}
+/* Ticks tracker in the Monitor bar — boxes are clickable there too. */
+.ticktrk{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#191c22,#141519);border:1px solid var(--border);border-left:2px solid #5bbf9a;border-radius:8px;padding:4px 10px;flex:0 0 auto}
+.ticktrk .tl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.ticktrk .tl:hover{color:#5bbf9a}
+.tick-boxes{display:flex;align-items:center;gap:3px}
+.tick-boxes .tmr-tick{width:14px;height:14px;border-radius:3px}
 
 @media (max-width:760px){
   .console-main{flex-direction:column;overflow-x:hidden;overflow-y:auto}
@@ -2656,7 +2672,7 @@ GMScenes.renderPins();
       </div>
       <div class="bb-quick" id="bb-quick">
         <button class="qbtn" type="button" onclick="openTool('gen')"><span class="qi">☉</span>Generators</button>
-        <button class="qbtn" type="button" onclick="openTool('timers')"><span class="qi">⏱</span>Timers</button>
+        <button class="qbtn" type="button" onclick="openTool('timers')"><span class="qi">⏱</span>Trackers</button>
         <button class="qbtn" type="button" onclick="openTool('music')"><span class="qi">♪</span>Music</button>
         <button class="qbtn" type="button" onclick="openTool('notes')"><span class="qi">✎</span>Notes</button>
         <button class="qbtn" type="button" onclick="openTool('message')"><span class="qi">💬</span>Message</button>
@@ -4054,6 +4070,7 @@ GMScenes.renderPins();
     <div class="toolbar-tpl" style="display:none">
       <button class="btn small primary tmr-add-time" type="button" title="Add a countdown clock">＋ Time</button>
       <button class="btn small ghost tmr-add-round" type="button" title="Add a round countdown">＋ Rounds</button>
+      <button class="btn small ghost tmr-add-ticks" type="button" title="Add a tick-box tracker (e.g. Alarm Level, NPC Mood)">＋ Ticks</button>
       <div class="toolbar-spacer"></div>
       <button class="btn small ghost tmr-next-round" type="button" title="Advance all round countdowns by one">Next Round ›</button>
       <button class="btn small ghost tmr-reset-rounds" type="button" title="Reset all round countdowns">Reset Rounds</button>
@@ -4061,8 +4078,8 @@ GMScenes.renderPins();
     <div class="tmr-body">
       <div class="tmr-empty">
         <div class="tmr-empty-icon">⏱</div>
-        <div class="tmr-empty-title">No Timers Yet</div>
-        <div class="tmr-empty-sub">Add a <b>Time</b> countdown (e.g. a ritual clock) or a <b>Rounds</b> countdown to track when something goes off.</div>
+        <div class="tmr-empty-title">No Trackers Yet</div>
+        <div class="tmr-empty-sub">Add a <b>Time</b> countdown (e.g. a ritual clock), a <b>Rounds</b> countdown, or a <b>Ticks</b> tracker (a labelled row of boxes for things like Alarm Level or NPC Mood).</div>
       </div>
       <div class="tmr-list" style="display:none"></div>
     </div>
@@ -4260,7 +4277,7 @@ function normalizeTool(t) { return t === 'combat' ? 'trackers' : t; }
 
 // Tool catalog (order = the tool-picker menu order)
 const TOOL_ORDER = ['adventure','maps','trackers','timers','notes','music','gen','party','message','rules','dice'];
-const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Combat', timers:'Timers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', message:'Message', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
+const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Combat', timers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', message:'Message', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
 
 // ── Dynamic windows ───────────────────────────────────────────────────────
 // The GM screen is a row of independent "windows" (columns). Each window shows
@@ -4721,18 +4738,43 @@ function renderTimers(){
   const timers = (st && st.timers) || [];
   if(!timers.length){ el.innerHTML = ''; return; }
   el.innerHTML = timers.map(t => {
+    if(t.kind === 'ticks'){
+      const n = Math.max(1, Math.min(30, t.count||1)), f = Math.max(0, Math.min(n, t.filled||0));
+      let boxes = '';
+      for(let i=1;i<=n;i++) boxes += '<button type="button" class="tmr-tick'+(i<=f?' on':'')+'" data-i="'+i+'" title="Set to '+i+'"></button>';
+      return '<div class="ticktrk" data-id="'+t.id+'">'
+        + '<div class="tl" data-opentrackers title="Open Trackers">'+esc2(t.name||'Ticks')+'</div>'
+        + '<div class="tick-boxes">'+boxes+'</div></div>';
+    }
     if(t.kind === 'round'){
       const zero = t.remainingRounds <= 0;
-      return '<div class="timer'+(zero?' zero':'')+'" onclick="openTool(\'timers\')" title="Open Timers">'
+      return '<div class="timer'+(zero?' zero':'')+'" onclick="openTool(\'timers\')" title="Open Trackers">'
         + '<div><div class="tl">'+esc2(t.name||'Rounds')+'</div><div class="tv">'+t.remainingRounds+' rd</div></div></div>';
     }
     const secs = t.remainingSeconds != null ? t.remainingSeconds : (t.totalSeconds || 0);
     const m = Math.floor(Math.max(0,secs)/60), s = Math.max(0,secs)%60;
     const zero = secs <= 0;
-    return '<div class="timer'+(zero?' zero':'')+'" onclick="openTool(\'timers\')" title="Open Timers">'
+    return '<div class="timer'+(zero?' zero':'')+'" onclick="openTool(\'timers\')" title="Open Trackers">'
       + '<div><div class="tl">'+esc2(t.name||'Timer')+'</div>'
       + '<div class="tv">'+m+':'+String(s).padStart(2,'0')+'</div></div></div>';
   }).join('');
+  wireTimers();
+}
+// Monitor-bar tick boxes tick the Trackers-tool state directly (fill-to-level);
+// the label opens the tool. Delegated so it survives every renderTimers rebuild.
+function wireTimers(){
+  const el = document.getElementById('gmc-timers');
+  if(!el || el._wiredTicks) return; el._wiredTicks = true;
+  el.addEventListener('click', e => {
+    const box = e.target.closest('.tmr-tick');
+    if(box){
+      const trk = box.closest('.ticktrk'); if(!trk) return;
+      const node = gmcPopNodes && gmcPopNodes['timers'];
+      if(node && node._setTick){ node._setTick(+trk.dataset.id, +box.dataset.i); renderTimers(); }
+      return;
+    }
+    if(e.target.closest('[data-opentrackers]')) openTool('timers');
+  });
 }
 
 // ── Scenes — auto-pin every scene as a one-tap toggle in the monitor bar. ──
@@ -15568,6 +15610,7 @@ function init_timers(root) {
   const emptyEl    = root.querySelector('.tmr-empty');
   const addTimeBtn = root.querySelector('.tmr-add-time');
   const addRoundBtn= root.querySelector('.tmr-add-round');
+  const addTicksBtn= root.querySelector('.tmr-add-ticks');
   let timers = [];
   let nextId = 1;
   const esc = t => String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -15576,12 +15619,31 @@ function init_timers(root) {
 
   function addTimer(kind){
     if(kind === 'round') timers.push({ id:nextId++, kind:'round', name:'', totalRounds:3, remainingRounds:3 });
+    else if(kind === 'ticks') timers.push({ id:nextId++, kind:'ticks', name:'', count:5, filled:0 });
     else timers.push({ id:nextId++, kind:'time', name:'', totalSeconds:180, remainingSeconds:180, running:false });
     render(); save();
   }
+  // Boxes for a tick tracker; `interactive` adds the data-i hooks the click
+  // handlers use (the monitor bar reuses the same markup via renderTimers).
+  function ticksBoxes(t){
+    const n = Math.max(1, Math.min(30, t.count || 1)), f = Math.max(0, Math.min(n, t.filled || 0));
+    let out = '';
+    for(let i=1;i<=n;i++) out += `<button type="button" class="tmr-tick${i<=f?' on':''}" data-i="${i}" title="Set to ${i}"></button>`;
+    return out;
+  }
+  // Tap box i to set the level to i; tap the box that's already the top to drop one.
+  function setTicks(t, i){ const n = Math.max(1, Math.min(30, t.count || 1)); t.filled = ((t.filled||0) === i ? i - 1 : i); t.filled = Math.max(0, Math.min(n, t.filled)); }
   function findT(card){ const id = +card.dataset.id; return timers.find(x => x.id === id); }
 
   function cardHtml(t){
+    if(t.kind === 'ticks'){
+      const n = Math.max(1, Math.min(30, t.count || 1)), f = Math.max(0, Math.min(n, t.filled || 0));
+      return `<div class="tmr-card ticks" data-id="${t.id}">
+        <div class="tmr-row1"><input class="tmr-name" placeholder="Alarm Level, NPC Mood…" value="${esc(t.name)}"><span class="tmr-kind tk">Ticks</span><button class="tmr-del" title="Remove">✕</button></div>
+        <div class="tmr-row2 tmr-ticks">${ticksBoxes(t)}<span class="tmr-tickcount">${f}/${n}</span></div>
+        <div class="tmr-row3"><span class="tmr-setlbl">Boxes</span><input type="number" class="tmr-count" min="1" max="30" value="${n}"><button class="tmr-apply tmr-apply-ticks">Set</button><button class="tmr-reset" title="Clear all">↺</button></div>
+      </div>`;
+    }
     if(t.kind === 'round'){
       const zero = t.remainingRounds <= 0;
       return `<div class="tmr-card round${zero?' expired':''}" data-id="${t.id}">
@@ -15607,10 +15669,20 @@ function init_timers(root) {
     card.querySelector('.tmr-del').addEventListener('click', () => { timers = timers.filter(x => x !== t); render(); save(); });
     card.querySelector('.tmr-reset').addEventListener('click', () => {
       if(t.kind === 'round') t.remainingRounds = t.totalRounds;
+      else if(t.kind === 'ticks') t.filled = 0;
       else { t.remainingSeconds = t.totalSeconds; t.running = false; }
       render(); save();
     });
-    if(t.kind === 'round'){
+    if(t.kind === 'ticks'){
+      card.querySelector('.tmr-ticks').addEventListener('click', e => {
+        const box = e.target.closest('.tmr-tick'); if(!box) return;
+        setTicks(t, +box.dataset.i); render(); save();
+      });
+      card.querySelector('.tmr-apply-ticks').addEventListener('click', () => {
+        const n = Math.max(1, Math.min(30, parseInt(card.querySelector('.tmr-count').value) || 1));
+        t.count = n; if(t.filled > n) t.filled = n; render(); save();
+      });
+    } else if(t.kind === 'round'){
       card.querySelector('.tmr-minus').addEventListener('click', () => { t.remainingRounds = Math.max(0, t.remainingRounds - 1); render(); save(); });
       card.querySelector('.tmr-plus').addEventListener('click', () => { t.remainingRounds += 1; if(t.remainingRounds > t.totalRounds) t.totalRounds = t.remainingRounds; render(); save(); });
     } else {
@@ -15637,6 +15709,7 @@ function init_timers(root) {
 
   addTimeBtn.addEventListener('click', () => addTimer('time'));
   addRoundBtn.addEventListener('click', () => addTimer('round'));
+  if(addTicksBtn) addTicksBtn.addEventListener('click', () => addTimer('ticks'));
 
   // Advance every round-countdown by one (driven by the Monitor bar Next-Round).
   root._stepRounds = () => {
@@ -15657,6 +15730,11 @@ function init_timers(root) {
   const rrBtn = root.querySelector('.tmr-reset-rounds');
   if(rrBtn) rrBtn.addEventListener('click', () => { root._resetRounds(); try { renderTimers(); } catch(e){} });
 
+  // Tick a box straight from the Monitor bar (fill-to-level, same as the tool card).
+  root._setTick = (id, i) => {
+    const t = timers.find(x => x.id === id && x.kind === 'ticks'); if(!t) return false;
+    setTicks(t, i); render(); save(); return true;
+  };
   root._getState = () => ({ timers });
   root._setState = (st) => {
     if(st && Array.isArray(st.timers)){
