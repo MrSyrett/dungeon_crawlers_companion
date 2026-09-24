@@ -5667,6 +5667,16 @@ function initDocTool(root) {
 const PREP_ICO = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg>';
 function advEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function advText(str){ return advEsc(str).replace(/\n/g, '<br>'); }
+// Matches the Adventure Prep's fmtText(): per line, bold the label before a colon
+// (when the colon is near the start), and join lines with <br>.
+function advFmt(str){
+  if(!str) return '';
+  return String(str).split('\n').map(line => {
+    const idx = line.indexOf(':');
+    if(idx > 0 && idx < 40) return '<strong>' + advEsc(line.slice(0, idx)) + ':</strong> ' + advEsc(line.slice(idx + 1).trim());
+    return advEsc(line);
+  }).join('<br>');
+}
 
 function wireSessionPrepLoader(root) {
   const emptyEl = root.querySelector('.doc-empty');
@@ -5835,7 +5845,7 @@ function wireSessionPrepLoader(root) {
         const typName = typ === 'npc' ? 'Social' : (typ ? typ.charAt(0).toUpperCase() + typ.slice(1) : '');
         const sub = s.tag || typName;
         const scnSec = (label, val) => (val && String(val).trim())
-          ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advText(val) + '</div></div>'
+          ? '<div class="advh-scene-sec"><div class="advh-scene-lbl">' + label + '</div><div class="advh-desc">' + advFmt(val) + '</div></div>'
           : '';
         const hasBody = s.readaloud || s.desc || s.consequences || s.notes;
         return '<div class="advh-scene" data-i="' + i + '">'
@@ -5845,7 +5855,7 @@ function wireSessionPrepLoader(root) {
           + '<span class="advh-chev">▾</span></button>'
           + '<div class="advh-scene-body" style="display:none;">'
           + (s.tag ? '<div class="advh-scene-dq">' + advEsc(s.tag) + '</div>' : '')
-          + (s.readaloud ? '<div class="advh-readaloud">' + advText(s.readaloud) + '</div>' : '')
+          + (s.readaloud ? '<div class="advh-readaloud">' + advFmt(s.readaloud) + '</div>' : '')
           + scnSec('Interactions', s.desc)
           + scnSec('Consequences', s.consequences)
           + scnSec('Notes', s.notes)
