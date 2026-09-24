@@ -2084,18 +2084,18 @@ body[data-cview="free"] .cst-log-rail{display:none}
   const SYS_GENS = {
     SD:  ['adventure','npc','rival','monster','dungeon','encounter','shop','sdfoundloot'],
     DCC: ['dccnpc','dccneighborhood','dccmonster','dccencounter','dccloot','dccitem'],
-    ACE: ['acemonster','acetreasure'],
-    KOB: [],
-    NIM: ['nimmonster','nimtreasure'],
-    SW:  ['swmonster','swtreasure'],
+    ACE: ['npc','acemonster','acetreasure'],
+    KOB: ['npc'],
+    NIM: ['npc','nimmonster','nimtreasure'],
+    SW:  ['npc','swmonster','swtreasure'],
     DND: ['adventure','npc','dungeon','encounter','shop','dndmonster','dndtreasure'],
-    D62E:['d62emonster','d62etreasure'],
-    ICRPG:['icrpgmonster','icrpgtreasure'],
-    MMRPG:['mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
-    CO:  [],
-    YZE: ['yzetables'],
-    JLU: [],
-    GB:  [],
+    D62E:['npc','d62emonster','d62etreasure'],
+    ICRPG:['npc','icrpgmonster','icrpgtreasure'],
+    MMRPG:['npc','mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
+    CO:  ['npc'],
+    YZE: ['npc','yzetables'],
+    JLU: ['npc'],
+    GB:  ['npc'],
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
@@ -8782,31 +8782,71 @@ function genRivalCrawler(size, disp) {
 }
 
 // ── NPC ───────────────────────────────────────────────────────────────────
-function genNPC(ancestry, wealth) {
-  const anc  = ancestry==='random'?R(['Human','Human','Human','Dwarf','Elf','Halfling','Half-Orc','Goblin']):ancestry;
-  const wlth = wealth==='random'?R(['Poor','Poor','Standard','Standard','Standard','Wealthy']):wealth;
-  const pool = NPC_NAMES[anc]||NPC_NAMES.Human;
-  const age  = anc==='Goblin'?`${rollD(20)+5}`:anc==='Elf'?`${rollD(400)+50}`:anc==='Dwarf'?`${rollD(200)+30}`:`${rollD(40)+15}`;
+// The active system's NPC table set (falls back to Shadowdark). System-specific,
+// genre-appropriate data lives in public/tools-data/gm-npc-tables.js.
+function npcTables() {
+  const K = (window.GM_SYSTEM || 'SD');
+  const T = window.GM_NPC_TABLES || {};
+  return T[K] || T.SD || null;
+}
+function genNPC(kindArg, wealth) {
+  const T = npcTables();
+  if(!T) return card('<div class="gen-empty">NPC tables are still loading — try again.</div>');
+  const kinds = T.kinds;
+  const kind  = !kinds ? '' : (kindArg && kindArg !== 'random' ? kindArg : R(kinds));
+  const wlth  = (wealth && wealth !== 'random') ? wealth : R(['Poor','Poor','Standard','Standard','Standard','Wealthy']);
+  const pool  = kinds ? (T.names[kind] || T.names._ || T.names.Human || Object.values(T.names)[0] || []) : (T.names._ || []);
+  const age   = typeof T.age === 'function' ? T.age(kind) : `${rollD(40)+15}`;
+  const appear = [R(T.builds)];
+  if(T.hair) appear.push(`${R(T.hair)} hair`);
+  if(T.eyes) appear.push(`${R(T.eyes)} eyes`);
+  const dressPool = (T.dress && (T.dress[wlth] || T.dress.Standard)) || [];
+  const coinFn    = T.coin && (T.coin[wlth] || T.coin.Standard);
   const npc = {
-    name: R(pool), ancestry: anc, wealth: wlth, age,
-    build: `${R(BUILDS)}, ${R(HAIR)} hair, ${R(EYES)} eyes`,
-    dress: R(CLOTHING[wlth]), feature: R(FEATURES),
-    occupation: R(OCCUPATIONS), demeanor: R(DEMEANOR),
-    quirk: R(QUIRKS), wants: R(WANTS), secret: R(SECRETS), coin: COIN[wlth]()
+    name: R(pool) || 'NPC', ancestry: kind, wealth: wlth, age,
+    build: appear.filter(Boolean).join(', '),
+    dress: R(dressPool) || '', feature: R(T.features) || '',
+    occupation: R(T.occupations) || '', demeanor: R(T.demeanor) || '',
+    quirk: R(T.quirks) || '', wants: R(T.wants) || '', secret: R(T.secrets) || '',
+    coin: coinFn ? coinFn() : ''
   };
+  const tag = kind ? `${esc(kind)} · ${esc(wlth)}` : esc(wlth);
+  const showAge = npc.age && npc.age !== '—';
   const c = card(`
-    <div class="gen-card-header"><span class="gen-card-name">${esc(npc.name)}</span><span class="gen-card-tag">${esc(anc)} · ${esc(wlth)}</span></div>
-    ${row('Age',npc.age)} ${row('Build',npc.build)}
+    <div class="gen-card-header"><span class="gen-card-name">${esc(npc.name)}</span><span class="gen-card-tag">${tag}</span></div>
+    ${showAge ? row('Age',npc.age) : ''} ${row('Build',npc.build)}
     ${row('Dress',npc.dress)} ${row('Feature',npc.feature)}
     <hr class="gen-card-divider">
     ${row('Occupation',npc.occupation)} ${row('Demeanor',npc.demeanor)}
     ${row('Quirk',npc.quirk)} ${row('Wants',npc.wants)}
-    ${row('Secret',npc.secret)} ${row('Coin',npc.coin)}
+    ${row('Secret',npc.secret)} ${npc.coin ? row('Coin',npc.coin) : ''}
     <div class="gen-card-actions"><button class="btn small primary gen-send-social" title="Send this NPC to the Social station">Send to Social</button></div>
   `);
   try { c.dataset.npc = JSON.stringify(npc); } catch(e) {}
   return c;
 }
+// Rebuild the NPC panel's ancestry/species picker for the active system. Systems
+// without a species axis (modern settings) hide the picker entirely.
+function populateNpcPanel(root) {
+  const scope = root || document;
+  const T = npcTables();
+  scope.querySelectorAll('#gen-npc-ancestry').forEach(sel => {
+    const lbl = sel.closest('.gen-label');
+    if(!T || !T.kinds) {
+      if(lbl) lbl.style.display = 'none';
+      sel.innerHTML = '<option value="random">Random</option>';
+      return;
+    }
+    if(lbl) {
+      lbl.style.display = '';
+      if(lbl.firstChild && lbl.firstChild.nodeType === 3) lbl.firstChild.nodeValue = (T.kindLabel || 'Ancestry') + ' ';
+    }
+    const seen = {}, opts = ['<option value="random">Random</option>'];
+    T.kinds.forEach(k => { if(!seen[k]) { seen[k] = 1; opts.push(`<option value="${esc(k)}">${esc(k)}</option>`); } });
+    sel.innerHTML = opts.join('');
+  });
+}
+document.addEventListener('gm-system-change', () => populateNpcPanel(document));
 // A rolled NPC → Social-card fields.
 function npcObjToSocial(npc) {
   npc = npc || {};
@@ -11068,6 +11108,8 @@ window.init_gen = function(root) {
   // Honor the SD/DCC toggle: hide the other system's options and, if the default
   // tab ('adventure') belongs to the hidden system, switch to the first visible one.
   if(typeof window.applyGmSystemToGenerators === 'function') window.applyGmSystemToGenerators(root);
+  // Populate the NPC picker for the active system (species list, or hidden for modern settings).
+  try { populateNpcPanel(root); } catch(e){}
   // Wire the loot-box + found-loot builders now living in this tool's panels.
   try { if(typeof wireAiConsole === 'function') wireAiConsole(root); } catch(e){}
 
@@ -13324,6 +13366,7 @@ else syncHomebrewMonsters();
 <script src="/tools-data/mmrpg-traits.js"></script>
 <script src="/tools-data/mmrpg-tags.js"></script>
 <script src="/tools-data/gb-bestiary.js"></script>
+<script src="/tools-data/gm-npc-tables.js"></script>
 <script>
 
 
