@@ -4731,6 +4731,7 @@ let gmcAutoedFight = false;
 let gmcRestored = false;   // true once a saved layout has been restored, so bootstrap won't override it
 let gmcRoster = [];        // last published roster (so a bubble click can open its detail)
 let gmcCharPopIdx = null;  // which roster index the popup is showing (for live refresh)
+let gmcCharPopId = null;   // and the matching card id (identity-based refresh)
 const gmcStart = Date.now();
 
 function gmcInitials(name){
@@ -4932,6 +4933,7 @@ function closeGmcPop(){
   const scrim = document.getElementById('gmc-scrim');
   if(scrim) scrim.classList.remove('show');
   gmcCharPopIdx = null;   // popup closed — stop live-refreshing any character card
+  gmcCharPopId = null;
   const tb = document.getElementById('gmc-pop-toolbar');
   if(tb) tb.innerHTML = '';
   // detach any mounted tool node back to the pool so it can be reopened.
@@ -4976,13 +4978,26 @@ function openTool(k){
 
 // A party bubble opens that character's actual Party-tool card (cloned so it
 // reads identically), expanded, in a full-height window.
+// Find the Party-tool card that belongs to roster entry `p`. Match by the card's
+// data-id first (robust when the roster is filtered/reordered vs the card list, or
+// a second Party instance is mounted), then by name, and only fall back to index.
+function gmcFindPartyCard(p, i){
+  const partyNode = gmcPopNodes['party'];
+  if(!partyNode) return null;
+  const cards = partyNode.querySelectorAll('.pty-list .pty-card');
+  if(p && p.id != null && p.id !== ''){
+    for(const c of cards){ if(c.getAttribute('data-id') === String(p.id)) return c; }
+  }
+  if(p && p.name){
+    for(const c of cards){ if((((c.querySelector('.pty-name')||{}).textContent)||'').trim() === p.name) return c; }
+  }
+  return cards[i] || null;
+}
 function charPop(i){
   const body = document.getElementById('gmc-pop-body');
   if(!body) return;
-  const partyNode = gmcPopNodes['party'];
-  const cards = partyNode ? partyNode.querySelectorAll('.pty-list .pty-card') : [];
-  const src = cards[i];
   const p = gmcRoster[i] || (window.GM_ROSTER||[])[i] || {};
+  const src = gmcFindPartyCard(p, i);
   const title = p.name || (src && src.querySelector('.pty-name') ? src.querySelector('.pty-name').textContent : 'Character');
   if(src){
     const clone = src.cloneNode(true);
@@ -4993,6 +5008,7 @@ function charPop(i){
     body.innerHTML = '';
     body.appendChild(clone);
     gmcCharPopIdx = i;   // remember it so live syncs refresh the open card
+    gmcCharPopId = (p && p.id != null && p.id !== '') ? String(p.id) : (src.getAttribute('data-id') || null);
     return;
   }
   // No synced card yet — fall back to a compact live-stats card.
@@ -5020,7 +5036,10 @@ function gmcRefreshCharPop(){
   if(!open) return;   // popup no longer showing a character card
   const partyNode = gmcPopNodes['party'];
   const cards = partyNode ? partyNode.querySelectorAll('.pty-list .pty-card') : [];
-  const src = cards[gmcCharPopIdx];
+  // Prefer the same card by identity (data-id); fall back to the stored index.
+  let src = null;
+  if(gmcCharPopId != null){ for(const c of cards){ if(c.getAttribute('data-id') === gmcCharPopId){ src = c; break; } } }
+  if(!src) src = cards[gmcCharPopIdx];
   if(!src) return;
   const clone = src.cloneNode(true);
   clone.classList.add('open');
@@ -15095,6 +15114,7 @@ function init_party(root) {
   function publishRoster() {
     try {
       const roster = Array.from(listEl.querySelectorAll('.pty-card')).map(card => {
+        const id = card.getAttribute('data-id');
         const name = ((card.querySelector('.pty-name') || {}).textContent || '').trim();
         const subEl = card.querySelector('.pty-sub') || card.querySelector('.pcard-type');
         const sub  = ((subEl || {}).textContent || '').trim();
@@ -15108,7 +15128,7 @@ function init_party(root) {
             const bd = JSON.parse(raw.replace(/&#39;/g, "'"));
             const bchips = (bd.chips || []).map(c => ({ label: c.label || c.l || '', value: c.value == null ? (c.v == null ? '' : c.v) : c.value }))
                                             .filter(c => c.label || c.value);
-            return { name, sub, hp: bd.hp || '', wound: bd.wound || '', ac: '', acLabel: 'AC', extra: bchips };
+            return { id, name, sub, hp: bd.hp || '', wound: bd.wound || '', ac: '', acLabel: 'AC', extra: bchips };
           } catch(e) { /* fall through to header scrape */ }
         }
         // Capture EVERY header chip as {label, value} so the Monitor bubble can
@@ -15137,7 +15157,7 @@ function init_party(root) {
           else if(acIdx < 0 && DEF.test(full)) { ac = value || full.replace(DEF, '').trim(); acLabel = (label || 'AC').toUpperCase().slice(0, 4); acIdx = idx; }
         });
         const extra = chips.filter((_, i) => i !== hpIdx && i !== acIdx && (chips[i].label || chips[i].value));
-        return { name, sub, hp, ac, acLabel, extra };
+        return { id, name, sub, hp, ac, acLabel, extra };
       }).filter(x => x.name);
       window.GM_ROSTER = roster;
       document.dispatchEvent(new CustomEvent('gm-roster', { detail: roster }));
