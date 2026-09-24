@@ -407,8 +407,8 @@ for (const S of SYSTEMS) {
   s = rep(s, 'placeholder="e.g. A One-Session Adventure..."', `placeholder="${S.subtitlePh}"`);
   s = rep(s, ">NPCs/Mobs</button>", `>${S.mobs}</button>`);
   s = rep(s, "NPCs &amp; Mobs</div>", `${S.mobsHeading}</div>`);
-  s = rep(s, "onchange=\"updateSbCardColor(this);autosave()\"> Mob\n", `onchange="updateSbCardColor(this);autosave()"> ${S.mob}\n`);
-  s = rep(s, "onchange=\"updateSbCardColor(this);autosave()\"> Boss\n", `onchange="updateSbCardColor(this);autosave()"> ${S.boss}\n`);
+  s = rep(s, "onchange=\"updateSbCardColor(this);toggleSocial(this);autosave()\"> Mob\n", `onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> ${S.mob}\n`);
+  s = rep(s, "onchange=\"updateSbCardColor(this);toggleSocial(this);autosave()\"> Boss\n", `onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> ${S.boss}\n`);
   // stat-block schema + bestiary source
   s = s.replace(/\/\* SB_CONFIG_START \*\/[\s\S]*?const _DCC_SIZE_NAMES/, "/* SB_CONFIG_START */\n" + SB_CONFIGS[S.cfg] + "\nconst _DCC_SIZE_NAMES");
   s = s.replace(/<!-- MOB_DATA_START -->[\s\S]*?<!-- MOB_DATA_END -->/, MOB_DATA[S.cfg]);

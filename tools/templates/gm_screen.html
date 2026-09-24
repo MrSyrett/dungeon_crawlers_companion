@@ -1843,6 +1843,13 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .csub{display:flex;flex-direction:column;min-height:0;flex:1 1 0;border-bottom:2px solid var(--border);overflow:hidden;transition:flex .3s,opacity .25s}
 .csub:last-child{border-bottom:none}
 .csub.collapsed{flex:0 0 0!important;opacity:0;border-width:0!important;pointer-events:none;overflow:hidden}
+/* Top row of the center column: Maps | Social side-by-side (Master), or one of them filling it. */
+#cst-toprow{display:flex;flex-direction:row;min-height:0;min-width:0;flex:1 1 0;border-bottom:2px solid var(--border);overflow:hidden;transition:flex .3s,opacity .25s}
+#cst-toprow.collapsed{flex:0 0 0!important;opacity:0;border-width:0!important;pointer-events:none;overflow:hidden}
+#cst-toprow > .csub{flex:1 1 0;min-width:0;border-bottom:none}
+#cst-toprow > .csub.collapsed{flex:0 0 0!important;min-width:0!important;width:0!important;border-left-width:0!important}
+#cst-toprow > #cst-soc{border-left:2px solid var(--border)}
+#cst-toprow:has(> #cst-map.collapsed) > #cst-soc{border-left:none}
 
 .cst-head{display:flex;align-items:center;gap:8px;padding:7px 10px;background:linear-gradient(180deg,#20242c,#171a20);border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(36,211,238,.3);flex-shrink:0;position:relative}
 .cst-head::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2) 60%,transparent);opacity:.5;pointer-events:none}
@@ -1963,6 +1970,23 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .ticktrk .tl:hover{color:#5bbf9a}
 .tick-boxes{display:flex;align-items:center;gap:3px}
 .tick-boxes .tmr-tick{width:14px;height:14px;border-radius:3px}
+/* ── Social station cards (roleplay NPCs) ── */
+.soc-card .soc-name{flex:1;min-width:0;background:transparent;border:1px solid transparent;border-radius:5px;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:.02em;padding:2px 5px;margin:-2px 0}
+.soc-card .soc-name:hover{border-color:var(--border)}
+.soc-card .soc-name:focus{outline:none;border-color:var(--gold);background:var(--panel)}
+.soc-meters{display:flex;flex-wrap:wrap;gap:8px 16px;margin:2px 0 4px}
+.soc-meter{display:flex;align-items:center;gap:8px;min-width:0}
+.soc-meter-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);flex:0 0 auto;min-width:56px}
+.soc-meter.interest .soc-meter-lbl{color:#6a9fc8}
+.soc-meter-boxes{display:flex;align-items:center;gap:4px}
+.soc-tick{flex:0 0 auto;width:18px;height:18px;border:1px solid var(--border);border-radius:4px;background:var(--panel);cursor:pointer;padding:0;transition:background .1s,border-color .1s}
+.soc-tick:hover{border-color:var(--gold)}
+.soc-tick.on{background:var(--gold);border-color:var(--gold)}
+.soc-meter.interest .soc-tick:hover{border-color:#6a9fc8}
+.soc-meter.interest .soc-tick.on{background:#6a9fc8;border-color:#6a9fc8}
+.soc-meter-val{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);flex:0 0 auto}
+.soc-sec.soc-secret{border-top-color:var(--red)}
+.soc-sec.soc-secret .cc-sec{color:var(--red-light)}
 
 @media (max-width:760px){
   .console-main{flex-direction:column;overflow-x:hidden;overflow-y:auto}
@@ -2649,10 +2673,16 @@ GMScenes.renderPins();
         <div class="cst-content" id="cst-adv-content"></div>
       </aside>
       <main class="cstation cstation-center" id="cst-center">
-        <section class="csub" id="cst-map">
-          <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Maps</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
-          <div class="cst-content" id="cst-map-content"></div>
-        </section>
+        <div class="csub-row" id="cst-toprow">
+          <section class="csub" id="cst-map">
+            <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Maps</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
+            <div class="cst-content" id="cst-map-content"></div>
+          </section>
+          <section class="csub" id="cst-soc">
+            <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-soc-title">Social</span><div class="cst-toolbar" id="cst-soc-toolbar"></div></div>
+            <div class="cst-content" id="cst-soc-content"></div>
+          </section>
+        </div>
         <section class="csub" id="cst-cbt">
           <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-cbt-title">Combat</span><div class="cst-toolbar" id="cst-cbt-toolbar"></div></div>
           <div class="cst-content" id="cst-cbt-content"></div>
@@ -2667,6 +2697,7 @@ GMScenes.renderPins();
     <footer class="bottom-bar" id="bottom-bar">
       <div class="bb-modes">
         <button class="cmode-tab" data-mode="explore"   type="button" onclick="setConsoleMode('explore')"><span class="cm-ico">🧭</span><span class="cm-name">Explore</span></button>
+        <button class="cmode-tab" data-mode="social"    type="button" onclick="setConsoleMode('social')"><span class="cm-ico">🗣</span><span class="cm-name">Social</span></button>
         <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
         <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
       </div>
@@ -2864,6 +2895,24 @@ GMScenes.renderPins();
         <div class="cbt-empty cbt-trackers-empty">
           <div class="cbt-empty-text">Nothing tracked yet</div>
           <div class="cbt-empty-sub">Add timers, round trackers, or combatants &mdash; drag the grip to reorder</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<template id="tpl-social">
+  <div class="tool-instance soc-tool" data-tool="social">
+    <div class="toolbar-tpl" style="display:none">
+      <button class="btn small primary soc-add" type="button" title="Add a blank NPC card" aria-label="Add NPC">&#43; NPC</button>
+      <div class="toolbar-spacer"></div>
+      <button class="btn small ghost soc-clear" type="button" title="Remove all NPCs" aria-label="Clear NPCs">Clear</button>
+    </div>
+    <div class="cbt-body cbt-single">
+      <div class="cbt-col cbt-trackers-col">
+        <div class="cbt-tracker-list soc-list"></div>
+        <div class="cbt-empty soc-empty">
+          <div class="cbt-empty-text">No NPCs in the scene</div>
+          <div class="cbt-empty-sub">Send NPCs here from the Adventure hub or the NPC generator, or add a blank card &mdash; then track Patience &amp; Interest.</div>
         </div>
       </div>
     </div>
@@ -4276,8 +4325,8 @@ function isMobileView() { return GM_MOBILE_MQ.matches; }
 function normalizeTool(t) { return t === 'combat' ? 'trackers' : t; }
 
 // Tool catalog (order = the tool-picker menu order)
-const TOOL_ORDER = ['adventure','maps','trackers','timers','notes','music','gen','party','message','rules','dice'];
-const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Combat', timers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', message:'Message', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
+const TOOL_ORDER = ['adventure','maps','trackers','social','timers','notes','music','gen','party','message','rules','dice'];
+const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Combat', social:'Social', timers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', message:'Message', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
 
 // ── Dynamic windows ───────────────────────────────────────────────────────
 // The GM screen is a row of independent "windows" (columns). Each window shows
@@ -4329,7 +4378,7 @@ function ensureToolWindow(toolType) {
   // Console view: route to the station that hosts the tool (e.g. a monster sent
   // to the tracker lands in the spine), rather than spawning a hidden window.
   if(document.body.dataset.cview === 'console') {
-    const STATION_FOR = { trackers:'cbt', dice:'log', maps:'map', adventure:'adv' };
+    const STATION_FOR = { trackers:'cbt', dice:'log', maps:'map', adventure:'adv', social:'soc' };
     for(const st of CONSOLE_STATIONS) {
       const cache = gmNodes['cst-' + st];
       if(cache && cache.active === toolType) return cache.byTool[toolType];
@@ -4399,7 +4448,7 @@ function buildWindowColumn(w) {
 // and quick-tool popups use, so a Free-mode window shows the content the GM
 // already loaded elsewhere (and vice-versa). Console tools live in their fixed
 // station cache; everything else shares the popup instance.
-const TOOL_HOME = { adventure:'cst-adv', maps:'cst-map', trackers:'cst-cbt', dice:'cst-log' };
+const TOOL_HOME = { adventure:'cst-adv', maps:'cst-map', trackers:'cst-cbt', social:'cst-soc', dice:'cst-log' };
 function sharedToolNode(tool) {
   tool = normalizeTool(tool);
   if(TOOL_HOME[tool]) return getWinNode(TOOL_HOME[tool], tool);
@@ -4525,16 +4574,17 @@ GM_MOBILE_MQ.addEventListener('change', () => applyResponsiveMode());
 //
 //   Canvas: [ Adventure ] | [ Map·VTT / Combat (center stack) ] | [ Roll Log ]
 // ══════════════════════════════════════════════════════════════════════════
-const CONSOLE_STATIONS = ['adv','map','cbt','log'];
-const STATION_TOOL   = { adv:'adventure', map:'maps', cbt:'trackers', log:'dice' };
-const STATION_TITLES = { adv:'Adventure', map:'Maps', cbt:'Combat', log:'Roll Log' };
+const CONSOLE_STATIONS = ['adv','map','soc','cbt','log'];
+const STATION_TOOL   = { adv:'adventure', map:'maps', soc:'social', cbt:'trackers', log:'dice' };
+const STATION_TITLES = { adv:'Adventure', map:'Maps', soc:'Social', cbt:'Combat', log:'Roll Log' };
 // Each mode is a visibility map over the four stations. `tools` overrides which
 // tool a station hosts in that mode, `titles` its header text. The center wrapper
 // (#cst-center) is shown whenever either of its subs (map / cbt) is visible.
 const CONSOLE_MODES = {
-  explore:  { adv:1, map:1, cbt:0, log:1 },   // adventure + MAP (combat hidden) + roll log
-  combat:   { adv:1, map:0, cbt:1, log:1 },   // adventure + COMBAT (map hidden) + roll log
-  master:   { adv:1, map:1, cbt:1, log:1 },   // everything — the home layout
+  explore:  { adv:1, map:1, soc:0, cbt:0, log:1 },   // adventure + MAP fills the canvas + roll log
+  social:   { adv:1, map:0, soc:1, cbt:0, log:1 },   // adventure + SOCIAL fills the canvas + roll log
+  combat:   { adv:1, map:0, soc:0, cbt:1, log:1 },   // adventure + COMBAT fills the canvas + roll log
+  master:   { adv:1, map:1, soc:1, cbt:1, log:1 },   // everything — Maps|Social on top, Combat below
 };
 let consoleMode = 'master';
 function stationToolFor(cfg, st){ return (cfg.tools && cfg.tools[st]) || STATION_TOOL[st]; }
@@ -4597,8 +4647,11 @@ function renderConsole(mode) {
       if(titleEl) titleEl.textContent = (cfg.titles && cfg.titles[st]) || STATION_TITLES[st];
     }
   });
-  // The center wrapper collapses when both of its subs are hidden.
-  const centerVis = !!(cfg.map || cfg.cbt);
+  // The top row (Maps | Social) collapses when neither is visible, so Combat fills
+  // the center on its own. The center wrapper collapses when all three subs hide.
+  const toprow = document.getElementById('cst-toprow');
+  if(toprow) toprow.classList.toggle('collapsed', !(cfg.map || cfg.soc));
+  const centerVis = !!(cfg.map || cfg.soc || cfg.cbt);
   const center = document.getElementById('cst-center');
   if(center) center.classList.toggle('collapsed', !centerVis);
 
@@ -5844,9 +5897,12 @@ function wireSessionPrepLoader(root) {
     // Strip the adjustable / removable bits — read-only in the hub.
     card.querySelectorAll('.cc-hp-dmg, .npc-del').forEach(e => e.remove());
     card.querySelectorAll('.cc-hp-cur').forEach(inp => { inp.readOnly = true; inp.disabled = true; inp.tabIndex = -1; });
-    // A → Combat action still lives on the banner (on-demand send).
+    // → Combat and → Social send actions live on the banner (on-demand send).
     const band = card.querySelector('.cc-band');
-    if(band) { const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small primary advh-send'; send.title = 'Add to the combat tracker'; send.innerHTML = '&rarr; Combat'; band.appendChild(send); }
+    if(band) {
+      const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small primary advh-send'; send.title = 'Add to the combat tracker'; send.innerHTML = '&rarr; Combat'; band.appendChild(send);
+      const soc = document.createElement('button'); soc.type = 'button'; soc.className = 'btn small ghost advh-send-social'; soc.title = 'Add to the Social station'; soc.innerHTML = '&rarr; Social'; band.appendChild(soc);
+    }
     slot.innerHTML = '';
     slot.appendChild(card);
   }
@@ -5872,7 +5928,7 @@ function wireSessionPrepLoader(root) {
     hub.querySelectorAll('.advh-npc').forEach(slot => {
       mountNpcCard(slot);
       const band = slot.querySelector('.cc-band');
-      if(band) band.addEventListener('click', e => { if(e.target.closest('.advh-send')) return; slot.classList.toggle('advh-collapsed'); });
+      if(band) band.addEventListener('click', e => { if(e.target.closest('.advh-send, .advh-send-social')) return; slot.classList.toggle('advh-collapsed'); });
       const send = slot.querySelector('.advh-send');
       if(send) send.addEventListener('click', e => {
         e.stopPropagation();
@@ -5880,6 +5936,15 @@ function wireSessionPrepLoader(root) {
         if(sb && typeof window.sendPrepNpcToTracker === 'function' && window.sendPrepNpcToTracker(sb, prepSys)) {
           send.innerHTML = '✓ Added'; send.disabled = true;
           setTimeout(() => { send.innerHTML = '&rarr; Combat'; send.disabled = false; }, 1400);
+        }
+      });
+      const soc = slot.querySelector('.advh-send-social');
+      if(soc) soc.addEventListener('click', e => {
+        e.stopPropagation();
+        const i = +slot.dataset.i; const sb = (prep.statblocks || [])[i];
+        if(sb && typeof window.sendPrepNpcToSocial === 'function' && window.sendPrepNpcToSocial(sb, prepSys)) {
+          soc.innerHTML = '✓ Added'; soc.disabled = true;
+          setTimeout(() => { soc.innerHTML = '&rarr; Social'; soc.disabled = false; }, 1400);
         }
       });
     });
@@ -6941,6 +7006,125 @@ window.sendPrepNpcToTracker = function(sb, sys) {
 };
 // Old sessions may still ask for the 'combat' tool; it's the same tool now.
 window.init_combat = init_trackers;
+
+// ── SOCIAL TOOL — the third pillar. A list of "social NPC" cards: roleplay info
+//    (Read Aloud, Wants, Quirks, Info, Secrets, Inventory, Bio) + two 5-box
+//    fill-to-level meters (Patience / Interest). Mirrors the combat tracker shape
+//    (items[] + render + _addPrepNpc/_addNpc + _getState/_setState) but the card
+//    has no HP/attacks. NPCs arrive from the Adventure hub, the NPC generator, or
+//    a blank "+ NPC" add.
+function init_social(root) {
+  let items = [];
+  let nextId = 1;
+  const list  = root.querySelector('.soc-list');
+  const empty = root.querySelector('.soc-empty');
+  const save  = () => { if(window.__ddScheduleSave) window.__ddScheduleSave(); };
+  const esc   = t => String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const multi = t => esc(t).replace(/\r?\n/g,'<br>');
+
+  function buildSocialCard(it){
+    const sec = (label, val, cls) => (val && String(val).trim())
+      ? `<div class="cc-traits soc-sec${cls?' '+cls:''}"><div class="cc-sec">${label}</div><div class="cc-trait">${multi(val)}</div></div>` : '';
+    const meter = (label, key, level) => {
+      const lv = Math.max(0, Math.min(5, level||0));
+      let boxes = '';
+      for(let i=1;i<=5;i++) boxes += `<button type="button" class="soc-tick${i<=lv?' on':''}" data-key="${key}" data-i="${i}" title="Set ${label} to ${i}"></button>`;
+      return `<div class="soc-meter ${key}"><span class="soc-meter-lbl">${label}</span><span class="soc-meter-boxes">${boxes}</span><span class="soc-meter-val">${lv}/5</span></div>`;
+    };
+    const card = document.createElement('div');
+    card.className = 'npc-card soc-card';
+    card.dataset.id = it.id;
+    card.style.setProperty('--tone', 'var(--gold)');
+    card.innerHTML = `
+      <div class="cc-band">
+        <div class="cc-title">
+          <input class="soc-name" value="${esc(it.name||'NPC')}" title="NPC name" aria-label="NPC name">
+          ${it.tag ? `<div class="cc-subrow"><span class="cc-type">${esc(it.tag)}</span></div>` : ''}
+        </div>
+        <button class="cc-x soc-del" title="Remove">&#10005;</button>
+      </div>
+      <div class="cc-body">
+        ${it.readaloud && it.readaloud.trim() ? `<div class="cc-readaloud">${multi(it.readaloud)}</div>` : ''}
+        <div class="soc-meters">${meter('Patience','patience',it.patience==null?5:it.patience)}${meter('Interest','interest',it.interest==null?1:it.interest)}</div>
+        ${sec('Wants', it.wants)}
+        ${sec('Quirks', it.quirks)}
+        ${sec('Info', it.info)}
+        ${sec('Secrets', it.secrets, 'soc-secret')}
+        ${sec('Inventory', it.inventory)}
+        ${sec('Bio / Notes', it.bio)}
+      </div>`;
+    card.querySelector('.soc-del').addEventListener('click', () => { items = items.filter(x => x.id !== it.id); render(); save(); });
+    const nameEl = card.querySelector('.soc-name');
+    nameEl.addEventListener('input', e => { it.name = e.target.value; save(); });
+    nameEl.addEventListener('keydown', e => { if(e.key === 'Enter') e.target.blur(); });
+    card.querySelectorAll('.soc-tick').forEach(b => b.addEventListener('click', () => {
+      const key = b.dataset.key, i = +b.dataset.i, cur = it[key] || 0;
+      it[key] = (cur === i ? i - 1 : i);
+      it[key] = Math.max(0, Math.min(5, it[key]));
+      render(); save();
+    }));
+    return card;
+  }
+  function render(){
+    if(!list) return;
+    if(empty) empty.classList.toggle('show', items.length === 0);
+    list.innerHTML = '';
+    items.forEach(it => list.appendChild(buildSocialCard(it)));
+  }
+  function fromPrep(sb){
+    return { id: nextId++, type:'npc', name: sb.name || 'NPC', tag: sb.type || '',
+      readaloud: sb.readaloud || sb.flavor || '', wants: sb.wants || '', quirks: sb.quirks || '',
+      info: sb.info || '', secrets: sb.secrets || '', inventory: sb.inventory || '',
+      bio: sb.bio || sb.notes || '', patience: 5, interest: 1 };
+  }
+  function fromNpc(o){
+    o = o || {};
+    return { id: nextId++, type:'npc', name: o.name || 'NPC', tag: o.tag || '',
+      readaloud: o.readaloud || '', wants: o.wants || '', quirks: o.quirks || '',
+      info: o.info || '', secrets: o.secrets || '', inventory: o.inventory || '',
+      bio: o.bio || '', patience: 5, interest: 1 };
+  }
+
+  root._addPrepNpc = (sb, sys) => { if(!sb) return null; const it = fromPrep(sb); items.push(it); render(); save(); return it; };
+  root._addNpc     = (o)       => { const it = fromNpc(o); items.push(it); render(); save(); return it; };
+  root._getState   = () => ({ items });
+  root._setState   = (st) => {
+    if(st && Array.isArray(st.items)){
+      items = st.items.map(x => ({ ...x }));
+      nextId = items.reduce((m, t) => Math.max(m, t.id || 0), 0) + 1;
+      render();
+    }
+  };
+
+  const addBtn = root.querySelector('.soc-add');
+  if(addBtn) addBtn.addEventListener('click', () => {
+    items.push({ id: nextId++, type:'npc', name:'New NPC', tag:'', readaloud:'', wants:'', quirks:'', info:'', secrets:'', inventory:'', bio:'', patience:5, interest:1 });
+    render(); save();
+  });
+  const clearBtn = root.querySelector('.soc-clear');
+  if(clearBtn) clearBtn.addEventListener('click', () => { if(items.length){ items = []; render(); save(); } });
+
+  render();
+}
+window.init_social = init_social;
+
+// Send a prepped Adventure statblock (or a generated NPC object) into the Social station.
+window.sendPrepNpcToSocial = function(sb, sys) {
+  if(!sb) return false;
+  try {
+    const node = ensureToolWindow('social');
+    if(node && typeof node._addPrepNpc === 'function') { node._addPrepNpc(sb, sys); return true; }
+  } catch(e) {}
+  return false;
+};
+window.sendNpcToSocial = function(obj) {
+  if(!obj) return false;
+  try {
+    const node = ensureToolWindow('social');
+    if(node && typeof node._addNpc === 'function') { node._addNpc(obj); return true; }
+  } catch(e) {}
+  return false;
+};
 </script>
 
 </script>
@@ -8591,17 +8775,42 @@ function genNPC(ancestry, wealth) {
   const anc  = ancestry==='random'?R(['Human','Human','Human','Dwarf','Elf','Halfling','Half-Orc','Goblin']):ancestry;
   const wlth = wealth==='random'?R(['Poor','Poor','Standard','Standard','Standard','Wealthy']):wealth;
   const pool = NPC_NAMES[anc]||NPC_NAMES.Human;
-  const name = R(pool);
   const age  = anc==='Goblin'?`${rollD(20)+5}`:anc==='Elf'?`${rollD(400)+50}`:anc==='Dwarf'?`${rollD(200)+30}`:`${rollD(40)+15}`;
-  return card(`
-    <div class="gen-card-header"><span class="gen-card-name">${esc(name)}</span><span class="gen-card-tag">${esc(anc)} · ${esc(wlth)}</span></div>
-    ${row('Age',age)} ${row('Build',`${R(BUILDS)}, ${R(HAIR)} hair, ${R(EYES)} eyes`)}
-    ${row('Dress',R(CLOTHING[wlth]))} ${row('Feature',R(FEATURES))}
+  const npc = {
+    name: R(pool), ancestry: anc, wealth: wlth, age,
+    build: `${R(BUILDS)}, ${R(HAIR)} hair, ${R(EYES)} eyes`,
+    dress: R(CLOTHING[wlth]), feature: R(FEATURES),
+    occupation: R(OCCUPATIONS), demeanor: R(DEMEANOR),
+    quirk: R(QUIRKS), wants: R(WANTS), secret: R(SECRETS), coin: COIN[wlth]()
+  };
+  const c = card(`
+    <div class="gen-card-header"><span class="gen-card-name">${esc(npc.name)}</span><span class="gen-card-tag">${esc(anc)} · ${esc(wlth)}</span></div>
+    ${row('Age',npc.age)} ${row('Build',npc.build)}
+    ${row('Dress',npc.dress)} ${row('Feature',npc.feature)}
     <hr class="gen-card-divider">
-    ${row('Occupation',R(OCCUPATIONS))} ${row('Demeanor',R(DEMEANOR))}
-    ${row('Quirk',R(QUIRKS))} ${row('Wants',R(WANTS))}
-    ${row('Secret',R(SECRETS))} ${row('Coin',COIN[wlth]())}
+    ${row('Occupation',npc.occupation)} ${row('Demeanor',npc.demeanor)}
+    ${row('Quirk',npc.quirk)} ${row('Wants',npc.wants)}
+    ${row('Secret',npc.secret)} ${row('Coin',npc.coin)}
+    <div class="gen-card-actions"><button class="btn small primary gen-send-social" title="Send this NPC to the Social station">Send to Social</button></div>
   `);
+  try { c.dataset.npc = JSON.stringify(npc); } catch(e) {}
+  return c;
+}
+// A rolled NPC → Social-card fields.
+function npcObjToSocial(npc) {
+  npc = npc || {};
+  const j = (...a) => a.filter(Boolean).join(' · ');
+  return {
+    name: npc.name || 'NPC',
+    tag: j(npc.ancestry, npc.occupation),
+    readaloud: [npc.build ? npc.build.charAt(0).toUpperCase() + npc.build.slice(1) + '.' : '', npc.dress ? 'Wearing ' + npc.dress + '.' : '', npc.feature ? npc.feature.charAt(0).toUpperCase() + npc.feature.slice(1) + '.' : ''].filter(Boolean).join(' '),
+    info: j(npc.occupation, npc.age ? 'Age ' + npc.age : '', npc.demeanor),
+    quirks: npc.quirk || '',
+    wants: npc.wants || '',
+    secrets: npc.secret || '',
+    inventory: npc.coin || '',
+    bio: ''
+  };
 }
 
 // ── Treasure ─────────────────────────────────────────────────────────────
@@ -10769,6 +10978,18 @@ window.init_gen = function(root) {
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
+    // "Send to Social" on a generated NPC card \u2192 the Social station.
+    const socBtn = e.target.closest('.gen-send-social');
+    if(socBtn && root.contains(socBtn)) {
+      const cardEl = socBtn.closest('.gen-card');
+      let npc = null; try { npc = JSON.parse((cardEl && cardEl.dataset.npc) || 'null'); } catch(_) {}
+      const ok = npc && typeof window.sendNpcToSocial === 'function' ? window.sendNpcToSocial(npcObjToSocial(npc)) : false;
+      const label = socBtn.textContent;
+      socBtn.textContent = ok ? 'Sent \u2713' : 'Could not send';
+      socBtn.disabled = true;
+      setTimeout(() => { socBtn.textContent = label; socBtn.disabled = false; }, 1400);
+      return;
+    }
     // "Send all to Tracker" on a DCC encounter \u2014 send every listed creature.
     const all = e.target.closest('.gen-send-tracker-all');
     if(all && root.contains(all)) {
@@ -12540,7 +12761,7 @@ function restoreConsole(c) {
   // Restore each tool's saved state into its NEW home station, regardless of
   // which (possibly older-scheme) station it was saved under. Only the four
   // fixed console tools carry over; everything else lives in popups now.
-  const TOOL_STATION = { adventure:'adv', maps:'map', vtt:'map', trackers:'cbt', dice:'log' };
+  const TOOL_STATION = { adventure:'adv', maps:'map', vtt:'map', trackers:'cbt', social:'soc', dice:'log' };
   Object.values(c.stations || {}).forEach(conf => {
     if(!conf) return;
     Object.entries(conf.tools || {}).forEach(([t, state]) => {

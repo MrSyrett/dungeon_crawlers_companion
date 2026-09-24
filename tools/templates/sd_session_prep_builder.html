@@ -280,6 +280,8 @@
   .sb-score-table td { font-family: 'Montserrat', sans-serif; font-size: 9px; text-align: center; color: var(--ink); border: none; padding: 1px 2px; }
   .sb-section-label { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: var(--accent-red); border-bottom: 1.5px solid #0a0a0a; display: block; margin: 6px 0 4px; padding-bottom: 1px; }
   .sb-ability { font-size: 9px; color: var(--ink); margin-bottom: 4px; line-height: 1.5; font-family: 'Montserrat', sans-serif; }
+  .sb-ability.sb-secret strong { color: #a11; }
+  .page.dark-mode .sb-ability.sb-secret strong { color: #e07a7a; }
   .sb-ability strong { font-style: italic; }
   .sb-flavor { font-size: 9px; font-style: italic; color: #f4f4f2; line-height: 1.5; margin-bottom: 5px; font-family: 'Montserrat', sans-serif; }
   .sb-warning { background: rgba(255,255,255,0.5); border-left: 3px solid var(--blue-npc); padding: 4px 8px; font-size: 8px; color: var(--blue-npc); margin-bottom: 6px; }
@@ -1351,7 +1353,14 @@ function readFields() {
     abilities:c.querySelector('.sb-abilities-input')?.value.trim()||'',
     isnpc:c.querySelector('.sb-isnpc')?.checked||false,
     fullwidth:c.querySelector('.sb-fullwidth')?.checked||false,
-    notes:c.querySelector('.sb-notes-input')?.value.trim()||''
+    notes:c.querySelector('.sb-notes-input')?.value.trim()||'',
+    readaloud:c.querySelector('.sb-readaloud-input')?.value.trim()||'',
+    wants:c.querySelector('.sb-wants-input')?.value.trim()||'',
+    quirks:c.querySelector('.sb-quirks-input')?.value.trim()||'',
+    info:c.querySelector('.sb-info-input')?.value.trim()||'',
+    secrets:c.querySelector('.sb-secrets-input')?.value.trim()||'',
+    inventory:c.querySelector('.sb-inventory-input')?.value.trim()||'',
+    bio:c.querySelector('.sb-bio-input')?.value.trim()||''
   })).filter(s=>s.name);
   state.notes=document.getElementById('f-notes')?.value||'';
   state.rolltables=[...document.querySelectorAll('#rolltables-list .entity-card')].map(c=>({
@@ -2084,13 +2093,13 @@ function addStatBlock(data={}) {
       <label class="field-label">Type</label>
       <div style="display:flex;gap:6px;">
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;color:#C0392B;letter-spacing:0.06em;">
-          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="mob" ${sbtype==='mob'?'checked':''} onchange="updateSbCardColor(this);autosave()"> Mob
+          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="mob" ${sbtype==='mob'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> Mob
         </label>
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;color:#6a2d8a;letter-spacing:0.06em;">
-          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="boss" ${sbtype==='boss'?'checked':''} onchange="updateSbCardColor(this);autosave()"> Boss
+          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="boss" ${sbtype==='boss'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> Boss
         </label>
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;color:#1a4a8a;letter-spacing:0.06em;">
-          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="npc" ${sbtype==='npc'?'checked':''} onchange="updateSbCardColor(this);autosave()"> NPC
+          <input type="radio" class="sb-type-radio" name="sbtype-${uid}" value="npc" ${sbtype==='npc'?'checked':''} onchange="updateSbCardColor(this);toggleSocial(this);autosave()"> NPC
         </label>
       </div>
     </div>
@@ -2135,6 +2144,23 @@ function addStatBlock(data={}) {
     <div class="npc-fields field-group" style="${data.isnpc?'':'display:none'}">
       <label class="field-label green">NPC Notes</label>
       <textarea class="sb-notes-input" placeholder="Extended NPC biography and notes..." oninput="autosave()">${escH(data.notes||'')}</textarea>
+    </div>
+    <div class="sb-social-fields field-group" style="${sbtype==='npc'?'':'display:none'}">
+      <div class="field-label green">Social (roleplay) — sends to the GM Screen Social station</div>
+      <label class="field-label">Read Aloud</label>
+      <textarea class="sb-readaloud-input short" placeholder="Read-aloud description of the NPC..." oninput="autosave()">${escH(data.readaloud||'')}</textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" class="field-group">
+        <div><label class="field-label">Wants</label><textarea class="sb-wants-input short" placeholder="What they want" oninput="autosave()">${escH(data.wants||'')}</textarea></div>
+        <div><label class="field-label">Quirks</label><textarea class="sb-quirks-input short" placeholder="Mannerisms, tics" oninput="autosave()">${escH(data.quirks||'')}</textarea></div>
+      </div>
+      <label class="field-label">Info</label>
+      <textarea class="sb-info-input short" placeholder="What they know or can offer" oninput="autosave()">${escH(data.info||'')}</textarea>
+      <label class="field-label">Secrets</label>
+      <textarea class="sb-secrets-input short" placeholder="GM-only secrets" oninput="autosave()">${escH(data.secrets||'')}</textarea>
+      <label class="field-label">Inventory</label>
+      <textarea class="sb-inventory-input short" placeholder="Carried items, coin" oninput="autosave()">${escH(data.inventory||'')}</textarea>
+      <label class="field-label">Bio / Notes</label>
+      <textarea class="sb-bio-input short" placeholder="Background &amp; notes" oninput="autosave()">${escH(data.bio||'')}</textarea>
     </div>`;
   list.appendChild(div);
   return div;
@@ -2147,6 +2173,13 @@ function updateSbCardColor(radio) {
 
 function toggleNpc(cb) {
   cb.closest('.entity-card').querySelector('.npc-fields').style.display=cb.checked?'block':'none';
+}
+
+// Social (roleplay) fields show only for NPC-typed stat blocks — they feed the GM
+// Screen's Social station.
+function toggleSocial(radio) {
+  const el=radio.closest('.entity-card').querySelector('.sb-social-fields');
+  if(el) el.style.display=radio.value==='npc'?'block':'none';
 }
 
 // Format text: line breaks → <br>, lines with "Label: text" → bold label
@@ -2356,6 +2389,8 @@ function buildSB(s) {
 
   // Flavor / Description — italic, right under name
   if(s.flavor) html += '<div class="sb-flavor">' + fmtText(s.flavor) + '</div>';
+  // NPC read-aloud description (from the Social fields)
+  if(s.sbtype==='npc' && s.readaloud && s.readaloud.trim()) html += '<div class="sb-flavor">' + fmtText(s.readaloud) + '</div>';
 
   html += '<hr class="sb-divider">';
 
@@ -2392,6 +2427,13 @@ function buildSB(s) {
         html += '<div class="sb-ability"><strong>' + escH(line.slice(0,ci)) + '.</strong> ' + fmtText(line.slice(ci+1).trim()) + '</div>';
       }
     });
+  }
+
+  // Social (roleplay) sections — only for NPC-typed stat blocks.
+  if(s.sbtype==='npc') {
+    const socSec=(label,val,cls)=>(val&&String(val).trim())?'<div class="sb-ability'+(cls?' '+cls:'')+'"><strong>'+escH(label)+':</strong> '+fmtText(val)+'</div>':'';
+    const soc=socSec('Wants',s.wants)+socSec('Quirks',s.quirks)+socSec('Info',s.info)+socSec('Secrets',s.secrets,'sb-secret')+socSec('Inventory',s.inventory)+socSec('Bio',s.bio);
+    if(soc) html += '<hr class="sb-divider">' + soc;
   }
 
   // NPC notes
@@ -3134,7 +3176,7 @@ function fillMonster(m, card) {
   const lv = parseInt(m.lv) || 0;
   const typeVal = lv >= 7 ? 'boss' : lv >= 4 ? 'boss' : 'mob';
   const radio = card.querySelector('.sb-type-radio[value="'+typeVal+'"]');
-  if(radio) { radio.checked = true; updateSbCardColor(radio); }
+  if(radio) { radio.checked = true; updateSbCardColor(radio); toggleSocial(radio); }
   autosave();
 }
 
