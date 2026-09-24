@@ -1372,13 +1372,10 @@ function readFields() {
     isnpc:c.querySelector('.sb-isnpc')?.checked||false,
     fullwidth:c.querySelector('.sb-fullwidth')?.checked||false,
     notes:c.querySelector('.sb-notes-input')?.value.trim()||'',
-    readaloud:c.querySelector('.sb-readaloud-input')?.value.trim()||'',
     wants:c.querySelector('.sb-wants-input')?.value.trim()||'',
     quirks:c.querySelector('.sb-quirks-input')?.value.trim()||'',
     info:c.querySelector('.sb-info-input')?.value.trim()||'',
-    secrets:c.querySelector('.sb-secrets-input')?.value.trim()||'',
-    inventory:c.querySelector('.sb-inventory-input')?.value.trim()||'',
-    bio:c.querySelector('.sb-bio-input')?.value.trim()||''
+    inventory:c.querySelector('.sb-inventory-input')?.value.trim()||''
   })).filter(s=>s.name);
 }
 
@@ -1872,21 +1869,14 @@ function addStatBlock(data={}) {
       <textarea class="sb-notes-input" placeholder="Extended NPC biography and notes..." oninput="autosave()">${escH(data.notes||'')}</textarea>
     </div>
     <div class="sb-social-fields field-group" style="${sbtype==='npc'?'':'display:none'}">
-      <div class="field-label green">Social (roleplay) — sends to the GM Screen Social station</div>
-      <label class="field-label">Read Aloud</label>
-      <textarea class="sb-readaloud-input short" placeholder="Read-aloud description of the NPC..." oninput="autosave()">${escH(data.readaloud||'')}</textarea>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" class="field-group">
         <div><label class="field-label">Wants</label><textarea class="sb-wants-input short" placeholder="What they want" oninput="autosave()">${escH(data.wants||'')}</textarea></div>
         <div><label class="field-label">Quirks</label><textarea class="sb-quirks-input short" placeholder="Mannerisms, tics" oninput="autosave()">${escH(data.quirks||'')}</textarea></div>
       </div>
-      <label class="field-label">Info</label>
-      <textarea class="sb-info-input short" placeholder="What they know or can offer" oninput="autosave()">${escH(data.info||'')}</textarea>
-      <label class="field-label">Secrets</label>
-      <textarea class="sb-secrets-input short" placeholder="GM-only secrets" oninput="autosave()">${escH(data.secrets||'')}</textarea>
+      <label class="field-label">Info / Secrets</label>
+      <textarea class="sb-info-input short" placeholder="What they know, plus GM-only secrets" oninput="autosave()">${escH(data.info||'')}</textarea>
       <label class="field-label">Inventory</label>
       <textarea class="sb-inventory-input short" placeholder="Carried items, coin" oninput="autosave()">${escH(data.inventory||'')}</textarea>
-      <label class="field-label">Bio / Notes</label>
-      <textarea class="sb-bio-input short" placeholder="Background &amp; notes" oninput="autosave()">${escH(data.bio||'')}</textarea>
     </div>`;
   list.appendChild(div);
 }
@@ -2106,19 +2096,17 @@ function buildSB(s) {
     <tr>${row.map(f => '<td>'+escH(s[f.key]||'')+'</td>').join('')}</tr></table>`).join('');
   // Social (roleplay) content, only for NPC-typed stat blocks.
   const socSec=(label,val,cls)=>(val&&String(val).trim())?`<div class="sb-ability${cls?' '+cls:''}"><strong>${escH(label)}:</strong> ${fmtText(val)}</div>`:'';
-  const readAloudBox=(s.sbtype==='npc'&&s.readaloud&&s.readaloud.trim())?`<div class="sb-flavor">${fmtText(s.readaloud)}</div>`:'';
-  const socSections=(s.sbtype==='npc')?(socSec('Wants',s.wants)+socSec('Quirks',s.quirks)+socSec('Info',s.info)+socSec('Secrets',s.secrets,'sb-secret')+socSec('Inventory',s.inventory)+socSec('Bio',s.bio)):'';
+  const socSections=(s.sbtype==='npc')?(socSec('Wants',s.wants)+socSec('Quirks',s.quirks)+socSec('Info / Secrets',s.info)+socSec('Inventory',s.inventory)):'';
   if(s.isnpc&&s.fullwidth) {
     div.innerHTML=`<div class="sb-name">${escH(s.name)}</div><div class="sb-type">${escH(s.type)}</div>
       <div class="sb-warning"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.3 3.8a1.5 1.5 0 0 0-2.6 0L2.5 18.4A1.5 1.5 0 0 0 3.8 20.6h16.4a1.5 1.5 0 0 0 1.3-2.2ZM12 8.4a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1Zm0 8.8a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/></svg> WARNING: This is a non-combatant NPC.</div>
       <div style="display:flex;gap:12px;">
         <div style="flex:1">${pips?`<div class="sb-hp-row">${pips}</div>`:``}${tables}</div>
-        <div style="flex:2">${readAloudBox}${s.notes?`<div class="sb-notes">${fmtText(s.notes)}</div>`:''}${socSections}</div>
+        <div style="flex:2">${s.notes?`<div class="sb-notes">${fmtText(s.notes)}</div>`:''}${socSections}</div>
       </div>`;
   } else {
     div.innerHTML=`<div class="sb-name">${escH(s.name)}</div><div class="sb-type">${escH(s.type)}</div>
       ${s.flavor?`<div class="sb-flavor">${fmtText(s.flavor)}</div>`:''}
-      ${readAloudBox}
       ${pips?`<div class="sb-hp-row">${pips}</div>`:``}${tables}
       ${abilities?`<hr class="sb-divider">${abilities}`:''}
       ${socSections?`<hr class="sb-divider">${socSections}`:''}

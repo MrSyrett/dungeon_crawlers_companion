@@ -21,6 +21,7 @@
   --white: #ede9e1;
   --red: #b82018;
   --red-light: #d63a30;
+  --npc-blue: #4f86bd;
   --gold: #c8a020;
   --green: #2d7a2d;
   --green-light: #4caf50;
@@ -496,7 +497,12 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-ro .cc-hp-cur { cursor: default; opacity: .95; }
 .advh-ro .cc-atk-roll, .advh-ro .npc-mon-roll, .advh-ro .npc-mon-attack, .advh-ro .cc-diebtn, .advh-ro .cc-pip, .advh-ro .cc-ace-pip, .advh-ro .cc-wound, .advh-ro .cc-abil { pointer-events: none; }
 .advh-ro .cc-abil { cursor: default; }
-.advh-npc .advh-send { margin-left: 8px; }
+.advh-send-col { margin-left: auto; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; align-self: flex-start; }
+.advh-send-col .btn { margin: 0; }
+.advh-send-combat { background: var(--red); border-color: var(--red); color: #fff; }
+.advh-send-combat:hover { background: var(--red-light); border-color: var(--red-light); }
+.advh-send-social { background: var(--npc-blue); border-color: var(--npc-blue); color: #fff; }
+.advh-send-social:hover { filter: brightness(1.12); }
 .advh-readaloud { border-left: 3px solid var(--gold); background: rgba(200,160,32,.08); padding: 7px 9px; border-radius: 0 6px 6px 0; font-size: 12.5px; line-height: 1.5; color: var(--light); font-style: italic; overflow-wrap: anywhere; word-break: break-word; }
 .advh-desc { font-size: 12px; line-height: 1.5; color: var(--light); margin-top: 6px; overflow-wrap: anywhere; }
 .advh-desc.dim { color: var(--muted); }
@@ -5134,6 +5140,8 @@ function syncToolbar(slot, toolNode) {
     ['.tmr-add-ticks', '.tmr-add-ticks'],
     ['.tmr-next-round', '.tmr-next-round'],
     ['.tmr-reset-rounds', '.tmr-reset-rounds'],
+    ['.soc-add', '.soc-add'],
+    ['.soc-clear', '.soc-clear'],
   ];
 
   pairs.forEach(([cloneSelector, liveSelector]) => {
@@ -5894,14 +5902,18 @@ function wireSessionPrepLoader(root) {
     let card; try { card = window.buildNpcCard(item, i); } catch(e) { card = null; }
     if(!card) return;
     card.classList.add('advh-ro');
+    // NPC-typed stat blocks get the blue header (matches the Social station).
+    if(sb.sbtype === 'npc') card.style.setProperty('--tone', 'var(--npc-blue)');
     // Strip the adjustable / removable bits — read-only in the hub.
     card.querySelectorAll('.cc-hp-dmg, .npc-del').forEach(e => e.remove());
     card.querySelectorAll('.cc-hp-cur').forEach(inp => { inp.readOnly = true; inp.disabled = true; inp.tabIndex = -1; });
-    // → Combat and → Social send actions live on the banner (on-demand send).
+    // → Combat and → Social send actions live stacked on the banner (on-demand send).
     const band = card.querySelector('.cc-band');
     if(band) {
-      const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small primary advh-send'; send.title = 'Add to the combat tracker'; send.innerHTML = '&rarr; Combat'; band.appendChild(send);
-      const soc = document.createElement('button'); soc.type = 'button'; soc.className = 'btn small ghost advh-send-social'; soc.title = 'Add to the Social station'; soc.innerHTML = '&rarr; Social'; band.appendChild(soc);
+      const col = document.createElement('div'); col.className = 'advh-send-col';
+      const send = document.createElement('button'); send.type = 'button'; send.className = 'btn small advh-send advh-send-combat'; send.title = 'Add to the combat tracker'; send.innerHTML = '&rarr; Combat'; col.appendChild(send);
+      const soc = document.createElement('button'); soc.type = 'button'; soc.className = 'btn small advh-send-social'; soc.title = 'Add to the Social station'; soc.innerHTML = '&rarr; Social'; col.appendChild(soc);
+      band.appendChild(col);
     }
     slot.innerHTML = '';
     slot.appendChild(card);
@@ -7034,7 +7046,7 @@ function init_social(root) {
     const card = document.createElement('div');
     card.className = 'npc-card soc-card';
     card.dataset.id = it.id;
-    card.style.setProperty('--tone', 'var(--gold)');
+    card.style.setProperty('--tone', 'var(--npc-blue)');
     card.innerHTML = `
       <div class="cc-band">
         <div class="cc-title">
@@ -7048,8 +7060,7 @@ function init_social(root) {
         <div class="soc-meters">${meter('Patience','patience',it.patience==null?5:it.patience)}${meter('Interest','interest',it.interest==null?1:it.interest)}</div>
         ${sec('Wants', it.wants)}
         ${sec('Quirks', it.quirks)}
-        ${sec('Info', it.info)}
-        ${sec('Secrets', it.secrets, 'soc-secret')}
+        ${sec('Info / Secrets', [it.info, it.secrets].filter(v => v && String(v).trim()).join('\n'))}
         ${sec('Inventory', it.inventory)}
         ${sec('Bio / Notes', it.bio)}
       </div>`;
@@ -8800,16 +8811,17 @@ function genNPC(ancestry, wealth) {
 function npcObjToSocial(npc) {
   npc = npc || {};
   const j = (...a) => a.filter(Boolean).join(' · ');
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
   return {
     name: npc.name || 'NPC',
     tag: j(npc.ancestry, npc.occupation),
-    readaloud: [npc.build ? npc.build.charAt(0).toUpperCase() + npc.build.slice(1) + '.' : '', npc.dress ? 'Wearing ' + npc.dress + '.' : '', npc.feature ? npc.feature.charAt(0).toUpperCase() + npc.feature.slice(1) + '.' : ''].filter(Boolean).join(' '),
-    info: j(npc.occupation, npc.age ? 'Age ' + npc.age : '', npc.demeanor),
+    readaloud: [npc.build ? cap(npc.build) + '.' : '', npc.dress ? 'Wearing ' + npc.dress + '.' : '', npc.feature ? cap(npc.feature) + '.' : '', npc.age ? 'Age ' + npc.age + '.' : ''].filter(Boolean).join(' '),
+    info: '',
     quirks: npc.quirk || '',
     wants: npc.wants || '',
     secrets: npc.secret || '',
     inventory: npc.coin || '',
-    bio: ''
+    bio: j(npc.occupation, npc.demeanor)
   };
 }
 
