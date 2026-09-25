@@ -53,9 +53,11 @@
       ruler: null,          // { ax, ay, bx, by } in world coords
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
+      fogSetup: false,      // GM: show walls / edit doors
       dpr: opts.dpr || (root.devicePixelRatio || 1),
       _remote: false,
     };
+    var canMove = opts.canMove || function () { return true; };
     function snapTok(t) {
       if (!state.snap || !state.map.ppg) return;
       var g = state.map.ppg;
@@ -119,13 +121,74 @@
       // tokens
       state.tokens.forEach(drawToken);
 
+      // doors sit above the map/tokens but below the fog, so a player can't see
+      // a door in an unrevealed area.
+      if (map.doors && map.doors.length && map.ppg * state.cam.scale > 8) drawDoors();
+
       // fog on top of map + tokens (players can't see hidden tokens either)
       if (state.fog.enabled && !state.fog.showAll && map.widthPx) drawFog();
+
+      // fog setup overlay (GM): show the walls so they can be seen while prepping
+      if (state.fogSetup && map.widthPx) drawSetup();
 
       if (state.selectedId) drawSelection(byId(state.selectedId));
       if (state.ruler) drawRuler();
       drawPings();
       emit("render", null);
+    }
+
+    // ---- doors --------------------------------------------------------------
+    function doorMid(d) { return { x: (d.x1 + d.x2) / 2, y: (d.y1 + d.y2) / 2 }; }
+    function doorBadgeR() { return Math.max(9, Math.min(15, state.map.ppg * state.cam.scale * 0.22)); }
+    function drawDoors() {
+      var R = doorBadgeR();
+      state.map.doors.forEach(function (d) {
+        var m = doorMid(d), cx = w2sX(m.x), cy = w2sY(m.y);
+        var closed = d.closed || d.locked;
+        var col = d.locked ? "#c8503a" : closed ? "#c8a24a" : "#5ac26a";
+        ctx.save();
+        ctx.translate(cx, cy);
+        // the door leaf, along the doorway, dimmed when open
+        var ang = Math.atan2(d.y2 - d.y1, d.x2 - d.x1);
+        ctx.rotate(ang);
+        var half = Math.max(R, Math.hypot(d.x2 - d.x1, d.y2 - d.y1) * state.cam.scale / 2);
+        ctx.globalAlpha = closed ? 0.9 : 0.28;
+        ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(-half, 0); ctx.lineTo(half, 0); ctx.stroke();
+        ctx.rotate(-ang);
+        // badge
+        ctx.globalAlpha = 1;
+        ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(10,12,16,0.92)"; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.stroke();
+        ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = Math.max(1.5, R * 0.16);
+        if (d.locked) { // padlock
+          ctx.strokeRect(-R * 0.32, -R * 0.05, R * 0.64, R * 0.5);
+          ctx.beginPath(); ctx.arc(0, -R * 0.05, R * 0.28, Math.PI, 0); ctx.stroke();
+        } else if (closed) { // closed bar
+          ctx.fillRect(-R * 0.42, -R * 0.14, R * 0.84, R * 0.28);
+        } else { // open (ajar) chevron
+          ctx.beginPath(); ctx.moveTo(-R * 0.3, -R * 0.35); ctx.lineTo(R * 0.35, 0); ctx.lineTo(-R * 0.3, R * 0.35); ctx.stroke();
+        }
+        ctx.restore();
+      });
+    }
+    function doorAt(sx, sy) {
+      if (!state.map.doors) return -1;
+      var R = doorBadgeR() + 4;
+      for (var i = state.map.doors.length - 1; i >= 0; i--) {
+        var m = doorMid(state.map.doors[i]);
+        if (Math.hypot(sx - w2sX(m.x), sy - w2sY(m.y)) <= R) return i;
+      }
+      return -1;
+    }
+    function drawSetup() {
+      ctx.save();
+      ctx.strokeStyle = "rgba(78,163,255,0.55)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+      ctx.beginPath();
+      state.map.walls.forEach(function (w) { ctx.moveTo(w2sX(w.x1), w2sY(w.y1)); ctx.lineTo(w2sX(w.x2), w2sY(w.y2)); });
+      ctx.stroke();
+      ctx.restore();
     }
 
     function drawPings() {
@@ -227,7 +290,7 @@
 
     function blockingSegments() {
       var segs = state.map.walls.slice();
-      state.map.doors.forEach(function (d) { if (d.closed) segs.push(d); });
+      state.map.doors.forEach(function (d) { if (d.closed || d.locked) segs.push(d); });
       return segs;
     }
 
@@ -265,23 +328,13 @@
       var cx = w2sX(t.x), cy = w2sY(t.y);
       var w = t.w * state.cam.scale, h = t.h * state.cam.scale, r = Math.min(w, h) / 2;
       ctx.save();
-      ctx.translate(cx, cy);
-      // circular selection halo
-      ctx.strokeStyle = "#e6c66a"; ctx.lineWidth = 2;
-      ctx.setLineDash([5, 3]);
-      ctx.beginPath(); ctx.arc(0, 0, r + 3, 0, Math.PI * 2); ctx.stroke();
+      // A clean selection halo — no rotate/resize handles (size is set from the
+      // right-click menu; move with drag or the arrow keys).
+      ctx.strokeStyle = "#e6c66a"; ctx.lineWidth = 2.5;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, Math.PI * 2); ctx.stroke();
       ctx.setLineDash([]);
-      // handles at the bounding box, rotated with the token
-      ctx.rotate(t.rot || 0);
-      ctx.strokeStyle = "#e6c66a"; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(0, -h / 2); ctx.lineTo(0, -h / 2 - ROTATE_OFFSET); ctx.stroke();
-      handleDot(0, -h / 2 - ROTATE_OFFSET);
-      handleDot(w / 2, h / 2);
       ctx.restore();
-    }
-    function handleDot(x, y) {
-      ctx.fillStyle = "#c8a24a";
-      ctx.beginPath(); ctx.arc(x, y, HANDLE_R, 0, Math.PI * 2); ctx.fill();
     }
 
     function drawRuler() {
@@ -360,13 +413,14 @@
         return;
       }
       if (state.tool === "select") {
-        var h = handleAt(p.x, p.y);
-        if (h) { drag = { mode: h, id: state.selectedId, sx: p.x, sy: p.y }; return; }
+        // door badges are interactive UI on the map (open/close/lock)
+        var di = doorAt(p.x, p.y);
+        if (di >= 0) { emit("doorclick", { index: di }); return; }
         var t = tokenAt(p.x, p.y);
         if (t) {
           state.selectedId = t.id;
           emit("select", t);
-          drag = { mode: "move", id: t.id, dx: s2wX(p.x) - t.x, dy: s2wY(p.y) - t.y };
+          if (canMove(t)) drag = { mode: "move", id: t.id, dx: s2wX(p.x) - t.x, dy: s2wY(p.y) - t.y };
           scheduleRender();
           return;
         }
@@ -423,12 +477,22 @@
     }
 
     function onKey(e) {
+      var a = document.activeElement, tag = a && a.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (a && a.isContentEditable)) return;
       var t = byId(state.selectedId);
       if (!t) return;
+      var g = state.map.ppg || 70;
       if (e.key === "Delete" || e.key === "Backspace") {
-        removeToken(t.id); e.preventDefault();
-      } else if (e.key === "[") { t.rot = (t.rot || 0) - Math.PI / 12; scheduleRender(); }
-      else if (e.key === "]") { t.rot = (t.rot || 0) + Math.PI / 12; scheduleRender(); }
+        if (canMove(t)) { removeToken(t.id); emit("token", null); }
+        e.preventDefault();
+      } else if (e.key.indexOf("Arrow") === 0) {
+        if (!canMove(t)) return;
+        var step = e.shiftKey ? Math.max(2, Math.round(g / 10)) : g;
+        if (e.key === "ArrowLeft") t.x -= step; else if (e.key === "ArrowRight") t.x += step;
+        else if (e.key === "ArrowUp") t.y -= step; else if (e.key === "ArrowDown") t.y += step; else return;
+        if (!e.shiftKey) snapTok(t);
+        emit("token", t); scheduleRender(); e.preventDefault();
+      }
     }
 
     // ---- map + token loading ------------------------------------------------
@@ -637,6 +701,14 @@
     }
 
     // ---- camera helpers -----------------------------------------------------
+    function centerOn(id) {
+      var t = byId(id); if (!t) return;
+      var s = cssSize();
+      state.cam.offX = s.w / 2 - t.x * state.cam.scale;
+      state.cam.offY = s.h / 2 - t.y * state.cam.scale;
+      scheduleRender();
+    }
+
     function fitToMap() {
       var m = state.map; if (!m.widthPx) return;
       var s = cssSize();
@@ -702,6 +774,13 @@
       setGrid: function (on) { state.grid = !!on; scheduleRender(); },
       setSnap: function (on) { state.snap = !!on; },
       getSnap: function () { return state.snap; },
+      setFogSetup: function (on) { state.fogSetup = !!on; scheduleRender(); },
+      getFogSetup: function () { return state.fogSetup; },
+      setDoor: function (i, fields) { var d = state.map.doors[i]; if (!d) return; if (fields.closed !== undefined) d.closed = !!fields.closed; if (fields.locked !== undefined) d.locked = !!fields.locked; scheduleRender(); },
+      getDoor: function (i) { return state.map.doors[i]; },
+      doorCount: function () { return state.map.doors ? state.map.doors.length : 0; },
+      centerOn: centerOn,
+      setCanMove: function (fn) { canMove = fn || function () { return true; }; },
       setPpg: function (n) { state.map.ppg = Math.max(4, n | 0); scheduleRender(); emit("map", state.map); },
       setFeetPerCell: function (n) { state.feetPerCell = Math.max(1, n) || 5; },
       screenToWorld: function (sx, sy) { var r = canvas.getBoundingClientRect(); return { x: s2wX(sx - r.left), y: s2wY(sy - r.top) }; },

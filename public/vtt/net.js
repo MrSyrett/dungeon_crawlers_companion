@@ -138,8 +138,13 @@
       } else if (msg.t === "ping") {
         board.ping(msg.x, msg.y, "#4ea3ff");
         Object.keys(peers).forEach(function (k) { if (k !== peerId) sendObj(peers[k], { t: "ping", x: msg.x, y: msg.y }); });
+      } else if (msg.t === "door") {
+        // A player may open/close an UNLOCKED door; locking is GM-only.
+        var d = board.state.map.doors[msg.index];
+        if (d && !d.locked) { board.setDoor(msg.index, { closed: !!msg.closed }); syncDoor(msg.index); }
       }
     }
+    function syncDoor(i) { var d = board.state.map.doors[i]; if (d) broadcast({ t: "door", index: i, closed: d.closed, locked: d.locked }); }
 
     function scheduleTokens() { if (tokenTimer) return; tokenTimer = setTimeout(function () { tokenTimer = null; pushTokens(); }, 60); }
 
@@ -153,6 +158,7 @@
     return {
       pushScene: pushScene, pushTokens: pushTokens, peerCount: peerCount, peers: peersList,
       ping: function (x, y) { broadcast({ t: "ping", x: x, y: y }); },
+      doorSync: function (i) { syncDoor(i); },
       stop: function () { transport.stop(); Object.keys(peers).forEach(function (k) { try { peers[k].pc.close(); } catch (e) {} }); },
     };
   }
@@ -213,6 +219,7 @@
       } else if (msg.t === "tokens") {
         board.setRemoteApply(true); board.syncTokens(msg.tokens || []); board.setRemoteApply(false);
       } else if (msg.t === "ping") { board.ping(msg.x, msg.y, "#4ea3ff"); }
+      else if (msg.t === "door") { board.setDoor(msg.index, { closed: msg.closed, locked: msg.locked }); }
       else if (msg.t === "mapBegin") { mapBuf = ""; }
       else if (msg.t === "mapChunk") { if (mapBuf !== null) mapBuf += msg.s; }
       else if (msg.t === "mapEnd") {
@@ -244,6 +251,7 @@
     return {
       connected: function () { return !!(conn && conn.open); },
       ping: function (x, y) { sendHost({ t: "ping", x: x, y: y }); },
+      door: function (i, closed) { sendHost({ t: "door", index: i, closed: closed }); },
       stop: function () { transport.stop(); if (joinTimer) clearTimeout(joinTimer); if (conn) { try { conn.pc.close(); } catch (e) {} } },
     };
   }
