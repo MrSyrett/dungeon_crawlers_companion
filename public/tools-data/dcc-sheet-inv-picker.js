@@ -196,7 +196,7 @@
     fillRow(tr, name || (it ? it.name : ""), it ? notesOf(it) : "");
     // Stamp category/slot/effect so the row's radial can equip it (works for
     // homebrew armor/accessories too, which a name lookup wouldn't find).
-    if (tr && it) { tr.dataset.cat = it.category || ""; if (it.slot) tr.dataset.slot = it.slot; if (it.effect) tr.dataset.effect = it.effect; }
+    if (tr && it) { tr.dataset.cat = it.category || ""; if (it.slot) tr.dataset.slot = it.slot; if (it.effect) tr.dataset.effect = it.effect; if (Array.isArray(it.benefits) && it.benefits.length) { try { tr.dataset.benefits = JSON.stringify(it.benefits); } catch (e) {} } }
     // Auto-equip body-slot gear straight into the Gear slots instead of leaving
     // it to be pinned to the Hotlist.
     var equipped = false;

@@ -52,12 +52,14 @@ function hbToRow(data: Record<string, unknown>, name: string): Row {
   const category = (CAT_KEYS.includes(catRaw) ? catRaw : "mundane") as DccItem["category"];
   const tier = s("tier");
   const price = typeof data.price === "number" ? data.price : undefined;
+  const benefits = Array.isArray(data.benefits) ? (data.benefits as DccItem["benefits"]) : undefined;
   return {
     name,
     category,
     effect: s("effect"),
     slot: s("slot") || undefined,
     tier: (tier || undefined) as DccItem["tier"],
+    benefits,
     price,
     source: "Homebrew",
     homebrew: true,

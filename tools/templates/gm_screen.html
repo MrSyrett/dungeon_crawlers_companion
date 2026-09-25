@@ -9250,6 +9250,19 @@ function dccEnchantPerk(raw, tierKey) {
   if(/something unique|table 42/i.test(p)) { const u = dccRollRow(dccLootTable('42')); return 'Unique: ' + (u ? u.result : 'GM’s choice'); }
   return p;
 }
+// Convert one rolled perk string ("+3 STR", "+1 DR", "+2 Athletics Skill") into a
+// structured benefit the character sheet can auto-apply on equip. Non-numeric perks
+// (buffs, spells, resistances, "Rank = Floor" passives) return null — they stay in
+// the effect text for the player to resolve by hand, exactly as before.
+function dccPerkToBenefit(perk) {
+  const p = String(perk || '').trim();
+  const STAT = { strength:'str', str:'str', intelligence:'int', int:'int', constitution:'con', con:'con', dexterity:'dex', dex:'dex', charisma:'cha', cha:'cha' };
+  let m;
+  if((m = p.match(/^\+(\d+)\s*(?:DR\b|Damage Resistance)/i))) return { kind:'dr', amount:+m[1] };
+  if((m = p.match(/^\+(\d+)\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/i))) return { kind:'stat', target:STAT[m[2].toLowerCase()], amount:+m[1] };
+  if((m = p.match(/^\+(\d+)\s+([A-Za-z][A-Za-z'\/\- ]*?)\s+skills?\b/i))) return { kind:'skill', target:m[2].trim(), amount:+m[1] };
+  return null;
+}
 window.dccEnchantItem = function(tierKey, category) {
   const CAT_TABLE = { armor: '40', accessory: '41', weapon: '39', mundane: '39' };
   let cats = category ? [category] : dccPick([['weapon'], ['armor'], ['accessory']]);
@@ -9274,7 +9287,8 @@ window.dccEnchantItem = function(tierKey, category) {
   }
   const name = 'Enchanted ' + base + ' ' + dccPick(DCC_ENCHANT_EPITHETS);
   const effect = perks.join(', ');   // description = perks only (tier lives on the item's tier field / card tag)
-  return { base: base, name: name, category: cat, slot: slot, tier: tierKey, perks: perks, effect: effect };
+  const benefits = perks.map(dccPerkToBenefit).filter(Boolean);   // structured, auto-applied on equip
+  return { base: base, name: name, category: cat, slot: slot, tier: tierKey, perks: perks, effect: effect, benefits: benefits };
 };
 
 // ── DCC Item generator (random draw from the catalog) ──────────────────────
@@ -15588,6 +15602,7 @@ function wireAiConsole(root) {
     inp[0].value = name || ''; inp[1].value = (qty == null ? '' : String(qty)); inp[2].value = notes || '';
     if(meta && meta.category) tr.dataset.cat = meta.category;
     if(meta && meta.slot) tr.dataset.slot = meta.slot;
+    if(meta && Array.isArray(meta.benefits) && meta.benefits.length) { try { tr.dataset.benefits = JSON.stringify(meta.benefits); } catch(e){} }
     tr.querySelector('.ai-it-del').addEventListener('click', () => tr.remove());
     tbody.appendChild(tr);
     return tr;
@@ -15603,6 +15618,7 @@ function wireAiConsole(root) {
       const row = { item: item.slice(0, 80), qty: qty || 1, notes };
       if(tr.dataset.cat) row.cat = tr.dataset.cat;
       if(tr.dataset.slot) row.slot = tr.dataset.slot;
+      if(tr.dataset.benefits) row.benefits = tr.dataset.benefits;
       out.push(row);
     });
     return out;
@@ -15770,7 +15786,11 @@ function wireAiConsole(root) {
   addRow.addEventListener('click', () => makeRow(itemsBody, '', '', ''));
   buildPicker({ filters:root.querySelector('.ai-cat-filters'), search:root.querySelector('.ai-cat-search'), results:root.querySelector('.ai-cat-results'), groups:DCC_GROUPS,
     catalog: () => ((typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[])),
-    onAdd: (name, notes) => { makeRow(itemsBody, name, 1, notes); setStatus(boxStatus, 'Added “'+name+'”.', 'ok'); } });
+    onAdd: (name, notes) => {
+      const cat = (typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[]);
+      const it = cat.find(x => x && x.name === name);
+      makeRow(itemsBody, name, 1, notes, it ? { category: it.category, slot: it.slot, benefits: it.benefits } : null);
+      setStatus(boxStatus, 'Added “'+name+'”.', 'ok'); } });
   function lootTier(t){ if(typeof DCC_LOOT==='undefined')return null; const tiers=DCC_LOOT.tiers||[]; return tiers.find(x=>x.tier===t)||tiers[0]||null; }
   function itemsOfTier(t,cats){ if(typeof DCC_ITEMS==='undefined')return []; return DCC_ITEMS.filter(it=>it.tier===t&&cats.indexOf(it.category)>=0); }
   function rollGold(formula){ const f=String(formula||''); if(/none|nuthin/i.test(f))return 0; const m=f.match(/(\d+)\s*d\s*(\d+)/i); if(!m)return 0; let total=0; const num=+m[1],sides=+m[2]; for(let i=0;i<num;i++) total+=1+Math.floor(Math.random()*sides); const mult=f.match(/[x×]\s*([\d,]+)/i); if(mult) total*=(parseInt(mult[1].replace(/,/g,''),10)||1); return total; }
@@ -15787,7 +15807,7 @@ function wireAiConsole(root) {
     // yields real, usable magic gear instead of plain catalog rows.
     const nGear=Math.max(1, td.gearRolls||1);
     if(typeof window.dccEnchantItem==='function'){
-      for(let i=0;i<nGear;i++){ const e=window.dccEnchantItem(key,''); makeRow(itemsBody,e.name,1,e.effect,{category:e.category,slot:e.slot}); }
+      for(let i=0;i<nGear;i++){ const e=window.dccEnchantItem(key,''); makeRow(itemsBody,e.name,1,e.effect,{category:e.category,slot:e.slot,benefits:e.benefits}); }
     } else {
       const gear=itemsOfTier(td.tier,['weapon','armor','accessory']);
       pickN(gear,nGear).forEach(it=>makeRow(itemsBody,it.name,1,(it.slot?it.slot+' — ':'')+(it.effect||'')));
@@ -15800,7 +15820,7 @@ function wireAiConsole(root) {
   if(enchRoll) enchRoll.addEventListener('click', () => {
     if(typeof window.dccEnchantItem !== 'function'){ setStatus(boxStatus,'Loot tables didn’t load — open from the app.','err'); return; }
     const e = window.dccEnchantItem(boxTier.value, enchCat && enchCat.value ? enchCat.value : '');
-    makeRow(itemsBody, e.name, 1, e.effect, { category: e.category, slot: e.slot });
+    makeRow(itemsBody, e.name, 1, e.effect, { category: e.category, slot: e.slot, benefits: e.benefits });
     setStatus(boxStatus, 'Enchanted a '+e.base+' — edit the name/perks, then send.', 'ok');
   });
   sendBox.addEventListener('click', () => {

@@ -49,9 +49,38 @@
   // Category/slot/effect come from the row's stamped dataset (set when added from the
   // picker) or a catalog lookup by name (covers loot + hand-typed catalog items).
   function rowMeta(tr) {
-    var cat = tr.dataset.cat, slot = tr.dataset.slot, effect = tr.dataset.effect;
-    if (cat == null || cat === "") { var it = lookup(rowName(tr)); if (it) { cat = it.category; slot = it.slot || ""; effect = it.effect || ""; } }
-    return { cat: cat || "", slot: slot || "", effect: effect || "" };
+    var cat = tr.dataset.cat, slot = tr.dataset.slot, effect = tr.dataset.effect, benefits = null;
+    if (tr.dataset.benefits) { try { benefits = JSON.parse(tr.dataset.benefits); } catch (e) {} }
+    if (cat == null || cat === "" || !(benefits && benefits.length)) {
+      var it = lookup(rowName(tr));
+      if (it) {
+        if (cat == null || cat === "") { cat = it.category; slot = it.slot || ""; effect = it.effect || ""; }
+        if (!(benefits && benefits.length) && Array.isArray(it.benefits) && it.benefits.length) benefits = it.benefits;
+      }
+    }
+    return { cat: cat || "", slot: slot || "", effect: effect || "", benefits: (benefits && benefits.length) ? benefits : null };
+  }
+  // Structured benefits authored on an item (homebrew / generated) — the exact,
+  // author-controlled version of what parseBonuses() scrapes from effect text.
+  // Shape: [{ kind:'stat'|'skill'|'dr'|'evade'|'move'|'step', target?, amount }].
+  function benefitsToBonus(benefits) {
+    var out = { dr: 0, evade: 0, move: 0, step: 0, stats: {}, skills: [] };
+    (benefits || []).forEach(function (bn) {
+      if (!bn) return;
+      var amt = num(bn.amount);
+      var kind = norm(bn.kind).toLowerCase();
+      if (kind === "dr") out.dr += amt;
+      else if (kind === "evade") out.evade += amt;
+      else if (kind === "move" || kind === "speed") out.move += amt;
+      else if (kind === "step") out.step += amt;
+      else if (kind === "stat") { var id = STAT_ID[norm(bn.target).toLowerCase()]; if (id) out.stats[id] = (out.stats[id] || 0) + amt; }
+      else if (kind === "skill") {
+        var nm = norm(bn.target); if (!nm) return;
+        var sd = skillLookup(nm);
+        out.skills.push({ name: sd ? sd.name : nm, rank: amt, stat: sd && sd.stat ? String(sd.stat).toLowerCase() : "", passive: !!(sd && sd.passive), src: sd ? sd.name : "" });
+      }
+    });
+    return out;
   }
   // Does an effect/name carry a bonus the sheet can actually apply on equip
   // (Damage Resistance, a Stat bonus, or a named Skill rank)? Mirrors the regexes
@@ -71,7 +100,7 @@
     // Weapons equip into the Hands / Holding slot (any bonus in the effect still applies).
     if (m.cat === "weapon") return true;
     // Other mundane items are equippable only when they carry a real bonus.
-    if (m.cat === "mundane") return hasBonus(m.effect, rowName(tr));
+    if (m.cat === "mundane") return (m.benefits && m.benefits.length > 0) || hasBonus(m.effect, rowName(tr));
     return false;
   }
 
@@ -143,6 +172,9 @@
   }
   function applyBonus(b, sign) {
     if (b.dr) { var drEl = document.getElementById("dr-armor"); if (drEl) { drEl.value = String(num(drEl.value) + sign * b.dr); fire(drEl); } }
+    if (b.evade) { var evEl = document.getElementById("evade-buffs"); if (evEl) { evEl.value = String(num(evEl.value) + sign * b.evade); fire(evEl); } }
+    if (b.move) { var mvEl = document.getElementById("evade-move"); if (mvEl) { mvEl.value = String(num(mvEl.value) + sign * b.move); fire(mvEl); } }
+    if (b.step) { var stEl = document.getElementById("evade-step"); if (stEl) { stEl.value = String(num(stEl.value) + sign * b.step); fire(stEl); } }
     Object.keys(b.stats || {}).forEach(function (id) {
       var el = document.getElementById(id + "-enh");
       if (el) { el.value = String(num(el.value) + sign * b.stats[id]); fire(el); }
@@ -214,7 +246,8 @@
       if (!label && meta.cat === "weapon") label = "Hands / Holding"; // weapons default to the Hands slot
       if (label) { addName(gearInput(label), name); placed = label; }
     }
-    var bonus = parseBonuses(meta.effect, name);
+    // Prefer author-controlled structured benefits; fall back to scraping the effect text.
+    var bonus = (meta.benefits && meta.benefits.length) ? benefitsToBonus(meta.benefits) : parseBonuses(meta.effect, name);
     applyBonus(bonus, +1);
     // Skill bonuses add ranks to an existing skill row, or create the skill row.
     // Record what actually happened (created vs bumped) so unequip reverses it.
@@ -222,8 +255,9 @@
     tr.dataset.equipped = "1";
     tr.dataset.equipPlaced = placed;
     tr.dataset.equipBonus = JSON.stringify(bonus);
-    // keep the resolved category/slot on the row so refresh/save don't need a re-lookup
+    // keep the resolved category/slot/benefits on the row so refresh/save don't need a re-lookup
     tr.dataset.cat = meta.cat; if (meta.slot) tr.dataset.slot = meta.slot; if (meta.effect) tr.dataset.effect = meta.effect;
+    if (meta.benefits && meta.benefits.length) { try { tr.dataset.benefits = JSON.stringify(meta.benefits); } catch (e) {} }
     refreshRowEl(tr);
   }
   function unequip(tr) {
@@ -232,7 +266,7 @@
     if (placed === "acc") { accInputs().forEach(function (i) { if (norm(i.value).toLowerCase() === name.toLowerCase()) { i.value = ""; fire(i); } }); }
     else if (placed) { removeName(gearInput(placed), name); }
     var bonus = {}; try { bonus = JSON.parse(tr.dataset.equipBonus || "{}"); } catch (e) {}
-    applyBonus({ dr: bonus.dr || 0, stats: bonus.stats || {} }, -1);
+    applyBonus({ dr: bonus.dr || 0, evade: bonus.evade || 0, move: bonus.move || 0, step: bonus.step || 0, stats: bonus.stats || {} }, -1);
     unequipSkills(bonus.skills || []);
     delete tr.dataset.equipped; delete tr.dataset.equipPlaced; delete tr.dataset.equipBonus;
     refreshRowEl(tr);

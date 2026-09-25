@@ -92,6 +92,9 @@ export const DCC_ITEM_TIERS = [
 export const DCC_ITEM_SLOTS = [
   "Head", "Torso", "Arms", "Legs", "Feet", "Hands/Holding", "Accessory",
 ] as const;
+// Structured, auto-applied item benefits (equip engine: dcc-sheet-equip.js).
+export const DCC_BENEFIT_KINDS = ["stat", "skill", "dr", "evade", "move", "step"] as const;
+export const DCC_BENEFIT_STATS = ["str", "int", "con", "dex", "cha"] as const;
 
 // ── Dungeon Crawler Carl vocabularies (shared with the homebrew editors) ─────
 export const DCC_STATS = ["STR", "INT", "CON", "DEX", "CHA"] as const;
@@ -519,7 +522,35 @@ function normalizeDccItem(input: unknown): { name: string; data: Record<string, 
   if (str(o.slot)) data.slot = str(o.slot).slice(0, 60);
   const price = num(o.price);
   if (price != null && price > 0) data.price = price;
+  const benefits = normalizeDccBenefits(o.benefits);
+  if (benefits.length) data.benefits = benefits;
   return { name, data };
+}
+
+// Validate the structured, auto-applied benefits list (kind/target/amount).
+function normalizeDccBenefits(v: unknown): { kind: string; target?: string; amount: number }[] {
+  if (!Array.isArray(v)) return [];
+  const out: { kind: string; target?: string; amount: number }[] = [];
+  for (const raw of v as unknown[]) {
+    const o = (raw ?? {}) as Record<string, unknown>;
+    const kind = str(o.kind).toLowerCase();
+    if (!(DCC_BENEFIT_KINDS as readonly string[]).includes(kind)) continue;
+    const amount = num(o.amount);
+    if (amount == null || amount === 0) continue;
+    const b: { kind: string; target?: string; amount: number } = { kind, amount };
+    if (kind === "stat") {
+      const t = str(o.target).toLowerCase();
+      if (!(DCC_BENEFIT_STATS as readonly string[]).includes(t)) continue;
+      b.target = t;
+    } else if (kind === "skill") {
+      const t = str(o.target).slice(0, 60);
+      if (!t) continue;
+      b.target = t;
+    }
+    out.push(b);
+    if (out.length >= 20) break;
+  }
+  return out;
 }
 
 // ── Dungeon Crawler Carl homebrew (bestiary / skills / spells / classes / races) ──

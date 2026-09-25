@@ -25,6 +25,16 @@ const CATEGORIES: [string, string][] = [
 const TIERS = ["Mundane", "Bronze", "Silver", "Gold", "Platinum", "Legendary", "Celestial"];
 const SLOTS = ["Head", "Torso", "Arms", "Legs", "Feet", "Hands/Holding", "Accessory"];
 
+// Structured, auto-applied benefits (mirror DCC_BENEFIT_KINDS / DCC_BENEFIT_STATS in lib/homebrew.ts).
+const BENEFIT_KINDS: [string, string][] = [
+  ["stat", "Stat"], ["skill", "Skill (rank)"], ["dr", "DR"],
+  ["evade", "Evade"], ["move", "Move"], ["step", "Step"],
+];
+const BENEFIT_STATS: [string, string][] = [
+  ["str", "STR"], ["int", "INT"], ["con", "CON"], ["dex", "DEX"], ["cha", "CHA"],
+];
+type Benefit = { kind: string; target: string; amount: string };
+
 type Form = {
   id: string | null;
   name: string;
@@ -33,6 +43,7 @@ type Form = {
   slot: string;
   price: string;
   effect: string;
+  benefits: Benefit[];
   campaignIds: string[];
 };
 
@@ -45,7 +56,19 @@ const btnRed =
   "rounded border border-[var(--red)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0a8a3] hover:bg-[var(--red)] hover:text-white disabled:opacity-50";
 
 function blank(): Form {
-  return { id: null, name: "", category: "mundane", tier: "", slot: "", price: "", effect: "", campaignIds: [] };
+  return { id: null, name: "", category: "mundane", tier: "", slot: "", price: "", effect: "", benefits: [], campaignIds: [] };
+}
+
+function benefitsFromData(v: unknown): Benefit[] {
+  if (!Array.isArray(v)) return [];
+  return (v as unknown[]).map((raw) => {
+    const o = (raw ?? {}) as Record<string, unknown>;
+    return {
+      kind: typeof o.kind === "string" ? o.kind : "stat",
+      target: o.target == null ? "" : String(o.target),
+      amount: o.amount == null ? "" : String(o.amount),
+    };
+  });
 }
 
 function formFromRecord(rec: HomebrewRecord): Form {
@@ -59,11 +82,23 @@ function formFromRecord(rec: HomebrewRecord): Form {
     slot: s("slot"),
     price: s("price"),
     effect: s("effect"),
+    benefits: benefitsFromData(d.benefits),
     campaignIds: rec.campaignIds ?? [],
   };
 }
 
 function payloadFromForm(f: Form): Record<string, unknown> {
+  const benefits = f.benefits
+    .map((b) => {
+      const amount = parseInt(String(b.amount).trim(), 10);
+      if (!Number.isFinite(amount) || amount === 0) return null;
+      const kind = b.kind;
+      const out: { kind: string; target?: string; amount: number } = { kind, amount };
+      if (kind === "stat") { if (!BENEFIT_STATS.some(([v]) => v === b.target)) return null; out.target = b.target; }
+      else if (kind === "skill") { if (!b.target.trim()) return null; out.target = b.target.trim().slice(0, 60); }
+      return out;
+    })
+    .filter((b): b is { kind: string; target?: string; amount: number } => b != null);
   return {
     name: f.name.trim(),
     category: f.category,
@@ -71,6 +106,7 @@ function payloadFromForm(f: Form): Record<string, unknown> {
     slot: f.slot.trim(),
     price: f.price.trim(),
     effect: f.effect.trim(),
+    benefits,
   };
 }
 
@@ -95,6 +131,22 @@ export default function DccHomebrew({
         ? { ...f, campaignIds: f.campaignIds.includes(id) ? f.campaignIds.filter((x) => x !== id) : [...f.campaignIds, id] }
         : f,
     );
+  const addBenefit = () =>
+    setForm((f) => (f ? { ...f, benefits: [...f.benefits, { kind: "stat", target: "str", amount: "" }] } : f));
+  const removeBenefit = (i: number) =>
+    setForm((f) => (f ? { ...f, benefits: f.benefits.filter((_, j) => j !== i) } : f));
+  const setBenefit = (i: number, patch: Partial<Benefit>) =>
+    setForm((f) => {
+      if (!f) return f;
+      const benefits = f.benefits.map((b, j) => {
+        if (j !== i) return b;
+        const nb = { ...b, ...patch };
+        // Default the target sensibly when the kind changes.
+        if (patch.kind && patch.kind !== b.kind) nb.target = patch.kind === "stat" ? "str" : "";
+        return nb;
+      });
+      return { ...f, benefits };
+    });
 
   async function submit() {
     if (!form) return;
@@ -243,6 +295,37 @@ export default function DccHomebrew({
                   <label className={label}>Effect</label>
                   <textarea className={`${fieldBase} min-h-[70px] w-full`} value={form.effect} maxLength={4000}
                     onChange={(e) => set("effect", e.target.value)} placeholder="What it does…" />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className={label}>Mechanical Benefits</label>
+                  <p className="mb-2 text-[11px] text-[var(--muted)]">
+                    Auto-applied when the item is equipped on a character sheet (adds to the sheet’s stat, skill,
+                    DR, Evade, or Speed). Leave empty for flavor-only items.
+                  </p>
+                  {form.benefits.length ? (
+                    <div className="mb-2 flex flex-col gap-2">
+                      {form.benefits.map((b, i) => (
+                        <div key={i} className="flex flex-wrap items-center gap-2">
+                          <select className={fieldBase} value={b.kind} onChange={(e) => setBenefit(i, { kind: e.target.value })}>
+                            {BENEFIT_KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                          </select>
+                          {b.kind === "stat" ? (
+                            <select className={fieldBase} value={b.target} onChange={(e) => setBenefit(i, { target: e.target.value })}>
+                              {BENEFIT_STATS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                            </select>
+                          ) : b.kind === "skill" ? (
+                            <input className={`${fieldBase} w-40`} value={b.target} maxLength={60}
+                              onChange={(e) => setBenefit(i, { target: e.target.value })} placeholder="Skill name…" />
+                          ) : null}
+                          <input className={`${fieldBase} w-20`} value={b.amount} inputMode="numeric"
+                            onChange={(e) => setBenefit(i, { amount: e.target.value.replace(/[^\d-]/g, "") })} placeholder="+N" />
+                          <button className={btn} type="button" onClick={() => removeBenefit(i)}>Remove</button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  <button className={btn} type="button" onClick={addBenefit}>+ Add Benefit</button>
                 </div>
 
                 {campaigns.length ? (

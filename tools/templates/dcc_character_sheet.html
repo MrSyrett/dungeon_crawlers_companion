@@ -2121,6 +2121,7 @@ function collectSheet() {
     if(tr.dataset.cat) rec.cat = tr.dataset.cat;
     if(tr.dataset.slot) rec.slot = tr.dataset.slot;
     if(tr.dataset.effect) rec.effect = tr.dataset.effect;
+    if(tr.dataset.benefits) rec.benefits = tr.dataset.benefits;
     if(tr.dataset.equipped === '1') { rec.equipped = true; rec.equipPlaced = tr.dataset.equipPlaced||''; rec.equipBonus = tr.dataset.equipBonus||''; }
     return rec;
   });
@@ -2304,6 +2305,7 @@ function applySheet(data) {
       if(inv.cat) tr.dataset.cat = inv.cat;
       if(inv.slot) tr.dataset.slot = inv.slot;
       if(inv.effect) tr.dataset.effect = inv.effect;
+      if(inv.benefits) tr.dataset.benefits = inv.benefits;
       if(inv.equipped) { tr.dataset.equipped = '1'; tr.dataset.equipPlaced = inv.equipPlaced||''; tr.dataset.equipBonus = inv.equipBonus||''; }
     });
   }
@@ -3514,6 +3516,7 @@ function lootAddItems(items){
     if(it.cat) tr.dataset.cat = it.cat;
     if(it.slot) tr.dataset.slot = it.slot;
     if(it.notes) tr.dataset.effect = it.notes;
+    if(it.benefits) tr.dataset.benefits = (typeof it.benefits === 'string' ? it.benefits : JSON.stringify(it.benefits));
   });
   // Refresh the row radials so equippable loot shows its equip control.
   try { if(window.DCCHotlist) window.DCCHotlist.refresh(); } catch(e){}

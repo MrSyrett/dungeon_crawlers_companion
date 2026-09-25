@@ -210,6 +210,17 @@ export type DccItemCategory =
 export type DccLootTier =
   | "Mundane" | "Bronze" | "Silver" | "Gold" | "Platinum" | "Legendary" | "Celestial";
 
+/** A structured, auto-applied mechanical benefit an item grants when equipped.
+ *  `kind` picks the target; `target` names the stat (str/int/con/dex/cha) or skill;
+ *  `amount` is the (possibly negative) integer bonus. Consumed by the DCC character
+ *  sheet's equip engine (dcc-sheet-equip.js). */
+export type DccBenefitKind = "stat" | "skill" | "dr" | "evade" | "move" | "step";
+export interface DccBenefit {
+  kind: DccBenefitKind;
+  target?: string;   // stat id for kind "stat"; skill name for kind "skill"
+  amount: number;
+}
+
 export interface DccItem {
   name: string;
   category: DccItemCategory;
@@ -217,6 +228,8 @@ export interface DccItem {
   /** Equip slot for wearable gear. */
   slot?: string;
   effect: string;
+  /** Structured bonuses auto-applied on equip (homebrew / generated items). */
+  benefits?: DccBenefit[];
   price?: number;         // gold, where the rulebook gives one
   page?: number;
   source: DccSource;
