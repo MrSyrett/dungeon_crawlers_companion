@@ -52,9 +52,22 @@
       grid: true,
       ruler: null,          // { ax, ay, bx, by } in world coords
       pings: [],            // transient "look here" markers
+      snap: true,           // snap tokens to the grid
       dpr: opts.dpr || (root.devicePixelRatio || 1),
       _remote: false,
     };
+    function snapTok(t) {
+      if (!state.snap || !state.map.ppg) return;
+      var g = state.map.ppg;
+      t.x = Math.round((t.x - t.w / 2) / g) * g + t.w / 2;
+      t.y = Math.round((t.y - t.h / 2) / g) * g + t.h / 2;
+    }
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
     function now() { return root.performance && root.performance.now ? root.performance.now() : Date.now(); }
 
     // ---- coordinate transforms (world = map pixels) -------------------------
@@ -159,22 +172,55 @@
     function drawToken(t) {
       var cx = w2sX(t.x), cy = w2sY(t.y);
       var w = t.w * state.cam.scale, h = t.h * state.cam.scale;
+      var r = Math.min(w, h) / 2;
+      var ring = t.color || "#c8a24a";
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(t.rot || 0);
+      // drop shadow disc
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = Math.min(10, r * 0.4); ctx.shadowOffsetY = 2;
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fillStyle = "#10141a"; ctx.fill();
+      ctx.restore();
       if (t.image && t.image.complete && t.image.naturalWidth) {
-        ctx.drawImage(t.image, -w / 2, -h / 2, w, h);
+        ctx.save();
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.clip();
+        ctx.rotate(t.rot || 0);
+        var iw = t.image.naturalWidth, ih = t.image.naturalHeight;
+        var s = Math.max((2 * r) / iw, (2 * r) / ih); // cover-fit
+        ctx.drawImage(t.image, -iw * s / 2, -ih * s / 2, iw * s, ih * s);
+        ctx.restore();
       } else {
-        ctx.fillStyle = t.color || "#c8a24a";
-        ctx.beginPath();
-        ctx.arc(0, 0, Math.min(w, h) / 2, 0, Math.PI * 2);
-        ctx.fill();
-        if (t.name) {
-          ctx.fillStyle = "#1a1a1a";
-          ctx.font = "bold " + Math.max(9, Math.min(w, h) / 3) + "px system-ui, sans-serif";
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fillStyle = ring; ctx.fill();
+        if (t.name && r > 8) {
+          ctx.fillStyle = "#12151a";
+          ctx.font = "800 " + Math.max(9, r * 0.85) + "px 'Barlow Condensed', system-ui, sans-serif";
           ctx.textAlign = "center"; ctx.textBaseline = "middle";
-          ctx.fillText(t.name.slice(0, 2).toUpperCase(), 0, 0);
+          ctx.fillText(t.name.slice(0, 2).toUpperCase(), 0, 1);
         }
+      }
+      // owner ring
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.lineWidth = Math.max(2, r * 0.09); ctx.strokeStyle = ring; ctx.stroke();
+      ctx.restore();
+      if (r > 11) drawNamePlate(t, cx, cy, r);
+    }
+
+    function drawNamePlate(t, cx, cy, r) {
+      var y = cy + r + 4;
+      ctx.save();
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      if (t.name) {
+        ctx.font = "600 " + Math.min(13, Math.max(10, r * 0.5)) + "px system-ui, sans-serif";
+        var tw = ctx.measureText(t.name).width, bw = tw + 12, bh = 16;
+        ctx.fillStyle = "rgba(9,11,15,0.86)"; roundRect(cx - bw / 2, y, bw, bh, 4); ctx.fill();
+        ctx.fillStyle = "#e6ebf2"; ctx.fillText(t.name, cx, y + bh / 2 + 0.5);
+        y += bh + 3;
+      }
+      if (t.hp && t.hp.max > 0) {
+        var w2 = Math.max(30, r * 2), h2 = 5, k = Math.max(0, Math.min(1, t.hp.cur / t.hp.max));
+        ctx.fillStyle = "rgba(0,0,0,0.6)"; roundRect(cx - w2 / 2, y, w2, h2, 2); ctx.fill();
+        ctx.fillStyle = k > 0.5 ? "#5ac26a" : k > 0.25 ? "#d8b24a" : "#c8503a";
+        roundRect(cx - w2 / 2, y, w2 * k, h2, 2); ctx.fill();
       }
       ctx.restore();
     }
@@ -217,16 +263,20 @@
     function drawSelection(t) {
       if (!t) return;
       var cx = w2sX(t.x), cy = w2sY(t.y);
-      var w = t.w * state.cam.scale, h = t.h * state.cam.scale;
+      var w = t.w * state.cam.scale, h = t.h * state.cam.scale, r = Math.min(w, h) / 2;
       ctx.save();
       ctx.translate(cx, cy);
+      // circular selection halo
+      ctx.strokeStyle = "#e6c66a"; ctx.lineWidth = 2;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath(); ctx.arc(0, 0, r + 3, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      // handles at the bounding box, rotated with the token
       ctx.rotate(t.rot || 0);
-      ctx.strokeStyle = "#c8a24a"; ctx.lineWidth = 1.5;
-      ctx.strokeRect(-w / 2, -h / 2, w, h);
-      // resize handle (bottom-right), rotate handle (above top-center)
-      handleDot(w / 2, h / 2);
+      ctx.strokeStyle = "#e6c66a"; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(0, -h / 2); ctx.lineTo(0, -h / 2 - ROTATE_OFFSET); ctx.stroke();
       handleDot(0, -h / 2 - ROTATE_OFFSET);
+      handleDot(w / 2, h / 2);
       ctx.restore();
     }
     function handleDot(x, y) {
@@ -336,12 +386,14 @@
       } else if (drag.mode === "move") {
         var t = byId(drag.id); if (!t) return;
         t.x = s2wX(p.x) - drag.dx; t.y = s2wY(p.y) - drag.dy;
+        snapTok(t);
         emit("token", t);
       } else if (drag.mode === "resize") {
         var rt = byId(drag.id); if (!rt) return;
         var l = toLocal(rt, p.x, p.y);
-        rt.w = Math.max(MIN_TOKEN, Math.abs(l.x) * 2);
-        rt.h = Math.max(MIN_TOKEN, Math.abs(l.y) * 2);
+        var nw = Math.max(MIN_TOKEN, Math.abs(l.x) * 2), nh = Math.max(MIN_TOKEN, Math.abs(l.y) * 2);
+        if (state.snap && state.map.ppg) { var g = state.map.ppg; nw = Math.max(g, Math.round(nw / g) * g); nh = Math.max(g, Math.round(nh / g) * g); }
+        rt.w = nw; rt.h = nh; snapTok(rt);
         emit("token", rt);
       } else if (drag.mode === "rotate") {
         var ro = byId(drag.id); if (!ro) return;
@@ -596,6 +648,22 @@
       scheduleRender();
     }
 
+    function makeThumb(maxW) {
+      var m = state.map; if (!m.widthPx) return null;
+      var sc = Math.min(maxW / m.widthPx, maxW / m.heightPx);
+      var tw = Math.max(1, Math.round(m.widthPx * sc)), th = Math.max(1, Math.round(m.heightPx * sc));
+      var c = document.createElement("canvas"); c.width = tw; c.height = th;
+      var g = c.getContext("2d");
+      g.fillStyle = "#0b0d10"; g.fillRect(0, 0, tw, th);
+      if (m.image && m.image.complete && m.image.naturalWidth) g.drawImage(m.image, 0, 0, tw, th);
+      state.tokens.forEach(function (t) {
+        g.fillStyle = t.color || "#c8a24a";
+        g.beginPath(); g.arc(t.x * sc, t.y * sc, Math.max(2, (t.w / 2) * sc), 0, Math.PI * 2); g.fill();
+      });
+      try { return c.toDataURL("image/jpeg", 0.55); } catch (e) { return null; }
+    }
+    function cursorFor(t) { return t === "ruler" || t === "pointer" ? "crosshair" : "default"; }
+
     // ---- public API ---------------------------------------------------------
     canvas.addEventListener("pointerdown", onDown);
     root.addEventListener("pointermove", onMove);
@@ -603,6 +671,16 @@
     canvas.addEventListener("wheel", onWheel, { passive: false });
     root.addEventListener("keydown", onKey);
     root.addEventListener("resize", resize);
+    canvas.addEventListener("dblclick", function (e) {
+      var p = localPoint(e); var t = tokenAt(p.x, p.y);
+      if (t) emit("open", { token: t });
+    });
+    canvas.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+      var p = localPoint(e); var t = tokenAt(p.x, p.y);
+      if (t) { state.selectedId = t.id; emit("select", t); scheduleRender(); }
+      emit("context", { token: t || null, sx: e.clientX, sy: e.clientY, wx: s2wX(p.x), wy: s2wY(p.y) });
+    });
     resize();
 
     return {
@@ -616,14 +694,32 @@
       removeToken: removeToken,
       getToken: byId,
       select: function (id) { state.selectedId = id; emit("select", byId(id)); scheduleRender(); },
-      setTool: function (t) { state.tool = t; if (t !== "ruler") state.ruler = null; scheduleRender(); emit("tool", t); },
+      setTool: function (t) { state.tool = t; if (t !== "ruler") state.ruler = null; try { canvas.style.cursor = cursorFor(t); } catch (e) {} scheduleRender(); emit("tool", t); },
       getTool: function () { return state.tool; },
       setFog: function (on) { state.fog.enabled = !!on; scheduleRender(); },
       setShowAll: function (on) { state.fog.showAll = !!on; scheduleRender(); },
       setFogOpacity: function (o) { state.fog.opacity = clamp(o, 0.1, 1); scheduleRender(); },
       setGrid: function (on) { state.grid = !!on; scheduleRender(); },
+      setSnap: function (on) { state.snap = !!on; },
+      getSnap: function () { return state.snap; },
       setPpg: function (n) { state.map.ppg = Math.max(4, n | 0); scheduleRender(); emit("map", state.map); },
       setFeetPerCell: function (n) { state.feetPerCell = Math.max(1, n) || 5; },
+      screenToWorld: function (sx, sy) { var r = canvas.getBoundingClientRect(); return { x: s2wX(sx - r.left), y: s2wY(sy - r.top) }; },
+      addTokenAtScreen: function (spec, sx, sy) {
+        var r = canvas.getBoundingClientRect(); spec = spec || {};
+        spec.x = s2wX(sx - r.left); spec.y = s2wY(sy - r.top);
+        var g = state.map.ppg, w = spec.w || g || 70, h = spec.h || g || 70;
+        if (state.snap && state.map.ppg) { spec.x = Math.round((spec.x - w / 2) / g) * g + w / 2; spec.y = Math.round((spec.y - h / 2) / g) * g + h / 2; }
+        return addToken(spec);
+      },
+      zoomBy: function (f, sx, sy) {
+        var s = cssSize(); var px = sx == null ? s.w / 2 : sx, py = sy == null ? s.h / 2 : sy;
+        var before = { x: s2wX(px), y: s2wY(py) };
+        state.cam.scale = clamp(state.cam.scale * f, 0.05, 12);
+        state.cam.offX = px - before.x * state.cam.scale; state.cam.offY = py - before.y * state.cam.scale;
+        scheduleRender();
+      },
+      thumbnail: function (maxW) { return makeThumb(maxW || 200); },
       fitToMap: fitToMap,
       toScene: toScene,
       loadScene: loadScene,
