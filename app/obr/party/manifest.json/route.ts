@@ -3,33 +3,40 @@ import { OBR_FRAME_ANCESTORS } from "@/lib/vtt";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /obr/party/manifest.json — install URL for Party Tokens, a third,
+ * GET /obr/party/manifest.json — install URL for Table Tools, a third,
  * separate Owlbear Rodeo extension hosted alongside the Companion
  * (../../manifest.json) and the VTT Importer (../../vtt-import/manifest.json).
  *
- * Party Tokens remembers which token belongs to which player (in room
- * metadata, so it survives scene changes) and drops the whole party into a new
- * scene already owned by the right players.
+ *   Party   — remember each player's token (room metadata, so it survives scene
+ *             changes) and drop the party into any scene already owned by them.
+ *   Vision  — GM-only preview of what one token, or the whole party, can see
+ *             under Dynamic Fog.
+ *   Stage   — hide a scene behind a curtain while the GM sets it up, then
+ *             make it live.
+ *
+ * The background page runs in every client (GM and players); it is what draws
+ * the vision preview and the players' curtain.
  *
  * Same rule as the other manifests: load-bearing paths are root-relative so
  * Owlbear Rodeo resolves them against whatever origin the user pasted.
  */
 export async function GET(req: Request) {
   const manifest: Record<string, unknown> = {
-    name: "Party Tokens",
+    name: "Table Tools",
     version: "1.0.0",
     manifest_version: 1,
     // Owlbear Rodeo rejects manifests whose description is >= 128 chars.
     description:
-      "Assign a token to each player once, then drop the whole party into any scene already owned by the right players.",
+      "Party tokens that follow players between scenes, per-token vision preview, and a curtain for prepping scenes in secret.",
     author: "Dungeon Crawler's Companion",
     icon: "/obr/party/icon.svg",
+    background_url: "/obr/party/background",
     action: {
-      title: "Party Tokens",
+      title: "Table Tools",
       icon: "/obr/party/icon.svg",
       popover: "/obr/party/popover",
       width: 400,
-      height: 600,
+      height: 640,
     },
   };
 
