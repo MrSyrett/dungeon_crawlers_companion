@@ -4742,6 +4742,7 @@ let gmcRestored = false;   // true once a saved layout has been restored, so boo
 let gmcRoster = [];        // last published roster (so a bubble click can open its detail)
 let gmcCharPopIdx = null;  // which roster index the popup is showing (for live refresh)
 let gmcCharPopId = null;   // and the matching card id (identity-based refresh)
+let gmcCharPopName = null; // and its name (most reliable identity key for refresh)
 const gmcStart = Date.now();
 
 function gmcInitials(name){
@@ -4944,6 +4945,7 @@ function closeGmcPop(){
   if(scrim) scrim.classList.remove('show');
   gmcCharPopIdx = null;   // popup closed — stop live-refreshing any character card
   gmcCharPopId = null;
+  gmcCharPopName = null;
   const tb = document.getElementById('gmc-pop-toolbar');
   if(tb) tb.innerHTML = '';
   // detach any mounted tool node back to the pool so it can be reopened.
@@ -4995,11 +4997,20 @@ function gmcFindPartyCard(p, i){
   const partyNode = gmcPopNodes['party'];
   if(!partyNode) return null;
   const cards = partyNode.querySelectorAll('.pty-list .pty-card');
-  if(p && p.id != null && p.id !== ''){
-    for(const c of cards){ if(c.getAttribute('data-id') === String(p.id)) return c; }
-  }
+  // Name is the most reliable key: the Party tool dedupes characters by name, so
+  // it is unique and always present, and it survives id gaps in older restored
+  // boards (which could leave several cards sharing data-id="undefined").
   if(p && p.name){
     for(const c of cards){ if((((c.querySelector('.pty-name')||{}).textContent)||'').trim() === p.name) return c; }
+  }
+  // Then data-id — but only when EXACTLY ONE card carries it. A placeholder id
+  // (e.g. "undefined" on multiple id-less cards) must never collapse every bubble
+  // onto the first matching card.
+  const idStr = (p && p.id != null) ? String(p.id) : '';
+  if(idStr && idStr !== 'undefined' && idStr !== 'null'){
+    let match = null, count = 0;
+    for(const c of cards){ if(c.getAttribute('data-id') === idStr){ if(!match) match = c; count++; } }
+    if(count === 1) return match;
   }
   return cards[i] || null;
 }
@@ -5019,6 +5030,7 @@ function charPop(i){
     body.appendChild(clone);
     gmcCharPopIdx = i;   // remember it so live syncs refresh the open card
     gmcCharPopId = (p && p.id != null && p.id !== '') ? String(p.id) : (src.getAttribute('data-id') || null);
+    gmcCharPopName = title || (((src.querySelector('.pty-name')||{}).textContent)||'').trim() || null;
     return;
   }
   // No synced card yet — fall back to a compact live-stats card.
@@ -5046,9 +5058,15 @@ function gmcRefreshCharPop(){
   if(!open) return;   // popup no longer showing a character card
   const partyNode = gmcPopNodes['party'];
   const cards = partyNode ? partyNode.querySelectorAll('.pty-list .pty-card') : [];
-  // Prefer the same card by identity (data-id); fall back to the stored index.
+  // Prefer the same card by name (unique, id-gap-proof), then by a unique data-id,
+  // and only fall back to the stored index.
   let src = null;
-  if(gmcCharPopId != null){ for(const c of cards){ if(c.getAttribute('data-id') === gmcCharPopId){ src = c; break; } } }
+  if(gmcCharPopName != null){ for(const c of cards){ if((((c.querySelector('.pty-name')||{}).textContent)||'').trim() === gmcCharPopName){ src = c; break; } } }
+  if(!src && gmcCharPopId != null && gmcCharPopId !== 'undefined' && gmcCharPopId !== 'null'){
+    let cnt = 0, m = null;
+    for(const c of cards){ if(c.getAttribute('data-id') === gmcCharPopId){ if(!m) m = c; cnt++; } }
+    if(cnt === 1) src = m;
+  }
   if(!src) src = cards[gmcCharPopIdx];
   if(!src) return;
   const clone = src.cloneNode(true);
@@ -15332,7 +15350,17 @@ function init_party(root) {
   root._setState = (st) => {
     if(!st) return;
     chars  = Array.isArray(st.chars) ? st.chars.filter(x => x && x.sheet) : [];
-    nextId = st.nextId || (chars.reduce((m, x) => Math.max(m, x.id || 0), 0) + 1);
+    nextId = st.nextId || (chars.reduce((m, x) => Math.max(m, (parseInt(x.id, 10) || 0)), 0) + 1);
+    // Backfill missing / duplicate ids so every card gets a unique data-id. Older
+    // boards were saved before party entries carried ids; without this each such
+    // card renders data-id="undefined" and every monitor-bar bubble resolves to
+    // the first card (wrong-character popup). Names stay the primary lookup key.
+    const usedIds = new Set();
+    chars.forEach(x => {
+      let id = x.id;
+      if(id == null || id === '' || usedIds.has(id)) id = nextId++;
+      x.id = id; usedIds.add(id);
+    });
     openIds = new Set(st.openIds || []);
     status('');
     render();
