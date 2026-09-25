@@ -1,4 +1,5 @@
-/* Table Tools popover: Party, Vision and Stage tabs (plain JS, no bundler).
+/* Table Tools popover: Party, Vision, Stage and Import tabs (plain JS, no bundler).
+ * (Import is driven entirely by /obr/party/import.js; this file only shows/hides its tab.)
  *
  * PARTY is the original Party Tokens feature, described below. VISION and
  * STAGE only write settings here: player metadata NS/vision for the preview,
@@ -464,7 +465,7 @@
     var gm = isGM();
     if (!gm) state.tab = "party";
     $("tabs").hidden = !gm;
-    ["party", "vision", "stage"].forEach(function (t) {
+    ["party", "vision", "stage", "import"].forEach(function (t) {
       $("tab-" + t).hidden = state.tab !== t;
     });
     var btns = $("tabs").querySelectorAll("button[data-tab]");

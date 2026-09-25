@@ -13,6 +13,9 @@ export const dynamic = "force-dynamic";
  *             under Dynamic Fog.
  *   Stage   — hide a scene behind a curtain while the GM sets it up, then
  *             make it live.
+ *   Import  — Universal VTT (.dd2vtt/.uvtt/.df2vtt) to a new scene with
+ *             Dynamic Fog walls, doors and lights. Replaces the standalone
+ *             VTT Importer extension (/obr/vtt-import), which still works.
  *
  * The background page runs in every client (GM and players); it is what draws
  * the vision preview and the players' curtain.
@@ -23,11 +26,11 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const manifest: Record<string, unknown> = {
     name: "Table Tools",
-    version: "1.0.0",
+    version: "1.1.0",
     manifest_version: 1,
     // Owlbear Rodeo rejects manifests whose description is >= 128 chars.
     description:
-      "Party tokens that follow players between scenes, per-token vision preview, and a curtain for prepping scenes in secret.",
+      "Party tokens that follow players between scenes, per-token vision preview, a prep curtain, and Universal VTT map import.",
     author: "Dungeon Crawler's Companion",
     icon: "/obr/party/icon.svg",
     background_url: "/obr/party/background",
