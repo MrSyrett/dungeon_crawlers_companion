@@ -9638,15 +9638,37 @@ function prepStatblockToItem(sb, sys, id) {
   const notes = [sb.flavor, sb.notes].map(s => String(s || '').trim()).filter(Boolean);
   const hp = prepStatblockHp(sb, cfg);
   const roleTone = sb.sbtype === 'boss' ? 'var(--boss, #7b5cff)' : sb.sbtype === 'npc' ? 'var(--gold)' : 'var(--red)';
-  return {
+  const SYS = String(sys || '').toUpperCase();
+  // Health-track mode mirrors the bestiary combatants (monsterItem / dccMonsterItem
+  // / xsMonsterItem) so a prepped NPC keeps its system's specialised track — DCC
+  // pip segments, Star Wars / D6 2e wounds, ACE! Health pips — instead of a generic
+  // HP bar, both in the Adventure Hub card and once it's sent to the combat tracker.
+  const hpMode = SYS === 'DCC' ? 'dcc'
+             : SYS === 'ACE' ? 'ace'
+             : (SYS === 'SW' || SYS === 'D62E') ? 'sw'
+             : 'standard';
+  const item = {
     id: id, type: 'npc',
     name: sb.name || 'Combatant',
     tag: sb.type || (sb.sbtype ? sb.sbtype.toUpperCase() : ''),
     tone: sb.sbtype === 'npc' ? 'var(--gold)' : (sb.sbtype === 'boss' ? roleTone : 'var(--red)'),
-    hpMode: 'standard', hpCurrent: hp, hpMax: hp, wound: 'none',
+    hpMode: hpMode,
     statuses: [], statsOpen: true, traitsOpen: false,
     gmon: { src: 'prep', stats: stats, lines: lines, notes: notes, meta: meta, page: '', chips: null }
   };
+  if(hpMode === 'dcc') {
+    // DCC Health Bar: hpcount segments, each worth hpval (the pip value).
+    const segCount = Math.max(1, parseInt(sb.hpcount, 10) || 10);
+    const segHp = Math.max(1, parseInt(sb.hpval, 10) || Math.max(1, Math.round(hp / segCount)));
+    item.segCount = segCount; item.segHp = segHp;
+    item.segments = Array.from({ length: segCount }, () => true);
+  } else if(hpMode === 'sw') {
+    item.wound = 'none';   // Star Wars / D6 2e five-step wound track
+  } else {
+    // Standard HP bar and ACE! Health pips both read hpCurrent / hpMax.
+    item.hpCurrent = hp; item.hpMax = hp;
+  }
+  return item;
 }
 window.prepStatblockToItem = prepStatblockToItem;
 // The tracker (a separate script) uses these too.
