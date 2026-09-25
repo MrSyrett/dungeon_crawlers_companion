@@ -35,6 +35,9 @@
 
     var listeners = {};
     function emit(ev, payload) {
+      // While applying remote (synced) state, don't re-fire change events — that
+      // would make the network layer echo the update straight back out.
+      if (state._remote && (ev === "token" || ev === "map" || ev === "scene")) return;
       (listeners[ev] || []).forEach(function (cb) { try { cb(payload); } catch (e) {} });
     }
 
@@ -48,8 +51,11 @@
       feetPerCell: 5,
       grid: true,
       ruler: null,          // { ax, ay, bx, by } in world coords
+      pings: [],            // transient "look here" markers
       dpr: opts.dpr || (root.devicePixelRatio || 1),
+      _remote: false,
     };
+    function now() { return root.performance && root.performance.now ? root.performance.now() : Date.now(); }
 
     // ---- coordinate transforms (world = map pixels) -------------------------
     function w2sX(x) { return x * state.cam.scale + state.cam.offX; }
@@ -105,7 +111,32 @@
 
       if (state.selectedId) drawSelection(byId(state.selectedId));
       if (state.ruler) drawRuler();
+      drawPings();
       emit("render", null);
+    }
+
+    function drawPings() {
+      if (!state.pings.length) return;
+      var t = now(), alive = [];
+      for (var i = 0; i < state.pings.length; i++) {
+        var p = state.pings[i], age = t - p.t0;
+        if (age > 1100) continue;
+        alive.push(p);
+        var k = age / 1100, r = 8 + 34 * k;
+        ctx.save();
+        ctx.globalAlpha = 1 - k;
+        ctx.strokeStyle = p.color || "#4ea3ff";
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(w2sX(p.x), w2sY(p.y), r, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      }
+      state.pings = alive;
+      if (alive.length) scheduleRender();
+    }
+
+    function ping(x, y, color) {
+      state.pings.push({ x: x, y: y, color: color || "#4ea3ff", t0: now() });
+      scheduleRender();
     }
 
     function drawGrid() {
@@ -270,6 +301,12 @@
         state.ruler = { ax: s2wX(p.x), ay: s2wY(p.y), bx: s2wX(p.x), by: s2wY(p.y) };
         drag = { mode: "ruler" };
         scheduleRender();
+        return;
+      }
+      if (state.tool === "pointer") {
+        var px = s2wX(p.x), py = s2wY(p.y);
+        ping(px, py, "#4ea3ff");
+        emit("ping", { x: px, y: py });
         return;
       }
       if (state.tool === "select") {
@@ -506,6 +543,47 @@
       });
     }
 
+    // ---- sync helpers (used by the network layer) ---------------------------
+    // Apply a map coming from the host over the wire: {src, srcType, ppg, walls,
+    // doors, widthPx, heightPx}. Same shape toScene().map produces.
+    function loadMapState(m) {
+      var fields = {
+        ppg: m.ppg || 70, walls: m.walls || [], doors: m.doors || [],
+        widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType,
+      };
+      if (m.src) {
+        return loadImage(m.src).then(function (img) {
+          fields.image = img;
+          if (img) { fields.widthPx = img.naturalWidth; fields.heightPx = img.naturalHeight; }
+          setMap(fields); fitToMap(); return state.map;
+        }, function () { fields.image = null; setMap(fields); return state.map; });
+      }
+      fields.image = null; setMap(fields); scheduleRender();
+      return Promise.resolve(state.map);
+    }
+
+    // Reconcile the token list against an authoritative array (host -> guests):
+    // update in place, add new, drop removed — reloading an image only when its
+    // URL actually changed, so synced tokens don't flicker every frame.
+    function syncTokens(list) {
+      var byId2 = {}; state.tokens.forEach(function (t) { byId2[t.id] = t; });
+      var keep = {};
+      (list || []).forEach(function (spec) {
+        keep[spec.id] = true;
+        var t = byId2[spec.id];
+        if (!t) { addToken(spec); return; }
+        if (t.imageUrl !== spec.imageUrl) {
+          t.imageUrl = spec.imageUrl; t.image = null;
+          if (spec.imageUrl) loadImage(spec.imageUrl).then(function (img) { t.image = img; scheduleRender(); }, function () {});
+        }
+        t.name = spec.name; t.x = spec.x; t.y = spec.y; t.w = spec.w; t.h = spec.h;
+        t.rot = spec.rot || 0; t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
+        t.isViewer = !!spec.isViewer; t.color = spec.color || t.color;
+      });
+      state.tokens = state.tokens.filter(function (t) { return keep[t.id]; });
+      scheduleRender();
+    }
+
     // ---- camera helpers -----------------------------------------------------
     function fitToMap() {
       var m = state.map; if (!m.widthPx) return;
@@ -549,6 +627,10 @@
       fitToMap: fitToMap,
       toScene: toScene,
       loadScene: loadScene,
+      loadMapState: loadMapState,
+      syncTokens: syncTokens,
+      setRemoteApply: function (b) { state._remote = !!b; },
+      ping: ping,
       resize: resize,
       render: render,
     };
