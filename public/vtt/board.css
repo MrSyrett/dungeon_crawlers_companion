@@ -1,0 +1,49 @@
+/* Dungeon Crawler's Companion — VTT board styling (self-contained). */
+:root {
+  --bg: #0b0d10;
+  --panel: #14181e;
+  --panel-2: #1b212a;
+  --border: #2a323d;
+  --text: #e6ebf2;
+  --muted: #8b97a7;
+  --gold: #c8a24a;
+  --blue: #4ea3ff;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 14px/1.4 "Montserrat", system-ui, -apple-system, sans-serif;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.vtt-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--border);
+}
+.vtt-toolbar .group { display: flex; align-items: center; gap: 6px; padding-right: 10px; border-right: 1px solid var(--border); }
+.vtt-toolbar .group:last-child { border-right: 0; }
+.vtt-toolbar h1 {
+  font-size: 13px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold); margin: 0 10px 0 0; font-weight: 800;
+}
+.vtt-btn {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 5px; padding: 6px 10px; font-size: 12px; cursor: pointer;
+  font-weight: 600; letter-spacing: .02em;
+}
+.vtt-btn:hover { border-color: var(--muted); }
+.vtt-btn[aria-pressed="true"] { background: var(--gold); color: #14181e; border-color: var(--gold); }
+.vtt-btn.ghost { background: transparent; }
+label.vtt-inline { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 5px; }
+input[type="number"] { width: 58px; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px; }
+input[type="text"] { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; }
+.vtt-stage { position: relative; flex: 1; min-height: 0; }
+#board { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#board:active { cursor: grabbing; }
+.vtt-readout {
+  position: absolute; left: 12px; bottom: 12px; background: rgba(10,12,16,.85);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px;
+  font-size: 12px; color: var(--muted); pointer-events: none;
+}
+.vtt-readout b { color: var(--text); font-weight: 700; }
+.vtt-hint { color: var(--muted); font-size: 11px; }

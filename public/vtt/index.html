@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DCC — Virtual Tabletop</title>
+<link rel="stylesheet" href="./board.css">
+</head>
+<body>
+<div class="vtt-toolbar">
+  <h1>VTT</h1>
+
+  <div class="group">
+    <button class="vtt-btn" id="tool-select" aria-pressed="true">Select</button>
+    <button class="vtt-btn" id="tool-ruler" aria-pressed="false">Ruler</button>
+  </div>
+
+  <div class="group">
+    <button class="vtt-btn" id="load-map">Load map/UVTT…</button>
+    <button class="vtt-btn ghost" id="load-url">Map by link…</button>
+    <label class="vtt-inline">Grid px <input type="number" id="ppg" min="4" value="70"></label>
+    <label class="vtt-inline">ft/sq <input type="number" id="fpc" min="1" value="5"></label>
+    <button class="vtt-btn ghost" id="fit">Fit</button>
+  </div>
+
+  <div class="group">
+    <button class="vtt-btn" id="add-token">Add token…</button>
+    <button class="vtt-btn ghost" id="add-url">Token by link…</button>
+    <label class="vtt-inline"><input type="checkbox" id="viewer"> viewer (PC)</label>
+  </div>
+
+  <div class="group">
+    <button class="vtt-btn" id="fog" aria-pressed="false">Fog</button>
+    <button class="vtt-btn" id="reveal" aria-pressed="true">GM reveal</button>
+    <label class="vtt-inline"><input type="checkbox" id="grid" checked> grid</label>
+  </div>
+
+  <div class="group">
+    <button class="vtt-btn" id="save">Save scene</button>
+    <button class="vtt-btn" id="load-scene">Load scene…</button>
+  </div>
+
+  <span class="vtt-hint">drag to pan · wheel to zoom · click a token to select · Del removes · [ ] rotate</span>
+</div>
+
+<div class="vtt-stage">
+  <canvas id="board"></canvas>
+  <div class="vtt-readout" id="readout">No map loaded. Load a UVTT, an image map, or a link.</div>
+</div>
+
+<input type="file" id="file-map" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden>
+<input type="file" id="file-token" accept="image/*" hidden>
+<input type="file" id="file-scene" accept=".json" hidden>
+
+<script src="./uvtt.js"></script>
+<script src="./visibility.js"></script>
+<script src="./board.js"></script>
+<script>
+(function () {
+  "use strict";
+  var board = VTTBoard(document.getElementById("board"));
+  var $ = function (id) { return document.getElementById(id); };
+  var readout = $("readout");
+  function say(msg) { readout.innerHTML = msg; }
+
+  // tools
+  function setTool(t) {
+    board.setTool(t);
+    $("tool-select").setAttribute("aria-pressed", t === "select");
+    $("tool-ruler").setAttribute("aria-pressed", t === "ruler");
+  }
+  $("tool-select").onclick = function () { setTool("select"); };
+  $("tool-ruler").onclick = function () { setTool("ruler"); };
+
+  // map
+  $("load-map").onclick = function () { $("file-map").click(); };
+  $("file-map").onchange = function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    board.loadFile(f).then(function () { say("Map loaded: <b>" + f.name + "</b>"); },
+      function (err) { say("<b>Load failed:</b> " + err.message); });
+    e.target.value = "";
+  };
+  $("load-url").onclick = function () {
+    var url = prompt("Map image URL (Dropbox direct link, etc.):");
+    if (!url) return;
+    board.loadImageMap(url, parseInt($("ppg").value, 10) || 70, "url").then(
+      function () { say("Map loaded from link."); },
+      function (err) { say("<b>Load failed:</b> " + err.message); });
+  };
+  $("ppg").onchange = function () { board.setPpg(parseInt(this.value, 10) || 70); };
+  $("fpc").onchange = function () { board.setFeetPerCell(parseFloat(this.value) || 5); };
+  $("fit").onclick = function () { board.fitToMap(); };
+
+  // tokens
+  $("add-token").onclick = function () { $("file-token").click(); };
+  $("file-token").onchange = function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      board.addToken({ imageUrl: reader.result, name: f.name.replace(/\.[^.]+$/, ""), isViewer: $("viewer").checked });
+    };
+    reader.readAsDataURL(f);
+    e.target.value = "";
+  };
+  $("add-url").onclick = function () {
+    var url = prompt("Token image URL:");
+    if (url) board.addToken({ imageUrl: url, isViewer: $("viewer").checked });
+  };
+
+  // fog / grid
+  $("fog").onclick = function () {
+    var on = this.getAttribute("aria-pressed") !== "true";
+    this.setAttribute("aria-pressed", on);
+    board.setFog(on);
+  };
+  $("reveal").onclick = function () {
+    var on = this.getAttribute("aria-pressed") !== "true";
+    this.setAttribute("aria-pressed", on);
+    board.setShowAll(on); // GM reveal ON = show everything
+  };
+  $("grid").onchange = function () { board.setGrid(this.checked); };
+
+  // scenes
+  $("save").onclick = function () {
+    var name = prompt("Scene name:", "Scene") || "Scene";
+    var blob = new Blob([JSON.stringify(board.toScene(name), null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name.replace(/[^\w.-]+/g, "_") + ".dccscene.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    say("Scene saved: <b>" + name + "</b>");
+  };
+  $("load-scene").onclick = function () { $("file-scene").click(); };
+  $("file-scene").onchange = function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    board.loadFile(f).then(function () { say("Scene loaded: <b>" + f.name + "</b>"); },
+      function (err) { say("<b>Load failed:</b> " + err.message); });
+    e.target.value = "";
+  };
+
+  board.on("ruler", function (r) { say("Ruler: <b>" + r.text + "</b>"); });
+  board.on("select", function (t) { if (t) say("Selected token" + (t.name ? ": <b>" + t.name + "</b>" : "") + " — drag to move, corner to resize, top handle to rotate."); });
+
+  window.__vtt = board; // for headless tests
+})();
+</script>
+</body>
+</html>
