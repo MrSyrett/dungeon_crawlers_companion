@@ -214,8 +214,12 @@ function DocList({
   docs,
 }: {
   id: ToolId;
-  /** `vttUrl` is set when this sheet is linked to a campaign that has a room. */
-  docs: { id: string; title: string; updatedAt: Date; vttUrl?: string | null }[];
+  /**
+   * `vttCampaignId` is set when this sheet is linked to a campaign (so it can
+   * always open our first-party tabletop). `vttUrl` is set only when that
+   * campaign also has an Owlbear room entered — which takes precedence.
+   */
+  docs: { id: string; title: string; updatedAt: Date; vttUrl?: string | null; vttCampaignId?: string | null }[];
 }) {
   const def = TOOLS[id];
   return (
@@ -250,17 +254,22 @@ function DocList({
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {doc.vttUrl ? (
-                  <a
-                    href={doc.vttUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Open this campaign's virtual tabletop in a new tab"
-                    className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
-                  >
-                    Launch VTT
-                  </a>
-                ) : null}
+                {(() => {
+                  // Owlbear room if the GM entered one, otherwise our own tabletop.
+                  const vttHref = doc.vttUrl || (doc.vttCampaignId ? `/play/${doc.vttCampaignId}` : null);
+                  if (!vttHref) return null;
+                  return (
+                    <a
+                      href={vttHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Open this campaign's virtual tabletop in a new tab"
+                      className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
+                    >
+                      Launch VTT
+                    </a>
+                  );
+                })()}
                 <form action={deleteDocument}>
                   <input type="hidden" name="id" value={doc.id} />
                   <ConfirmButton
@@ -313,14 +322,18 @@ export default async function DashboardPage() {
     }
   }
 
-  type DocRow = (typeof docs)[number] & { vttUrl?: string | null };
+  type DocRow = (typeof docs)[number] & { vttUrl?: string | null; vttCampaignId?: string | null };
   const byTool = new Map<ToolId, DocRow[]>();
   for (const id of TOOL_ORDER) byTool.set(id, []);
   for (const doc of docs) {
     const tool = doc.tool as ToolId;
     if (!byTool.has(tool)) continue;
     const cid = doc.linkedCampaignId;
-    byTool.get(tool)!.push({ ...doc, vttUrl: cid ? vttByCampaign.get(cid) ?? null : null });
+    byTool.get(tool)!.push({
+      ...doc,
+      vttUrl: cid ? vttByCampaign.get(cid) ?? null : null,
+      vttCampaignId: cid ?? null,
+    });
   }
 
   // Split tools by kind

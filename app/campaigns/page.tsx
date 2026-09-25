@@ -447,22 +447,30 @@ export default async function CampaignsPage() {
                     ) : null}
                   </div>
 
-                  <form action={deleteCampaign} className="shrink-0">
-                    <input type="hidden" name="id" value={c.id} />
-                    <ConfirmButton
-                      message={
-                        `Delete "${c.name}" (${c.code})?\n\n` +
-                        `This deletes the campaign and its ${rolls} shared roll${rolls === 1 ? "" : "s"}.\n` +
-                        (links > 0
-                          ? `${party.map((m) => m.name).join(", ")} will stop sharing rolls and will need to join a new campaign.\n\n`
-                          : "\n") +
-                        `This cannot be undone.`
-                      }
-                      className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[#f0a8a3] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Link
+                      href={`/play/${c.id}`}
+                      className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[#1a1a1a] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                     >
-                      Delete
-                    </ConfirmButton>
-                  </form>
+                      Open Tabletop
+                    </Link>
+                    <form action={deleteCampaign} className="shrink-0">
+                      <input type="hidden" name="id" value={c.id} />
+                      <ConfirmButton
+                        message={
+                          `Delete "${c.name}" (${c.code})?\n\n` +
+                          `This deletes the campaign and its ${rolls} shared roll${rolls === 1 ? "" : "s"}.\n` +
+                          (links > 0
+                            ? `${party.map((m) => m.name).join(", ")} will stop sharing rolls and will need to join a new campaign.\n\n`
+                            : "\n") +
+                          `This cannot be undone.`
+                        }
+                        className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[#f0a8a3] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                      >
+                        Delete
+                      </ConfirmButton>
+                    </form>
+                  </div>
                 </div>
 
                 <form action={renameCampaign} className="mt-3 flex gap-2 border-t border-[var(--border)] pt-3">
@@ -562,6 +570,14 @@ export default async function CampaignsPage() {
                       ))}
                     </div>
                   ) : null}
+                  <div className="mt-3">
+                    <Link
+                      href={`/play/${c.id}`}
+                      className="inline-block rounded border border-[var(--gold)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)]"
+                    >
+                      Open Tabletop
+                    </Link>
+                  </div>
                 </li>
               );
             })}

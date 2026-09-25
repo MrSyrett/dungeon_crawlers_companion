@@ -2460,13 +2460,16 @@ const GMCamp = (function() {
 window.GMCamp = GMCamp;
 window.__gmCampaign = () => GMCamp.get();   // Party tool reads the linked campaign from here
 
-// ── Launch VTT button ──  Mirrors the homepage's Launch VTT: shows only when the
-// linked campaign has a tabletop room, and opens it in a new tab.
+// ── Launch VTT button ──  Shows whenever a campaign is linked. Opens the
+// Owlbear room if the GM entered one; otherwise our own first-party tabletop
+// at /play/<campaignId>. Opens in a new tab either way.
 function updateVttBtn() {
   const a = document.getElementById('vtt-btn');
   if(!a) return;
   const url = GMCamp.vttUrl();
-  if(url) { a.href = url; a.style.display = 'inline-block'; }
+  const camp = (typeof GMCamp !== 'undefined' && GMCamp.get) ? GMCamp.get() : null;
+  const href = url || (camp && camp.id ? '/play/' + camp.id : null);
+  if(href) { a.href = href; a.style.display = 'inline-block'; }
   else { a.removeAttribute('href'); a.style.display = 'none'; }
 }
 GMCamp.onChange(updateVttBtn);
