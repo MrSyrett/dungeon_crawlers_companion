@@ -16,6 +16,7 @@
   mount.innerHTML = shell();
   var $ = function (id) { return document.getElementById(id); };
   var board = window.VTTBoard($("vtt-canvas"), {});
+  window.__vttBoard = board; // handy for debugging/support
   var readout = $("vtt-readout");
   function say(h) { readout.innerHTML = h; }
 
@@ -237,8 +238,12 @@
       '<div class="vtt-stage"><canvas id="vtt-canvas"></canvas>' +
       '<div class="vtt-readout" id="vtt-readout">' + (isGM ? "Load a map or open a saved scene to begin." : "Connecting…") + "</div>" +
       '<div id="vtt-sheet-menu" class="vtt-menu" hidden></div>' +
-      (isGM ? sceneDrawer() + selPanel() : "") +
+      (isGM ? sceneDrawer() + selPanel() + gmInputs() : "") +
       sheetPop() + "</div>";
+  }
+  function gmInputs() {
+    return '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden>' +
+      '<input type="file" id="tk-file" accept="image/*" hidden>';
   }
   function sceneDrawer() {
     return '<div id="vtt-scenes" class="vtt-scene-panel" hidden><div class="vtt-scene-head">Scenes' +
@@ -266,12 +271,23 @@
 
   function injectStyles() {
     var css = ""
+      // The panels below use display:flex, which overrides the `hidden` attribute
+      // unless we force it — without this the sheet popup/menus sit invisibly on
+      // top of the canvas and eat every click.
+      + "[hidden]{display:none!important}"
+      // Layout: fill the viewport. The in-app DOM mounts inside #vtt-root, which
+      // the standalone board.css doesn't know about, so size it here (and the
+      // canvas, whose id differs from the standalone page's #board).
+      + "html,body{height:100%;margin:0;overflow:hidden}"
+      + "#vtt-root{display:flex;flex-direction:column;height:100vh;min-height:0}"
+      + ".vtt-stage{position:relative;flex:1;min-height:0}"
+      + "#vtt-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;background:var(--bg)}"
       + ".vtt-menu{position:absolute;top:56px;right:12px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:4px;z-index:40}"
       + ".vtt-scene-panel{position:absolute;top:12px;left:12px;width:240px;background:var(--panel);border:1px solid var(--border);border-radius:8px;z-index:30;max-height:70%;overflow:auto}"
       + ".vtt-scene-head{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold)}"
       + ".vtt-scene-row{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:13px;border-bottom:1px solid var(--border)}"
       + ".vtt-sel{position:absolute;bottom:12px;right:12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;gap:10px;align-items:center;z-index:30;flex-wrap:wrap;max-width:60%}"
-      + ".vtt-sheetpop{position:absolute;top:60px;right:12px;width:420px;height:70%;background:var(--panel);border:1px solid var(--border);border-radius:8px;z-index:50;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.5)}"
+      + ".vtt-sheetpop{position:absolute;top:56px;right:12px;width:min(680px,92vw);height:86%;background:var(--panel);border:1px solid var(--border);border-radius:8px;z-index:50;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.5);resize:both}"
       + ".vtt-sheet-head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--panel-2);cursor:move;font-weight:700}"
       + ".vtt-sheetpop iframe{border:0;flex:1;width:100%;background:#fff}"
       + "@media(max-width:640px){.vtt-sheetpop{width:94vw;right:3vw}.vtt-sel{max-width:94vw}}";
