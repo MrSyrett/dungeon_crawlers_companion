@@ -307,6 +307,8 @@ export default function DccHomebrew({
                     <div className="mb-2 flex flex-col gap-2">
                       {form.benefits.map((b, i) => (
                         <div key={i} className="flex flex-wrap items-center gap-2">
+                          <input className={`${fieldBase} w-20`} value={b.amount} inputMode="numeric"
+                            onChange={(e) => setBenefit(i, { amount: e.target.value.replace(/[^\d-]/g, "") })} placeholder="+N" />
                           <select className={fieldBase} value={b.kind} onChange={(e) => setBenefit(i, { kind: e.target.value })}>
                             {BENEFIT_KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                           </select>
@@ -318,14 +320,12 @@ export default function DccHomebrew({
                             <input className={`${fieldBase} w-40`} value={b.target} maxLength={60}
                               onChange={(e) => setBenefit(i, { target: e.target.value })} placeholder="Skill name…" />
                           ) : null}
-                          <input className={`${fieldBase} w-20`} value={b.amount} inputMode="numeric"
-                            onChange={(e) => setBenefit(i, { amount: e.target.value.replace(/[^\d-]/g, "") })} placeholder="+N" />
                           <button className={btn} type="button" onClick={() => removeBenefit(i)}>Remove</button>
                         </div>
                       ))}
                     </div>
                   ) : null}
-                  <button className={btn} type="button" onClick={addBenefit}>+ Add Benefit</button>
+                  <button className={btn} type="button" onClick={addBenefit}>Add Bonus</button>
                 </div>
 
                 {campaigns.length ? (

@@ -1076,6 +1076,15 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .ai-items .ai-input { font-size: 12px; padding: 5px 7px; }
 .ai-items .ai-it-del { background: transparent; border: 1px solid var(--border); color: var(--mid); cursor: pointer; border-radius: 3px; padding: 4px 7px; font-size: 12px; line-height: 1; }
 .ai-items .ai-it-del:hover { color: var(--red-light); border-color: var(--red-light); }
+.ai-bonus-builder { border: 1px dashed var(--border); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.ai-bonus-head { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--mid); }
+.ai-bonus-line { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ai-bonus-line .ai-bonus-amt { width: 54px; flex: 0 0 auto; }
+.ai-bonus-line .ai-bonus-kind { flex: 0 0 auto; }
+.ai-bonus-line .ai-bonus-tgt-wrap { flex: 1; min-width: 90px; display: flex; }
+.ai-bonus-line .ai-bonus-tgt { flex: 1; min-width: 0; }
+.ai-bonus-del { background: transparent; border: 1px solid var(--border); color: var(--mid); cursor: pointer; border-radius: 3px; padding: 4px 7px; font-size: 12px; line-height: 1; }
+.ai-bonus-del:hover { color: var(--red-light); border-color: var(--red-light); }
 .ai-status { font-size: 11px; min-height: 14px; color: var(--mid); }
 .ai-status.ok { color: var(--green-light); } .ai-status.err { color: var(--red-light); }
 .pane.narrow .ai-scroll { padding: 10px 11px; }
@@ -3382,6 +3391,23 @@ GMScenes.renderPins();
             <div class="ai-cat-results"></div>
             <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
             <button class="btn small ghost ai-add-row" type="button">+ Add custom item</button>
+            <div class="ai-bonus-builder">
+              <div class="ai-bonus-head">Custom bonused item — auto-applies on the player&rsquo;s sheet when equipped</div>
+              <div class="ai-row">
+                <input type="text" class="ai-input ai-bonus-name" placeholder="Item name (e.g. Ring of Might)">
+                <select class="ai-select ai-bonus-cat" title="Equip type">
+                  <option value="accessory">Accessory</option>
+                  <option value="weapon">Weapon</option>
+                  <option value="armor">Armor</option>
+                  <option value="mundane">Other</option>
+                </select>
+              </div>
+              <div class="ai-bonus-lines"></div>
+              <div class="ai-row ai-bonus-actions">
+                <button class="btn small ghost ai-bonus-add-line" type="button">Add Bonus</button>
+                <button class="btn small primary ai-bonus-add-item" type="button">Add Item to Box</button>
+              </div>
+            </div>
             <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
             <div class="ai-status ai-box-status"></div>
           </div>
@@ -15873,6 +15899,62 @@ function wireAiConsole(root) {
     makeRow(itemsBody, e.name, 1, e.effect, { category: e.category, slot: e.slot, benefits: e.benefits });
     setStatus(boxStatus, 'Enchanted a '+e.base+' — edit the name/perks, then send.', 'ok');
   });
+  // ── Custom bonused item composer ──
+  // Attach structured bonuses (stat / skill rank / DR / Evade / Move / Step, +N)
+  // to a made-up item and drop it in the box — same equippable format the enchanter
+  // produces, so the player's sheet auto-applies it on equip. No trip to Homebrew.
+  const BONUS_KINDS = [['stat','Stat'],['skill','Skill (rank)'],['dr','DR'],['evade','Evade'],['move','Move'],['step','Step']];
+  const BONUS_STATS = [['str','STR'],['int','INT'],['con','CON'],['dex','DEX'],['cha','CHA']];
+  const bonusName = root.querySelector('.ai-bonus-name'), bonusCat = root.querySelector('.ai-bonus-cat');
+  const bonusLines = root.querySelector('.ai-bonus-lines');
+  const bonusAddLine = root.querySelector('.ai-bonus-add-line'), bonusAddItem = root.querySelector('.ai-bonus-add-item');
+  function bonusTargetCtrl(kind){
+    if(kind==='stat') return '<select class="ai-select ai-bonus-tgt">'+BONUS_STATS.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')+'</select>';
+    if(kind==='skill') return '<input type="text" class="ai-input ai-bonus-tgt" placeholder="Skill name…" maxlength="60">';
+    return '';   // dr/evade/move/step take no target
+  }
+  function bonusLabel(b){
+    const n=(b.amount>=0?'+':'')+b.amount;
+    if(b.kind==='stat')  return n+' '+String(b.target||'').toUpperCase();
+    if(b.kind==='skill') return n+' '+b.target;
+    return n+' '+({dr:'DR',evade:'Evade',move:'Move',step:'Step'}[b.kind]||b.kind);
+  }
+  function addBonusLine(){
+    if(!bonusLines) return null;
+    const row=document.createElement('div'); row.className='ai-bonus-line';
+    row.innerHTML =
+      '<input type="text" class="ai-input ai-bonus-amt" inputmode="numeric" placeholder="+N">' +
+      '<select class="ai-select ai-bonus-kind">'+BONUS_KINDS.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')+'</select>' +
+      '<span class="ai-bonus-tgt-wrap">'+bonusTargetCtrl('stat')+'</span>' +
+      '<button type="button" class="ai-bonus-del" title="Remove">✕</button>';
+    const kindSel=row.querySelector('.ai-bonus-kind'), wrap=row.querySelector('.ai-bonus-tgt-wrap');
+    kindSel.addEventListener('change',()=>{ wrap.innerHTML=bonusTargetCtrl(kindSel.value); });
+    row.querySelector('.ai-bonus-amt').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d-]/g,''); });
+    row.querySelector('.ai-bonus-del').addEventListener('click',()=>row.remove());
+    bonusLines.appendChild(row);
+    return row;
+  }
+  if(bonusAddLine) bonusAddLine.addEventListener('click', addBonusLine);
+  if(bonusAddItem) bonusAddItem.addEventListener('click', ()=>{
+    const nm=(bonusName.value||'').trim();
+    if(!nm){ setStatus(boxStatus,'Name the bonused item first.','err'); return; }
+    const benefits=[];
+    bonusLines.querySelectorAll('.ai-bonus-line').forEach(row=>{
+      const amt=parseInt((row.querySelector('.ai-bonus-amt').value||'').trim(),10);
+      if(!Number.isFinite(amt)||amt===0) return;
+      const kind=row.querySelector('.ai-bonus-kind').value, tgtEl=row.querySelector('.ai-bonus-tgt');
+      const b={kind,amount:amt};
+      if(kind==='stat'){ if(!tgtEl) return; b.target=tgtEl.value; }
+      else if(kind==='skill'){ const t=tgtEl?(tgtEl.value||'').trim():''; if(!t) return; b.target=t.slice(0,60); }
+      benefits.push(b);
+    });
+    if(!benefits.length){ setStatus(boxStatus,'Add at least one bonus with an amount.','err'); return; }
+    makeRow(itemsBody, nm, 1, benefits.map(bonusLabel).join(', '), { category: bonusCat?bonusCat.value:'accessory', benefits });
+    bonusName.value=''; bonusLines.innerHTML=''; addBonusLine();
+    setStatus(boxStatus,'Added “'+nm+'” with '+benefits.length+' bonus'+(benefits.length===1?'':'es')+' — send when ready.','ok');
+  });
+  addBonusLine();   // start with one empty bonus line
+
   sendBox.addEventListener('click', () => {
     if(!canSend()){ setStatus(boxStatus,'Link a campaign first (top bar) to send loot.','err'); return; }
     const items=readRows(itemsBody).slice(0,12);
