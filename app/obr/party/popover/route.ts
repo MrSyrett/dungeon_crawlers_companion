@@ -3,7 +3,8 @@ import { embedHeaders } from "@/lib/vtt";
 export const dynamic = "force-dynamic";
 
 // GET /obr/party/popover — the Table Tools UI inside Owlbear Rodeo (Party,
-// Vision and Stage tabs for the GM; players only see their own token). A plain
+// Vision, Stage and Import tabs for the GM; players only see their own token).
+// The Import tab is the Universal VTT importer (/obr/party/import.js). A plain
 // framable page like the other extension popovers; all logic lives in
 // /obr/party/app.js, which drives window.OBR from the vendored /obr/sdk.js.
 // The vision preview and curtain themselves are drawn by the background page.
@@ -70,8 +71,8 @@ const PAGE = String.raw`<!doctype html>
   .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); }
   .tabs button {
     flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
-    font: 700 11px/1 "Montserrat", system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase;
-    padding: 10px 4px 9px; cursor: pointer;
+    font: 700 11px/1 "Montserrat", system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase;
+    padding: 10px 2px 9px; cursor: pointer;
   }
   .tabs button[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
   .tabs .pill { display: inline-block; margin-left: 5px; padding: 1px 5px; border-radius: 3px; background: var(--red); color: #fff; font-size: 9px; letter-spacing: .06em; vertical-align: 1px; }
@@ -86,6 +87,23 @@ const PAGE = String.raw`<!doctype html>
   .field { width: 100%; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 8px; font: 13px "Montserrat", system-ui, sans-serif; resize: vertical; }
   input[type=range] { width: 100%; accent-color: var(--gold); }
   .stats { font-size: 11px; color: var(--muted); }
+  /* Import tab (Universal VTT importer) */
+  #imp-drop {
+    display: block; border: 1.5px dashed var(--border); border-radius: 6px; padding: 22px 14px; text-align: center;
+    color: var(--muted); cursor: pointer; background: var(--panel); transition: border-color .15s, color .15s, background .15s;
+  }
+  #imp-drop:hover, #imp-drop.drag { border-color: var(--gold); color: var(--text); background: var(--panel-2); }
+  #imp-drop strong { color: var(--gold); }
+  #imp-file { display: none; }
+  #imp-summary { display: none; }
+  #imp-summary.show { display: block; }
+  #imp-summary .fname { font-weight: 600; margin-bottom: 8px; word-break: break-all; }
+  #imp-summary .kv { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+  #imp-summary .kv span:first-child { color: var(--muted); }
+  #imp-status { font-size: 12px; line-height: 1.5; min-height: 16px; }
+  #imp-status.err { color: var(--red); }
+  #imp-status.ok { color: var(--green); }
+  .note a { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -98,6 +116,7 @@ const PAGE = String.raw`<!doctype html>
   <button role="tab" data-tab="party" aria-selected="true">Party</button>
   <button role="tab" data-tab="vision" aria-selected="false">Vision</button>
   <button role="tab" data-tab="stage" aria-selected="false">Stage<span class="pill" id="stage-pill" hidden>Hidden</span></button>
+  <button role="tab" data-tab="import" aria-selected="false">Import</button>
 </nav>
 
 <div class="panel" id="tab-party">
@@ -167,9 +186,26 @@ const PAGE = String.raw`<!doctype html>
   <p class="note">While a scene is hidden, players see a full-screen curtain instead of the map. You can open it, move things, drop the party and set up fog, then make it live.</p>
 </div>
 
+<div class="panel" id="tab-import" hidden>
+  <p class="sub">Drop a <strong>.dd2vtt / .uvtt / .df2vtt</strong> file to create a new scene with the map, walls, openable doors and lights.</p>
+  <label id="imp-drop" for="imp-file">Drag a Universal VTT file here<br>or <strong>click to browse</strong></label>
+  <input type="file" id="imp-file" accept=".dd2vtt,.uvtt,.df2vtt,application/json">
+  <div class="card" id="imp-summary">
+    <div class="fname" id="imp-fname"></div>
+    <div class="kv"><span>Map size</span><span id="imp-s-size"></span></div>
+    <div class="kv"><span>Walls</span><span id="imp-s-walls"></span></div>
+    <div class="kv"><span>Doors (portals)</span><span id="imp-s-doors"></span></div>
+    <div class="kv"><span>Lights</span><span id="imp-s-lights"></span></div>
+  </div>
+  <button class="btn wide" id="imp-import" disabled>Import as new scene</button>
+  <div id="imp-status" role="status"></div>
+  <p class="note">Needs the free official <a href="https://extensions.owlbear.rodeo/dynamic-fog" target="_blank" rel="noopener">Dynamic Fog</a> extension for walls, doors and lights. The new scene appears in your scene list. With Stage → &ldquo;Hide new scenes&rdquo; on, it opens behind the curtain until you make it live.</p>
+</div>
+
 <div id="status" role="status"></div>
 
 <script src="/obr/party/app.js"></script>
+<script src="/obr/party/import.js"></script>
 </body>
 </html>`;
 
