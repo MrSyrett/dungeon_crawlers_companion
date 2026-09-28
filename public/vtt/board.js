@@ -43,7 +43,7 @@
 
     var state = {
       cam: { scale: 1, offX: 0, offY: 0 },
-      map: { image: null, widthPx: 0, heightPx: 0, ppg: 70, walls: [], doors: [], src: null, srcType: null },
+      map: { image: null, widthPx: 0, heightPx: 0, ppg: 70, walls: [], windows: [], doors: [], lights: [], dark: false, src: null, srcType: null },
       tokens: [],
       tool: "select",       // select | pan | ruler
       selectedId: null,
@@ -54,6 +54,10 @@
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
       fogSetup: false,      // GM: show walls / edit doors
+      setupTool: "wall",    // wall | window | door | erase | lock (setup sub-tool)
+      segDraft: null,       // barrier being drawn in setup mode { x1,y1,x2,y2,kind }
+      gm: false,            // this board belongs to the GM (sees hidden tokens)
+      collide: false,       // enforce barrier collision on this board's own moves
       dpr: opts.dpr || (root.devicePixelRatio || 1),
       _remote: false,
     };
@@ -69,6 +73,75 @@
       ctx.moveTo(x + r, y);
       ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
       ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+    // snap a world point to the nearest grid vertex (for clean wall drawing)
+    function snapVertex(x, y) {
+      if (!state.snap || !state.map.ppg) return { x: x, y: y };
+      var g = state.map.ppg; return { x: Math.round(x / g) * g, y: Math.round(y / g) * g };
+    }
+    function segDist(px, py, s) {
+      var vx = s.x2 - s.x1, vy = s.y2 - s.y1, wx = px - s.x1, wy = py - s.y1;
+      var L = vx * vx + vy * vy, t = L ? Math.max(0, Math.min(1, (wx * vx + wy * vy) / L)) : 0;
+      var dx = s.x1 + t * vx - px, dy = s.y1 + t * vy - py;
+      return Math.hypot(dx, dy);
+    }
+    // Remove the nearest barrier of ANY kind (wall, window, or drawn door) near
+    // a world point — used by the setup Erase tool and a short "click" draw.
+    function removeSegNear(x, y) {
+      var g = state.map.ppg || 70, best = null, bi = -1, bd = g * 0.45;
+      ["walls", "windows", "doors"].forEach(function (key) {
+        var arr = state.map[key] || [];
+        for (var i = 0; i < arr.length; i++) {
+          var d = segDist(x, y, arr[i]);
+          if (d < bd) { bd = d; best = key; bi = i; }
+        }
+      });
+      if (best) { state.map[best].splice(bi, 1); return true; }
+      return false;
+    }
+    // Segment/segment intersection: returns the parameter t in [0,1] along a->b
+    // at which it crosses c->d, or null if they don't cross.
+    function segHit(ax, ay, bx, by, cx, cy, dx, dy) {
+      var r_x = bx - ax, r_y = by - ay, s_x = dx - cx, s_y = dy - cy;
+      var denom = r_x * s_y - r_y * s_x;
+      if (Math.abs(denom) < 1e-9) return null; // parallel
+      var t = ((cx - ax) * s_y - (cy - ay) * s_x) / denom;
+      var u = ((cx - ax) * r_y - (cy - ay) * r_x) / denom;
+      if (t >= 0 && t <= 1 && u >= 0 && u <= 1) return t;
+      return null;
+    }
+    // Barriers that stop MOVEMENT: walls + windows + shut doors. (Windows stop
+    // movement but not sight; sight uses blockingSegments() which omits windows.)
+    function movementSegments() {
+      var segs = state.map.walls.slice();
+      (state.map.windows || []).forEach(function (w) { segs.push(w); });
+      state.map.doors.forEach(function (d) { if (d.closed || d.locked) segs.push(d); });
+      return segs;
+    }
+    // Is the straight path a->b crossing any movement barrier?
+    function pathBlocked(ax, ay, bx, by) {
+      var segs = movementSegments();
+      for (var i = 0; i < segs.length; i++) {
+        var s = segs[i];
+        if (segHit(ax, ay, bx, by, s.x1, s.y1, s.x2, s.y2) !== null) return true;
+      }
+      return false;
+    }
+    // Furthest point along a->b that does not cross (or land on) a barrier. Lets
+    // a token slide up to a wall but stop a hair short of it, never on it — so a
+    // grid-snap onto a wall line can't leave the token straddling the barrier.
+    function clampMove(ax, ay, bx, by) {
+      var segs = movementSegments(), best = Infinity;
+      for (var i = 0; i < segs.length; i++) {
+        var s = segs[i], t = segHit(ax, ay, bx, by, s.x1, s.y1, s.x2, s.y2);
+        if (t !== null && t < best) best = t;
+      }
+      if (best === Infinity) return { x: bx, y: by, hit: false };
+      // Pull back a fixed ~2px along the path (independent of move length) so the
+      // stop point is just shy of the barrier regardless of how far the drag was.
+      var len = Math.hypot(bx - ax, by - ay) || 1;
+      var t2 = Math.max(0, best - 2 / len);
+      return { x: ax + (bx - ax) * t2, y: ay + (by - ay) * t2, hit: true };
     }
     function now() { return root.performance && root.performance.now ? root.performance.now() : Date.now(); }
 
@@ -184,10 +257,42 @@
     }
     function drawSetup() {
       ctx.save();
-      ctx.strokeStyle = "rgba(78,163,255,0.55)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+      ctx.lineCap = "round";
+      // walls — solid blue
+      ctx.strokeStyle = "rgba(78,163,255,0.75)"; ctx.lineWidth = 3;
       ctx.beginPath();
       state.map.walls.forEach(function (w) { ctx.moveTo(w2sX(w.x1), w2sY(w.y1)); ctx.lineTo(w2sX(w.x2), w2sY(w.y2)); });
       ctx.stroke();
+      // windows — dashed cyan (block movement, transparent to sight)
+      ctx.strokeStyle = "rgba(90,220,235,0.9)"; ctx.lineWidth = 3; ctx.setLineDash([7, 5]);
+      ctx.beginPath();
+      (state.map.windows || []).forEach(function (w) { ctx.moveTo(w2sX(w.x1), w2sY(w.y1)); ctx.lineTo(w2sX(w.x2), w2sY(w.y2)); });
+      ctx.stroke(); ctx.setLineDash([]);
+      // doors — faint gold underline beneath their badges so they read as barriers
+      ctx.strokeStyle = "rgba(230,198,106,0.55)"; ctx.lineWidth = 3;
+      ctx.beginPath();
+      state.map.doors.forEach(function (d) { ctx.moveTo(w2sX(d.x1), w2sY(d.y1)); ctx.lineTo(w2sX(d.x2), w2sY(d.y2)); });
+      ctx.stroke();
+      // endpoints for walls + windows
+      ctx.fillStyle = "#4ea3ff";
+      state.map.walls.forEach(function (w) {
+        ctx.beginPath(); ctx.arc(w2sX(w.x1), w2sY(w.y1), 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(w2sX(w.x2), w2sY(w.y2), 2.5, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.fillStyle = "#5adceb";
+      (state.map.windows || []).forEach(function (w) {
+        ctx.beginPath(); ctx.arc(w2sX(w.x1), w2sY(w.y1), 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(w2sX(w.x2), w2sY(w.y2), 2.5, 0, Math.PI * 2); ctx.fill();
+      });
+      // draft being drawn (colour hints the kind)
+      if (state.segDraft) {
+        var d = state.segDraft;
+        ctx.strokeStyle = d.kind === "window" ? "#5adceb" : d.kind === "door" ? "#e6c66a" : "#e6c66a";
+        ctx.lineWidth = 3;
+        if (d.kind === "window") ctx.setLineDash([7, 5]);
+        ctx.beginPath(); ctx.moveTo(w2sX(d.x1), w2sY(d.y1)); ctx.lineTo(w2sX(d.x2), w2sY(d.y2)); ctx.stroke();
+        ctx.setLineDash([]);
+      }
       ctx.restore();
     }
 
@@ -233,12 +338,15 @@
     }
 
     function drawToken(t) {
+      // Hidden tokens are invisible to players; the GM sees them ghosted.
+      if (t.hidden && !state.gm) return;
       var cx = w2sX(t.x), cy = w2sY(t.y);
       var w = t.w * state.cam.scale, h = t.h * state.cam.scale;
       var r = Math.min(w, h) / 2;
       var ring = t.color || "#c8a24a";
       ctx.save();
       ctx.translate(cx, cy);
+      if (t.hidden) ctx.globalAlpha = 0.42; // GM-only ghost
       // drop shadow disc
       ctx.save();
       ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = Math.min(10, r * 0.4); ctx.shadowOffsetY = 2;
@@ -311,7 +419,11 @@
       fctx.fillStyle = "#000";
       var segs = blockingSegments();
       viewerTokens().forEach(function (t) {
-        var poly = Vis.compute(segs, { x: t.x, y: t.y }, state.map.widthPx, state.map.heightPx);
+        // Dynamic lighting: in a dark scene a token sees only as far as its own
+        // light; in a lit scene it sees its whole line of sight.
+        var radius = state.map.dark ? (t.light > 0 ? t.light * state.map.ppg : 0) : Infinity;
+        if (radius === 0) return; // dark + no light: sees nothing
+        var poly = Vis.compute(segs, { x: t.x, y: t.y }, state.map.widthPx, state.map.heightPx, { radius: radius });
         if (poly.length < 3) return;
         fctx.beginPath();
         fctx.moveTo(w2sX(poly[0].x), w2sY(poly[0].y));
@@ -319,6 +431,17 @@
         fctx.closePath();
         fctx.fill();
       });
+      // Map light sources (from a UVTT) reveal their area when the scene is dark.
+      if (state.map.dark && state.map.lights) {
+        state.map.lights.forEach(function (L) {
+          if (!(L.range > 0)) return;
+          var poly = Vis.compute(segs, { x: L.x, y: L.y }, state.map.widthPx, state.map.heightPx, { radius: L.range });
+          if (poly.length < 3) return;
+          fctx.beginPath(); fctx.moveTo(w2sX(poly[0].x), w2sY(poly[0].y));
+          for (var j = 1; j < poly.length; j++) fctx.lineTo(w2sX(poly[j].x), w2sY(poly[j].y));
+          fctx.closePath(); fctx.fill();
+        });
+      }
       fctx.restore();
       ctx.drawImage(fog, 0, 0, s.w, s.h);
     }
@@ -398,6 +521,33 @@
       return { x: cx - r.left, y: cy - r.top };
     }
 
+    // Setup-mode pointer-down: behaviour depends on the active sub-tool.
+    function setupDown(p) {
+      var wx = s2wX(p.x), wy = s2wY(p.y);
+      if (state.setupTool === "erase") {
+        if (removeSegNear(wx, wy)) { emit("map", state.map); }
+        scheduleRender(); return;
+      }
+      if (state.setupTool === "lock") {
+        var di = doorAt(p.x, p.y);
+        if (di >= 0) {
+          var d = state.map.doors[di];
+          // cycle a door: open -> closed -> locked -> open
+          if (!d.closed && !d.locked) { d.closed = true; }
+          else if (d.closed && !d.locked) { d.locked = true; }
+          else { d.closed = false; d.locked = false; }
+          emit("map", state.map);
+        }
+        scheduleRender(); return;
+      }
+      // wall | window | door -> start dragging out a barrier
+      var v = snapVertex(wx, wy);
+      var kind = state.setupTool;
+      drag = { mode: "seg", kind: kind, x1: v.x, y1: v.y, x2: v.x, y2: v.y };
+      state.segDraft = { x1: v.x, y1: v.y, x2: v.x, y2: v.y, kind: kind };
+      scheduleRender();
+    }
+
     function onDown(e) {
       var p = localPoint(e);
       if (state.tool === "ruler") {
@@ -413,6 +563,8 @@
         return;
       }
       if (state.tool === "select") {
+        // Fog setup mode owns clicks: draw/erase/lock barriers by sub-tool.
+        if (state.fogSetup) { setupDown(p); return; }
         // door badges are interactive UI on the map (open/close/lock)
         var di = doorAt(p.x, p.y);
         if (di >= 0) { emit("doorclick", { index: di }); return; }
@@ -420,7 +572,7 @@
         if (t) {
           state.selectedId = t.id;
           emit("select", t);
-          if (canMove(t)) drag = { mode: "move", id: t.id, dx: s2wX(p.x) - t.x, dy: s2wY(p.y) - t.y };
+          if (canMove(t)) drag = { mode: "move", id: t.id, dx: s2wX(p.x) - t.x, dy: s2wY(p.y) - t.y, lastX: t.x, lastY: t.y };
           scheduleRender();
           return;
         }
@@ -439,8 +591,17 @@
         state.cam.offY = drag.offY + (p.y - drag.sy);
       } else if (drag.mode === "move") {
         var t = byId(drag.id); if (!t) return;
-        t.x = s2wX(p.x) - drag.dx; t.y = s2wY(p.y) - drag.dy;
-        snapTok(t);
+        var nx = s2wX(p.x) - drag.dx, ny = s2wY(p.y) - drag.dy;
+        if (state.collide) {
+          // Players slide up to barriers but can't cross them. (The GM's board
+          // has collide=false, so a GM can drag a token past a wall.)
+          var c = clampMove(drag.lastX, drag.lastY, nx, ny);
+          nx = c.x; ny = c.y;
+          t.x = nx; t.y = ny;              // no mid-drag grid snap while colliding
+        } else {
+          t.x = nx; t.y = ny; snapTok(t);
+        }
+        drag.lastX = t.x; drag.lastY = t.y;
         emit("token", t);
       } else if (drag.mode === "resize") {
         var rt = byId(drag.id); if (!rt) return;
@@ -455,12 +616,38 @@
         emit("token", ro);
       } else if (drag.mode === "ruler") {
         state.ruler.bx = s2wX(p.x); state.ruler.by = s2wY(p.y);
+      } else if (drag.mode === "seg") {
+        var v = snapVertex(s2wX(p.x), s2wY(p.y));
+        drag.x2 = v.x; drag.y2 = v.y; state.segDraft.x2 = v.x; state.segDraft.y2 = v.y;
       }
       scheduleRender();
     }
 
     function onUp() {
-      if (drag && drag.mode === "ruler") { /* keep ruler visible until next tool use */ }
+      if (drag && drag.mode === "seg") {
+        var len = Math.hypot(drag.x2 - drag.x1, drag.y2 - drag.y1);
+        if (len < (state.map.ppg || 70) * 0.3) {
+          removeSegNear(drag.x1, drag.y1); // a click (no real drag) erases nearest
+        } else if (drag.kind === "window") {
+          state.map.windows.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
+        } else if (drag.kind === "door") {
+          state.map.doors.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2, closed: true, locked: false });
+        } else {
+          state.map.walls.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
+        }
+        state.segDraft = null;
+        emit("map", state.map); scheduleRender();
+      } else if (drag && drag.mode === "move" && state.collide) {
+        // Snap to grid on drop, but only if the snapped square is reachable
+        // without crossing a barrier — otherwise keep the clamped position.
+        var mt = byId(drag.id);
+        if (mt) {
+          var ox = mt.x, oy = mt.y;
+          snapTok(mt);
+          if (pathBlocked(ox, oy, mt.x, mt.y)) { mt.x = ox; mt.y = oy; }
+          emit("token", mt);
+        }
+      }
       drag = null;
     }
 
@@ -488,8 +675,12 @@
       } else if (e.key.indexOf("Arrow") === 0) {
         if (!canMove(t)) return;
         var step = e.shiftKey ? Math.max(2, Math.round(g / 10)) : g;
-        if (e.key === "ArrowLeft") t.x -= step; else if (e.key === "ArrowRight") t.x += step;
-        else if (e.key === "ArrowUp") t.y -= step; else if (e.key === "ArrowDown") t.y += step; else return;
+        var nx = t.x, ny = t.y;
+        if (e.key === "ArrowLeft") nx -= step; else if (e.key === "ArrowRight") nx += step;
+        else if (e.key === "ArrowUp") ny -= step; else if (e.key === "ArrowDown") ny += step; else return;
+        // A player can't step through a barrier; the GM's board (collide=false) can.
+        if (state.collide && pathBlocked(t.x, t.y, nx, ny)) { e.preventDefault(); return; }
+        t.x = nx; t.y = ny;
         if (!e.shiftKey) snapTok(t);
         emit("token", t); scheduleRender(); e.preventDefault();
       }
@@ -518,7 +709,7 @@
           widthPx: img.naturalWidth,
           heightPx: img.naturalHeight,
           ppg: ppg || state.map.ppg || 70,
-          walls: [], doors: [],
+          walls: [], windows: [], doors: [], lights: [],
           src: src, srcType: srcType || (/^data:/.test(src) ? "embedded" : "url"),
         });
         fitToMap();
@@ -537,7 +728,9 @@
           heightPx: img ? img.naturalHeight : m.heightPx,
           ppg: m.ppg,
           walls: m.walls,
+          windows: [],
           doors: m.doors,
+          lights: m.lights || [],
           src: m.imageDataUrl, srcType: "embedded",
         });
         fitToMap();
@@ -562,6 +755,9 @@
         characterDocId: spec.characterDocId || null,
         isViewer: !!spec.isViewer,
         color: spec.color || "#c8a24a",
+        light: typeof spec.light === "number" ? spec.light : 6, // cells of bright light (30ft torch)
+        hp: spec.hp || null,
+        hidden: !!spec.hidden, // GM-only: not drawn for players, ghosted for GM
       };
       state.tokens.push(t);
       if (t.imageUrl) loadImage(t.imageUrl).then(function (img) { t.image = img; scheduleRender(); }, function () {});
@@ -591,14 +787,14 @@
           src: m.src,                   // URL, or data-url (embedded)
           ppg: m.ppg,
           widthPx: m.widthPx, heightPx: m.heightPx,
-          walls: m.walls, doors: m.doors,
+          walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, dark: m.dark,
         },
         tokens: state.tokens.map(function (t) {
           return {
             id: t.id, name: t.name, imageUrl: t.imageUrl,
             x: t.x, y: t.y, w: t.w, h: t.h, rot: t.rot,
             ownerId: t.ownerId, characterDocId: t.characterDocId,
-            isViewer: t.isViewer, color: t.color,
+            isViewer: t.isViewer, color: t.color, light: t.light, hp: t.hp, hidden: t.hidden,
           };
         }),
         fog: { enabled: state.fog.enabled, opacity: state.fog.opacity },
@@ -618,7 +814,7 @@
       state.fog.enabled = !!(scene.fog && scene.fog.enabled);
       state.fog.opacity = (scene.fog && scene.fog.opacity) || 1;
       var done = function () {
-        setMap({ ppg: m.ppg || 70, walls: m.walls || [], doors: m.doors || [], widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType });
+        setMap({ ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], dark: !!m.dark, widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType });
         (scene.tokens || []).forEach(function (ts) { addToken(ts); });
         fitToMap();
         emit("scene", scene);
@@ -664,7 +860,7 @@
     // doors, widthPx, heightPx}. Same shape toScene().map produces.
     function loadMapState(m) {
       var fields = {
-        ppg: m.ppg || 70, walls: m.walls || [], doors: m.doors || [],
+        ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], dark: !!m.dark,
         widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType,
       };
       if (m.src) {
@@ -676,6 +872,19 @@
       }
       fields.image = null; setMap(fields); scheduleRender();
       return Promise.resolve(state.map);
+    }
+
+    // Apply map metadata only (walls/doors/lights/dark/ppg) without touching the
+    // image — used when the host syncs a wall/door/light change so the whole map
+    // picture isn't re-shipped over the wire.
+    function applyMapMeta(m) {
+      var f = { dark: !!m.dark };
+      if (m.ppg) f.ppg = m.ppg;
+      if (m.walls) f.walls = m.walls;
+      if (m.windows) f.windows = m.windows;
+      if (m.doors) f.doors = m.doors;
+      if (m.lights) f.lights = m.lights;
+      setMap(f);
     }
 
     // Reconcile the token list against an authoritative array (host -> guests):
@@ -695,6 +904,7 @@
         t.name = spec.name; t.x = spec.x; t.y = spec.y; t.w = spec.w; t.h = spec.h;
         t.rot = spec.rot || 0; t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
         t.isViewer = !!spec.isViewer; t.color = spec.color || t.color;
+        t.light = spec.light; t.hp = spec.hp; t.hidden = !!spec.hidden;
       });
       state.tokens = state.tokens.filter(function (t) { return keep[t.id]; });
       scheduleRender();
@@ -765,6 +975,7 @@
       addToken: addToken,
       removeToken: removeToken,
       getToken: byId,
+      setHidden: function (id, on) { var t = byId(id); if (!t) return; t.hidden = !!on; scheduleRender(); emit("token", t); },
       select: function (id) { state.selectedId = id; emit("select", byId(id)); scheduleRender(); },
       setTool: function (t) { state.tool = t; if (t !== "ruler") state.ruler = null; try { canvas.style.cursor = cursorFor(t); } catch (e) {} scheduleRender(); emit("tool", t); },
       getTool: function () { return state.tool; },
@@ -774,8 +985,19 @@
       setGrid: function (on) { state.grid = !!on; scheduleRender(); },
       setSnap: function (on) { state.snap = !!on; },
       getSnap: function () { return state.snap; },
-      setFogSetup: function (on) { state.fogSetup = !!on; scheduleRender(); },
+      setFogSetup: function (on) { state.fogSetup = !!on; if (!on) state.segDraft = null; scheduleRender(); },
       getFogSetup: function () { return state.fogSetup; },
+      setSetupTool: function (t) { if (["wall", "window", "door", "erase", "lock"].indexOf(t) >= 0) state.setupTool = t; },
+      getSetupTool: function () { return state.setupTool; },
+      setGm: function (b) { state.gm = !!b; scheduleRender(); },
+      getGm: function () { return state.gm; },
+      setCollision: function (b) { state.collide = !!b; },
+      getCollision: function () { return state.collide; },
+      // Barrier tests exposed for the network host to validate guest moves.
+      movementBlocked: function (ax, ay, bx, by) { return pathBlocked(ax, ay, bx, by); },
+      clampMovement: function (ax, ay, bx, by) { return clampMove(ax, ay, bx, by); },
+      setDark: function (on) { state.map.dark = !!on; scheduleRender(); emit("map", state.map); },
+      getDark: function () { return !!state.map.dark; },
       setDoor: function (i, fields) { var d = state.map.doors[i]; if (!d) return; if (fields.closed !== undefined) d.closed = !!fields.closed; if (fields.locked !== undefined) d.locked = !!fields.locked; scheduleRender(); },
       getDoor: function (i) { return state.map.doors[i]; },
       doorCount: function () { return state.map.doors ? state.map.doors.length : 0; },
@@ -803,6 +1025,7 @@
       toScene: toScene,
       loadScene: loadScene,
       loadMapState: loadMapState,
+      applyMapMeta: applyMapMeta,
       syncTokens: syncTokens,
       setRemoteApply: function (b) { state._remote = !!b; },
       ping: ping,

@@ -9,13 +9,13 @@ import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 
 export const VTT_SCENE_TOOL = "vtt-scene";
 
-// Keep server-stored scenes small. Map images that are LINKS cost nothing; an
-// EMBEDDED image (a local file / UVTT with the picture baked in) can be several
-// MB. Mirror the app's existing "don't bloat the DB" posture (see gm-screen
-// stripBigFiles): keep an embedded image only under this cap, else drop it and
-// mark the map so the GM re-loads it locally next session. Walls/doors/tokens
-// (the small, valuable part) are always kept.
-const EMBEDDED_MAP_CAP = 3_500_000; // ~3.5 MB of data-url string
+// Keep server-stored scenes bounded. Map images that are LINKS cost nothing; an
+// EMBEDDED image (a local file / UVTT with the picture baked in) is kept in the
+// scene so it survives a refresh without re-importing the file. UVTT battlemaps
+// are commonly a few MB (base64 inflates ~33%), so the cap is generous; only an
+// unusually huge image is dropped (and the map marked so the GM re-loads it).
+// Walls/doors/tokens (the small, valuable part) are always kept.
+const EMBEDDED_MAP_CAP = 18_000_000; // ~18 MB of data-url string (~13 MB image)
 
 type SceneMap = { srcType?: string; src?: string | null; [k: string]: unknown };
 type SceneData = { map?: SceneMap; [k: string]: unknown };

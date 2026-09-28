@@ -39,6 +39,13 @@
     link: '<path d="M9 15l6-6M10 6l1-1a4 4 0 0 1 6 6l-1 1M14 18l-1 1a4 4 0 0 1-6-6l1-1"/>',
     desktop: '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',
     mobile: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+    light: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.4c.7.6 1 1.3 1 2.1h6c0-.8.3-1.5 1-2.1A6 6 0 0 0 12 3z"/>',
+    copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
+    wall: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 12h18M9 5v7M15 12v7"/>',
+    window: '<rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h16"/>',
+    erase: '<path d="M4 20h16"/><path d="M15 6l3 3-8 8H6l-1-1z"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    ghost: '<path d="M12 3a7 7 0 0 0-7 7v10l2.5-2 2.5 2 2-2 2 2 2.5-2 2.5 2V10a7 7 0 0 0-7-7z"/><circle cx="9.5" cy="10" r="1"/><circle cx="14.5" cy="10" r="1"/>',
   };
   function ico(n, s) { return '<svg viewBox="0 0 24 24" width="' + (s || 20) + '" height="' + (s || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (P[n] || "") + "</svg>"; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]; }); }
@@ -51,6 +58,8 @@
   var board = window.VTTBoard($("vtt-canvas"), {});
   window.__vttBoard = board;
   board.setCanMove(function (t) { return isGM || t.ownerId === V.userId; });
+  board.setGm(isGM);            // the GM sees hidden tokens (ghosted); players don't
+  board.setCollision(!isGM);    // players are stopped by barriers; the GM moves freely
   var net = null, currentScene = null, tokTimer = null;
   var readout = $("vtt-readout");
   function say(h) { readout.innerHTML = h; readout.hidden = false; }
@@ -115,7 +124,6 @@
 
   // ---- GM controls ----------------------------------------------------------
   if (isGM) {
-    bind("t-addtok", function () { pendingDrop = null; $("tk-file").click(); });
     bind("side-toggle", function () { toggleSide(); });
     bind("side-close", function () { toggleSide(false); });
     // tabs
@@ -131,11 +139,32 @@
     // fog panel
     fbtn("f-fog", function (on) { board.setFog(on); say(on ? "Fog on — players see only what their tokens can." : "Fog off."); });
     fbtn("f-reveal", function (on) { board.setShowAll(on); }, true);
+    fbtn("f-dark", function (on) { board.setDark(on); say(on ? "Dark map — tokens see only as far as their light." : "Map lit — full line of sight."); });
     fbtn("f-snap", function (on) { board.setSnap(on); }, true);
-    fbtn("f-setup", function (on) { board.setFogSetup(on); say(on ? "Setup mode: walls shown; click a door to <b>lock/unlock</b> it." : ""); });
+    fbtn("f-setup", function (on) {
+      board.setFogSetup(on);
+      var bar = $("setupbar"); if (bar) bar.hidden = !on;
+      if (on) { setSetupTool("wall"); say(setupHint("wall")); } else say("");
+    });
     $("f-op").oninput = function () { board.setFogOpacity(parseInt(this.value, 10) / 100); };
+    // setup toolbar (walls / windows / doors / erase / lock)
+    ["wall", "window", "door", "erase", "lock"].forEach(function (k) {
+      bind("su-" + k, function () { setSetupTool(k); say(setupHint(k)); });
+    });
     // token add
     bind("tok-add", function () { pendingDrop = null; $("tk-file").click(); });
+  }
+
+  function setSetupTool(k) {
+    board.setSetupTool(k);
+    ["wall", "window", "door", "erase", "lock"].forEach(function (x) { var b = $("su-" + x); if (b) b.classList.toggle("on", x === k); });
+  }
+  function setupHint(k) {
+    if (k === "window") return "<b>Window:</b> drag to draw a see-through barrier (blocks movement, not sight). Short click erases.";
+    if (k === "door") return "<b>Door:</b> drag to place a door (starts closed). Short click erases.";
+    if (k === "erase") return "<b>Erase:</b> click a wall, window or door to remove it.";
+    if (k === "lock") return "<b>Lock:</b> click a door to cycle it open → closed → locked.";
+    return "<b>Wall:</b> drag to draw a solid barrier (blocks movement and sight). Short click erases.";
   }
 
   // ---- live sync ------------------------------------------------------------
@@ -161,6 +190,9 @@
   }
 
   // ---- scenes ---------------------------------------------------------------
+  var lastKey = "vtt-last-" + V.campaignId;
+  function rememberScene(id) { try { localStorage.setItem(lastKey, id); } catch (e) {} }
+  function autoLoadLast() { var id = null; try { id = localStorage.getItem(lastKey); } catch (e) {} if (id) loadSceneById(id); }
   function thumbKey(id) { return "vtt-thumb-" + id; }
   function saveThumb(id) { try { var t = board.thumbnail(220); if (t) localStorage.setItem(thumbKey(id), t); } catch (e) {} }
   function getThumb(id) { try { return localStorage.getItem(thumbKey(id)); } catch (e) { return null; } }
@@ -180,11 +212,11 @@
       });
     });
   }
-  function loadSceneById(id) { fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) { if (!doc) return; Promise.resolve(board.loadScene(doc.data)).then(function () { saveThumb(id); }); currentScene = { id: doc.id, title: doc.title }; setSceneName(); loadSceneList(); say("Scene: <b>" + esc(doc.title) + "</b>"); }); }
+  function loadSceneById(id) { fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) { if (!doc) return; Promise.resolve(board.loadScene(doc.data)).then(function () { saveThumb(id); }); currentScene = { id: doc.id, title: doc.title }; rememberScene(id); setSceneName(); loadSceneList(); say("Scene: <b>" + esc(doc.title) + "</b>"); }); }
   function saveScene() {
     var data = board.toScene(currentScene ? currentScene.title : "Scene");
     if (currentScene) { fetch(V.sceneBase + "/" + currentScene.id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: data.name, data: data }) }).then(function (r) { if (r.ok) { saveThumb(currentScene.id); say("Saved <b>" + esc(data.name) + "</b>"); loadSceneList(); } else say("<b>Save failed</b>"); }); }
-    else { var name = prompt("Name this scene:", "Scene"); if (!name) return; data.name = name; fetch(V.sceneBase, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, title: name, data: data }) }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && d.scene) { currentScene = { id: d.scene.id, title: d.scene.title }; saveThumb(currentScene.id); setSceneName(); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); } else say("<b>Save failed</b>"); }); }
+    else { var name = prompt("Name this scene:", "Scene"); if (!name) return; data.name = name; fetch(V.sceneBase, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, title: name, data: data }) }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && d.scene) { currentScene = { id: d.scene.id, title: d.scene.title }; rememberScene(currentScene.id); saveThumb(currentScene.id); setSceneName(); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); } else say("<b>Save failed</b>"); }); }
   }
   function renameScene(id, cur) { var name = prompt("Rename scene:", cur); if (!name) return; fetch(V.sceneBase + "/" + id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: name }) }).then(function () { if (currentScene && currentScene.id === id) { currentScene.title = name; setSceneName(); } loadSceneList(); }); }
   function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (currentScene && currentScene.id === id) { currentScene = null; setSceneName(); } loadSceneList(); }); }
@@ -199,13 +231,23 @@
       var sel = t.id === board.state.selectedId;
       var av = t.imageUrl ? '<img src="' + esc(t.imageUrl) + '" alt="">' : '<span class="vtt-swatch" style="background:' + (t.color || "#c8a24a") + '"></span>';
       var who = t.ownerId === V.userId ? "GM" : (t.ownerId ? "player" : "");
-      return '<div class="vtt-trow' + (sel ? " active" : "") + '" data-id="' + t.id + '"><div class="vtt-tav">' + av + '</div><div class="vtt-tinfo"><div class="vtt-tname">' + esc(t.name || "Token") + '</div>' + (who ? '<div class="vtt-tsub">' + who + (t.isViewer ? " · sees fog" : "") + "</div>" : "") + '</div><button class="vtt-mini del" title="Delete">' + ico("trash", 14) + "</button></div>";
+      var sub = [who, t.isViewer ? "sees fog" : "", t.hidden ? "hidden" : ""].filter(Boolean).join(" · ");
+      var hideBtn = isGM ? '<button class="vtt-mini hide' + (t.hidden ? " on" : "") + '" title="' + (t.hidden ? "Show to players" : "Hide from players") + '">' + ico(t.hidden ? "eyeoff" : "eye", 14) + "</button>" : "";
+      return '<div class="vtt-trow' + (sel ? " active" : "") + (t.hidden ? " hidden-tok" : "") + '" data-id="' + t.id + '"><div class="vtt-tav">' + av + '</div><div class="vtt-tinfo"><div class="vtt-tname">' + esc(t.name || "Token") + '</div>' + (sub ? '<div class="vtt-tsub">' + sub + "</div>" : "") + "</div>" + hideBtn + '<button class="vtt-mini copy" title="Place another copy on the map">' + ico("copy", 14) + '</button><button class="vtt-mini del" title="Delete">' + ico("trash", 14) + "</button></div>";
     }).join("");
     el.querySelectorAll(".vtt-trow").forEach(function (row) {
       var id = row.dataset.id;
       row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; board.select(id); board.centerOn(id); renderTokens(); });
+      var hb = row.querySelector(".hide"); if (hb) hb.onclick = function (e) { e.stopPropagation(); var tk = board.getToken(id); board.setHidden(id, !(tk && tk.hidden)); if (net) net.pushTokens(); renderTokens(); };
+      row.querySelector(".copy").onclick = function (e) { e.stopPropagation(); placeCopy(id); };
       row.querySelector(".del").onclick = function (e) { e.stopPropagation(); board.removeToken(id); if (net) net.pushTokens(); renderTokens(); };
     });
+  }
+  // Place another instance of an existing token (same image) on the map.
+  function placeCopy(id) {
+    var t = board.getToken(id); if (!t) return;
+    var c = clone(t); c.id = null; c.x += (board.state.map.ppg || 70);
+    var nt = board.addToken(c); if (net) net.pushTokens(); board.select(nt.id); board.centerOn(nt.id); renderTokens();
   }
   board.on("select", function () { if (tab() === "tokens") renderTokens(); });
 
@@ -222,7 +264,9 @@
         (net && net.peers ? net.peers() : []).forEach(function (p) { owners.push({ label: p.name, onClick: function () { assign(t, p.id); } }); });
         items.push({ label: "Assign to", sub: owners });
         items.push({ label: (t.isViewer ? "✓ " : "") + "Sees fog (viewer)", onClick: function () { t.isViewer = !t.isViewer; board.render(); if (net) net.pushTokens(); } });
-        items.push({ label: "Duplicate", onClick: function () { var c = clone(t); c.id = null; c.x += (board.state.map.ppg || 70); var nt = board.addToken(c); if (net) net.pushTokens(); board.select(nt.id); } });
+        items.push({ label: "Light (in the dark)", sub: [{ ft: 0, l: "None" }, { ft: 20 }, { ft: 40 }, { ft: 60 }, { ft: 90 }].map(function (o) { var fpc = board.state.feetPerCell || 5, cells = o.ft / fpc; return { label: (o.l || o.ft + " ft") + (Math.abs((t.light || 0) - cells) < 0.01 ? "  ✓" : ""), onClick: function () { t.light = cells; board.render(); if (net) net.pushTokens(); } }; }) });
+        items.push({ label: (t.hidden ? "✓ " : "") + "Hide from players", onClick: function () { board.setHidden(t.id, !t.hidden); if (net) net.pushTokens(); say(t.hidden ? "Token <b>hidden</b> from players." : "Token visible to players."); } });
+        items.push({ label: "Place copy", onClick: function () { placeCopy(t.id); } });
         items.push({ sep: true });
         items.push({ label: "Delete", danger: true, onClick: function () { board.removeToken(t.id); if (net) net.pushTokens(); } });
       }
@@ -232,13 +276,20 @@
     if (items.length) menuAt(items, e.sx, e.sy);
   }
   function assign(t, id) { t.ownerId = id; t.color = id ? colorFor(id) : "#c8a24a"; board.render(); if (net) net.pushTokens(); }
-  function clone(o) { return JSON.parse(JSON.stringify({ name: o.name, imageUrl: o.imageUrl, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot, ownerId: o.ownerId, characterDocId: o.characterDocId, isViewer: o.isViewer, color: o.color })); }
+  function clone(o) { return JSON.parse(JSON.stringify({ name: o.name, imageUrl: o.imageUrl, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot, ownerId: o.ownerId, characterDocId: o.characterDocId, isViewer: o.isViewer, color: o.color, light: o.light, hp: o.hp, hidden: o.hidden })); }
+  // Generic browser filenames (download.png, image, IMG_1234, screenshot…) make
+  // lousy token names — fall back to "Token N" instead.
+  function tokenName(fname) {
+    var base = (fname || "").replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim();
+    if (!base || /^(download|image|untitled|unnamed|photo|screenshot|clipboard|dfclip)\b/i.test(base) || /^img\s?\d*$/i.test(base)) return "Token " + (board.state.tokens.length + 1);
+    return base.charAt(0).toUpperCase() + base.slice(1);
+  }
 
   if (isGM) {
     $("tk-file").onchange = function (e) {
       var f = e.target.files[0]; if (!f) return; var where = pendingDrop; pendingDrop = null;
       var rd = new FileReader();
-      rd.onload = function () { var sx = where ? where.sx : window.innerWidth / 2, sy = where ? where.sy : window.innerHeight / 2; var t = board.addTokenAtScreen({ imageUrl: rd.result, name: f.name.replace(/\.[^.]+$/, "") }, sx, sy); if (net) net.pushTokens(); board.select(t.id); if (tab() === "tokens") renderTokens(); };
+      rd.onload = function () { var sx = where ? where.sx : window.innerWidth / 2, sy = where ? where.sy : window.innerHeight / 2; var t = board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name) }, sx, sy); if (net) net.pushTokens(); board.select(t.id); if (tab() === "tokens") renderTokens(); };
       rd.readAsDataURL(f); e.target.value = "";
     };
   }
@@ -271,18 +322,19 @@
   stage.addEventListener("drop", function (e) {
     if (!isGM) return; e.preventDefault();
     var files = (e.dataTransfer && e.dataTransfer.files) || []; var n = 0;
-    Array.prototype.forEach.call(files, function (f) { if (!/^image\//.test(f.type)) return; var rd = new FileReader(); rd.onload = function () { board.addTokenAtScreen({ imageUrl: rd.result, name: f.name.replace(/\.[^.]+$/, "") }, e.clientX + (n++) * 8, e.clientY); if (net) net.pushTokens(); if (tab() === "tokens") renderTokens(); }; rd.readAsDataURL(f); });
+    Array.prototype.forEach.call(files, function (f) { if (!/^image\//.test(f.type)) return; var rd = new FileReader(); rd.onload = function () { board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name) }, e.clientX + (n++) * 8, e.clientY); if (net) net.pushTokens(); if (tab() === "tokens") renderTokens(); }; rd.readAsDataURL(f); });
   });
 
-  startNet(); setTool("select"); if (isGM) setSceneName();
+  startNet(); setTool("select"); if (isGM) { setSceneName(); autoLoadLast(); }
 
   // ---- shell + styles -------------------------------------------------------
   function rb(id, name, label, on) { return '<button class="vtt-tbtn' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name) + "</button>"; }
   function frow(id, name, label, on) { return '<button class="vtt-frow' + (on ? " on" : "") + '" id="' + id + '"><span class="vtt-frow-i">' + ico(name, 18) + "</span>" + label + "</button>"; }
+  function subtn(id, name, label, on) { return '<button class="vtt-sub-t' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name, 17) + "<span>" + label + "</span></button>"; }
   function shell() {
-    var rail = rb("t-select", "select", "Select / move  (V)", true) + rb("t-ruler", "ruler", "Measure  (R)") + rb("t-pointer", "ping", "Ping  (P)") + (isGM ? '<div class="vtt-rail-sep"></div>' + rb("t-addtok", "plus", "Add token") : "");
+    var rail = rb("t-select", "select", "Select / move  (V)", true) + rb("t-ruler", "ruler", "Measure  (R)") + rb("t-pointer", "ping", "Ping  (P)") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
     var top = '<div class="vtt-top"><a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a><div class="vtt-title">' + esc(V.campaignName || "Tabletop") + "</div></div>" +
-      '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span><button class="vtt-tbtn" id="t-sheet" title="My character sheet">' + ico("sheet") + "</button>" + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
+      '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
     var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden><div class="vtt-side-head"><span>Table</span><button class="vtt-mini" id="side-close">' + ico("close", 16) + "</button></div>" +
       '<div class="vtt-tabs">' + tabBtn("scenes", "layers", "Scenes", true) + tabBtn("tokens", "token", "Tokens") + tabBtn("fog", "fog", "Fog") + tabBtn("players", "players", "Players") + "</div>" +
       // scenes
@@ -296,14 +348,19 @@
       '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div><div class="vtt-hint2">Tip: drag an image straight onto the map.</div><div class="vtt-token-list" id="token-list"></div></div>' +
       // fog
       '<div class="vtt-panel" data-panel="fog" hidden>' +
-      frow("f-fog", "fog", "Fog of war") + frow("f-reveal", "eye", "GM reveal (see through fog)", true) + frow("f-snap", "snap", "Snap tokens to grid", true) + frow("f-setup", "wrench", "Setup mode (walls & door locks)") +
+      frow("f-fog", "fog", "Fog of war") + frow("f-reveal", "eye", "GM reveal (see through fog)", true) + frow("f-dark", "light", "Dynamic lighting (dark map)") + frow("f-snap", "snap", "Snap tokens to grid", true) + frow("f-setup", "wrench", "Setup mode (edit walls, windows & doors)") +
       '<div class="vtt-row small" style="margin-top:8px"><label style="flex:1">Darkness <input type="range" id="f-op" min="40" max="100" value="90"></label></div>' +
-      '<div class="vtt-hint2">' + ico("door", 15) + ' Doors show an icon on the map — click to open or close. In setup mode, click a door to lock it.</div></div>' +
+      '<div class="vtt-hint2">' + ico("wall", 15) + ' In <b>setup mode</b> a toolbar appears at the top: pick <b>Wall</b> (blocks sight + movement), <b>Window</b> (blocks movement, see-through), <b>Door</b>, <b>Erase</b>, or <b>Lock</b>, then drag on the map. A short click erases the nearest barrier.</div>' +
+      '<div class="vtt-hint2">' + ico("door", 15) + ' Outside setup, doors show an icon on the map — click to open/close. Players and their tokens can’t cross walls, windows or shut doors (you can drag a token past them yourself).</div>' +
+      '<div class="vtt-hint2">' + ico("ghost", 15) + ' <b>Hide a token</b> from players via its right-click menu or the eye button in the Tokens list — hidden tokens show ghosted to you and vanish for players.</div>' +
+      '<div class="vtt-hint2">' + ico("light", 15) + ' <b>Dynamic lighting</b>: in the dark, a token sees only as far as its light — set a token’s light from its right-click menu.</div></div>' +
       // players
       '<div class="vtt-panel" data-panel="players" hidden><div id="players"></div></div></div>';
     var zoom = '<div class="vtt-zoom"><button class="vtt-tbtn" id="z-in" title="Zoom in">' + ico("zin") + '</button><button class="vtt-tbtn" id="z-fit" title="Fit map">' + ico("fit") + '</button><button class="vtt-tbtn" id="z-out" title="Zoom out">' + ico("zout") + "</button></div>";
     var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="tk-file" accept="image/*" hidden>' : "";
-    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + inputs + "</div>";
+    var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden><span class="vtt-setupbar-t">Barriers</span>' +
+      subtn("su-wall", "wall", "Wall", true) + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + subtn("su-lock", "lock", "Lock") + "</div>";
+    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + inputs + "</div>";
   }
   function tabBtn(name, icon, label, on) { return '<button class="vtt-tab' + (on ? " on" : "") + '" data-tab="' + name + '">' + ico(icon, 16) + "<span>" + label + "</span></button>"; }
   function sheetPop() { return '<div id="sheetpop" class="vtt-sheetpop" hidden><div class="vtt-sheet-head" id="sheet-head"><span id="sheet-title">Character</span><span style="flex:1"></span><button class="vtt-mini" id="sheet-mode" title="Switch to desktop size">' + ico("desktop", 16) + '</button><button class="vtt-mini" id="sheet-close">' + ico("close", 16) + '</button></div><iframe id="sheet-frame" title="Character sheet"></iframe></div>'; }
@@ -358,13 +415,19 @@
       ".vtt-tav{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:#0b0d10}.vtt-tav img{width:100%;height:100%;object-fit:cover}.vtt-swatch{width:20px;height:20px;border-radius:50%}",
       ".vtt-tinfo{flex:1;min-width:0}.vtt-tname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vtt-tsub{font-size:10px;color:#8b97a7;text-transform:uppercase;letter-spacing:.05em}",
       ".vtt-prow{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}",
+      ".vtt-trow.hidden-tok .vtt-tav{opacity:.5}.vtt-mini.hide.on{color:#c8a24a}",
+      ".vtt-setupbar{position:absolute;top:64px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:rgba(15,18,23,.97);border:1px solid #2a323d;border-radius:10px;padding:6px 8px;z-index:22;box-shadow:0 8px 30px rgba(0,0,0,.5)}",
+      ".vtt-setupbar-t{font:700 10px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:#8b97a7;margin:0 6px 0 2px}",
+      ".vtt-sub-t{display:flex;align-items:center;gap:5px;background:#161b22;color:#c3ccd8;border:1px solid #2a323d;border-radius:7px;padding:6px 10px;font:600 12px/1 system-ui;cursor:pointer}",
+      ".vtt-sub-t:hover{color:#fff;border-color:#3d4756}.vtt-sub-t.on{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
+      "@media(max-width:640px){.vtt-setupbar{top:auto;bottom:70px;flex-wrap:wrap;max-width:94vw;justify-content:center}.vtt-sub-t span{display:none}}",
       ".vtt-empty{font-size:12px;color:#8b97a7;line-height:1.5;padding:6px 0}",
       ".vtt-hint2{font-size:11px;color:#8b97a7;line-height:1.5;margin:6px 0;display:flex;gap:6px;align-items:flex-start}.vtt-hint2 svg{flex:0 0 auto;margin-top:1px}",
       ".vtt-ctx{position:fixed;z-index:100;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:4px;min-width:160px;box-shadow:0 12px 40px rgba(0,0,0,.6)}",
       ".vtt-ctx.sub{position:absolute;left:100%;top:-5px;display:none}",
       ".vtt-ctx-item{position:relative;padding:7px 10px;border-radius:5px;font-size:13px;cursor:pointer;white-space:nowrap;color:#e6ebf2}.vtt-ctx-item:hover{background:#232b35}.vtt-ctx-item.has-sub:hover>.vtt-ctx.sub{display:block}.vtt-ctx-item.danger{color:#f0a8a3}",
       ".vtt-ctx-sep{height:1px;background:#2a323d;margin:4px 2px}",
-      ".vtt-sheetpop{position:absolute;top:60px;right:12px;width:min(680px,92vw);height:86%;background:#14181e;border:1px solid #2a323d;border-radius:10px;z-index:60;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6);resize:both}",
+      ".vtt-sheetpop{position:absolute;top:60px;right:12px;width:min(510px,92vw);height:86%;background:#14181e;border:1px solid #2a323d;border-radius:10px;z-index:60;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6);resize:both}",
       ".vtt-sheetpop.wide{width:min(1120px,96vw);height:92vh;top:4vh;right:2vw;left:auto}",
       ".vtt-sheet-head{display:flex;align-items:center;gap:6px;padding:9px 12px;background:#1b212a;cursor:move;font-weight:700}",
       ".vtt-sheetpop iframe{border:0;flex:1;width:100%;background:#fff}",

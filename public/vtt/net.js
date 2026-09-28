@@ -91,13 +91,18 @@
     function mapPayload() {
       var m = board.state.map;
       return {
-        ppg: m.ppg, walls: m.walls, doors: m.doors,
+        ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, dark: m.dark,
         widthPx: m.widthPx, heightPx: m.heightPx, srcType: m.srcType,
         url: m.srcType === "url" ? m.src : null,
       };
     }
+    // Players never receive tokens the GM has hidden — they're filtered out here
+    // (not merely undrawn), so a hidden monster's position never leaves the GM.
+    function visibleWire() {
+      return board.state.tokens.filter(function (t) { return !t.hidden; }).map(tokenWire);
+    }
     function scenePayload() {
-      return { t: "scene", map: mapPayload(), tokens: board.state.tokens.map(tokenWire), fog: { enabled: board.state.fog.enabled, opacity: board.state.fog.opacity } };
+      return { t: "scene", map: mapPayload(), tokens: visibleWire(), fog: { enabled: board.state.fog.enabled, opacity: board.state.fog.opacity } };
     }
 
     function sendObj(peer, obj) { if (peer.open) { try { peer.dc.send(JSON.stringify(obj)); } catch (e) {} } }
@@ -114,11 +119,15 @@
       sendObj(peer, { t: "mapEnd" });
     }
 
-    function pushTokens() { broadcast({ t: "tokens", tokens: board.state.tokens.map(tokenWire) }); }
+    function pushTokens() { broadcast({ t: "tokens", tokens: visibleWire() }); }
+    var lastShipSrc = null;
     function pushScene() {
       broadcast(scenePayload());
+      // Only re-ship the (embedded) map image when it actually changed — a wall,
+      // door or lighting edit updates metadata without re-sending the whole map.
       var m = board.state.map;
-      if (m.srcType !== "url" && typeof m.src === "string" && m.src.length) {
+      if (m.srcType !== "url" && typeof m.src === "string" && m.src.length && m.src !== lastShipSrc) {
+        lastShipSrc = m.src;
         Object.keys(peers).forEach(function (k) { if (peers[k].open) shipMap(peers[k], m.src); });
       }
     }
@@ -127,10 +136,16 @@
       var msg; try { msg = JSON.parse(raw); } catch (e) { return; }
       if (msg.t === "moveToken") {
         var t = board.getToken(msg.id);
-        // Authoritative check: a player may only move a token they own.
+        // Authoritative check: a player may only move a token they own, and only
+        // to a spot reachable without crossing a wall/window/closed door. If the
+        // path is blocked we clamp to just short of the barrier and echo back the
+        // corrected position, so a tampered client can't walk through walls.
         if (t && t.ownerId === peerId) {
+          var nx = msg.x, ny = msg.y;
+          var c = board.clampMovement(t.x, t.y, nx, ny);
+          nx = c.x; ny = c.y;
           board.setRemoteApply(true);
-          t.x = msg.x; t.y = msg.y; if (typeof msg.rot === "number") t.rot = msg.rot;
+          t.x = nx; t.y = ny; if (typeof msg.rot === "number") t.rot = msg.rot;
           board.setRemoteApply(false);
           board.render();
           scheduleTokens();
@@ -209,12 +224,15 @@
         board.setFog(msg.fog && msg.fog.enabled); board.setFogOpacity((msg.fog && msg.fog.opacity) || 1);
         board.setShowAll(false); // players always see through fog, never GM-reveal
         pendingMap = msg.map;
+        // Always apply map metadata (walls/doors/lights/dark) so wall & lighting
+        // edits land even when the image isn't re-shipped.
+        if (msg.map) board.applyMapMeta(msg.map);
         if (msg.map && msg.map.srcType === "url" && msg.map.url) {
-          board.loadMapState({ src: msg.map.url, srcType: "url", ppg: msg.map.ppg, walls: msg.map.walls, doors: msg.map.doors, widthPx: msg.map.widthPx, heightPx: msg.map.heightPx })
+          board.loadMapState({ src: msg.map.url, srcType: "url", ppg: msg.map.ppg, walls: msg.map.walls, windows: msg.map.windows, doors: msg.map.doors, lights: msg.map.lights, dark: msg.map.dark, widthPx: msg.map.widthPx, heightPx: msg.map.heightPx })
             .then(function () { board.setRemoteApply(false); });
         }
         board.syncTokens(msg.tokens || []);
-        // if embedded map, applied when mapEnd arrives; keep remote flag until then
+        // embedded image (if new) arrives via chunks; metadata already applied
         if (!(msg.map && msg.map.srcType === "url")) board.setRemoteApply(false);
       } else if (msg.t === "tokens") {
         board.setRemoteApply(true); board.syncTokens(msg.tokens || []); board.setRemoteApply(false);
@@ -225,7 +243,7 @@
       else if (msg.t === "mapEnd") {
         var m = pendingMap || {};
         board.setRemoteApply(true);
-        board.loadMapState({ src: mapBuf, srcType: "embedded", ppg: m.ppg, walls: m.walls, doors: m.doors, widthPx: m.widthPx, heightPx: m.heightPx })
+        board.loadMapState({ src: mapBuf, srcType: "embedded", ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, dark: m.dark, widthPx: m.widthPx, heightPx: m.heightPx })
           .then(function () { board.setRemoteApply(false); });
         mapBuf = null;
       }
@@ -259,8 +277,11 @@
   function tokenWire(t) {
     return {
       id: t.id, name: t.name, imageUrl: t.imageUrl, x: t.x, y: t.y, w: t.w, h: t.h,
-      rot: t.rot || 0, ownerId: t.ownerId, characterDocId: t.characterDocId, isViewer: !!t.isViewer, color: t.color,
+      rot: t.rot || 0, ownerId: t.ownerId, characterDocId: t.characterDocId, isViewer: !!t.isViewer,
+      color: t.color, light: t.light, hp: t.hp,
     };
+    // NB: `hidden` is deliberately NOT wired — hidden tokens are filtered out
+    // before send, so a guest never learns they exist.
   }
 
   root.VTTNet = { httpTransport: httpTransport, host: host, guest: guest };
