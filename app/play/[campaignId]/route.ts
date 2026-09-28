@@ -53,8 +53,11 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
     sceneBase: "/api/vtt/scenes",
     signalBase: "/api/vtt/signal",
     toolBase: "/tools",
-    // Free public STUN for connection setup; no TURN (peer-to-peer, no relay).
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    // Free public STUN for connection setup, plus an OPTIONAL TURN relay if the
+    // env is configured (helps the ~10-15% of players behind symmetric NAT /
+    // strict firewalls who can't hole-punch a direct connection). Unset = STUN
+    // only, unchanged behaviour.
+    iceServers: iceServers(),
   };
 
   return new Response(pageHtml(cfg), {
@@ -67,6 +70,25 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
 
 function inlineJson(v: unknown): string {
   return JSON.stringify(v).replace(/</g, "\\u003c");
+}
+
+// Build the ICE server list. Always includes free public STUN. If TURN is
+// configured via env, appends it so strict-NAT players can still connect:
+//   VTT_TURN_URLS       comma-separated, e.g. "turn:turn.example.com:3478,turns:turn.example.com:5349"
+//   VTT_TURN_USERNAME   TURN username (or a time-limited credential username)
+//   VTT_TURN_CREDENTIAL TURN credential/password
+// All three must be set for TURN to be added; otherwise it's STUN-only.
+function iceServers(): Array<{ urls: string | string[]; username?: string; credential?: string }> {
+  const servers: Array<{ urls: string | string[]; username?: string; credential?: string }> = [
+    { urls: "stun:stun.l.google.com:19302" },
+  ];
+  const urls = (process.env.VTT_TURN_URLS || "").split(",").map((u) => u.trim()).filter(Boolean);
+  const username = process.env.VTT_TURN_USERNAME;
+  const credential = process.env.VTT_TURN_CREDENTIAL;
+  if (urls.length && username && credential) {
+    servers.push({ urls, username, credential });
+  }
+  return servers;
 }
 
 function pageHtml(cfg: Record<string, unknown>): string {

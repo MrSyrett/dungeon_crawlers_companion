@@ -46,6 +46,7 @@
     erase: '<path d="M4 20h16"/><path d="M15 6l3 3-8 8H6l-1-1z"/>',
     lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     ghost: '<path d="M12 3a7 7 0 0 0-7 7v10l2.5-2 2.5 2 2-2 2 2 2.5-2 2.5 2V10a7 7 0 0 0-7-7z"/><circle cx="9.5" cy="10" r="1"/><circle cx="14.5" cy="10" r="1"/>',
+    refresh: '<path d="M4 11a8 8 0 0 1 13.4-4.4L20 9"/><path d="M20 4v5h-5"/><path d="M20 13a8 8 0 0 1-13.4 4.4L4 15"/><path d="M4 20v-5h5"/>',
   };
   function ico(n, s) { return '<svg viewBox="0 0 24 24" width="' + (s || 20) + '" height="' + (s || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (P[n] || "") + "</svg>"; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]; }); }
@@ -77,6 +78,7 @@
   bind("z-in", function () { board.zoomBy(1.2); });
   bind("z-out", function () { board.zoomBy(1 / 1.2); });
   bind("z-fit", function () { board.fitToMap(); });
+  bind("conn-retry", function () { if (net && net.reconnect) { setConn("connecting"); net.reconnect(); } });
   board.on("ruler", function (r) { say("<b>" + r.text + "</b>"); });
   board.on("ping", function (p) { if (net) net.ping(p.x, p.y); });
   board.on("open", function (e) { openSheetForToken(e.token); });
@@ -131,7 +133,15 @@
     // map
     bind("m-load", function () { $("m-file").click(); });
     $("m-file").onchange = function (e) { var f = e.target.files[0]; if (!f) return; board.loadFile(f).then(function () { say("Map loaded: <b>" + esc(f.name) + "</b>"); }, function (err) { say("<b>Load failed:</b> " + esc(err.message)); }); e.target.value = ""; };
-    bind("m-url", function () { var u = prompt("Map image URL (Dropbox direct link, etc.):"); if (u) board.loadImageMap(u, parseInt($("m-ppg").value, 10) || 70, "url").then(function () { say("Map loaded from link."); }, function (err) { say("<b>Load failed:</b> " + esc(err.message)); }); });
+    bind("m-url", function () {
+      var u = prompt("Direct image URL (must be a direct link to the image file, from a host that allows embedding — e.g. GitHub 'raw', a Discord CDN link, imgur direct):");
+      if (!u) return;
+      board.loadImageMap(u.trim(), parseInt($("m-ppg").value, 10) || 70, "url").then(function () { say("Map loaded from link."); }, function () {
+        // The browser reports a cross-origin/blocked image the same as a genuine
+        // 404, so give the most common cause + the reliable fallback.
+        say("<b>Couldn’t load that link.</b> Either it isn’t a direct image URL, or the host doesn’t allow other sites to embed its images (CORS). Try a direct link from a host that does — or just use <b>Map / UVTT</b> to upload the file, which always works.");
+      });
+    });
     $("m-ppg").onchange = function () { board.setPpg(parseInt(this.value, 10) || 70); };
     $("m-fpc").onchange = function () { board.setFeetPerCell(parseFloat(this.value) || 5); };
     bind("sc-new", function () { board.loadScene({ kind: "dcc-vtt-scene", version: 1, name: "New scene", map: {}, tokens: [] }); currentScene = null; setSceneName(); });
@@ -171,9 +181,24 @@
   function startNet() {
     var transport = window.VTTNet.httpTransport({ base: V.signalBase, campaignId: V.campaignId, me: V.userId });
     if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers }); renderPlayers([]); }
-    else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn(false); }
+    else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn("waiting"); }
   }
-  function setConn(up) { var d = $("conn"); if (d) { d.className = "vtt-dot " + (up ? "live" : "wait"); d.title = up ? "Connected to your GM" : "Connecting…"; } if (up) say("Connected — your GM is running the table."); }
+  // Player connection state: "waiting" | "connecting" | "connected" | "failed".
+  var CONN_MSG = {
+    connecting: "Connecting to your GM…",
+    waiting: "Waiting for your GM to open the table…",
+    connected: "Connected — your GM is running the table.",
+    failed: "Can’t reach your GM directly — your network may be blocking the peer-to-peer connection. Try another network, or ask your GM for a link-based map.",
+  };
+  function setConn(state) {
+    if (state === true) state = "connected"; else if (state === false) state = "waiting";
+    var d = $("conn");
+    if (d) { d.className = "vtt-dot " + (state === "connected" ? "live" : state === "failed" ? "bad" : "wait"); d.title = CONN_MSG[state] || ""; }
+    var rc = $("conn-retry"); if (rc) rc.hidden = (state === "connected");
+    if (state === "connected") say(CONN_MSG.connected);
+    else if (state === "failed") say("<b>Can’t connect.</b> " + CONN_MSG.failed);
+    else say(CONN_MSG[state] || "");
+  }
   function renderPlayers(list) {
     var open = (list || []).filter(function (p) { return p.open; });
     var d = $("conn"); if (d && isGM) { d.className = "vtt-dot live"; d.title = open.length + " player(s) connected"; }
@@ -334,7 +359,7 @@
   function shell() {
     var rail = rb("t-select", "select", "Select / move  (V)", true) + rb("t-ruler", "ruler", "Measure  (R)") + rb("t-pointer", "ping", "Ping  (P)") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
     var top = '<div class="vtt-top"><a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a><div class="vtt-title">' + esc(V.campaignName || "Tabletop") + "</div></div>" +
-      '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
+      '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (!isGM ? '<button class="vtt-tbtn" id="conn-retry" title="Reconnect to your GM" hidden>' + ico("refresh", 18) + "</button>" : "") + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
     var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden><div class="vtt-side-head"><span>Table</span><button class="vtt-mini" id="side-close">' + ico("close", 16) + "</button></div>" +
       '<div class="vtt-tabs">' + tabBtn("scenes", "layers", "Scenes", true) + tabBtn("tokens", "token", "Tokens") + tabBtn("fog", "fog", "Fog") + tabBtn("players", "players", "Players") + "</div>" +
       // scenes
@@ -390,7 +415,7 @@
       ".vtt-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:17px;background:rgba(11,13,16,.8);padding:6px 12px;border-radius:8px;border:1px solid #2a323d}",
       ".vtt-zoom{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:7px;z-index:20}",
       ".vtt-readout{position:absolute;left:64px;bottom:14px;max-width:min(560px,60vw);background:rgba(11,13,16,.9);border:1px solid #2a323d;border-radius:8px;padding:7px 12px;font-size:12px;color:#8b97a7;z-index:15}.vtt-readout b{color:#e6ebf2}",
-      ".vtt-dot{width:11px;height:11px;border-radius:50%;display:inline-block;flex:0 0 auto}.vtt-dot.live{background:#5ac26a;box-shadow:0 0 8px rgba(90,194,106,.6)}.vtt-dot.wait{background:#8b97a7}",
+      ".vtt-dot{width:11px;height:11px;border-radius:50%;display:inline-block;flex:0 0 auto}.vtt-dot.live{background:#5ac26a;box-shadow:0 0 8px rgba(90,194,106,.6)}.vtt-dot.wait{background:#d8b24a}.vtt-dot.bad{background:#c8503a;box-shadow:0 0 8px rgba(200,80,58,.6)}",
       ".vtt-side{position:absolute;top:0;right:0;width:300px;height:100%;background:rgba(15,18,23,.97);border-left:1px solid #2a323d;z-index:30;display:flex;flex-direction:column;overflow:hidden;backdrop-filter:blur(6px)}",
       ".vtt-side-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #2a323d;font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#c8a24a}",
       ".vtt-tabs{display:flex;border-bottom:1px solid #2a323d}",

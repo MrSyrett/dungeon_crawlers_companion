@@ -142,7 +142,7 @@
         // corrected position, so a tampered client can't walk through walls.
         if (t && t.ownerId === peerId) {
           var nx = msg.x, ny = msg.y;
-          var c = board.clampMovement(t.x, t.y, nx, ny);
+          var c = board.clampMovement(t.x, t.y, nx, ny, board.moveRadius ? board.moveRadius(t) : 0);
           nx = c.x; ny = c.y;
           board.setRemoteApply(true);
           t.x = nx; t.y = ny; if (typeof msg.rot === "number") t.rot = msg.rot;
@@ -183,23 +183,41 @@
     var transport = opts.transport, board = opts.board, me = opts.me;
     var iceServers = opts.iceServers, status = opts.onStatus || function () {};
     var conn = null; // { pc, dc, ice:[], open }
-    var joinTries = 0, joinTimer = null;
+    var joinTries = 0, joinTimer = null, connState = "waiting";
     var mapBuf = null, pendingMap = null;
 
+    // Report a coarse connection state to the UI:
+    //   "waiting"    — sent a join, no GM host has answered yet (GM tab not open?)
+    //   "connecting" — a host answered; negotiating the peer connection
+    //   "connected"  — data channel open
+    //   "failed"     — the network blocked the direct connection (strict NAT / no TURN)
+    function setState(s) { if (connState === s) return; connState = s; try { status(s); } catch (e) {} }
+
+    // Keep trying to reach the GM forever, with a gentle backoff — a player who
+    // opens before the GM, or during a GM refresh, should connect on their own
+    // once the host is there, without a page reload.
     function join() {
       if (conn && conn.open) return;
-      if (joinTries++ > 20) return;
       transport.send("*", "join", { name: opts.name || me });
-      joinTimer = setTimeout(join, 1200);
+      joinTries++;
+      if (connState !== "connecting") setState(joinTries >= 2 ? "waiting" : "connecting");
+      var delay = Math.min(6000, 1000 + joinTries * 700); // ~1.7s → 6s
+      joinTimer = setTimeout(join, delay);
     }
 
     function onSignal(m) {
       if (m.kind === "offer") {
         if (conn) { try { conn.pc.close(); } catch (e) {} }
+        setState("connecting");
         var pc = rtc(iceServers);
         conn = { pc: pc, dc: null, ice: [], open: false, hostId: m.from };
         pc.onicecandidate = function (e) { if (e.candidate) transport.send(m.from, "ice", e.candidate.toJSON()); };
         pc.ondatachannel = function (ev) { wireDc(ev.channel); };
+        pc.onconnectionstatechange = function () {
+          var st = pc.connectionState;
+          if (st === "failed") { setState("failed"); resumeJoining(); }
+          else if (st === "disconnected") { if (conn) conn.open = false; setState("waiting"); resumeJoining(); }
+        };
         pc.setRemoteDescription(m.payload)
           .then(function () { return pc.createAnswer(); })
           .then(function (a) { return pc.setLocalDescription(a).then(function () { transport.send(m.from, "answer", desc(a)); }); })
@@ -210,10 +228,18 @@
       }
     }
 
+    // Resume the join loop if it isn't already running (after a drop/failure).
+    function resumeJoining() {
+      if (conn && conn.open) return;
+      if (joinTimer) return; // already looping
+      joinTries = 0;
+      join();
+    }
+
     function wireDc(dc) {
       conn.dc = dc;
-      dc.onopen = function () { conn.open = true; if (joinTimer) clearTimeout(joinTimer); status(true); };
-      dc.onclose = function () { conn.open = false; status(false); };
+      dc.onopen = function () { conn.open = true; joinTries = 0; if (joinTimer) { clearTimeout(joinTimer); joinTimer = null; } setState("connected"); };
+      dc.onclose = function () { if (conn) conn.open = false; setState("waiting"); resumeJoining(); };
       dc.onmessage = function (ev) { onHostMsg(ev.data); };
     }
 
@@ -268,6 +294,13 @@
     join();
     return {
       connected: function () { return !!(conn && conn.open); },
+      state: function () { return connState; },
+      // Manual "Reconnect" — tear down any half-open peer and start fresh.
+      reconnect: function () {
+        if (conn) { try { conn.pc.close(); } catch (e) {} conn = null; }
+        if (joinTimer) { clearTimeout(joinTimer); joinTimer = null; }
+        joinTries = 0; setState("connecting"); join();
+      },
       ping: function (x, y) { sendHost({ t: "ping", x: x, y: y }); },
       door: function (i, closed) { sendHost({ t: "door", index: i, closed: closed }); },
       stop: function () { transport.stop(); if (joinTimer) clearTimeout(joinTimer); if (conn) { try { conn.pc.close(); } catch (e) {} } },

@@ -20,10 +20,6 @@
   var Vis = root.VTTVisibility;
   var Uvtt = root.VTTUvtt;
 
-  var HANDLE_R = 7;         // px, screen-space handle radius
-  var ROTATE_OFFSET = 26;   // px above the token top edge
-  var MIN_TOKEN = 12;       // px, smallest token side (map space)
-
   function uid() { return "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
@@ -118,23 +114,39 @@
       state.map.doors.forEach(function (d) { if (d.closed || d.locked) segs.push(d); });
       return segs;
     }
-    // Is the straight path a->b crossing any movement barrier?
-    function pathBlocked(ax, ay, bx, by) {
-      var segs = movementSegments();
-      for (var i = 0; i < segs.length; i++) {
-        var s = segs[i];
-        if (segHit(ax, ay, bx, by, s.x1, s.y1, s.x2, s.y2) !== null) return true;
+    // Movement is tested along the token's CENTRE plus, for a token wider than a
+    // point, two rays offset by `rad` perpendicular to the direction of travel —
+    // so a large (2×2+) token's leading edges can't clip a wall corner the centre
+    // would clear. `rad` defaults to 0 (a point).
+    function moveRays(ax, ay, bx, by, rad) {
+      if (!rad) return [[ax, ay, bx, by]];
+      var dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy) || 1;
+      var nx = -dy / L * rad, ny = dx / L * rad;
+      return [[ax, ay, bx, by], [ax + nx, ay + ny, bx + nx, by + ny], [ax - nx, ay - ny, bx - nx, by - ny]];
+    }
+    // Does the token (centre a->b, half-width `rad`) cross any movement barrier?
+    function pathBlocked(ax, ay, bx, by, rad) {
+      var segs = movementSegments(), rays = moveRays(ax, ay, bx, by, rad);
+      for (var r = 0; r < rays.length; r++) {
+        var q = rays[r];
+        for (var i = 0; i < segs.length; i++) {
+          var s = segs[i];
+          if (segHit(q[0], q[1], q[2], q[3], s.x1, s.y1, s.x2, s.y2) !== null) return true;
+        }
       }
       return false;
     }
-    // Furthest point along a->b that does not cross (or land on) a barrier. Lets
-    // a token slide up to a wall but stop a hair short of it, never on it — so a
-    // grid-snap onto a wall line can't leave the token straddling the barrier.
-    function clampMove(ax, ay, bx, by) {
-      var segs = movementSegments(), best = Infinity;
-      for (var i = 0; i < segs.length; i++) {
-        var s = segs[i], t = segHit(ax, ay, bx, by, s.x1, s.y1, s.x2, s.y2);
-        if (t !== null && t < best) best = t;
+    // Furthest point along the centre path a->b that keeps the token (half-width
+    // `rad`) clear of every barrier, stopping a hair short so it never sits on a
+    // line — a grid-snap onto a wall can't leave it straddling.
+    function clampMove(ax, ay, bx, by, rad) {
+      var segs = movementSegments(), rays = moveRays(ax, ay, bx, by, rad), best = Infinity;
+      for (var r = 0; r < rays.length; r++) {
+        var q = rays[r];
+        for (var i = 0; i < segs.length; i++) {
+          var t = segHit(q[0], q[1], q[2], q[3], segs[i].x1, segs[i].y1, segs[i].x2, segs[i].y2);
+          if (t !== null && t < best) best = t;
+        }
       }
       if (best === Infinity) return { x: bx, y: by, hit: false };
       // Pull back a fixed ~2px along the path (independent of move length) so the
@@ -143,6 +155,8 @@
       var t2 = Math.max(0, best - 2 / len);
       return { x: ax + (bx - ax) * t2, y: ay + (by - ay) * t2, hit: true };
     }
+    // Half-width used for a token's collision rays (a bit inside its disc).
+    function tokMoveRad(t) { return Math.max(0, Math.min(t.w, t.h) / 2 - state.map.ppg * 0.08); }
     function now() { return root.performance && root.performance.now ? root.performance.now() : Date.now(); }
 
     // ---- coordinate transforms (world = map pixels) -------------------------
@@ -373,7 +387,10 @@
       ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.lineWidth = Math.max(2, r * 0.09); ctx.strokeStyle = ring; ctx.stroke();
       ctx.restore();
-      if (r > 11) drawNamePlate(t, cx, cy, r);
+      if (r > 11) {
+        if (t.hidden) { ctx.save(); ctx.globalAlpha = 0.42; drawNamePlate(t, cx, cy, r); ctx.restore(); }
+        else drawNamePlate(t, cx, cy, r);
+      }
     }
 
     function drawNamePlate(t, cx, cy, r) {
@@ -407,6 +424,27 @@
       return vs.length ? vs : [];
     }
 
+    // A cheap signature of everything that changes what's visible EXCEPT camera and
+    // token positions: wall/window counts, each door's shut state, dark, grid, map
+    // size. Visibility polygons live in world space, so panning/zooming doesn't
+    // change them — only a viewer moving or this signature changing does. We key
+    // the polygon cache on it so a pan/zoom just re-blits instead of recomputing.
+    function geomSig() {
+      var m = state.map, ds = "";
+      for (var i = 0; i < m.doors.length; i++) { var d = m.doors[i]; ds += (d.closed || d.locked) ? "1" : "0"; }
+      return m.walls.length + "|" + (m.windows ? m.windows.length : 0) + "|" + ds + "|" +
+        (m.dark ? 1 : 0) + "|" + m.ppg + "|" + m.widthPx + "x" + m.heightPx;
+    }
+    function fillFogPoly(poly) {
+      if (!poly || poly.length < 3) return;
+      fctx.beginPath();
+      fctx.moveTo(w2sX(poly[0].x), w2sY(poly[0].y));
+      for (var i = 1; i < poly.length; i++) fctx.lineTo(w2sX(poly[i].x), w2sY(poly[i].y));
+      fctx.closePath();
+      fctx.fill();
+    }
+    var _lightFogCache = { sig: null, polys: [] };
+
     function drawFog() {
       var s = cssSize();
       fctx.clearRect(0, 0, s.w, s.h);
@@ -417,30 +455,32 @@
       // punch out what each viewer sees
       fctx.globalCompositeOperation = "destination-out";
       fctx.fillStyle = "#000";
-      var segs = blockingSegments();
+      var sig = geomSig();
+      var segs = null; // built lazily, only when a real recompute is needed this frame
+      function segsOnce() { if (!segs) segs = blockingSegments(); return segs; }
       viewerTokens().forEach(function (t) {
         // Dynamic lighting: in a dark scene a token sees only as far as its own
         // light; in a lit scene it sees its whole line of sight.
         var radius = state.map.dark ? (t.light > 0 ? t.light * state.map.ppg : 0) : Infinity;
-        if (radius === 0) return; // dark + no light: sees nothing
-        var poly = Vis.compute(segs, { x: t.x, y: t.y }, state.map.widthPx, state.map.heightPx, { radius: radius });
-        if (poly.length < 3) return;
-        fctx.beginPath();
-        fctx.moveTo(w2sX(poly[0].x), w2sY(poly[0].y));
-        for (var i = 1; i < poly.length; i++) fctx.lineTo(w2sX(poly[i].x), w2sY(poly[i].y));
-        fctx.closePath();
-        fctx.fill();
+        if (radius === 0) { t._fogKey = null; return; } // dark + no light: sees nothing
+        // Reuse the cached polygon unless this viewer moved or geometry changed.
+        var key = t.x + "," + t.y + "," + radius + "|" + sig;
+        if (t._fogKey !== key || !t._fogPoly) {
+          t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, state.map.widthPx, state.map.heightPx, { radius: radius });
+          t._fogKey = key;
+        }
+        fillFogPoly(t._fogPoly);
       });
       // Map light sources (from a UVTT) reveal their area when the scene is dark.
-      if (state.map.dark && state.map.lights) {
-        state.map.lights.forEach(function (L) {
-          if (!(L.range > 0)) return;
-          var poly = Vis.compute(segs, { x: L.x, y: L.y }, state.map.widthPx, state.map.heightPx, { radius: L.range });
-          if (poly.length < 3) return;
-          fctx.beginPath(); fctx.moveTo(w2sX(poly[0].x), w2sY(poly[0].y));
-          for (var j = 1; j < poly.length; j++) fctx.lineTo(w2sX(poly[j].x), w2sY(poly[j].y));
-          fctx.closePath(); fctx.fill();
-        });
+      // They never move, so their polygons only change with the geometry signature.
+      if (state.map.dark && state.map.lights && state.map.lights.length) {
+        if (_lightFogCache.sig !== sig) {
+          _lightFogCache.polys = state.map.lights.map(function (L) {
+            return L.range > 0 ? Vis.compute(segsOnce(), { x: L.x, y: L.y }, state.map.widthPx, state.map.heightPx, { radius: L.range }) : null;
+          });
+          _lightFogCache.sig = sig;
+        }
+        _lightFogCache.polys.forEach(fillFogPoly);
       }
       fctx.restore();
       ctx.drawImage(fog, 0, 0, s.w, s.h);
@@ -497,23 +537,30 @@
       }
       return null;
     }
-    // Which handle of the selected token (if any) is under the pointer?
-    function handleAt(sx, sy) {
-      var t = byId(state.selectedId);
-      if (!t) return null;
-      var cx = w2sX(t.x), cy = w2sY(t.y);
-      var w = t.w * state.cam.scale, h = t.h * state.cam.scale;
-      var rot = t.rot || 0, c = Math.cos(rot), s = Math.sin(rot);
-      function pt(lx, ly) { return { x: cx + lx * c - ly * s, y: cy + lx * s + ly * c }; }
-      var resize = pt(w / 2, h / 2);
-      var rotate = pt(0, -h / 2 - ROTATE_OFFSET);
-      if (Math.hypot(sx - rotate.x, sy - rotate.y) <= HANDLE_R + 3) return "rotate";
-      if (Math.hypot(sx - resize.x, sy - resize.y) <= HANDLE_R + 3) return "resize";
-      return null;
-    }
 
     // ---- interaction --------------------------------------------------------
     var drag = null;
+    var pointers = {}; // active pointerId -> {x,y} in canvas space (for pinch)
+    var pinch = null;  // two-finger gesture baseline
+    function activePointers() { return Object.keys(pointers); }
+    function beginPinch() {
+      drag = null; state.segDraft = null; // a second finger cancels any 1-finger action
+      var ids = activePointers(), a = pointers[ids[0]], b = pointers[ids[1]];
+      var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      pinch = { scale0: state.cam.scale, dist0: Math.hypot(a.x - b.x, a.y - b.y) || 1, worldX: s2wX(mx), worldY: s2wY(my) };
+    }
+    function updatePinch() {
+      var ids = activePointers(); if (ids.length < 2) return;
+      var a = pointers[ids[0]], b = pointers[ids[1]];
+      var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      var dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      var ns = clamp(pinch.scale0 * (dist / pinch.dist0), 0.05, 12);
+      state.cam.scale = ns;
+      // keep the world point first under the two fingers pinned to their moving
+      // midpoint — so a pinch both zooms and pans naturally.
+      state.cam.offX = mx - pinch.worldX * ns;
+      state.cam.offY = my - pinch.worldY * ns;
+    }
     function localPoint(e) {
       var r = canvas.getBoundingClientRect();
       var cx = (e.touches ? e.touches[0].clientX : e.clientX);
@@ -549,6 +596,9 @@
     }
 
     function onDown(e) {
+      // Multi-touch: two fingers = pinch-zoom + two-finger pan (tablets/phones).
+      if (typeof e.pointerId !== "undefined") pointers[e.pointerId] = localPoint(e);
+      if (activePointers().length >= 2) { beginPinch(); return; }
       var p = localPoint(e);
       if (state.tool === "ruler") {
         state.ruler = { ax: s2wX(p.x), ay: s2wY(p.y), bx: s2wX(p.x), by: s2wY(p.y) };
@@ -584,6 +634,8 @@
     }
 
     function onMove(e) {
+      if (typeof e.pointerId !== "undefined" && pointers[e.pointerId]) pointers[e.pointerId] = localPoint(e);
+      if (pinch) { updatePinch(); scheduleRender(); return; }
       if (!drag) return;
       var p = localPoint(e);
       if (drag.mode === "pan") {
@@ -595,7 +647,7 @@
         if (state.collide) {
           // Players slide up to barriers but can't cross them. (The GM's board
           // has collide=false, so a GM can drag a token past a wall.)
-          var c = clampMove(drag.lastX, drag.lastY, nx, ny);
+          var c = clampMove(drag.lastX, drag.lastY, nx, ny, tokMoveRad(t));
           nx = c.x; ny = c.y;
           t.x = nx; t.y = ny;              // no mid-drag grid snap while colliding
         } else {
@@ -603,17 +655,6 @@
         }
         drag.lastX = t.x; drag.lastY = t.y;
         emit("token", t);
-      } else if (drag.mode === "resize") {
-        var rt = byId(drag.id); if (!rt) return;
-        var l = toLocal(rt, p.x, p.y);
-        var nw = Math.max(MIN_TOKEN, Math.abs(l.x) * 2), nh = Math.max(MIN_TOKEN, Math.abs(l.y) * 2);
-        if (state.snap && state.map.ppg) { var g = state.map.ppg; nw = Math.max(g, Math.round(nw / g) * g); nh = Math.max(g, Math.round(nh / g) * g); }
-        rt.w = nw; rt.h = nh; snapTok(rt);
-        emit("token", rt);
-      } else if (drag.mode === "rotate") {
-        var ro = byId(drag.id); if (!ro) return;
-        ro.rot = Math.atan2(s2wY(p.y) - ro.y, s2wX(p.x) - ro.x) + Math.PI / 2;
-        emit("token", ro);
       } else if (drag.mode === "ruler") {
         state.ruler.bx = s2wX(p.x); state.ruler.by = s2wY(p.y);
       } else if (drag.mode === "seg") {
@@ -623,7 +664,9 @@
       scheduleRender();
     }
 
-    function onUp() {
+    function onUp(e) {
+      if (e && typeof e.pointerId !== "undefined") delete pointers[e.pointerId];
+      if (pinch && activePointers().length < 2) { pinch = null; drag = null; }
       if (drag && drag.mode === "seg") {
         var len = Math.hypot(drag.x2 - drag.x1, drag.y2 - drag.y1);
         if (len < (state.map.ppg || 70) * 0.3) {
@@ -644,7 +687,7 @@
         if (mt) {
           var ox = mt.x, oy = mt.y;
           snapTok(mt);
-          if (pathBlocked(ox, oy, mt.x, mt.y)) { mt.x = ox; mt.y = oy; }
+          if (pathBlocked(ox, oy, mt.x, mt.y, tokMoveRad(mt))) { mt.x = ox; mt.y = oy; }
           emit("token", mt);
         }
       }
@@ -679,7 +722,7 @@
         if (e.key === "ArrowLeft") nx -= step; else if (e.key === "ArrowRight") nx += step;
         else if (e.key === "ArrowUp") ny -= step; else if (e.key === "ArrowDown") ny += step; else return;
         // A player can't step through a barrier; the GM's board (collide=false) can.
-        if (state.collide && pathBlocked(t.x, t.y, nx, ny)) { e.preventDefault(); return; }
+        if (state.collide && pathBlocked(t.x, t.y, nx, ny, tokMoveRad(t))) { e.preventDefault(); return; }
         t.x = nx; t.y = ny;
         if (!e.shiftKey) snapTok(t);
         emit("token", t); scheduleRender(); e.preventDefault();
@@ -950,6 +993,7 @@
     canvas.addEventListener("pointerdown", onDown);
     root.addEventListener("pointermove", onMove);
     root.addEventListener("pointerup", onUp);
+    root.addEventListener("pointercancel", onUp);
     canvas.addEventListener("wheel", onWheel, { passive: false });
     root.addEventListener("keydown", onKey);
     root.addEventListener("resize", resize);
@@ -994,8 +1038,9 @@
       setCollision: function (b) { state.collide = !!b; },
       getCollision: function () { return state.collide; },
       // Barrier tests exposed for the network host to validate guest moves.
-      movementBlocked: function (ax, ay, bx, by) { return pathBlocked(ax, ay, bx, by); },
-      clampMovement: function (ax, ay, bx, by) { return clampMove(ax, ay, bx, by); },
+      movementBlocked: function (ax, ay, bx, by, rad) { return pathBlocked(ax, ay, bx, by, rad || 0); },
+      clampMovement: function (ax, ay, bx, by, rad) { return clampMove(ax, ay, bx, by, rad || 0); },
+      moveRadius: function (t) { return tokMoveRad(t); },
       setDark: function (on) { state.map.dark = !!on; scheduleRender(); emit("map", state.map); },
       getDark: function () { return !!state.map.dark; },
       setDoor: function (i, fields) { var d = state.map.doors[i]; if (!d) return; if (fields.closed !== undefined) d.closed = !!fields.closed; if (fields.locked !== undefined) d.locked = !!fields.locked; scheduleRender(); },
