@@ -28,6 +28,13 @@
     var ctx = canvas.getContext("2d");
     var fog = document.createElement("canvas"); // offscreen fog layer
     var fctx = fog.getContext("2d");
+    // Extra offscreen buffers for the "sight needs light" compositing (dark scenes):
+    //   vbuf = a viewer's line-of-sight, then intersected with the lit mask
+    //   lbuf = that viewer's lit mask (own light disc ∪ visible map-light areas)
+    //   gbuf = the global map-light mask (each light's lit area, respecting walls)
+    var vbuf = document.createElement("canvas"), vctx = vbuf.getContext("2d");
+    var lbuf = document.createElement("canvas"), lctx = lbuf.getContext("2d");
+    var gbuf = document.createElement("canvas"), gctx = gbuf.getContext("2d");
 
     var listeners = {};
     function emit(ev, payload) {
@@ -50,8 +57,10 @@
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
       fogSetup: false,      // GM: show walls / edit doors
-      setupTool: "pan",     // pan | wall | window | door | erase (setup sub-tool)
+      setupTool: "select",  // select | wall | window | door | erase (setup sub-tool)
       segDraft: null,       // barrier being drawn in setup mode { x1,y1,x2,y2,kind }
+      wallPath: null,       // in-progress polygon wall { pts:[{x,y}] } (Wall tool)
+      wallHover: null,      // {x,y} cursor point for the wall rubber-band
       gm: false,            // this board belongs to the GM (sees hidden tokens)
       collide: false,       // enforce barrier collision on this board's own moves
       dpr: opts.dpr || (root.devicePixelRatio || 1),
@@ -96,6 +105,36 @@
       });
       if (best) { state.map[best].splice(bi, 1); bumpGeom(); return true; }
       return false;
+    }
+    // For the Select tool: find the barrier endpoint(s) near a world point. Any
+    // endpoints sharing that location (a polygon corner) are grouped so they move
+    // together. Returns [{seg, kx, ky}] or null.
+    function pickVertices(wx, wy) {
+      var g = state.map.ppg || 70, thr = g * 0.4, best = null, bd = thr;
+      ["walls", "windows", "doors"].forEach(function (kk) {
+        (state.map[kk] || []).forEach(function (seg) {
+          [["x1", "y1"], ["x2", "y2"]].forEach(function (e) {
+            var d = Math.hypot(seg[e[0]] - wx, seg[e[1]] - wy);
+            if (d < bd) { bd = d; best = { x: seg[e[0]], y: seg[e[1]] }; }
+          });
+        });
+      });
+      if (!best) return null;
+      var group = [];
+      ["walls", "windows", "doors"].forEach(function (kk) {
+        (state.map[kk] || []).forEach(function (seg) {
+          [["x1", "y1"], ["x2", "y2"]].forEach(function (e) {
+            if (Math.hypot(seg[e[0]] - best.x, seg[e[1]] - best.y) < 1) group.push({ seg: seg, kx: e[0], ky: e[1] });
+          });
+        });
+      });
+      return group.length ? group : null;
+    }
+    // Finish (or cancel) an in-progress polygon-wall being drawn with the Wall tool.
+    function finishWallPath() {
+      if (!state.wallPath) return;
+      state.wallPath = null; state.wallHover = null;
+      emit("map", state.map); scheduleRender();
     }
     // Segment/segment intersection: returns the parameter t in [0,1] along a->b
     // at which it crosses c->d, or null if they don't cross.
@@ -178,8 +217,13 @@
       canvas.width = Math.max(1, Math.round(s.w * dpr));
       canvas.height = Math.max(1, Math.round(s.h * dpr));
       fog.width = canvas.width; fog.height = canvas.height;
+      vbuf.width = lbuf.width = gbuf.width = canvas.width;
+      vbuf.height = lbuf.height = gbuf.height = canvas.height;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       scheduleRender();
     }
 
@@ -308,6 +352,32 @@
         if (d.kind === "window") ctx.setLineDash([7, 5]);
         ctx.beginPath(); ctx.moveTo(w2sX(d.x1), w2sY(d.y1)); ctx.lineTo(w2sX(d.x2), w2sY(d.y2)); ctx.stroke();
         ctx.setLineDash([]);
+      }
+      // in-progress polygon wall (Wall tool): committed segments already show as
+      // walls; here we draw the rubber-band from the last point to the cursor and
+      // a marker on the first point (click it to close).
+      if (state.wallPath && state.wallPath.pts.length) {
+        var pts = state.wallPath.pts, lastP = pts[pts.length - 1];
+        if (state.wallHover) {
+          ctx.strokeStyle = "#e6c66a"; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+          ctx.beginPath(); ctx.moveTo(w2sX(lastP.x), w2sY(lastP.y)); ctx.lineTo(w2sX(state.wallHover.x), w2sY(state.wallHover.y)); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+        ctx.fillStyle = "#e6c66a";
+        pts.forEach(function (pt) { ctx.beginPath(); ctx.arc(w2sX(pt.x), w2sY(pt.y), 3, 0, Math.PI * 2); ctx.fill(); });
+        // ring the first point so it reads as "click here to close"
+        ctx.strokeStyle = "#e6c66a"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(w2sX(pts[0].x), w2sY(pts[0].y), 6, 0, Math.PI * 2); ctx.stroke();
+      }
+      // Select tool: enlarge the grab handles so endpoints are easy to hit.
+      if (state.setupTool === "select") {
+        ctx.fillStyle = "#e6c66a";
+        ["walls", "windows", "doors"].forEach(function (kk) {
+          (state.map[kk] || []).forEach(function (w) {
+            ctx.beginPath(); ctx.arc(w2sX(w.x1), w2sY(w.y1), 4, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(w2sX(w.x2), w2sY(w.y2), 4, 0, Math.PI * 2); ctx.fill();
+          });
+        });
       }
       ctx.restore();
     }
@@ -445,53 +515,89 @@
       return state._geomVer + "|" + m.walls.length + "|" + (m.windows ? m.windows.length : 0) + "|" +
         ds + "|" + (m.dark ? 1 : 0) + "|" + m.ppg + "|" + m.widthPx + "x" + m.heightPx;
     }
-    function fillFogPoly(poly) {
+    function fillFogPoly(poly) { fillPolyInto(fctx, poly); }
+    function fillPolyInto(c, poly) {
       if (!poly || poly.length < 3) return;
-      fctx.beginPath();
-      fctx.moveTo(w2sX(poly[0].x), w2sY(poly[0].y));
-      for (var i = 1; i < poly.length; i++) fctx.lineTo(w2sX(poly[i].x), w2sY(poly[i].y));
-      fctx.closePath();
-      fctx.fill();
+      c.beginPath();
+      c.moveTo(w2sX(poly[0].x), w2sY(poly[0].y));
+      for (var i = 1; i < poly.length; i++) c.lineTo(w2sX(poly[i].x), w2sY(poly[i].y));
+      c.closePath();
+      c.fill();
     }
     var _lightFogCache = { sig: null, polys: [] };
 
+    // Fog of war with a "sight needs light" model in dark scenes:
+    //   A viewer reveals a point P only if it has LINE OF SIGHT to P **and** P is
+    //   LIT — lit meaning within the viewer's own light, or within a map light's
+    //   area that the viewer can also see. So a lit room isn't handed to a player
+    //   who can't see into it, and a light only "shares" its glow along a viewer's
+    //   own line of sight. In a lit (not dark) scene a viewer simply sees its whole
+    //   line of sight.
     function drawFog() {
       var s = cssSize();
       fctx.clearRect(0, 0, s.w, s.h);
-      // dark everywhere over the map rect
       fctx.save();
       fctx.fillStyle = "rgba(4,5,7," + state.fog.opacity + ")";
       fctx.fillRect(w2sX(0), w2sY(0), state.map.widthPx * state.cam.scale, state.map.heightPx * state.cam.scale);
-      // punch out what each viewer sees
-      fctx.globalCompositeOperation = "destination-out";
-      fctx.fillStyle = "#000";
-      var sig = geomSig();
-      var segs = null; // built lazily, only when a real recompute is needed this frame
+
+      var sig = geomSig(), dark = !!state.map.dark, ppg = state.map.ppg, sc = state.cam.scale;
+      var mapW = state.map.widthPx, mapH = state.map.heightPx;
+      var segs = null;
       function segsOnce() { if (!segs) segs = blockingSegments(); return segs; }
-      viewerTokens().forEach(function (t) {
-        // Dynamic lighting: in a dark scene a token sees only as far as its own
-        // light; in a lit scene it sees its whole line of sight.
-        var radius = state.map.dark ? (t.light > 0 ? t.light * state.map.ppg : 0) : Infinity;
-        if (radius === 0) { t._fogKey = null; return; } // dark + no light: sees nothing
-        // Reuse the cached polygon unless this viewer moved or geometry changed.
-        var key = t.x + "," + t.y + "," + radius + "|" + sig;
-        if (t._fogKey !== key || !t._fogPoly) {
-          t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, state.map.widthPx, state.map.heightPx, { radius: radius });
-          t._fogKey = key;
-        }
-        fillFogPoly(t._fogPoly);
-      });
-      // Map light sources (from a UVTT) reveal their area when the scene is dark.
-      // They never move, so their polygons only change with the geometry signature.
-      if (state.map.dark && state.map.lights && state.map.lights.length) {
+
+      // Global map-light mask (dark scenes): each light's lit area, wall-respecting.
+      var haveLights = dark && state.map.lights && state.map.lights.length;
+      if (haveLights) {
         if (_lightFogCache.sig !== sig) {
           _lightFogCache.polys = state.map.lights.map(function (L) {
-            return L.range > 0 ? Vis.compute(segsOnce(), { x: L.x, y: L.y }, state.map.widthPx, state.map.heightPx, { radius: L.range }) : null;
+            return L.range > 0 ? Vis.compute(segsOnce(), { x: L.x, y: L.y }, mapW, mapH, { radius: L.range }) : null;
           });
           _lightFogCache.sig = sig;
         }
-        _lightFogCache.polys.forEach(fillFogPoly);
+        gctx.clearRect(0, 0, s.w, s.h);
+        gctx.save(); gctx.fillStyle = "#fff";
+        _lightFogCache.polys.forEach(function (p) { fillPolyInto(gctx, p); });
+        gctx.restore();
       }
+
+      fctx.globalCompositeOperation = "destination-out";
+      fctx.fillStyle = "#000";
+      viewerTokens().forEach(function (t) {
+        var lr = t.light > 0 ? t.light * ppg : 0;
+
+        // Lit scene, or dark with NO baked map lights: the reveal is just the
+        // viewer's line of sight (unbounded when lit; clamped to their own light
+        // when dark). Fill it straight into the fog — no mask compositing needed.
+        if (!dark || !haveLights) {
+          var radius = dark ? lr : Infinity;
+          if (dark && lr <= 0) { t._fogKey = null; return; } // dark + no light: sees nothing
+          var k = t.x + "," + t.y + "," + radius + "|" + sig;
+          if (t._fogKey !== k || !t._fogPoly) { t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: radius }); t._fogKey = k; }
+          fillFogPoly(t._fogPoly);
+          return;
+        }
+
+        // Dark WITH map lights: sight needs light. Bound the line-of-sight to how
+        // far any light could reach this viewer (nothing beyond that is lit), then
+        // intersect it with the lit mask so a lit room is only revealed where the
+        // viewer actually has line of sight to it.
+        var reach = lr;
+        state.map.lights.forEach(function (L) { if (L.range > 0) reach = Math.max(reach, Math.hypot(L.x - t.x, L.y - t.y) + L.range); });
+        if (reach <= 0) { t._fogKey = null; return; }
+        var key = t.x + "," + t.y + "," + reach + "|" + sig;
+        if (t._fogKey !== key || !t._fogPoly) { t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: reach }); t._fogKey = key; }
+        var vis = t._fogPoly;
+
+        vctx.clearRect(0, 0, s.w, s.h);
+        vctx.save(); vctx.fillStyle = "#fff"; fillPolyInto(vctx, vis); vctx.restore();
+        lctx.clearRect(0, 0, s.w, s.h);
+        lctx.save(); lctx.fillStyle = "#fff";
+        if (lr > 0) { lctx.beginPath(); lctx.arc(w2sX(t.x), w2sY(t.y), lr * sc, 0, Math.PI * 2); lctx.fill(); }
+        lctx.drawImage(gbuf, 0, 0, s.w, s.h);
+        lctx.restore();
+        vctx.save(); vctx.globalCompositeOperation = "destination-in"; vctx.drawImage(lbuf, 0, 0, s.w, s.h); vctx.restore();
+        fctx.drawImage(vbuf, 0, 0, s.w, s.h);
+      });
       fctx.restore();
       ctx.drawImage(fog, 0, 0, s.w, s.h);
     }
@@ -581,24 +687,43 @@
     // Setup-mode pointer-down: behaviour depends on the active sub-tool.
     function setupDown(p) {
       var wx = s2wX(p.x), wy = s2wY(p.y);
-      // Pan tool: click a door to open/close it, otherwise pan the map — so the
-      // GM can move around the map while editing barriers.
-      if (state.setupTool === "pan") {
+
+      // SELECT: click a door badge to open/close it; grab a barrier endpoint to
+      // move it; otherwise pan the map.
+      if (state.setupTool === "select") {
         var dp = doorAt(p.x, p.y);
         if (dp >= 0) { emit("doorclick", { index: dp }); return; }
+        var grp = pickVertices(wx, wy);
+        if (grp) { drag = { mode: "vertex", grp: grp }; return; }
         drag = { mode: "pan", sx: p.x, sy: p.y, offX: state.cam.offX, offY: state.cam.offY };
         return;
       }
-      // Erase tool ONLY erases (a plain click no longer erases under a draw tool).
+
+      // ERASE: delete whatever barrier you click.
       if (state.setupTool === "erase") {
         if (removeSegNear(wx, wy)) emit("map", state.map);
         scheduleRender(); return;
       }
-      // wall | window | door -> start dragging out a barrier
-      var v = snapVertex(wx, wy);
+
+      // WALL: click-to-place polygon, like a map-maker polygon tool. Each click
+      // drops a vertex and draws a segment from the previous one; click back on the
+      // first point (or Esc / right-click) to finish.
+      if (state.setupTool === "wall") {
+        var v = snapVertex(wx, wy);
+        if (!state.wallPath) { state.wallPath = { pts: [v] }; state.wallHover = v; scheduleRender(); return; }
+        var pts = state.wallPath.pts, first = pts[0], last = pts[pts.length - 1];
+        var closing = pts.length >= 2 && Math.hypot(v.x - first.x, v.y - first.y) < (state.map.ppg || 70) * 0.4;
+        var target = closing ? first : v;
+        if (target.x !== last.x || target.y !== last.y) { state.map.walls.push({ x1: last.x, y1: last.y, x2: target.x, y2: target.y }); bumpGeom(); }
+        if (closing) { finishWallPath(); } else { pts.push(v); emit("map", state.map); scheduleRender(); }
+        return;
+      }
+
+      // WINDOW / DOOR: drag out a single segment.
+      var sv = snapVertex(wx, wy);
       var kind = state.setupTool;
-      drag = { mode: "seg", kind: kind, x1: v.x, y1: v.y, x2: v.x, y2: v.y };
-      state.segDraft = { x1: v.x, y1: v.y, x2: v.x, y2: v.y, kind: kind };
+      drag = { mode: "seg", kind: kind, x1: sv.x, y1: sv.y, x2: sv.x, y2: sv.y };
+      state.segDraft = { x1: sv.x, y1: sv.y, x2: sv.x, y2: sv.y, kind: kind };
       scheduleRender();
     }
 
@@ -643,9 +768,16 @@
     function onMove(e) {
       if (typeof e.pointerId !== "undefined" && pointers[e.pointerId]) pointers[e.pointerId] = localPoint(e);
       if (pinch) { updatePinch(); scheduleRender(); return; }
+      // Wall tool: track the cursor for the rubber-band even without a button down.
+      if (!drag && state.fogSetup && state.setupTool === "wall" && state.wallPath) {
+        var hp = localPoint(e); state.wallHover = { x: s2wX(hp.x), y: s2wY(hp.y) }; scheduleRender(); return;
+      }
       if (!drag) return;
       var p = localPoint(e);
-      if (drag.mode === "pan") {
+      if (drag.mode === "vertex") {
+        var vv = snapVertex(s2wX(p.x), s2wY(p.y));
+        drag.grp.forEach(function (m) { m.seg[m.kx] = vv.x; m.seg[m.ky] = vv.y; });
+      } else if (drag.mode === "pan") {
         state.cam.offX = drag.offX + (p.x - drag.sx);
         state.cam.offY = drag.offY + (p.y - drag.sy);
       } else if (drag.mode === "move") {
@@ -687,6 +819,8 @@
         }
         state.segDraft = null;
         scheduleRender();
+      } else if (drag && drag.mode === "vertex") {
+        bumpGeom(); emit("map", state.map); scheduleRender();
       } else if (drag && drag.mode === "move" && state.collide) {
         // Snap to grid on drop, but only if the snapped square is reachable
         // without crossing a barrier — otherwise keep the clamped position.
@@ -716,6 +850,8 @@
     function onKey(e) {
       var a = document.activeElement, tag = a && a.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (a && a.isContentEditable)) return;
+      // Esc finishes an in-progress polygon wall.
+      if (e.key === "Escape" && state.wallPath) { finishWallPath(); e.preventDefault(); return; }
       var t = byId(state.selectedId);
       if (!t) return;
       var g = state.map.ppg || 70;
@@ -1016,9 +1152,10 @@
     canvas.addEventListener("contextmenu", function (e) {
       e.preventDefault();
       var p = localPoint(e);
-      // In setup mode, a right-click on a door locks/unlocks it (left-click
-      // opens/closes) — no context menu.
+      // In setup mode: right-click finishes an in-progress polygon wall; else a
+      // right-click on a door locks/unlocks it (left-click opens/closes). No menu.
       if (state.fogSetup) {
+        if (state.wallPath) { finishWallPath(); return; }
         var di = doorAt(p.x, p.y);
         if (di >= 0) { emit("doorlock", { index: di }); return; }
         return; // setup mode: no token context menu
@@ -1050,9 +1187,9 @@
       setGrid: function (on) { state.grid = !!on; scheduleRender(); },
       setSnap: function (on) { state.snap = !!on; },
       getSnap: function () { return state.snap; },
-      setFogSetup: function (on) { state.fogSetup = !!on; if (!on) state.segDraft = null; scheduleRender(); },
+      setFogSetup: function (on) { state.fogSetup = !!on; if (!on) { state.segDraft = null; state.wallPath = null; state.wallHover = null; } scheduleRender(); },
       getFogSetup: function () { return state.fogSetup; },
-      setSetupTool: function (t) { if (["pan", "wall", "window", "door", "erase"].indexOf(t) >= 0) state.setupTool = t; },
+      setSetupTool: function (t) { if (["select", "wall", "window", "door", "erase"].indexOf(t) >= 0) { if (t !== "wall") finishWallPath(); state.setupTool = t; } },
       getSetupTool: function () { return state.setupTool; },
       setGm: function (b) { state.gm = !!b; scheduleRender(); },
       getGm: function () { return state.gm; },

@@ -42,6 +42,23 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
     orderBy: { updatedAt: "desc" },
   });
 
+  // The campaign's player roster (users other than the GM who own a linked
+  // character sheet) — so the GM can assign library tokens to specific players
+  // even when they're offline. Only exposed to the GM.
+  let players: Array<{ id: string; name: string }> = [];
+  if (role === "gm") {
+    const memberRows = await prisma.document.findMany({
+      where: { linkedCampaignId: campaign.id, tool: { in: CHARACTER_TOOL_IDS }, userId: { not: user.id } },
+      select: { userId: true },
+      distinct: ["userId"],
+    });
+    const ids = memberRows.map((r) => r.userId);
+    if (ids.length) {
+      const users = await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, email: true } });
+      players = users.map((u) => ({ id: u.id, name: (u.email || "").split("@")[0] || "Player" }));
+    }
+  }
+
   const cfg = {
     campaignId: campaign.id,
     campaignName: campaign.name,
@@ -50,6 +67,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
     userId: user.id,
     userName: user.email,
     myCharacters,
+    players,
     sceneBase: "/api/vtt/scenes",
     tokenBase: "/api/vtt/tokens",
     signalBase: "/api/vtt/signal",

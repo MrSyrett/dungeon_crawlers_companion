@@ -50,6 +50,7 @@
     move: '<path d="M12 3v18M3 12h18"/><path d="M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
     circle: '<circle cx="12" cy="12" r="8"/>',
+    live: '<circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"/><path d="M6.5 6.5a8 8 0 0 0 0 11M17.5 6.5a8 8 0 0 1 0 11"/>',
   };
   function ico(n, s) { return '<svg viewBox="0 0 24 24" width="' + (s || 20) + '" height="' + (s || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (P[n] || "") + "</svg>"; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]; }); }
@@ -141,18 +142,18 @@
     bind("side-toggle", function () { toggleSide(); });
     // tabs
     mount.querySelectorAll(".vtt-tab").forEach(function (b) { b.addEventListener("click", function () { selectTab(b.dataset.tab); }); });
-    // map controls (live inside the scene-editor popup)
+    // map controls target the popup's PREVIEW board (not the live board)
     bind("m-load", function () { $("m-file").click(); });
-    $("m-file").onchange = function (e) { var f = e.target.files[0]; if (!f) return; board.loadFile(f).then(function () { seMapName(f.name); }, function (err) { say("<b>Load failed:</b> " + esc(err.message)); }); e.target.value = ""; };
+    $("m-file").onchange = function (e) { var f = e.target.files[0]; if (!f) return; pb().loadFile(f).then(function () { seMapName(f.name); }, function (err) { say("<b>Load failed:</b> " + esc(err.message)); }); e.target.value = ""; };
     bind("m-url", function () {
       var u = prompt("Direct image URL (must be a direct link to the image file, from a host that allows embedding — e.g. GitHub 'raw', a Discord CDN link, imgur direct):");
       if (!u) return;
-      board.loadImageMap(u.trim(), parseInt($("m-ppg").value, 10) || 70, "url").then(function () { seMapName("Linked image"); }, function () {
+      pb().loadImageMap(u.trim(), parseInt($("m-ppg").value, 10) || 70, "url").then(function () { seMapName("Linked image"); }, function () {
         say("<b>Couldn’t load that link.</b> Either it isn’t a direct image URL, or the host doesn’t allow other sites to embed its images (CORS). Try a direct link from a host that does — or use <b>Upload</b>, which always works.");
       });
     });
-    $("m-ppg").onchange = function () { board.setPpg(parseInt(this.value, 10) || 70); };
-    $("m-fpc").onchange = function () { board.setFeetPerCell(parseFloat(this.value) || 5); };
+    $("m-ppg").onchange = function () { pb().setPpg(parseInt(this.value, 10) || 70); };
+    $("m-fpc").onchange = function () { pb().setFeetPerCell(parseFloat(this.value) || 5); };
     // scene editor
     bind("sc-new", function () { openEditor(null); });
     bind("se-close", closeEditor);
@@ -166,27 +167,32 @@
     fbtn("f-setup", function (on) {
       board.setFogSetup(on);
       var bar = $("setupbar"); if (bar) bar.hidden = !on;
-      if (on) { setSetupTool("pan"); say(setupHint("pan")); } else say("");
+      if (on) { setSetupTool("select"); say(setupHint("select")); } else say("");
     });
     $("f-op").oninput = function () { board.setFogOpacity(parseInt(this.value, 10) / 100); };
-    // setup toolbar (pan / walls / windows / doors / erase)
-    ["pan", "wall", "window", "door", "erase"].forEach(function (k) {
+    // setup toolbar (select / wall / window / door / erase)
+    ["select", "wall", "window", "door", "erase"].forEach(function (k) {
       bind("su-" + k, function () { setSetupTool(k); say(setupHint(k)); });
     });
-    // token library
-    bind("tok-add", function () { $("lib-file").click(); });
+    // token library + editor
+    bind("tok-add", function () { openTokenEditor(null); });
+    bind("te-close", closeTokenEditor);
+    bind("te-save", saveTokenEditor);
+    bind("te-del", function () { if (teId && confirm("Remove this token from the library?")) { library = library.filter(function (x) { return x.id !== teId; }); saveLibrary(); renderTokens(); closeTokenEditor(); } });
+    bind("te-img", function () { $("lib-file").click(); });
+    var ts = $("tok-search"); if (ts) ts.oninput = function () { tokQuery = this.value; renderTokens(); };
   }
 
   function setSetupTool(k) {
     board.setSetupTool(k);
-    ["pan", "wall", "window", "door", "erase"].forEach(function (x) { var b = $("su-" + x); if (b) b.classList.toggle("on", x === k); });
+    ["select", "wall", "window", "door", "erase"].forEach(function (x) { var b = $("su-" + x); if (b) b.classList.toggle("on", x === k); });
   }
   function setupHint(k) {
-    if (k === "pan") return "<b>Pan:</b> drag to move the map · left-click a door to open/close · right-click a door to lock/unlock.";
+    if (k === "select") return "<b>Select:</b> drag to move the map · drag a wall/window/door corner to reshape it · left-click a door to open/close · right-click to lock.";
     if (k === "window") return "<b>Window:</b> drag to draw a see-through barrier (blocks movement, not sight).";
     if (k === "door") return "<b>Door:</b> drag to place a door (starts closed).";
     if (k === "erase") return "<b>Erase:</b> click a wall, window or door to remove it.";
-    return "<b>Wall:</b> drag to draw a solid barrier (blocks movement and sight).";
+    return "<b>Wall:</b> click to drop points and draw connected walls · click the first point (or right-click / Esc) to finish.";
   }
 
   // ---- live sync ------------------------------------------------------------
@@ -227,60 +233,111 @@
   }
 
   // ---- scenes ---------------------------------------------------------------
-  var lastKey = "vtt-last-" + V.campaignId;
-  function rememberScene(id) { try { localStorage.setItem(lastKey, id); } catch (e) {} }
-  function autoLoadLast() { var id = null; try { id = localStorage.getItem(lastKey); } catch (e) {} if (id) loadSceneById(id); }
+  // The main board shows the LIVE scene (what players see). Creating/selecting a
+  // scene does NOT go live — it opens a preview in the editor popup. Going live is
+  // a separate action (right-click a scene → Send live). The live scene auto-saves.
+  var liveKey = "vtt-live-" + V.campaignId, liveSceneId = null, liveSaveTimer = null, applyingLive = false;
+  function rememberLive(id) { liveSceneId = id; try { localStorage.setItem(liveKey, id || ""); } catch (e) {} }
+  function autoLoadLast() { var id = null; try { id = localStorage.getItem(liveKey); } catch (e) {} if (id) sendLive(id); }
   function thumbKey(id) { return "vtt-thumb-" + id; }
-  function saveThumb(id) { try { var t = board.thumbnail(220); if (t) localStorage.setItem(thumbKey(id), t); } catch (e) {} }
+  function saveThumbFrom(bd, id) { try { var t = bd.thumbnail(220); if (t) localStorage.setItem(thumbKey(id), t); } catch (e) {} }
   function getThumb(id) { try { return localStorage.getItem(thumbKey(id)); } catch (e) { return null; } }
+
   function loadSceneList() {
     var el = $("scene-list"); if (!el) return;
     fetch(V.sceneBase + "?campaignId=" + encodeURIComponent(V.campaignId), { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : { scenes: [] }; }).then(function (d) {
       if (!d.scenes || !d.scenes.length) { el.innerHTML = '<div class="vtt-empty">No scenes yet. <b>New scene</b> to create one.</div>'; return; }
       el.innerHTML = d.scenes.map(function (s) {
-        var th = getThumb(s.id), active = currentScene && currentScene.id === s.id;
-        return '<div class="vtt-scene' + (active ? " active" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
+        var th = getThumb(s.id), live = s.id === liveSceneId;
+        return '<div class="vtt-scene' + (live ? " active" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + (live ? '<span class="vtt-live" title="Live for players">' + ico("live", 12) + "</span>" : "") + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + (live ? ' <span class="vtt-live-t">LIVE</span>' : "") + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
       }).join("");
       el.querySelectorAll(".vtt-scene").forEach(function (row) {
-        var id = row.dataset.id;
-        row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; loadSceneById(id); });
-        row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openEditor({ id: id, title: row.dataset.title }); };
+        var id = row.dataset.id, title = row.dataset.title;
+        row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; openEditor({ id: id, title: title }); });
+        row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openEditor({ id: id, title: title }); };
+        row.addEventListener("contextmenu", function (e) {
+          e.preventDefault();
+          menuAt([
+            { label: (id === liveSceneId ? "✓ " : "") + "Send live to players", onClick: function () { sendLive(id); } },
+            { label: "Edit scene", onClick: function () { openEditor({ id: id, title: title }); } },
+            { sep: true },
+            { label: "Delete", danger: true, onClick: function () { if (confirm("Delete this scene?")) delScene(id); } },
+          ], e.clientX, e.clientY);
+        });
       });
     });
   }
-  function loadSceneById(id, cb) { return fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) { if (!doc) return; return Promise.resolve(board.loadScene(doc.data)).then(function () { saveThumb(id); currentScene = { id: doc.id, title: doc.title }; rememberScene(id); setSceneName(); loadSceneList(); say("Scene: <b>" + esc(doc.title) + "</b>"); if (cb) cb(doc); }); }); }
-  function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (currentScene && currentScene.id === id) { currentScene = null; setSceneName(); } loadSceneList(); }); }
+  // Make a scene LIVE: load it onto the main board (which broadcasts to players).
+  function sendLive(id) {
+    return fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) {
+      if (!doc) return;
+      applyingLive = true;
+      return Promise.resolve(board.loadScene(doc.data)).then(function () {
+        applyingLive = false;
+        saveThumbFrom(board, id); rememberLive(id); currentScene = { id: doc.id, title: doc.title };
+        setSceneName(); loadSceneList(); say("Now live: <b>" + esc(doc.title) + "</b>");
+      });
+    });
+  }
+  function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (liveSceneId === id) { rememberLive(null); currentScene = null; setSceneName(); } loadSceneList(); }); }
   function setSceneName() { var b = $("scene-badge"); if (!b) return; if (currentScene && currentScene.title) { b.textContent = currentScene.title; b.hidden = false; } else { b.textContent = ""; b.hidden = true; } }
 
-  // ---- scene editor popup (#3) ----------------------------------------------
-  var editId = null;
-  function seMapName(name) { var el = $("se-mapname"); if (el) el.innerHTML = name ? (ico("upload", 14) + " " + esc(name)) : ""; }
+  // Auto-save the live scene as the GM edits it live (walls, tokens, doors, dark…).
+  function autoSaveLive() {
+    if (applyingLive || !liveSceneId) return;
+    if (liveSaveTimer) clearTimeout(liveSaveTimer);
+    liveSaveTimer = setTimeout(function () {
+      liveSaveTimer = null;
+      var id = liveSceneId, data = board.toScene(currentScene ? currentScene.title : "Scene");
+      fetch(V.sceneBase + "/" + id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: data }) })
+        .then(function () { saveThumbFrom(board, id); }).catch(function () {});
+    }, 900);
+  }
+  board.on("map", autoSaveLive);
+  board.on("token", autoSaveLive);
+
+  // ---- scene editor popup (#3) — previews in its own board, never goes live ---
+  var editId = null, pboard = null;
+  function pb() {
+    if (!pboard) { pboard = window.VTTBoard($("se-canvas"), {}); }
+    return pboard;
+  }
+  function seMapName(name) { var el = $("se-mapname"); if (el) el.innerHTML = name ? (ico("upload", 14) + " " + esc(name)) : ""; var em = $("se-empty"); if (em) em.hidden = !!(pboard && pboard.state.map.widthPx); }
   function openEditor(scene) {
     editId = scene && scene.id ? scene.id : null;
     $("se-h").textContent = editId ? "Edit scene" : "New scene";
     $("se-del").hidden = !editId;
-    seMapName("");
-    var finish = function () {
-      $("se-name").value = currentScene ? currentScene.title : (scene && scene.title ? scene.title : "");
-      $("m-ppg").value = board.state.map.ppg || 70;
-      $("m-fpc").value = board.state.feetPerCell || 5;
-      if (board.state.map.src) seMapName(board.state.map.srcType === "url" ? "Linked image" : "Loaded map");
-      $("scene-editor").hidden = false;
+    $("scene-editor").hidden = false;
+    pb().resize(); // the canvas is measurable now that the popup is shown
+    var finish = function (title) {
+      $("se-name").value = title || "";
+      $("m-ppg").value = pboard.state.map.ppg || 70;
+      $("m-fpc").value = pboard.state.feetPerCell || 5;
+      seMapName(pboard.state.map.src ? (pboard.state.map.srcType === "url" ? "Linked image" : "Loaded map") : "");
+      pboard.resize();
     };
-    if (editId) { loadSceneById(editId).then(finish); }
-    else { board.loadScene({ kind: "dcc-vtt-scene", version: 1, name: "New scene", map: {}, tokens: [] }); currentScene = null; setSceneName(); finish(); }
+    if (editId) {
+      fetch(V.sceneBase + "/" + editId, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) {
+        if (!doc) { finish(scene.title); return; }
+        Promise.resolve(pboard.loadScene(doc.data)).then(function () { finish(doc.title); });
+      });
+    } else {
+      pboard.loadScene({ kind: "dcc-vtt-scene", version: 1, name: "New scene", map: {}, tokens: [] });
+      finish("");
+    }
   }
   function closeEditor() { $("scene-editor").hidden = true; }
   function saveEditor() {
     var name = ($("se-name").value || "").trim() || "Scene";
-    var data = board.toScene(name);
+    var data = pb().toScene(name);
     if (editId) {
-      fetch(V.sceneBase + "/" + editId, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: name, data: data }) })
-        .then(function (r) { if (r.ok) { saveThumb(editId); currentScene = { id: editId, title: name }; setSceneName(); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); closeEditor(); } else say("<b>Save failed</b>"); });
+      var id = editId;
+      fetch(V.sceneBase + "/" + id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: name, data: data }) })
+        .then(function (r) { if (r.ok) { saveThumbFrom(pboard, id); if (liveSceneId === id) { currentScene = { id: id, title: name }; setSceneName(); } loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); closeEditor(); } else say("<b>Save failed</b>"); });
     } else {
       fetch(V.sceneBase, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, title: name, data: data }) })
         .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-          if (d && d.scene) { currentScene = { id: d.scene.id, title: d.scene.title }; rememberScene(currentScene.id); saveThumb(currentScene.id); setSceneName(); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); closeEditor(); }
+          if (d && d.scene) { saveThumbFrom(pboard, d.scene.id); loadSceneList(); say("Saved <b>" + esc(name) + "</b> — right-click it to send live."); closeEditor(); }
           else say("<b>Save failed</b>");
         });
     }
@@ -307,27 +364,92 @@
       fetch(V.tokenBase, { method: "PUT", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, tokens: library }) }).catch(function () {});
     }, 400);
   }
-  function addToLibrary(name, imageUrl) { library.push({ id: libUid(), name: name, imageUrl: imageUrl }); saveLibrary(); if (tab() === "tokens") renderTokens(); }
+  var tokQuery = "", dragLibId = null;
+  var roster = Array.isArray(V.players) ? V.players : [];
+  function ownerLabel(id) {
+    if (!id) return ""; if (id === V.userId) return "GM";
+    var p = roster.filter(function (x) { return x.id === id; })[0]; if (p) return p.name;
+    var pk = (net && net.peers ? net.peers() : []).filter(function (x) { return x.id === id; })[0];
+    return pk ? pk.name : "Player";
+  }
+  // Build an addToken() spec from a library token, applying all its presets.
+  function tokenSpec(lt) {
+    var g = board.state.map.ppg || 70, sz = lt.size || 1;
+    return { imageUrl: lt.imageUrl || null, name: lt.name, w: g * sz, h: g * sz, ownerId: lt.ownerId || null,
+      isViewer: !!lt.isViewer, light: typeof lt.light === "number" ? lt.light : 0, hidden: !!lt.hidden,
+      ring: !!lt.ring, ringColor: lt.ringColor || null, color: lt.ownerId ? colorFor(lt.ownerId) : "#c8a24a" };
+  }
+  function libRow(lt) {
+    var av = lt.imageUrl ? '<img src="' + esc(lt.imageUrl) + '" alt="">' : '<span class="vtt-swatch" style="background:' + (lt.ownerId ? colorFor(lt.ownerId) : "#c8a24a") + '"></span>';
+    var bits = []; if (lt.ownerId) bits.push(ownerLabel(lt.ownerId)); if (lt.isViewer) bits.push("vision"); if (lt.hidden) bits.push("hidden"); if (lt.ring) bits.push("ring");
+    var sub = bits.join(" · ");
+    return '<div class="vtt-trow" data-id="' + lt.id + '" draggable="true" title="Drag onto the map to place"><div class="vtt-tav">' + av + '</div><div class="vtt-tinfo"><div class="vtt-tname">' + esc(lt.name || "Token") + '</div>' + (sub ? '<div class="vtt-tsub">' + esc(sub) + "</div>" : "") + '</div><button class="vtt-mini edit" title="Edit token">' + ico("pencil", 14) + "</button></div>";
+  }
   function renderTokens() {
     var el = $("token-list"); if (!el) return;
-    if (!library.length) { el.innerHTML = '<div class="vtt-empty">Your token library is empty. <b>Add token to library</b> to build a reusable set for this campaign.</div>'; return; }
-    el.innerHTML = library.map(function (lt) {
-      var av = lt.imageUrl ? '<img src="' + esc(lt.imageUrl) + '" alt="">' : '<span class="vtt-swatch" style="background:#c8a24a"></span>';
-      return '<div class="vtt-trow" data-id="' + lt.id + '"><div class="vtt-tav">' + av + '</div><div class="vtt-tinfo"><div class="vtt-tname">' + esc(lt.name || "Token") + '</div></div><button class="vtt-mini place" title="Place a copy on the map">' + ico("plus", 14) + '</button><button class="vtt-mini rn" title="Rename">' + ico("pencil", 14) + '</button><button class="vtt-mini del" title="Remove from library">' + ico("trash", 14) + "</button></div>";
-    }).join("");
+    if (!library.length) { el.innerHTML = '<div class="vtt-empty">Your token library is empty. <b>Add token</b> to build a reusable set for this campaign.</div>'; return; }
+    var q = tokQuery.trim().toLowerCase();
+    var list = library.filter(function (lt) { return !q || (lt.name || "").toLowerCase().indexOf(q) >= 0; });
+    if (!list.length) { el.innerHTML = '<div class="vtt-empty">No tokens match “' + esc(tokQuery) + '”.</div>'; return; }
+    var assigned = list.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId; });
+    var rest = list.filter(function (lt) { return !(lt.ownerId && lt.ownerId !== V.userId); });
+    var html = "";
+    if (assigned.length) html += '<div class="vtt-sec-h">Players</div>' + assigned.map(libRow).join("");
+    if (rest.length) html += (assigned.length ? '<div class="vtt-sec-h" style="margin-top:10px">Tokens</div>' : "") + rest.map(libRow).join("");
+    el.innerHTML = html;
     el.querySelectorAll(".vtt-trow").forEach(function (row) {
       var id = row.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
-      row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; placeFromLibrary(lt); });
-      row.querySelector(".place").onclick = function (e) { e.stopPropagation(); placeFromLibrary(lt); };
-      row.querySelector(".rn").onclick = function (e) { e.stopPropagation(); var n = prompt("Token name:", lt.name || ""); if (n != null) { lt.name = n.trim() || lt.name; saveLibrary(); renderTokens(); } };
-      row.querySelector(".del").onclick = function (e) { e.stopPropagation(); library = library.filter(function (x) { return x.id !== id; }); saveLibrary(); renderTokens(); };
+      row.addEventListener("dragstart", function (e) { dragLibId = id; try { e.dataTransfer.setData("text/plain", "lib:" + id); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
+      row.addEventListener("dragend", function () { dragLibId = null; });
+      row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; openTokenEditor(lt); });
+      row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openTokenEditor(lt); };
     });
   }
-  function placeFromLibrary(lt) {
-    var g = board.state.map.ppg || 70;
-    var t = board.addToken({ imageUrl: lt.imageUrl, name: lt.name, w: lt.w || g, h: lt.h || g });
-    if (net) net.pushTokens(); board.select(t.id); board.centerOn(t.id);
+  function placeLibAt(lt, sx, sy) {
+    var t = board.addTokenAtScreen(tokenSpec(lt), sx, sy);
+    if (net) net.pushTokens(); board.select(t.id);
     say("Placed <b>" + esc(lt.name || "token") + "</b> on the map.");
+  }
+
+  // ---- token editor popup (#5) ----------------------------------------------
+  var teId = null, teDraft = null;
+  function openTokenEditor(lt) {
+    teId = lt && lt.id ? lt.id : null;
+    teDraft = lt ? JSON.parse(JSON.stringify(lt)) : { id: libUid(), name: "", imageUrl: null, size: 1, ownerId: null, isViewer: false, light: 0, hidden: false, ring: false, ringColor: "#c8a24a" };
+    $("te-h").textContent = teId ? "Edit token" : "Add token";
+    $("te-del").hidden = !teId;
+    $("te-name").value = teDraft.name || "";
+    $("te-size").value = teDraft.size || 1;
+    // owner options: Unassigned / Me (GM) / roster / any extra connected peers
+    var opts = [{ id: "", n: "Unassigned" }, { id: V.userId, n: "Me (GM)" }];
+    roster.forEach(function (p) { opts.push({ id: p.id, n: p.name }); });
+    (net && net.peers ? net.peers() : []).forEach(function (p) { if (!opts.some(function (o) { return o.id === p.id; })) opts.push({ id: p.id, n: p.name }); });
+    $("te-owner").innerHTML = opts.map(function (o) { return '<option value="' + esc(o.id) + '"' + (String(teDraft.ownerId || "") === o.id ? " selected" : "") + ">" + esc(o.n) + "</option>"; }).join("");
+    var fpc = board.state.feetPerCell || 5;
+    $("te-light").value = String(Math.round((teDraft.light || 0) * fpc));
+    $("te-vision").checked = !!teDraft.isViewer;
+    $("te-hidden").checked = !!teDraft.hidden;
+    $("te-ring").checked = !!teDraft.ring;
+    $("te-ringcolor").value = teDraft.ringColor || "#c8a24a";
+    teAvatar();
+    $("token-editor").hidden = false;
+  }
+  function teAvatar() { var a = $("te-av"); if (a) a.innerHTML = teDraft && teDraft.imageUrl ? '<img src="' + esc(teDraft.imageUrl) + '" alt="">' : '<span class="vtt-swatch" style="background:' + (teDraft && teDraft.ownerId ? colorFor(teDraft.ownerId) : "#c8a24a") + '"></span>'; }
+  function closeTokenEditor() { $("token-editor").hidden = true; }
+  function saveTokenEditor() {
+    if (!teDraft) return;
+    var fpc = board.state.feetPerCell || 5;
+    teDraft.name = ($("te-name").value || "").trim() || teDraft.name || "Token";
+    teDraft.size = Math.max(1, parseInt($("te-size").value, 10) || 1);
+    teDraft.ownerId = $("te-owner").value || null;
+    teDraft.light = (parseFloat($("te-light").value) || 0) / fpc;
+    teDraft.isViewer = $("te-vision").checked;
+    teDraft.hidden = $("te-hidden").checked;
+    teDraft.ring = $("te-ring").checked;
+    teDraft.ringColor = $("te-ringcolor").value;
+    if (teId) { library = library.map(function (x) { return x.id === teId ? teDraft : x; }); }
+    else { library.push(teDraft); }
+    saveLibrary(); renderTokens(); closeTokenEditor();
   }
   // Place another instance of an existing SCENE token (right-click "Place copy").
   function placeCopy(id) {
@@ -381,11 +503,11 @@
       rd.onload = function () { var sx = where ? where.sx : window.innerWidth / 2, sy = where ? where.sy : window.innerHeight / 2; var t = board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name, board.state.tokens.length + 1) }, sx, sy); if (net) net.pushTokens(); board.select(t.id); };
       rd.readAsDataURL(f); e.target.value = "";
     };
-    // "Add token to library" → add to the campaign library (not the scene).
+    // Token-editor "Change image" → set the draft token's image (+ default name).
     $("lib-file").onchange = function (e) {
-      var f = e.target.files[0]; if (!f) return;
+      var f = e.target.files[0]; if (!f || !teDraft) return;
       var rd = new FileReader();
-      rd.onload = function () { addToLibrary(tokenName(f.name, library.length + 1), rd.result); };
+      rd.onload = function () { teDraft.imageUrl = rd.result; if (!teDraft.name) { teDraft.name = tokenName(f.name, library.length + 1); $("te-name").value = teDraft.name; } teAvatar(); };
       rd.readAsDataURL(f); e.target.value = "";
     };
   }
@@ -417,6 +539,15 @@
   ["dragleave", "drop"].forEach(function (ev) { stage.addEventListener(ev, function () { stage.classList.remove("drop"); }); });
   stage.addEventListener("drop", function (e) {
     if (!isGM) return; e.preventDefault();
+    // Dragging a library token onto the map places it (with all its presets).
+    var txt = ""; try { txt = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || ""; } catch (_) {}
+    if (dragLibId || txt.indexOf("lib:") === 0) {
+      var id = dragLibId || txt.slice(4), lt = library.filter(function (x) { return x.id === id; })[0];
+      dragLibId = null;
+      if (lt) placeLibAt(lt, e.clientX, e.clientY);
+      return;
+    }
+    // Dropping image files makes one-off scene tokens.
     var files = (e.dataTransfer && e.dataTransfer.files) || []; var n = 0;
     Array.prototype.forEach.call(files, function (f) { if (!/^image\//.test(f.type)) return; var rd = new FileReader(); rd.onload = function () { board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name, board.state.tokens.length + 1) }, e.clientX + (n++) * 8, e.clientY); if (net) net.pushTokens(); }; rd.readAsDataURL(f); });
   });
@@ -437,7 +568,7 @@
       '<div class="vtt-panel" data-panel="scenes"><div class="vtt-row"><button class="vtt-btn" id="sc-new">' + ico("plus", 15) + ' New scene</button></div>' +
       '<div class="vtt-scene-list" id="scene-list"></div></div>' +
       // tokens: campaign token library (decoupled from the scene)
-      '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token to library</button></div><div class="vtt-hint2">Your campaign token library. <b>Place</b> drops a copy on the map; removing a token from the map doesn’t delete it here.</div><div class="vtt-token-list" id="token-list"></div></div>' +
+      '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div><input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
       // settings
       '<div class="vtt-panel" data-panel="settings" hidden>' +
       frow("f-fog", "fog", "Fog of war") + frow("f-reveal", "eye", "GM reveal (see through fog)", true) + frow("f-dark", "light", "Dynamic lighting (dark map)") + frow("f-snap", "snap", "Snap tokens to grid", true) + frow("f-setup", "wrench", "Setup mode (edit walls, windows & doors)") +
@@ -447,8 +578,25 @@
     var zoom = '<div class="vtt-zoom"><button class="vtt-tbtn" id="z-in" title="Zoom in">' + ico("zin") + '</button><button class="vtt-tbtn" id="z-fit" title="Fit map">' + ico("fit") + '</button><button class="vtt-tbtn" id="z-out" title="Zoom out">' + ico("zout") + "</button></div>";
     var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="tk-file" accept="image/*" hidden><input type="file" id="lib-file" accept="image/*" hidden>' : "";
     var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden><span class="vtt-setupbar-t">Setup</span>' +
-      subtn("su-pan", "move", "Pan", true) + subtn("su-wall", "wall", "Wall") + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + "</div>";
-    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + (isGM ? sceneEditor() : "") + inputs + "</div>";
+      subtn("su-select", "select", "Select", true) + subtn("su-wall", "wall", "Wall") + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + "</div>";
+    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + (isGM ? sceneEditor() + tokenEditor() : "") + inputs + "</div>";
+  }
+  // Token editor popup (#5): presets applied whenever the token is placed.
+  function tokenEditor() {
+    var ftOpts = [0, 20, 40, 60, 90].map(function (f) { return '<option value="' + f + '">' + (f ? f + " ft" : "None") + "</option>"; }).join("");
+    var ringOpts = RING_COLORS.map(function (c) { return '<option value="' + c.v + '">' + c.n + "</option>"; }).join("");
+    return '<div id="token-editor" class="vtt-modal" hidden><div class="vtt-modal-box">' +
+      '<div class="vtt-modal-head"><span id="te-h">Add token</span><button class="vtt-mini" id="te-close">' + ico("close", 16) + "</button></div>" +
+      '<div class="vtt-modal-body">' +
+      '<div class="vtt-te-top"><div class="vtt-te-av" id="te-av"></div><div style="flex:1"><label class="vtt-field"><span>Name</span><input type="text" id="te-name" placeholder="Token name"></label><button class="vtt-btn ghost" id="te-img">' + ico("upload", 14) + " Change image</button></div></div>" +
+      '<div class="vtt-row small"><label>Size (squares) <input type="number" id="te-size" min="1" max="8" value="1"></label></div>' +
+      '<label class="vtt-field"><span>Assign to</span><select id="te-owner"></select></label>' +
+      '<label class="vtt-field"><span>Light in the dark</span><select id="te-light">' + ftOpts + "</select></label>" +
+      '<div class="vtt-te-checks"><label><input type="checkbox" id="te-vision"> Sees fog (vision)</label><label><input type="checkbox" id="te-hidden"> Hidden from players</label></div>' +
+      '<div class="vtt-te-checks"><label><input type="checkbox" id="te-ring"> Ring</label><select id="te-ringcolor">' + ringOpts + "</select></div>" +
+      "</div>" +
+      '<div class="vtt-modal-foot"><button class="vtt-btn danger" id="te-del">' + ico("trash", 15) + " Delete</button><span style=\"flex:1\"></span><button class=\"vtt-btn primary\" id=\"te-save\">Save</button></div>" +
+      "</div></div>";
   }
   // Scene editor popup — create/edit a scene's map, grid and name (#3).
   function sceneEditor() {
@@ -459,6 +607,7 @@
       '<div class="vtt-field-l">Map</div>' +
       '<div class="vtt-row"><button class="vtt-btn" id="m-load">' + ico("upload", 15) + ' Upload UVTT / image</button><button class="vtt-btn ghost" id="m-url">' + ico("link", 15) + " Link</button></div>" +
       '<div id="se-mapname" class="vtt-hint2"></div>' +
+      '<div class="vtt-preview"><canvas id="se-canvas"></canvas><div class="vtt-preview-empty" id="se-empty">No map yet — upload a UVTT/image or paste a link.</div></div>' +
       '<div class="vtt-row small"><label>Grid px <input type="number" id="m-ppg" min="4" value="70"></label><label>ft / square <input type="number" id="m-fpc" min="1" value="5"></label></div>' +
       "</div>" +
       '<div class="vtt-modal-foot"><button class="vtt-btn danger" id="se-del">' + ico("trash", 15) + " Delete</button><span style=\"flex:1\"></span><button class=\"vtt-btn primary\" id=\"se-save\">Save scene</button></div>" +
@@ -541,6 +690,16 @@
       ".vtt-modal-foot{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid #2a323d}",
       ".vtt-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;font-size:12px;color:#8b97a7}.vtt-field input{background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:6px;padding:8px 10px;font-size:14px}",
       ".vtt-field-l{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8b97a7;margin:4px 0 8px}",
+      ".vtt-preview{position:relative;height:200px;border:1px solid #2a323d;border-radius:8px;overflow:hidden;background:#0b0d10;margin-bottom:12px}.vtt-preview canvas{position:absolute;inset:0;width:100%;height:100%;display:block}",
+      ".vtt-preview-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;color:#8b97a7;font-size:12px;pointer-events:none}",
+      ".vtt-live{position:absolute;top:2px;left:2px;background:rgba(90,194,106,.92);color:#0b0d10;border-radius:5px;padding:1px 3px;display:inline-flex}",
+      ".vtt-live-t{font-size:9px;font-weight:800;letter-spacing:.08em;color:#0b0d10;background:#5ac26a;border-radius:3px;padding:1px 4px;vertical-align:middle}",
+      ".vtt-scene.active{border-color:#5ac26a;background:rgba(90,194,106,.08)}",
+      ".vtt-search{width:100%;background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:6px;padding:7px 10px;font-size:13px;margin-bottom:8px}",
+      ".vtt-te-top{display:flex;gap:12px;margin-bottom:12px}.vtt-te-av{width:56px;height:56px;border-radius:50%;overflow:hidden;flex:0 0 auto;background:#0b0d10;display:flex;align-items:center;justify-content:center}.vtt-te-av img{width:100%;height:100%;object-fit:cover}",
+      ".vtt-field select{background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:6px;padding:8px 10px;font-size:14px}",
+      ".vtt-te-checks{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;font-size:13px;color:#e6ebf2}.vtt-te-checks label{display:flex;align-items:center;gap:6px}.vtt-te-checks select{background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:6px;padding:5px 8px}",
+      ".vtt-trow[draggable=true]{cursor:grab}",
       ".vtt-btn.primary{flex:0 0 auto;padding:8px 18px;background:#c8a24a;color:#14181e;border-color:#c8a24a}.vtt-btn.primary:hover{background:#d8b25a}",
       ".vtt-btn.danger{flex:0 0 auto;color:#f0a8a3;border-color:#5a2f2c;background:transparent}.vtt-btn.danger:hover{background:rgba(200,80,58,.12)}",
       "@media(max-width:640px){.vtt-side{width:88vw}#vtt-root.side-open .vtt-top.right,#vtt-root.side-open .vtt-zoom{right:12px}.vtt-sheetpop,.vtt-sheetpop.wide{width:94vw;height:88vh;right:3vw;left:auto;top:6vh}.vtt-readout{left:12px;bottom:64px}}",
