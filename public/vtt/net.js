@@ -94,7 +94,7 @@
     function mapPayload() {
       var m = board.state.map;
       return {
-        ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, dark: m.dark,
+        ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights,
         widthPx: m.widthPx, heightPx: m.heightPx, srcType: m.srcType,
         url: m.srcType === "url" ? m.src : null,
       };
@@ -124,6 +124,24 @@
     }
 
     function pushTokens() { broadcast({ t: "tokens", tokens: visibleWire() }); }
+
+    // Live presence overlays (laser pointer, measure line, range rings) — the GM's
+    // own overlay only reaches players while the board is live; positions are
+    // throttled, a "clear" (kind:null) always goes out at once.
+    var overlayTimer = null, overlayPending = null;
+    function pushOverlay(o) {
+      if (!live && o && o.kind != null) return;
+      broadcast({ t: "overlay", from: me, o: o || { kind: null } });
+    }
+    function hostOverlay(o) {
+      if (o && o.kind != null) {
+        overlayPending = o;
+        if (!overlayTimer) overlayTimer = setTimeout(function () { overlayTimer = null; var pend = overlayPending; overlayPending = null; if (pend) pushOverlay(pend); }, 50);
+      } else {
+        overlayPending = null; if (overlayTimer) { clearTimeout(overlayTimer); overlayTimer = null; }
+        pushOverlay({ kind: null });
+      }
+    }
     var lastShipSrc = null;
     function pushScene() {
       broadcast(scenePayload());
@@ -161,6 +179,11 @@
         // A player may open/close an UNLOCKED door; locking is GM-only.
         var d = board.state.map.doors[msg.index];
         if (d && !d.locked) { board.setDoor(msg.index, { closed: !!msg.closed }); syncDoor(msg.index); }
+      } else if (msg.t === "overlay") {
+        // A player's live overlay: show it to the GM and relay to other players.
+        var o = msg.o || { kind: null };
+        board.setOverlay(peerId, o);
+        Object.keys(peers).forEach(function (k) { if (k !== peerId) sendObj(peers[k], { t: "overlay", from: peerId, o: o }); });
       }
     }
     function syncDoor(i) { var d = board.state.map.doors[i]; if (d) broadcast({ t: "door", index: i, closed: d.closed, locked: d.locked }); }
@@ -177,6 +200,7 @@
     return {
       pushScene: pushScene, pushTokens: pushTokens, peerCount: peerCount, peers: peersList,
       setLive: function (b) { live = !!b; }, isLive: function () { return live; },
+      overlay: hostOverlay,
       ping: function (x, y) { broadcast({ t: "ping", x: x, y: y }); },
       doorSync: function (i) { syncDoor(i); },
       stop: function () { transport.stop(); Object.keys(peers).forEach(function (k) { try { peers[k].pc.close(); } catch (e) {} }); },
@@ -255,11 +279,11 @@
         board.setFog(msg.fog && msg.fog.enabled); board.setFogOpacity((msg.fog && msg.fog.opacity) || 1);
         board.setShowAll(false); // players always see through fog, never GM-reveal
         pendingMap = msg.map;
-        // Always apply map metadata (walls/doors/lights/dark) so wall & lighting
-        // edits land even when the image isn't re-shipped.
+        // Always apply map metadata (walls/doors/lights) so wall edits land even
+        // when the image isn't re-shipped.
         if (msg.map) board.applyMapMeta(msg.map);
         if (msg.map && msg.map.srcType === "url" && msg.map.url) {
-          board.loadMapState({ src: msg.map.url, srcType: "url", ppg: msg.map.ppg, walls: msg.map.walls, windows: msg.map.windows, doors: msg.map.doors, lights: msg.map.lights, dark: msg.map.dark, widthPx: msg.map.widthPx, heightPx: msg.map.heightPx })
+          board.loadMapState({ src: msg.map.url, srcType: "url", ppg: msg.map.ppg, walls: msg.map.walls, windows: msg.map.windows, doors: msg.map.doors, lights: msg.map.lights, widthPx: msg.map.widthPx, heightPx: msg.map.heightPx })
             .then(function () { board.setRemoteApply(false); });
         }
         board.syncTokens(msg.tokens || []);
@@ -268,13 +292,14 @@
       } else if (msg.t === "tokens") {
         board.setRemoteApply(true); board.syncTokens(msg.tokens || []); board.setRemoteApply(false);
       } else if (msg.t === "ping") { board.ping(msg.x, msg.y, "#4ea3ff"); }
+      else if (msg.t === "overlay") { board.setOverlay(msg.from || "gm", msg.o || { kind: null }); }
       else if (msg.t === "door") { board.setDoor(msg.index, { closed: msg.closed, locked: msg.locked }); }
       else if (msg.t === "mapBegin") { mapBuf = ""; }
       else if (msg.t === "mapChunk") { if (mapBuf !== null) mapBuf += msg.s; }
       else if (msg.t === "mapEnd") {
         var m = pendingMap || {};
         board.setRemoteApply(true);
-        board.loadMapState({ src: mapBuf, srcType: "embedded", ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, dark: m.dark, widthPx: m.widthPx, heightPx: m.heightPx })
+        board.loadMapState({ src: mapBuf, srcType: "embedded", ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, widthPx: m.widthPx, heightPx: m.heightPx })
           .then(function () { board.setRemoteApply(false); });
         mapBuf = null;
       }
@@ -294,12 +319,26 @@
       }, 40);
     });
 
+    // A player's live overlay (laser/measure/rings) to the GM, throttled; the GM
+    // relays it to the other players. A "clear" always goes out at once.
+    var goTimer = null, goPending = null;
+    function guestOverlay(o) {
+      if (o && o.kind != null) {
+        goPending = o;
+        if (!goTimer) goTimer = setTimeout(function () { goTimer = null; var pend = goPending; goPending = null; if (pend) sendHost({ t: "overlay", o: pend }); }, 50);
+      } else {
+        goPending = null; if (goTimer) { clearTimeout(goTimer); goTimer = null; }
+        sendHost({ t: "overlay", o: { kind: null } });
+      }
+    }
+
     transport.onMessage(onSignal);
     transport.start();
     join();
     return {
       connected: function () { return !!(conn && conn.open); },
       state: function () { return connState; },
+      overlay: guestOverlay,
       // Manual "Reconnect" — tear down any half-open peer and start fresh.
       reconnect: function () {
         if (conn) { try { conn.pc.close(); } catch (e) {} conn = null; }
@@ -316,7 +355,7 @@
     return {
       id: t.id, name: t.name, imageUrl: t.imageUrl, x: t.x, y: t.y, w: t.w, h: t.h,
       rot: t.rot || 0, ownerId: t.ownerId, characterDocId: t.characterDocId, isViewer: !!t.isViewer,
-      color: t.color, light: t.light, hp: t.hp, ring: t.ring, ringColor: t.ringColor,
+      color: t.color, vision: t.vision, hp: t.hp, ring: t.ring, ringColor: t.ringColor,
     };
     // NB: `hidden` is deliberately NOT wired — hidden tokens are filtered out
     // before send, so a guest never learns they exist.

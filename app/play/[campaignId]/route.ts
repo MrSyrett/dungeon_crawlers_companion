@@ -45,17 +45,21 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
   // The campaign's player roster (users other than the GM who own a linked
   // character sheet) — so the GM can assign library tokens to specific players
   // even when they're offline. Only exposed to the GM.
-  let players: Array<{ id: string; name: string }> = [];
+  const players: Array<{ id: string; name: string }> = [];
   if (role === "gm") {
+    // One display name per player: their linked character sheet's title (the
+    // character's name), most-recently-updated sheet winning. We deliberately
+    // surface the character name rather than the player's email.
     const memberRows = await prisma.document.findMany({
       where: { linkedCampaignId: campaign.id, tool: { in: CHARACTER_TOOL_IDS }, userId: { not: user.id } },
-      select: { userId: true },
-      distinct: ["userId"],
+      select: { userId: true, title: true },
+      orderBy: { updatedAt: "desc" },
     });
-    const ids = memberRows.map((r) => r.userId);
-    if (ids.length) {
-      const users = await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, email: true } });
-      players = users.map((u) => ({ id: u.id, name: (u.email || "").split("@")[0] || "Player" }));
+    const seen = new Set<string>();
+    for (const r of memberRows) {
+      if (seen.has(r.userId)) continue;
+      seen.add(r.userId);
+      players.push({ id: r.userId, name: (r.title || "").trim() || "Player" });
     }
   }
 
@@ -65,7 +69,9 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
     system: campaign.system ?? null,
     role, // "gm" | "player"
     userId: user.id,
-    userName: user.email,
+    // A player is shown to the table by their character's name; the GM keeps
+    // their account identity. (The guest join also prefers the character title.)
+    userName: role === "player" && myCharacters[0] && myCharacters[0].title ? myCharacters[0].title : user.email,
     myCharacters,
     players,
     sceneBase: "/api/vtt/scenes",

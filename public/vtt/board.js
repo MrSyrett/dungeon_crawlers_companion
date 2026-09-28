@@ -28,13 +28,6 @@
     var ctx = canvas.getContext("2d");
     var fog = document.createElement("canvas"); // offscreen fog layer
     var fctx = fog.getContext("2d");
-    // Extra offscreen buffers for the "sight needs light" compositing (dark scenes):
-    //   vbuf = a viewer's line-of-sight, then intersected with the lit mask
-    //   lbuf = that viewer's lit mask (own light disc ∪ visible map-light areas)
-    //   gbuf = the global map-light mask (each light's lit area, respecting walls)
-    var vbuf = document.createElement("canvas"), vctx = vbuf.getContext("2d");
-    var lbuf = document.createElement("canvas"), lctx = lbuf.getContext("2d");
-    var gbuf = document.createElement("canvas"), gctx = gbuf.getContext("2d");
 
     var listeners = {};
     function emit(ev, payload) {
@@ -46,14 +39,20 @@
 
     var state = {
       cam: { scale: 1, offX: 0, offY: 0 },
-      map: { image: null, widthPx: 0, heightPx: 0, ppg: 70, walls: [], windows: [], doors: [], lights: [], dark: false, src: null, srcType: null },
+      map: { image: null, widthPx: 0, heightPx: 0, ppg: 70, walls: [], windows: [], doors: [], lights: [], src: null, srcType: null },
       tokens: [],
-      tool: "select",       // select | pan | ruler
+      tool: "select",       // select | lasso | pan | ruler | movement | rings | pointer | laser
       selectedId: null,
+      selection: [],        // multi-select: ids of all selected tokens (lasso / shift)
+      marquee: null,        // in-progress lasso rect { x1,y1,x2,y2 } in world coords
       fog: { enabled: false, opacity: 1, showAll: true },
       feetPerCell: 5,
       grid: true,
       ruler: null,          // { ax, ay, bx, by } in world coords
+      moveMeas: null,       // live movement measurement while dragging { ax,ay,bx,by }
+      rings: null,          // range-rings center { x, y } in world coords (transient)
+      laser: null,          // local laser pointer { x, y } in world coords (transient)
+      overlays: {},         // remote presence overlays, keyed by senderId (shared live)
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
       fogSetup: false,      // GM: show walls / edit doors
@@ -217,13 +216,8 @@
       canvas.width = Math.max(1, Math.round(s.w * dpr));
       canvas.height = Math.max(1, Math.round(s.h * dpr));
       fog.width = canvas.width; fog.height = canvas.height;
-      vbuf.width = lbuf.width = gbuf.width = canvas.width;
-      vbuf.height = lbuf.height = gbuf.height = canvas.height;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       scheduleRender();
     }
 
@@ -264,8 +258,13 @@
       // fog setup overlay (GM): show the walls so they can be seen while prepping
       if (state.fogSetup && map.widthPx) drawSetup();
 
-      if (state.selectedId) drawSelection(byId(state.selectedId));
+      drawSelections();
       if (state.ruler) drawRuler();
+      if (state.moveMeas) drawMeasureLine(state.moveMeas.ax, state.moveMeas.ay, state.moveMeas.bx, state.moveMeas.by, "#7fd6a1");
+      if (state.rings) drawRings(state.rings, null);
+      drawMarquee();
+      drawOverlays();
+      if (state.laser) drawLaser(state.laser.x, state.laser.y, "#ff5a5a");
       drawPings();
       emit("render", null);
     }
@@ -501,7 +500,7 @@
     }
 
     // A cheap signature of everything that changes what's visible EXCEPT camera and
-    // token positions: wall/window counts, each door's shut state, dark, grid, map
+    // token positions: wall/window counts, each door's shut state, grid, map
     // size. Visibility polygons live in world space, so panning/zooming doesn't
     // change them — only a viewer moving or this signature changing does. We key
     // the polygon cache on it so a pan/zoom just re-blits instead of recomputing.
@@ -513,7 +512,7 @@
       // same-count array swap (e.g. an edit or a wholesale replace over the wire).
       // Door open/close is an in-place flag, captured separately in `ds`.
       return state._geomVer + "|" + m.walls.length + "|" + (m.windows ? m.windows.length : 0) + "|" +
-        ds + "|" + (m.dark ? 1 : 0) + "|" + m.ppg + "|" + m.widthPx + "x" + m.heightPx;
+        ds + "|" + m.ppg + "|" + m.widthPx + "x" + m.heightPx;
     }
     function fillFogPoly(poly) { fillPolyInto(fctx, poly); }
     function fillPolyInto(c, poly) {
@@ -524,15 +523,15 @@
       c.closePath();
       c.fill();
     }
-    var _lightFogCache = { sig: null, polys: [] };
 
-    // Fog of war with a "sight needs light" model in dark scenes:
-    //   A viewer reveals a point P only if it has LINE OF SIGHT to P **and** P is
-    //   LIT — lit meaning within the viewer's own light, or within a map light's
-    //   area that the viewer can also see. So a lit room isn't handed to a player
-    //   who can't see into it, and a light only "shares" its glow along a viewer's
-    //   own line of sight. In a lit (not dark) scene a viewer simply sees its whole
-    //   line of sight.
+    // Fog of war via a simple VISION model: each viewer sees its line of sight
+    // (walls + closed/locked doors block; windows are transparent to sight),
+    // clamped to that token's vision distance — `null`/unset = unlimited, else a
+    // number of cells. Scene lights don't affect vision. The union of all viewers'
+    // visible areas is punched out of the fog.
+    function visionRadius(t) {
+      return (typeof t.vision === "number" && t.vision > 0) ? t.vision * state.map.ppg : Infinity;
+    }
     function drawFog() {
       var s = cssSize();
       fctx.clearRect(0, 0, s.w, s.h);
@@ -540,63 +539,21 @@
       fctx.fillStyle = "rgba(4,5,7," + state.fog.opacity + ")";
       fctx.fillRect(w2sX(0), w2sY(0), state.map.widthPx * state.cam.scale, state.map.heightPx * state.cam.scale);
 
-      var sig = geomSig(), dark = !!state.map.dark, ppg = state.map.ppg, sc = state.cam.scale;
-      var mapW = state.map.widthPx, mapH = state.map.heightPx;
+      var sig = geomSig(), mapW = state.map.widthPx, mapH = state.map.heightPx;
       var segs = null;
       function segsOnce() { if (!segs) segs = blockingSegments(); return segs; }
-
-      // Global map-light mask (dark scenes): each light's lit area, wall-respecting.
-      var haveLights = dark && state.map.lights && state.map.lights.length;
-      if (haveLights) {
-        if (_lightFogCache.sig !== sig) {
-          _lightFogCache.polys = state.map.lights.map(function (L) {
-            return L.range > 0 ? Vis.compute(segsOnce(), { x: L.x, y: L.y }, mapW, mapH, { radius: L.range }) : null;
-          });
-          _lightFogCache.sig = sig;
-        }
-        gctx.clearRect(0, 0, s.w, s.h);
-        gctx.save(); gctx.fillStyle = "#fff";
-        _lightFogCache.polys.forEach(function (p) { fillPolyInto(gctx, p); });
-        gctx.restore();
-      }
 
       fctx.globalCompositeOperation = "destination-out";
       fctx.fillStyle = "#000";
       viewerTokens().forEach(function (t) {
-        var lr = t.light > 0 ? t.light * ppg : 0;
-
-        // Lit scene, or dark with NO baked map lights: the reveal is just the
-        // viewer's line of sight (unbounded when lit; clamped to their own light
-        // when dark). Fill it straight into the fog — no mask compositing needed.
-        if (!dark || !haveLights) {
-          var radius = dark ? lr : Infinity;
-          if (dark && lr <= 0) { t._fogKey = null; return; } // dark + no light: sees nothing
-          var k = t.x + "," + t.y + "," + radius + "|" + sig;
-          if (t._fogKey !== k || !t._fogPoly) { t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: radius }); t._fogKey = k; }
-          fillFogPoly(t._fogPoly);
-          return;
+        var radius = visionRadius(t);
+        // Cache the polygon by position + vision + geometry; a pan/zoom just re-blits.
+        var key = t.x + "," + t.y + "," + radius + "|" + sig;
+        if (t._fogKey !== key || !t._fogPoly) {
+          t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: radius });
+          t._fogKey = key;
         }
-
-        // Dark WITH map lights: sight needs light. Bound the line-of-sight to how
-        // far any light could reach this viewer (nothing beyond that is lit), then
-        // intersect it with the lit mask so a lit room is only revealed where the
-        // viewer actually has line of sight to it.
-        var reach = lr;
-        state.map.lights.forEach(function (L) { if (L.range > 0) reach = Math.max(reach, Math.hypot(L.x - t.x, L.y - t.y) + L.range); });
-        if (reach <= 0) { t._fogKey = null; return; }
-        var key = t.x + "," + t.y + "," + reach + "|" + sig;
-        if (t._fogKey !== key || !t._fogPoly) { t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: reach }); t._fogKey = key; }
-        var vis = t._fogPoly;
-
-        vctx.clearRect(0, 0, s.w, s.h);
-        vctx.save(); vctx.fillStyle = "#fff"; fillPolyInto(vctx, vis); vctx.restore();
-        lctx.clearRect(0, 0, s.w, s.h);
-        lctx.save(); lctx.fillStyle = "#fff";
-        if (lr > 0) { lctx.beginPath(); lctx.arc(w2sX(t.x), w2sY(t.y), lr * sc, 0, Math.PI * 2); lctx.fill(); }
-        lctx.drawImage(gbuf, 0, 0, s.w, s.h);
-        lctx.restore();
-        vctx.save(); vctx.globalCompositeOperation = "destination-in"; vctx.drawImage(lbuf, 0, 0, s.w, s.h); vctx.restore();
-        fctx.drawImage(vbuf, 0, 0, s.w, s.h);
+        fillFogPoly(t._fogPoly);
       });
       fctx.restore();
       ctx.drawImage(fog, 0, 0, s.w, s.h);
@@ -615,26 +572,101 @@
       ctx.setLineDash([]);
       ctx.restore();
     }
+    // Halo every selected token. `selection` is the multi-select set; for a single
+    // click-select we fall back to selectedId so old callers keep working.
+    function selectedList() {
+      if (state.selection && state.selection.length) return state.selection.map(byId).filter(Boolean);
+      var t = byId(state.selectedId); return t ? [t] : [];
+    }
+    function drawSelections() { selectedList().forEach(drawSelection); }
 
-    function drawRuler() {
-      var r = state.ruler;
-      var ax = w2sX(r.ax), ay = w2sY(r.ay), bx = w2sX(r.bx), by = w2sY(r.by);
+    // The lasso marquee rectangle while dragging it out.
+    function drawMarquee() {
+      var m = state.marquee; if (!m) return;
+      var x = w2sX(Math.min(m.x1, m.x2)), y = w2sY(Math.min(m.y1, m.y2));
+      var w = Math.abs(m.x2 - m.x1) * state.cam.scale, h = Math.abs(m.y2 - m.y1) * state.cam.scale;
       ctx.save();
-      ctx.strokeStyle = "#4ea3ff"; ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+      ctx.fillStyle = "rgba(120,170,255,0.12)";
+      ctx.strokeStyle = "#6ea8ff"; ctx.lineWidth = 1.5; ctx.setLineDash([5, 3]);
+      ctx.fillRect(x, y, w, h); ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]); ctx.restore();
+    }
+
+    // A measuring line + distance chip between two WORLD points (shared by the
+    // ruler, the movement overlay and remote overlays).
+    function drawMeasureLine(ax, ay, bx, by, color) {
+      var sax = w2sX(ax), say = w2sY(ay), sbx = w2sX(bx), sby = w2sY(by);
+      ctx.save();
+      ctx.strokeStyle = color || "#4ea3ff"; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(sax, say); ctx.lineTo(sbx, sby); ctx.stroke();
       ctx.setLineDash([]);
-      var cells = Math.hypot(r.bx - r.ax, r.by - r.ay) / state.map.ppg;
+      var cells = Math.hypot(bx - ax, by - ay) / (state.map.ppg || 70);
       var feet = Math.round(cells * state.feetPerCell);
       var label = feet + " ft (" + (Math.round(cells * 10) / 10) + " sq)";
       ctx.font = "bold 13px system-ui, sans-serif";
       var tw = ctx.measureText(label).width + 12;
-      ctx.fillStyle = "rgba(10,12,16,0.9)";
-      ctx.fillRect(bx + 10, by - 12, tw, 22);
+      ctx.fillStyle = "rgba(10,12,16,0.9)"; ctx.fillRect(sbx + 10, sby - 12, tw, 22);
       ctx.fillStyle = "#dfe7f2"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
-      ctx.fillText(label, bx + 16, by - 1);
+      ctx.fillText(label, sbx + 16, sby - 1);
       ctx.restore();
-      emit("ruler", { cells: cells, feet: feet, text: label });
+      return { cells: cells, feet: feet, text: label };
+    }
+
+    // Range rings at a WORLD center: Close 1sq/5ft, Near 6sq/30ft, Far 12sq/60ft.
+    var RING_BANDS = [{ sq: 1, name: "Close" }, { sq: 6, name: "Near" }, { sq: 12, name: "Far" }];
+    function drawRings(c, color) {
+      var ppg = state.map.ppg || 70, sc = state.cam.scale, cx = w2sX(c.x), cy = w2sY(c.y);
+      ctx.save();
+      ctx.textBaseline = "middle"; ctx.textAlign = "center"; ctx.font = "bold 12px system-ui, sans-serif";
+      for (var i = RING_BANDS.length - 1; i >= 0; i--) {
+        var b = RING_BANDS[i], rad = b.sq * ppg * sc;
+        ctx.strokeStyle = color || "#7fd6a1"; ctx.globalAlpha = 0.85; ctx.lineWidth = 1.6;
+        ctx.setLineDash([7, 5]);
+        ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+        var label = b.name + " · " + (b.sq * state.feetPerCell) + " ft";
+        var tw = ctx.measureText(label).width + 10;
+        ctx.globalAlpha = 1; ctx.fillStyle = "rgba(10,12,16,0.85)";
+        ctx.fillRect(cx - tw / 2, cy - rad - 9, tw, 18);
+        ctx.fillStyle = "#dfe7f2"; ctx.fillText(label, cx, cy - rad);
+      }
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fillStyle = color || "#7fd6a1"; ctx.fill();
+      ctx.restore();
+    }
+
+    // A laser-pointer dot (glowing) at a WORLD point.
+    function drawLaser(wx, wy, color) {
+      var x = w2sX(wx), y = w2sY(wy);
+      ctx.save();
+      var grd = ctx.createRadialGradient(x, y, 0, x, y, 16);
+      grd.addColorStop(0, color || "#ff5a5a"); grd.addColorStop(1, "rgba(255,90,90,0)");
+      ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = color || "#ff5a5a"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+
+    // Remote presence overlays (shared live from other peers): a laser dot, a
+    // measure line, or range rings, each keyed by the sender. Stale ones expire.
+    function drawOverlays() {
+      var keys = Object.keys(state.overlays), any = false;
+      for (var i = 0; i < keys.length; i++) {
+        var o = state.overlays[keys[i]];
+        if (!o) continue;
+        if (o.exp && now() > o.exp) { delete state.overlays[keys[i]]; continue; }
+        any = true;
+        if (o.kind === "laser") drawLaser(o.x, o.y, o.color || "#ff5a5a");
+        else if (o.kind === "measure") drawMeasureLine(o.ax, o.ay, o.bx, o.by, o.color || "#4ea3ff");
+        else if (o.kind === "rings") drawRings({ x: o.x, y: o.y }, o.color || "#7fd6a1");
+      }
+      if (any) scheduleRender();
+    }
+
+    function drawRuler() {
+      var r = state.ruler;
+      var m = drawMeasureLine(r.ax, r.ay, r.bx, r.by, r.color || "#4ea3ff");
+      emit("ruler", m);
     }
 
     // ---- hit testing --------------------------------------------------------
@@ -727,24 +759,38 @@
       scheduleRender();
     }
 
+    function emitOverlay(kind, data) {
+      emit("overlay", kind ? Object.assign({ kind: kind }, data) : { kind: null });
+    }
+
     function onDown(e) {
       // Multi-touch: two fingers = pinch-zoom + two-finger pan (tablets/phones).
       if (typeof e.pointerId !== "undefined") pointers[e.pointerId] = localPoint(e);
       if (activePointers().length >= 2) { beginPinch(); return; }
-      var p = localPoint(e);
-      if (state.tool === "ruler") {
-        state.ruler = { ax: s2wX(p.x), ay: s2wY(p.y), bx: s2wX(p.x), by: s2wY(p.y) };
-        drag = { mode: "ruler" };
-        scheduleRender();
-        return;
+      var p = localPoint(e), tool = state.tool, wx = s2wX(p.x), wy = s2wY(p.y);
+
+      if (tool === "ruler") {
+        state.ruler = { ax: wx, ay: wy, bx: wx, by: wy };
+        drag = { mode: "ruler" }; emitOverlay("measure", { ax: wx, ay: wy, bx: wx, by: wy });
+        scheduleRender(); return;
       }
-      if (state.tool === "pointer") {
-        var px = s2wX(p.x), py = s2wY(p.y);
-        ping(px, py, "#4ea3ff");
-        emit("ping", { x: px, y: py });
-        return;
+      if (tool === "rings") {
+        state.rings = { x: wx, y: wy };
+        drag = { mode: "rings" }; emitOverlay("rings", { x: wx, y: wy });
+        scheduleRender(); return;
       }
-      if (state.tool === "select") {
+      if (tool === "pointer") { ping(wx, wy, "#4ea3ff"); emit("ping", { x: wx, y: wy }); return; }
+      if (tool === "laser") {
+        state.laser = { x: wx, y: wy };
+        drag = { mode: "laser" }; emitOverlay("laser", { x: wx, y: wy });
+        scheduleRender(); return;
+      }
+      if (tool === "lasso") {
+        if (state.fogSetup) { setupDown(p); return; }
+        state.marquee = { x1: wx, y1: wy, x2: wx, y2: wy };
+        drag = { mode: "lasso" }; scheduleRender(); return;
+      }
+      if (tool === "select" || tool === "movement") {
         // Fog setup mode owns clicks: draw/erase/lock barriers by sub-tool.
         if (state.fogSetup) { setupDown(p); return; }
         // door badges are interactive UI on the map (open/close/lock)
@@ -752,14 +798,23 @@
         if (di >= 0) { emit("doorclick", { index: di }); return; }
         var t = tokenAt(p.x, p.y);
         if (t) {
+          // Grabbing a token that's part of a multi-selection drags the whole
+          // group; otherwise it becomes the single selection.
+          var inSel = state.selection.indexOf(t.id) >= 0 && state.selection.length > 1;
+          if (!inSel) { state.selection = [t.id]; }
           state.selectedId = t.id;
           emit("select", t);
-          if (canMove(t)) drag = { mode: "move", id: t.id, dx: s2wX(p.x) - t.x, dy: s2wY(p.y) - t.y, lastX: t.x, lastY: t.y };
+          if (canMove(t)) {
+            var ids = inSel ? state.selection.filter(function (id) { var m = byId(id); return m && canMove(m); }) : [t.id];
+            var members = ids.map(function (id) { var m = byId(id); return { id: id, ox: m.x, oy: m.y, lastX: m.x, lastY: m.y }; });
+            drag = { mode: "move", id: t.id, dx: s2wX(p.x) - t.x, dy: s2wY(p.y) - t.y, gx0: t.x, gy0: t.y, members: members, measure: tool === "movement" };
+            if (tool === "movement") { state.moveMeas = { ax: t.x, ay: t.y, bx: t.x, by: t.y }; emitOverlay("measure", state.moveMeas); }
+          }
           scheduleRender();
           return;
         }
         // clicked empty space -> deselect + pan
-        state.selectedId = null; emit("select", null);
+        state.selectedId = null; state.selection = []; emit("select", null);
       }
       drag = { mode: "pan", sx: p.x, sy: p.y, offX: state.cam.offX, offY: state.cam.offY };
       scheduleRender();
@@ -782,20 +837,38 @@
         state.cam.offY = drag.offY + (p.y - drag.sy);
       } else if (drag.mode === "move") {
         var t = byId(drag.id); if (!t) return;
-        var nx = s2wX(p.x) - drag.dx, ny = s2wY(p.y) - drag.dy;
-        if (state.collide) {
-          // Players slide up to barriers but can't cross them. (The GM's board
-          // has collide=false, so a GM can drag a token past a wall.)
-          var c = clampMove(drag.lastX, drag.lastY, nx, ny, tokMoveRad(t));
-          nx = c.x; ny = c.y;
-          t.x = nx; t.y = ny;              // no mid-drag grid snap while colliding
-        } else {
-          t.x = nx; t.y = ny; snapTok(t);
+        // World delta the grabbed token wants to travel; every group member moves
+        // by the same delta from its own origin (each clamped on its own path).
+        var gnx = s2wX(p.x) - drag.dx, gny = s2wY(p.y) - drag.dy;
+        var ddx = gnx - drag.gx0, ddy = gny - drag.gy0;
+        drag.members.forEach(function (mm) {
+          var mt = byId(mm.id); if (!mt) return;
+          var tx = mm.ox + ddx, ty = mm.oy + ddy;
+          if (state.collide) {
+            var c = clampMove(mm.lastX, mm.lastY, tx, ty, tokMoveRad(mt));
+            mt.x = c.x; mt.y = c.y;         // no mid-drag grid snap while colliding
+          } else {
+            mt.x = tx; mt.y = ty; snapTok(mt);
+          }
+          mm.lastX = mt.x; mm.lastY = mt.y;
+          emit("token", mt);
+        });
+        if (drag.measure) {
+          var gm = byId(drag.id);
+          state.moveMeas = { ax: drag.gx0, ay: drag.gy0, bx: gm.x, by: gm.y };
+          emitOverlay("measure", state.moveMeas);
         }
-        drag.lastX = t.x; drag.lastY = t.y;
-        emit("token", t);
       } else if (drag.mode === "ruler") {
         state.ruler.bx = s2wX(p.x); state.ruler.by = s2wY(p.y);
+        emitOverlay("measure", { ax: state.ruler.ax, ay: state.ruler.ay, bx: state.ruler.bx, by: state.ruler.by });
+      } else if (drag.mode === "rings") {
+        state.rings = { x: s2wX(p.x), y: s2wY(p.y) };
+        emitOverlay("rings", { x: state.rings.x, y: state.rings.y });
+      } else if (drag.mode === "laser") {
+        state.laser = { x: s2wX(p.x), y: s2wY(p.y) };
+        emitOverlay("laser", { x: state.laser.x, y: state.laser.y });
+      } else if (drag.mode === "lasso") {
+        state.marquee.x2 = s2wX(p.x); state.marquee.y2 = s2wY(p.y);
       } else if (drag.mode === "seg") {
         var v = snapVertex(s2wX(p.x), s2wY(p.y));
         drag.x2 = v.x; drag.y2 = v.y; state.segDraft.x2 = v.x; state.segDraft.y2 = v.y;
@@ -821,16 +894,38 @@
         scheduleRender();
       } else if (drag && drag.mode === "vertex") {
         bumpGeom(); emit("map", state.map); scheduleRender();
-      } else if (drag && drag.mode === "move" && state.collide) {
-        // Snap to grid on drop, but only if the snapped square is reachable
-        // without crossing a barrier — otherwise keep the clamped position.
-        var mt = byId(drag.id);
-        if (mt) {
-          var ox = mt.x, oy = mt.y;
-          snapTok(mt);
-          if (pathBlocked(ox, oy, mt.x, mt.y, tokMoveRad(mt))) { mt.x = ox; mt.y = oy; }
-          emit("token", mt);
+      } else if (drag && drag.mode === "move") {
+        // Snap each moved token to grid on drop, but only if the snapped square is
+        // reachable without crossing a barrier — otherwise keep the clamped spot.
+        if (state.collide) {
+          drag.members.forEach(function (mm) {
+            var mt = byId(mm.id); if (!mt) return;
+            var ox = mt.x, oy = mt.y;
+            snapTok(mt);
+            if (pathBlocked(ox, oy, mt.x, mt.y, tokMoveRad(mt))) { mt.x = ox; mt.y = oy; }
+            emit("token", mt);
+          });
         }
+        if (drag.measure) { state.moveMeas = null; emitOverlay(null); scheduleRender(); }
+      } else if (drag && drag.mode === "ruler") {
+        // The ruler line stays up locally, but the live copy players see clears.
+        emitOverlay(null);
+      } else if (drag && drag.mode === "rings") {
+        state.rings = null; emitOverlay(null); scheduleRender();
+      } else if (drag && drag.mode === "laser") {
+        state.laser = null; emitOverlay(null); scheduleRender();
+      } else if (drag && drag.mode === "lasso") {
+        var mq = state.marquee;
+        if (mq) {
+          var x1 = Math.min(mq.x1, mq.x2), x2 = Math.max(mq.x1, mq.x2), y1 = Math.min(mq.y1, mq.y2), y2 = Math.max(mq.y1, mq.y2);
+          // Select the tokens this client may move whose centre lies in the box.
+          var picked = state.tokens.filter(function (t) { return canMove(t) && t.x >= x1 && t.x <= x2 && t.y >= y1 && t.y <= y2; }).map(function (t) { return t.id; });
+          state.selection = picked;
+          state.selectedId = picked.length ? picked[picked.length - 1] : null;
+          emit("select", state.selectedId ? byId(state.selectedId) : null);
+          emit("lasso", { count: picked.length });
+        }
+        state.marquee = null; scheduleRender();
       }
       drag = null;
     }
@@ -944,7 +1039,7 @@
         characterDocId: spec.characterDocId || null,
         isViewer: !!spec.isViewer,
         color: spec.color || "#c8a24a",
-        light: typeof spec.light === "number" ? spec.light : 6, // cells of bright light (30ft torch)
+        vision: (typeof spec.vision === "number" && spec.vision > 0) ? spec.vision : null, // cells of sight; null = unlimited
         hp: spec.hp || null,
         hidden: !!spec.hidden, // GM-only: not drawn for players, ghosted for GM
         ring: !!spec.ring,     // optional colored outline (off by default)
@@ -959,6 +1054,7 @@
 
     function removeToken(id) {
       state.tokens = state.tokens.filter(function (t) { return t.id !== id; });
+      state.selection = state.selection.filter(function (sid) { return sid !== id; });
       if (state.selectedId === id) { state.selectedId = null; emit("select", null); }
       scheduleRender();
     }
@@ -978,14 +1074,14 @@
           src: m.src,                   // URL, or data-url (embedded)
           ppg: m.ppg,
           widthPx: m.widthPx, heightPx: m.heightPx,
-          walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, dark: m.dark,
+          walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights,
         },
         tokens: state.tokens.map(function (t) {
           return {
             id: t.id, name: t.name, imageUrl: t.imageUrl,
             x: t.x, y: t.y, w: t.w, h: t.h, rot: t.rot,
             ownerId: t.ownerId, characterDocId: t.characterDocId,
-            isViewer: t.isViewer, color: t.color, light: t.light, hp: t.hp, hidden: t.hidden, ring: t.ring, ringColor: t.ringColor,
+            isViewer: t.isViewer, color: t.color, vision: t.vision, hp: t.hp, hidden: t.hidden, ring: t.ring, ringColor: t.ringColor,
           };
         }),
         fog: { enabled: state.fog.enabled, opacity: state.fog.opacity },
@@ -997,15 +1093,15 @@
     function loadScene(scene) {
       if (!scene || scene.kind !== "dcc-vtt-scene") throw new Error("Not a DCC VTT scene file.");
       state.tokens = [];
-      state.selectedId = null;
-      state.ruler = null;
+      state.selectedId = null; state.selection = [];
+      state.ruler = null; state.moveMeas = null; state.rings = null; state.laser = null; state.overlays = {};
       var m = scene.map || {};
       state.feetPerCell = scene.feetPerCell || 5;
       state.grid = scene.grid !== false;
       state.fog.enabled = !!(scene.fog && scene.fog.enabled);
       state.fog.opacity = (scene.fog && scene.fog.opacity) || 1;
       var done = function () {
-        setMap({ ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], dark: !!m.dark, widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType });
+        setMap({ ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType });
         (scene.tokens || []).forEach(function (ts) { addToken(ts); });
         fitToMap();
         emit("scene", scene);
@@ -1051,7 +1147,7 @@
     // doors, widthPx, heightPx}. Same shape toScene().map produces.
     function loadMapState(m) {
       var fields = {
-        ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], dark: !!m.dark,
+        ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [],
         widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType,
       };
       if (m.src) {
@@ -1065,11 +1161,11 @@
       return Promise.resolve(state.map);
     }
 
-    // Apply map metadata only (walls/doors/lights/dark/ppg) without touching the
+    // Apply map metadata only (walls/doors/lights/ppg) without touching the
     // image — used when the host syncs a wall/door/light change so the whole map
     // picture isn't re-shipped over the wire.
     function applyMapMeta(m) {
-      var f = { dark: !!m.dark };
+      var f = {};
       if (m.ppg) f.ppg = m.ppg;
       if (m.walls) f.walls = m.walls;
       if (m.windows) f.windows = m.windows;
@@ -1092,10 +1188,13 @@
           t.imageUrl = spec.imageUrl; t.image = null;
           if (spec.imageUrl) loadImage(spec.imageUrl).then(function (img) { t.image = img; scheduleRender(); }, function () {});
         }
-        t.name = spec.name; t.x = spec.x; t.y = spec.y; t.w = spec.w; t.h = spec.h;
+        // Don't let a host echo fight the token this client is actively dragging —
+        // that's the rubber-band jitter. Keep the local position until the drag ends.
+        var dragging = drag && drag.mode === "move" && drag.id === spec.id;
+        t.name = spec.name; if (!dragging) { t.x = spec.x; t.y = spec.y; } t.w = spec.w; t.h = spec.h;
         t.rot = spec.rot || 0; t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
         t.isViewer = !!spec.isViewer; t.color = spec.color || t.color;
-        t.light = spec.light; t.hp = spec.hp; t.hidden = !!spec.hidden; t.ring = !!spec.ring; t.ringColor = spec.ringColor || null;
+        t.vision = (typeof spec.vision === "number" && spec.vision > 0) ? spec.vision : null; t.hp = spec.hp; t.hidden = !!spec.hidden; t.ring = !!spec.ring; t.ringColor = spec.ringColor || null;
       });
       state.tokens = state.tokens.filter(function (t) { return keep[t.id]; });
       scheduleRender();
@@ -1135,7 +1234,7 @@
       });
       try { return c.toDataURL("image/jpeg", 0.55); } catch (e) { return null; }
     }
-    function cursorFor(t) { return t === "ruler" || t === "pointer" ? "crosshair" : "default"; }
+    function cursorFor(t) { return (t === "ruler" || t === "pointer" || t === "rings" || t === "laser" || t === "lasso" || t === "movement") ? "crosshair" : "default"; }
 
     // ---- public API ---------------------------------------------------------
     canvas.addEventListener("pointerdown", onDown);
@@ -1156,13 +1255,15 @@
       // right-click on a door locks/unlocks it (left-click opens/closes). No menu.
       if (state.fogSetup) {
         if (state.wallPath) { finishWallPath(); return; }
-        var di = doorAt(p.x, p.y);
-        if (di >= 0) { emit("doorlock", { index: di }); return; }
+        var dis = doorAt(p.x, p.y);
+        if (dis >= 0) { emit("doorlock", { index: dis }); return; }
         return; // setup mode: no token context menu
       }
+      // Normal mode: right-click a token -> options; a door -> lock/unlock; empty -> nothing.
       var t = tokenAt(p.x, p.y);
-      if (t) { state.selectedId = t.id; emit("select", t); scheduleRender(); }
-      emit("context", { token: t || null, sx: e.clientX, sy: e.clientY, wx: s2wX(p.x), wy: s2wY(p.y) });
+      if (t) { state.selectedId = t.id; emit("select", t); scheduleRender(); emit("context", { token: t, sx: e.clientX, sy: e.clientY, wx: s2wX(p.x), wy: s2wY(p.y) }); return; }
+      var di = doorAt(p.x, p.y);
+      if (di >= 0) { emit("doorlock", { index: di }); return; }
     });
     resize();
 
@@ -1178,8 +1279,26 @@
       getToken: byId,
       setHidden: function (id, on) { var t = byId(id); if (!t) return; t.hidden = !!on; scheduleRender(); emit("token", t); },
       setRing: function (id, on, color) { var t = byId(id); if (!t) return; t.ring = !!on; if (color !== undefined) t.ringColor = color; scheduleRender(); emit("token", t); },
-      select: function (id) { state.selectedId = id; emit("select", byId(id)); scheduleRender(); },
-      setTool: function (t) { state.tool = t; if (t !== "ruler") state.ruler = null; try { canvas.style.cursor = cursorFor(t); } catch (e) {} scheduleRender(); emit("tool", t); },
+      select: function (id) { state.selectedId = id; state.selection = id ? [id] : []; emit("select", byId(id)); scheduleRender(); },
+      getSelection: function () { return state.selection.slice(); },
+      clearSelection: function () { state.selection = []; state.selectedId = null; emit("select", null); scheduleRender(); },
+      setTool: function (t) {
+        state.tool = t;
+        // Switching tools drops any transient overlay this tool owned and tells
+        // peers to clear the live copy they were shown.
+        if (t !== "ruler") state.ruler = null;
+        state.rings = null; state.laser = null; state.marquee = null; state.moveMeas = null;
+        emitOverlay(null);
+        try { canvas.style.cursor = cursorFor(t); } catch (e) {}
+        scheduleRender(); emit("tool", t);
+      },
+      // Apply / clear a remote peer's live overlay (laser, measure line, rings).
+      setOverlay: function (senderId, o) {
+        if (!o || o.kind == null) { delete state.overlays[senderId]; }
+        else { o.exp = now() + 4000; state.overlays[senderId] = o; }
+        scheduleRender();
+      },
+      dropOverlay: function (senderId) { delete state.overlays[senderId]; scheduleRender(); },
       getTool: function () { return state.tool; },
       setFog: function (on) { state.fog.enabled = !!on; scheduleRender(); },
       setShowAll: function (on) { state.fog.showAll = !!on; scheduleRender(); },
@@ -1199,8 +1318,6 @@
       movementBlocked: function (ax, ay, bx, by, rad) { return pathBlocked(ax, ay, bx, by, rad || 0); },
       clampMovement: function (ax, ay, bx, by, rad) { return clampMove(ax, ay, bx, by, rad || 0); },
       moveRadius: function (t) { return tokMoveRad(t); },
-      setDark: function (on) { state.map.dark = !!on; scheduleRender(); emit("map", state.map); },
-      getDark: function () { return !!state.map.dark; },
       setDoor: function (i, fields) { var d = state.map.doors[i]; if (!d) return; if (fields.closed !== undefined) d.closed = !!fields.closed; if (fields.locked !== undefined) d.locked = !!fields.locked; scheduleRender(); },
       getDoor: function (i) { return state.map.doors[i]; },
       doorCount: function () { return state.map.doors ? state.map.doors.length : 0; },

@@ -51,12 +51,40 @@
     gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
     circle: '<circle cx="12" cy="12" r="8"/>',
     live: '<circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"/><path d="M6.5 6.5a8 8 0 0 0 0 11M17.5 6.5a8 8 0 0 1 0 11"/>',
+    lasso: '<ellipse cx="12" cy="10" rx="8" ry="5.5" stroke-dasharray="3 3"/><path d="M7 15.2c-1.2 1-1.4 2.6-.4 3.8"/><circle cx="6.2" cy="19.4" r="1.4"/>',
+    target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
+    laser: '<circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22M5.2 5.2l2.4 2.4M16.4 16.4l2.4 2.4M18.8 5.2l-2.4 2.4M7.6 16.4l-2.4 2.4"/>',
   };
   function ico(n, s) { return '<svg viewBox="0 0 24 24" width="' + (s || 20) + '" height="' + (s || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (P[n] || "") + "</svg>"; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]; }); }
   var COLORS = ["#4ea3ff", "#c8503a", "#5ac26a", "#c8a24a", "#a06ad4", "#e0863a", "#3ac6c6", "#d45a9a"];
   var RING_COLORS = [{ n: "Gold", v: "#c8a24a" }, { n: "Red", v: "#c8503a" }, { n: "Green", v: "#5ac26a" }, { n: "Blue", v: "#4ea3ff" }, { n: "Purple", v: "#a06ad4" }, { n: "White", v: "#e6ebf2" }];
   function colorFor(id) { var h = 0; id = String(id || ""); for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return COLORS[Math.abs(h) % COLORS.length]; }
+
+  // Rail tool groups — declared before shell() builds the rail HTML from them.
+  var TOOL_GROUPS = [
+    { id: "select", title: "Select", subs: [
+      { tool: "select", icon: "select", label: "Select / move", key: "V" },
+      { tool: "lasso", icon: "lasso", label: "Lasso (multi-select)", key: "L" },
+    ] },
+    { id: "measure", title: "Measure", subs: [
+      { tool: "ruler", icon: "ruler", label: "Standard measure", key: "R" },
+      { tool: "movement", icon: "move", label: "Movement (drag a token)", key: "M" },
+      { tool: "rings", icon: "target", label: "Ranges / zones", key: "Z" },
+    ] },
+    { id: "ping", title: "Ping", subs: [
+      { tool: "ping", icon: "ping", label: "Ping", key: "P" },
+      { tool: "laser", icon: "laser", label: "Laser pointer", key: "K" },
+    ] },
+  ];
+  var TOOL_SUB = {}, TOOL_GROUP = {}, GROUP_ACTIVE = {};
+  TOOL_GROUPS.forEach(function (g) { GROUP_ACTIVE[g.id] = g.subs[0].tool; g.subs.forEach(function (s) { TOOL_SUB[s.tool] = s; TOOL_GROUP[s.tool] = g.id; }); });
+  var TOOL_HINT = {
+    lasso: "<b>Lasso:</b> drag a box to select several tokens, then drag any of them to move the whole group.",
+    movement: "<b>Movement:</b> drag a token to see how far it's moving from where it started.",
+    rings: "<b>Ranges:</b> press and drag to show Close / Near / Far rings around a point.",
+    laser: "<b>Laser:</b> hold and drag to point — everyone at the table sees it live.",
+  };
 
   injectStyles();
   mount.innerHTML = shell();
@@ -73,16 +101,47 @@
   function say(h) { readout.innerHTML = h; readout.hidden = !h; if (readoutTimer) clearTimeout(readoutTimer); if (h) readoutTimer = setTimeout(function () { readout.hidden = true; }, 4500); }
 
   // ---- rail tools -----------------------------------------------------------
-  function setTool(t) { board.setTool(t); ["select", "ruler", "pointer"].forEach(function (x) { var b = $("t-" + x); if (b) b.classList.toggle("on", x === t); }); }
-  bind("t-select", function () { setTool("select"); });
-  bind("t-ruler", function () { setTool("ruler"); });
-  bind("t-pointer", function () { setTool("pointer"); });
+  // Each rail button is a GROUP with a flyout of sub-tools (TOOL_GROUPS defined
+  // above). The main button shows/activates the group's last-used sub-tool.
+  function setTool(t) {
+    board.setTool(t);
+    var gid = TOOL_GROUP[t], sub = TOOL_SUB[t];
+    if (gid) {
+      GROUP_ACTIVE[gid] = t;
+      var mb = $("grp-" + gid); if (mb && sub) mb.querySelector(".vtt-gi").innerHTML = ico(sub.icon, 20);
+      TOOL_GROUPS.forEach(function (g) { var b = $("grp-" + g.id); if (b) b.classList.toggle("on", g.id === gid); });
+      var grpEl = mb ? mb.parentNode : null;
+      if (grpEl) grpEl.querySelectorAll(".vtt-sub").forEach(function (s) { s.classList.toggle("on", s.dataset.tool === t); });
+    }
+    if (TOOL_HINT[t]) say(TOOL_HINT[t]);
+    closeFlyouts();
+  }
+  function closeFlyouts() { (mount.querySelectorAll(".vtt-rail-group.open") || []).forEach(function (g) { g.classList.remove("open"); }); }
+  // Wire each group: main button activates its current sub-tool (or toggles the
+  // flyout if already active); flyout items pick a specific sub-tool.
+  TOOL_GROUPS.forEach(function (g) {
+    var main = $("grp-" + g.id); if (!main) return;
+    main.onclick = function (e) {
+      e.stopPropagation();
+      var grpEl = main.parentNode, isActive = main.classList.contains("on");
+      if (isActive) { grpEl.classList.toggle("open"); }
+      else { setTool(GROUP_ACTIVE[g.id]); }
+    };
+    var grpEl = main.parentNode;
+    grpEl.querySelectorAll(".vtt-sub").forEach(function (sb) {
+      sb.onclick = function (e) { e.stopPropagation(); setTool(sb.dataset.tool); };
+    });
+  });
+  document.addEventListener("pointerdown", function (e) { if (!e.target.closest(".vtt-rail-group")) closeFlyouts(); }, true);
+
   bind("z-in", function () { board.zoomBy(1.2); });
   bind("z-out", function () { board.zoomBy(1 / 1.2); });
   bind("z-fit", function () { board.fitToMap(); });
   bind("conn-retry", function () { if (net && net.reconnect) { setConn("connecting"); net.reconnect(); } });
   board.on("ruler", function (r) { say("<b>" + r.text + "</b>"); });
   board.on("ping", function (p) { if (net) net.ping(p.x, p.y); });
+  board.on("overlay", function (o) { if (net && net.overlay) net.overlay(o); });
+  board.on("lasso", function (e) { say(e.count ? "<b>" + e.count + "</b> token" + (e.count === 1 ? "" : "s") + " selected — drag to move them together." : "Nothing selected."); });
   board.on("open", function (e) { openSheetForToken(e.token); });
   board.on("context", function (e) { showContext(e); });
   board.on("doorclick", function (e) { handleDoor(e.index); });
@@ -93,8 +152,9 @@
     var el = document.activeElement, tag = el && el.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (el && el.isContentEditable)) return;
     var k = e.key.toLowerCase();
-    if (k === "v") setTool("select"); else if (k === "r") setTool("ruler"); else if (k === "p") setTool("pointer");
-    else if (k === "escape") hideContext();
+    var byKey = { v: "select", l: "lasso", r: "ruler", m: "movement", z: "rings", p: "ping", k: "laser" };
+    if (byKey[k]) setTool(byKey[k]);
+    else if (k === "escape") { hideContext(); closeFlyouts(); }
   });
 
   // ---- character sheet popup ------------------------------------------------
@@ -159,7 +219,6 @@
     // settings panel
     fbtn("f-fog", function (on) { board.setFog(on); say(on ? "Fog on — players see only what their tokens can." : "Fog off."); });
     fbtn("f-reveal", function (on) { board.setShowAll(on); }, true);
-    fbtn("f-dark", function (on) { board.setDark(on); say(on ? "Dark map — tokens see only as far as their light." : "Map lit — full line of sight."); });
     fbtn("f-snap", function (on) { board.setSnap(on); }, true);
     fbtn("f-setup", function (on) {
       board.setFogSetup(on);
@@ -196,7 +255,7 @@
   function startNet() {
     var transport = window.VTTNet.httpTransport({ base: V.signalBase, campaignId: V.campaignId, me: V.userId });
     if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers, live: false }); renderPlayers([]); }
-    else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn("waiting"); }
+    else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: (chars[0] && chars[0].title) || V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn("waiting"); }
   }
   // Player connection state: "waiting" | "connecting" | "connected" | "failed".
   var CONN_MSG = {
@@ -380,7 +439,7 @@
       fetch(V.tokenBase, { method: "PUT", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, tokens: library }) }).catch(function () {});
     }, 400);
   }
-  var tokQuery = "", dragLibId = null;
+  var tokQuery = "", dragLibId = null, dragParty = false;
   var roster = Array.isArray(V.players) ? V.players : [];
   function ownerLabel(id) {
     if (!id) return ""; if (id === V.userId) return "GM";
@@ -392,7 +451,7 @@
   function tokenSpec(lt) {
     var g = board.state.map.ppg || 70, sz = lt.size || 1;
     return { imageUrl: lt.imageUrl || null, name: lt.name, w: g * sz, h: g * sz, ownerId: lt.ownerId || null,
-      isViewer: !!lt.isViewer, light: typeof lt.light === "number" ? lt.light : 0, hidden: !!lt.hidden,
+      isViewer: !!lt.isViewer, vision: typeof lt.vision === "number" ? lt.vision : null, hidden: !!lt.hidden,
       ring: !!lt.ring, ringColor: lt.ringColor || null, color: lt.ownerId ? colorFor(lt.ownerId) : "#c8a24a" };
   }
   function libRow(lt) {
@@ -403,16 +462,19 @@
   }
   function renderTokens() {
     var el = $("token-list"); if (!el) return;
+    var party = partyTokens();
+    var partyBar = party.length ? '<div class="vtt-party" id="party-chip" draggable="true" title="Drag onto the map, or click, to place the whole party">' + ico("players", 16) + "<span>Place party <b>(" + party.length + ")</b></span>" + ico("move", 14) + "</div>" : "";
     if (!library.length) { el.innerHTML = '<div class="vtt-empty">Your token library is empty. <b>Add token</b> to build a reusable set for this campaign.</div>'; return; }
     var q = tokQuery.trim().toLowerCase();
     var list = library.filter(function (lt) { return !q || (lt.name || "").toLowerCase().indexOf(q) >= 0; });
-    if (!list.length) { el.innerHTML = '<div class="vtt-empty">No tokens match “' + esc(tokQuery) + '”.</div>'; return; }
+    if (!list.length) { el.innerHTML = partyBar + '<div class="vtt-empty">No tokens match “' + esc(tokQuery) + '”.</div>'; wireParty(); return; }
     var assigned = list.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId; });
     var rest = list.filter(function (lt) { return !(lt.ownerId && lt.ownerId !== V.userId); });
-    var html = "";
+    var html = partyBar;
     if (assigned.length) html += '<div class="vtt-sec-h">Players</div>' + assigned.map(libRow).join("");
     if (rest.length) html += (assigned.length ? '<div class="vtt-sec-h" style="margin-top:10px">Tokens</div>' : "") + rest.map(libRow).join("");
     el.innerHTML = html;
+    wireParty();
     el.querySelectorAll(".vtt-trow").forEach(function (row) {
       var id = row.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
       row.addEventListener("dragstart", function (e) { dragLibId = id; try { e.dataTransfer.setData("text/plain", "lib:" + id); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
@@ -421,17 +483,46 @@
       row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openTokenEditor(lt); };
     });
   }
+  function wireParty() {
+    var pc = $("party-chip"); if (!pc) return;
+    pc.onclick = function () { var r = stage.getBoundingClientRect(); placeParty(r.left + r.width / 2, r.top + r.height / 2); };
+    pc.addEventListener("dragstart", function (e) { dragParty = true; try { e.dataTransfer.setData("text/plain", "party"); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
+    pc.addEventListener("dragend", function () { dragParty = false; });
+  }
   function placeLibAt(lt, sx, sy) {
     var t = board.addTokenAtScreen(tokenSpec(lt), sx, sy);
     if (net) net.pushTokens(); board.select(t.id);
     say("Placed <b>" + esc(lt.name || "token") + "</b> on the map.");
+  }
+  // Party = library tokens assigned to a player (i.e. anyone but the GM).
+  function partyTokens() { return library.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId; }); }
+  // Drop the whole party onto the map at once, clustered around (sx,sy), skipping
+  // any member already on the board (matched by owner + name).
+  function placeParty(sx, sy) {
+    var party = partyTokens();
+    if (!party.length) { say("No party members yet — assign library tokens to players first."); return; }
+    var onBoard = {};
+    board.state.tokens.forEach(function (t) { if (t.ownerId) onBoard[t.ownerId + "|" + (t.name || "")] = true; });
+    var toPlace = party.filter(function (lt) { return !onBoard[lt.ownerId + "|" + (lt.name || "")]; });
+    if (!toPlace.length) { say("The whole party is already on the map."); return; }
+    var g = board.state.map.ppg || 70, sc = board.state.cam.scale;
+    var cols = Math.ceil(Math.sqrt(toPlace.length)), first = null;
+    toPlace.forEach(function (lt, i) {
+      var col = i % cols, row = Math.floor(i / cols);
+      var ox = (col - (cols - 1) / 2) * g, oy = (row - (Math.ceil(toPlace.length / cols) - 1) / 2) * g;
+      var t = board.addTokenAtScreen(tokenSpec(lt), sx + ox * sc, sy + oy * sc);
+      if (!first) first = t;
+    });
+    if (net) net.pushTokens();
+    if (first) board.select(first.id);
+    say("Placed <b>" + toPlace.length + "</b> party member" + (toPlace.length === 1 ? "" : "s") + " on the map.");
   }
 
   // ---- token editor popup (#5) ----------------------------------------------
   var teId = null, teDraft = null;
   function openTokenEditor(lt) {
     teId = lt && lt.id ? lt.id : null;
-    teDraft = lt ? JSON.parse(JSON.stringify(lt)) : { id: libUid(), name: "", imageUrl: null, size: 1, ownerId: null, isViewer: false, light: 0, hidden: false, ring: false, ringColor: "#c8a24a" };
+    teDraft = lt ? JSON.parse(JSON.stringify(lt)) : { id: libUid(), name: "", imageUrl: null, size: 1, ownerId: null, isViewer: false, vision: null, hidden: false, ring: false, ringColor: "#c8a24a" };
     $("te-h").textContent = teId ? "Edit token" : "Add token";
     $("te-del").hidden = !teId;
     $("te-name").value = teDraft.name || "";
@@ -442,7 +533,7 @@
     (net && net.peers ? net.peers() : []).forEach(function (p) { if (!opts.some(function (o) { return o.id === p.id; })) opts.push({ id: p.id, n: p.name }); });
     $("te-owner").innerHTML = opts.map(function (o) { return '<option value="' + esc(o.id) + '"' + (String(teDraft.ownerId || "") === o.id ? " selected" : "") + ">" + esc(o.n) + "</option>"; }).join("");
     var fpc = board.state.feetPerCell || 5;
-    $("te-light").value = String(Math.round((teDraft.light || 0) * fpc));
+    $("te-vdist").value = teDraft.vision != null ? String(Math.round(teDraft.vision * fpc)) : "";
     $("te-vision").checked = !!teDraft.isViewer;
     $("te-hidden").checked = !!teDraft.hidden;
     $("te-ring").checked = !!teDraft.ring;
@@ -458,7 +549,8 @@
     teDraft.name = ($("te-name").value || "").trim() || teDraft.name || "Token";
     teDraft.size = Math.max(1, parseInt($("te-size").value, 10) || 1);
     teDraft.ownerId = $("te-owner").value || null;
-    teDraft.light = (parseFloat($("te-light").value) || 0) / fpc;
+    var vv = $("te-vdist").value;
+    teDraft.vision = vv === "" ? null : (parseFloat(vv) || 0) / fpc;
     teDraft.isViewer = $("te-vision").checked;
     teDraft.hidden = $("te-hidden").checked;
     teDraft.ring = $("te-ring").checked;
@@ -475,7 +567,6 @@
   }
 
   // ---- token context menu ---------------------------------------------------
-  var pendingDrop = null;
   function showContext(e) {
     var t = e.token, items = [];
     if (t) {
@@ -487,7 +578,7 @@
         (net && net.peers ? net.peers() : []).forEach(function (p) { owners.push({ label: p.name, onClick: function () { assign(t, p.id); } }); });
         items.push({ label: "Assign to", sub: owners });
         items.push({ label: (t.isViewer ? "✓ " : "") + "Sees fog (viewer)", onClick: function () { t.isViewer = !t.isViewer; board.render(); if (net) net.pushTokens(); } });
-        items.push({ label: "Light (in the dark)", sub: [{ ft: 0, l: "None" }, { ft: 20 }, { ft: 40 }, { ft: 60 }, { ft: 90 }].map(function (o) { var fpc = board.state.feetPerCell || 5, cells = o.ft / fpc; return { label: (o.l || o.ft + " ft") + (Math.abs((t.light || 0) - cells) < 0.01 ? "  ✓" : ""), onClick: function () { t.light = cells; board.render(); if (net) net.pushTokens(); } }; }) });
+        items.push({ label: "Vision", sub: [{ v: null, l: "Unlimited" }, { ft: 120 }, { ft: 60 }, { ft: 30 }, { ft: 10 }].map(function (o) { var fpc = board.state.feetPerCell || 5, cells = o.v === null ? null : o.ft / fpc; var cur = cells === null ? t.vision == null : (t.vision != null && Math.abs(t.vision - cells) < 0.01); return { label: (o.l || o.ft + " ft") + (cur ? "  ✓" : ""), onClick: function () { t.vision = cells; board.render(); if (net) net.pushTokens(); } }; }) });
         items.push({ label: (t.hidden ? "✓ " : "") + "Hide from players", onClick: function () { board.setHidden(t.id, !t.hidden); if (net) net.pushTokens(); say(t.hidden ? "Token <b>hidden</b> from players." : "Token visible to players."); } });
         var ringSub = [{ label: (!t.ring ? "✓ " : "") + "Off", onClick: function () { board.setRing(t.id, false); if (net) net.pushTokens(); } }];
         RING_COLORS.forEach(function (c) { ringSub.push({ label: (t.ring && (t.ringColor || t.color) === c.v ? "✓ " : "") + c.n, onClick: function () { board.setRing(t.id, true, c.v); if (net) net.pushTokens(); } }); });
@@ -496,13 +587,11 @@
         items.push({ sep: true });
         items.push({ label: "Delete", danger: true, onClick: function () { board.removeToken(t.id); if (net) net.pushTokens(); } });
       }
-    } else if (isGM) {
-      items.push({ label: "Add token here…", onClick: function () { pendingDrop = { sx: e.sx, sy: e.sy }; $("tk-file").click(); } });
     }
     if (items.length) menuAt(items, e.sx, e.sy);
   }
   function assign(t, id) { t.ownerId = id; t.color = id ? colorFor(id) : "#c8a24a"; board.render(); if (net) net.pushTokens(); }
-  function clone(o) { return JSON.parse(JSON.stringify({ name: o.name, imageUrl: o.imageUrl, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot, ownerId: o.ownerId, characterDocId: o.characterDocId, isViewer: o.isViewer, color: o.color, light: o.light, hp: o.hp, hidden: o.hidden, ring: o.ring, ringColor: o.ringColor })); }
+  function clone(o) { return JSON.parse(JSON.stringify({ name: o.name, imageUrl: o.imageUrl, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot, ownerId: o.ownerId, characterDocId: o.characterDocId, isViewer: o.isViewer, color: o.color, vision: o.vision, hp: o.hp, hidden: o.hidden, ring: o.ring, ringColor: o.ringColor })); }
   // Generic browser filenames (download.png, image, IMG_1234, screenshot…) make
   // lousy token names — fall back to "Token N" instead.
   function tokenName(fname, n) {
@@ -512,13 +601,6 @@
   }
 
   if (isGM) {
-    // Right-click "Add token here" → place a one-off SCENE token at that spot.
-    $("tk-file").onchange = function (e) {
-      var f = e.target.files[0]; if (!f) return; var where = pendingDrop; pendingDrop = null;
-      var rd = new FileReader();
-      rd.onload = function () { var sx = where ? where.sx : window.innerWidth / 2, sy = where ? where.sy : window.innerHeight / 2; var t = board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name, board.state.tokens.length + 1) }, sx, sy); if (net) net.pushTokens(); board.select(t.id); };
-      rd.readAsDataURL(f); e.target.value = "";
-    };
     // Token-editor "Change image" → set the draft token's image (+ default name).
     $("lib-file").onchange = function (e) {
       var f = e.target.files[0]; if (!f || !teDraft) return;
@@ -557,6 +639,7 @@
     if (!isGM) return; e.preventDefault();
     // Dragging a library token onto the map places it (with all its presets).
     var txt = ""; try { txt = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || ""; } catch (_) {}
+    if (dragParty || txt === "party") { dragParty = false; placeParty(e.clientX, e.clientY); return; }
     if (dragLibId || txt.indexOf("lib:") === 0) {
       var id = dragLibId || txt.slice(4), lt = library.filter(function (x) { return x.id === id; })[0];
       dragLibId = null;
@@ -572,10 +655,20 @@
 
   // ---- shell + styles -------------------------------------------------------
   function rb(id, name, label, on) { return '<button class="vtt-tbtn' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name) + "</button>"; }
+  // A rail tool GROUP: a main button (shows the active sub-tool) + a hover/tap
+  // flyout of sub-tools.
+  function railGroup(g, on) {
+    var subs = g.subs.map(function (s) {
+      return '<button class="vtt-sub" data-tool="' + s.tool + '" title="' + esc(s.label) + (s.key ? "  (" + s.key + ")" : "") + '">' + ico(s.icon, 18) + "<span>" + esc(s.label) + (s.key ? ' <b class="vtt-key">' + s.key + "</b>" : "") + "</span></button>";
+    }).join("");
+    return '<div class="vtt-rail-group">' +
+      '<button class="vtt-tbtn vtt-groupbtn' + (on ? " on" : "") + '" id="grp-' + g.id + '" title="' + esc(g.title) + '"><span class="vtt-gi">' + ico(g.subs[0].icon, 20) + "</span><i class=\"vtt-caret\"></i></button>" +
+      '<div class="vtt-flyout">' + subs + "</div></div>";
+  }
   function frow(id, name, label, on) { return '<button class="vtt-frow' + (on ? " on" : "") + '" id="' + id + '"><span class="vtt-frow-i">' + ico(name, 18) + "</span>" + label + "</button>"; }
   function subtn(id, name, label, on) { return '<button class="vtt-sub-t' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name, 17) + "<span>" + label + "</span></button>"; }
   function shell() {
-    var rail = rb("t-select", "select", "Select / move  (V)", true) + rb("t-ruler", "ruler", "Measure  (R)") + rb("t-pointer", "ping", "Ping  (P)") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
+    var rail = TOOL_GROUPS.map(function (g, i) { return railGroup(g, i === 0); }).join("") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
     var top = '<div class="vtt-top"><a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a><div class="vtt-title">' + esc(V.campaignName || "Tabletop") + '</div><span class="vtt-scene-badge" id="scene-badge" hidden></span></div>' +
       '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (!isGM ? '<button class="vtt-tbtn" id="conn-retry" title="Reconnect to your GM" hidden>' + ico("refresh", 18) + "</button>" : "") + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
     var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden>' +
@@ -587,19 +680,21 @@
       '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div><input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
       // settings
       '<div class="vtt-panel" data-panel="settings" hidden>' +
-      frow("f-fog", "fog", "Fog of war") + frow("f-reveal", "eye", "GM reveal (see through fog)", true) + frow("f-dark", "light", "Dynamic lighting (dark map)") + frow("f-snap", "snap", "Snap tokens to grid", true) + frow("f-setup", "wrench", "Setup mode (edit walls, windows & doors)") +
+      frow("f-fog", "fog", "Fog of war") + frow("f-reveal", "eye", "GM reveal (see through fog)", true) + frow("f-snap", "snap", "Snap tokens to grid", true) + frow("f-setup", "wrench", "Setup mode (edit walls, windows & doors)") +
       '<div class="vtt-row small" style="margin-top:8px"><label style="flex:1">Darkness <input type="range" id="f-op" min="40" max="100" value="90"></label></div></div>' +
       // players
       '<div class="vtt-panel" data-panel="players" hidden><div id="players"></div></div></div>';
     var zoom = '<div class="vtt-zoom"><button class="vtt-tbtn" id="z-in" title="Zoom in">' + ico("zin") + '</button><button class="vtt-tbtn" id="z-fit" title="Fit map">' + ico("fit") + '</button><button class="vtt-tbtn" id="z-out" title="Zoom out">' + ico("zout") + "</button></div>";
-    var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="tk-file" accept="image/*" hidden><input type="file" id="lib-file" accept="image/*" hidden>' : "";
+    var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="lib-file" accept="image/*" hidden>' : "";
     var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden><span class="vtt-setupbar-t">Setup</span>' +
       subtn("su-select", "select", "Select", true) + subtn("su-wall", "wall", "Wall") + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + "</div>";
     return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + (isGM ? sceneEditor() + tokenEditor() : "") + inputs + "</div>";
   }
   // Token editor popup (#5): presets applied whenever the token is placed.
   function tokenEditor() {
-    var ftOpts = [0, 20, 40, 60, 90].map(function (f) { return '<option value="' + f + '">' + (f ? f + " ft" : "None") + "</option>"; }).join("");
+    // Vision distance: Unlimited (empty value) + capped ranges. Blank = null = sees
+    // as far as walls/doors allow; a number caps the line of sight to that many feet.
+    var vdOpts = ['<option value="">Unlimited</option>'].concat([120, 60, 30, 10].map(function (f) { return '<option value="' + f + '">' + f + " ft</option>"; })).join("");
     var ringOpts = RING_COLORS.map(function (c) { return '<option value="' + c.v + '">' + c.n + "</option>"; }).join("");
     return '<div id="token-editor" class="vtt-modal" hidden><div class="vtt-modal-box">' +
       '<div class="vtt-modal-head"><span id="te-h">Add token</span><button class="vtt-mini" id="te-close">' + ico("close", 16) + "</button></div>" +
@@ -607,7 +702,7 @@
       '<div class="vtt-te-top"><div class="vtt-te-av" id="te-av"></div><div style="flex:1"><label class="vtt-field"><span>Name</span><input type="text" id="te-name" placeholder="Token name"></label><button class="vtt-btn ghost" id="te-img">' + ico("upload", 14) + " Change image</button></div></div>" +
       '<div class="vtt-row small"><label>Size (squares) <input type="number" id="te-size" min="1" max="8" value="1"></label></div>' +
       '<label class="vtt-field"><span>Assign to</span><select id="te-owner"></select></label>' +
-      '<label class="vtt-field"><span>Light in the dark</span><select id="te-light">' + ftOpts + "</select></label>" +
+      '<label class="vtt-field"><span>Vision distance</span><select id="te-vdist">' + vdOpts + "</select></label>" +
       '<div class="vtt-te-checks"><label><input type="checkbox" id="te-vision"> Sees fog (vision)</label><label><input type="checkbox" id="te-hidden"> Hidden from players</label></div>' +
       '<div class="vtt-te-checks"><label><input type="checkbox" id="te-ring"> Ring</label><select id="te-ringcolor">' + ringOpts + "</select></div>" +
       "</div>" +
@@ -650,6 +745,15 @@
       ".vtt-tbtn:hover{color:#fff;border-color:#3d4756}.vtt-tbtn.on{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
       ".vtt-rail{position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:7px;z-index:20}",
       ".vtt-rail-sep{height:1px;background:#2a323d;margin:3px 4px}",
+      ".vtt-rail-group{position:relative}",
+      ".vtt-groupbtn{position:relative}.vtt-groupbtn .vtt-gi{display:flex}",
+      ".vtt-caret{position:absolute;right:3px;bottom:3px;width:0;height:0;border-left:4px solid transparent;border-bottom:4px solid currentColor;opacity:.55}",
+      ".vtt-flyout{display:none;position:absolute;left:47px;top:0;flex-direction:column;gap:3px;background:rgba(18,22,28,.98);border:1px solid #2a323d;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.55);z-index:40;min-width:190px}",
+      ".vtt-rail-group:hover .vtt-flyout,.vtt-rail-group.open .vtt-flyout{display:flex}",
+      ".vtt-sub{display:flex;align-items:center;gap:9px;background:none;border:0;color:#c3ccd8;padding:7px 9px;border-radius:7px;font:600 12px/1.1 system-ui;cursor:pointer;white-space:nowrap;text-align:left;width:100%}",
+      ".vtt-sub:hover{background:#232b35;color:#fff}.vtt-sub.on{background:#2a3442;color:#e6c66a}",
+      ".vtt-sub .vtt-key{margin-left:6px;padding:1px 5px;border:1px solid #3a4453;border-radius:4px;font-size:10px;color:#8b97a7;font-weight:700}",
+      ".vtt-groupbtn.on{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
       ".vtt-top{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:10px;z-index:20}",
       ".vtt-top.right{left:auto;right:12px}",
       ".vtt-top.right,.vtt-zoom{transition:right .18s ease}",
@@ -690,12 +794,14 @@
       ".vtt-sub-t:hover{color:#fff;border-color:#3d4756}.vtt-sub-t.on{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
       "@media(max-width:640px){.vtt-setupbar{top:auto;bottom:70px;flex-wrap:wrap;max-width:94vw;justify-content:center}.vtt-sub-t span{display:none}}",
       ".vtt-empty{font-size:12px;color:#8b97a7;line-height:1.5;padding:6px 0}",
+      ".vtt-party{display:flex;align-items:center;gap:8px;margin:2px 0 10px;padding:9px 11px;border:1px solid #3a4453;border-radius:8px;background:linear-gradient(180deg,#20283a,#171d29);color:#dfe7f2;font-size:12px;font-weight:600;cursor:grab}",
+      ".vtt-party:hover{border-color:#c8a24a}.vtt-party:active{cursor:grabbing}.vtt-party span{flex:1}.vtt-party b{color:#e6c66a}",
       ".vtt-hint2{font-size:11px;color:#8b97a7;line-height:1.5;margin:6px 0;display:flex;gap:6px;align-items:flex-start}.vtt-hint2 svg{flex:0 0 auto;margin-top:1px}",
       ".vtt-ctx{position:fixed;z-index:100;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:4px;min-width:160px;box-shadow:0 12px 40px rgba(0,0,0,.6)}",
       ".vtt-ctx.sub{position:absolute;left:100%;top:-5px;display:none}",
       ".vtt-ctx-item{position:relative;padding:7px 10px;border-radius:5px;font-size:13px;cursor:pointer;white-space:nowrap;color:#e6ebf2}.vtt-ctx-item:hover{background:#232b35}.vtt-ctx-item.has-sub:hover>.vtt-ctx.sub{display:block}.vtt-ctx-item.danger{color:#f0a8a3}",
       ".vtt-ctx-sep{height:1px;background:#2a323d;margin:4px 2px}",
-      ".vtt-sheetpop{position:absolute;top:60px;right:12px;width:min(510px,92vw);height:86%;background:#14181e;border:1px solid #2a323d;border-radius:10px;z-index:60;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6);resize:both}",
+      ".vtt-sheetpop{position:absolute;top:60px;right:12px;width:min(510px,92vw);height:86%;background:#14181e;border:1px solid #2a323d;border-radius:10px;z-index:60;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6)}",
       ".vtt-sheetpop.wide{width:min(1120px,96vw);height:92vh;top:4vh;right:2vw;left:auto}",
       ".vtt-sheet-head{display:flex;align-items:center;gap:6px;padding:9px 12px;background:#1b212a;cursor:move;font-weight:700}",
       ".vtt-sheetpop iframe{border:0;flex:1;width:100%;background:#fff}",
