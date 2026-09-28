@@ -51,6 +51,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
     userName: user.email,
     myCharacters,
     sceneBase: "/api/vtt/scenes",
+    tokenBase: "/api/vtt/tokens",
     signalBase: "/api/vtt/signal",
     toolBase: "/tools",
     // Free public STUN for connection setup, plus an OPTIONAL TURN relay if the

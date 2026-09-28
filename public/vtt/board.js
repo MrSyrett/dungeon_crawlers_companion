@@ -50,13 +50,15 @@
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
       fogSetup: false,      // GM: show walls / edit doors
-      setupTool: "wall",    // wall | window | door | erase | lock (setup sub-tool)
+      setupTool: "pan",     // pan | wall | window | door | erase (setup sub-tool)
       segDraft: null,       // barrier being drawn in setup mode { x1,y1,x2,y2,kind }
       gm: false,            // this board belongs to the GM (sees hidden tokens)
       collide: false,       // enforce barrier collision on this board's own moves
       dpr: opts.dpr || (root.devicePixelRatio || 1),
       _remote: false,
+      _geomVer: 0,          // bumped on any wall/window/door structural change (fog cache key)
     };
+    function bumpGeom() { state._geomVer++; }
     var canMove = opts.canMove || function () { return true; };
     function snapTok(t) {
       if (!state.snap || !state.map.ppg) return;
@@ -92,7 +94,7 @@
           if (d < bd) { bd = d; best = key; bi = i; }
         }
       });
-      if (best) { state.map[best].splice(bi, 1); return true; }
+      if (best) { state.map[best].splice(bi, 1); bumpGeom(); return true; }
       return false;
     }
     // Segment/segment intersection: returns the parameter t in [0,1] along a->b
@@ -383,9 +385,13 @@
           ctx.fillText(t.name.slice(0, 2).toUpperCase(), 0, 1);
         }
       }
-      // owner ring
-      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.lineWidth = Math.max(2, r * 0.09); ctx.strokeStyle = ring; ctx.stroke();
+      // Optional colored ring — OFF by default, turned on per-token from the
+      // right-click menu (with a color). An imageless token still shows its disc
+      // fill (above) so it's always visible.
+      if (t.ring) {
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.lineWidth = Math.max(2, r * 0.09); ctx.strokeStyle = t.ringColor || ring; ctx.stroke();
+      }
       ctx.restore();
       if (r > 11) {
         if (t.hidden) { ctx.save(); ctx.globalAlpha = 0.42; drawNamePlate(t, cx, cy, r); ctx.restore(); }
@@ -432,8 +438,12 @@
     function geomSig() {
       var m = state.map, ds = "";
       for (var i = 0; i < m.doors.length; i++) { var d = m.doors[i]; ds += (d.closed || d.locked) ? "1" : "0"; }
-      return m.walls.length + "|" + (m.windows ? m.windows.length : 0) + "|" + ds + "|" +
-        (m.dark ? 1 : 0) + "|" + m.ppg + "|" + m.widthPx + "x" + m.heightPx;
+      // Two structural components so ANY mutation path invalidates the cache:
+      // wall/window COUNTS catch a direct push/splice, and _geomVer catches a
+      // same-count array swap (e.g. an edit or a wholesale replace over the wire).
+      // Door open/close is an in-place flag, captured separately in `ds`.
+      return state._geomVer + "|" + m.walls.length + "|" + (m.windows ? m.windows.length : 0) + "|" +
+        ds + "|" + (m.dark ? 1 : 0) + "|" + m.ppg + "|" + m.widthPx + "x" + m.heightPx;
     }
     function fillFogPoly(poly) {
       if (!poly || poly.length < 3) return;
@@ -571,20 +581,17 @@
     // Setup-mode pointer-down: behaviour depends on the active sub-tool.
     function setupDown(p) {
       var wx = s2wX(p.x), wy = s2wY(p.y);
-      if (state.setupTool === "erase") {
-        if (removeSegNear(wx, wy)) { emit("map", state.map); }
-        scheduleRender(); return;
+      // Pan tool: click a door to open/close it, otherwise pan the map — so the
+      // GM can move around the map while editing barriers.
+      if (state.setupTool === "pan") {
+        var dp = doorAt(p.x, p.y);
+        if (dp >= 0) { emit("doorclick", { index: dp }); return; }
+        drag = { mode: "pan", sx: p.x, sy: p.y, offX: state.cam.offX, offY: state.cam.offY };
+        return;
       }
-      if (state.setupTool === "lock") {
-        var di = doorAt(p.x, p.y);
-        if (di >= 0) {
-          var d = state.map.doors[di];
-          // cycle a door: open -> closed -> locked -> open
-          if (!d.closed && !d.locked) { d.closed = true; }
-          else if (d.closed && !d.locked) { d.locked = true; }
-          else { d.closed = false; d.locked = false; }
-          emit("map", state.map);
-        }
+      // Erase tool ONLY erases (a plain click no longer erases under a draw tool).
+      if (state.setupTool === "erase") {
+        if (removeSegNear(wx, wy)) emit("map", state.map);
         scheduleRender(); return;
       }
       // wall | window | door -> start dragging out a barrier
@@ -669,17 +676,17 @@
       if (pinch && activePointers().length < 2) { pinch = null; drag = null; }
       if (drag && drag.mode === "seg") {
         var len = Math.hypot(drag.x2 - drag.x1, drag.y2 - drag.y1);
-        if (len < (state.map.ppg || 70) * 0.3) {
-          removeSegNear(drag.x1, drag.y1); // a click (no real drag) erases nearest
-        } else if (drag.kind === "window") {
-          state.map.windows.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
-        } else if (drag.kind === "door") {
-          state.map.doors.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2, closed: true, locked: false });
-        } else {
-          state.map.walls.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
+        // A too-short drag is just a mis-click — cancel it (no erase). Erasing is
+        // only ever the Erase tool now, so a stray click can't delete a barrier.
+        if (len >= (state.map.ppg || 70) * 0.3) {
+          if (drag.kind === "window") state.map.windows.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
+          else if (drag.kind === "door") state.map.doors.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2, closed: true, locked: false });
+          else state.map.walls.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
+          bumpGeom();
+          emit("map", state.map);
         }
         state.segDraft = null;
-        emit("map", state.map); scheduleRender();
+        scheduleRender();
       } else if (drag && drag.mode === "move" && state.collide) {
         // Snap to grid on drop, but only if the snapped square is reachable
         // without crossing a barrier — otherwise keep the clamped position.
@@ -742,6 +749,9 @@
 
     function setMap(fields) {
       state.map = Object.assign(state.map, fields);
+      // Any map change may swap the wall/window/door arrays wholesale — invalidate
+      // the fog cache even if counts happen to match.
+      if (fields && (fields.walls || fields.windows || fields.doors || "ppg" in fields || "widthPx" in fields)) bumpGeom();
       scheduleRender();
     }
 
@@ -801,6 +811,8 @@
         light: typeof spec.light === "number" ? spec.light : 6, // cells of bright light (30ft torch)
         hp: spec.hp || null,
         hidden: !!spec.hidden, // GM-only: not drawn for players, ghosted for GM
+        ring: !!spec.ring,     // optional colored outline (off by default)
+        ringColor: spec.ringColor || null,
       };
       state.tokens.push(t);
       if (t.imageUrl) loadImage(t.imageUrl).then(function (img) { t.image = img; scheduleRender(); }, function () {});
@@ -837,7 +849,7 @@
             id: t.id, name: t.name, imageUrl: t.imageUrl,
             x: t.x, y: t.y, w: t.w, h: t.h, rot: t.rot,
             ownerId: t.ownerId, characterDocId: t.characterDocId,
-            isViewer: t.isViewer, color: t.color, light: t.light, hp: t.hp, hidden: t.hidden,
+            isViewer: t.isViewer, color: t.color, light: t.light, hp: t.hp, hidden: t.hidden, ring: t.ring, ringColor: t.ringColor,
           };
         }),
         fog: { enabled: state.fog.enabled, opacity: state.fog.opacity },
@@ -947,7 +959,7 @@
         t.name = spec.name; t.x = spec.x; t.y = spec.y; t.w = spec.w; t.h = spec.h;
         t.rot = spec.rot || 0; t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
         t.isViewer = !!spec.isViewer; t.color = spec.color || t.color;
-        t.light = spec.light; t.hp = spec.hp; t.hidden = !!spec.hidden;
+        t.light = spec.light; t.hp = spec.hp; t.hidden = !!spec.hidden; t.ring = !!spec.ring; t.ringColor = spec.ringColor || null;
       });
       state.tokens = state.tokens.filter(function (t) { return keep[t.id]; });
       scheduleRender();
@@ -1003,7 +1015,15 @@
     });
     canvas.addEventListener("contextmenu", function (e) {
       e.preventDefault();
-      var p = localPoint(e); var t = tokenAt(p.x, p.y);
+      var p = localPoint(e);
+      // In setup mode, a right-click on a door locks/unlocks it (left-click
+      // opens/closes) — no context menu.
+      if (state.fogSetup) {
+        var di = doorAt(p.x, p.y);
+        if (di >= 0) { emit("doorlock", { index: di }); return; }
+        return; // setup mode: no token context menu
+      }
+      var t = tokenAt(p.x, p.y);
       if (t) { state.selectedId = t.id; emit("select", t); scheduleRender(); }
       emit("context", { token: t || null, sx: e.clientX, sy: e.clientY, wx: s2wX(p.x), wy: s2wY(p.y) });
     });
@@ -1020,6 +1040,7 @@
       removeToken: removeToken,
       getToken: byId,
       setHidden: function (id, on) { var t = byId(id); if (!t) return; t.hidden = !!on; scheduleRender(); emit("token", t); },
+      setRing: function (id, on, color) { var t = byId(id); if (!t) return; t.ring = !!on; if (color !== undefined) t.ringColor = color; scheduleRender(); emit("token", t); },
       select: function (id) { state.selectedId = id; emit("select", byId(id)); scheduleRender(); },
       setTool: function (t) { state.tool = t; if (t !== "ruler") state.ruler = null; try { canvas.style.cursor = cursorFor(t); } catch (e) {} scheduleRender(); emit("tool", t); },
       getTool: function () { return state.tool; },
@@ -1031,7 +1052,7 @@
       getSnap: function () { return state.snap; },
       setFogSetup: function (on) { state.fogSetup = !!on; if (!on) state.segDraft = null; scheduleRender(); },
       getFogSetup: function () { return state.fogSetup; },
-      setSetupTool: function (t) { if (["wall", "window", "door", "erase", "lock"].indexOf(t) >= 0) state.setupTool = t; },
+      setSetupTool: function (t) { if (["pan", "wall", "window", "door", "erase"].indexOf(t) >= 0) state.setupTool = t; },
       getSetupTool: function () { return state.setupTool; },
       setGm: function (b) { state.gm = !!b; scheduleRender(); },
       getGm: function () { return state.gm; },

@@ -47,10 +47,14 @@
     lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     ghost: '<path d="M12 3a7 7 0 0 0-7 7v10l2.5-2 2.5 2 2-2 2 2 2.5-2 2.5 2V10a7 7 0 0 0-7-7z"/><circle cx="9.5" cy="10" r="1"/><circle cx="14.5" cy="10" r="1"/>',
     refresh: '<path d="M4 11a8 8 0 0 1 13.4-4.4L20 9"/><path d="M20 4v5h-5"/><path d="M20 13a8 8 0 0 1-13.4 4.4L4 15"/><path d="M4 20v-5h5"/>',
+    move: '<path d="M12 3v18M3 12h18"/><path d="M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
+    circle: '<circle cx="12" cy="12" r="8"/>',
   };
   function ico(n, s) { return '<svg viewBox="0 0 24 24" width="' + (s || 20) + '" height="' + (s || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (P[n] || "") + "</svg>"; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]; }); }
   var COLORS = ["#4ea3ff", "#c8503a", "#5ac26a", "#c8a24a", "#a06ad4", "#e0863a", "#3ac6c6", "#d45a9a"];
+  var RING_COLORS = [{ n: "Gold", v: "#c8a24a" }, { n: "Red", v: "#c8503a" }, { n: "Green", v: "#5ac26a" }, { n: "Blue", v: "#4ea3ff" }, { n: "Purple", v: "#a06ad4" }, { n: "White", v: "#e6ebf2" }];
   function colorFor(id) { var h = 0; id = String(id || ""); for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return COLORS[Math.abs(h) % COLORS.length]; }
 
   injectStyles();
@@ -61,7 +65,7 @@
   board.setCanMove(function (t) { return isGM || t.ownerId === V.userId; });
   board.setGm(isGM);            // the GM sees hidden tokens (ghosted); players don't
   board.setCollision(!isGM);    // players are stopped by barriers; the GM moves freely
-  var net = null, currentScene = null, tokTimer = null;
+  var net = null, currentScene = null;
   var readout = $("vtt-readout");
   function say(h) { readout.innerHTML = h; readout.hidden = false; }
 
@@ -84,7 +88,8 @@
   board.on("open", function (e) { openSheetForToken(e.token); });
   board.on("context", function (e) { showContext(e); });
   board.on("doorclick", function (e) { handleDoor(e.index); });
-  board.on("token", function () { if (!tokTimer) tokTimer = setTimeout(function () { tokTimer = null; if (tab() === "tokens") renderTokens(); }, 120); });
+  // (Scene-token changes no longer re-render the Tokens tab — that tab is now the
+  // campaign library, which is independent of what's on the map.)
 
   window.addEventListener("keydown", function (e) {
     var el = document.activeElement, tag = el && el.tagName;
@@ -98,7 +103,10 @@
   var chars = Array.isArray(V.myCharacters) ? V.myCharacters : [];
   bind("t-sheet", function () { if (!chars.length) { say("No character sheet is linked to this campaign yet."); return; } chars.length === 1 ? openSheet(chars[0]) : pickSheet(); });
   function openSheetForToken(t) { if (chars.length === 1) openSheet(chars[0]); else if (chars.length) pickSheet(); }
-  function pickSheet() { menuAt(chars.map(function (c) { return { label: c.title || "Character", onClick: function () { openSheet(c); } }; }), window.innerWidth - 260, 60); }
+  function pickSheet() {
+    var b = $("t-sheet"), r = b ? b.getBoundingClientRect() : { right: 56, top: 60 };
+    menuAt(chars.map(function (c) { return { label: c.title || "Character", onClick: function () { openSheet(c); } }; }), r.right + 8, r.top);
+  }
   function openSheet(c) { $("sheet-title").textContent = c.title || "Character"; $("sheet-frame").src = (V.toolBase || "/tools") + "/" + encodeURIComponent(c.tool) + "/" + encodeURIComponent(c.id); $("sheetpop").hidden = false; }
   bind("sheet-close", function () { $("sheetpop").hidden = true; $("sheet-frame").src = "about:blank"; });
   bind("sheet-mode", function () {
@@ -109,44 +117,48 @@
   makeDraggable($("sheetpop"), $("sheet-head"));
 
   // ---- doors ----------------------------------------------------------------
+  // Left-click a door → open/close (both in and out of setup). Right-click a door
+  // in setup → lock/unlock (GM only).
   function handleDoor(i) {
     var d = board.getDoor(i); if (!d) return;
-    if (isGM && board.getFogSetup()) {
-      var lock = !d.locked;
-      board.setDoor(i, { locked: lock, closed: lock ? true : d.closed });
-      if (net && net.doorSync) net.doorSync(i);
-      say(lock ? "Door <b>locked</b>." : "Door unlocked.");
-      return;
-    }
     if (d.locked && !isGM) { say("That door is <b>locked</b>."); return; }
     var newClosed = !(d.closed || d.locked);
     if (isGM) { board.setDoor(i, { closed: newClosed, locked: false }); if (net && net.doorSync) net.doorSync(i); }
     else if (net && net.door) net.door(i, newClosed);
   }
+  function handleDoorLock(i) {
+    if (!isGM) return;
+    var d = board.getDoor(i); if (!d) return;
+    var lock = !d.locked;
+    board.setDoor(i, { locked: lock, closed: lock ? true : d.closed });
+    if (net && net.doorSync) net.doorSync(i);
+    say(lock ? "Door <b>locked</b>." : "Door unlocked.");
+  }
+  board.on("doorlock", function (e) { handleDoorLock(e.index); });
 
   // ---- GM controls ----------------------------------------------------------
   if (isGM) {
     bind("side-toggle", function () { toggleSide(); });
-    bind("side-close", function () { toggleSide(false); });
     // tabs
     mount.querySelectorAll(".vtt-tab").forEach(function (b) { b.addEventListener("click", function () { selectTab(b.dataset.tab); }); });
-    // map
+    // map controls (live inside the scene-editor popup)
     bind("m-load", function () { $("m-file").click(); });
-    $("m-file").onchange = function (e) { var f = e.target.files[0]; if (!f) return; board.loadFile(f).then(function () { say("Map loaded: <b>" + esc(f.name) + "</b>"); }, function (err) { say("<b>Load failed:</b> " + esc(err.message)); }); e.target.value = ""; };
+    $("m-file").onchange = function (e) { var f = e.target.files[0]; if (!f) return; board.loadFile(f).then(function () { seMapName(f.name); }, function (err) { say("<b>Load failed:</b> " + esc(err.message)); }); e.target.value = ""; };
     bind("m-url", function () {
       var u = prompt("Direct image URL (must be a direct link to the image file, from a host that allows embedding — e.g. GitHub 'raw', a Discord CDN link, imgur direct):");
       if (!u) return;
-      board.loadImageMap(u.trim(), parseInt($("m-ppg").value, 10) || 70, "url").then(function () { say("Map loaded from link."); }, function () {
-        // The browser reports a cross-origin/blocked image the same as a genuine
-        // 404, so give the most common cause + the reliable fallback.
-        say("<b>Couldn’t load that link.</b> Either it isn’t a direct image URL, or the host doesn’t allow other sites to embed its images (CORS). Try a direct link from a host that does — or just use <b>Map / UVTT</b> to upload the file, which always works.");
+      board.loadImageMap(u.trim(), parseInt($("m-ppg").value, 10) || 70, "url").then(function () { seMapName("Linked image"); }, function () {
+        say("<b>Couldn’t load that link.</b> Either it isn’t a direct image URL, or the host doesn’t allow other sites to embed its images (CORS). Try a direct link from a host that does — or use <b>Upload</b>, which always works.");
       });
     });
     $("m-ppg").onchange = function () { board.setPpg(parseInt(this.value, 10) || 70); };
     $("m-fpc").onchange = function () { board.setFeetPerCell(parseFloat(this.value) || 5); };
-    bind("sc-new", function () { board.loadScene({ kind: "dcc-vtt-scene", version: 1, name: "New scene", map: {}, tokens: [] }); currentScene = null; setSceneName(); });
-    bind("sc-save", saveScene);
-    // fog panel
+    // scene editor
+    bind("sc-new", function () { openEditor(null); });
+    bind("se-close", closeEditor);
+    bind("se-save", saveEditor);
+    bind("se-del", function () { if (editId && confirm("Delete this scene?")) { delScene(editId); closeEditor(); } });
+    // settings panel
     fbtn("f-fog", function (on) { board.setFog(on); say(on ? "Fog on — players see only what their tokens can." : "Fog off."); });
     fbtn("f-reveal", function (on) { board.setShowAll(on); }, true);
     fbtn("f-dark", function (on) { board.setDark(on); say(on ? "Dark map — tokens see only as far as their light." : "Map lit — full line of sight."); });
@@ -154,27 +166,27 @@
     fbtn("f-setup", function (on) {
       board.setFogSetup(on);
       var bar = $("setupbar"); if (bar) bar.hidden = !on;
-      if (on) { setSetupTool("wall"); say(setupHint("wall")); } else say("");
+      if (on) { setSetupTool("pan"); say(setupHint("pan")); } else say("");
     });
     $("f-op").oninput = function () { board.setFogOpacity(parseInt(this.value, 10) / 100); };
-    // setup toolbar (walls / windows / doors / erase / lock)
-    ["wall", "window", "door", "erase", "lock"].forEach(function (k) {
+    // setup toolbar (pan / walls / windows / doors / erase)
+    ["pan", "wall", "window", "door", "erase"].forEach(function (k) {
       bind("su-" + k, function () { setSetupTool(k); say(setupHint(k)); });
     });
-    // token add
-    bind("tok-add", function () { pendingDrop = null; $("tk-file").click(); });
+    // token library
+    bind("tok-add", function () { $("lib-file").click(); });
   }
 
   function setSetupTool(k) {
     board.setSetupTool(k);
-    ["wall", "window", "door", "erase", "lock"].forEach(function (x) { var b = $("su-" + x); if (b) b.classList.toggle("on", x === k); });
+    ["pan", "wall", "window", "door", "erase"].forEach(function (x) { var b = $("su-" + x); if (b) b.classList.toggle("on", x === k); });
   }
   function setupHint(k) {
-    if (k === "window") return "<b>Window:</b> drag to draw a see-through barrier (blocks movement, not sight). Short click erases.";
-    if (k === "door") return "<b>Door:</b> drag to place a door (starts closed). Short click erases.";
+    if (k === "pan") return "<b>Pan:</b> drag to move the map · left-click a door to open/close · right-click a door to lock/unlock.";
+    if (k === "window") return "<b>Window:</b> drag to draw a see-through barrier (blocks movement, not sight).";
+    if (k === "door") return "<b>Door:</b> drag to place a door (starts closed).";
     if (k === "erase") return "<b>Erase:</b> click a wall, window or door to remove it.";
-    if (k === "lock") return "<b>Lock:</b> click a door to cycle it open → closed → locked.";
-    return "<b>Wall:</b> drag to draw a solid barrier (blocks movement and sight). Short click erases.";
+    return "<b>Wall:</b> drag to draw a solid barrier (blocks movement and sight).";
   }
 
   // ---- live sync ------------------------------------------------------------
@@ -224,57 +236,105 @@
   function loadSceneList() {
     var el = $("scene-list"); if (!el) return;
     fetch(V.sceneBase + "?campaignId=" + encodeURIComponent(V.campaignId), { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : { scenes: [] }; }).then(function (d) {
-      if (!d.scenes || !d.scenes.length) { el.innerHTML = '<div class="vtt-empty">No saved scenes yet. Load a map, then <b>Save</b>.</div>'; return; }
+      if (!d.scenes || !d.scenes.length) { el.innerHTML = '<div class="vtt-empty">No scenes yet. <b>New scene</b> to create one.</div>'; return; }
       el.innerHTML = d.scenes.map(function (s) {
         var th = getThumb(s.id), active = currentScene && currentScene.id === s.id;
-        return '<div class="vtt-scene' + (active ? " active" : "") + '" data-id="' + s.id + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + '</div><button class="vtt-mini rn" title="Rename">' + ico("pencil", 14) + '</button><button class="vtt-mini del" title="Delete">' + ico("trash", 14) + "</button></div>";
+        return '<div class="vtt-scene' + (active ? " active" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
       }).join("");
       el.querySelectorAll(".vtt-scene").forEach(function (row) {
         var id = row.dataset.id;
         row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; loadSceneById(id); });
-        row.querySelector(".del").onclick = function (e) { e.stopPropagation(); if (confirm("Delete this scene?")) delScene(id); };
-        row.querySelector(".rn").onclick = function (e) { e.stopPropagation(); renameScene(id, row.querySelector(".vtt-scene-name").textContent); };
+        row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openEditor({ id: id, title: row.dataset.title }); };
       });
     });
   }
-  function loadSceneById(id) { fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) { if (!doc) return; Promise.resolve(board.loadScene(doc.data)).then(function () { saveThumb(id); }); currentScene = { id: doc.id, title: doc.title }; rememberScene(id); setSceneName(); loadSceneList(); say("Scene: <b>" + esc(doc.title) + "</b>"); }); }
-  function saveScene() {
-    var data = board.toScene(currentScene ? currentScene.title : "Scene");
-    if (currentScene) { fetch(V.sceneBase + "/" + currentScene.id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: data.name, data: data }) }).then(function (r) { if (r.ok) { saveThumb(currentScene.id); say("Saved <b>" + esc(data.name) + "</b>"); loadSceneList(); } else say("<b>Save failed</b>"); }); }
-    else { var name = prompt("Name this scene:", "Scene"); if (!name) return; data.name = name; fetch(V.sceneBase, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, title: name, data: data }) }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && d.scene) { currentScene = { id: d.scene.id, title: d.scene.title }; rememberScene(currentScene.id); saveThumb(currentScene.id); setSceneName(); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); } else say("<b>Save failed</b>"); }); }
-  }
-  function renameScene(id, cur) { var name = prompt("Rename scene:", cur); if (!name) return; fetch(V.sceneBase + "/" + id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: name }) }).then(function () { if (currentScene && currentScene.id === id) { currentScene.title = name; setSceneName(); } loadSceneList(); }); }
+  function loadSceneById(id, cb) { return fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) { if (!doc) return; return Promise.resolve(board.loadScene(doc.data)).then(function () { saveThumb(id); currentScene = { id: doc.id, title: doc.title }; rememberScene(id); setSceneName(); loadSceneList(); say("Scene: <b>" + esc(doc.title) + "</b>"); if (cb) cb(doc); }); }); }
   function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (currentScene && currentScene.id === id) { currentScene = null; setSceneName(); } loadSceneList(); }); }
-  function setSceneName() { var l = $("scene-cur"); if (l) l.textContent = currentScene ? currentScene.title : "Unsaved scene"; }
+  function setSceneName() { var b = $("scene-badge"); if (!b) return; if (currentScene && currentScene.title) { b.textContent = currentScene.title; b.hidden = false; } else { b.textContent = ""; b.hidden = true; } }
 
-  // ---- tokens panel ---------------------------------------------------------
+  // ---- scene editor popup (#3) ----------------------------------------------
+  var editId = null;
+  function seMapName(name) { var el = $("se-mapname"); if (el) el.innerHTML = name ? (ico("upload", 14) + " " + esc(name)) : ""; }
+  function openEditor(scene) {
+    editId = scene && scene.id ? scene.id : null;
+    $("se-h").textContent = editId ? "Edit scene" : "New scene";
+    $("se-del").hidden = !editId;
+    seMapName("");
+    var finish = function () {
+      $("se-name").value = currentScene ? currentScene.title : (scene && scene.title ? scene.title : "");
+      $("m-ppg").value = board.state.map.ppg || 70;
+      $("m-fpc").value = board.state.feetPerCell || 5;
+      if (board.state.map.src) seMapName(board.state.map.srcType === "url" ? "Linked image" : "Loaded map");
+      $("scene-editor").hidden = false;
+    };
+    if (editId) { loadSceneById(editId).then(finish); }
+    else { board.loadScene({ kind: "dcc-vtt-scene", version: 1, name: "New scene", map: {}, tokens: [] }); currentScene = null; setSceneName(); finish(); }
+  }
+  function closeEditor() { $("scene-editor").hidden = true; }
+  function saveEditor() {
+    var name = ($("se-name").value || "").trim() || "Scene";
+    var data = board.toScene(name);
+    if (editId) {
+      fetch(V.sceneBase + "/" + editId, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: name, data: data }) })
+        .then(function (r) { if (r.ok) { saveThumb(editId); currentScene = { id: editId, title: name }; setSceneName(); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); closeEditor(); } else say("<b>Save failed</b>"); });
+    } else {
+      fetch(V.sceneBase, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, title: name, data: data }) })
+        .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          if (d && d.scene) { currentScene = { id: d.scene.id, title: d.scene.title }; rememberScene(currentScene.id); saveThumb(currentScene.id); setSceneName(); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); closeEditor(); }
+          else say("<b>Save failed</b>");
+        });
+    }
+  }
+
+  // ---- token library (#4) — a persisted, per-campaign set of tokens ---------
+  // The library is separate from what's ON the scene: "Place" drops a copy on the
+  // map; removing a token from the map (Delete / right-click) never touches the
+  // library, and adding to the library never touches the scene.
+  var library = [], libSaveTimer = null;
+  function libUid() { return "lt" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function loadLibrary() {
+    if (!V.tokenBase) return;
+    fetch(V.tokenBase + "?campaignId=" + encodeURIComponent(V.campaignId), { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : { tokens: [] }; })
+      .then(function (d) { library = (d && Array.isArray(d.tokens)) ? d.tokens : []; if (tab() === "tokens") renderTokens(); })
+      .catch(function () {});
+  }
+  function saveLibrary() {
+    if (!V.tokenBase) return;
+    if (libSaveTimer) clearTimeout(libSaveTimer);
+    libSaveTimer = setTimeout(function () {
+      libSaveTimer = null;
+      fetch(V.tokenBase, { method: "PUT", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, tokens: library }) }).catch(function () {});
+    }, 400);
+  }
+  function addToLibrary(name, imageUrl) { library.push({ id: libUid(), name: name, imageUrl: imageUrl }); saveLibrary(); if (tab() === "tokens") renderTokens(); }
   function renderTokens() {
     var el = $("token-list"); if (!el) return;
-    var toks = board.state.tokens;
-    if (!toks.length) { el.innerHTML = '<div class="vtt-empty">No tokens yet. <b>Add token</b> or drag an image onto the map.</div>'; return; }
-    el.innerHTML = toks.map(function (t) {
-      var sel = t.id === board.state.selectedId;
-      var av = t.imageUrl ? '<img src="' + esc(t.imageUrl) + '" alt="">' : '<span class="vtt-swatch" style="background:' + (t.color || "#c8a24a") + '"></span>';
-      var who = t.ownerId === V.userId ? "GM" : (t.ownerId ? "player" : "");
-      var sub = [who, t.isViewer ? "sees fog" : "", t.hidden ? "hidden" : ""].filter(Boolean).join(" · ");
-      var hideBtn = isGM ? '<button class="vtt-mini hide' + (t.hidden ? " on" : "") + '" title="' + (t.hidden ? "Show to players" : "Hide from players") + '">' + ico(t.hidden ? "eyeoff" : "eye", 14) + "</button>" : "";
-      return '<div class="vtt-trow' + (sel ? " active" : "") + (t.hidden ? " hidden-tok" : "") + '" data-id="' + t.id + '"><div class="vtt-tav">' + av + '</div><div class="vtt-tinfo"><div class="vtt-tname">' + esc(t.name || "Token") + '</div>' + (sub ? '<div class="vtt-tsub">' + sub + "</div>" : "") + "</div>" + hideBtn + '<button class="vtt-mini copy" title="Place another copy on the map">' + ico("copy", 14) + '</button><button class="vtt-mini del" title="Delete">' + ico("trash", 14) + "</button></div>";
+    if (!library.length) { el.innerHTML = '<div class="vtt-empty">Your token library is empty. <b>Add token to library</b> to build a reusable set for this campaign.</div>'; return; }
+    el.innerHTML = library.map(function (lt) {
+      var av = lt.imageUrl ? '<img src="' + esc(lt.imageUrl) + '" alt="">' : '<span class="vtt-swatch" style="background:#c8a24a"></span>';
+      return '<div class="vtt-trow" data-id="' + lt.id + '"><div class="vtt-tav">' + av + '</div><div class="vtt-tinfo"><div class="vtt-tname">' + esc(lt.name || "Token") + '</div></div><button class="vtt-mini place" title="Place a copy on the map">' + ico("plus", 14) + '</button><button class="vtt-mini rn" title="Rename">' + ico("pencil", 14) + '</button><button class="vtt-mini del" title="Remove from library">' + ico("trash", 14) + "</button></div>";
     }).join("");
     el.querySelectorAll(".vtt-trow").forEach(function (row) {
-      var id = row.dataset.id;
-      row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; board.select(id); board.centerOn(id); renderTokens(); });
-      var hb = row.querySelector(".hide"); if (hb) hb.onclick = function (e) { e.stopPropagation(); var tk = board.getToken(id); board.setHidden(id, !(tk && tk.hidden)); if (net) net.pushTokens(); renderTokens(); };
-      row.querySelector(".copy").onclick = function (e) { e.stopPropagation(); placeCopy(id); };
-      row.querySelector(".del").onclick = function (e) { e.stopPropagation(); board.removeToken(id); if (net) net.pushTokens(); renderTokens(); };
+      var id = row.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
+      row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; placeFromLibrary(lt); });
+      row.querySelector(".place").onclick = function (e) { e.stopPropagation(); placeFromLibrary(lt); };
+      row.querySelector(".rn").onclick = function (e) { e.stopPropagation(); var n = prompt("Token name:", lt.name || ""); if (n != null) { lt.name = n.trim() || lt.name; saveLibrary(); renderTokens(); } };
+      row.querySelector(".del").onclick = function (e) { e.stopPropagation(); library = library.filter(function (x) { return x.id !== id; }); saveLibrary(); renderTokens(); };
     });
   }
-  // Place another instance of an existing token (same image) on the map.
+  function placeFromLibrary(lt) {
+    var g = board.state.map.ppg || 70;
+    var t = board.addToken({ imageUrl: lt.imageUrl, name: lt.name, w: lt.w || g, h: lt.h || g });
+    if (net) net.pushTokens(); board.select(t.id); board.centerOn(t.id);
+    say("Placed <b>" + esc(lt.name || "token") + "</b> on the map.");
+  }
+  // Place another instance of an existing SCENE token (right-click "Place copy").
   function placeCopy(id) {
     var t = board.getToken(id); if (!t) return;
     var c = clone(t); c.id = null; c.x += (board.state.map.ppg || 70);
-    var nt = board.addToken(c); if (net) net.pushTokens(); board.select(nt.id); board.centerOn(nt.id); renderTokens();
+    var nt = board.addToken(c); if (net) net.pushTokens(); board.select(nt.id); board.centerOn(nt.id);
   }
-  board.on("select", function () { if (tab() === "tokens") renderTokens(); });
 
   // ---- token context menu ---------------------------------------------------
   var pendingDrop = null;
@@ -291,6 +351,9 @@
         items.push({ label: (t.isViewer ? "✓ " : "") + "Sees fog (viewer)", onClick: function () { t.isViewer = !t.isViewer; board.render(); if (net) net.pushTokens(); } });
         items.push({ label: "Light (in the dark)", sub: [{ ft: 0, l: "None" }, { ft: 20 }, { ft: 40 }, { ft: 60 }, { ft: 90 }].map(function (o) { var fpc = board.state.feetPerCell || 5, cells = o.ft / fpc; return { label: (o.l || o.ft + " ft") + (Math.abs((t.light || 0) - cells) < 0.01 ? "  ✓" : ""), onClick: function () { t.light = cells; board.render(); if (net) net.pushTokens(); } }; }) });
         items.push({ label: (t.hidden ? "✓ " : "") + "Hide from players", onClick: function () { board.setHidden(t.id, !t.hidden); if (net) net.pushTokens(); say(t.hidden ? "Token <b>hidden</b> from players." : "Token visible to players."); } });
+        var ringSub = [{ label: (!t.ring ? "✓ " : "") + "Off", onClick: function () { board.setRing(t.id, false); if (net) net.pushTokens(); } }];
+        RING_COLORS.forEach(function (c) { ringSub.push({ label: (t.ring && (t.ringColor || t.color) === c.v ? "✓ " : "") + c.n, onClick: function () { board.setRing(t.id, true, c.v); if (net) net.pushTokens(); } }); });
+        items.push({ label: (t.ring ? "✓ " : "") + "Ring", sub: ringSub });
         items.push({ label: "Place copy", onClick: function () { placeCopy(t.id); } });
         items.push({ sep: true });
         items.push({ label: "Delete", danger: true, onClick: function () { board.removeToken(t.id); if (net) net.pushTokens(); } });
@@ -301,20 +364,28 @@
     if (items.length) menuAt(items, e.sx, e.sy);
   }
   function assign(t, id) { t.ownerId = id; t.color = id ? colorFor(id) : "#c8a24a"; board.render(); if (net) net.pushTokens(); }
-  function clone(o) { return JSON.parse(JSON.stringify({ name: o.name, imageUrl: o.imageUrl, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot, ownerId: o.ownerId, characterDocId: o.characterDocId, isViewer: o.isViewer, color: o.color, light: o.light, hp: o.hp, hidden: o.hidden })); }
+  function clone(o) { return JSON.parse(JSON.stringify({ name: o.name, imageUrl: o.imageUrl, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot, ownerId: o.ownerId, characterDocId: o.characterDocId, isViewer: o.isViewer, color: o.color, light: o.light, hp: o.hp, hidden: o.hidden, ring: o.ring, ringColor: o.ringColor })); }
   // Generic browser filenames (download.png, image, IMG_1234, screenshot…) make
   // lousy token names — fall back to "Token N" instead.
-  function tokenName(fname) {
+  function tokenName(fname, n) {
     var base = (fname || "").replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim();
-    if (!base || /^(download|image|untitled|unnamed|photo|screenshot|clipboard|dfclip)\b/i.test(base) || /^img\s?\d*$/i.test(base)) return "Token " + (board.state.tokens.length + 1);
+    if (!base || /^(download|image|untitled|unnamed|photo|screenshot|clipboard|dfclip)\b/i.test(base) || /^img\s?\d*$/i.test(base)) return "Token " + (n || 1);
     return base.charAt(0).toUpperCase() + base.slice(1);
   }
 
   if (isGM) {
+    // Right-click "Add token here" → place a one-off SCENE token at that spot.
     $("tk-file").onchange = function (e) {
       var f = e.target.files[0]; if (!f) return; var where = pendingDrop; pendingDrop = null;
       var rd = new FileReader();
-      rd.onload = function () { var sx = where ? where.sx : window.innerWidth / 2, sy = where ? where.sy : window.innerHeight / 2; var t = board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name) }, sx, sy); if (net) net.pushTokens(); board.select(t.id); if (tab() === "tokens") renderTokens(); };
+      rd.onload = function () { var sx = where ? where.sx : window.innerWidth / 2, sy = where ? where.sy : window.innerHeight / 2; var t = board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name, board.state.tokens.length + 1) }, sx, sy); if (net) net.pushTokens(); board.select(t.id); };
+      rd.readAsDataURL(f); e.target.value = "";
+    };
+    // "Add token to library" → add to the campaign library (not the scene).
+    $("lib-file").onchange = function (e) {
+      var f = e.target.files[0]; if (!f) return;
+      var rd = new FileReader();
+      rd.onload = function () { addToLibrary(tokenName(f.name, library.length + 1), rd.result); };
       rd.readAsDataURL(f); e.target.value = "";
     };
   }
@@ -347,10 +418,10 @@
   stage.addEventListener("drop", function (e) {
     if (!isGM) return; e.preventDefault();
     var files = (e.dataTransfer && e.dataTransfer.files) || []; var n = 0;
-    Array.prototype.forEach.call(files, function (f) { if (!/^image\//.test(f.type)) return; var rd = new FileReader(); rd.onload = function () { board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name) }, e.clientX + (n++) * 8, e.clientY); if (net) net.pushTokens(); if (tab() === "tokens") renderTokens(); }; rd.readAsDataURL(f); });
+    Array.prototype.forEach.call(files, function (f) { if (!/^image\//.test(f.type)) return; var rd = new FileReader(); rd.onload = function () { board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name, board.state.tokens.length + 1) }, e.clientX + (n++) * 8, e.clientY); if (net) net.pushTokens(); }; rd.readAsDataURL(f); });
   });
 
-  startNet(); setTool("select"); if (isGM) { setSceneName(); autoLoadLast(); }
+  startNet(); setTool("select"); if (isGM) { setSceneName(); loadLibrary(); autoLoadLast(); }
 
   // ---- shell + styles -------------------------------------------------------
   function rb(id, name, label, on) { return '<button class="vtt-tbtn' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name) + "</button>"; }
@@ -358,34 +429,40 @@
   function subtn(id, name, label, on) { return '<button class="vtt-sub-t' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name, 17) + "<span>" + label + "</span></button>"; }
   function shell() {
     var rail = rb("t-select", "select", "Select / move  (V)", true) + rb("t-ruler", "ruler", "Measure  (R)") + rb("t-pointer", "ping", "Ping  (P)") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
-    var top = '<div class="vtt-top"><a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a><div class="vtt-title">' + esc(V.campaignName || "Tabletop") + "</div></div>" +
+    var top = '<div class="vtt-top"><a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a><div class="vtt-title">' + esc(V.campaignName || "Tabletop") + '</div><span class="vtt-scene-badge" id="scene-badge" hidden></span></div>' +
       '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (!isGM ? '<button class="vtt-tbtn" id="conn-retry" title="Reconnect to your GM" hidden>' + ico("refresh", 18) + "</button>" : "") + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
-    var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden><div class="vtt-side-head"><span>Table</span><button class="vtt-mini" id="side-close">' + ico("close", 16) + "</button></div>" +
-      '<div class="vtt-tabs">' + tabBtn("scenes", "layers", "Scenes", true) + tabBtn("tokens", "token", "Tokens") + tabBtn("fog", "fog", "Fog") + tabBtn("players", "players", "Players") + "</div>" +
-      // scenes
-      '<div class="vtt-panel" data-panel="scenes"><div class="vtt-sec-h">Map</div>' +
-      '<div class="vtt-row"><button class="vtt-btn" id="m-load">' + ico("upload", 15) + ' Map / UVTT</button><button class="vtt-btn ghost" id="m-url">' + ico("link", 15) + " Link</button></div>" +
-      '<div class="vtt-row small"><label>Grid px <input type="number" id="m-ppg" min="4" value="70"></label><label>ft/sq <input type="number" id="m-fpc" min="1" value="5"></label></div>' +
-      '<div class="vtt-sec-h" style="margin-top:12px">Scenes <span class="vtt-cur" id="scene-cur">Unsaved scene</span></div>' +
-      '<div class="vtt-row"><button class="vtt-btn" id="sc-new">' + ico("plus", 15) + ' New</button><button class="vtt-btn" id="sc-save">Save current</button></div>' +
+    var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden>' +
+      '<div class="vtt-tabs">' + tabBtn("scenes", "layers", "Scenes", true) + tabBtn("tokens", "token", "Tokens") + tabBtn("settings", "gear", "Settings") + tabBtn("players", "players", "Players") + "</div>" +
+      // scenes: just New + the list (each row has an Edit button -> editor popup)
+      '<div class="vtt-panel" data-panel="scenes"><div class="vtt-row"><button class="vtt-btn" id="sc-new">' + ico("plus", 15) + ' New scene</button></div>' +
       '<div class="vtt-scene-list" id="scene-list"></div></div>' +
-      // tokens
-      '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div><div class="vtt-hint2">Tip: drag an image straight onto the map.</div><div class="vtt-token-list" id="token-list"></div></div>' +
-      // fog
-      '<div class="vtt-panel" data-panel="fog" hidden>' +
+      // tokens: campaign token library (decoupled from the scene)
+      '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token to library</button></div><div class="vtt-hint2">Your campaign token library. <b>Place</b> drops a copy on the map; removing a token from the map doesn’t delete it here.</div><div class="vtt-token-list" id="token-list"></div></div>' +
+      // settings
+      '<div class="vtt-panel" data-panel="settings" hidden>' +
       frow("f-fog", "fog", "Fog of war") + frow("f-reveal", "eye", "GM reveal (see through fog)", true) + frow("f-dark", "light", "Dynamic lighting (dark map)") + frow("f-snap", "snap", "Snap tokens to grid", true) + frow("f-setup", "wrench", "Setup mode (edit walls, windows & doors)") +
-      '<div class="vtt-row small" style="margin-top:8px"><label style="flex:1">Darkness <input type="range" id="f-op" min="40" max="100" value="90"></label></div>' +
-      '<div class="vtt-hint2">' + ico("wall", 15) + ' In <b>setup mode</b> a toolbar appears at the top: pick <b>Wall</b> (blocks sight + movement), <b>Window</b> (blocks movement, see-through), <b>Door</b>, <b>Erase</b>, or <b>Lock</b>, then drag on the map. A short click erases the nearest barrier.</div>' +
-      '<div class="vtt-hint2">' + ico("door", 15) + ' Outside setup, doors show an icon on the map — click to open/close. Players and their tokens can’t cross walls, windows or shut doors (you can drag a token past them yourself).</div>' +
-      '<div class="vtt-hint2">' + ico("ghost", 15) + ' <b>Hide a token</b> from players via its right-click menu or the eye button in the Tokens list — hidden tokens show ghosted to you and vanish for players.</div>' +
-      '<div class="vtt-hint2">' + ico("light", 15) + ' <b>Dynamic lighting</b>: in the dark, a token sees only as far as its light — set a token’s light from its right-click menu.</div></div>' +
+      '<div class="vtt-row small" style="margin-top:8px"><label style="flex:1">Darkness <input type="range" id="f-op" min="40" max="100" value="90"></label></div></div>' +
       // players
       '<div class="vtt-panel" data-panel="players" hidden><div id="players"></div></div></div>';
     var zoom = '<div class="vtt-zoom"><button class="vtt-tbtn" id="z-in" title="Zoom in">' + ico("zin") + '</button><button class="vtt-tbtn" id="z-fit" title="Fit map">' + ico("fit") + '</button><button class="vtt-tbtn" id="z-out" title="Zoom out">' + ico("zout") + "</button></div>";
-    var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="tk-file" accept="image/*" hidden>' : "";
-    var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden><span class="vtt-setupbar-t">Barriers</span>' +
-      subtn("su-wall", "wall", "Wall", true) + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + subtn("su-lock", "lock", "Lock") + "</div>";
-    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + inputs + "</div>";
+    var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="tk-file" accept="image/*" hidden><input type="file" id="lib-file" accept="image/*" hidden>' : "";
+    var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden><span class="vtt-setupbar-t">Setup</span>' +
+      subtn("su-pan", "move", "Pan", true) + subtn("su-wall", "wall", "Wall") + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + "</div>";
+    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + (isGM ? sceneEditor() : "") + inputs + "</div>";
+  }
+  // Scene editor popup — create/edit a scene's map, grid and name (#3).
+  function sceneEditor() {
+    return '<div id="scene-editor" class="vtt-modal" hidden><div class="vtt-modal-box">' +
+      '<div class="vtt-modal-head"><span id="se-h">New scene</span><button class="vtt-mini" id="se-close">' + ico("close", 16) + "</button></div>" +
+      '<div class="vtt-modal-body">' +
+      '<label class="vtt-field"><span>Scene name</span><input type="text" id="se-name" placeholder="e.g. The Sunless Citadel"></label>' +
+      '<div class="vtt-field-l">Map</div>' +
+      '<div class="vtt-row"><button class="vtt-btn" id="m-load">' + ico("upload", 15) + ' Upload UVTT / image</button><button class="vtt-btn ghost" id="m-url">' + ico("link", 15) + " Link</button></div>" +
+      '<div id="se-mapname" class="vtt-hint2"></div>' +
+      '<div class="vtt-row small"><label>Grid px <input type="number" id="m-ppg" min="4" value="70"></label><label>ft / square <input type="number" id="m-fpc" min="1" value="5"></label></div>' +
+      "</div>" +
+      '<div class="vtt-modal-foot"><button class="vtt-btn danger" id="se-del">' + ico("trash", 15) + " Delete</button><span style=\"flex:1\"></span><button class=\"vtt-btn primary\" id=\"se-save\">Save scene</button></div>" +
+      "</div></div>";
   }
   function tabBtn(name, icon, label, on) { return '<button class="vtt-tab' + (on ? " on" : "") + '" data-tab="' + name + '">' + ico(icon, 16) + "<span>" + label + "</span></button>"; }
   function sheetPop() { return '<div id="sheetpop" class="vtt-sheetpop" hidden><div class="vtt-sheet-head" id="sheet-head"><span id="sheet-title">Character</span><span style="flex:1"></span><button class="vtt-mini" id="sheet-mode" title="Switch to desktop size">' + ico("desktop", 16) + '</button><button class="vtt-mini" id="sheet-close">' + ico("close", 16) + '</button></div><iframe id="sheet-frame" title="Character sheet"></iframe></div>'; }
@@ -413,6 +490,7 @@
       ".vtt-top.right,.vtt-zoom{transition:right .18s ease}",
       "#vtt-root.side-open .vtt-top.right{right:312px}#vtt-root.side-open .vtt-zoom{right:312px}",
       ".vtt-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:17px;background:rgba(11,13,16,.8);padding:6px 12px;border-radius:8px;border:1px solid #2a323d}",
+      ".vtt-scene-badge{font:600 13px/1 'Montserrat',system-ui,sans-serif;color:#c8a24a;background:rgba(11,13,16,.8);padding:7px 11px;border-radius:8px;border:1px solid #2a323d;max-width:34vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
       ".vtt-zoom{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:7px;z-index:20}",
       ".vtt-readout{position:absolute;left:64px;bottom:14px;max-width:min(560px,60vw);background:rgba(11,13,16,.9);border:1px solid #2a323d;border-radius:8px;padding:7px 12px;font-size:12px;color:#8b97a7;z-index:15}.vtt-readout b{color:#e6ebf2}",
       ".vtt-dot{width:11px;height:11px;border-radius:50%;display:inline-block;flex:0 0 auto}.vtt-dot.live{background:#5ac26a;box-shadow:0 0 8px rgba(90,194,106,.6)}.vtt-dot.wait{background:#d8b24a}.vtt-dot.bad{background:#c8503a;box-shadow:0 0 8px rgba(200,80,58,.6)}",
@@ -456,6 +534,15 @@
       ".vtt-sheetpop.wide{width:min(1120px,96vw);height:92vh;top:4vh;right:2vw;left:auto}",
       ".vtt-sheet-head{display:flex;align-items:center;gap:6px;padding:9px 12px;background:#1b212a;cursor:move;font-weight:700}",
       ".vtt-sheetpop iframe{border:0;flex:1;width:100%;background:#fff}",
+      ".vtt-modal{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(4,5,7,.55)}",
+      ".vtt-modal-box{width:min(460px,94vw);max-height:90vh;background:#14181e;border:1px solid #2a323d;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}",
+      ".vtt-modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #2a323d;font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#c8a24a;font-size:15px}",
+      ".vtt-modal-body{padding:14px;overflow:auto}",
+      ".vtt-modal-foot{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid #2a323d}",
+      ".vtt-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;font-size:12px;color:#8b97a7}.vtt-field input{background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:6px;padding:8px 10px;font-size:14px}",
+      ".vtt-field-l{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8b97a7;margin:4px 0 8px}",
+      ".vtt-btn.primary{flex:0 0 auto;padding:8px 18px;background:#c8a24a;color:#14181e;border-color:#c8a24a}.vtt-btn.primary:hover{background:#d8b25a}",
+      ".vtt-btn.danger{flex:0 0 auto;color:#f0a8a3;border-color:#5a2f2c;background:transparent}.vtt-btn.danger:hover{background:rgba(200,80,58,.12)}",
       "@media(max-width:640px){.vtt-side{width:88vw}#vtt-root.side-open .vtt-top.right,#vtt-root.side-open .vtt-zoom{right:12px}.vtt-sheetpop,.vtt-sheetpop.wide{width:94vw;height:88vh;right:3vw;left:auto;top:6vh}.vtt-readout{left:12px;bottom:64px}}",
     ].join("");
     var s = document.createElement("style"); s.textContent = css; document.head.appendChild(s);

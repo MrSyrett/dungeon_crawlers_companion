@@ -9,6 +9,11 @@ import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 
 export const VTT_SCENE_TOOL = "vtt-scene";
 
+// One per campaign (per GM): the reusable token library shown in the Tokens tab.
+// Stored the same way as scenes — a Document with a free-string tool id, no schema
+// change. Separate from the tokens placed on any given scene.
+export const VTT_TOKENLIB_TOOL = "vtt-token-lib";
+
 // Keep server-stored scenes bounded. Map images that are LINKS cost nothing; an
 // EMBEDDED image (a local file / UVTT with the picture baked in) is kept in the
 // scene so it survives a refresh without re-importing the file. UVTT battlemaps
