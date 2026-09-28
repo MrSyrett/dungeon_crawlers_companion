@@ -149,6 +149,9 @@ export function renderToolPage(
     vttToken?: string;
     /** Hide the editing sidebar/chrome and serve a read-only preview. */
     previewOnly?: boolean;
+    /** Framed by our first-party VTT popup (same-origin): hide the Home chrome
+     *  but keep the sheet fully editable. */
+    embed?: boolean;
   },
 ): string {
   const cfg = {
@@ -171,7 +174,7 @@ export function renderToolPage(
   // is small enough that a floating bar would just cover the sheet. It also
   // must not navigate itself anywhere, since the popover owns the Owlbear
   // connection.
-  if (!opts.vttToken && !opts.previewOnly) {
+  if (!opts.vttToken && !opts.previewOnly && !opts.embed) {
     out = out.replace(/<body[^>]*>/i, (m) =>
       `${m}\n${chrome({ backHref: "/dashboard", backLabel: "Home" })}`);
   }

@@ -22,6 +22,9 @@ export async function GET(req: Request, ctx: Ctx) {
   // Used when another surface (e.g. the GM Screen's Adventure pane) embeds a
   // saved session-prep document in an iframe.
   const previewOnly = new URL(req.url).searchParams.get("view") === "preview";
+  // ?embed=1 — framed by our first-party VTT sheet popup: keep the sheet fully
+  // editable but hide the floating Home chrome (the popup provides its own).
+  const embed = new URL(req.url).searchParams.get("embed") === "1";
 
   const template = await loadToolTemplate(def.file);
   const html = renderToolPage(template, {
@@ -30,6 +33,7 @@ export async function GET(req: Request, ctx: Ctx) {
     data: doc.data,
     title: doc.title,
     previewOnly,
+    embed,
   });
 
   return new Response(html, {

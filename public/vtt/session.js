@@ -67,16 +67,13 @@
   board.setGm(isGM);            // the GM sees hidden tokens (ghosted); players don't
   board.setCollision(!isGM);    // players are stopped by barriers; the GM moves freely
   var net = null, currentScene = null;
-  var readout = $("vtt-readout");
-  function say(h) { readout.innerHTML = h; readout.hidden = false; }
+  var readout = $("vtt-readout"), readoutTimer = null;
+  // Transient status line (saves, "now live", ruler readout, connection). It
+  // auto-hides so no explainer text lingers on the canvas.
+  function say(h) { readout.innerHTML = h; readout.hidden = !h; if (readoutTimer) clearTimeout(readoutTimer); if (h) readoutTimer = setTimeout(function () { readout.hidden = true; }, 4500); }
 
   // ---- rail tools -----------------------------------------------------------
-  var HINTS = {
-    select: "Drag to pan · scroll to zoom · drag or arrow-keys to move a token · right-click for options · double-click opens a sheet",
-    ruler: "Click and drag to measure",
-    pointer: "Click to ping a spot for everyone",
-  };
-  function setTool(t) { board.setTool(t); ["select", "ruler", "pointer"].forEach(function (x) { var b = $("t-" + x); if (b) b.classList.toggle("on", x === t); }); say(HINTS[t] || ""); }
+  function setTool(t) { board.setTool(t); ["select", "ruler", "pointer"].forEach(function (x) { var b = $("t-" + x); if (b) b.classList.toggle("on", x === t); }); }
   bind("t-select", function () { setTool("select"); });
   bind("t-ruler", function () { setTool("ruler"); });
   bind("t-pointer", function () { setTool("pointer"); });
@@ -108,7 +105,7 @@
     var b = $("t-sheet"), r = b ? b.getBoundingClientRect() : { right: 56, top: 60 };
     menuAt(chars.map(function (c) { return { label: c.title || "Character", onClick: function () { openSheet(c); } }; }), r.right + 8, r.top);
   }
-  function openSheet(c) { $("sheet-title").textContent = c.title || "Character"; $("sheet-frame").src = (V.toolBase || "/tools") + "/" + encodeURIComponent(c.tool) + "/" + encodeURIComponent(c.id); $("sheetpop").hidden = false; }
+  function openSheet(c) { $("sheet-title").textContent = c.title || "Character"; $("sheet-frame").src = (V.toolBase || "/tools") + "/" + encodeURIComponent(c.tool) + "/" + encodeURIComponent(c.id) + "?embed=1"; $("sheetpop").hidden = false; }
   bind("sheet-close", function () { $("sheetpop").hidden = true; $("sheet-frame").src = "about:blank"; });
   bind("sheet-mode", function () {
     var pop = $("sheetpop"), wide = pop.classList.toggle("wide");
@@ -198,7 +195,7 @@
   // ---- live sync ------------------------------------------------------------
   function startNet() {
     var transport = window.VTTNet.httpTransport({ base: V.signalBase, campaignId: V.campaignId, me: V.userId });
-    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers }); renderPlayers([]); }
+    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers, live: false }); renderPlayers([]); }
     else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn("waiting"); }
   }
   // Player connection state: "waiting" | "connecting" | "connected" | "failed".
@@ -248,17 +245,20 @@
     fetch(V.sceneBase + "?campaignId=" + encodeURIComponent(V.campaignId), { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : { scenes: [] }; }).then(function (d) {
       if (!d.scenes || !d.scenes.length) { el.innerHTML = '<div class="vtt-empty">No scenes yet. <b>New scene</b> to create one.</div>'; return; }
       el.innerHTML = d.scenes.map(function (s) {
-        var th = getThumb(s.id), live = s.id === liveSceneId;
-        return '<div class="vtt-scene' + (live ? " active" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + (live ? '<span class="vtt-live" title="Live for players">' + ico("live", 12) + "</span>" : "") + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + (live ? ' <span class="vtt-live-t">LIVE</span>' : "") + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
+        var th = getThumb(s.id), live = s.id === liveSceneId, viewing = currentScene && currentScene.id === s.id;
+        return '<div class="vtt-scene' + (live ? " live" : "") + (viewing ? " viewing" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + (live ? ' <span class="vtt-live-t">LIVE</span>' : "") + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
       }).join("");
       el.querySelectorAll(".vtt-scene").forEach(function (row) {
         var id = row.dataset.id, title = row.dataset.title;
-        row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; openEditor({ id: id, title: title }); });
+        // Left-click OPENS the scene on the GM's canvas (not live). Only the Edit
+        // pencil (and New) open the editor popup; right-click sends live.
+        row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; openScene(id); });
         row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openEditor({ id: id, title: title }); };
         row.addEventListener("contextmenu", function (e) {
           e.preventDefault();
           menuAt([
             { label: (id === liveSceneId ? "✓ " : "") + "Send live to players", onClick: function () { sendLive(id); } },
+            { label: "Open on my canvas", onClick: function () { openScene(id); } },
             { label: "Edit scene", onClick: function () { openEditor({ id: id, title: title }); } },
             { sep: true },
             { label: "Delete", danger: true, onClick: function () { if (confirm("Delete this scene?")) delScene(id); } },
@@ -267,28 +267,44 @@
       });
     });
   }
-  // Make a scene LIVE: load it onto the main board (which broadcasts to players).
-  function sendLive(id) {
+  // Open a scene on the GM's own canvas WITHOUT broadcasting — players keep seeing
+  // whatever is currently live.
+  function openScene(id) {
     return fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) {
       if (!doc) return;
+      if (net && net.setLive) net.setLive(false);
       applyingLive = true;
       return Promise.resolve(board.loadScene(doc.data)).then(function () {
         applyingLive = false;
+        saveThumbFrom(board, id); currentScene = { id: doc.id, title: doc.title };
+        setSceneName(); loadSceneList(); say("Opened <b>" + esc(doc.title) + "</b> — not live yet.");
+      });
+    });
+  }
+  // Make a scene LIVE: load it onto the main board and push it to players.
+  function sendLive(id) {
+    return fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) {
+      if (!doc) return;
+      if (net && net.setLive) net.setLive(false); // suppress the per-emit spam during load
+      applyingLive = true;
+      return Promise.resolve(board.loadScene(doc.data)).then(function () {
+        applyingLive = false;
+        if (net && net.setLive) { net.setLive(true); if (net.pushScene) net.pushScene(); }
         saveThumbFrom(board, id); rememberLive(id); currentScene = { id: doc.id, title: doc.title };
         setSceneName(); loadSceneList(); say("Now live: <b>" + esc(doc.title) + "</b>");
       });
     });
   }
-  function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (liveSceneId === id) { rememberLive(null); currentScene = null; setSceneName(); } loadSceneList(); }); }
+  function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (liveSceneId === id) { rememberLive(null); if (net && net.setLive) net.setLive(false); } if (currentScene && currentScene.id === id) { currentScene = null; setSceneName(); } loadSceneList(); }); }
   function setSceneName() { var b = $("scene-badge"); if (!b) return; if (currentScene && currentScene.title) { b.textContent = currentScene.title; b.hidden = false; } else { b.textContent = ""; b.hidden = true; } }
 
-  // Auto-save the live scene as the GM edits it live (walls, tokens, doors, dark…).
+  // Auto-save the scene currently open on the GM's board as they edit it.
   function autoSaveLive() {
-    if (applyingLive || !liveSceneId) return;
+    if (applyingLive || !currentScene) return;
     if (liveSaveTimer) clearTimeout(liveSaveTimer);
     liveSaveTimer = setTimeout(function () {
       liveSaveTimer = null;
-      var id = liveSceneId, data = board.toScene(currentScene ? currentScene.title : "Scene");
+      var id = currentScene.id, data = board.toScene(currentScene ? currentScene.title : "Scene");
       fetch(V.sceneBase + "/" + id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: data }) })
         .then(function () { saveThumbFrom(board, id); }).catch(function () {});
     }, 900);
@@ -401,7 +417,7 @@
       var id = row.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
       row.addEventListener("dragstart", function (e) { dragLibId = id; try { e.dataTransfer.setData("text/plain", "lib:" + id); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
       row.addEventListener("dragend", function () { dragLibId = null; });
-      row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; openTokenEditor(lt); });
+      // Only the Edit pencil opens the editor; the row itself is for dragging onto the map.
       row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openTokenEditor(lt); };
     });
   }
@@ -692,9 +708,9 @@
       ".vtt-field-l{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8b97a7;margin:4px 0 8px}",
       ".vtt-preview{position:relative;height:200px;border:1px solid #2a323d;border-radius:8px;overflow:hidden;background:#0b0d10;margin-bottom:12px}.vtt-preview canvas{position:absolute;inset:0;width:100%;height:100%;display:block}",
       ".vtt-preview-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;color:#8b97a7;font-size:12px;pointer-events:none}",
-      ".vtt-live{position:absolute;top:2px;left:2px;background:rgba(90,194,106,.92);color:#0b0d10;border-radius:5px;padding:1px 3px;display:inline-flex}",
       ".vtt-live-t{font-size:9px;font-weight:800;letter-spacing:.08em;color:#0b0d10;background:#5ac26a;border-radius:3px;padding:1px 4px;vertical-align:middle}",
-      ".vtt-scene.active{border-color:#5ac26a;background:rgba(90,194,106,.08)}",
+      ".vtt-scene.viewing{border-color:#c8a24a;background:rgba(200,162,74,.08)}",
+      ".vtt-scene.live{border-color:#5ac26a;background:rgba(90,194,106,.10)}",
       ".vtt-search{width:100%;background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:6px;padding:7px 10px;font-size:13px;margin-bottom:8px}",
       ".vtt-te-top{display:flex;gap:12px;margin-bottom:12px}.vtt-te-av{width:56px;height:56px;border-radius:50%;overflow:hidden;flex:0 0 auto;background:#0b0d10;display:flex;align-items:center;justify-content:center}.vtt-te-av img{width:100%;height:100%;object-fit:cover}",
       ".vtt-field select{background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:6px;padding:8px 10px;font-size:14px}",

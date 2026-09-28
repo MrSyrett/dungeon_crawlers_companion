@@ -60,6 +60,9 @@
     var iceServers = opts.iceServers, status = opts.onStatus || function () {};
     var peers = {}; // peerId -> { pc, dc, ice:[], open, name }
     var tokenTimer = null;
+    // When false, GM board edits are NOT pushed to players (the GM is previewing
+    // a scene on their own canvas). Going "live" sets this true and pushes once.
+    var live = opts.live !== false;
     var onPeers = opts.onPeers || function () {};
     function peersList() { return Object.keys(peers).map(function (k) { return { id: k, name: peers[k].name || k, open: peers[k].open }; }); }
     function emitPeers() { onPeers(peersList()); }
@@ -109,6 +112,7 @@
     function broadcast(obj) { Object.keys(peers).forEach(function (k) { sendObj(peers[k], obj); }); }
 
     function pushFull(peer) {
+      if (!live) return; // nothing is live yet — a joiner sees an empty board until the GM goes live
       sendObj(peer, scenePayload());
       var m = board.state.map;
       if (m.srcType !== "url" && typeof m.src === "string" && m.src.length) shipMap(peer, m.src);
@@ -161,17 +165,18 @@
     }
     function syncDoor(i) { var d = board.state.map.doors[i]; if (d) broadcast({ t: "door", index: i, closed: d.closed, locked: d.locked }); }
 
-    function scheduleTokens() { if (tokenTimer) return; tokenTimer = setTimeout(function () { tokenTimer = null; pushTokens(); }, 60); }
+    function scheduleTokens() { if (tokenTimer) return; tokenTimer = setTimeout(function () { tokenTimer = null; if (live) pushTokens(); }, 60); }
 
-    // Wire board changes -> broadcast. GM edits fire these; remote-apply is guarded.
-    board.on("token", function () { scheduleTokens(); });
-    board.on("map", function () { pushScene(); });
-    board.on("scene", function () { pushScene(); });
+    // Wire board changes -> broadcast, but only while live (see `live` above).
+    board.on("token", function () { if (live) scheduleTokens(); });
+    board.on("map", function () { if (live) pushScene(); });
+    board.on("scene", function () { if (live) pushScene(); });
 
     transport.onMessage(onSignal);
     transport.start();
     return {
       pushScene: pushScene, pushTokens: pushTokens, peerCount: peerCount, peers: peersList,
+      setLive: function (b) { live = !!b; }, isLive: function () { return live; },
       ping: function (x, y) { broadcast({ t: "ping", x: x, y: y }); },
       doorSync: function (i) { syncDoor(i); },
       stop: function () { transport.stop(); Object.keys(peers).forEach(function (k) { try { peers[k].pc.close(); } catch (e) {} }); },
