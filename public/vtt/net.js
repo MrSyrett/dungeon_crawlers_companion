@@ -462,6 +462,7 @@
       id: t.id, name: t.name, imageUrl: t.imageUrl, x: t.x, y: t.y, w: t.w, h: t.h,
       rot: t.rot || 0, ownerId: t.ownerId, characterDocId: t.characterDocId, isViewer: !!t.isViewer,
       color: t.color, vision: t.vision, hp: t.hp, ring: t.ring, ringColor: t.ringColor,
+      conditions: Array.isArray(t.conditions) ? t.conditions : [],
     };
     // NB: `hidden` is deliberately NOT wired — hidden tokens are filtered out
     // before send, so a guest never learns they exist.

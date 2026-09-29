@@ -71,6 +71,24 @@
     };
     function bumpGeom() { state._geomVer++; }
     var canMove = opts.canMove || function () { return true; };
+
+    // ---- condition rings ----------------------------------------------------
+    // Transparent-centre PNG overlays (Owlbear-style) laid on top of a token to
+    // flag conditions. The list + file names are fixed built-in art; a token holds
+    // the active keys in t.conditions, drawn concentrically on top of its image.
+    var CONDITIONS = ["Stunned", "Unconscious", "Blessed", "Frightened", "Exhaustion", "Hunters-Mark", "Restrained", "Poisoned", "Paralyzed", "Dead", "Incapacitated", "Charmed", "Invisible", "Petrified", "Hexed", "Prone", "Hasted", "Grappled", "Concentration", "Blinded"];
+    var conditionBase = opts.conditionBase || "/vtt/condition-rings";
+    var condCache = {}; // key -> Image (loaded once, redrawn each frame)
+    function condImg(key) {
+      var c = condCache[key];
+      if (c) return c.complete && c.naturalWidth ? c : null;
+      var img = new Image();
+      condCache[key] = img;
+      img.onload = function () { scheduleRender(); };
+      img.onerror = function () {};
+      img.src = conditionBase + "/" + key + ".png";
+      return null;
+    }
     function snapTok(t) {
       if (!state.snap || !state.map.ppg) return;
       var g = state.map.ppg;
@@ -484,6 +502,15 @@
       if (t.ring) {
         ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2);
         ctx.lineWidth = Math.max(2, r * 0.09); ctx.strokeStyle = t.ringColor || ring; ctx.stroke();
+      }
+      // Condition-ring overlays (transparent-centre PNGs), nested concentrically so
+      // several are readable at once. Drawn unrotated, on top of the token art.
+      if (t.conditions && t.conditions.length) {
+        for (var ci = 0; ci < t.conditions.length; ci++) {
+          var cim = condImg(t.conditions[ci]); if (!cim) continue;
+          var d = 2 * r * (1.16 + Math.min(ci, 4) * 0.12);
+          ctx.drawImage(cim, -d / 2, -d / 2, d, d);
+        }
       }
       ctx.restore();
       if (r > 11) {
@@ -1123,6 +1150,7 @@
         hidden: !!spec.hidden, // GM-only: not drawn for players, ghosted for GM
         ring: !!spec.ring,     // optional colored outline (off by default)
         ringColor: spec.ringColor || null,
+        conditions: Array.isArray(spec.conditions) ? spec.conditions.slice() : [], // active condition-ring keys
       };
       state.tokens.push(t);
       if (t.imageUrl) loadImage(t.imageUrl).then(function (img) { t.image = img; scheduleRender(); }, function () {});
@@ -1290,6 +1318,7 @@
         t.rot = spec.rot || 0; t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
         t.isViewer = !!spec.isViewer; t.color = spec.color || t.color;
         t.vision = (typeof spec.vision === "number" && spec.vision > 0) ? spec.vision : null; t.hp = spec.hp; t.hidden = !!spec.hidden; t.ring = !!spec.ring; t.ringColor = spec.ringColor || null;
+        t.conditions = Array.isArray(spec.conditions) ? spec.conditions.slice() : [];
       });
       state.tokens = state.tokens.filter(function (t) { return keep[t.id]; });
       scheduleRender();
@@ -1422,6 +1451,20 @@
       // The network guest calls this after sending a move it made locally, so the
       // host's echo doesn't rubber-band the token back until the host has caught up.
       noteLocalMove: function (id, x, y) { state.pendingMove[id] = { x: x, y: y, ts: Date.now() }; },
+      // ---- conditions: overlay rings a token is flagged with -----------------
+      conditions: function () { return CONDITIONS.slice(); },
+      conditionName: function (key) { return String(key).replace(/-/g, " "); },
+      tokenHasCondition: function (id, key) { var t = byId(id); return !!(t && t.conditions && t.conditions.indexOf(key) >= 0); },
+      toggleCondition: function (id, key) {
+        var t = byId(id); if (!t) return false;
+        if (!t.conditions) t.conditions = [];
+        var i = t.conditions.indexOf(key);
+        if (i >= 0) t.conditions.splice(i, 1); else t.conditions.push(key);
+        scheduleRender();
+        return t.conditions.indexOf(key) >= 0;
+      },
+      setConditions: function (id, arr) { var t = byId(id); if (!t) return; t.conditions = Array.isArray(arr) ? arr.slice() : []; scheduleRender(); },
+      getConditions: function (id) { var t = byId(id); return t && t.conditions ? t.conditions.slice() : []; },
       setCollision: function (b) { state.collide = !!b; },
       getCollision: function () { return state.collide; },
       // Barrier tests exposed for the network host to validate guest moves.

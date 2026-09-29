@@ -685,6 +685,14 @@
         var ringSub = [{ label: (!t.ring ? "✓ " : "") + "Off", onClick: function () { board.setRing(t.id, false); if (net) net.pushTokens(); } }];
         RING_COLORS.forEach(function (c) { ringSub.push({ label: (t.ring && (t.ringColor || t.color) === c.v ? "✓ " : "") + c.n, onClick: function () { board.setRing(t.id, true, c.v); if (net) net.pushTokens(); } }); });
         items.push({ label: (t.ring ? "✓ " : "") + "Ring", sub: ringSub });
+        // Conditions: toggle any of the built-in condition rings on this token. Each
+        // stays open so several can be flipped at once; a live count shows on the item.
+        var condSub = [{ label: "Clear all", onClick: function () { board.setConditions(t.id, []); if (net) net.pushTokens(); } }, { sep: true }];
+        board.conditions().forEach(function (key) {
+          condSub.push({ label: board.conditionName(key), keepOpen: true, check: board.tokenHasCondition(t.id, key), onClick: function () { var on = board.toggleCondition(t.id, key); if (net) net.pushTokens(); return on; } });
+        });
+        var cn = (t.conditions || []).length;
+        items.push({ label: "Conditions" + (cn ? " (" + cn + ")" : ""), sub: condSub, subScroll: true });
       }
     }
     if (items.length) menuAt(items, e.sx, e.sy);
@@ -718,9 +726,21 @@
   function renderMenu(container, items) {
     items.forEach(function (it) {
       if (it.sep) { var s = document.createElement("div"); s.className = "vtt-ctx-sep"; container.appendChild(s); return; }
-      var b = document.createElement("div"); b.className = "vtt-ctx-item" + (it.danger ? " danger" : "") + (it.sub ? " has-sub" : ""); b.textContent = it.label + (it.sub ? " ▸" : "");
-      if (it.sub) { var sub = document.createElement("div"); sub.className = "vtt-ctx sub"; renderMenu(sub, it.sub); b.appendChild(sub); }
-      else b.addEventListener("click", function () { hideContext(); it.onClick && it.onClick(); });
+      var b = document.createElement("div"); b.className = "vtt-ctx-item" + (it.danger ? " danger" : "") + (it.sub ? " has-sub" : "");
+      if (it.sub) {
+        b.textContent = it.label + " ▸";
+        var sub = document.createElement("div"); sub.className = "vtt-ctx sub" + (it.subScroll ? " scroll" : "");
+        renderMenu(sub, it.sub); b.appendChild(sub);
+      } else if (it.keepOpen) {
+        // A toggle that stays open so several can be flipped in one visit — the mark
+        // updates in place and onClick returns the new checked state.
+        var ck = document.createElement("span"); ck.className = "vtt-ctx-ck"; ck.textContent = it.check ? "✓" : "";
+        b.appendChild(ck); b.appendChild(document.createTextNode(it.label));
+        b.addEventListener("click", function (e) { e.stopPropagation(); var on = it.onClick && it.onClick(); ck.textContent = on ? "✓" : ""; });
+      } else {
+        b.textContent = it.label;
+        b.addEventListener("click", function () { hideContext(); it.onClick && it.onClick(); });
+      }
       container.appendChild(b);
     });
   }
@@ -912,6 +932,8 @@
       ".vtt-hint2{font-size:11px;color:#8b97a7;line-height:1.5;margin:6px 0;display:flex;gap:6px;align-items:flex-start}.vtt-hint2 svg{flex:0 0 auto;margin-top:1px}",
       ".vtt-ctx{position:fixed;z-index:100;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:4px;min-width:160px;box-shadow:0 12px 40px rgba(0,0,0,.6)}",
       ".vtt-ctx.sub{position:absolute;left:100%;top:-5px;display:none}",
+      ".vtt-ctx.sub.scroll{max-height:340px;overflow-y:auto}",
+      ".vtt-ctx-ck{display:inline-block;width:14px;color:#7fd6a1;font-weight:700}",
       ".vtt-ctx-item{position:relative;padding:7px 10px;border-radius:5px;font-size:13px;cursor:pointer;white-space:nowrap;color:#e6ebf2}.vtt-ctx-item:hover{background:#232b35}.vtt-ctx-item.has-sub:hover>.vtt-ctx.sub{display:block}.vtt-ctx-item.danger{color:#f0a8a3}",
       ".vtt-ctx-sep{height:1px;background:#2a323d;margin:4px 2px}",
       ".vtt-sheetpop{position:absolute;top:60px;right:12px;width:min(510px,92vw);height:86%;background:#14181e;border:1px solid #2a323d;border-radius:10px;z-index:60;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6)}",

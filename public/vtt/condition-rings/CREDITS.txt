@@ -1,0 +1,6 @@
+Condition ring overlays — 20 transparent-centre PNGs (512x512) laid on top of a
+token to flag a condition. The token art shows through the middle; the medallion
+at the top of each ring carries the condition icon.
+
+Condition icons from game-icons.net, CC BY 3.0 (artists incl. Lorc, Delapouite,
+Skoll). Keep a game-icons.net credit if you redistribute.
