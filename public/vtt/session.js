@@ -156,12 +156,20 @@
     var k = e.key.toLowerCase();
     var byKey = { v: "select", l: "lasso", r: "ruler", m: "movement", z: "rings", p: "ping", k: "laser" };
     if (byKey[k]) setTool(byKey[k]);
-    else if (k === "escape") { hideContext(); closeFlyouts(); }
+    else if (k === "c") toggleSheet();
+    else if (k === "escape") { hideContext(); closeFlyouts(); if ($("sheetpop") && !$("sheetpop").hidden) { $("sheetpop").hidden = true; $("sheet-frame").src = "about:blank"; } }
   });
 
   // ---- character sheet popup ------------------------------------------------
   var chars = Array.isArray(V.myCharacters) ? V.myCharacters : [];
-  bind("t-sheet", function () { if (!chars.length) { say("No character sheet is linked to this campaign yet."); return; } chars.length === 1 ? openSheet(chars[0]) : pickSheet(); });
+  // Open (or toggle) the character sheet — from the rail button or the "C" key.
+  function toggleSheet() {
+    var pop = $("sheetpop");
+    if (pop && !pop.hidden) { pop.hidden = true; $("sheet-frame").src = "about:blank"; return; }
+    if (!chars.length) { say("No character sheet is linked to this campaign yet."); return; }
+    chars.length === 1 ? openSheet(chars[0]) : pickSheet();
+  }
+  bind("t-sheet", toggleSheet);
   function openSheetForToken(t) { if (chars.length === 1) openSheet(chars[0]); else if (chars.length) pickSheet(); }
   function pickSheet() {
     var b = $("t-sheet"), r = b ? b.getBoundingClientRect() : { right: 56, top: 60 };
@@ -201,6 +209,7 @@
   // ---- GM controls ----------------------------------------------------------
   if (isGM) {
     bind("side-toggle", function () { toggleSide(); });
+    bind("side-close", function () { toggleSide(false); });
     // tabs
     mount.querySelectorAll(".vtt-tab").forEach(function (b) { b.addEventListener("click", function () { selectTab(b.dataset.tab); }); });
     // map controls target the popup's PREVIEW board (not the live board)
@@ -483,7 +492,10 @@
       var id = row.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
       row.addEventListener("dragstart", function (e) { dragLibId = id; try { e.dataTransfer.setData("text/plain", "lib:" + id); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
       row.addEventListener("dragend", function () { dragLibId = null; });
-      // Only the Edit pencil opens the editor; the row itself is for dragging onto the map.
+      // Tapping/clicking the row places the token at the view centre — this is the
+      // touch-friendly path (drag-to-canvas is mouse-only). The Edit pencil still
+      // opens the editor and never places.
+      row.addEventListener("click", function (e) { if (e.target.closest(".edit")) return; var r = stage.getBoundingClientRect(); placeLibAt(lt, r.left + r.width / 2, r.top + r.height / 2); });
       row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openTokenEditor(lt); };
     });
   }
@@ -563,39 +575,25 @@
     else { library.push(teDraft); }
     saveLibrary(); renderTokens(); closeTokenEditor();
   }
-  // Place another instance of an existing SCENE token (right-click "Place copy").
-  function placeCopy(id) {
-    var t = board.getToken(id); if (!t) return;
-    var c = clone(t); c.id = null; c.x += (board.state.map.ppg || 70);
-    var nt = board.addToken(c); if (net) net.pushTokens(); board.select(nt.id); board.centerOn(nt.id);
-  }
-
   // ---- token context menu ---------------------------------------------------
   function showContext(e) {
     var t = e.token, items = [];
     if (t) {
-      if (chars.length && (t.ownerId === V.userId || isGM)) items.push({ label: "Open sheet", onClick: function () { openSheetForToken(t); } });
       if (isGM) {
+        // Quick per-token tweaks only — Rename, Size, Vision, Hide, Ring. Owner,
+        // "sees fog", image, copy and delete all live in the library editor now,
+        // and the sheet opens from the rail button or the C shortcut.
         items.push({ label: "Rename…", onClick: function () { var n = prompt("Token name:", t.name || ""); if (n != null) { t.name = n; board.render(); if (net) net.pushTokens(); } } });
         items.push({ label: "Size", sub: [1, 2, 3, 4].map(function (n) { return { label: n + "× (" + n + " sq)", onClick: function () { var g = board.state.map.ppg || 70; t.w = t.h = g * n; board.render(); if (net) net.pushTokens(); } }; }) });
-        var owners = [{ label: "Unassigned", onClick: function () { assign(t, null); } }, { label: "Me (GM)", onClick: function () { assign(t, V.userId); } }];
-        (net && net.peers ? net.peers() : []).forEach(function (p) { owners.push({ label: p.name, onClick: function () { assign(t, p.id); } }); });
-        items.push({ label: "Assign to", sub: owners });
-        items.push({ label: (t.isViewer ? "✓ " : "") + "Sees fog (viewer)", onClick: function () { t.isViewer = !t.isViewer; board.render(); if (net) net.pushTokens(); } });
         items.push({ label: "Vision", sub: [{ v: null, l: "Unlimited" }, { ft: 120 }, { ft: 60 }, { ft: 30 }, { ft: 10 }].map(function (o) { var fpc = board.state.feetPerCell || 5, cells = o.v === null ? null : o.ft / fpc; var cur = cells === null ? t.vision == null : (t.vision != null && Math.abs(t.vision - cells) < 0.01); return { label: (o.l || o.ft + " ft") + (cur ? "  ✓" : ""), onClick: function () { t.vision = cells; board.render(); if (net) net.pushTokens(); } }; }) });
         items.push({ label: (t.hidden ? "✓ " : "") + "Hide from players", onClick: function () { board.setHidden(t.id, !t.hidden); if (net) net.pushTokens(); say(t.hidden ? "Token <b>hidden</b> from players." : "Token visible to players."); } });
         var ringSub = [{ label: (!t.ring ? "✓ " : "") + "Off", onClick: function () { board.setRing(t.id, false); if (net) net.pushTokens(); } }];
         RING_COLORS.forEach(function (c) { ringSub.push({ label: (t.ring && (t.ringColor || t.color) === c.v ? "✓ " : "") + c.n, onClick: function () { board.setRing(t.id, true, c.v); if (net) net.pushTokens(); } }); });
         items.push({ label: (t.ring ? "✓ " : "") + "Ring", sub: ringSub });
-        items.push({ label: "Place copy", onClick: function () { placeCopy(t.id); } });
-        items.push({ sep: true });
-        items.push({ label: "Delete", danger: true, onClick: function () { board.removeToken(t.id); if (net) net.pushTokens(); } });
       }
     }
     if (items.length) menuAt(items, e.sx, e.sy);
   }
-  function assign(t, id) { t.ownerId = id; t.color = id ? colorFor(id) : "#c8a24a"; board.render(); if (net) net.pushTokens(); }
-  function clone(o) { return JSON.parse(JSON.stringify({ name: o.name, imageUrl: o.imageUrl, x: o.x, y: o.y, w: o.w, h: o.h, rot: o.rot, ownerId: o.ownerId, characterDocId: o.characterDocId, isViewer: o.isViewer, color: o.color, vision: o.vision, hp: o.hp, hidden: o.hidden, ring: o.ring, ringColor: o.ringColor })); }
   // Generic browser filenames (download.png, image, IMG_1234, screenshot…) make
   // lousy token names — fall back to "Token N" instead.
   function tokenName(fname, n) {
@@ -676,21 +674,22 @@
     var top = '<div class="vtt-top"><a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a><div class="vtt-title">' + esc(V.campaignName || "Tabletop") + '</div><span class="vtt-scene-badge" id="scene-badge" hidden></span></div>' +
       '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (!isGM ? '<button class="vtt-tbtn" id="conn-retry" title="Reconnect to your GM" hidden>' + ico("refresh", 18) + "</button>" : "") + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
     var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden>' +
-      '<div class="vtt-tabs">' + tabBtn("scenes", "layers", "Scenes", true) + tabBtn("tokens", "token", "Tokens") + tabBtn("settings", "gear", "Settings") + tabBtn("players", "players", "Players") + "</div>" +
+      '<button class="vtt-side-x" id="side-close" title="Close panel">' + ico("close", 16) + "</button>" +
+      '<div class="vtt-tabs">' + tabBtn("scenes", "layers", "Scenes", true) + tabBtn("tokens", "token", "Tokens") + tabBtn("settings", "gear", "Settings") + "</div>" +
       // scenes: just New + the list (each row has an Edit button -> editor popup)
       '<div class="vtt-panel" data-panel="scenes"><div class="vtt-row"><button class="vtt-btn" id="sc-new">' + ico("plus", 15) + ' New scene</button></div>' +
       '<div class="vtt-scene-list" id="scene-list"></div></div>' +
       // tokens: campaign token library (decoupled from the scene)
       '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div><input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
-      // settings
+      // settings — table toggles, darkness, then the player roster as a section
       '<div class="vtt-panel" data-panel="settings" hidden>' +
-      frow("f-fog", "fog", "Fog of war") + frow("f-reveal", "eye", "GM reveal (see through fog)", true) + frow("f-snap", "snap", "Snap tokens to grid", true) + frow("f-setup", "wrench", "Setup mode (edit walls, windows & doors)") +
-      '<div class="vtt-row small" style="margin-top:8px"><label style="flex:1">Darkness <input type="range" id="f-op" min="40" max="100" value="90"></label></div></div>' +
-      // players
-      '<div class="vtt-panel" data-panel="players" hidden><div id="players"></div></div></div>';
+      frow("f-fog", "fog", "Fog of War") + frow("f-reveal", "eye", "GM Reveal", true) + frow("f-snap", "snap", "Snapping", true) + frow("f-setup", "wrench", "Wall Editor") +
+      '<div class="vtt-row small" style="margin-top:8px"><label style="flex:1">Darkness <input type="range" id="f-op" min="40" max="100" value="90"></label></div>' +
+      '<div class="vtt-sec-h" style="margin-top:14px">Players</div><div id="players"></div>' +
+      '</div></div>';
     var zoom = '<div class="vtt-zoom"><button class="vtt-tbtn" id="z-in" title="Zoom in">' + ico("zin") + '</button><button class="vtt-tbtn" id="z-fit" title="Fit map">' + ico("fit") + '</button><button class="vtt-tbtn" id="z-out" title="Zoom out">' + ico("zout") + "</button></div>";
     var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="lib-file" accept="image/*" hidden>' : "";
-    var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden><span class="vtt-setupbar-t">Setup</span>' +
+    var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden>' +
       subtn("su-select", "select", "Select", true) + subtn("su-wall", "wall", "Wall") + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + "</div>";
     return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + (isGM ? sceneEditor() + tokenEditor() : "") + inputs + "</div>";
   }
@@ -743,6 +742,7 @@
       "html,body{height:100%;margin:0;overflow:hidden;background:var(--bg,#0b0d10)}",
       "#vtt-root{position:fixed;inset:0;font:14px/1.4 'Montserrat',system-ui,sans-serif;color:#e6ebf2}",
       ".vtt-stage{position:absolute;inset:0;overflow:hidden}",
+      ".vtt-rail,.vtt-top,.vtt-zoom,.vtt-setupbar,.vtt-readout,.vtt-tabs,.vtt-trow,.vtt-party,.vtt-sub,.vtt-frow,.vtt-scene{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}",
       "#vtt-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}",
       ".vtt-stage.drop::after{content:'Drop token image';position:absolute;inset:14px;border:2px dashed #c8a24a;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#c8a24a;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(200,162,74,.06);pointer-events:none;z-index:5}",
       ".vtt-tbtn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:rgba(20,24,30,.92);color:#c3ccd8;border:1px solid #2a323d;border-radius:9px;cursor:pointer;text-decoration:none;transition:.12s}",
@@ -771,6 +771,7 @@
       ".vtt-side{position:absolute;top:0;right:0;width:300px;height:100%;background:rgba(15,18,23,.97);border-left:1px solid #2a323d;z-index:30;display:flex;flex-direction:column;overflow:hidden;backdrop-filter:blur(6px)}",
       ".vtt-side-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #2a323d;font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#c8a24a}",
       ".vtt-tabs{display:flex;border-bottom:1px solid #2a323d}",
+      ".vtt-side-x{display:none;position:absolute;top:7px;right:8px;z-index:5;width:30px;height:30px;align-items:center;justify-content:center;background:rgba(20,24,30,.9);color:#c3ccd8;border:1px solid #2a323d;border-radius:7px;cursor:pointer}",
       ".vtt-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;background:none;border:0;border-bottom:2px solid transparent;color:#8b97a7;font:600 10px/1 system-ui;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}",
       ".vtt-tab.on{color:#c8a24a;border-bottom-color:#c8a24a}.vtt-tab:hover{color:#e6ebf2}",
       ".vtt-panel{padding:14px;overflow:auto;flex:1}",
@@ -796,8 +797,7 @@
       ".vtt-tinfo{flex:1;min-width:0}.vtt-tname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vtt-tsub{font-size:10px;color:#8b97a7;text-transform:uppercase;letter-spacing:.05em}",
       ".vtt-prow{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}",
       ".vtt-trow.hidden-tok .vtt-tav{opacity:.5}.vtt-mini.hide.on{color:#c8a24a}",
-      ".vtt-setupbar{position:absolute;top:64px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:rgba(15,18,23,.97);border:1px solid #2a323d;border-radius:10px;padding:6px 8px;z-index:22;box-shadow:0 8px 30px rgba(0,0,0,.5)}",
-      ".vtt-setupbar-t{font:700 10px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:#8b97a7;margin:0 6px 0 2px}",
+      ".vtt-setupbar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:rgba(15,18,23,.97);border:1px solid #2a323d;border-radius:10px;padding:6px 8px;z-index:22;box-shadow:0 8px 30px rgba(0,0,0,.5)}",
       ".vtt-sub-t{display:flex;align-items:center;gap:5px;background:#161b22;color:#c3ccd8;border:1px solid #2a323d;border-radius:7px;padding:6px 10px;font:600 12px/1 system-ui;cursor:pointer}",
       ".vtt-sub-t:hover{color:#fff;border-color:#3d4756}.vtt-sub-t.on{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
       "@media(max-width:640px){.vtt-setupbar{top:auto;bottom:70px;flex-wrap:wrap;max-width:94vw;justify-content:center}.vtt-sub-t span{display:none}}",
@@ -832,7 +832,7 @@
       ".vtt-trow[draggable=true]{cursor:grab}",
       ".vtt-btn.primary{flex:0 0 auto;padding:8px 18px;background:#c8a24a;color:#14181e;border-color:#c8a24a}.vtt-btn.primary:hover{background:#d8b25a}",
       ".vtt-btn.danger{flex:0 0 auto;color:#f0a8a3;border-color:#5a2f2c;background:transparent}.vtt-btn.danger:hover{background:rgba(200,80,58,.12)}",
-      "@media(max-width:640px){.vtt-side{width:88vw}#vtt-root.side-open .vtt-top.right,#vtt-root.side-open .vtt-zoom{right:12px}.vtt-sheetpop,.vtt-sheetpop.wide{width:94vw;height:88vh;right:3vw;left:auto;top:6vh}.vtt-readout{left:12px;bottom:64px}}",
+      "@media(max-width:640px){.vtt-side{width:88vw}.vtt-side-x{display:flex}.vtt-tabs{padding-right:44px}#vtt-root.side-open .vtt-top.right,#vtt-root.side-open .vtt-zoom{right:12px}.vtt-sheetpop,.vtt-sheetpop.wide{width:94vw;height:88vh;right:3vw;left:auto;top:6vh}.vtt-readout{left:12px;bottom:64px}}",
     ].join("");
     var s = document.createElement("style"); s.textContent = css; document.head.appendChild(s);
   }

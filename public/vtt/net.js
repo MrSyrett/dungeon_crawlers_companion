@@ -243,7 +243,7 @@
     var iceServers = opts.iceServers, status = opts.onStatus || function () {};
     var conn = null; // { pc, dc, ice:[], open }
     var joinTries = 0, joinTimer = null, connState = "waiting";
-    var mapBuf = null, pendingMap = null;
+    var mapBuf = null, pendingMap = null, mapLen = 0;
 
     // Report a coarse connection state to the UI:
     //   "waiting"    — sent a join, no GM host has answered yet (GM tab not open?)
@@ -312,14 +312,17 @@
         pendingMap = msg.map;
         var mp = msg.map || {};
         if (mp.srcType === "url" && mp.url) {
+          if (board.setLoading) board.setLoading(0); // blank + bar while the URL image loads
           board.applyMapMeta(mp);
           board.loadMapState({ src: mp.url, srcType: "url", ppg: mp.ppg, walls: mp.walls, windows: mp.windows, doors: mp.doors, lights: mp.lights, widthPx: mp.widthPx, heightPx: mp.heightPx })
-            .then(function () { board.setRemoteApply(false); });
+            .then(function () { board.setRemoteApply(false); if (board.setLoading) board.setLoading(null); });
           board.syncTokens(msg.tokens || []);
         } else if (mp.shipping) {
-          // An embedded image is being (re)shipped right after this: DON'T apply the
-          // new walls yet, or the player would briefly see the OLD image under the
-          // NEW walls. mapEnd applies the whole map (image + walls + size) at once.
+          // An embedded image is being (re)shipped right after this: show a blank
+          // canvas + progress bar and DON'T apply the new walls yet, or the player
+          // would briefly see the OLD image under the NEW walls. mapEnd applies the
+          // whole map (image + walls + size) at once and clears the loader.
+          if (board.setLoading) board.setLoading(0);
           board.syncTokens(msg.tokens || []);
           board.setRemoteApply(false);
         } else {
@@ -338,13 +341,13 @@
       } else if (msg.t === "ping") { board.ping(msg.x, msg.y, "#4ea3ff"); }
       else if (msg.t === "overlay") { board.setOverlay(msg.from || "gm", msg.o || { kind: null }); }
       else if (msg.t === "door") { board.setDoor(msg.index, { closed: msg.closed, locked: msg.locked }); }
-      else if (msg.t === "mapBegin") { mapBuf = ""; }
-      else if (msg.t === "mapChunk") { if (mapBuf !== null) mapBuf += msg.s; }
+      else if (msg.t === "mapBegin") { mapBuf = ""; mapLen = msg.len || 0; if (board.setLoading) board.setLoading(1); }
+      else if (msg.t === "mapChunk") { if (mapBuf !== null) { mapBuf += msg.s; if (board.setLoading && mapLen) board.setLoading(Math.min(99, mapBuf.length / mapLen * 100)); } }
       else if (msg.t === "mapEnd") {
         var m = pendingMap || {};
         board.setRemoteApply(true);
         board.loadMapState({ src: mapBuf, srcType: "embedded", ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, widthPx: m.widthPx, heightPx: m.heightPx })
-          .then(function () { board.setRemoteApply(false); });
+          .then(function () { board.setRemoteApply(false); if (board.setLoading) board.setLoading(null); });
         mapBuf = null;
       }
     }

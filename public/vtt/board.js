@@ -53,6 +53,7 @@
       rings: null,          // range-rings center { x, y } in world coords (transient)
       laser: null,          // local laser pointer { x, y } in world coords (transient)
       overlays: {},         // remote presence overlays, keyed by senderId (shared live)
+      loading: null,        // 0..100 while a scene/map is streaming in (blank + bar)
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
       fogSetup: false,      // GM: show walls / edit doors
@@ -238,6 +239,10 @@
       ctx.fillStyle = "#0b0d10";
       ctx.fillRect(0, 0, s.w, s.h);
 
+      // While a scene is streaming in, show just a blank canvas + a progress bar so
+      // the player never sees the map assemble in pieces.
+      if (state.loading != null) { drawLoading(s); emit("render", null); return; }
+
       var map = state.map;
       if (map.image && map.widthPx) {
         ctx.imageSmoothingEnabled = true;
@@ -381,6 +386,23 @@
       ctx.restore();
     }
 
+    function drawLoading(s) {
+      var pct = Math.max(0, Math.min(100, state.loading || 0));
+      var cx = s.w / 2, cy = s.h / 2, bw = Math.min(280, s.w * 0.6), bh = 8;
+      ctx.save();
+      ctx.fillStyle = "#c8cdd6"; ctx.font = "600 13px system-ui, sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      ctx.fillText("Loading scene…", cx, cy - 16);
+      // track
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      roundRect(cx - bw / 2, cy - bh / 2, bw, bh, bh / 2); ctx.fill();
+      // fill
+      ctx.fillStyle = "#c8a24a";
+      roundRect(cx - bw / 2, cy - bh / 2, Math.max(bh, bw * pct / 100), bh, bh / 2); ctx.fill();
+      ctx.fillStyle = "#8b93a0"; ctx.font = "600 11px system-ui, sans-serif";
+      ctx.fillText(Math.round(pct) + "%", cx, cy + 22);
+      ctx.restore();
+    }
     function drawPings() {
       if (!state.pings.length) return;
       var t = now(), alive = [];
@@ -692,6 +714,8 @@
 
     // ---- interaction --------------------------------------------------------
     var drag = null;
+    var longPress = null, longPressPt = null; // touch long-press -> context menu
+    function clearLongPress() { if (longPress) { clearTimeout(longPress); longPress = null; } longPressPt = null; }
     var pointers = {}; // active pointerId -> {x,y} in canvas space (for pinch)
     var pinch = null;  // two-finger gesture baseline
     function activePointers() { return Object.keys(pointers); }
@@ -777,6 +801,20 @@
       if (activePointers().length >= 2) { beginPinch(); return; }
       var p = localPoint(e), tool = state.tool, wx = s2wX(p.x), wy = s2wY(p.y);
 
+      // Touch/pen have no right-click: a ~500ms long-press on a token opens its
+      // options menu, on a door locks/unlocks it (the touch equivalent of the
+      // contextmenu handler). Cancelled by moving or lifting before it fires.
+      clearLongPress();
+      if (e.pointerType && e.pointerType !== "mouse" && (tool === "select" || tool === "movement" || tool === "lasso") && !state.fogSetup) {
+        var lpx = e.clientX, lpy = e.clientY; longPressPt = p;
+        longPress = setTimeout(function () {
+          longPress = null; drag = null;
+          var lt = tokenAt(p.x, p.y);
+          if (lt) { state.selectedId = lt.id; state.selection = [lt.id]; emit("select", lt); scheduleRender(); emit("context", { token: lt, sx: lpx, sy: lpy, wx: s2wX(p.x), wy: s2wY(p.y) }); }
+          else { var ld = doorAt(p.x, p.y); if (ld >= 0) emit("doorlock", { index: ld }); }
+        }, 500);
+      }
+
       if (tool === "ruler") {
         state.ruler = { ax: wx, ay: wy, bx: wx, by: wy };
         drag = { mode: "ruler" }; emitOverlay("measure", { ax: wx, ay: wy, bx: wx, by: wy });
@@ -830,6 +868,8 @@
 
     function onMove(e) {
       if (typeof e.pointerId !== "undefined" && pointers[e.pointerId]) pointers[e.pointerId] = localPoint(e);
+      // A finger that travels cancels the long-press (it's a drag, not a hold).
+      if (longPress && longPressPt) { var mp = localPoint(e); if (Math.hypot(mp.x - longPressPt.x, mp.y - longPressPt.y) > 8) clearLongPress(); }
       if (pinch) { updatePinch(); scheduleRender(); return; }
       // Wall tool: track the cursor for the rubber-band even without a button down.
       if (!drag && state.fogSetup && state.setupTool === "wall" && state.wallPath) {
@@ -853,8 +893,14 @@
           var mt = byId(mm.id); if (!mt) return;
           var tx = mm.ox + ddx, ty = mm.oy + ddy;
           if (state.collide) {
-            var c = clampMove(mm.lastX, mm.lastY, tx, ty, tokMoveRad(mt));
-            mt.x = c.x; mt.y = c.y;         // no mid-drag grid snap while colliding
+            // Snap the destination to the grid and step there if it's reachable —
+            // players now snap cell-to-cell AS THEY DRAG (like the GM), and simply
+            // hold position when the next cell is across a barrier. With snap off,
+            // slide smoothly up to the barrier instead.
+            var sx = tx, sy = ty;
+            if (state.snap && state.map.ppg) { var g = state.map.ppg; sx = Math.round((tx - mt.w / 2) / g) * g + mt.w / 2; sy = Math.round((ty - mt.h / 2) / g) * g + mt.h / 2; }
+            if (!pathBlocked(mm.lastX, mm.lastY, sx, sy, tokMoveRad(mt))) { mt.x = sx; mt.y = sy; }
+            else if (!state.snap) { var c = clampMove(mm.lastX, mm.lastY, tx, ty, tokMoveRad(mt)); mt.x = c.x; mt.y = c.y; }
           } else {
             mt.x = tx; mt.y = ty; snapTok(mt);
           }
@@ -886,6 +932,7 @@
 
     function onUp(e) {
       if (e && typeof e.pointerId !== "undefined") delete pointers[e.pointerId];
+      clearLongPress();
       if (pinch && activePointers().length < 2) { pinch = null; drag = null; }
       if (drag && drag.mode === "seg") {
         var len = Math.hypot(drag.x2 - drag.x1, drag.y2 - drag.y1);
@@ -994,19 +1041,41 @@
       scheduleRender();
     }
 
+    // A huge embedded battlemap (e.g. a 25 MB Dungeondraft UVTT) doesn't fit the
+    // scene store and crawls over the peer connection. Re-encode anything oversized
+    // to a full-resolution JPEG on a dark backdrop — the grid size and walls are in
+    // map-pixel space so nothing about the geometry changes, only the byte size.
+    var MAX_EMBED = 6 * 1024 * 1024; // re-encode embedded images above ~6 MB
+    function shrinkEmbedded(src, img) {
+      if (!/^data:/.test(src || "") || (src || "").length <= MAX_EMBED || !img || !img.naturalWidth || typeof document === "undefined") {
+        return Promise.resolve({ src: src, img: img });
+      }
+      try {
+        var c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+        var g = c.getContext("2d"); g.fillStyle = "#0b0d10"; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0);
+        var jpg = c.toDataURL("image/jpeg", 0.85);
+        if (jpg && jpg.length < src.length) {
+          return loadImage(jpg).then(function (ni) { return { src: jpg, img: ni }; }, function () { return { src: src, img: img }; });
+        }
+      } catch (e) {}
+      return Promise.resolve({ src: src, img: img });
+    }
+
     function loadImageMap(src, ppg, srcType) {
       return loadImage(src).then(function (img) {
-        setMap({
-          image: img,
-          widthPx: img.naturalWidth,
-          heightPx: img.naturalHeight,
-          ppg: ppg || state.map.ppg || 70,
-          walls: [], windows: [], doors: [], lights: [],
-          src: src, srcType: srcType || (/^data:/.test(src) ? "embedded" : "url"),
+        return shrinkEmbedded(src, img).then(function (r) {
+          setMap({
+            image: r.img,
+            widthPx: r.img.naturalWidth,
+            heightPx: r.img.naturalHeight,
+            ppg: ppg || state.map.ppg || 70,
+            walls: [], windows: [], doors: [], lights: [],
+            src: r.src, srcType: srcType || (/^data:/.test(r.src) ? "embedded" : "url"),
+          });
+          fitToMap();
+          emit("map", state.map);
+          return state.map;
         });
-        fitToMap();
-        emit("map", state.map);
-        return state.map;
       });
     }
 
@@ -1014,20 +1083,22 @@
       var m = Uvtt.parse(input);
       var p = m.imageDataUrl ? loadImage(m.imageDataUrl) : Promise.resolve(null);
       return p.then(function (img) {
-        setMap({
-          image: img,
-          widthPx: img ? img.naturalWidth : m.widthPx,
-          heightPx: img ? img.naturalHeight : m.heightPx,
-          ppg: m.ppg,
-          walls: m.walls,
-          windows: [],
-          doors: m.doors,
-          lights: m.lights || [],
-          src: m.imageDataUrl, srcType: "embedded",
+        return (img ? shrinkEmbedded(m.imageDataUrl, img) : Promise.resolve({ src: m.imageDataUrl, img: null })).then(function (r) {
+          setMap({
+            image: r.img,
+            widthPx: r.img ? r.img.naturalWidth : m.widthPx,
+            heightPx: r.img ? r.img.naturalHeight : m.heightPx,
+            ppg: m.ppg,
+            walls: m.walls,
+            windows: [],
+            doors: m.doors,
+            lights: m.lights || [],
+            src: r.src, srcType: "embedded",
+          });
+          fitToMap();
+          emit("map", state.map);
+          return state.map;
         });
-        fitToMap();
-        emit("map", state.map);
-        return state.map;
       });
     }
 
@@ -1307,6 +1378,8 @@
         scheduleRender();
       },
       dropOverlay: function (senderId) { delete state.overlays[senderId]; scheduleRender(); },
+      // Scene-load progress: pass 0..100 to show a blank canvas + bar, null to clear.
+      setLoading: function (pct) { state.loading = (pct == null) ? null : Math.max(0, Math.min(100, pct)); scheduleRender(); },
       getTool: function () { return state.tool; },
       setFog: function (on) { state.fog.enabled = !!on; scheduleRender(); },
       setShowAll: function (on) { state.fog.showAll = !!on; scheduleRender(); },
