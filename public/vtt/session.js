@@ -125,7 +125,8 @@
     main.onclick = function (e) {
       e.stopPropagation();
       var grpEl = main.parentNode, isActive = main.classList.contains("on");
-      if (isActive) { grpEl.classList.toggle("open"); }
+      // Single-option groups (Select, Pointer) have no flyout — just activate.
+      if (g.subs.length > 1 && isActive) { grpEl.classList.toggle("open"); }
       else { setTool(GROUP_ACTIVE[g.id]); }
     };
     var grpEl = main.parentNode;
@@ -511,20 +512,29 @@
     var assigned = library.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId && matchQ(lt.name); });
     var rest = library.filter(function (lt) { return !lt.stock && !(lt.ownerId && lt.ownerId !== V.userId) && matchQ(lt.name); });
     var html = partyBar;
-    if (assigned.length) html += '<div class="vtt-sec-h">Players</div>' + assigned.map(libRow).join("");
-    if (rest.length) html += (assigned.length ? '<div class="vtt-sec-h" style="margin-top:10px">Tokens</div>' : "") + rest.map(libRow).join("");
+    // Players + custom tokens render as a 3-to-a-row tile grid (like Stock): just
+    // the art + a name. For an assigned token the label is the PLAYER's name.
+    if (assigned.length) html += '<div class="vtt-sec-h">Players</div><div class="vtt-stock-grid">' + assigned.map(function (lt) { return libTile(lt, ownerLabel(lt.ownerId)); }).join("") + "</div>";
+    if (rest.length) html += (assigned.length ? '<div class="vtt-sec-h" style="margin-top:10px">Tokens</div>' : "") + '<div class="vtt-stock-grid">' + rest.map(function (lt) { return libTile(lt, lt.name || "Token"); }).join("") + "</div>";
     if (!assigned.length && !rest.length && !realLib().length) html += '<div class="vtt-empty">Your token library is empty. <b>Add token</b> for your own art, or open <b>Stock tokens</b> below for the built-in set.</div>';
     html += stockSectionHtml(q);
     el.innerHTML = html;
     wireParty();
-    el.querySelectorAll(".vtt-trow").forEach(function (row) {
-      var id = row.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
-      row.addEventListener("dragstart", function (e) { dragLibId = id; try { e.dataTransfer.setData("text/plain", "lib:" + id); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
-      row.addEventListener("dragend", function () { dragLibId = null; });
-      row.addEventListener("click", function (e) { if (e.target.closest(".edit")) return; var r = stage.getBoundingClientRect(); placeLibAt(lt, r.left + r.width / 2, r.top + r.height / 2); });
-      row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openTokenEditor(lt); };
+    el.querySelectorAll(".vtt-ltile").forEach(function (tile) {
+      var id = tile.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
+      tile.addEventListener("dragstart", function (e) { dragLibId = id; try { e.dataTransfer.setData("text/plain", "lib:" + id); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
+      tile.addEventListener("dragend", function () { dragLibId = null; });
+      tile.addEventListener("click", function (e) { if (e.target.closest(".edit")) return; var r = stage.getBoundingClientRect(); placeLibAt(lt, r.left + r.width / 2, r.top + r.height / 2); });
+      var ed = tile.querySelector(".edit"); if (ed) ed.onclick = function (e) { e.stopPropagation(); openTokenEditor(lt); };
     });
     wireStock(el);
+  }
+  // A library-token tile for the Players / Tokens grids: art (or a colour swatch)
+  // plus a single label — the player's name for assigned tokens, else the token name.
+  function libTile(lt, label) {
+    var av = lt.imageUrl ? '<img src="' + esc(lt.imageUrl) + '" alt="" loading="lazy">' : '<span class="vtt-tswatch" style="background:' + (lt.ownerId ? colorFor(lt.ownerId) : "#c8a24a") + '"></span>';
+    return '<div class="vtt-ltile" data-id="' + esc(lt.id) + '" draggable="true" title="' + esc(label) + '">' + av + "<span>" + esc(label) + "</span>" +
+      '<button class="vtt-stok-edit edit" title="Edit token">' + ico("pencil", 12) + "</button></div>";
   }
   function wireParty() {
     var pc = $("party-chip"); if (!pc) return;
@@ -545,9 +555,8 @@
   // party) and syncs to players.
   function stockSectionHtml(q) {
     var cats = (stockData && stockData.categories) || [];
-    var total = cats.reduce(function (n, c) { return n + ((c.tokens || []).length); }, 0);
     var open = stockOpen || !!q; // a search auto-opens the section so it reaches stock
-    var head = '<div class="vtt-stock-head' + (open ? " open" : "") + '" id="stock-head"><span class="vtt-stock-chev">▸</span><span>Stock tokens</span><b>' + total + "</b></div>";
+    var head = '<div class="vtt-stock-head' + (open ? " open" : "") + '" id="stock-head"><span class="vtt-stock-chev">▸</span><span>Stock tokens</span></div>';
     if (!open) return head;
     if (stockData && stockData.error) return head + '<div class="vtt-empty">Could not load stock tokens.</div>';
     if (!stockData) return head + '<div class="vtt-empty">Loading stock tokens…</div>';
@@ -775,12 +784,14 @@
   // A rail tool GROUP: a main button (shows the active sub-tool) + a hover/tap
   // flyout of sub-tools.
   function railGroup(g, on) {
+    // A single-option group is just a plain tool button — no caret, no flyout.
+    var single = g.subs.length < 2;
+    var main = '<button class="vtt-tbtn vtt-groupbtn' + (on ? " on" : "") + '" id="grp-' + g.id + '" title="' + esc(single ? g.subs[0].label : g.title) + '"><span class="vtt-gi">' + ico(g.subs[0].icon, 20) + "</span>" + (single ? "" : '<i class="vtt-caret"></i>') + "</button>";
+    if (single) return '<div class="vtt-rail-group single">' + main + "</div>";
     var subs = g.subs.map(function (s) {
       return '<button class="vtt-sub" data-tool="' + s.tool + '" title="' + esc(s.label) + (s.key ? "  (" + s.key + ")" : "") + '">' + ico(s.icon, 18) + "<span>" + esc(s.label) + (s.key ? ' <b class="vtt-key">' + s.key + "</b>" : "") + "</span></button>";
     }).join("");
-    return '<div class="vtt-rail-group">' +
-      '<button class="vtt-tbtn vtt-groupbtn' + (on ? " on" : "") + '" id="grp-' + g.id + '" title="' + esc(g.title) + '"><span class="vtt-gi">' + ico(g.subs[0].icon, 20) + "</span><i class=\"vtt-caret\"></i></button>" +
-      '<div class="vtt-flyout">' + subs + "</div></div>";
+    return '<div class="vtt-rail-group">' + main + '<div class="vtt-flyout">' + subs + "</div></div>";
   }
   function frow(id, name, label, on) { return '<button class="vtt-frow' + (on ? " on" : "") + '" id="' + id + '" role="switch" aria-checked="' + (on ? "true" : "false") + '"><span class="vtt-frow-i">' + ico(name, 18) + '</span><span class="vtt-frow-l">' + label + '</span><span class="vtt-switch" aria-hidden="true"></span></button>'; }
   function subtn(id, name, label, on) { return '<button class="vtt-sub-t' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name, 17) + "<span>" + label + "</span></button>"; }
@@ -923,10 +934,11 @@
       ".vtt-stock-chev{display:inline-block;transition:transform .12s;color:#8b97a7}.vtt-stock-head.open .vtt-stock-chev{transform:rotate(90deg)}",
       ".vtt-sec-h.sub{margin:8px 0 6px;font-size:10px;color:#7c8797}",
       ".vtt-stock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 6px}",
-      ".vtt-stok{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:6px 4px;cursor:pointer;color:#c3ccd8}.vtt-stok:hover{border-color:#c8a24a}",
-      ".vtt-stok img{width:46px;height:46px;object-fit:contain;pointer-events:none}.vtt-stok span{font-size:10px;text-align:center;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
+      ".vtt-stok,.vtt-ltile{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:6px 4px;cursor:pointer;color:#c3ccd8}.vtt-stok:hover,.vtt-ltile:hover{border-color:#c8a24a}",
+      ".vtt-stok img,.vtt-ltile img{width:46px;height:46px;object-fit:contain;pointer-events:none}.vtt-stok span,.vtt-ltile span{font-size:10px;text-align:center;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
+      ".vtt-tswatch{width:46px;height:46px;border-radius:50%;display:block;border:1px solid rgba(0,0,0,.4)}",
       ".vtt-stok-dot{position:absolute;top:5px;left:5px;width:9px;height:9px;border-radius:50%;border:1px solid #0c0f14}",
-      ".vtt-stok-edit{position:absolute;top:3px;right:3px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:rgba(12,15,20,.82);border:1px solid #2a323d;border-radius:6px;color:#c3ccd8;cursor:pointer;opacity:0;transition:opacity .12s}.vtt-stok:hover .vtt-stok-edit,.vtt-stok-edit:focus{opacity:1}.vtt-stok-edit:hover{border-color:#c8a24a;color:#e6c66a}",
+      ".vtt-stok-edit{position:absolute;top:3px;right:3px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:rgba(12,15,20,.82);border:1px solid #2a323d;border-radius:6px;color:#c3ccd8;cursor:pointer;opacity:0;transition:opacity .12s}.vtt-stok:hover .vtt-stok-edit,.vtt-ltile:hover .vtt-stok-edit,.vtt-stok-edit:focus{opacity:1}.vtt-stok-edit:hover{border-color:#c8a24a;color:#e6c66a}",
       ".vtt-party{display:flex;align-items:center;gap:8px;margin:2px 0 10px;padding:9px 11px;border:1px solid #3a4453;border-radius:8px;background:linear-gradient(180deg,#20283a,#171d29);color:#dfe7f2;font-size:12px;font-weight:600;cursor:grab}",
       ".vtt-party:hover{border-color:#c8a24a}.vtt-party:active{cursor:grabbing}.vtt-party span{flex:1}.vtt-party b{color:#e6c66a}",
       ".vtt-hint2{font-size:11px;color:#8b97a7;line-height:1.5;margin:6px 0;display:flex;gap:6px;align-items:flex-start}.vtt-hint2 svg{flex:0 0 auto;margin-top:1px}",
