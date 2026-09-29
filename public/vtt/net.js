@@ -60,9 +60,9 @@
     var iceServers = opts.iceServers, status = opts.onStatus || function () {};
     var peers = {}; // peerId -> { pc, dc, ice:[], open, name }
     var tokenTimer = null;
-    // When false, GM board edits are NOT pushed to players (the GM is previewing
-    // a scene on their own canvas). Going "live" sets this true and pushes once.
-    var live = opts.live !== false;
+    // The GM's board is ALWAYS shared: whatever the GM sees, the players see. There
+    // is no "preview vs live" — opening a scene / moving a token / editing a wall
+    // broadcasts to every connected player at once.
     var onPeers = opts.onPeers || function () {};
     function peersList() { return Object.keys(peers).map(function (k) { return { id: k, name: peers[k].name || k, open: peers[k].open }; }); }
     function emitPeers() { onPeers(peersList()); }
@@ -121,7 +121,7 @@
     function broadcast(obj) { Object.keys(peers).forEach(function (k) { sendObj(peers[k], obj); }); }
 
     function pushFull(peer) {
-      if (!live) return; // nothing is live yet — a joiner sees an empty board until the GM goes live
+      // A joining player immediately gets the GM's current scene + tokens.
       var src = embeddedSrc();
       sendObj(peer, scenePayload(!!src));
       if (src) shipMap(peer, src);
@@ -152,12 +152,10 @@
 
     function pushTokens() { broadcast({ t: "tokens", tokens: visibleWire() }); }
 
-    // Live presence overlays (laser pointer, measure line, range rings) — the GM's
-    // own overlay only reaches players while the board is live; positions are
-    // throttled, a "clear" (kind:null) always goes out at once.
+    // Live presence overlays (laser pointer, measure line, range rings): positions
+    // are throttled, a "clear" (kind:null) always goes out at once.
     var overlayTimer = null, overlayPending = null;
     function pushOverlay(o) {
-      if (!live && o && o.kind != null) return;
       broadcast({ t: "overlay", from: me, o: o || { kind: null } });
     }
     function hostOverlay(o) {
@@ -220,18 +218,17 @@
     }
     function syncDoor(i) { var d = board.state.map.doors[i]; if (d) broadcast({ t: "door", index: i, closed: d.closed, locked: d.locked }); }
 
-    function scheduleTokens() { if (tokenTimer) return; tokenTimer = setTimeout(function () { tokenTimer = null; if (live) pushTokens(); }, 60); }
+    function scheduleTokens() { if (tokenTimer) return; tokenTimer = setTimeout(function () { tokenTimer = null; pushTokens(); }, 60); }
 
-    // Wire board changes -> broadcast, but only while live (see `live` above).
-    board.on("token", function () { if (live) scheduleTokens(); });
-    board.on("map", function () { if (live) pushScene(); });
-    board.on("scene", function () { if (live) pushScene(); });
+    // Wire board changes -> broadcast to every player, always.
+    board.on("token", function () { scheduleTokens(); });
+    board.on("map", function () { pushScene(); });
+    board.on("scene", function () { pushScene(); });
 
     transport.onMessage(onSignal);
     transport.start();
     return {
       pushScene: pushScene, pushTokens: pushTokens, peerCount: peerCount, peers: peersList,
-      setLive: function (b) { live = !!b; }, isLive: function () { return live; },
       settings: pushSettings,
       overlay: hostOverlay,
       ping: function (x, y) { broadcast({ t: "ping", x: x, y: y }); },

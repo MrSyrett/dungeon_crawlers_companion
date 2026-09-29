@@ -268,7 +268,7 @@
   // ---- live sync ------------------------------------------------------------
   function startNet() {
     var transport = window.VTTNet.httpTransport({ base: V.signalBase, campaignId: V.campaignId, me: V.userId });
-    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers, live: false }); renderPlayers([]); }
+    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers }); renderPlayers([]); }
     else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: (chars[0] && chars[0].title) || V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn("waiting"); }
   }
   // Player connection state: "waiting" | "connecting" | "connected" | "failed".
@@ -303,12 +303,12 @@
   }
 
   // ---- scenes ---------------------------------------------------------------
-  // The main board shows the LIVE scene (what players see). Creating/selecting a
-  // scene does NOT go live — it opens a preview in the editor popup. Going live is
-  // a separate action (right-click a scene → Send live). The live scene auto-saves.
-  var liveKey = "vtt-live-" + V.campaignId, liveSceneId = null, liveSaveTimer = null, applyingLive = false;
-  function rememberLive(id) { liveSceneId = id; try { localStorage.setItem(liveKey, id || ""); } catch (e) {} }
-  function autoLoadLast() { var id = null; try { id = localStorage.getItem(liveKey); } catch (e) {} if (id) sendLive(id); }
+  // The GM's board is ALWAYS what players see. Opening a scene loads it on the GM's
+  // canvas and it is instantly shown to every connected player — there is no
+  // separate "go live" step. The open scene auto-saves as the GM edits it.
+  var curKey = "vtt-scene-" + V.campaignId, liveSaveTimer = null, loadingScene = false;
+  function rememberCurrent(id) { try { localStorage.setItem(curKey, id || ""); } catch (e) {} }
+  function autoLoadLast() { var id = null; try { id = localStorage.getItem(curKey); } catch (e) {} if (id) openScene(id); }
   function thumbKey(id) { return "vtt-thumb-" + id; }
   function saveThumbFrom(bd, id) { try { var t = bd.thumbnail(220); if (t) localStorage.setItem(thumbKey(id), t); } catch (e) {} }
   function getThumb(id) { try { return localStorage.getItem(thumbKey(id)); } catch (e) { return null; } }
@@ -318,20 +318,19 @@
     fetch(V.sceneBase + "?campaignId=" + encodeURIComponent(V.campaignId), { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : { scenes: [] }; }).then(function (d) {
       if (!d.scenes || !d.scenes.length) { el.innerHTML = '<div class="vtt-empty">No scenes yet. <b>New scene</b> to create one.</div>'; return; }
       el.innerHTML = d.scenes.map(function (s) {
-        var th = getThumb(s.id), live = s.id === liveSceneId, viewing = currentScene && currentScene.id === s.id;
-        return '<div class="vtt-scene' + (live ? " live" : "") + (viewing ? " viewing" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + (live ? ' <span class="vtt-live-t">LIVE</span>' : "") + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
+        var th = getThumb(s.id), active = currentScene && currentScene.id === s.id;
+        return '<div class="vtt-scene' + (active ? " viewing" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + (active ? ' <span class="vtt-live-t">SHOWING</span>' : "") + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
       }).join("");
       el.querySelectorAll(".vtt-scene").forEach(function (row) {
         var id = row.dataset.id, title = row.dataset.title;
-        // Left-click OPENS the scene on the GM's canvas (not live). Only the Edit
-        // pencil (and New) open the editor popup; right-click sends live.
+        // Left-click OPENS the scene — which shows it to the players immediately.
+        // The Edit pencil (and New) open the editor popup.
         row.addEventListener("click", function (e) { if (e.target.closest(".vtt-mini")) return; openScene(id); });
         row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openEditor({ id: id, title: title }); };
         row.addEventListener("contextmenu", function (e) {
           e.preventDefault();
           menuAt([
-            { label: (id === liveSceneId ? "✓ " : "") + "Send live to players", onClick: function () { sendLive(id); } },
-            { label: "Open on my canvas", onClick: function () { openScene(id); } },
+            { label: "Open (show players)", onClick: function () { openScene(id); } },
             { label: "Edit scene", onClick: function () { openEditor({ id: id, title: title }); } },
             { sep: true },
             { label: "Delete", danger: true, onClick: function () { if (confirm("Delete this scene?")) delScene(id); } },
@@ -340,40 +339,25 @@
       });
     });
   }
-  // Open a scene on the GM's own canvas WITHOUT broadcasting — players keep seeing
-  // whatever is currently live.
+  // Open a scene: load it on the GM's canvas and push it to every player at once.
   function openScene(id) {
     return fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) {
       if (!doc) return;
-      if (net && net.setLive) net.setLive(false);
-      applyingLive = true;
+      loadingScene = true;
       return Promise.resolve(board.loadScene(doc.data)).then(function () {
-        applyingLive = false;
-        saveThumbFrom(board, id); currentScene = { id: doc.id, title: doc.title };
-        setSceneName(); loadSceneList(); say("Opened <b>" + esc(doc.title) + "</b> — not live yet.");
+        loadingScene = false;
+        if (net && net.pushScene) net.pushScene(); // make sure players get the full scene
+        saveThumbFrom(board, id); currentScene = { id: doc.id, title: doc.title }; rememberCurrent(id);
+        setSceneName(); loadSceneList(); say("Showing <b>" + esc(doc.title) + "</b> to your players.");
       });
     });
   }
-  // Make a scene LIVE: load it onto the main board and push it to players.
-  function sendLive(id) {
-    return fetch(V.sceneBase + "/" + id, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (doc) {
-      if (!doc) return;
-      if (net && net.setLive) net.setLive(false); // suppress the per-emit spam during load
-      applyingLive = true;
-      return Promise.resolve(board.loadScene(doc.data)).then(function () {
-        applyingLive = false;
-        if (net && net.setLive) { net.setLive(true); if (net.pushScene) net.pushScene(); }
-        saveThumbFrom(board, id); rememberLive(id); currentScene = { id: doc.id, title: doc.title };
-        setSceneName(); loadSceneList(); say("Now live: <b>" + esc(doc.title) + "</b>");
-      });
-    });
-  }
-  function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (liveSceneId === id) { rememberLive(null); if (net && net.setLive) net.setLive(false); } if (currentScene && currentScene.id === id) { currentScene = null; setSceneName(); } loadSceneList(); }); }
+  function delScene(id) { fetch(V.sceneBase + "/" + id, { method: "DELETE", credentials: "same-origin" }).then(function () { if (currentScene && currentScene.id === id) { currentScene = null; rememberCurrent(null); setSceneName(); } loadSceneList(); }); }
   function setSceneName() { var b = $("scene-badge"); if (!b) return; if (currentScene && currentScene.title) { b.textContent = currentScene.title; b.hidden = false; } else { b.textContent = ""; b.hidden = true; } }
 
   // Auto-save the scene currently open on the GM's board as they edit it.
   function autoSaveLive() {
-    if (applyingLive || !currentScene) return;
+    if (loadingScene || !currentScene) return;
     if (liveSaveTimer) clearTimeout(liveSaveTimer);
     liveSaveTimer = setTimeout(function () {
       liveSaveTimer = null;
@@ -422,7 +406,7 @@
     if (editId) {
       var id = editId;
       fetch(V.sceneBase + "/" + id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: name, data: data }) })
-        .then(function (r) { if (r.ok) { saveThumbFrom(pboard, id); if (liveSceneId === id) { currentScene = { id: id, title: name }; setSceneName(); } loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); closeEditor(); } else say("<b>Save failed</b>"); });
+        .then(function (r) { if (r.ok) { saveThumbFrom(pboard, id); loadSceneList(); say("Saved <b>" + esc(name) + "</b>"); closeEditor(); if (currentScene && currentScene.id === id) openScene(id); } else say("<b>Save failed</b>"); });
     } else {
       fetch(V.sceneBase, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, title: name, data: data }) })
         .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
