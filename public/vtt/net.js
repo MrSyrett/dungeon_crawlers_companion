@@ -16,6 +16,63 @@
   "use strict";
 
   var CHUNK = 12000; // chars of the base64 map string per data-channel message
+  var MAXMSG = 49152; // 48 KiB — hard cap on a single data-channel message; anything
+  // larger is fragmented. A token carrying a big embedded image (an uploaded photo
+  // as a data URL) used to be sent as ONE message; past the channel's max size the
+  // send threw, was swallowed, and every GM->player update silently stopped — while
+  // the player's own tiny moves still reached the GM. Fragmentation removes that
+  // whole failure class.
+  var fragSeq = 0;
+
+  // An ordered, backpressured outbox over ONE data channel. Every message a side
+  // sends goes through here so that (a) an oversized payload is split into <=MAXMSG
+  // frames instead of throwing, (b) frames and later small messages keep send order,
+  // and (c) the send buffer is never flooded (a synchronous flood congested/dropped
+  // the channel, which showed up as players stuck reloading). `chan.dc()` returns the
+  // live RTCDataChannel (may change on reconnect) and `chan.open()` whether it's up.
+  function makeOutbox(chan) {
+    var q = [], pumping = false;
+    function push(str) {
+      if (str.length <= MAXMSG) { q.push(str); }
+      else {
+        var id = "f" + (fragSeq++) + "_" + Date.now().toString(36);
+        q.push(JSON.stringify({ t: "_f0", id: id }));
+        for (var i = 0; i < str.length; i += MAXMSG) q.push(JSON.stringify({ t: "_f", id: id, s: str.slice(i, i + MAXMSG) }));
+        q.push(JSON.stringify({ t: "_fx", id: id }));
+      }
+      pump();
+    }
+    function pump() {
+      if (pumping) return;
+      pumping = true;
+      (function step() {
+        if (!chan.open()) { pumping = false; q.length = 0; return; }
+        var dc = chan.dc();
+        while (dc && q.length) {
+          // Keep the send buffer modest so a big token/map streams in gentle bursts.
+          if (dc.bufferedAmount > 512 * 1024) { pumping = false; setTimeout(pump, 25); return; }
+          try { dc.send(q[0]); q.shift(); }
+          catch (e) { pumping = false; setTimeout(pump, 40); return; } // over-buffer/closed: back off, retry
+        }
+        pumping = false;
+      })();
+    }
+    return { push: push, reset: function () { q.length = 0; } };
+  }
+
+  // Reassembles frames produced by makeOutbox. `feed(raw, whole)` returns true when
+  // `raw` was a frame-control message (handled here); on the closing frame it calls
+  // whole(reassembledString). Returns false for an ordinary message to handle normally.
+  function makeReasm() {
+    var bufs = {};
+    return function (raw, whole) {
+      var m; try { m = JSON.parse(raw); } catch (e) { return false; }
+      if (m.t === "_f0") { bufs[m.id] = ""; return true; }
+      if (m.t === "_f") { if (bufs[m.id] != null) bufs[m.id] += m.s; return true; }
+      if (m.t === "_fx") { var s = bufs[m.id]; delete bufs[m.id]; if (s != null) whole(s); return true; }
+      return false;
+    };
+  }
 
   // ---- signaling transport over the app's polling endpoint ------------------
   function httpTransport(opts) {
@@ -72,6 +129,8 @@
       var pc = rtc(iceServers);
       var dc = pc.createDataChannel("vtt");
       var peer = peers[peerId] = { pc: pc, dc: dc, ice: [], open: false };
+      peer.out = makeOutbox({ dc: function () { return peer.dc; }, open: function () { return peer.open; } });
+      peer.reasm = makeReasm();
       pc.onicecandidate = function (e) { if (e.candidate) transport.send(peerId, "ice", e.candidate.toJSON()); };
       pc.onconnectionstatechange = function () {
         if (pc.connectionState === "failed" || pc.connectionState === "closed") { delete peers[peerId]; status(peerCount()); }
@@ -117,7 +176,7 @@
       return (m.srcType !== "url" && typeof m.src === "string" && m.src.length) ? m.src : null;
     }
 
-    function sendObj(peer, obj) { if (peer.open) { try { peer.dc.send(JSON.stringify(obj)); } catch (e) {} } }
+    function sendObj(peer, obj) { if (peer.open && peer.out) peer.out.push(JSON.stringify(obj)); }
     function broadcast(obj) { Object.keys(peers).forEach(function (k) { sendObj(peers[k], obj); }); }
 
     function pushFull(peer) {
@@ -126,28 +185,15 @@
       sendObj(peer, scenePayload(!!src));
       if (src) shipMap(peer, src);
     }
-    // Ship the embedded map in chunks WITH backpressure — a big data-URL would
-    // otherwise blow past the data channel's send buffer and silently drop chunks,
-    // leaving the player without the new map. We pause when the buffer is high.
+    // Ship the embedded map as mapBegin/mapChunk/mapEnd (chunked for a live progress
+    // bar and the atomic swap on the guest). Backpressure + ordering are handled by
+    // the peer's outbox, so a big data-URL streams in gentle bursts in send order
+    // with everything else and never floods the channel.
     function shipMap(peer, dataUrl) {
-      if (!peer.open) return;
-      try { peer.dc.send(JSON.stringify({ t: "mapBegin", len: dataUrl.length })); } catch (e) { return; }
-      var i = 0;
-      function pump() {
-        if (!peer.open) return;
-        try {
-          while (i < dataUrl.length) {
-            // Keep the send buffer small so a big map streams in gentle bursts — a
-            // large synchronous flood can congest or drop the data channel (which
-            // showed up as players stuck re-loading in a loop).
-            if (peer.dc.bufferedAmount > 256 * 1024) { setTimeout(pump, 30); return; }
-            peer.dc.send(JSON.stringify({ t: "mapChunk", s: dataUrl.slice(i, i + CHUNK) }));
-            i += CHUNK;
-          }
-          peer.dc.send(JSON.stringify({ t: "mapEnd" }));
-        } catch (e) { /* channel closed mid-ship — the guest will re-request on reconnect */ }
-      }
-      pump();
+      if (!peer.open || !peer.out) return;
+      peer.out.push(JSON.stringify({ t: "mapBegin", len: dataUrl.length }));
+      for (var i = 0; i < dataUrl.length; i += CHUNK) peer.out.push(JSON.stringify({ t: "mapChunk", s: dataUrl.slice(i, i + CHUNK) }));
+      peer.out.push(JSON.stringify({ t: "mapEnd" }));
     }
 
     function pushTokens() { broadcast({ t: "tokens", tokens: visibleWire() }); }
@@ -185,6 +231,8 @@
     }
 
     function onGuestMsg(peerId, raw) {
+      var peer = peers[peerId];
+      if (peer && peer.reasm && peer.reasm(raw, function (whole) { onGuestMsg(peerId, whole); })) return;
       var msg; try { msg = JSON.parse(raw); } catch (e) { return; }
       if (msg.t === "moveToken") {
         var t = board.getToken(msg.id);
@@ -241,9 +289,10 @@
   function guest(opts) {
     var transport = opts.transport, board = opts.board, me = opts.me;
     var iceServers = opts.iceServers, status = opts.onStatus || function () {};
-    var conn = null; // { pc, dc, ice:[], open }
+    var conn = null; // { pc, dc, out, ice:[], open }
     var joinTries = 0, joinTimer = null, connState = "waiting";
     var mapBuf = null, pendingMap = null, mapLen = 0;
+    var reasm = makeReasm(); // reassembles fragmented host->guest messages
 
     // Report a coarse connection state to the UI:
     //   "waiting"    — sent a join, no GM host has answered yet (GM tab not open?)
@@ -268,8 +317,9 @@
       if (m.kind === "offer") {
         if (conn) { try { conn.pc.close(); } catch (e) {} }
         setState("connecting");
+        reasm = makeReasm(); // a fresh connection: drop any half-received fragment
         var pc = rtc(iceServers);
-        conn = { pc: pc, dc: null, ice: [], open: false, hostId: m.from };
+        conn = { pc: pc, dc: null, out: null, ice: [], open: false, hostId: m.from };
         pc.onicecandidate = function (e) { if (e.candidate) transport.send(m.from, "ice", e.candidate.toJSON()); };
         pc.ondatachannel = function (ev) { wireDc(ev.channel); };
         pc.onconnectionstatechange = function () {
@@ -301,12 +351,14 @@
 
     function wireDc(dc) {
       conn.dc = dc;
+      conn.out = makeOutbox({ dc: function () { return conn && conn.dc; }, open: function () { return !!(conn && conn.open); } });
       dc.onopen = function () { conn.open = true; joinTries = 0; if (joinTimer) { clearTimeout(joinTimer); joinTimer = null; } setState("connected"); };
       dc.onclose = function () { if (conn) conn.open = false; setState("waiting"); clearLoad(); resumeJoining(); };
       dc.onmessage = function (ev) { onHostMsg(ev.data); };
     }
 
     function onHostMsg(raw) {
+      if (reasm(raw, onHostMsg)) return; // a reassembled message re-enters here whole
       var msg; try { msg = JSON.parse(raw); } catch (e) { return; }
       if (msg.t === "scene") {
         board.setRemoteApply(true);
@@ -356,7 +408,7 @@
       }
     }
 
-    function sendHost(obj) { if (conn && conn.open) { try { conn.dc.send(JSON.stringify(obj)); } catch (e) {} } }
+    function sendHost(obj) { if (conn && conn.open && conn.out) conn.out.push(JSON.stringify(obj)); }
 
     // A player dragging their OWN token asks the host to move it (host is
     // authoritative and echoes the result back to everyone).

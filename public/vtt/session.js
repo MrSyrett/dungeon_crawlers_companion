@@ -251,6 +251,7 @@
     bind("te-del", function () { if (teId && confirm("Remove this token from the library?")) { library = library.filter(function (x) { return x.id !== teId; }); saveLibrary(); renderTokens(); closeTokenEditor(); } });
     bind("te-img", function () { $("lib-file").click(); });
     var ts = $("tok-search"); if (ts) ts.oninput = function () { tokQuery = this.value; renderTokens(); };
+    ["tok-lib", "tok-stock"].forEach(function (id) { var b = $(id); if (b) b.onclick = function () { tokMode = b.dataset.mode; mount.querySelectorAll(".vtt-seg-b").forEach(function (x) { x.classList.toggle("on", x === b); }); var ar = $("tok-addrow"); if (ar) ar.style.display = tokMode === "stock" ? "none" : ""; renderTokens(); }; });
   }
 
   function setSetupTool(k) {
@@ -437,13 +438,39 @@
       fetch(V.tokenBase, { method: "PUT", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, tokens: library }) }).catch(function () {});
     }, 400);
   }
-  var tokQuery = "", dragLibId = null, dragParty = false;
+  var tokQuery = "", dragLibId = null, dragParty = false, tokMode = "library", stockData = null, dragStock = null;
   var roster = Array.isArray(V.players) ? V.players : [];
   function ownerLabel(id) {
     if (!id) return ""; if (id === V.userId) return "GM";
     var p = roster.filter(function (x) { return x.id === id; })[0]; if (p) return p.name;
     var pk = (net && net.peers ? net.peers() : []).filter(function (x) { return x.id === id; })[0];
     return pk ? pk.name : "Player";
+  }
+  // Read an uploaded image file and hand back a SMALL token data URL: downscaled so
+  // its longest side is <= 256px. Tokens draw small, and a full-res photo as a token
+  // bloats the library (localStorage) and, more importantly, the live-sync payload —
+  // a big token image is shipped to every player, so keeping it small keeps sync
+  // snappy. Falls back to the raw data URL if the image can't be decoded, and never
+  // inflates an already-tiny source.
+  function tokenImageFromFile(f, cb) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var raw = rd.result, img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        if (!w || !h) return cb(raw);
+        var sc = Math.min(1, 256 / Math.max(w, h));
+        var tw = Math.max(1, Math.round(w * sc)), th = Math.max(1, Math.round(h * sc));
+        var c = document.createElement("canvas"); c.width = tw; c.height = th;
+        var out;
+        try { c.getContext("2d").drawImage(img, 0, 0, tw, th); out = c.toDataURL("image/png"); }
+        catch (e) { out = raw; }
+        cb(out && out.length < raw.length ? out : raw);
+      };
+      img.onerror = function () { cb(raw); };
+      img.src = raw;
+    };
+    rd.readAsDataURL(f);
   }
   // Build an addToken() spec from a library token, applying all its presets.
   function tokenSpec(lt) {
@@ -460,6 +487,7 @@
   }
   function renderTokens() {
     var el = $("token-list"); if (!el) return;
+    if (tokMode === "stock") return renderStock(el);
     var party = partyTokens();
     var partyBar = party.length ? '<div class="vtt-party" id="party-chip" draggable="true" title="Drag onto the map, or click, to place the whole party">' + ico("players", 16) + "<span>Place party <b>(" + party.length + ")</b></span>" + ico("move", 14) + "</div>" : "";
     if (!library.length) { el.innerHTML = '<div class="vtt-empty">Your token library is empty. <b>Add token</b> to build a reusable set for this campaign.</div>'; return; }
@@ -494,6 +522,37 @@
     var t = board.addTokenAtScreen(tokenSpec(lt), sx, sy);
     if (net) net.pushTokens(); board.select(t.id);
     say("Placed <b>" + esc(lt.name || "token") + "</b> on the map.");
+  }
+  // ---- stock tokens: a built-in, always-available generic set ----------------
+  function renderStock(el) {
+    if (!stockData) {
+      el.innerHTML = '<div class="vtt-empty">Loading stock tokens…</div>';
+      fetch((V.stockBase || "/vtt") + "/stock-tokens.json", { credentials: "same-origin" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { stockData = d || { categories: [] }; if (tokMode === "stock") renderStock($("token-list")); })
+        .catch(function () { el.innerHTML = '<div class="vtt-empty">Could not load stock tokens.</div>'; });
+      return;
+    }
+    var q = tokQuery.trim().toLowerCase(), html = "";
+    (stockData.categories || []).forEach(function (cat) {
+      var toks = (cat.tokens || []).filter(function (t) { return !q || t.name.toLowerCase().indexOf(q) >= 0; });
+      if (!toks.length) return;
+      html += '<div class="vtt-sec-h">' + esc(cat.name) + '</div><div class="vtt-stock-grid">' +
+        toks.map(function (t) { return '<button class="vtt-stok" data-url="' + esc(t.url) + '" data-name="' + esc(t.name) + '" title="' + esc(t.name) + '"><img src="' + esc(t.url) + '" alt="" loading="lazy"><span>' + esc(t.name) + "</span></button>"; }).join("") + "</div>";
+    });
+    el.innerHTML = html || '<div class="vtt-empty">No stock tokens match “' + esc(tokQuery) + '”.</div>';
+    el.querySelectorAll(".vtt-stok").forEach(function (btn) {
+      var url = btn.dataset.url, name = btn.dataset.name;
+      btn.addEventListener("click", function () { var r = stage.getBoundingClientRect(); placeStock(url, name, r.left + r.width / 2, r.top + r.height / 2); });
+      btn.addEventListener("dragstart", function (e) { btn.setAttribute("draggable", "true"); dragStock = { url: url, name: name }; try { e.dataTransfer.setData("text/plain", "stock:" + url); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
+      btn.setAttribute("draggable", "true");
+      btn.addEventListener("dragend", function () { dragStock = null; });
+    });
+  }
+  function placeStock(url, name, sx, sy) {
+    var t = board.addTokenAtScreen({ imageUrl: url, name: name || "Token" }, sx, sy);
+    if (net) net.pushTokens(); board.select(t.id);
+    say("Placed <b>" + esc(name || "token") + "</b> on the map.");
   }
   // Party = library tokens assigned to a player (i.e. anyone but the GM).
   function partyTokens() { return library.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId; }); }
@@ -598,9 +657,8 @@
     // Token-editor "Change image" → set the draft token's image (+ default name).
     $("lib-file").onchange = function (e) {
       var f = e.target.files[0]; if (!f || !teDraft) return;
-      var rd = new FileReader();
-      rd.onload = function () { teDraft.imageUrl = rd.result; if (!teDraft.name) { teDraft.name = tokenName(f.name, library.length + 1); $("te-name").value = teDraft.name; } teAvatar(); };
-      rd.readAsDataURL(f); e.target.value = "";
+      tokenImageFromFile(f, function (url) { teDraft.imageUrl = url; if (!teDraft.name) { teDraft.name = tokenName(f.name, library.length + 1); $("te-name").value = teDraft.name; } teAvatar(); });
+      e.target.value = "";
     };
   }
 
@@ -634,6 +692,7 @@
     // Dragging a library token onto the map places it (with all its presets).
     var txt = ""; try { txt = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || ""; } catch (_) {}
     if (dragParty || txt === "party") { dragParty = false; placeParty(e.clientX, e.clientY); return; }
+    if (dragStock || txt.indexOf("stock:") === 0) { var su = dragStock ? dragStock.url : txt.slice(6), sn = dragStock ? dragStock.name : ""; dragStock = null; placeStock(su, sn, e.clientX, e.clientY); return; }
     if (dragLibId || txt.indexOf("lib:") === 0) {
       var id = dragLibId || txt.slice(4), lt = library.filter(function (x) { return x.id === id; })[0];
       dragLibId = null;
@@ -642,7 +701,7 @@
     }
     // Dropping image files makes one-off scene tokens.
     var files = (e.dataTransfer && e.dataTransfer.files) || []; var n = 0;
-    Array.prototype.forEach.call(files, function (f) { if (!/^image\//.test(f.type)) return; var rd = new FileReader(); rd.onload = function () { board.addTokenAtScreen({ imageUrl: rd.result, name: tokenName(f.name, board.state.tokens.length + 1) }, e.clientX + (n++) * 8, e.clientY); if (net) net.pushTokens(); }; rd.readAsDataURL(f); });
+    Array.prototype.forEach.call(files, function (f) { if (!/^image\//.test(f.type)) return; var ix = n++; tokenImageFromFile(f, function (url) { board.addTokenAtScreen({ imageUrl: url, name: tokenName(f.name, board.state.tokens.length + 1) }, e.clientX + ix * 8, e.clientY); if (net) net.pushTokens(); }); });
   });
 
   startNet(); setTool("select"); if (isGM) { setSceneName(); loadLibrary(); autoLoadLast(); }
@@ -672,7 +731,10 @@
       '<div class="vtt-panel" data-panel="scenes"><div class="vtt-row"><button class="vtt-btn" id="sc-new">' + ico("plus", 15) + ' New scene</button></div>' +
       '<div class="vtt-scene-list" id="scene-list"></div></div>' +
       // tokens: campaign token library (decoupled from the scene)
-      '<div class="vtt-panel" data-panel="tokens" hidden><div class="vtt-row"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div><input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
+      '<div class="vtt-panel" data-panel="tokens" hidden>' +
+      '<div class="vtt-seg"><button class="vtt-seg-b on" id="tok-lib" data-mode="library">Library</button><button class="vtt-seg-b" id="tok-stock" data-mode="stock">Stock</button></div>' +
+      '<div class="vtt-row" id="tok-addrow"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div>' +
+      '<input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
       // settings — table toggles, darkness, then the player roster as a section
       '<div class="vtt-panel" data-panel="settings" hidden>' +
       frow("f-fog", "fog", "Fog of War") + frow("f-reveal", "eye", "GM Reveal", true) + frow("f-snap", "snap", "Snapping", true) + frow("f-setup", "wrench", "Wall Editor") +
@@ -794,6 +856,11 @@
       ".vtt-sub-t:hover{color:#fff;border-color:#3d4756}.vtt-sub-t.on{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
       "@media(max-width:640px){.vtt-setupbar{top:auto;bottom:70px;flex-wrap:wrap;max-width:94vw;justify-content:center}.vtt-sub-t span{display:none}}",
       ".vtt-empty{font-size:12px;color:#8b97a7;line-height:1.5;padding:6px 0}",
+      ".vtt-seg{display:flex;gap:4px;margin-bottom:8px;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:3px}",
+      ".vtt-seg-b{flex:1;background:none;border:0;color:#8b97a7;padding:6px;border-radius:6px;font:600 12px system-ui;cursor:pointer}.vtt-seg-b.on{background:#2a3442;color:#e6c66a}",
+      ".vtt-stock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 10px}",
+      ".vtt-stok{display:flex;flex-direction:column;align-items:center;gap:3px;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:6px 4px;cursor:pointer;color:#c3ccd8}.vtt-stok:hover{border-color:#c8a24a}",
+      ".vtt-stok img{width:46px;height:46px;object-fit:contain;pointer-events:none}.vtt-stok span{font-size:10px;text-align:center;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
       ".vtt-party{display:flex;align-items:center;gap:8px;margin:2px 0 10px;padding:9px 11px;border:1px solid #3a4453;border-radius:8px;background:linear-gradient(180deg,#20283a,#171d29);color:#dfe7f2;font-size:12px;font-weight:600;cursor:grab}",
       ".vtt-party:hover{border-color:#c8a24a}.vtt-party:active{cursor:grabbing}.vtt-party span{flex:1}.vtt-party b{color:#e6c66a}",
       ".vtt-hint2{font-size:11px;color:#8b97a7;line-height:1.5;margin:6px 0;display:flex;gap:6px;align-items:flex-start}.vtt-hint2 svg{flex:0 0 auto;margin-top:1px}",

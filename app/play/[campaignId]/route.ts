@@ -5,6 +5,16 @@ import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 
 export const dynamic = "force-dynamic";
 
+// A per-process version stamp appended to the static board assets (?v=…). It changes
+// only when the server (re)starts — i.e. exactly when a new build of the board code
+// is deployed — so browsers cache /vtt/*.js and board.css normally within a run but
+// always pick up the latest after a deploy, instead of serving a stale session.js
+// (which showed up as new features like the stock-token library not appearing).
+const ASSET_VER = Date.now().toString(36);
+function asset(path: string): string {
+  return `${path}${path.includes("?") ? "&" : "?"}v=${ASSET_VER}`;
+}
+
 // GET /play/:campaignId — the first-party virtual tabletop.
 //
 // Served as a self-contained HTML shell (like the GM Screen at /vtt/gm-screen):
@@ -125,16 +135,16 @@ function pageHtml(cfg: Record<string, unknown>): string {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <link rel="icon" type="image/png" href="/icon-64.png">
-<link rel="stylesheet" href="/vtt/board.css">
+<link rel="stylesheet" href="${asset("/vtt/board.css")}">
 </head>
 <body>
 <div id="vtt-root"></div>
 <script>window.__VTT__=${inlineJson(cfg)};</script>
-<script src="/vtt/uvtt.js"></script>
-<script src="/vtt/visibility.js"></script>
-<script src="/vtt/board.js"></script>
-<script src="/vtt/net.js"></script>
-<script src="/vtt/session.js"></script>
+<script src="${asset("/vtt/uvtt.js")}"></script>
+<script src="${asset("/vtt/visibility.js")}"></script>
+<script src="${asset("/vtt/board.js")}"></script>
+<script src="${asset("/vtt/net.js")}"></script>
+<script src="${asset("/vtt/session.js")}"></script>
 </body>
 </html>`;
 }
