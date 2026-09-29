@@ -585,7 +585,14 @@
         // and the sheet opens from the rail button or the C shortcut.
         items.push({ label: "Rename…", onClick: function () { var n = prompt("Token name:", t.name || ""); if (n != null) { t.name = n; board.render(); if (net) net.pushTokens(); } } });
         items.push({ label: "Size", sub: [1, 2, 3, 4].map(function (n) { return { label: n + "× (" + n + " sq)", onClick: function () { var g = board.state.map.ppg || 70; t.w = t.h = g * n; board.render(); if (net) net.pushTokens(); } }; }) });
-        items.push({ label: "Vision", sub: [{ v: null, l: "Unlimited" }, { ft: 120 }, { ft: 60 }, { ft: 30 }, { ft: 10 }].map(function (o) { var fpc = board.state.feetPerCell || 5, cells = o.v === null ? null : o.ft / fpc; var cur = cells === null ? t.vision == null : (t.vision != null && Math.abs(t.vision - cells) < 0.01); return { label: (o.l || o.ft + " ft") + (cur ? "  ✓" : ""), onClick: function () { t.vision = cells; board.render(); if (net) net.pushTokens(); } }; }) });
+        // Vision controls whether the token reveals fog AND how far it sees: "Off"
+        // makes it a non-seeing token; any distance makes it a viewer.
+        var visOpts = [{ off: true, l: "Off (can't see)" }, { v: null, l: "Unlimited" }, { ft: 120 }, { ft: 60 }, { ft: 30 }, { ft: 10 }];
+        items.push({ label: "Vision", sub: visOpts.map(function (o) {
+          var fpc = board.state.feetPerCell || 5, cells = o.off ? null : (o.v === null ? null : o.ft / fpc);
+          var cur = o.off ? !t.isViewer : (t.isViewer && (cells === null ? t.vision == null : (t.vision != null && Math.abs(t.vision - cells) < 0.01)));
+          return { label: (o.l || o.ft + " ft") + (cur ? "  ✓" : ""), onClick: function () { t.isViewer = !o.off; t.vision = cells; board.render(); if (net) net.pushTokens(); } };
+        }) });
         items.push({ label: (t.hidden ? "✓ " : "") + "Hide from players", onClick: function () { board.setHidden(t.id, !t.hidden); if (net) net.pushTokens(); say(t.hidden ? "Token <b>hidden</b> from players." : "Token visible to players."); } });
         var ringSub = [{ label: (!t.ring ? "✓ " : "") + "Off", onClick: function () { board.setRing(t.id, false); if (net) net.pushTokens(); } }];
         RING_COLORS.forEach(function (c) { ringSub.push({ label: (t.ring && (t.ringColor || t.color) === c.v ? "✓ " : "") + c.n, onClick: function () { board.setRing(t.id, true, c.v); if (net) net.pushTokens(); } }); });

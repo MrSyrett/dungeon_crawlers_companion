@@ -714,6 +714,7 @@
 
     // ---- interaction --------------------------------------------------------
     var drag = null;
+    var loadSafety = null; // watchdog that force-clears a stuck scene-load screen
     var longPress = null, longPressPt = null; // touch long-press -> context menu
     function clearLongPress() { if (longPress) { clearTimeout(longPress); longPress = null; } longPressPt = null; }
     var pointers = {}; // active pointerId -> {x,y} in canvas space (for pinch)
@@ -1177,8 +1178,9 @@
       var m = scene.map || {};
       state.feetPerCell = scene.feetPerCell || 5;
       state.grid = scene.grid !== false;
-      state.fog.enabled = !!(scene.fog && scene.fog.enabled);
-      state.fog.opacity = (scene.fog && scene.fog.opacity) || 1;
+      // Fog on/off + darkness are the GM's TABLE settings and persist across scenes —
+      // switching scenes must NOT snap fog back to whatever this scene happened to be
+      // saved with (that made "fog is on" silently turn off on the players).
       var done = function () {
         setMap({ ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType });
         (scene.tokens || []).forEach(function (ts) { addToken(ts); });
@@ -1379,7 +1381,14 @@
       },
       dropOverlay: function (senderId) { delete state.overlays[senderId]; scheduleRender(); },
       // Scene-load progress: pass 0..100 to show a blank canvas + bar, null to clear.
-      setLoading: function (pct) { state.loading = (pct == null) ? null : Math.max(0, Math.min(100, pct)); scheduleRender(); },
+      // A safety timer force-clears the loader if progress stalls, so a dropped or
+      // slow map transfer can never leave a player stuck on a blank screen.
+      setLoading: function (pct) {
+        if (loadSafety) { clearTimeout(loadSafety); loadSafety = null; }
+        state.loading = (pct == null) ? null : Math.max(0, Math.min(100, pct));
+        if (state.loading != null) loadSafety = setTimeout(function () { state.loading = null; loadSafety = null; scheduleRender(); }, 20000);
+        scheduleRender();
+      },
       getTool: function () { return state.tool; },
       setFog: function (on) { state.fog.enabled = !!on; scheduleRender(); },
       setShowAll: function (on) { state.fog.showAll = !!on; scheduleRender(); },

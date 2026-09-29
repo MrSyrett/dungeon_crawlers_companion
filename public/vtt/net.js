@@ -137,7 +137,10 @@
         if (!peer.open) return;
         try {
           while (i < dataUrl.length) {
-            if (peer.dc.bufferedAmount > 4 * 1024 * 1024) { setTimeout(pump, 40); return; }
+            // Keep the send buffer small so a big map streams in gentle bursts — a
+            // large synchronous flood can congest or drop the data channel (which
+            // showed up as players stuck re-loading in a loop).
+            if (peer.dc.bufferedAmount > 256 * 1024) { setTimeout(pump, 30); return; }
             peer.dc.send(JSON.stringify({ t: "mapChunk", s: dataUrl.slice(i, i + CHUNK) }));
             i += CHUNK;
           }
@@ -274,8 +277,8 @@
         pc.ondatachannel = function (ev) { wireDc(ev.channel); };
         pc.onconnectionstatechange = function () {
           var st = pc.connectionState;
-          if (st === "failed") { setState("failed"); resumeJoining(); }
-          else if (st === "disconnected") { if (conn) conn.open = false; setState("waiting"); resumeJoining(); }
+          if (st === "failed") { setState("failed"); clearLoad(); resumeJoining(); }
+          else if (st === "disconnected") { if (conn) conn.open = false; setState("waiting"); clearLoad(); resumeJoining(); }
         };
         pc.setRemoteDescription(m.payload)
           .then(function () { return pc.createAnswer(); })
@@ -295,10 +298,14 @@
       join();
     }
 
+    // A dropped connection mid-map-stream must not leave the player stuck on the
+    // blank loading screen; clear it (the re-load starts fresh on reconnect).
+    function clearLoad() { mapBuf = null; if (board.setLoading) board.setLoading(null); }
+
     function wireDc(dc) {
       conn.dc = dc;
       dc.onopen = function () { conn.open = true; joinTries = 0; if (joinTimer) { clearTimeout(joinTimer); joinTimer = null; } setState("connected"); };
-      dc.onclose = function () { if (conn) conn.open = false; setState("waiting"); resumeJoining(); };
+      dc.onclose = function () { if (conn) conn.open = false; setState("waiting"); clearLoad(); resumeJoining(); };
       dc.onmessage = function (ev) { onHostMsg(ev.data); };
     }
 
