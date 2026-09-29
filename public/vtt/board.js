@@ -54,6 +54,7 @@
       laser: null,          // local laser pointer { x, y } in world coords (transient)
       overlays: {},         // remote presence overlays, keyed by senderId (shared live)
       loading: null,        // 0..100 while a scene/map is streaming in (blank + bar)
+      viewerId: null,       // on a player board: the local player's id (fog = their tokens)
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
       fogSetup: false,      // GM: show walls / edit doors
@@ -517,8 +518,13 @@
     }
 
     function viewerTokens() {
-      var vs = state.tokens.filter(function (t) { return t.isViewer; });
-      return vs.length ? vs : [];
+      // On a PLAYER's board (viewerId set) they see ONLY through the tokens they
+      // own — never through other players' or the GM's tokens. With none of their
+      // tokens on the map they see nothing (fog stays dark) unless fog is off. On
+      // the GM's board (no viewerId) the isViewer union is used, but the GM normally
+      // renders with fog-reveal on so this doesn't gate their view.
+      if (state.viewerId != null) return state.tokens.filter(function (t) { return t.ownerId === state.viewerId; });
+      return state.tokens.filter(function (t) { return t.isViewer; });
     }
 
     // A cheap signature of everything that changes what's visible EXCEPT camera and
@@ -1402,6 +1408,9 @@
       getSetupTool: function () { return state.setupTool; },
       setGm: function (b) { state.gm = !!b; scheduleRender(); },
       getGm: function () { return state.gm; },
+      // A player board sees fog only through the tokens this id owns.
+      setViewerId: function (id) { state.viewerId = id || null; scheduleRender(); },
+      getViewerId: function () { return state.viewerId; },
       setCollision: function (b) { state.collide = !!b; },
       getCollision: function () { return state.collide; },
       // Barrier tests exposed for the network host to validate guest moves.

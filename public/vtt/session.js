@@ -94,6 +94,7 @@
   board.setCanMove(function (t) { return isGM || t.ownerId === V.userId; });
   board.setGm(isGM);            // the GM sees hidden tokens (ghosted); players don't
   board.setCollision(!isGM);    // players are stopped by barriers; the GM moves freely
+  if (!isGM) board.setViewerId(V.userId); // a player sees fog only through THEIR own tokens
   var net = null, currentScene = null;
   var readout = $("vtt-readout"), readoutTimer = null;
   // Transient status line (saves, "now live", ruler readout, connection). It
