@@ -55,6 +55,7 @@
       overlays: {},         // remote presence overlays, keyed by senderId (shared live)
       loading: null,        // 0..100 while a scene/map is streaming in (blank + bar)
       viewerId: null,       // on a player board: the local player's id (fog = their tokens)
+      pendingMove: {},      // id -> {x,y,ts}: a local move this client sent, awaiting the host echo (anti rubber-band)
       pings: [],            // transient "look here" markers
       snap: true,           // snap tokens to the grid
       fogSetup: false,      // GM: show walls / edit doors
@@ -812,7 +813,7 @@
       // options menu, on a door locks/unlocks it (the touch equivalent of the
       // contextmenu handler). Cancelled by moving or lifting before it fires.
       clearLongPress();
-      if (e.pointerType && e.pointerType !== "mouse" && (tool === "select" || tool === "movement" || tool === "lasso") && !state.fogSetup) {
+      if (e.pointerType && e.pointerType !== "mouse" && (tool === "select" || tool === "movement") && !state.fogSetup) {
         var lpx = e.clientX, lpy = e.clientY; longPressPt = p;
         longPress = setTimeout(function () {
           longPress = null; drag = null;
@@ -832,16 +833,10 @@
         drag = { mode: "rings" }; emitOverlay("rings", { x: wx, y: wy });
         scheduleRender(); return;
       }
-      if (tool === "pointer") { ping(wx, wy, "#4ea3ff"); emit("ping", { x: wx, y: wy }); return; }
       if (tool === "laser") {
         state.laser = { x: wx, y: wy };
         drag = { mode: "laser" }; emitOverlay("laser", { x: wx, y: wy });
         scheduleRender(); return;
-      }
-      if (tool === "lasso") {
-        if (state.fogSetup) { setupDown(p); return; }
-        state.marquee = { x1: wx, y1: wy, x2: wx, y2: wy };
-        drag = { mode: "lasso" }; scheduleRender(); return;
       }
       if (tool === "select" || tool === "movement") {
         // Fog setup mode owns clicks: draw/erase/lock barriers by sub-tool.
@@ -851,6 +846,18 @@
         if (di >= 0) { emit("doorclick", { index: di }); return; }
         var t = tokenAt(p.x, p.y);
         if (t) {
+          // Ctrl/Cmd-click builds a multi-selection (toggle this token in/out) —
+          // the replacement for the old lasso. It never starts a drag; the player
+          // ctrl-clicks a few tokens, then plain-drags any one to move the group.
+          if (e.ctrlKey || e.metaKey) {
+            var at = state.selection.indexOf(t.id);
+            if (at >= 0) { state.selection.splice(at, 1); if (state.selectedId === t.id) state.selectedId = state.selection[state.selection.length - 1] || null; }
+            else { state.selection.push(t.id); state.selectedId = t.id; }
+            emit("select", byId(state.selectedId));
+            emit("multiselect", { count: state.selection.length });
+            scheduleRender();
+            return;
+          }
           // Grabbing a token that's part of a multi-selection drags the whole
           // group; otherwise it becomes the single selection.
           var inSel = state.selection.indexOf(t.id) >= 0 && state.selection.length > 1;
@@ -928,8 +935,6 @@
       } else if (drag.mode === "laser") {
         state.laser = { x: s2wX(p.x), y: s2wY(p.y) };
         emitOverlay("laser", { x: state.laser.x, y: state.laser.y });
-      } else if (drag.mode === "lasso") {
-        state.marquee.x2 = s2wX(p.x); state.marquee.y2 = s2wY(p.y);
       } else if (drag.mode === "seg") {
         var v = snapVertex(s2wX(p.x), s2wY(p.y));
         drag.x2 = v.x; drag.y2 = v.y; state.segDraft.x2 = v.x; state.segDraft.y2 = v.y;
@@ -976,18 +981,6 @@
         state.rings = null; emitOverlay(null); scheduleRender();
       } else if (drag && drag.mode === "laser") {
         state.laser = null; emitOverlay(null); scheduleRender();
-      } else if (drag && drag.mode === "lasso") {
-        var mq = state.marquee;
-        if (mq) {
-          var x1 = Math.min(mq.x1, mq.x2), x2 = Math.max(mq.x1, mq.x2), y1 = Math.min(mq.y1, mq.y2), y2 = Math.max(mq.y1, mq.y2);
-          // Select the tokens this client may move whose centre lies in the box.
-          var picked = state.tokens.filter(function (t) { return canMove(t) && t.x >= x1 && t.x <= x2 && t.y >= y1 && t.y <= y2; }).map(function (t) { return t.id; });
-          state.selection = picked;
-          state.selectedId = picked.length ? picked[picked.length - 1] : null;
-          emit("select", state.selectedId ? byId(state.selectedId) : null);
-          emit("lasso", { count: picked.length });
-        }
-        state.marquee = null; scheduleRender();
       }
       drag = null;
     }
@@ -1275,10 +1268,25 @@
           t.imageUrl = spec.imageUrl; t.image = null;
           if (spec.imageUrl) loadImage(spec.imageUrl).then(function (img) { t.image = img; scheduleRender(); }, function () {});
         }
-        // Don't let a host echo fight the token this client is actively dragging —
-        // that's the rubber-band jitter. Keep the local position until the drag ends.
-        var dragging = drag && drag.mode === "move" && drag.id === spec.id;
-        t.name = spec.name; if (!dragging) { t.x = spec.x; t.y = spec.y; } t.w = spec.w; t.h = spec.h;
+        // Don't let a host echo fight a token this client controls locally — that's
+        // the rubber-band jitter. Hold the local position while:
+        //  (a) actively dragging this token (or any member of a group drag), and
+        //  (b) after release, until the host's echo catches up to the LAST position
+        //      we sent (positions match), or a short grace expires (then we accept
+        //      the host as authoritative — e.g. it clamped the move at a wall).
+        // Fast drags put several stale echoes in flight; without (b) each one snaps
+        // the token back to an old spot before the newest echo corrects it.
+        var dragging = drag && drag.mode === "move" && (drag.id === spec.id || (drag.members && drag.members.some(function (m) { return m.id === spec.id; })));
+        var hold = dragging;
+        if (!hold) {
+          var pm = state.pendingMove[spec.id];
+          if (pm) {
+            if (Math.abs(spec.x - pm.x) < 0.5 && Math.abs(spec.y - pm.y) < 0.5) { delete state.pendingMove[spec.id]; }
+            else if (Date.now() - pm.ts < 600) { hold = true; }
+            else { delete state.pendingMove[spec.id]; }
+          }
+        }
+        t.name = spec.name; if (!hold) { t.x = spec.x; t.y = spec.y; } t.w = spec.w; t.h = spec.h;
         t.rot = spec.rot || 0; t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
         t.isViewer = !!spec.isViewer; t.color = spec.color || t.color;
         t.vision = (typeof spec.vision === "number" && spec.vision > 0) ? spec.vision : null; t.hp = spec.hp; t.hidden = !!spec.hidden; t.ring = !!spec.ring; t.ringColor = spec.ringColor || null;
@@ -1321,7 +1329,7 @@
       });
       try { return c.toDataURL("image/jpeg", 0.55); } catch (e) { return null; }
     }
-    function cursorFor(t) { return (t === "ruler" || t === "pointer" || t === "rings" || t === "laser" || t === "lasso" || t === "movement") ? "crosshair" : "default"; }
+    function cursorFor(t) { return (t === "ruler" || t === "rings" || t === "laser" || t === "movement") ? "crosshair" : "default"; }
 
     // ---- public API ---------------------------------------------------------
     canvas.addEventListener("pointerdown", onDown);
@@ -1411,6 +1419,9 @@
       // A player board sees fog only through the tokens this id owns.
       setViewerId: function (id) { state.viewerId = id || null; scheduleRender(); },
       getViewerId: function () { return state.viewerId; },
+      // The network guest calls this after sending a move it made locally, so the
+      // host's echo doesn't rubber-band the token back until the host has caught up.
+      noteLocalMove: function (id, x, y) { state.pendingMove[id] = { x: x, y: y, ts: Date.now() }; },
       setCollision: function (b) { state.collide = !!b; },
       getCollision: function () { return state.collide; },
       // Barrier tests exposed for the network host to validate guest moves.

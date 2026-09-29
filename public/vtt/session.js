@@ -65,25 +65,23 @@
   var TOOL_GROUPS = [
     { id: "select", title: "Select", subs: [
       { tool: "select", icon: "select", label: "Select / move", key: "V" },
-      { tool: "lasso", icon: "lasso", label: "Lasso (multi-select)", key: "L" },
     ] },
     { id: "measure", title: "Measure", subs: [
       { tool: "ruler", icon: "ruler", label: "Standard measure", key: "R" },
       { tool: "movement", icon: "move", label: "Movement (drag a token)", key: "M" },
       { tool: "rings", icon: "target", label: "Ranges / zones", key: "Z" },
     ] },
-    { id: "ping", title: "Ping", subs: [
-      { tool: "ping", icon: "ping", label: "Ping", key: "P" },
-      { tool: "laser", icon: "laser", label: "Laser pointer", key: "K" },
+    { id: "pointer", title: "Pointer", subs: [
+      { tool: "laser", icon: "laser", label: "Pointer", key: "P" },
     ] },
   ];
   var TOOL_SUB = {}, TOOL_GROUP = {}, GROUP_ACTIVE = {};
   TOOL_GROUPS.forEach(function (g) { GROUP_ACTIVE[g.id] = g.subs[0].tool; g.subs.forEach(function (s) { TOOL_SUB[s.tool] = s; TOOL_GROUP[s.tool] = g.id; }); });
   var TOOL_HINT = {
-    lasso: "<b>Lasso:</b> drag a box to select several tokens, then drag any of them to move the whole group.",
+    select: "<b>Select:</b> click a token to move it · <b>Ctrl/⌘-click</b> tokens to select several, then drag any of them to move the group.",
     movement: "<b>Movement:</b> drag a token to see how far it's moving from where it started.",
     rings: "<b>Ranges:</b> press and drag to show Close / Near / Far rings around a point.",
-    laser: "<b>Laser:</b> hold and drag to point — everyone at the table sees it live.",
+    laser: "<b>Pointer:</b> hold and drag to point — everyone at the table sees it live.",
   };
 
   injectStyles();
@@ -142,9 +140,8 @@
   bind("z-fit", function () { board.fitToMap(); });
   bind("conn-retry", function () { if (net && net.reconnect) { setConn("connecting"); net.reconnect(); } });
   board.on("ruler", function (r) { say("<b>" + r.text + "</b>"); });
-  board.on("ping", function (p) { if (net) net.ping(p.x, p.y); });
   board.on("overlay", function (o) { if (net && net.overlay) net.overlay(o); });
-  board.on("lasso", function (e) { say(e.count ? "<b>" + e.count + "</b> token" + (e.count === 1 ? "" : "s") + " selected — drag to move them together." : "Nothing selected."); });
+  board.on("multiselect", function (e) { say(e.count ? "<b>" + e.count + "</b> token" + (e.count === 1 ? "" : "s") + " selected — drag any to move them together." : "Selection cleared."); });
   board.on("open", function (e) { openSheetForToken(e.token); });
   board.on("context", function (e) { showContext(e); });
   board.on("doorclick", function (e) { handleDoor(e.index); });
@@ -155,7 +152,7 @@
     var el = document.activeElement, tag = el && el.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (el && el.isContentEditable)) return;
     var k = e.key.toLowerCase();
-    var byKey = { v: "select", l: "lasso", r: "ruler", m: "movement", z: "rings", p: "ping", k: "laser" };
+    var byKey = { v: "select", r: "ruler", m: "movement", z: "rings", p: "laser" };
     if (byKey[k]) setTool(byKey[k]);
     else if (k === "c") toggleSheet();
     else if (k === "escape") { hideContext(); closeFlyouts(); if ($("sheetpop") && !$("sheetpop").hidden) { $("sheetpop").hidden = true; $("sheet-frame").src = "about:blank"; } }
@@ -251,7 +248,6 @@
     bind("te-del", function () { if (teId && confirm("Remove this token from the library?")) { library = library.filter(function (x) { return x.id !== teId; }); saveLibrary(); renderTokens(); closeTokenEditor(); } });
     bind("te-img", function () { $("lib-file").click(); });
     var ts = $("tok-search"); if (ts) ts.oninput = function () { tokQuery = this.value; renderTokens(); };
-    ["tok-lib", "tok-stock"].forEach(function (id) { var b = $(id); if (b) b.onclick = function () { tokMode = b.dataset.mode; mount.querySelectorAll(".vtt-seg-b").forEach(function (x) { x.classList.toggle("on", x === b); }); var ar = $("tok-addrow"); if (ar) ar.style.display = tokMode === "stock" ? "none" : ""; renderTokens(); }; });
   }
 
   function setSetupTool(k) {
@@ -438,7 +434,7 @@
       fetch(V.tokenBase, { method: "PUT", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaignId: V.campaignId, tokens: library }) }).catch(function () {});
     }, 400);
   }
-  var tokQuery = "", dragLibId = null, dragParty = false, tokMode = "library", stockData = null, dragStock = null;
+  var tokQuery = "", dragLibId = null, dragParty = false, stockOpen = false, stockData = null, dragStock = null;
   var roster = Array.isArray(V.players) ? V.players : [];
   function ownerLabel(id) {
     if (!id) return ""; if (id === V.userId) return "GM";
@@ -485,32 +481,50 @@
     var sub = bits.join(" · ");
     return '<div class="vtt-trow" data-id="' + lt.id + '" draggable="true" title="Drag onto the map to place"><div class="vtt-tav">' + av + '</div><div class="vtt-tinfo"><div class="vtt-tname">' + esc(lt.name || "Token") + '</div>' + (sub ? '<div class="vtt-tsub">' + esc(sub) + "</div>" : "") + '</div><button class="vtt-mini edit" title="Edit token">' + ico("pencil", 14) + "</button></div>";
   }
+  // Only the GM's OWN library tokens (not stock overrides, which live in the same
+  // array but are the built-in stock set customised for this campaign).
+  function realLib() { return library.filter(function (x) { return !x.stock; }); }
+  // The saved override for a stock token (assignment, vision, name, …), or null.
+  function stockOv(url) { for (var i = 0; i < library.length; i++) { if (library[i].stock && library[i].stockUrl === url) return library[i]; } return null; }
+  // Make sure the built-in stock manifest is loaded, then run cb.
+  function ensureStock(cb) {
+    if (stockData) { cb && cb(); return; }
+    fetch((V.stockBase || "/vtt") + "/stock-tokens.json", { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { stockData = d || { categories: [] }; cb && cb(); })
+      .catch(function () { stockData = { categories: [], error: true }; cb && cb(); });
+  }
+
   function renderTokens() {
     var el = $("token-list"); if (!el) return;
-    if (tokMode === "stock") return renderStock(el);
+    ensureStock(function () { if (tab() === "tokens") paintTokens(el); });
+    paintTokens(el);
+  }
+  function paintTokens(el) {
     var party = partyTokens();
     var partyBar = party.length ? '<div class="vtt-party" id="party-chip" draggable="true" title="Drag onto the map, or click, to place the whole party">' + ico("players", 16) + "<span>Place party <b>(" + party.length + ")</b></span>" + ico("move", 14) + "</div>" : "";
-    if (!library.length) { el.innerHTML = '<div class="vtt-empty">Your token library is empty. <b>Add token</b> to build a reusable set for this campaign.</div>'; return; }
     var q = tokQuery.trim().toLowerCase();
-    var list = library.filter(function (lt) { return !q || (lt.name || "").toLowerCase().indexOf(q) >= 0; });
-    if (!list.length) { el.innerHTML = partyBar + '<div class="vtt-empty">No tokens match “' + esc(tokQuery) + '”.</div>'; wireParty(); return; }
-    var assigned = list.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId; });
-    var rest = list.filter(function (lt) { return !(lt.ownerId && lt.ownerId !== V.userId); });
+    function matchQ(nm) { return !q || (nm || "").toLowerCase().indexOf(q) >= 0; }
+    // Players group = anything assigned to a player (own library tokens AND assigned
+    // stock tokens — both are library entries). "Tokens" = the GM's own unassigned
+    // library tokens. Stock built-ins get their own collapsible section below.
+    var assigned = library.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId && matchQ(lt.name); });
+    var rest = library.filter(function (lt) { return !lt.stock && !(lt.ownerId && lt.ownerId !== V.userId) && matchQ(lt.name); });
     var html = partyBar;
     if (assigned.length) html += '<div class="vtt-sec-h">Players</div>' + assigned.map(libRow).join("");
     if (rest.length) html += (assigned.length ? '<div class="vtt-sec-h" style="margin-top:10px">Tokens</div>' : "") + rest.map(libRow).join("");
+    if (!assigned.length && !rest.length && !realLib().length) html += '<div class="vtt-empty">Your token library is empty. <b>Add token</b> for your own art, or open <b>Stock tokens</b> below for the built-in set.</div>';
+    html += stockSectionHtml(q);
     el.innerHTML = html;
     wireParty();
     el.querySelectorAll(".vtt-trow").forEach(function (row) {
       var id = row.dataset.id, lt = library.filter(function (x) { return x.id === id; })[0]; if (!lt) return;
       row.addEventListener("dragstart", function (e) { dragLibId = id; try { e.dataTransfer.setData("text/plain", "lib:" + id); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
       row.addEventListener("dragend", function () { dragLibId = null; });
-      // Tapping/clicking the row places the token at the view centre — this is the
-      // touch-friendly path (drag-to-canvas is mouse-only). The Edit pencil still
-      // opens the editor and never places.
       row.addEventListener("click", function (e) { if (e.target.closest(".edit")) return; var r = stage.getBoundingClientRect(); placeLibAt(lt, r.left + r.width / 2, r.top + r.height / 2); });
       row.querySelector(".edit").onclick = function (e) { e.stopPropagation(); openTokenEditor(lt); };
     });
+    wireStock(el);
   }
   function wireParty() {
     var pc = $("party-chip"); if (!pc) return;
@@ -523,36 +537,60 @@
     if (net) net.pushTokens(); board.select(t.id);
     say("Placed <b>" + esc(lt.name || "token") + "</b> on the map.");
   }
-  // ---- stock tokens: a built-in, always-available generic set ----------------
-  function renderStock(el) {
-    if (!stockData) {
-      el.innerHTML = '<div class="vtt-empty">Loading stock tokens…</div>';
-      fetch((V.stockBase || "/vtt") + "/stock-tokens.json", { credentials: "same-origin" })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) { stockData = d || { categories: [] }; if (tokMode === "stock") renderStock($("token-list")); })
-        .catch(function () { el.innerHTML = '<div class="vtt-empty">Could not load stock tokens.</div>'; });
-      return;
-    }
-    var q = tokQuery.trim().toLowerCase(), html = "";
-    (stockData.categories || []).forEach(function (cat) {
+  // ---- stock tokens: a built-in set, shown as a collapsible section of the -----
+  // library. Each can be assigned to a player, given vision, sized, hidden, ringed
+  // — the full token editor minus Delete and Change-image (the art is fixed). Those
+  // edits are saved as image-locked library entries (stock:true), so an assigned
+  // stock token behaves exactly like any other party token (owner, vision/FoW, Place
+  // party) and syncs to players.
+  function stockSectionHtml(q) {
+    var cats = (stockData && stockData.categories) || [];
+    var total = cats.reduce(function (n, c) { return n + ((c.tokens || []).length); }, 0);
+    var open = stockOpen || !!q; // a search auto-opens the section so it reaches stock
+    var head = '<div class="vtt-stock-head' + (open ? " open" : "") + '" id="stock-head"><span class="vtt-stock-chev">▸</span><span>Stock tokens</span><b>' + total + "</b></div>";
+    if (!open) return head;
+    if (stockData && stockData.error) return head + '<div class="vtt-empty">Could not load stock tokens.</div>';
+    if (!stockData) return head + '<div class="vtt-empty">Loading stock tokens…</div>';
+    var body = "";
+    cats.forEach(function (cat) {
       var toks = (cat.tokens || []).filter(function (t) { return !q || t.name.toLowerCase().indexOf(q) >= 0; });
       if (!toks.length) return;
-      html += '<div class="vtt-sec-h">' + esc(cat.name) + '</div><div class="vtt-stock-grid">' +
-        toks.map(function (t) { return '<button class="vtt-stok" data-url="' + esc(t.url) + '" data-name="' + esc(t.name) + '" title="' + esc(t.name) + '"><img src="' + esc(t.url) + '" alt="" loading="lazy"><span>' + esc(t.name) + "</span></button>"; }).join("") + "</div>";
+      body += '<div class="vtt-sec-h sub">' + esc(cat.name) + '</div><div class="vtt-stock-grid">' +
+        toks.map(function (t) {
+          var ov = stockOv(t.url), owned = ov && ov.ownerId && ov.ownerId !== V.userId;
+          var dot = owned ? '<i class="vtt-stok-dot" style="background:' + colorFor(ov.ownerId) + '" title="' + esc(ownerLabel(ov.ownerId)) + '"></i>' : "";
+          var nm = (ov && ov.name) || t.name;
+          return '<div class="vtt-stok" data-url="' + esc(t.url) + '" data-name="' + esc(t.name) + '" draggable="true" title="' + esc(nm) + '">' +
+            '<img src="' + esc(t.url) + '" alt="" loading="lazy"><span>' + esc(nm) + "</span>" + dot +
+            '<button class="vtt-stok-edit edit" title="Edit / assign to a player">' + ico("pencil", 12) + "</button></div>";
+        }).join("") + "</div>";
     });
-    el.innerHTML = html || '<div class="vtt-empty">No stock tokens match “' + esc(tokQuery) + '”.</div>';
-    el.querySelectorAll(".vtt-stok").forEach(function (btn) {
-      var url = btn.dataset.url, name = btn.dataset.name;
-      btn.addEventListener("click", function () { var r = stage.getBoundingClientRect(); placeStock(url, name, r.left + r.width / 2, r.top + r.height / 2); });
-      btn.addEventListener("dragstart", function (e) { btn.setAttribute("draggable", "true"); dragStock = { url: url, name: name }; try { e.dataTransfer.setData("text/plain", "stock:" + url); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
-      btn.setAttribute("draggable", "true");
-      btn.addEventListener("dragend", function () { dragStock = null; });
+    return head + (body || '<div class="vtt-empty">No stock tokens match “' + esc(tokQuery) + '”.</div>');
+  }
+  function wireStock(el) {
+    var head = el.querySelector("#stock-head");
+    if (head) head.onclick = function () { stockOpen = !stockOpen; renderTokens(); };
+    el.querySelectorAll(".vtt-stok").forEach(function (tile) {
+      var url = tile.dataset.url, name = tile.dataset.name;
+      tile.addEventListener("click", function (e) { if (e.target.closest(".edit")) return; var r = stage.getBoundingClientRect(); placeStock(url, name, r.left + r.width / 2, r.top + r.height / 2); });
+      tile.addEventListener("dragstart", function (e) { dragStock = { url: url, name: name }; try { e.dataTransfer.setData("text/plain", "stock:" + url); e.dataTransfer.effectAllowed = "copy"; } catch (_) {} });
+      tile.addEventListener("dragend", function () { dragStock = null; });
+      var ed = tile.querySelector(".edit"); if (ed) ed.onclick = function (e) { e.stopPropagation(); openStockEditor(url, name); };
     });
   }
+  // Open the token editor for a stock built-in: its saved override if it has one,
+  // else a fresh image-locked draft seeded from the built-in.
+  function openStockEditor(url, name) {
+    var ov = stockOv(url);
+    if (ov) return openTokenEditor(ov);
+    openTokenEditor({ id: libUid(), name: name, imageUrl: url, stock: true, stockUrl: url, size: 1, ownerId: null, isViewer: false, vision: null, hidden: false, ring: false, ringColor: "#c8a24a" });
+  }
   function placeStock(url, name, sx, sy) {
-    var t = board.addTokenAtScreen({ imageUrl: url, name: name || "Token" }, sx, sy);
+    var ov = stockOv(url);
+    var spec = ov ? tokenSpec(ov) : { imageUrl: url, name: name || "Token" };
+    var t = board.addTokenAtScreen(spec, sx, sy);
     if (net) net.pushTokens(); board.select(t.id);
-    say("Placed <b>" + esc(name || "token") + "</b> on the map.");
+    say("Placed <b>" + esc((ov && ov.name) || name || "token") + "</b> on the map.");
   }
   // Party = library tokens assigned to a player (i.e. anyone but the GM).
   function partyTokens() { return library.filter(function (lt) { return lt.ownerId && lt.ownerId !== V.userId; }); }
@@ -581,10 +619,16 @@
   // ---- token editor popup (#5) ----------------------------------------------
   var teId = null, teDraft = null;
   function openTokenEditor(lt) {
-    teId = lt && lt.id ? lt.id : null;
+    // teId is set only when this token is already saved in the library — a stock
+    // built-in opened for the first time has an id but isn't in the library yet, so
+    // Save PUSHES it (adopting the override) rather than trying to replace.
+    teId = (lt && lt.id && library.some(function (x) { return x.id === lt.id; })) ? lt.id : null;
     teDraft = lt ? JSON.parse(JSON.stringify(lt)) : { id: libUid(), name: "", imageUrl: null, size: 1, ownerId: null, isViewer: false, vision: null, hidden: false, ring: false, ringColor: "#c8a24a" };
-    $("te-h").textContent = teId ? "Edit token" : "Add token";
-    $("te-del").hidden = !teId;
+    var isStock = !!(teDraft && teDraft.stock);
+    $("te-h").textContent = isStock ? "Stock token" : (teId ? "Edit token" : "Add token");
+    // Stock tokens can't be deleted (built-in) or have their image changed (fixed art).
+    $("te-del").hidden = !teId || isStock;
+    var img = $("te-img"); if (img) img.style.display = isStock ? "none" : "";
     $("te-name").value = teDraft.name || "";
     $("te-size").value = teDraft.size || 1;
     // owner options: Unassigned / Me (GM) / roster / any extra connected peers
@@ -732,9 +776,8 @@
       '<div class="vtt-scene-list" id="scene-list"></div></div>' +
       // tokens: campaign token library (decoupled from the scene)
       '<div class="vtt-panel" data-panel="tokens" hidden>' +
-      '<div class="vtt-seg"><button class="vtt-seg-b on" id="tok-lib" data-mode="library">Library</button><button class="vtt-seg-b" id="tok-stock" data-mode="stock">Stock</button></div>' +
       '<div class="vtt-row" id="tok-addrow"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div>' +
-      '<input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
+      '<input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens & stock by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
       // settings — table toggles, darkness, then the player roster as a section
       '<div class="vtt-panel" data-panel="settings" hidden>' +
       frow("f-fog", "fog", "Fog of War") + frow("f-reveal", "eye", "GM Reveal", true) + frow("f-snap", "snap", "Snapping", true) + frow("f-setup", "wrench", "Wall Editor") +
@@ -856,11 +899,14 @@
       ".vtt-sub-t:hover{color:#fff;border-color:#3d4756}.vtt-sub-t.on{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
       "@media(max-width:640px){.vtt-setupbar{top:auto;bottom:70px;flex-wrap:wrap;max-width:94vw;justify-content:center}.vtt-sub-t span{display:none}}",
       ".vtt-empty{font-size:12px;color:#8b97a7;line-height:1.5;padding:6px 0}",
-      ".vtt-seg{display:flex;gap:4px;margin-bottom:8px;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:3px}",
-      ".vtt-seg-b{flex:1;background:none;border:0;color:#8b97a7;padding:6px;border-radius:6px;font:600 12px system-ui;cursor:pointer}.vtt-seg-b.on{background:#2a3442;color:#e6c66a}",
-      ".vtt-stock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 10px}",
-      ".vtt-stok{display:flex;flex-direction:column;align-items:center;gap:3px;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:6px 4px;cursor:pointer;color:#c3ccd8}.vtt-stok:hover{border-color:#c8a24a}",
+      ".vtt-stock-head{display:flex;align-items:center;gap:8px;margin:12px 0 6px;padding:8px 10px;background:#161b22;border:1px solid #2a323d;border-radius:8px;color:#c3ccd8;font:700 11px system-ui;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;user-select:none}.vtt-stock-head:hover{border-color:#3a4453}.vtt-stock-head b{margin-left:auto;color:#8b97a7;font-weight:600}",
+      ".vtt-stock-chev{display:inline-block;transition:transform .12s;color:#8b97a7}.vtt-stock-head.open .vtt-stock-chev{transform:rotate(90deg)}",
+      ".vtt-sec-h.sub{margin:8px 0 6px;font-size:10px;color:#7c8797}",
+      ".vtt-stock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 6px}",
+      ".vtt-stok{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;background:#161b22;border:1px solid #2a323d;border-radius:8px;padding:6px 4px;cursor:pointer;color:#c3ccd8}.vtt-stok:hover{border-color:#c8a24a}",
       ".vtt-stok img{width:46px;height:46px;object-fit:contain;pointer-events:none}.vtt-stok span{font-size:10px;text-align:center;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
+      ".vtt-stok-dot{position:absolute;top:5px;left:5px;width:9px;height:9px;border-radius:50%;border:1px solid #0c0f14}",
+      ".vtt-stok-edit{position:absolute;top:3px;right:3px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:rgba(12,15,20,.82);border:1px solid #2a323d;border-radius:6px;color:#c3ccd8;cursor:pointer;opacity:0;transition:opacity .12s}.vtt-stok:hover .vtt-stok-edit,.vtt-stok-edit:focus{opacity:1}.vtt-stok-edit:hover{border-color:#c8a24a;color:#e6c66a}",
       ".vtt-party{display:flex;align-items:center;gap:8px;margin:2px 0 10px;padding:9px 11px;border:1px solid #3a4453;border-radius:8px;background:linear-gradient(180deg,#20283a,#171d29);color:#dfe7f2;font-size:12px;font-weight:600;cursor:grab}",
       ".vtt-party:hover{border-color:#c8a24a}.vtt-party:active{cursor:grabbing}.vtt-party span{flex:1}.vtt-party b{color:#e6c66a}",
       ".vtt-hint2{font-size:11px;color:#8b97a7;line-height:1.5;margin:6px 0;display:flex;gap:6px;align-items:flex-start}.vtt-hint2 svg{flex:0 0 auto;margin-top:1px}",

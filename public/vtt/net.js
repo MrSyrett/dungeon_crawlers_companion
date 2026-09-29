@@ -419,6 +419,9 @@
       moveTimer[t.id] = setTimeout(function () {
         moveTimer[t.id] = null;
         sendHost({ t: "moveToken", id: t.id, x: t.x, y: t.y, rot: t.rot });
+        // Remember what we sent so the host's echo doesn't rubber-band us back to a
+        // stale position before it catches up to this one.
+        if (board.noteLocalMove) board.noteLocalMove(t.id, t.x, t.y);
       }, 40);
     });
 
