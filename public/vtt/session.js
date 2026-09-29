@@ -99,6 +99,8 @@
   // Transient status line (saves, "now live", ruler readout, connection). It
   // auto-hides so no explainer text lingers on the canvas.
   function say(h) { readout.innerHTML = h; readout.hidden = !h; if (readoutTimer) clearTimeout(readoutTimer); if (h) readoutTimer = setTimeout(function () { readout.hidden = true; }, 4500); }
+  // Push the GM's table settings (fog, snap, opacity) to connected players.
+  function pushSettings() { if (net && net.settings) net.settings(); }
 
   // ---- rail tools -----------------------------------------------------------
   // Each rail button is a GROUP with a flyout of sub-tools (TOOL_GROUPS defined
@@ -179,9 +181,11 @@
   // in setup → lock/unlock (GM only).
   function handleDoor(i) {
     var d = board.getDoor(i); if (!d) return;
-    if (d.locked && !isGM) { say("That door is <b>locked</b>."); return; }
-    var newClosed = !(d.closed || d.locked);
-    if (isGM) { board.setDoor(i, { closed: newClosed, locked: false }); if (net && net.doorSync) net.doorSync(i); }
+    // A locked door never opens on a left-click — for anyone. The GM unlocks it
+    // with a right-click first.
+    if (d.locked) { say(isGM ? "That door is <b>locked</b> — right-click to unlock." : "That door is <b>locked</b>."); return; }
+    var newClosed = !d.closed;
+    if (isGM) { board.setDoor(i, { closed: newClosed }); if (net && net.doorSync) net.doorSync(i); }
     else if (net && net.door) net.door(i, newClosed);
   }
   function handleDoorLock(i) {
@@ -216,16 +220,16 @@
     bind("se-close", closeEditor);
     bind("se-save", saveEditor);
     bind("se-del", function () { if (editId && confirm("Delete this scene?")) { delScene(editId); closeEditor(); } });
-    // settings panel
-    fbtn("f-fog", function (on) { board.setFog(on); say(on ? "Fog on — players see only what their tokens can." : "Fog off."); });
-    fbtn("f-reveal", function (on) { board.setShowAll(on); }, true);
-    fbtn("f-snap", function (on) { board.setSnap(on); }, true);
+    // settings panel — fog and snap are TABLE settings: they carry to players live.
+    fbtn("f-fog", function (on) { board.setFog(on); pushSettings(); say(on ? "Fog on — players see only what their tokens can." : "Fog off for everyone."); });
+    fbtn("f-reveal", function (on) { board.setShowAll(on); }, true); // GM-only view, not shared
+    fbtn("f-snap", function (on) { board.setSnap(on); pushSettings(); say(on ? "Grid snap on — tokens snap for you and your players." : "Grid snap off for everyone."); }, true);
     fbtn("f-setup", function (on) {
       board.setFogSetup(on);
       var bar = $("setupbar"); if (bar) bar.hidden = !on;
       if (on) { setSetupTool("select"); say(setupHint("select")); } else say("");
     });
-    $("f-op").oninput = function () { board.setFogOpacity(parseInt(this.value, 10) / 100); };
+    $("f-op").oninput = function () { board.setFogOpacity(parseInt(this.value, 10) / 100); pushSettings(); };
     // setup toolbar (select / wall / window / door / erase)
     ["select", "wall", "window", "door", "erase"].forEach(function (k) {
       bind("su-" + k, function () { setSetupTool(k); say(setupHint(k)); });
@@ -665,7 +669,7 @@
       '<button class="vtt-tbtn vtt-groupbtn' + (on ? " on" : "") + '" id="grp-' + g.id + '" title="' + esc(g.title) + '"><span class="vtt-gi">' + ico(g.subs[0].icon, 20) + "</span><i class=\"vtt-caret\"></i></button>" +
       '<div class="vtt-flyout">' + subs + "</div></div>";
   }
-  function frow(id, name, label, on) { return '<button class="vtt-frow' + (on ? " on" : "") + '" id="' + id + '"><span class="vtt-frow-i">' + ico(name, 18) + "</span>" + label + "</button>"; }
+  function frow(id, name, label, on) { return '<button class="vtt-frow' + (on ? " on" : "") + '" id="' + id + '" role="switch" aria-checked="' + (on ? "true" : "false") + '"><span class="vtt-frow-i">' + ico(name, 18) + '</span><span class="vtt-frow-l">' + label + '</span><span class="vtt-switch" aria-hidden="true"></span></button>'; }
   function subtn(id, name, label, on) { return '<button class="vtt-sub-t' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name, 17) + "<span>" + label + "</span></button>"; }
   function shell() {
     var rail = TOOL_GROUPS.map(function (g, i) { return railGroup(g, i === 0); }).join("") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
@@ -728,7 +732,7 @@
   function sheetPop() { return '<div id="sheetpop" class="vtt-sheetpop" hidden><div class="vtt-sheet-head" id="sheet-head"><span id="sheet-title">Character</span><span style="flex:1"></span><button class="vtt-mini" id="sheet-mode" title="Switch to desktop size">' + ico("desktop", 16) + '</button><button class="vtt-mini" id="sheet-close">' + ico("close", 16) + '</button></div><iframe id="sheet-frame" title="Character sheet"></iframe></div>'; }
 
   function bind(id, fn) { var el = $(id); if (el) el.onclick = fn; }
-  function fbtn(id, fn, on) { var el = $(id); if (!el) return; el.onclick = function () { var v = !el.classList.contains("on"); el.classList.toggle("on", v); if (id === "f-reveal") { el.querySelector(".vtt-frow-i").innerHTML = ico(v ? "eye" : "eyeoff", 18); } fn(v); }; }
+  function fbtn(id, fn, on) { var el = $(id); if (!el) return; el.onclick = function () { var v = !el.classList.contains("on"); el.classList.toggle("on", v); el.setAttribute("aria-checked", v ? "true" : "false"); if (id === "f-reveal") { el.querySelector(".vtt-frow-i").innerHTML = ico(v ? "eye" : "eyeoff", 18); } fn(v); }; }
   function makeDraggable(box, handle) { var d = null; handle.addEventListener("pointerdown", function (e) { if (e.target.closest("button")) return; d = { x: e.clientX, y: e.clientY, l: box.offsetLeft, t: box.offsetTop }; handle.setPointerCapture(e.pointerId); }); handle.addEventListener("pointermove", function (e) { if (!d) return; box.style.left = (d.l + e.clientX - d.x) + "px"; box.style.top = (d.t + e.clientY - d.y) + "px"; box.style.right = "auto"; }); handle.addEventListener("pointerup", function () { d = null; }); }
 
   function toggleSide(force) { var el = $("vtt-side"); if (!el) return; var show = force == null ? el.hidden : force; el.hidden = !show; mount.classList.toggle("side-open", show); if (show) selectTab(tab()); }
@@ -748,7 +752,8 @@
       ".vtt-rail-group{position:relative}",
       ".vtt-groupbtn{position:relative}.vtt-groupbtn .vtt-gi{display:flex}",
       ".vtt-caret{position:absolute;right:3px;bottom:3px;width:0;height:0;border-left:4px solid transparent;border-bottom:4px solid currentColor;opacity:.55}",
-      ".vtt-flyout{display:none;position:absolute;left:47px;top:0;flex-direction:column;gap:3px;background:rgba(18,22,28,.98);border:1px solid #2a323d;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.55);z-index:40;min-width:190px}",
+      ".vtt-flyout{display:none;position:absolute;left:46px;top:0;flex-direction:column;gap:3px;background:rgba(18,22,28,.98);border:1px solid #2a323d;border-radius:10px;padding:5px;box-shadow:0 10px 30px rgba(0,0,0,.55);z-index:40;min-width:190px}",
+      ".vtt-flyout::before{content:'';position:absolute;left:-12px;top:0;bottom:0;width:12px}",
       ".vtt-rail-group:hover .vtt-flyout,.vtt-rail-group.open .vtt-flyout{display:flex}",
       ".vtt-sub{display:flex;align-items:center;gap:9px;background:none;border:0;color:#c3ccd8;padding:7px 9px;border-radius:7px;font:600 12px/1.1 system-ui;cursor:pointer;white-space:nowrap;text-align:left;width:100%}",
       ".vtt-sub:hover{background:#232b35;color:#fff}.vtt-sub.on{background:#2a3442;color:#e6c66a}",
@@ -777,8 +782,11 @@
       ".vtt-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:#1b212a;color:#e6ebf2;border:1px solid #2a323d;border-radius:6px;padding:7px 8px;font-size:12px;font-weight:600;cursor:pointer}.vtt-btn:hover{border-color:#3d4756}.vtt-btn.ghost{background:transparent}",
       ".vtt-mini{background:none;border:0;color:#8b97a7;cursor:pointer;padding:3px;display:inline-flex;border-radius:4px}.vtt-mini:hover{color:#fff;background:#232b35}",
       ".vtt-frow{display:flex;align-items:center;gap:10px;width:100%;background:#161b22;color:#e6ebf2;border:1px solid #2a323d;border-radius:8px;padding:9px 11px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:6px}",
-      ".vtt-frow:hover{border-color:#3d4756}.vtt-frow-i{color:#8b97a7;display:inline-flex}",
-      ".vtt-frow.on{border-color:#c8a24a;background:rgba(200,162,74,.1)}.vtt-frow.on .vtt-frow-i{color:#c8a24a}",
+      ".vtt-frow:hover{border-color:#3d4756}.vtt-frow-i{color:#8b97a7;display:inline-flex}.vtt-frow-l{flex:1;text-align:left}",
+      ".vtt-frow.on{border-color:#c8a24a}.vtt-frow.on .vtt-frow-i{color:#c8a24a}",
+      ".vtt-switch{flex:0 0 auto;width:34px;height:19px;border-radius:10px;background:#39424f;position:relative;transition:background .15s}",
+      ".vtt-switch::after{content:'';position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#c3ccd8;transition:left .15s,background .15s}",
+      ".vtt-frow.on .vtt-switch{background:#c8a24a}.vtt-frow.on .vtt-switch::after{left:17px;background:#14181e}",
       ".vtt-scene-list,.vtt-token-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}",
       ".vtt-scene,.vtt-trow{display:flex;align-items:center;gap:9px;padding:6px;border:1px solid #2a323d;border-radius:8px;cursor:pointer;background:#161b22}",
       ".vtt-scene:hover,.vtt-trow:hover{border-color:#3d4756}.vtt-scene.active,.vtt-trow.active{border-color:#c8a24a;background:rgba(200,162,74,.08)}",

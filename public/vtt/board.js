@@ -600,9 +600,11 @@
       ctx.strokeStyle = color || "#4ea3ff"; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
       ctx.beginPath(); ctx.moveTo(sax, say); ctx.lineTo(sbx, sby); ctx.stroke();
       ctx.setLineDash([]);
-      var cells = Math.hypot(bx - ax, by - ay) / (state.map.ppg || 70);
-      var feet = Math.round(cells * state.feetPerCell);
-      var label = feet + " ft (" + (Math.round(cells * 10) / 10) + " sq)";
+      // Round to whole squares (feet follow as whole squares × ft/cell, i.e. the
+      // nearest 5 ft by default) so measurements read in clean grid steps.
+      var cells = Math.round(Math.hypot(bx - ax, by - ay) / (state.map.ppg || 70));
+      var feet = cells * state.feetPerCell;
+      var label = feet + " ft (" + cells + " sq)";
       ctx.font = "bold 13px system-ui, sans-serif";
       var tw = ctx.measureText(label).width + 12;
       ctx.fillStyle = "rgba(10,12,16,0.9)"; ctx.fillRect(sbx + 10, sby - 12, tw, 22);
@@ -619,7 +621,9 @@
       ctx.save();
       ctx.textBaseline = "middle"; ctx.textAlign = "center"; ctx.font = "bold 12px system-ui, sans-serif";
       for (var i = RING_BANDS.length - 1; i >= 0; i--) {
-        var b = RING_BANDS[i], rad = b.sq * ppg * sc;
+        // Draw half a square larger than the band so a token that many squares away
+        // sits INSIDE the ring (measured from the source token's edge).
+        var b = RING_BANDS[i], rad = (b.sq + 0.5) * ppg * sc;
         ctx.strokeStyle = color || "#7fd6a1"; ctx.globalAlpha = 0.85; ctx.lineWidth = 1.6;
         ctx.setLineDash([7, 5]);
         ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
@@ -764,6 +768,10 @@
     }
 
     function onDown(e) {
+      // Right/middle mouse buttons belong to the contextmenu handler (token options
+      // / door lock). Without this guard a right-click would ALSO run a left-click
+      // action first — e.g. toggling a door open a frame before locking it.
+      if (typeof e.button === "number" && e.button > 0) return;
       // Multi-touch: two fingers = pinch-zoom + two-finger pan (tablets/phones).
       if (typeof e.pointerId !== "undefined") pointers[e.pointerId] = localPoint(e);
       if (activePointers().length >= 2) { beginPinch(); return; }

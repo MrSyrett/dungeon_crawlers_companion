@@ -104,8 +104,17 @@
     function visibleWire() {
       return board.state.tokens.filter(function (t) { return !t.hidden; }).map(tokenWire);
     }
-    function scenePayload() {
-      return { t: "scene", map: mapPayload(), tokens: visibleWire(), fog: { enabled: board.state.fog.enabled, opacity: board.state.fog.opacity } };
+    // `shipping` tells the guest an embedded image is (re)coming right after this
+    // scene, so it applies the new geometry atomically at mapEnd instead of now.
+    // `snap` carries the GM's grid-snap setting so players snap like the GM does.
+    function scenePayload(shipping) {
+      var p = { t: "scene", map: mapPayload(), tokens: visibleWire(), fog: { enabled: board.state.fog.enabled, opacity: board.state.fog.opacity, snap: !!(board.getSnap && board.getSnap()) } };
+      p.map.shipping = !!shipping;
+      return p;
+    }
+    function embeddedSrc() {
+      var m = board.state.map;
+      return (m.srcType !== "url" && typeof m.src === "string" && m.src.length) ? m.src : null;
     }
 
     function sendObj(peer, obj) { if (peer.open) { try { peer.dc.send(JSON.stringify(obj)); } catch (e) {} } }
@@ -113,14 +122,29 @@
 
     function pushFull(peer) {
       if (!live) return; // nothing is live yet — a joiner sees an empty board until the GM goes live
-      sendObj(peer, scenePayload());
-      var m = board.state.map;
-      if (m.srcType !== "url" && typeof m.src === "string" && m.src.length) shipMap(peer, m.src);
+      var src = embeddedSrc();
+      sendObj(peer, scenePayload(!!src));
+      if (src) shipMap(peer, src);
     }
+    // Ship the embedded map in chunks WITH backpressure — a big data-URL would
+    // otherwise blow past the data channel's send buffer and silently drop chunks,
+    // leaving the player without the new map. We pause when the buffer is high.
     function shipMap(peer, dataUrl) {
-      sendObj(peer, { t: "mapBegin", len: dataUrl.length });
-      for (var i = 0; i < dataUrl.length; i += CHUNK) sendObj(peer, { t: "mapChunk", s: dataUrl.slice(i, i + CHUNK) });
-      sendObj(peer, { t: "mapEnd" });
+      if (!peer.open) return;
+      try { peer.dc.send(JSON.stringify({ t: "mapBegin", len: dataUrl.length })); } catch (e) { return; }
+      var i = 0;
+      function pump() {
+        if (!peer.open) return;
+        try {
+          while (i < dataUrl.length) {
+            if (peer.dc.bufferedAmount > 4 * 1024 * 1024) { setTimeout(pump, 40); return; }
+            peer.dc.send(JSON.stringify({ t: "mapChunk", s: dataUrl.slice(i, i + CHUNK) }));
+            i += CHUNK;
+          }
+          peer.dc.send(JSON.stringify({ t: "mapEnd" }));
+        } catch (e) { /* channel closed mid-ship — the guest will re-request on reconnect */ }
+      }
+      pump();
     }
 
     function pushTokens() { broadcast({ t: "tokens", tokens: visibleWire() }); }
@@ -144,14 +168,19 @@
     }
     var lastShipSrc = null;
     function pushScene() {
-      broadcast(scenePayload());
-      // Only re-ship the (embedded) map image when it actually changed — a wall,
+      // Re-ship the (embedded) map image only when it actually changed — a wall,
       // door or lighting edit updates metadata without re-sending the whole map.
-      var m = board.state.map;
-      if (m.srcType !== "url" && typeof m.src === "string" && m.src.length && m.src !== lastShipSrc) {
-        lastShipSrc = m.src;
-        Object.keys(peers).forEach(function (k) { if (peers[k].open) shipMap(peers[k], m.src); });
+      var src = embeddedSrc(), willShip = !!src && src !== lastShipSrc;
+      broadcast(scenePayload(willShip));
+      if (willShip) {
+        lastShipSrc = src;
+        Object.keys(peers).forEach(function (k) { if (peers[k].open) shipMap(peers[k], src); });
       }
+    }
+    // Broadcast the GM's table settings (fog on/off + opacity, grid snap) so they
+    // apply to every player live — not gated by `live` (they're not scene content).
+    function pushSettings() {
+      broadcast({ t: "settings", fog: { enabled: board.state.fog.enabled, opacity: board.state.fog.opacity }, snap: !!(board.getSnap && board.getSnap()) });
     }
 
     function onGuestMsg(peerId, raw) {
@@ -200,6 +229,7 @@
     return {
       pushScene: pushScene, pushTokens: pushTokens, peerCount: peerCount, peers: peersList,
       setLive: function (b) { live = !!b; }, isLive: function () { return live; },
+      settings: pushSettings,
       overlay: hostOverlay,
       ping: function (x, y) { broadcast({ t: "ping", x: x, y: y }); },
       doorSync: function (i) { syncDoor(i); },
@@ -278,17 +308,31 @@
         board.setRemoteApply(true);
         board.setFog(msg.fog && msg.fog.enabled); board.setFogOpacity((msg.fog && msg.fog.opacity) || 1);
         board.setShowAll(false); // players always see through fog, never GM-reveal
+        if (msg.fog && typeof msg.fog.snap === "boolean") board.setSnap(msg.fog.snap); // GM's snap setting carries
         pendingMap = msg.map;
-        // Always apply map metadata (walls/doors/lights) so wall edits land even
-        // when the image isn't re-shipped.
-        if (msg.map) board.applyMapMeta(msg.map);
-        if (msg.map && msg.map.srcType === "url" && msg.map.url) {
-          board.loadMapState({ src: msg.map.url, srcType: "url", ppg: msg.map.ppg, walls: msg.map.walls, windows: msg.map.windows, doors: msg.map.doors, lights: msg.map.lights, widthPx: msg.map.widthPx, heightPx: msg.map.heightPx })
+        var mp = msg.map || {};
+        if (mp.srcType === "url" && mp.url) {
+          board.applyMapMeta(mp);
+          board.loadMapState({ src: mp.url, srcType: "url", ppg: mp.ppg, walls: mp.walls, windows: mp.windows, doors: mp.doors, lights: mp.lights, widthPx: mp.widthPx, heightPx: mp.heightPx })
             .then(function () { board.setRemoteApply(false); });
+          board.syncTokens(msg.tokens || []);
+        } else if (mp.shipping) {
+          // An embedded image is being (re)shipped right after this: DON'T apply the
+          // new walls yet, or the player would briefly see the OLD image under the
+          // NEW walls. mapEnd applies the whole map (image + walls + size) at once.
+          board.syncTokens(msg.tokens || []);
+          board.setRemoteApply(false);
+        } else {
+          // Metadata-only update (a wall/door edit; no image re-ship) — apply now.
+          if (msg.map) board.applyMapMeta(msg.map);
+          board.syncTokens(msg.tokens || []);
+          board.setRemoteApply(false);
         }
-        board.syncTokens(msg.tokens || []);
-        // embedded image (if new) arrives via chunks; metadata already applied
-        if (!(msg.map && msg.map.srcType === "url")) board.setRemoteApply(false);
+      } else if (msg.t === "settings") {
+        // GM table settings carry to players: fog on/off + opacity, grid snap.
+        board.setFog(msg.fog && msg.fog.enabled); board.setFogOpacity((msg.fog && msg.fog.opacity) || 1);
+        board.setShowAll(false);
+        if (typeof msg.snap === "boolean") board.setSnap(msg.snap);
       } else if (msg.t === "tokens") {
         board.setRemoteApply(true); board.syncTokens(msg.tokens || []); board.setRemoteApply(false);
       } else if (msg.t === "ping") { board.ping(msg.x, msg.y, "#4ea3ff"); }
