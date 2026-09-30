@@ -605,10 +605,11 @@
       function segsOnce() { if (!segs) segs = blockingSegments(); return segs; }
 
       fctx.globalCompositeOperation = "destination-out";
-      // Soften the RANGE edge of vision: the reveal fades out over up to this many
-      // squares instead of stopping at a hard line. (Walls still cut sight sharply;
-      // this only feathers the outer distance limit.)
-      var FALLOFF_CELLS = 10;
+      // A token has CLEAR sight across its whole set range; only the last ~square of
+      // open distance feathers out so the range limit isn't a hard ring. Walls cut
+      // sight sharply and, because everything inside (radius − this band) is a solid
+      // reveal, a wall within range shows crisp and fully lit right up to it.
+      var FALLOFF_CELLS = 1;
       viewerTokens().forEach(function (t) {
         var radius = visionRadius(t);
         // Cache the polygon by position + vision + geometry; a pan/zoom just re-blits.
@@ -619,9 +620,9 @@
         }
         // destination-out erases the fog by the fill's alpha. For a finite vision
         // radius, fill the line-of-sight polygon with a radial gradient centred on
-        // the token: fully erased (revealed) out to (radius − falloff), then fading
-        // to no-erase (fogged) at radius — a soft edge. Unlimited vision keeps a
-        // flat erase (its only edges are walls/map bounds).
+        // the token: fully erased (revealed, alpha 1) out to (radius − 1 cell), then
+        // fading to no-erase across the last cell — clear vision in range, a soft
+        // outer edge. Unlimited vision keeps a flat erase (its edges are walls).
         if (isFinite(radius) && state.map.ppg > 0) {
           var cx = w2sX(t.x), cy = w2sY(t.y);
           var outer = radius * state.cam.scale;
