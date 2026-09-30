@@ -10,8 +10,6 @@
 //   • flat       — a solid band of the chosen color.
 //   • beveled    — a rounded, raised band shaded from a light inner lip to a
 //                  dark outer edge.
-//   • metallic   — the chosen color rendered as polished metal via a banded
-//                  specular sweep (tinted gold/silver/bronze/etc.).
 //   • steelglass — the "pack" look: a fixed brushed-steel bezel around a
 //                  recessed, domed glass inset tinted by the chosen color, with
 //                  a single top-left glint. The color tints the glass, not the
@@ -19,16 +17,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type RingStyle = "flat" | "beveled" | "metallic" | "steelglass";
+type RingStyle = "flat" | "beveled" | "steelglass";
 
-const EXPORT_SIZE = 256; // finished token dimensions in px
+const EXPORT_SIZE = 512; // finished token dimensions in px
 const PREVIEW_SIZE = 440; // on-screen preview canvas (CSS + backing px scaled by DPR)
 
 const STYLES: { id: RingStyle; label: string; hint: string }[] = [
   { id: "steelglass", label: "Steel Glass", hint: "Brushed-steel bezel over tinted glass — the pack look" },
   { id: "flat", label: "Flat", hint: "Simple solid ring" },
   { id: "beveled", label: "Beveled", hint: "Raised, rounded ring" },
-  { id: "metallic", label: "Metallic", hint: "Polished tinted metal" },
 ];
 
 // A spread of useful ring colors — metals plus a few saturated hues.
@@ -107,12 +104,15 @@ function drawSteelGlass(
   p: DrawParams,
   image: HTMLImageElement | null,
 ) {
+  // Geometry mirrors the offline generator's 512px source exactly. All lengths
+  // are expressed as a fraction of the canvas (k = size/512 equivalents) so the
+  // bezel width, glass sheen and hairline arcs scale 1:1 with the pack. The
+  // metal band is a FIXED ~18.5% of the radius (the pack thickness) and does not
+  // follow the thickness slider — that control is hidden for this style.
   const cx = size / 2;
   const cy = size / 2;
-  const R = size / 2 - Math.max(1, size * 0.008); // small inset for the AA edge
-  const ringPx = Math.max(size * 0.05, p.ringFrac * R);
-  const rInner = Math.max(1, R - ringPx); // glass radius = inner edge of steel
-  const midR = (R + rInner) / 2;
+  const R = size * 0.484; // outer bezel radius (≈248/512), small AA inset
+  const rInner = R * 0.812; // glass radius = inner edge of steel band
   const fillAll = () => ctx.fillRect(0, 0, size, size);
   const circle = (r: number) => {
     ctx.beginPath();
@@ -128,28 +128,40 @@ function drawSteelGlass(
     circle(rInner);
     ctx.fillStyle = "#101216"; // dark recess base
     ctx.fill();
-    const tint = ctx.createRadialGradient(cx, cy - rInner * 0.12, rInner * 0.08, cx, cy, rInner);
+    const tint = ctx.createRadialGradient(cx, cy - rInner * 0.12, rInner * 0.08, cx, cy, rInner * 1.24);
     tint.addColorStop(0, shade(p.color, 0.06));
     tint.addColorStop(1, shade(p.color, -0.46));
     ctx.fillStyle = tint;
     fillAll();
-    const vig = ctx.createRadialGradient(cx, cy, rInner * 0.64, cx, cy, rInner);
+    const vig = ctx.createRadialGradient(cx, cy, rInner * 0.66, cx, cy, rInner);
     vig.addColorStop(0, "rgba(0,0,0,0)");
-    vig.addColorStop(1, "rgba(0,0,0,0.5)");
+    vig.addColorStop(1, "rgba(0,0,0,0.62)");
     ctx.fillStyle = vig;
     fillAll();
     ctx.restore();
   };
 
-  // ── Domed-glass sheen: one broad gloss + one bright top-left glint ─────────
-  const ellipseGlow = (ex: number, ey: number, rx: number, ry: number, rotDeg: number, a: number) => {
+  // ── Domed-glass sheen: this is where the highlight lives. A soft inner
+  //    shadow, one broad gloss and one bright top-left glint, all clipped to the
+  //    glass so the metal band stays matte. Positions match the pack (relative
+  //    to the glass radius). ───────────────────────────────────────────────────
+  const ellipseGlow = (
+    dxFrac: number,
+    dyFrac: number,
+    rxFrac: number,
+    ryFrac: number,
+    rotDeg: number,
+    a: number,
+  ) => {
+    const rx = rxFrac * rInner;
+    const ry = ryFrac * rInner;
     ctx.save();
-    ctx.translate(ex, ey);
+    ctx.translate(cx + dxFrac * rInner, cy + dyFrac * rInner);
     ctx.rotate((rotDeg * Math.PI) / 180);
     ctx.scale(rx / ry, 1);
     const g = ctx.createRadialGradient(0, 0, 0, 0, 0, ry);
     g.addColorStop(0, `rgba(255,255,255,${a})`);
-    g.addColorStop(0.55, `rgba(255,255,255,${a * 0.28})`);
+    g.addColorStop(0.6, `rgba(255,255,255,${a * 0.26})`);
     g.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = g;
     ctx.beginPath();
@@ -163,15 +175,17 @@ function drawSteelGlass(
     ctx.clip();
     const ish = ctx.createRadialGradient(cx, cy, rInner * 0.74, cx, cy, rInner);
     ish.addColorStop(0, "rgba(0,0,0,0)");
-    ish.addColorStop(1, "rgba(0,0,0,0.5)");
+    ish.addColorStop(1, "rgba(0,0,0,0.52)");
     ctx.fillStyle = ish;
     fillAll();
-    ellipseGlow(cx, cy - rInner * 0.5, rInner * 0.78, rInner * 0.46, 0, 0.14); // broad sheen
-    ellipseGlow(cx - rInner * 0.27, cy - rInner * 0.66, rInner * 0.42, rInner * 0.22, -24, 0.34); // glint
+    ellipseGlow(0, -0.53, 0.76, 0.44, 0, 0.17); // broad domed sheen
+    ellipseGlow(-0.27, -0.68, 0.41, 0.22, -24, 0.4); // bright glint
     ctx.restore();
   };
 
-  // ── Brushed-steel bezel (fixed grey metal, not the picker color) ──────────
+  // ── Brushed-steel bezel (fixed grey metal, not the picker color). Its only
+  //    highlights are hairline arcs (bright across the top, dark across the
+  //    bottom) so the eye reads the gloss on the glass, not the ring. ──────────
   const paintBezel = () => {
     ctx.save();
     circle(R);
@@ -185,34 +199,34 @@ function drawSteelGlass(
     g.addColorStop(1, "#2a2e35");
     ctx.fillStyle = g;
     fillAll();
-    const hi = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.34, R * 0.08, cx - R * 0.3, cy - R * 0.34, R * 1.1);
-    hi.addColorStop(0, "rgba(238,242,246,0.6)");
+    const hi = ctx.createRadialGradient(size * 0.35, size * 0.28, size * 0.04, size * 0.35, size * 0.28, size * 0.75);
+    hi.addColorStop(0, "rgba(238,242,246,0.7)");
     hi.addColorStop(0.5, "rgba(238,242,246,0)");
     hi.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = hi;
     fillAll();
     ctx.restore();
-    // bright sheen arc across the top, dark arc across the bottom
+    // Hairline brushed arcs (thin, like the 5–6px strokes in the 512 source).
+    const arcR = R * 0.847;
     ctx.lineCap = "round";
     ctx.strokeStyle = "rgba(242,245,248,0.42)";
-    ctx.lineWidth = ringPx * 0.16;
+    ctx.lineWidth = Math.max(1, size * 0.0098);
     ctx.beginPath();
-    ctx.arc(cx, cy, midR, Math.PI * 1.12, Math.PI * 1.9);
+    ctx.arc(cx, cy, arcR, (209 * Math.PI) / 180, (298 * Math.PI) / 180);
     ctx.stroke();
-    ctx.strokeStyle = "rgba(24,28,34,0.5)";
-    ctx.lineWidth = ringPx * 0.2;
+    ctx.strokeStyle = "rgba(32,36,42,0.5)";
+    ctx.lineWidth = Math.max(1, size * 0.0117);
     ctx.beginPath();
-    ctx.arc(cx, cy, midR, Math.PI * 0.12, Math.PI * 0.82);
+    ctx.arc(cx, cy, arcR, (47 * Math.PI) / 180, (133 * Math.PI) / 180);
     ctx.stroke();
-    // outer + inner rim lines
-    const line = Math.max(1, size * 0.008);
-    ctx.lineWidth = line;
+    // Outer dark rim + inner rim that caps the glass edge.
     ctx.strokeStyle = "#1b1e23";
-    circle(R - line / 2);
+    ctx.lineWidth = Math.max(1, size * 0.008);
+    circle(R - ctx.lineWidth / 2);
     ctx.stroke();
-    ctx.lineWidth = line * 1.6;
     ctx.strokeStyle = "rgba(12,14,17,0.9)";
-    circle(rInner + line * 0.4);
+    ctx.lineWidth = Math.max(1.5, size * 0.0135);
+    circle(rInner + ctx.lineWidth * 0.3);
     ctx.stroke();
   };
 
@@ -299,9 +313,9 @@ function drawToken(
     if (p.style === "flat") {
       ctx.fillStyle = p.color;
       ctx.fillRect(0, 0, size, size);
-    } else if (p.style === "beveled") {
-      // Concentric shading reads as a rounded, raised band: bright inner lip →
-      // base → dark outer edge.
+    } else {
+      // Beveled: concentric shading reads as a rounded, raised band — bright
+      // inner lip → base → dark outer edge.
       const g = ctx.createRadialGradient(cx, cy, rInner, cx, cy, R);
       g.addColorStop(0, shade(p.color, 0.34));
       g.addColorStop(0.45, shade(p.color, 0.05));
@@ -315,26 +329,6 @@ function drawToken(
       hl.addColorStop(0.5, "rgba(255,255,255,0)");
       hl.addColorStop(1, "rgba(0,0,0,0.22)");
       ctx.fillStyle = hl;
-      ctx.fillRect(0, 0, size, size);
-    } else {
-      // Metallic: a banded specular sweep across the ring, tinted to the color.
-      const g = ctx.createLinearGradient(0, 0, size * 0.6, size);
-      g.addColorStop(0.0, shade(p.color, -0.45));
-      g.addColorStop(0.12, shade(p.color, 0.55));
-      g.addColorStop(0.26, shade(p.color, -0.1));
-      g.addColorStop(0.4, shade(p.color, 0.4));
-      g.addColorStop(0.52, shade(p.color, -0.28));
-      g.addColorStop(0.66, shade(p.color, 0.5));
-      g.addColorStop(0.8, shade(p.color, -0.2));
-      g.addColorStop(1.0, shade(p.color, -0.5));
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, size, size);
-      // A round cross-section shade on top so the band still reads as raised.
-      const bev = ctx.createRadialGradient(cx, cy, rInner, cx, cy, R);
-      bev.addColorStop(0, "rgba(255,255,255,0.16)");
-      bev.addColorStop(0.5, "rgba(255,255,255,0)");
-      bev.addColorStop(1, "rgba(0,0,0,0.3)");
-      ctx.fillStyle = bev;
       ctx.fillRect(0, 0, size, size);
     }
     ctx.restore();
@@ -672,19 +666,21 @@ export default function TokenMaker() {
           </p>
         </div>
 
-        <div>
-          <ControlHeading>
-            Ring thickness <Value>{Math.round(ringFrac * 100)}%</Value>
-            <button
-              type="button"
-              onClick={() => setRingFrac(DEFAULT_RING_FRAC)}
-              className="ml-auto text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] underline hover:text-[var(--gold)]"
-            >
-              Reset
-            </button>
-          </ControlHeading>
-          <Slider min={0.05} max={0.24} step={0.005} value={ringFrac} onChange={setRingFrac} />
-        </div>
+        {style !== "steelglass" && (
+          <div>
+            <ControlHeading>
+              Ring thickness <Value>{Math.round(ringFrac * 100)}%</Value>
+              <button
+                type="button"
+                onClick={() => setRingFrac(DEFAULT_RING_FRAC)}
+                className="ml-auto text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] underline hover:text-[var(--gold)]"
+              >
+                Reset
+              </button>
+            </ControlHeading>
+            <Slider min={0.05} max={0.24} step={0.005} value={ringFrac} onChange={setRingFrac} />
+          </div>
+        )}
 
         <div>
           <ControlHeading>
