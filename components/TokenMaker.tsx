@@ -129,8 +129,8 @@ function drawSteelGlass(
     ctx.fillStyle = "#101216"; // dark recess base
     ctx.fill();
     const tint = ctx.createRadialGradient(cx, cy - rInner * 0.12, rInner * 0.08, cx, cy, rInner * 1.24);
-    tint.addColorStop(0, shade(p.color, 0.06));
-    tint.addColorStop(1, shade(p.color, -0.46));
+    tint.addColorStop(0, shade(p.color, 0.0));
+    tint.addColorStop(1, shade(p.color, -0.5));
     ctx.fillStyle = tint;
     fillAll();
     const vig = ctx.createRadialGradient(cx, cy, rInner * 0.66, cx, cy, rInner);
@@ -178,8 +178,8 @@ function drawSteelGlass(
     ish.addColorStop(1, "rgba(0,0,0,0.52)");
     ctx.fillStyle = ish;
     fillAll();
-    ellipseGlow(0, -0.53, 0.76, 0.44, 0, 0.17); // broad domed sheen
-    ellipseGlow(-0.27, -0.68, 0.41, 0.22, -24, 0.4); // bright glint
+    ellipseGlow(0, -0.4, 0.82, 0.56, 0, 0.2); // broad domed sheen (fills the upper glass)
+    ellipseGlow(-0.24, -0.52, 0.5, 0.3, -20, 0.5); // bright glint, clearly inside the glass
     ctx.restore();
   };
 
@@ -200,25 +200,12 @@ function drawSteelGlass(
     ctx.fillStyle = g;
     fillAll();
     const hi = ctx.createRadialGradient(size * 0.35, size * 0.28, size * 0.04, size * 0.35, size * 0.28, size * 0.75);
-    hi.addColorStop(0, "rgba(238,242,246,0.7)");
+    hi.addColorStop(0, "rgba(238,242,246,0.4)"); // gentle metal sheen — must not out-shine the glass
     hi.addColorStop(0.5, "rgba(238,242,246,0)");
     hi.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = hi;
     fillAll();
     ctx.restore();
-    // Hairline brushed arcs (thin, like the 5–6px strokes in the 512 source).
-    const arcR = R * 0.847;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "rgba(242,245,248,0.42)";
-    ctx.lineWidth = Math.max(1, size * 0.0098);
-    ctx.beginPath();
-    ctx.arc(cx, cy, arcR, (209 * Math.PI) / 180, (298 * Math.PI) / 180);
-    ctx.stroke();
-    ctx.strokeStyle = "rgba(32,36,42,0.5)";
-    ctx.lineWidth = Math.max(1, size * 0.0117);
-    ctx.beginPath();
-    ctx.arc(cx, cy, arcR, (47 * Math.PI) / 180, (133 * Math.PI) / 180);
-    ctx.stroke();
     // Outer dark rim + inner rim that caps the glass edge.
     ctx.strokeStyle = "#1b1e23";
     ctx.lineWidth = Math.max(1, size * 0.008);
