@@ -605,29 +605,30 @@
       function segsOnce() { if (!segs) segs = blockingSegments(); return segs; }
 
       fctx.globalCompositeOperation = "destination-out";
-      // A token has CLEAR sight across its whole set range; only the last ~square of
-      // open distance feathers out so the range limit isn't a hard ring. Walls cut
-      // sight sharply and, because everything inside (radius − this band) is a solid
-      // reveal, a wall within range shows crisp and fully lit right up to it.
+      // How far PAST the set range the reveal feathers out (open distance only).
       var FALLOFF_CELLS = 1;
       viewerTokens().forEach(function (t) {
         var radius = visionRadius(t);
-        // Cache the polygon by position + vision + geometry; a pan/zoom just re-blits.
-        var key = t.x + "," + t.y + "," + radius + "|" + sig;
+        // ALWAYS compute the full wall-occluded line-of-sight polygon (no distance
+        // clamp). The distance limit is applied by the gradient below, so the only
+        // hard edges in the reveal come from REAL walls — never from the range
+        // circle being approximated as straight chords (that was the stray-line
+        // artifact). The polygon depends only on position + geometry, so it caches
+        // across vision changes and pans.
+        var key = t.x + "," + t.y + "|" + sig;
         if (t._fogKey !== key || !t._fogPoly) {
-          t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: radius });
+          t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: Infinity });
           t._fogKey = key;
         }
         // destination-out erases the fog by the fill's alpha. For a finite vision
-        // radius, fill the line-of-sight polygon with a radial gradient centred on
-        // the token: fully erased (revealed, alpha 1) out to (radius − 1 cell), then
-        // fading to no-erase across the last cell — clear vision in range, a soft
-        // outer edge. Unlimited vision keeps a flat erase (its edges are walls).
+        // radius, fill with a radial gradient centred on the token: CLEAR (alpha 1)
+        // all the way out to the full range, then fading to no-erase across the next
+        // cell OUTWARD — so players see clearly for their whole vision, then it
+        // softens. Unlimited vision keeps a flat erase (its only edges are walls).
         if (isFinite(radius) && state.map.ppg > 0) {
           var cx = w2sX(t.x), cy = w2sY(t.y);
-          var outer = radius * state.cam.scale;
-          var band = Math.min(FALLOFF_CELLS * state.map.ppg, radius) * state.cam.scale;
-          var inner = Math.max(0, outer - band);
+          var inner = radius * state.cam.scale;                                  // clear to full range
+          var outer = inner + FALLOFF_CELLS * state.map.ppg * state.cam.scale;   // fade the next cell out
           var g = fctx.createRadialGradient(cx, cy, inner, cx, cy, Math.max(inner + 0.01, outer));
           g.addColorStop(0, "rgba(0,0,0,1)");
           g.addColorStop(1, "rgba(0,0,0,0)");
