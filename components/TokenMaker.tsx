@@ -7,20 +7,25 @@
 //
 // Ring styles (all driven by a single base color; the disc behind the art is
 // always filled with that same color so the background matches the ring):
-//   • flat     — a solid band of the chosen color.
-//   • beveled  — a rounded, raised band shaded from a light inner lip to a dark
-//                outer edge.
-//   • metallic — the chosen color rendered as polished metal via a banded
-//                specular sweep (tinted gold/silver/bronze/etc.).
+//   • flat       — a solid band of the chosen color.
+//   • beveled    — a rounded, raised band shaded from a light inner lip to a
+//                  dark outer edge.
+//   • metallic   — the chosen color rendered as polished metal via a banded
+//                  specular sweep (tinted gold/silver/bronze/etc.).
+//   • steelglass — the "pack" look: a fixed brushed-steel bezel around a
+//                  recessed, domed glass inset tinted by the chosen color, with
+//                  a single top-left glint. The color tints the glass, not the
+//                  metal ring.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type RingStyle = "flat" | "beveled" | "metallic";
+type RingStyle = "flat" | "beveled" | "metallic" | "steelglass";
 
 const EXPORT_SIZE = 256; // finished token dimensions in px
 const PREVIEW_SIZE = 440; // on-screen preview canvas (CSS + backing px scaled by DPR)
 
 const STYLES: { id: RingStyle; label: string; hint: string }[] = [
+  { id: "steelglass", label: "Steel Glass", hint: "Brushed-steel bezel over tinted glass — the pack look" },
   { id: "flat", label: "Flat", hint: "Simple solid ring" },
   { id: "beveled", label: "Beveled", hint: "Raised, rounded ring" },
   { id: "metallic", label: "Metallic", hint: "Polished tinted metal" },
@@ -69,6 +74,164 @@ interface DrawParams {
   offsetY: number;
 }
 
+// Fit-and-draw the art into the current (already-clipped) context. Sizing is
+// relative to the inner disc so toggling placement never resizes the art
+// (zoom = 1 covers the inner disc of radius `rInner`).
+function paintArt(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  cx: number,
+  cy: number,
+  rInner: number,
+  p: DrawParams,
+  image: HTMLImageElement,
+) {
+  const innerD = rInner * 2;
+  const cover = innerD / Math.min(image.width, image.height); // cover fit
+  const scale = cover * p.zoom;
+  const w = image.width * scale;
+  const h = image.height * scale;
+  const dx = cx - w / 2 + p.offsetX * size;
+  const dy = cy - h / 2 + p.offsetY * size;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(image, dx, dy, w, h);
+}
+
+// The "pack" token: a fixed brushed-steel bezel around a recessed, domed glass
+// inset that is tinted by `p.color`. The uploaded art lives inside the glass
+// (framed) or floats on top as a mini (above). Mirrors the offline generator:
+// tinted interior → art (clipped to the glass) → single top glint → steel ring.
+function drawSteelGlass(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  p: DrawParams,
+  image: HTMLImageElement | null,
+) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const R = size / 2 - Math.max(1, size * 0.008); // small inset for the AA edge
+  const ringPx = Math.max(size * 0.05, p.ringFrac * R);
+  const rInner = Math.max(1, R - ringPx); // glass radius = inner edge of steel
+  const midR = (R + rInner) / 2;
+  const fillAll = () => ctx.fillRect(0, 0, size, size);
+  const circle = (r: number) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.closePath();
+  };
+
+  // ── Recessed glass interior (tinted by the chosen color) ──────────────────
+  const paintInterior = () => {
+    ctx.save();
+    circle(rInner);
+    ctx.clip();
+    circle(rInner);
+    ctx.fillStyle = "#101216"; // dark recess base
+    ctx.fill();
+    const tint = ctx.createRadialGradient(cx, cy - rInner * 0.12, rInner * 0.08, cx, cy, rInner);
+    tint.addColorStop(0, shade(p.color, 0.06));
+    tint.addColorStop(1, shade(p.color, -0.46));
+    ctx.fillStyle = tint;
+    fillAll();
+    const vig = ctx.createRadialGradient(cx, cy, rInner * 0.64, cx, cy, rInner);
+    vig.addColorStop(0, "rgba(0,0,0,0)");
+    vig.addColorStop(1, "rgba(0,0,0,0.5)");
+    ctx.fillStyle = vig;
+    fillAll();
+    ctx.restore();
+  };
+
+  // ── Domed-glass sheen: one broad gloss + one bright top-left glint ─────────
+  const ellipseGlow = (ex: number, ey: number, rx: number, ry: number, rotDeg: number, a: number) => {
+    ctx.save();
+    ctx.translate(ex, ey);
+    ctx.rotate((rotDeg * Math.PI) / 180);
+    ctx.scale(rx / ry, 1);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, ry);
+    g.addColorStop(0, `rgba(255,255,255,${a})`);
+    g.addColorStop(0.55, `rgba(255,255,255,${a * 0.28})`);
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, ry, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  const paintGlass = () => {
+    ctx.save();
+    circle(rInner);
+    ctx.clip();
+    const ish = ctx.createRadialGradient(cx, cy, rInner * 0.74, cx, cy, rInner);
+    ish.addColorStop(0, "rgba(0,0,0,0)");
+    ish.addColorStop(1, "rgba(0,0,0,0.5)");
+    ctx.fillStyle = ish;
+    fillAll();
+    ellipseGlow(cx, cy - rInner * 0.5, rInner * 0.78, rInner * 0.46, 0, 0.14); // broad sheen
+    ellipseGlow(cx - rInner * 0.27, cy - rInner * 0.66, rInner * 0.42, rInner * 0.22, -24, 0.34); // glint
+    ctx.restore();
+  };
+
+  // ── Brushed-steel bezel (fixed grey metal, not the picker color) ──────────
+  const paintBezel = () => {
+    ctx.save();
+    circle(R);
+    ctx.arc(cx, cy, rInner, 0, Math.PI * 2, true); // annulus hole
+    ctx.clip("evenodd");
+    const g = ctx.createLinearGradient(0, cy - R, 0, cy + R);
+    g.addColorStop(0, "#c4cbd4");
+    g.addColorStop(0.13, "#949ca6");
+    g.addColorStop(0.5, "#6a727d");
+    g.addColorStop(0.86, "#414751");
+    g.addColorStop(1, "#2a2e35");
+    ctx.fillStyle = g;
+    fillAll();
+    const hi = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.34, R * 0.08, cx - R * 0.3, cy - R * 0.34, R * 1.1);
+    hi.addColorStop(0, "rgba(238,242,246,0.6)");
+    hi.addColorStop(0.5, "rgba(238,242,246,0)");
+    hi.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = hi;
+    fillAll();
+    ctx.restore();
+    // bright sheen arc across the top, dark arc across the bottom
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(242,245,248,0.42)";
+    ctx.lineWidth = ringPx * 0.16;
+    ctx.beginPath();
+    ctx.arc(cx, cy, midR, Math.PI * 1.12, Math.PI * 1.9);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(24,28,34,0.5)";
+    ctx.lineWidth = ringPx * 0.2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, midR, Math.PI * 0.12, Math.PI * 0.82);
+    ctx.stroke();
+    // outer + inner rim lines
+    const line = Math.max(1, size * 0.008);
+    ctx.lineWidth = line;
+    ctx.strokeStyle = "#1b1e23";
+    circle(R - line / 2);
+    ctx.stroke();
+    ctx.lineWidth = line * 1.6;
+    ctx.strokeStyle = "rgba(12,14,17,0.9)";
+    circle(rInner + line * 0.4);
+    ctx.stroke();
+  };
+
+  paintInterior();
+  if (image && !p.above) {
+    ctx.save();
+    circle(rInner);
+    ctx.clip();
+    paintArt(ctx, size, cx, cy, rInner, p, image);
+    ctx.restore();
+    paintGlass();
+  } else if (!image) {
+    paintGlass();
+  }
+  paintBezel();
+  // Mini mode: the art floats on top of the whole token, uncropped.
+  if (image && p.above) paintArt(ctx, size, cx, cy, rInner, p, image);
+}
+
 // Draw the complete token into `ctx` at the given square `size`. Pure w.r.t. the
 // passed state, so the preview and the export share identical output.
 function drawToken(
@@ -78,6 +241,10 @@ function drawToken(
   image: HTMLImageElement | null,
 ) {
   ctx.clearRect(0, 0, size, size);
+  if (p.style === "steelglass") {
+    drawSteelGlass(ctx, size, p, image);
+    return;
+  }
   const cx = size / 2;
   const cy = size / 2;
   const R = size / 2 - Math.max(1, size * 0.004); // tiny inset for clean AA
@@ -203,8 +370,8 @@ function drawToken(
 export default function TokenMaker() {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [fileName, setFileName] = useState<string>("token");
-  const [style, setStyle] = useState<RingStyle>("beveled");
-  const [color, setColor] = useState<string>("#c8a020");
+  const [style, setStyle] = useState<RingStyle>("steelglass");
+  const [color, setColor] = useState<string>("#3a3f47");
   const [ringFrac, setRingFrac] = useState<number>(DEFAULT_RING_FRAC);
   const [above, setAbove] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(1);
@@ -468,8 +635,9 @@ export default function TokenMaker() {
             </label>
           </div>
           <p className="mt-2 text-[12px] text-[var(--muted)]">
-            The disc behind your art is filled with this same color, so the background always
-            matches the ring.
+            {style === "steelglass"
+              ? "The metal bezel stays brushed steel; this color tints the recessed glass behind your art."
+              : "The disc behind your art is filled with this same color, so the background always matches the ring."}
           </p>
         </div>
 
