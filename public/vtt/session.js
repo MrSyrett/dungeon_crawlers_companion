@@ -647,7 +647,6 @@
     $("te-owner").innerHTML = opts.map(function (o) { return '<option value="' + esc(o.id) + '"' + (String(teDraft.ownerId || "") === o.id ? " selected" : "") + ">" + esc(o.n) + "</option>"; }).join("");
     var fpc = board.state.feetPerCell || 5;
     $("te-vdist").value = teDraft.vision != null ? String(Math.round(teDraft.vision * fpc)) : "";
-    $("te-vision").checked = !!teDraft.isViewer;
     $("te-hidden").checked = !!teDraft.hidden;
     $("te-ring").checked = !!teDraft.ring;
     $("te-ringcolor").value = teDraft.ringColor || "#c8a24a";
@@ -664,7 +663,9 @@
     teDraft.ownerId = $("te-owner").value || null;
     var vv = $("te-vdist").value;
     teDraft.vision = vv === "" ? null : (parseFloat(vv) || 0) / fpc;
-    teDraft.isViewer = $("te-vision").checked;
+    // Every token can reveal fog now (governed by FoW on/off + ownership/selection),
+    // so a token is always a potential viewer — no separate "sees fog" flag.
+    teDraft.isViewer = true;
     teDraft.hidden = $("te-hidden").checked;
     teDraft.ring = $("te-ring").checked;
     teDraft.ringColor = $("te-ringcolor").value;
@@ -682,13 +683,13 @@
         // and the sheet opens from the rail button or the C shortcut.
         items.push({ label: "Rename…", onClick: function () { var n = prompt("Token name:", t.name || ""); if (n != null) { t.name = n; board.render(); if (net) net.pushTokens(); } } });
         items.push({ label: "Size", sub: [1, 2, 3, 4].map(function (n) { return { label: n + "× (" + n + " sq)", onClick: function () { var g = board.state.map.ppg || 70; t.w = t.h = g * n; board.render(); if (net) net.pushTokens(); } }; }) });
-        // Vision controls whether the token reveals fog AND how far it sees: "Off"
-        // makes it a non-seeing token; any distance makes it a viewer.
-        var visOpts = [{ off: true, l: "Off (can't see)" }, { v: null, l: "Unlimited" }, { ft: 120 }, { ft: 60 }, { ft: 30 }, { ft: 10 }];
+        // Vision is how far this token sees; Unlimited = as far as walls allow. Fog
+        // reveal itself is governed by FoW on/off + who owns/selects the token.
+        var visOpts = [{ v: null, l: "Unlimited" }, { ft: 120 }, { ft: 60 }, { ft: 30 }, { ft: 10 }];
         items.push({ label: "Vision", sub: visOpts.map(function (o) {
-          var fpc = board.state.feetPerCell || 5, cells = o.off ? null : (o.v === null ? null : o.ft / fpc);
-          var cur = o.off ? !t.isViewer : (t.isViewer && (cells === null ? t.vision == null : (t.vision != null && Math.abs(t.vision - cells) < 0.01)));
-          return { label: (o.l || o.ft + " ft") + (cur ? "  ✓" : ""), onClick: function () { t.isViewer = !o.off; t.vision = cells; board.render(); if (net) net.pushTokens(); } };
+          var fpc = board.state.feetPerCell || 5, cells = o.v === null ? null : o.ft / fpc;
+          var cur = cells === null ? t.vision == null : (t.vision != null && Math.abs(t.vision - cells) < 0.01);
+          return { label: (o.l || o.ft + " ft") + (cur ? "  ✓" : ""), onClick: function () { t.vision = cells; t.isViewer = true; board.render(); if (net) net.pushTokens(); } };
         }) });
         items.push({ label: (t.hidden ? "✓ " : "") + "Hide from players", onClick: function () { board.setHidden(t.id, !t.hidden); if (net) net.pushTokens(); say(t.hidden ? "Token <b>hidden</b> from players." : "Token visible to players."); } });
         var ringSub = [{ label: (!t.ring ? "✓ " : "") + "Off", onClick: function () { board.setRing(t.id, false); if (net) net.pushTokens(); } }];
@@ -834,7 +835,7 @@
       '<div class="vtt-row small"><label>Size (squares) <input type="number" id="te-size" min="1" max="8" value="1"></label></div>' +
       '<label class="vtt-field"><span>Assign to</span><select id="te-owner"></select></label>' +
       '<label class="vtt-field"><span>Vision distance</span><select id="te-vdist">' + vdOpts + "</select></label>" +
-      '<div class="vtt-te-checks"><label><input type="checkbox" id="te-vision"> Sees fog (vision)</label><label><input type="checkbox" id="te-hidden"> Hidden from players</label></div>' +
+      '<div class="vtt-te-checks"><label><input type="checkbox" id="te-hidden"> Hidden from players</label></div>' +
       '<div class="vtt-te-checks"><label><input type="checkbox" id="te-ring"> Ring</label><select id="te-ringcolor">' + ringOpts + "</select></div>" +
       "</div>" +
       '<div class="vtt-modal-foot"><button class="vtt-btn danger" id="te-del">' + ico("trash", 15) + " Delete</button><span style=\"flex:1\"></span><button class=\"vtt-btn primary\" id=\"te-save\">Save</button></div>" +

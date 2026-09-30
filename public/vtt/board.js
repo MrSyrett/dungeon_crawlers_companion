@@ -548,11 +548,16 @@
     function viewerTokens() {
       // On a PLAYER's board (viewerId set) they see ONLY through the tokens they
       // own — never through other players' or the GM's tokens. With none of their
-      // tokens on the map they see nothing (fog stays dark) unless fog is off. On
-      // the GM's board (no viewerId) the isViewer union is used, but the GM normally
-      // renders with fog-reveal on so this doesn't gate their view.
+      // tokens on the map they see nothing (fog stays dark) unless fog is off.
       if (state.viewerId != null) return state.tokens.filter(function (t) { return t.ownerId === state.viewerId; });
-      return state.tokens.filter(function (t) { return t.isViewer; });
+      // On the GM's board (no viewerId) with fog-reveal OFF, the GM previews what a
+      // token sees: the SELECTED token(s) drive the view. With nothing selected, the
+      // combined view of every owned (player) token — or all tokens if none are
+      // owned — so the GM still sees the party's perspective.
+      var sel = selectedList();
+      if (sel.length) return sel;
+      var owned = state.tokens.filter(function (t) { return t.ownerId; });
+      return owned.length ? owned : state.tokens.slice();
     }
 
     // A cheap signature of everything that changes what's visible EXCEPT camera and
@@ -600,7 +605,10 @@
       function segsOnce() { if (!segs) segs = blockingSegments(); return segs; }
 
       fctx.globalCompositeOperation = "destination-out";
-      fctx.fillStyle = "#000";
+      // Soften the RANGE edge of vision: the reveal fades out over up to this many
+      // squares instead of stopping at a hard line. (Walls still cut sight sharply;
+      // this only feathers the outer distance limit.)
+      var FALLOFF_CELLS = 10;
       viewerTokens().forEach(function (t) {
         var radius = visionRadius(t);
         // Cache the polygon by position + vision + geometry; a pan/zoom just re-blits.
@@ -608,6 +616,23 @@
         if (t._fogKey !== key || !t._fogPoly) {
           t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: radius });
           t._fogKey = key;
+        }
+        // destination-out erases the fog by the fill's alpha. For a finite vision
+        // radius, fill the line-of-sight polygon with a radial gradient centred on
+        // the token: fully erased (revealed) out to (radius − falloff), then fading
+        // to no-erase (fogged) at radius — a soft edge. Unlimited vision keeps a
+        // flat erase (its only edges are walls/map bounds).
+        if (isFinite(radius) && state.map.ppg > 0) {
+          var cx = w2sX(t.x), cy = w2sY(t.y);
+          var outer = radius * state.cam.scale;
+          var band = Math.min(FALLOFF_CELLS * state.map.ppg, radius) * state.cam.scale;
+          var inner = Math.max(0, outer - band);
+          var g = fctx.createRadialGradient(cx, cy, inner, cx, cy, Math.max(inner + 0.01, outer));
+          g.addColorStop(0, "rgba(0,0,0,1)");
+          g.addColorStop(1, "rgba(0,0,0,0)");
+          fctx.fillStyle = g;
+        } else {
+          fctx.fillStyle = "#000";
         }
         fillFogPoly(t._fogPoly);
       });
