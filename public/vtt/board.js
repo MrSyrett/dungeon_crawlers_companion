@@ -86,7 +86,7 @@
       condCache[key] = img;
       img.onload = function () { scheduleRender(); };
       img.onerror = function () {};
-      img.src = conditionBase + "/" + key + ".png";
+      img.src = conditionBase + "/" + key + ".webp";
       return null;
     }
     function snapTok(t) {

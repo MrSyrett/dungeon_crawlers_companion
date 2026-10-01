@@ -77,10 +77,29 @@
   // ---- signaling transport over the app's polling endpoint ------------------
   function httpTransport(opts) {
     var base = opts.base, campaignId = opts.campaignId, me = opts.me;
-    var since = 0, stopped = false, handler = null, timer = null;
+    var since = 0, stopped = false, handler = null, timer = null, inFlight = false;
     var url = base + "/" + encodeURIComponent(campaignId);
 
+    // Adaptive poll cadence. Signaling is only busy while peers connect, reconnect
+    // or a new player joins; once the P2P mesh is up there is nothing to carry, so
+    // steady-state polling can be slow. We poll FAST while traffic is flowing (a
+    // message just arrived, or we just sent one) and ease toward SLOW when the room
+    // is quiet. This cuts idle polls — and their server-side auth/role checks —
+    // several-fold without slowing joins (any inbound message snaps back to FAST).
+    var FAST = opts.interval || 700;
+    var SLOW = opts.maxInterval || 4000;
+    var wait = FAST;
+    function quick() { wait = FAST; }
+    function ease() { wait = Math.min(SLOW, Math.round(wait * 1.5)); }
+    function soon() { // poll promptly without stacking parallel poll chains
+      if (stopped || inFlight) return;
+      if (timer) { clearTimeout(timer); timer = null; }
+      timer = setTimeout(poll, 0);
+    }
+
     function send(to, kind, payload) {
+      quick();   // local handshake traffic — poll fast for the reply
+      soon();    // and check for it right away instead of waiting out a slow interval
       return fetch(url, {
         method: "POST", credentials: "same-origin",
         headers: { "content-type": "application/json" },
@@ -89,19 +108,22 @@
     }
     function poll() {
       if (stopped) return;
+      inFlight = true;
       fetch(url + "?me=" + encodeURIComponent(me) + "&since=" + since, { credentials: "same-origin" })
         .then(function (r) { return r.ok ? r.json() : { messages: [], last: since }; })
         .then(function (d) {
           if (typeof d.last === "number") since = Math.max(since, d.last);
-          (d.messages || []).forEach(function (m) { if (handler) handler(m); });
+          var msgs = d.messages || [];
+          if (msgs.length) quick(); else ease();   // activity → fast; quiet → back off
+          msgs.forEach(function (m) { if (handler) handler(m); });
         })
         .catch(function () {})
-        .finally(function () { if (!stopped) timer = setTimeout(poll, opts.interval || 700); });
+        .finally(function () { inFlight = false; if (!stopped) timer = setTimeout(poll, wait); });
     }
     return {
       send: send,
       onMessage: function (cb) { handler = cb; },
-      start: function () { stopped = false; poll(); },
+      start: function () { stopped = false; quick(); poll(); },
       stop: function () { stopped = true; if (timer) clearTimeout(timer); },
     };
   }

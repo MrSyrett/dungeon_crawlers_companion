@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import nodePath from "node:path";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { boardRole } from "@/lib/vtt-scenes";
@@ -5,12 +8,26 @@ import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 
 export const dynamic = "force-dynamic";
 
-// A per-process version stamp appended to the static board assets (?v=…). It changes
-// only when the server (re)starts — i.e. exactly when a new build of the board code
-// is deployed — so browsers cache /vtt/*.js and board.css normally within a run but
-// always pick up the latest after a deploy, instead of serving a stale session.js
-// (which showed up as new features like the stock-token library not appearing).
-const ASSET_VER = Date.now().toString(36);
+// A content stamp appended to the static board assets (?v=…). It is a hash of the
+// board files' bytes, computed once when the server process starts, so it changes
+// ONLY when the board code itself changes — not on every unrelated restart/redeploy.
+// Browsers then cache /vtt/*.js and board.css across restarts (a cheap 304) and
+// still pick up a genuinely new session.js the moment it's deployed. (The old
+// stamp was Date.now(), which changed every boot and forced a full re-download of
+// ~190 KB of board code after any restart — wasted egress with no benefit.)
+const ASSET_FILES = ["board.css", "uvtt.js", "visibility.js", "board.js", "net.js", "session.js"];
+const ASSET_VER = (() => {
+  try {
+    const h = createHash("sha1");
+    for (const f of ASSET_FILES) {
+      h.update(readFileSync(nodePath.join(process.cwd(), "public", "vtt", f)));
+    }
+    return h.digest("hex").slice(0, 12);
+  } catch {
+    // Never worse than before: fall back to a per-boot stamp if a file can't be read.
+    return Date.now().toString(36);
+  }
+})();
 function asset(path: string): string {
   return `${path}${path.includes("?") ? "&" : "?"}v=${ASSET_VER}`;
 }

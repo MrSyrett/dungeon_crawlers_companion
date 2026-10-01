@@ -458,17 +458,26 @@ export default function TokenMaker() {
     const ctx = out.getContext("2d");
     if (!ctx) return;
     drawToken(ctx, EXPORT_SIZE, params, image);
-    out.toBlob((blob) => {
+    // Export WebP, not PNG: a round token is drawn once and then re-uploaded to the
+    // VTT and shipped to every player over the live-sync channel, so a smaller file
+    // is lighter everywhere it travels. WebP keeps the token's alpha (the circular
+    // cutout) and at quality 0.92 is visually identical to the PNG at roughly a
+    // third of the size. Browsers without canvas WebP encoding fall back to PNG.
+    const save = (blob: Blob | null, ext: string) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${fileName || "token"}-token.png`;
+      a.download = `${fileName || "token"}-token.${ext}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-    }, "image/png");
+    };
+    out.toBlob((blob) => {
+      if (blob && blob.type === "image/webp") save(blob, "webp");
+      else out.toBlob((png) => save(png, "png"), "image/png"); // fallback: encoder ignored WebP
+    }, "image/webp", 0.92);
   }, [params, image, fileName]);
 
   const reset = () => {

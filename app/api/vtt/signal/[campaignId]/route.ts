@@ -44,10 +44,38 @@ function prune(r: Room) {
   }
 }
 
+// Access check with a short-TTL cache. Every connected client polls this endpoint
+// (see net.js), and without the cache each poll ran boardRole() — 1-2 campaign/
+// document count queries — against Postgres. Board membership effectively never
+// changes mid-session, so caching the (userId, campaignId) → role decision for a
+// minute cuts the DB load of a busy table by orders of magnitude. getCurrentUser()
+// still runs each poll (it validates the session), but that's a single indexed
+// lookup; the roster/ownership counts are what we're saving.
+const ROLE_TTL_MS = 60_000;
+const gRole = globalThis as unknown as {
+  __vttRoleCache?: Map<string, { role: "gm" | "player" | null; exp: number }>;
+};
+const roleCache: Map<string, { role: "gm" | "player" | null; exp: number }> =
+  gRole.__vttRoleCache ?? (gRole.__vttRoleCache = new Map());
+
+async function cachedRole(userId: string, campaignId: string): Promise<"gm" | "player" | null> {
+  const key = userId + "\u0000" + campaignId;
+  const now = Date.now();
+  const hit = roleCache.get(key);
+  if (hit && hit.exp > now) return hit.role;
+  const role = await boardRole(userId, campaignId);
+  roleCache.set(key, { role, exp: now + ROLE_TTL_MS });
+  // Opportunistic prune so the map can't grow without bound on a long-lived process.
+  if (roleCache.size > 1000) {
+    for (const [k, v] of roleCache) if (v.exp <= now) roleCache.delete(k);
+  }
+  return role;
+}
+
 async function allowed(campaignId: string) {
   const user = await getCurrentUser();
   if (!user) return null;
-  const role = await boardRole(user.id, campaignId);
+  const role = await cachedRole(user.id, campaignId);
   return role ? { user, role } : null;
 }
 
