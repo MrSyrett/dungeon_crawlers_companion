@@ -10,6 +10,13 @@
   "use strict";
   var V = window.__VTT__ || {};
   var isGM = V.role === "gm";
+  // Embedded inside the GM Screen (an iframe in the Maps pane) or a pop-out window
+  // opened with ?embed=1 — in those cases hide the "Home" link so a stray click
+  // can't navigate the frame/window away from the tabletop.
+  var EMBED = (function () {
+    try { if (new URLSearchParams(location.search).get("embed") === "1") return true; } catch (e) {}
+    try { return window.self !== window.top; } catch (e) { return true; }
+  })();
   var mount = document.getElementById("vtt-root");
   if (!mount) return;
 
@@ -852,7 +859,7 @@
   function subtn(id, name, label, on) { return '<button class="vtt-sub-t' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name, 17) + "<span>" + label + "</span></button>"; }
   function shell() {
     var rail = TOOL_GROUPS.map(function (g, i) { return railGroup(g, i === 0); }).join("") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
-    var top = '<div class="vtt-top"><a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a><div class="vtt-title">' + esc(V.campaignName || "Tabletop") + '</div><span class="vtt-scene-badge" id="scene-badge" hidden></span></div>' +
+    var top = '<div class="vtt-top">' + (EMBED ? "" : '<a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a>') + '<div class="vtt-title">' + esc(V.campaignName || "Tabletop") + '</div><span class="vtt-scene-badge" id="scene-badge" hidden></span></div>' +
       '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (!isGM ? '<button class="vtt-tbtn" id="conn-retry" title="Reconnect to your GM" hidden>' + ico("refresh", 18) + "</button>" : "") + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
     var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden>' +
       '<button class="vtt-side-x" id="side-close" title="Close panel">' + ico("close", 16) + "</button>" +

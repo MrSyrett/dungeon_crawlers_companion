@@ -1876,6 +1876,9 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .cst-head{display:flex;align-items:center;gap:8px;padding:7px 10px;background:linear-gradient(180deg,#20242c,#171a20);border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(36,211,238,.3);flex-shrink:0;position:relative}
 .cst-head::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2) 60%,transparent);opacity:.5;pointer-events:none}
 .cst-tick{width:15px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));flex-shrink:0}
+.cst-expand{width:18px;height:18px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--accent);cursor:pointer;line-height:0}
+.cst-expand:hover{border-color:var(--accent);background:rgba(36,211,238,.12)}
+.cst-expand.on{background:rgba(36,211,238,.2);border-color:var(--accent)}
 .cst-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--white);white-space:nowrap}
 .cst-toolbar{margin-left:auto;display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden}
 .cst-content{flex:1;min-height:0;display:flex;position:relative;overflow:hidden}
@@ -2469,69 +2472,38 @@ const GMCamp = (function() {
 window.GMCamp = GMCamp;
 window.__gmCampaign = () => GMCamp.get();   // Party tool reads the linked campaign from here
 
-// ── Launch VTT button ──  Shows whenever a campaign is linked. Clicking it opens
-// a small chooser: embed our first-party tabletop (/play/<id>) as a live tab in
-// the Maps pane (Owlbear can't embed — ours can), or open in a new browser tab
-// (the saved Owlbear room if one is set, else our tabletop).
+// ── Launch VTT button ──  Shows whenever a campaign is linked. No chooser: an
+// Owlbear room (can't embed) opens in a new browser tab; our own tabletop embeds
+// straight into the Maps pane as a live tab (you can pop it out from there).
 function updateVttBtn() {
   const a = document.getElementById('vtt-btn');
   if(!a) return;
   const camp = (typeof GMCamp !== 'undefined' && GMCamp.get) ? GMCamp.get() : null;
   if(camp && camp.id) {
     a.style.display = 'inline-block';
-    a.removeAttribute('href');          // it's a menu trigger now, not a plain link
-    a.onclick = (e) => { e.preventDefault(); openVttMenu(a); };
+    a.removeAttribute('href');          // handled in JS so we can route by link type
+    a.onclick = (e) => {
+      e.preventDefault();
+      const obr = (GMCamp.vttUrl && GMCamp.vttUrl()) || null;
+      if(obr) { window.open(obr, '_blank', 'noopener'); return; }   // external Owlbear room
+      embedVttInMaps('/play/' + camp.id + '?embed=1');              // our tabletop, in the Maps pane
+    };
   } else {
     a.style.display = 'none';
     a.onclick = null;
   }
 }
 
-// Bring the Maps station on-screen (console modes 'explore'/'master' show it; in
-// Free/window view ensureToolWindow opens a Maps window), then open the live-VTT
-// tab in that maps tool pointed at `url`.
+// Bring the Maps station on-screen (console modes 'explore'/'master'/'combat' show
+// it; in Free/window view ensureToolWindow opens a Maps window), then open the
+// live-VTT tab in that maps tool pointed at `url`.
 function embedVttInMaps(url) {
   const cmode = document.body.dataset.cmode || '';
   const inConsole = document.body.dataset.cview === 'console';
-  const mapsVisible = !inConsole || cmode === 'explore' || cmode === 'master';
+  const mapsVisible = !inConsole || cmode === 'explore' || cmode === 'master' || cmode === 'combat';
   if(!mapsVisible && typeof window.setConsoleMode === 'function') window.setConsoleMode('master');
   const node = (typeof window.ensureToolWindow === 'function') ? window.ensureToolWindow('maps') : null;
   if(node && typeof node._openVttTab === 'function') node._openVttTab(url, 'Live VTT');
-}
-
-// The VTT button's chooser menu.
-function openVttMenu(anchor) {
-  const old = document.getElementById('vtt-open-menu');
-  if(old) { old.remove(); return; }   // clicking the button again closes it
-  const camp = (typeof GMCamp !== 'undefined' && GMCamp.get) ? GMCamp.get() : null;
-  if(!camp || !camp.id) return;
-  const obr = (GMCamp.vttUrl && GMCamp.vttUrl()) || null;   // external Owlbear link, if any
-  const play = '/play/' + camp.id;                          // our tabletop (embeds fine)
-  const menu = document.createElement('div');
-  menu.id = 'vtt-open-menu';
-  menu.style.cssText = 'position:fixed;z-index:100000;background:var(--panel,#14181e);border:1px solid var(--border,#2a323d);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.55);padding:5px;min-width:220px;font-family:Barlow,system-ui,sans-serif;';
-  function item(label, sub, fn) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.style.cssText = 'display:block;width:100%;text-align:left;background:none;border:0;color:var(--light,#e6ebf2);padding:8px 10px;border-radius:6px;cursor:pointer;';
-    b.onmouseenter = () => { b.style.background = 'var(--panel-2,#1b2129)'; };
-    b.onmouseleave = () => { b.style.background = 'none'; };
-    b.innerHTML = '<div style="font-weight:700;font-size:13px">' + label + '</div>'
-      + (sub ? '<div style="font-size:11px;color:var(--muted,#8b97a7);margin-top:1px">' + sub + '</div>' : '');
-    b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); close(); fn(); };
-    menu.appendChild(b);
-  }
-  function close() { menu.remove(); document.removeEventListener('click', onDoc, true); }
-  function onDoc(e) { if(!menu.contains(e.target) && e.target !== anchor) close(); }
-  item('Open in the Maps pane', 'Embed our tabletop as a live Maps tab', () => embedVttInMaps(play));
-  item(obr ? 'Open Owlbear in a new tab' : 'Open in a new tab',
-       obr ? 'Your saved Owlbear room' : 'Our tabletop, full browser tab',
-       () => window.open(obr || play, '_blank', 'noopener'));
-  document.body.appendChild(menu);
-  const r = anchor.getBoundingClientRect();
-  menu.style.top = (r.bottom + 6) + 'px';
-  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8)) + 'px';
-  setTimeout(() => document.addEventListener('click', onDoc, true), 0);
 }
 GMCamp.onChange(updateVttBtn);
 GMCamp.render();
@@ -2753,22 +2725,22 @@ GMScenes.renderPins();
     <!-- ZONE 2 — CANVAS: Adventure | (Maps + Combat) -->
     <div class="console-workspace" id="console-workspace">
       <aside class="cstation" id="cst-adv">
-        <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
+        <div class="cst-head"><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
         <div class="cst-content" id="cst-adv-content"></div>
       </aside>
       <main class="cstation cstation-center" id="cst-center">
         <div class="csub-row" id="cst-toprow">
           <section class="csub" id="cst-map">
-            <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-map-title">Maps</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
+            <div class="cst-head"><button class="cst-expand" data-st="map" type="button" title="Expand to fill the canvas" aria-label="Expand or shrink Maps"></button><span class="cst-title" id="cst-map-title">Maps</span><div class="cst-toolbar" id="cst-map-toolbar"></div></div>
             <div class="cst-content" id="cst-map-content"></div>
           </section>
           <section class="csub" id="cst-soc">
-            <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-soc-title">Social</span><div class="cst-toolbar" id="cst-soc-toolbar"></div></div>
+            <div class="cst-head"><button class="cst-expand" data-st="soc" type="button" title="Expand to fill the canvas" aria-label="Expand or shrink Social"></button><span class="cst-title" id="cst-soc-title">Social</span><div class="cst-toolbar" id="cst-soc-toolbar"></div></div>
             <div class="cst-content" id="cst-soc-content"></div>
           </section>
         </div>
         <section class="csub" id="cst-cbt">
-          <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-cbt-title">Combat</span><div class="cst-toolbar" id="cst-cbt-toolbar"></div></div>
+          <div class="cst-head"><button class="cst-expand" data-st="cbt" type="button" title="Expand to fill the canvas" aria-label="Expand or shrink Combat"></button><span class="cst-title" id="cst-cbt-title">Combat</span><div class="cst-toolbar" id="cst-cbt-toolbar"></div></div>
           <div class="cst-content" id="cst-cbt-content"></div>
         </section>
       </main>
@@ -2800,7 +2772,7 @@ GMScenes.renderPins();
 
   <!-- Roll Log — full-height right rail; the command bar connects to its left edge -->
   <aside class="cstation cst-log-rail" id="cst-log">
-    <div class="cst-head"><span class="cst-tick"></span><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div>
+    <div class="cst-head"><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div>
     <div class="cst-content" id="cst-log-content"></div>
   </aside>
 </div>
@@ -4694,10 +4666,15 @@ const STATION_TITLES = { adv:'Adventure', map:'Maps', soc:'Social', cbt:'Combat'
 const CONSOLE_MODES = {
   explore:  { adv:1, map:1, soc:0, cbt:0, log:1 },   // adventure + MAP fills the canvas + roll log
   social:   { adv:1, map:0, soc:1, cbt:0, log:1 },   // adventure + SOCIAL fills the canvas + roll log
-  combat:   { adv:1, map:0, soc:0, cbt:1, log:1 },   // adventure + COMBAT fills the canvas + roll log
+  combat:   { adv:1, map:1, soc:0, cbt:1, log:1 },   // adventure + MAP on top, COMBAT below + roll log
   master:   { adv:1, map:1, soc:1, cbt:1, log:1 },   // everything — Maps|Social on top, Combat below
 };
 let consoleMode = 'master';
+// When set ('map'|'soc'|'cbt'), that station is expanded to fill the whole canvas
+// and the others (plus Adventure / Roll Log) collapse. Cleared on a mode change.
+let expandedStation = null;
+const EXPAND_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M4 9V4h5v2H6v3H4zm11-5h5v5h-2V6h-3V4zM6 15v3h3v2H4v-5h2zm12 3v-3h2v5h-5v-2h3z"/></svg>';
+const SHRINK_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M9 4v5H4V7h3V4h2zm6 0h2v3h3v2h-5V4zM4 15h5v5H7v-3H4v-2zm13 2v3h-2v-5h5v2h-3z"/></svg>';
 function stationToolFor(cfg, st){ return (cfg.tools && cfg.tools[st]) || STATION_TOOL[st]; }
 
 function mountStation(stationId, tool) {
@@ -4746,23 +4723,34 @@ function renderConsole(mode) {
   if(ws) ws.style.display = '';
   if(free) free.style.display = 'none';
 
+  // An expanded station (Maps/Social/Combat) overrides the mode: show ONLY that
+  // station, filling the whole canvas (Adventure, Roll Log and the other center
+  // subs collapse). If the expanded station isn't part of this mode, drop it.
+  let eff = cfg;
+  if(expandedStation && cfg[expandedStation]) {
+    eff = { adv:0, map:0, soc:0, cbt:0, log:0, titles: cfg.titles };
+    eff[expandedStation] = 1;
+  } else {
+    expandedStation = null;
+  }
+
   // Show / hide each station for this mode, and mount its (possibly per-mode)
   // tool. Mounting only the visible stations keeps hidden ones untouched.
   CONSOLE_STATIONS.forEach(st => {
     const el = document.getElementById('cst-' + st);
-    const visible = !!cfg[st];
+    const visible = !!eff[st];
     if(el) el.classList.toggle('collapsed', !visible);
     if(visible) {
-      mountStation(st, stationToolFor(cfg, st));
+      mountStation(st, stationToolFor(eff, st));
       const titleEl = document.getElementById('cst-' + st + '-title');
-      if(titleEl) titleEl.textContent = (cfg.titles && cfg.titles[st]) || STATION_TITLES[st];
+      if(titleEl) titleEl.textContent = (eff.titles && eff.titles[st]) || STATION_TITLES[st];
     }
   });
   // The top row (Maps | Social) collapses when neither is visible, so Combat fills
   // the center on its own. The center wrapper collapses when all three subs hide.
   const toprow = document.getElementById('cst-toprow');
-  if(toprow) toprow.classList.toggle('collapsed', !(cfg.map || cfg.soc));
-  const centerVis = !!(cfg.map || cfg.soc || cfg.cbt);
+  if(toprow) toprow.classList.toggle('collapsed', !(eff.map || eff.soc));
+  const centerVis = !!(eff.map || eff.soc || eff.cbt);
   const center = document.getElementById('cst-center');
   if(center) center.classList.toggle('collapsed', !centerVis);
 
@@ -4770,7 +4758,17 @@ function renderConsole(mode) {
   // (Prep / Downtime); otherwise clear the override so the CSS basis governs.
   // The Roll Log is a fixed-width right rail and is never grown.
   const adv = document.getElementById('cst-adv');
-  if(adv) adv.style.flex = (!centerVis && cfg.adv) ? '1 1 auto' : '';
+  if(adv) adv.style.flex = (!centerVis && eff.adv) ? '1 1 auto' : '';
+
+  // Reflect expand/shrink state on the toggle buttons (only the ones in this mode).
+  ['map','soc','cbt'].forEach(st => {
+    const btn = document.querySelector('.cst-expand[data-st="' + st + '"]');
+    if(!btn) return;
+    const isExp = expandedStation === st;
+    btn.innerHTML = isExp ? SHRINK_SVG : EXPAND_SVG;
+    btn.classList.toggle('on', isExp);
+    btn.title = isExp ? 'Shrink to the normal layout' : 'Expand to fill the canvas';
+  });
 
   document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === consoleMode));
   if(window.__ddScheduleSave) window.__ddScheduleSave();
@@ -4797,7 +4795,18 @@ function setFreeView() {
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
-function setConsoleMode(mode) { renderConsole(mode); }
+function setConsoleMode(mode) { expandedStation = null; renderConsole(mode); }
+
+// Expand/shrink toggles on the Maps / Social / Combat headers. Delegated so it
+// works regardless of when the headers are (re)rendered.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('.cst-expand');
+  if(!btn || !btn.dataset.st) return;
+  e.preventDefault();
+  const st = btn.dataset.st;
+  expandedStation = (expandedStation === st) ? null : st;
+  renderConsole(consoleMode);
+});
 
 // ── Mobile mode ────────────────────────────────────────────────────────────
 // Phones can't show four side-by-side stations, so on a narrow screen the GM
@@ -5697,15 +5706,86 @@ function initDocTool(root) {
   // image in the pan/zoom viewer, that tab shows an <iframe> of /play/<campaign>
   // (same-origin, so it embeds — unlike Owlbear, which blocks framing). The iframe
   // is kept mounted while hidden so switching tabs never reloads a live session.
-  let vttWrap = null, vttFrame = null;
+  // It can also pop out to its own window (second screen) and pop back in.
+  let vttWrap = null, vttFrame = null, vttRO = null, vttPopped = false, vttPopWin = null;
   function ensureVttWrap() {
     if(vttWrap) return vttWrap;
     const bodyEl = root.querySelector('.doc-body');
     vttWrap = document.createElement('div');
     vttWrap.className = 'maps-vtt-wrap';
-    vttWrap.style.cssText = 'position:absolute;inset:0;display:none;background:#0a0c10;z-index:2;';
+    vttWrap.style.cssText = 'position:absolute;inset:0;display:none;background:#0a0c10;z-index:2;overflow:hidden;';
     if(bodyEl) bodyEl.appendChild(vttWrap);
     return vttWrap;
+  }
+  // Lay the tabletop out at a comfortable logical width and scale it down to fit a
+  // small pane, so its toolbar/rail aren't oversized outside Explore. A wide pane
+  // (Explore or an expanded station) scales at ~1 — native size.
+  function fitVttFrame() {
+    if(!vttFrame || !vttWrap) return;
+    const BASE = 1100, w = vttWrap.clientWidth;
+    if(!w) return;
+    const scale = Math.min(1, Math.max(0.6, w / BASE));
+    vttFrame.style.width = (100 / scale) + '%';
+    vttFrame.style.height = (100 / scale) + '%';
+    vttFrame.style.transform = 'scale(' + scale + ')';
+    vttFrame.style.transformOrigin = 'top left';
+  }
+  function vttPopBtn() {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = 'Pop out ↗';
+    b.title = 'Open the tabletop in its own window (for a second screen)';
+    b.style.cssText = 'position:absolute;top:6px;right:8px;z-index:4;background:rgba(12,15,20,.86);border:1px solid var(--border,#2a323d);color:var(--light,#e6ebf2);border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;';
+    b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); popOutVtt(); };
+    return b;
+  }
+  function buildEmbed(url) {
+    vttWrap.innerHTML = '';
+    vttFrame = document.createElement('iframe');
+    vttFrame.style.cssText = 'border:0;display:block;background:#0a0c10;';
+    vttFrame.setAttribute('allow', 'clipboard-write; fullscreen; autoplay');
+    vttFrame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    vttFrame.src = url;
+    vttWrap.appendChild(vttFrame);
+    vttWrap.appendChild(vttPopBtn());
+    fitVttFrame();
+    if(!vttRO && typeof ResizeObserver === 'function') {
+      vttRO = new ResizeObserver(() => fitVttFrame());
+      vttRO.observe(vttWrap);
+    }
+  }
+  function buildPopped(url) {
+    vttWrap.innerHTML = '';
+    vttFrame = null;
+    const box = document.createElement('div');
+    box.style.cssText = 'margin:auto;max-width:360px;text-align:center;color:var(--muted,#8b97a7);font-size:13px;padding:24px;display:flex;flex-direction:column;gap:12px;align-items:center;';
+    box.innerHTML = '<div style="font-weight:700;color:var(--light,#e6ebf2);font-size:14px">Tabletop popped out</div>'
+      + '<div>The live map is open in its own window — park it on your second screen.</div>';
+    const back = document.createElement('button');
+    back.type = 'button'; back.className = 'btn small primary'; back.textContent = 'Bring it back in';
+    back.onclick = (e) => { e.preventDefault(); popInVtt(); };
+    const reopen = document.createElement('button');
+    reopen.type = 'button'; reopen.className = 'btn small ghost'; reopen.textContent = 'Re-open window';
+    reopen.onclick = (e) => { e.preventDefault(); openPopWin(url); };
+    box.appendChild(back); box.appendChild(reopen);
+    vttWrap.appendChild(box);
+    vttWrap.style.display = 'flex';
+  }
+  function openPopWin(url) {
+    try { if(vttPopWin && !vttPopWin.closed) { vttPopWin.focus(); return; } } catch(e) {}
+    vttPopWin = window.open(url, 'gm-vtt-popout', 'width=1500,height=950,menubar=no,toolbar=no');
+  }
+  function popOutVtt() {
+    const url = vttWrap ? vttWrap.dataset.url : '';
+    if(!url) return;
+    vttPopped = true;
+    openPopWin(url);
+    buildPopped(url);
+  }
+  function popInVtt() {
+    vttPopped = false;
+    try { if(vttPopWin && !vttPopWin.closed) vttPopWin.close(); } catch(e) {}
+    vttPopWin = null;
+    showVtt(vttWrap ? vttWrap.dataset.url : '');
   }
   function showVtt(url) {
     ensureVttWrap();
@@ -5713,27 +5793,35 @@ function initDocTool(root) {
     frameWrap.style.display = 'none';
     controls.style.display = 'none';
     filenameEl.textContent = 'Live VTT';
-    // Rebuild the iframe only when the URL actually changes, so re-selecting the
-    // VTT tab doesn't reload (and drop) a running session.
-    if(vttFrame && vttWrap.dataset.url === (url || '')) { vttWrap.style.display = 'block'; return; }
-    vttWrap.innerHTML = '';
-    vttWrap.dataset.url = url || '';
+    url = url || '';
+    // If the GM popped it out and that window is still open, keep the placeholder
+    // rather than a duplicate embed.
+    let stillPopped = false;
+    try { stillPopped = vttPopped && vttPopWin && !vttPopWin.closed; } catch(e) { stillPopped = false; }
+    if(stillPopped) { vttWrap.dataset.url = url; buildPopped(url); return; }
+    vttPopped = false;
     if(!url) {
-      vttWrap.style.display = 'flex';
+      vttWrap.dataset.url = '';
       vttWrap.innerHTML = '<div style="margin:auto;text-align:center;color:var(--muted);font-size:13px;padding:24px">Link a campaign to open its tabletop here.</div>';
+      vttWrap.style.display = 'flex';
       vttFrame = null;
       return;
     }
-    vttFrame = document.createElement('iframe');
-    vttFrame.style.cssText = 'width:100%;height:100%;border:0;display:block;background:#0a0c10;';
-    vttFrame.setAttribute('allow', 'clipboard-write; fullscreen; autoplay');
-    vttFrame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-    vttFrame.src = url;
-    vttWrap.appendChild(vttFrame);
+    // Rebuild the iframe only when the URL changes, so re-selecting the VTT tab
+    // doesn't reload (and drop) a running session.
+    if(vttFrame && vttWrap.dataset.url === url) { vttWrap.style.display = 'block'; fitVttFrame(); return; }
+    vttWrap.dataset.url = url;
     vttWrap.style.display = 'block';
+    buildEmbed(url);
   }
   function hideVtt() { if(vttWrap) vttWrap.style.display = 'none'; }
-  function destroyVtt() { if(vttWrap) { vttWrap.style.display = 'none'; vttWrap.innerHTML = ''; vttWrap.dataset.url = ''; } vttFrame = null; }
+  function destroyVtt() {
+    if(vttRO) { try { vttRO.disconnect(); } catch(e) {} vttRO = null; }
+    try { if(vttPopWin && !vttPopWin.closed) vttPopWin.close(); } catch(e) {}
+    vttPopWin = null; vttPopped = false;
+    if(vttWrap) { vttWrap.style.display = 'none'; vttWrap.innerHTML = ''; vttWrap.dataset.url = ''; }
+    vttFrame = null;
+  }
 
   // Show whatever a tab holds: a live VTT iframe, or an image in the pan/zoom viewer.
   function activateTab(tab) {
