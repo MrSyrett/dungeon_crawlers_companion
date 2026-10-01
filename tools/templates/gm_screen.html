@@ -5407,6 +5407,28 @@ function syncToolbar(slot, toolNode) {
 // ══════════════════════════════════════════
 // DOCUMENT VIEWER (Adventure + Maps share this)
 // ══════════════════════════════════════════
+// Page-wide live-VTT host guard. The Maps tool can exist as MORE THAN ONE node
+// instance in a single GM screen (the console "Maps" station, a Free-mode Maps
+// window, and copies rebuilt by a state restore), and the tabletop can also be
+// popped out into its own window. Each of those is a full /play host, and because
+// they all run as the SAME GM account they share one identity on the signaling
+// channel — so a connected player can't tell them apart and ping-pongs between
+// them, showing one host's scene for a moment and then snapping back to another's
+// (usually a stale scene). To prevent that, only ONE live-VTT embed may exist in
+// the whole page at a time, and the popped-out state is shared across every Maps
+// node (not per-closure), so no node rebuilds an embed while the pop-out is open.
+window.__dccVttHost = window.__dccVttHost || { popped: false, popWin: null };
+// Tear down every live-VTT embed iframe in the page (optionally keeping the one
+// inside `keepWrap`). Removing an iframe ends its /play session/host cleanly.
+function dccKillVttEmbeds(keepWrap) {
+  try {
+    document.querySelectorAll('iframe.maps-vtt-frame').forEach(function (f) {
+      if(keepWrap && keepWrap.contains(f)) return;
+      const w = f.closest('.maps-vtt-wrap');
+      if(w) { try { w.innerHTML = ''; } catch(e) { f.remove(); } } else { f.remove(); }
+    });
+  } catch(e) {}
+}
 function initDocTool(root) {
   const fileInput = root.querySelector('.doc-file-input');
   const filenameEl = root.querySelector('.doc-filename');
@@ -5703,7 +5725,7 @@ function initDocTool(root) {
         const t = mapTabs.find(x => x.id === id);
         if(t && t.vtt) {
           if(activeMapId !== id) switchMap(id);   // show the VTT tab first
-          if(vttPopped) popInVtt(); else popOutVtt();
+          if(vttPop.popped) popInVtt(); else popOutVtt();
           renderMapTabs();                         // refresh the pop icon state
         }
         return;
@@ -5723,7 +5745,7 @@ function initDocTool(root) {
     mapTabsEl.style.display = 'flex';
     mapTabsEl.innerHTML = mapTabs.map(t => {
       const popBtn = t.vtt
-        ? '<button class="map-tab-pop" type="button" title="' + (vttPopped ? 'Bring the tabletop back in' : 'Pop out to its own window') + '" aria-label="Pop the tabletop out or back in">' + (vttPopped ? TAB_POP_IN : TAB_POP_OUT) + '</button>'
+        ? '<button class="map-tab-pop" type="button" title="' + (vttPop.popped ? 'Bring the tabletop back in' : 'Pop out to its own window') + '" aria-label="Pop the tabletop out or back in">' + (vttPop.popped ? TAB_POP_IN : TAB_POP_OUT) + '</button>'
         : '';
       return '<div class="map-tab' + (t.id === activeMapId ? ' active' : '') + (t.vtt ? ' vtt' : '') + '" data-id="' + t.id + '" title="' + advEsc(t.vtt ? 'Live VTT — your first-party tabletop' : t.name) + '">'
         + '<span class="map-tab-name">' + advEsc(t.name) + '</span>'
@@ -5736,7 +5758,10 @@ function initDocTool(root) {
   // (same-origin, so it embeds — unlike Owlbear, which blocks framing). The iframe
   // is kept mounted while hidden so switching tabs never reloads a live session.
   // It can also pop out to its own window (second screen) and pop back in.
-  let vttWrap = null, vttFrame = null, vttRO = null, vttPopped = false, vttPopWin = null;
+  let vttWrap = null, vttFrame = null, vttRO = null;
+  // Popped-out state is PAGE-GLOBAL (shared by every Maps node), not per-closure,
+  // so a second Maps instance won't rebuild an embed while the tabletop is popped.
+  const vttPop = window.__dccVttHost;
   function ensureVttWrap() {
     if(vttWrap) return vttWrap;
     const bodyEl = root.querySelector('.doc-body');
@@ -5762,8 +5787,13 @@ function initDocTool(root) {
   // Pop-out lives on the Live-VTT tab (see renderMapTabs) rather than as an overlay,
   // so it never covers the tabletop's own top-right controls.
   function buildEmbed(url) {
+    // Singleton: tear down ANY other live-VTT embed in the page first, so two
+    // hosts for the same campaign can never run at once (see the guard note).
+    dccKillVttEmbeds(vttWrap);
+    vttPop.popped = false;   // an embed is live here, so we're not popped out
     vttWrap.innerHTML = '';
     vttFrame = document.createElement('iframe');
+    vttFrame.className = 'maps-vtt-frame';
     vttFrame.style.cssText = 'border:0;display:block;background:#0a0c10;';
     vttFrame.setAttribute('allow', 'clipboard-write; fullscreen; autoplay');
     vttFrame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
@@ -5793,20 +5823,23 @@ function initDocTool(root) {
     vttWrap.style.display = 'flex';
   }
   function openPopWin(url) {
-    try { if(vttPopWin && !vttPopWin.closed) { vttPopWin.focus(); return; } } catch(e) {}
-    vttPopWin = window.open(url, 'gm-vtt-popout', 'width=1500,height=950,menubar=no,toolbar=no');
+    try { if(vttPop.popWin && !vttPop.popWin.closed) { vttPop.popWin.focus(); return; } } catch(e) {}
+    vttPop.popWin = window.open(url, 'gm-vtt-popout', 'width=1500,height=950,menubar=no,toolbar=no');
   }
   function popOutVtt() {
     const url = vttWrap ? vttWrap.dataset.url : '';
     if(!url) return;
-    vttPopped = true;
+    vttPop.popped = true;
+    // The pop-out window becomes the one and only host — kill every in-page embed
+    // (across all Maps nodes) so it can't race the popped-out window.
+    dccKillVttEmbeds(null);
     openPopWin(url);
     buildPopped(url);
   }
   function popInVtt() {
-    vttPopped = false;
-    try { if(vttPopWin && !vttPopWin.closed) vttPopWin.close(); } catch(e) {}
-    vttPopWin = null;
+    vttPop.popped = false;
+    try { if(vttPop.popWin && !vttPop.popWin.closed) vttPop.popWin.close(); } catch(e) {}
+    vttPop.popWin = null;
     showVtt(vttWrap ? vttWrap.dataset.url : '');
   }
   function showVtt(url) {
@@ -5819,9 +5852,9 @@ function initDocTool(root) {
     // If the GM popped it out and that window is still open, keep the placeholder
     // rather than a duplicate embed.
     let stillPopped = false;
-    try { stillPopped = vttPopped && vttPopWin && !vttPopWin.closed; } catch(e) { stillPopped = false; }
+    try { stillPopped = vttPop.popped && vttPop.popWin && !vttPop.popWin.closed; } catch(e) { stillPopped = false; }
     if(stillPopped) { vttWrap.dataset.url = url; buildPopped(url); return; }
-    vttPopped = false;
+    vttPop.popped = false;
     if(!url) {
       vttWrap.dataset.url = '';
       vttWrap.innerHTML = '<div style="margin:auto;text-align:center;color:var(--muted);font-size:13px;padding:24px">Link a campaign to open its tabletop here.</div>';
@@ -5839,8 +5872,8 @@ function initDocTool(root) {
   function hideVtt() { if(vttWrap) vttWrap.style.display = 'none'; }
   function destroyVtt() {
     if(vttRO) { try { vttRO.disconnect(); } catch(e) {} vttRO = null; }
-    try { if(vttPopWin && !vttPopWin.closed) vttPopWin.close(); } catch(e) {}
-    vttPopWin = null; vttPopped = false;
+    try { if(vttPop.popWin && !vttPop.popWin.closed) vttPop.popWin.close(); } catch(e) {}
+    vttPop.popWin = null; vttPop.popped = false;
     if(vttWrap) { vttWrap.style.display = 'none'; vttWrap.innerHTML = ''; vttWrap.dataset.url = ''; }
     vttFrame = null;
   }
