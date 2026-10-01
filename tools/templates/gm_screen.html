@@ -444,6 +444,9 @@ input[type="number"] { -moz-appearance: textfield; }
 .map-tab-name { letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .map-tab-x { flex-shrink: 0; background: transparent; border: 0; color: #666; font-size: 11px; line-height: 1; padding: 0 1px; border-radius: 4px; cursor: pointer; }
 .map-tab-x:hover { color: #d06060; }
+.map-tab-pop { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 0; color: #7f8a99; padding: 0 1px; line-height: 0; cursor: pointer; }
+.map-tab-pop:hover { color: var(--accent); }
+.map-tab.vtt.active .map-tab-pop { color: var(--accent); }
 
 /* ── ADVENTURE HUB (Adventure pane, loaded prep) ── */
 .adv-hub { flex: 1; min-width: 0; min-height: 0; flex-direction: column; background: var(--panel); color: var(--text); overflow: hidden; }
@@ -4723,12 +4726,14 @@ function renderConsole(mode) {
   if(ws) ws.style.display = '';
   if(free) free.style.display = 'none';
 
-  // An expanded station (Maps/Social/Combat) overrides the mode: show ONLY that
-  // station, filling the whole canvas (Adventure, Roll Log and the other center
-  // subs collapse). If the expanded station isn't part of this mode, drop it.
+  // An expanded station fills the CANVAS — the center section between Adventure
+  // and the Roll Log. Those two are fixed and stay exactly as the mode has them;
+  // only the center subs (Maps / Social / Combat) are affected, so expanding one
+  // simply hides the other center subs and lets it fill the center. If the
+  // expanded station isn't a center sub of this mode, drop the expand.
   let eff = cfg;
   if(expandedStation && cfg[expandedStation]) {
-    eff = { adv:0, map:0, soc:0, cbt:0, log:0, titles: cfg.titles };
+    eff = { adv: cfg.adv, log: cfg.log, map:0, soc:0, cbt:0, titles: cfg.titles };
     eff[expandedStation] = 1;
   } else {
     expandedStation = null;
@@ -4760,10 +4765,14 @@ function renderConsole(mode) {
   const adv = document.getElementById('cst-adv');
   if(adv) adv.style.flex = (!centerVis && eff.adv) ? '1 1 auto' : '';
 
-  // Reflect expand/shrink state on the toggle buttons (only the ones in this mode).
+  // Expand/shrink toggles. Only meaningful when the mode has more than one center
+  // sub to swap between (Combat: Maps+Combat; Master: Maps+Social+Combat) — hide
+  // the toggle in Explore/Social where the single center pane already fills it.
+  const canExpand = ['map','soc','cbt'].filter(st => cfg[st]).length > 1;
   ['map','soc','cbt'].forEach(st => {
     const btn = document.querySelector('.cst-expand[data-st="' + st + '"]');
     if(!btn) return;
+    btn.style.display = canExpand ? 'inline-flex' : 'none';
     const isExp = expandedStation === st;
     btn.innerHTML = isExp ? SHRINK_SVG : EXPAND_SVG;
     btn.classList.toggle('on', isExp);
@@ -5687,20 +5696,40 @@ function initDocTool(root) {
     const bodyEl = root.querySelector('.doc-body');
     if(bodyEl) bodyEl.insertBefore(mapTabsEl, bodyEl.firstChild);
     mapTabsEl.addEventListener('click', e => {
+      const pop = e.target.closest('.map-tab-pop');
+      if(pop) {
+        e.stopPropagation();
+        const id = +pop.closest('.map-tab').dataset.id;
+        const t = mapTabs.find(x => x.id === id);
+        if(t && t.vtt) {
+          if(activeMapId !== id) switchMap(id);   // show the VTT tab first
+          if(vttPopped) popInVtt(); else popOutVtt();
+          renderMapTabs();                         // refresh the pop icon state
+        }
+        return;
+      }
       const x = e.target.closest('.map-tab-x');
       if(x) { e.stopPropagation(); removeMap(+x.closest('.map-tab').dataset.id); return; }
       const t = e.target.closest('.map-tab');
       if(t) switchMap(+t.dataset.id);
     });
   }
+  // Pop-out / pop-in glyphs for the Live-VTT tab (arrow out of / into a frame).
+  const TAB_POP_OUT = '<svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3z"/><path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg>';
+  const TAB_POP_IN  = '<svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M21 3v6h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H15V3h6z"/><path d="M5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg>';
   function renderMapTabs() {
     if(!mapTabsEl) return;
     if(!mapTabs.length) { mapTabsEl.style.display = 'none'; mapTabsEl.innerHTML = ''; return; }
     mapTabsEl.style.display = 'flex';
-    mapTabsEl.innerHTML = mapTabs.map(t =>
-      '<div class="map-tab' + (t.id === activeMapId ? ' active' : '') + (t.vtt ? ' vtt' : '') + '" data-id="' + t.id + '" title="' + advEsc(t.vtt ? 'Live VTT — your first-party tabletop' : t.name) + '">'
-      + '<span class="map-tab-name">' + advEsc(t.name) + '</span>'
-      + '<button class="map-tab-x" type="button" aria-label="' + (t.vtt ? 'Close VTT tab' : 'Remove map') + '">✕</button></div>').join('');
+    mapTabsEl.innerHTML = mapTabs.map(t => {
+      const popBtn = t.vtt
+        ? '<button class="map-tab-pop" type="button" title="' + (vttPopped ? 'Bring the tabletop back in' : 'Pop out to its own window') + '" aria-label="Pop the tabletop out or back in">' + (vttPopped ? TAB_POP_IN : TAB_POP_OUT) + '</button>'
+        : '';
+      return '<div class="map-tab' + (t.id === activeMapId ? ' active' : '') + (t.vtt ? ' vtt' : '') + '" data-id="' + t.id + '" title="' + advEsc(t.vtt ? 'Live VTT — your first-party tabletop' : t.name) + '">'
+        + '<span class="map-tab-name">' + advEsc(t.name) + '</span>'
+        + popBtn
+        + '<button class="map-tab-x" type="button" aria-label="' + (t.vtt ? 'Close VTT tab' : 'Remove map') + '">✕</button></div>';
+    }).join('');
   }
   // A live first-party VTT can ride in the Maps pane as its own tab: instead of an
   // image in the pan/zoom viewer, that tab shows an <iframe> of /play/<campaign>
@@ -5730,14 +5759,8 @@ function initDocTool(root) {
     vttFrame.style.transform = 'scale(' + scale + ')';
     vttFrame.style.transformOrigin = 'top left';
   }
-  function vttPopBtn() {
-    const b = document.createElement('button');
-    b.type = 'button'; b.textContent = 'Pop out ↗';
-    b.title = 'Open the tabletop in its own window (for a second screen)';
-    b.style.cssText = 'position:absolute;top:6px;right:8px;z-index:4;background:rgba(12,15,20,.86);border:1px solid var(--border,#2a323d);color:var(--light,#e6ebf2);border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;';
-    b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); popOutVtt(); };
-    return b;
-  }
+  // Pop-out lives on the Live-VTT tab (see renderMapTabs) rather than as an overlay,
+  // so it never covers the tabletop's own top-right controls.
   function buildEmbed(url) {
     vttWrap.innerHTML = '';
     vttFrame = document.createElement('iframe');
@@ -5746,7 +5769,6 @@ function initDocTool(root) {
     vttFrame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
     vttFrame.src = url;
     vttWrap.appendChild(vttFrame);
-    vttWrap.appendChild(vttPopBtn());
     fitVttFrame();
     if(!vttRO && typeof ResizeObserver === 'function') {
       vttRO = new ResizeObserver(() => fitVttFrame());
