@@ -55,7 +55,6 @@ export default async function NimbleAncestriesPage({ searchParams }: { searchPar
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Ancestries & Backgrounds" subtitle={`${NIMBLE_ANCESTRIES.length} ancestries${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · ${NIMBLE_BACKGROUNDS.length} backgrounds · ${NIMBLE_MOTIVATIONS.length} motivations`} />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">Choose one ancestry (flavor is free — swap traits with the GM&rsquo;s blessing), one background, and optionally a reason your hero adventures.</p>
       <div className="mb-6"><HomebrewEditor kind="nimble-ancestry" campaigns={campaigns} initial={hbOwn} /></div>
       <SearchForm base={BASE} q={q} placeholder="Search…" hidden={{ kind }} />
       <ChipRow label="Show" base={BASE} current={current} param="kind" options={KINDS} active={kind} />

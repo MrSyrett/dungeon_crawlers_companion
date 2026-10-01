@@ -86,7 +86,6 @@ export default async function D62eEquipmentPage({ searchParams }: { searchParams
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Equipment" subtitle={`${D62E_EQUIPMENT.length} items of gear · ${D62E_VEHICLES.length} starships & vehicles${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Weapon damage is rolled against the target&rsquo;s Brawn plus any armor; melee weapons add to the wielder&rsquo;s Brawn. Armor adds its protection to Brawn rolls to resist damage. Vehicles and starships use Scale to compare against character-scale attacks.</p>
 
       <div className="mb-6"><HomebrewEditor kind="d62e-gear" campaigns={campaigns} initial={hbOwn} /></div>
 

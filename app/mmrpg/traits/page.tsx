@@ -43,7 +43,6 @@ export default async function MmrpgTraitsPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Traits & Tags" subtitle={`${MMRPG_TRAITS.length} traits · ${MMRPG_TAGS.length} tags${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">A <b>trait</b> is a label with a game-mechanical effect (you get one extra trait per rank, plus your origin and occupation traits). A <b>tag</b> mostly has a narrative effect — it describes who you are (the Heroic tag gives you Karma equal to your rank).</p>
 
       <div className="mb-6 flex flex-col gap-4">
         <HomebrewEditor kind="mmrpg-trait" campaigns={campaigns} initial={hbTraitOwn} />

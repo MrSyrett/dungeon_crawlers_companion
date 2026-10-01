@@ -65,10 +65,6 @@ export default async function KobStrengthsPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <KobHeader title="Strengths & Flaws" subtitle={`${KOB_STRENGTHS.length} strengths · ${KOB_FLAWS.length} flaws${hbStrengths.length + hbFlaws.length ? ` + ${hbStrengths.length + hbFlaws.length} homebrew` : ""}`} />
-      <p className="mb-3 text-sm leading-relaxed text-[var(--muted)]">
-        Pick two Strengths (plus the one your age or grade gives you for free) and one Flaw. Strengths with an AT cost
-        need Adversity Tokens to activate; failing a check because you acted on your Flaw earns an extra token.
-      </p>
       <div className="mb-6 grid gap-4 md:grid-cols-2">
         <HomebrewEditor kind="kob-strength" campaigns={campaigns} initial={hbStrOwn} />
         <HomebrewEditor kind="kob-flaw" campaigns={campaigns} initial={hbFlawOwn} />

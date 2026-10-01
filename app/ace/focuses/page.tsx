@@ -61,11 +61,6 @@ export default async function AceFocusesPage({ searchParams }: { searchParams: P
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Stats & Focuses" subtitle={`${ACE_FOCUSES.length} focuses${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} across five stats`} />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
-        Roll a number of six-sided dice equal to your Stat. For each Stat you have one Focus — an area of
-        expertise — and when it applies you roll <strong className="text-[var(--text)]">two extra dice</strong>.
-        Sixes explode. Want a Focus that isn&rsquo;t listed? Make it below.
-      </p>
 
       <div className="mb-6">
         <HomebrewEditor kind="ace-focus" campaigns={campaigns} initial={hbOwn} />

@@ -64,7 +64,6 @@ export default async function IcrpgBestiaryPage({ searchParams }: { searchParams
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Bestiary" subtitle={`${ICRPG_MONSTERS.length} monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Enemies roll d20 + a stat vs your Defense (10 + your CON &amp; armor). Hearts are 10 HP each; EFFORT dice determine how fast they fall. Reskin any block to fit your world.</p>
 
       <div className="mb-6"><HomebrewEditor kind="icrpg-monster" campaigns={campaigns} initial={hbOwn} /></div>
 

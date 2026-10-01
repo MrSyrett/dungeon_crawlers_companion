@@ -39,10 +39,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <CandelaHeader title="Gear & Harm" subtitle={`Candela Obscura · Equipment${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-5 text-[13px] leading-relaxed text-[var(--muted)]">
-        Up to three gear slots per assignment, declared as needed. Standard gear is available to any
-        member; each specialty also carries its own. Homebrew you create below is merged in.
-      </p>
 
       <div className="mb-6"><HomebrewEditor kind="co-gear" campaigns={campaigns} initial={hbOwn} /></div>
 

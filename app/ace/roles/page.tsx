@@ -67,11 +67,6 @@ export default async function AceRolesPage({ searchParams }: { searchParams: Pro
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Roles" subtitle={`${ACE_ROLES.length} roles${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · one special ability each`} />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
-        Your Role is what makes you <em>you</em> — a cowboy, a robot, a talking dog — and it gives you one
-        special ability. Want two Roles? You can, but you only get one of the abilities; the second is
-        descriptive. Roles marked <span className="text-[#8ad4ff]">✦ Power</span> come with a Power Stat.
-      </p>
 
       <div className="mb-6">
         <HomebrewEditor kind="ace-role" campaigns={campaigns} initial={hbOwn} />

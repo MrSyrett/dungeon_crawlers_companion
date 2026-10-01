@@ -42,7 +42,6 @@ export default async function D62ePerksPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Perks, Flaws & Talents" subtitle={`${D62E_PERKS.length} perks, flaws, talents & more`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Perks and talents are bought with points or die-code reductions; flaws and troubles give points (or dice) back in exchange for taking on a drawback. Each entry lists its cost — a positive value spends, a &ldquo;+&rdquo; value returns.</p>
 
       <SearchForm base={BASE} q={q} placeholder="Search perks, flaws & talents…" hidden={{ kind }} />
       <ChipRow label="Kind" base={BASE} current={current} param="kind" options={KINDS} active={kind} />

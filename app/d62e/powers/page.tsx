@@ -65,7 +65,6 @@ export default async function D62ePowersPage({ searchParams }: { searchParams: P
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Powers" subtitle={`${D62E_POWERS.length} magic, psionic & super powers${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">The genre modules add three families of extraordinary abilities. Magic and psionics are rolled against a Difficulty Number using their governing skill; superpowers are bought in ranks. Each power lists its skill, difficulty, and any parameters (casting time, power cost, duration, range).</p>
 
       <div className="mb-6"><HomebrewEditor kind="d62e-power" campaigns={campaigns} initial={hbOwn} /></div>
 

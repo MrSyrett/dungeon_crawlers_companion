@@ -26,11 +26,6 @@ export default async function KobQuestionsPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <KobHeader title="Relationship Questions" subtitle={`${bookName(book)} · 60 questions`} />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
-        After introductions, pass the questions around the table. Quick start: one question about one character.
-        One-sided: one question about each character. Complete: a positive and a negative about everyone you know,
-        and one &ldquo;don&rsquo;t know&rdquo; question about everyone else. The sheet&rsquo;s Relationships block draws these at random.
-      </p>
       <SearchForm base={BASE} q={q} placeholder="Search questions…" hidden={{ book, kind }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />
       <ChipRow label="Kind" base={BASE} current={current} param="kind" options={KINDS} active={kind} />

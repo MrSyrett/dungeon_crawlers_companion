@@ -26,7 +26,6 @@ export default async function SwTemplatesPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <SwHeader title="Character Templates" subtitle={`${SW_TEMPLATES.length} templates · pick one, add ${SW_TABLES.creation.skillDice}D of skills`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">{SW_TABLES.creation.templateNote}</p>
       <SearchForm base={BASE} q={q} placeholder="Search templates…" hidden={{ kind }} />
       <ChipRow label="Leans on" base={BASE} current={current} param="kind" options={LEANS} active={kind} />
       <CountLine count={results.length} noun="template" base={BASE} filtered={Boolean(needle || kind)} />

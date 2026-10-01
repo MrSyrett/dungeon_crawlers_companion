@@ -61,7 +61,6 @@ export default async function NimbleBestiaryPage({ searchParams }: { searchParam
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Bestiary" subtitle={`${NIMBLE_MONSTERS.length} monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · ${NIMBLE_FAMILIES.length} families`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Monsters act together on their group&rsquo;s turn. <span className="font-mono text-[#9fe3bd]">M</span> = Medium armor (damage from dice only, no modifiers); <span className="font-mono text-[#9fe3bd]">H</span> = Heavy (half the dice, no modifiers). Crits and vulnerabilities ignore armor. Minions die to any damage and can&rsquo;t crit.</p>
       <div className="mb-6"><HomebrewEditor kind="nimble-monster" campaigns={campaigns} initial={hbOwn} /></div>
       <SearchForm base={BASE} q={q} placeholder="Search monsters…" hidden={{ fam, kind }} />
       <ChipRow label="Family" base={BASE} current={current} param="fam" options={FAMILIES} active={fam} />

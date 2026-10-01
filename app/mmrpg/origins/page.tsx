@@ -43,7 +43,6 @@ export default async function MmrpgBackgroundsPage({ searchParams }: { searchPar
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Origins & Occupations" subtitle={`${MMRPG_ORIGINS.length} origins · ${MMRPG_OCCUPATIONS.length} occupations`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Your <b>origin</b> explains where your powers come from; your <b>occupation</b> is what you do with your time. Each grants a free package of tags and traits (origins can also grant powers, which must be picked first).</p>
       <SearchForm base={BASE} q={q} placeholder="Search origins & occupations…" hidden={{ show }} />
       <ChipRow label="Show" base={BASE} current={current} param="show" options={[{ key: "origins", label: "Origins" }, { key: "occupations", label: "Occupations" }]} active={show} />
       <CountLine count={total} noun="entry" base={BASE} filtered={Boolean(needle || show)} />

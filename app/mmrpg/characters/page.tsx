@@ -11,7 +11,6 @@ export default async function MmrpgCharactersPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Characters" subtitle={`${MMRPG_CHARACTERS.length} pre-generated heroes & villains`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Ready-to-play stat blocks from the core rulebook and its supplements. Each lists the six <b>MARVEL</b> abilities (Melee, Agility, Resilience, Vigilance, Ego, Logic) plus Health, Focus, Karma and rank. Click a character for their full profile — defenses, speed, powers, traits and tags. Drop them straight into a scene as allies or opposition.</p>
       <MmrpgCharacterBrowser />
     </div>
   );

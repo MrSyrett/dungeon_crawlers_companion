@@ -91,11 +91,6 @@ export default async function AceExtrasPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Bestiary" subtitle={`${ACE_EXTRAS.length} mooks, monsters & villains${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
-        Everyone the Director plays is an Extra. A Mook has 1 Health and goes down to a single punch; a
-        Tyrannosaur has Brawn 10 and twenty. Attack lines read <em>Name dice (damage)</em> — the Extra rolls
-        that many d6 against a Hero&rsquo;s Defence.
-      </p>
 
       <div className="mb-6">
         <HomebrewEditor kind="ace-extra" campaigns={campaigns} initial={hbOwn} />

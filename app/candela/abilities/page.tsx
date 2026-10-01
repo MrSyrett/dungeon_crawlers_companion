@@ -49,7 +49,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <CandelaHeader title="Abilities" subtitle={`Candela Obscura · Role & Specialty${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-5 text-[13px] leading-relaxed text-[var(--muted)]">Choose one role ability and one specialty ability at character creation. Homebrew you create below is merged in.</p>
 
       <div className="mb-6"><HomebrewEditor kind="co-ability" campaigns={campaigns} initial={hbOwn} /></div>
 

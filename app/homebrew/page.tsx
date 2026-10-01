@@ -51,11 +51,6 @@ export default async function ShadowdarkHomebrewHubPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <p className="mb-6 max-w-[62ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Everything you make here flows into the character sheet and the GM screen, and shows up
-        on its reference page (Spells, Gear, Bestiary, and so on). Share a creation to a campaign
-        to let your table use it too.
-      </p>
 
       <div className="flex flex-col gap-10">
         {KINDS.map((k, i) => (

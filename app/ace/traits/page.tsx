@@ -48,12 +48,6 @@ export default async function AceTraitsPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Traits" subtitle={`${ACE_TRAITS.length} traits${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · one complication each`} />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
-        While your Role gives you an ability, your Trait introduces a complication. It&rsquo;s always an
-        adjective, your Role is always a noun — a <em>Squeamish Scientist</em>, a <em>Paranoid Robot</em>.
-        Every time you take a significant action that reflects your Trait, the Director may award a Karma
-        point (up to 10). No two Heroes in a group should have the same Trait.
-      </p>
 
       <div className="mb-6">
         <HomebrewEditor kind="ace-trait" campaigns={campaigns} initial={hbOwn} />

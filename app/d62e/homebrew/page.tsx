@@ -25,10 +25,6 @@ export default async function D62eHomebrewHubPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <p className="mb-6 max-w-[62ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Everything you make here flows into the D62e reference pages and the GM tools. Share a
-        creation to a campaign to let your table use it too.
-      </p>
 
       <div className="flex flex-col gap-10">
         {KINDS.map((k, i) => (

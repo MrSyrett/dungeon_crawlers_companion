@@ -113,7 +113,6 @@ export default async function D62eTraitsPage({ searchParams }: { searchParams: P
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Traits" subtitle={`${builtinCount} perks, flaws, talents, assets, troubles, superpowers & limitations${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Everything that customizes a character beyond attributes and skills. Perks &amp; talents cost skill dice; flaws give them back. Troubles &amp; assets are the alternate module — troubles grant Hero Points, assets can be invoked twice a session for +3D. Superpowers are an extension of talents, bought from a Superpower Dice pool; limitations are their flaws, granting dice back.</p>
 
       <div className="mb-6 flex flex-col gap-4">
         <HomebrewEditor kind="d62e-trait" campaigns={campaigns} initial={hbTraitOwn} />

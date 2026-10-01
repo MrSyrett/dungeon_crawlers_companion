@@ -69,11 +69,6 @@ export default async function KobTropesPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <KobHeader title="Tropes" subtitle={`${KOB_TROPES.length} tropes across three books${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
-        A Trope is a touchstone, not a stereotype: it sets your six stat dice (one each of d20, d12, d10, d8, d6, d4),
-        suggests Strengths and Flaws, and asks two questions that flesh out who you are. Don&rsquo;t like any? Build
-        from scratch instead.
-      </p>
       <div className="mb-6">
         <HomebrewEditor kind="kob-trope" campaigns={campaigns} initial={hbOwn} />
       </div>

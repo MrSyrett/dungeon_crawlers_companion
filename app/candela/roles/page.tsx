@@ -12,10 +12,6 @@ export default function Page() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <CandelaHeader title="Roles & Specialties" subtitle="Candela Obscura · Playbooks" />
-      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
-        {CO_ROLES.length} roles · {specCount} specialties. A character is a Role and a Specialty; together
-        they set your starting actions, drives, gilded action, abilities, and gear.
-      </p>
       <div className="space-y-6">
         {CO_ROLES.map((r) => (
           <div key={r.role} className={cardCls}>

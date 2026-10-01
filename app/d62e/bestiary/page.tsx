@@ -66,7 +66,6 @@ export default async function D62eBestiaryPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Bestiary" subtitle={`${D62E_CREATURES.length} creatures & NPCs${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Stat blocks list attribute die codes and any trained skills; roll them like a character&rsquo;s. Defenses (Dodge, Parry) and other notes sit under Special. Assign weapons and gear to suit your setting.</p>
 
       <div className="mb-6"><HomebrewEditor kind="d62e-creature" campaigns={campaigns} initial={hbOwn} /></div>
 

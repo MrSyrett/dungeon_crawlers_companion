@@ -24,7 +24,6 @@ export default async function SwStarshipsPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <SwHeader title="Starships & Vehicles" subtitle={`${SW_VEHICLES.length} stat blocks · starfighters, transports, capital ships, speeders, walkers`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Space speed and maneuverability are die codes; hull is rolled against damage like a character&rsquo;s Strength. Capital-scale weapons add dice against starfighters — see the scale rules under Rules.</p>
       <details className="mb-5 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"><summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.15em] text-[#f0c020]">Starship combat reference ({SW_TABLES.starship.length})</summary><dl className="mt-2 grid gap-x-6 gap-y-2 md:grid-cols-2">{SW_TABLES.starship.map((r) => <div key={r.name}><dt className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">{r.name}</dt><dd className="text-[12px] leading-relaxed text-[var(--muted)]">{r.text}</dd></div>)}</dl></details>
       <SearchForm base={BASE} q={q} placeholder="Search ships…" hidden={{ kind }} />
       <ChipRow label="Type" base={BASE} current={current} param="kind" options={KINDS} active={kind} />

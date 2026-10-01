@@ -30,11 +30,6 @@ export default async function KobMagicPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <KobHeader title="Magic" subtitle="Kids on Brooms · wands, brooms, familiars & spell checks" />
-      <p className="mb-6 text-sm leading-relaxed text-[var(--muted)]">
-        There are no spell lists. If it could be done with magic, you can try it: describe the spell, the GM picks the
-        type of magic (a stat) and adds up a difficulty from the four tables below, then you roll that stat&rsquo;s die
-        plus a d4 Magic Die and any bonuses. Failure has consequences — the GM narrates them.
-      </p>
 
       <section className={`${cardCls} mb-4`}>
         <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Types of magic</h2>

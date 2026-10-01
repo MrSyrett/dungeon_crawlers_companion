@@ -58,7 +58,6 @@ export default async function IcrpgLootPage({ searchParams }: { searchParams: Pr
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Loot &amp; Gear" subtitle={`${ICRPG_LOOT.length} loot · ${ICRPG_GEAR.length} gear`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Loot tables are rolled for treasure and rewards; gear is what a hero carries. Weapons roll d6 EFFORT, Guns d6/d8, Magic &amp; Energy d10. The World chip filters gear by setting.</p>
 
       <div className="mb-6 flex flex-col gap-6">
         <HomebrewEditor kind="icrpg-loot" campaigns={campaigns} initial={ownLoot} />

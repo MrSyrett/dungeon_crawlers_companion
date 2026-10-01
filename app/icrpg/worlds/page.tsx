@@ -33,7 +33,6 @@ export default async function IcrpgWorldsPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Worlds" subtitle={`${ICRPG_WORLDS.length} settings · ${ICRPG_LIFEFORMS.length} life forms`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">ICRPG ships five ready worlds, each with its own life forms and tone. Pick one — or reskin the mechanics into your own. Filter by World to see what fits a setting.</p>
 
       <SearchForm base={BASE} q={q} placeholder="Search worlds &amp; life forms…" hidden={{ world }} />
       <ChipRow label="World" base={BASE} current={current} param="world" options={WORLDS} active={world} />

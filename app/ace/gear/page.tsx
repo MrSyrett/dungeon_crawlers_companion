@@ -64,10 +64,6 @@ export default async function AceGearPage({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <AceHeader title="Gear" subtitle={`${ACE_GEAR.length} items${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · money isn't tracked`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">
-        You have all the regular stuff your Role would suggest. To buy something special, spend a Karma
-        point and roll Style (the Wealth Focus shines here) against the item&rsquo;s value.
-      </p>
       <div className="mb-6 overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]">
         <table className="w-full text-[12px]">
           <thead>

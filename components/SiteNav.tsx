@@ -74,10 +74,11 @@ export default function SiteNav({
       ? storedSystem
       : list[0].key;
 
-  // Persist the effective system so every reader (dashboard, other tabs) agrees.
-  useEffect(() => {
-    if (effective !== storedSystem) setSystem(effective);
-  }, [effective, storedSystem]);
+  // `effective` is display-only (so the dropdown reflects the compendium page
+  // you're on). We deliberately DON'T force the stored system to match the
+  // path — that made picking a different system on a compendium page snap
+  // straight back. Switching systems is an explicit choice (chooseSystem),
+  // which jumps to that system's Characters page.
 
   // Close any open menu on navigation.
   useEffect(() => { setMenu(null); }, [pathname]);
@@ -90,8 +91,11 @@ export default function SiteNav({
   const homebrewHref = homebrewFor(effective);
 
   function chooseSystem(key: SystemKey) {
+    // Switch systems from anywhere → land on that system's Characters page.
     setSystem(key);
+    setView("characters");
     setMenu(null);
+    router.push("/dashboard");
   }
   function openTab(v: "characters" | "adventures") {
     setView(v);

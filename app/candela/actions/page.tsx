@@ -7,12 +7,6 @@ export default function Page() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <CandelaHeader title="Drives & Actions" subtitle="Candela Obscura · The Dice Pool" />
-      <p className="mb-5 text-[13px] leading-relaxed text-[var(--muted)]">
-        Each action is rated 0&ndash;3 — the number of d6 in your pool. Spend a point from its drive
-        (0&ndash;9) to add +1d. Roll: a 6 is a full success, 4&ndash;5 a mixed success, 1&ndash;3 a miss;
-        two 6s crit. A gilded action lets you take the gilded die&rsquo;s result to refresh a drive point.
-        For every 3 maximum drive points you gain 1 resistance to burn for a reroll.
-      </p>
       <div className="space-y-5">
         {CO_DRIVES.map((d) => (
           <div key={d.name} className={cardCls}>

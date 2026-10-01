@@ -27,7 +27,6 @@ export default async function D62eTemplatesPage({ searchParams }: { searchParams
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <D62eHeader title="Templates" subtitle={`${D62E_TEMPLATES.length} ready-to-play character templates`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">A template is a partially completed character — pick one, then add {c.skillDice} of skills to finish it. Attribute dice are pre-assigned ({c.attributeDice} total); each character starts with {c.heroPoints} Hero Point. Dodge is {c.dodge.toLowerCase()}, Parry is {c.parry.toLowerCase()}.</p>
 
       <SearchForm base={BASE} q={q} placeholder="Search templates…" hidden={{ genre }} />
       <ChipRow label="Genre" base={BASE} current={current} param="genre" options={GENRES} active={genre} />

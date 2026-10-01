@@ -63,7 +63,6 @@ export default async function IcrpgHeroesPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <IcrpgHeader title="Heroes" subtitle={`${ICRPG_TYPES.length} types · ${ICRPG_ABILITIES.length} abilities`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Every hero assigns 6 points across STR, DEX, CON, INT, WIS &amp; CHA (max +10 each), then picks a Type and its Abilities, Powers, and Augments. Your World sets which options are on the table.</p>
 
       <div className="mb-6 flex flex-col gap-6">
         <HomebrewEditor kind="icrpg-type" campaigns={campaigns} initial={ownTypes} />

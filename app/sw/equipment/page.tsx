@@ -78,7 +78,6 @@ export default async function SwEquipmentPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <SwHeader title="Weapons & Equipment" subtitle={`${SW_WEAPONS.length} weapons · ${SW_GEAR.length} items of gear${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Ranges are short/medium/long in meters (Easy / Moderate / Difficult to hit; point-blank under 3 m is Very Easy). Damage is rolled against the target&rsquo;s Strength plus armor. Melee weapons add to the wielder&rsquo;s Strength. <span className="text-[var(--sw)]">RC</span> marks Rules Companion entries.</p>
       <div className="mb-6 flex flex-col gap-6">
         <HomebrewEditor kind="sw-weapon" campaigns={campaigns} initial={hbWeaponsOwn} />
         <HomebrewEditor kind="sw-gear" campaigns={campaigns} initial={hbGearOwn} />

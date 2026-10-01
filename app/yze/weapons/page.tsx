@@ -38,10 +38,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <YzeHeader title="Weapons" subtitle={`Year Zero Engine · SRD examples${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-5 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Bonus dice add to your attack pool; damage is the base rating, +1 per extra success. Weight
-        is how many inventory slots the weapon takes. Homebrew you create below is merged in.
-      </p>
 
       <div className="mb-6"><HomebrewEditor kind="yze-weapon" campaigns={campaigns} initial={hbOwn} /></div>
 

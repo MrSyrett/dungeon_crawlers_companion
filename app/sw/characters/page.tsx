@@ -56,7 +56,6 @@ export default async function SwCharactersPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <SwHeader title="Bestiary" subtitle={`${SW_CHARACTERS.length} stat blocks${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · Imperials, aliens, Droids, creatures, heroes & villains`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Stock Imperials, civilians, Droids and creatures from the rulebook and its adventures, plus the Sourcebook&rsquo;s alien species (the typical member — add 6D to make a player character), creatures, stormtrooper variants and the heroes and villains of the films. Anything without a listed skill uses its attribute; a &ldquo;standard&rdquo; block is the GM&rsquo;s baseline for anyone the players meet.</p>
       <div className="mb-6"><HomebrewEditor kind="sw-character" campaigns={campaigns} initial={hbOwn} /></div>
       <SearchForm base={BASE} q={q} placeholder="Search characters…" hidden={{ group }} />
       <ChipRow label="Group" base={BASE} current={current} param="group" options={GROUPS} active={group} />

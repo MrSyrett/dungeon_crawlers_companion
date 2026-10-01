@@ -47,7 +47,6 @@ export default async function MmrpgPowersPage({ searchParams }: { searchParams: 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MmrpgHeader title="Powers" subtitle={`${MMRPG_POWERS.length} powers across the power sets${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Powers are grouped into power sets. A basic power (set &ldquo;None&rdquo;) is available to anyone; the rest require the power set and any listed prerequisites. Numbered powers (Mighty 1, 2, 3…) upgrade in place. Each lists its action, duration, cost and effect.</p>
 
       <div className="mb-6"><HomebrewEditor kind="mmrpg-power" campaigns={campaigns} initial={hbOwn} /></div>
 

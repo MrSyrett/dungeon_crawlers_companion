@@ -19,11 +19,6 @@ export default async function KobCapesPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <KobHeader title="Capes & Powers" subtitle={`Kids in Capes · ${KOB_CAPES.length} capes · ${powers.length} power categories`} />
-      <p className="mb-6 text-sm leading-relaxed text-[var(--muted)]">
-        You don&rsquo;t start with powers, but you choose your eventual <strong className="text-[var(--text)]">Cape</strong> (your role on the
-        team) and <strong className="text-[var(--text)]">Power</strong> at creation. When they manifest you gain a d4 Power Die,
-        rolled alongside your stat die; Growth Points grow the die and unlock Cape and Power skills.
-      </p>
 
       <div className="mb-6 grid gap-4 md:grid-cols-2">
         <section className={cardCls}>
