@@ -213,13 +213,15 @@ function tokenFetchPatch(vttToken: string): string {
 // probe returns early and `window.Audio` is left untouched, so those platforms
 // keep their exact current behaviour and never touch the proxy.
 //
-// Web Audio can only read same-origin (or CORS-clean) media, and the tools' hosts
-// (Dropbox etc.) send no CORS headers — so cross-origin http(s) tracks are routed
-// through our same-origin proxy (/api/audio-proxy), which makes them readable
-// without CORS. blob:/data:/same-origin URLs are already readable and pass
-// through untouched. The GainNode graph is built on 'canplay' (the media loaded
-// fine); if the proxy itself fails, we fall back to the original URL played plain
-// so the track still sounds (uncontrolled volume, as before) rather than dropping.
+// Web Audio can only read same-origin or CORS-clean media. A cross-origin http(s)
+// track is tried DIRECT first with crossOrigin=anonymous: a host that sends CORS
+// headers streams straight to the browser and never touches our server (no egress).
+// Only if that read fails (no CORS headers — Dropbox etc.) do we retry through our
+// same-origin proxy (/api/audio-proxy), which makes it readable without CORS; if the
+// proxy fails too we fall back to the original URL played plain so the track still
+// sounds (uncontrolled volume, as before) rather than dropping. blob:/data:/
+// same-origin URLs are already readable and pass through untouched, never proxied.
+// The GainNode graph is built on 'canplay' (the media loaded fine).
 //
 // Injected in <head> so the wrapper is installed before the template's audio code
 // ever calls `new Audio`. Parameterised by the VTT token: framed in the Owlbear
@@ -254,17 +256,24 @@ function audioVolumeFix(vttToken: string): string {
   var PROXY = "/api/audio-proxy";
   var TOKEN = ${JSON.stringify(vttToken || "")};
 
-  // Cross-origin http(s) -> same-origin proxy so Web Audio can read it. Anything
-  // already readable (blob:, data:, same-origin, relative) is left as-is.
-  function playable(url) {
-    if (typeof url !== "string" || !url) return { src: url, proxied: false };
-    if (/^(blob:|data:)/i.test(url)) return { src: url, proxied: false };
+  // Classify a URL. A cross-origin http(s) track needs CORS for Web Audio to
+  // read it; we try it DIRECT first (crossOrigin=anonymous) so a CORS-clean host
+  // streams straight to the browser and never touches our server, and keep the
+  // same-origin proxy URL as the fallback for hosts that send no CORS headers.
+  // Anything already readable (blob:, data:, same-origin, relative) is used as-is
+  // and never proxied.
+  function classify(url) {
+    if (typeof url !== "string" || !url) return { kind: "local", direct: url };
+    if (/^(blob:|data:)/i.test(url)) return { kind: "local", direct: url };
     var abs;
-    try { abs = new URL(url, location.href); } catch (e) { return { src: url, proxied: false }; }
-    if (abs.protocol !== "http:" && abs.protocol !== "https:") return { src: url, proxied: false };
-    if (abs.origin === location.origin) return { src: url, proxied: false };
-    var p = PROXY + "?u=" + encodeURIComponent(abs.href) + (TOKEN ? "&t=" + encodeURIComponent(TOKEN) : "");
-    return { src: p, proxied: true };
+    try { abs = new URL(url, location.href); } catch (e) { return { kind: "local", direct: url }; }
+    if (abs.protocol !== "http:" && abs.protocol !== "https:") return { kind: "local", direct: url };
+    if (abs.origin === location.origin) return { kind: "local", direct: url };
+    return {
+      kind: "xorigin",
+      direct: abs.href,
+      proxy: PROXY + "?u=" + encodeURIComponent(abs.href) + (TOKEN ? "&t=" + encodeURIComponent(TOKEN) : ""),
+    };
   }
 
   var ctx = null;
@@ -317,19 +326,22 @@ function audioVolumeFix(vttToken: string): string {
       });
     } catch (e) { return a; }   // couldn't shadow the native accessor; leave native
 
-    // Rewrite each src to the proxy (for cross-origin hosts). The getter returns
-    // the ORIGINAL url the tools set, so nothing in the template sees the proxy.
+    // Point each src at the DIRECT url first (cross-origin tracks get
+    // crossOrigin=anonymous so a CORS-clean host streams straight to the browser,
+    // off our server). The getter returns the ORIGINAL url the tools set, so
+    // nothing in the template ever sees the direct/proxy swap.
     try {
       Object.defineProperty(a, "src", {
         configurable: true,
         get: function () { return a._origSrc != null ? a._origSrc : srcDesc.get.call(a); },
         set: function (u) {
           a._origSrc = u;
-          var pl = playable(u);
-          a._proxied = pl.proxied;
-          a._reverted = false;
-          if (state !== 1) state = 0;   // a fresh same-origin src can graph on canplay
-          srcDesc.set.call(a, pl.src);
+          var info = classify(u);
+          a._info = info;
+          a._stage = info.kind === "xorigin" ? "direct" : "local";
+          if (state !== 1) state = 0;   // a fresh readable src can graph on canplay
+          try { a.crossOrigin = info.kind === "xorigin" ? "anonymous" : null; } catch (e) {}
+          srcDesc.set.call(a, info.direct);
         }
       });
     } catch (e) {}
@@ -337,13 +349,27 @@ function audioVolumeFix(vttToken: string): string {
     a.addEventListener("canplay", build);
     a.addEventListener("loadeddata", build);
     a.addEventListener("error", function () {
-      // The proxy failed (network/auth). Fall back to the original URL played
-      // plain so the track still sounds — uncontrolled volume on iOS, i.e. the
-      // pre-fix behaviour — instead of dropping out. Not proxied → nothing to do.
-      if (!a._proxied || a._reverted) return;
-      a._reverted = true;
-      if (state !== 1) state = 2;
-      try { srcDesc.set.call(a, a._origSrc); a.load(); } catch (e) {}
+      // Walk the fallback ladder: direct (CORS) -> same-origin proxy -> plain.
+      var info = a._info;
+      if (!info || info.kind !== "xorigin") return;   // local src, nothing to retry
+      if (a._stage === "direct") {
+        // Host sent no CORS headers, so the direct read failed. Route through the
+        // same-origin proxy, which Web Audio can read (volume control preserved).
+        // Any graph already built keeps feeding off the same element unchanged.
+        a._stage = "proxied";
+        if (state !== 1) state = 0;
+        try { a.crossOrigin = "anonymous"; } catch (e) {}   // proxy is same-origin -> fine
+        try { srcDesc.set.call(a, info.proxy); a.load(); } catch (e) {}
+      } else if (a._stage === "proxied") {
+        // Proxy failed too (network/auth). Last resort: original url played plain
+        // so the track still sounds — uncontrolled volume, i.e. the pre-fix
+        // behaviour — instead of dropping out.
+        a._stage = "plain";
+        if (state !== 1) state = 2;
+        try { a.crossOrigin = null; } catch (e) {}
+        try { srcDesc.set.call(a, info.direct); a.load(); } catch (e) {}
+      }
+      // _stage === "plain" -> already at the last resort; nothing more to try.
     });
 
     // Keep the context running whenever the tools start playback.
@@ -356,7 +382,7 @@ function audioVolumeFix(vttToken: string): string {
   function Wrapped(src) {
     var a = new Native();
     wire(a);
-    if (src != null) { try { a.src = src; } catch (e) {} }   // src setter routes to the proxy
+    if (src != null) { try { a.src = src; } catch (e) {} }   // src setter routes direct-first
     return a;
   }
   Wrapped.prototype = Native.prototype;

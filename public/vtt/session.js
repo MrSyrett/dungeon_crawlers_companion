@@ -305,6 +305,11 @@
   // canvas and it is instantly shown to every connected player — there is no
   // separate "go live" step. The open scene auto-saves as the GM edits it.
   var curKey = "vtt-scene-" + V.campaignId, liveSaveTimer = null, loadingScene = false;
+  // The embedded map image last persisted for the open scene. Autosave compares the
+  // live map src against this (by reference — a new import makes a new string) so a
+  // routine token/wall/door edit never re-uploads the multi-MB image; only a real
+  // map change does. null until a scene is open.
+  var lastSavedSrc = null;
   function rememberCurrent(id) { try { localStorage.setItem(curKey, id || ""); } catch (e) {} }
   function autoLoadLast() { var id = null; try { id = localStorage.getItem(curKey); } catch (e) {} if (id) openScene(id); }
   function thumbKey(id) { return "vtt-thumb-" + id; }
@@ -344,6 +349,9 @@
       loadingScene = true;
       return Promise.resolve(board.loadScene(doc.data)).then(function () {
         loadingScene = false;
+        // The stored scene already holds this image, so autosave can omit it until
+        // the GM actually imports a different map.
+        lastSavedSrc = board.state.map ? board.state.map.src : null;
         if (net && net.pushScene) net.pushScene(); // make sure players get the full scene
         saveThumbFrom(board, id); currentScene = { id: doc.id, title: doc.title }; rememberCurrent(id);
         setSceneName(); loadSceneList(); say("Showing <b>" + esc(doc.title) + "</b> to your players.");
@@ -360,6 +368,15 @@
     liveSaveTimer = setTimeout(function () {
       liveSaveTimer = null;
       var id = currentScene.id, data = board.toScene(currentScene ? currentScene.title : "Scene");
+      // Don't re-upload the embedded map image on a routine edit — it's by far the
+      // biggest part of the payload and only changes on a new import. When it's
+      // unchanged, send the scene WITHOUT the image and flag keepSrc so the server
+      // keeps the stored image; this keeps the GM's tab light and saves bandwidth.
+      if (data.map && data.map.srcType === "embedded" && data.map.src && data.map.src === lastSavedSrc) {
+        data = Object.assign({}, data, { map: Object.assign({}, data.map, { src: null, keepSrc: true }) });
+      } else if (data.map) {
+        lastSavedSrc = data.map.src; // a full save (new/changed image, or a URL map)
+      }
       fetch(V.sceneBase + "/" + id, { method: "PATCH", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: data }) })
         .then(function () { saveThumbFrom(board, id); }).catch(function () {});
     }, 900);

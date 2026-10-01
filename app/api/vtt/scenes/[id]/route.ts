@@ -38,7 +38,33 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
   const update: { title?: string; data?: object } = {};
   if (typeof body.title === "string" && body.title.trim()) update.title = body.title.trim().slice(0, 120);
-  if (body.data !== undefined) update.data = stripSceneForStore(body.data).data;
+
+  if (body.data !== undefined) {
+    let incoming = body.data;
+    // A lightweight autosave (tokens/walls/doors/fog) omits the UNCHANGED embedded
+    // map image and sets map.keepSrc, so the GM's tab never re-serializes/uploads
+    // the multi-MB picture on every edit. Splice the stored image back in here, or
+    // saving just the tokens would blank the map. Reading the blob is now the only
+    // place that touches it, and only on these keep-image saves.
+    const map =
+      incoming && typeof incoming === "object"
+        ? (incoming as { map?: { keepSrc?: unknown; src?: unknown; srcType?: unknown } }).map
+        : undefined;
+    if (map && map.keepSrc) {
+      const prev = await prisma.document.findFirst({
+        where: { id, userId: user.id, tool: VTT_SCENE_TOOL },
+        select: { data: true },
+      });
+      const prevMap = (prev?.data as { map?: { src?: unknown; srcType?: unknown } } | null)?.map;
+      const mergedMap = { ...map } as { keepSrc?: unknown; src?: unknown; srcType?: unknown };
+      delete mergedMap.keepSrc;
+      mergedMap.src = (prevMap?.src as string | null | undefined) ?? null;
+      if (prevMap && prevMap.srcType != null) mergedMap.srcType = prevMap.srcType;
+      incoming = { ...(incoming as object), map: mergedMap };
+    }
+    update.data = stripSceneForStore(incoming).data;
+  }
+
   if (!Object.keys(update).length) return Response.json({ ok: true });
 
   await prisma.document.update({ where: { id }, data: update });
