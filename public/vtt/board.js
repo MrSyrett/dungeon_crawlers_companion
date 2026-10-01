@@ -597,7 +597,8 @@
       var s = cssSize();
       fctx.clearRect(0, 0, s.w, s.h);
       fctx.save();
-      fctx.fillStyle = "rgba(4,5,7," + state.fog.opacity + ")";
+      // Fog of war is always fully opaque black — hidden areas reveal nothing.
+      fctx.fillStyle = "#000";
       fctx.fillRect(w2sX(0), w2sY(0), state.map.widthPx * state.cam.scale, state.map.heightPx * state.cam.scale);
 
       var sig = geomSig(), mapW = state.map.widthPx, mapH = state.map.heightPx;
@@ -1218,7 +1219,10 @@
             isViewer: t.isViewer, color: t.color, vision: t.vision, hp: t.hp, hidden: t.hidden, ring: t.ring, ringColor: t.ringColor,
           };
         }),
-        fog: { enabled: state.fog.enabled, opacity: state.fog.opacity },
+        // Fog of war and the grid are PER-SCENE settings. Fog is stored as a plain
+        // boolean (older scenes saved it as {enabled,opacity} — loadScene tolerates
+        // that and defaults missing/legacy values to ON).
+        fog: !!state.fog.enabled,
         feetPerCell: state.feetPerCell,
         grid: state.grid,
       };
@@ -1231,10 +1235,12 @@
       state.ruler = null; state.moveMeas = null; state.rings = null; state.laser = null; state.overlays = {};
       var m = scene.map || {};
       state.feetPerCell = scene.feetPerCell || 5;
+      // Grid and fog of war are PER-SCENE. Both default ON: grid unless explicitly
+      // false, fog unless the scene stores the plain boolean `false`. Legacy scenes
+      // saved fog as an object ({enabled,opacity}) while it was a global table toggle
+      // — those are treated as ON so a map isn't silently un-fogged on open.
       state.grid = scene.grid !== false;
-      // Fog on/off + darkness are the GM's TABLE settings and persist across scenes —
-      // switching scenes must NOT snap fog back to whatever this scene happened to be
-      // saved with (that made "fog is on" silently turn off on the players).
+      state.fog.enabled = (typeof scene.fog === "boolean") ? scene.fog : true;
       var done = function () {
         setMap({ ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType });
         (scene.tokens || []).forEach(function (ts) { addToken(ts); });

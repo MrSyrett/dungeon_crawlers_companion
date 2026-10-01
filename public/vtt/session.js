@@ -152,10 +152,17 @@
   window.addEventListener("keydown", function (e) {
     var el = document.activeElement, tag = el && el.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (el && el.isContentEditable)) return;
+    // Never hijack a browser/OS shortcut (Ctrl/⌘+S, etc.).
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     var k = e.key.toLowerCase();
     var byKey = { v: "select", r: "ruler", m: "movement", z: "rings", p: "laser" };
     if (byKey[k]) setTool(byKey[k]);
     else if (k === "c") toggleSheet();
+    // GM-only table toggles — trigger the real buttons so their UI state stays synced.
+    // s = Snapping, g = GM Reveal, e = Edit Mode (wall/door editor).
+    else if (isGM && k === "s") { var bs = $("f-snap"); if (bs) bs.click(); }
+    else if (isGM && k === "g") { var bg = $("f-reveal"); if (bg) bg.click(); }
+    else if (isGM && k === "e") { var be = $("f-setup"); if (be) be.click(); }
     else if (k === "escape") { hideContext(); closeFlyouts(); if ($("sheetpop") && !$("sheetpop").hidden) { $("sheetpop").hidden = true; $("sheet-frame").src = "about:blank"; } }
   });
 
@@ -228,16 +235,16 @@
     bind("se-close", closeEditor);
     bind("se-save", saveEditor);
     bind("se-del", function () { if (editId && confirm("Delete this scene?")) { delScene(editId); closeEditor(); } });
-    // settings panel — fog and snap are TABLE settings: they carry to players live.
-    fbtn("f-fog", function (on) { board.setFog(on); pushSettings(); say(on ? "Fog on — players see only what their tokens can." : "Fog off for everyone."); });
-    fbtn("f-reveal", function (on) { board.setShowAll(on); }, true); // GM-only view, not shared
+    // Settings panel. Fog of War is now a PER-SCENE setting (in the scene editor),
+    // not a live table toggle. GM Reveal (g), Snapping (s) and Edit Mode (e) also
+    // have keyboard shortcuts — see the keydown handler.
+    fbtn("f-reveal", function (on) { board.setShowAll(on); say(on ? "GM Reveal on — you see the whole map." : "GM Reveal off — you see what the selected/owned tokens can."); }, true); // GM-only view, not shared
     fbtn("f-snap", function (on) { board.setSnap(on); pushSettings(); say(on ? "Grid snap on — tokens snap for you and your players." : "Grid snap off for everyone."); }, true);
     fbtn("f-setup", function (on) {
       board.setFogSetup(on);
       var bar = $("setupbar"); if (bar) bar.hidden = !on;
       if (on) { setSetupTool("select"); say(setupHint("select")); } else say("");
     });
-    $("f-op").oninput = function () { board.setFogOpacity(parseInt(this.value, 10) / 100); pushSettings(); };
     // setup toolbar (select / wall / window / door / erase)
     ["select", "wall", "window", "door", "erase"].forEach(function (k) {
       bind("su-" + k, function () { setSetupTool(k); say(setupHint(k)); });
@@ -287,9 +294,26 @@
   }
   function renderPlayers(list) {
     var open = (list || []).filter(function (p) { return p.open; });
+    var onlineById = {}; open.forEach(function (p) { onlineById[p.id] = p; });
     var d = $("conn"); if (d && isGM) { d.className = "vtt-dot live"; d.title = open.length + " player(s) connected"; }
     var box = $("players"); if (!box) return;
-    box.innerHTML = open.length ? open.map(function (p) { return '<div class="vtt-prow"><span class="vtt-dot" style="background:' + colorFor(p.id) + '"></span>' + esc(p.name) + "</div>"; }).join("") : '<div class="vtt-empty">No players connected yet. Share the campaign join code and have players open the tabletop.</div>';
+    // Show the WHOLE campaign roster (everyone with a character sheet linked to this
+    // campaign) so the GM can set up tokens ahead of time, even for players who
+    // haven't joined yet. A green dot marks the ones currently connected. Any
+    // connected peer not in the roster (edge case) is appended.
+    var rosterList = Array.isArray(V.players) ? V.players : [];
+    var rows = [], seen = {};
+    rosterList.forEach(function (p) { seen[p.id] = true; rows.push({ id: p.id, name: p.name, online: !!onlineById[p.id] }); });
+    open.forEach(function (p) { if (!seen[p.id]) { seen[p.id] = true; rows.push({ id: p.id, name: p.name, online: true }); } });
+    if (!rows.length) {
+      box.innerHTML = '<div class="vtt-empty">No players yet. Players appear here once they join with the campaign code and link a character sheet.</div>';
+      return;
+    }
+    box.innerHTML = rows.map(function (r) {
+      return '<div class="vtt-prow"><span class="vtt-dot" style="background:' + colorFor(r.id) + '"></span>' +
+        '<span class="vtt-pname">' + esc(r.name) + "</span>" +
+        '<span class="vtt-pconn' + (r.online ? " on" : "") + '" title="' + (r.online ? "Connected" : "Not connected") + '"></span></div>';
+    }).join("");
   }
 
   // ---- tabs -----------------------------------------------------------------
@@ -401,6 +425,9 @@
       $("se-name").value = title || "";
       $("m-ppg").value = pboard.state.map.ppg || 70;
       $("m-fpc").value = pboard.state.feetPerCell || 5;
+      // Per-scene Fog of War / grid — reflect what loadScene applied (both default on).
+      $("se-fog").checked = !!pboard.state.fog.enabled;
+      $("se-grid").checked = pboard.state.grid !== false;
       seMapName(pboard.state.map.src ? (pboard.state.map.srcType === "url" ? "Linked image" : "Loaded map") : "");
       pboard.resize();
     };
@@ -417,6 +444,10 @@
   function closeEditor() { $("scene-editor").hidden = true; }
   function saveEditor() {
     var name = ($("se-name").value || "").trim() || "Scene";
+    // Fold the per-scene Fog of War / grid choices into the preview board before
+    // serializing, so toScene() captures them.
+    pb().setFog($("se-fog").checked);
+    pb().setGrid($("se-grid").checked);
     var data = pb().toScene(name);
     if (editId) {
       var id = editId;
@@ -827,10 +858,10 @@
       '<div class="vtt-panel" data-panel="tokens" hidden>' +
       '<div class="vtt-row" id="tok-addrow"><button class="vtt-btn" id="tok-add">' + ico("plus", 15) + ' Add token</button></div>' +
       '<input type="text" id="tok-search" class="vtt-search" placeholder="Search tokens & stock by name…"><div class="vtt-token-list" id="token-list"></div></div>' +
-      // settings — table toggles, darkness, then the player roster as a section
+      // settings — table toggles (reveal/snap/edit), then the player roster section
       '<div class="vtt-panel" data-panel="settings" hidden>' +
-      frow("f-fog", "fog", "Fog of War") + frow("f-reveal", "eye", "GM Reveal", true) + frow("f-snap", "snap", "Snapping", true) + frow("f-setup", "wrench", "Wall Editor") +
-      '<div class="vtt-row small" style="margin-top:8px"><label style="flex:1">Darkness <input type="range" id="f-op" min="40" max="100" value="90"></label></div>' +
+      frow("f-reveal", "eye", "GM Reveal", true) + frow("f-snap", "snap", "Snapping", true) + frow("f-setup", "wrench", "Edit Mode") +
+      '<div class="vtt-hint2" style="margin:2px 2px 0">Shortcuts: <b>G</b> reveal · <b>S</b> snap · <b>E</b> edit. Fog of War &amp; grid are set per scene (edit a scene).</div>' +
       '<div class="vtt-sec-h" style="margin-top:14px">Players</div><div id="players"></div>' +
       '</div></div>';
     var zoom = '<div class="vtt-zoom"><button class="vtt-tbtn" id="z-in" title="Zoom in">' + ico("zin") + '</button><button class="vtt-tbtn" id="z-fit" title="Fit map">' + ico("fit") + '</button><button class="vtt-tbtn" id="z-out" title="Zoom out">' + ico("zout") + "</button></div>";
@@ -869,6 +900,7 @@
       '<div id="se-mapname" class="vtt-hint2"></div>' +
       '<div class="vtt-preview"><canvas id="se-canvas"></canvas><div class="vtt-preview-empty" id="se-empty">No map yet — upload a UVTT/image or paste a link.</div></div>' +
       '<div class="vtt-row small"><label>Grid px <input type="number" id="m-ppg" min="4" value="70"></label><label>ft / square <input type="number" id="m-fpc" min="1" value="5"></label></div>' +
+      '<div class="vtt-te-checks"><label><input type="checkbox" id="se-fog" checked> Fog of War</label><label><input type="checkbox" id="se-grid" checked> Show grid</label></div>' +
       "</div>" +
       '<div class="vtt-modal-foot"><button class="vtt-btn danger" id="se-del">' + ico("trash", 15) + " Delete</button><span style=\"flex:1\"></span><button class=\"vtt-btn primary\" id=\"se-save\">Save scene</button></div>" +
       "</div></div>";
@@ -942,6 +974,8 @@
       ".vtt-tav{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:#0b0d10}.vtt-tav img{width:100%;height:100%;object-fit:cover}.vtt-swatch{width:20px;height:20px;border-radius:50%}",
       ".vtt-tinfo{flex:1;min-width:0}.vtt-tname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vtt-tsub{font-size:10px;color:#8b97a7;text-transform:uppercase;letter-spacing:.05em}",
       ".vtt-prow{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}",
+      ".vtt-pname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+      ".vtt-pconn{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:#39414c;border:1px solid #2a323d}.vtt-pconn.on{background:#5ac26a;border-color:#5ac26a;box-shadow:0 0 7px rgba(90,194,106,.7)}",
       ".vtt-trow.hidden-tok .vtt-tav{opacity:.5}.vtt-mini.hide.on{color:#c8a24a}",
       ".vtt-setupbar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:rgba(15,18,23,.97);border:1px solid #2a323d;border-radius:10px;padding:6px 8px;z-index:22;box-shadow:0 8px 30px rgba(0,0,0,.5)}",
       ".vtt-sub-t{display:flex;align-items:center;gap:5px;background:#161b22;color:#c3ccd8;border:1px solid #2a323d;border-radius:7px;padding:6px 10px;font:600 12px/1 system-ui;cursor:pointer}",

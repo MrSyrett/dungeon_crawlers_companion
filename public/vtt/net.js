@@ -189,7 +189,7 @@
     // scene, so it applies the new geometry atomically at mapEnd instead of now.
     // `snap` carries the GM's grid-snap setting so players snap like the GM does.
     function scenePayload(shipping) {
-      var p = { t: "scene", map: mapPayload(), tokens: visibleWire(), fog: { enabled: board.state.fog.enabled, opacity: board.state.fog.opacity, snap: !!(board.getSnap && board.getSnap()) } };
+      var p = { t: "scene", map: mapPayload(), tokens: visibleWire(), fog: { enabled: board.state.fog.enabled, snap: !!(board.getSnap && board.getSnap()), grid: !!board.state.grid } };
       p.map.shipping = !!shipping;
       return p;
     }
@@ -246,10 +246,10 @@
         Object.keys(peers).forEach(function (k) { if (peers[k].open) shipMap(peers[k], src); });
       }
     }
-    // Broadcast the GM's table settings (fog on/off + opacity, grid snap) so they
-    // apply to every player live — not gated by `live` (they're not scene content).
+    // Broadcast the GM's table settings (fog on/off, grid snap, grid visibility) so
+    // they apply to every player live — not gated by `live` (not scene content).
     function pushSettings() {
-      broadcast({ t: "settings", fog: { enabled: board.state.fog.enabled, opacity: board.state.fog.opacity }, snap: !!(board.getSnap && board.getSnap()) });
+      broadcast({ t: "settings", fog: { enabled: board.state.fog.enabled }, snap: !!(board.getSnap && board.getSnap()), grid: !!board.state.grid });
     }
 
     function onGuestMsg(peerId, raw) {
@@ -384,9 +384,10 @@
       var msg; try { msg = JSON.parse(raw); } catch (e) { return; }
       if (msg.t === "scene") {
         board.setRemoteApply(true);
-        board.setFog(msg.fog && msg.fog.enabled); board.setFogOpacity((msg.fog && msg.fog.opacity) || 1);
+        board.setFog(msg.fog && msg.fog.enabled);
         board.setShowAll(false); // players always see through fog, never GM-reveal
         if (msg.fog && typeof msg.fog.snap === "boolean") board.setSnap(msg.fog.snap); // GM's snap setting carries
+        if (msg.fog && typeof msg.fog.grid === "boolean") board.setGrid(msg.fog.grid); // the scene's grid on/off carries
         pendingMap = msg.map;
         var mp = msg.map || {};
         if (mp.srcType === "url" && mp.url) {
@@ -410,10 +411,11 @@
           board.setRemoteApply(false);
         }
       } else if (msg.t === "settings") {
-        // GM table settings carry to players: fog on/off + opacity, grid snap.
-        board.setFog(msg.fog && msg.fog.enabled); board.setFogOpacity((msg.fog && msg.fog.opacity) || 1);
+        // GM table settings carry to players: fog on/off, grid snap, grid visibility.
+        board.setFog(msg.fog && msg.fog.enabled);
         board.setShowAll(false);
         if (typeof msg.snap === "boolean") board.setSnap(msg.snap);
+        if (typeof msg.grid === "boolean") board.setGrid(msg.grid);
       } else if (msg.t === "tokens") {
         board.setRemoteApply(true); board.syncTokens(msg.tokens || []); board.setRemoteApply(false);
       } else if (msg.t === "ping") { board.ping(msg.x, msg.y, "#4ea3ff"); }
