@@ -101,10 +101,12 @@
   board.setCollision(!isGM);    // players are stopped by barriers; the GM moves freely
   if (!isGM) board.setViewerId(V.userId); // a player sees fog only through THEIR own tokens
   var net = null, currentScene = null;
-  var readout = $("vtt-readout"), readoutTimer = null;
-  // Transient status line (saves, "now live", ruler readout, connection). It
-  // auto-hides so no explainer text lingers on the canvas.
-  function say(h) { readout.innerHTML = h; readout.hidden = !h; if (readoutTimer) clearTimeout(readoutTimer); if (h) readoutTimer = setTimeout(function () { readout.hidden = true; }, 4500); }
+  // The transient lower-left status/notification toasts were removed by request —
+  // say() is now a no-op, so all the "Fog on", "Saved", "Showing to players",
+  // connection and ruler-readout callers keep working without putting anything on
+  // screen. (The ruler still draws its distance label on the canvas itself, and
+  // connection state still shows via the status dot, so no real feedback is lost.)
+  function say() {}
   // Push the GM's table settings (fog, snap, opacity) to connected players.
   function pushSettings() { if (net && net.settings) net.settings(); }
 
@@ -859,7 +861,9 @@
   function subtn(id, name, label, on) { return '<button class="vtt-sub-t' + (on ? " on" : "") + '" id="' + id + '" title="' + label + '">' + ico(name, 17) + "<span>" + label + "</span></button>"; }
   function shell() {
     var rail = TOOL_GROUPS.map(function (g, i) { return railGroup(g, i === 0); }).join("") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
-    var top = '<div class="vtt-top">' + (EMBED ? "" : '<a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a>') + '<div class="vtt-title">' + esc(V.campaignName || "Tabletop") + '</div><span class="vtt-scene-badge" id="scene-badge" hidden></span></div>' +
+    // Top-left is just the Home button (and only when not embedded). The campaign
+    // name and the live scene-name badge were intentionally dropped — a cleaner map.
+    var top = '<div class="vtt-top">' + (EMBED ? "" : '<a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a>') + '</div>' +
       '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (!isGM ? '<button class="vtt-tbtn" id="conn-retry" title="Reconnect to your GM" hidden>' + ico("refresh", 18) + "</button>" : "") + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
     var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden>' +
       '<button class="vtt-side-x" id="side-close" title="Close panel">' + ico("close", 16) + "</button>" +
@@ -880,7 +884,7 @@
     var inputs = isGM ? '<input type="file" id="m-file" accept=".uvtt,.dd2vtt,.df2vtt,.json,image/*" hidden><input type="file" id="lib-file" accept="image/*" hidden>' : "";
     var setupbar = !isGM ? "" : '<div class="vtt-setupbar" id="setupbar" hidden>' +
       subtn("su-select", "select", "Select", true) + subtn("su-wall", "wall", "Wall") + subtn("su-window", "window", "Window") + subtn("su-door", "door", "Door") + subtn("su-erase", "erase", "Erase") + "</div>";
-    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + '<div class="vtt-readout" id="vtt-readout" hidden></div>' + side + sheetPop() + (isGM ? sceneEditor() + tokenEditor() : "") + inputs + "</div>";
+    return '<div class="vtt-stage" id="vtt-stage"><canvas id="vtt-canvas"></canvas>' + top + '<div class="vtt-rail">' + rail + "</div>" + zoom + setupbar + side + sheetPop() + (isGM ? sceneEditor() + tokenEditor() : "") + inputs + "</div>";
   }
   // Token editor popup (#5): presets applied whenever the token is placed.
   function tokenEditor() {
