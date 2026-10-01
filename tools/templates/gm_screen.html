@@ -644,8 +644,6 @@ input[type="number"] { -moz-appearance: textfield; }
 /* Sound Library — docked left column, part of the same window (no popup-on-popup) */
 .mus-library { display: none; flex-direction: column; width: 288px; flex-shrink: 0; min-height: 0; border-right: 1px solid var(--border); background: rgba(8,10,14,.35); }
 @container (min-width: 640px) { .mus-library { display: flex; } }
-.mus-tool .mus-library.mus-lib-hidden { display: none; }
-.mus-tool .mus-library.mus-lib-shown { display: flex; }
 .mus-lib-head { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .mus-lib-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 5px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mus-lib-refresh { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; padding: 4px 7px; line-height: 1; flex-shrink: 0; }
@@ -1280,6 +1278,42 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 
   .nts-editor { font-size: 16px; padding: 14px 16px; }
 }
+
+/* ═══ MOBILE — GM Screen fixes (2026-10) ═══ */
+@media (max-width: 760px) {
+  /* 1. The mobile browser already has a back/home control, so drop the injected
+        floating Home button and the spacer that reserved room for it. */
+  #dd-chrome { display: none !important; }
+  .gmc-home-spacer { display: none !important; }
+
+  /* 2. Session controls: VTT · Export · Import · Campaign all inline on one row
+        (they stack VTT/Export/Import over Campaign on desktop). */
+  .io-cluster { flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .camp-btn-wide { width: auto; }
+
+  /* 3. Maps needs real height on mobile. The shared `.doc-body { flex:none }`
+        rule above is right for Adventure (its PDF/HTML frames carry explicit
+        heights) but collapses the Maps image / live-VTT viewer to nothing. */
+  [data-tool="maps"] .doc-body { flex: 1 1 auto !important; min-height: 78vh; }
+  [data-tool="maps"] .doc-frame-wrap.maps-mode { min-height: 78vh; }
+
+  /* 4. Sound Library becomes a full-width collapsible section (it's a hidden
+        side column otherwise, with no way to reach it on a phone). */
+  .mus-shell { flex-direction: column; }
+  .mus-tool .mus-library { display: flex !important; width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 52vh; }
+  .mus-library.mus-lib-collapsed { max-height: none; }
+  .mus-library.mus-lib-collapsed > *:not(.mus-lib-head) { display: none !important; }
+  .mus-lib-collapse { display: inline-flex !important; }
+
+  /* 5b. Keep popup headers (and their ✕) clear of the browser's top chrome —
+         pin popups to the top with a safe-area gap instead of centering them. */
+  .pop-scrim { align-items: flex-start; }
+  .popup, .popup.wide, .popup.xwide { margin-top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100dvh - 24px); }
+  .popup.tall, .popup.tall.xwide { height: auto; max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px); }
+}
+
+/* Library collapse toggle — only meaningful in the mobile stacked layout. */
+.mus-lib-collapse { display: none; }
 
 /* ── NOTES TABS (hanging overlay) ── */
 .nts-body { position: relative; }
@@ -1918,7 +1952,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 /* xwide after tall so the extra width wins when a popup is both (Music) */
 .popup.xwide,.popup.tall.xwide{width:min(1060px,97vw)}
 /* Message composer only — hide the roster list/controls from the Party tool. */
-.pop-body.msg-only .pty-bar,.pop-body.msg-only .pty-empty,.pop-body.msg-only .pty-list{display:none!important}
+.pop-body.msg-only .pty-bar,.pop-body.msg-only .pty-empty,.pop-body.msg-only .pty-list,.pop-body.msg-only .pty-bubbles{display:none!important}
 .pop-body.msg-only .ai-party-msg{border-bottom:none}
 .pop-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(36,211,238,.06),transparent);flex-shrink:0}
 .pop-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--white);flex-shrink:0}
@@ -2795,6 +2829,9 @@ GMScenes.renderPins();
 .pty-bar { display:flex; gap:8px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--border); background:var(--panel); flex-shrink:0; flex-wrap:wrap; }
 .pty-note { font-family:'Montserrat',sans-serif; font-size:10px; color:var(--muted); }
 .pty-list { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
+/* Party members as monitor-style bubbles; tap one to open its full card popup. */
+.pty-bubbles { flex:1; overflow-y:auto; padding:12px; display:flex; flex-wrap:wrap; align-content:flex-start; gap:8px; }
+.pty-bubbles .bubble { width:168px; }
 .pty-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:var(--muted); text-align:center; padding:20px; }
 .pty-empty-icon { font-size:34px; opacity:.6; }
 .pty-empty-title { font-family:'Montserrat',sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:.12em; font-size:12px; color:var(--light); }
@@ -3010,13 +3047,13 @@ GMScenes.renderPins();
 <template id="tpl-music">
   <div class="tool-instance mus-tool" data-tool="music">
     <div class="toolbar-tpl" style="display:none">
-      <button class="btn small ghost mus-lib-toggle" title="Show / hide Sound Library" aria-label="Show / hide Sound Library"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg> Library</button>
       <div class="toolbar-spacer"></div>
       <button class="btn small ghost mus-stopall" title="Stop All" aria-label="Fade out and stop everything"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><rect x="5.2" y="5.2" width="13.6" height="13.6" rx="2"/></svg></button>
     </div>
     <div class="mus-shell">
       <aside class="mus-library">
         <div class="mus-lib-head">
+          <button class="mus-sec-toggle mus-lib-collapse" title="Collapse / expand the library" aria-label="Collapse / expand the library">&#9662;</button>
           <span class="mus-lib-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg> <span>Sound Library</span></span>
           <button class="mus-lib-refresh" title="Reload library" aria-label="Reload library"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.6a6.4 6.4 0 0 1 5.5 3.1H15.3v2.1h5.4V5.4h-2.1v1.9A8.5 8.5 0 0 0 3.6 11.2l2.1.3A6.4 6.4 0 0 1 12 5.6z"/><path d="M12 18.4a6.4 6.4 0 0 1-5.5-3.1h2.2v-2.1H3.3v5.4h2.1v-1.9A8.5 8.5 0 0 0 20.4 12.8l-2.1-.3A6.4 6.4 0 0 1 12 18.4z"/></svg></button>
         </div>
@@ -4260,6 +4297,10 @@ GMScenes.renderPins();
         <div class="pty-empty-title">No Character Sheets</div>
         <div class="pty-empty-sub">Add the .json a player exported from their character sheet (Save), or press Sync to pull sheets shared with your linked campaign.</div>
       </div>
+      <!-- Members render as monitor-style bubbles; the full card opens in a popup
+           on tap. The .pty-list below stays in the DOM (hidden) as the source
+           the popup clones and the roster strip scrapes. -->
+      <div class="pty-bubbles" style="display:none;"></div>
       <div class="pty-list" style="display:none;"></div>
     </div>
   </div>
@@ -4876,36 +4917,41 @@ function gmcHpColor(pct){
 function esc2(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 // ── Party BUBBLES — always-on, click a bubble for its detail popup. ──
+// One party bubble's HTML (shared by the monitor strip and the Party tool).
+// `i` is the roster index charPop() opens.
+function gmcBubbleHTML(pc, i){
+  const pct = gmcHpPct(pc.hp);
+  const down = pct != null && pct <= 0;
+  const bloodied = pct != null && pct > 0 && pct <= 40;
+  const barW = pct==null ? 100 : Math.max(4,pct);
+  const hpText = pc.hp || '';
+  const wound = pc.wound || '';   // wounds-as-health systems (SW, D62e) show status here
+  // Row 3 = stat details: the defense/AC chip first, then everything else.
+  const chips = [];
+  if(pc.ac) chips.push({ label: pc.acLabel || 'AC', value: pc.ac });
+  (pc.extra || []).forEach(c => { if(c && (c.label || c.value)) chips.push(c); });
+  // Health row: HP bar when we have an HP figure; otherwise a wound-status pill
+  // for wound systems; otherwise an empty dash.
+  let hpRow;
+  if(hpText) hpRow = '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span></div>';
+  else if(wound) hpRow = '<div class="bub-hpb bub-wound"><span class="bub-hpt">'+esc2(wound)+'</span></div>';
+  else hpRow = '<div class="bub-hpb empty"><span class="bub-hpt bub-hpt-none">—</span></div>';
+  // Consistent 3-row stack: identity · health · stat chips.
+  return '<div class="bubble'+(down?' down':'')+(bloodied?' bloodied':'')+'" onclick="charPop('+i+')" title="'+esc2(pc.name)+'">'
+    + '<div class="bub-id"><span class="bub-nm">'+esc2(pc.name)+'</span>'+(pc.sub?'<span class="bub-sub">'+esc2(pc.sub)+'</span>':'')+'</div>'
+    + hpRow
+    + (chips.length ? '<div class="bub-r3">'+chips.map(c=>'<span class="bub-chip">'+(c.label?'<em>'+esc2(c.label)+'</em>':'')+(c.value?esc2(c.value):'')+'</span>').join('')+'</div>' : '<div class="bub-r3 bub-r3-empty">—</div>')
+    + '</div>';
+}
+function gmcBubblesHTML(roster){ return (roster||[]).map((pc,i)=> gmcBubbleHTML(pc,i)).join(''); }
+
 function renderPartyStrip(roster){
   const el = document.getElementById('gmc-party-bubbles');
   if(!el) return;
   roster = roster || window.GM_ROSTER || [];
   gmcRoster = roster;
   if(!roster.length){ el.innerHTML = '<div class="party-empty" id="party-empty">Link a campaign to see your party</div>'; return; }
-  el.innerHTML = roster.map((pc,i) => {
-    const pct = gmcHpPct(pc.hp);
-    const down = pct != null && pct <= 0;
-    const bloodied = pct != null && pct > 0 && pct <= 40;
-    const barW = pct==null ? 100 : Math.max(4,pct);
-    const hpText = pc.hp || '';
-    const wound = pc.wound || '';   // wounds-as-health systems (SW, D62e) show status here
-    // Row 3 = stat details: the defense/AC chip first, then everything else.
-    const chips = [];
-    if(pc.ac) chips.push({ label: pc.acLabel || 'AC', value: pc.ac });
-    (pc.extra || []).forEach(c => { if(c && (c.label || c.value)) chips.push(c); });
-    // Health row: HP bar when we have an HP figure; otherwise a wound-status pill
-    // for wound systems; otherwise an empty dash.
-    let hpRow;
-    if(hpText) hpRow = '<div class="bub-hpb"><i style="width:'+barW+'%;background:'+gmcHpColor(pct)+'"></i><span class="bub-hpt">'+esc2(hpText)+'</span></div>';
-    else if(wound) hpRow = '<div class="bub-hpb bub-wound"><span class="bub-hpt">'+esc2(wound)+'</span></div>';
-    else hpRow = '<div class="bub-hpb empty"><span class="bub-hpt bub-hpt-none">—</span></div>';
-    // Consistent 3-row stack: identity · health · stat chips.
-    return '<div class="bubble'+(down?' down':'')+(bloodied?' bloodied':'')+'" onclick="charPop('+i+')" title="'+esc2(pc.name)+'">'
-      + '<div class="bub-id"><span class="bub-nm">'+esc2(pc.name)+'</span>'+(pc.sub?'<span class="bub-sub">'+esc2(pc.sub)+'</span>':'')+'</div>'
-      + hpRow
-      + (chips.length ? '<div class="bub-r3">'+chips.map(c=>'<span class="bub-chip">'+(c.label?'<em>'+esc2(c.label)+'</em>':'')+(c.value?esc2(c.value):'')+'</span>').join('')+'</div>' : '<div class="bub-r3 bub-r3-empty">—</div>')
-      + '</div>';
-  }).join('');
+  el.innerHTML = gmcBubblesHTML(roster);
 }
 document.addEventListener('gm-roster', e => renderPartyStrip(e.detail));
 
@@ -12495,7 +12541,7 @@ function init_music(root) {
     const searchEl= root.querySelector('.mus-lib-search');
     const emptyEl = root.querySelector('.mus-lib-empty');
     const preview = root.querySelector('.mus-lib-preview');
-    const toggleBtn = root.querySelector('.mus-lib-toggle');
+    const collapseBtn = root.querySelector('.mus-lib-collapse');
     const refreshBtn= root.querySelector('.mus-lib-refresh');
     if(!lib || !listEl) return;
 
@@ -12577,22 +12623,11 @@ function init_music(root) {
 
     if(searchEl) searchEl.addEventListener('input', ()=>{ query=searchEl.value.trim().toLowerCase(); render(); });
     if(refreshBtn) refreshBtn.addEventListener('click', ()=>{ cache=null; load(); });
-    // null = follow the container query (shown when the window is wide enough);
-    // 'on'/'off' = explicit user override that wins in either context.
-    let libForced = null;
-    if(toggleBtn) toggleBtn.addEventListener('click', ()=>{
-      if(libForced === null){
-        // First click: flip whatever the GM currently sees.
-        let visible = false;
-        try { visible = root.ownerDocument.defaultView.getComputedStyle(lib).display !== 'none'; } catch(_){}
-        libForced = visible ? 'off' : 'on';
-      } else {
-        libForced = libForced === 'off' ? 'on' : 'off';
-      }
-      lib.classList.toggle('mus-lib-hidden', libForced==='off');
-      lib.classList.toggle('mus-lib-shown', libForced==='on');
-      toggleBtn.classList.toggle('active', libForced!=='off');
-    });
+    // On mobile the library is a full-width collapsible section (see CSS). The
+    // toggle in its header folds it down to just the title bar; default folded
+    // on a phone so it doesn't bury the player/soundboard.
+    if(collapseBtn) collapseBtn.addEventListener('click', ()=> lib.classList.toggle('mus-lib-collapsed'));
+    try { if(typeof isMobileView === 'function' && isMobileView()) lib.classList.add('mus-lib-collapsed'); } catch(_){}
     // Load once the library becomes visible (avoids a needless fetch in tiny
     // free-mode windows where it's hidden), but always load on first open.
     load();
@@ -14461,6 +14496,7 @@ function init_party(root) {
   const clearBtn  = root.querySelector('.pty-clear');
   const noteEl    = root.querySelector('.pty-note');
   const listEl    = root.querySelector('.pty-list');
+  const bubblesEl = root.querySelector('.pty-bubbles');
   const emptyEl   = root.querySelector('.pty-empty');
 
   let chars = [];          // [{id, source, sheet}]
@@ -15456,7 +15492,10 @@ function init_party(root) {
   function render() {
     const any = chars.length > 0;
     emptyEl.style.display = any ? 'none' : 'flex';
-    listEl.style.display  = any ? 'flex' : 'none';
+    // The full cards stay in the DOM (hidden) — they're the source charPop()
+    // clones into the popup and that publishRoster() scrapes for the roster.
+    // What the GM actually sees is the bubble strip below.
+    listEl.style.display = 'none';
     // One malformed sheet must never blank the whole party. Build each card in
     // isolation so a single throw becomes a small "couldn't render" card instead
     // of an empty list + dead bubbles (and a stalled auto-refresh).
@@ -15473,7 +15512,13 @@ function init_party(root) {
       }
     }).join('');
     if(any && !noteEl.textContent) status(chars.length + ' character' + (chars.length === 1 ? '' : 's'));
-    publishRoster();
+    publishRoster();   // builds window.GM_ROSTER from the cards above (order matches charPop indices)
+    // Render the member bubbles the GM taps to open a full card popup.
+    if(bubblesEl){
+      const roster = window.GM_ROSTER || [];
+      bubblesEl.innerHTML = gmcBubblesHTML(roster);
+      bubblesEl.style.display = roster.length ? 'flex' : 'none';
+    }
   }
 
   // Publish a compact roster for the console masthead's always-on party strip.
