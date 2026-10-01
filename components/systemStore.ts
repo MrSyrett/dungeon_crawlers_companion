@@ -92,3 +92,43 @@ export function setSystem(key: SystemKey): void {
   }
   listeners.forEach((l) => l());
 }
+
+// ── Dashboard view (Characters | Adventures) ────────────────────────────────
+// The homepage splits a system's documents into two tabs. Which one is showing
+// is shared client state (like the system above), so the top navbar's tabs and
+// the dashboard body stay in step with no server round-trip when you switch.
+
+export type DashView = "characters" | "adventures";
+
+const VIEW_KEY = "dcw_dash_view";
+const viewListeners = new Set<() => void>();
+
+export function subscribeView(cb: () => void): () => void {
+  viewListeners.add(cb);
+  window.addEventListener("storage", cb);
+  return () => {
+    viewListeners.delete(cb);
+    window.removeEventListener("storage", cb);
+  };
+}
+
+export function getViewSnapshot(): DashView {
+  try {
+    return window.localStorage.getItem(VIEW_KEY) === "adventures" ? "adventures" : "characters";
+  } catch {
+    return "characters";
+  }
+}
+
+export function getViewServerSnapshot(): DashView {
+  return "characters";
+}
+
+export function setView(view: DashView): void {
+  try {
+    window.localStorage.setItem(VIEW_KEY, view);
+  } catch {
+    /* ignore */
+  }
+  viewListeners.forEach((l) => l());
+}

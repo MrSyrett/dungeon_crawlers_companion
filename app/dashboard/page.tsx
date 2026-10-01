@@ -1,314 +1,36 @@
-import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { TOOLS, TOOL_ORDER, type ToolId } from "@/lib/tools";
-import { logout } from "@/app/actions/auth";
-import { createDocument, deleteDocument } from "@/app/actions/documents";
-import { ConfirmButton } from "@/components/ConfirmButton";
-import SystemTabs from "@/components/SystemTabs";
-import SystemToggle from "@/components/SystemToggle";
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
 import { getHiddenSystemKeys } from "@/lib/systems";
+import DashboardDocs, { type SystemPanels, type DocRow } from "@/components/DashboardDocs";
 
-// Toolbar links, in the order they appear beside the system toggle.
-// These work for either ruleset, so they show on both tabs. On the Shadowdark
-// tab they sit after the Shadowdark reference pages (see SD_REFERENCE); on the
-// DCC tab they're the only toolbar links.
-const SHARED_NAV: { href: string; label: string }[] = [
-  // Leads the shared links so the Shadowdark tab keeps its old order (reference
-  // pages, then Rulebooks) and the DCC tab starts with it.
-  { href: "/rules", label: "Rulebooks" },
-  { href: "/vtt", label: "VTT" },
-  { href: "/token-maker", label: "Tokens" },
-  { href: "/dungeon-map", label: "Maps" },
-  { href: "/campaigns", label: "Campaigns" },
-  { href: "/gm-screen", label: "GM Screen" },
-];
-
-// Shadowdark reference pages — they read Shadowdark data, so they lead the
-// toolbar on that tab only, ahead of the shared links.
-const SD_REFERENCE: { href: string; label: string }[] = [
-  { href: "/classes", label: "Classes" },
-  { href: "/ancestries", label: "Ancestries" },
-  { href: "/backgrounds", label: "Backgrounds" },
-  { href: "/spells", label: "Spells" },
-  { href: "/gear", label: "Gear" },
-  { href: "/bestiary", label: "Bestiary" },
-];
-
-
-// DCC reference pages — they read Dungeon Crawler Carl data and lead the toolbar
-// on the DCC tab only. Grows as each reference page ships (roadmap Phase 1);
-// links are added here only once their route exists so nothing points at a 404.
-const DCC_REFERENCE: { href: string; label: string }[] = [
-  { href: "/dcc/classes", label: "Classes" },
-  { href: "/dcc/races", label: "Races" },
-  { href: "/dcc/skills-and-spells", label: "Skills & Spells" },
-  { href: "/dcc/loot", label: "Loot" },
-  { href: "/dcc/bestiary", label: "Bestiary" },
-  { href: "/dcc/options", label: "Options" },
-  { href: "/dcc/reference", label: "Rules" },
-];
-
-// ACE! reference pages — they read Awfully Cheerful Engine! data and lead the
-// toolbar on the ACE tab only.
-const ACE_REFERENCE: { href: string; label: string }[] = [
-  { href: "/ace/roles", label: "Roles" },
-  { href: "/ace/focuses", label: "Focuses" },
-  { href: "/ace/traits", label: "Traits" },
-  { href: "/ace/gear", label: "Gear" },
-  { href: "/ace/extras", label: "Bestiary" },
-  { href: "/ace/settings", label: "Rules" },
-];
-
-// Kids on Bikes / Brooms / Capes reference pages — one tab, three books.
-const KOB_REFERENCE: { href: string; label: string }[] = [
-  { href: "/kob/tropes", label: "Tropes" },
-  { href: "/kob/strengths", label: "Strengths & Flaws" },
-  { href: "/kob/questions", label: "Questions" },
-  { href: "/kob/magic", label: "Magic" },
-  { href: "/kob/capes", label: "Capes & Powers" },
-  { href: "/kob/rules", label: "Rules" },
-];
-
-// Nimble reference pages.
-const NIM_REFERENCE: { href: string; label: string }[] = [
-  { href: "/nimble/classes", label: "Classes" },
-  { href: "/nimble/ancestries", label: "Ancestries" },
-  { href: "/nimble/equipment", label: "Equipment" },
-  { href: "/nimble/spells", label: "Spells" },
-  { href: "/nimble/bestiary", label: "Bestiary" },
-  { href: "/nimble/rules", label: "Rules" },
-];
-
-// Star Wars (WEG 1e + Rules Companion) reference pages.
-const SW_REFERENCE: { href: string; label: string }[] = [
-  { href: "/sw/templates", label: "Templates" },
-  { href: "/sw/skills", label: "Skills" },
-  { href: "/sw/equipment", label: "Equipment" },
-  { href: "/sw/starships", label: "Starships" },
-  { href: "/sw/characters", label: "Bestiary" },
-  { href: "/sw/rules", label: "Rules" },
-];
-
-// D&D (2024) reference pages. Backgrounds & Feats share a page (they pair up on
-// the 2024 origin), and Magic Items live on the Equipment page.
-const DND_REFERENCE: { href: string; label: string }[] = [
-  { href: "/dnd/bestiary", label: "Bestiary" },
-  { href: "/dnd/classes", label: "Classes" },
-  { href: "/dnd/species", label: "Species" },
-  { href: "/dnd/backgrounds", label: "Backgrounds & Feats" },
-  { href: "/dnd/spells", label: "Spells" },
-  { href: "/dnd/equipment", label: "Equipment" },
-];
-
-// D&D has no rulebook PDFs, so its shared toolbar drops the Rulebooks link.
-const SHARED_NAV_DND = SHARED_NAV.filter((l) => l.href !== "/rules");
-
-// D6 System: Second Edition (D62e) reference pages. Genre-agnostic: skills,
-// templates, equipment, powers (magic/psionics/superpowers), perks/flaws/talents,
-// bestiary, and the rules modules + tables.
-const D62E_REFERENCE: { href: string; label: string }[] = [
-  { href: "/d62e/skills", label: "Skills" },
-  { href: "/d62e/templates", label: "Templates" },
-  { href: "/d62e/equipment", label: "Equipment" },
-  { href: "/d62e/traits", label: "Traits" },
-  { href: "/d62e/bestiary", label: "Bestiary" },
-  { href: "/d62e/rules", label: "Rules" },
-];
-
-// Index Card RPG (ICRPG Master Edition) reference pages — a rules-light unified
-// d20 system: worlds, heroes (life forms + types), loot tables, spells, bestiary.
-const ICRPG_REFERENCE: { href: string; label: string }[] = [
-  { href: "/icrpg/worlds", label: "Worlds" },
-  { href: "/icrpg/heroes", label: "Heroes" },
-  { href: "/icrpg/loot", label: "Loot" },
-  { href: "/icrpg/spells", label: "Spells" },
-  { href: "/icrpg/bestiary", label: "Bestiary" },
-  { href: "/icrpg/rules", label: "Rules" },
-];
-
-const CO_REFERENCE: { href: string; label: string }[] = [
-  { href: "/candela/roles", label: "Roles" },
-  { href: "/candela/actions", label: "Actions" },
-  { href: "/candela/abilities", label: "Abilities" },
-  { href: "/candela/gear", label: "Gear" },
-  { href: "/candela/rules", label: "Rules" },
-];
-
-const YZE_REFERENCE: { href: string; label: string }[] = [
-  { href: "/yze/rules", label: "Core Rules" },
-  { href: "/yze/skills", label: "Skills" },
-  { href: "/yze/weapons", label: "Weapons" },
-  { href: "/yze/gear", label: "Gear" },
-  { href: "/yze/combat", label: "Combat" },
-  { href: "/yze/alien", label: "Alien" },
-];
-
-const MMRPG_REFERENCE: { href: string; label: string }[] = [
-  { href: "/mmrpg/origins", label: "Origins & Occupations" },
-  { href: "/mmrpg/traits", label: "Traits & Tags" },
-  { href: "/mmrpg/powers", label: "Powers" },
-  { href: "/mmrpg/equipment", label: "Equipment" },
-  { href: "/mmrpg/characters", label: "Characters" },
-];
-
-const JLU_REFERENCE: { href: string; label: string }[] = [
-  { href: "/jlu/powers", label: "Powers" },
-  { href: "/jlu/origins", label: "Origins & Archetypes" },
-  { href: "/jlu/gear", label: "Gear & Traits" },
-  { href: "/jlu/bestiary", label: "Bestiary" },
-  { href: "/jlu/rules", label: "Rules" },
-];
-
-const GB_REFERENCE: { href: string; label: string }[] = [
-  { href: "/gb/rules", label: "Rules" },
-  { href: "/gb/talents", label: "Traits & Talents" },
-  { href: "/gb/gear", label: "Gear & Goals" },
-  { href: "/gb/bestiary", label: "Ghosts & Extras" },
-];
-
-// Per-system reference links, keyed the same way the toggle is.
-const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
-  SD: SD_REFERENCE,
-  DCC: DCC_REFERENCE,
-  ACE: ACE_REFERENCE,
-  KOB: KOB_REFERENCE,
-  NIM: NIM_REFERENCE,
-  SW: SW_REFERENCE,
-  DND: DND_REFERENCE,
-  D62E: D62E_REFERENCE,
-  ICRPG: ICRPG_REFERENCE,
-  CO: CO_REFERENCE,
-  YZE: YZE_REFERENCE,
-  MMRPG: MMRPG_REFERENCE,
-  JLU: JLU_REFERENCE,
-  GB: GB_REFERENCE,
-};
-
-function NavLinks({ links }: { links: { href: string; label: string }[] }) {
-  return (
-    <>
-      {links.map((r) => (
-        <Link
-          key={r.href}
-          href={r.href}
-          className="flex-1 whitespace-nowrap rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-3 text-center text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] transition-colors hover:border-[var(--gold)] hover:text-[var(--text)] sm:py-2.5 sm:text-[11px] md:flex-none"
-        >
-          {r.label}
-        </Link>
-      ))}
-    </>
-  );
-}
-
-function formatDate(d: Date): string {
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(d);
-}
-
-function DocList({
-  id,
-  docs,
-}: {
-  id: ToolId;
-  /**
-   * `vttCampaignId` is set when this sheet is linked to a campaign (so it can
-   * always open our first-party tabletop). `vttUrl` is set only when that
-   * campaign also has an Owlbear room entered — which takes precedence.
-   */
-  docs: { id: string; title: string; updatedAt: Date; vttUrl?: string | null; vttCampaignId?: string | null }[];
-}) {
-  const def = TOOLS[id];
-  return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)]">
-      <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-        <h3 className="text-base font-bold uppercase tracking-[0.15em] sm:text-sm">
-          {def.kind === "character" ? "Characters" : "Adventures"}
-        </h3>
-        <form action={createDocument}>
-          <input type="hidden" name="tool" value={id} />
-          <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]">
-            + New
-          </button>
-        </form>
-      </div>
-
-      {docs.length === 0 ? (
-        <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">No saved {def.kind === "character" ? "characters" : "adventures"} yet.</p>
-      ) : (
-        <ul className="divide-y divide-[var(--border)]">
-          {docs.map((doc) => (
-            <li key={doc.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <Link
-                  href={`/tools/${id}/${doc.id}`}
-                  className="block truncate py-1 text-lg font-semibold hover:text-[var(--gold)] sm:py-0 sm:text-base"
-                >
-                  {doc.title}
-                </Link>
-                <span className="text-[13px] text-[var(--muted)] sm:text-[11px]">
-                  Updated {formatDate(doc.updatedAt)}
-                </span>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {(() => {
-                  // Owlbear room if the GM entered one, otherwise our own tabletop.
-                  const vttHref = doc.vttUrl || (doc.vttCampaignId ? `/play/${doc.vttCampaignId}` : null);
-                  if (!vttHref) return null;
-                  return (
-                    <a
-                      href={vttHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Open this campaign's virtual tabletop in a new tab"
-                      className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
-                    >
-                      Launch VTT
-                    </a>
-                  );
-                })()}
-                <form action={deleteDocument}>
-                  <input type="hidden" name="id" value={doc.id} />
-                  <ConfirmButton
-                    message={`Delete "${doc.title}"? This cannot be undone.`}
-                    className="min-h-11 shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[#f0a8a3] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
-                  >
-                    Delete
-                  </ConfirmButton>
-                </form>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
+// The homepage. The top navbar (SiteNav, in the root layout) owns system
+// selection, the Characters/Adventures tabs, Compendium and Tools; this page
+// only renders the active system's active list.
+//
+// Perf: we query the user's documents once, then hand the client compact row
+// data grouped by system + tool — NOT fourteen fully-rendered panels. Only the
+// active slice is ever in the DOM, so a GM with dozens of adventures no longer
+// pays to render (and ship) every other system's lists on each load.
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const isAdmin = isAdminEmail(user.email);
   const hiddenSystems = await getHiddenSystemKeys();
 
   const docs = await prisma.document.findMany({
     where: { userId: user.id },
     orderBy: { updatedAt: "desc" },
+    select: { id: true, title: true, updatedAt: true, tool: true, linkedCampaignId: true },
   });
 
-  // A sheet's campaign link now lives in the indexed linkedCampaignId column
-  // (populated on save for both sd-character and dcc-character docs). We map each
-  // linked sheet to its campaign's tabletop link so it can offer Launch VTT.
-  // `docs` already holds every scalar column, so this is a field read — no extra
-  // query, no JSON parse.
+  // Map each campaign-linked sheet to its campaign's Owlbear room (if any) so it
+  // can offer Launch VTT; sheets with a campaign but no room fall back to our
+  // first-party tabletop at /play/<campaignId>. One batched query, no N+1.
   const campaignIds = [
     ...new Set(
-      docs
-        .map((d) => d.linkedCampaignId)
-        .filter((v: string | null): v is string => !!v),
+      docs.map((d) => d.linkedCampaignId).filter((v: string | null): v is string => !!v),
     ),
   ];
   const vttByCampaign = new Map<string, string>();
@@ -322,103 +44,31 @@ export default async function DashboardPage() {
     }
   }
 
-  type DocRow = (typeof docs)[number] & { vttUrl?: string | null; vttCampaignId?: string | null };
   const byTool = new Map<ToolId, DocRow[]>();
   for (const id of TOOL_ORDER) byTool.set(id, []);
   for (const doc of docs) {
     const tool = doc.tool as ToolId;
     if (!byTool.has(tool)) continue;
     const cid = doc.linkedCampaignId;
+    const vttHref = cid ? vttByCampaign.get(cid) ?? `/play/${cid}` : null;
     byTool.get(tool)!.push({
-      ...doc,
-      vttUrl: cid ? vttByCampaign.get(cid) ?? null : null,
-      vttCampaignId: cid ?? null,
+      id: doc.id,
+      title: doc.title,
+      updatedAt: doc.updatedAt.getTime(),
+      vttHref,
     });
   }
 
-  // Split tools by kind
-  const charSheetIds = TOOL_ORDER.filter((id) => TOOLS[id].kind === "character");
-  const sessionPrepIds = TOOL_ORDER.filter((id) => TOOLS[id].kind === "session");
+  // Group into per-system { character, session } panels for the client.
+  const panels: SystemPanels = {};
+  for (const s of SYSTEMS) {
+    const charId = TOOL_ORDER.find((id) => TOOLS[id].system === s.key && TOOLS[id].kind === "character");
+    const sessId = TOOL_ORDER.find((id) => TOOLS[id].system === s.key && TOOLS[id].kind === "session");
+    const entry: { character?: { toolId: string; docs: DocRow[] }; session?: { toolId: string; docs: DocRow[] } } = {};
+    if (charId) entry.character = { toolId: charId, docs: byTool.get(charId) ?? [] };
+    if (sessId) entry.session = { toolId: sessId, docs: byTool.get(sessId) ?? [] };
+    panels[s.key] = entry;
+  }
 
-  return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <header className="mb-5 flex items-start justify-between gap-4 border-b border-[var(--border)] pb-6">
-        <div className="flex items-center gap-3">
-          <Image src="/logo-white.png" alt="" width={72} height={72} priority className="h-10 w-10 shrink-0 sm:h-14 sm:w-14" />
-          <div>
-          <h1 className="font-display text-xl font-black tracking-wide sm:text-3xl">Dungeon Crawler&rsquo;s Companion</h1>
-          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-            TTRPG Digital Toolkit
-          </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
-            <span className="hidden sm:inline">{user.email}</span>
-            {isAdmin ? (
-              <Link
-                href="/admin/users"
-                className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-              >
-                Admin
-              </Link>
-            ) : null}
-            <form action={logout}>
-              <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] hover:border-[var(--muted)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]">
-                Sign out
-              </button>
-            </form>
-        </div>
-      </header>
-
-      {/* System picker on its own row, centred, so the tab strip has room
-          for six systems without crowding the sign-out controls. */}
-      <div className="mb-8 flex justify-center border-b border-[var(--border)] pb-6">
-        <SystemToggle hiddenKeys={hiddenSystems} />
-      </div>
-
-      {/* One system at a time; Shadowdark by default. Each system gets the
-          same two columns (its character sheets and its session-prep docs),
-          filtered by the tool registry's system tag, plus its own reference
-          links ahead of the shared toolbar links. */}
-      <SystemTabs
-        hiddenKeys={hiddenSystems}
-        nav={<NavLinks links={SHARED_NAV} />}
-        navFor={{ DND: <NavLinks links={SHARED_NAV_DND} /> }}
-        systemNav={Object.fromEntries(
-          SYSTEMS.map((s) => [s.key, <NavLinks key={s.key} links={SYSTEM_REFERENCE[s.key]} />]),
-        )}
-        panels={Object.fromEntries(
-          SYSTEMS.map((s) => [
-            s.key,
-            <div key={s.key} className="grid gap-10 md:grid-cols-2">
-              <section>
-                <div className="flex flex-col gap-6">
-                  {charSheetIds
-                    .filter((id) => TOOLS[id].system === s.key)
-                    .map((id) => (
-                      <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
-                    ))}
-                </div>
-              </section>
-
-              <section>
-                <div className="flex flex-col gap-6">
-                  {sessionPrepIds
-                    .filter((id) => TOOLS[id].system === s.key)
-                    .map((id) => (
-                      <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
-                    ))}
-                  {sessionPrepIds.every((id) => TOOLS[id].system !== s.key) ? (
-                    <p className="text-sm text-[var(--muted)]">
-                      No session-prep tool for {s.name} yet.
-                    </p>
-                  ) : null}
-                </div>
-              </section>
-            </div>,
-          ]),
-        )}
-      />
-    </div>
-  );
+  return <DashboardDocs panels={panels} hiddenKeys={hiddenSystems as SystemKey[]} />;
 }
