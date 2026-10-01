@@ -253,43 +253,54 @@ export default async function CampaignsPage() {
 
   const ids = campaigns.map((c) => c.id);
 
-  // Roll activity for every campaign in one grouped query.
-  // Note the log is pruned to ~500 rolls per campaign, so this is "rolls still
-  // on record", not a lifetime total — fine for judging what's gone quiet.
-  const rollStats = ids.length
-    ? await prisma.campaignRoll.groupBy({
-        by: ["campaignId"],
-        where: { campaignId: { in: ids } },
-        _count: { _all: true },
-        _max: { createdAt: true },
-      })
-    : [];
+  // These three reads don't depend on one another — run them concurrently so the
+  // page waits for one round-trip, not three in series:
+  //  • rollStats  — roll activity per campaign (one grouped query; the log is
+  //    pruned to ~500 rolls each, so it's "rolls still on record", not lifetime).
+  //  • partyDocs  — every character sheet linked to one of these campaigns, in a
+  //    SINGLE query (was an N+1: one findMany per campaign). linkedCampaignId is
+  //    indexed, so this is an index scan; we group the rows in JS below.
+  //  • myDocs     — the user's own linked sheets, for the "joined" section.
+  // An empty `in: []` simply matches nothing, so these are safe to run even when
+  // the user owns no campaigns — no need to branch on ids.length.
+  const [rollStats, partyDocs, myDocs] = await Promise.all([
+    prisma.campaignRoll.groupBy({
+      by: ["campaignId"],
+      where: { campaignId: { in: ids } },
+      _count: { _all: true },
+      _max: { createdAt: true },
+    }),
+    prisma.document.findMany({
+      where: { tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: { in: ids } },
+      select: { id: true, title: true, data: true, linkedCampaignId: true },
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.document.findMany({
+      where: {
+        userId: user.id,
+        tool: { in: CHARACTER_TOOL_IDS },
+        linkedCampaignId: { not: null },
+      },
+      select: { id: true, title: true, data: true, linkedCampaignId: true },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
 
   const statFor = new Map(
     rollStats.map((r) => [r.campaignId, { rolls: r._count._all, last: r._max.createdAt }]),
   );
 
-  // Who is actually in each party. The campaign link is now its own indexed
-  // column (kept in sync on save), so this is an index scan; we still parse the
-  // sheet JSON for the roster's name / class / level.
-  const parties = await Promise.all(
-    ids.map(async (id) => {
-      const docs = await prisma.document.findMany({
-        where: { tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: id },
-        select: { id: true, title: true, data: true },
-        orderBy: { updatedAt: "desc" },
-      });
-
-      const members: PartyMember[] = [];
-      for (const doc of docs) {
-        const meta = readCharMeta(doc.data, doc.title || "");
-        if (!meta) continue; // no readable character sheet — skip
-        members.push({ id: doc.id, name: meta.name, cls: meta.cls, level: meta.level });
-      }
-      return [id, members] as const;
-    }),
-  );
-  const partyFor = new Map(parties);
+  // Group the linked sheets into each campaign's party (preserving updatedAt-desc
+  // order from the query). We still parse the sheet JSON for name / class / level.
+  const partyFor = new Map<string, PartyMember[]>();
+  for (const id of ids) partyFor.set(id, []);
+  for (const doc of partyDocs) {
+    const cid = doc.linkedCampaignId;
+    if (typeof cid !== "string" || !partyFor.has(cid)) continue;
+    const meta = readCharMeta(doc.data, doc.title || "");
+    if (!meta) continue; // no readable character sheet — skip
+    partyFor.get(cid)!.push({ id: doc.id, name: meta.name, cls: meta.cls, level: meta.level });
+  }
 
   // ── Campaigns the player has JOINED (a character is linked) but does not own ──
   // Membership is recorded inside each of the user's own sheets as
@@ -297,15 +308,6 @@ export default async function CampaignsPage() {
   // We gather those ids from the column, drop any this user owns, and show the
   // rest read-only. The sheet JSON is still parsed for the character name.
   const ownedIds = new Set(campaigns.map((c) => c.id));
-  const myDocs = await prisma.document.findMany({
-    where: {
-      userId: user.id,
-      tool: { in: CHARACTER_TOOL_IDS },
-      linkedCampaignId: { not: null },
-    },
-    select: { id: true, title: true, data: true, linkedCampaignId: true },
-    orderBy: { updatedAt: "desc" },
-  });
 
   const joinedChars = new Map<string, string[]>(); // campaignId -> character names
   for (const doc of myDocs) {

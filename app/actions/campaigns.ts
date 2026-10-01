@@ -23,7 +23,9 @@ export async function deleteCampaign(formData: FormData): Promise<void> {
   if (!id) return;
 
   await prisma.campaign.deleteMany({ where: { id, ownerId: user.id } });
+  // A campaign drives Launch VTT on the dashboard too, so refresh both lists.
   revalidatePath("/campaigns");
+  revalidatePath("/dashboard");
 }
 
 /**

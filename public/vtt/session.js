@@ -344,7 +344,13 @@
     var el = $("scene-list"); if (!el) return;
     fetch(V.sceneBase + "?campaignId=" + encodeURIComponent(V.campaignId), { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : { scenes: [] }; }).then(function (d) {
       if (!d.scenes || !d.scenes.length) { el.innerHTML = '<div class="vtt-empty">No scenes yet. <b>New scene</b> to create one.</div>'; return; }
-      el.innerHTML = d.scenes.map(function (s) {
+      // Lock the list to a stable A→Z order by title (case-insensitive) so scenes
+      // never shuffle around as they're edited/opened (the server returns them by
+      // most-recently-updated).
+      var scenes = d.scenes.slice().sort(function (a, b) {
+        return String(a.title || "").toLowerCase().localeCompare(String(b.title || "").toLowerCase());
+      });
+      el.innerHTML = scenes.map(function (s) {
         var th = getThumb(s.id), active = currentScene && currentScene.id === s.id;
         return '<div class="vtt-scene' + (active ? " viewing" : "") + '" data-id="' + s.id + '" data-title="' + esc(s.title) + '"><div class="vtt-thumb">' + (th ? '<img src="' + th + '" alt="">' : ico("layers", 22)) + '</div><div class="vtt-scene-name" title="' + esc(s.title) + '">' + esc(s.title) + (active ? ' <span class="vtt-live-t">SHOWING</span>' : "") + '</div><button class="vtt-mini edit" title="Edit scene">' + ico("pencil", 14) + "</button></div>";
       }).join("");
@@ -861,7 +867,6 @@
       // settings — table toggles (reveal/snap/edit), then the player roster section
       '<div class="vtt-panel" data-panel="settings" hidden>' +
       frow("f-reveal", "eye", "GM Reveal", true) + frow("f-snap", "snap", "Snapping", true) + frow("f-setup", "wrench", "Edit Mode") +
-      '<div class="vtt-hint2" style="margin:2px 2px 0">Shortcuts: <b>G</b> reveal · <b>S</b> snap · <b>E</b> edit. Fog of War &amp; grid are set per scene (edit a scene).</div>' +
       '<div class="vtt-sec-h" style="margin-top:14px">Players</div><div id="players"></div>' +
       '</div></div>';
     var zoom = '<div class="vtt-zoom"><button class="vtt-tbtn" id="z-in" title="Zoom in">' + ico("zin") + '</button><button class="vtt-tbtn" id="z-fit" title="Fit map">' + ico("fit") + '</button><button class="vtt-tbtn" id="z-out" title="Zoom out">' + ico("zout") + "</button></div>";

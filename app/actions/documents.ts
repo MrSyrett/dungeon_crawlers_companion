@@ -39,5 +39,8 @@ export async function deleteDocument(formData: FormData): Promise<void> {
 
   const id = String(formData.get("id") ?? "");
   await prisma.document.deleteMany({ where: { id, userId: user.id } });
+  // A sheet shows on the dashboard AND in a campaign's party roster, so refresh
+  // both — otherwise the deleted character lingers on /campaigns until a reload.
   revalidatePath("/dashboard");
+  revalidatePath("/campaigns");
 }
