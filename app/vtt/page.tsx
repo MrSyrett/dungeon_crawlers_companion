@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -28,30 +27,16 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-10">
-      <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
-        <div>
-          <h1 className="font-display text-3xl font-black tracking-wide">OBR</h1>
-          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-            Owlbear Rodeo Extension
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <a
-            href="https://www.owlbear.rodeo/profile"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Open VTT ↗
-          </a>
-          <Link
-            href="/dashboard"
-            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            ← Home
-          </Link>
-        </div>
-      </header>
+      <div className="mb-8 flex justify-end border-b border-[var(--border)] pb-6">
+        <a
+          href="https://www.owlbear.rodeo/profile"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+        >
+          Open VTT ↗
+        </a>
+      </div>
 
       {justCreated ? (
         <div className="mb-8 rounded-lg border border-[var(--gold)] bg-[var(--panel)] p-5">

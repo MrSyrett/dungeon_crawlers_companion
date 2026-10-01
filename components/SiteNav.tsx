@@ -16,20 +16,24 @@ import {
   getViewServerSnapshot,
   type SystemKey,
 } from "./systemStore";
-import { compendiumFor, systemForPath, TOOLS_NAV } from "./navConfig";
+import { compendiumFor, homebrewFor, systemForPath, TOOLS_NAV } from "./navConfig";
 import { logout } from "@/app/actions/auth";
 
 // The single site-wide top navbar.
 //
-//   [logo] [System ▾]   Characters · Adventures · Compendium ▾        Tools · [account ▾]
+//   [logo] [System ▾]  Characters · Adventures · Compendium ▾ · Homebrew ·
+//                      OBR · Token Maker · Map Maker · Campaigns · GM Screen
+//                                                      … [email / Admin · Sign out]
 //
 // System selection is client state (systemStore, localStorage) shared with the
 // dashboard; the Characters/Adventures tabs drive the dashboard's view store.
 // Compendium is a per-system dropdown of that system's reference pages (+ the
-// Rulebooks shelf). Tools sit on the right. The bar hides itself on the auth
-// screens, and the layout only mounts it for signed-in users.
+// Rulebooks shelf); Homebrew links to that system's homebrew hub. Tools are
+// plain left-aligned links. The account block sits on the right (name, with
+// Admin · Sign out beneath). The bar hides itself on the auth screens, and the
+// layout only mounts it for signed-in users.
 
-type Menu = "system" | "compendium" | "tools" | "account" | "mobile" | null;
+type Menu = "system" | "compendium" | "mobile" | null;
 
 const HIDDEN_ON = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
@@ -70,8 +74,7 @@ export default function SiteNav({
       ? storedSystem
       : list[0].key;
 
-  // Persist the effective system so every reader (dashboard, other tabs) agrees:
-  // land on /dcc/classes and the dropdown — and the dashboard — follow to DCC.
+  // Persist the effective system so every reader (dashboard, other tabs) agrees.
   useEffect(() => {
     if (effective !== storedSystem) setSystem(effective);
   }, [effective, storedSystem]);
@@ -84,6 +87,7 @@ export default function SiteNav({
   const sys = list.find((s) => s.key === effective) ?? list[0];
   const onDashboard = pathname === "/dashboard";
   const compendium = compendiumFor(effective);
+  const homebrewHref = homebrewFor(effective);
 
   function chooseSystem(key: SystemKey) {
     setSystem(key);
@@ -95,16 +99,27 @@ export default function SiteNav({
     if (!onDashboard) router.push("/dashboard");
   }
 
-  const tabBase = "rounded px-3 py-2 text-[12px] font-bold uppercase tracking-[0.12em] transition-colors";
-  const tabOn = "bg-[var(--panel-2)] text-[var(--text)]";
-  const tabOff = "text-[var(--muted)] hover:text-[var(--text)]";
+  const item = "rounded px-3 py-2 text-[12px] font-bold uppercase tracking-[0.1em] transition-colors";
+  const on = "bg-[var(--panel-2)] text-[var(--text)]";
+  const off = "text-[var(--muted)] hover:text-[var(--text)]";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--panel)]">
-      {/* Click-away backdrop for any open dropdown. */}
       {menu ? <button aria-hidden="true" tabIndex={-1} className="fixed inset-0 z-0 cursor-default" onClick={() => setMenu(null)} /> : null}
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-5">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center gap-x-2 gap-y-1 px-3 py-2 sm:px-5">
+        {/* Mobile hamburger — left of the logo, reveals the nav links panel */}
+        <button
+          onClick={() => setMenu(menu === "mobile" ? null : "mobile")}
+          aria-label="Menu"
+          aria-expanded={menu === "mobile"}
+          className="flex shrink-0 items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 md:hidden"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
+          </svg>
+        </button>
+
         {/* Logo → home */}
         <Link href="/dashboard" className="flex shrink-0 items-center gap-2" title="Dungeon Crawler's Companion">
           <Image src="/logo-white.png" alt="" width={36} height={36} priority className="h-8 w-8" />
@@ -120,8 +135,7 @@ export default function SiteNav({
             className="flex items-center gap-1.5 rounded border border-[var(--border)] bg-[var(--panel-2)] px-2.5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] sm:px-3"
             style={{ color: sys.accent }}
           >
-            <span className="hidden sm:inline">{sys.name}</span>
-            <span className="sm:hidden">{sys.short}</span>
+            <span>{sys.name}</span>
             <Caret />
           </button>
           {menu === "system" ? (
@@ -140,20 +154,21 @@ export default function SiteNav({
           ) : null}
         </div>
 
-        {/* System page tabs (desktop) */}
-        <div className="hidden items-center gap-1 md:flex">
-          <button className={`${tabBase} ${onDashboard && view === "characters" ? tabOn : tabOff}`} onClick={() => openTab("characters")}>
+        {/* Left nav group (desktop): tabs + Compendium + Homebrew + Tools */}
+        <div className="hidden min-w-0 flex-wrap items-center gap-1 md:flex">
+          <button className={`${item} ${onDashboard && view === "characters" ? on : off}`} onClick={() => openTab("characters")}>
             Characters
           </button>
-          <button className={`${tabBase} ${onDashboard && view === "adventures" ? tabOn : tabOff}`} onClick={() => openTab("adventures")}>
+          <button className={`${item} ${onDashboard && view === "adventures" ? on : off}`} onClick={() => openTab("adventures")}>
             Adventures
           </button>
+
           <div className="relative">
             <button
               onClick={() => setMenu(menu === "compendium" ? null : "compendium")}
               aria-haspopup="true"
               aria-expanded={menu === "compendium"}
-              className={`${tabBase} ${tabOff} flex items-center gap-1`}
+              className={`${item} ${off} flex items-center gap-1`}
             >
               Compendium <Caret />
             </button>
@@ -172,84 +187,46 @@ export default function SiteNav({
               </div>
             ) : null}
           </div>
+
+          {homebrewHref ? (
+            <Link href={homebrewHref} className={`${item} ${pathname === homebrewHref ? on : off}`}>
+              Homebrew
+            </Link>
+          ) : null}
+
+          {/* Tools — individual links, always the same */}
+          {TOOLS_NAV.map((t) => (
+            <a key={t.href} href={t.href} className={`${item} ${pathname === t.href ? on : off}`}>
+              {t.label}
+            </a>
+          ))}
         </div>
 
-        {/* Right side: Tools + account (desktop) */}
-        <div className="ml-auto hidden items-center gap-1 md:flex">
-          <div className="relative">
-            <button
-              onClick={() => setMenu(menu === "tools" ? null : "tools")}
-              aria-haspopup="true"
-              aria-expanded={menu === "tools"}
-              className={`${tabBase} ${tabOff} flex items-center gap-1`}
-            >
-              Tools <Caret />
-            </button>
-            {menu === "tools" ? (
-              <div className="absolute right-0 top-full mt-1 w-52 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 shadow-xl">
-                {TOOLS_NAV.map((t) => (
-                  <a
-                    key={t.href}
-                    href={t.href}
-                    onClick={() => setMenu(null)}
-                    className="block rounded px-3 py-2 text-[13px] font-semibold text-[var(--muted)] transition-colors hover:bg-[var(--panel-2)] hover:text-[var(--text)]"
-                  >
-                    {t.label}
-                  </a>
-                ))}
-              </div>
+        {/* Account block — always visible: name, with Admin · Sign out beneath */}
+        <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
+          <span className="max-w-[110px] truncate text-[12px] text-[var(--muted)] sm:max-w-[180px]" title={email}>{email}</span>
+          <div className="flex items-center gap-2">
+            {isAdmin ? (
+              <Link href="/admin/users" className="rounded border border-[var(--gold)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--gold)] hover:bg-[var(--panel-2)]">
+                Admin
+              </Link>
             ) : null}
-          </div>
-
-          <div className="relative">
-            <button
-              onClick={() => setMenu(menu === "account" ? null : "account")}
-              aria-haspopup="true"
-              aria-expanded={menu === "account"}
-              className={`${tabBase} ${tabOff} flex items-center gap-1`}
-            >
-              Account <Caret />
-            </button>
-            {menu === "account" ? (
-              <div className="absolute right-0 top-full mt-1 w-60 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-2 shadow-xl">
-                <p className="truncate px-2 pb-2 text-[12px] text-[var(--muted)]" title={email}>{email}</p>
-                {isAdmin ? (
-                  <Link href="/admin/users" onClick={() => setMenu(null)} className="block rounded px-3 py-2 text-[13px] font-semibold text-[var(--gold)] transition-colors hover:bg-[var(--panel-2)]">
-                    Admin
-                  </Link>
-                ) : null}
-                <Link href="/account" onClick={() => setMenu(null)} className="block rounded px-3 py-2 text-[13px] font-semibold text-[var(--muted)] transition-colors hover:bg-[var(--panel-2)] hover:text-[var(--text)]">
-                  Account
-                </Link>
-                <form action={logout}>
-                  <button className="mt-1 block w-full rounded px-3 py-2 text-left text-[13px] font-semibold text-[var(--muted)] transition-colors hover:bg-[var(--panel-2)] hover:text-[var(--text)]">
-                    Sign out
-                  </button>
-                </form>
-              </div>
-            ) : null}
+            <form action={logout}>
+              <button className="rounded border border-[var(--border)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]">
+                Sign out
+              </button>
+            </form>
           </div>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMenu(menu === "mobile" ? null : "mobile")}
-          aria-label="Menu"
-          aria-expanded={menu === "mobile"}
-          className="ml-auto flex items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 md:hidden"
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-            <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
-          </svg>
-        </button>
       </div>
 
       {/* Mobile panel */}
       {menu === "mobile" ? (
         <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 md:hidden">
           <div className="flex gap-2">
-            <button className={`${tabBase} flex-1 ${onDashboard && view === "characters" ? tabOn : tabOff} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
-            <button className={`${tabBase} flex-1 ${onDashboard && view === "adventures" ? tabOn : tabOff} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>
+            <button className={`${item} flex-1 ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
+            <button className={`${item} flex-1 ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>
           </div>
 
           <p className="mt-3 px-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Compendium</p>
@@ -259,6 +236,11 @@ export default function SiteNav({
                 {l.label}
               </Link>
             ))}
+            {homebrewHref ? (
+              <Link href={homebrewHref} onClick={() => setMenu(null)} className="rounded border border-[var(--border)] px-3 py-2 text-[12px] font-semibold text-[var(--muted)] hover:text-[var(--text)]">
+                Homebrew
+              </Link>
+            ) : null}
           </div>
 
           <p className="mt-3 px-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Tools</p>
@@ -268,16 +250,6 @@ export default function SiteNav({
                 {t.label}
               </a>
             ))}
-          </div>
-
-          <div className="mt-3 flex items-center justify-between gap-2 border-t border-[var(--border)] pt-3">
-            <span className="truncate text-[12px] text-[var(--muted)]">{email}</span>
-            <div className="flex shrink-0 items-center gap-2">
-              {isAdmin ? <Link href="/admin/users" onClick={() => setMenu(null)} className="rounded border border-[var(--gold)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--gold)]">Admin</Link> : null}
-              <form action={logout}>
-                <button className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] hover:border-[var(--muted)]">Sign out</button>
-              </form>
-            </div>
           </div>
         </div>
       ) : null}

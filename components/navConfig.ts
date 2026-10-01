@@ -124,7 +124,30 @@ export function compendiumFor(system: SystemKey): NavLink[] {
   return SYSTEMS_WITHOUT_RULEBOOKS.includes(system) ? base : [...base, RULEBOOKS_LINK];
 }
 
-// Right-aligned Tools group. Order as requested: OBR (the Owlbear Rodeo setup,
+// Per-system "My Homebrew" hub. Shadowdark's lives at the top-level /homebrew;
+// the others at /<system>/homebrew. JLU and Ghostbusters have no homebrew hub
+// yet, so they get no Homebrew nav link.
+export const HOMEBREW: Partial<Record<SystemKey, string>> = {
+  SD: "/homebrew",
+  DCC: "/dcc/homebrew",
+  ACE: "/ace/homebrew",
+  KOB: "/kob/homebrew",
+  NIM: "/nimble/homebrew",
+  SW: "/sw/homebrew",
+  DND: "/dnd/homebrew",
+  D62E: "/d62e/homebrew",
+  ICRPG: "/icrpg/homebrew",
+  CO: "/candela/homebrew",
+  YZE: "/yze/homebrew",
+  MMRPG: "/mmrpg/homebrew",
+};
+
+export function homebrewFor(system: SystemKey): string | null {
+  return HOMEBREW[system] ?? null;
+}
+
+// The Tools group. Shown as individual nav links (not a dropdown), since they
+// never change by system. Order as requested: OBR (the Owlbear Rodeo setup,
 // still served at /vtt), Token Maker, Map Maker, Campaigns, GM Screen.
 export const TOOLS_NAV: NavLink[] = [
   { href: "/vtt", label: "OBR" },

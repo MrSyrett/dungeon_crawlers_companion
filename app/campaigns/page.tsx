@@ -331,23 +331,6 @@ export default async function CampaignsPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
-        <div>
-          <h1 className="font-display text-3xl font-black tracking-wide">Campaigns</h1>
-          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-            {campaigns.length === 0
-              ? "None yet"
-              : `${campaigns.length} campaign${campaigns.length === 1 ? "" : "s"} you own`}
-          </p>
-        </div>
-        <Link
-          href="/dashboard"
-          className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-        >
-          ← Home
-        </Link>
-      </header>
-
       <section className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--gold)]">
           Create a campaign

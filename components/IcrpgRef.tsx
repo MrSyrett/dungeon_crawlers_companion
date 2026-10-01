@@ -45,16 +45,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
 
 export function IcrpgHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
-      <div>
-        <h1 className="font-display text-3xl font-black tracking-wide">{title}</h1>
-        <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--icrpg)] sm:text-[11px] sm:tracking-[0.35em]">{subtitle}</p>
-      </div>
-      <div className="flex shrink-0 gap-2">
-        <Link href="/icrpg/homebrew" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--icrpg)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">My Homebrew</Link>
-        <Link href="/dashboard" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">← Home</Link>
-      </div>
-    </header>
+    null
   );
 }
 
