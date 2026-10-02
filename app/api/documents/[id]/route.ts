@@ -44,7 +44,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
   const { id } = await ctx.params;
   const body = (await req.json().catch(() => null)) as
-    | { data?: unknown; title?: unknown }
+    | { data?: unknown; title?: unknown; baseRev?: unknown }
     | null;
   if (!body || typeof body !== "object") {
     return new Response("Bad request", { status: 400 });
@@ -52,12 +52,24 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
   // Select only what the checks below read — without the select this pulled the
   // document's entire `data` blob (potentially MBs) out of the DB on every
-  // autosave just to verify ownership.
+  // autosave just to verify ownership. updatedAt is the optimistic-concurrency
+  // stamp used to refuse a stale overwrite (see below).
   const existing = await prisma.document.findFirst({
     where: { id, userId: user.id },
-    select: { id: true, tool: true, title: true },
+    select: { id: true, tool: true, title: true, updatedAt: true },
   });
   if (!existing) return new Response("Not found", { status: 404 });
+
+  // Optimistic concurrency: a data write carries the version it was based on
+  // (baseRev = the updatedAt it loaded). If the stored version has moved on,
+  // another tab or device saved in the meantime — refuse rather than clobber it,
+  // and hand back the current version so the client can warn and reload. This is
+  // what stops a stale second tab from erasing a session's progress. Title-only
+  // writes and older clients (no baseRev) are unaffected.
+  const baseRev = typeof body.baseRev === "number" ? body.baseRev : undefined;
+  if (body.data !== undefined && baseRev !== undefined && existing.updatedAt.getTime() !== baseRev) {
+    return Response.json({ conflict: true, rev: existing.updatedAt.getTime() }, { status: 409 });
+  }
 
   const update: { data?: object; title?: string; linkedCampaignId?: string | null } = {};
   if (body.data !== undefined) update.data = body.data as object;
@@ -82,8 +94,8 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
   }
 
-  await prisma.document.update({ where: { id }, data: update });
-  return Response.json({ ok: true });
+  const saved = await prisma.document.update({ where: { id }, data: update, select: { updatedAt: true } });
+  return Response.json({ ok: true, rev: saved.updatedAt.getTime() });
 }
 
 // Narrows an extracted campaign id to one that still exists, so we never try to

@@ -16,14 +16,22 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const doc = await prisma.document.findFirst({
     where: { id, userId: owner.id, tool: { in: CHARACTER_TOOLS } },
-    select: { id: true, tool: true },
+    select: { id: true, tool: true, updatedAt: true },
   });
   if (!doc) return new Response("Not found", { status: 404 });
 
   const body = (await req.json().catch(() => null)) as
-    | { data?: unknown; title?: unknown }
+    | { data?: unknown; title?: unknown; baseRev?: unknown }
     | null;
   if (!body || typeof body !== "object") return new Response("Bad request", { status: 400 });
+
+  // Optimistic concurrency — same guard as /api/documents/[id]: refuse a data
+  // write whose base version is stale (another tab/device saved since) so it
+  // can't clobber newer progress. Title-only / older clients are unaffected.
+  const baseRev = typeof body.baseRev === "number" ? body.baseRev : undefined;
+  if (body.data !== undefined && baseRev !== undefined && doc.updatedAt.getTime() !== baseRev) {
+    return Response.json({ conflict: true, rev: doc.updatedAt.getTime() }, { status: 409 });
+  }
 
   // `data` is typed as `object` to satisfy Prisma's JSON input.
   const update: { data?: object; title?: string; linkedCampaignId?: string | null } = {};
@@ -38,10 +46,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (update.data && isToolId(doc.tool) && CHARACTER_TOOL_IDS.includes(doc.tool)) {
     update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
   }
-  if (!Object.keys(update).length) return Response.json({ ok: true });
+  if (!Object.keys(update).length) return Response.json({ ok: true, rev: doc.updatedAt.getTime() });
 
-  await prisma.document.update({ where: { id }, data: update });
-  return Response.json({ ok: true });
+  const saved = await prisma.document.update({ where: { id }, data: update, select: { updatedAt: true } });
+  return Response.json({ ok: true, rev: saved.updatedAt.getTime() });
 }
 
 // Narrows an extracted campaign id to one that still exists, so we never write a

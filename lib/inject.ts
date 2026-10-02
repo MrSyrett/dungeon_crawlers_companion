@@ -46,6 +46,17 @@ const SHIM = `
 
   var saving = false, queued = false;
   var lastTitle = null;
+  // Optimistic concurrency. curRev is the version this tab is based on (the
+  // sheet's updatedAt at load, then whatever the server reports after each of
+  // OUR saves). We send it with every data save; the server refuses the write if
+  // the stored version moved on (another tab or device saved in the meantime),
+  // so a stale tab closing can never clobber newer progress. lastSavedJson lets
+  // us skip a save that wouldn't change anything — so an untouched tab, which is
+  // exactly how sheets used to get wiped, never even sends a write.
+  var curRev = (typeof cfg.rev === "number") ? cfg.rev : null;
+  var lastSavedJson = null;
+  try { lastSavedJson = JSON.stringify(cfg.state || {}); } catch (e) {}
+  var conflicted = false;
 
   // NOTE: fetch keepalive caps the request body at 64KB. Anything bigger (a
   // sheet with a portrait, a prep doc with map images) is rejected outright, so
@@ -65,19 +76,59 @@ const SHIM = `
     });
   }
 
+  // A fixed warning bar shown once this tab's saves start being refused because
+  // the sheet changed somewhere else. It offers a reload (which pulls the current
+  // version) and, from here on, this tab stops trying to save so it can't fight
+  // the other copy.
+  function showConflict() {
+    if (document.getElementById("dd-conflict")) return;
+    var bar = document.createElement("div");
+    bar.id = "dd-conflict";
+    bar.setAttribute("role", "alert");
+    bar.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:2147483647;background:#7a1f1a;color:#fff;font:600 13px/1.4 system-ui,sans-serif;padding:10px 14px;display:flex;gap:12px;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.4)";
+    var msg = document.createElement("span");
+    msg.textContent = "This sheet was changed in another tab or on another device. To avoid overwriting that, changes here are no longer being saved.";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Reload latest";
+    btn.style.cssText = "flex:0 0 auto;background:#fff;color:#7a1f1a;border:0;border-radius:5px;padding:6px 12px;font:600 12px system-ui,sans-serif;cursor:pointer";
+    btn.onclick = function () { try { window.location.reload(); } catch (e) {} };
+    bar.appendChild(msg); bar.appendChild(btn);
+    (document.body || document.documentElement).appendChild(bar);
+  }
+
+  // Apply the version the server reports after a successful write, so this tab
+  // stays current and its next save isn't flagged as stale against its own work.
+  function applyRev(r) {
+    try {
+      return r.json().then(function (j) { if (j && typeof j.rev === "number") curRev = j.rev; }, function () {});
+    } catch (e) { return; }
+  }
+
   function save(data) {
+    if (conflicted) return;                 // refused once — don't keep fighting
+    var json;
+    try { json = JSON.stringify(data); } catch (e) { json = null; }
+    // Nothing actually changed since our last save/load → don't write at all.
+    if (json !== null && json === lastSavedJson) return;
     if (saving) { queued = data; return; }
     saving = true;
+    var body = { data: data };
+    if (curRev !== null) body.baseRev = curRev;
     // keepalive lets the request survive navigation back to the dashboard
-    patch({ data: data }, true)
+    patch(body, true)
       .then(function(r) {
         if (r.status === 401) { return; }
+        if (r.status === 409) { conflicted = true; showConflict(); return; }
         if (!r.ok) throw new Error(r.status);
+        if (json !== null) lastSavedJson = json;
+        return applyRev(r);
       })
       .catch(function(e) {})
       .finally(function() {
         saving = false;
-        if (queued) { var d = queued; queued = null; save(d); }
+        if (queued && !conflicted) { var d = queued; queued = null; save(d); }
+        else { queued = null; }
       });
   }
 
@@ -86,9 +137,9 @@ const SHIM = `
   // the title hasn't changed, and sent with keepalive so it survives unload.
   function saveTitle(title) {
     title = (title || "").trim().slice(0, 120);
-    if (!title || title === lastTitle) return;
+    if (!title || title === lastTitle || conflicted) return;
     lastTitle = title;
-    patch({ title: title }, true).catch(function(e) {});
+    patch({ title: title }, true).then(function (r) { if (r && r.ok) return applyRev(r); }, function () {}).catch(function(e) {});
     var label = document.querySelector("#dd-chrome .dd-title");
     if (label) label.textContent = title;
     try { document.title = title; } catch (e) {}
@@ -145,6 +196,9 @@ export function renderToolPage(
     def: ToolDef;
     data: unknown;
     title: string;
+    /** Optimistic-concurrency stamp (document updatedAt in ms) sent back with
+     *  each save so the server can refuse a stale overwrite. */
+    rev?: number;
     /** Set when the page is framed by a VTT: saves authenticate with this. */
     vttToken?: string;
     /** Hide the editing sidebar/chrome and serve a read-only preview. */
@@ -158,6 +212,7 @@ export function renderToolPage(
     docId: opts.docId,
     keys: opts.def.keys,
     state: opts.data ?? {},
+    ...(typeof opts.rev === "number" ? { rev: opts.rev } : {}),
     ...(opts.vttToken ? { vttToken: opts.vttToken } : {}),
   };
   // The tool templates are standalone HTML, not rendered by the app's layout,

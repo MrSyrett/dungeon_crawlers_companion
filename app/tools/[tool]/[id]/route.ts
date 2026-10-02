@@ -32,6 +32,10 @@ export async function GET(req: Request, ctx: Ctx) {
     def,
     data: doc.data,
     title: doc.title,
+    // Optimistic-concurrency stamp: the sheet's updatedAt at load time. The save
+    // shim sends it back, and the server refuses a write whose base is stale —
+    // so a second (older) tab closing can't overwrite newer progress.
+    rev: doc.updatedAt.getTime(),
     previewOnly,
     embed,
   });
