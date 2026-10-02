@@ -2,8 +2,8 @@
 
 // Token Maker — a client-side canvas tool for turning an uploaded image into a
 // round VTT token with a colorized ring. No server round-trip: everything runs
-// in the browser and the finished token is offered as a transparent PNG
-// download.
+// in the browser and the finished token is offered as a transparent WebP
+// download (PNG fallback on browsers without canvas WebP encoding).
 //
 // Ring styles (all driven by a single base color; the disc behind the art is
 // always filled with that same color so the background matches the ring):
@@ -363,6 +363,9 @@ export default function TokenMaker() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragState = useRef<{ startX: number; startY: number; ox: number; oy: number } | null>(null);
+  // Active touch/mouse pointers for multi-touch pinch-zoom + pan.
+  const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchState = useRef<{ dist: number; zoom: number; mx: number; my: number; ox: number; oy: number } | null>(null);
 
   const params = useMemo<DrawParams>(
     () => ({ style, color, ringFrac, above, zoom, offsetX: offset.x, offsetY: offset.y }),
@@ -409,32 +412,72 @@ export default function TokenMaker() {
     return () => window.removeEventListener("paste", onPaste);
   }, [loadFile]);
 
-  // Pan with pointer drag.
+  // Drag to pan (one finger / mouse); pinch with two fingers to zoom + pan.
+  // Both routes go through pointer events so touch and mouse share one path.
+  const twoPointDist = () => {
+    const pts = Array.from(pointers.current.values());
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  };
+  const twoPointMid = () => {
+    const pts = Array.from(pointers.current.values());
+    return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+  };
   const onPointerDown = (e: React.PointerEvent) => {
     if (!image) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    dragState.current = { startX: e.clientX, startY: e.clientY, ox: offset.x, oy: offset.y };
-    setDragging(true);
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size >= 2) {
+      // Second finger down → start a pinch; freeze the current zoom/offset + the
+      // starting finger spread and midpoint to measure against.
+      const m = twoPointMid();
+      pinchState.current = { dist: twoPointDist() || 1, zoom, mx: m.x, my: m.y, ox: offset.x, oy: offset.y };
+      dragState.current = null;
+      setDragging(false);
+    } else {
+      dragState.current = { startX: e.clientX, startY: e.clientY, ox: offset.x, oy: offset.y };
+      setDragging(true);
+    }
   };
   const onPointerMove = (e: React.PointerEvent) => {
-    const st = dragState.current;
-    if (!st) return;
+    if (!pointers.current.has(e.pointerId)) return;
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     // Normalize by the canvas's actual on-screen size so panning stays 1:1 even
     // when the preview is scaled down on small screens.
     const rect = canvasRef.current?.getBoundingClientRect();
     const w = rect?.width || PREVIEW_SIZE;
     const h = rect?.height || PREVIEW_SIZE;
+    const ps = pinchState.current;
+    if (pointers.current.size >= 2 && ps) {
+      // Pinch: zoom by the change in finger spread, and pan by the change in the
+      // fingers' midpoint so the gesture tracks under your fingers.
+      const ratio = twoPointDist() / ps.dist;
+      setZoom(Math.min(5, Math.max(0.5, ps.zoom * ratio)));
+      const m = twoPointMid();
+      setOffset({ x: ps.ox + (m.x - ps.mx) / w, y: ps.oy + (m.y - ps.my) / h });
+      return;
+    }
+    const st = dragState.current;
+    if (!st) return;
     const dx = (e.clientX - st.startX) / w;
     const dy = (e.clientY - st.startY) / h;
     setOffset({ x: st.ox + dx, y: st.oy + dy });
   };
   const onPointerUp = (e: React.PointerEvent) => {
-    dragState.current = null;
-    setDragging(false);
+    pointers.current.delete(e.pointerId);
     try {
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
       /* pointer already released */
+    }
+    if (pointers.current.size < 2) pinchState.current = null;
+    if (pointers.current.size === 0) {
+      dragState.current = null;
+      setDragging(false);
+    } else {
+      // A finger lifted out of a pinch — hand control back to the remaining one
+      // so a single-finger pan continues seamlessly.
+      const only = Array.from(pointers.current.values())[0];
+      dragState.current = { startX: only.x, startY: only.y, ox: offset.x, oy: offset.y };
     }
   };
 
@@ -521,6 +564,7 @@ export default function TokenMaker() {
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
             onWheel={onWheel}
             className={`absolute inset-0 h-full w-full touch-none select-none ${
               image ? (dragging ? "cursor-grabbing" : "cursor-grab") : "cursor-default"
@@ -534,7 +578,7 @@ export default function TokenMaker() {
             >
               <span className="font-display text-lg text-[var(--text)]">Drop an image here</span>
               <span className="text-[12px] uppercase tracking-[0.15em] text-[var(--muted)]">
-                or click to browse · paste works too
+                or click to browse
               </span>
             </button>
           ) : null}
@@ -543,16 +587,9 @@ export default function TokenMaker() {
         <div className="flex w-full items-center justify-center gap-2">
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className={`${btnBase} flex-1 border-[var(--border)] bg-[var(--panel)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]`}
-          >
-            {image ? "Replace image" : "Upload image"}
-          </button>
-          <button
-            type="button"
             onClick={reset}
             disabled={!image}
-            className={`${btnBase} border-[var(--border)] bg-[var(--panel)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] disabled:cursor-not-allowed disabled:opacity-40`}
+            className={`${btnBase} flex-1 border-[var(--border)] bg-[var(--panel)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] disabled:cursor-not-allowed disabled:opacity-40`}
           >
             Recenter
           </button>
@@ -594,7 +631,7 @@ export default function TokenMaker() {
         </div>
 
         <div>
-          <ControlHeading>Ring color</ControlHeading>
+          <ControlHeading>Color</ControlHeading>
           <div className="flex flex-wrap items-center gap-2">
             {SWATCHES.map((sw) => (
               <button
@@ -624,11 +661,6 @@ export default function TokenMaker() {
               <span className="font-mono text-[12px] uppercase text-[var(--muted)]">{color}</span>
             </label>
           </div>
-          <p className="mt-2 text-[12px] text-[var(--muted)]">
-            {style === "steelglass"
-              ? "The metal bezel stays brushed steel; this color tints the recessed glass behind your art."
-              : "The disc behind your art is filled with this same color, so the background always matches the ring."}
-          </p>
         </div>
 
         <div>
@@ -678,23 +710,6 @@ export default function TokenMaker() {
           </div>
         )}
 
-        <div>
-          <ControlHeading>
-            Zoom <Value>{zoom.toFixed(2)}×</Value>
-          </ControlHeading>
-          <Slider
-            min={0.5}
-            max={5}
-            step={0.01}
-            value={zoom}
-            onChange={setZoom}
-            disabled={!image}
-          />
-          <p className="mt-2 text-[12px] text-[var(--muted)]">
-            Drag the token to reposition · scroll to zoom.
-          </p>
-        </div>
-
         <div className="mt-1 border-t border-[var(--border)] pt-6">
           <button
             type="button"
@@ -702,11 +717,8 @@ export default function TokenMaker() {
             disabled={!image}
             className="w-full rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-3 text-[13px] font-bold uppercase tracking-[0.15em] text-[#141208] transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]"
           >
-            Download PNG · {EXPORT_SIZE}px
+            Download WebP · {EXPORT_SIZE}px
           </button>
-          <p className="mt-2 text-center text-[12px] text-[var(--muted)]">
-            Transparent outside the ring — drops straight onto a VTT map.
-          </p>
         </div>
       </div>
     </div>
