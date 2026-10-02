@@ -199,11 +199,17 @@
   }
   function openSheet(c) { $("sheet-title").textContent = c.title || "Character"; $("sheet-frame").src = (V.toolBase || "/tools") + "/" + encodeURIComponent(c.tool) + "/" + encodeURIComponent(c.id) + "?embed=1"; $("sheetpop").hidden = false; }
   bind("sheet-close", function () { $("sheetpop").hidden = true; $("sheet-frame").src = "about:blank"; });
-  bind("sheet-mode", function () {
-    var pop = $("sheetpop"), wide = pop.classList.toggle("wide");
-    this.innerHTML = ico(wide ? "mobile" : "desktop", 16);
-    this.title = wide ? "Switch to mobile size" : "Switch to desktop size";
-  });
+  // Desktop / Mobile are always-present RESET buttons: each snaps the sheet back
+  // to that preset size. Clearing the inline geometry (set by dragging/resizing)
+  // lets the CSS preset rule (.vtt-sheetpop vs .vtt-sheetpop.wide) govern again.
+  function sheetReset(wide) {
+    var pop = $("sheetpop"); if (!pop) return;
+    pop.style.left = pop.style.top = pop.style.right = pop.style.width = pop.style.height = "";
+    pop.classList.toggle("wide", !!wide);
+  }
+  bind("sheet-desktop", function () { sheetReset(true); });
+  bind("sheet-mobile", function () { sheetReset(false); });
+  makeResizable($("sheetpop"), $("sheet-resize"));
   makeDraggable($("sheetpop"), $("sheet-head"));
 
   // ---- doors ----------------------------------------------------------------
@@ -987,11 +993,36 @@
       "</div></div>";
   }
   function tabBtn(name, icon, label, on) { return '<button class="vtt-tab' + (on ? " on" : "") + '" data-tab="' + name + '">' + ico(icon, 16) + "<span>" + label + "</span></button>"; }
-  function sheetPop() { return '<div id="sheetpop" class="vtt-sheetpop" hidden><div class="vtt-sheet-head" id="sheet-head"><span id="sheet-title">Character</span><span style="flex:1"></span><button class="vtt-mini" id="sheet-mode" title="Switch to desktop size">' + ico("desktop", 16) + '</button><button class="vtt-mini" id="sheet-close">' + ico("close", 16) + '</button></div><iframe id="sheet-frame" title="Character sheet"></iframe></div>'; }
+  function sheetPop() { return '<div id="sheetpop" class="vtt-sheetpop" hidden><div class="vtt-sheet-head" id="sheet-head"><span id="sheet-title">Character</span><span style="flex:1"></span><button class="vtt-mini" id="sheet-desktop" title="Reset to desktop size">' + ico("desktop", 16) + '</button><button class="vtt-mini" id="sheet-mobile" title="Reset to mobile size">' + ico("mobile", 16) + '</button><button class="vtt-mini" id="sheet-close">' + ico("close", 16) + '</button></div><iframe id="sheet-frame" title="Character sheet"></iframe><div class="vtt-sheet-resize" id="sheet-resize" title="Drag to resize"></div></div>'; }
 
   function bind(id, fn) { var el = $(id); if (el) el.onclick = fn; }
   function fbtn(id, fn, on) { var el = $(id); if (!el) return; el.onclick = function () { var v = !el.classList.contains("on"); el.classList.toggle("on", v); el.setAttribute("aria-checked", v ? "true" : "false"); if (id === "f-reveal") { el.querySelector(".vtt-frow-i").innerHTML = ico(v ? "eye" : "eyeoff", 18); } fn(v); }; }
   function makeDraggable(box, handle) { var d = null; handle.addEventListener("pointerdown", function (e) { if (e.target.closest("button")) return; d = { x: e.clientX, y: e.clientY, l: box.offsetLeft, t: box.offsetTop }; handle.setPointerCapture(e.pointerId); }); handle.addEventListener("pointermove", function (e) { if (!d) return; box.style.left = (d.l + e.clientX - d.x) + "px"; box.style.top = (d.t + e.clientY - d.y) + "px"; box.style.right = "auto"; }); handle.addEventListener("pointerup", function () { d = null; }); }
+  // Free-resize from the bottom-right grip. We first pin the box to its current
+  // left/top (it's right-anchored by default) so the top-left corner stays put
+  // and the bottom-right follows the grip. The iframe is made click-through while
+  // dragging so a fast drag over the sheet doesn't get swallowed by it. The
+  // Desktop/Mobile buttons clear this inline size to return to a preset.
+  function makeResizable(box, handle) {
+    if (!box || !handle) return;
+    var r = null, frame = box.querySelector("iframe");
+    handle.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      box.style.left = box.offsetLeft + "px"; box.style.top = box.offsetTop + "px"; box.style.right = "auto";
+      r = { x: e.clientX, y: e.clientY, w: box.offsetWidth, h: box.offsetHeight };
+      if (frame) frame.style.pointerEvents = "none";
+      try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    handle.addEventListener("pointermove", function (e) {
+      if (!r) return;
+      var maxW = window.innerWidth - box.offsetLeft - 8, maxH = window.innerHeight - box.offsetTop - 8;
+      box.style.width = Math.max(300, Math.min(r.w + (e.clientX - r.x), maxW)) + "px";
+      box.style.height = Math.max(220, Math.min(r.h + (e.clientY - r.y), maxH)) + "px";
+    });
+    function end() { r = null; if (frame) frame.style.pointerEvents = ""; }
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+  }
 
   function toggleSide(force) { var el = $("vtt-side"); if (!el) return; var show = force == null ? el.hidden : force; el.hidden = !show; mount.classList.toggle("side-open", show); if (show) selectTab(tab()); }
 
@@ -1085,6 +1116,8 @@
       ".vtt-sheetpop.wide{width:min(1120px,96vw);height:92vh;top:4vh;right:2vw;left:auto}",
       ".vtt-sheet-head{display:flex;align-items:center;gap:6px;padding:9px 12px;background:#1b212a;cursor:move;font-weight:700}",
       ".vtt-sheetpop iframe{border:0;flex:1;width:100%;background:#fff}",
+      ".vtt-sheet-resize{position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:nwse-resize;z-index:5;touch-action:none}",
+      ".vtt-sheet-resize::after{content:'';position:absolute;right:3px;bottom:3px;width:9px;height:9px;border-right:2px solid #6b7686;border-bottom:2px solid #6b7686}",
       ".vtt-modal{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(4,5,7,.55)}",
       ".vtt-modal-box{width:min(460px,94vw);max-height:90vh;background:#14181e;border:1px solid #2a323d;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}",
       ".vtt-modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #2a323d;font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#c8a24a;font-size:15px}",
