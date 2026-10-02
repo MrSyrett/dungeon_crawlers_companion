@@ -120,13 +120,10 @@ export default function DashboardDocs({
   const panel = panels[system];
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-5">
-      <div className="mb-5 flex items-baseline justify-between gap-3">
+      <div className="mb-5">
         <h2 className="font-display text-xl font-black tracking-wide sm:text-2xl">
           {systemName(system)}
         </h2>
-        <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-          {view === "characters" ? "Characters" : "Adventures"}
-        </span>
       </div>
       <DocList kind={view} panel={view === "characters" ? panel?.character : panel?.session} />
     </div>
