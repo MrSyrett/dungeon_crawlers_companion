@@ -5863,7 +5863,7 @@ function initDocTool(root) {
     back.onclick = (e) => { e.preventDefault(); popInVtt(); };
     const reopen = document.createElement('button');
     reopen.type = 'button'; reopen.className = 'btn small ghost'; reopen.textContent = 'Re-open window';
-    reopen.onclick = (e) => { e.preventDefault(); openPopWin(url); };
+    reopen.onclick = (e) => { e.preventDefault(); openPopWin(url + (url.includes('?') ? '&' : '?') + 'popout=1'); };
     box.appendChild(back); box.appendChild(reopen);
     vttWrap.appendChild(box);
     vttWrap.style.display = 'flex';
@@ -5878,41 +5878,70 @@ function initDocTool(root) {
       setTimeout(() => { try { n.remove(); } catch(e) {} }, 6000);
     } catch(e) {}
   }
-  // Open the tabletop in its own window. Returns true only if a real window was
-  // created — some shells (a pop-up blocker, or an app wrapper that refuses
-  // window.open) return null, and the caller must NOT tear the in-page host down
-  // in that case or players are left with no host at all.
+  // --- pop-out handshake ------------------------------------------------------
+  // window.open() can't reliably report success in the desktop shell (it returns
+  // null even when a real window opened), so we don't trust its return value to
+  // decide whether to tear the embed down. Instead the popped-out /play page
+  // announces itself over a same-origin BroadcastChannel ("alive"/"bye"); we use
+  // that to confirm the hand-off and to re-embed when the pop-out closes. There is
+  // therefore never a silent second host sharing the GM Screen's Maps pane.
+  function popoutChan(url) {
+    const m = (url || '').match(/\/play\/([^/?#]+)/);
+    return m ? 'dcc-vtt-popout:' + decodeURIComponent(m[1]) : null;
+  }
+  function closePopoutChan() {
+    if(vttPop.handoffTimer) { try { clearTimeout(vttPop.handoffTimer); } catch(e) {} vttPop.handoffTimer = null; }
+    if(vttPop.bc) { try { vttPop.bc.close(); } catch(e) {} vttPop.bc = null; }
+  }
   function openPopWin(url) {
-    try { if(vttPop.popWin && !vttPop.popWin.closed) { vttPop.popWin.focus(); return true; } } catch(e) {}
-    let w = null;
-    try { w = window.open(url, 'gm-vtt-popout', 'width=1500,height=950,menubar=no,toolbar=no'); } catch(e) { w = null; }
-    vttPop.popWin = w || null;
-    return !!w;
+    try { if(vttPop.popWin && !vttPop.popWin.closed) { vttPop.popWin.focus(); return; } } catch(e) {}
+    try { vttPop.popWin = window.open(url, 'gm-vtt-popout', 'width=1500,height=950,menubar=no,toolbar=no') || null; }
+    catch(e) { vttPop.popWin = null; }
   }
   function popOutVtt() {
-    const url = vttWrap ? vttWrap.dataset.url : '';
-    if(!url) return;
-    // Open the pop-out FIRST, and only hand the game off to it once it actually
-    // opened. If the window is blocked, keep hosting here so players never lose
-    // their connection.
-    const opened = openPopWin(url);
-    if(!opened) {
-      vttPop.popped = false;
-      showVtt(url); // make sure a live embed host is running here
-      vttPopNote('Couldn’t open the pop-out window (it was blocked). The map stays here and players are still connected.');
-      return;
-    }
-    // The pop-out window is now the one and only host — kill every in-page embed
-    // (across all Maps nodes) so it can't race the popped-out window.
+    const embedUrl = vttWrap ? vttWrap.dataset.url : '';
+    if(!embedUrl) return;
+    const popUrl = embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'popout=1';
+    vttPop.popUrl = embedUrl; // the plain URL we re-embed when the pop-out comes back
+    // ONE host only: tear every in-page embed down immediately so the pop-out is
+    // the sole host the moment it comes up (no overlap, no ping-pong).
     vttPop.popped = true;
     dccKillVttEmbeds(null);
-    buildPopped(url);
+    buildPopped(embedUrl);
+    openPopWin(popUrl);
+    // Listen for the pop-out's heartbeat so we can (a) confirm it actually opened
+    // and (b) re-embed automatically when it closes.
+    closePopoutChan();
+    const chan = popoutChan(embedUrl);
+    if(chan && typeof BroadcastChannel !== 'undefined') {
+      try {
+        vttPop.aliveSeen = false;
+        vttPop.bc = new BroadcastChannel(chan);
+        vttPop.bc.onmessage = (e) => {
+          const t = e && e.data && e.data.t;
+          if(t === 'alive') { vttPop.aliveSeen = true; if(vttPop.handoffTimer) { clearTimeout(vttPop.handoffTimer); vttPop.handoffTimer = null; } }
+          else if(t === 'bye') { popInVtt(); }
+        };
+        // Failsafe: if the pop-out never reports in (blocked window, or it couldn't
+        // open), re-embed here so players are never left without a host.
+        vttPop.handoffTimer = setTimeout(() => {
+          vttPop.handoffTimer = null;
+          if(!vttPop.aliveSeen) {
+            closePopoutChan();
+            popInVtt();
+            vttPopNote('Couldn’t open the pop-out window. The map stays here and players are still connected.');
+          }
+        }, 5000);
+      } catch(e) { vttPop.bc = null; }
+    }
   }
   function popInVtt() {
+    closePopoutChan();
     vttPop.popped = false;
     try { if(vttPop.popWin && !vttPop.popWin.closed) vttPop.popWin.close(); } catch(e) {}
     vttPop.popWin = null;
-    showVtt(vttWrap ? vttWrap.dataset.url : '');
+    showVtt((vttWrap && vttWrap.dataset.url) || vttPop.popUrl || '');
+    try { renderMapTabs(); } catch(e) {}
   }
   function showVtt(url) {
     ensureVttWrap();
@@ -5921,12 +5950,10 @@ function initDocTool(root) {
     controls.style.display = 'none';
     filenameEl.textContent = 'Live VTT';
     url = url || '';
-    // If the GM popped it out and that window is still open, keep the placeholder
-    // rather than a duplicate embed.
-    let stillPopped = false;
-    try { stillPopped = vttPop.popped && vttPop.popWin && !vttPop.popWin.closed; } catch(e) { stillPopped = false; }
-    if(stillPopped) { vttWrap.dataset.url = url; buildPopped(url); return; }
-    vttPop.popped = false;
+    // If the GM popped it out, keep the placeholder rather than a duplicate embed.
+    // `popped` is the source of truth (window.open's handle is unreliable in the
+    // desktop shell); the pop-out's "bye" beacon flips it back off and re-embeds.
+    if(vttPop.popped) { vttWrap.dataset.url = url; buildPopped(url); return; }
     if(!url) {
       vttWrap.dataset.url = '';
       vttWrap.innerHTML = '<div style="margin:auto;text-align:center;color:var(--muted);font-size:13px;padding:24px">Link a campaign to open its tabletop here.</div>';
@@ -5944,6 +5971,7 @@ function initDocTool(root) {
   function hideVtt() { if(vttWrap) vttWrap.style.display = 'none'; }
   function destroyVtt() {
     if(vttRO) { try { vttRO.disconnect(); } catch(e) {} vttRO = null; }
+    closePopoutChan();
     try { if(vttPop.popWin && !vttPop.popWin.closed) vttPop.popWin.close(); } catch(e) {}
     vttPop.popWin = null; vttPop.popped = false;
     if(vttWrap) { vttWrap.style.display = 'none'; vttWrap.innerHTML = ''; vttWrap.dataset.url = ''; }
@@ -15518,6 +15546,18 @@ function init_party(root) {
   function render() {
     const any = chars.length > 0;
     emptyEl.style.display = any ? 'none' : 'flex';
+    // Keep a STABLE, deterministic order so the Monitor bubbles don't jump around.
+    // The campaign API hands sheets back in updatedAt-desc order, so an HP/notes
+    // edit during play would otherwise shuffle the party every sync. Sort by name
+    // (id as a tiebreak) once here; the hidden cards, the scraped roster and the
+    // bubbles all derive from this order, so everything stays put.
+    chars.sort((a, b) => {
+      const an = ((a.sheet && a.sheet.name) || '').toLowerCase();
+      const bn = ((b.sheet && b.sheet.name) || '').toLowerCase();
+      if(an < bn) return -1;
+      if(an > bn) return 1;
+      return (a.id || 0) - (b.id || 0);
+    });
     // The full cards stay in the DOM (hidden) — they're the source charPop()
     // clones into the popup and that publishRoster() scrapes for the roster.
     // What the GM actually sees is the bubble strip below.

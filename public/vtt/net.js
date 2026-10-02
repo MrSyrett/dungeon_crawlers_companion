@@ -439,12 +439,17 @@
     var moveTimer = {};
     board.on("token", function (t) {
       if (!t || t.ownerId !== me) return;
+      // Record our INTENDED position immediately, on every move event — not only
+      // when the (throttled) network send fires. Otherwise, in the ~40ms gap right
+      // after releasing a drag, a host echo of an earlier position can arrive while
+      // pendingMove still points at the previous send, match it, and yank the token
+      // back a step before the final send goes out — the rubber-band. Noting it now
+      // keeps pendingMove at the latest spot, so any older echo is held, not applied.
+      if (board.noteLocalMove) board.noteLocalMove(t.id, t.x, t.y);
       if (moveTimer[t.id]) return;
       moveTimer[t.id] = setTimeout(function () {
         moveTimer[t.id] = null;
         sendHost({ t: "moveToken", id: t.id, x: t.x, y: t.y, rot: t.rot });
-        // Remember what we sent so the host's echo doesn't rubber-band us back to a
-        // stale position before it catches up to this one.
         if (board.noteLocalMove) board.noteLocalMove(t.id, t.x, t.y);
       }, 40);
     });

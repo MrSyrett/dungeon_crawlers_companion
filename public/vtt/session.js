@@ -17,6 +17,13 @@
     try { if (new URLSearchParams(location.search).get("embed") === "1") return true; } catch (e) {}
     try { return window.self !== window.top; } catch (e) { return true; }
   })();
+  // True when THIS page is the pop-out window the GM Screen opened (via ?popout=1).
+  // The pop-out beacons its presence to the GM Screen so the screen can tear down
+  // its own in-page embed — exactly ONE host must run at a time, and in the desktop
+  // shell window.open can't report success, so the GM Screen waits for this beacon.
+  var POPOUT = (function () {
+    try { return new URLSearchParams(location.search).get("popout") === "1"; } catch (e) { return false; }
+  })();
   var mount = document.getElementById("vtt-root");
   if (!mount) return;
 
@@ -283,8 +290,24 @@
   // ---- live sync ------------------------------------------------------------
   function startNet() {
     var transport = window.VTTNet.httpTransport({ base: V.signalBase, campaignId: V.campaignId, me: V.userId });
-    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers }); renderPlayers([]); }
+    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers }); renderPlayers([]); startPopoutBeacon(); }
     else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: (chars[0] && chars[0].title) || V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn("waiting"); }
+  }
+  // When we're the GM's popped-out tabletop, tell the GM Screen we're alive (and
+  // say goodbye on close) over a same-origin BroadcastChannel. The GM Screen only
+  // tears down its in-page embed once it hears us, and re-embeds when we close —
+  // so there's always exactly one live host, never a silent duplicate.
+  function startPopoutBeacon() {
+    if (!POPOUT || typeof BroadcastChannel === "undefined") return;
+    try {
+      var bc = new BroadcastChannel("dcc-vtt-popout:" + V.campaignId);
+      var alive = function () { try { bc.postMessage({ t: "alive" }); } catch (e) {} };
+      alive();
+      var hb = setInterval(alive, 1500);
+      var bye = function () { try { clearInterval(hb); } catch (e) {} try { bc.postMessage({ t: "bye" }); } catch (e) {} try { bc.close(); } catch (e) {} };
+      window.addEventListener("pagehide", bye);
+      window.addEventListener("beforeunload", bye);
+    } catch (e) {}
   }
   // Player connection state: "waiting" | "connecting" | "connected" | "failed".
   var CONN_MSG = {
