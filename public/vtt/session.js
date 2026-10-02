@@ -231,10 +231,11 @@
     bind("m-load", function () { $("m-file").click(); });
     $("m-file").onchange = function (e) { var f = e.target.files[0]; if (!f) return; pb().loadFile(f).then(function () { seMapName(f.name); }, function (err) { say("<b>Load failed:</b> " + esc(err.message)); }); e.target.value = ""; };
     bind("m-url", function () {
-      var u = prompt("Direct image URL (must be a direct link to the image file, from a host that allows embedding — e.g. GitHub 'raw', a Discord CDN link, imgur direct):");
-      if (!u) return;
-      pb().loadImageMap(u.trim(), parseInt($("m-ppg").value, 10) || 70, "url").then(function () { seMapName("Linked image"); }, function () {
-        say("<b>Couldn’t load that link.</b> Either it isn’t a direct image URL, or the host doesn’t allow other sites to embed its images (CORS). Try a direct link from a host that does — or use <b>Upload</b>, which always works.");
+      vttPrompt("Direct image URL (a direct link to the image file, from a host that allows embedding — e.g. GitHub 'raw', a Discord CDN link, imgur direct)", "", function (u) {
+        if (!u) return;
+        pb().loadImageMap(u.trim(), parseInt($("m-ppg").value, 10) || 70, "url").then(function () { seMapName("Linked image"); }, function () {
+          say("<b>Couldn’t load that link.</b> Either it isn’t a direct image URL, or the host doesn’t allow other sites to embed its images (CORS). Try a direct link from a host that does — or use <b>Upload</b>, which always works.");
+        });
       });
     });
     $("m-ppg").onchange = function () { pb().setPpg(parseInt(this.value, 10) || 70); };
@@ -532,10 +533,21 @@
     };
     rd.readAsDataURL(f);
   }
+  // The label a placed token should carry. A token assigned to a player takes
+  // that player's character name (matching how it reads in the Players grid),
+  // falling back to the token's own name if the owner can't be resolved to a
+  // real name. GM-owned and unassigned tokens keep their own name.
+  function tokenLabel(lt) {
+    if (lt.ownerId && lt.ownerId !== V.userId) {
+      var pn = ownerLabel(lt.ownerId);
+      if (pn && pn !== "Player") return pn;
+    }
+    return lt.name;
+  }
   // Build an addToken() spec from a library token, applying all its presets.
   function tokenSpec(lt) {
     var g = board.state.map.ppg || 70, sz = lt.size || 1;
-    return { imageUrl: lt.imageUrl || null, name: lt.name, w: g * sz, h: g * sz, ownerId: lt.ownerId || null,
+    return { imageUrl: lt.imageUrl || null, name: tokenLabel(lt), w: g * sz, h: g * sz, ownerId: lt.ownerId || null,
       isViewer: !!lt.isViewer, vision: typeof lt.vision === "number" ? lt.vision : null, hidden: !!lt.hidden,
       ring: !!lt.ring, ringColor: lt.ringColor || null, color: lt.ownerId ? colorFor(lt.ownerId) : "#c8a24a" };
   }
@@ -673,7 +685,7 @@
     if (!party.length) { say("No party members yet — assign library tokens to players first."); return; }
     var onBoard = {};
     board.state.tokens.forEach(function (t) { if (t.ownerId) onBoard[t.ownerId + "|" + (t.name || "")] = true; });
-    var toPlace = party.filter(function (lt) { return !onBoard[lt.ownerId + "|" + (lt.name || "")]; });
+    var toPlace = party.filter(function (lt) { return !onBoard[lt.ownerId + "|" + tokenLabel(lt)]; });
     if (!toPlace.length) { say("The whole party is already on the map."); return; }
     var g = board.state.map.ppg || 70, sc = board.state.cam.scale;
     var cols = Math.ceil(Math.sqrt(toPlace.length)), first = null;
@@ -744,7 +756,7 @@
         // Quick per-token tweaks only — Rename, Size, Vision, Hide, Ring. Owner,
         // "sees fog", image, copy and delete all live in the library editor now,
         // and the sheet opens from the rail button or the C shortcut.
-        items.push({ label: "Rename…", onClick: function () { var n = prompt("Token name:", t.name || ""); if (n != null) { t.name = n; board.render(); if (net) net.pushTokens(); } } });
+        items.push({ label: "Rename…", onClick: function () { vttPrompt("Token name", t.name || "", function (n) { if (n != null) { t.name = n; board.render(); if (net) net.pushTokens(); } }); } });
         items.push({ label: "Size", sub: [1, 2, 3, 4].map(function (n) { return { label: n + "× (" + n + " sq)", onClick: function () { var g = board.state.map.ppg || 70; t.w = t.h = g * n; board.render(); if (net) net.pushTokens(); } }; }) });
         // Vision is how far this token sees; Unlimited = as far as walls allow. Fog
         // reveal itself is governed by FoW on/off + who owns/selects the token.
@@ -819,6 +831,36 @@
   }
   function outside(e) { if (menuEl && !menuEl.contains(e.target)) hideContext(); }
   function hideContext() { if (menuEl) { menuEl.remove(); menuEl = null; document.removeEventListener("pointerdown", outside, true); } }
+
+  // A small in-app text prompt. The native window.prompt() is unreliable when the
+  // board runs embedded (GM screen) or popped out — some frames suppress modal
+  // dialogs, so the box never appears and the click looks like it did nothing.
+  // This DOM modal works in every context and matches the board's styling. cb
+  // gets the entered string, or null if cancelled (same contract as prompt()).
+  function vttPrompt(title, value, cb) {
+    var wrap = document.createElement("div");
+    wrap.className = "vtt-modal";
+    wrap.innerHTML =
+      '<div class="vtt-modal-box" role="dialog" aria-modal="true">' +
+        '<div class="vtt-modal-head"><span class="vtt-pr-t"></span></div>' +
+        '<div class="vtt-modal-body"><div class="vtt-field"><input class="vtt-pr-i" type="text"></div></div>' +
+        '<div class="vtt-modal-foot"><button class="vtt-btn vtt-pr-cancel" type="button">Cancel</button><button class="vtt-btn primary vtt-pr-ok" type="button">OK</button></div>' +
+      "</div>";
+    wrap.querySelector(".vtt-pr-t").textContent = title || "";
+    var inp = wrap.querySelector(".vtt-pr-i");
+    inp.value = value == null ? "" : value;
+    function done(v) { wrap.remove(); document.removeEventListener("keydown", onKey, true); if (cb) cb(v); }
+    function onKey(e) {
+      if (e.key === "Escape") { e.preventDefault(); done(null); }
+      else if (e.key === "Enter") { e.preventDefault(); done(inp.value); }
+    }
+    wrap.querySelector(".vtt-pr-ok").addEventListener("click", function () { done(inp.value); });
+    wrap.querySelector(".vtt-pr-cancel").addEventListener("click", function () { done(null); });
+    wrap.addEventListener("pointerdown", function (e) { if (e.target === wrap) done(null); });
+    document.addEventListener("keydown", onKey, true);
+    document.body.appendChild(wrap);
+    setTimeout(function () { try { inp.focus(); inp.select(); } catch (_) {} }, 0);
+  }
 
   // ---- drag & drop ----------------------------------------------------------
   var stage = $("vtt-stage");
