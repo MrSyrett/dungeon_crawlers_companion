@@ -5868,18 +5868,44 @@ function initDocTool(root) {
     vttWrap.appendChild(box);
     vttWrap.style.display = 'flex';
   }
+  // A small self-dismissing note in the corner (there's no toast system here).
+  function vttPopNote(msg) {
+    try {
+      const n = document.createElement('div');
+      n.textContent = msg;
+      n.style.cssText = 'position:fixed;z-index:9999;left:50%;bottom:22px;transform:translateX(-50%);max-width:420px;background:#161922;border:1px solid var(--accent-dim,#2a4);color:var(--light,#e6ebf2);font-family:Montserrat,sans-serif;font-size:12px;line-height:1.45;padding:10px 14px;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.6);';
+      document.body.appendChild(n);
+      setTimeout(() => { try { n.remove(); } catch(e) {} }, 6000);
+    } catch(e) {}
+  }
+  // Open the tabletop in its own window. Returns true only if a real window was
+  // created — some shells (a pop-up blocker, or an app wrapper that refuses
+  // window.open) return null, and the caller must NOT tear the in-page host down
+  // in that case or players are left with no host at all.
   function openPopWin(url) {
-    try { if(vttPop.popWin && !vttPop.popWin.closed) { vttPop.popWin.focus(); return; } } catch(e) {}
-    vttPop.popWin = window.open(url, 'gm-vtt-popout', 'width=1500,height=950,menubar=no,toolbar=no');
+    try { if(vttPop.popWin && !vttPop.popWin.closed) { vttPop.popWin.focus(); return true; } } catch(e) {}
+    let w = null;
+    try { w = window.open(url, 'gm-vtt-popout', 'width=1500,height=950,menubar=no,toolbar=no'); } catch(e) { w = null; }
+    vttPop.popWin = w || null;
+    return !!w;
   }
   function popOutVtt() {
     const url = vttWrap ? vttWrap.dataset.url : '';
     if(!url) return;
-    vttPop.popped = true;
-    // The pop-out window becomes the one and only host — kill every in-page embed
+    // Open the pop-out FIRST, and only hand the game off to it once it actually
+    // opened. If the window is blocked, keep hosting here so players never lose
+    // their connection.
+    const opened = openPopWin(url);
+    if(!opened) {
+      vttPop.popped = false;
+      showVtt(url); // make sure a live embed host is running here
+      vttPopNote('Couldn’t open the pop-out window (it was blocked). The map stays here and players are still connected.');
+      return;
+    }
+    // The pop-out window is now the one and only host — kill every in-page embed
     // (across all Maps nodes) so it can't race the popped-out window.
+    vttPop.popped = true;
     dccKillVttEmbeds(null);
-    openPopWin(url);
     buildPopped(url);
   }
   function popInVtt() {
