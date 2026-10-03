@@ -2,260 +2,3035 @@
  "Marvel Multiverse RPG Core Rule Book.pdf": [
   {
    "title": "/1/ HOW TO PLAY",
-   "page": 10,
+   "page": 6,
    "depth": 0
+  },
+  {
+   "title": "A Role-What?",
+   "page": 6,
+   "depth": 1
+  },
+  {
+   "title": "What You Need to Play",
+   "page": 6,
+   "depth": 1
+  },
+  {
+   "title": "Using This Book",
+   "page": 7,
+   "depth": 1
+  },
+  {
+   "title": "Play It Safe",
+   "page": 8,
+   "depth": 1
+  },
+  {
+   "title": "The Spirit of the Game",
+   "page": 10,
+   "depth": 1
+  },
+  {
+   "title": "Which Universe?",
+   "page": 10,
+   "depth": 1
+  },
+  {
+   "title": "House Rules",
+   "page": 10,
+   "depth": 1
   },
   {
    "title": "/2/ CORE MECHANICS",
-   "page": 16,
+   "page": 12,
    "depth": 0
+  },
+  {
+   "title": "The Action Check",
+   "page": 12,
+   "depth": 1
+  },
+  {
+   "title": "Target Numbers",
+   "page": 14,
+   "depth": 1
+  },
+  {
+   "title": "Fantastic Rolls",
+   "page": 14,
+   "depth": 1
+  },
+  {
+   "title": "Challenging TN by Rank Table",
+   "page": 14,
+   "depth": 1
+  },
+  {
+   "title": "TN Modiﬁ ers by Adjectives Table",
+   "page": 14,
+   "depth": 1
+  },
+  {
+   "title": "Edges and Troubles",
+   "page": 15,
+   "depth": 1
+  },
+  {
+   "title": "Doing the Math",
+   "page": 16,
+   "depth": 1
   },
   {
    "title": "/3/ CHARACTER PROFILES",
-   "page": 23,
+   "page": 18,
    "depth": 0
+  },
+  {
+   "title": "Character Data",
+   "page": 18,
+   "depth": 1
+  },
+  {
+   "title": "Rank",
+   "page": 18,
+   "depth": 1
+  },
+  {
+   "title": "Ability Scores",
+   "page": 19,
+   "depth": 1
+  },
+  {
+   "title": "Health",
+   "page": 20,
+   "depth": 1
+  },
+  {
+   "title": "Focus",
+   "page": 20,
+   "depth": 1
+  },
+  {
+   "title": "Karma",
+   "page": 20,
+   "depth": 1
+  },
+  {
+   "title": "Initiative Modiﬁ er",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Speed",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Damage",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Size",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Power Sets and Powers",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Backstory",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Traits and Tags",
+   "page": 22,
+   "depth": 1
   },
   {
    "title": "/4/ COMBAT",
-   "page": 42,
+   "page": 26,
    "depth": 0
+  },
+  {
+   "title": "Ways to Play",
+   "page": 26,
+   "depth": 1
+  },
+  {
+   "title": "Timing",
+   "page": 27,
+   "depth": 1
+  },
+  {
+   "title": "Sequence of Play",
+   "page": 27,
+   "depth": 1
+  },
+  {
+   "title": "Determine Positions",
+   "page": 27,
+   "depth": 1
+  },
+  {
+   "title": "Initiative",
+   "page": 28,
+   "depth": 1
+  },
+  {
+   "title": "Taking a Turn",
+   "page": 29,
+   "depth": 1
+  },
+  {
+   "title": "Delaying Things",
+   "page": 30,
+   "depth": 1
+  },
+  {
+   "title": "Standard Actions",
+   "page": 30,
+   "depth": 1
+  },
+  {
+   "title": "Reactions",
+   "page": 32,
+   "depth": 1
+  },
+  {
+   "title": "Movement Actions",
+   "page": 32,
+   "depth": 1
+  },
+  {
+   "title": "Falling",
+   "page": 33,
+   "depth": 1
+  },
+  {
+   "title": "Dealing Damage",
+   "page": 34,
+   "depth": 1
+  },
+  {
+   "title": "Common Weapons Table",
+   "page": 35,
+   "depth": 1
+  },
+  {
+   "title": "Weapons",
+   "page": 35,
+   "depth": 1
+  },
+  {
+   "title": "Healing",
+   "page": 37,
+   "depth": 1
+  },
+  {
+   "title": "Conditions Summary",
+   "page": 38,
+   "depth": 1
+  },
+  {
+   "title": "Maneuver Levels Table",
+   "page": 39,
+   "depth": 1
+  },
+  {
+   "title": "Team Maneuvers",
+   "page": 39,
+   "depth": 1
+  },
+  {
+   "title": "Objects",
+   "page": 40,
+   "depth": 1
+  },
+  {
+   "title": "Objects & Sizes Table",
+   "page": 40,
+   "depth": 1
+  },
+  {
+   "title": "Plowing Through Things Table",
+   "page": 42,
+   "depth": 1
   },
   {
    "title": "/5/ CREATING A CHARACTER",
-   "page": 50,
+   "page": 44,
    "depth": 0
+  },
+  {
+   "title": "The Character Concept",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "Ability Score Points Table",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Building a Character",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Rank",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Ability Scores",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Backstory",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "Powers",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "Other Scores",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "Character Data",
+   "page": 47,
+   "depth": 1
+  },
+  {
+   "title": "Ability Scores Table",
+   "page": 49,
+   "depth": 1
+  },
+  {
+   "title": "An Example Character",
+   "page": 49,
+   "depth": 1
+  },
+  {
+   "title": "Gaining Ranks",
+   "page": 50,
+   "depth": 1
+  },
+  {
+   "title": "Young Lion’s Damages Table",
+   "page": 50,
+   "depth": 1
+  },
+  {
+   "title": "Resources by Rank Table",
+   "page": 50,
+   "depth": 1
+  },
+  {
+   "title": "Increases per Rank Table",
+   "page": 50,
+   "depth": 1
   },
   {
    "title": "/6/ BACKSTORIES",
-   "page": 66,
+   "page": 52,
    "depth": 0
+  },
+  {
+   "title": "Traits and Tags",
+   "page": 52,
+   "depth": 1
+  },
+  {
+   "title": "Origins",
+   "page": 53,
+   "depth": 1
+  },
+  {
+   "title": "Occupations",
+   "page": 58,
+   "depth": 1
+  },
+  {
+   "title": "Traits",
+   "page": 60,
+   "depth": 1
+  },
+  {
+   "title": "Tags",
+   "page": 64,
+   "depth": 1
   },
   {
    "title": "/7/ POWERS",
-   "page": 132,
+   "page": 68,
    "depth": 0
+  },
+  {
+   "title": "Picking Powers",
+   "page": 68,
+   "depth": 1
+  },
+  {
+   "title": "Number of Powers Table",
+   "page": 68,
+   "depth": 1
+  },
+  {
+   "title": "Power Sets",
+   "page": 69,
+   "depth": 1
+  },
+  {
+   "title": "Resize Eﬀ ects Table",
+   "page": 74,
+   "depth": 1
+  },
+  {
+   "title": "Basic Powers",
+   "page": 76,
+   "depth": 1
+  },
+  {
+   "title": "Examples",
+   "page": 76,
+   "depth": 1
+  },
+  {
+   "title": "Powers",
+   "page": 82,
+   "depth": 1
+  },
+  {
+   "title": "Power Descriptions",
+   "page": 82,
+   "depth": 1
   },
   {
    "title": "/8/ CHARACTERS",
-   "page": 262,
+   "page": 134,
    "depth": 0
+  },
+  {
+   "title": "Using the Proﬁ les",
+   "page": 134,
+   "depth": 1
+  },
+  {
+   "title": "Changing The Proﬁ les",
+   "page": 134,
+   "depth": 1
   },
   {
    "title": "/9/ THE MARVEL MULTIVERSE",
-   "page": 276,
+   "page": 264,
    "depth": 0
   },
   {
+   "title": "Your Game, Your Universe",
+   "page": 264,
+   "depth": 1
+  },
+  {
+   "title": "The Marvel Multiverse",
+   "page": 265,
+   "depth": 1
+  },
+  {
+   "title": "Earth-616 History",
+   "page": 266,
+   "depth": 1
+  },
+  {
+   "title": "Earth-616 Today",
+   "page": 268,
+   "depth": 1
+  },
+  {
+   "title": "Other Universes",
+   "page": 272,
+   "depth": 1
+  },
+  {
+   "title": "Time aª er time",
+   "page": 274,
+   "depth": 1
+  },
+  {
+   "title": "Playing in Diﬀ erent Eras",
+   "page": 274,
+   "depth": 1
+  },
+  {
+   "title": "Moving Between Universes",
+   "page": 275,
+   "depth": 1
+  },
+  {
    "title": "/10/ NARRATOR",
-   "page": 306,
+   "page": 278,
    "depth": 0
+  },
+  {
+   "title": "Being the Narrator",
+   "page": 278,
+   "depth": 1
+  },
+  {
+   "title": "Finding Players",
+   "page": 278,
+   "depth": 1
+  },
+  {
+   "title": "Setting Up Your Game",
+   "page": 279,
+   "depth": 1
+  },
+  {
+   "title": "Running the Game",
+   "page": 280,
+   "depth": 1
+  },
+  {
+   "title": "Taking Breaks",
+   "page": 281,
+   "depth": 1
+  },
+  {
+   "title": "Scope",
+   "page": 282,
+   "depth": 1
+  },
+  {
+   "title": "Illusions & Mirages",
+   "page": 282,
+   "depth": 1
+  },
+  {
+   "title": "Mind Control",
+   "page": 283,
+   "depth": 1
+  },
+  {
+   "title": "Omniversal Travel",
+   "page": 283,
+   "depth": 1
+  },
+  {
+   "title": "Social Interactions",
+   "page": 285,
+   "depth": 1
+  },
+  {
+   "title": "Creating New Powers",
+   "page": 286,
+   "depth": 1
+  },
+  {
+   "title": "Working With Ranks",
+   "page": 289,
+   "depth": 1
+  },
+  {
+   "title": "Adjusting Adventures",
+   "page": 290,
+   "depth": 1
+  },
+  {
+   "title": "Changing Heroes",
+   "page": 291,
+   "depth": 1
+  },
+  {
+   "title": "Ending Heroes",
+   "page": 292,
+   "depth": 1
+  },
+  {
+   "title": "Playing in the Multiverse",
+   "page": 295,
+   "depth": 1
+  },
+  {
+   "title": "Game Style",
+   "page": 296,
+   "depth": 1
+  },
+  {
+   "title": "Designing Adventures",
+   "page": 298,
+   "depth": 1
+  },
+  {
+   "title": "Balancing Combats",
+   "page": 301,
+   "depth": 1
+  },
+  {
+   "title": "Times and Places",
+   "page": 302,
+   "depth": 1
+  },
+  {
+   "title": "Filling Out the Cast",
+   "page": 303,
+   "depth": 1
+  },
+  {
+   "title": "Other Heroes",
+   "page": 304,
+   "depth": 1
+  },
+  {
+   "title": "Villains",
+   "page": 305,
+   "depth": 1
+  },
+  {
+   "title": "Rank X",
+   "page": 306,
+   "depth": 1
+  },
+  {
+   "title": "Monologuing",
+   "page": 306,
+   "depth": 1
+  },
+  {
+   "title": "APPENDIX: POWER TREES",
+   "page": 307,
+   "depth": 1
+  },
+  {
+   "title": "CHARACTER SHEET",
+   "page": 315,
+   "depth": 1
+  },
+  {
+   "title": "GLOSSARY/INDEX",
+   "page": 318,
+   "depth": 1
   }
  ],
  "Marvel Multiverse RPG Avengers Expansion.pdf": [
   {
    "title": "/1/ INTRODUCTION",
-   "page": 8,
+   "page": 6,
    "depth": 0
+  },
+  {
+   "title": "How to Use This Book",
+   "page": 6,
+   "depth": 1
+  },
+  {
+   "title": "Earth’s Mightiest Super Heroes",
+   "page": 7,
+   "depth": 1
+  },
+  {
+   "title": "Narrators",
+   "page": 7,
+   "depth": 1
   },
   {
    "title": "/2/ THE AVENGERS",
-   "page": 42,
+   "page": 10,
    "depth": 0
+  },
+  {
+   "title": "The First Avengers",
+   "page": 10,
+   "depth": 1
+  },
+  {
+   "title": "The Avengers of 1,000 A.D",
+   "page": 11,
+   "depth": 1
+  },
+  {
+   "title": "The Avengers of the 1950s",
+   "page": 11,
+   "depth": 1
+  },
+  {
+   "title": "The Modern Avengers",
+   "page": 13,
+   "depth": 1
+  },
+  {
+   "title": "The New Avengers",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "The Eighth Cosmos",
+   "page": 30,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 34,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 35,
+   "depth": 1
+  },
+  {
+   "title": "Map: Avengers Tower",
+   "page": 36,
+   "depth": 1
+  },
+  {
+   "title": "Map: Avengers Tower: War Room",
+   "page": 37,
+   "depth": 1
+  },
+  {
+   "title": "Map: Avengers Tower: Hangar",
+   "page": 38,
+   "depth": 1
+  },
+  {
+   "title": "Map: Avengers Tower: Basement",
+   "page": 39,
+   "depth": 1
+  },
+  {
+   "title": "Playing the Avengers",
+   "page": 40,
+   "depth": 1
+  },
+  {
+   "title": "Joining the Avengers",
+   "page": 42,
+   "depth": 1
+  },
+  {
+   "title": "Adventure Hooks",
+   "page": 42,
+   "depth": 1
   },
   {
    "title": "/3/ AVENGERS-INSPIRED TEAMS",
-   "page": 56,
+   "page": 44,
    "depth": 0
+  },
+  {
+   "title": "The West Coast Avengers",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "Map: West Coast Avengers HQ",
+   "page": 47,
+   "depth": 1
+  },
+  {
+   "title": "The Young Avengers",
+   "page": 48,
+   "depth": 1
+  },
+  {
+   "title": "The Champions",
+   "page": 49,
+   "depth": 1
+  },
+  {
+   "title": "The Ultimates",
+   "page": 51,
+   "depth": 1
+  },
+  {
+   "title": "The Thunderbolts",
+   "page": 52,
+   "depth": 1
+  },
+  {
+   "title": "The Pet Avengers",
+   "page": 55,
+   "depth": 1
   },
   {
    "title": "/4/ AVENGERS AND THE LAW",
-   "page": 64,
+   "page": 58,
    "depth": 0
+  },
+  {
+   "title": "Avengers and the Government",
+   "page": 58,
+   "depth": 1
+  },
+  {
+   "title": "S.H.I.E.L.D",
+   "page": 59,
+   "depth": 1
+  },
+  {
+   "title": "Civil War",
+   "page": 59,
+   "depth": 1
+  },
+  {
+   "title": "Map: S.H.I.E.L.D. Helicarrier",
+   "page": 60,
+   "depth": 1
+  },
+  {
+   "title": "The Initiative",
+   "page": 62,
+   "depth": 1
+  },
+  {
+   "title": "Table: Fi y-State Initiative Teams",
+   "page": 63,
+   "depth": 1
+  },
+  {
+   "title": "Dark Reign",
+   "page": 64,
+   "depth": 1
+  },
+  {
+   "title": "Return of S.H.I.E.L.D",
+   "page": 64,
+   "depth": 1
   },
   {
    "title": "/5/ AVENGERS WORLD",
-   "page": 76,
+   "page": 66,
    "depth": 0
+  },
+  {
+   "title": "New York",
+   "page": 66,
+   "depth": 1
+  },
+  {
+   "title": "Savage Land",
+   "page": 66,
+   "depth": 1
+  },
+  {
+   "title": "Map: Global",
+   "page": 67,
+   "depth": 1
+  },
+  {
+   "title": "Wakanda",
+   "page": 71,
+   "depth": 1
+  },
+  {
+   "title": "Atlantis",
+   "page": 73,
+   "depth": 1
+  },
+  {
+   "title": "Latveria and Symkaria",
+   "page": 76,
+   "depth": 1
+  },
+  {
+   "title": "Other Nations",
+   "page": 76,
+   "depth": 1
   },
   {
    "title": "/6/ MULTIVERSAL AVENGERS",
-   "page": 88,
+   "page": 78,
    "depth": 0
+  },
+  {
+   "title": "A-Next",
+   "page": 78,
+   "depth": 1
+  },
+  {
+   "title": "Heroes Reborn",
+   "page": 79,
+   "depth": 1
+  },
+  {
+   "title": "The Ultimates (Earth-1610)",
+   "page": 82,
+   "depth": 1
+  },
+  {
+   "title": "The Ultimates (Earth-6160)",
+   "page": 84,
+   "depth": 1
+  },
+  {
+   "title": "Map: The Maker’s World",
+   "page": 85,
+   "depth": 1
+  },
+  {
+   "title": "The Multiversal Avengers",
+   "page": 86,
+   "depth": 1
   },
   {
    "title": "/7/ EVIL ORGANIZATIONS",
-   "page": 100,
+   "page": 90,
    "depth": 0
+  },
+  {
+   "title": "The Masters of Evil",
+   "page": 90,
+   "depth": 1
+  },
+  {
+   "title": "Hydra",
+   "page": 92,
+   "depth": 1
+  },
+  {
+   "title": "The Zodiac",
+   "page": 93,
+   "depth": 1
+  },
+  {
+   "title": "The Dark Avengers",
+   "page": 95,
+   "depth": 1
+  },
+  {
+   "title": "Map: The Ra\u0016 Prison",
+   "page": 96,
+   "depth": 1
+  },
+  {
+   "title": "The Black Order",
+   "page": 98,
+   "depth": 1
   },
   {
    "title": "/8/ NEW RULES",
-   "page": 164,
+   "page": 102,
    "depth": 0
+  },
+  {
+   "title": "Stunning",
+   "page": 102,
+   "depth": 1
+  },
+  {
+   "title": "Shields",
+   "page": 102,
+   "depth": 1
+  },
+  {
+   "title": "Complicated Backstories",
+   "page": 102,
+   "depth": 1
+  },
+  {
+   "title": "Iconic Items",
+   "page": 103,
+   "depth": 1
+  },
+  {
+   "title": "Iconic Item Descriptions",
+   "page": 110,
+   "depth": 1
+  },
+  {
+   "title": "Battle Suits",
+   "page": 117,
+   "depth": 1
+  },
+  {
+   "title": "Narrative Items",
+   "page": 120,
+   "depth": 1
+  },
+  {
+   "title": "Alternate Forms",
+   "page": 121,
+   "depth": 1
+  },
+  {
+   "title": "Table: Alternate Form Changes",
+   "page": 122,
+   "depth": 1
+  },
+  {
+   "title": "Headquarters",
+   "page": 123,
+   "depth": 1
+  },
+  {
+   "title": "Map: Avengers Mountain",
+   "page": 130,
+   "depth": 1
+  },
+  {
+   "title": "Getting Schooled",
+   "page": 135,
+   "depth": 1
+  },
+  {
+   "title": "New Equipment",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "Table: Melee Weapons",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "Table: Ranged Weapons",
+   "page": 137,
+   "depth": 1
+  },
+  {
+   "title": "Vehicles",
+   "page": 138,
+   "depth": 1
+  },
+  {
+   "title": "Table: Mounted Weapons",
+   "page": 138,
+   "depth": 1
+  },
+  {
+   "title": "Table: Basic Vehicles",
+   "page": 139,
+   "depth": 1
+  },
+  {
+   "title": "Map: Quinjet",
+   "page": 143,
+   "depth": 1
+  },
+  {
+   "title": "Map: Quinjet",
+   "page": 144,
+   "depth": 1
+  },
+  {
+   "title": "Gadget Hacking",
+   "page": 146,
+   "depth": 1
+  },
+  {
+   "title": "Assembling the Team",
+   "page": 146,
+   "depth": 1
+  },
+  {
+   "title": "Teams of Mixed Rank",
+   "page": 148,
+   "depth": 1
+  },
+  {
+   "title": "Handling the Multiverse",
+   "page": 149,
+   "depth": 1
+  },
+  {
+   "title": "Authority and Responsibility",
+   "page": 150,
+   "depth": 1
+  },
+  {
+   "title": "New Team Maneuvers",
+   "page": 151,
+   "depth": 1
+  },
+  {
+   "title": "Villain Teams",
+   "page": 152,
+   "depth": 1
+  },
+  {
+   "title": "Stunts",
+   "page": 152,
+   "depth": 1
+  },
+  {
+   "title": "Stunt Descriptions",
+   "page": 153,
+   "depth": 1
+  },
+  {
+   "title": "Henchmen",
+   "page": 154,
+   "depth": 1
+  },
+  {
+   "title": "Table: Sinister Plots",
+   "page": 155,
+   "depth": 1
+  },
+  {
+   "title": "Sinister Plots",
+   "page": 155,
+   "depth": 1
+  },
+  {
+   "title": "The Ultimate Fantastic Initiative Rule",
+   "page": 155,
+   "depth": 1
+  },
+  {
+   "title": "The Battle Multiplier",
+   "page": 155,
+   "depth": 1
+  },
+  {
+   "title": "Disarming",
+   "page": 156,
+   "depth": 1
+  },
+  {
+   "title": "Big Fights",
+   "page": 156,
+   "depth": 1
+  },
+  {
+   "title": "New Conditions",
+   "page": 158,
+   "depth": 1
+  },
+  {
+   "title": "New Traits",
+   "page": 159,
+   "depth": 1
+  },
+  {
+   "title": "New Tags",
+   "page": 159,
+   "depth": 1
+  },
+  {
+   "title": "Origins",
+   "page": 160,
+   "depth": 1
+  },
+  {
+   "title": "New Powers",
+   "page": 160,
+   "depth": 1
+  },
+  {
+   "title": "New Power Descriptions",
+   "page": 160,
+   "depth": 1
+  },
+  {
+   "title": "Narrative Powers",
+   "page": 161,
+   "depth": 1
+  },
+  {
+   "title": "Random Encounters",
+   "page": 163,
+   "depth": 1
+  },
+  {
+   "title": "Table: New York City",
+   "page": 164,
+   "depth": 1
+  },
+  {
+   "title": "Table: West Coast",
+   "page": 164,
+   "depth": 1
   },
   {
    "title": "/9/ CHARACTERS",
-   "page": 254,
+   "page": 166,
    "depth": 0
   },
   {
-   "title": "/10/ CHARACTERS",
-   "page": 255,
-   "depth": 0
+   "title": "Once an Avenger",
+   "page": 166,
+   "depth": 1
+  },
+  {
+   "title": "Iconic Items and Battle Suits",
+   "page": 166,
+   "depth": 1
+  },
+  {
+   "title": "Reliances",
+   "page": 166,
+   "depth": 1
+  },
+  {
+   "title": "GLOSSARY/INDEX",
+   "page": 256,
+   "depth": 1
   }
  ],
  "Marvel Multiverse RPG Secret Wars.pdf": [
   {
    "title": "/1/ INTRODUCTION",
-   "page": 8,
+   "page": 6,
    "depth": 0
+  },
+  {
+   "title": "How to Use This Book",
+   "page": 6,
+   "depth": 1
+  },
+  {
+   "title": "From the Dawn of the Marvel Age",
+   "page": 6,
+   "depth": 1
+  },
+  {
+   "title": "Battleworlds and Beyond",
+   "page": 7,
+   "depth": 1
+  },
+  {
+   "title": "Rules and Proﬁles",
+   "page": 7,
+   "depth": 1
+  },
+  {
+   "title": "Narrators",
+   "page": 8,
+   "depth": 1
   },
   {
    "title": "/2/ FANTASTIC FOUR",
-   "page": 22,
+   "page": 10,
    "depth": 0
+  },
+  {
+   "title": "Preﬂight Check",
+   "page": 10,
+   "depth": 1
+  },
+  {
+   "title": "Lioﬀ",
+   "page": 11,
+   "depth": 1
+  },
+  {
+   "title": "The Secret Wars Trilogy",
+   "page": 12,
+   "depth": 1
+  },
+  {
+   "title": "The Future Foundation",
+   "page": 15,
+   "depth": 1
+  },
+  {
+   "title": "Fantastic New Frontiers",
+   "page": 18,
+   "depth": 1
+  },
+  {
+   "title": "Headquarters",
+   "page": 18,
+   "depth": 1
+  },
+  {
+   "title": "Map: The Baxter Building",
+   "page": 19,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 20,
+   "depth": 1
+  },
+  {
+   "title": "Playing the Fantastic Four",
+   "page": 20,
+   "depth": 1
+  },
+  {
+   "title": "Joining the Fantastic Four",
+   "page": 22,
+   "depth": 1
+  },
+  {
+   "title": "Adventure Hooks",
+   "page": 22,
+   "depth": 1
   },
   {
    "title": "/3/ GUARDIANS OF THE GALAXY",
-   "page": 32,
+   "page": 24,
    "depth": 0
+  },
+  {
+   "title": "Guardians of the Galaxy (Earth-691)",
+   "page": 24,
+   "depth": 1
+  },
+  {
+   "title": "Guardians 3000",
+   "page": 25,
+   "depth": 1
+  },
+  {
+   "title": "Guardians of the Galaxy (Earth-616)",
+   "page": 25,
+   "depth": 1
+  },
+  {
+   "title": "Guardians of Inﬁnity",
+   "page": 28,
+   "depth": 1
+  },
+  {
+   "title": "Annihilators",
+   "page": 28,
+   "depth": 1
+  },
+  {
+   "title": "Guardians of Knowhere (Secret Wars)",
+   "page": 29,
+   "depth": 1
+  },
+  {
+   "title": "Playing the Guardians",
+   "page": 29,
+   "depth": 1
+  },
+  {
+   "title": "Map: Knowhere",
+   "page": 31,
+   "depth": 1
+  },
+  {
+   "title": "Joining the Guardians",
+   "page": 32,
+   "depth": 1
   },
   {
    "title": "/4/ THE NEGATIVE ZONE",
-   "page": 40,
+   "page": 34,
    "depth": 0
+  },
+  {
+   "title": "History of the Zone",
+   "page": 34,
+   "depth": 1
+  },
+  {
+   "title": "Playing in the Zone",
+   "page": 37,
+   "depth": 1
+  },
+  {
+   "title": "Major Organizations",
+   "page": 38,
+   "depth": 1
+  },
+  {
+   "title": "Other Points of Interest",
+   "page": 39,
+   "depth": 1
+  },
+  {
+   "title": "Entering the Zone",
+   "page": 40,
+   "depth": 1
+  },
+  {
+   "title": "Adventure Hooks",
+   "page": 40,
+   "depth": 1
   },
   {
    "title": "/5/ GALACTIC POWERS",
-   "page": 52,
+   "page": 42,
    "depth": 0
+  },
+  {
+   "title": "The Galactic Council",
+   "page": 42,
+   "depth": 1
+  },
+  {
+   "title": "The Nova Corps and Xandar",
+   "page": 43,
+   "depth": 1
+  },
+  {
+   "title": "The Badoon Empire",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "The Brood",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "The Chitauri",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "The Cotati",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Klyntar",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "The Korbinites",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "The Kree Empire and the Inhumans",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "Kymellians",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "Rigellians",
+   "page": 47,
+   "depth": 1
+  },
+  {
+   "title": "Sakaar (Planet Hulk)",
+   "page": 47,
+   "depth": 1
+  },
+  {
+   "title": "The Shi’ar Empire",
+   "page": 47,
+   "depth": 1
+  },
+  {
+   "title": "The Skrull Empire",
+   "page": 48,
+   "depth": 1
+  },
+  {
+   "title": "The Intergalactic Empire of Wakanda",
+   "page": 49,
+   "depth": 1
+  },
+  {
+   "title": "Adventures in the Galaxy",
+   "page": 50,
+   "depth": 1
+  },
+  {
+   "title": "Adventure Hooks",
+   "page": 52,
+   "depth": 1
   },
   {
    "title": "/6/ DOCTOR DOOM",
-   "page": 62,
+   "page": 54,
    "depth": 0
+  },
+  {
+   "title": "Humble Beginnings",
+   "page": 54,
+   "depth": 1
+  },
+  {
+   "title": "Doom Reigns",
+   "page": 55,
+   "depth": 1
+  },
+  {
+   "title": "The Secret Wars Trilogy",
+   "page": 56,
+   "depth": 1
+  },
+  {
+   "title": "Later Schemes",
+   "page": 57,
+   "depth": 1
+  },
+  {
+   "title": "One World Under Doom",
+   "page": 58,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 59,
+   "depth": 1
+  },
+  {
+   "title": "Cracks in the Armor",
+   "page": 59,
+   "depth": 1
+  },
+  {
+   "title": "Playing With Doom",
+   "page": 62,
+   "depth": 1
+  },
+  {
+   "title": "Adventure Hooks",
+   "page": 62,
+   "depth": 1
   },
   {
    "title": "/7/ THE SECRET WARS",
-   "page": 78,
+   "page": 64,
    "depth": 0
+  },
+  {
+   "title": "The Cosmos",
+   "page": 64,
+   "depth": 1
+  },
+  {
+   "title": "Cosmic Entities",
+   "page": 66,
+   "depth": 1
+  },
+  {
+   "title": "The Beyonders",
+   "page": 69,
+   "depth": 1
+  },
+  {
+   "title": "Cosmic Geography",
+   "page": 70,
+   "depth": 1
+  },
+  {
+   "title": "Secret Wars I",
+   "page": 72,
+   "depth": 1
+  },
+  {
+   "title": "Secret Wars II",
+   "page": 75,
+   "depth": 1
+  },
+  {
+   "title": "Secret Wars III",
+   "page": 75,
+   "depth": 1
+  },
+  {
+   "title": "Secret Wars IV",
+   "page": 75,
+   "depth": 1
   },
   {
    "title": "/8/ BATTLEWORLD",
-   "page": 152,
+   "page": 80,
    "depth": 0
+  },
+  {
+   "title": "Other Battleworlds",
+   "page": 80,
+   "depth": 1
+  },
+  {
+   "title": "Doom’s Battleworld",
+   "page": 81,
+   "depth": 1
+  },
+  {
+   "title": "Map: Battleworld",
+   "page": 82,
+   "depth": 1
+  },
+  {
+   "title": "Playing the Secret Wars",
+   "page": 83,
+   "depth": 1
+  },
+  {
+   "title": "Battleworld’s Universe",
+   "page": 84,
+   "depth": 1
+  },
+  {
+   "title": "Battleworld Government",
+   "page": 86,
+   "depth": 1
+  },
+  {
+   "title": "Crime and Punishment",
+   "page": 88,
+   "depth": 1
+  },
+  {
+   "title": "The Oceans",
+   "page": 90,
+   "depth": 1
+  },
+  {
+   "title": "The Domains",
+   "page": 91,
+   "depth": 1
+  },
+  {
+   "title": "Map: Egyptia",
+   "page": 97,
+   "depth": 1
+  },
+  {
+   "title": "Map: Temple of Khonshu",
+   "page": 98,
+   "depth": 1
+  },
+  {
+   "title": "Victor Von Doom Institute for Gied Youths",
+   "page": 116,
+   "depth": 1
+  },
+  {
+   "title": "Battleworld’s End",
+   "page": 151,
+   "depth": 1
+  },
+  {
+   "title": "In the Eighth Cosmos",
+   "page": 152,
+   "depth": 1
   },
   {
    "title": "/9/ NEW RULES",
-   "page": 202,
+   "page": 154,
    "depth": 0
   },
   {
+   "title": "Rules Updates",
+   "page": 154,
+   "depth": 1
+  },
+  {
+   "title": "Building Your Own Battleworld",
+   "page": 156,
+   "depth": 1
+  },
+  {
+   "title": "Battleworld Games",
+   "page": 156,
+   "depth": 1
+  },
+  {
+   "title": "Table: Avoiding Consequences",
+   "page": 157,
+   "depth": 1
+  },
+  {
+   "title": "Running an Event",
+   "page": 158,
+   "depth": 1
+  },
+  {
+   "title": "The Battleworld Event",
+   "page": 160,
+   "depth": 1
+  },
+  {
+   "title": "Challenging God Emperor Doom",
+   "page": 163,
+   "depth": 1
+  },
+  {
+   "title": "Self-Sacriﬁce",
+   "page": 165,
+   "depth": 1
+  },
+  {
+   "title": "Zombies",
+   "page": 165,
+   "depth": 1
+  },
+  {
+   "title": "Table: Zombie Bite Location",
+   "page": 166,
+   "depth": 1
+  },
+  {
+   "title": "Werewolves",
+   "page": 167,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Virus",
+   "page": 167,
+   "depth": 1
+  },
+  {
+   "title": "Iconic Items",
+   "page": 167,
+   "depth": 1
+  },
+  {
+   "title": "Battle Suits",
+   "page": 170,
+   "depth": 1
+  },
+  {
+   "title": "Narrative Items",
+   "page": 171,
+   "depth": 1
+  },
+  {
+   "title": "New Equipment",
+   "page": 174,
+   "depth": 1
+  },
+  {
+   "title": "Table: New Ranged Weapons",
+   "page": 174,
+   "depth": 1
+  },
+  {
+   "title": "Headquarters",
+   "page": 175,
+   "depth": 1
+  },
+  {
+   "title": "Vehicles",
+   "page": 181,
+   "depth": 1
+  },
+  {
+   "title": "Starships",
+   "page": 183,
+   "depth": 1
+  },
+  {
+   "title": "Starship Proﬁles",
+   "page": 185,
+   "depth": 1
+  },
+  {
+   "title": "Rank X",
+   "page": 189,
+   "depth": 1
+  },
+  {
+   "title": "New Hero Team Maneuvers",
+   "page": 193,
+   "depth": 1
+  },
+  {
+   "title": "New Villain Team Maneuvers",
+   "page": 193,
+   "depth": 1
+  },
+  {
+   "title": "New Origins",
+   "page": 193,
+   "depth": 1
+  },
+  {
+   "title": "New Traits",
+   "page": 194,
+   "depth": 1
+  },
+  {
+   "title": "New Tags",
+   "page": 195,
+   "depth": 1
+  },
+  {
+   "title": "New Powers",
+   "page": 196,
+   "depth": 1
+  },
+  {
+   "title": "New Power Descriptions",
+   "page": 197,
+   "depth": 1
+  },
+  {
+   "title": "Narrative Powers",
+   "page": 200,
+   "depth": 1
+  },
+  {
+   "title": "Narrative Limitations",
+   "page": 201,
+   "depth": 1
+  },
+  {
    "title": "/10/ CHARACTERS",
-   "page": 255,
+   "page": 204,
    "depth": 0
+  },
+  {
+   "title": "Cosmoses of Characters",
+   "page": 204,
+   "depth": 1
+  },
+  {
+   "title": "Iconic Items and Battle Suits",
+   "page": 204,
+   "depth": 1
+  },
+  {
+   "title": "Reliances",
+   "page": 204,
+   "depth": 1
+  },
+  {
+   "title": "GLOSSARY/INDEX",
+   "page": 256,
+   "depth": 1
+  },
+  {
+   "title": "Art by John Buscema, Tom Palmer & Max Scheele Rank X",
+   "page": 189,
+   "depth": 1
   }
  ],
  "Marvel Multiverse RPG Spider verse Expansion.pdf": [
   {
    "title": "/1/ INTRODUCTION",
-   "page": 3,
+   "page": 6,
    "depth": 0
   },
   {
-   "title": "/2/ THE SPIDER VERSE",
-   "page": 12,
+   "title": "How To Use This Book",
+   "page": 6,
+   "depth": 1
+  },
+  {
+   "title": "/2/ THE SPIDER-VERSE",
+   "page": 8,
    "depth": 0
   },
   {
-   "title": "/3/ SPIDER MAN (PETER PARKER)",
-   "page": 22,
+   "title": "Origin",
+   "page": 8,
+   "depth": 1
+  },
+  {
+   "title": "History",
+   "page": 8,
+   "depth": 1
+  },
+  {
+   "title": "Playing in the Spider-Verse",
+   "page": 10,
+   "depth": 1
+  },
+  {
+   "title": "/3/ SPIDER-MAN (PETER PARKER)",
+   "page": 14,
    "depth": 0
+  },
+  {
+   "title": "Origin",
+   "page": 14,
+   "depth": 1
+  },
+  {
+   "title": "History",
+   "page": 14,
+   "depth": 1
+  },
+  {
+   "title": "Map: New York City Alleys",
+   "page": 17,
+   "depth": 1
+  },
+  {
+   "title": "Supporting Cast",
+   "page": 18,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 19,
+   "depth": 1
+  },
+  {
+   "title": "Playing in Peter Parker’s World",
+   "page": 20,
+   "depth": 1
   },
   {
    "title": "/4/ SPIDER-MAN (MILES MORALES)",
-   "page": 32,
+   "page": 24,
    "depth": 0
+  },
+  {
+   "title": "Origin",
+   "page": 24,
+   "depth": 1
+  },
+  {
+   "title": "History",
+   "page": 24,
+   "depth": 1
+  },
+  {
+   "title": "Supporting Cast",
+   "page": 25,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 28,
+   "depth": 1
+  },
+  {
+   "title": "Playing in Miles Morales’ World",
+   "page": 28,
+   "depth": 1
+  },
+  {
+   "title": "Map: Brooklyn Visions Academy 1",
+   "page": 29,
+   "depth": 1
+  },
+  {
+   "title": "Map: Brooklyn Visions Academy 2",
+   "page": 30,
+   "depth": 1
   },
   {
    "title": "/5/ GHOST-SPIDER",
-   "page": 42,
+   "page": 34,
    "depth": 0
   },
   {
-   "title": "/6/ SPIDER-MAN",
-   "page": 52,
+   "title": "Origin",
+   "page": 34,
+   "depth": 1
+  },
+  {
+   "title": "History",
+   "page": 34,
+   "depth": 1
+  },
+  {
+   "title": "Supporting Cast",
+   "page": 35,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 38,
+   "depth": 1
+  },
+  {
+   "title": "Playing in Ghost-Spider’s Worlds",
+   "page": 38,
+   "depth": 1
+  },
+  {
+   "title": "Map: Empire State University Campus",
+   "page": 39,
+   "depth": 1
+  },
+  {
+   "title": "/6/ SPIDER-MAN 2099",
+   "page": 44,
    "depth": 0
+  },
+  {
+   "title": "Origin",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "History",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Supporting Cast",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 48,
+   "depth": 1
+  },
+  {
+   "title": "Playing in Spider-Man 2099’s Worlds",
+   "page": 48,
+   "depth": 1
+  },
+  {
+   "title": "Map: Alchemax R&D Building Lab Floor",
+   "page": 49,
+   "depth": 1
   },
   {
    "title": "/7/ OTHER SPIDER-CHARACTERS",
-   "page": 80,
+   "page": 54,
    "depth": 0
+  },
+  {
+   "title": "Araña",
+   "page": 54,
+   "depth": 1
+  },
+  {
+   "title": "Madame Web (Julia Carpenter)",
+   "page": 55,
+   "depth": 1
+  },
+  {
+   "title": "Silk",
+   "page": 57,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Boy",
+   "page": 58,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Woman (Jessica Drew)",
+   "page": 59,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Woman (Mattie Franklin)",
+   "page": 61,
+   "depth": 1
+  },
+  {
+   "title": "The Superior Spider-Man (Otto Octavius)",
+   "page": 61,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Man (Earth-1610)",
+   "page": 64,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Woman (Earth-1610)",
+   "page": 65,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Man (Earth-6160)",
+   "page": 66,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Girl (Mayday Parker)",
+   "page": 67,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Ham",
+   "page": 69,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Man India",
+   "page": 71,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Man Noir",
+   "page": 72,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Punk",
+   "page": 74,
+   "depth": 1
+  },
+  {
+   "title": "SP//dr",
+   "page": 75,
+   "depth": 1
+  },
+  {
+   "title": "Earth-1048 Spider-Men",
+   "page": 78,
+   "depth": 1
   },
   {
    "title": "/8/ CLONES",
-   "page": 90,
+   "page": 82,
    "depth": 0
+  },
+  {
+   "title": "History",
+   "page": 82,
+   "depth": 1
+  },
+  {
+   "title": "Clones",
+   "page": 85,
+   "depth": 1
+  },
+  {
+   "title": "Playing (With) Clones",
+   "page": 87,
+   "depth": 1
   },
   {
    "title": "/9/ SYMBIOTES",
-   "page": 102,
+   "page": 92,
    "depth": 0
+  },
+  {
+   "title": "History",
+   "page": 92,
+   "depth": 1
+  },
+  {
+   "title": "Symbiotes",
+   "page": 94,
+   "depth": 1
+  },
+  {
+   "title": "Playing With Symbiotes",
+   "page": 99,
+   "depth": 1
   },
   {
    "title": "/10/ NEW RULES",
-   "page": 153,
+   "page": 104,
    "depth": 0
   },
   {
+   "title": "Secret Identities",
+   "page": 104,
+   "depth": 1
+  },
+  {
+   "title": "Table: Secret Identity Suspicion",
+   "page": 105,
+   "depth": 1
+  },
+  {
+   "title": "Supporting Casts",
+   "page": 106,
+   "depth": 1
+  },
+  {
+   "title": "Table: Family",
+   "page": 107,
+   "depth": 1
+  },
+  {
+   "title": "Table: Friends",
+   "page": 107,
+   "depth": 1
+  },
+  {
+   "title": "Table: Romantic Interest",
+   "page": 107,
+   "depth": 1
+  },
+  {
+   "title": "Table: Personal Responsibility Check",
+   "page": 109,
+   "depth": 1
+  },
+  {
+   "title": "Personal Responsibilities",
+   "page": 109,
+   "depth": 1
+  },
+  {
+   "title": "Loner Adventures",
+   "page": 110,
+   "depth": 1
+  },
+  {
+   "title": "Team-Ups",
+   "page": 111,
+   "depth": 1
+  },
+  {
+   "title": "Remote Assistance",
+   "page": 112,
+   "depth": 1
+  },
+  {
+   "title": "New Team Maneuvers",
+   "page": 112,
+   "depth": 1
+  },
+  {
+   "title": "Villain Teams",
+   "page": 113,
+   "depth": 1
+  },
+  {
+   "title": "Great Responsibilities",
+   "page": 114,
+   "depth": 1
+  },
+  {
+   "title": "Table: Explosives Details",
+   "page": 116,
+   "depth": 1
+  },
+  {
+   "title": "Hero Reputation",
+   "page": 117,
+   "depth": 1
+  },
+  {
+   "title": "Table: Hero Reputation",
+   "page": 117,
+   "depth": 1
+  },
+  {
+   "title": "Bad Karma",
+   "page": 118,
+   "depth": 1
+  },
+  {
+   "title": "Clones",
+   "page": 119,
+   "depth": 1
+  },
+  {
+   "title": "Symbiotes",
+   "page": 120,
+   "depth": 1
+  },
+  {
+   "title": "Multiversal Variants",
+   "page": 123,
+   "depth": 1
+  },
+  {
+   "title": "Multiversal Rules",
+   "page": 125,
+   "depth": 1
+  },
+  {
+   "title": "Spider-Wasp Venom",
+   "page": 126,
+   "depth": 1
+  },
+  {
+   "title": "Henchmen",
+   "page": 127,
+   "depth": 1
+  },
+  {
+   "title": "Sinister Plots",
+   "page": 127,
+   "depth": 1
+  },
+  {
+   "title": "Table: Sinister Plot Point Eﬀ ects",
+   "page": 127,
+   "depth": 1
+  },
+  {
+   "title": "Webbing",
+   "page": 127,
+   "depth": 1
+  },
+  {
+   "title": "Stunts",
+   "page": 129,
+   "depth": 1
+  },
+  {
+   "title": "New Equipment",
+   "page": 130,
+   "depth": 1
+  },
+  {
+   "title": "Gadget Hacking",
+   "page": 132,
+   "depth": 1
+  },
+  {
+   "title": "Vehicles",
+   "page": 132,
+   "depth": 1
+  },
+  {
+   "title": "Table: Basic Vehicles",
+   "page": 133,
+   "depth": 1
+  },
+  {
+   "title": "The Ultimate Fantastic Initiative Rule",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "The Battle Multiplier",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "Disarming",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "Mindswapping",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "New Conditions",
+   "page": 137,
+   "depth": 1
+  },
+  {
+   "title": "New Origins",
+   "page": 139,
+   "depth": 1
+  },
+  {
+   "title": "New Traits",
+   "page": 139,
+   "depth": 1
+  },
+  {
+   "title": "New Tags",
+   "page": 140,
+   "depth": 1
+  },
+  {
+   "title": "New Powers",
+   "page": 140,
+   "depth": 1
+  },
+  {
+   "title": "Power Descriptions",
+   "page": 142,
+   "depth": 1
+  },
+  {
+   "title": "Narrative Powers",
+   "page": 150,
+   "depth": 1
+  },
+  {
+   "title": "Random Encounters",
+   "page": 152,
+   "depth": 1
+  },
+  {
+   "title": "Table: Empire State University Encounters",
+   "page": 153,
+   "depth": 1
+  },
+  {
+   "title": "Table: New York City Encounters",
+   "page": 153,
+   "depth": 1
+  },
+  {
+   "title": "Table: Multiversal Encounters",
+   "page": 153,
+   "depth": 1
+  },
+  {
+   "title": "Map: Sewer Lair",
+   "page": 154,
+   "depth": 1
+  },
+  {
    "title": "/11/ CHARACTERS",
-   "page": 255,
+   "page": 156,
    "depth": 0
+  },
+  {
+   "title": "Across the Spider-Verse",
+   "page": 156,
+   "depth": 1
+  },
+  {
+   "title": "Reliances",
+   "page": 156,
+   "depth": 1
+  },
+  {
+   "title": "GLOSSARY/INDEX",
+   "page": 256,
+   "depth": 1
   }
  ],
  "Marvel Multiverse RPG X Men Expansion.pdf": [
   {
-   "title": "/1/ Introduction",
+   "title": "/1/ INTRODUCTION",
    "page": 7,
    "depth": 0
   },
   {
-   "title": "/2/ Mutants",
+   "title": "How to Use this Book",
+   "page": 8,
+   "depth": 1
+  },
+  {
+   "title": "The Dawn of the Atom",
+   "page": 9,
+   "depth": 1
+  },
+  {
+   "title": "Narrators",
+   "page": 10,
+   "depth": 1
+  },
+  {
+   "title": "/2/ MUTANTS",
    "page": 11,
    "depth": 0
   },
   {
-   "title": "/3/ The X-Men",
+   "title": "The X-Gene",
+   "page": 12,
+   "depth": 1
+  },
+  {
+   "title": "History",
+   "page": 13,
+   "depth": 1
+  },
+  {
+   "title": "Map: Krakoa",
+   "page": 17,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "Playing Mutants",
+   "page": 21,
+   "depth": 1
+  },
+  {
+   "title": "/3/ THE X-MEN",
    "page": 23,
    "depth": 0
   },
   {
-   "title": "/4/ X-Factor",
+   "title": "Team History",
+   "page": 24,
+   "depth": 1
+  },
+  {
+   "title": "Map: Blackbird",
+   "page": 28,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 30,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 31,
+   "depth": 1
+  },
+  {
+   "title": "Playing the X-Men",
+   "page": 33,
+   "depth": 1
+  },
+  {
+   "title": "Joining the X-Men",
+   "page": 35,
+   "depth": 1
+  },
+  {
+   "title": "X-Men Adventure Hooks",
+   "page": 37,
+   "depth": 1
+  },
+  {
+   "title": "/4/ X-FACTOR",
    "page": 39,
    "depth": 0
   },
   {
-   "title": "/5/ X-Force",
+   "title": "Team History",
+   "page": 40,
+   "depth": 1
+  },
+  {
+   "title": "Map: The Boneyard",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Map: Mutant Town",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 47,
+   "depth": 1
+  },
+  {
+   "title": "Playing X-Factor",
+   "page": 49,
+   "depth": 1
+  },
+  {
+   "title": "Joining X-Factor",
+   "page": 49,
+   "depth": 1
+  },
+  {
+   "title": "X-Factor Adventure Hooks",
+   "page": 51,
+   "depth": 1
+  },
+  {
+   "title": "/5/ X-FORCE",
    "page": 53,
    "depth": 0
   },
   {
-   "title": "/6/ Mutant Classes",
+   "title": "Team History",
+   "page": 54,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 58,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 58,
+   "depth": 1
+  },
+  {
+   "title": "Map: Cavern-X",
+   "page": 59,
+   "depth": 1
+  },
+  {
+   "title": "Playing X-Force",
+   "page": 60,
+   "depth": 1
+  },
+  {
+   "title": "Joining X-Force",
+   "page": 61,
+   "depth": 1
+  },
+  {
+   "title": "X-Force Adventure Hooks",
+   "page": 61,
+   "depth": 1
+  },
+  {
+   "title": "/6/ MUTANT CLASSES",
    "page": 63,
    "depth": 0
   },
   {
-   "title": "/7/ Marauders",
+   "title": "History",
+   "page": 64,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 69,
+   "depth": 1
+  },
+  {
+   "title": "Map: Xavier Estate",
+   "page": 70,
+   "depth": 1
+  },
+  {
+   "title": "Map: Xavier’s Mansion Upper Floors",
+   "page": 71,
+   "depth": 1
+  },
+  {
+   "title": "Map: Xavier’s Mansion Basements",
+   "page": 72,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 73,
+   "depth": 1
+  },
+  {
+   "title": "Playing at School",
+   "page": 74,
+   "depth": 1
+  },
+  {
+   "title": "Registration",
+   "page": 75,
+   "depth": 1
+  },
+  {
+   "title": "Adventure Hooks",
+   "page": 77,
+   "depth": 1
+  },
+  {
+   "title": "/7/ MARAUDERS",
    "page": 79,
    "depth": 0
   },
   {
-   "title": "/8/ Alpha Flight",
+   "title": "Team History",
+   "page": 80,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 82,
+   "depth": 1
+  },
+  {
+   "title": "Map: Morlock Tunnels",
+   "page": 83,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 84,
+   "depth": 1
+  },
+  {
+   "title": "Fighting the Marauders",
+   "page": 85,
+   "depth": 1
+  },
+  {
+   "title": "Playing the Marauders",
+   "page": 85,
+   "depth": 1
+  },
+  {
+   "title": "Map: The Marauder Upper Decks",
+   "page": 86,
+   "depth": 1
+  },
+  {
+   "title": "Map: The Marauder Lower Decks",
+   "page": 87,
+   "depth": 1
+  },
+  {
+   "title": "Joining the Krakoan Marauders",
+   "page": 88,
+   "depth": 1
+  },
+  {
+   "title": "Marauders Adventure Hooks",
+   "page": 88,
+   "depth": 1
+  },
+  {
+   "title": "/8/ ALPHA FLIGHT",
    "page": 89,
    "depth": 0
   },
   {
-   "title": "/9/ Exiles",
+   "title": "Team History",
+   "page": 90,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 94,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 95,
+   "depth": 1
+  },
+  {
+   "title": "Playing Alpha Flight",
+   "page": 95,
+   "depth": 1
+  },
+  {
+   "title": "Joining Alpha Flight",
+   "page": 97,
+   "depth": 1
+  },
+  {
+   "title": "Alpha Flight Adventure Hooks",
+   "page": 97,
+   "depth": 1
+  },
+  {
+   "title": "/9/ EXILES",
    "page": 99,
+   "depth": 0
+  },
+  {
+   "title": "Team History",
+   "page": 100,
+   "depth": 1
+  },
+  {
+   "title": "Locations",
+   "page": 102,
+   "depth": 1
+  },
+  {
+   "title": "Map: Panoptichron",
+   "page": 103,
+   "depth": 1
+  },
+  {
+   "title": "Opponents",
+   "page": 104,
+   "depth": 1
+  },
+  {
+   "title": "Playing the Exiles",
+   "page": 104,
+   "depth": 1
+  },
+  {
+   "title": "Joining the Exiles",
+   "page": 105,
+   "depth": 1
+  },
+  {
+   "title": "Exiles Adventure Hooks",
+   "page": 106,
+   "depth": 1
+  },
+  {
+   "title": "/10/ OTHER WORLDS",
+   "page": 107,
+   "depth": 0
+  },
+  {
+   "title": "Age of Apocalypse: Earth-295",
+   "page": 108,
+   "depth": 1
+  },
+  {
+   "title": "Mutant X: Earth-1298",
+   "page": 110,
+   "depth": 1
+  },
+  {
+   "title": "House of M: Earth-58163",
+   "page": 111,
+   "depth": 1
+  },
+  {
+   "title": "Age of X: Earth-11326",
+   "page": 112,
+   "depth": 1
+  },
+  {
+   "title": "Ultimate X-Men: Earth-1610",
+   "page": 113,
+   "depth": 1
+  },
+  {
+   "title": "X-Men Noir: Earth-90214",
+   "page": 114,
+   "depth": 1
+  },
+  {
+   "title": "Mojoworld: Mojoverse",
+   "page": 115,
+   "depth": 1
+  },
+  {
+   "title": "Playing in Other Worlds",
+   "page": 118,
+   "depth": 1
+  },
+  {
+   "title": "Visiting Other Worlds",
+   "page": 118,
+   "depth": 1
+  },
+  {
+   "title": "/11/ FUTURES PAST",
+   "page": 119,
+   "depth": 0
+  },
+  {
+   "title": "X-Men 2099: Earth-928, Earth-23291 and Earth-2099",
+   "page": 120,
+   "depth": 1
+  },
+  {
+   "title": "Days of Future Past: Earth-811",
+   "page": 122,
+   "depth": 1
+  },
+  {
+   "title": "Cable’s Future: Earth-4935",
+   "page": 123,
+   "depth": 1
+  },
+  {
+   "title": "Bishop’s Future: Earth-1191",
+   "page": 124,
+   "depth": 1
+  },
+  {
+   "title": "Old Man Logan: Earth-807128 and Earth-21923",
+   "page": 124,
+   "depth": 1
+  },
+  {
+   "title": "Map: Amerika",
+   "page": 126,
+   "depth": 1
+  },
+  {
+   "title": "Restarting Time",
+   "page": 126,
+   "depth": 1
+  },
+  {
+   "title": "Playing in Other Times",
+   "page": 130,
+   "depth": 1
+  },
+  {
+   "title": "/12/ NEW RULES",
+   "page": 131,
+   "depth": 0
+  },
+  {
+   "title": "Teams",
+   "page": 132,
+   "depth": 1
+  },
+  {
+   "title": "New Team Maneuvers",
+   "page": 133,
+   "depth": 1
+  },
+  {
+   "title": "Mutant Reputation",
+   "page": 134,
+   "depth": 1
+  },
+  {
+   "title": "Table: Mutant Reputation",
+   "page": 135,
+   "depth": 1
+  },
+  {
+   "title": "Getting Schooled",
+   "page": 135,
+   "depth": 1
+  },
+  {
+   "title": "Table: Schooling Advancement Chart",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "New Equipment",
+   "page": 137,
+   "depth": 1
+  },
+  {
+   "title": "Table: New Weapon (Bo Staff)",
+   "page": 138,
+   "depth": 1
+  },
+  {
+   "title": "Vehicles",
+   "page": 139,
+   "depth": 1
+  },
+  {
+   "title": "Table: Basic Vehicles",
+   "page": 140,
+   "depth": 1
+  },
+  {
+   "title": "Vehicle Profile: Blackbird",
+   "page": 140,
+   "depth": 1
+  },
+  {
+   "title": "Vehicle Profile: E.V.A.",
+   "page": 141,
+   "depth": 1
+  },
+  {
+   "title": "Vehicle Profile: Marauder",
+   "page": 141,
+   "depth": 1
+  },
+  {
+   "title": "New Conditions",
+   "page": 142,
+   "depth": 1
+  },
+  {
+   "title": "Mental Duels",
+   "page": 142,
+   "depth": 1
+  },
+  {
+   "title": "The Danger Room",
+   "page": 144,
+   "depth": 1
+  },
+  {
+   "title": "Table: Challenging TN by Rank",
+   "page": 146,
+   "depth": 1
+  },
+  {
+   "title": "Table: TN Modifiers by Adjectives",
+   "page": 146,
+   "depth": 1
+  },
+  {
+   "title": "Table: Random Danger Room Setting",
+   "page": 147,
+   "depth": 1
+  },
+  {
+   "title": "Table: Random Danger Room Threats",
+   "page": 147,
+   "depth": 1
+  },
+  {
+   "title": "Table: Random Danger Room Environment (Modern)",
+   "page": 147,
+   "depth": 1
+  },
+  {
+   "title": "Table: Random Danger Room Environment (Classic)",
+   "page": 147,
+   "depth": 1
+  },
+  {
+   "title": "Mutant Growth Hormone",
+   "page": 148,
+   "depth": 1
+  },
+  {
+   "title": "Anti-Mutant “Cures”",
+   "page": 148,
+   "depth": 1
+  },
+  {
+   "title": "Infections and Possessions",
+   "page": 149,
+   "depth": 1
+  },
+  {
+   "title": "New Origins",
+   "page": 153,
+   "depth": 1
+  },
+  {
+   "title": "New Traits",
+   "page": 155,
+   "depth": 1
+  },
+  {
+   "title": "New Tags",
+   "page": 156,
+   "depth": 1
+  },
+  {
+   "title": "New Powers",
+   "page": 157,
+   "depth": 1
+  },
+  {
+   "title": "New Power Descriptions",
+   "page": 161,
+   "depth": 1
+  },
+  {
+   "title": "Narrative Powers",
+   "page": 171,
+   "depth": 1
+  },
+  {
+   "title": "Random Encounters",
+   "page": 173,
+   "depth": 1
+  },
+  {
+   "title": "Table: Krakoa Encounters",
+   "page": 174,
+   "depth": 1
+  },
+  {
+   "title": "Table: New York City Encounters",
+   "page": 174,
+   "depth": 1
+  },
+  {
+   "title": "Table: Mutant School Encounters",
+   "page": 174,
+   "depth": 1
+  },
+  {
+   "title": "/13/ CHARACTERS",
+   "page": 175,
+   "depth": 0
+  },
+  {
+   "title": "Mutants, Mutants Everywhere",
+   "page": 176,
+   "depth": 1
+  },
+  {
+   "title": "Reliances",
+   "page": 176,
+   "depth": 1
+  },
+  {
+   "title": "GLOSSARY/INDEX",
+   "page": 246,
    "depth": 0
   }
  ],
@@ -775,6 +3550,580 @@
   {
    "title": "Ghostbusters Headquarters",
    "page": 26,
+   "depth": 0
+  }
+ ],
+ "STAR WARS The Roleplaying Game.pdf": [
+  {
+   "title": "Introduction",
+   "page": 5,
+   "depth": 0
+  },
+  {
+   "title": "Player Section",
+   "page": 7,
+   "depth": 0
+  },
+  {
+   "title": "Chapter One: Creating a Character",
+   "page": 7,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Two: The Bare Bones",
+   "page": 11,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Three: An Introduction to Roleplaying",
+   "page": 17,
+   "depth": 1
+  },
+  {
+   "title": "Gamemaster Section",
+   "page": 26,
+   "depth": 0
+  },
+  {
+   "title": "Chapter One: An Introduction to Gamemastering",
+   "page": 26,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Two: Attributes and Skills",
+   "page": 29,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Three: Combat",
+   "page": 45,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Four: Wounds and Healing",
+   "page": 52,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Five: Starships",
+   "page": 53,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Six: The Force",
+   "page": 64,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Seven: Other Characters",
+   "page": 78,
+   "depth": 1
+  },
+  {
+   "title": "Adventure Section",
+   "page": 84,
+   "depth": 0
+  },
+  {
+   "title": "Chapter One: Running Adventures",
+   "page": 84,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Two: Designing Adventures",
+   "page": 92,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Three: “Rebel Breakout” Adventure",
+   "page": 97,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Four: Adventure Ideas",
+   "page": 111,
+   "depth": 1
+  },
+  {
+   "title": "Character Templates",
+   "page": 118,
+   "depth": 0
+  },
+  {
+   "title": "Charts and Tables",
+   "page": 135,
+   "depth": 0
+  }
+ ],
+ "STAR WARS Sourcebook.pdf": [
+  {
+   "title": "Introduction",
+   "page": 6,
+   "depth": 0
+  },
+  {
+   "title": "Chapter One: General Spacecraft Systems",
+   "page": 7,
+   "depth": 0
+  },
+  {
+   "title": "Hyperdrives",
+   "page": 7,
+   "depth": 1
+  },
+  {
+   "title": "Sublight Drives",
+   "page": 8,
+   "depth": 1
+  },
+  {
+   "title": "Armament and Shields",
+   "page": 9,
+   "depth": 1
+  },
+  {
+   "title": "Sensors",
+   "page": 10,
+   "depth": 1
+  },
+  {
+   "title": "Life Support",
+   "page": 11,
+   "depth": 1
+  },
+  {
+   "title": "Escape Equipment",
+   "page": 12,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Two: Starfighters",
+   "page": 13,
+   "depth": 0
+  },
+  {
+   "title": "Z-95 Headhunter",
+   "page": 13,
+   "depth": 1
+  },
+  {
+   "title": "A-Wing Starfighter",
+   "page": 14,
+   "depth": 1
+  },
+  {
+   "title": "B-Wing Assault Starfighter",
+   "page": 15,
+   "depth": 1
+  },
+  {
+   "title": "Y-Wing Starfighter",
+   "page": 16,
+   "depth": 1
+  },
+  {
+   "title": "X-Wing Space Superiority Fighter",
+   "page": 18,
+   "depth": 1
+  },
+  {
+   "title": "X-Wing Technical Manual and Diagram",
+   "page": 20,
+   "depth": 1
+  },
+  {
+   "title": "Spacecraft Performance Data Chart",
+   "page": 23,
+   "depth": 1
+  },
+  {
+   "title": "TIE Starfighter",
+   "page": 23,
+   "depth": 1
+  },
+  {
+   "title": "TIE Interceptor",
+   "page": 25,
+   "depth": 1
+  },
+  {
+   "title": "TIE Bomber",
+   "page": 26,
+   "depth": 1
+  },
+  {
+   "title": "Star Destroyer TIE Complement Diagram",
+   "page": 27,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Three: Combat Starships",
+   "page": 29,
+   "depth": 0
+  },
+  {
+   "title": "Corellian Corvettes",
+   "page": 29,
+   "depth": 1
+  },
+  {
+   "title": "Escort Frigates",
+   "page": 30,
+   "depth": 1
+  },
+  {
+   "title": "Victory-Class Destroyer",
+   "page": 31,
+   "depth": 1
+  },
+  {
+   "title": "Imperial Star Destroyer",
+   "page": 32,
+   "depth": 1
+  },
+  {
+   "title": "Mon Calamari Star Cruiser",
+   "page": 34,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Four: Space Transports",
+   "page": 37,
+   "depth": 0
+  },
+  {
+   "title": "Space Barges",
+   "page": 37,
+   "depth": 1
+  },
+  {
+   "title": "Stock Light Freighters",
+   "page": 38,
+   "depth": 1
+  },
+  {
+   "title": "Millennium Falcon",
+   "page": 39,
+   "depth": 1
+  },
+  {
+   "title": "Millennium Falcon Technical Diagram",
+   "page": 40,
+   "depth": 1
+  },
+  {
+   "title": "Bulk Freighters",
+   "page": 43,
+   "depth": 1
+  },
+  {
+   "title": "Container Ships",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "Passenger Liners",
+   "page": 44,
+   "depth": 1
+  },
+  {
+   "title": "Rebel Transports",
+   "page": 46,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Five: Droids",
+   "page": 48,
+   "depth": 0
+  },
+  {
+   "title": "Astromech Droids",
+   "page": 48,
+   "depth": 1
+  },
+  {
+   "title": "Protocol Droids",
+   "page": 49,
+   "depth": 1
+  },
+  {
+   "title": "Medical Droids",
+   "page": 50,
+   "depth": 1
+  },
+  {
+   "title": "Probe Droids",
+   "page": 52,
+   "depth": 1
+  },
+  {
+   "title": "Assassin Droids",
+   "page": 54,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Six: Repulsorlift Vehicles",
+   "page": 57,
+   "depth": 0
+  },
+  {
+   "title": "Landspeeders",
+   "page": 57,
+   "depth": 1
+  },
+  {
+   "title": "Airspeeders",
+   "page": 58,
+   "depth": 1
+  },
+  {
+   "title": "Cloud Cars",
+   "page": 59,
+   "depth": 1
+  },
+  {
+   "title": "Sail Barges",
+   "page": 60,
+   "depth": 1
+  },
+  {
+   "title": "Skiffs",
+   "page": 61,
+   "depth": 1
+  },
+  {
+   "title": "Speeder Bikes",
+   "page": 61,
+   "depth": 1
+  },
+  {
+   "title": "Swoops",
+   "page": 64,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Seven: Imperial Ground Assault Vehicles",
+   "page": 65,
+   "depth": 0
+  },
+  {
+   "title": "Imperial AT-AT",
+   "page": 65,
+   "depth": 1
+  },
+  {
+   "title": "Imperial AT-ST",
+   "page": 67,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Eight: Aliens",
+   "page": 69,
+   "depth": 0
+  },
+  {
+   "title": "Ewoks",
+   "page": 69,
+   "depth": 1
+  },
+  {
+   "title": "Gamorreans",
+   "page": 70,
+   "depth": 1
+  },
+  {
+   "title": "Ithorians",
+   "page": 72,
+   "depth": 1
+  },
+  {
+   "title": "Jawas",
+   "page": 73,
+   "depth": 1
+  },
+  {
+   "title": "Mon Calamari",
+   "page": 75,
+   "depth": 1
+  },
+  {
+   "title": "Quarren",
+   "page": 76,
+   "depth": 1
+  },
+  {
+   "title": "Sand People",
+   "page": 78,
+   "depth": 1
+  },
+  {
+   "title": "Sullustans",
+   "page": 78,
+   "depth": 1
+  },
+  {
+   "title": "Twi’leks",
+   "page": 80,
+   "depth": 1
+  },
+  {
+   "title": "Wookiees",
+   "page": 81,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Nine: Creatures",
+   "page": 83,
+   "depth": 0
+  },
+  {
+   "title": "Banthas",
+   "page": 83,
+   "depth": 1
+  },
+  {
+   "title": "Dewbacks",
+   "page": 85,
+   "depth": 1
+  },
+  {
+   "title": "Mynocks",
+   "page": 86,
+   "depth": 1
+  },
+  {
+   "title": "The Rancor",
+   "page": 86,
+   "depth": 1
+  },
+  {
+   "title": "Space Slugs",
+   "page": 89,
+   "depth": 1
+  },
+  {
+   "title": "Tauntauns",
+   "page": 90,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Ten: General Equipment",
+   "page": 91,
+   "depth": 0
+  },
+  {
+   "title": "Equipment Cost Chart",
+   "page": 95,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Eleven: Lightsabers",
+   "page": 98,
+   "depth": 0
+  },
+  {
+   "title": "Chapter Twelve: Stormtroopers",
+   "page": 100,
+   "depth": 0
+  },
+  {
+   "title": "Cold Assault Troops",
+   "page": 101,
+   "depth": 1
+  },
+  {
+   "title": "Zero G Stormtroopers",
+   "page": 102,
+   "depth": 1
+  },
+  {
+   "title": "Scouts",
+   "page": 103,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Thirteen: Rebel Bases",
+   "page": 105,
+   "depth": 0
+  },
+  {
+   "title": "Tierfon Rebel Outpost Map",
+   "page": 110,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Fourteen: Imperial Garrisons",
+   "page": 113,
+   "depth": 0
+  },
+  {
+   "title": "Imperial Base Map",
+   "page": 115,
+   "depth": 1
+  },
+  {
+   "title": "Chapter Fifteen: Heroes and Villains",
+   "page": 117,
+   "depth": 0
+  },
+  {
+   "title": "Luke Skywalker",
+   "page": 117,
+   "depth": 1
+  },
+  {
+   "title": "Princess Leia Organa",
+   "page": 119,
+   "depth": 1
+  },
+  {
+   "title": "Han Solo",
+   "page": 121,
+   "depth": 1
+  },
+  {
+   "title": "Chewbacca",
+   "page": 124,
+   "depth": 1
+  },
+  {
+   "title": "Mon Mothma",
+   "page": 126,
+   "depth": 1
+  },
+  {
+   "title": "Lando Calrissian",
+   "page": 127,
+   "depth": 1
+  },
+  {
+   "title": "C-3PO and R2-D2",
+   "page": 128,
+   "depth": 1
+  },
+  {
+   "title": "Obi-Wan Kenobi",
+   "page": 130,
+   "depth": 1
+  },
+  {
+   "title": "Yoda",
+   "page": 132,
+   "depth": 1
+  },
+  {
+   "title": "Boba Fett",
+   "page": 134,
+   "depth": 1
+  },
+  {
+   "title": "Darth Vader",
+   "page": 136,
+   "depth": 1
+  },
+  {
+   "title": "Bibliography",
+   "page": 138,
    "depth": 0
   }
  ]

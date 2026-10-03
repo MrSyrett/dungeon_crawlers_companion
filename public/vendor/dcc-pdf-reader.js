@@ -129,6 +129,9 @@
     var tocAvailable = false, tocOpen = false;
     var lastFlip = 0;
     var wheelAccum = 0;
+    var renderedScale = 1;      // effective CSS scale the visible canvas was drawn at
+    var zoomTarget = 0;         // in-flight zoom target scale (0 = none pending)
+    var zoomSettle = null;      // debounce timer: crisp re-render after a zoom gesture
     var books = [], activeFile = "";   // the tab bar's book list + current book
 
     // ── DOM ──────────────────────────────────────────────────────────────────
@@ -219,7 +222,8 @@
         // sits cleanly on screen with no scrolling. This is the default view.
         fitScale = Math.min(availW / base.width, availH / base.height);
         // Never render smaller than fit-to-page — that's the zoomed-out floor.
-        var scale = (userScale > 0 ? Math.max(userScale, fitScale) : fitScale) * dpr;
+        var effForRender = (userScale > 0 ? Math.max(userScale, fitScale) : fitScale);
+        var scale = effForRender * dpr;
         var vp = page.getViewport({ scale: scale });
         // Render into an OFFSCREEN canvas and swap it in only once it's painted, so
         // the visible page never clears to white mid-zoom / mid-flip.
@@ -235,6 +239,7 @@
           wrap.appendChild(c);
           canvas = c;
           canvas.dataset.page = String(n);
+          renderedScale = effForRender;   // the fresh canvas carries no live-zoom transform
           // restore / set scroll position for this render
           if (pendingRatio != null) {
             stage.scrollTop = clamp(pendingRatio * stage.scrollHeight - stage.clientHeight / 2, 0, stage.scrollHeight);
@@ -274,11 +279,42 @@
       setPage(pageNum + dir, dir, dir < 0 ? "bottom" : "top");
     }
 
-    function setZoom(scale) { userScale = scale > 0 ? scale : 0; pendingScroll = "top"; render(pageNum, 0); }
+    function setZoom(scale) {
+      if (zoomSettle) { clearTimeout(zoomSettle); zoomSettle = null; }
+      zoomTarget = 0;
+      userScale = scale > 0 ? scale : 0; pendingScroll = "top"; render(pageNum, 0);
+    }
     function zoomBy(f) {
       var ratio = stage.scrollHeight ? (stage.scrollTop + stage.clientHeight / 2) / stage.scrollHeight : 0;
       // Floor at fit-to-page so you can't zoom out past the default view.
       userScale = clamp(effScale() * f, fitScale, 6);
+      pendingRatio = ratio;
+      render(pageNum, 0);
+    }
+
+    // Smooth, continuous zoom. During a wheel/pinch gesture we scale the EXISTING
+    // canvas bitmap with a CSS transform (instant, fluid — no re-raster per step),
+    // and only re-rasterize crisply once the gesture settles. This replaces the
+    // old "zoom in discrete steps" feel.
+    function liveZoom(target) {
+      target = clamp(target, fitScale, 6);
+      zoomTarget = target;
+      userScale = target;
+      var f = renderedScale > 0 ? (target / renderedScale) : 1;
+      if (canvas) {
+        canvas.style.transformOrigin = "center center";
+        canvas.style.transform = "scale(" + f + ")";
+        canvas.style.willChange = "transform";
+      }
+      if (zoomSettle) clearTimeout(zoomSettle);
+      zoomSettle = setTimeout(settleZoom, 140);
+    }
+    function settleZoom() {
+      if (zoomSettle) { clearTimeout(zoomSettle); zoomSettle = null; }
+      if (!zoomTarget) return;
+      zoomTarget = 0;
+      if (canvas) { canvas.style.willChange = ""; }  // transform cleared by the swap-in
+      var ratio = stage.scrollHeight ? (stage.scrollTop + stage.clientHeight / 2) / stage.scrollHeight : 0;
       pendingRatio = ratio;
       render(pageNum, 0);
     }
@@ -372,21 +408,27 @@
       tocEnable(false);
       var mySeq = renderSeq;
       var key = docKey, doc = pdfDoc;
-      var outlinePromise;
-      try { outlinePromise = doc.getOutline(); } catch (e) { outlinePromise = Promise.resolve(null); }
-      outlinePromise.then(function (outline) {
-        if (mySeq !== renderSeq) return;
-        if (outline && outline.length) { tocEnable(true); populateToc(flattenOutline(outline)); return; }
-        // No embedded outline. Prefer a CURATED outline (hand-verified from the
-        // book's real Table of Contents, shipped as /vendor/rulebook-outlines.json
-        // keyed by file), then fall back to runtime generation.
-        loadCurated().then(function (map) {
+      // Fall back to the PDF's own embedded outline, then to runtime generation.
+      function fromEmbedded() {
+        var outlinePromise;
+        try { outlinePromise = doc.getOutline(); } catch (e) { outlinePromise = Promise.resolve(null); }
+        outlinePromise.then(function (outline) {
           if (mySeq !== renderSeq) return;
-          var cur = map && map[key];
-          if (cur && cur.length) { tocEnable(true); populateToc(cur); return; }
+          if (outline && outline.length) { tocEnable(true); populateToc(flattenOutline(outline)); return; }
           buildGeneratedToc(doc, key, mySeq);
-        });
-      }).catch(function () { tocEnable(false); });
+        }).catch(function () { if (mySeq === renderSeq) buildGeneratedToc(doc, key, mySeq); });
+      }
+      // A CURATED outline (hand-verified from the book's real Table of Contents,
+      // shipped as /vendor/rulebook-outlines.json keyed by file) takes priority
+      // and OVERRIDES any embedded outline — some PDFs ship junk outlines (e.g.
+      // one bookmark per scanned page), which curated entries are meant to
+      // replace. Order: curated → embedded → runtime generation.
+      loadCurated().then(function (map) {
+        if (mySeq !== renderSeq) return;
+        var cur = map && map[key];
+        if (cur && cur.length) { tocEnable(true); populateToc(cur); return; }
+        fromEmbedded();
+      }).catch(function () { if (mySeq === renderSeq) fromEmbedded(); });
     }
 
     // Runtime fallback: generate (and cache) chapters by parsing the TOC / scanning.
@@ -651,7 +693,14 @@
     // ── wiring: wheel (flip / pan-edge / ctrl-zoom) ──────────────────────────
     stage.addEventListener("wheel", function (e) {
       if (!pdfDoc) return;
-      if (e.ctrlKey || e.metaKey) { e.preventDefault(); zoomBy(e.deltaY < 0 ? 1.12 : 1 / 1.12); return; }
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        // Continuous zoom: accumulate a target and scale the bitmap live, so it
+        // glides rather than jumping in fixed steps.
+        var from = zoomTarget || effScale();
+        liveZoom(from * Math.exp(-e.deltaY * 0.0022));
+        return;
+      }
       var overflowY = stage.scrollHeight - stage.clientHeight > 2;
       if (overflowY) {
         var atTop = stage.scrollTop <= 0;
@@ -713,7 +762,7 @@
       if (tc.mode === "pinch" && e.touches.length === 2) {
         e.preventDefault();
         var d = touchDist(e.touches);
-        if (tc.d0 > 0) { userScale = clamp(tc.s0 * (d / tc.d0), fitScale, 6); render(pageNum, 0); }
+        if (tc.d0 > 0) { liveZoom(tc.s0 * (d / tc.d0)); }
         return;
       }
       if (tc.mode === "one" && e.touches.length === 1) {
@@ -740,6 +789,9 @@
           else if (Math.abs(dy) > 52 && Math.abs(dy) > Math.abs(dx)) flip(dy < 0 ? 1 : -1);
         }
       }
+      // Pinch finished → re-rasterize crisply at the final zoom (unless a second
+      // finger is still down, i.e. one of two fingers lifted mid-pinch).
+      if (tc.mode === "pinch" && (!e.touches || e.touches.length < 2) && zoomTarget) settleZoom();
       tc.mode = "";
     });
 
