@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { MMRPG_TRAITS } from "@/lib/data/mmrpg-traits";
+import { MMRPG_TAGS } from "@/lib/data/mmrpg-tags";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
@@ -9,22 +9,22 @@ import {
 } from "@/components/MmrpgRef";
 
 export const dynamic = "force-dynamic";
-const BASE = "/mmrpg/traits";
+const BASE = "/mmrpg/tags";
 const sd = (o: Record<string, unknown>, k: string) => (typeof o[k] === "string" ? (o[k] as string) : "");
 type Row = { name: string; description: string; homebrew?: boolean };
 
-export default async function MmrpgTraitsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
+export default async function MmrpgTagsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const [hbTrait, hbTraitOwn, campaigns] = await Promise.all([
-    visibleHomebrew(user.id, { type: "mmrpg-trait" }),
-    ownHomebrew(user.id, "mmrpg-trait"),
+  const [hbTag, hbTagOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "mmrpg-tag" }),
+    ownHomebrew(user.id, "mmrpg-tag"),
     userCampaigns(user.id),
   ]);
   const ALL: Row[] = [
-    ...hbTrait.map((h) => ({ name: h.name, description: sd(h.data as Record<string, unknown>, "description"), homebrew: true })),
-    ...MMRPG_TRAITS.map((t) => ({ name: t.name, description: t.description })),
+    ...hbTag.map((h) => ({ name: h.name, description: sd(h.data as Record<string, unknown>, "description"), homebrew: true })),
+    ...MMRPG_TAGS.map((t) => ({ name: t.name, description: t.description })),
   ];
 
   const raw = await searchParams;
@@ -34,16 +34,16 @@ export default async function MmrpgTraitsPage({ searchParams }: { searchParams: 
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <MmrpgHeader title="Traits" subtitle={`${MMRPG_TRAITS.length} traits${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
+      <MmrpgHeader title="Tags" subtitle={`${MMRPG_TAGS.length} tags${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
 
       <div className="mb-6 flex flex-col gap-4">
-        <HomebrewEditor kind="mmrpg-trait" campaigns={campaigns} initial={hbTraitOwn} />
+        <HomebrewEditor kind="mmrpg-tag" campaigns={campaigns} initial={hbTagOwn} />
       </div>
 
-      <SearchForm base={BASE} q={q} placeholder="Search traits…" hidden={{}} />
-      <CountLine count={results.length} noun="trait" base={BASE} filtered={Boolean(needle)} />
+      <SearchForm base={BASE} q={q} placeholder="Search tags…" hidden={{}} />
+      <CountLine count={results.length} noun="tag" base={BASE} filtered={Boolean(needle)} />
 
-      {results.length === 0 ? <EmptyState noun="trait" base={BASE} /> : (
+      {results.length === 0 ? <EmptyState noun="tag" base={BASE} /> : (
         <div className="grid gap-3 md:grid-cols-2">
           {results.map((t) => (
             <article key={`${t.homebrew ? "hb" : "bk"}-${t.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">

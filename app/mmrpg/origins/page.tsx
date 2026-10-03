@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { MMRPG_ORIGINS } from "@/lib/data/mmrpg-origins";
-import { MMRPG_OCCUPATIONS } from "@/lib/data/mmrpg-occupations";
-import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, one, type Query, type RawQuery } from "@/components/MmrpgRef";
+import { MmrpgHeader, SearchForm, CountLine, EmptyState, RefDetails, cardCls, nameCls, one, type RawQuery } from "@/components/MmrpgRef";
 import MmrpgRefTokens from "@/components/MmrpgRefTokens";
 
 export const dynamic = "force-dynamic";
@@ -10,16 +9,16 @@ const BASE = "/mmrpg/origins";
 
 type Row = { name: string; description: string; tags?: string; traits?: string; powers?: string; occupation?: string; limitation?: string; examples?: string };
 
-function Card({ o, kind }: { o: Row; kind: "origin" | "occupation" }) {
+function Card({ o }: { o: Row }) {
   return (
     <article className={cardCls}>
       <h3 className={nameCls}>{o.name}</h3>
       <dl className="mt-2 space-y-0.5 text-[11px] text-[var(--muted)]">
         {o.tags ? <div><span className="font-semibold text-[var(--text)]">Tags:</span> <MmrpgRefTokens text={o.tags} kind="tag" /></div> : null}
         {o.traits ? <div><span className="font-semibold text-[var(--text)]">Traits:</span> <MmrpgRefTokens text={o.traits} kind="trait" /></div> : null}
-        {kind === "origin" && o.powers ? <div><span className="font-semibold text-[var(--text)]">Powers:</span> <MmrpgRefTokens text={o.powers} kind="power" /></div> : null}
-        {kind === "origin" && o.occupation ? <div><span className="font-semibold text-[var(--text)]">Suggested occupation:</span> <MmrpgRefTokens text={o.occupation} kind="occupation" /></div> : null}
-        {kind === "origin" && o.limitation ? <div><span className="font-semibold text-[var(--text)]">Limitation:</span> {o.limitation}</div> : null}
+        {o.powers ? <div><span className="font-semibold text-[var(--text)]">Powers:</span> <MmrpgRefTokens text={o.powers} kind="power" /></div> : null}
+        {o.occupation ? <div><span className="font-semibold text-[var(--text)]">Suggested occupation:</span> <MmrpgRefTokens text={o.occupation} kind="occupation" /></div> : null}
+        {o.limitation ? <div><span className="font-semibold text-[var(--text)]">Limitation:</span> {o.limitation}</div> : null}
         {o.examples ? <div className="italic">e.g. {o.examples}</div> : null}
       </dl>
       {o.description ? <RefDetails><p className="text-[12px] leading-relaxed text-[var(--muted)]">{o.description}</p></RefDetails> : null}
@@ -27,44 +26,25 @@ function Card({ o, kind }: { o: Row; kind: "origin" | "occupation" }) {
   );
 }
 
-export default async function MmrpgBackgroundsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
+export default async function MmrpgOriginsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
-  const show = ["origins", "occupations"].includes(one(raw.show)) ? one(raw.show) : "";
-  const current: Query = { q, show };
 
   const origins = (MMRPG_ORIGINS as Row[]).filter((o) => !needle || [o.name, o.description, o.tags ?? "", o.traits ?? "", o.powers ?? ""].join(" ").toLowerCase().includes(needle));
-  const occupations = (MMRPG_OCCUPATIONS as Row[]).filter((o) => !needle || [o.name, o.description, o.tags ?? "", o.traits ?? ""].join(" ").toLowerCase().includes(needle));
-  const total = (show !== "occupations" ? origins.length : 0) + (show !== "origins" ? occupations.length : 0);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <MmrpgHeader title="Origins & Occupations" subtitle={`${MMRPG_ORIGINS.length} origins · ${MMRPG_OCCUPATIONS.length} occupations`} />
-      <SearchForm base={BASE} q={q} placeholder="Search origins & occupations…" hidden={{ show }} />
-      <ChipRow label="Show" base={BASE} current={current} param="show" options={[{ key: "origins", label: "Origins" }, { key: "occupations", label: "Occupations" }]} active={show} />
-      <CountLine count={total} noun="entry" base={BASE} filtered={Boolean(needle || show)} />
-      {total === 0 ? <EmptyState noun="entry" base={BASE} /> : null}
-
-      {show !== "occupations" && origins.length ? (
-        <section className={`${cardCls} mb-4`}>
-          <SectionH>Origins</SectionH>
-          <div className="mt-3 grid gap-3 md:grid-cols-2">
-            {origins.map((o) => <Card key={o.name} o={o} kind="origin" />)}
-          </div>
-        </section>
-      ) : null}
-
-      {show !== "origins" && occupations.length ? (
-        <section className={`${cardCls} mb-4`}>
-          <SectionH>Occupations</SectionH>
-          <div className="mt-3 grid gap-3 md:grid-cols-2">
-            {occupations.map((o) => <Card key={o.name} o={o} kind="occupation" />)}
-          </div>
-        </section>
-      ) : null}
+      <MmrpgHeader title="Origins" subtitle={`${MMRPG_ORIGINS.length} origins`} />
+      <SearchForm base={BASE} q={q} placeholder="Search origins…" hidden={{}} />
+      <CountLine count={origins.length} noun="origin" base={BASE} filtered={Boolean(needle)} />
+      {origins.length === 0 ? <EmptyState noun="origin" base={BASE} /> : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {origins.map((o) => <Card key={o.name} o={o} />)}
+        </div>
+      )}
     </div>
   );
 }
