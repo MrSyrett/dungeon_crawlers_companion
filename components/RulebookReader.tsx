@@ -5,6 +5,9 @@ import {
   subscribeSystem,
   getSystemSnapshot,
   getSystemServerSnapshot,
+  setSystem,
+  isSystemKey,
+  type SystemKey,
 } from "@/components/systemStore";
 
 // The Rulebook Compendium's PDF viewer. It mounts the shared, site-wide reader
@@ -82,15 +85,14 @@ export default function RulebookReader({
   const sysRef = useRef(activeSystem);
   sysRef.current = activeSystem;
 
-  // Only tabs for the selected system ("BOTH" always shows); the currently-open
-  // book stays visible even if it belongs to a different system.
+  // Only tabs for the SELECTED system ("BOTH" always shows). On a system swap the
+  // current book is intentionally dropped if it isn't in the new system — setBooks
+  // then opens that system's first book, which (after lib ordering) is its core
+  // rule book.
   function applyBooks(reader: ReaderInstance) {
     const sys = sysRef.current;
-    const cur = activeFileRef.current;
-    const shown = books.filter(
-      (b) => b.system === "BOTH" || b.system === sys || b.file === cur,
-    );
-    reader.setBooks(shown, cur);
+    const shown = books.filter((b) => b.system === "BOTH" || b.system === sys);
+    reader.setBooks(shown, activeFileRef.current);
   }
 
   // Create the reader once; /rules re-navigates (remounts) to change books.
@@ -133,6 +135,14 @@ export default function RulebookReader({
         },
       });
       readerRef.current = reader;
+      // The book was opened from a system-filtered grid (or a direct link). Make
+      // the global system match it so the tabs filter to the right system and the
+      // nav toggle stays in step.
+      const openedBook = books.find((b) => b.file === active);
+      if (openedBook && isSystemKey(openedBook.system) && openedBook.system !== sysRef.current) {
+        sysRef.current = openedBook.system as SystemKey;
+        setSystem(openedBook.system as SystemKey);
+      }
       applyBooks(reader);
     })();
 

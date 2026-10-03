@@ -270,12 +270,19 @@
     }
 
     // ── chapters / outline ─────────────────────────────────────────────────────
-    var tocEntries = []; // { link, dest, page(null until resolved) }
+    var tocEntries = [];          // { link, page(null until known) }
+    var genCache = new Map();     // docKey → generated outline (so re-open is instant)
     function setTocOpen(open) {
       tocOpen = !!open && tocAvailable;
       container.classList.toggle("dccpdf-toc-open", tocOpen);
       tocToggle.classList.toggle("is-on", tocOpen);
       tocToggle.setAttribute("aria-expanded", tocOpen ? "true" : "false");
+    }
+    function tocEnable(on) {
+      tocAvailable = on;
+      tocToggle.disabled = !on;
+      tocToggle.classList.toggle("is-disabled", !on);
+      if (!on) setTocOpen(false);
     }
     function highlightToc() {
       if (!tocEntries.length) return;
@@ -298,54 +305,160 @@
         });
       } catch (e) { return Promise.resolve(null); }
     }
-    function buildToc() {
+
+    // Build the TOC DOM from a normalized list: [{ title, dest?, page?, depth }].
+    // `page` entries already know their target (generated outline); `dest` entries
+    // resolve it lazily (embedded outline).
+    function populateToc(items) {
       tocList.innerHTML = "";
       tocEntries = [];
       var mySeq = renderSeq;
+      var frag = document.createDocumentFragment();
+      items.forEach(function (it) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "dccpdf-toc-link";
+        btn.style.paddingLeft = (8 + (it.depth || 0) * 14) + "px";
+        btn.textContent = it.title || "(untitled)";
+        var entry = { link: btn, page: it.page != null ? it.page : null };
+        tocEntries.push(entry);
+        btn.addEventListener("click", function () {
+          if (entry.page != null) { setPage(entry.page, 0, "top"); if (isNarrow()) setTocOpen(false); return; }
+          resolveDest(it.dest).then(function (p) {
+            if (p) { entry.page = p; setPage(p, 0, "top"); if (isNarrow()) setTocOpen(false); }
+          });
+        });
+        frag.appendChild(btn);
+      });
+      tocList.appendChild(frag);
+      // Resolve dest-based entries in the background for current-chapter highlight.
+      items.forEach(function (it, i) {
+        if (tocEntries[i].page == null && it.dest != null) {
+          resolveDest(it.dest).then(function (p) { if (mySeq === renderSeq) { tocEntries[i].page = p; highlightToc(); } });
+        }
+      });
+      highlightToc();
+    }
+
+    // Flatten an embedded PDF outline (nested via `.items`) to a depth list.
+    function flattenOutline(outline) {
+      var out = [];
+      (function walk(items, depth) {
+        items.forEach(function (it) {
+          out.push({ title: it.title, dest: it.dest, depth: depth });
+          if (it.items && it.items.length) walk(it.items, depth + 1);
+        });
+      })(outline, 0);
+      return out;
+    }
+
+    function buildToc() {
+      tocList.innerHTML = "";
+      tocEntries = [];
+      tocEnable(false);
+      var mySeq = renderSeq;
+      var key = docKey, doc = pdfDoc;
       var outlinePromise;
-      try { outlinePromise = pdfDoc.getOutline(); } catch (e) { outlinePromise = Promise.resolve(null); }
+      try { outlinePromise = doc.getOutline(); } catch (e) { outlinePromise = Promise.resolve(null); }
       outlinePromise.then(function (outline) {
         if (mySeq !== renderSeq) return;
-        if (!outline || !outline.length) {
-          tocAvailable = false;
-          tocToggle.disabled = true;
-          tocToggle.classList.add("is-disabled");
-          setTocOpen(false);
-          tocList.innerHTML = '<div class="dccpdf-toc-empty">This PDF has no embedded chapters.</div>';
+        if (outline && outline.length) { tocEnable(true); populateToc(flattenOutline(outline)); return; }
+        // No embedded outline — generate chapters from the page text so every book
+        // is navigable. Cached per document for instant re-open.
+        var cached = genCache.get(key);
+        if (cached) {
+          if (cached.length) { tocEnable(true); populateToc(cached); }
+          else { tocEnable(false); tocToggle.disabled = true; tocToggle.classList.add("is-disabled"); tocList.innerHTML = '<div class="dccpdf-toc-empty">No chapters found in this PDF.</div>'; }
           return;
         }
-        tocAvailable = true;
-        tocToggle.disabled = false;
-        tocToggle.classList.remove("is-disabled");
-        var frag = document.createDocumentFragment();
-        (function add(items, depth) {
-          items.forEach(function (it) {
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "dccpdf-toc-link";
-            btn.style.paddingLeft = (8 + depth * 14) + "px";
-            btn.textContent = it.title || "(untitled)";
-            var entry = { link: btn, dest: it.dest, page: null };
-            tocEntries.push(entry);
-            btn.addEventListener("click", function () {
-              resolveDest(it.dest).then(function (p) {
-                if (p) { setPage(p, 0, "top"); if (isNarrow()) setTocOpen(false); }
-              });
+        // Let the panel be opened to show progress while we scan.
+        tocAvailable = true; tocToggle.disabled = false; tocToggle.classList.remove("is-disabled");
+        tocList.innerHTML = '<div class="dccpdf-toc-empty">Building chapters…</div>';
+        generateOutline(doc, mySeq).then(function (entries) {
+          if (mySeq !== renderSeq) return;
+          genCache.set(key, entries);
+          if (entries.length) { tocEnable(true); populateToc(entries); }
+          else { tocList.innerHTML = '<div class="dccpdf-toc-empty">No chapters found in this PDF.</div>'; }
+        }).catch(function () { if (mySeq === renderSeq) tocList.innerHTML = '<div class="dccpdf-toc-empty">Couldn’t build chapters.</div>'; });
+      }).catch(function () { tocEnable(false); });
+    }
+
+    // Derive a chapter list from a PDF with no embedded outline by scanning page
+    // text for lines rendered noticeably larger than the body text. Sequential and
+    // in the background; aborts if the user switches books (seq check).
+    function generateOutline(doc, mySeq) {
+      var N = Math.min(doc.numPages || 0, 800);
+      if (!N) return Promise.resolve([]);
+      var lines = [];        // { page, size, text }
+      var sizeWeight = {};   // rounded font size → total chars (to find the body size)
+      var p = 0;
+      function nextPage() {
+        if (mySeq !== renderSeq || p >= N) return Promise.resolve();
+        p++;
+        var pageNo = p;
+        return doc.getPage(pageNo).then(function (page) {
+          return page.getTextContent().then(function (tc) {
+            var byLine = {};
+            tc.items.forEach(function (it) {
+              if (!it.str || !it.str.trim()) return;
+              var tr = it.transform || [1, 0, 0, 1, 0, 0];
+              var size = Math.hypot(tr[2], tr[3]) || it.height || 0;
+              var y = Math.round(tr[5]);
+              var L = byLine[y] || (byLine[y] = { size: 0, parts: [] });
+              if (size > L.size) L.size = size;
+              L.parts.push({ x: tr[4], s: it.str });
             });
-            frag.appendChild(btn);
-            if (it.items && it.items.length) add(it.items, depth + 1);
+            Object.keys(byLine).forEach(function (y) {
+              var L = byLine[y];
+              L.parts.sort(function (a, b) { return a.x - b.x; });
+              var text = L.parts.map(function (q) { return q.s; }).join("").replace(/\s+/g, " ").trim();
+              if (!text) return;
+              var sz = Math.round(L.size);
+              sizeWeight[sz] = (sizeWeight[sz] || 0) + text.length;
+              lines.push({ page: pageNo, size: sz, text: text });
+            });
+            if (page.cleanup) { try { page.cleanup(); } catch (e) {} }
+            return nextPage();
           });
-        })(outline, 0);
-        tocList.appendChild(frag);
-        // Resolve destinations in the background so we can highlight the current
-        // chapter (best-effort; never blocks navigation).
-        tocEntries.forEach(function (e) {
-          resolveDest(e.dest).then(function (p) { if (mySeq === renderSeq) { e.page = p; highlightToc(); } });
+        }).catch(function () { return nextPage(); });
+      }
+      return nextPage().then(function () {
+        if (mySeq !== renderSeq || !lines.length) return [];
+        // Body text size = the size carrying the most characters.
+        var bodySize = 0, bodyW = -1;
+        Object.keys(sizeWeight).forEach(function (s) { if (sizeWeight[s] > bodyW) { bodyW = sizeWeight[s]; bodySize = +s; } });
+        var threshold = Math.max(bodySize * 1.25, bodySize + 1);
+        var cand = lines.filter(function (l) {
+          return l.size >= threshold && l.text.length >= 2 && l.text.length <= 80 &&
+            /[A-Za-z]/.test(l.text) && !/^[\d.\s]+$/.test(l.text);
         });
-      }).catch(function () {
-        tocAvailable = false;
-        tocToggle.disabled = true;
-        tocToggle.classList.add("is-disabled");
+        if (!cand.length) return [];
+        // Drop running headers/footers: identical text repeating on many pages.
+        var freq = {};
+        cand.forEach(function (c) { var k = c.text.toLowerCase(); freq[k] = (freq[k] || 0) + 1; });
+        var maxRepeat = Math.max(4, Math.floor(N * 0.15));
+        cand = cand.filter(function (c) { return freq[c.text.toLowerCase()] <= maxRepeat; });
+        // Collapse an identical heading repeated on the same page.
+        var dedup = [];
+        cand.forEach(function (c) {
+          var prev = dedup[dedup.length - 1];
+          if (prev && prev.text === c.text && prev.page === c.page) return;
+          dedup.push(c);
+        });
+        // Cap the count: keep the largest size tiers first.
+        var MAXN = 300;
+        if (dedup.length > MAXN) {
+          var sizes = dedup.map(function (c) { return c.size; }).sort(function (a, b) { return b - a; });
+          var cut = sizes[MAXN - 1];
+          dedup = dedup.filter(function (c) { return c.size >= cut; }).slice(0, MAXN);
+        }
+        // Depth by size tier (largest = depth 0), capped at 2.
+        var uniq = [];
+        dedup.forEach(function (c) { if (uniq.indexOf(c.size) < 0) uniq.push(c.size); });
+        uniq.sort(function (a, b) { return b - a; });
+        var depthOf = {};
+        uniq.forEach(function (s, i) { depthOf[s] = Math.min(i, 2); });
+        return dedup.map(function (c) { return { title: c.text, page: c.page, depth: depthOf[c.size] || 0 }; });
       });
     }
 
@@ -578,9 +691,11 @@
       if (key) {
         var d = docCache.get(key);
         if (d) { try { d.destroy(); } catch (e) {} docCache.delete(key); }
+        genCache.delete(key);
       } else {
         docCache.forEach(function (d) { try { d.destroy(); } catch (e) {} });
         docCache.clear();
+        genCache.clear();
       }
     }
     function refresh() {

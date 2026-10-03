@@ -31,10 +31,39 @@ export function prettyName(file: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Every PDF sitting in the private directory (sorted, .pdf only).
+// Rulebooks sort into these buckets, shown in this order within each system:
+// Core Rules → Quickstarts → Expansions → Adventures. Classification is by
+// filename keyword (these are the GM's own files, so the name is the lever):
+//   • "quickstart / starter / intro / basic / primer / beginner / free rules" → Quickstarts
+//   • "core / rulebook / rules / player(s) / handbook / corebook"             → Core Rules
+//   • "adventure / module / scenario / one-shot / dungeon / campaign / quest" → Adventures
+//   • anything else (supplement, bestiary, gear, setting, companion, …)       → Expansions
+// The FIRST Core-Rules book in a system is therefore its default ("core rule book").
+export type RulebookCategory = "Core Rules" | "Quickstarts" | "Expansions" | "Adventures";
+const CATEGORY_ORDER: RulebookCategory[] = ["Core Rules", "Quickstarts", "Expansions", "Adventures"];
+
+export function rulebookCategory(file: string): RulebookCategory {
+  const n = file.toLowerCase();
+  if (/quick[\s_-]?start|starter|intro|basic|primer|beginner|free[\s_-]?rules/.test(n)) return "Quickstarts";
+  if (/\bcore\b|rulebook|corebook|core[\s_-]?rules|player'?s?|handbook|\brules\b/.test(n)) return "Core Rules";
+  if (/adventure|module|scenario|one[\s_-]?shot|dungeon|campaign|quest/.test(n)) return "Adventures";
+  return "Expansions";
+}
+
+// Order by category (the four buckets above), then alphabetically within a bucket.
+function compareRulebooks(a: string, b: string): number {
+  const ca = CATEGORY_ORDER.indexOf(rulebookCategory(a));
+  const cb = CATEGORY_ORDER.indexOf(rulebookCategory(b));
+  if (ca !== cb) return ca - cb;
+  return a.localeCompare(b);
+}
+
+// Every PDF sitting in the private directory (.pdf only), ordered by category.
 export async function listRulebookFiles(): Promise<string[]> {
   try {
-    return (await readdir(RULEBOOK_DIR)).filter((f) => f.toLowerCase().endsWith(".pdf")).sort();
+    return (await readdir(RULEBOOK_DIR))
+      .filter((f) => f.toLowerCase().endsWith(".pdf"))
+      .sort(compareRulebooks);
   } catch {
     return []; // directory missing — treated the same as empty
   }
