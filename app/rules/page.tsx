@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { isAdminEmail } from "@/lib/admin";
 import { visibleRulebooks, prettyName } from "@/lib/rulebooks";
 import RulebookGrid from "@/components/RulebookGrid";
+import RulebookReader from "@/components/RulebookReader";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +14,6 @@ export default async function RulesPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const isAdmin = isAdminEmail(user.email);
   // Only the books this user is allowed to see (with their system tags — the
   // grid below hides non-matching ones behind the Shadowdark/DCC toggle).
   const books = await visibleRulebooks({ id: user.id, email: user.email });
@@ -27,52 +25,10 @@ export default async function RulesPage({
   const selected = book && books.some((b) => b.file === book) ? book : null;
 
   if (selected) {
+    // The shared, site-wide reader (same component the GM Screen uses): chapters
+    // panel, snap paging, pinch/ctrl zoom, drag-to-pan, per-book page memory.
     const src = `/api/rulebooks/${encodeURIComponent(selected)}`;
-    return (
-      <div className="flex h-screen flex-col">
-        <header className="flex shrink-0 items-center gap-3 border-b border-[var(--border)] bg-[var(--panel)] px-4 py-2">
-          <Link
-            href="/rules"
-            className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]"
-          >
-            ← Rulebooks
-          </Link>
-          <span className="truncate text-sm font-bold uppercase tracking-[0.1em]">
-            {prettyName(selected)}
-          </span>
-          <div className="ml-auto flex items-center gap-2">
-            <a
-              href={src}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]"
-            >
-              New tab
-            </a>
-            <a
-              href={src}
-              download
-              className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]"
-            >
-              Download
-            </a>
-          </div>
-        </header>
-
-        {/* Browsers with a built-in PDF viewer render this inline; the rest get
-            the fallback link below it. */}
-        <object data={src} type="application/pdf" className="min-h-0 flex-1">
-          <iframe src={src} title={prettyName(selected)} className="h-full w-full border-0" />
-          <p className="p-8 text-sm text-[var(--muted)]">
-            Your browser can&apos;t display PDFs inline.{" "}
-            <a href={src} className="text-[var(--gold)] underline">
-              Open {prettyName(selected)}
-            </a>
-            .
-          </p>
-        </object>
-      </div>
-    );
+    return <RulebookReader src={src} title={prettyName(selected)} docKey={selected} />;
   }
 
   return (

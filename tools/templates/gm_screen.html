@@ -13921,6 +13921,7 @@ else syncHomebrewMonsters();
 <script src="/tools-data/gb-bestiary.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <script src="/vendor/pdfjs/pdf.min.js"></script>
+<script src="/vendor/dcc-pdf-reader.js"></script>
 <script>
 
 
@@ -15887,129 +15888,39 @@ function init_rules(root) {
   const esc = t => String(t == null ? '' : t)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-  // ── PDF.js paged reader ───────────────────────────────────────────────────
-  // Each book renders through the bundled PDF.js (/vendor/pdfjs) so the app can
-  // remember the exact page per book and restore it on reopen. The ↗ "open in
-  // new tab" link still gives the browser's native viewer (search / print).
-  let viewerBuilt = false;
-  let scrollEl = null, canvasEl = null, pageInp = null, pageTot = null, prevBtn = null, nextBtn = null;
-  let pdfDoc = null, pageNum = 1, pageCount = 0, userScale = 0, renderSeq = 0, renderingPage = 0, queuedPage = 0;
-  const _docCache = new Map();   // file → PDF.js document (avoid re-parsing on tab switch)
+  // ── Unified PDF reader ────────────────────────────────────────────────────
+  // The reader is the shared window.DCCPdfReader (/vendor/dcc-pdf-reader.js),
+  // the same component the Rulebook Compendium uses — chapters panel, snap
+  // paging, pinch/ctrl zoom, drag-to-pan. We keep per-book page memory here
+  // (positions) and feed it in via startPage / onPage so each book reopens on
+  // its last page. The ↗ "open in new tab" link still gives the browser's
+  // native viewer for full-text search / print.
+  let reader = null;
   const positions = {};          // file → last-viewed page (persisted across sessions)
 
-  function pdfjsReady() {
-    if(!window.pdfjsLib) return null;
-    try { if(!window.pdfjsLib.GlobalWorkerOptions.workerSrc) window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs/pdf.worker.min.js'; } catch(e){}
-    return window.pdfjsLib;
-  }
-
-  function buildViewer() {
-    if(viewerBuilt) return;
-    frameWrap.innerHTML =
-      '<div class="rul-pdf-nav">'
-      + '<button class="btn small ghost rul-pg-prev" title="Previous page" aria-label="Previous page">‹</button>'
-      + '<span class="rul-pg-ind">Page <input class="rul-pg-inp" type="text" inputmode="numeric" value="1" aria-label="Page number"> / <span class="rul-pg-tot">–</span></span>'
-      + '<button class="btn small ghost rul-pg-next" title="Next page" aria-label="Next page">›</button>'
-      + '<span class="rul-pg-sp"></span>'
-      + '<button class="btn small ghost rul-zoom-out" title="Zoom out" aria-label="Zoom out">−</button>'
-      + '<button class="btn small ghost rul-zoom-in" title="Zoom in" aria-label="Zoom in">+</button>'
-      + '<button class="btn small ghost rul-zoom-fit" title="Fit width" aria-label="Fit width">Fit</button>'
-      + '</div>'
-      + '<div class="rul-pdf-scroll" tabindex="0"><canvas class="rul-pdf-canvas"></canvas></div>';
-    scrollEl = frameWrap.querySelector('.rul-pdf-scroll');
-    canvasEl = frameWrap.querySelector('.rul-pdf-canvas');
-    pageInp  = frameWrap.querySelector('.rul-pg-inp');
-    pageTot  = frameWrap.querySelector('.rul-pg-tot');
-    prevBtn  = frameWrap.querySelector('.rul-pg-prev');
-    nextBtn  = frameWrap.querySelector('.rul-pg-next');
-    prevBtn.addEventListener('click', () => goPage(pageNum - 1));
-    nextBtn.addEventListener('click', () => goPage(pageNum + 1));
-    pageInp.addEventListener('change', () => { const n = parseInt(pageInp.value, 10); if(n) goPage(n); else pageInp.value = pageNum; });
-    frameWrap.querySelector('.rul-zoom-in').addEventListener('click', () => setZoom((userScale || 1) * 1.2));
-    frameWrap.querySelector('.rul-zoom-out').addEventListener('click', () => setZoom((userScale || 1) / 1.2));
-    frameWrap.querySelector('.rul-zoom-fit').addEventListener('click', () => setZoom(0));
-    scrollEl.addEventListener('keydown', e => {
-      if(e.key === 'ArrowRight' || e.key === 'PageDown'){ goPage(pageNum + 1); e.preventDefault(); }
-      else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ goPage(pageNum - 1); e.preventDefault(); }
+  function ensureReader() {
+    if(reader) return reader;
+    if(!window.DCCPdfReader || !window.pdfjsLib) return null;
+    reader = window.DCCPdfReader.create(frameWrap, {
+      onPage: (file, pg) => {
+        if(pg > 0) positions[file] = pg;
+        if(window.__ddScheduleSave) { try { window.__ddScheduleSave(); } catch(e){} }
+      },
     });
-    viewerBuilt = true;
-  }
-
-  function setZoom(z) { userScale = z > 0 ? z : 0; renderPage(pageNum); }
-
-  function goPage(n) {
-    if(!pdfDoc) return;
-    n = Math.max(1, Math.min(pageCount, n || 1));
-    pageNum = n;
-    positions[activeFile] = pageNum;
-    if(scrollEl) scrollEl.scrollTop = 0;
-    renderPage(pageNum);
-    if(window.__ddScheduleSave) { try { window.__ddScheduleSave(); } catch(e){} }
-  }
-
-  function renderPage(n) {
-    if(!pdfDoc) return;
-    // A prior loading/error message may have replaced the canvas — rebuild it.
-    if(scrollEl && (!canvasEl || canvasEl.parentNode !== scrollEl)) {
-      scrollEl.innerHTML = '';
-      canvasEl = document.createElement('canvas'); canvasEl.className = 'rul-pdf-canvas';
-      scrollEl.appendChild(canvasEl);
-    }
-    if(!canvasEl) return;
-    if(pageInp) pageInp.value = n;
-    if(pageTot) pageTot.textContent = pageCount;
-    if(prevBtn) prevBtn.disabled = n <= 1;
-    if(nextBtn) nextBtn.disabled = n >= pageCount;
-    if(renderingPage){ queuedPage = n; return; }   // one render at a time; keep only the latest
-    renderingPage = n;
-    const myseq = renderSeq;
-    pdfDoc.getPage(n).then(page => {
-      if(myseq !== renderSeq){ renderingPage = 0; return; }   // book switched mid-render
-      const dpr = window.devicePixelRatio || 1;
-      const avail = Math.max(120, (scrollEl.clientWidth || 600) - 24);
-      const base = page.getViewport({ scale: 1 });
-      const scale = (userScale > 0 ? userScale : (avail / base.width)) * dpr;
-      const vp = page.getViewport({ scale });
-      const ctx = canvasEl.getContext('2d');
-      canvasEl.width = Math.floor(vp.width);
-      canvasEl.height = Math.floor(vp.height);
-      canvasEl.style.width = Math.floor(vp.width / dpr) + 'px';
-      canvasEl.style.height = Math.floor(vp.height / dpr) + 'px';
-      page.render({ canvasContext: ctx, viewport: vp }).promise.then(() => {
-        canvasEl.dataset.rendered = String(n);
-        renderingPage = 0;
-        if(queuedPage && queuedPage !== n){ const q = queuedPage; queuedPage = 0; renderPage(q); } else queuedPage = 0;
-      }).catch(() => { renderingPage = 0; });
-    }).catch(() => { renderingPage = 0; });
+    return reader;
   }
 
   function showBook() {
     const b = books.find(x => x.file === activeFile) || books[0];
-    if(!b) { frameWrap.style.display = 'none'; newTabLink.style.display = 'none'; pdfDoc = null; root.dispatchEvent(new Event('rul-book-change')); return; }
+    if(!b) { frameWrap.style.display = 'none'; newTabLink.style.display = 'none'; root.dispatchEvent(new Event('rul-book-change')); return; }
     activeFile = b.file;
     emptyEl.style.display = 'none';
     frameWrap.style.display = 'flex';
-    buildViewer();
     newTabLink.href = b.url; newTabLink.style.display = '';
-    const lib = pdfjsReady();
-    if(!lib){ if(scrollEl) scrollEl.innerHTML = '<div class="rul-loading">PDF reader is still loading… give it a moment, then switch books.</div>'; root.dispatchEvent(new Event('rul-book-change')); return; }
-    renderSeq++;                       // cancel any in-flight render for the previous book
-    pdfDoc = null;
-    const targetPage = positions[b.file] || 1;
     root.dispatchEvent(new Event('rul-book-change'));
-    const openDoc = doc => {
-      if(activeFile !== b.file) return;   // user already switched away
-      pdfDoc = doc; pageCount = doc.numPages || 1;
-      pageNum = Math.max(1, Math.min(pageCount, targetPage));
-      positions[b.file] = pageNum;
-      renderPage(pageNum);
-    };
-    const cached = _docCache.get(b.file);
-    if(cached){ openDoc(cached); return; }
-    lib.getDocument({ url: b.url }).promise.then(doc => {
-      _docCache.set(b.file, doc);
-      openDoc(doc);
-    }).catch(() => { if(activeFile === b.file && scrollEl) scrollEl.innerHTML = '<div class="rul-loading">Couldn’t open this book.</div>'; });
+    const r = ensureReader();
+    if(!r) { frameWrap.textContent = 'PDF reader is still loading… give it a moment, then switch books.'; return; }
+    r.load({ url: b.url, docKey: b.file, title: b.title, startPage: positions[b.file] || 1 });
   }
 
   function render() {
@@ -16017,8 +15928,7 @@ function init_rules(root) {
       '<button class="rul-booktab' + (b.file === activeFile ? ' on' : '') + '" data-file="' + esc(b.file) + '">'
       + esc(b.title) + '</button>').join('');
     if(!books.length) {
-      _docCache.forEach(doc => { try { doc.destroy(); } catch(e){} });
-      _docCache.clear();
+      if(reader) { try { reader.dropCache(); } catch(e){} }
       frameWrap.style.display = 'none';
       newTabLink.style.display = 'none';
       emptyEl.style.display = 'flex';
@@ -16036,11 +15946,8 @@ function init_rules(root) {
       allBooks = (data.books || []).filter(b => b && b.url && b.file);
       applyBookFilter();
       // Manual refresh means "re-read from the server" — drop every cached PDF
-      // document so the books really reload. Quiet loads just prune documents for
-      // books that no longer exist.
-      _docCache.forEach((doc, file) => {
-        if(!quiet || !books.some(b => b.file === file)) { try { doc.destroy(); } catch(e){} _docCache.delete(file); }
-      });
+      // document so the books really reload.
+      if(!quiet && reader) { try { reader.dropCache(); } catch(e){} }
       loaded = true;
       noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
       render();

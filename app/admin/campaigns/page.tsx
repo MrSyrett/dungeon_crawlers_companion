@@ -9,7 +9,7 @@ import { adminDeleteCampaign } from "@/app/actions/admin-campaigns";
 
 export const dynamic = "force-dynamic";
 
-const SYSTEM_NAME = new Map(SYSTEMS.map((s) => [s.key, s.name]));
+const SYSTEM_NAME = new Map<string, string>(SYSTEMS.map((s) => [s.key, s.name]));
 
 function formatDate(d: Date): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(d);
