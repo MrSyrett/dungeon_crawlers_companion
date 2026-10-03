@@ -18,7 +18,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
-.sheet-wrap{flex:1;overflow-y:auto;padding:16px;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:16px;container-type:inline-size;}
 .roll-log{width:260px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--red);position:sticky;top:0;height:100vh;overflow:hidden;}
 /* collapse tab */
 #log-collapse-btn{position:fixed;right:260px;top:50%;transform:translateY(-50%);z-index:201;background:var(--red);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
@@ -2968,6 +2968,57 @@ syncLinkedAttacks();
 .roll-log { transition: width 0.2s ease; }
 .roll-log.collapsed { width: 0 !important; overflow: hidden; border: none; }
 #log-collapse-btn { transition: right 0.2s ease; }
+
+/* ═══ HYBRID: single-column body while the roll log stays docked right ═══
+   Keyed off the SHEET AREA's real width (container query on .sheet-wrap),
+   not the viewport — so when the open log squeezes the sheet below ~900px
+   the multi-column body collapses to one column but the log stays on the
+   right. Only the phone @media below moves the log to the bottom. These are
+   the body-layout / header-stack / section-grid rules from that @media,
+   minus the log, app-wrap, collapse-btn, padding and pure touch/type bumps. */
+@container (max-width: 900px) {
+  /* Header stacks */
+  .hdr-row { flex-direction: column; }
+  .hdr-logo { min-width: unset !important; }
+  .hdr-fields { grid-template-columns: 1fr 1fr; border-left: none; border-top: 2px solid var(--border); }
+  .hdr-field:nth-child(2n) { border-right: none; }
+  .hdr-field:nth-child(3) { border-right: 1px solid var(--rule); }
+
+  /* Body → single column */
+  .body-row { flex-direction: column; align-items: stretch; }
+  .body-row > div[style*="flex:1;display:flex;flex-direction:column"] { width: 100%; }
+  .stats-col { width: 100%; border-right: none; border-bottom: 2px solid var(--border); }
+  #stats-list { display: flex; flex-direction: column; }
+  .stat-block:nth-child(odd) { border-right: none; }
+  .center-col { width: 100%; }
+
+  /* Combat / vitals strips → one column */
+  .combat-section { flex-direction: column; }
+  .combat-main { width: 100%; }
+  .combat-side { width: 100% !important; border-left: none !important; border-top: 2px solid var(--border); margin-top: 6px; }
+  .combat-row { flex-wrap: wrap; gap: 4px; }
+
+  /* Section grids → fewer columns */
+  #hotlist-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .gear-grid { grid-template-columns: 1fr; }
+  .gear-slot { border-right: none !important; }
+  .bg-notes-grid { grid-template-columns: 1fr; }
+  .bg-extra-grid { grid-template-columns: 1fr; }
+  .comp-grid { grid-template-columns: 1fr; }
+
+  /* Tabs wrap to fill */
+  .tabs-row { overflow-x: visible; }
+  .tab-btn { flex: 1 1 0; min-width: 0; white-space: normal; line-height: 1.12; }
+  .tab-panel { padding: 8px; }
+}
+
+@container (max-width: 420px) {
+  .hdr-fields { grid-template-columns: 1fr; }
+  .hdr-field:nth-child(3) { border-right: none; }
+  #stats-list { grid-template-columns: 1fr; }
+  .stat-block:nth-child(odd) { border-right: none; }
+  .dice-btns { grid-template-columns: repeat(4,1fr); }
+}
 
 @media (max-width: 768px) {
   .app-wrap { flex-direction: column; align-items: stretch; }

@@ -27,7 +27,7 @@ body.dark {
 body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;transition:background .2s,color .2s;}
 
 .app-wrap{display:flex;flex:1;min-height:0;}
-.sheet-wrap{flex:1;overflow-y:auto;padding:16px;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:16px;container-type:inline-size;}
 
 /* ── Scrollbars ────────────────────────────────────────────────────────────
    Thin and in-palette rather than the OS default. Two treatments, because the
@@ -4337,6 +4337,51 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
 
 <!-- Mobile -->
 <style>
+/* ── Hybrid (container query) ──────────────────────────────────────────────
+   When the SHEET AREA itself (not the viewport) is too narrow for the
+   two-column body — e.g. a wide window with the roll log docked open on the
+   right — single-column the body while the log STAYS docked on the right.
+   Keyed off .sheet-wrap's inline size via container-type, so it shrinks with
+   the log. The phone @media below keys off the viewport and is what also docks
+   the log to the bottom; nothing here touches the log, app-wrap or touch sizes. */
+@container (max-width:900px){
+  /* Flow both columns' children into one stacked list and reorder them */
+  .main-body{display:flex;flex-direction:column;align-items:stretch;}
+  .left-col,.main-col{display:contents;}
+  /* Card order: Vitals → Ability Scores → Attacks → Trackers → Tabs */
+  .sd-vitals-card{order:1;}
+  .sd-abilities{order:2;}
+  .sd-attacks-card{order:3;}
+  .sd-trackers{order:4;}
+  .sd-tabs-card{order:5;}
+  /* Inner order (mirrors the phone @media) */
+  .sd-vitals{order:1;grid-template-columns:1fr 1fr;}
+  .main-body > .left-col > .sl:nth-child(1){order:2;}
+  #stats-grid{order:2;}
+  .attacks-section-wrap{order:3;border-top:2px solid var(--border);}
+  .main-body > .left-col > .sl:nth-child(3){order:4;}
+  #trk-list{order:4;}
+  .tabs-bar{order:5;}
+  #tab-spells,#tab-talents,#tab-gear{order:6;}
+  /* Ability scores stay stacked (single column) */
+  .stats-grid{display:flex;flex-direction:column;}
+  /* Header stacking + field grids */
+  .hdr-top{gap:9px;}
+  .hdr-top .name-primary{flex:1 1 100%;order:2;}
+  .hdr-top .title-auto{font-size:12px;}
+  .hdr-metarow > *{flex:1 1 31%!important;}
+  .hdr-fields,.hdr-fields-2{grid-template-columns:1fr 1fr;}
+  .hdr-field:nth-child(2n){border-right:none;}
+  .hdr-field:nth-child(3){border-right:1px solid var(--rule);}
+}
+@container (max-width:460px){
+  .hdr-metarow > *{flex:1 1 47%!important;}
+}
+@container (max-width:420px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .hdr-fields,.hdr-fields-2{grid-template-columns:1fr;}
+  .hdr-field{border-right:none!important;}
+}
 @media(max-width:768px){
   .app-wrap{flex-direction:column;}
   .sheet-wrap{padding:8px;}

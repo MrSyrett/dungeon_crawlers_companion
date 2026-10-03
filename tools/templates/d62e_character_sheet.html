@@ -18,7 +18,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
-.sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;container-type:inline-size;}
 .roll-log{width:280px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--d62e);position:sticky;top:0;height:100vh;overflow:hidden;}
 #log-collapse-btn{position:fixed;right:280px;top:50%;transform:translateY(-50%);z-index:201;background:var(--d62e);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:6px 0 0 6px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 #log-collapse-btn::after{content:"\25C0";}
@@ -321,6 +321,30 @@ body.spec-on .sk-spec-cell{display:table-cell;}
 
 .roll-log{transition:width .2s ease;}
 .roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+/* Hybrid layout: when the SHEET AREA (not the viewport) is too narrow for the multi-column body — e.g. the roll log is docked open — collapse the body to one column while the log stays on the right. Mirrors the sheet's own mobile body/header/grid rules via container queries on .sheet-wrap. Roll-log docking stays in the @media blocks below. */
+@container (max-width:1024px){
+  .body-row{flex-direction:column;align-items:stretch;}
+  .stats-col,.center-col{width:100%;}
+  .hdr-top{grid-template-columns:1fr;gap:9px;}
+}
+@container (max-width:768px){
+  .hdr-row{flex-direction:column;}
+  .hdr-logo{border-right:none;}
+  .hdr-fields{grid-template-columns:1fr 1fr;}
+  .hdr-field{grid-column:span 1 !important;}
+  .hdr-field.wide{grid-column:span 2 !important;}
+  .blk-grid,.vitals{grid-template-columns:1fr;}
+  .combat-grid,.combat-grid.four{grid-template-columns:1fr 1fr;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  #weapons-tbl th:nth-child(4),#weapons-tbl td:nth-child(4),#weapons-tbl th:nth-child(5),#weapons-tbl td:nth-child(5){display:none;}
+  .hdr-metarow>*{flex:1 1 31%!important;}
+}
+@container (max-width:480px){
+  .wound-track{gap:4px;}
+  .wound-track button{flex:1 1 28%;min-width:0;}
+  .a-skills{grid-template-columns:1fr;}
+  .hdr-metarow>*{flex:1 1 47%!important;}
+}
 @media (max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}

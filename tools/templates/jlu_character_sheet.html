@@ -34,7 +34,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
-.sheet-wrap{flex:1;overflow-y:auto;padding:40px 16px 24px;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:40px 16px 24px;container-type:inline-size;}
 .sheet{max-width:1120px;margin:0 auto;background:var(--paper);border:3px solid var(--border);border-radius:14px;box-shadow:0 10px 34px rgba(12,22,44,.28);overflow:hidden;}
 /* Header — system name + hero name on the top line; the rest in a row underneath */
 .hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,var(--jlu-dk),var(--jlu));color:#fff;padding:14px 18px;}
@@ -253,6 +253,15 @@ body.dark .pill button{background:#1f2c47;color:var(--ink);}
 body.dark .stat.click:hover{background:#1a2a4d;}
 
 .roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+/* Hybrid layout: collapse the multi-column body to a single column when the SHEET AREA itself (not the viewport) is too narrow — e.g. when the roll log is docked open on a mid-width screen. Driven by a container query on .sheet-wrap so it reacts to the sheet's real width (which shrinks when the log is open). The roll log itself only re-docks to the bottom at true phone width via the @media block below. */
+@container (max-width:900px){
+  .grid2,.grid3{grid-template-columns:1fr;}
+  .hdr-top{grid-template-columns:1fr;gap:9px;}
+  .hdr-metarow>*{flex:1 1 31%!important;}
+}
+@container (max-width:520px){
+  .hdr-metarow>*{flex:1 1 47%!important;}
+}
 @media(max-width:768px){
   .sheet-wrap{padding:12px 12px 16px;}
   .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--jlu);border-radius:14px 14px 0 0;z-index:200;max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
