@@ -795,6 +795,21 @@
       tc.mode = "";
     });
 
+    // Scrolling the chapters list or the book-tab bar must NOT reach the page's
+    // pull-to-refresh (it listens on window and treats a downward swipe at the
+    // top as a pull). Swallow the touch sequence inside those scrollers, exactly
+    // like the stage does.
+    function keepScroll(el) {
+      if (!el) return;
+      var stop = function (e) { e.stopPropagation(); };
+      el.addEventListener("touchstart", stop, { passive: true });
+      el.addEventListener("touchmove", stop, { passive: true });
+      el.addEventListener("touchend", stop, { passive: true });
+    }
+    keepScroll(tocList);
+    keepScroll(tocEl);
+    keepScroll(booksBar);
+
     // ── container resize → re-fit ────────────────────────────────────────────
     var ro = null, roT = 0;
     if (window.ResizeObserver) {
