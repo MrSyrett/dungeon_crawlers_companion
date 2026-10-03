@@ -35,8 +35,14 @@
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
     var css =
-      ".dccpdf{display:flex;flex-direction:column;min-height:0;height:100%;position:relative;background:var(--dccpdf-stage,#111);color:var(--text,var(--white,#e5e7eb));overflow:hidden}" +
+      ".dccpdf{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;height:100%;position:relative;background:var(--dccpdf-stage,#111);color:var(--text,var(--white,#e5e7eb));overflow:hidden}" +
       ".dccpdf *{box-sizing:border-box}" +
+      ".dccpdf-books{display:flex;gap:4px;overflow-x:auto;padding:6px 8px;background:var(--panel,#1a1d24);border-bottom:1px solid var(--border,#2a2f3a);flex-shrink:0}" +
+      ".dccpdf-books:empty{display:none}" +
+      ".dccpdf-booktab{flex-shrink:0;white-space:nowrap;padding:5px 10px;border-radius:6px;background:var(--panel-2,#22262f);border:1px solid var(--border,#2a2f3a);color:var(--muted,#8a93a3);font:700 10.5px/1 'Barlow Condensed','Montserrat',system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}" +
+      ".dccpdf-booktab:hover{color:var(--text,var(--white,#fff));border-color:var(--accent,var(--gold,#d8b45a))}" +
+      ".dccpdf-booktab.is-active{background:var(--gold,#d8b45a);color:#1a1a1a;border-color:var(--gold,#d8b45a)}" +
+      ".dccpdf-empty{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:24px;color:var(--muted,#8a93a3);font:500 13px/1.5 'Barlow','Montserrat',system-ui,sans-serif}" +
       ".dccpdf-toolbar{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--panel,#1a1d24);border-bottom:1px solid var(--border,#2a2f3a);flex-shrink:0;flex-wrap:wrap}" +
       ".dccpdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:30px;height:28px;padding:0 9px;border-radius:6px;background:var(--panel-2,#22262f);border:1px solid var(--border,#2a2f3a);color:var(--text,var(--white,#e5e7eb));font:700 12px/1 'Barlow Condensed','Montserrat',system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap}" +
       ".dccpdf-btn:hover{border-color:var(--accent,var(--gold,#d8b45a));color:var(--white,#fff)}" +
@@ -86,6 +92,9 @@
     var workerSrc = opts.workerSrc || "/vendor/pdfjs/pdf.worker.min.js";
     var showOpen = !!opts.showOpenInNew;   // "New tab" link in the toolbar
     var showDl = !!opts.showDownload;      // "Download" link in the toolbar
+    var getStart = typeof opts.getStartPage === "function" ? opts.getStartPage : null;
+    var onActive = typeof opts.onActiveBook === "function" ? opts.onActiveBook : null;
+    var emptyText = opts.emptyText || "No rulebooks found.";
     if (pdfjsLib && pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
       try { pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc; } catch (e) {}
     }
@@ -102,10 +111,12 @@
     var tocAvailable = false, tocOpen = false;
     var lastFlip = 0;
     var wheelAccum = 0;
+    var books = [], activeFile = "";   // the tab bar's book list + current book
 
     // ── DOM ──────────────────────────────────────────────────────────────────
     container.classList.add("dccpdf");
     container.innerHTML =
+      '<div class="dccpdf-books"></div>' +
       '<div class="dccpdf-toolbar">' +
         '<button class="dccpdf-btn dccpdf-toc-toggle" type="button" title="Chapters" aria-label="Chapters">☰</button>' +
         '<span class="dccpdf-ind">Page <input class="dccpdf-inp" type="text" inputmode="numeric" value="1" aria-label="Page number"> / <span class="dccpdf-tot">–</span></span>' +
@@ -121,8 +132,13 @@
           '<div class="dccpdf-wrap"><canvas class="dccpdf-canvas"></canvas></div>' +
           '<div class="dccpdf-msg" style="display:none"></div>' +
         '</div>' +
-      '</div>';
+      '</div>' +
+      '<div class="dccpdf-empty"></div>';
 
+    var booksBar = container.querySelector(".dccpdf-books");
+    var toolbarEl = container.querySelector(".dccpdf-toolbar");
+    var bodyEl = container.querySelector(".dccpdf-body");
+    var emptyEl = container.querySelector(".dccpdf-empty");
     var tocToggle = container.querySelector(".dccpdf-toc-toggle");
     var pageInp = container.querySelector(".dccpdf-inp");
     var openLink = container.querySelector(".dccpdf-open");
@@ -327,6 +343,15 @@
       return window.matchMedia && window.matchMedia("(max-width:720px)").matches;
     }
 
+    // ── wiring: book tabs ────────────────────────────────────────────────────
+    emptyEl.textContent = emptyText;
+    booksBar.addEventListener("click", function (e) {
+      var t = e.target && e.target.closest ? e.target.closest(".dccpdf-booktab") : null;
+      if (!t) return;
+      var f = t.getAttribute("data-file");
+      if (f && f !== activeFile) openBook(f);
+    });
+
     // ── wiring: toolbar ────────────────────────────────────────────────────────
     tocToggle.addEventListener("click", function () { if (tocAvailable) setTocOpen(!tocOpen); });
     tocBackdrop.addEventListener("click", function () { setTocOpen(false); });
@@ -482,6 +507,58 @@
       }).catch(function () { if (mySeq === renderSeq) showMsg("Couldn’t open this book."); });
     }
 
+    // ── public: book tabs / library ──────────────────────────────────────────
+    // The reader owns the whole shell — tab bar + toolbar + reader + empty state —
+    // so both the Compendium and the GM Screen get the identical experience from
+    // one place. Hosts just feed it the book list and (optionally) per-book start
+    // pages; the reader handles switching, caching and page memory callbacks.
+    function markTabs() {
+      var tabs = booksBar.querySelectorAll(".dccpdf-booktab");
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.toggle("is-active", tabs[i].getAttribute("data-file") === activeFile);
+      }
+    }
+    function renderTabs() {
+      booksBar.innerHTML = books.map(function (b) {
+        return '<button class="dccpdf-booktab" type="button" data-file="' + esc(b.file) + '">' +
+          esc(b.title || b.file) + "</button>";
+      }).join("");
+      markTabs();
+    }
+    function showEmpty(on) {
+      emptyEl.style.display = on ? "flex" : "none";
+      toolbarEl.style.display = on ? "none" : "";
+      bodyEl.style.display = on ? "none" : "";
+      if (on) { renderSeq++; pdfDoc = null; }
+    }
+    function openBook(file) {
+      var b = null;
+      for (var i = 0; i < books.length; i++) { if (books[i].file === file) { b = books[i]; break; } }
+      if (!b) return;
+      activeFile = b.file;
+      markTabs();
+      if (onActive) { try { onActive(b.file); } catch (e) {} }
+      load({
+        url: b.url,
+        docKey: b.file,
+        title: b.title,
+        downloadName: b.downloadName,
+        startPage: getStart ? (getStart(b.file) || 1) : 1,
+      });
+    }
+    // Replace the tab bar's book list and open one. `active` picks the book to
+    // show (falls back to the current one, then the first).
+    function setBooks(list, active) {
+      books = (Array.isArray(list) ? list : []).filter(function (b) { return b && b.url && b.file; });
+      renderTabs();
+      if (!books.length) { activeFile = ""; showMsg(""); showEmpty(true); return; }
+      showEmpty(false);
+      var want = (active && books.some(function (b) { return b.file === active; })) ? active
+        : (activeFile && books.some(function (b) { return b.file === activeFile; })) ? activeFile
+          : books[0].file;
+      openBook(want);
+    }
+
     function dropCache(key) {
       if (key) {
         var d = docCache.get(key);
@@ -492,6 +569,7 @@
       }
     }
     function refresh() {
+      if (activeFile) { dropCache(activeFile); openBook(activeFile); return Promise.resolve(); }
       if (!lastBook) return Promise.resolve();
       dropCache(docKey);
       return load({ url: lastBook.url, docKey: docKey, title: lastBook.title, startPage: pageNum });
@@ -506,11 +584,17 @@
     }
 
     return {
+      // Library API (preferred): feed it the book list; it renders the tabs.
+      setBooks: setBooks,
+      setActiveFile: function (f) { if (f && f !== activeFile) openBook(f); },
+      getActiveFile: function () { return activeFile; },
+      // Single-book convenience (no tabs): open one document directly.
       load: load,
       setPage: function (n) { setPage(n, 0, "top"); },
       getPage: function () { return pageNum; },
       pageCount: function () { return pageCount; },
       refresh: refresh,
+      refreshCurrent: refresh,
       dropCache: dropCache,
       relayout: function () { if (pdfDoc) render(pageNum, 0); },
       openToc: function (open) { setTocOpen(open !== false); },

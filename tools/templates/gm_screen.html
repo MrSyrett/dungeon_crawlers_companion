@@ -4323,19 +4323,8 @@ GMScenes.renderPins();
       <div class="toolbar-spacer"></div>
       <span class="rul-note"></span>
     </div>
-    <div class="rul-body">
-      <div class="rul-bar">
-        <div class="rul-booktabs"></div>
-      </div>
-      <div class="rul-view">
-        <div class="rul-empty">
-          <div class="pty-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg></div>
-          <div class="pty-empty-title">No Rulebooks Found</div>
-          <div class="pty-empty-sub">Rulebooks are read from the server &mdash; the same books listed on the Rulebooks page. Drop a PDF into public/rulebooks/ and press Refresh.</div>
-        </div>
-        <div class="rul-frame-wrap" style="display:none;"></div>
-      </div>
-    </div>
+    <!-- The shared DCCPdfReader (tabs + toolbar + chapters + reader) mounts here. -->
+    <div class="rul-body"></div>
   </div>
 </template>
 
@@ -15858,10 +15847,8 @@ function init_party(root) {
 // ══════════════════════════════════════════
 function init_rules(root) {
   const refreshBtn = root.querySelector('.rul-refresh');
-  const tabsEl     = root.querySelector('.rul-booktabs');
   const noteEl     = root.querySelector('.rul-note');
-  const emptyEl    = root.querySelector('.rul-empty');
-  const frameWrap  = root.querySelector('.rul-frame-wrap');
+  const body       = root.querySelector('.rul-body');
 
   let allBooks = [];     // every book the user may see — from /api/rulebooks
   let books = [];        // filtered to the currently-selected game system
@@ -15875,107 +15862,80 @@ function init_rules(root) {
     if(!books.some(b => b.file === activeFile)) activeFile = books.length ? books[0].file : '';
   }
 
-  const esc = t => String(t == null ? '' : t)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
   // ── Unified PDF reader ────────────────────────────────────────────────────
-  // The reader is the shared window.DCCPdfReader (/vendor/dcc-pdf-reader.js),
-  // the same component the Rulebook Compendium uses — chapters panel, snap
-  // paging, pinch/ctrl zoom, drag-to-pan. We keep per-book page memory here
-  // (positions) and feed it in via startPage / onPage so each book reopens on
-  // its last page. New tab / Download live in the reader's own toolbar (the
-  // shared eReader menu bar), updated per book.
+  // The reader is the shared window.DCCPdfReader (/vendor/dcc-pdf-reader.js) —
+  // the SAME component (and the same tab bar, toolbar, chapters panel, gestures)
+  // the Rulebook Compendium uses, so there's one system to update. We feed it the
+  // book list via setBooks and keep per-book page memory here (positions) through
+  // getStartPage / onPage so each book reopens on its last page; onActiveBook
+  // tracks the current tab for the board save.
   let reader = null;
   const positions = {};          // file → last-viewed page (persisted across sessions)
+  const save = () => { if(window.__ddScheduleSave) { try { window.__ddScheduleSave(); } catch(e){} } };
 
   function ensureReader() {
     if(reader) return reader;
     if(!window.DCCPdfReader || !window.pdfjsLib) return null;
-    reader = window.DCCPdfReader.create(frameWrap, {
+    body.innerHTML = '';
+    reader = window.DCCPdfReader.create(body, {
       showOpenInNew: true,
       showDownload: true,
-      onPage: (file, pg) => {
-        if(pg > 0) positions[file] = pg;
-        if(window.__ddScheduleSave) { try { window.__ddScheduleSave(); } catch(e){} }
-      },
+      emptyText: 'No rulebooks found. Rulebooks are read from the server — the same books listed on the Rulebooks page. Drop a PDF into public/rulebooks/ and press Refresh.',
+      getStartPage: (f) => positions[f] || 1,
+      onActiveBook: (f) => { activeFile = f; save(); },
+      onPage: (f, pg) => { if(pg > 0) positions[f] = pg; save(); },
     });
     return reader;
   }
 
-  function showBook() {
-    const b = books.find(x => x.file === activeFile) || books[0];
-    if(!b) { frameWrap.style.display = 'none'; return; }
-    activeFile = b.file;
-    emptyEl.style.display = 'none';
-    frameWrap.style.display = 'flex';
+  // Push the current (filtered) book list into the shared reader.
+  function sync() {
     const r = ensureReader();
-    if(!r) { frameWrap.textContent = 'PDF reader is still loading… give it a moment, then switch books.'; return; }
-    r.load({ url: b.url, docKey: b.file, title: b.title, startPage: positions[b.file] || 1 });
-  }
-
-  function render() {
-    tabsEl.innerHTML = books.map(b =>
-      '<button class="rul-booktab' + (b.file === activeFile ? ' on' : '') + '" data-file="' + esc(b.file) + '">'
-      + esc(b.title) + '</button>').join('');
-    if(!books.length) {
-      if(reader) { try { reader.dropCache(); } catch(e){} }
-      frameWrap.style.display = 'none';
-      emptyEl.style.display = 'flex';
-      return;
-    }
-    showBook();
+    if(!r) { body.textContent = 'PDF reader is still loading… give it a moment.'; return; }
+    r.setBooks(books.map(b => ({ file: b.file, title: b.title, url: b.url })), activeFile);
+    noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
   }
 
   async function load(quiet) {
     if(!quiet) noteEl.textContent = 'Loading…';
     try {
-      const r = await fetch('/api/rulebooks', { credentials: 'same-origin' });
-      if(!r.ok) throw new Error(r.status);
-      const data = await r.json();
+      const resp = await fetch('/api/rulebooks', { credentials: 'same-origin' });
+      if(!resp.ok) throw new Error(resp.status);
+      const data = await resp.json();
       allBooks = (data.books || []).filter(b => b && b.url && b.file);
       applyBookFilter();
-      // Manual refresh means "re-read from the server" — drop every cached PDF
-      // document so the books really reload.
+      // Manual refresh means "re-read from the server" — drop cached PDFs so the
+      // books really reload.
       if(!quiet && reader) { try { reader.dropCache(); } catch(e){} }
       loaded = true;
-      noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
-      render();
+      sync();
     } catch(err) {
       noteEl.textContent = '';
-      emptyEl.style.display = 'flex';
-      emptyEl.querySelector('.pty-empty-title').textContent = 'Rulebooks Unavailable';
-      emptyEl.querySelector('.pty-empty-sub').textContent =
-        'Could not read the rulebook list from the server. Open the GM Screen from Dungeon Crawler\'s Companion while signed in.';
+      const r = ensureReader();
+      if(r) r.setBooks([]);   // shows the reader's empty state
     }
   }
-
-  tabsEl.addEventListener('click', e => {
-    const t = e.target.closest('.rul-booktab');
-    if(!t) return;
-    activeFile = t.dataset.file;
-    render();
-  });
 
   refreshBtn.addEventListener('click', () => load(false));
 
   // Re-filter when the GM switches game system in the top bar.
   document.addEventListener('gm-system-change', () => {
     if(!loaded) return;
+    if(reader) activeFile = reader.getActiveFile() || activeFile;
     applyBookFilter();
-    noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
-    render();
+    sync();
   });
 
   // Save the chosen book AND the last-viewed page per book (PDFs live on the
   // server; only these small pointers are persisted) so the reader reopens right
   // where the GM left off.
-  root._getState = () => ({ activeFile, positions: Object.assign({}, positions) });
+  root._getState = () => ({ activeFile: reader ? (reader.getActiveFile() || activeFile) : activeFile, positions: Object.assign({}, positions) });
   root._setState = (st) => {
     if(st && st.activeFile) activeFile = st.activeFile;
     if(st && st.positions && typeof st.positions === 'object') {
       Object.keys(st.positions).forEach(f => { const n = parseInt(st.positions[f], 10); if(n > 0) positions[f] = n; });
     }
-    if(loaded) render();
+    if(loaded) sync();
   };
 
   load(true);
