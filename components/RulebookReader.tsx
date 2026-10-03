@@ -1,18 +1,21 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 // The Rulebook Compendium's PDF viewer. It mounts the shared, site-wide reader
 // (window.DCCPdfReader, /vendor/dcc-pdf-reader.js) — the exact same component the
 // GM Screen uses — so chapters, snap paging, pinch/ctrl zoom and drag-to-pan
-// behave identically in both places. Page position is remembered per book in
-// localStorage, so reopening a book returns to the last page read.
+// behave identically in both places. The reader's own toolbar carries New tab /
+// Download, so there's no separate header. Page position is remembered per book
+// in localStorage, so reopening a book returns to the last page read.
 
 type ReaderInstance = { load: (b: Record<string, unknown>) => void; destroy: () => void };
-type ReaderFactory = {
-  create: (el: HTMLElement, opts: { onPage?: (docKey: string, page: number) => void }) => ReaderInstance;
+type ReaderOpts = {
+  onPage?: (docKey: string, page: number) => void;
+  showOpenInNew?: boolean;
+  showDownload?: boolean;
 };
+type ReaderFactory = { create: (el: HTMLElement, opts: ReaderOpts) => ReaderInstance };
 declare global {
   interface Window {
     pdfjsLib?: unknown;
@@ -75,6 +78,8 @@ export default function RulebookReader({
       }
       if (cancelled || !hostRef.current || !window.DCCPdfReader) return;
       const reader = window.DCCPdfReader.create(hostRef.current, {
+        showOpenInNew: true,
+        showDownload: true,
         onPage: (_k: string, page: number) => {
           try {
             localStorage.setItem(posKey, String(page));
@@ -100,28 +105,7 @@ export default function RulebookReader({
     };
   }, [src, docKey, title]);
 
-  const linkCls =
-    "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]";
-
-  return (
-    <div className="flex h-screen flex-col">
-      <header className="flex shrink-0 items-center gap-3 border-b border-[var(--border)] bg-[var(--panel)] px-4 py-2">
-        <Link href="/rules" className={`${linkCls} shrink-0`}>
-          ← Rulebooks
-        </Link>
-        <span className="min-w-0 flex-1 truncate text-sm font-bold uppercase tracking-[0.1em]">
-          {title}
-        </span>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <a href={src} target="_blank" rel="noreferrer" className={linkCls}>
-            New tab
-          </a>
-          <a href={src} download className={linkCls}>
-            Download
-          </a>
-        </div>
-      </header>
-      <div ref={hostRef} className="min-h-0 flex-1" />
-    </div>
-  );
+  // The reader fills the screen; its own toolbar carries chapters, page, Fit,
+  // New tab and Download (no separate header bar).
+  return <div ref={hostRef} className="h-screen" />;
 }

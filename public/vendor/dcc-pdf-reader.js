@@ -84,6 +84,8 @@
     injectStyles();
     var pdfjsLib = opts.pdfjsLib || window.pdfjsLib;
     var workerSrc = opts.workerSrc || "/vendor/pdfjs/pdf.worker.min.js";
+    var showOpen = !!opts.showOpenInNew;   // "New tab" link in the toolbar
+    var showDl = !!opts.showDownload;      // "Download" link in the toolbar
     if (pdfjsLib && pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
       try { pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc; } catch (e) {}
     }
@@ -106,13 +108,11 @@
     container.innerHTML =
       '<div class="dccpdf-toolbar">' +
         '<button class="dccpdf-btn dccpdf-toc-toggle" type="button" title="Chapters" aria-label="Chapters">☰</button>' +
-        '<button class="dccpdf-btn dccpdf-prev" type="button" title="Previous page" aria-label="Previous page">‹</button>' +
         '<span class="dccpdf-ind">Page <input class="dccpdf-inp" type="text" inputmode="numeric" value="1" aria-label="Page number"> / <span class="dccpdf-tot">–</span></span>' +
-        '<button class="dccpdf-btn dccpdf-next" type="button" title="Next page" aria-label="Next page">›</button>' +
         '<span class="dccpdf-sp"></span>' +
-        '<button class="dccpdf-btn dccpdf-zoomout" type="button" title="Zoom out" aria-label="Zoom out">−</button>' +
-        '<button class="dccpdf-btn dccpdf-zoomin" type="button" title="Zoom in" aria-label="Zoom in">+</button>' +
-        '<button class="dccpdf-btn dccpdf-zoomfit" type="button" title="Fit width" aria-label="Fit width">Fit</button>' +
+        '<button class="dccpdf-btn dccpdf-zoomfit" type="button" title="Fit the whole page" aria-label="Fit the whole page">Fit</button>' +
+        '<a class="dccpdf-btn dccpdf-open" target="_blank" rel="noreferrer" title="Open in a new tab" aria-label="Open in a new tab" style="display:none;text-decoration:none">New tab</a>' +
+        '<a class="dccpdf-btn dccpdf-dl" title="Download the PDF" aria-label="Download the PDF" style="display:none;text-decoration:none">Download</a>' +
       '</div>' +
       '<div class="dccpdf-body">' +
         '<aside class="dccpdf-toc" aria-label="Chapters"><div class="dccpdf-toc-head">Chapters</div><div class="dccpdf-toc-list"></div></aside>' +
@@ -124,9 +124,9 @@
       '</div>';
 
     var tocToggle = container.querySelector(".dccpdf-toc-toggle");
-    var prevBtn = container.querySelector(".dccpdf-prev");
-    var nextBtn = container.querySelector(".dccpdf-next");
     var pageInp = container.querySelector(".dccpdf-inp");
+    var openLink = container.querySelector(".dccpdf-open");
+    var dlLink = container.querySelector(".dccpdf-dl");
     var pageTot = container.querySelector(".dccpdf-tot");
     var tocEl = container.querySelector(".dccpdf-toc");
     var tocList = container.querySelector(".dccpdf-toc-list");
@@ -143,8 +143,6 @@
     function updateNav() {
       pageInp.value = pageNum;
       pageTot.textContent = pageCount || "–";
-      prevBtn.disabled = pageNum <= 1;
-      nextBtn.disabled = pageNum >= pageCount;
     }
 
     function setPannable() {
@@ -181,10 +179,14 @@
       pdfDoc.getPage(n).then(function (page) {
         if (myseq !== renderSeq) { rendering = 0; return; }
         var dpr = window.devicePixelRatio || 1;
-        var avail = Math.max(120, (stage.clientWidth || 600) - 28);
+        var availW = Math.max(120, (stage.clientWidth || 600) - 28);
+        var availH = Math.max(120, (stage.clientHeight || 600) - 28);
         var base = page.getViewport({ scale: 1 });
-        fitScale = avail / base.width;
-        var scale = (userScale > 0 ? userScale : fitScale) * dpr;
+        // "Fit" shows the WHOLE page — bounded by both width and height — so a page
+        // sits cleanly on screen with no scrolling. This is the default view.
+        fitScale = Math.min(availW / base.width, availH / base.height);
+        // Never render smaller than fit-to-page — that's the zoomed-out floor.
+        var scale = (userScale > 0 ? Math.max(userScale, fitScale) : fitScale) * dpr;
         var vp = page.getViewport({ scale: scale });
         var ctx = canvas.getContext("2d");
         canvas.width = Math.floor(vp.width);
@@ -235,7 +237,8 @@
     function setZoom(scale) { userScale = scale > 0 ? scale : 0; pendingScroll = "top"; render(pageNum, 0); }
     function zoomBy(f) {
       var ratio = stage.scrollHeight ? (stage.scrollTop + stage.clientHeight / 2) / stage.scrollHeight : 0;
-      userScale = clamp(effScale() * f, 0.25, 6);
+      // Floor at fit-to-page so you can't zoom out past the default view.
+      userScale = clamp(effScale() * f, fitScale, 6);
       pendingRatio = ratio;
       render(pageNum, 0);
     }
@@ -327,14 +330,10 @@
     // ── wiring: toolbar ────────────────────────────────────────────────────────
     tocToggle.addEventListener("click", function () { if (tocAvailable) setTocOpen(!tocOpen); });
     tocBackdrop.addEventListener("click", function () { setTocOpen(false); });
-    prevBtn.addEventListener("click", function () { flip(-1); });
-    nextBtn.addEventListener("click", function () { flip(1); });
     pageInp.addEventListener("change", function () {
       var n = parseInt(pageInp.value, 10);
       if (n) setPage(n, 0, "top"); else pageInp.value = pageNum;
     });
-    container.querySelector(".dccpdf-zoomin").addEventListener("click", function () { zoomBy(1.2); });
-    container.querySelector(".dccpdf-zoomout").addEventListener("click", function () { zoomBy(1 / 1.2); });
     container.querySelector(".dccpdf-zoomfit").addEventListener("click", function () { setZoom(0); });
 
     // ── wiring: keyboard ─────────────────────────────────────────────────────
@@ -408,7 +407,7 @@
       if (tc.mode === "pinch" && e.touches.length === 2) {
         e.preventDefault();
         var d = touchDist(e.touches);
-        if (tc.d0 > 0) { userScale = clamp(tc.s0 * (d / tc.d0), 0.25, 6); render(pageNum, 0); }
+        if (tc.d0 > 0) { userScale = clamp(tc.s0 * (d / tc.d0), fitScale, 6); render(pageNum, 0); }
         return;
       }
       if (tc.mode === "one" && e.touches.length === 1) {
@@ -458,6 +457,13 @@
       renderSeq++;
       var mySeq = renderSeq;
       docKey = key; userScale = 0; pdfDoc = null;
+      // Point the toolbar's New tab / Download links at this book.
+      if (openLink) { openLink.href = url || "#"; openLink.style.display = (showOpen && url) ? "" : "none"; }
+      if (dlLink) {
+        dlLink.href = url || "#";
+        dlLink.setAttribute("download", book.downloadName || "");
+        dlLink.style.display = (showDl && url) ? "" : "none";
+      }
       setTocOpen(false);
       tocAvailable = false; tocToggle.disabled = true; tocToggle.classList.add("is-disabled");
       showMsg("Loading…");

@@ -4320,7 +4320,6 @@ GMScenes.renderPins();
   <div class="tool-instance rul-tool" data-tool="rules">
     <div class="toolbar-tpl" style="display:none">
       <button class="btn small ghost rul-refresh" title="Refresh" aria-label="Re-read the rulebooks on the server"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.6a6.4 6.4 0 0 1 5.5 3.1H15.3v2.1h5.4V5.4h-2.1v1.9A8.5 8.5 0 0 0 3.6 11.2l2.1.3A6.4 6.4 0 0 1 12 5.6z"/><path d="M12 18.4a6.4 6.4 0 0 1-5.5-3.1h2.2v-2.1H3.3v5.4h2.1v-1.9A8.5 8.5 0 0 0 20.4 12.8l-2.1-.3A6.4 6.4 0 0 1 12 18.4z"/></svg></button>
-      <a class="btn small ghost rul-newtab" href="#" target="_blank" rel="noreferrer" title="Open in new tab" aria-label="Open in new tab" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg></a>
       <div class="toolbar-spacer"></div>
       <span class="rul-note"></span>
     </div>
@@ -5459,15 +5458,7 @@ function syncToolbar(slot, toolNode) {
     if(lbl) lbl.addEventListener('click', e => { e.preventDefault(); livePtyInput.click(); });
   }
 
-  // Rulebooks: mirror the live "open in new tab" link onto the cloned one
-  const cloneOpen = slot.querySelector('.rul-newtab');
-  const liveOpen  = toolNode.querySelector('.rul-newtab');
-  if(cloneOpen && liveOpen) {
-    const mirror = () => { cloneOpen.href = liveOpen.href; cloneOpen.style.display = liveOpen.style.display; };
-    mirror();
-    toolNode.addEventListener('rul-book-change', mirror);
-    _cleanups.push(() => toolNode.removeEventListener('rul-book-change', mirror));
-  }
+  // (Rulebooks "open in new tab" now lives in the reader's own toolbar.)
 
   // Notes import: cloned label click triggers live file input
   // Generator tabs: wire each clone tab to its live counterpart by data-tab
@@ -15867,7 +15858,6 @@ function init_party(root) {
 // ══════════════════════════════════════════
 function init_rules(root) {
   const refreshBtn = root.querySelector('.rul-refresh');
-  const newTabLink = root.querySelector('.rul-newtab');
   const tabsEl     = root.querySelector('.rul-booktabs');
   const noteEl     = root.querySelector('.rul-note');
   const emptyEl    = root.querySelector('.rul-empty');
@@ -15893,8 +15883,8 @@ function init_rules(root) {
   // the same component the Rulebook Compendium uses — chapters panel, snap
   // paging, pinch/ctrl zoom, drag-to-pan. We keep per-book page memory here
   // (positions) and feed it in via startPage / onPage so each book reopens on
-  // its last page. The ↗ "open in new tab" link still gives the browser's
-  // native viewer for full-text search / print.
+  // its last page. New tab / Download live in the reader's own toolbar (the
+  // shared eReader menu bar), updated per book.
   let reader = null;
   const positions = {};          // file → last-viewed page (persisted across sessions)
 
@@ -15902,6 +15892,8 @@ function init_rules(root) {
     if(reader) return reader;
     if(!window.DCCPdfReader || !window.pdfjsLib) return null;
     reader = window.DCCPdfReader.create(frameWrap, {
+      showOpenInNew: true,
+      showDownload: true,
       onPage: (file, pg) => {
         if(pg > 0) positions[file] = pg;
         if(window.__ddScheduleSave) { try { window.__ddScheduleSave(); } catch(e){} }
@@ -15912,12 +15904,10 @@ function init_rules(root) {
 
   function showBook() {
     const b = books.find(x => x.file === activeFile) || books[0];
-    if(!b) { frameWrap.style.display = 'none'; newTabLink.style.display = 'none'; root.dispatchEvent(new Event('rul-book-change')); return; }
+    if(!b) { frameWrap.style.display = 'none'; return; }
     activeFile = b.file;
     emptyEl.style.display = 'none';
     frameWrap.style.display = 'flex';
-    newTabLink.href = b.url; newTabLink.style.display = '';
-    root.dispatchEvent(new Event('rul-book-change'));
     const r = ensureReader();
     if(!r) { frameWrap.textContent = 'PDF reader is still loading… give it a moment, then switch books.'; return; }
     r.load({ url: b.url, docKey: b.file, title: b.title, startPage: positions[b.file] || 1 });
@@ -15930,7 +15920,6 @@ function init_rules(root) {
     if(!books.length) {
       if(reader) { try { reader.dropCache(); } catch(e){} }
       frameWrap.style.display = 'none';
-      newTabLink.style.display = 'none';
       emptyEl.style.display = 'flex';
       return;
     }
