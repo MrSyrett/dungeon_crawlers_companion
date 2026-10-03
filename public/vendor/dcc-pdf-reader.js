@@ -110,9 +110,9 @@
         '<button class="dccpdf-btn dccpdf-toc-toggle" type="button" title="Chapters" aria-label="Chapters">☰</button>' +
         '<span class="dccpdf-ind">Page <input class="dccpdf-inp" type="text" inputmode="numeric" value="1" aria-label="Page number"> / <span class="dccpdf-tot">–</span></span>' +
         '<span class="dccpdf-sp"></span>' +
-        '<button class="dccpdf-btn dccpdf-zoomfit" type="button" title="Fit the whole page" aria-label="Fit the whole page">Fit</button>' +
         '<a class="dccpdf-btn dccpdf-open" target="_blank" rel="noreferrer" title="Open in a new tab" aria-label="Open in a new tab" style="display:none;text-decoration:none">New tab</a>' +
         '<a class="dccpdf-btn dccpdf-dl" title="Download the PDF" aria-label="Download the PDF" style="display:none;text-decoration:none">Download</a>' +
+        '<button class="dccpdf-btn dccpdf-zoomfit" type="button" title="Fit the whole page" aria-label="Fit the whole page">Fit</button>' +
       '</div>' +
       '<div class="dccpdf-body">' +
         '<aside class="dccpdf-toc" aria-label="Chapters"><div class="dccpdf-toc-head">Chapters</div><div class="dccpdf-toc-list"></div></aside>' +

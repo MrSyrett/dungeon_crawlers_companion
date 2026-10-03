@@ -106,6 +106,13 @@ export default function RulebookReader({
   }, [src, docKey, title]);
 
   // The reader fills the screen; its own toolbar carries chapters, page, Fit,
-  // New tab and Download (no separate header bar).
-  return <div ref={hostRef} className="h-screen" />;
+  // New tab and Download (no separate header bar). The host sits as a flex child
+  // of an h-screen column so it has a DEFINITE height — the reader's internal
+  // `.dccpdf{height:100%}` then resolves correctly (fit-to-page needs a real
+  // viewport height, same as the GM Screen, where flex:1 provides it).
+  return (
+    <div className="flex h-screen flex-col">
+      <div ref={hostRef} className="min-h-0 flex-1" />
+    </div>
+  );
 }
