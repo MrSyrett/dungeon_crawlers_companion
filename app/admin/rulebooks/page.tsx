@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
@@ -56,19 +55,11 @@ export default async function AdminRulebooksPage({
     <div className="mx-auto w-full max-w-4xl px-5 py-10">
       <header className="mb-8 border-b border-[var(--border)] pb-6">
         <AdminNav active="rulebooks" />
-        <div className="mt-5 flex items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-black tracking-wide">Rulebook access</h1>
-            <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-              Admin · who can read each PDF
-            </p>
-          </div>
-          <Link
-            href="/rules"
-            className="whitespace-nowrap rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Open reader ↗
-          </Link>
+        <div className="mt-5">
+          <h1 className="font-display text-3xl font-black tracking-wide">Rulebook access</h1>
+          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
+            Admin · who can read each PDF
+          </p>
         </div>
       </header>
 
@@ -111,7 +102,7 @@ export default async function AdminRulebooksPage({
                 className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  <h2 className="min-w-0 break-words text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
                     {prettyName(file)}
                   </h2>
                   <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
@@ -121,7 +112,7 @@ export default async function AdminRulebooksPage({
                     · {SYSTEM_LABEL[system]}
                   </span>
                 </div>
-                <div className="mt-0.5 text-[11px] text-[var(--muted)]">{file}</div>
+                <div className="mt-0.5 break-all text-[11px] text-[var(--muted)]">{file}</div>
 
                 <RulebookSettingsForm
                   file={file}

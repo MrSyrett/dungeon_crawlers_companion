@@ -1,11 +1,11 @@
 import Link from "next/link";
 
-// Shared top nav for the admin pages. Renders the three admin sections as
-// toggle buttons (the current one highlighted) plus a back link to the
-// dashboard, so you can move between Members / Sounds / Rulebooks or head home
-// from any admin page.
+// Shared top nav for the admin pages. Renders the admin sections as toggle
+// buttons (the current one highlighted), so you can move between
+// Members / Campaigns / Sounds / Rulebooks / Systems from any admin page.
 const SECTIONS = [
   { key: "users", href: "/admin/users", label: "Members" },
+  { key: "campaigns", href: "/admin/campaigns", label: "Campaigns" },
   { key: "sounds", href: "/admin/sounds", label: "Sounds" },
   { key: "rulebooks", href: "/admin/rulebooks", label: "Rulebooks" },
   { key: "systems", href: "/admin/systems", label: "Systems" },
@@ -17,7 +17,11 @@ const inactive =
   `${base} border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]`;
 const activeCls = `${base} border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]`;
 
-export function AdminNav({ active }: { active: "users" | "sounds" | "rulebooks" | "systems" }) {
+export function AdminNav({
+  active,
+}: {
+  active: "users" | "campaigns" | "sounds" | "rulebooks" | "systems";
+}) {
   return (
     <nav className="flex flex-wrap items-center gap-2">
       {SECTIONS.map((s) => (
@@ -30,10 +34,6 @@ export function AdminNav({ active }: { active: "users" | "sounds" | "rulebooks" 
           {s.label}
         </Link>
       ))}
-      <span className="mx-1 hidden h-5 w-px bg-[var(--border)] sm:inline-block" />
-      <Link href="/dashboard" className={inactive}>
-        ← Dashboard
-      </Link>
     </nav>
   );
 }

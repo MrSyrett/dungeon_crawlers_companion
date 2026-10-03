@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
@@ -22,19 +21,11 @@ export default async function AdminSystemsPage() {
     <div className="mx-auto w-full max-w-4xl px-5 py-10">
       <header className="mb-8 border-b border-[var(--border)] pb-6">
         <AdminNav active="systems" />
-        <div className="mt-5 flex items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-black tracking-wide">Systems</h1>
-            <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-              Admin · show or hide game systems
-            </p>
-          </div>
-          <Link
-            href="/dashboard"
-            className="whitespace-nowrap rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Open dashboard ↗
-          </Link>
+        <div className="mt-5">
+          <h1 className="font-display text-3xl font-black tracking-wide">Systems</h1>
+          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
+            Admin · show or hide game systems
+          </p>
         </div>
       </header>
 
