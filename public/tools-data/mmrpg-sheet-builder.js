@@ -200,6 +200,13 @@
     document.getElementById('mmrpgb-foot').innerHTML = footer();
     body.scrollTop = sBody;
     var ns = document.getElementById('mmrpgb-list'); if (ns) ns.scrollTop = sList;
+    // Restore again after layout settles — some browsers reset scrollTop to 0
+    // on the frame after innerHTML is replaced, which was snapping the wizard to
+    // the top when a power/trait/tag was selected.
+    requestAnimationFrame(function () {
+      var b2 = document.getElementById('mmrpgb-body'); if (b2) b2.scrollTop = sBody;
+      var l2 = document.getElementById('mmrpgb-list'); if (l2) l2.scrollTop = sList;
+    });
   }
 
   // ── small UI helpers ──────────────────────────────────────────────────────
@@ -562,9 +569,11 @@
     psetFilter: function (v) { B._pset = v; B._focus = ''; paint(); },
     toggleLocked: function (on) { B._showLocked = !!on; paint(); },
     focusItem: function (n) { B._focus = (B._focus === n ? '' : n); paint(); },
-    addTrait: function (n) { if (B.traits.length >= traitLimit()) return; if (!exists(B.traits, n)) { var d = traitByName(n); B.traits.push({ name:n, description:d ? d.description : '' }); } B._q = ''; B._focus = ''; paint(); },
-    addTag: function (n) { if (!exists(B.tags, n)) { var d = tagByName(n); B.tags.push({ name:n, description:d ? d.description : '' }); } B._q = ''; B._focus = ''; paint(); },
-    addPower: function (n) { if (powersUnused() <= 0) return; if (!exists(B.powers, n)) { var p = powerByName(n) || {}; B.powers.push({ name:n, powerSet:p.powerSet || '', action:p.action || '', duration:p.duration || '', cost:p.cost || '', range:p.range || '', prerequisites:p.prerequisites || '', effect:p.effect || '', fantastic:p.fantastic || '' }); } B._q = ''; B._focus = ''; paint(); },
+    // Keep the search query AND the focused item on add, so the list stays exactly
+    // where it was instead of collapsing back to the top of the wizard.
+    addTrait: function (n) { if (B.traits.length >= traitLimit()) return; if (!exists(B.traits, n)) { var d = traitByName(n); B.traits.push({ name:n, description:d ? d.description : '' }); } paint(); },
+    addTag: function (n) { if (!exists(B.tags, n)) { var d = tagByName(n); B.tags.push({ name:n, description:d ? d.description : '' }); } paint(); },
+    addPower: function (n) { if (powersUnused() <= 0) return; if (!exists(B.powers, n)) { var p = powerByName(n) || {}; B.powers.push({ name:n, powerSet:p.powerSet || '', action:p.action || '', duration:p.duration || '', cost:p.cost || '', range:p.range || '', prerequisites:p.prerequisites || '', effect:p.effect || '', fantastic:p.fantastic || '' }); } paint(); },
     addCustom: function (kind) { var n = (B._q || '').trim(); if (!n) return; if (kind === 'trait') this.addTrait(n); else if (kind === 'tag') this.addTag(n); else this.addPower(n); },
     rmTrait: function (i) { B.traits.splice(i, 1); paint(); },
     rmTag: function (i) { B.tags.splice(i, 1); paint(); },

@@ -20,7 +20,7 @@
    sheets (framed card + two-column body + tabs + sticky Roll Log). Accent Marvel red. */
 :root{
   --bg:#e8eaed;--paper:#f6f7f9;--ink:#16181c;--muted:#5c626e;--rule:#c9ccd4;
-  --mv:#EC1D24;--mv-dk:#b3141a;--mv-lt:#fbe0e1;--gild:#b3141a;--red:#b3141a;--green:#2f8f5b;--blue:#2b6cb0;--gold:#c8a020;
+  --mv:#EC1D24;--mv-dk:#b3141a;--mv-lt:#fbe0e1;--gild:#b3141a;--red:#b3141a;--green:#2f8f5b;--blue:#2b6cb0;--gold:#c8a020;--mv-blue:#7fc0f5;
   --border:#1c1e24;--section-hdr:#16181c;--box:#eceef2;--input-bg:#fff;--input-border:#8b909c;
   --log-bg:#14151a;--log-text:#f2f0ee;
 }
@@ -77,7 +77,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 /* Section bubbles — each section is its own floating card (JLU/GB style) */
 .card{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(20,22,30,.07);}
 .section-bar{position:relative;background:transparent;color:var(--mv-dk);font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:.13em;text-transform:uppercase;padding:10px 13px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--mv-lt);}
+.section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:2px;background:var(--mv-blue);}
 .section-bar.accent{background:transparent;color:var(--mv-dk);}
 .hdr-right{display:flex;align-items:center;gap:8px;}
 .hdr-btn{background:transparent;border:1px solid var(--mv);color:var(--mv-dk);border-radius:6px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
@@ -177,7 +177,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .vbig .v-cur{width:40px;min-width:0;flex:1;height:34px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
 .vbig .v-max{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);white-space:nowrap;}
 .vital.health .v-cur{border-color:var(--red);}
-.vital.focus .v-cur{border-color:var(--blue);}
+.vital.focus .v-cur{border-color:var(--mv-blue);}
 .vital.karma .v-cur{border-color:var(--gold);}
 .vline{display:flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
 .vline input{width:40px;height:22px;border:1px solid var(--rule);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
@@ -316,8 +316,21 @@ body.dark .a-tile .atv{color:#f0888e;}
 /* Whole sheet (header + body) stacks together at one breakpoint; every section full-width */
 @media(max-width:1024px){
   .body-row{flex-direction:column;align-items:stretch;}
-  .stats-col,.center-col{width:100%;}
+  /* Dissolve the two columns so all cards become direct children of body-row and
+     can be interleaved/ordered freely in the single-column (mobile) layout. */
+  .stats-col,.center-col{width:100%;display:contents;}
   .hdr-top{grid-template-columns:1fr;gap:9px;}
+  /* Mobile card order: Abilities, Vitals, Conditions, Attacks, Tabs. */
+  .card-abilities{order:1;}
+  .card-vitals{order:2;}
+  .card-conditions{order:3;}
+  .card-attacks{order:4;}
+  .tabs-card{order:5;}
+  /* Within Vitals, Focus & Health sit above Speed & Karma on mobile. */
+  .vitals .vital.focus{order:1;}
+  .vitals .vital.health{order:2;}
+  .vitals .vital.speed{order:3;}
+  .vitals .vital.karma{order:4;}
 }
 @media(max-width:430px){.conds{gap:4px;}}
 .roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
@@ -334,6 +347,26 @@ body.dark .a-tile .atv{color:#f0888e;}
 /* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
 @media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
 @media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
+
+/* ── 2026-10 MMRPG sheet updates ─────────────────────────────────────────── */
+/* Sub-headers (Traits / Tags / Power Sets) get the same Marvel-blue divider. */
+.subhead{position:relative;}
+.subhead::after{content:'';position:absolute;left:10px;right:10px;bottom:0;height:2px;background:var(--mv-blue);}
+/* Non-Combat reads as a red, rollable button — distinct from the plain
+   Ability score and Defense numbers beside it. */
+.a-tile.a-nc{background:var(--mv);border-color:var(--mv-dk);}
+.a-tile.a-nc .atv,body.dark .a-tile.a-nc .atv{color:#fff;}
+.a-tile.a-nc:hover{background:var(--mv-dk);border-color:var(--mv-dk);}
+/* Individually collapsible power / trait / tag cards. */
+.pc-card .pc-head[onclick]{cursor:pointer;}
+.pc-caret{font-size:10px;opacity:.65;color:var(--muted);flex:0 0 auto;transition:transform .15s ease;}
+.pc-card.collapsed .pc-caret{transform:rotate(-90deg);}
+.pc-card.collapsed .pc-desc{display:none;}
+/* Powers grouped under their Power Set (the set name is the section header). */
+.pset{margin:2px 0;}
+.pset .card-list{padding-top:4px;}
+/* Conditions: only the applied ones show; add more from the + popup. */
+.conds-empty{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:2px 2px 4px;}
 </style>
 </head>
 <body>
@@ -360,19 +393,19 @@ body.dark .a-tile .atv{color:#f0888e;}
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="card">
+      <div class="card card-abilities">
         <div class="section-bar accent"><span>Abilities</span><span class="a-tiles"><span class="a-head-l">Ability</span><span class="a-head-l">Defense</span><span class="a-head-l">Non-Combat</span></span></div>
         <div class="abil-list" id="abil-list"></div>
       </div>
 
-      <div class="card">
-        <div class="section-bar accent"><span>Conditions</span></div>
+      <div class="card card-conditions">
+        <div class="section-bar accent"><span>Conditions</span><span class="hdr-right"><button class="hdr-btn" onclick="openCondPicker()" title="Apply a condition">＋ Add</button></span></div>
         <div class="conds" id="conds"></div>
       </div>
     </div>
 
     <div class="center-col">
-      <div class="card">
+      <div class="card card-vitals">
       <div class="section-bar accent"><span>Vitals</span><span class="hdr-right"><button class="hdr-btn" onclick="recover('health')" title="Resilience check vs 10 → regain Marvel die × rank">Recover Health</button><button class="hdr-btn" onclick="recover('focus')" title="Vigilance check vs 10 → regain Marvel die × rank">Recover Focus</button></span></div>
       <div class="vitals" id="vitals">
         <div class="vital speed">
@@ -397,7 +430,7 @@ body.dark .a-tile .atv{color:#f0888e;}
       </div>
       </div>
 
-      <div class="card">
+      <div class="card card-attacks">
       <div class="section-bar accent"><span>Attacks</span></div>
       <div class="dmg-wrap" id="dmg-wrap"></div>
       </div>
@@ -411,24 +444,17 @@ body.dark .a-tile .atv{color:#f0888e;}
       </div>
 
       <div class="tab-panel" id="tab-powers">
-        <div class="section-bar clp" onclick="clpToggle(this)"><span>Powers &amp; Power Sets</span><span class="clp-caret">▾</span></div>
-        <div class="clp-body">
-          <div class="card-list" id="powers-list"></div>
-          <div id="powers-empty" class="tbl-empty">No powers yet. Powers are chosen in the character builder (Create / Rebuild).</div>
-        </div>
+        <div id="powers-list"></div>
+        <div id="powers-empty" class="tbl-empty">No powers yet. Powers are chosen in the character builder (Create / Rebuild).</div>
       </div>
 
       <div class="tab-panel" id="tab-traits">
-        <div class="subhead clp" onclick="clpToggle(this)"><span>Traits</span><span class="clp-caret">▾</span></div>
-        <div class="clp-body">
-          <div class="card-list" id="traits-list"></div>
-          <div id="traits-empty" class="tbl-empty">No traits yet. Traits are chosen in the character builder (Create / Rebuild).</div>
-        </div>
-        <div class="subhead clp" onclick="clpToggle(this)"><span>Tags</span><span class="clp-caret">▾</span></div>
-        <div class="clp-body">
-          <div class="card-list" id="tags-list"></div>
-          <div id="tags-empty" class="tbl-empty">No tags yet. Tags are set in the character builder (Create / Rebuild).</div>
-        </div>
+        <div class="subhead"><span>Traits</span></div>
+        <div class="card-list" id="traits-list"></div>
+        <div id="traits-empty" class="tbl-empty">No traits yet. Traits are chosen in the character builder (Create / Rebuild).</div>
+        <div class="subhead"><span>Tags</span></div>
+        <div class="card-list" id="tags-list"></div>
+        <div id="tags-empty" class="tbl-empty">No tags yet. Tags are set in the character builder (Create / Rebuild).</div>
       </div>
 
       <div class="tab-panel" id="tab-equipment">
@@ -564,16 +590,17 @@ function renderAbilities(){
   ABILITIES.forEach(function(a){
     var sc=ab(a.key), def=defense(a.key);
     var nb=ncBonus(a.key), ncv=sc+nb, dfb=defBonus(a.key);
-    var sg=(sc>=0?'+':'')+sc;
     var ncg=(ncv>=0?'+':'')+ncv;
     var dis=condDisabled(a.key,false);
     var disC=dis?' a-disabled':'', disT=dis?' — '+dis+' (can’t act)':'';
     var row=document.createElement('div'); row.className='abil-row';
     row.innerHTML='<div class="a-name">'+a.name+'<small>'+a.desc+'</small></div>'
       +'<div class="a-tiles">'
-      +  '<button class="a-tile'+disC+'" onclick="rollCheck(\''+a.key+'\',\'score\')" title="Roll d616 + '+a.name+disT+'"><span class="atv">'+sg+'</span></button>'
+      // Ability score is a flat number (not a bonus, not rollable).
+      +  '<div class="a-tile a-static" title="'+a.name+' score"><span class="atv">'+sc+'</span></div>'
       +  '<div class="a-tile a-static'+(dfb?' a-boosted':'')+'" title="'+a.name+' Defense (10 + score'+(dfb?' + '+dfb+' power':'')+')"><span class="atv">'+def+'</span></div>'
-      +  '<button class="a-tile'+(nb?' a-boosted':'')+disC+'" onclick="rollCheck(\''+a.key+'\',\'noncombat\')" title="Roll a non-combat '+a.name+' check'+(nb?' (incl. +'+nb+' power)':'')+disT+'"><span class="atv">'+ncg+'</span></button>'
+      // Non-combat check is the rollable one — styled as a red button.
+      +  '<button class="a-tile a-nc'+disC+'" onclick="rollCheck(\''+a.key+'\',\'noncombat\')" title="Roll a non-combat '+a.name+' check'+(nb?' (incl. +'+nb+' power)':'')+disT+'"><span class="atv">'+ncg+'</span></button>'
       +'</div>';
     host.appendChild(row);
   });
@@ -718,9 +745,12 @@ function speedHalvedByCond(){ return activeConds().some(function(n){ return COND
 // ── Render: conditions (toggle chips) ──
 function renderConditions(){
   var host=$('conds'); if(!host)return;
-  host.innerHTML=CONDITIONS.map(function(c){
-    var on=!!(S.conditions&&S.conditions[c.name]);
-    return '<button class="cond'+(on?' on':'')+'" onclick="toggleCondition(\''+esc(c.name)+'\')"><span class="cbox"></span>'+esc(c.name)
+  // Only the conditions currently applied are shown (add more from the + popup).
+  // Clicking a chip removes it; the info icon still explains what it does.
+  var active=CONDITIONS.filter(function(c){ return !!(S.conditions&&S.conditions[c.name]); });
+  if(!active.length){ host.innerHTML='<div class="conds-empty">None — use ＋ Add to apply a condition.</div>'; return; }
+  host.innerHTML=active.map(function(c){
+    return '<button class="cond on" title="Click to remove" onclick="toggleCondition(\''+esc(c.name)+'\')"><span class="cbox"></span>'+esc(c.name)
       +'<span class="cinfo" title="What it does" onclick="event.stopPropagation();showCondInfo(\''+esc(c.name)+'\')">i</span></button>';
   }).join('');
 }
@@ -822,13 +852,35 @@ function bumpTray(w,d){ if(w==='edge')edges=clamp(edges+d,0,6); else troubles=cl
 function renderTray(){ $('tray-edge').textContent=edges; $('tray-trouble').textContent=troubles; }
 
 // ═══ POWERS / TRAITS / TAGS ═════════════════════════════════════════════════
+// A single collapsible power/trait/tag card. When it has a description the head
+// toggles it open/closed; the ✕ and info clicks never trigger the toggle.
+function pcToggle(el){ var c=el.closest('.pc-card'); if(c) c.classList.toggle('collapsed'); }
+function pcCardHTML(kind, i, name, meta, desc){
+  var head='<div class="pc-head"'+(desc?' onclick="pcToggle(this)"':'')+'>'
+    +(desc?'<span class="pc-caret">▾</span>':'')
+    +'<span class="pc-name">'+esc(name)+'</span>'
+    +(meta?'<span class="pc-meta">'+esc(meta)+'</span>':'')
+    +'<button class="row-x" onclick="event.stopPropagation();delItem(\''+kind+'\','+i+')">✕</button></div>';
+  return '<div class="pc-card'+(desc?'':' no-desc')+'">'+head+(desc?'<div class="pc-desc">'+esc(desc)+'</div>':'')+'</div>';
+}
+// Powers are grouped under their Power Set, the set name serving as the section
+// header; each power within is its own collapsible card.
 function renderPowers(){
-  var host=$('powers-list'); host.innerHTML='';
-  S.powers.forEach(function(p,i){
-    var c=document.createElement('div'); c.className='pc-card';
-    c.innerHTML='<div class="pc-head"><span class="pc-name" style="cursor:default;">'+esc(p.name)+'</span><span class="pc-meta">'+esc(p.powerSet&&p.powerSet!=='None'?p.powerSet:'Basic')+(p.action?' · '+esc(p.action):'')+(p.duration?' · '+esc(p.duration):'')+(p.cost?' · '+esc(p.cost):'')+'</span><button class="row-x" onclick="delItem(\'powers\','+i+')">✕</button></div>'
-      +(p.effect?'<div class="pc-desc">'+esc(p.effect)+'</div>':'');
-    host.appendChild(c);
+  var host=$('powers-list'); if(!host)return; host.innerHTML='';
+  var groups={}, order=[];
+  (S.powers||[]).forEach(function(p,i){
+    var set=(p.powerSet&&p.powerSet!=='None')?p.powerSet:'Basic';
+    if(!groups[set]){ groups[set]=[]; order.push(set); }
+    groups[set].push({p:p,i:i});
+  });
+  order.forEach(function(set){
+    var rows=groups[set].map(function(o){
+      var p=o.p; var meta=[p.action,p.duration,p.cost].filter(Boolean).join(' · ');
+      return pcCardHTML('powers', o.i, p.name, meta, p.effect||'');
+    }).join('');
+    var sec=document.createElement('div'); sec.className='pset';
+    sec.innerHTML='<div class="subhead"><span>'+esc(set)+'</span></div><div class="card-list">'+rows+'</div>';
+    host.appendChild(sec);
   });
   $('powers-empty').style.display=S.powers.length?'none':'block';
 }
@@ -836,10 +888,9 @@ function renderTraitsTags(){
   ['traits','tags'].forEach(function(kind){
     var host=$(kind+'-list'); host.innerHTML='';
     S[kind].forEach(function(t,i){
-      var c=document.createElement('div'); c.className='pc-card';
-      c.innerHTML='<div class="pc-head"><span class="pc-name" style="cursor:default;">'+esc(t.name)+'</span><button class="row-x" onclick="delItem(\''+kind+'\','+i+')">✕</button></div>'
-        +(t.description?'<div class="pc-desc">'+esc(t.description)+'</div>':'');
-      host.appendChild(c);
+      var c=document.createElement('div');
+      c.innerHTML=pcCardHTML(kind, i, t.name, '', t.description||'');
+      host.appendChild(c.firstChild);
     });
     $(kind+'-empty').style.display=S[kind].length?'none':'block';
   });
@@ -938,10 +989,14 @@ function pickerData(kind){
   if(kind==='trait') return TRAITS;
   if(kind==='tag') return TAGS;
   if(kind==='equip') return EQUIP();
+  if(kind==='cond') return CONDITIONS;
   return TAGS;
 }
+// Apply a condition from the shared picker popup (so the sheet isn't cluttered
+// with every condition all the time).
+function openCondPicker(){ openPicker('cond'); }
 function openPicker(kind, preset){
-  _pk=kind; $('picker-title').textContent=kind==='power'?'✦ Powers':kind==='trait'?'＋ Traits':kind==='equip'?'＋ Equipment':'＋ Tags';
+  _pk=kind; $('picker-title').textContent=kind==='power'?'✦ Powers':kind==='trait'?'＋ Traits':kind==='equip'?'＋ Equipment':kind==='cond'?'＋ Conditions':'＋ Tags';
   $('picker-search').value='';
   var flt=$('picker-filter');
   if(kind==='power'){ var sets=['']; POWERS.forEach(function(p){ if(sets.indexOf(p.powerSet)<0)sets.push(p.powerSet); });
@@ -959,11 +1014,12 @@ function renderPicker(){
   if(!_pk)return; var q=($('picker-search').value||'').toLowerCase().trim(); var fset=$('picker-filter').value;
   var rows=pickerData(_pk).filter(function(x){
     if(_pk==='power'&&fset&&x.powerSet!==fset)return false;
+    if(_pk==='cond'&&condOn(x.name))return false; // already applied → not offered again
     if(_pk==='equip'&&fset){
       if(fset.indexOf('tier:')===0 && (x.tier||'Common')!==fset.slice(5)) return false;
       if(fset.indexOf('type:')===0 && (x.type||x.category||'Weapon')!==fset.slice(5)) return false;
     }
-    if(!q)return true; return ((x.name||'')+' '+(x.description||'')+' '+(x.effect||'')+' '+(x.notes||'')+' '+(x.special||'')+' '+(x.owner||'')+' '+(x.powerSet||'')+' '+(x.tier||'')+' '+(x.type||x.category||'')).toLowerCase().indexOf(q)>=0;
+    if(!q)return true; return ((x.name||'')+' '+(x.description||'')+' '+(x.desc||'')+' '+(x.effect||'')+' '+(x.notes||'')+' '+(x.special||'')+' '+(x.owner||'')+' '+(x.powerSet||'')+' '+(x.tier||'')+' '+(x.type||x.category||'')).toLowerCase().indexOf(q)>=0;
   }).slice(0,400);
   _pkRows=rows; var el=$('picker-body');
   if(!rows.length){ var arm=(_pk==='equip'&&(fset==='type:Armor'||fset==='type:Item'||fset==='tier:Narrative')); el.innerHTML='<div class="brow-empty">'+(arm?'More arrive with the expansions.':'No matches.')+'</div>'; return; }
@@ -971,7 +1027,7 @@ function renderPicker(){
     var meta=_pk==='power'?((x.powerSet&&x.powerSet!=='None'?x.powerSet:'Basic')+(x.action?' · '+x.action:'')+(x.cost?' · '+x.cost:''))
       :_pk==='equip'?[x.tier&&x.tier!=='Common'?x.tier:'',x.type||x.category,x.weaponClass,x.range?('Range '+x.range):'',x.damageBonus&&x.damageBonus!=='—'?('Dmg '+x.damageBonus):''].filter(Boolean).join(' · '):'';
     var nm=esc(x.name)+(_pk==='equip'&&x.owner?' <span class="brow-owner">'+esc(x.owner)+'</span>':'');
-    var body=_pk==='power'?(x.effect||''):_pk==='equip'?(x.special||x.notes||''):(x.description||'');
+    var body=_pk==='power'?(x.effect||''):_pk==='equip'?(x.special||x.notes||''):_pk==='cond'?(x.desc||''):(x.description||'');
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+nm+(meta?'<span class="brow-cost">'+esc(meta)+'</span>':'')+'</div>'
       +(body?'<div class="brow-desc">'+esc(body)+'</div>':'')+'</div><button class="brow-add" onclick="pickAdd('+idx+')">＋ Add</button></div>';
   }).join('');
@@ -980,6 +1036,10 @@ function pickAdd(idx){ var x=_pkRows[idx]; if(!x)return;
   if(_pk==='power'){ S.powers.push({name:x.name,powerSet:x.powerSet||'',action:x.action||'',duration:x.duration||'',cost:x.cost||'',range:x.range||'',prerequisites:x.prerequisites||'',effect:x.effect||'',fantastic:x.fantastic||''}); renderPowers(); renderAbilities(); renderDerived(); renderDamage(); setTab('powers'); }
   else if(_pk==='trait'){ S.traits.push({name:x.name,description:x.description||''}); renderTraitsTags(); setTab('traits'); }
   else if(_pk==='equip'){ S.attacks.push(mkEquip(x,false)); renderAttacks(); renderDamage(); renderDerived(); setTab('equipment'); }
+  else if(_pk==='cond'){ if(!S.conditions)S.conditions={}; S.conditions[x.name]=true;
+    addLog('Condition','+ '+x.name,'applied','fumble');
+    renderConditions(); renderAbilities(); renderDamage(); renderDerived();
+    renderPicker(); /* refresh so the applied one drops out — stays open to add more */ scheduleAutosave(); return; }
   else { S.tags.push({name:x.name,description:x.description||''}); renderTraitsTags(); setTab('traits'); }
   scheduleAutosave();
 }
