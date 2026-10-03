@@ -32,21 +32,35 @@ export function prettyName(file: string): string {
 }
 
 // Rulebooks sort into these buckets, shown in this order within each system:
-// Core Rules → Quickstarts → Expansions → Adventures. Classification is by
-// filename keyword (these are the GM's own files, so the name is the lever):
-//   • "quickstart / starter / intro / basic / primer / beginner / free rules" → Quickstarts
-//   • "core / rulebook / rules / player(s) / handbook / corebook"             → Core Rules
-//   • "adventure / module / scenario / one-shot / dungeon / campaign / quest" → Adventures
-//   • anything else (supplement, bestiary, gear, setting, companion, …)       → Expansions
-// The FIRST Core-Rules book in a system is therefore its default ("core rule book").
+// Core Rules → Quickstarts → Expansions → Adventures. The FIRST Core-Rules book
+// in a system is its default ("core rule book").
+//
+// Classification is by filename, with an explicit override list for the books
+// whose names don't follow the pattern. Keyword rules (checked in order):
+//   • "quickstart / starter / intro / primer / beginner"            → Quickstarts
+//   • contains "core"                                                → Core Rules
+//   • "adventure / module / scenario / one-shot / dungeon / quest"   → Adventures
+//   • everything else (companion, sourcebook, supplement, toolkit …) → Expansions
+// NOTE: "rulebook" / "rules" alone are NOT core signals — only "core" is — so an
+// expansion like "DarkSpace Rulebook" or "STARWARS Rules Companion" sorts as an
+// Expansion, not mistaken for the core book.
 export type RulebookCategory = "Core Rules" | "Quickstarts" | "Expansions" | "Adventures";
 const CATEGORY_ORDER: RulebookCategory[] = ["Core Rules", "Quickstarts", "Expansions", "Adventures"];
 
+// Books whose filename doesn't carry its category keyword. Keyed by exact
+// filename; add a line here when a new book lands in the wrong bucket.
+const CATEGORY_OVERRIDES: Record<string, RulebookCategory> = {
+  "STAR WARS The Roleplaying Game.pdf": "Core Rules",
+  "ICRPG Master Edition.pdf": "Core Rules",
+  "ACE Omnibus.pdf": "Core Rules",
+};
+
 export function rulebookCategory(file: string): RulebookCategory {
+  if (CATEGORY_OVERRIDES[file]) return CATEGORY_OVERRIDES[file];
   const n = file.toLowerCase();
-  if (/quick[\s_-]?start|starter|intro|basic|primer|beginner|free[\s_-]?rules/.test(n)) return "Quickstarts";
-  if (/\bcore\b|rulebook|corebook|core[\s_-]?rules|player'?s?|handbook|\brules\b/.test(n)) return "Core Rules";
-  if (/adventure|module|scenario|one[\s_-]?shot|dungeon|campaign|quest/.test(n)) return "Adventures";
+  if (/quick[\s_-]?start|starter|\bintro\b|primer|beginner/.test(n)) return "Quickstarts";
+  if (/core/.test(n)) return "Core Rules";
+  if (/adventure|module|scenario|one[\s_-]?shot|dungeon|\bquest\b/.test(n)) return "Adventures";
   return "Expansions";
 }
 

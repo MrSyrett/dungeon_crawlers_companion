@@ -83,6 +83,20 @@
     document.head.appendChild(el);
   }
 
+  // Curated chapter outlines (hand-verified from each book's real Table of
+  // Contents), keyed by filename. Fetched once and shared across reader instances.
+  var CURATED_URL = "/vendor/rulebook-outlines.json";
+  var _curated = null, _curatedP = null;
+  function loadCurated() {
+    if (_curated) return Promise.resolve(_curated);
+    if (_curatedP) return _curatedP;
+    _curatedP = fetch(CURATED_URL, { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (j) { _curated = j || {}; return _curated; })
+      .catch(function () { _curated = {}; return _curated; });
+    return _curatedP;
+  }
+
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
   function esc(t) {
     return String(t == null ? "" : t)
@@ -363,8 +377,20 @@
       outlinePromise.then(function (outline) {
         if (mySeq !== renderSeq) return;
         if (outline && outline.length) { tocEnable(true); populateToc(flattenOutline(outline)); return; }
-        // No embedded outline — generate chapters from the page text so every book
-        // is navigable. Cached per document for instant re-open.
+        // No embedded outline. Prefer a CURATED outline (hand-verified from the
+        // book's real Table of Contents, shipped as /vendor/rulebook-outlines.json
+        // keyed by file), then fall back to runtime generation.
+        loadCurated().then(function (map) {
+          if (mySeq !== renderSeq) return;
+          var cur = map && map[key];
+          if (cur && cur.length) { tocEnable(true); populateToc(cur); return; }
+          buildGeneratedToc(doc, key, mySeq);
+        });
+      }).catch(function () { tocEnable(false); });
+    }
+
+    // Runtime fallback: generate (and cache) chapters by parsing the TOC / scanning.
+    function buildGeneratedToc(doc, key, mySeq) {
         var cached = genCache.get(key);
         if (cached) {
           if (cached.length) { tocEnable(true); populateToc(cached); }
@@ -380,13 +406,141 @@
           if (entries.length) { tocEnable(true); populateToc(entries); }
           else { tocList.innerHTML = '<div class="dccpdf-toc-empty">No chapters found in this PDF.</div>'; }
         }).catch(function () { if (mySeq === renderSeq) tocList.innerHTML = '<div class="dccpdf-toc-empty">Couldn’t build chapters.</div>'; });
-      }).catch(function () { tocEnable(false); });
     }
 
-    // Derive a chapter list from a PDF with no embedded outline by scanning page
-    // text for lines rendered noticeably larger than the body text. Sequential and
-    // in the background; aborts if the user switches books (seq check).
+    // Build a chapter list for a PDF with no embedded outline. PREFER the book's
+    // own printed Table of Contents (clean chapter names + page numbers); only if
+    // one can't be parsed do we fall back to scanning for large heading text.
     function generateOutline(doc, mySeq) {
+      return extractPrintedToc(doc, mySeq).then(function (toc) {
+        if (toc && toc.length >= 3) return toc;
+        return headingScan(doc, mySeq);
+      });
+    }
+
+    // Collapse a page's text items into lines ([{ y, size, x, text }]), top → down.
+    function pageLines(tc) {
+      var byLine = {};
+      tc.items.forEach(function (it) {
+        if (!it.str || !it.str.trim()) return;
+        var tr = it.transform || [1, 0, 0, 1, 0, 0];
+        var y = Math.round(tr[5]);
+        var L = byLine[y] || (byLine[y] = { y: y, size: 0, x: Infinity, parts: [] });
+        var size = Math.hypot(tr[2], tr[3]) || it.height || 0;
+        if (size > L.size) L.size = size;
+        if (tr[4] < L.x) L.x = tr[4];
+        L.parts.push({ x: tr[4], s: it.str });
+      });
+      return Object.keys(byLine).map(function (y) {
+        var L = byLine[y];
+        L.parts.sort(function (a, b) { return a.x - b.x; });
+        L.text = L.parts.map(function (q) { return q.s; }).join("").replace(/\s+/g, " ").trim();
+        return L;
+      }).sort(function (a, b) { return b.y - a.y; }); // PDF y grows upward → top line first
+    }
+
+    // Parse the printed Table of Contents from the first pages — lines like
+    // "Combat .......... 45" (dotted leader) or "Combat 45". Then map each printed
+    // page number to a physical page index (PDF page labels, else a detected
+    // front-matter offset). Returns [{title, page, depth}] or null.
+    function extractPrintedToc(doc, mySeq) {
+      var N = doc.numPages || 0;
+      if (!N) return Promise.resolve(null);
+      var scanTo = Math.min(N, 30);
+      var raw = [], sawToc = false, done = false;
+      var labelsP = (doc.getPageLabels ? doc.getPageLabels() : Promise.resolve(null)).catch(function () { return null; });
+      var p = 0;
+      function nextPage() {
+        if (mySeq !== renderSeq || done || p >= scanTo) return Promise.resolve();
+        p++;
+        return doc.getPage(p).then(function (page) {
+          return page.getTextContent().then(function (tc) {
+            var all = tc.items.map(function (i) { return i.str; }).join(" ");
+            var hasContents = /contents/i.test(all);
+            var hits = 0;
+            pageLines(tc).forEach(function (L) {
+              var t = L.text;
+              var m = t.match(/^(.{2,}?)[\s.·…]{2,}(\d{1,4})$/) || t.match(/^(.{2,}?)\s(\d{1,4})$/);
+              if (!m) return;
+              var title = m[1].replace(/[\s.·…]+$/, "").trim();
+              var num = parseInt(m[2], 10);
+              if (title.length < 2 || title.length > 90 || !/[A-Za-z]/.test(title)) return;
+              if (!(num >= 1 && num <= 4000)) return;
+              raw.push({ printed: num, title: title, dotted: /[.·…]{2,}/.test(t) });
+              hits++;
+            });
+            if (hasContents || hits >= 4) sawToc = true;
+            if (page.cleanup) { try { page.cleanup(); } catch (e) {} }
+            if (sawToc && hits === 0 && raw.length) { done = true; return; } // TOC block ended
+            return nextPage();
+          });
+        }).catch(function () { return nextPage(); });
+      }
+      return nextPage().then(function () {
+        return labelsP.then(function (labels) {
+          if (mySeq !== renderSeq) return null;
+          // Dotted-leader rows are the real TOC; prefer them when we have enough.
+          var dotted = raw.filter(function (r) { return r.dotted; });
+          var entries = dotted.length >= 3 ? dotted : raw;
+          if (entries.length < 3) return null;
+          var seen = {};
+          entries = entries.filter(function (e) { var k = e.title.toLowerCase() + "|" + e.printed; if (seen[k]) return false; seen[k] = 1; return true; });
+          entries.sort(function (a, b) { return a.printed - b.printed; });
+          var map = null;
+          if (labels && labels.length) { map = {}; for (var i = 0; i < labels.length; i++) if (map[labels[i]] == null) map[labels[i]] = i; }
+          var mapped = 0;
+          entries.forEach(function (e) { if (map && map[String(e.printed)] != null) { e.page = map[String(e.printed)] + 1; mapped++; } });
+          if (mapped >= entries.length * 0.6) return finishToc(entries, N);
+          return tocOffset(doc, entries, mySeq, N).then(function (off) {
+            if (off == null) return null;
+            entries.forEach(function (e) { e.page = Math.max(1, Math.min(N, e.printed + off)); });
+            return finishToc(entries, N);
+          });
+        });
+      });
+    }
+
+    function finishToc(entries, N) {
+      entries = entries.filter(function (e) { return e.page != null && e.page >= 1 && e.page <= N; });
+      entries.sort(function (a, b) { return a.page - b.page; });
+      var seen = {}, out = [];
+      entries.forEach(function (e) { var k = e.page + "|" + e.title.toLowerCase(); if (seen[k]) return; seen[k] = 1; out.push(e); });
+      if (!out.length) return null;
+      if (out.length > 300) out = out.slice(0, 300);
+      return out.map(function (e) { return { title: e.title, page: e.page, depth: 0 }; });
+    }
+
+    // Front-matter offset (physical − printed): locate the first few TOC titles on
+    // nearby physical pages and take the first match's offset.
+    function tocOffset(doc, entries, mySeq, N) {
+      var i = 0;
+      function tryEntry() {
+        if (mySeq !== renderSeq || i >= Math.min(entries.length, 5)) return Promise.resolve(null);
+        var e = entries[i++];
+        var needle = e.title.toLowerCase().replace(/\s+/g, " ").slice(0, 28);
+        if (needle.length < 4) return tryEntry();
+        var hi = Math.min(N, e.printed + 25), q = Math.max(1, e.printed) - 1;
+        function scan() {
+          if (mySeq !== renderSeq || q >= hi) return tryEntry();
+          q++;
+          var no = q;
+          return doc.getPage(no).then(function (page) {
+            return page.getTextContent().then(function (tc) {
+              var txt = tc.items.map(function (it) { return it.str; }).join(" ").replace(/\s+/g, " ").toLowerCase();
+              if (page.cleanup) { try { page.cleanup(); } catch (ee) {} }
+              if (txt.indexOf(needle) >= 0) return no - e.printed;
+              return scan();
+            });
+          }).catch(scan);
+        }
+        return scan();
+      }
+      return tryEntry();
+    }
+
+    // Fallback: derive chapters by scanning for lines rendered noticeably larger
+    // than the body text. Sequential and in the background; aborts on book switch.
+    function headingScan(doc, mySeq) {
       var N = Math.min(doc.numPages || 0, 800);
       if (!N) return Promise.resolve([]);
       var lines = [];        // { page, size, text }
