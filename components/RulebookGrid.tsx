@@ -40,9 +40,9 @@ export default function RulebookGrid({ books }: { books: RulebookListItem[] }) {
           </p>
         </div>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {shown.map((b) => (
-            <li key={b.file}>
+            <li key={b.file} className="min-w-0">
               <Link
                 href={`/rules?book=${encodeURIComponent(b.file)}`}
                 className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--panel)] px-5 py-5 transition-colors hover:border-[var(--gold)] hover:bg-[var(--panel-2)]"
