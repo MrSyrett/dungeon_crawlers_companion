@@ -57,26 +57,26 @@
       ".dccpdf-inp:focus{border-color:var(--gold,#d8b45a)}" +
       ".dccpdf-sp{flex:1}" +
       ".dccpdf-body{flex:1;display:flex;min-height:0;position:relative;overflow:hidden}" +
-      ".dccpdf-toc{flex:0 0 0;width:0;overflow:hidden;background:var(--panel,#1a1d24);border-right:1px solid var(--border,#2a2f3a);transition:width .18s ease,flex-basis .18s ease;display:flex;flex-direction:column}" +
-      ".dccpdf.dccpdf-toc-open .dccpdf-toc{flex-basis:264px;width:264px}" +
+      ".dccpdf-toc{position:absolute;z-index:6;top:0;bottom:0;left:0;width:0;overflow:hidden;background:var(--panel,#1a1d24);border-right:1px solid var(--border,#2a2f3a);box-shadow:0 0 30px rgba(0,0,0,.55);transition:width .18s ease;display:flex;flex-direction:column}" +
+      ".dccpdf.dccpdf-toc-open .dccpdf-toc{width:min(86%,300px)}" +
       ".dccpdf-toc-head{flex-shrink:0;padding:9px 12px;font:800 11px/1 'Barlow Condensed','Montserrat',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold,#d8b45a);border-bottom:1px solid var(--border,#2a2f3a)}" +
-      ".dccpdf-toc-list{flex:1;overflow-y:auto;padding:6px 4px}" +
+      ".dccpdf-toc-list{flex:1;overflow-y:auto;padding:6px 4px;scrollbar-width:thin;scrollbar-color:var(--border,#2a2f3a) transparent}" +
+      ".dccpdf-toc-list::-webkit-scrollbar{width:9px}" +
+      ".dccpdf-toc-list::-webkit-scrollbar-track{background:transparent}" +
+      ".dccpdf-toc-list::-webkit-scrollbar-thumb{background:var(--border,#2a2f3a);border-radius:999px;border:2px solid transparent;background-clip:padding-box}" +
+      ".dccpdf-toc-list:hover::-webkit-scrollbar-thumb{background:var(--accent,var(--gold,#d8b45a));background-clip:padding-box}" +
       ".dccpdf-toc-link{display:block;width:100%;text-align:left;background:transparent;border:none;border-radius:5px;color:var(--text,#cdd3dd);font:500 12.5px/1.35 'Barlow','Montserrat',system-ui,sans-serif;padding:6px 8px;cursor:pointer}" +
       ".dccpdf-toc-link:hover{background:var(--panel-2,#22262f);color:var(--white,#fff)}" +
       ".dccpdf-toc-link.is-current{background:var(--panel-2,#22262f);color:var(--gold,#d8b45a)}" +
       ".dccpdf-toc-empty{padding:12px;color:var(--muted,#8a93a3);font:500 12px/1.4 'Barlow','Montserrat',sans-serif}" +
       ".dccpdf-toc-backdrop{display:none;position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.5)}" +
+      ".dccpdf.dccpdf-toc-open .dccpdf-toc-backdrop{display:block}" +
       ".dccpdf-stage{flex:1;min-width:0;overflow:auto;padding:14px;outline:none;-webkit-overflow-scrolling:touch;touch-action:none;position:relative}" +
       ".dccpdf-stage.is-pannable{cursor:grab}" +
       ".dccpdf-stage.is-grabbing{cursor:grabbing}" +
       ".dccpdf-wrap{width:max-content;margin:0 auto;will-change:transform,opacity}" +
       ".dccpdf-canvas{display:block;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.5)}" +
-      ".dccpdf-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted,#8a93a3);font:500 13px/1.5 'Barlow','Montserrat',system-ui,sans-serif;background:var(--dccpdf-stage,#111)}" +
-      "@media (max-width:720px){" +
-      ".dccpdf-toc{position:absolute;z-index:6;top:0;bottom:0;left:0;width:0;box-shadow:0 0 30px rgba(0,0,0,.6)}" +
-      ".dccpdf.dccpdf-toc-open .dccpdf-toc{width:min(82%,290px);flex-basis:auto}" +
-      ".dccpdf.dccpdf-toc-open .dccpdf-toc-backdrop{display:block}" +
-      "}";
+      ".dccpdf-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted,#8a93a3);font:500 13px/1.5 'Barlow','Montserrat',system-ui,sans-serif;background:var(--dccpdf-stage,#111)}";
     var el = document.createElement("style");
     el.id = STYLE_ID;
     el.textContent = css;
@@ -192,7 +192,6 @@
 
     function render(n, dir) {
       if (!pdfDoc) return;
-      ensureCanvas();
       if (rendering) { queued = n; return; }
       rendering = n;
       var myseq = renderSeq;
@@ -208,12 +207,19 @@
         // Never render smaller than fit-to-page — that's the zoomed-out floor.
         var scale = (userScale > 0 ? Math.max(userScale, fitScale) : fitScale) * dpr;
         var vp = page.getViewport({ scale: scale });
-        var ctx = canvas.getContext("2d");
-        canvas.width = Math.floor(vp.width);
-        canvas.height = Math.floor(vp.height);
-        canvas.style.width = Math.floor(vp.width / dpr) + "px";
-        canvas.style.height = Math.floor(vp.height / dpr) + "px";
-        page.render({ canvasContext: ctx, viewport: vp }).promise.then(function () {
+        // Render into an OFFSCREEN canvas and swap it in only once it's painted, so
+        // the visible page never clears to white mid-zoom / mid-flip.
+        var c = document.createElement("canvas");
+        c.className = "dccpdf-canvas";
+        c.width = Math.floor(vp.width);
+        c.height = Math.floor(vp.height);
+        c.style.width = Math.floor(vp.width / dpr) + "px";
+        c.style.height = Math.floor(vp.height / dpr) + "px";
+        page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise.then(function () {
+          if (myseq !== renderSeq) { rendering = 0; return; }
+          wrap.innerHTML = "";
+          wrap.appendChild(c);
+          canvas = c;
           canvas.dataset.page = String(n);
           // restore / set scroll position for this render
           if (pendingRatio != null) {
@@ -424,6 +430,9 @@
       return Math.hypot(dx, dy);
     }
     stage.addEventListener("touchstart", function (e) {
+      // Keep reader gestures from reaching the page's pull-to-refresh (it listens
+      // on window and treats any downward swipe at scrollTop 0 as a pull).
+      e.stopPropagation();
       if (e.touches.length === 2) {
         tc.mode = "pinch"; tc.d0 = touchDist(e.touches); tc.s0 = effScale();
       } else if (e.touches.length === 1) {
@@ -433,6 +442,7 @@
       }
     }, { passive: false });
     stage.addEventListener("touchmove", function (e) {
+      e.stopPropagation();
       if (tc.mode === "pinch" && e.touches.length === 2) {
         e.preventDefault();
         var d = touchDist(e.touches);
@@ -454,6 +464,7 @@
       }
     }, { passive: false });
     stage.addEventListener("touchend", function (e) {
+      e.stopPropagation();
       if (tc.mode === "one" && !tc.panned) {
         var t = (e.changedTouches && e.changedTouches[0]) || null;
         if (t) {

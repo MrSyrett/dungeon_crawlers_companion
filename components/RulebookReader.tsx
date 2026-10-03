@@ -68,6 +68,7 @@ export default function RulebookReader({
   books: Book[];
   active: string;
 }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<ReaderInstance | null>(null);
   const activeFileRef = useRef(active);
@@ -155,12 +156,31 @@ export default function RulebookReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSystem]);
 
+  // Size the reader to exactly the space BELOW the site nav. Using 100vh would
+  // overshoot by the nav's height (the nav sits above {children} in the layout),
+  // cutting off the bottom of a fit-to-page view and forcing a page scroll.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const fit = () => {
+      const top = el.getBoundingClientRect().top;
+      el.style.height = Math.max(240, window.innerHeight - top) + "px";
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    window.addEventListener("orientationchange", fit);
+    return () => {
+      window.removeEventListener("resize", fit);
+      window.removeEventListener("orientationchange", fit);
+    };
+  }, []);
+
   // Full height; on desktop the reader is capped to a contained column (centered,
   // with side rules) instead of spanning the whole window — matching the GM
   // Screen pane. The host has a definite height either way (parent is h-screen;
   // row-flex stretch), so the reader's fit-to-page math works.
   return (
-    <div className="flex h-screen justify-center">
+    <div ref={wrapRef} className="flex justify-center" style={{ height: "100dvh" }}>
       <div
         ref={hostRef}
         className="min-h-0 w-full max-w-[1024px] border-[var(--border)] sm:border-x"
