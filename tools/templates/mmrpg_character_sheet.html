@@ -748,7 +748,7 @@ function renderConditions(){
   // Only the conditions currently applied are shown (add more from the + popup).
   // Clicking a chip removes it; the info icon still explains what it does.
   var active=CONDITIONS.filter(function(c){ return !!(S.conditions&&S.conditions[c.name]); });
-  if(!active.length){ host.innerHTML='<div class="conds-empty">None — use ＋ Add to apply a condition.</div>'; return; }
+  if(!active.length){ host.innerHTML=''; return; }
   host.innerHTML=active.map(function(c){
     return '<button class="cond on" title="Click to remove" onclick="toggleCondition(\''+esc(c.name)+'\')"><span class="cbox"></span>'+esc(c.name)
       +'<span class="cinfo" title="What it does" onclick="event.stopPropagation();showCondInfo(\''+esc(c.name)+'\')">i</span></button>';

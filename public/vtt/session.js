@@ -53,6 +53,7 @@
     link: '<path d="M9 15l6-6M10 6l1-1a4 4 0 0 1 6 6l-1 1M14 18l-1 1a4 4 0 0 1-6-6l1-1"/>',
     desktop: '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',
     mobile: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+    tablet: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M10 18h4"/>',
     light: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.4c.7.6 1 1.3 1 2.1h6c0-.8.3-1.5 1-2.1A6 6 0 0 0 12 3z"/>',
     copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
     wall: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 12h18M9 5v7M15 12v7"/>',
@@ -199,16 +200,20 @@
   }
   function openSheet(c) { $("sheet-title").textContent = c.title || "Character"; $("sheet-frame").src = (V.toolBase || "/tools") + "/" + encodeURIComponent(c.tool) + "/" + encodeURIComponent(c.id) + "?embed=1"; $("sheetpop").hidden = false; }
   bind("sheet-close", function () { $("sheetpop").hidden = true; $("sheet-frame").src = "about:blank"; });
-  // Desktop / Mobile are always-present RESET buttons: each snaps the sheet back
-  // to that preset size. Clearing the inline geometry (set by dragging/resizing)
-  // lets the CSS preset rule (.vtt-sheetpop vs .vtt-sheetpop.wide) govern again.
-  function sheetReset(wide) {
+  // Desktop / Hybrid / Mobile are always-present RESET buttons: each snaps the
+  // sheet back to that preset size. Clearing the inline geometry (set by
+  // dragging/resizing) lets the CSS preset rule govern again. Hybrid is a middle
+  // width that puts the sheet in its one-column layout with the roll log still
+  // on the right (the sheet's own container query handles that).
+  function sheetReset(mode) {
     var pop = $("sheetpop"); if (!pop) return;
     pop.style.left = pop.style.top = pop.style.right = pop.style.width = pop.style.height = "";
-    pop.classList.toggle("wide", !!wide);
+    pop.classList.toggle("wide", mode === "desktop");
+    pop.classList.toggle("hybrid", mode === "hybrid");
   }
-  bind("sheet-desktop", function () { sheetReset(true); });
-  bind("sheet-mobile", function () { sheetReset(false); });
+  bind("sheet-desktop", function () { sheetReset("desktop"); });
+  bind("sheet-hybrid", function () { sheetReset("hybrid"); });
+  bind("sheet-mobile", function () { sheetReset("mobile"); });
   makeResizable($("sheetpop"), $("sheet-resize"));
   makeDraggable($("sheetpop"), $("sheet-head"));
 
@@ -993,7 +998,7 @@
       "</div></div>";
   }
   function tabBtn(name, icon, label, on) { return '<button class="vtt-tab' + (on ? " on" : "") + '" data-tab="' + name + '">' + ico(icon, 16) + "<span>" + label + "</span></button>"; }
-  function sheetPop() { return '<div id="sheetpop" class="vtt-sheetpop" hidden><div class="vtt-sheet-head" id="sheet-head"><span id="sheet-title">Character</span><span style="flex:1"></span><button class="vtt-mini" id="sheet-desktop" title="Reset to desktop size">' + ico("desktop", 16) + '</button><button class="vtt-mini" id="sheet-mobile" title="Reset to mobile size">' + ico("mobile", 16) + '</button><button class="vtt-mini" id="sheet-close">' + ico("close", 16) + '</button></div><iframe id="sheet-frame" title="Character sheet"></iframe><div class="vtt-sheet-resize" id="sheet-resize" title="Drag to resize"></div></div>'; }
+  function sheetPop() { return '<div id="sheetpop" class="vtt-sheetpop" hidden><div class="vtt-sheet-head" id="sheet-head"><span id="sheet-title">Character</span><span style="flex:1"></span><button class="vtt-mini" id="sheet-desktop" title="Reset to desktop size">' + ico("desktop", 16) + '</button><button class="vtt-mini" id="sheet-hybrid" title="Reset to hybrid size">' + ico("tablet", 16) + '</button><button class="vtt-mini" id="sheet-mobile" title="Reset to mobile size">' + ico("mobile", 16) + '</button><button class="vtt-mini" id="sheet-close">' + ico("close", 16) + '</button></div><iframe id="sheet-frame" title="Character sheet"></iframe><div class="vtt-sheet-resize" id="sheet-resize" title="Drag to resize"></div></div>'; }
 
   function bind(id, fn) { var el = $(id); if (el) el.onclick = fn; }
   function fbtn(id, fn, on) { var el = $(id); if (!el) return; el.onclick = function () { var v = !el.classList.contains("on"); el.classList.toggle("on", v); el.setAttribute("aria-checked", v ? "true" : "false"); if (id === "f-reveal") { el.querySelector(".vtt-frow-i").innerHTML = ico(v ? "eye" : "eyeoff", 18); } fn(v); }; }
@@ -1113,7 +1118,8 @@
       ".vtt-ctx-item{position:relative;padding:7px 10px;border-radius:5px;font-size:13px;cursor:pointer;white-space:nowrap;color:#e6ebf2}.vtt-ctx-item:hover{background:#232b35}.vtt-ctx-item.has-sub:hover>.vtt-ctx.sub{display:block}.vtt-ctx-item.danger{color:#f0a8a3}",
       ".vtt-ctx-sep{height:1px;background:#2a323d;margin:4px 2px}",
       ".vtt-sheetpop{position:absolute;top:60px;right:12px;width:min(510px,92vw);height:86%;background:#14181e;border:1px solid #2a323d;border-radius:10px;z-index:60;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6)}",
-      ".vtt-sheetpop.wide{width:min(1120px,96vw);height:92vh;top:4vh;right:2vw;left:auto}",
+      ".vtt-sheetpop.wide{width:min(1260px,96vw);height:92vh;top:4vh;right:2vw;left:auto}",
+      ".vtt-sheetpop.hybrid{width:min(900px,95vw);height:92vh;top:4vh;right:2vw;left:auto}",
       ".vtt-sheet-head{display:flex;align-items:center;gap:6px;padding:9px 12px;background:#1b212a;cursor:move;font-weight:700}",
       ".vtt-sheetpop iframe{border:0;flex:1;width:100%;background:#fff}",
       ".vtt-sheet-resize{position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:nwse-resize;z-index:5;touch-action:none}",
@@ -1137,7 +1143,7 @@
       ".vtt-trow[draggable=true]{cursor:grab}",
       ".vtt-btn.primary{flex:0 0 auto;padding:8px 18px;background:#c8a24a;color:#14181e;border-color:#c8a24a}.vtt-btn.primary:hover{background:#d8b25a}",
       ".vtt-btn.danger{flex:0 0 auto;color:#f0a8a3;border-color:#5a2f2c;background:transparent}.vtt-btn.danger:hover{background:rgba(200,80,58,.12)}",
-      "@media(max-width:640px){.vtt-side{width:88vw}.vtt-side-x{display:flex}.vtt-tabs{padding-right:44px}#vtt-root.side-open .vtt-top.right,#vtt-root.side-open .vtt-zoom{right:12px}.vtt-sheetpop,.vtt-sheetpop.wide{width:94vw;height:88vh;right:3vw;left:auto;top:6vh}.vtt-readout{left:12px;bottom:64px}}",
+      "@media(max-width:640px){.vtt-side{width:88vw}.vtt-side-x{display:flex}.vtt-tabs{padding-right:44px}#vtt-root.side-open .vtt-top.right,#vtt-root.side-open .vtt-zoom{right:12px}.vtt-sheetpop,.vtt-sheetpop.wide,.vtt-sheetpop.hybrid{width:94vw;height:88vh;right:3vw;left:auto;top:6vh}.vtt-readout{left:12px;bottom:64px}}",
     ].join("");
     var s = document.createElement("style"); s.textContent = css; document.head.appendChild(s);
   }
