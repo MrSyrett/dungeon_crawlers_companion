@@ -1916,6 +1916,9 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .cst-expand{width:18px;height:18px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--accent);cursor:pointer;line-height:0}
 .cst-expand:hover{border-color:var(--accent);background:rgba(36,211,238,.12)}
 .cst-expand.on{background:rgba(36,211,238,.2);border-color:var(--accent)}
+/* Hide control on the Adventure / Roll Log headers — collapses the pane toward its edge. */
+.cst-hide{width:18px;height:18px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:0;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;line-height:0}
+.cst-hide:hover{border-color:var(--accent);background:rgba(36,211,238,.12);color:var(--accent)}
 .cst-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--white);white-space:nowrap}
 .cst-toolbar{margin-left:auto;display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden}
 .cst-content{flex:1;min-height:0;display:flex;position:relative;overflow:hidden}
@@ -1923,6 +1926,12 @@ body[data-cview="free"] .cst-log-rail{display:none}
 /* ── ZONE 3: Bottom Command bar — modes + quick tools + dice ── */
 .bottom-bar{flex-shrink:0;display:flex;align-items:stretch;min-height:58px;background:linear-gradient(180deg,#101319,#0a0c10);border-top:2px solid var(--border);box-shadow:0 -2px 0 rgba(36,211,238,.25),0 -6px 16px rgba(0,0,0,.4);position:relative;z-index:5}
 .bb-modes{display:flex;align-items:stretch;border-right:1px solid var(--border);flex-shrink:0}
+/* Restore chips for hidden Adventure / Roll Log panes — its own command-bar segment, hidden when empty. */
+.bb-restore{display:flex;align-items:center;gap:8px;padding:0 12px;border-right:1px solid var(--border);flex-shrink:0}
+.bb-restore:empty{display:none}
+.bb-restore-btn{display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;background:rgba(36,211,238,.08);border:1px solid var(--accent-dim);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.bb-restore-btn:hover{border-color:var(--accent);background:rgba(36,211,238,.16)}
+.bb-restore-btn .qi{font-size:13px;color:var(--accent)}
 .cmode-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 16px;cursor:pointer;border:none;border-right:1px solid var(--border);background:transparent;position:relative;transition:background .15s;min-width:78px}
 .cmode-tab:hover{background:rgba(36,211,238,.05)}
 .cm-ico{font-size:14px;line-height:1;color:var(--muted);transition:color .15s}
@@ -2762,7 +2771,7 @@ GMScenes.renderPins();
     <!-- ZONE 2 — CANVAS: Adventure | (Maps + Combat) -->
     <div class="console-workspace" id="console-workspace">
       <aside class="cstation" id="cst-adv">
-        <div class="cst-head"><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
+        <div class="cst-head"><button class="cst-hide" data-hide="adv" type="button" title="Hide the Adventure panel" aria-label="Hide Adventure"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button><span class="cst-title" id="cst-adv-title">Adventure</span><div class="cst-toolbar" id="cst-adv-toolbar"></div></div>
         <div class="cst-content" id="cst-adv-content"></div>
       </aside>
       <main class="cstation cstation-center" id="cst-center">
@@ -2794,6 +2803,8 @@ GMScenes.renderPins();
         <button class="cmode-tab" data-mode="combat"    type="button" onclick="setConsoleMode('combat')"><span class="cm-ico">⚔</span><span class="cm-name">Combat</span></button>
         <button class="cmode-tab" data-mode="master"   type="button" onclick="setConsoleMode('master')"><span class="cm-ico">▦</span><span class="cm-name">Master</span></button>
       </div>
+      <!-- Restore chips for hidden Adventure / Roll Log panes — populated only while hidden. -->
+      <div class="bb-restore" id="bb-restore"></div>
       <div class="bb-quick" id="bb-quick">
         <button class="qbtn" type="button" onclick="openTool('gen')"><span class="qi">☉</span>Generators</button>
         <button class="qbtn" type="button" onclick="openTool('timers')"><span class="qi">⏱</span>Trackers</button>
@@ -2809,7 +2820,7 @@ GMScenes.renderPins();
 
   <!-- Roll Log — full-height right rail; the command bar connects to its left edge -->
   <aside class="cstation cst-log-rail" id="cst-log">
-    <div class="cst-head"><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div>
+    <div class="cst-head"><button class="cst-hide" data-hide="log" type="button" title="Hide the Roll Log" aria-label="Hide Roll Log"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button><span class="cst-title" id="cst-log-title">Roll Log</span><div class="cst-toolbar" id="cst-log-toolbar"></div></div>
     <div class="cst-content" id="cst-log-content"></div>
   </aside>
 </div>
@@ -4717,6 +4728,40 @@ let consoleMode = 'master';
 // When set ('map'|'soc'|'cbt'), that station is expanded to fill the whole canvas
 // and the others (plus Adventure / Roll Log) collapse. Cleared on a mode change.
 let expandedStation = null;
+// Stations the GM has manually hidden to free up space (only 'adv' / 'log'). Unlike
+// expand, this persists across mode switches and reloads (localStorage), so an
+// in-person GM who hides the Roll Log or Adventure keeps the extra room.
+let hiddenStations = (function(){ try { const v = JSON.parse(localStorage.getItem('gm_hidden_stations') || '[]'); return new Set(Array.isArray(v) ? v.filter(s => s === 'adv' || s === 'log') : []); } catch(e){ return new Set(); } })();
+function saveHiddenStations(){ try { localStorage.setItem('gm_hidden_stations', JSON.stringify([...hiddenStations])); } catch(e){} }
+function setStationHidden(st, hidden){
+  if(st !== 'adv' && st !== 'log') return;
+  if(hidden) hiddenStations.add(st); else hiddenStations.delete(st);
+  saveHiddenStations();
+  if(document.body.dataset.cview === 'console') renderConsole(consoleMode); else updateStationShowTabs();
+}
+// Populate the command-bar restore segment with a chip for each hidden pane.
+// Desktop console view only, and only for a station the current mode includes
+// (always true for adv/log across the four modes). The segment hides when empty.
+const RESTORE_META = { adv: { icon: '◧', label: 'Adventure' }, log: { icon: '◨', label: 'Roll Log' } };
+function updateStationShowTabs(){
+  const host = document.getElementById('bb-restore');
+  if(!host) return;
+  const inConsole = document.body.dataset.cview === 'console' && !document.body.classList.contains('gm-mobile');
+  const cfg = CONSOLE_MODES[consoleMode] || CONSOLE_MODES.master;
+  host.innerHTML = '';
+  if(!inConsole) return;
+  ['adv','log'].forEach(st => {
+    if(!cfg[st] || !hiddenStations.has(st)) return;
+    const m = RESTORE_META[st];
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'bb-restore-btn';
+    b.title = 'Show the ' + m.label + ' panel';
+    b.innerHTML = '<span class="qi">' + m.icon + '</span>' + m.label;
+    b.addEventListener('click', () => setStationHidden(st, false));
+    host.appendChild(b);
+  });
+}
 const EXPAND_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M4 9V4h5v2H6v3H4zm11-5h5v5h-2V6h-3V4zM6 15v3h3v2H4v-5h2zm12 3v-3h2v5h-5v-2h3z"/></svg>';
 const SHRINK_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M9 4v5H4V7h3V4h2zm6 0h2v3h3v2h-5V4zM4 15h5v5H7v-3H4v-2zm13 2v3h-2v-5h5v2h-3z"/></svg>';
 function stationToolFor(cfg, st){ return (cfg.tools && cfg.tools[st]) || STATION_TOOL[st]; }
@@ -4784,9 +4829,14 @@ function renderConsole(mode) {
   // tool. Mounting only the visible stations keeps hidden ones untouched.
   CONSOLE_STATIONS.forEach(st => {
     const el = document.getElementById('cst-' + st);
-    const visible = !!eff[st];
+    const modeWants = !!eff[st];
+    // Adventure / Roll Log can be manually hidden on top of the mode layout.
+    const manuallyHidden = (st === 'adv' || st === 'log') && hiddenStations.has(st);
+    const visible = modeWants && !manuallyHidden;
     if(el) el.classList.toggle('collapsed', !visible);
-    if(visible) {
+    if(modeWants) {
+      // Keep the tool mounted even while hidden so its state is preserved and
+      // un-hiding is instant.
       mountStation(st, stationToolFor(eff, st));
       const titleEl = document.getElementById('cst-' + st + '-title');
       if(titleEl) titleEl.textContent = (eff.titles && eff.titles[st]) || STATION_TITLES[st];
@@ -4821,6 +4871,7 @@ function renderConsole(mode) {
   });
 
   document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === consoleMode));
+  updateStationShowTabs();
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
@@ -4842,6 +4893,7 @@ function setFreeView() {
   renderWindows();
   document.querySelectorAll('.cmode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === 'free'));
   document.getElementById('add-window-btn') && (document.getElementById('add-window-btn').style.display = '');
+  try { updateStationShowTabs(); } catch(e) {}
   if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
@@ -4850,6 +4902,9 @@ function setConsoleMode(mode) { expandedStation = null; renderConsole(mode); }
 // Expand/shrink toggles on the Maps / Social / Combat headers. Delegated so it
 // works regardless of when the headers are (re)rendered.
 document.addEventListener('click', (e) => {
+  // Hide (Adventure / Roll Log) — collapse the pane and reveal its edge tab.
+  const hideBtn = e.target.closest && e.target.closest('.cst-hide');
+  if(hideBtn && hideBtn.dataset.hide) { e.preventDefault(); setStationHidden(hideBtn.dataset.hide, true); return; }
   const btn = e.target.closest && e.target.closest('.cst-expand');
   if(!btn || !btn.dataset.st) return;
   e.preventDefault();
