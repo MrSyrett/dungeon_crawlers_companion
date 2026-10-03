@@ -1,14 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import {
+  subscribeSystem,
+  getSystemSnapshot,
+  getSystemServerSnapshot,
+} from "@/components/systemStore";
 
 // The Rulebook Compendium's PDF viewer. It mounts the shared, site-wide reader
 // (window.DCCPdfReader, /vendor/dcc-pdf-reader.js) — the SAME component, tab bar,
 // toolbar, chapters panel and gestures the GM Screen uses, so there's one system
-// to maintain. We hand it the whole book list (it renders the tabs) and the book
-// to open; page position is remembered per book in localStorage.
+// to maintain. We hand it the book list (it renders the tabs) filtered to the
+// selected game system, and the book to open; page position is remembered per
+// book in localStorage. On desktop the reader is capped to a contained column
+// (like the GM Screen pane) rather than spanning the whole window.
 
-type Book = { file: string; title: string; url: string };
+type Book = { file: string; title: string; url: string; system: string };
 type ReaderInstance = {
   setBooks: (list: Book[], active?: string) => void;
   destroy: () => void;
@@ -63,10 +70,31 @@ export default function RulebookReader({
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<ReaderInstance | null>(null);
+  const activeFileRef = useRef(active);
 
+  // The selected game system (same store the dashboard toggle + grid use).
+  const activeSystem = useSyncExternalStore(
+    subscribeSystem,
+    getSystemSnapshot,
+    getSystemServerSnapshot,
+  );
+  const sysRef = useRef(activeSystem);
+  sysRef.current = activeSystem;
+
+  // Only tabs for the selected system ("BOTH" always shows); the currently-open
+  // book stays visible even if it belongs to a different system.
+  function applyBooks(reader: ReaderInstance) {
+    const sys = sysRef.current;
+    const cur = activeFileRef.current;
+    const shown = books.filter(
+      (b) => b.system === "BOTH" || b.system === sys || b.file === cur,
+    );
+    reader.setBooks(shown, cur);
+  }
+
+  // Create the reader once; /rules re-navigates (remounts) to change books.
   useEffect(() => {
     let cancelled = false;
-
     (async () => {
       try {
         await loadScript("/vendor/pdfjs/pdf.min.js");
@@ -95,7 +123,7 @@ export default function RulebookReader({
           }
         },
         onActiveBook: (file: string) => {
-          // Keep the URL in sync so refresh / share / back lands on this book.
+          activeFileRef.current = file;
           try {
             window.history.replaceState(null, "", `/rules?book=${encodeURIComponent(file)}`);
           } catch {
@@ -104,7 +132,7 @@ export default function RulebookReader({
         },
       });
       readerRef.current = reader;
-      reader.setBooks(books, active);
+      applyBooks(reader);
     })();
 
     return () => {
@@ -118,17 +146,25 @@ export default function RulebookReader({
         readerRef.current = null;
       }
     };
-    // Mounted once per page load; /rules re-navigates (remounts) to change books.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The reader fills the screen; its own tab bar + toolbar carry everything. The
-  // host sits as a flex child of an h-screen column so it has a DEFINITE height —
-  // the reader's internal `.dccpdf{height:100%}` then resolves correctly
-  // (fit-to-page needs a real viewport height, same as the GM Screen).
+  // Re-filter the tabs when the selected system changes.
+  useEffect(() => {
+    if (readerRef.current) applyBooks(readerRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSystem]);
+
+  // Full height; on desktop the reader is capped to a contained column (centered,
+  // with side rules) instead of spanning the whole window — matching the GM
+  // Screen pane. The host has a definite height either way (parent is h-screen;
+  // row-flex stretch), so the reader's fit-to-page math works.
   return (
-    <div className="flex h-screen flex-col">
-      <div ref={hostRef} className="min-h-0 flex-1" />
+    <div className="flex h-screen justify-center">
+      <div
+        ref={hostRef}
+        className="min-h-0 w-full max-w-[1024px] border-[var(--border)] sm:border-x"
+      />
     </div>
   );
 }

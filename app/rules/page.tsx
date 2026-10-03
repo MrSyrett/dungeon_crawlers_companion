@@ -33,6 +33,7 @@ export default async function RulesPage({
       file: b.file,
       title: prettyName(b.file),
       url: `/api/rulebooks/${encodeURIComponent(b.file)}`,
+      system: b.system,
     }));
     return <RulebookReader books={list} active={selected} />;
   }

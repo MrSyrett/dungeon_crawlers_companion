@@ -37,8 +37,12 @@
     var css =
       ".dccpdf{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;height:100%;position:relative;background:var(--dccpdf-stage,#111);color:var(--text,var(--white,#e5e7eb));overflow:hidden}" +
       ".dccpdf *{box-sizing:border-box}" +
-      ".dccpdf-books{display:flex;gap:4px;overflow-x:auto;padding:6px 8px;background:var(--panel,#1a1d24);border-bottom:1px solid var(--border,#2a2f3a);flex-shrink:0}" +
+      ".dccpdf-books{display:flex;gap:4px;overflow-x:auto;padding:6px 8px;background:var(--panel,#1a1d24);border-bottom:1px solid var(--border,#2a2f3a);flex-shrink:0;scrollbar-width:thin;scrollbar-color:var(--accent,var(--gold,#d8b45a)) transparent}" +
       ".dccpdf-books:empty{display:none}" +
+      ".dccpdf-books::-webkit-scrollbar{height:8px}" +
+      ".dccpdf-books::-webkit-scrollbar-track{background:transparent}" +
+      ".dccpdf-books::-webkit-scrollbar-thumb{background:var(--border,#2a2f3a);border-radius:999px}" +
+      ".dccpdf-books:hover::-webkit-scrollbar-thumb{background:var(--accent,var(--gold,#d8b45a))}" +
       ".dccpdf-booktab{flex-shrink:0;white-space:nowrap;padding:5px 10px;border-radius:6px;background:var(--panel-2,#22262f);border:1px solid var(--border,#2a2f3a);color:var(--muted,#8a93a3);font:700 10.5px/1 'Barlow Condensed','Montserrat',system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}" +
       ".dccpdf-booktab:hover{color:var(--text,var(--white,#fff));border-color:var(--accent,var(--gold,#d8b45a))}" +
       ".dccpdf-booktab.is-active{background:var(--gold,#d8b45a);color:#1a1a1a;border-color:var(--gold,#d8b45a)}" +
