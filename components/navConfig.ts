@@ -155,7 +155,7 @@ export function homebrewFor(system: SystemKey): string | null {
 
 // The Tools group. Shown as individual nav links (not a dropdown), since they
 // never change by system. Naming (site-wide): "Tabletop" is OUR first-party
-// VTT at /play; "Owlbear" is the external Owlbear Rodeo integration (its setup
+// VTT at /play; "OBR" is the external Owlbear Rodeo integration (its setup
 // page is still served at /vtt). Map Maker and GM Screen are route handlers
 // (standalone HTML), hence `hard`.
 export const TOOLS_NAV: NavLink[] = [
@@ -163,7 +163,7 @@ export const TOOLS_NAV: NavLink[] = [
   { href: "/gm-screen", label: "GM Screen", hard: true },
   { href: "/dungeon-map", label: "Map Maker", hard: true },
   { href: "/token-maker", label: "Token Maker" },
-  { href: "/vtt", label: "Owlbear" },
+  { href: "/vtt", label: "OBR" },
 ];
 
 // When the user switches system while on a compendium page, keep them in the

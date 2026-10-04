@@ -164,11 +164,10 @@ export default function SiteNav({
         </button>
 
         {/* Logo → home */}
-        <Link href="/dashboard" className="flex shrink-0 items-center gap-2" title="Dungeon Crawler's Companion">
-          <Image src="/logo-white.png" alt="" width={36} height={36} priority className="h-8 w-8" />
-          {/* "Companion", not "DCC": that abbreviation is also the Dungeon
-              Crawler Carl *system*, so it read as a system name in the bar. */}
-          <span className="hidden font-display text-sm font-black tracking-wide lg:inline">Companion</span>
+        {/* The mark alone — no wordmark. The title attribute carries the name
+            for anyone who hovers, and the alt text for screen readers. */}
+        <Link href="/dashboard" className="flex shrink-0 items-center" title="Dungeon Crawler's Companion">
+          <Image src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width={36} height={36} priority className="h-8 w-8" />
         </Link>
 
         {/* System selector */}

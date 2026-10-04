@@ -13,10 +13,10 @@ import { TOOLS_NAV, compendiumFor } from "@/components/navConfig";
 // padding hacks, nothing overlapped. Hidden in embed / preview modes by the
 // callers (the framing page provides chrome there).
 //
-//   [logo Companion] [SYSTEM] Characters › Kira            [Saved] [☰]
+//   [logo] [SYSTEM] Characters › Kira                      [Saved] [☰]
 //
 // The ☰ menu: Dashboard · Characters · Adventures · Campaigns, any context
-// links the caller passes (Campaign · Tabletop · Owlbear), the Tools group,
+// links the caller passes (Campaign · Tabletop · OBR), the Tools group,
 // that system's Compendium (+ Rulebooks), and — on sheets — the Light/Dark
 // theme toggle. Colors come from /tokens.css; the system chip (and anything
 // using var(--sys)) wears the current system's accent.
@@ -30,7 +30,7 @@ export type MiniBarOpts = {
   crumb: string;
   /** The document's name (a character, an adventure). Live-updated via .dd-title. */
   title?: string;
-  /** Page-specific places to go next (Campaign · Tabletop · Owlbear …). */
+  /** Page-specific places to go next (Campaign · Tabletop · OBR …). */
   context?: MiniBarLink[];
   /** Show the save-status chip (#dd-status) — sheets and the GM Screen. */
   status?: boolean;
@@ -69,9 +69,8 @@ export function miniBar(opts: MiniBarOpts): string {
   const style = `<style id="dd-bar-style">
 #dd-bar{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;box-sizing:border-box;background:var(--panel,#111113);border-bottom:1px solid var(--border,#26262a);color:var(--text,#ece9e1);font:600 11px/1 "Barlow Condensed",Barlow,system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;-webkit-user-select:none;user-select:none}
 #dd-bar a{color:inherit;text-decoration:none}
-#dd-bar .dd-logo{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+#dd-bar .dd-logo{display:flex;align-items:center;flex:0 0 auto}
 #dd-bar .dd-logo img{width:22px;height:22px;display:block}
-#dd-bar .dd-logo span{font-weight:800;letter-spacing:.1em}
 #dd-bar .dd-sys{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border,#26262a);border-radius:4px;background:var(--panel-2,#161618);color:var(--sys,var(--gold,#c8a020));white-space:nowrap}
 #dd-bar .dd-crumb{display:flex;align-items:center;gap:6px;min-width:0;color:var(--muted,#8a8a93)}
 #dd-bar .dd-crumb .dd-title{color:var(--text,#ece9e1);text-transform:none;letter-spacing:.02em;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
@@ -92,7 +91,7 @@ export function miniBar(opts: MiniBarOpts): string {
 #dd-menu a:hover,#dd-menu button:hover{color:var(--text,#ece9e1);border-color:var(--sys,var(--gold,#c8a020));background:var(--panel-2,#161618)}
 #dd-menu .dd-menu-ctx a{color:var(--sys,var(--gold,#c8a020));border-color:var(--sys,var(--gold,#c8a020))}
 #dd-bar .dd-backdrop{position:fixed;inset:0;z-index:2147482999;background:transparent}
-@media (max-width:640px){#dd-bar{gap:7px;padding:0 8px}#dd-bar .dd-logo span{display:none}#dd-bar .dd-crumb .dd-crumb-k{display:none}#dd-bar .dd-crumb .dd-sep{display:none}}
+@media (max-width:640px){#dd-bar{gap:7px;padding:0 8px}#dd-bar .dd-crumb .dd-crumb-k{display:none}#dd-bar .dd-crumb .dd-sep{display:none}}
 @media (prefers-reduced-motion:no-preference){#dd-menu{animation:dd-menu-in .12s ease-out}}
 @keyframes dd-menu-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 </style>`;
@@ -118,7 +117,7 @@ export function miniBar(opts: MiniBarOpts): string {
 ${ctx}${tools}${comp}${theme}</div>`;
 
   const bar = `<div id="dd-bar" role="navigation" aria-label="Site">
-<a class="dd-logo" href="/dashboard" title="Dashboard"><img src="/logo-white.png" alt="" width="22" height="22"><span>Companion</span></a>
+<a class="dd-logo" href="/dashboard" title="Dashboard"><img src="/logo-white.png" alt="Dashboard" width="22" height="22"></a>
 ${s ? `<span class="dd-sys" title="Current system">${esc(s.name)}</span>` : ""}
 ${crumb}
 <span class="dd-spacer"></span>

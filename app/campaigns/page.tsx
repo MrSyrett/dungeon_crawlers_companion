@@ -436,7 +436,7 @@ export default async function CampaignsPage() {
                     {/* Plain <a>s: /play and /gm-screen are route handlers that
                         return standalone HTML, so <Link> would prefetch/RSC-fetch
                         a whole document for nothing. Same words + same behavior
-                        as the dashboard: Tabletop (ours) opens here; an Owlbear
+                        as the dashboard: Tabletop (ours) opens here; an OBR
                         room (external) opens in a new tab. */}
                     <a
                       href={`/play/${c.id}`}
@@ -451,7 +451,7 @@ export default async function CampaignsPage() {
                         rel="noopener noreferrer"
                         className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                       >
-                        Open in Owlbear ↗
+                        Open in OBR ↗
                       </a>
                     ) : null}
                     <OpenGmScreenButton
@@ -514,8 +514,8 @@ export default async function CampaignsPage() {
                 </form>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
                   {c.vttUrl
-                    ? "Characters linked to this campaign open this Owlbear room from the home page (instead of the built-in Tabletop)."
-                    : "Characters linked to this campaign open the built-in Tabletop from the home page. Paste an Owlbear Rodeo room link here to use Owlbear instead."}
+                    ? "Characters linked to this campaign open this OBR room from the home page (instead of the built-in Tabletop)."
+                    : "Characters linked to this campaign open the built-in Tabletop from the home page. Paste an OBR room link here to use OBR instead."}
                 </p>
               </li>
             );

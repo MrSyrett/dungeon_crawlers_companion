@@ -28,7 +28,7 @@ export async function GET(req: Request, ctx: Ctx) {
 
   // Context links for the mini-bar menu: where this document's campaign plays.
   // A sheet used to be a dead end (its only exit was Home); now its campaign,
-  // the Tabletop and any Owlbear room are one tap away.
+  // the Tabletop and any OBR room are one tap away.
   const context: { label: string; href: string; external?: boolean }[] = [];
   if (doc.linkedCampaignId && !previewOnly && !embed) {
     const camp = await prisma.campaign
@@ -37,7 +37,7 @@ export async function GET(req: Request, ctx: Ctx) {
     if (camp) {
       context.push({ label: `Campaign: ${camp.name}`, href: "/campaigns" });
       context.push({ label: "Open Tabletop", href: `/play/${camp.id}` });
-      if (camp.vttUrl) context.push({ label: "Open in Owlbear", href: camp.vttUrl, external: true });
+      if (camp.vttUrl) context.push({ label: "Open in OBR", href: camp.vttUrl, external: true });
     }
   }
 

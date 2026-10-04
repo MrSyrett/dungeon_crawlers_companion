@@ -481,7 +481,7 @@ export async function buildGmScreenHtml(opts: {
     if (camp) {
       context.push({ label: `Campaign: ${camp.name}`, href: "/campaigns" });
       context.push({ label: "Open Tabletop", href: `/play/${camp.id}` });
-      if (camp.vttUrl) context.push({ label: "Open in Owlbear", href: camp.vttUrl, external: true });
+      if (camp.vttUrl) context.push({ label: "Open in OBR", href: camp.vttUrl, external: true });
     }
     chrome = miniBar({
       system: camp?.system ?? null,   // unlinked board → the bar adopts the site-wide choice

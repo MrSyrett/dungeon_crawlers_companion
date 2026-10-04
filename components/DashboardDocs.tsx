@@ -17,7 +17,7 @@ import { ConfirmButton } from "./ConfirmButton";
 
 // Compact per-document row the server hands us — no Prisma objects, no rendered
 // panels, just what a list item needs. `vttHref` is where the sheet's campaign
-// plays: `vttKind` says whether that's an external Owlbear room ("owlbear") or
+// plays: `vttKind` says whether that's an external OBR room ("owlbear") or
 // our own first-party tabletop at /play ("tabletop"); null when unlinked.
 export type DocRow = {
   id: string;
@@ -98,19 +98,19 @@ function DocList({
               <div className="flex shrink-0 items-center gap-2">
                 {doc.vttHref ? (
                   // Our own Tabletop opens in this tab (it's part of the app);
-                  // an external Owlbear room opens in a new one. Same words and
+                  // an external OBR room opens in a new one. Same words and
                   // same behavior as the Campaigns page.
                   <a
                     href={doc.vttHref}
                     {...(doc.vttKind === "owlbear" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     title={
                       doc.vttKind === "owlbear"
-                        ? "Open this campaign's Owlbear Rodeo room in a new tab"
+                        ? "Open this campaign's OBR room in a new tab"
                         : "Open this campaign's tabletop"
                     }
                     className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
                   >
-                    {doc.vttKind === "owlbear" ? "Open in Owlbear ↗" : "Open Tabletop"}
+                    {doc.vttKind === "owlbear" ? "Open in OBR ↗" : "Open Tabletop"}
                   </a>
                 ) : null}
                 <form action={deleteDocument}>

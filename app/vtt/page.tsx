@@ -55,7 +55,7 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
         <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.15em]">Character Sheet/GM Screen</h2>
         <ol className="flex flex-col gap-2 text-[13px] leading-relaxed text-[var(--muted)]">
           <li>
-            <span className="text-[var(--text)]">1.</span> In Owlbear Rodeo, open your profile and
+            <span className="text-[var(--text)]">1.</span> In OBR, open your profile and
             choose <span className="text-[var(--text)]">Add Extension</span>.
           </li>
           <li>
@@ -86,8 +86,8 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
         </p>
         <ol className="flex flex-col gap-2 text-[13px] leading-relaxed text-[var(--muted)]">
           <li>
-            <span className="text-[var(--text)]">1.</span> Add this second extension in Owlbear
-            Rodeo the same way — <span className="text-[var(--text)]">Add Extension</span>, then
+            <span className="text-[var(--text)]">1.</span> Add this second extension in OBR
+            the same way — <span className="text-[var(--text)]">Add Extension</span>, then
             paste this install link:
             <CopyField value="/obr/vtt-import/manifest.json" absolute />
           </li>

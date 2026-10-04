@@ -11,7 +11,7 @@ export async function createVttToken(formData: FormData): Promise<void> {
   const user = await getCurrentUser();
   if (!user) return;
 
-  const label = String(formData.get("label") ?? "").trim().slice(0, 60) || "Owlbear Rodeo";
+  const label = String(formData.get("label") ?? "").trim().slice(0, 60) || "OBR";
   const raw = generateToken();
 
   await prisma.vttToken.create({
