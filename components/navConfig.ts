@@ -158,12 +158,14 @@ export function homebrewFor(system: SystemKey): string | null {
 // VTT at /play; "OBR" is the external Owlbear Rodeo integration (its setup
 // page is still served at /vtt). Map Maker and GM Screen are route handlers
 // (standalone HTML), hence `hard`.
+// Order: Campaigns then OBR (the two places a table starts), the makers in the
+// middle, GM Screen last so it sits at the right-hand end of the bar.
 export const TOOLS_NAV: NavLink[] = [
   { href: "/campaigns", label: "Campaigns" },
-  { href: "/gm-screen", label: "GM Screen", hard: true },
+  { href: "/vtt", label: "OBR" },
   { href: "/dungeon-map", label: "Map Maker", hard: true },
   { href: "/token-maker", label: "Token Maker" },
-  { href: "/vtt", label: "OBR" },
+  { href: "/gm-screen", label: "GM Screen", hard: true },
 ];
 
 // When the user switches system while on a compendium page, keep them in the
