@@ -16,7 +16,7 @@ import { TOOLS_NAV, compendiumFor, homebrewFor } from "@/components/navConfig";
 // modules SiteNav imports. Add a compendium page and both navbars grow it.
 // That is the whole reason this is maintainable; keep it that way.
 //
-// The GM Screen and the Tabletop deliberately keep the mini-bar: they are
+// The GM Screen and the VTT deliberately keep the mini-bar: they are
 // full-bleed working surfaces where 16px of height is worth more than matching
 // chrome, and both already have their own dense toolbars.
 

@@ -3,7 +3,7 @@ import { TOOLS_NAV, compendiumFor } from "@/components/navConfig";
 
 // The shared "mini-bar": the site's navigation chrome for every surface that
 // is NOT rendered by the Next.js layout — the standalone character sheets, the
-// GM Screen, the Map Maker and the Tabletop (VTT). Before this each of those
+// GM Screen, the Map Maker and the VTT. Before this each of those
 // had only a lone "Home" control, in a different spot on each page, and the
 // user lost the system picker, Compendium and Tools the moment a tool opened.
 //
@@ -27,7 +27,7 @@ export type MiniBarLink = { label: string; href: string; external?: boolean };
 export type MiniBarOpts = {
   /** Tints the chip and sets --sys for the page. */
   system: SystemKey | null;
-  /** What this page is: "Characters", "Adventures", "GM Screen", "Map Maker", "Tabletop". */
+  /** What this page is: "Characters", "Adventures", "GM Screen", "Map Maker", "VTT". */
   crumb: string;
   /** The document's name (a character, an adventure). Live-updated via .dd-title. */
   title?: string;
@@ -84,7 +84,7 @@ function sysEntry(key: SystemKey | null) {
 // The faces each themed skin in public/tokens.css names. A standalone document
 // can't use next/font, so the ones its own template doesn't already load have
 // to be fetched here. Only the themed tools (character sheets, adventure preps)
-// ask for this — the GM Screen, the Map Maker and the Tabletop never do.
+// ask for this — the GM Screen, the Map Maker and the VTT never do.
 // A system with no entry has no skin yet and keeps the template's own type.
 const THEME_FONTS: Partial<Record<SystemKey, string>> = {
   SD: "family=Montserrat:wght@400;600;800",

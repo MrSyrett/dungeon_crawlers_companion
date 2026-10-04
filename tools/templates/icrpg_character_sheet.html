@@ -330,7 +330,7 @@ body.spec-on .sk-spec-cell{display:table-cell;}
   /* iOS zooms the page when a focused input is <16px — keep picker search at 16px so the menu opens at its proper size */
   input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
-  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--icrpg);border-radius:14px 14px 0 0;z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--icrpg);border-radius:14px 14px 0 0;z-index:200;max-height:calc(100vh - max(var(--dd-bar-h, 0px), 34px));max-height:calc(100dvh - max(var(--dd-bar-h, 0px), 34px));transition:transform .25s ease;overflow:visible !important;}
   .log-header{border-radius:14px 14px 0 0;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
   .roll-log:not(.collapsed) .log-entries{max-height:calc(100vh - 300px);max-height:calc(100dvh - 300px);}
@@ -478,19 +478,44 @@ body.dark .tabs-bar{background:#1a161a;}
   };
 
   /* ── The roll log's VTT button ───────────────────────────────────────────
-     Shown only once this character has joined a campaign, because that
-     campaign IS the table the button opens (/play/<campaign id>). With no
-     campaign there is nothing to open, so the button stays out of the way.
+     Shown only once this character has joined a campaign, because that campaign
+     is the table the button opens. With no campaign there is nothing to open, so
+     the button stays out of the way.
 
-     It also stays hidden inside a frame. A sheet shown in our own tabletop,
-     or in the Owlbear popover, is already at the table — opening the tabletop
-     from there would nest it inside itself. (A cross-origin parent makes the
-     check throw, and "framed" is the safe answer to that too.)
+     Where it goes depends on the campaign, the same way the dashboard decides:
+     our own tabletop at /play/<id>, or the GM's Owlbear room when one is set —
+     and then it says OBR and opens externally, so the label never lies about
+     where the click lands. The room URL is NOT kept in the sheet's saved data;
+     it is read from the campaign each time the link is restored, so a GM adding
+     or clearing the room takes effect without the player re-joining. The /play
+     default is painted first, so a slow or failed lookup still leaves a button
+     that works.
+
+     It stays hidden inside a frame. A sheet shown in our own tabletop, or in the
+     Owlbear popover, is already at the table — opening the tabletop from there
+     would nest it inside itself. (A cross-origin parent makes the check throw,
+     and "framed" is the safe answer to that too.)
 
      Order in the header is VTT · dice · Clear: dice-anim.js mounts its gear
      immediately before the LAST .log-clear, which is Clear. */
   var __ddFramed = false;
   try { __ddFramed = window.self !== window.top; } catch (e) { __ddFramed = true; }
+
+  var __ddVttDest = {};   /* campaign id → where its button goes, asked once */
+
+  function __ddVttHome(id) {
+    return { href: '/play/' + encodeURIComponent(id), label: 'VTT', ext: false };
+  }
+
+  function __ddVttPaint(btn, camp, d) {
+    var name = camp && camp.name ? String(camp.name) : '';
+    btn.textContent = d.label;
+    btn.setAttribute('data-href', d.href);
+    btn.title = d.ext
+      ? (name ? 'Open the Owlbear room for "' + name + '"' : "Open the campaign's Owlbear room")
+      : (name ? 'Open the tabletop for "' + name + '"' : 'Open the campaign tabletop');
+    btn.setAttribute('aria-label', btn.title);
+  }
 
   window.__ddVtt = function (camp) {
     var btn = document.getElementById('vtt-open-btn');
@@ -498,21 +523,37 @@ body.dark .tabs-bar{background:#1a161a;}
     var id = camp && camp.id ? String(camp.id) : '';
     if (!id || __ddFramed) {
       btn.hidden = true;
-      btn.removeAttribute('data-campaign');
+      btn.removeAttribute('data-href');
       return;
     }
-    btn.setAttribute('data-campaign', id);
-    var name = camp && camp.name ? String(camp.name) : '';
-    btn.title = name ? 'Open the tabletop for "' + name + '"' : 'Open the campaign tabletop';
-    btn.setAttribute('aria-label', btn.title);
     if (!btn.getAttribute('data-wired')) {
       btn.setAttribute('data-wired', '1');
       btn.addEventListener('click', function () {
-        var c = btn.getAttribute('data-campaign');
-        if (c) window.open('/play/' + encodeURIComponent(c), '_blank', 'noopener');
+        var href = btn.getAttribute('data-href');
+        if (href) window.open(href, '_blank', 'noopener');
       });
     }
+    __ddVttPaint(btn, camp, __ddVttDest[id] || __ddVttHome(id));
     btn.hidden = false;
+
+    if (__ddVttDest[id] || !(camp && camp.code)) return;
+    try {
+      fetch('/api/campaigns?code=' + encodeURIComponent(camp.code), { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (c) {
+          /* A code can only be reused after a campaign is gone, but check anyway
+             rather than trust a lookup to be about the campaign we asked for. */
+          if (!c || String(c.id) !== id) return;
+          var url = typeof c.vttUrl === 'string' ? c.vttUrl.trim() : '';
+          /* http(s) only: the GM types this field by hand, and a javascript: or
+             data: value handed to window.open would run on our own origin. */
+          __ddVttDest[id] = /^https?:\/\//i.test(url)
+            ? { href: url, label: 'OBR', ext: true }
+            : __ddVttHome(id);
+          if (!btn.hidden) __ddVttPaint(btn, camp, __ddVttDest[id]);
+        })
+        .catch(function () {});
+    } catch (e) {}
   };
 })();
 </script>

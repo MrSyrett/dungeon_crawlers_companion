@@ -154,10 +154,13 @@ export function homebrewFor(system: SystemKey): string | null {
 }
 
 // The Tools group. Shown as individual nav links (not a dropdown), since they
-// never change by system. Naming (site-wide): "Tabletop" is OUR first-party
-// VTT at /play; "OBR" is the external Owlbear Rodeo integration (its setup
-// page is still served at /vtt). Map Maker and GM Screen are route handlers
-// (standalone HTML), hence `hard`.
+// never change by system. Naming (site-wide): "VTT" is OUR first-party tabletop
+// at /play — every button that opens it says "Open VTT", and the page's own
+// crumb and tab title say VTT. "OBR" is the external Owlbear Rodeo integration.
+// Mind the one crossed wire this leaves: the OBR *setup* page is served at the
+// path /vtt, which is not our VTT. The nav link below labels it OBR for that
+// reason; don't "fix" the label to match the path.
+// Map Maker and GM Screen are route handlers (standalone HTML), hence `hard`.
 // Order: Campaigns then OBR (the two places a table starts), the makers in the
 // middle, GM Screen last so it sits at the right-hand end of the bar.
 export const TOOLS_NAV: NavLink[] = [

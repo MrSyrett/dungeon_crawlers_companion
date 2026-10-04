@@ -97,7 +97,7 @@ function DocList({
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 {doc.vttHref ? (
-                  // Our own Tabletop opens in this tab (it's part of the app);
+                  // Our own VTT opens in this tab (it's part of the app);
                   // an external OBR room opens in a new one. Same words and
                   // same behavior as the Campaigns page.
                   <a

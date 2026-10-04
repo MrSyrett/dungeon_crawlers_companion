@@ -121,7 +121,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ campaignId: str
     ? ""
     : miniBar({
         system: isSystemKey(campaign.system) ? campaign.system : null,
-        crumb: "Tabletop",
+        crumb: "VTT",
         title: campaign.name,
         status: false,
       });
@@ -158,7 +158,7 @@ function iceServers(): Array<{ urls: string | string[]; username?: string; crede
 }
 
 function pageHtml(cfg: Record<string, unknown>, bar: string): string {
-  const title = `${String(cfg.campaignName)} — Tabletop`;
+  const title = `${String(cfg.campaignName)} — VTT`;
   const system = isSystemKey(cfg.system) ? cfg.system : null;
   // Shared tokens AFTER board.css so the site palette (panel, border, muted,
   // gold) wins over the board's own fallbacks — one palette on every surface.

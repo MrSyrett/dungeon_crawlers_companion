@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getPlayUser } from "@/lib/vtt";
 import { makeCode } from "@/lib/campaign-code";
+import { participatesInCampaign } from "@/lib/homebrew";
 
 // POST — create a campaign. Body: { name }. Returns { id, name, code }.
 export async function POST(req: NextRequest) {
@@ -58,9 +59,22 @@ export async function GET(req: NextRequest) {
 
   const campaign = await prisma.campaign.findUnique({
     where: { code },
-    select: { id: true, name: true, code: true },
+    select: { id: true, name: true, code: true, vttUrl: true },
   });
   if (!campaign) return new Response("Not found", { status: 404 });
 
-  return Response.json(campaign);
+  // `vttUrl` goes out only to someone already IN the campaign — the GM who owns
+  // it, or a player with a sheet linked to it (participatesInCampaign is the
+  // same predicate the roster and shared homebrew use, so membership has one
+  // definition). This endpoint doubles as the join-by-code lookup, which any
+  // signed-in account can call with a code it was handed, and an Owlbear room
+  // link is a capability: holding it is enough to walk into the room. So it is
+  // not part of what knowing a code buys you before you join.
+  //
+  // A joined character sheet re-reads this to decide where its roll-log VTT
+  // button points. Read live rather than saved into the sheet, so a GM who adds
+  // or clears the room afterwards takes effect without anyone re-joining.
+  const { vttUrl, ...publicFields } = campaign;
+  const inside = await participatesInCampaign(user.id, campaign.id);
+  return Response.json(inside ? { ...publicFields, vttUrl: vttUrl ?? null } : publicFields);
 }

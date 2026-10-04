@@ -237,8 +237,6 @@ export function renderToolPage(
     /** Systems an admin has hidden, so the bar's system dropdown matches the
      *  one the Next pages show. */
     hiddenKeys?: SystemKey[];
-    /** Page-specific places to go next, shown in the mini-bar menu (e.g. the
-     *  sheet's campaign, its Tabletop / Owlbear room). */
   },
 ): string {
   const cfg = {
@@ -263,7 +261,7 @@ export function renderToolPage(
   // owns appearance", which conflated two different things. The host page owns the
   // CHROME, and `framed` still suppresses that (no navbar). But a character sheet's
   // own paper, palette and faces belong to the sheet, so the same Shadowdark sheet
-  // looked skinned on its own page and unskinned inside the Tabletop or the Owlbear
+  // looked skinned on its own page and unskinned inside the VTT or the Owlbear
   // popover — one template, two different appearances, for no reason the reader
   // benefits from.
   //
@@ -302,7 +300,7 @@ export function renderToolPage(
   //
   // Otherwise: the SITE NAVBAR, the same one the Next pages wear. These used to
   // get the 36px mini-bar, which is the main reason they read as a different
-  // product from the rest of the site. The GM Screen and the Tabletop keep the
+  // product from the rest of the site. The GM Screen and the VTT keep the
   // mini-bar — they are full-bleed working surfaces with their own dense
   // toolbars, where the 16px is worth more than matching chrome.
   if (!framed) {

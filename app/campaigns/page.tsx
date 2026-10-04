@@ -438,7 +438,7 @@ export default async function CampaignsPage() {
                     {/* Plain <a>s: /play and /gm-screen are route handlers that
                         return standalone HTML, so <Link> would prefetch/RSC-fetch
                         a whole document for nothing. Same words + same behavior
-                        as the dashboard: Tabletop (ours) opens here; an OBR
+                        as the dashboard: the VTT (ours) opens here; an OBR
                         room (external) opens in a new tab. */}
                     <a
                       href={`/play/${c.id}`}
@@ -501,7 +501,7 @@ export default async function CampaignsPage() {
                 </p>
 
                 {/* Deliberately NOT required: clearing this field is how you go back
-                    to the built-in Tabletop, so an empty value must save. */}
+                    to the built-in VTT, so an empty value must save. */}
                 <CampaignAutoField
                   id={c.id}
                   field="vttUrl"
@@ -514,8 +514,8 @@ export default async function CampaignsPage() {
                 />
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
                   {c.vttUrl
-                    ? "Characters linked to this campaign open this OBR room from the home page (instead of the built-in Tabletop)."
-                    : "Characters linked to this campaign open the built-in Tabletop from the home page. Paste an OBR room link here to use OBR instead."}
+                    ? "Characters linked to this campaign open this OBR room from the home page (instead of the built-in VTT)."
+                    : "Characters linked to this campaign open the built-in VTT from the home page. Paste an OBR room link here to use OBR instead."}
                 </p>
               </li>
             );
