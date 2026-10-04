@@ -462,11 +462,17 @@
     else closePop(); }
   function outside(e){ if(pop && !pop.contains(e.target) && !(e.target.closest && e.target.closest('.da-gear,.da-gear-gm'))) closePop(); }
   function closePop(){ if(pop) pop.style.display='none'; document.removeEventListener('mousedown', outside); }
+  // The dice button sits BEFORE Clear, matching the GM Screen's own roll log
+  // (mountGmGear inserts ahead of .dice-clear). It used to anchor off
+  // .dm-toggle-wrap, which no longer exists anywhere since the per-sheet dark
+  // mode toggles were removed in favour of the account preference — so every
+  // sheet fell through to appendChild and the button landed after Clear.
   function mountGear(){ var host=document.querySelector('.log-header'); if(!host) return;
-    var slot=host.querySelector('.dm-toggle-wrap') ? host.querySelector('.dm-toggle-wrap').parentNode : host;
+    if(host.querySelector('.da-gear')) return;
     var g=document.createElement('button'); g.className='da-gear'; g.type='button'; g.title='Dice animation settings'; g.setAttribute('aria-label','Dice animation settings'); g.textContent='🎲';
     g.onclick=function(){ togglePop(g); };
-    var dm=host.querySelector('.dm-toggle-wrap'); if(dm && dm.parentNode){ dm.parentNode.insertBefore(g, dm); } else host.appendChild(g); }
+    var clear=host.querySelector('.log-clear');
+    if(clear && clear.parentNode){ clear.parentNode.insertBefore(g, clear); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
   window.DiceAnim={ get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,sound:S.sound}; },

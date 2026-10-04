@@ -125,13 +125,18 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav .nav-row > .nav-wrap{flex:0 1 auto;min-width:0}
 #dd-nav .nav-sysbtn{max-width:100%;min-width:0}
 #dd-nav .nav-sysbtn > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-#dd-nav .nav-sysbtn > svg{flex:0 0 auto}
+#dd-nav .nav-sysbtn > svg,#dd-nav .nav-item > svg{flex:0 0 auto}
 #dd-nav .nav-backdrop{position:fixed;inset:0;z-index:0;background:transparent;border:0;cursor:default}
 #dd-nav .nav-panel{position:relative;z-index:10;border-top:1px solid var(--border,#2b3038);background:var(--panel,#14161a);padding:12px}
 #dd-nav .nav-panel[hidden]{display:none}
 #dd-nav .nav-panel h4{margin:12px 4px 4px;font-size:11px;font-weight:700;line-height:1.5;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#8d96a3)}
 #dd-nav .nav-panel h4:first-child{margin-top:0}
 #dd-nav .nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+/* SiteNav's mobile panel opens with the two view tabs as a flex row of equal
+   bordered buttons (flex gap-2), carrying the same 11px uppercase styling as
+   the desktop links — not the 12px grid cells the lists below use. */
+#dd-nav .nav-tabs{display:flex;gap:8px}
+#dd-nav .nav-tabs .nav-item{flex:1 1 0;border:1px solid var(--border,#2b3038);text-align:center}
 #dd-nav .nav-grid a,#dd-nav .nav-grid button{border:1px solid var(--border,#2b3038);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);background:transparent;text-align:left;cursor:pointer}
 #dd-nav .nav-grid a:hover,#dd-nav .nav-grid button:hover{color:var(--text,#e9edf2)}
 @media (min-width:${LINKS_AT}px){
@@ -193,7 +198,7 @@ export function siteNav(opts: SiteNavOpts): string {
   </div>
 </div>
 <div class="nav-panel" id="dd-nav-panel" hidden>
-  <div class="nav-grid"><button type="button" data-view="characters">Characters</button><button type="button" data-view="adventures">Adventures</button></div>
+  <div class="nav-tabs"><button class="nav-item" type="button" data-view="characters">Characters</button><button class="nav-item" type="button" data-view="adventures">Adventures</button></div>
   <h4>Compendium</h4>
   <div class="nav-grid" id="dd-nav-panelcomp"></div>
   <h4>Tools</h4>
@@ -306,6 +311,21 @@ nav.addEventListener("click",function(e){
 // system X means you are in X, so the dashboard and the Next navbar follow when
 // you go back.
 if(docSys){try{localStorage.setItem("dcw_system",docSys);}catch(e2){}}
+
+// Active state, as SiteNav computes it: a tool link whose href is the page we
+// are on gets the "on" class. The Map Maker is a TOOLS_NAV entry and so highlights
+// itself; a character sheet and a prep builder live under /tools/<id>/<docId>
+// and match nothing, which is correct — they are not nav destinations.
+// No regex literal in here: this whole block lives inside a template literal,
+// where \/ is consumed as an escape and /\/+$/ reaches the browser as //+$/ —
+// a syntax error that kills the entire bar script.
+function ddTrim(s){ s=String(s==null?"":s); while(s.length>1&&s.charAt(s.length-1)==="/")s=s.slice(0,-1); return s||"/"; }
+try{
+  var here=ddTrim(location.pathname);
+  nav.querySelectorAll('a.nav-item[href]').forEach(function(a){
+    if(ddTrim(a.getAttribute("href"))===here)a.classList.add("on");
+  });
+}catch(e2){}
 
 // The save-status contract. The sheets and the GM Screen both call
 // window.__ddStatus(kind, text); it has to behave identically here or saving

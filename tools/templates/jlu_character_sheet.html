@@ -342,7 +342,35 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
   var baseline = -1;        /* leaf count of the payload this tab loaded */
   var allowShrink = false;  /* set by "Save anyway" */
   var realSave = null;
+  var savedKey = null;      /* the state key __ddPick() read, e.g. "dcc_sheet" */
+  var leaving = false;      /* the page is going away: no bar can be clicked */
   function leafCount(o) { var b = leafBag(o), n = 0; for (var k in b) { n += b[k]; } return n; }
+  /* saveSheet() sends the ENVELOPE — { dcc_sheet: "<json string>" } — while the
+     baseline was counted from the sheet OBJECT inside it. Counting the envelope
+     gives 1 (one non-empty string), so every save looked like a total loss and
+     the brake fired on all of them. Unwrap to the same shape before comparing;
+     if the inner JSON will not parse there is nothing to compare against, so
+     return null and let the write through rather than blocking blind. */
+  function payloadOf(data) {
+    if (!data || typeof data !== 'object') return data;
+    if (savedKey && typeof data[savedKey] === 'string') {
+      try { return JSON.parse(data[savedKey]); } catch (e) { return null; }
+    }
+    return data;
+  }
+  /* A save fired by beforeunload / pagehide / going hidden cannot be answered:
+     the bar would flash up on a page that is already closing, with a button
+     nobody can reach. Hold the write back silently instead — the stored copy is
+     what we are protecting, and any real edit was already committed by the 1.5s
+     autosave while the page was still alive. */
+  try {
+    var mark = function () { leaving = true; };
+    window.addEventListener('beforeunload', mark);
+    window.addEventListener('pagehide', mark);
+    document.addEventListener('visibilitychange', function () {
+      leaving = (document.visibilityState === 'hidden');
+    });
+  } catch (e) {}
   function shrinkBar(out, pending) {
     var bar = document.getElementById('dd-shrink');
     if (!bar) {
@@ -378,11 +406,14 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
     var wrapped = function (data) {
       if (window.__ddFrozen) return;
       var out = -1;
-      try { out = leafCount(data); } catch (e) {}
+      try {
+        var body = payloadOf(data);
+        out = (body === null) ? -1 : leafCount(body);
+      } catch (e) { out = -1; }
       if (!allowShrink && baseline >= 12 && out >= 0 && out * 2 < baseline) {
         try { if (typeof window.__ddStatus === 'function') window.__ddStatus('error', 'Not saved — large loss'); } catch (e) {}
         try { console.error('[dd] save held back:', out, 'values vs', baseline, 'loaded'); } catch (e) {}
-        shrinkBar(out, data);
+        if (!leaving) shrinkBar(out, data);
         return;
       }
       if (out > baseline) baseline = out;   /* a growing sheet raises its own floor */
@@ -432,6 +463,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
       return null;
     }
     var bag = leafBag(parsed), blank = null;
+    savedKey = key;
     try { baseline = leafCount(parsed); } catch (e) {}
     try { if (typeof collectSheet === 'function') blank = leafBag(collectSheet()); } catch (e) {}
     /* Values this payload carries that a blank sheet of this template does not —
