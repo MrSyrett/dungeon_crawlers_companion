@@ -173,6 +173,137 @@
   font-family: var(--sys-display);
 }
 
+/* ============================================================================
+   THE PAPER — D&D and Dungeon Crawler Carl
+   ----------------------------------------------------------------------------
+   The block above deliberately stopped at the ground. These two go further,
+   because their sheets and prep builders were drawn long before the skins
+   existed and still carry the palettes they were born with: the DCC prep is
+   built around a safety orange with a sage-green callout and a cyan read-aloud,
+   and the D&D sheet still has a gold, a teal and a purple in its root.
+
+   Both re-theme through variables the templates already define, so nothing is
+   restyled here that wasn't already a named colour there — the handful of rules
+   at the end are the places a template wrote a hex straight into a declaration.
+   Type sizes, weights, spacing and radii are untouched.
+
+   data-tool keeps the two documents apart. They share variable names for
+   different jobs: --green is a heal button on a character sheet and a section
+   label in a prep, so a skin that re-points one must not reach the other.
+
+   Every colour below was checked against the surface it lands on: text at or
+   above 4.5:1, display type and non-text marks at or above 3:1.
+   ========================================================================== */
+
+/* --- DCC · adventure prep -------------------------------------------------
+   Orange → the cover magenta, sage → gold, cyan read-aloud → a near-black
+   block with a magenta rule, and the masthead band goes black with a gold
+   wordmark the way the covers do it. */
+:root[data-themed][data-system="DCC"][data-tool="session"] {
+  --accent: #cf1148;          /* 5.5:1 on the white page */
+  --accent-dark: #97093a;
+  --accent-red: #cf1148;
+  --accent-red-dark: #8f0b33;
+  --section-hdr: #cf1148;
+  --highlight: #f2c230;
+  --box-bg: #f7ecd0;          /* was sage #b5c4b1 */
+  --read-bg: #141016;
+  --green: #8a6a10;           /* no green in this palette — dark gold instead */
+  --blue-npc: #8f0b33;        /* nor blue — the deep magenta */
+  --rule: #d6d2d8;
+  --banner-a: #0b0a0d;
+  --banner-b: #3a0c22;
+  --title-color: #f2c230;     /* gold on the black band, 10:1 */
+  --sub-color: #ee4a78;
+  --preview-bg: #060507;
+}
+/* The one place the template wrote the cyan straight into the rule. */
+:root[data-themed][data-system="DCC"][data-tool="session"] .read-aloud,
+:root[data-themed][data-system="DCC"][data-tool="session"] .sb-flavor {
+  background: #141016;
+  border-left-color: #e8275f;
+}
+
+/* --- DCC · character sheet ------------------------------------------------
+   The sheet is essentially one colour used sixty times, and that colour was
+   the app's brick red. */
+:root[data-themed][data-system="DCC"][data-tool="character"] body:not(.dark) {
+  --red: #cf1148;
+  --gold: #9a7410;
+  --dcc-dk: #b00d3e;
+  --dcc-lt: #fbe0e9;
+}
+:root[data-themed][data-system="DCC"][data-tool="character"] body.dark {
+  --red: #f26a92;             /* 5.3:1 on the dark paper; #cf1148 is 3.2 */
+  --dcc-dk: #f26a92;
+  --dcc-lt: #3a1020;
+}
+/* The masthead band and its wordmark, both written as literals in the sheet
+   (and again under body.dark, which is why this has to out-rank both). */
+:root[data-themed][data-system="DCC"][data-tool="character"] .hdr-row {
+  background: linear-gradient(120deg, #0b0a0d, #3a0c22);
+}
+:root[data-themed][data-system="DCC"][data-tool="character"] .lg-word {
+  color: #f2c230;
+}
+:root[data-themed][data-system="DCC"][data-tool="character"] .lg-sub {
+  color: #ee4a78;
+}
+
+/* --- D&D · adventure prep -------------------------------------------------
+   Black, white, red and the light brown — so the gold highlight, the green and
+   the blue NPC rule all go, and the read-aloud stops being cyan. */
+:root[data-themed][data-system="DND"][data-tool="session"] {
+  /* Two reds, not four: the theme red and its dark. The template shipped
+     #c8102e, #8a0f1e, #9b1b22 and #6f1119, which read as a smear. */
+  --accent: #c8102e;
+  --accent-dark: #8a0a1f;
+  --accent-red: #8a0a1f;
+  --accent-red-dark: #6f0a18;
+  --section-hdr: #c8102e;     /* 5.6:1 on the cream page */
+  --highlight: #f0a37f;       /* was the gold #f0c020 */
+  --read-bg: #1a0d0e;
+  --green: #8a3a28;
+  --blue-npc: #7a1119;
+  --banner-a: #7a1119;
+  --banner-b: #c8102e;
+  --title-color: #ffffff;
+  --sub-color: #fbe7dc;       /* was gold; 4.9:1 on the band */
+  --preview-bg: #28070b;
+}
+:root[data-themed][data-system="DND"][data-tool="session"] .read-aloud,
+:root[data-themed][data-system="DND"][data-tool="session"] .sb-flavor {
+  background: #7a1119;
+  border-left-color: #c8102e;
+}
+:root[data-themed][data-system="DND"][data-tool="session"] .sl.gold {
+  color: #8a4a22;
+  border-bottom-color: #b87333;
+}
+
+/* --- D&D · character sheet ------------------------------------------------
+   The sheet's red is a shade off the theme's, and its gold is the one colour
+   that isn't in the palette at all. --green stays: it is the heal button and
+   the death-save successes, sitting next to a red damage button, and a second
+   red there would read as the same control twice. */
+:root[data-themed][data-system="DND"][data-tool="character"] body:not(.dark) {
+  --dnd: #c8102e;
+  --dnd-dk: #8a0a1f;
+  --gold: #b87333;            /* the light brown, dark enough to carry label text */
+}
+:root[data-themed][data-system="DND"][data-tool="character"] body.dark {
+  --dnd: #c8102e;
+  --dnd-dk: #f0a37f;          /* this one letters the stat fields in dark mode */
+  --gold: #b87333;
+}
+:root[data-themed][data-system="DND"][data-tool="character"] .hdr-row,
+:root[data-themed][data-system="DND"][data-tool="character"] body.dark .hdr-row {
+  background: linear-gradient(120deg, #8a0a1f, #c8102e);
+}
+:root[data-themed][data-system="DND"][data-tool="character"] .lg-sub {
+  color: #fbe7dc;
+}
+
 /* On paper none of the above applies: a printed sheet is ink on white. The
    ground is set at a higher specificity than each template's own print rule,
    so it has to be undone here or it would follow the page into the printer. */

@@ -263,11 +263,17 @@ export function renderToolPage(
 
   // Switch the skin on at the <html> tag rather than from a script, so the page
   // is never painted once unthemed and then again themed.
+  // data-tool tells the skin which of the two documents it is in. The sheets
+  // and the prep builders share several variable names for different jobs
+  // (--green is a heal button on a sheet and a section label in a prep), so a
+  // skin that re-points one must not reach the other.
   if (themed) {
     out = out.replace(
       /<html\b([^>]*)>/i,
       (m, attrs: string) =>
-        /\bdata-system=/i.test(attrs) ? m : `<html${attrs} data-system="${opts.def.system}" data-themed="1">`,
+        /\bdata-system=/i.test(attrs)
+          ? m
+          : `<html${attrs} data-system="${opts.def.system}" data-tool="${opts.def.kind}" data-themed="1">`,
     );
   }
 
