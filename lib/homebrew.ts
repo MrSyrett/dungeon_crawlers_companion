@@ -183,7 +183,9 @@ export const userCampaigns = cache(async function userCampaigns(
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, "en"));
 });
 
-async function participatesInCampaign(userId: string, campaignId: string): Promise<boolean> {
+// Exported: the campaign roster route gates on this too, so "who is in this
+// campaign" has exactly one definition in the codebase.
+export async function participatesInCampaign(userId: string, campaignId: string): Promise<boolean> {
   if (!campaignId) return false;
   const owned = await prisma.campaign.count({ where: { id: campaignId, ownerId: userId } });
   if (owned > 0) return true;

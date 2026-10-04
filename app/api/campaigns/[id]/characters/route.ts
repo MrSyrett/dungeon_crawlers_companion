@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPlayUser } from "@/lib/vtt";
 import { CHARACTER_TOOL_IDS, TOOLS, sheetKeyFor, campaignIdInSheet } from "@/lib/tools";
+import { participatesInCampaign } from "@/lib/homebrew";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -40,6 +41,52 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   });
   if (!campaign) return new Response("Not found", { status: 404 });
 
+  // ?repair=1 (the manual Sync button, never the 30s poll) re-derives the caller's
+  // OWN campaign links from their sheet bodies and writes the column back.
+  // linkedCampaignId is only ever written by the save route, so a sheet whose row
+  // changed outside the app — restored from a backup, edited in the DB — or one
+  // saved while the writer bug skipped its system, can name the right campaign in
+  // its JSON while the column still says null, and then be invisible to the party
+  // with perfectly good data.
+  //
+  // This runs BEFORE the participation gate below, deliberately. The gate asks
+  // "does this user have a sheet linked to this campaign", and a player whose link
+  // is the thing that broke would otherwise be locked out of the one button that
+  // repairs it. It is safe to run first because it only ever touches rows the
+  // caller owns, and only ratifies a campaign the sheet's own JSON already names
+  // — it cannot invent a membership the user had not already recorded.
+  let repaired = 0;
+  if (req.nextUrl.searchParams.get("repair") === "1") {
+    const orphans = await prisma.document.findMany({
+      where: { userId: user.id, tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: null },
+      select: { id: true, data: true, tool: true },
+      orderBy: { updatedAt: "desc" },
+      take: 300,
+    });
+    const mine = orphans.filter((d) => campaignIdInSheet(d.tool, d.data) === id);
+    if (mine.length) {
+      await prisma.document.updateMany({
+        // userId again, so the write is scoped on its own terms and not only by
+        // how `mine` happened to be derived above.
+        where: { userId: user.id, id: { in: mine.map((d) => d.id) } },
+        data: { linkedCampaignId: id },
+      });
+      repaired = mine.length;
+    }
+  }
+
+  // Who may see a party: anyone IN the campaign — the GM who owns it, or a player
+  // with a character sheet linked to it. participatesInCampaign() is the same
+  // predicate lib/homebrew.ts uses to decide who may see homebrew shared to a
+  // campaign, so the app has one definition of membership rather than two.
+  // Without this the route answered for any campaign id at all.
+  if (!(await participatesInCampaign(user.id, id))) {
+    return Response.json(
+      { error: "not-in-campaign", message: "You are not in this campaign." },
+      { status: 403 },
+    );
+  }
+
   const memberWhere = {
     tool: { in: CHARACTER_TOOL_IDS },
     linkedCampaignId: id,
@@ -65,53 +112,11 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   // Indexed lookup: the campaign link now lives in its own column, kept in sync
   // on every save. We still parse the sheet JSON below for the sheet body the
   // caller wants, but membership is decided by the column, not a full scan.
-  let docs = await prisma.document.findMany({
+  const docs = await prisma.document.findMany({
     where: memberWhere,
     select: { id: true, title: true, updatedAt: true, data: true, tool: true },
     orderBy: { updatedAt: "desc" },
   });
-
-  // Self-heal a stale campaign link. linkedCampaignId is only ever written by
-  // the save route, so a character whose row changed outside the app — restored
-  // from a backup, edited in the DB — can hold the right campaign in its sheet
-  // JSON while the column still says null, and then it is invisible to the party
-  // even though its data is perfectly good. The same happened to every Candela
-  // sheet until lib/tools.ts started reading both campaign shapes. So: read the
-  // link out of the sheet bodies, and write the column back, so the character
-  // reappears without having to be opened and re-saved by hand.
-  //
-  // Gated on ?repair=1 (the manual Sync button, never the 30s poll): the fallback
-  // has to pull candidate blobs, which is the cost the column exists to avoid. It
-  // runs even when the column already found somebody, because the writer bug this
-  // repairs was per-system — a campaign could have three linked players and a
-  // fourth that never linked at all, which is exactly the case that looks like
-  // "some of my party is missing" rather than "my party is empty".
-  // Scoped to the CALLER'S OWN documents. Without userId this scanned every
-  // account's unlinked sheets and wrote to the ones whose JSON named this
-  // campaign — so a caller could pull a stranger's sheet into their campaign and
-  // then read it through the GET above. A repair only ever needs to fix the rows
-  // belonging to whoever asked for it.
-  let repaired = 0;
-  if (req.nextUrl.searchParams.get("repair") === "1") {
-    const orphans = await prisma.document.findMany({
-      where: { userId: user.id, tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: null },
-      select: { id: true, title: true, updatedAt: true, data: true, tool: true },
-      orderBy: { updatedAt: "desc" },
-      take: 300,
-    });
-    const mine = orphans.filter((d) => campaignIdInSheet(d.tool, d.data) === id);
-    if (mine.length) {
-      await prisma.document.updateMany({
-        // userId again, so the write is scoped on its own terms and not only by
-        // how `mine` happened to be derived above.
-        where: { userId: user.id, id: { in: mine.map((d) => d.id) } },
-        data: { linkedCampaignId: id },
-      });
-      repaired = mine.length;
-      const already = new Set(docs.map((d) => d.id));
-      docs = docs.concat(mine.filter((d) => !already.has(d.id)));
-    }
-  }
 
   const characters = [];
   const unreadable: Unreadable[] = [];
@@ -160,7 +165,8 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     characters,
     ...(unreadable.length ? { unreadable } : {}),
     ...(repaired ? { repaired } : {}),
-    // A repair changed membership, so the poller's old token must not match.
-    syncToken: repaired ? `${docs.length}:${Date.now()}` : syncToken,
+    // The repair runs before the aggregate above, so syncToken already reflects it
+    // and a poller's stale token cannot match a roster a repair just changed.
+    syncToken,
   });
 }
