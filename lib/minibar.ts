@@ -125,7 +125,13 @@ export function miniBarHead(system: SystemKey | null, themeKey?: string, themed?
     : "";
   // The app's own pair, on every standalone surface. A themed tool adds its
   // system's faces on top of this.
-  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600;700&display=swap">`;
+  // Geist's loaded weights MUST stay in step with app/layout.tsx's next/font call
+  // (currently 400, 500, 700). SiteNav styles its links font-semibold, and with no
+  // 600 loaded the CSS font-matching algorithm resolves 600 upward to 700 — so the
+  // Next navbar has always rendered them Bold. Adding a real 600 here alone made
+  // the standalone bar render Semibold and read slightly lighter than every other
+  // page. If a true 600 is ever wanted, add it to BOTH or neither.
+  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;700&display=swap">`;
   return `<link rel="stylesheet" href="/tokens.css">\n${base}\n${faces}\n${accent}\n${seed}`;
 }
 

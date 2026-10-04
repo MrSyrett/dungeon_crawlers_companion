@@ -82,7 +82,16 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
    (2) SiteNav's arbitrary text-[Npx] sets font-size ONLY, so its controls are
        laid out against Tailwind preflight's line-height:1.5 on <html>. Pin 1.5
        here or every control comes out several px shorter than the real bar. */
-#dd-nav{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font-family:"Geist",ui-sans-serif,system-ui,sans-serif;font-size:11px;line-height:1.5;font-weight:400;letter-spacing:normal;-webkit-user-select:none;user-select:none}
+/* THE CHROME PALETTE, SET HERE AND NOT INHERITED. On a Next page the bar wears
+   .dcc-chrome, whose token reset lives in app/globals.css — a file no standalone
+   document loads. They load public/tokens.css instead, which sets --accent to the
+   game's colour on a session doc (#cf1148 for DCC) and, on a character sheet in
+   dark mode, re-points --border and --muted on <body> for the sheet's own paper.
+   The bar is a child of <body>, so it inherited all of it and wore each game's
+   palette instead of the app's. Declaring the chrome tokens on #dd-nav itself is
+   what .dcc-chrome does on the other side, and a theme can no longer reach in. */
+#dd-nav{--panel:#14161a;--panel-2:#1c1f24;--border:#2b3038;--text:#e9edf2;--muted:#8d96a3;--accent:#5490c4;--signal:#ff8419;--red:#b82018;
+  position:sticky;top:0;z-index:2147483000;flex:0 0 auto;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font-family:"Geist",ui-sans-serif,system-ui,sans-serif;font-size:11px;line-height:1.5;font-weight:400;letter-spacing:normal;-webkit-user-select:none;user-select:none}
 #dd-nav *{box-sizing:border-box;font-family:inherit}
 #dd-nav a{text-decoration:none;color:inherit}
 /* No fixed height: the row is as tall as its tallest control, exactly as the
