@@ -1,4 +1,5 @@
 import { loadToolTemplate } from "@/lib/tools";
+import { prisma } from "@/lib/prisma";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import { miniBar, miniBarHead } from "@/lib/minibar";
 import { isSystemKey, type SystemKey } from "@/components/systemStore";
@@ -426,6 +427,52 @@ function audioVolumeFix(vttToken: string): string {
  * Build the GM Screen page. Pass `vttToken` to render the framed, token-auth
  * variant (fetch-patch + embed chrome); omit it for the cookie full-page variant.
  */
+// ── Per-system data files ────────────────────────────────────────────────────
+// The template hard-codes a <script src="/tools-data/…"> tag for EVERY system's
+// game data: 4.8 MB raw / 1.1 MB gzipped across 43 files, of which ~977 KB
+// gzipped is per-system data. A GM Screen is linked to one campaign running one
+// system, so on a DCC session roughly 85% of that is Marvel, D&D, Star Wars and
+// the rest — downloaded, parsed and executed for nothing. Measured baseline:
+// 5,570 KB of JS, 63 script requests, 459 ms to DOMContentLoaded on a fast
+// desktop with no network latency.
+//
+// Dropping the other systems' tags is safe because every one of the 35 per-system
+// data globals the template reads is behind a `typeof` guard that falls back to an
+// empty list. That was verified file by file, and the one global that was NOT
+// guarded (SD_MONSTERS) was fixed first. A harness then booted the screen with
+// 32–39 files withheld across five systems and built all twelve stations with no
+// errors. If a new station ever reads one of these globals unguarded, it will show
+// empty rather than throw — so guard new reads the same way.
+//
+// Files every system needs, whatever is linked.
+const SHARED_DATA = new Set(["dice-anim.js", "gm-npc-tables.js"]);
+
+/** Drop the /tools-data/ script tags that belong to other systems. With no
+ *  campaign linked the served system is unknown (the template picks it up
+ *  client-side from the stored choice), so nothing is dropped — status quo. */
+export function keepOnlySystemData(html: string, system: SystemKey | null): string {
+  if (!system) return html;
+  const mine = system.toLowerCase() + "-";
+
+  // Fail open. A system whose data files don't follow the "<key>-*.js" naming —
+  // a newly added system, or a key that stops matching its prefix — would
+  // otherwise be served a GM Screen with no game data at all, silently. If
+  // nothing matches, keep every tag: slow is recoverable, empty is not.
+  if (!new RegExp('src="/tools-data/' + mine).test(html)) return html;
+
+  return html.replace(
+    /[ \t]*<script\b[^>]*\bsrc="\/tools-data\/([^"?]+)(?:\?[^"]*)?"[^>]*><\/script>\n?/gi,
+    (tag, file: string) => {
+      if (SHARED_DATA.has(file)) return tag;
+      // Only a <system>-prefixed data file is system-specific; anything else
+      // (a shared helper added later) is kept rather than guessed about.
+      const dash = file.indexOf("-");
+      if (dash < 0) return tag;
+      return file.startsWith(mine) ? tag : "";
+    },
+  );
+}
+
 export async function buildGmScreenHtml(opts: {
   savedState: unknown;
   vttToken?: string;
@@ -453,12 +500,34 @@ export async function buildGmScreenHtml(opts: {
   // The linked campaign (if any) gives the mini-bar its system and its title.
   const camp = campaignOf(opts.savedState);
 
+  // The SAVED BOARD's snapshot of the campaign can be stale: the GM may have
+  // changed that campaign's system on the Campaigns page since, or the board may
+  // predate systems entirely. The client already reconciles this at runtime
+  // (loadList → setGmSystem), but which data files we serve is decided HERE and
+  // cannot be reconciled after the fact — serve the wrong system's data and every
+  // station reads a guarded global that isn't loaded and shows nothing.
+  //
+  // So the live campaign row wins. One indexed lookup by id; on any error we keep
+  // the snapshot's value, which is what the page used before this existed.
+  let liveSystem: SystemKey | null = camp?.system ?? null;
+  if (camp?.id) {
+    try {
+      const row = await prisma.campaign.findUnique({
+        where: { id: camp.id },
+        select: { system: true },
+      });
+      if (row?.system && isSystemKey(row.system)) liveSystem = row.system;
+    } catch {
+      /* keep the snapshot's system */
+    }
+  }
+
   // Shared tokens + this system's accent go right after <head> (BEFORE the
   // template's own <style>, whose :root now derives --accent from --sys).
   // (Also the favicon: the GM Screen was the one standalone page without one.)
   html = html.replace(
     /<head[^>]*>/i,
-    (m) => `${m}\n<link rel="icon" type="image/png" href="/icon-64.png">\n${miniBarHead(camp?.system ?? null)}`,
+    (m) => `${m}\n<link rel="icon" type="image/png" href="/icon-64.png">\n${miniBarHead(liveSystem)}`,
   );
 
   // Inject (audio fix → token patch →) hidden-systems → state → shim before
@@ -478,13 +547,16 @@ export async function buildGmScreenHtml(opts: {
     chrome = CHROME_EMBED;
   } else {
     chrome = miniBar({
-      system: camp?.system ?? null,   // unlinked board → the bar adopts the site-wide choice
+      system: liveSystem,   // unlinked board → null, and the bar adopts the site-wide choice
       crumb: "GM Screen",
       title: camp?.name,
       status: true,
     });
   }
   html = html.replace(/<body([^>]*)>/i, (m) => `${m}\n${chrome}`);
+
+  // Last, so the tag set this prunes is the final one.
+  html = keepOnlySystemData(html, liveSystem);
 
   return html;
 }

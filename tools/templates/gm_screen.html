@@ -2385,6 +2385,12 @@ const GMCamp = (function() {
         campaign.vttUrl = m.vttUrl || null;
         if(m.system && m.system !== campaign.system) {
           campaign.system = m.system;
+          // No reload here. The page is served with only the linked system's data
+          // (keepOnlySystemData in lib/gm-screen.ts), and that choice is made from
+          // the LIVE campaign row rather than this board's saved snapshot — so the
+          // data on the page already matches m.system and switching in place is
+          // correct. Reloading instead would compare a snapshot that still says the
+          // old system and reload again.
           if(typeof window.setGmSystem === 'function') window.setGmSystem(m.system);
         }
       }
