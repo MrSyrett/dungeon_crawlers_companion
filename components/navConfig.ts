@@ -131,7 +131,7 @@ export function compendiumFor(system: SystemKey): NavLink[] {
   return SYSTEMS_WITHOUT_RULEBOOKS.includes(system) ? base : [...base, RULEBOOKS_LINK];
 }
 
-// Per-system "My Homebrew" hub. Shadowdark's lives at the top-level /homebrew;
+// Per-system Homebrew hub. Shadowdark's lives at the top-level /homebrew;
 // the others at /<system>/homebrew. JLU and Ghostbusters have no homebrew hub
 // yet, so they get no Homebrew nav link.
 export const HOMEBREW: Partial<Record<SystemKey, string>> = {

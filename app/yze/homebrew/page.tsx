@@ -21,7 +21,7 @@ export default async function YzeHomebrewHubPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <PageHeader title="My Homebrew" subtitle={<>{total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your homebrew"}</>} />
+      <PageHeader title="Homebrew" subtitle={<>{total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your homebrew"}</>} />
 
       <p className="mb-6 max-w-[62ch] text-[13px] leading-relaxed text-[var(--muted)]">
         Everything you make here flows into the Year Zero Engine reference pages and the character

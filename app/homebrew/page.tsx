@@ -9,7 +9,7 @@ import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
 
-// Shadowdark's "My Homebrew" hub. Shadowdark is the flagship system, so its
+// Shadowdark's "Homebrew" hub. Shadowdark is the flagship system, so its
 // homebrew types are the bare ones (no system prefix) and its on-page editor is
 // HomebrewManager (the same one embedded on /spells, /gear, /bestiary, …). This
 // page just gathers every Shadowdark type in one place, mirroring the per-system
@@ -51,7 +51,7 @@ export default async function ShadowdarkHomebrewHubPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <PageHeader title="My Homebrew" subtitle={<>{total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your Shadowdark homebrew"}</>} />
+      <PageHeader title="Homebrew" subtitle={<>{total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your Shadowdark homebrew"}</>} />
 
       <p className="mb-6 max-w-[62ch] text-[13px] leading-relaxed text-[var(--muted)]">
         Everything you make here flows into the character sheet and the GM screen, and shows up

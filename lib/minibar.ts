@@ -19,8 +19,7 @@ import { TOOLS_NAV, compendiumFor } from "@/components/navConfig";
 //   [logo] [SYSTEM] Characters › Kira                      [Saved] [☰]
 //
 // The ☰ menu: Characters · Adventures, the Tools group,
-// that system's Compendium (+ Rulebooks), and — on sheets — the Light/Dark
-// theme toggle. Colors come from /tokens.css; the system chip (and anything
+// that system's Compendium (+ Rulebooks), and a link to the account page. Colors come from /tokens.css; the system chip (and anything
 // using var(--sys)) wears the current system's accent.
 
 export type MiniBarLink = { label: string; href: string; external?: boolean };
@@ -34,8 +33,9 @@ export type MiniBarOpts = {
   title?: string;
   /** Show the save-status chip (#dd-status) — sheets and the GM Screen. */
   status?: boolean;
-  /** The sheet's own dark-mode localStorage key (e.g. "sd_dark"): shows the
-   *  Light/Dark toggle and binds it to the ONE global dd_theme preference. */
+  /** The sheet's own dark-mode localStorage key (e.g. "sd_dark"). Used only to
+   *  SEED the sheet from the global dd_theme preference before its script runs;
+   *  the control itself lives on /account. */
   themeKey?: string;
   /** For a page whose <body> is a flex ROW (the adventure-prep builders): take
    *  the bar out of the flow and reserve its height with padding instead, so it
@@ -94,7 +94,10 @@ export function miniBarHead(system: SystemKey | null, themeKey?: string, themed?
   const seed = themeKey
     ? `<script>(function(){try{var t=localStorage.getItem("dd_theme")||"dark";localStorage.setItem(${JSON.stringify(themeKey)},t==="dark"?"1":"0");}catch(e){}})();</script>`
     : "";
-  return `<link rel="stylesheet" href="/tokens.css">\n${faces}\n${accent}\n${seed}`;
+  // The app's own pair, on every standalone surface. A themed tool adds its
+  // system's faces on top of this.
+  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;500&family=Chivo:wght@400;500;700&display=swap">`;
+  return `<link rel="stylesheet" href="/tokens.css">\n${base}\n${faces}\n${accent}\n${seed}`;
 }
 
 /** True when public/tokens.css actually has a skin for this system — i.e. when
@@ -110,28 +113,28 @@ export function miniBar(opts: MiniBarOpts): string {
     `<a href="${esc(l.href)}"${l.external ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(l.label)}${l.external ? " ↗" : ""}</a>`;
 
   const style = `<style id="dd-bar-style">
-#dd-bar{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;box-sizing:border-box;background:var(--panel,#111113);border-bottom:1px solid var(--border,#26262a);color:var(--text,#ece9e1);font:600 11px/1 "Barlow Condensed",Barlow,system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;-webkit-user-select:none;user-select:none}
+#dd-bar{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font:500 11px/1 "Chivo",system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;-webkit-user-select:none;user-select:none}
 #dd-bar a{color:inherit;text-decoration:none}
 #dd-bar .dd-logo{display:flex;align-items:center;flex:0 0 auto}
 #dd-bar .dd-logo img{width:22px;height:22px;display:block}
-#dd-bar .dd-sys{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border,#26262a);border-radius:4px;background:var(--panel-2,#161618);color:var(--sys,var(--gold,#c8a020));white-space:nowrap}
-#dd-bar .dd-crumb{display:flex;align-items:center;gap:6px;min-width:0;color:var(--muted,#8a8a93)}
-#dd-bar .dd-crumb .dd-title{color:var(--text,#ece9e1);text-transform:none;letter-spacing:.02em;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
+#dd-bar .dd-sys{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--sys,var(--accent,#5490c4));white-space:nowrap}
+#dd-bar .dd-crumb{display:flex;align-items:center;gap:6px;min-width:0;color:var(--muted,#8d96a3)}
+#dd-bar .dd-crumb .dd-title{color:var(--text,#e9edf2);text-transform:none;letter-spacing:.02em;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
 #dd-bar .dd-spacer{flex:1 1 auto}
-#dd-bar #dd-status{flex:0 0 auto;font-size:10px;color:var(--muted,#8a8a93);padding:4px 8px;border:1px solid transparent;border-radius:4px;white-space:nowrap}
+#dd-bar #dd-status{flex:0 0 auto;font-size:10px;color:var(--muted,#8d96a3);padding:4px 8px;border:1px solid transparent;border-radius:4px;white-space:nowrap}
 #dd-bar #dd-status:empty{display:none}
-#dd-bar #dd-status.is-saving{color:var(--muted,#8a8a93)}
-#dd-bar #dd-status.is-saved{color:var(--sys,var(--gold,#c8a020))}
+#dd-bar #dd-status.is-saving{color:var(--muted,#8d96a3)}
+#dd-bar #dd-status.is-saved{color:var(--signal,#ff8419)}
 #dd-bar #dd-status.is-error{color:#fff;background:var(--red,#b82018);border-color:var(--red,#b82018)}
-#dd-bar .dd-menu-btn{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--border,#26262a);border-radius:4px;background:var(--panel-2,#161618);color:var(--text,#ece9e1);cursor:pointer;font:inherit}
-#dd-bar .dd-menu-btn:hover,#dd-bar .dd-menu-btn[aria-expanded="true"]{border-color:var(--sys,var(--gold,#c8a020))}
-#dd-menu{position:absolute;right:8px;top:40px;width:min(92vw,330px);max-height:calc(100vh - 56px);overflow:auto;background:var(--panel,#111113);border:1px solid var(--border,#26262a);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:6px;z-index:2147483001;text-transform:none;letter-spacing:.02em;font-weight:600;font-size:13px}
+#dd-bar .dd-menu-btn{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2);cursor:pointer;font:inherit}
+#dd-bar .dd-menu-btn:hover,#dd-bar .dd-menu-btn[aria-expanded="true"]{border-color:var(--accent,#5490c4)}
+#dd-menu{position:absolute;right:8px;top:40px;width:min(92vw,330px);max-height:calc(100vh - 56px);overflow:auto;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:6px;z-index:2147483001;text-transform:none;letter-spacing:.02em;font-weight:600;font-size:13px}
 #dd-menu[hidden]{display:none}
-#dd-menu .dd-menu-h{padding:8px 10px 4px;font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#8a8a93)}
+#dd-menu .dd-menu-h{padding:8px 10px 4px;font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#8d96a3)}
 #dd-menu .dd-menu-sec{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px}
 #dd-menu .dd-menu-sec.one{grid-template-columns:1fr}
-#dd-menu a,#dd-menu button{display:block;width:100%;box-sizing:border-box;text-align:left;padding:8px 10px;border:1px solid var(--border,#26262a);border-radius:5px;background:transparent;color:var(--muted,#8a8a93);font:inherit;cursor:pointer}
-#dd-menu a:hover,#dd-menu button:hover{color:var(--text,#ece9e1);border-color:var(--sys,var(--gold,#c8a020));background:var(--panel-2,#161618)}
+#dd-menu a,#dd-menu button{display:block;width:100%;box-sizing:border-box;text-align:left;padding:8px 10px;border:1px solid var(--border,#2b3038);border-radius:5px;background:transparent;color:var(--muted,#8d96a3);font:inherit;cursor:pointer}
+#dd-menu a:hover,#dd-menu button:hover{color:var(--text,#e9edf2);border-color:var(--accent,#5490c4);background:var(--panel-2,#1c1f24)}
 #dd-bar .dd-backdrop{position:fixed;inset:0;z-index:2147482999;background:transparent}
 @media (max-width:640px){#dd-bar{gap:7px;padding:0 8px}#dd-bar .dd-crumb .dd-crumb-k{display:none}#dd-bar .dd-crumb .dd-sep{display:none}}
 @media (prefers-reduced-motion:no-preference){#dd-menu{animation:dd-menu-in .12s ease-out}}
@@ -146,13 +149,14 @@ ${opts.fixed ? FIXED_STYLE : ""}</style>`;
   const comp = compendium.length
     ? `<div class="dd-menu-h">${s ? esc(s.name) + " " : ""}Compendium</div><div class="dd-menu-sec">${compendium.map(link).join("")}</div>`
     : "";
-  const theme = opts.themeKey
-    ? `<div class="dd-menu-h">Appearance</div><div class="dd-menu-sec one"><button type="button" class="dd-theme" data-key="${esc(opts.themeKey)}">Theme: <span class="dd-theme-v">Dark</span> — switch</button></div>`
-    : "";
+  // One link, not a toggle. /account owns the light/dark preference; this page
+  // still SEEDS itself from it in miniBarHead, so the sheet opens in the right
+  // mode without the control being duplicated here.
+  const account = `<div class="dd-menu-h">You</div><div class="dd-menu-sec one"><a href="/account">Account &amp; appearance</a></div>`;
 
   const menu = `<div id="dd-menu" hidden>
 <div class="dd-menu-sec"><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a></div>
-${tools}${comp}${theme}</div>`;
+${tools}${comp}${account}</div>`;
 
   const bar = `<div id="dd-bar" role="navigation" aria-label="Site">
 <a class="dd-logo" href="/dashboard" title="Dashboard"><img src="/logo-white.png" alt="Dashboard" width="22" height="22"></a>
@@ -194,14 +198,6 @@ if(sysKey){try{localStorage.setItem("dcw_system",sysKey);}catch(x){}}
 else{var stored=null;try{stored=localStorage.getItem("dcw_system");}catch(x){}if(stored&&SYS[stored])window.__ddSetSystem(stored,{silent:true});}
 // Save status (sheets + GM Screen call this): kind = saving | saved | error.
 window.__ddStatus=function(kind,text){var el=document.getElementById("dd-status");if(!el)return;el.className=kind?("is-"+kind):"";el.textContent=text||"";if(kind==="saved"){clearTimeout(el._t);el._t=setTimeout(function(){if(el.className==="is-saved"){el.textContent="";el.className="";}},2500);}};
-// Theme toggle: one global preference (dd_theme) mirrored into this sheet's key.
-var tb=menu.querySelector(".dd-theme");
-if(tb){var key=tb.getAttribute("data-key"),v=tb.querySelector(".dd-theme-v");
-  function cur(){try{return localStorage.getItem("dd_theme")||"dark";}catch(x){return "dark";}}
-  function paint(){var t=cur();if(v)v.textContent=t==="dark"?"Dark":"Light";}
-  tb.addEventListener("click",function(){var t=cur()==="dark"?"light":"dark";try{localStorage.setItem("dd_theme",t);localStorage.setItem(key,t==="dark"?"1":"0");}catch(x){}
-    try{document.body.classList.toggle("dark",t==="dark");}catch(x){}paint();close();});
-  paint();}
 })();</script>`;
 
   return style + "\n" + bar + "\n" + script;

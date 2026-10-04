@@ -24,7 +24,6 @@ import {
   STAY_ON_SWITCH,
   TOOLS_NAV,
 } from "./navConfig";
-import { logout } from "@/app/actions/auth";
 
 // The single site-wide top navbar.
 //
@@ -50,7 +49,7 @@ const HIDDEN_ON = ["/login", "/signup", "/forgot-password", "/reset-password"];
 // navbar does. Marked with data-chrome on <html>; app/globals.css skips its
 // theme blocks whenever that's set. (The GM Screen and the Map Maker are
 // standalone documents, not Next pages, so they never see those rules.)
-const CHROME_PREFIXES = ["/campaigns", "/vtt", "/admin", "/token-maker"];
+const CHROME_PREFIXES = ["/campaigns", "/vtt", "/admin", "/token-maker", "/account"];
 
 function isChromePath(pathname: string): boolean {
   return CHROME_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
@@ -272,21 +271,31 @@ export default function SiteNav({
           )}
         </div>
 
-        {/* Account block — always visible: name, with Admin · Sign out beneath */}
-        <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
-          <span className="max-w-[110px] truncate text-[12px] text-[var(--muted)] sm:max-w-[180px]" title={email}>{email}</span>
-          <div className="flex items-center gap-2">
-            {isAdmin ? (
-              <Link href="/admin/users" className="rounded border border-[var(--gold)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--gold)] hover:bg-[var(--panel-2)]">
-                Admin
-              </Link>
-            ) : null}
-            <form action={logout}>
-              <button className="rounded border border-[var(--border)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]">
-                Sign out
-              </button>
-            </form>
-          </div>
+        {/* Account block — the email is the link to /account, which owns the
+            theme preference, the password form and sign-out. Sign-out used to
+            sit here; it moved so there is one place for all of it, and so the
+            mini-bar on the standalone tools can point at the same page. */}
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          {isAdmin ? (
+            <Link href="/admin/users" className="rounded border border-[var(--accent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
+              Admin
+            </Link>
+          ) : null}
+          <Link
+            href="/account"
+            title={`${email} — account settings`}
+            className={`flex items-center gap-1.5 rounded border px-3 py-1.5 text-[12px] transition-colors ${
+              pathname === "/account"
+                ? "border-[var(--accent)] text-[var(--accent)]"
+                : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]"
+            }`}
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="shrink-0">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M4.5 20a7.5 7.5 0 0 1 15 0" strokeLinecap="round" />
+            </svg>
+            <span className="max-w-[110px] truncate sm:max-w-[170px]">{email}</span>
+          </Link>
         </div>
 
       </div>

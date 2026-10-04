@@ -622,7 +622,7 @@ export default function TokenMaker() {
                       : "border-[var(--border)] bg-[var(--panel)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]"
                   }`}
                 >
-                  <RingIcon style={s.id} color={active ? color : "#8a8a93"} />
+                  <RingIcon style={s.id} color={active ? color : "#8d96a3"} />
                   <span>{s.label}</span>
                 </button>
               );

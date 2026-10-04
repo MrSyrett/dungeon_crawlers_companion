@@ -27,7 +27,7 @@ export default async function DndHomebrewHubPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <DndHeader title="My Homebrew" subtitle={total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your homebrew"} />
+      <DndHeader title="Homebrew" subtitle={total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your homebrew"} />
       {KINDS.map((k, i) => (
         <DndHomebrewEditor key={k.kind} kind={k.kind} campaigns={campaigns} initial={owned[i]} />
       ))}

@@ -15,13 +15,21 @@
    gold until something sets it.
    ========================================================================== */
 :root {
-  --bg: #070707;
-  --panel: #111113;
-  --panel-2: #161618;
-  --border: #26262a;
-  --muted: #8a8a93;
-  --text: #ece9e1;
-  --gold: #c8a020;
+  --bg: #0b0c0e;
+  --panel: #14161a;
+  --panel-2: #1c1f24;
+  --border: #2b3038;
+  --muted: #8d96a3;
+  --text: #e9edf2;
+  /* The app's two accents. --accent is what you act on; --signal is what the
+     app is telling you (a save state, a roll result), used sparingly.
+     --gold is Shadowdark's colour and the fallback for anything written before
+     --accent existed, so on these surfaces it points at the accent. */
+  --accent: #5490c4;
+  --signal: #ff8419;
+  --gold: var(--accent);
+  /* Shadowdark's accent, its own token at last. */
+  --sd: #c8a020;
   --red: #b82018;
 
   /* Per-system accents (same values as the app). */
@@ -41,14 +49,14 @@
   --dcc-gold: #f2c230;
   --dcc-ink: #ee4a78;
 
-  --sys: var(--gold);
+  --sys: var(--accent);
 
   /* The selected system's typefaces. The standalone surfaces (sheets, Map
      Maker, Tabletop) keep the app's pair unless a theme sets otherwise; the
      GM Screen deliberately ignores both and stays on the app's own chrome. */
-  --sys-display: var(--font-cinzel, "Cinzel", serif);
-  --sys-text: var(--font-barlow, "Barlow Condensed", ui-sans-serif, system-ui, sans-serif);
-  --sys-label: var(--sys-text);
+  --sys-display: "Chivo", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Chivo", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Chivo Mono", ui-monospace, monospace;
 }
 
 /* Shadowdark's display face, served from /fonts (next.config.ts caches it for
@@ -90,6 +98,7 @@
 
 /* --- Shadowdark ----------------------------------------------------------- */
 :root[data-themed][data-system="SD"] {
+  --gold: #c8a020;
   --sys-display: "JSL Blackletter", cursive;
   --sys-text: "Montserrat", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Montserrat", ui-sans-serif, system-ui, sans-serif;

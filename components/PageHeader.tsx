@@ -1,7 +1,7 @@
 // The ONE page header used by every compendium / reference / tool page.
 //
 // Before this, 31 pages each drew their own header — some with a "← Home"
-// button and a "My Homebrew" button (both now redundant under the site-wide
+// button and a "Homebrew" button (both now redundant under the site-wide
 // navbar), some with none at all (D&D, Marvel, Ghostbusters pages had no title),
 // at three different widths. This standardizes the title block and drops the
 // duplicate navigation; the navbar owns Home, Compendium and Homebrew.

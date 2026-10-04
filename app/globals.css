@@ -26,14 +26,41 @@
   src: url("/fonts/old-newspaper.woff2") format("woff2");
 }
 
+/* ===========================================================================
+   THE SITE'S OWN LOOK
+   Everything below the system accents is the app talking, not a game. Four
+   surfaces used to each have their own idea of what "standard" meant — the
+   site, the GM Screen, the Map Maker and the Tabletop each carried a different
+   near-black, a different ink and, in three cases, a different gold. This is
+   the one palette they all read from now.
+
+   Two accents, with different jobs. Keeping them apart is what stops a
+   two-colour chrome turning into decoration:
+     --accent  what you ACT on: primary buttons, links, the active tab, focus.
+     --signal  what the app is TELLING you: a save state, a roll result, a
+               live indicator. Used sparingly — if it is on screen twice at
+               once it has stopped meaning anything.
+
+   The accent is a blue that is deliberately darker and duller than ACE's sky
+   blue and JLU's vivid blue, so the furniture never reads as a game. The
+   signal is the one electric colour in the app; every system accent is matte
+   beside it.
+   ========================================================================= */
 :root {
-  --bg: #070707;
-  --panel: #111113;
-  --panel-2: #161618;
-  --border: #26262a;
-  --muted: #8a8a93;
-  --text: #ece9e1;
+  --bg: #0b0c0e;
+  --panel: #14161a;
+  --panel-2: #1c1f24;
+  --border: #2b3038;
+  --muted: #8d96a3;
+  --text: #e9edf2;
+  --accent: #5490c4;
+  --signal: #ff8419;
+  /* Shadowdark's colour, and the fallback for anything written before --accent
+     existed. NOT the app's accent any more: the chrome blocks below re-point
+     it at --accent so a surface that is about the app can't come out gold. */
   --gold: #c8a020;
+  /* Shadowdark's accent, its own token at last. */
+  --sd: #c8a020;
   --red: #b82018;
   /* ACE! accent — the comic-book sky blue of the omnibus covers. */
   --ace: #3aa8e0;
@@ -71,17 +98,21 @@
   --dcc-ink: #ee4a78;
   /* The SELECTED system's accent. SiteNav republishes this on <html> whenever
      the system changes (and sets data-system), so any surface can tint itself
-     with var(--sys) and follow the switch live. Gold until the client sets it. */
-  --sys: var(--gold);
+     with var(--sys) and follow the switch live. The app's own accent until the
+     client sets it. */
+  --sys: var(--accent);
 
   /* The selected system's typefaces. A system that sets neither keeps the
-     app's own pair, so an unthemed system looks exactly as it does today. */
-  --sys-display: var(--font-cinzel);
-  --sys-text: var(--font-barlow);
+     app's own pair — Chivo over Chivo Mono — so a game with no skin yet reads
+     as the site rather than borrowing another game's face. Every typeface the
+     chrome used to wear (Cinzel, Barlow Condensed, Montserrat, Share Tech
+     Mono) belongs to one of the systems; these two belong to nobody. */
+  --sys-display: var(--font-chivo);
+  --sys-text: var(--font-chivo);
   /* An optional third face, for the small uppercase labels: a page's eyebrow
      line, stat keys. Defaults to the body face, so a system that doesn't name
      one looks exactly as it does today. */
-  --sys-label: var(--sys-text);
+  --sys-label: var(--font-chivo-mono);
 }
 
 @theme inline {
@@ -105,8 +136,10 @@
   --color-jlu: var(--jlu);
   --color-gb: var(--gb);
   --color-dcc: var(--dcc);
-  --font-display: var(--font-cinzel);
-  --font-body: var(--font-barlow);
+  --color-accent: var(--accent);
+  --color-signal: var(--signal);
+  --font-display: var(--font-chivo);
+  --font-body: var(--font-chivo);
 }
 
 html,
@@ -116,16 +149,16 @@ body {
 }
 
 body {
-  font-family: var(--sys-text), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--sys-text), "Chivo", ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-display {
-  font-family: var(--sys-display), "Cinzel", serif;
+  font-family: var(--sys-display), "Chivo", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Small uppercase labels — a page's eyebrow line. */
 .font-label {
-  font-family: var(--sys-label), var(--font-barlow), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--sys-label), var(--font-chivo-mono), "Chivo Mono", ui-monospace, monospace;
 }
 
 /* ===========================================================================
@@ -136,20 +169,22 @@ body {
    cannot reach inside it. See the THEMES block below.
    ========================================================================= */
 .dcc-chrome {
-  --panel: #111113;
-  --panel-2: #161618;
-  --border: #26262a;
-  --text: #ece9e1;
-  --muted: #8a8a93;
+  --panel: #14161a;
+  --panel-2: #1c1f24;
+  --border: #2b3038;
+  --text: #e9edf2;
+  --muted: #8d96a3;
   /* A theme may re-point --gold and --red at its own pair (DCC does). The bar
-     must not follow: its Admin button and its rules are the app's, not the
-     game's. */
-  --gold: #c8a020;
+     must not follow: its controls are the app's, not the game's. --gold lands
+     on the app's accent rather than on a literal, so everything written against
+     it before --accent existed comes out blue here with no edit at the usage
+     site. */
+  --gold: var(--accent);
   --red: #b82018;
-  --sys-display: var(--font-cinzel);
-  --sys-text: var(--font-barlow);
-  --sys-label: var(--font-barlow);
-  font-family: var(--font-barlow), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  --sys-display: var(--font-chivo);
+  --sys-text: var(--font-chivo);
+  --sys-label: var(--font-chivo-mono);
+  font-family: var(--font-chivo), "Chivo", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ===========================================================================
@@ -174,12 +209,20 @@ body {
    page title's eyebrow there isn't lettered in whatever game was last open.
    ========================================================================= */
 
+/* The app's own pages — the campaign list, OBR, the Token Maker, admin. The
+   theme blocks are guarded against them, so they already hold the base
+   palette; these two lines finish the job by pointing the accent and the old
+   gold at the app's blue, which re-skins every control on them without a
+   single page edit. */
 :root[data-chrome] body {
-  --sys: var(--gold);
+  --sys: var(--accent);
+  --gold: var(--accent);
 }
 
 /* --- Shadowdark: black and white, gold only as an occasional highlight ---- */
 :root[data-system="SD"]:not([data-chrome]) body {
+  /* Shadowdark is the one skin where --gold still means gold. */
+  --gold: var(--sd);
   --panel: #0f0f11;
   --panel-2: #141418;
   --border: #2a2a2e;
