@@ -293,6 +293,7 @@ export function renderToolPage(
       // (sidebar | preview), which would turn a sticky bar into a column down
       // the left edge. The sheets are flex columns and want the sticky bar.
       fixed: opts.def.kind === "session",
+      sheetFit: opts.def.kind === "character",
     });
     out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${bar}`);
   }

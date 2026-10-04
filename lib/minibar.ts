@@ -41,6 +41,9 @@ export type MiniBarOpts = {
    *  the bar out of the flow and reserve its height with padding instead, so it
    *  spans the top rather than becoming a column beside the sidebar. */
   fixed?: boolean;
+  /** For a character sheet: take the bar's own height off the roll log, which
+   *  is pinned to a hard 100vh. */
+  sheetFit?: boolean;
 };
 
 // For a <body> that is a flex ROW. A sticky first child there becomes a narrow
@@ -53,6 +56,18 @@ export type MiniBarOpts = {
 // This <style> is the last one in the document, and `body` here out-ranks
 // nothing it shouldn't: both rules are a bare element selector, so the one that
 // comes last — this one — wins over the template's.
+// For a character sheet. Its <body> is a flex column, so the bar sits above the
+// sheet correctly — but the roll log inside is `position:sticky; top:0` with a
+// hard `height:100vh`, written when nothing was above it. With the bar there,
+// that is 36px taller than the room it has: the page grows a scrollbar it
+// should not have and the bottom of the log falls off the screen. All fourteen
+// sheets share the rule, so one correction here covers them.
+const SHEET_FIT = `
+#dd-bar{--dd-h:36px}
+body{min-height:calc(100vh - 36px)}
+.roll-log{top:36px;height:calc(100vh - 36px)}
+`;
+
 const FIXED_STYLE = `
 #dd-bar{position:fixed;left:0;right:0;top:0}
 body{padding-top:36px;box-sizing:border-box}
@@ -139,7 +154,7 @@ export function miniBar(opts: MiniBarOpts): string {
 @media (max-width:640px){#dd-bar{gap:7px;padding:0 8px}#dd-bar .dd-crumb .dd-crumb-k{display:none}#dd-bar .dd-crumb .dd-sep{display:none}}
 @media (prefers-reduced-motion:no-preference){#dd-menu{animation:dd-menu-in .12s ease-out}}
 @keyframes dd-menu-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-${opts.fixed ? FIXED_STYLE : ""}</style>`;
+${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
 
   const crumb = `<span class="dd-crumb"><span class="dd-crumb-k">${esc(opts.crumb)}</span>${
     opts.title ? `<span class="dd-sep">›</span><span class="dd-title">${esc(opts.title)}</span>` : ""
