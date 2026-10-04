@@ -8,10 +8,13 @@ import { TOOLS_NAV, compendiumFor } from "@/components/navConfig";
 // user lost the system picker, Compendium and Tools the moment a tool opened.
 //
 // It is a static HTML/CSS/JS snippet (no React) inserted as the FIRST child of
-// <body>. Every one of those surfaces lays its body out as a flex column, so a
+// <body>. Most of those surfaces lay their body out as a flex COLUMN, so a
 // sticky first child simply takes its own 36px and pushes content down — no
-// padding hacks, nothing overlapped. Hidden in embed / preview modes by the
-// callers (the framing page provides chrome there).
+// padding hacks, nothing overlapped. The adventure-prep builders are the
+// exception: their body is a flex ROW (sidebar | preview), which turned the bar
+// into a 36px-wide column down the left edge. `fixed: true` lifts the bar out
+// of the flow for those — see FIXED_STYLE below. Hidden in embed / preview
+// modes by the callers (the framing page provides chrome there).
 //
 //   [logo] [SYSTEM] Characters › Kira                      [Saved] [☰]
 //
@@ -34,7 +37,26 @@ export type MiniBarOpts = {
   /** The sheet's own dark-mode localStorage key (e.g. "sd_dark"): shows the
    *  Light/Dark toggle and binds it to the ONE global dd_theme preference. */
   themeKey?: string;
+  /** For a page whose <body> is a flex ROW (the adventure-prep builders): take
+   *  the bar out of the flow and reserve its height with padding instead, so it
+   *  spans the top rather than becoming a column beside the sidebar. */
+  fixed?: boolean;
 };
+
+// For a <body> that is a flex ROW. A sticky first child there becomes a narrow
+// column down the left edge — which is exactly what the adventure-prep builders
+// were showing. Taking the bar out of the flow and reserving its 36px with
+// padding instead puts it back across the top without touching the builder's
+// own two-pane layout. border-box keeps the reserved strip inside the body's
+// own height:100vh, so nothing is pushed off the bottom.
+//
+// This <style> is the last one in the document, and `body` here out-ranks
+// nothing it shouldn't: both rules are a bare element selector, so the one that
+// comes last — this one — wins over the template's.
+const FIXED_STYLE = `
+#dd-bar{position:fixed;left:0;right:0;top:0}
+body{padding-top:36px;box-sizing:border-box}
+`;
 
 function esc(s: string): string {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -44,17 +66,41 @@ function sysEntry(key: SystemKey | null) {
   return key ? SYSTEMS.find((s) => s.key === key) ?? null : null;
 }
 
+// The faces each themed skin in public/tokens.css names. A standalone document
+// can't use next/font, so the ones its own template doesn't already load have
+// to be fetched here. Only the themed tools (character sheets, adventure preps)
+// ask for this — the GM Screen, the Map Maker and the Tabletop never do.
+// A system with no entry has no skin yet and keeps the template's own type.
+const THEME_FONTS: Partial<Record<SystemKey, string>> = {
+  SD: "family=Montserrat:wght@400;600;800",
+  DND: "family=Cinzel:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400",
+  DCC: "family=Anton&family=Barlow:wght@400;500;600&family=Share+Tech+Mono",
+};
+
 // What goes in <head>: the shared tokens (BEFORE the tool's own CSS so the tool
 // can still override) and the page's --sys accent. Also seeds the global theme
 // into the sheet's own dark-mode key before the sheet reads it, so sheets open
 // in the app's dark theme by default (one preference, not fourteen).
-export function miniBarHead(system: SystemKey | null, themeKey?: string): string {
+//
+// `themed` adds the skin's faces. The <html> attributes that switch the skin on
+// (data-system + data-themed) are written by the caller onto the tag itself —
+// no script, so there's no flash of the unthemed ground on load.
+export function miniBarHead(system: SystemKey | null, themeKey?: string, themed?: boolean): string {
   const s = sysEntry(system);
   const accent = s ? `<style id="dd-sys">:root{--sys:${s.accent}}</style>` : "";
+  const faces = themed && system && THEME_FONTS[system]
+    ? `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${THEME_FONTS[system]}&display=swap">`
+    : "";
   const seed = themeKey
     ? `<script>(function(){try{var t=localStorage.getItem("dd_theme")||"dark";localStorage.setItem(${JSON.stringify(themeKey)},t==="dark"?"1":"0");}catch(e){}})();</script>`
     : "";
-  return `<link rel="stylesheet" href="/tokens.css">\n${accent}\n${seed}`;
+  return `<link rel="stylesheet" href="/tokens.css">\n${faces}\n${accent}\n${seed}`;
+}
+
+/** True when public/tokens.css actually has a skin for this system — i.e. when
+ *  stamping data-themed on a document would change anything. */
+export function hasThemeFor(system: SystemKey | null): boolean {
+  return !!system && !!THEME_FONTS[system];
 }
 
 export function miniBar(opts: MiniBarOpts): string {
@@ -90,7 +136,7 @@ export function miniBar(opts: MiniBarOpts): string {
 @media (max-width:640px){#dd-bar{gap:7px;padding:0 8px}#dd-bar .dd-crumb .dd-crumb-k{display:none}#dd-bar .dd-crumb .dd-sep{display:none}}
 @media (prefers-reduced-motion:no-preference){#dd-menu{animation:dd-menu-in .12s ease-out}}
 @keyframes dd-menu-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-</style>`;
+${opts.fixed ? FIXED_STYLE : ""}</style>`;
 
   const crumb = `<span class="dd-crumb"><span class="dd-crumb-k">${esc(opts.crumb)}</span>${
     opts.title ? `<span class="dd-sep">›</span><span class="dd-title">${esc(opts.title)}</span>` : ""

@@ -27,11 +27,11 @@ const chipBase =
   "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 const chipOff =
   "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
-const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
+const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[var(--gold)]";
 const badge =
   "rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]";
 const hbBadge =
-  "rounded border border-[var(--red)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
+  "rounded border border-[var(--red)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--gold)]";
 const srcBadge =
   "rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]";
 
@@ -209,7 +209,7 @@ async function SkillsSection({ userId, raw }: { userId: string; raw: Raw }) {
             return (
               <li key={`${hb ? "hb" : "bk"}-${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">{s.name}</h2>
+                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{s.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{metaBits}</span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -385,7 +385,7 @@ async function SpellsSection({ userId, raw }: { userId: string; raw: Raw }) {
             return (
               <li key={`${hb ? "hb" : "bk"}-${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">{s.name}</h2>
+                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{s.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{typeLabel} · {s.mana} Mana · {s.stat}</span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -429,7 +429,7 @@ export default async function DccSkillsSpellsPage({ searchParams }: { searchPara
   const tabBtn = (active: boolean) =>
     `rounded border px-3.5 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] transition-colors ${
       active
-        ? "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]"
+        ? "border-[var(--red)] bg-[var(--panel-2)] text-[var(--gold)]"
         : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]"
     }`;
 

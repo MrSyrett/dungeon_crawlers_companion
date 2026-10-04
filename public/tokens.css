@@ -37,6 +37,9 @@
   --mmrpg: #EC1D24;
   --jlu: #2f6fed;
   --gb: #8bc53f;
+  --dcc: #e8275f;
+  --dcc-gold: #f2c230;
+  --dcc-ink: #ee4a78;
 
   --sys: var(--gold);
 
@@ -45,4 +48,137 @@
      GM Screen deliberately ignores both and stays on the app's own chrome. */
   --sys-display: var(--font-cinzel, "Cinzel", serif);
   --sys-text: var(--font-barlow, "Barlow Condensed", ui-sans-serif, system-ui, sans-serif);
+  --sys-label: var(--sys-text);
+}
+
+/* Shadowdark's display face, served from /fonts (next.config.ts caches it for
+   a year). The Shadowdark character sheet carries its own inline copy; every
+   other themed surface gets it from here. */
+@font-face {
+  font-family: "JSL Blackletter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/jsl-blackletter.woff2") format("woff2");
+}
+
+/* ============================================================================
+   THEMES — the standalone surfaces
+   ----------------------------------------------------------------------------
+   The same skins app/globals.css gives the Next pages, carried into the
+   character sheets and the adventure-prep builders so a Shadowdark sheet opens
+   on the same ground as the Shadowdark bestiary.
+
+   Opt-in, not automatic: lib/inject.ts stamps data-system + data-themed on
+   <html> for those two tools only. The GM Screen, the Map Maker and the
+   Tabletop load this same file and are deliberately left alone — they are app
+   chrome, the same way the navbar is.
+
+   What a skin touches here, and what it does not:
+     • the GROUND the page floats on (the surround behind a sheet, the
+       preview area behind the prep pages) — colour and texture;
+     • the prep builder's UI palette, which it already reads from one set of
+       --ui-* variables, and its display face (--font-display);
+     • the sheet masthead's wordmark face (.lg-word), shared by all fourteen.
+   It does NOT repaint the paper. The sheets are print-first documents with
+   hand-set type sizes and ink colours; a face or a colour swapped underneath
+   them is how a stat box ends up a line taller than its row.
+
+   This file loads BEFORE each template's own <style>, so everything here is
+   written to out-specify the template rather than relying on order.
+   ========================================================================== */
+
+/* --- Shadowdark ----------------------------------------------------------- */
+:root[data-themed][data-system="SD"] {
+  --sys-display: "JSL Blackletter", cursive;
+  --sys-text: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  /* The prep builder's UI palette. */
+  --ui-bg: #0f0f11;
+  --ui-panel: #141418;
+  --ui-border: #2a2a2e;
+  --ui-text: #f6f5f2;
+  --ui-muted: #9a9aa0;
+  --ui-accent: #c8a020;
+  --ui-highlight: #f6f5f2;
+  --font-display: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="SD"] body,
+:root[data-themed][data-system="SD"] .preview-area {
+  background-color: #08080a;
+  background-image:
+    radial-gradient(112% 70% at 50% -4%, rgba(252, 250, 244, 0.085) 0%, rgba(252, 250, 244, 0.026) 36%, rgba(8, 8, 10, 0) 66%),
+    radial-gradient(74% 40% at 50% -2%, rgba(200, 160, 32, 0.05) 0%, rgba(8, 8, 10, 0) 64%),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.84) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- D&D 2024 ------------------------------------------------------------- */
+:root[data-themed][data-system="DND"] {
+  --sys-display: "Cinzel", serif;
+  --sys-text: "EB Garamond", Georgia, serif;
+  --sys-label: "Cinzel", serif;
+  --ui-bg: #140d0e;
+  --ui-panel: #1b1314;
+  --ui-border: #332224;
+  --ui-text: #f5efe3;
+  --ui-muted: #c2b3a0;
+  --ui-accent: #c8102e;
+  --ui-highlight: #f0a37f;
+  --font-display: "Cinzel", serif;
+}
+:root[data-themed][data-system="DND"] body,
+:root[data-themed][data-system="DND"] .preview-area {
+  background-color: #28070b;
+  background-image: url("/themes/dnd-cover.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Dungeon Crawler Carl -------------------------------------------------- */
+:root[data-themed][data-system="DCC"] {
+  --sys-display: "Anton", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Share Tech Mono", ui-monospace, monospace;
+  --ui-bg: #121016;
+  --ui-panel: #19161f;
+  --ui-border: #2b2430;
+  --ui-text: #ece9e1;
+  --ui-muted: #9a94a0;
+  --ui-accent: #e8275f;
+  --ui-highlight: #f2c230;
+  --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="DCC"] body,
+:root[data-themed][data-system="DCC"] .preview-area {
+  background-color: #060507;
+  background-image:
+    url("/themes/dcc-splatter.webp"),
+    radial-gradient(85% 40% at 50% 0%, rgba(232, 39, 95, 0.17) 0%, rgba(6, 5, 7, 0) 72%),
+    radial-gradient(125% 92% at 50% 46%, rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, 0.84) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Every sheet's masthead wordmark, which all fourteen draw with .lg-word, takes
+   the system's display face. The banner is one word on one line, so this is the
+   one place a face can change without moving anything around it. */
+:root[data-themed] .lg-word {
+  font-family: var(--sys-display);
+}
+
+/* On paper none of the above applies: a printed sheet is ink on white. The
+   ground is set at a higher specificity than each template's own print rule,
+   so it has to be undone here or it would follow the page into the printer. */
+@media print {
+  :root[data-themed] body,
+  :root[data-themed] .preview-area {
+    background: #fff;
+  }
 }

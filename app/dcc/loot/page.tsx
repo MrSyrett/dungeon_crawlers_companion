@@ -92,9 +92,9 @@ function matches(it: Row, q: string, cat: string, tier: string, src: string, the
 
 const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
-const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
+const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[var(--gold)]";
 const badge = "rounded border border-[var(--border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]";
-const hbBadge = "rounded border border-[var(--red)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
+const hbBadge = "rounded border border-[var(--red)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--gold)]";
 
 export default async function DccLootPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -221,7 +221,7 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
             return (
               <li key={`${it.homebrew ? "hb" : "bk"}-${it.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">{it.name}</h2>
+                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{it.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
                     {catLabel}
                     {it.slot ? ` · ${it.slot}` : ""}

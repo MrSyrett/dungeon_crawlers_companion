@@ -55,9 +55,9 @@ const chipBase =
   "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 const chipOff =
   "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
-const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
+const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[var(--gold)]";
 const hbBadge =
-  "rounded border border-[var(--red)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f0a8a3]";
+  "rounded border border-[var(--red)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]";
 const srcBadge =
   "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
 
@@ -183,7 +183,7 @@ export default async function DccRacesPage({
             return (
               <li key={`${hb ? "hb" : "bk"}-${r.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">{r.name}</h2>
+                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{r.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
                     {r.group} · {SIZE_NAMES[r.size] ?? `Size ${r.size}`}
                   </span>

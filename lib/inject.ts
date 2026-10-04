@@ -1,5 +1,5 @@
 import type { ToolDef } from "@/lib/tools";
-import { miniBar, miniBarHead } from "@/lib/minibar";
+import { miniBar, miniBarHead, hasThemeFor } from "@/lib/minibar";
 
 function inlineJson(value: unknown): string {
   return JSON.stringify(value ?? {}).replace(/</g, "\\u003c");
@@ -251,10 +251,25 @@ export function renderToolPage(
   // (before the template's own <style>s) so the sheet can still override.
   // In framed/preview modes the theme seed is skipped: the framing page owns
   // appearance there.
-  const head = miniBarHead(opts.def.system, framed ? undefined : themeKey);
+  // The system's skin (public/tokens.css): the ground the sheet floats on, the
+  // prep builder's palette and display face, the masthead's wordmark. Only on
+  // the standalone tools, and only when we're drawing the chrome ourselves —
+  // framed by a VTT or served as a preview, the page around us owns appearance.
+  const themed = !framed && hasThemeFor(opts.def.system);
+  const head = miniBarHead(opts.def.system, framed ? undefined : themeKey, themed);
   const bootstrap = `${favicon}\n${head}\n<script>window.__DD__=${inlineJson(cfg)};</script>\n<script>${SHIM}</script>${opts.previewOnly ? PREVIEW : ""}`;
 
   let out = html.replace(/<head[^>]*>/i, (m) => `${m}\n${bootstrap}`);
+
+  // Switch the skin on at the <html> tag rather than from a script, so the page
+  // is never painted once unthemed and then again themed.
+  if (themed) {
+    out = out.replace(
+      /<html\b([^>]*)>/i,
+      (m, attrs: string) =>
+        /\bdata-system=/i.test(attrs) ? m : `<html${attrs} data-system="${opts.def.system}" data-themed="1">`,
+    );
+  }
 
   // Framed by a VTT the sheet is the *contents* of a panel: the popover around
   // it provides the back button, the title and the size switch, and the panel
@@ -268,6 +283,10 @@ export function renderToolPage(
       title: opts.title,
       status: true,
       themeKey,
+      // The adventure-prep builders lay their body out as a flex row
+      // (sidebar | preview), which would turn a sticky bar into a column down
+      // the left edge. The sheets are flex columns and want the sticky bar.
+      fixed: opts.def.kind === "session",
     });
     out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${bar}`);
   }

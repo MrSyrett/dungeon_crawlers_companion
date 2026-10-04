@@ -25,7 +25,7 @@ export default function PageHeader({
       <div className="min-w-0">
         <h1 className="font-display text-3xl font-black tracking-wide">{title}</h1>
         {subtitle ? (
-          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--sys,var(--gold))] sm:text-[11px] sm:tracking-[0.35em]">
+          <p className="font-label mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--sys,var(--gold))] sm:text-[11px] sm:tracking-[0.35em]">
             {subtitle}
           </p>
         ) : null}

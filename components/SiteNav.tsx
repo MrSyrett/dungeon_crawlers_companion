@@ -44,6 +44,18 @@ type Menu = "system" | "compendium" | "mobile" | null;
 
 const HIDDEN_ON = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
+// Surfaces that belong to the APP rather than to one game: the campaign list,
+// the Owlbear (OBR) page, the Token Maker and every admin screen. These keep
+// the standard look — no system ground, no system faces — the same way the
+// navbar does. Marked with data-chrome on <html>; app/globals.css skips its
+// theme blocks whenever that's set. (The GM Screen and the Map Maker are
+// standalone documents, not Next pages, so they never see those rules.)
+const CHROME_PREFIXES = ["/campaigns", "/vtt", "/admin", "/token-maker"];
+
+function isChromePath(pathname: string): boolean {
+  return CHROME_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
 function Caret() {
   return (
     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true" className="shrink-0">
@@ -96,15 +108,21 @@ export default function SiteNav({
   // <html> (plus data-system) so any page — dashboard heading, spinner, chips,
   // hover states — can tint itself with var(--sys) and follow the switch live.
   // Uses the *display* system, so a compendium page wears its own system's color.
+  // On the app's own surfaces (Campaigns, OBR, Token Maker, admin) we still
+  // publish the accent — the chips and buttons there use it — but flag the
+  // page as chrome so the system's ground and faces stay out of it.
+  const chrome = isChromePath(pathname);
   useEffect(() => {
     try {
       const root = document.documentElement;
       root.style.setProperty("--sys", sys.accent);
       root.dataset.system = sys.key;
+      if (chrome) root.dataset.chrome = "1";
+      else delete root.dataset.chrome;
     } catch {
       /* non-browser */
     }
-  }, [sys.accent, sys.key]);
+  }, [sys.accent, sys.key, chrome]);
 
   if (HIDDEN_ON.includes(pathname)) return null;
 

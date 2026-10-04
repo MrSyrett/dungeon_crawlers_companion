@@ -20,7 +20,8 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.
   { key: "DND", name: "Dungeons & Dragons", short: "D&D", accent: "var(--dnd)" },
-  { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--red)" },
+  // Accent is the covers' hot magenta (--dcc), not the app's brick --red.
+  { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--dcc)" },
   // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
   // same system (one sheet, one shelf, one tab).
   { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },

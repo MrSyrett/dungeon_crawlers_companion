@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* Shadowdark's display face. This is the same JSL Blackletter the Shadowdark
+   character sheet has always drawn its masthead in — the sheet carries it
+   inline as base64; here it's the same woff2 served from /fonts, which
+   next.config.ts caches for a year. Google's UnifrakturMaguntia stood in for it
+   while the theme was being built and reads noticeably differently, so the two
+   surfaces disagreed; this is the real one. */
+@font-face {
+  font-family: "JSL Blackletter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/jsl-blackletter.woff2") format("woff2");
+}
+
+/* Shadowdark's second face: the old newspaper type its entry and creature
+   names are set in. Google's IM Fell English stood in for this one the same
+   way UnifrakturMaguntia stood in for the blackletter. Both files were already
+   sitting in /fonts, extracted from the sheets and unused until now. */
+@font-face {
+  font-family: "Old newspaper font";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/old-newspaper.woff2") format("woff2");
+}
+
 :root {
   --bg: #070707;
   --panel: #111113;
@@ -33,6 +59,16 @@
   --jlu: #2f6fed;
   /* Ghostbusters accent — ectoplasm slime green. */
   --gb: #8bc53f;
+  /* Dungeon Crawler Carl accent — the covers' hot magenta. (Its pages used to
+     borrow --red, which is the app's muted brick and nowhere near the books.) */
+  --dcc: #e8275f;
+  /* Dungeon Crawler Carl's second colour — the covers' bright gold, used for
+     entry names and labels on DCC pages. */
+  --dcc-gold: #f2c230;
+  /* The magenta lifted just far enough to clear 4.5:1 as body-sized text on
+     the DCC panels (#e8275f lands at 4.2–4.4, which is under the bar). The
+     cover magenta stays the brand colour for rules, borders and fills. */
+  --dcc-ink: #ee4a78;
   /* The SELECTED system's accent. SiteNav republishes this on <html> whenever
      the system changes (and sets data-system), so any surface can tint itself
      with var(--sys) and follow the switch live. Gold until the client sets it. */
@@ -42,6 +78,10 @@
      app's own pair, so an unthemed system looks exactly as it does today. */
   --sys-display: var(--font-cinzel);
   --sys-text: var(--font-barlow);
+  /* An optional third face, for the small uppercase labels: a page's eyebrow
+     line, stat keys. Defaults to the body face, so a system that doesn't name
+     one looks exactly as it does today. */
+  --sys-label: var(--sys-text);
 }
 
 @theme inline {
@@ -64,6 +104,7 @@
   --color-mmrpg: var(--mmrpg);
   --color-jlu: var(--jlu);
   --color-gb: var(--gb);
+  --color-dcc: var(--dcc);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }
@@ -82,6 +123,11 @@ body {
   font-family: var(--sys-display), "Cinzel", serif;
 }
 
+/* Small uppercase labels — a page's eyebrow line. */
+.font-label {
+  font-family: var(--sys-label), var(--font-barlow), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+}
+
 /* ===========================================================================
    CHROME
    The furniture that must not change when the system does: the navbar, and
@@ -95,8 +141,14 @@ body {
   --border: #26262a;
   --text: #ece9e1;
   --muted: #8a8a93;
+  /* A theme may re-point --gold and --red at its own pair (DCC does). The bar
+     must not follow: its Admin button and its rules are the app's, not the
+     game's. */
+  --gold: #c8a020;
+  --red: #b82018;
   --sys-display: var(--font-cinzel);
   --sys-text: var(--font-barlow);
+  --sys-label: var(--font-barlow);
   font-family: var(--font-barlow), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -113,16 +165,27 @@ body {
 
    Grounds are `fixed` so the texture belongs to the window rather than
    scrolling away with a long bestiary.
+
+   `:not([data-chrome])` keeps all of this off the app's own surfaces — the
+   campaign list, OBR, the Token Maker, admin. SiteNav sets data-chrome on
+   <html> for those routes (CHROME_PREFIXES); they are about the app, not
+   about one game, so they keep the standard palette and the standard pair of
+   faces. The reset below also puts their accent back to the app's gold, so a
+   page title's eyebrow there isn't lettered in whatever game was last open.
    ========================================================================= */
 
+:root[data-chrome] body {
+  --sys: var(--gold);
+}
+
 /* --- Shadowdark: black and white, gold only as an occasional highlight ---- */
-:root[data-system="SD"] body {
+:root[data-system="SD"]:not([data-chrome]) body {
   --panel: #0f0f11;
   --panel-2: #141418;
   --border: #2a2a2e;
   --text: #f6f5f2;
   --muted: #9a9aa0;
-  --sys-display: var(--font-unifraktur);
+  --sys-display: "JSL Blackletter";
   --sys-text: var(--font-montserrat);
   background-color: #08080a;
   background-image:
@@ -134,14 +197,15 @@ body {
   background-size: cover;
 }
 /* Creature and entry names take the old newspaper face; the blackletter is
-   kept for the page title alone, where it is large enough to read. */
-:root[data-system="SD"] body h2,
-:root[data-system="SD"] body h3 {
-  font-family: var(--font-imfell), "IM Fell English", serif;
+   kept for the page title alone, where it is large enough to read. (The one
+   glyph the newspaper face is missing is "&", which falls back on its own.) */
+:root[data-system="SD"]:not([data-chrome]) body h2,
+:root[data-system="SD"]:not([data-chrome]) body h3 {
+  font-family: "Old newspaper font", serif;
 }
 
 /* --- D&D 2024: a worn module cover. Black, white, red, light brown -------- */
-:root[data-system="DND"] body {
+:root[data-system="DND"]:not([data-chrome]) body {
   --panel: #140d0e;
   --panel-2: #1b1314;
   --border: #332224;
@@ -158,14 +222,20 @@ body {
 }
 
 /* --- Dungeon Crawler Carl: black, gold and magenta, thrown splatter ------- */
-:root[data-system="DCC"] body {
+:root[data-system="DCC"]:not([data-chrome]) body {
   --panel: #121016;
   --panel-2: #19161f;
   --border: #2b2430;
   --text: #ece9e1;
   --muted: #9a94a0;
+  /* The two cover colours take over the page's two accent tokens, so every
+     chip, border and badge already written against --red or --gold re-skins
+     without touching a single page. The navbar resets both (.dcc-chrome). */
+  --red: var(--dcc-ink);
+  --gold: var(--dcc-gold);
   --sys-display: var(--font-anton);
   --sys-text: var(--font-barlow);
+  --sys-label: var(--font-sharetech);
   background-color: #060507;
   background-image:
     url("/themes/dcc-splatter.webp"),
@@ -175,6 +245,18 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+/* The covers letter everything in heavy poster type, so section and entry
+   names take the display face here too — not just the page title. */
+:root[data-system="DCC"]:not([data-chrome]) body h1,
+:root[data-system="DCC"]:not([data-chrome]) body h2,
+:root[data-system="DCC"]:not([data-chrome]) body h3 {
+  font-family: var(--font-anton), "Anton", ui-sans-serif, system-ui, sans-serif;
+}
+/* The page title is the one place the cover magenta runs large enough to use
+   straight (3:1 is the bar for display type; it clears 4.7). */
+:root[data-system="DCC"]:not([data-chrome]) body h1 {
+  color: var(--dcc);
 }
 
 /* Icon color policy: gold on the app's black/light surfaces, white on

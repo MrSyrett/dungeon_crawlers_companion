@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import {
   Cinzel,
   Barlow_Condensed,
-  UnifrakturMaguntia,
-  IM_Fell_English,
   Montserrat,
   EB_Garamond,
   Anton,
+  Share_Tech_Mono,
 } from "next/font/google";
 import "./globals.css";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -34,22 +33,11 @@ const barlow = Barlow_Condensed({
 // request to Google and no render-blocking stylesheet. A browser only fetches
 // a face when something on screen actually uses it, so a reader on a
 // Shadowdark page never downloads the Marvel or D&D faces.
+//
+// Shadowdark's two display faces aren't here: they are JSL Blackletter and the
+// old newspaper type, which aren't on Google at all. They're served from
+// /fonts and declared with @font-face at the top of app/globals.css.
 // ---------------------------------------------------------------------------
-const unifraktur = UnifrakturMaguntia({
-  variable: "--font-unifraktur",
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-});
-
-const imFell = IM_Fell_English({
-  variable: "--font-imfell",
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
@@ -67,6 +55,15 @@ const ebGaramond = EB_Garamond({
 
 const anton = Anton({
   variable: "--font-anton",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+// The label face: DCC's stat keys and eyebrow lines are set in it on the
+// covers and in the sheets, which already load it.
+const shareTech = Share_Tech_Mono({
+  variable: "--font-sharetech",
   subsets: ["latin"],
   weight: ["400"],
   display: "swap",
@@ -109,7 +106,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cinzel.variable} ${barlow.variable} ${unifraktur.variable} ${imFell.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} h-full antialiased`}
+      className={`${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PullToRefresh />

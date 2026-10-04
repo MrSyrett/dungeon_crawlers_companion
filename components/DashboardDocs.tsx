@@ -155,13 +155,10 @@ export default function DashboardDocs({
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-5">
       {/* key={system}: remounting the body on a system switch replays the
           fade-in, so changing systems reads as "switching worlds" rather than
-          text swapping in place. The heading takes the system's accent. */}
+          text swapping in place. No system title here — the navbar's system
+          chip already says which game this is, and the page's own theme says
+          it again. */}
       <div key={system} className="dcc-fade-in">
-        <div className="mb-5">
-          <h2 className="font-display text-xl font-black tracking-wide text-[var(--sys,var(--text))] sm:text-2xl">
-            {systemName(system)}
-          </h2>
-        </div>
         <DocList
           kind={view}
           system={system}
