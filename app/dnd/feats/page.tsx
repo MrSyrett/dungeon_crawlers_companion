@@ -18,7 +18,7 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
   if (!user) redirect("/login");
   const raw = await searchParams;
   const q = one(raw.q).trim().toLowerCase();
-  const cat = one(raw.cat);
+  const rawCat = one(raw.cat);
   const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbFeatV, hbFeatOwn, campaigns] = await Promise.all([
@@ -33,11 +33,19 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
   // `show` applies the URL's filters for the initial paint, through the same
   // facet match the client uses.
   const list = [...hbFeats, ...DND_FEATS].sort((a, b) => a.name.localeCompare(b.name));
+  const cats = CATS.filter((c) => [...hbFeats, ...DND_FEATS].some((f) => f.category === c));
+
+  // Validated against the option lists the chips actually offer, the way every
+  // other system does it. InstantFilter drops a value no chip offers, so an
+  // unvalidated ?param= made the server and the client disagree: the first paint
+  // hid everything and showed "Nothing found", and because apply() does not run
+  // on mount it stayed wrong until the user clicked something.
+  const cat = cats.includes(rawCat) ? rawCat : "";
+
   const current = { q: one(raw.q), cat, src };
   const facets = (f: DndFeat) => ({ cat: f.category, src: isHb(f) ? "hb" : "book" });
   const show = (f: DndFeat) => facetMatch(facets(f), current) && (!q || f.name.toLowerCase().includes(q) || f.benefits.some((x) => x.toLowerCase().includes(q)));
   const shown = list.filter(show).length;
-  const cats = CATS.filter((c) => [...hbFeats, ...DND_FEATS].some((f) => f.category === c));
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Feats" subtitle="2024 feats" />

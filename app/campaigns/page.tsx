@@ -8,6 +8,7 @@ import CopyCodeButton from "@/components/CopyCodeButton";
 import { deleteCampaign, renameCampaign, setCampaignVttUrl, setCampaignSystem } from "@/app/actions/campaigns";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 import { CampaignSystemSelect } from "@/components/CampaignSystemSelect";
+import { CampaignAutoField } from "@/components/CampaignAutoField";
 import OpenGmScreenButton from "@/components/OpenGmScreenButton";
 
 export const dynamic = "force-dynamic";
@@ -478,41 +479,39 @@ export default async function CampaignsPage() {
                   </div>
                 </div>
 
-                <form action={renameCampaign} className="mt-3 flex gap-2 border-t border-[var(--border)] pt-3">
-                  <input type="hidden" name="id" value={c.id} />
-                  <input
-                    type="text"
-                    name="name"
-                    defaultValue={c.name}
-                    maxLength={60}
-                    aria-label={`Rename ${c.name}`}
-                    className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--gold)]"
-                  />
-                  <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">
-                    Rename
-                  </button>
-                </form>
+                {/* Saves on blur or Enter. A <form action> resets its fields when the
+                    action completes, which flashed the old name back after every
+                    rename — the bug CampaignAutoField was written for. `required`
+                    because renameCampaign falls back to "New Campaign" on a blank,
+                    so an auto-saving field must refuse to send one. */}
+                <CampaignAutoField
+                  id={c.id}
+                  field="name"
+                  value={c.name}
+                  action={renameCampaign}
+                  maxLength={60}
+                  ariaLabel={`Rename ${c.name}`}
+                  required
+                  className="mt-3 flex gap-2 border-t border-[var(--border)] pt-3"
+                />
 
                 <CampaignSystemSelect id={c.id} system={c.system ?? null} action={setCampaignSystem} />
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
                   The GM Screen switches to this system automatically when you link this campaign.
                 </p>
 
-                <form action={setCampaignVttUrl} className="mt-2 flex gap-2">
-                  <input type="hidden" name="id" value={c.id} />
-                  <input
-                    type="url"
-                    name="vttUrl"
-                    defaultValue={c.vttUrl ?? ""}
-                    maxLength={500}
-                    placeholder="Virtual tabletop room URL (optional)"
-                    aria-label={`Virtual tabletop room for ${c.name}`}
-                    className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--gold)]"
-                  />
-                  <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">
-                    Save
-                  </button>
-                </form>
+                {/* Deliberately NOT required: clearing this field is how you go back
+                    to the built-in Tabletop, so an empty value must save. */}
+                <CampaignAutoField
+                  id={c.id}
+                  field="vttUrl"
+                  value={c.vttUrl ?? ""}
+                  action={setCampaignVttUrl}
+                  type="url"
+                  maxLength={500}
+                  placeholder="Virtual tabletop room URL (optional)"
+                  ariaLabel={`Virtual tabletop room for ${c.name}`}
+                />
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
                   {c.vttUrl
                     ? "Characters linked to this campaign open this OBR room from the home page (instead of the built-in Tabletop)."

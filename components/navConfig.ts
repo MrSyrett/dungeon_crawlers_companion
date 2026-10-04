@@ -86,7 +86,7 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
   D62E: [
     { href: "/d62e/templates", label: "Templates" },
     { href: "/d62e/skills", label: "Skills" },
-    { href: "/d62e/traits", label: "Traits" },
+    { href: "/d62e/traits", label: "Options" },
     { href: "/d62e/equipment", label: "Equipment" },
     { href: "/d62e/bestiary", label: "Bestiary" },
   ],

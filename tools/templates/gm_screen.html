@@ -13939,7 +13939,13 @@ let _homebrewMonsters = [];
 // search, and the ~350-entry merge only changes when homebrew re-syncs.
 let _allMonstersCache = null;
 function allMonsters() {
-  return _allMonstersCache || (_allMonstersCache = SD_MONSTERS.concat(_homebrewMonsters));
+  // SD_MONSTERS comes from /tools-data/sd-monsters.js. Every other per-system
+  // data global in this file is read through a `typeof` guard and degrades to an
+  // empty list when its file is absent; this was the one that would have thrown.
+  // That matters for loading only the linked campaign's system data: 34 of the 35
+  // globals were already safe, and this was the 35th.
+  const base = (typeof SD_MONSTERS !== 'undefined' && Array.isArray(SD_MONSTERS)) ? SD_MONSTERS : [];
+  return _allMonstersCache || (_allMonstersCache = base.concat(_homebrewMonsters));
 }
 
 async function syncHomebrewMonsters() {

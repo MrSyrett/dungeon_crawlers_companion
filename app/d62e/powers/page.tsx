@@ -1,115 +1,12 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { D62E_POWERS } from "@/lib/data/d62e-powers";
-import type { D62ePower } from "@/lib/data/d62e-types";
-import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
-import HomebrewEditor from "@/components/HomebrewEditor";
-import InstantFilter from "@/components/InstantFilter";
-import { facetMatch, facetAttr } from "@/lib/facets";
-import {
-  D62eHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge,
-  genreBadge, genreName, one, GENRES, type Query, type RawQuery,
-} from "@/components/D62eRef";
 
-export const dynamic = "force-dynamic";
-const BASE = "/d62e/powers";
-
-const KINDS = [
-  { key: "magic", label: "Magic" },
-  { key: "psionic", label: "Psionic" },
-  { key: "superpower", label: "Superpower" },
-];
-const KIND_HEADING: Record<string, string> = { magic: "Magic", psionic: "Psionics", superpower: "Superpowers" };
-
-type Row = D62ePower & { homebrew?: boolean };
-
-function hbToPower(data: Record<string, unknown>, name: string): Row {
-  const s = (k: string) => (typeof data[k] === "string" ? (data[k] as string) : "");
-  const opts = (Array.isArray(data.options) ? data.options : []).filter((x): x is string => typeof x === "string");
-  return {
-    name,
-    kind: s("kind") || "magic",
-    genre: (s("genre") || "fantasy") as Row["genre"],
-    skill: s("skill") || null,
-    difficulty: s("difficulty") || null,
-    cost: s("cost") || null,
-    description: s("description"),
-    options: opts.length ? opts : undefined,
-    page: 0,
-    homebrew: true,
-  };
-}
-
-export default async function D62ePowersPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
-  const [hbVisible, hbOwn, campaigns] = await Promise.all([
-    visibleHomebrew(user.id, { type: "d62e-power" }),
-    ownHomebrew(user.id, "d62e-power"),
-    userCampaigns(user.id),
-  ]);
-  const hbRows: Row[] = hbVisible.map((h) => hbToPower(h.data as Record<string, unknown>, h.name));
-  const ALL: Row[] = [...hbRows, ...D62E_POWERS.map((p) => ({ ...p }))];
-
-  const raw = await searchParams;
-  const q = one(raw.q).trim(); const needle = q.toLowerCase();
-  const genre = GENRES.some((g) => g.key === one(raw.genre)) ? one(raw.genre) : "";
-  const kind = KINDS.some((k) => k.key === one(raw.kind)) ? one(raw.kind) : "";
-  const current: Query = { q, genre, kind };
-  // Every power is rendered; the chips filter on the client (InstantFilter).
-  // `show` applies the URL's filters for the initial paint, through the same
-  // facet match the client uses. The genre chip's matchesGenre(row, genre) is
-  // the array facet [p.genre]: "All" ("") matches everything, a genre key
-  // matches only the rows of that genre.
-  const list = ALL;
-  const facets = (p: Row) => ({ kind: p.kind, genre: [p.genre] });
-  const show = (p: Row) =>
-    facetMatch(facets(p), current) &&
-    (!needle || [p.name, p.kind, p.skill ?? "", p.description].join(" ").toLowerCase().includes(needle));
-  const shown = list.filter(show).length;
-  // Every kind that has rows gets its section; a section hides (data-section)
-  // when all of its entries are hidden.
-  const groups = KINDS.map((k) => k.key).filter((k) => list.some((p) => p.kind === k));
-
-  return (
-    <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <D62eHeader title="Powers" subtitle={`${D62E_POWERS.length} magic, psionic & super powers${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-
-      <div className="mb-6"><HomebrewEditor kind="d62e-power" campaigns={campaigns} initial={hbOwn} /></div>
-
-      <InstantFilter>
-      <SearchForm base={BASE} q={q} placeholder="Search powers…" hidden={{ genre, kind }} />
-      <ChipRow label="Kind" base={BASE} current={current} param="kind" options={KINDS} active={kind} />
-      <ChipRow label="Genre" base={BASE} current={current} param="genre" options={GENRES} active={genre} />
-      <CountLine count={shown} noun="power" base={BASE} filtered={Boolean(needle || genre || kind)} />
-
-      <EmptyState noun="power" base={BASE} hidden={shown > 0} />
-      {groups.map((k) => (
-        <section key={k} className={`${cardCls} mb-4`} data-section hidden={!list.some((p) => p.kind === k && show(p))}>
-          <SectionH>{KIND_HEADING[k]}</SectionH>
-          <div className="mt-3 grid gap-3 md:grid-cols-2">
-            {list.filter((p) => p.kind === k).map((p) => (
-              <article key={`${p.homebrew ? "hb" : "bk"}-${p.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={!show(p)} data-f={facetAttr(facets(p))} data-s={p.kind}>
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h3 className={nameCls}>{p.name}</h3>
-                  {p.homebrew ? <span className={hbBadge}>Homebrew</span> : p.genre !== "core" ? <span className={genreBadge}>{genreName(p.genre)}</span> : null}
-                </div>
-                {(p.skill || p.difficulty || p.cost) ? (
-                  <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
-                    {p.skill ? <span><span className="font-semibold text-[var(--text)]">Skill:</span> {p.skill}</span> : null}
-                    {p.difficulty ? <span><span className="font-semibold text-[var(--text)]">Difficulty:</span> {p.difficulty}</span> : null}
-                    {p.cost ? <span className={badge}>{p.cost}</span> : null}
-                  </p>
-                ) : null}
-                <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{p.description}</p>
-                {p.options?.length ? <p className="mt-2 text-[11px] text-[var(--muted)]">{p.options.join(" · ")}</p> : null}
-              </article>
-            ))}
-          </div>
-        </section>
-      ))}
-      </InstantFilter>
-    </div>
-  );
+// Magic, Psionics and Superpowers now live on /d62e/traits, titled "Options".
+//
+// This page was never listed in components/navConfig.ts, so it was unreachable
+// through the UI — and it was the only page carrying the `magic` and `psionic`
+// kinds, which made that content invisible rather than merely duplicated. Kept as
+// a redirect rather than deleted so any bookmark or pasted link still lands on
+// the content it was pointing at.
+export default function D62ePowersRedirect() {
+  redirect("/d62e/traits");
 }

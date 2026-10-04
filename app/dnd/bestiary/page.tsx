@@ -89,8 +89,8 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
   if (!user) redirect("/login");
   const raw = await searchParams;
   const q = one(raw.q).trim();
-  const group = one(raw.group);
-  const cr = one(raw.cr);
+  const rawGroup = one(raw.group);
+  const rawCr = one(raw.cr);
   const pick = one(raw.m);
   const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
@@ -104,6 +104,14 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
 
   const groups = GROUP_ORDER.filter((g) => allMonsters.some((m) => m.group === g));
   const crs = [...new Set(allMonsters.map((m) => m.cr))].sort((a, b) => crVal(a) - crVal(b));
+
+  // Validated against the option lists the chips actually offer, the way every
+  // other system does it. InstantFilter drops a value no chip offers, so an
+  // unvalidated ?param= made the server and the client disagree: the first paint
+  // hid everything and showed "Nothing found", and because apply() does not run
+  // on mount it stayed wrong until the user clicked something.
+  const group = groups.includes(rawGroup) ? rawGroup : "";
+  const cr = crs.includes(rawCr) ? rawCr : "";
 
   const selected = pick ? allMonsters.find((m) => m.name === pick) ?? null : null;
   if (selected) {

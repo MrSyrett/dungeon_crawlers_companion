@@ -12,6 +12,13 @@ type Props = {
   maxLength?: number;
   placeholder?: string;
   ariaLabel?: string;
+  /** Classes for the wrapper, when the field needs the separator its old form
+   *  carried. Defaults to the plain row. */
+  className?: string;
+  /** Refuse to save an empty value, restoring the last saved one instead. The
+   *  rename action falls back to "New Campaign" on a blank name, so without this
+   *  clearing the box and tabbing away would silently rename the campaign. */
+  required?: boolean;
 };
 
 /**
@@ -31,6 +38,8 @@ export function CampaignAutoField({
   maxLength,
   placeholder,
   ariaLabel,
+  className = "mt-2 flex gap-2",
+  required = false,
 }: Props) {
   const [value, setValue] = useState(initial ?? "");
   const [pending, startTransition] = useTransition();
@@ -47,6 +56,7 @@ export function CampaignAutoField({
 
   const commit = () => {
     const baseline = desired.current !== null ? desired.current : initial ?? "";
+    if (required && !value.trim()) { setValue(baseline); return; } // never save a blank
     if (value === baseline) return; // unchanged since the last save
     desired.current = value;
     const fd = new FormData();
@@ -56,7 +66,7 @@ export function CampaignAutoField({
   };
 
   return (
-    <div className="mt-2 flex gap-2">
+    <div className={className}>
       <input
         type={type}
         name={field}

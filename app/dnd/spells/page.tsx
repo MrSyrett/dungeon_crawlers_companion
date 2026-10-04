@@ -31,9 +31,14 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
   if (!user) redirect("/login");
   const raw = await searchParams;
   const q = one(raw.q).trim().toLowerCase();
-  const lvl = one(raw.lvl);
-  const cls = one(raw.cls);
-  const school = one(raw.school);
+  // Validated against the option lists the chips actually offer, the way every
+  // other system does it. InstantFilter drops a value no chip offers, so an
+  // unvalidated ?param= made the server and the client disagree: the first paint
+  // hid everything and showed "Nothing found", and because apply() does not run
+  // on mount it stayed wrong until the user clicked something.
+  const lvl = /^[0-9]$/.test(one(raw.lvl)) ? one(raw.lvl) : "";
+  const cls = CLASSES.includes(one(raw.cls)) ? one(raw.cls) : "";
+  const school = SCHOOLS.includes(one(raw.school)) ? one(raw.school) : "";
   const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
