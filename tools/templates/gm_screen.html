@@ -2235,8 +2235,8 @@ body[data-cview="free"] .cst-log-rail{display:none}
     paintSysLabel();
     window.applyGmSystemToGenerators(document);
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSys);
-  else initSys();
+  if (document.readyState === 'complete') initSys();
+  else document.addEventListener('DOMContentLoaded', initSys, { once: true });
 })();
 </script>
 
@@ -13347,8 +13347,15 @@ function gmBootstrapWindows() {
   // On a phone, collapse to the single-pane mobile view.
   try { applyResponsiveMode(); } catch(e) {}
 }
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gmBootstrapWindows);
-else gmBootstrapWindows();
+/* lib/tools.ts adds `defer` to every template script, and a deferred script runs
+   with document.readyState ALREADY "interactive" — so the old
+   `readyState === 'loading'` test was false and the else branch fired at once,
+   before the later blocks had run. That is what left init_dice / init_party /
+   init_timers undefined when the stations mounted ("No init function found for
+   tool: party") and the Party station therefore never wired its campaign sync.
+   "complete" is the only state in which DOMContentLoaded has already fired. */
+if(document.readyState === 'complete') gmBootstrapWindows();
+else document.addEventListener('DOMContentLoaded', gmBootstrapWindows, { once: true });
 
 // ══════════════════════════════════════════
 // SESSION SAVE / LOAD
@@ -13978,8 +13985,11 @@ async function syncHomebrewMonsters() {
 // Re-fetch when the campaign link changes, so a GM's shared monsters appear
 // for players' screens (and disappear again on leaving).
 try { GMCamp.onChange(() => { syncHomebrewMonsters(); }); } catch(e) {}
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncHomebrewMonsters);
-else syncHomebrewMonsters();
+// Also waits for DOMContentLoaded: the /tools-data/*-monsters.js files this
+// merges into are <script src> tags BELOW this block, so running now would
+// merge homebrew into arrays that do not exist yet.
+if(document.readyState === 'complete') syncHomebrewMonsters();
+else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once: true });
 
 // ── Bestiary ────────────────────────────────────────────────────────────────
 // SD_MONSTERS now lives in public/tools-data/sd-monsters.js (canonical source,
@@ -16921,7 +16931,8 @@ window.init_vtt = init_vtt;
     if(window.ACEHB) ACEHB.load(refresh);
   }
   try { if(typeof GMCamp !== 'undefined' && GMCamp.onChange) GMCamp.onChange(go); } catch(e){}
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  if(document.readyState === 'complete') go();
+  else document.addEventListener('DOMContentLoaded', go, { once: true });
 })();
 </script>
 
@@ -17035,7 +17046,8 @@ window.init_vtt = init_vtt;
     html+='</div>';
     o.innerHTML=html+o.innerHTML;
   };
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', populate); else populate();
+  if(document.readyState === 'complete') populate();
+  else document.addEventListener('DOMContentLoaded', populate, { once: true });
 })();
 </script>
 

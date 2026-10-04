@@ -3360,9 +3360,8 @@ document.addEventListener('change', function(e) {
 // fill their Type dropdowns now that this one has defined the helper.
 refreshTypeDropdowns();
 
-if(document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { refreshTypeDropdowns(); syncHomebrewMonsters(); syncMonsterTypes(); });
-} else { syncHomebrewMonsters(); syncMonsterTypes(); }
+if(document.readyState === 'complete') { syncHomebrewMonsters(); syncMonsterTypes(); }
+else document.addEventListener('DOMContentLoaded', () => { refreshTypeDropdowns(); syncHomebrewMonsters(); syncMonsterTypes(); }, { once: true });
 
 </script>
 

@@ -6987,7 +6987,8 @@
     if(mapHasContent()) fitView(); else render();
     if(!embed && !mapHasContent()) toast("Pick a tool, or roll a random dungeon →");
   }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+  if(document.readyState === "complete") boot();
+  else document.addEventListener("DOMContentLoaded", boot, { once: true });
 
   // expose a tiny API for the host page if ever needed
   window.DungeonMap = { get:()=>map, load:(d)=>{ map=Object.assign(blankMap(),d); afterLoad(); fitView(); }, render, fitView };

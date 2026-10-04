@@ -6763,9 +6763,8 @@ function campaignRestore(saved) {
     const bar = document.querySelector('.sheet-title');
     if(bar) new ResizeObserver(syncTitleStack).observe(bar);
   }
-  if(document.readyState === 'loading')
-    document.addEventListener('DOMContentLoaded', syncTitleStack);
-  else syncTitleStack();
+  if(document.readyState === 'complete') syncTitleStack();
+  else document.addEventListener('DOMContentLoaded', syncTitleStack, { once: true });
 })();
 
 </script>
