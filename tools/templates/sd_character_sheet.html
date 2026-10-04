@@ -785,7 +785,13 @@ body.dark .sl::after{background:#3a3320;}
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header" id="log-header-bar">
     <span class="log-title">Roll Log</span>
-    <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear" onclick="clearLog()">Clear</button>
+    <!-- The buttons sit in one flex group, as they do on all thirteen other
+         sheets. .log-header is justify-content:space-between, so without this
+         wrapper every button added to the header became one more child for the
+         free space to be dealt out between — first the dice gear, then the VTT
+         button — which is where the gap beside Clear came from. Wrapped,
+         space-between only ever sees two children: the title and the group. -->
+    <div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear" onclick="clearLog()">Clear</button></div>
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign">Link</button>
