@@ -108,10 +108,6 @@ document.addEventListener("DOMContentLoaded", function() {
   textarea.short { min-height: 40px; }
   .section-divider { position: relative; font-family: var(--font-display); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ui-accent); background: transparent; padding: 8px 2px 6px; margin: 16px 0 9px; border-left: none; }
   .section-divider::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: color-mix(in srgb, var(--ui-accent) 32%, transparent); }
-  .section-divider.green { color: #5bc98f; }
-  .section-divider.green::after { background: rgba(91,201,143,0.32); }
-  .section-divider.gold { color: var(--ui-highlight); }
-  .section-divider.gold::after { background: color-mix(in srgb, var(--ui-highlight) 32%, transparent); }
   .entity-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
   .entity-card { background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: 8px; padding: 8px; }
   .entity-card.dragging { opacity: 0.4; }
@@ -572,7 +568,7 @@ body.flow-mode .page + .page {
         <label class="field-label">Overview Text</label>
         <textarea id="f-overview" placeholder="Brief summary of the adventure..." oninput="autosave()"></textarea>
       </div>
-      <div class="section-divider gold">Secrets & Clues</div>
+      <div class="section-divider">Secrets & Clues</div>
       <div id="clues-list" class="entity-list"></div>
       <button class="btn-add" onclick="addClue()">+ Add Clue</button>
       <div class="section-divider" style="border-left-color:#c0392b;">Loot & Rewards</div>
