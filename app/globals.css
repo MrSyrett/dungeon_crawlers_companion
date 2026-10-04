@@ -54,6 +54,33 @@
   src: url("/fonts/ghostbusters.woff2") format("woff2");
 }
 
+/* Marvel's wordmark face. THIRTY-ONE GLYPHS: A–Z and little else — no
+   lowercase at all, no digits. So it is used on h1 only, and that h1 is
+   uppercased in CSS, which is the opposite of the Ghostbusters rule above and
+   for the opposite reason: without the transform every lowercase letter would
+   fall through to Oswald and "Owlbear" would come out as one Marvel O
+   followed by six letters in another face. Digits still fall back to Oswald,
+   which is condensed too, so a title with a number in it stays coherent. */
+@font-face {
+  font-family: "Marvel";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/marvel.woff2") format("woff2");
+}
+
+/* D&D's logo face. It has both cases but NO DIGITS, so it is h1-only as well
+   and Cinzel sits behind it in the stack to catch any numeral. Per-glyph
+   fallback is what makes this safe: a heading like "Chapter 3" sets the word
+   in the logo face and the 3 in Cinzel rather than losing it. */
+@font-face {
+  font-family: "DnDC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dndc.woff2") format("woff2");
+}
+
 /* ===========================================================================
    THE SITE'S OWN LOOK
    Everything below the system accents is the app talking, not a game. Four
@@ -352,6 +379,12 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
+/* The logo face on the page title alone — it has no digits, so Cinzel stands
+   behind it in the stack and catches them. h2 and h3 keep Cinzel outright;
+   a creature's stat line is the last place to risk a missing numeral. */
+:root[data-system="DND"]:not([data-chrome]) body h1 {
+  font-family: "DnDC", var(--font-cinzel), Georgia, serif;
+}
 
 /* --- Dungeon Crawler Carl: black, gold and magenta, thrown splatter ------- */
 :root[data-system="DCC"]:not([data-chrome]) body {
@@ -456,9 +489,13 @@ body {
   font-family: var(--font-oswald), "Oswald", ui-sans-serif, system-ui, sans-serif;
 }
 /* The page title is the one place the brand red runs large enough to use
-   straight — 3:1 is the bar for display type and it clears 4.3. */
+   straight — 3:1 is the bar for display type and it clears 4.3 — and the one
+   place the wordmark face can go. It is A–Z only, so the uppercase is load
+   bearing: without it every lowercase letter drops through to Oswald. */
 :root[data-system="MMRPG"]:not([data-chrome]) body h1 {
   color: var(--mmrpg);
+  font-family: "Marvel", var(--font-oswald), ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
 }
 
 /* --- ACE!: navy, comic-book blue, cartoon yellow, speed lines ------------- */

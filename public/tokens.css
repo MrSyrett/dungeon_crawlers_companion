@@ -126,7 +126,7 @@
 
 /* --- D&D 2024 ------------------------------------------------------------- */
 :root[data-themed][data-system="DND"] {
-  --sys-display: "Cinzel", serif;
+  --sys-display: "DnDC", "Cinzel", serif;
   --sys-text: "EB Garamond", Georgia, serif;
   --sys-label: "Cinzel", serif;
   --ui-bg: #1a1718;
@@ -207,7 +207,7 @@
 
 /* --- Marvel Multiverse ----------------------------------------------------- */
 :root[data-themed][data-system="MMRPG"] {
-  --sys-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --sys-display: "Marvel", "Oswald", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Oswald", ui-sans-serif, system-ui, sans-serif;
   --ui-bg: #141011;
@@ -333,6 +333,25 @@
   font-weight: 400;
   font-display: swap;
   src: url("/fonts/ghostbusters.woff2") format("woff2");
+}
+/* Marvel's wordmark face (A-Z only, no lowercase, no digits) and D&D's logo
+   face (both cases, no digits). On these surfaces --sys-display is read by
+   exactly ONE rule, .lg-word, the masthead wordmark — so that is where they
+   go. --font-display, which the prep builders use in two dozen places, keeps
+   the workhorse face in both systems. */
+@font-face {
+  font-family: "Marvel";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/marvel.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DnDC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dndc.woff2") format("woff2");
 }
 :root[data-themed][data-system="GB"] {
   --sys-display: "Ghostbusters", "Anton", ui-sans-serif, system-ui, sans-serif;
@@ -495,6 +514,12 @@
   background-position: bottom center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+/* Marvel's face has no lowercase at all, so its masthead must be uppercased
+   or half the wordmark falls through to Oswald. */
+:root[data-themed][data-system="MMRPG"] .lg-word {
+  text-transform: uppercase;
 }
 
 /* Every sheet's masthead wordmark, which all fourteen draw with .lg-word, takes
