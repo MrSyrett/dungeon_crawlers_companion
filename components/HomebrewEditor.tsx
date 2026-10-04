@@ -102,7 +102,7 @@ export type Field =
   // Titles by Motivation, 5 tiers each. Stored on Lawful/Neutral/Chaotic keys.
   | (BaseField & { type: "titles" });
 export type Schema = {
-  title: string; // accordion header ("My Homebrew Weapons")
+  title: string; // accordion header ("Homebrew Weapons")
   noun: string; // singular ("Weapon")
   fields: readonly Field[];
   blank: () => Data;
@@ -170,7 +170,7 @@ function codeFromPips(p: unknown): string {
 // ── the 16 schemas (kind → form). Keys match the lib/homebrew normalisers. ────
 const SCHEMAS: Record<string, Schema> = {
   "nimble-item": {
-    title: "My Homebrew Items", noun: "Item",
+    title: "Homebrew Items", noun: "Item",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "category", label: "Category", type: "select", options: [["Adventuring Gear", "Adventuring Gear"], ["Cloth", "Cloth armor"], ["Leather", "Leather armor"], ["Mail", "Mail armor"], ["Plate", "Plate armor"], ["Shield", "Shield"], ["Melee Weapon", "Melee Weapon"], ["Ranged Weapon", "Ranged Weapon"], ["Key Equipment", "Key Equipment"], ["Magic Item", "Magic Item"], ["Spell Scroll", "Spell Scroll"], ["Wand", "Wand"]] },
@@ -184,7 +184,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ category: "Adventuring Gear" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
   },
   "nimble-spell": {
-    title: "My Homebrew Spells", noun: "Spell",
+    title: "Homebrew Spells", noun: "Spell",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "school", label: "School", type: "select", options: NIM_SCHOOL_OPTS },
@@ -198,7 +198,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "school")} · Tier ${sv(d, "tier") || "0"}`,
   },
   "nimble-monster": {
-    title: "My Homebrew Monsters", noun: "Monster",
+    title: "Homebrew Monsters", noun: "Monster",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "family", label: "Family / group", type: "text", placeholder: "Kobolds" },
@@ -217,7 +217,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "family") || "—"} · Lvl ${sv(d, "level") || "?"}`,
   },
   "nimble-ancestry": {
-    title: "My Homebrew Ancestries", noun: "Ancestry",
+    title: "Homebrew Ancestries", noun: "Ancestry",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "group", label: "Group", type: "select", options: [["Common", "Common"], ["Exotic", "Exotic"]] },
@@ -228,7 +228,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ group: "Common", size: "Medium", traits: [] }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "group"),
   },
   "sw-weapon": {
-    title: "My Homebrew Weapons", noun: "Weapon",
+    title: "Homebrew Weapons", noun: "Weapon",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "kind", label: "Kind", type: "select", options: [["Blaster", "Blaster"], ["Melee", "Melee"], ["Grenade", "Grenade"], ["Heavy", "Heavy"], ["Vehicle", "Vehicle"], ["Starship", "Starship"], ["Capital", "Capital"], ["Artillery", "Artillery"], ["Droid", "Droid"]] },
@@ -245,7 +245,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "kind")}${sv(d, "damageText") ? " · " + sv(d, "damageText") : ""}`,
   },
   "sw-gear": {
-    title: "My Homebrew Gear", noun: "Gear",
+    title: "Homebrew Gear", noun: "Gear",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "category", label: "Category", type: "select", options: [["Armor", "Armor"], ["Medical", "Medical"], ["Tool", "Tool"], ["Communication", "Communication"], ["Survival", "Survival"], ["Droid", "Droid"], ["Misc", "Misc"]] },
@@ -257,7 +257,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ category: "Misc", book: "companion" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
   },
   "sw-force": {
-    title: "My Homebrew Force Powers", noun: "Force Power",
+    title: "Homebrew Force Powers", noun: "Force Power",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "attribute", label: "Attribute", type: "text", placeholder: "Control, Sense, Alter, Control & Sense…" },
@@ -270,7 +270,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ attribute: "Control", book: "companion" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "attribute"),
   },
   "sw-character": {
-    title: "My Homebrew Characters", noun: "Character",
+    title: "Homebrew Characters", noun: "Character",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "group", label: "Group", type: "select", options: [["Imperial", "Imperial"], ["Rebel", "Rebel"], ["Civilian", "Civilian"], ["Alien", "Alien"], ["Droid", "Droid"], ["Creature", "Creature"]] },
@@ -287,7 +287,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => sv(d, "group"),
   },
   "ace-role": {
-    title: "My Homebrew Roles", noun: "Role",
+    title: "Homebrew Roles", noun: "Role",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "category", label: "Category", type: "text", placeholder: "Species, Occupation…" },
@@ -307,7 +307,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => sv(d, "category"),
   },
   "ace-gear": {
-    title: "My Homebrew Gear", noun: "Gear",
+    title: "Homebrew Gear", noun: "Gear",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "setting", label: "Setting", type: "select", options: SETTING_OPTS },
@@ -322,7 +322,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "category")} · ${sv(d, "tier")}`,
   },
   "ace-extra": {
-    title: "My Homebrew Extras", noun: "Extra",
+    title: "Homebrew Extras", noun: "Extra",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "setting", label: "Setting", type: "select", options: SETTING_OPTS },
@@ -340,7 +340,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => sv(d, "type"),
   },
   "ace-focus": {
-    title: "My Homebrew Focuses", noun: "Focus",
+    title: "Homebrew Focuses", noun: "Focus",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "stat", label: "Stat", type: "select", options: ACE_STAT_OPTS },
@@ -350,7 +350,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ stat: "Smarts", setting: "core" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "stat"),
   },
   "ace-trait": {
-    title: "My Homebrew Traits", noun: "Trait",
+    title: "Homebrew Traits", noun: "Trait",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "setting", label: "Setting", type: "select", options: SETTING_OPTS },
@@ -359,7 +359,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ setting: "core" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "setting"),
   },
   "kob-trope": {
-    title: "My Homebrew Tropes", noun: "Trope",
+    title: "Homebrew Tropes", noun: "Trope",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "book", label: "Book", type: "select", options: KOB_BOOK_OPTS },
@@ -375,7 +375,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => sv(d, "book"),
   },
   "kob-strength": {
-    title: "My Homebrew Strengths", noun: "Strength",
+    title: "Homebrew Strengths", noun: "Strength",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "book", label: "Book", type: "select", options: KOB_BOOK_OPTS },
@@ -385,7 +385,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ book: "bikes" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "cost"),
   },
   "kob-flaw": {
-    title: "My Homebrew Flaws", noun: "Flaw",
+    title: "Homebrew Flaws", noun: "Flaw",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "book", label: "Book", type: "select", options: KOB_BOOK_OPTS },
@@ -394,7 +394,7 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ book: "bikes" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "book"),
   },
   "d62e-skill": {
-    title: "My Homebrew Skills", noun: "Skill",
+    title: "Homebrew Skills", noun: "Skill",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "attribute", label: "Attribute", type: "text", placeholder: "Agility, Brawn, Knowledge, Perception, Charm…" },
@@ -407,7 +407,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "attribute")}${sv(d, "genre") ? " · " + sv(d, "genre") : ""}`,
   },
   "d62e-gear": {
-    title: "My Homebrew Gear", noun: "Gear",
+    title: "Homebrew Gear", noun: "Gear",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "category", label: "Category", type: "select", options: [["weapon", "Weapon"], ["armor", "Armor"], ["gear", "Gear"]] },
@@ -424,7 +424,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "category")} · ${sv(d, "genre")}`,
   },
   "d62e-power": {
-    title: "My Homebrew Powers", noun: "Power",
+    title: "Homebrew Powers", noun: "Power",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "kind", label: "Kind", type: "select", options: [["magic", "Magic"], ["psionic", "Psionic"], ["superpower", "Superpower"]] },
@@ -439,7 +439,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "kind")} · ${sv(d, "genre")}`,
   },
   "d62e-creature": {
-    title: "My Homebrew Creatures", noun: "Creature",
+    title: "Homebrew Creatures", noun: "Creature",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "genre", label: "Genre", type: "select", options: D62E_GENRE_OPTS },
@@ -457,7 +457,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "kind") || "Creature"} · ${sv(d, "genre")}`,
   },
   "d62e-trait": {
-    title: "My Homebrew Perks, Flaws & Talents", noun: "Trait",
+    title: "Homebrew Perks, Flaws & Talents", noun: "Trait",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "kind", label: "Kind", type: "select", options: [["perk", "Perk"], ["flaw", "Flaw"], ["talent", "Talent"], ["asset", "Asset"], ["trouble", "Trouble"]] },
@@ -469,7 +469,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "kind")} · ${sv(d, "genre")}`,
   },
   "d62e-limitation": {
-    title: "My Homebrew Limitations", noun: "Limitation",
+    title: "Homebrew Limitations", noun: "Limitation",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "value", label: "Dice back (D)", type: "text", placeholder: "1, 2…" },
@@ -483,7 +483,7 @@ const SCHEMAS: Record<string, Schema> = {
 
   // ── ICRPG (Index Card RPG) ──
   "icrpg-type": {
-    title: "My Homebrew Hero Types", noun: "Hero Type",
+    title: "Homebrew Hero Types", noun: "Hero Type",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "world", label: "World", type: "select", options: ICRPG_WORLD_OPTS },
@@ -496,7 +496,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => sv(d, "world") || "core",
   },
   "icrpg-ability": {
-    title: "My Homebrew Abilities", noun: "Ability",
+    title: "Homebrew Abilities", noun: "Ability",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "kind", label: "Kind", type: "text", placeholder: "Ability, Power, Augment, Mastery…" },
@@ -507,7 +507,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "kind") || "Ability"} · ${sv(d, "world") || "core"}`,
   },
   "icrpg-loot": {
-    title: "My Homebrew Loot", noun: "Loot",
+    title: "Homebrew Loot", noun: "Loot",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "table", label: "Table", type: "text", placeholder: "Weapons, Wonders, Curses…" },
@@ -519,7 +519,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => sv(d, "table") || "Loot",
   },
   "icrpg-gear": {
-    title: "My Homebrew Gear", noun: "Gear",
+    title: "Homebrew Gear", noun: "Gear",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "world", label: "World", type: "select", options: ICRPG_WORLD_OPTS },
@@ -531,7 +531,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "category") || "Gear"} · ${sv(d, "world") || "core"}`,
   },
   "icrpg-spell": {
-    title: "My Homebrew Spells", noun: "Spell",
+    title: "Homebrew Spells", noun: "Spell",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "school", label: "School", type: "text", placeholder: "Magic, Energy, Blood, Tech…" },
@@ -543,7 +543,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => sv(d, "school") || "Magic",
   },
   "icrpg-monster": {
-    title: "My Homebrew Monsters", noun: "Monster",
+    title: "Homebrew Monsters", noun: "Monster",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "world", label: "World", type: "select", options: ICRPG_WORLD_OPTS },
@@ -566,7 +566,7 @@ const SCHEMAS: Record<string, Schema> = {
 
   // ── Candela Obscura (Illuminated Worlds) ──
   "co-ability": {
-    title: "My Homebrew Abilities", noun: "Ability",
+    title: "Homebrew Abilities", noun: "Ability",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "source", label: "Source", type: "select", options: [["Role", "Role"], ["Specialty", "Specialty"]] },
@@ -577,7 +577,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "source") || "Role"}${sv(d, "owner") ? ` · ${sv(d, "owner")}` : ""}`,
   },
   "co-gear": {
-    title: "My Homebrew Gear", noun: "Gear",
+    title: "Homebrew Gear", noun: "Gear",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "type", label: "Type", type: "text", placeholder: "Standard, Specialty, Circle…" },
@@ -589,7 +589,7 @@ const SCHEMAS: Record<string, Schema> = {
 
   // ── Year Zero Engine (Fria Ligan) ──
   "yze-weapon": {
-    title: "My Homebrew Weapons", noun: "Weapon",
+    title: "Homebrew Weapons", noun: "Weapon",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "grip", label: "Grip", type: "select", options: [["1H", "One-handed"], ["2H", "Two-handed"], ["—", "None"]] },
@@ -604,7 +604,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "damage") || "1"} dmg · ${sv(d, "range") || "Engaged"}`,
   },
   "yze-gear": {
-    title: "My Homebrew Gear", noun: "Gear",
+    title: "Homebrew Gear", noun: "Gear",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "weight", label: "Weight", type: "text", placeholder: "1, ½, ¼" },
@@ -614,7 +614,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "weight") || "1"} wt`,
   },
   "mmrpg-power": {
-    title: "My Homebrew Powers", noun: "Power",
+    title: "Homebrew Powers", noun: "Power",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "powerSet", label: "Power Set", type: "text", placeholder: "None (basic), Super-Strength, Telepathy…" },
@@ -631,7 +631,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "powerSet") || "None"}${sv(d, "action") ? " · " + sv(d, "action") : ""}`,
   },
   "mmrpg-trait": {
-    title: "My Homebrew Traits", noun: "Trait",
+    title: "Homebrew Traits", noun: "Trait",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "description", label: "Description", type: "textarea", full: true },
@@ -640,7 +640,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: () => "trait",
   },
   "mmrpg-tag": {
-    title: "My Homebrew Tags", noun: "Tag",
+    title: "Homebrew Tags", noun: "Tag",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "description", label: "Description", type: "textarea", full: true },
@@ -649,7 +649,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: () => "tag",
   },
   "mmrpg-iconic": {
-    title: "My Homebrew Iconic Items", noun: "Iconic Item",
+    title: "Homebrew Iconic Items", noun: "Iconic Item",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "type", label: "Type", type: "select", options: [["Weapon", "Weapon"], ["Item", "Item"], ["Armor", "Battle Suit / Armor"]] },
@@ -679,7 +679,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "type") || "Item"}${sv(d, "powerValue") ? " · PV " + sv(d, "powerValue") : ""}`,
   },
   "mmrpg-hq": {
-    title: "My Homebrew Headquarters", noun: "Headquarters",
+    title: "Homebrew Headquarters", noun: "Headquarters",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80, placeholder: "e.g. The Watchtower" },
       { key: "teamRank", label: "Team rank", type: "select", options: HQ_RANK_OPTS },
@@ -697,7 +697,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `Rank ${sv(d, "teamRank") || "?"}`,
   },
   "mmrpg-starship": {
-    title: "My Homebrew Starships", noun: "Starship",
+    title: "Homebrew Starships", noun: "Starship",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80, placeholder: "e.g. The Wayfinder" },
       { key: "teamRank", label: "Team rank", type: "select", options: HQ_RANK_OPTS, help: "Sets the ship's Size, Health and passenger capacity (Starship Size table)." },

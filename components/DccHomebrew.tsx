@@ -214,7 +214,7 @@ export default function DccHomebrew({
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
         <span className="text-sm font-bold uppercase tracking-[0.15em]">
-          My Homebrew Items {items.length ? <span className="text-[var(--muted)]">({items.length})</span> : null}
+          Homebrew Items {items.length ? <span className="text-[var(--muted)]">({items.length})</span> : null}
         </span>
         <span className="text-[var(--muted)]">{open ? "▾" : "▸"}</span>
       </button>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import PageHeader from "./PageHeader";
 
 // Shared shell for the Year Zero Engine reference pages (app/yze/*) — same
-// pieces as CandelaRef / IcrpgRef / NimbleRef (header with "My Homebrew" +
+// pieces as CandelaRef / IcrpgRef / NimbleRef (header with "Homebrew" +
 // "← Home", search form, filter chips, count line, empty state, cards) in the
 // YZE survival amber.
 export type Query = Record<string, string | undefined>;

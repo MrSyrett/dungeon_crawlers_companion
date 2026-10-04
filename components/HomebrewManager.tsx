@@ -925,7 +925,7 @@ export default function HomebrewManager({
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
         <span className="text-sm font-bold uppercase tracking-[0.15em]">
-          My Homebrew{" "}
+          Homebrew{" "}
           {type === "spell"
             ? "Spells"
             : type === "monster"

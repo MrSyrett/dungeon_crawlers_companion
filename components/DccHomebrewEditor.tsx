@@ -54,7 +54,7 @@ type Field =
 type BodyProps = { form: Data; setForm: (u: Data | ((f: Data) => Data)) => void };
 type Schema = {
   kind: string;
-  title: string; // accordion header ("My Homebrew Monsters")
+  title: string; // accordion header ("Homebrew Monsters")
   noun: string; // singular ("Monster")
   fields: readonly Field[];
   blank: () => Data;
@@ -82,7 +82,7 @@ const s = (d: Data, k: string): string => {
 const SCHEMAS: Record<string, Schema> = {
   "dcc-monster": {
     kind: "dcc-monster",
-    title: "My Homebrew Monsters",
+    title: "Homebrew Monsters",
     noun: "Monster",
     summary: (d) => [s(d, "role"), `Lvl ${s(d, "level")}`].filter(Boolean).join(" · "),
     fields: [],
@@ -122,7 +122,7 @@ const SCHEMAS: Record<string, Schema> = {
 
   "dcc-skill": {
     kind: "dcc-skill",
-    title: "My Homebrew Skills",
+    title: "Homebrew Skills",
     noun: "Skill",
     summary: (d) => [s(d, "category"), s(d, "group"), s(d, "stat")].filter(Boolean).join(" · "),
     blank: () => ({
@@ -173,7 +173,7 @@ const SCHEMAS: Record<string, Schema> = {
 
   "dcc-spell": {
     kind: "dcc-spell",
-    title: "My Homebrew Spells",
+    title: "Homebrew Spells",
     noun: "Spell",
     summary: (d) => [s(d, "type"), `${s(d, "mana")} mana`, s(d, "stat")].filter(Boolean).join(" · "),
     blank: () => ({
@@ -212,7 +212,7 @@ const SCHEMAS: Record<string, Schema> = {
 
   "dcc-class": {
     kind: "dcc-class",
-    title: "My Homebrew Classes",
+    title: "Homebrew Classes",
     noun: "Class",
     summary: (d) => {
       const cats = Array.isArray(d.categories) ? (d.categories as string[]).join("/") : "";
@@ -233,7 +233,7 @@ const SCHEMAS: Record<string, Schema> = {
 
   "dcc-race": {
     kind: "dcc-race",
-    title: "My Homebrew Races",
+    title: "Homebrew Races",
     noun: "Race",
     summary: (d) => {
       const pts = (d.build as { spent?: unknown })?.spent;

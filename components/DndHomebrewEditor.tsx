@@ -90,7 +90,7 @@ const arr = (d: Data, k: string): string[] => (Array.isArray(d[k]) ? (d[k] as st
 const SCHEMAS: Record<string, Schema> = {
   "dnd-equipment": {
     kind: "dnd-equipment",
-    title: "My Homebrew Equipment",
+    title: "Homebrew Equipment",
     noun: "Equipment",
     fields: [],
     Body: EquipmentBody,
@@ -106,7 +106,7 @@ const SCHEMAS: Record<string, Schema> = {
   },
   "dnd-feat": {
     kind: "dnd-feat",
-    title: "My Homebrew Feats",
+    title: "Homebrew Feats",
     noun: "Feat",
     summary: (d) => s(d, "category") || "Feat",
     fields: [
@@ -122,7 +122,7 @@ const SCHEMAS: Record<string, Schema> = {
   },
   "dnd-background": {
     kind: "dnd-background",
-    title: "My Homebrew Backgrounds",
+    title: "Homebrew Backgrounds",
     noun: "Background",
     summary: (d) => (arr(d, "abilityScores").join("/") || "Background"),
     fields: [
@@ -139,7 +139,7 @@ const SCHEMAS: Record<string, Schema> = {
   },
   "dnd-spell": {
     kind: "dnd-spell",
-    title: "My Homebrew Spells",
+    title: "Homebrew Spells",
     noun: "Spell",
     summary: (d) => [`${s(d, "level") === "0" ? "Cantrip" : "Level " + s(d, "level")} · ${s(d, "school")}`, s(d, "damage") && `${s(d, "damage")} ${s(d, "damageType")}`.trim(), s(d, "heal") && `heal ${s(d, "heal")}`].filter(Boolean).join(" · "),
     fields: [
@@ -167,7 +167,7 @@ const SCHEMAS: Record<string, Schema> = {
   },
   "dnd-species": {
     kind: "dnd-species",
-    title: "My Homebrew Species",
+    title: "Homebrew Species",
     noun: "Species",
     summary: (d) => `${s(d, "size")} · Speed ${s(d, "speed")}`,
     fields: [
@@ -194,7 +194,7 @@ const SCHEMAS: Record<string, Schema> = {
   },
   "dnd-monster": {
     kind: "dnd-monster",
-    title: "My Homebrew Creatures",
+    title: "Homebrew Creatures",
     noun: "Creature",
     fields: [],
     Body: MonsterBody,
@@ -221,7 +221,7 @@ const SCHEMAS: Record<string, Schema> = {
   },
   "dnd-subclass": {
     kind: "dnd-subclass",
-    title: "My Homebrew Subclasses",
+    title: "Homebrew Subclasses",
     noun: "Subclass",
     summary: (d) => { const n = Array.isArray(d.features) ? d.features.length : 0; return `${s(d, "className") || "—"} · ${n} feature${n === 1 ? "" : "s"}`; },
     fields: [
