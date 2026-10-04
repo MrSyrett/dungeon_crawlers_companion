@@ -54,9 +54,9 @@
   /* The selected system's typefaces. The standalone surfaces (sheets, Map
      Maker, Tabletop) keep the app's pair unless a theme sets otherwise; the
      GM Screen deliberately ignores both and stays on the app's own chrome. */
-  --sys-display: "Chivo", ui-sans-serif, system-ui, sans-serif;
-  --sys-text: "Chivo", ui-sans-serif, system-ui, sans-serif;
-  --sys-label: "Chivo Mono", ui-monospace, monospace;
+  --sys-display: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Geist Mono", ui-monospace, monospace;
 }
 
 /* Shadowdark's display face, served from /fonts (next.config.ts caches it for
@@ -514,6 +514,34 @@
   background-position: bottom center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+/* Ghostbusters' masthead gets the poster treatment, and three things had to
+   change for it to work on the sheet's green header:
+     - weight 400. The sheet asks for 900 on a face that only has 400, so the
+       browser was synthesising bold and thickening the letters — which also
+       muddied the no-ghost O. The real letterforms are the point here.
+     - a white stroke on a deep-green fill, so the wordmark reads as the logo
+       rather than as heavy ink. The glow is tight: it belongs to the stroke,
+       not to the whole word.
+     - the subtitle off purple. #5e2b90 came from the sheet's own rule and was
+       never looked at on this ground.
+   .lg-word keeps its text-transform: uppercase, which is what turns the
+   lowercase o of "Ghostbusters" into the capital that maps to the ghost. */
+:root[data-themed][data-system="GB"] .lg-word {
+  font-weight: 400;
+  color: #16240c;
+  -webkit-text-stroke: 1.1px #ffffff;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.85),
+    0 0 7px rgba(255, 255, 255, 0.40);
+}
+@supports not (-webkit-text-stroke: 1px #fff) {
+  :root[data-themed][data-system="GB"] .lg-word { color: #12180a; text-shadow: none; }
+}
+:root[data-themed][data-system="GB"] .lg-sub {
+  color: #16240c;
 }
 
 /* Marvel's face has no lowercase at all, so its masthead must be uppercased

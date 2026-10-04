@@ -125,7 +125,7 @@ export function miniBarHead(system: SystemKey | null, themeKey?: string, themed?
     : "";
   // The app's own pair, on every standalone surface. A themed tool adds its
   // system's faces on top of this.
-  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;500&family=Chivo:wght@400;500;700&display=swap">`;
+  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;700&display=swap">`;
   return `<link rel="stylesheet" href="/tokens.css">\n${base}\n${faces}\n${accent}\n${seed}`;
 }
 
@@ -142,7 +142,7 @@ export function miniBar(opts: MiniBarOpts): string {
     `<a href="${esc(l.href)}"${l.external ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(l.label)}${l.external ? " ↗" : ""}</a>`;
 
   const style = `<style id="dd-bar-style">
-#dd-bar{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font:500 11px/1 "Chivo",system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;-webkit-user-select:none;user-select:none}
+#dd-bar{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font:500 11px/1 "Geist",system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;-webkit-user-select:none;user-select:none}
 #dd-bar a{color:inherit;text-decoration:none}
 #dd-bar .dd-logo{display:flex;align-items:center;flex:0 0 auto}
 #dd-bar .dd-logo img{width:22px;height:22px;display:block}

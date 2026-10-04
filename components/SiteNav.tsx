@@ -159,7 +159,7 @@ export default function SiteNav({
     if (!onDashboard) router.push("/dashboard");
   }
 
-  // Measured, not guessed: with Chivo (not condensed, as Barlow Condensed was)
+  // Measured, not guessed: with Geist (not condensed, as Barlow Condensed was)
   // nine uppercase links plus the logo, the full-name system chip and the
   // account icon come to 1119px at "Justice League Unlimited" — so the row is
   // gated at 1152px rather than lg/1024, and any more size, padding or

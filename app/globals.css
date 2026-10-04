@@ -219,16 +219,16 @@
   --sys: var(--accent);
 
   /* The selected system's typefaces. A system that sets neither keeps the
-     app's own pair — Chivo over Chivo Mono — so a game with no skin yet reads
+     app's own pair — Geist over Geist Mono — so a game with no skin yet reads
      as the site rather than borrowing another game's face. Every typeface the
      chrome used to wear (Cinzel, Barlow Condensed, Montserrat, Share Tech
      Mono) belongs to one of the systems; these two belong to nobody. */
-  --sys-display: var(--font-chivo);
-  --sys-text: var(--font-chivo);
+  --sys-display: var(--font-chrome);
+  --sys-text: var(--font-chrome);
   /* An optional third face, for the small uppercase labels: a page's eyebrow
      line, stat keys. Defaults to the body face, so a system that doesn't name
      one looks exactly as it does today. */
-  --sys-label: var(--font-chivo-mono);
+  --sys-label: var(--font-chrome-mono);
 }
 
 @theme inline {
@@ -254,8 +254,8 @@
   --color-dcc: var(--dcc);
   --color-accent: var(--accent);
   --color-signal: var(--signal);
-  --font-display: var(--font-chivo);
-  --font-body: var(--font-chivo);
+  --font-display: var(--font-chrome);
+  --font-body: var(--font-chrome);
 }
 
 html,
@@ -265,16 +265,16 @@ body {
 }
 
 body {
-  font-family: var(--sys-text), "Chivo", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--sys-text), "Geist", ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-display {
-  font-family: var(--sys-display), "Chivo", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--sys-display), "Geist", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Small uppercase labels — a page's eyebrow line. */
 .font-label {
-  font-family: var(--sys-label), var(--font-chivo-mono), "Chivo Mono", ui-monospace, monospace;
+  font-family: var(--sys-label), var(--font-chrome-mono), "Geist Mono", ui-monospace, monospace;
 }
 
 /* ===========================================================================
@@ -297,10 +297,10 @@ body {
      site. */
   --gold: var(--accent);
   --red: #b82018;
-  --sys-display: var(--font-chivo);
-  --sys-text: var(--font-chivo);
-  --sys-label: var(--font-chivo-mono);
-  font-family: var(--font-chivo), "Chivo", ui-sans-serif, system-ui, sans-serif;
+  --sys-display: var(--font-chrome);
+  --sys-text: var(--font-chrome);
+  --sys-label: var(--font-chrome-mono);
+  font-family: var(--font-chrome), "Geist", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ===========================================================================

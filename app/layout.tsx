@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import {
-  Chivo,
-  Chivo_Mono,
+  Geist,
+  Geist_Mono,
   Cinzel,
   Barlow_Condensed,
   Montserrat,
@@ -38,20 +38,20 @@ import { getHiddenSystemKeys } from "@/lib/systems";
 import type { SystemKey } from "@/components/systemStore";
 
 // ---------------------------------------------------------------------------
-// The site's own pair. Chivo and Chivo Mono carry every surface that is about
+// The site's own pair. Geist and Geist Mono carry every surface that is about
 // the app rather than about one game — the navbar, the campaign list, OBR, the
 // Token Maker, admin, and any system that has no skin yet. They are here rather
 // than among the theme faces below because they are the default, not a skin.
 // ---------------------------------------------------------------------------
-const chivo = Chivo({
-  variable: "--font-chivo",
+const geist = Geist({
+  variable: "--font-chrome",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   display: "swap",
 });
 
-const chivoMono = Chivo_Mono({
-  variable: "--font-chivo-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-chrome-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
@@ -334,7 +334,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${chivo.variable} ${chivoMono.variable} ${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} ${archivoBlack.variable} ${libreFranklin.variable} ${oswald.variable} ${sourceSans.variable} ${lilitaOne.variable} ${nunito.variable} ${mulish.variable} ${sairaCond.variable} ${saira.variable} ${asap.variable} ${cormorant.variable} ${lora.variable} ${fraunces.variable} ${figtree.variable} ${permanentMarker.variable} ${archivo.variable} ${archivoNarrow.variable} ${plexSans.variable} ${russoOne.variable} ${rubik.variable} h-full antialiased`}
+      className={`${geist.variable} ${geistMono.variable} ${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} ${archivoBlack.variable} ${libreFranklin.variable} ${oswald.variable} ${sourceSans.variable} ${lilitaOne.variable} ${nunito.variable} ${mulish.variable} ${sairaCond.variable} ${saira.variable} ${asap.variable} ${cormorant.variable} ${lora.variable} ${fraunces.variable} ${figtree.variable} ${permanentMarker.variable} ${archivo.variable} ${archivoNarrow.variable} ${plexSans.variable} ${russoOne.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PullToRefresh />
