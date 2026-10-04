@@ -1,5 +1,6 @@
 import type { ToolDef } from "@/lib/tools";
-import { miniBar, miniBarHead, hasThemeFor } from "@/lib/minibar";
+import { miniBarHead, hasThemeFor } from "@/lib/minibar";
+import { siteNav } from "@/lib/sitenav";
 
 function inlineJson(value: unknown): string {
   return JSON.stringify(value ?? {}).replace(/</g, "\\u003c");
@@ -164,7 +165,7 @@ const SHIM = `
     if (!title || title === lastTitle || conflicted) return;
     lastTitle = title;
     patch({ title: title }, true).then(function (r) { if (r && r.ok) return applyRev(r); }, function () {}).catch(function(e) {});
-    var label = document.querySelector("#dd-bar .dd-title");
+    var label = document.querySelector("#dd-bar .dd-title, #dd-nav .dd-title");
     if (label) label.textContent = title;
     try { document.title = title; } catch (e) {}
   }
@@ -191,7 +192,7 @@ const PREVIEW = `
      GM Screen's Adventure pane shows a blank band at the top. body-qualified
      to out-specify the builder's own !important rule. */
   body .preview-area { margin-top: 0 !important; }
-  #dd-bar { display: none !important; }
+  #dd-bar, #dd-nav { display: none !important; }
 </style>
 <script>
 (function () {
@@ -229,6 +230,9 @@ export function renderToolPage(
     /** Framed by our first-party VTT popup (same-origin): hide the Home chrome
      *  but keep the sheet fully editable. */
     embed?: boolean;
+    /** For the navbar's account control — its tooltip and the Admin chip. */
+    email?: string;
+    isAdmin?: boolean;
     /** Page-specific places to go next, shown in the mini-bar menu (e.g. the
      *  sheet's campaign, its Tabletop / Owlbear room). */
   },
@@ -281,14 +285,18 @@ export function renderToolPage(
   // it provides the back button, the title and the size switch, and the panel
   // is small enough that a bar would just cover the sheet. It also must not
   // navigate itself anywhere, since the popover owns the Owlbear connection.
-  // Otherwise: the shared mini-bar (site navigation, system, save status).
+  //
+  // Otherwise: the SITE NAVBAR, the same one the Next pages wear. These used to
+  // get the 36px mini-bar, which is the main reason they read as a different
+  // product from the rest of the site. The GM Screen and the Tabletop keep the
+  // mini-bar — they are full-bleed working surfaces with their own dense
+  // toolbars, where the 16px is worth more than matching chrome.
   if (!framed) {
-    const bar = miniBar({
+    const bar = siteNav({
       system: opts.def.system,
-      crumb: opts.def.kind === "character" ? "Characters" : "Adventures",
-      title: opts.title,
+      email: opts.email ?? "",
+      isAdmin: opts.isAdmin,
       status: true,
-      themeKey,
       // The adventure-prep builders lay their body out as a flex row
       // (sidebar | preview), which would turn a sticky bar into a column down
       // the left edge. The sheets are flex columns and want the sticky bar.

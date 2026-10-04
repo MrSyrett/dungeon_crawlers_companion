@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPlayUser } from "@/lib/vtt";
-import { CHARACTER_TOOL_IDS, TOOLS, sheetKeyFor } from "@/lib/tools";
+import { CHARACTER_TOOL_IDS, TOOLS, sheetKeyFor, campaignIdInSheet } from "@/lib/tools";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -13,10 +13,20 @@ type SheetBlob = {
   name?: unknown;
 };
 
+// A linked sheet we could not read. These used to be `continue`d over, which is
+// how a party of unreadable characters showed up in the GM Screen as "No one has
+// linked a character sheet yet" — a data fault reported as an empty room. Naming
+// them lets the console say which sheet is broken instead of nothing at all.
+type Unreadable = { docId: string; title: string; tool: string; reason: string };
+
 // GET — every character sheet linked to this campaign.
-// Returns { characters: [{ docId, title, updatedAt, system, sheet }] } for both
-// every character tool (sd-character → sd_sheet, dcc-character → dcc_sheet,
+// Returns { characters: [{ docId, title, updatedAt, system, sheet }], unreadable? }
+// for every character tool (sd-character → sd_sheet, dcc-character → dcc_sheet,
 // ace-character → ace_sheet), so the GM Screen Party tool shows them all.
+//
+// ?repair=1 additionally re-derives membership from the sheet bodies when the
+// indexed column finds nobody (see below). The GM Screen's manual Sync sends it;
+// the 30s auto-poll does not.
 export async function GET(req: NextRequest, ctx: Ctx) {
   // Cookie normally; a VTT token when framed by a tabletop.
   const user = await getPlayUser(req);
@@ -55,24 +65,73 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   // Indexed lookup: the campaign link now lives in its own column, kept in sync
   // on every save. We still parse the sheet JSON below for the sheet body the
   // caller wants, but membership is decided by the column, not a full scan.
-  const docs = await prisma.document.findMany({
+  let docs = await prisma.document.findMany({
     where: memberWhere,
     select: { id: true, title: true, updatedAt: true, data: true, tool: true },
     orderBy: { updatedAt: "desc" },
   });
 
+  // Self-heal a stale campaign link. linkedCampaignId is only ever written by
+  // the save route, so a character whose row changed outside the app — restored
+  // from a backup, edited in the DB — can hold the right campaign in its sheet
+  // JSON while the column still says null, and then it is invisible to the party
+  // even though its data is perfectly good. When the column finds nobody, read
+  // the link out of the sheet bodies instead and write the column back, so the
+  // character reappears without having to be opened and re-saved by hand.
+  //
+  // Gated on ?repair=1 and only when the fast path came back empty: the fallback
+  // has to pull candidate blobs, which is the cost the column exists to avoid.
+  let repaired = 0;
+  if (docs.length === 0 && req.nextUrl.searchParams.get("repair") === "1") {
+    const orphans = await prisma.document.findMany({
+      where: { tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: null },
+      select: { id: true, title: true, updatedAt: true, data: true, tool: true },
+      orderBy: { updatedAt: "desc" },
+      take: 300,
+    });
+    const mine = orphans.filter((d) => campaignIdInSheet(d.tool, d.data) === id);
+    if (mine.length) {
+      await prisma.document.updateMany({
+        where: { id: { in: mine.map((d) => d.id) } },
+        data: { linkedCampaignId: id },
+      });
+      repaired = mine.length;
+      docs = mine;
+    }
+  }
+
   const characters = [];
+  const unreadable: Unreadable[] = [];
   for (const doc of docs) {
-    const blob = doc.data as Record<string, unknown> | null;
     const key = sheetKeyFor(doc.tool);
+    const blob = doc.data as Record<string, unknown> | null;
     const raw = key ? blob?.[key] : undefined;
-    if (typeof raw !== "string") continue;
+
+    if (typeof raw !== "string") {
+      unreadable.push({
+        docId: doc.id,
+        title: doc.title,
+        tool: doc.tool,
+        reason: !key
+          ? `"${doc.tool}" is not a character tool`
+          : raw === undefined
+            ? `saved data holds no "${key}"`
+            : `"${key}" is ${raw === null ? "null" : typeof raw}, not a JSON string`,
+      });
+      continue;
+    }
 
     let sheet: SheetBlob;
     try {
       sheet = JSON.parse(raw) as SheetBlob;
     } catch {
-      continue; // malformed payload — skip rather than fail the whole request
+      unreadable.push({
+        docId: doc.id,
+        title: doc.title,
+        tool: doc.tool,
+        reason: `"${key}" is not valid JSON (${raw.length} chars)`,
+      });
+      continue;
     }
 
     characters.push({
@@ -84,5 +143,11 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     });
   }
 
-  return Response.json({ characters, syncToken });
+  return Response.json({
+    characters,
+    ...(unreadable.length ? { unreadable } : {}),
+    ...(repaired ? { repaired } : {}),
+    // A repair changed membership, so the poller's old token must not match.
+    syncToken: repaired ? `${docs.length}:${Date.now()}` : syncToken,
+  });
 }

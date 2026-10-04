@@ -299,6 +299,33 @@ export function isToolId(value: string): value is ToolId {
   return Object.prototype.hasOwnProperty.call(TOOLS, value);
 }
 
+// The campaign a saved character sheet says it belongs to, read out of the sheet
+// body itself. `Document.linkedCampaignId` is a denormalised copy of this that
+// only the save route writes, so it can be stale after any change made outside
+// the app (a restore from backup, a manual DB edit). This is what the campaign
+// roster falls back to, and repairs the column from.
+//
+// Shadowdark and Candela nest the link under `_sheet.campaign`; every other
+// system keeps it at the top level. Reading both beats keeping a per-system key
+// list, which is how a newly added system ends up silently missing from the
+// party with nothing in the code to point at.
+export function campaignIdInSheet(tool: string, data: unknown): string | null {
+  const key = sheetKeyFor(tool);
+  if (!key) return null;
+  const raw = (data as Record<string, unknown> | null | undefined)?.[key];
+  if (typeof raw !== "string") return null;
+  try {
+    const sheet = JSON.parse(raw) as {
+      campaign?: { id?: unknown } | null;
+      _sheet?: { campaign?: { id?: unknown } | null } | null;
+    };
+    const id = sheet?.campaign?.id ?? sheet?._sheet?.campaign?.id;
+    return typeof id === "string" && id ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 // ── Template loading ─────────────────────────────────────────────────────────
 // The tool templates are large static HTML files (100 KB – 1 MB) that only
 // change on deploy, so each is read from disk once per server process, SPLIT

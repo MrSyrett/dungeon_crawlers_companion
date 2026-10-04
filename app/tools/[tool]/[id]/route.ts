@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin";
 import { isToolId, TOOLS, loadToolTemplate } from "@/lib/tools";
 import { renderToolPage } from "@/lib/inject";
 
@@ -38,6 +39,9 @@ export async function GET(req: Request, ctx: Ctx) {
     rev: doc.updatedAt.getTime(),
     previewOnly,
     embed,
+    // For the navbar's account control — its tooltip and the Admin chip.
+    email: user.email,
+    isAdmin: isAdminEmail(user.email),
   });
 
   return new Response(html, {

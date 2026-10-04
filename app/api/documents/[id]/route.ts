@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getPlayUser } from "@/lib/vtt";
-import { CHARACTER_TOOL_IDS, TOOLS, isToolId } from "@/lib/tools";
+import { CHARACTER_TOOL_IDS, TOOLS, isToolId, campaignIdInSheet } from "@/lib/tools";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -91,7 +91,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   // sheet can hold a stale link in its JSON (e.g. the campaign was since deleted),
   // and writing that would trip the foreign key, so an orphaned reference is null.
   if (update.data && isToolId(existing.tool) && CHARACTER_TOOL_IDS.includes(existing.tool)) {
-    update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
+    update.linkedCampaignId = await liveCampaignId(campaignIdInSheet(existing.tool, update.data));
   }
 
   const saved = await prisma.document.update({ where: { id }, data: update, select: { updatedAt: true } });
@@ -199,33 +199,3 @@ function extractDocTitle(tool: string, data: object): string | null {
   return null;
 }
 
-// Pulls the linked campaign id out of a saved SD character payload:
-//   { sd_sheet: "<json>" } → _sheet.campaign.id
-// Returns null when there's no valid link, which also clears the column if a
-// player disconnects their sheet from a campaign.
-function extractLinkedCampaignId(data: object): string | null {
-  try {
-    const blob = data as Record<string, unknown>;
-    // SD sheet: campaign lives under _sheet.campaign.id
-    for (const skey of ["sd_sheet", "co_sheet"]) {
-      if (typeof blob[skey] !== "string") continue;
-      const sheet = JSON.parse(blob[skey] as string) as {
-        _sheet?: { campaign?: { id?: unknown } | null } | null;
-      };
-      const id = sheet?._sheet?.campaign?.id;
-      return typeof id === "string" && id ? id : null;
-    }
-    // DCC, ACE, KoB, Nimble, SW, D&D, D62e and YZE sheets: campaign lives at the top level (campaign.id)
-    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet", "nimble_sheet", "sw_sheet", "dnd_sheet", "d62e_sheet", "icrpg_sheet", "yze_sheet", "mmrpg_sheet", "jlu_sheet", "gb_sheet"]) {
-      if (typeof blob[key] !== "string") continue;
-      const sheet = JSON.parse(blob[key] as string) as {
-        campaign?: { id?: unknown } | null;
-      };
-      const id = sheet?.campaign?.id;
-      return typeof id === "string" && id ? id : null;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}

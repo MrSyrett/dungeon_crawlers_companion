@@ -15878,7 +15878,12 @@ function init_party(root) {
       // Quiet polls hand the server our last change-token so an unchanged
       // roster comes back as a tiny { unchanged } instead of every sheet.
       let url = '/api/campaigns/' + camp.id + '/characters';
+      // A manual Sync also asks the server to re-derive membership from the sheet
+      // bodies if the indexed link column finds nobody — that column is only
+      // written on save, so a sheet restored from a backup can be linked in its
+      // own JSON and still invisible here. The 30s poll never pays for that.
       if(quiet && _lastSyncToken) url += '?ifUnchanged=' + encodeURIComponent(_lastSyncToken);
+      else if(!quiet) url += '?repair=1';
       const r = await fetch(url, { credentials: 'same-origin' });
       if(r.status === 401) { status('Signed out — reload the page and sign in again.', true); return; }
       if(r.status === 404) { status('That campaign no longer exists on the server.', true); return; }
@@ -15907,9 +15912,23 @@ function init_party(root) {
       });
       chars = chars.filter(x => !String(x.source).startsWith('campaign') || seen.has(x.sheet.name.toLowerCase()));
       lastSync = new Date();
-      status(ok
-        ? ok + ' character' + (ok === 1 ? '' : 's') + ' from ' + camp.code + ' · ' + lastSync.toLocaleTimeString()
-        : 'No one has linked a character sheet to ' + camp.code + ' yet.');
+      // Sheets the server found linked but could not parse. Reporting these as
+      // "nobody has linked a sheet" is what turned a data fault into a ghost
+      // story, so they are named here and counted separately from the party.
+      const bad = (data && Array.isArray(data.unreadable)) ? data.unreadable : [];
+      const fixed = (data && data.repaired) ? data.repaired : 0;
+      if(bad.length) {
+        status(
+          (ok ? ok + ' character' + (ok === 1 ? '' : 's') + ' from ' + camp.code + ' · ' : '') +
+          bad.length + ' sheet' + (bad.length === 1 ? '' : 's') + " couldn't be read: " +
+          bad.map(b => (b.title || 'Untitled') + ' (' + b.reason + ')').join('; '),
+          true);
+      } else {
+        status(ok
+          ? ok + ' character' + (ok === 1 ? '' : 's') + ' from ' + camp.code +
+            (fixed ? ' · relinked ' + fixed : '') + ' · ' + lastSync.toLocaleTimeString()
+          : 'No one has linked a character sheet to ' + camp.code + ' yet.');
+      }
       render();
     } catch(err) {
       status('Could not reach the campaign (' + err.message + ').', true);
@@ -16161,7 +16180,11 @@ function wireAiConsole(root) {
       .then(text=>{ if(text==null) return { names:[], msg:'Could not load the party.' }; let data;try{data=JSON.parse(text);}catch(e){data=null;}
         const list=Array.isArray(data)?data:(data&&data.characters)||[];
         const names=list.map(partyName).filter(Boolean).filter((n,i,a)=>a.findIndex(x=>x.toLowerCase()===n.toLowerCase())===i).sort((a,b)=>a.localeCompare(b,'en'));
-        _partyNames=names; return { names, msg: names.length?'':'No one has linked a character to this campaign yet.' }; })
+        const bad=(data&&Array.isArray(data.unreadable))?data.unreadable:[];
+        _partyNames=names;
+        return { names, msg: names.length ? '' : (bad.length
+          ? bad.length+' linked sheet'+(bad.length===1?'':'s')+" couldn't be read — open the Party tool for details."
+          : 'No one has linked a character to this campaign yet.') }; })
       .catch(()=>({ names:[], msg:'Could not load the party.' }))
       .then(res=>{ _partyPending=null; return res; });
     return _partyPending;
