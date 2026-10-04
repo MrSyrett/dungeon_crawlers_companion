@@ -38,7 +38,14 @@ export type SiteNavOpts = {
 /** The bar's height, and the single source of truth for it. Everything that
  *  needs to size around the bar reads var(--dd-bar-h) rather than a literal,
  *  so the mini-bar surfaces (36px) and these (52px) share one mechanism. */
-export const SITE_NAV_H = 52;
+export const SITE_NAV_H = 53;
+
+/** The width at which the links row replaces the hamburger. SiteNav gates at
+ *  1152px, measured against its own content; this bar carries the same nine
+ *  links plus a save-status chip, so it is measured separately — see the sweep
+ *  in the session notes. The JS narrows nothing at runtime: if the row would
+ *  overflow, the breakpoint is wrong and should be re-measured. */
+export const LINKS_AT = 1216;
 
 function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
@@ -62,49 +69,72 @@ function navData() {
 const CSS = `
 :root{--dd-bar-h:0px}
 body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
-#dd-nav{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font-family:"Geist",system-ui,-apple-system,sans-serif;-webkit-user-select:none;user-select:none}
-#dd-nav *{box-sizing:border-box}
+/* TYPE AND METRICS ARE NOT INVENTED HERE. Every number below is the computed
+   value of the Tailwind class SiteNav.tsx actually uses, so the two bars render
+   identically: px-1.5 = 6px, py-2 = 8px, text-[11px] = 11px, font-semibold =
+   600, gap-px = 1px, w-56 = 224px, rounded = 4px, rounded-lg = 8px.
+   Two traps this file fell into once and must not again:
+   (1) the CSS \`font\` shorthand has no legal way to say "keep the inherited
+       family" — \`font:600 11px/1 inherit\` is an INVALID declaration and is
+       dropped whole, so size, weight and line-height all silently vanish and
+       the bar renders in the sheet's own face at the sheet's own size. Use the
+       longhands and let font-family inherit from #dd-nav;
+   (2) SiteNav's arbitrary text-[Npx] sets font-size ONLY, so its controls are
+       laid out against Tailwind preflight's line-height:1.5 on <html>. Pin 1.5
+       here or every control comes out several px shorter than the real bar. */
+#dd-nav{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font-family:"Geist",ui-sans-serif,system-ui,sans-serif;font-size:11px;line-height:1.5;font-weight:400;letter-spacing:normal;-webkit-user-select:none;user-select:none}
+#dd-nav *{box-sizing:border-box;font-family:inherit}
 #dd-nav a{text-decoration:none;color:inherit}
-#dd-nav .nav-row{position:relative;z-index:10;display:flex;align-items:center;gap:6px;width:100%;max-width:80rem;margin:0 auto;padding:0 12px;height:${SITE_NAV_H}px}
+/* No fixed height: the row is as tall as its tallest control, exactly as the
+   Next bar is (py-2 + a 32px logo / 36px burger). The JS measures what that
+   came to and republishes it as --dd-bar-h, so nothing has to guess. */
+#dd-nav .nav-row{position:relative;z-index:10;display:flex;align-items:center;gap:6px;width:100%;max-width:80rem;margin:0 auto;padding:8px 12px}
+@media (min-width:640px){#dd-nav .nav-row{padding:8px 20px}}
 #dd-nav .nav-logo{display:flex;align-items:center;flex:0 0 auto}
 #dd-nav .nav-logo img{width:32px;height:32px;display:block}
-#dd-nav .nav-burger{display:flex;flex:0 0 auto;align-items:center;padding:7px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:inherit;cursor:pointer}
-#dd-nav .nav-sysbtn{display:flex;align-items:center;gap:4px;flex:0 0 auto;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);padding:6px 8px;font:700 11px/1 inherit;letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
+#dd-nav .nav-burger{display:flex;flex:0 0 auto;align-items:center;padding:8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:inherit;cursor:pointer}
+#dd-nav .nav-sysbtn{display:flex;align-items:center;gap:4px;flex:0 0 auto;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);padding:6px 8px;font-size:11px;font-weight:700;line-height:1.5;letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
 #dd-nav .nav-links{display:none;flex:0 0 auto;flex-wrap:nowrap;align-items:center;gap:1px}
-#dd-nav .nav-item{border-radius:4px;padding:7px 6px;font:600 11px/1 inherit;text-transform:uppercase;color:var(--muted,#8d96a3);background:transparent;border:0;cursor:pointer;white-space:nowrap;transition:color .12s,background .12s}
+#dd-nav .nav-item{border-radius:4px;padding:6px;font-size:11px;font-weight:600;line-height:1.5;text-transform:uppercase;color:var(--muted,#8d96a3);background:transparent;border:0;cursor:pointer;white-space:nowrap;transition:color .15s,background-color .15s}
 #dd-nav .nav-item:hover{color:var(--text,#e9edf2)}
 #dd-nav .nav-item.on{background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2)}
 #dd-nav .nav-item.has-caret{display:flex;align-items:center;gap:4px}
 #dd-nav .nav-right{margin-left:auto;display:flex;flex:0 0 auto;align-items:center;gap:8px}
-#dd-nav #dd-status{flex:0 0 auto;font:500 10px/1 inherit;color:var(--muted,#8d96a3);padding:4px 8px;border:1px solid transparent;border-radius:4px;white-space:nowrap;text-transform:uppercase;letter-spacing:.08em}
+#dd-nav #dd-status{flex:0 0 auto;font-size:10px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);padding:4px 8px;border:1px solid transparent;border-radius:4px;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
 #dd-nav #dd-status:empty{display:none}
 #dd-nav #dd-status.is-saving{color:var(--muted,#8d96a3)}
 #dd-nav #dd-status.is-saved{color:var(--signal,#ff8419)}
 #dd-nav #dd-status.is-error{color:#fff;background:var(--red,#b82018);border-color:var(--red,#b82018)}
-
-#dd-nav .nav-admin{border:1px solid var(--accent,#5490c4);border-radius:4px;padding:4px 9px;font:600 10px/1 inherit;letter-spacing:.06em;text-transform:uppercase;color:var(--accent,#5490c4)}
-#dd-nav .nav-acct{display:flex;flex:0 0 auto;align-items:center;padding:7px;border:1px solid var(--border,#2b3038);border-radius:4px;color:var(--muted,#8d96a3);transition:color .12s,border-color .12s}
+#dd-nav .nav-admin{border:1px solid var(--accent,#5490c4);border-radius:4px;padding:4px 10px;font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.06em;text-transform:uppercase;color:var(--accent,#5490c4)}
+#dd-nav .nav-admin:hover{background:var(--panel-2,#1c1f24)}
+#dd-nav .nav-acct{display:flex;flex:0 0 auto;align-items:center;padding:8px;border:1px solid var(--border,#2b3038);border-radius:4px;color:var(--muted,#8d96a3);transition:color .15s,border-color .15s}
 #dd-nav .nav-acct:hover{color:var(--text,#e9edf2);border-color:var(--muted,#8d96a3)}
-#dd-nav .nav-pop{position:absolute;top:100%;margin-top:4px;min-width:224px;max-height:70vh;overflow:auto;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.55);padding:4px;z-index:2147483001}
+#dd-nav .nav-pop{position:absolute;left:0;top:100%;margin-top:4px;width:224px;max-height:70vh;overflow:auto;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 20px 25px -5px rgba(0,0,0,.5),0 8px 10px -6px rgba(0,0,0,.5);padding:4px;z-index:2147483001}
 #dd-nav .nav-pop[hidden]{display:none}
-#dd-nav .nav-pop a,#dd-nav .nav-pop button{display:block;width:100%;text-align:left;border:0;background:transparent;border-radius:4px;padding:8px 12px;font:600 13px/1.2 inherit;color:var(--muted,#8d96a3);cursor:pointer}
+#dd-nav .nav-pop a,#dd-nav .nav-pop button{display:block;width:100%;text-align:left;border:0;background:transparent;border-radius:4px;padding:8px 12px;font-size:13px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);cursor:pointer;transition:color .15s,background-color .15s}
+/* The system list is uppercase with wider tracking; the compendium list is not.
+   Two different rules in SiteNav, so two here. */
+#dd-nav #dd-nav-syspop button{text-transform:uppercase;letter-spacing:.08em}
 #dd-nav .nav-pop a:hover,#dd-nav .nav-pop button:hover{background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2)}
 #dd-nav .nav-pop button.on{background:var(--panel-2,#1c1f24)}
 #dd-nav .nav-wrap{position:relative;flex:0 0 auto}
+/* On a phone the system chip is the one control that can be arbitrarily wide
+   ("Justice League Unlimited"), and with every control shrink-0 it pushed the
+   row past the viewport and gave the page a horizontal scrollbar. Only the
+   chip in the top row may shrink, and it truncates rather than wrapping. */
+#dd-nav .nav-row > .nav-wrap{flex:0 1 auto;min-width:0}
+#dd-nav .nav-sysbtn{max-width:100%;min-width:0}
+#dd-nav .nav-sysbtn > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#dd-nav .nav-sysbtn > svg{flex:0 0 auto}
 #dd-nav .nav-backdrop{position:fixed;inset:0;z-index:0;background:transparent;border:0;cursor:default}
 #dd-nav .nav-panel{position:relative;z-index:10;border-top:1px solid var(--border,#2b3038);background:var(--panel,#14161a);padding:12px}
 #dd-nav .nav-panel[hidden]{display:none}
-#dd-nav .nav-panel h4{margin:12px 2px 4px;font:700 11px/1 inherit;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#8d96a3)}
+#dd-nav .nav-panel h4{margin:12px 4px 4px;font-size:11px;font-weight:700;line-height:1.5;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#8d96a3)}
 #dd-nav .nav-panel h4:first-child{margin-top:0}
 #dd-nav .nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-#dd-nav .nav-grid a,#dd-nav .nav-grid button{border:1px solid var(--border,#2b3038);border-radius:4px;padding:8px 12px;font:600 12px/1.2 inherit;color:var(--muted,#8d96a3);background:transparent;text-align:left;cursor:pointer}
+#dd-nav .nav-grid a,#dd-nav .nav-grid button{border:1px solid var(--border,#2b3038);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);background:transparent;text-align:left;cursor:pointer}
 #dd-nav .nav-grid a:hover,#dd-nav .nav-grid button:hover{color:var(--text,#e9edf2)}
-/* Measured, not guessed, the same way the Next navbar's 1152 was: nine
-   uppercase links plus the logo, the full-name system chip, the save-status
-   chip, the Admin chip and the account icon come to 1227px, so this row is
-   gated at 1280. It is wider than SiteNav's gate because SiteNav carries
-   neither a status chip nor, on most pages, an Admin chip. */
-@media (min-width:1280px){
+@media (min-width:${LINKS_AT}px){
   #dd-nav .nav-links{display:flex}
   #dd-nav .nav-burger{display:none}
   #dd-nav .nav-panel{display:none!important}
@@ -209,6 +239,27 @@ function paint(){
   try{var r=document.documentElement;r.style.setProperty("--sys",e.a);if(!docSys)r.dataset.system=e.k;}catch(e2){}
 }
 paint();
+
+// --dd-bar-h is the single source of truth for the room the bar occupies, and
+// the row is content-sized, so it is MEASURED rather than assumed: the bar is
+// taller below the links breakpoint (the 36px hamburger beats the 32px logo)
+// and the CSS default can only be right for one of the two. Measured off
+// .nav-row + the 1px border, never the whole <nav>, so opening the mobile panel
+// does not momentarily report the bar as 300px tall and shove the page down.
+// Published on <body>, because the stylesheet's own default is a body rule and
+// an inline property on <html> would lose to it.
+var row=nav.querySelector(".nav-row");
+function measure(){
+  if(!row)return;
+  try{
+    var h=Math.round(row.getBoundingClientRect().height)+1;
+    if(h>1)document.body.style.setProperty("--dd-bar-h",h+"px");
+  }catch(e2){}
+}
+measure();
+window.addEventListener("resize",measure);
+window.addEventListener("load",measure);
+if(window.ResizeObserver&&row){try{new ResizeObserver(measure).observe(row);}catch(e2){}}
 
 var open=null,backdrop=null;
 function shut(){

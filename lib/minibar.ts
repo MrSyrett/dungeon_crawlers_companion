@@ -125,7 +125,7 @@ export function miniBarHead(system: SystemKey | null, themeKey?: string, themed?
     : "";
   // The app's own pair, on every standalone surface. A themed tool adds its
   // system's faces on top of this.
-  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;700&display=swap">`;
+  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600;700&display=swap">`;
   return `<link rel="stylesheet" href="/tokens.css">\n${base}\n${faces}\n${accent}\n${seed}`;
 }
 
