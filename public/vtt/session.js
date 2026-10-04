@@ -1067,7 +1067,15 @@
     var css = [
       "[hidden]{display:none!important}",
       "html,body{height:100%;margin:0;overflow:hidden;background:var(--bg,#0b0d10)}",
-      "#vtt-root{position:fixed;inset:0;font:14px/1.4 'Montserrat',system-ui,sans-serif;color:#e6ebf2}",
+      // The board is position:fixed over the whole viewport, so standalone it
+      // sat UNDER the site mini-bar and the top row of tools was hidden behind
+      // it. Start the root below the bar instead. Gated on the bar actually
+      // being present: framed in the GM Screen's Maps pane (?embed=1) there is
+      // no bar and --dd-bar-h stays 0, so that path is untouched. Same shape as
+      // the GM Screen's .pop-scrim fix.
+      ":root{--dd-bar-h:0px}",
+      "body:has(#dd-bar){--dd-bar-h:36px}",
+      "#vtt-root{position:fixed;inset:var(--dd-bar-h) 0 0 0;font:14px/1.4 'Montserrat',system-ui,sans-serif;color:#e6ebf2}",
       ".vtt-stage{position:absolute;inset:0;overflow:hidden}",
       ".vtt-rail,.vtt-top,.vtt-zoom,.vtt-setupbar,.vtt-readout,.vtt-tabs,.vtt-trow,.vtt-party,.vtt-sub,.vtt-frow,.vtt-scene{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}",
       "#vtt-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}",

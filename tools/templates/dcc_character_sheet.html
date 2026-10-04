@@ -532,6 +532,183 @@ body.dark .section-bar::after{background:#544c54;}
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
 <body>
+<script>
+/* ── SAVED-DATA GUARD ──────────────────────────────────────────────────────
+   A sheet that fails to ingest its saved state must never be allowed to save
+   over it. Every sheet reads the server payload through __ddPick(), which
+     (a) refuses a document whose data is present but not under this sheet's key,
+     (b) refuses a payload that isn't valid JSON, and
+     (c) when a payload carrying a real character did arrive, arms a watchdog:
+         if the page is still blank a moment later, something inside applySheet()
+         failed, so EVERY write is frozen behind a visible warning rather than
+         quietly replacing the character with an empty sheet.
+   (c) is the check that was missing when a null deref in a sheet's INIT left it
+   blank: the markup was intact and the JS parsed, so only an assertion about
+   what actually rendered could have caught it. */
+(function () {
+  /* Every non-empty leaf VALUE in a payload, as a multiset. Comparing the stored
+     payload's bag against a freshly-built blank sheet's bag is what tells "this
+     save carries a character" from "this save is legitimately empty" — a leaf
+     COUNT can't, because an old save can hold fewer values than today's blank
+     sheet does and still be somebody's character. */
+  function leafBag(x) {
+    var bag = Object.create(null);
+    (function walk(v) {
+      if (v === null || v === undefined) return;
+      if (typeof v === 'string') { var s = v.trim(); if (s) { bag['s' + s] = (bag['s' + s] || 0) + 1; } return; }
+      if (typeof v === 'number') { if (v) { bag['n' + v] = (bag['n' + v] || 0) + 1; } return; }
+      if (typeof v === 'boolean') { if (v) { bag['b!'] = (bag['b!'] || 0) + 1; } return; }
+      if (Array.isArray(v)) { for (var i = 0; i < v.length; i++) { walk(v[i]); } return; }
+      if (typeof v === 'object') { for (var k in v) { if (Object.prototype.hasOwnProperty.call(v, k)) walk(v[k]); } }
+    })(x);
+    return bag;
+  }
+  /* Does any of the stored content actually appear in the page? Comparing filled
+     field COUNTS before and after can't answer that: applySheet() fills its own
+     defaults, so the count rises even when none of the saved values landed. The
+     honest test is to take values the payload has and a blank sheet does not,
+     then look for them in the rendered fields. */
+  function present(list) {
+    try {
+      var hay = '';
+      var els = document.querySelectorAll('input,textarea,select');
+      for (var i = 0; i < els.length; i++) { var v = els[i].value; if (v) hay += '\u0001' + v; }
+      for (var j = 0; j < list.length; j++) { if (hay.indexOf(list[j]) !== -1) return true; }
+      /* Some sheets render saved values into plain elements rather than fields.
+         Checking page text second (never first) keeps those from false-alarming. */
+      var txt = document.body ? (document.body.innerText || '') : '';
+      for (var m = 0; m < list.length; m++) { if (txt.indexOf(list[m]) !== -1) return true; }
+    } catch (e) { return true; }
+    return false;
+  }
+
+  /* ── RUNAWAY-DELETION BRAKE ────────────────────────────────────────────────
+     The write that destroyed a character was not malformed. It was a valid save
+     of a sheet whose tables had never been built, so it carried the header and
+     nothing else — 1536 chars where the character had been far larger. No schema
+     or syntax check can catch that; only comparing a write against what the
+     document actually held at load time can. A save that drops more than half of
+     the loaded values is held behind a visible prompt rather than going out
+     silently, with a "Save anyway" for a deletion that really was intended. */
+  var baseline = -1;        /* leaf count of the payload this tab loaded */
+  var allowShrink = false;  /* set by "Save anyway" */
+  var realSave = null;
+  function leafCount(o) { var b = leafBag(o), n = 0; for (var k in b) { n += b[k]; } return n; }
+  function shrinkBar(out, pending) {
+    var bar = document.getElementById('dd-shrink');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'dd-shrink';
+      bar.setAttribute('role', 'alert');
+      bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:2147483646;background:#8a5a12;color:#fff;font:600 13px/1.4 system-ui,sans-serif;padding:9px 14px;display:flex;gap:12px;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.4)';
+      var msg = document.createElement('span');
+      msg.id = 'dd-shrink-msg';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Save anyway';
+      btn.style.cssText = 'flex:0 0 auto;background:#fff;color:#8a5a12;border:0;border-radius:5px;padding:6px 12px;font:600 12px system-ui,sans-serif;cursor:pointer';
+      btn.onclick = function () {
+        allowShrink = true;
+        try { bar.parentNode.removeChild(bar); } catch (e) {}
+        try { if (window.__ddPending) window.__ddSave(window.__ddPending); } catch (e) {}
+      };
+      bar.appendChild(msg);
+      bar.appendChild(btn);
+      (document.body || document.documentElement).appendChild(bar);
+    }
+    var m = document.getElementById('dd-shrink-msg');
+    if (m) {
+      m.textContent = 'Not saved — this sheet is about to store ' + out + ' values where it loaded ' +
+        baseline + '. If you really did clear that much, save anyway; otherwise reload to get the stored copy back.';
+    }
+    window.__ddPending = pending;
+  }
+  function wrapSave() {
+    if (typeof window.__ddSave !== 'function' || window.__ddSave.__ddWrapped) return;
+    realSave = window.__ddSave;
+    var wrapped = function (data) {
+      if (window.__ddFrozen) return;
+      var out = -1;
+      try { out = leafCount(data); } catch (e) {}
+      if (!allowShrink && baseline >= 12 && out >= 0 && out * 2 < baseline) {
+        try { if (typeof window.__ddStatus === 'function') window.__ddStatus('error', 'Not saved — large loss'); } catch (e) {}
+        try { console.error('[dd] save held back:', out, 'values vs', baseline, 'loaded'); } catch (e) {}
+        shrinkBar(out, data);
+        return;
+      }
+      if (out > baseline) baseline = out;   /* a growing sheet raises its own floor */
+      window.__ddPending = null;
+      return realSave(data);
+    };
+    wrapped.__ddWrapped = true;
+    window.__ddSave = wrapped;
+  }
+  wrapSave();
+  setTimeout(wrapSave, 0);
+  window.__ddFreeze = function (why) {
+    if (window.__ddFrozen) return;
+    window.__ddFrozen = why || 'unreadable';
+    try { window.__ddSave = function () {}; } catch (e) {}
+    try { window.__ddSaveTitle = function () {}; } catch (e) {}
+    try { if (typeof window.__ddStatus === 'function') window.__ddStatus('error', 'Not saving — load failed'); } catch (e) {}
+    try { console.error('[dd] saves frozen:', window.__ddFrozen); } catch (e) {}
+    try {
+      if (document.getElementById('dd-frozen')) return;
+      var bar = document.createElement('div');
+      bar.id = 'dd-frozen';
+      bar.setAttribute('role', 'alert');
+      bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:2147483647;background:#7a1f1a;color:#fff;font:600 13px/1.45 system-ui,sans-serif;padding:10px 16px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.45)';
+      bar.textContent = 'This sheet loaded blank — its saved data could not be read (' + window.__ddFrozen + '). Saving is switched OFF so the stored copy is left untouched. Leave without editing.';
+      (document.body || document.documentElement).appendChild(bar);
+    } catch (e) {}
+  };
+  window.__ddPick = function (key) {
+    if (window.__ddState === undefined) {
+      try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+    var raw = null;
+    try { raw = window.__ddState[key]; } catch (e) {}
+    if (raw === undefined || raw === null || raw === '') {
+      var keys = [];
+      try { keys = Object.keys(window.__ddState || {}); } catch (e) {}
+      if (keys.length) window.__ddFreeze('nothing stored under "' + key + '"; the document holds: ' + keys.join(', '));
+      return null;
+    }
+    var str = (typeof raw === 'string') ? raw : null;
+    if (str === null) { try { str = JSON.stringify(raw); } catch (e) { str = null; } }
+    if (str === null) { window.__ddFreeze('saved data is not readable'); return null; }
+    var parsed = null;
+    try { parsed = JSON.parse(str); } catch (e) {
+      window.__ddFreeze('saved data is not valid JSON (' + str.length + ' chars)');
+      return null;
+    }
+    var bag = leafBag(parsed), blank = null;
+    try { baseline = leafCount(parsed); } catch (e) {}
+    try { if (typeof collectSheet === 'function') blank = leafBag(collectSheet()); } catch (e) {}
+    /* Values this payload carries that a blank sheet of this template does not —
+       i.e. the character itself, as opposed to the template's own defaults. */
+    var probes = [], stored = 0;
+    for (var k in bag) {
+      stored += bag[k];
+      if (k.charAt(0) === 's' && (!blank || !(k in blank) || bag[k] > blank[k])) {
+        var s = k.slice(1);
+        if (s.length >= 2 && probes.length < 40) probes.push(s);
+      }
+    }
+    if (probes.length) {
+      var check = function () {
+        if (window.__ddFrozen) return;
+        if (!present(probes)) {
+          window.__ddFreeze('saved data did not reach the page — ' + stored + ' stored values, none of ' + probes.length + ' found in the sheet');
+        }
+      };
+      setTimeout(check, 300);
+      setTimeout(check, 1600);
+    }
+    return str;
+  };
+})();
+</script>
 <div id="roll-toast"><div class="t-label"></div><div class="t-dice" data-da-inline></div><div class="t-result"></div><div class="t-detail"></div></div>
 <div class="app-wrap">
 
@@ -2904,13 +3081,7 @@ function importSheet(input) {
 function autoLoad() {
   // Try server state first (injected by app), then fall back to localStorage
   var saved = null;
-  if(window.__ddState !== undefined) {
-    // Deck mode: only use server state; a new document starts empty
-    saved = window.__ddState['dcc_sheet'] || null;
-  } else {
-    // Standalone mode: use localStorage
-    saved = localStorage.getItem('dcc_sheet');
-  }
+  saved = window.__ddPick('dcc_sheet');
   if(!saved) return;
   try {
     const data = JSON.parse(saved);
