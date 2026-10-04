@@ -339,6 +339,7 @@ export default async function CampaignsPage() {
           <input
             type="text"
             name="name"
+            required
             maxLength={60}
             placeholder="Campaign name…"
             aria-label="New campaign name"
@@ -350,7 +351,7 @@ export default async function CampaignsPage() {
         </form>
         <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">
           You&apos;ll be its GM/owner. Share the join code with your players so they can link their
-          character sheets. A blank name becomes &ldquo;New Campaign&rdquo; — rename it below.
+          character sheets. You can rename it below at any time.
         </p>
       </section>
 

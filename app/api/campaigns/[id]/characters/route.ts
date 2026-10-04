@@ -75,14 +75,19 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   // the save route, so a character whose row changed outside the app — restored
   // from a backup, edited in the DB — can hold the right campaign in its sheet
   // JSON while the column still says null, and then it is invisible to the party
-  // even though its data is perfectly good. When the column finds nobody, read
-  // the link out of the sheet bodies instead and write the column back, so the
-  // character reappears without having to be opened and re-saved by hand.
+  // even though its data is perfectly good. The same happened to every Candela
+  // sheet until lib/tools.ts started reading both campaign shapes. So: read the
+  // link out of the sheet bodies, and write the column back, so the character
+  // reappears without having to be opened and re-saved by hand.
   //
-  // Gated on ?repair=1 and only when the fast path came back empty: the fallback
-  // has to pull candidate blobs, which is the cost the column exists to avoid.
+  // Gated on ?repair=1 (the manual Sync button, never the 30s poll): the fallback
+  // has to pull candidate blobs, which is the cost the column exists to avoid. It
+  // runs even when the column already found somebody, because the writer bug this
+  // repairs was per-system — a campaign could have three linked players and a
+  // fourth that never linked at all, which is exactly the case that looks like
+  // "some of my party is missing" rather than "my party is empty".
   let repaired = 0;
-  if (docs.length === 0 && req.nextUrl.searchParams.get("repair") === "1") {
+  if (req.nextUrl.searchParams.get("repair") === "1") {
     const orphans = await prisma.document.findMany({
       where: { tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: null },
       select: { id: true, title: true, updatedAt: true, data: true, tool: true },
@@ -96,7 +101,8 @@ export async function GET(req: NextRequest, ctx: Ctx) {
         data: { linkedCampaignId: id },
       });
       repaired = mine.length;
-      docs = mine;
+      const already = new Set(docs.map((d) => d.id));
+      docs = docs.concat(mine.filter((d) => !already.has(d.id)));
     }
   }
 
