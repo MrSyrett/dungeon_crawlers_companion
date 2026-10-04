@@ -256,7 +256,7 @@ body {
   --muted: #c2b3a0;
   --sys-display: var(--font-cinzel);
   --sys-text: var(--font-garamond);
-  background-color: #141213;
+  background-color: #0d0b0c;
   background-image: url("/themes/dnd-cover.webp");
   background-attachment: fixed;
   background-position: center;

@@ -140,7 +140,7 @@
 }
 :root[data-themed][data-system="DND"] body,
 :root[data-themed][data-system="DND"] .preview-area {
-  background-color: #141213;
+  background-color: #0d0b0c;
   background-image: url("/themes/dnd-cover.webp");
   background-attachment: fixed;
   background-position: center;
@@ -298,7 +298,7 @@
   --banner-b: #c8102e;
   --title-color: #ffffff;
   --sub-color: #fbe7dc;       /* was gold; 4.9:1 on the band */
-  --preview-bg: #141213;
+  --preview-bg: #0d0b0c;
   --gold: #8a4a22;            /* icons on the cream page */
 }
 :root[data-themed][data-system="DND"][data-tool="session"] .read-aloud,
