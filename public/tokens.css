@@ -129,9 +129,9 @@
   --sys-display: "Cinzel", serif;
   --sys-text: "EB Garamond", Georgia, serif;
   --sys-label: "Cinzel", serif;
-  --ui-bg: #140d0e;
-  --ui-panel: #1b1314;
-  --ui-border: #332224;
+  --ui-bg: #1a1718;
+  --ui-panel: #221e1f;
+  --ui-border: #342e30;
   --ui-text: #f5efe3;
   --ui-muted: #c2b3a0;
   --ui-accent: #c8102e;
@@ -140,7 +140,7 @@
 }
 :root[data-themed][data-system="DND"] body,
 :root[data-themed][data-system="DND"] .preview-area {
-  background-color: #28070b;
+  background-color: #141213;
   background-image: url("/themes/dnd-cover.webp");
   background-attachment: fixed;
   background-position: center;
@@ -298,7 +298,7 @@
   --banner-b: #c8102e;
   --title-color: #ffffff;
   --sub-color: #fbe7dc;       /* was gold; 4.9:1 on the band */
-  --preview-bg: #28070b;
+  --preview-bg: #141213;
   --gold: #8a4a22;            /* icons on the cream page */
 }
 :root[data-themed][data-system="DND"][data-tool="session"] .read-aloud,
@@ -328,7 +328,7 @@
   --bg: #100a0b;
   --paper: #1a1213;
   --box: #20171a;
-  --input-bg: #140d0e;
+  --input-bg: #130e0f;
   --rule: #332224;
   --border: #422d30;
   --ink: #f5efe3;

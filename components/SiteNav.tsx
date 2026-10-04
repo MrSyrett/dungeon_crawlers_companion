@@ -29,7 +29,7 @@ import {
 //
 //   [logo] [System ▾]  Characters · Adventures · Compendium ▾ · Homebrew ·
 //                      OBR · Token Maker · Map Maker · Campaigns · GM Screen
-//                                                      … [email / Admin · Sign out]
+//                                                            … [Admin] [account]
 //
 // System selection is client state (systemStore, localStorage) shared with the
 // dashboard; the Characters/Adventures tabs drive the dashboard's view store.
@@ -159,10 +159,12 @@ export default function SiteNav({
     if (!onDashboard) router.push("/dashboard");
   }
 
-  // Measured, not guessed: with Chivo (not condensed, as Barlow Condensed
-  // was) nine uppercase links plus the logo, the system chip and the account
-  // block come to 1003px at the widest system short-name — which clears the
-  // lg breakpoint. Any more size, padding or tracking and the row wraps.
+  // Measured, not guessed: with Chivo (not condensed, as Barlow Condensed was)
+  // nine uppercase links plus the logo, the full-name system chip and the
+  // account icon come to 1119px at "Justice League Unlimited" — so the row is
+  // gated at 1152px rather than lg/1024, and any more size, padding or
+  // tracking pushes it past that too. A system name longer than that one is
+  // what would wrap it next.
   const item = "rounded px-1.5 py-1.5 text-[11px] font-semibold uppercase transition-colors";
   const on = "bg-[var(--panel-2)] text-[var(--text)]";
   const off = "text-[var(--muted)] hover:text-[var(--text)]";
@@ -177,7 +179,7 @@ export default function SiteNav({
           onClick={() => setMenu(menu === "mobile" ? null : "mobile")}
           aria-label="Menu"
           aria-expanded={menu === "mobile"}
-          className="flex shrink-0 items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 lg:hidden"
+          className="flex shrink-0 items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 min-[1152px]:hidden"
         >
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
             <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
@@ -200,7 +202,7 @@ export default function SiteNav({
             className="flex items-center gap-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1.5 text-[11px] font-bold uppercase tracking-[0.03em]"
             style={{ color: sys.accent }}
           >
-            <span>{sys.short}</span>
+            <span>{sys.name}</span>
             <Caret />
           </button>
           {menu === "system" ? (
@@ -220,7 +222,7 @@ export default function SiteNav({
         </div>
 
         {/* Left nav group (desktop): tabs + Compendium + Homebrew + Tools */}
-        <div className="hidden min-w-0 flex-wrap items-center gap-px lg:flex">
+        <div className="hidden min-w-0 flex-wrap items-center gap-px min-[1152px]:flex">
           <button className={`${item} ${onDashboard && view === "characters" ? on : off}`} onClick={() => openTab("characters")}>
             Characters
           </button>
@@ -275,10 +277,11 @@ export default function SiteNav({
           )}
         </div>
 
-        {/* Account block — the email is the link to /account, which owns the
-            theme preference, the password form and sign-out. Sign-out used to
-            sit here; it moved so there is one place for all of it, and so the
-            mini-bar on the standalone tools can point at the same page. */}
+        {/* Account block — an icon the size of the hamburger, linking to
+            /account, which owns the theme preference, the password form and
+            sign-out. The email it used to print is on the page itself and in
+            this control's tooltip; printing it here cost up to 190px of a row
+            that has nine links to fit. */}
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {isAdmin ? (
             <Link href="/admin/users" className="rounded border border-[var(--accent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
@@ -289,17 +292,16 @@ export default function SiteNav({
             href="/account"
             title={`${email} — account settings`}
             aria-label={`Account settings for ${email}`}
-            className={`flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] transition-colors ${
+            className={`flex shrink-0 items-center rounded border p-2 transition-colors ${
               pathname === "/account"
                 ? "border-[var(--accent)] text-[var(--accent)]"
                 : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]"
             }`}
           >
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="shrink-0">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <circle cx="12" cy="8" r="3.5" />
               <path d="M4.5 20a7.5 7.5 0 0 1 15 0" strokeLinecap="round" />
             </svg>
-            <span className="hidden max-w-[150px] truncate xl:inline">{email}</span>
           </Link>
         </div>
 
@@ -307,7 +309,7 @@ export default function SiteNav({
 
       {/* Mobile panel */}
       {menu === "mobile" ? (
-        <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 lg:hidden">
+        <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 min-[1152px]:hidden">
           <div className="flex gap-2">
             <button className={`${item} flex-1 ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
             <button className={`${item} flex-1 ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>

@@ -249,14 +249,14 @@ body {
 
 /* --- D&D 2024: a worn module cover. Black, white, red, light brown -------- */
 :root[data-system="DND"]:not([data-chrome]) body {
-  --panel: #140d0e;
-  --panel-2: #1b1314;
-  --border: #332224;
+  --panel: #1a1718;
+  --panel-2: #221e1f;
+  --border: #342e30;
   --text: #f5efe3;
   --muted: #c2b3a0;
   --sys-display: var(--font-cinzel);
   --sys-text: var(--font-garamond);
-  background-color: #28070b;
+  background-color: #141213;
   background-image: url("/themes/dnd-cover.webp");
   background-attachment: fixed;
   background-position: center;
