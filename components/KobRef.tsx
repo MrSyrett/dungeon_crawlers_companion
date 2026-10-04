@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 import { KOB_BOOKS } from "@/lib/data/kob-books";
 import type { KobBook } from "@/lib/data/kob-types";
 
@@ -36,9 +37,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
 }
 
 export function KobHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {

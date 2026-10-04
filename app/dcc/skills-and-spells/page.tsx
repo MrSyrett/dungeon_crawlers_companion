@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_SKILLS } from "@/lib/data/dcc-skills";
@@ -434,6 +435,8 @@ export default async function DccSkillsSpellsPage({ searchParams }: { searchPara
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Skills &amp; Spells" subtitle={<>{DCC_SKILLS.length} skills · {DCC_SPELLS.length} spells</>} />
+
       {/* Sub-section toggle — same look as the Options page's section bar */}
       <div className="mb-6 flex flex-wrap gap-2 border-b border-[var(--border)] pb-4">
         {TABS.map((t) => (

@@ -262,7 +262,7 @@
     bind("sc-new", function () { openEditor(null); });
     bind("se-close", closeEditor);
     bind("se-save", saveEditor);
-    bind("se-del", function () { if (editId && confirm("Delete this scene?")) { delScene(editId); closeEditor(); } });
+    bind("se-del", function () { if (!editId) return; vttConfirm("Delete this scene?", function (yes) { if (yes) { delScene(editId); closeEditor(); } }, { danger: true }); });
     // Settings panel. Fog of War is now a PER-SCENE setting (in the scene editor),
     // not a live table toggle. GM Reveal (g), Snapping (s) and Edit Mode (e) also
     // have keyboard shortcuts — see the keydown handler.
@@ -281,7 +281,7 @@
     bind("tok-add", function () { openTokenEditor(null); });
     bind("te-close", closeTokenEditor);
     bind("te-save", saveTokenEditor);
-    bind("te-del", function () { if (teId && confirm("Remove this token from the library?")) { library = library.filter(function (x) { return x.id !== teId; }); saveLibrary(); renderTokens(); closeTokenEditor(); } });
+    bind("te-del", function () { if (!teId) return; vttConfirm("Remove this token from the library?", function (yes) { if (!yes) return; library = library.filter(function (x) { return x.id !== teId; }); saveLibrary(); renderTokens(); closeTokenEditor(); }, { danger: true, okLabel: "Remove" }); });
     bind("te-img", function () { $("lib-file").click(); });
     var ts = $("tok-search"); if (ts) ts.oninput = function () { tokQuery = this.value; renderTokens(); };
   }
@@ -410,7 +410,7 @@
             { label: "Open (show players)", onClick: function () { openScene(id); } },
             { label: "Edit scene", onClick: function () { openEditor({ id: id, title: title }); } },
             { sep: true },
-            { label: "Delete", danger: true, onClick: function () { if (confirm("Delete this scene?")) delScene(id); } },
+            { label: "Delete", danger: true, onClick: function () { vttConfirm("Delete this scene?", function (yes) { if (yes) delScene(id); }, { danger: true }); } },
           ], e.clientX, e.clientY);
         });
       });
@@ -896,6 +896,36 @@
     setTimeout(function () { try { inp.focus(); inp.select(); } catch (_) {} }, 0);
   }
 
+  // Same idea for yes/no. The native confirm() is blocked in the same framed
+  // contexts (so "Delete scene" embedded in the GM Screen's Maps pane silently
+  // did nothing). cb(true) on confirm, cb(false) on cancel/escape. `danger`
+  // styles the OK button as destructive.
+  function vttConfirm(message, cb, opts) {
+    opts = opts || {};
+    var wrap = document.createElement("div");
+    wrap.className = "vtt-modal";
+    wrap.innerHTML =
+      '<div class="vtt-modal-box" role="alertdialog" aria-modal="true">' +
+        '<div class="vtt-modal-body"><p class="vtt-cf-m" style="margin:0;line-height:1.45"></p></div>' +
+        '<div class="vtt-modal-foot"><button class="vtt-btn vtt-cf-cancel" type="button">Cancel</button><button class="vtt-btn primary vtt-cf-ok" type="button"></button></div>' +
+      "</div>";
+    wrap.querySelector(".vtt-cf-m").textContent = message || "Are you sure?";
+    var ok = wrap.querySelector(".vtt-cf-ok");
+    ok.textContent = opts.okLabel || (opts.danger ? "Delete" : "OK");
+    if (opts.danger) ok.classList.add("danger");
+    function done(v) { wrap.remove(); document.removeEventListener("keydown", onKey, true); if (cb) cb(!!v); }
+    function onKey(e) {
+      if (e.key === "Escape") { e.preventDefault(); done(false); }
+      else if (e.key === "Enter") { e.preventDefault(); done(true); }
+    }
+    ok.addEventListener("click", function () { done(true); });
+    wrap.querySelector(".vtt-cf-cancel").addEventListener("click", function () { done(false); });
+    wrap.addEventListener("pointerdown", function (e) { if (e.target === wrap) done(false); });
+    document.addEventListener("keydown", onKey, true);
+    document.body.appendChild(wrap);
+    setTimeout(function () { try { ok.focus(); } catch (_) {} }, 0);
+  }
+
   // ---- drag & drop ----------------------------------------------------------
   var stage = $("vtt-stage");
   ["dragenter", "dragover"].forEach(function (ev) { stage.addEventListener(ev, function (e) { if (isGM) { e.preventDefault(); stage.classList.add("drop"); } }); });
@@ -939,7 +969,9 @@
     var rail = TOOL_GROUPS.map(function (g, i) { return railGroup(g, i === 0); }).join("") + '<div class="vtt-rail-sep"></div>' + rb("t-sheet", "sheet", "My character sheet");
     // Top-left is just the Home button (and only when not embedded). The campaign
     // name and the live scene-name badge were intentionally dropped — a cleaner map.
-    var top = '<div class="vtt-top">' + (EMBED ? "" : '<a class="vtt-tbtn" href="/dashboard" title="Back to dashboard">' + ico("home") + '</a>') + '</div>' +
+    // (The site mini-bar now carries navigation on the full page, so the old
+    // top-left home icon is gone; the container stays for layout parity.)
+    var top = '<div class="vtt-top"></div>' +
       '<div class="vtt-top right"><span class="vtt-dot wait" id="conn" title="Connecting…"></span>' + (!isGM ? '<button class="vtt-tbtn" id="conn-retry" title="Reconnect to your GM" hidden>' + ico("refresh", 18) + "</button>" : "") + (isGM ? '<button class="vtt-tbtn" id="side-toggle" title="Table panel">' + ico("layers") + "</button>" : "") + "</div>";
     var side = !isGM ? "" : '<div class="vtt-side" id="vtt-side" hidden>' +
       '<button class="vtt-side-x" id="side-close" title="Close panel">' + ico("close", 16) + "</button>" +

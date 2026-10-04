@@ -1,4 +1,4 @@
-import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the Ghostbusters reference pages (app/gb/*) — same pieces as
 // JluRef / YzeRef in ecto slime green. (No homebrew hub yet, so the header
@@ -9,30 +9,14 @@ export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[
 export const catBadge = "rounded border border-[var(--gb)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#8fce3f]";
 
 export function GbHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 
-export function TabRow({ active }: { active: string }) {
-  const tabs = [
-    { href: "/gb/rules", label: "Rules" },
-    { href: "/gb/talents", label: "Traits & Talents" },
-    { href: "/gb/gear", label: "Gear & Goals" },
-    { href: "/gb/bestiary", label: "Ghosts & Extras" },
-  ];
-  return (
-    <div className="mb-6 flex flex-wrap gap-1.5">
-      {tabs.map((t) => (
-        <Link key={t.href} href={t.href}
-          className={`rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors ${
-            active === t.href
-              ? "border-[var(--gb)] bg-[var(--panel-2)] text-[#8fce3f]"
-              : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--gb)] hover:text-[var(--text)]"
-          }`}>{t.label}</Link>
-      ))}
-    </div>
-  );
+export function TabRow({ active: _active }: { active: string }) {
+  // The site navbar's Compendium menu already lists these pages (and the old
+  // "Rules" tab here pointed at a route that doesn't exist → 404). Render nothing;
+  // kept exported so the pages that call it keep compiling.
+  return null;
 }
 
 export function SectionH({ children }: { children: React.ReactNode }) {

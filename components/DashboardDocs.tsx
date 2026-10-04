@@ -1,7 +1,6 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import Link from "next/link";
 import {
   SYSTEMS,
   subscribeSystem,
@@ -17,9 +16,16 @@ import { createDocument, deleteDocument } from "@/app/actions/documents";
 import { ConfirmButton } from "./ConfirmButton";
 
 // Compact per-document row the server hands us — no Prisma objects, no rendered
-// panels, just what a list item needs. `vttHref` is the campaign's Owlbear room
-// if one is set, otherwise our own tabletop, or null when the sheet isn't linked.
-export type DocRow = { id: string; title: string; updatedAt: number; vttHref: string | null };
+// panels, just what a list item needs. `vttHref` is where the sheet's campaign
+// plays: `vttKind` says whether that's an external Owlbear room ("owlbear") or
+// our own first-party tabletop at /play ("tabletop"); null when unlinked.
+export type DocRow = {
+  id: string;
+  title: string;
+  updatedAt: number;
+  vttHref: string | null;
+  vttKind: "owlbear" | "tabletop" | null;
+};
 export type Panel = { toolId: string; docs: DocRow[] };
 export type SystemPanels = Partial<Record<SystemKey, { character?: Panel; session?: Panel }>>;
 
@@ -27,7 +33,24 @@ function formatDate(ms: number): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(ms));
 }
 
-function DocList({ kind, panel }: { kind: "characters" | "adventures"; panel?: Panel }) {
+// A friendlier empty state than "No saved X yet." — points at the one thing to
+// do next. Kept to a line so it reads as an invitation, not a tutorial.
+function emptyLine(kind: "characters" | "adventures", system: SystemKey): string {
+  const name = systemName(system);
+  return kind === "characters"
+    ? `No ${name} characters yet — your party is waiting. Hit + New to roll one up.`
+    : `No ${name} adventures yet. Hit + New to start prepping your next session.`;
+}
+
+function DocList({
+  kind,
+  panel,
+  system,
+}: {
+  kind: "characters" | "adventures";
+  panel?: Panel;
+  system: SystemKey;
+}) {
   const noun = kind === "characters" ? "characters" : "adventures";
   if (!panel) {
     return (
@@ -45,39 +68,49 @@ function DocList({ kind, panel }: { kind: "characters" | "adventures"; panel?: P
         </h3>
         <form action={createDocument}>
           <input type="hidden" name="tool" value={toolId} />
-          <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]">
+          <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] transition-colors hover:border-[var(--sys,var(--gold))] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]">
             + New
           </button>
         </form>
       </div>
 
       {docs.length === 0 ? (
-        <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">No saved {noun} yet.</p>
+        <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">{emptyLine(kind, system)}</p>
       ) : (
         <ul className="divide-y divide-[var(--border)]">
           {docs.map((doc) => (
             <li key={doc.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <Link
+                {/* Plain <a>, NOT next/link: /tools/… is a route handler that
+                    builds a full standalone HTML document. <Link> would prefetch
+                    it (auth + DB + a 60–520 KB render) for every row on screen,
+                    then fetch it a second time on click. */}
+                <a
                   href={`/tools/${toolId}/${doc.id}`}
-                  className="block truncate py-1 text-lg font-semibold hover:text-[var(--gold)] sm:py-0 sm:text-base"
+                  className="block truncate py-1 text-lg font-semibold transition-colors hover:text-[var(--sys,var(--gold))] sm:py-0 sm:text-base"
                 >
                   {doc.title}
-                </Link>
+                </a>
                 <span className="text-[13px] text-[var(--muted)] sm:text-[11px]">
                   Updated {formatDate(doc.updatedAt)}
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 {doc.vttHref ? (
+                  // Our own Tabletop opens in this tab (it's part of the app);
+                  // an external Owlbear room opens in a new one. Same words and
+                  // same behavior as the Campaigns page.
                   <a
                     href={doc.vttHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Open this campaign's virtual tabletop in a new tab"
+                    {...(doc.vttKind === "owlbear" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    title={
+                      doc.vttKind === "owlbear"
+                        ? "Open this campaign's Owlbear Rodeo room in a new tab"
+                        : "Open this campaign's tabletop"
+                    }
                     className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
                   >
-                    Launch VTT
+                    {doc.vttKind === "owlbear" ? "Open in Owlbear ↗" : "Open Tabletop"}
                   </a>
                 ) : null}
                 <form action={deleteDocument}>
@@ -120,12 +153,21 @@ export default function DashboardDocs({
   const panel = panels[system];
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-5">
-      <div className="mb-5">
-        <h2 className="font-display text-xl font-black tracking-wide sm:text-2xl">
-          {systemName(system)}
-        </h2>
+      {/* key={system}: remounting the body on a system switch replays the
+          fade-in, so changing systems reads as "switching worlds" rather than
+          text swapping in place. The heading takes the system's accent. */}
+      <div key={system} className="dcc-fade-in">
+        <div className="mb-5">
+          <h2 className="font-display text-xl font-black tracking-wide text-[var(--sys,var(--text))] sm:text-2xl">
+            {systemName(system)}
+          </h2>
+        </div>
+        <DocList
+          kind={view}
+          system={system}
+          panel={view === "characters" ? panel?.character : panel?.session}
+        />
       </div>
-      <DocList kind={view} panel={view === "characters" ? panel?.character : panel?.session} />
     </div>
   );
 }

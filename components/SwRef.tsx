@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the Star Wars reference pages (app/sw/*) — same pieces as
 // AceRef / KobRef / NimbleRef in the WEG cover yellow. `code()` renders pips as a die code.
@@ -19,9 +20,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
   const s = sp.toString(); return s ? `${base}?${s}` : base;
 }
 export function SwHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {
   return (

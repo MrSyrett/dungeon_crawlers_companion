@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the D62e (D6 System: Second Edition) reference pages
 // (app/d62e/*). Same pieces as SwRef / AceRef — header with "My Homebrew" +
@@ -52,9 +53,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
 }
 
 export function D62eHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {

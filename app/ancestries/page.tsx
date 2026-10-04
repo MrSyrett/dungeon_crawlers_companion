@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SD_ANCESTRIES } from "@/lib/data/ancestries";
@@ -100,6 +101,8 @@ export default async function AncestriesPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Ancestries" subtitle={<>{SD_ANCESTRIES.length} Shadowdark ancestries{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
+
       <HomebrewManager type="ancestry" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/ancestries" className="mb-4 flex gap-2">

@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { boardRole } from "@/lib/vtt-scenes";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
+import { miniBar, miniBarHead } from "@/lib/minibar";
+import { isSystemKey } from "@/components/systemStore";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +42,7 @@ function asset(path: string): string {
 // (campaign owner) authors and drives; players mirror the board and move their
 // own tokens. Auth is the normal session cookie (same-origin — no VTT token
 // needed, unlike the Owlbear embed).
-export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: string }> }) {
+export async function GET(req: Request, ctx: { params: Promise<{ campaignId: string }> }) {
   const { campaignId } = await ctx.params;
 
   const user = await getCurrentUser();
@@ -112,7 +114,23 @@ export async function GET(_req: Request, ctx: { params: Promise<{ campaignId: st
     iceServers: iceServers(),
   };
 
-  return new Response(pageHtml(cfg), {
+  // Framed inside the GM Screen's Maps pane (?embed=1) the host provides the
+  // chrome; otherwise the page gets the shared mini-bar like every other surface.
+  const embed = new URL(req.url).searchParams.get("embed") === "1";
+  const bar = embed
+    ? ""
+    : miniBar({
+        system: isSystemKey(campaign.system) ? campaign.system : null,
+        crumb: "Tabletop",
+        title: campaign.name,
+        context: [
+          { label: `Campaign: ${campaign.name}`, href: "/campaigns" },
+          ...(role === "gm" ? [{ label: "Open GM Screen", href: "/gm-screen" }] : []),
+        ],
+        status: false,
+      });
+
+  return new Response(pageHtml(cfg, bar), {
     headers: {
       "content-type": "text/html; charset=utf-8",
       "cache-control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -143,8 +161,11 @@ function iceServers(): Array<{ urls: string | string[]; username?: string; crede
   return servers;
 }
 
-function pageHtml(cfg: Record<string, unknown>): string {
-  const title = `${String(cfg.campaignName)} — Virtual Tabletop`;
+function pageHtml(cfg: Record<string, unknown>, bar: string): string {
+  const title = `${String(cfg.campaignName)} — Tabletop`;
+  const system = isSystemKey(cfg.system) ? cfg.system : null;
+  // Shared tokens AFTER board.css so the site palette (panel, border, muted,
+  // gold) wins over the board's own fallbacks — one palette on every surface.
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -153,8 +174,10 @@ function pageHtml(cfg: Record<string, unknown>): string {
 <title>${escapeHtml(title)}</title>
 <link rel="icon" type="image/png" href="/icon-64.png">
 <link rel="stylesheet" href="${asset("/vtt/board.css")}">
+${miniBarHead(system)}
 </head>
 <body>
+${bar}
 <div id="vtt-root"></div>
 <script>window.__VTT__=${inlineJson(cfg)};</script>
 <script src="${asset("/vtt/uvtt.js")}"></script>

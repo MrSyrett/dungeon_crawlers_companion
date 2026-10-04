@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the Marvel Multiverse RPG (MMRPG, d616) reference pages
 // (app/mmrpg/*). Mirrors D62eRef but single-genre (core) and Marvel red.
@@ -41,9 +42,7 @@ export function RefDetails({ label = "Details", openLabel = "Hide details", chil
 }
 
 export function MmrpgHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {

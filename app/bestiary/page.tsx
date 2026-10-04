@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { MONSTERS, type Monster } from "@/lib/data/monsters";
@@ -125,6 +126,8 @@ export default async function BestiaryPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Bestiary" subtitle={<>{MONSTERS.length} Shadowdark monsters{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
+
       <HomebrewManager
         type="monster"
         campaigns={campaigns}

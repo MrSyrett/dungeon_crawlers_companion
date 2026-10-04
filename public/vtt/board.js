@@ -253,6 +253,50 @@
       });
     }
 
+    // ---- token glide ---------------------------------------------------------
+    // A token moved by SOMEONE ELSE (a host echo of another player's drag, or the
+    // GM moving a monster) arrives as a series of positions ~60ms apart; drawn
+    // raw it teleports from one to the next. Each incoming position instead
+    // starts a short visual glide from where the token is currently DRAWN to its
+    // new true spot. The glide is purely visual: t.x/t.y always hold the real
+    // (authoritative) position, so collision, fog, pushTokens and hit-tests see
+    // the truth; only drawing reads dispPos(). A big jump (a teleport / scene
+    // swap) is not animated, nor is anything under prefers-reduced-motion.
+    var GLIDE_MS = 120;
+    var glides = {}; // id -> { fx, fy, t0 }  (from-point in world coords)
+    var reducedMotion = !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var nowMs = function () { return (root.performance && root.performance.now) ? root.performance.now() : Date.now(); };
+    function easeOut(k) { return 1 - Math.pow(1 - k, 3); }
+    function dispPos(t) {
+      var g = glides[t.id];
+      if (!g) return t;
+      var k = (nowMs() - g.t0) / GLIDE_MS;
+      if (k >= 1) { endGlide(t); return t; }
+      k = easeOut(k);
+      return { x: g.fx + (t.x - g.fx) * k, y: g.fy + (t.y - g.fy) * k };
+    }
+    function startGlide(t, fromX, fromY) {
+      if (reducedMotion || typeof fromX !== "number" || typeof fromY !== "number") { delete glides[t.id]; return; }
+      var d = Math.hypot(t.x - fromX, t.y - fromY);
+      if (d < 0.5 || d > (state.map.ppg || 70) * 8) { delete glides[t.id]; return; }
+      glides[t.id] = { fx: fromX, fy: fromY, t0: nowMs() };
+    }
+    function endGlide(t) { if (glides[t.id]) { delete glides[t.id]; t._fogKey = null; } }
+    // Any glide still running? Also sweeps out finished ones and those whose token
+    // is gone (removed mid-glide), so the render loop can't spin forever on them.
+    function gliding() {
+      var any = false, now = nowMs();
+      for (var k in glides) {
+        if (!Object.prototype.hasOwnProperty.call(glides, k)) continue;
+        var t = byId(k);
+        if (!t) { delete glides[k]; continue; }
+        if (now - glides[k].t0 >= GLIDE_MS) { delete glides[k]; t._fogKey = null; } // landed: one more frame draws it (and its fog) at rest
+        any = true;
+      }
+      return any;
+    }
+    function cancelGlide(id) { delete glides[id]; }
+
     function render() {
       var s = cssSize();
       ctx.clearRect(0, 0, s.w, s.h);
@@ -291,6 +335,7 @@
       drawOverlays();
       if (state.laser) drawLaser(state.laser.x, state.laser.y, "#ff5a5a");
       drawPings();
+      if (gliding()) scheduleRender(); // keep the frames coming until every glide lands
       emit("render", null);
     }
 
@@ -467,7 +512,7 @@
     function drawToken(t) {
       // Hidden tokens are invisible to players; the GM sees them ghosted.
       if (t.hidden && !state.gm) return;
-      var cx = w2sX(t.x), cy = w2sY(t.y);
+      var dp = dispPos(t), cx = w2sX(dp.x), cy = w2sY(dp.y);
       var w = t.w * state.cam.scale, h = t.h * state.cam.scale;
       var r = Math.min(w, h) / 2;
       var ring = t.color || "#c8a24a";
@@ -545,6 +590,13 @@
       return segs;
     }
 
+    // Is this token currently being dragged on THIS board, or gliding to a
+    // position someone else gave it? (Fog throttles its recompute while so.)
+    function inMotion(t) {
+      if (glides[t.id]) return true;
+      return !!(drag && drag.mode === "move" && (drag.id === t.id || (drag.members && drag.members.some(function (m) { return m.id === t.id; }))));
+    }
+
     function viewerTokens() {
       // On a PLAYER's board (viewerId set) they see ONLY through the tokens they
       // own — never through other players' or the GM's tokens. With none of their
@@ -616,9 +668,17 @@
         // circle being approximated as straight chords (that was the stray-line
         // artifact). The polygon depends only on position + geometry, so it caches
         // across vision changes and pans.
-        var key = t.x + "," + t.y + "|" + sig;
+        // While the token is IN MOTION (being dragged here with snap off, or
+        // gliding to a remote position) the origin is quantised to a quarter
+        // cell, so a drag recomputes line-of-sight only every ~17px of travel
+        // instead of on every pointer event — the big per-frame cost on a map
+        // with many walls. The moment it comes to rest (drop / glide end) the
+        // cache key is cleared and the polygon is recomputed from the exact spot.
+        var px = t.x, py = t.y;
+        if (inMotion(t)) { var qg = Math.max(4, (state.map.ppg || 70) / 4); px = Math.round(px / qg) * qg; py = Math.round(py / qg) * qg; }
+        var key = px + "," + py + "|" + sig;
         if (t._fogKey !== key || !t._fogPoly) {
-          t._fogPoly = Vis.compute(segsOnce(), { x: t.x, y: t.y }, mapW, mapH, { radius: Infinity });
+          t._fogPoly = Vis.compute(segsOnce(), { x: px, y: py }, mapW, mapH, { radius: Infinity });
           t._fogKey = key;
         }
         // destination-out erases the fog by the fill's alpha. For a finite vision
@@ -627,7 +687,7 @@
         // cell OUTWARD — so players see clearly for their whole vision, then it
         // softens. Unlimited vision keeps a flat erase (its only edges are walls).
         if (isFinite(radius) && state.map.ppg > 0) {
-          var cx = w2sX(t.x), cy = w2sY(t.y);
+          var dpf = dispPos(t), cx = w2sX(dpf.x), cy = w2sY(dpf.y);
           var inner = radius * state.cam.scale;                                  // clear to full range
           var outer = inner + FALLOFF_CELLS * state.map.ppg * state.cam.scale;   // fade the next cell out
           var g = fctx.createRadialGradient(cx, cy, inner, cx, cy, Math.max(inner + 0.01, outer));
@@ -645,7 +705,7 @@
 
     function drawSelection(t) {
       if (!t) return;
-      var cx = w2sX(t.x), cy = w2sY(t.y);
+      var dp = dispPos(t), cx = w2sX(dp.x), cy = w2sY(dp.y);
       var w = t.w * state.cam.scale, h = t.h * state.cam.scale, r = Math.min(w, h) / 2;
       ctx.save();
       // A clean selection halo — no rotate/resize handles (size is set from the
@@ -921,7 +981,7 @@
           emit("select", t);
           if (canMove(t)) {
             var ids = inSel ? state.selection.filter(function (id) { var m = byId(id); return m && canMove(m); }) : [t.id];
-            var members = ids.map(function (id) { var m = byId(id); return { id: id, ox: m.x, oy: m.y, lastX: m.x, lastY: m.y }; });
+            var members = ids.map(function (id) { var m = byId(id); cancelGlide(id); return { id: id, ox: m.x, oy: m.y, lastX: m.x, lastY: m.y }; });
             drag = { mode: "move", id: t.id, dx: s2wX(p.x) - t.x, dy: s2wY(p.y) - t.y, gx0: t.x, gy0: t.y, members: members, measure: tool === "movement" };
             if (tool === "movement") { state.moveMeas = { ax: t.x, ay: t.y, bx: t.x, by: t.y }; emitOverlay("measure", state.moveMeas); }
           }
@@ -1028,6 +1088,10 @@
             emit("token", mt);
           });
         }
+        // At rest now: drop the (quantised, in-motion) fog key so the next frame
+        // recomputes line-of-sight from the exact final position.
+        drag.members.forEach(function (mm) { var mt = byId(mm.id); if (mt) mt._fogKey = null; });
+        scheduleRender();
         if (drag.measure) { state.moveMeas = null; emitOverlay(null); scheduleRender(); }
       } else if (drag && drag.mode === "ruler") {
         // The ruler line stays up locally, but the live copy players see clears.
@@ -1325,36 +1389,64 @@
         keep[spec.id] = true;
         var t = byId2[spec.id];
         if (!t) { addToken(spec); return; }
-        if (t.imageUrl !== spec.imageUrl) {
+        // `img: 1` = "the art you already have for this token is current" — the
+        // host omits an image it has delivered to us before (see net.js
+        // tokensFor), so a drag no longer re-ships every photo every tick.
+        if (!spec.img && t.imageUrl !== spec.imageUrl) {
           t.imageUrl = spec.imageUrl; t.image = null;
           if (spec.imageUrl) loadImage(spec.imageUrl).then(function (img) { t.image = img; scheduleRender(); }, function () {});
         }
-        // Don't let a host echo fight a token this client controls locally — that's
-        // the rubber-band jitter. Hold the local position while:
-        //  (a) actively dragging this token (or any member of a group drag), and
-        //  (b) after release, until the host's echo catches up to the LAST position
-        //      we sent (positions match), or a short grace expires (then we accept
-        //      the host as authoritative — e.g. it clamped the move at a wall).
-        // Fast drags put several stale echoes in flight; without (b) each one snaps
-        // the token back to an old spot before the newest echo corrects it.
-        var dragging = drag && drag.mode === "move" && (drag.id === spec.id || (drag.members && drag.members.some(function (m) { return m.id === spec.id; })));
-        var hold = dragging;
-        if (!hold) {
-          var pm = state.pendingMove[spec.id];
-          if (pm) {
-            if (Math.abs(spec.x - pm.x) < 0.5 && Math.abs(spec.y - pm.y) < 0.5) { delete state.pendingMove[spec.id]; }
-            else if (Date.now() - pm.ts < 600) { hold = true; }
-            else { delete state.pendingMove[spec.id]; }
-          }
-        }
-        t.name = spec.name; if (!hold) { t.x = spec.x; t.y = spec.y; } t.w = spec.w; t.h = spec.h;
-        t.rot = spec.rot || 0; t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
+        applyRemotePos(t, spec.x, spec.y, spec.rot || 0);
+        t.name = spec.name; t.w = spec.w; t.h = spec.h;
+        t.ownerId = spec.ownerId; t.characterDocId = spec.characterDocId;
         t.isViewer = !!spec.isViewer; t.color = spec.color || t.color;
         t.vision = (typeof spec.vision === "number" && spec.vision > 0) ? spec.vision : null; t.hp = spec.hp; t.hidden = !!spec.hidden; t.ring = !!spec.ring; t.ringColor = spec.ringColor || null;
         t.conditions = Array.isArray(spec.conditions) ? spec.conditions.slice() : [];
       });
       state.tokens = state.tokens.filter(function (t) { return keep[t.id]; });
       scheduleRender();
+    }
+
+    // Apply a position the host gave a token we already hold.
+    // Don't let a host echo fight a token this client controls locally — that's
+    // the rubber-band jitter. Hold the local position while:
+    //  (a) actively dragging this token (or any member of a group drag), and
+    //  (b) after release, until the host's echo catches up to the LAST position
+    //      we sent (positions match), or a short grace expires (then we accept
+    //      the host as authoritative — e.g. it clamped the move at a wall).
+    // Fast drags put several stale echoes in flight; without (b) each one snaps
+    // the token back to an old spot before the newest echo corrects it.
+    // A position that IS applied glides there visually from where the token is
+    // drawn right now (chaining smoothly through a stream of updates).
+    function applyRemotePos(t, x, y, rot) {
+      var dragging = drag && drag.mode === "move" && (drag.id === t.id || (drag.members && drag.members.some(function (m) { return m.id === t.id; })));
+      var hold = dragging;
+      if (!hold) {
+        var pm = state.pendingMove[t.id];
+        if (pm) {
+          if (Math.abs(x - pm.x) < 0.5 && Math.abs(y - pm.y) < 0.5) { delete state.pendingMove[t.id]; }
+          else if (Date.now() - pm.ts < 600) { hold = true; }
+          else { delete state.pendingMove[t.id]; }
+        }
+      }
+      if (hold) { cancelGlide(t.id); }
+      else if (x !== t.x || y !== t.y) {
+        var from = dispPos(t), fx = from.x, fy = from.y;
+        t.x = x; t.y = y;
+        startGlide(t, fx, fy);
+      }
+      t.rot = rot || 0;
+    }
+    // Position-only delta from the host for tokens we already hold (net.js
+    // `tokmove`): nothing but x/y/rot changed, so only those are touched.
+    function moveTokens(list) {
+      var changed = false;
+      (list || []).forEach(function (m) {
+        var t = byId(m.id); if (!t) return;
+        applyRemotePos(t, m.x, m.y, m.rot || 0);
+        changed = true;
+      });
+      if (changed) scheduleRender();
     }
 
     // ---- camera helpers -----------------------------------------------------
@@ -1533,6 +1625,7 @@
       loadMapState: loadMapState,
       applyMapMeta: applyMapMeta,
       syncTokens: syncTokens,
+      moveTokens: moveTokens,
       setRemoteApply: function (b) { state._remote = !!b; },
       ping: ping,
       resize: resize,

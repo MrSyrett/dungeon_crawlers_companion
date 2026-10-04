@@ -7,10 +7,20 @@ const nextConfig: NextConfig = {
         // Display fonts extracted from the tool templates (see /fonts/ in
         // public/). They effectively never change — if one ever does, give the
         // file a new name. Long-lived immutable cache so returning visitors
-        // never re-download them. (The /tools-data/ scripts intentionally get
-        // no rule: the default ETag revalidation means edits to the bestiary
-        // or generator tables show up on the next load as a cheap 304 check.)
+        // never re-download them.
         source: "/fonts/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        // The tool templates' data scripts (bestiaries, generator tables, …).
+        // Safe to cache immutably because lib/tools.ts stamps every reference
+        // with `?v=<content hash>` when it loads a template — an edited data file
+        // gets a new URL on the next page load, so it still shows up immediately,
+        // while unchanged files (the common case: 45 of them on a GM Screen open)
+        // stop costing a revalidation round-trip each.
+        source: "/tools-data/:path*",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],

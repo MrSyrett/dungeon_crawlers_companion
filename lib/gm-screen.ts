@@ -1,17 +1,37 @@
 import { loadToolTemplate } from "@/lib/tools";
 import { getHiddenSystemKeys } from "@/lib/systems";
+import { miniBar, miniBarHead, type MiniBarLink } from "@/lib/minibar";
+import { isSystemKey, type SystemKey } from "@/components/systemStore";
 
 // Shared builder for the GM Screen HTML page. Two routes render it:
-//   • app/gm-screen (cookie auth, full page) — no token, floating "Home" chrome.
+//   • app/gm-screen (cookie auth, full page) — no token, the shared mini-bar
+//     (site navigation, system chip, save status) at the top.
 //   • app/vtt/gm-screen (VTT token auth, framed inside the Owlbear popover) —
 //     token fetch-patch so /api/ calls carry x-vtt-token, status-only chrome.
 // Extracted verbatim from the original app/gm-screen route so behaviour is
 // identical for the cookie path.
 
-const CHROME = `<div id="dd-chrome" style="position:fixed;top:8px;left:8px;z-index:2147483647;display:flex;flex-direction:column;gap:5px;align-items:flex-start;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase">
-<a href="/dashboard" style="color:#cfcabd;background:rgba(8,8,9,.7);border:1px solid #3a3a40;border-radius:5px;padding:6px 10px;text-decoration:none">&larr; Home</a>
-<span id="dd-status" style="color:#6f6f78;padding-left:2px"></span>
-</div>`;
+// What the saved board tells us about its campaign. The GM Screen serializes
+// its link as { campaign: { campaign: {id,name,code,system,vttUrl?}, hideRolls } }
+// (older boards: { campaign: {id,...} }). Fail soft: nothing → unlinked board.
+function campaignOf(state: unknown): { id: string; name: string; system: SystemKey | null; vttUrl: string | null } | null {
+  try {
+    const top = (state as { campaign?: unknown } | null)?.campaign as
+      | { id?: unknown; name?: unknown; system?: unknown; vttUrl?: unknown; campaign?: { id?: unknown; name?: unknown; system?: unknown; vttUrl?: unknown } }
+      | null
+      | undefined;
+    const c = top?.campaign && typeof top.campaign === "object" ? top.campaign : top;
+    if (!c || !c.id) return null;
+    return {
+      id: String(c.id),
+      name: typeof c.name === "string" ? c.name : "Campaign",
+      system: isSystemKey(c.system) ? c.system : null,
+      vttUrl: typeof c.vttUrl === "string" && c.vttUrl ? c.vttUrl : null,
+    };
+  } catch {
+    return null;
+  }
+}
 
 // Shim: loads the last-used board on startup, auto-saves on changes, and drives
 // the save-then-reload dance when the GM switches campaigns.
@@ -24,7 +44,14 @@ const SHIM = `
   // fallback save (and any other flush) skip the network + DB write entirely
   // when nothing actually changed since the last save.
   var lastSent = null;
-  function status(s) { var el = document.getElementById("dd-status"); if (el) el.textContent = s; }
+  // Save status → the mini-bar chip when present (kinds: saving/saved/error),
+  // else the plain #dd-status text (the embedded status-only chrome).
+  function status(s, kind) {
+    if (typeof window.__ddStatus === "function") {
+      try { window.__ddStatus(kind || (s === "Saved" ? "saved" : s ? "saving" : ""), s); return; } catch (e) {}
+    }
+    var el = document.getElementById("dd-status"); if (el) el.textContent = s;
+  }
 
   function getState() {
     try { return window.__gmScreenGetState ? window.__gmScreenGetState() : null; } catch(e) { return null; }
@@ -55,8 +82,12 @@ const SHIM = `
       headers: { "content-type": "application/json" },
       body: payload
     })
-      .then(function(r) { if (!r.ok) throw new Error(r.status); lastSent = payload; status("Saved"); })
-      .catch(function() { dirty = true; status("Save failed — retrying"); })
+      .then(function(r) {
+        if (r.status === 401) { status("Signed out — changes not saved", "error"); dirty = false; return; }
+        if (!r.ok) throw new Error(r.status);
+        lastSent = payload; status("Saved", "saved");
+      })
+      .catch(function() { dirty = true; status("Save failed — retrying", "error"); })
       .finally(function() { saving = false; if (dirty) setTimeout(schedule, 2000); });
   }
 
@@ -419,6 +450,17 @@ export async function buildGmScreenHtml(opts: {
   try { hiddenSystems = await getHiddenSystemKeys(); } catch { hiddenSystems = []; }
   const hiddenScript = `<script>window.__gmHiddenSystems__ = ${JSON.stringify(hiddenSystems)};</script>\n`;
 
+  // The linked campaign (if any) gives the mini-bar its system + context links.
+  const camp = campaignOf(opts.savedState);
+
+  // Shared tokens + this system's accent go right after <head> (BEFORE the
+  // template's own <style>, whose :root now derives --accent from --sys).
+  // (Also the favicon: the GM Screen was the one standalone page without one.)
+  html = html.replace(
+    /<head[^>]*>/i,
+    (m) => `${m}\n<link rel="icon" type="image/png" href="/icon-64.png">\n${miniBarHead(camp?.system ?? null)}`,
+  );
+
   // Inject (audio fix → token patch →) hidden-systems → state → shim before
   // </head>. The audio fix goes first so window.Audio is wrapped before any of
   // the template's music code runs. (The Sound Library is now a docked column
@@ -429,8 +471,26 @@ export async function buildGmScreenHtml(opts: {
     `${audioScript}\n${tokenScript}${hiddenScript}${stateScript}${SHIM}\n</head>`,
   );
 
-  // Inject chrome after <body>: Home + status (cookie) or status-only (embed).
-  const chrome = opts.vttToken ? CHROME_EMBED : CHROME;
+  // Chrome after <body>: the shared mini-bar (cookie mode) or the status-only
+  // pill (framed by the Owlbear popover, which owns navigation there).
+  let chrome: string;
+  if (opts.vttToken) {
+    chrome = CHROME_EMBED;
+  } else {
+    const context: MiniBarLink[] = [];
+    if (camp) {
+      context.push({ label: `Campaign: ${camp.name}`, href: "/campaigns" });
+      context.push({ label: "Open Tabletop", href: `/play/${camp.id}` });
+      if (camp.vttUrl) context.push({ label: "Open in Owlbear", href: camp.vttUrl, external: true });
+    }
+    chrome = miniBar({
+      system: camp?.system ?? null,   // unlinked board → the bar adopts the site-wide choice
+      crumb: "GM Screen",
+      title: camp?.name,
+      context,
+      status: true,
+    });
+  }
   html = html.replace(/<body([^>]*)>/i, (m) => `${m}\n${chrome}`);
 
   return html;

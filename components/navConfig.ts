@@ -9,7 +9,11 @@
 
 import type { SystemKey } from "./systemStore";
 
-export type NavLink = { href: string; label: string };
+// `hard`: the target is a route handler that returns a full standalone HTML
+// document (the GM Screen, the Map Maker), not a Next page — it must be a plain
+// <a> (a full load), never a <Link> (whose RSC fetch/prefetch would build the
+// whole document for nothing and then fall back to a hard navigation anyway).
+export type NavLink = { href: string; label: string; hard?: boolean };
 
 // Per-system Compendium links (Rules pages intentionally omitted).
 export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
@@ -150,15 +154,39 @@ export function homebrewFor(system: SystemKey): string | null {
 }
 
 // The Tools group. Shown as individual nav links (not a dropdown), since they
-// never change by system. Order as requested: OBR (the Owlbear Rodeo setup,
-// still served at /vtt), Token Maker, Map Maker, Campaigns, GM Screen.
+// never change by system. Naming (site-wide): "Tabletop" is OUR first-party
+// VTT at /play; "Owlbear" is the external Owlbear Rodeo integration (its setup
+// page is still served at /vtt). Map Maker and GM Screen are route handlers
+// (standalone HTML), hence `hard`.
 export const TOOLS_NAV: NavLink[] = [
-  { href: "/vtt", label: "OBR" },
-  { href: "/token-maker", label: "Token Maker" },
-  { href: "/dungeon-map", label: "Map Maker" },
   { href: "/campaigns", label: "Campaigns" },
-  { href: "/gm-screen", label: "GM Screen" },
+  { href: "/gm-screen", label: "GM Screen", hard: true },
+  { href: "/dungeon-map", label: "Map Maker", hard: true },
+  { href: "/token-maker", label: "Token Maker" },
+  { href: "/vtt", label: "Owlbear" },
 ];
+
+// When the user switches system while on a compendium page, keep them in the
+// compendium: the new system's page with the same label (Classes → Classes,
+// Bestiary → Bestiary) when it has one, else its first reference page. Returns
+// null when the current path isn't a compendium page (caller decides).
+export function compendiumCounterpart(pathname: string, to: SystemKey): string | null {
+  const from = systemForPath(pathname);
+  if (!from) return null;
+  const current = (COMPENDIUM[from] ?? []).find((l) => l.href === pathname);
+  const target = COMPENDIUM[to] ?? [];
+  if (!target.length) return null;
+  if (current) {
+    const same = target.find((l) => l.label === current.label);
+    if (same) return same.href;
+  }
+  return target[0].href;
+}
+
+// Paths that are system-agnostic shelves: switching system there should NOT
+// bounce the user to the dashboard (the Rulebooks shelf even says "switch
+// systems above" and then filters itself).
+export const STAY_ON_SWITCH = new Set<string>(["/rules"]);
 
 // Infer the system a compendium route belongs to, so the navbar reflects the
 // right system when you land directly on e.g. /dcc/classes. Returns null when a

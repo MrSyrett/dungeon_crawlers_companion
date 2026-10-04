@@ -9,8 +9,9 @@
      • Collapsible Chapters panel built from the PDF's own outline/bookmarks;
        click a chapter to jump to its page. Auto-disabled when a PDF has none.
      • Snap paging (one page at a time): wheel / swipe / arrow keys flip pages.
-     • Zoom with ctrl/⌘+scroll or pinch; the −/+/Fit buttons; drag (mouse or
-       one finger) to pan when a page is zoomed past the viewport.
+     • Zoom with ctrl/⌘+scroll or pinch; the −/+/Fit buttons; double-tap a
+       section (mobile) to zoom in on it and again to snap back to fit; drag
+       (mouse or one finger) to pan when a page is zoomed past the viewport.
      • Per-document page memory is delegated to the host via onPage + startPage,
        so the Compendium (localStorage) and the GM Screen (board save) each
        persist position their own way.
@@ -126,6 +127,8 @@
     var renderSeq = 0, rendering = 0, queued = 0;
     var pendingScroll = null;   // 'top' | 'bottom' after a render
     var pendingRatio = null;    // vertical scroll ratio to keep across a zoom
+    var pendingCenter = null;   // {fx,fy} page fraction to center after a render (double-tap zoom)
+    var lastTapT = 0, lastTapX = 0, lastTapY = 0;  // double-tap detection
     var tocAvailable = false, tocOpen = false;
     var lastFlip = 0;
     var wheelAccum = 0;
@@ -241,7 +244,14 @@
           canvas.dataset.page = String(n);
           renderedScale = effForRender;   // the fresh canvas carries no live-zoom transform
           // restore / set scroll position for this render
-          if (pendingRatio != null) {
+          if (pendingCenter) {
+            // Center a specific page point in the viewport (double-tap zoom).
+            var maxL = Math.max(0, stage.scrollWidth - stage.clientWidth);
+            var maxT = Math.max(0, stage.scrollHeight - stage.clientHeight);
+            stage.scrollLeft = clamp(pendingCenter.fx * stage.scrollWidth - stage.clientWidth / 2, 0, maxL);
+            stage.scrollTop = clamp(pendingCenter.fy * stage.scrollHeight - stage.clientHeight / 2, 0, maxT);
+            pendingCenter = null;
+          } else if (pendingRatio != null) {
             stage.scrollTop = clamp(pendingRatio * stage.scrollHeight - stage.clientHeight / 2, 0, stage.scrollHeight);
             stage.scrollLeft = Math.max(0, (stage.scrollWidth - stage.clientWidth) / 2);
             pendingRatio = null;
@@ -309,6 +319,22 @@
       if (zoomSettle) clearTimeout(zoomSettle);
       zoomSettle = setTimeout(settleZoom, 140);
     }
+    // Double-tap (mobile): if at fit, zoom in on the tapped section and center
+    // it; if already zoomed in, snap back to fit. The tap point is read off the
+    // canvas's own rect, so it's correct regardless of current scroll/zoom.
+    function doubleTapZoom(cx, cy) {
+      if (!pdfDoc || !canvas) return;
+      if (zoomSettle) { clearTimeout(zoomSettle); zoomSettle = null; }
+      zoomTarget = 0;
+      if (effScale() > fitScale * 1.2) { setZoom(0); return; }  // zoomed in → back to fit
+      var cr = canvas.getBoundingClientRect();
+      var fx = cr.width ? clamp((cx - cr.left) / cr.width, 0, 1) : 0.5;
+      var fy = cr.height ? clamp((cy - cr.top) / cr.height, 0, 1) : 0.5;
+      pendingCenter = { fx: fx, fy: fy };
+      userScale = clamp(fitScale * 2.5, fitScale, 6);
+      render(pageNum, 0);
+    }
+
     function settleZoom() {
       if (zoomSettle) { clearTimeout(zoomSettle); zoomSettle = null; }
       if (!zoomTarget) return;
@@ -787,6 +813,16 @@
           var dx = t.clientX - tc.sx, dy = t.clientY - tc.sy;
           if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy)) flip(dx < 0 ? 1 : -1);
           else if (Math.abs(dy) > 52 && Math.abs(dy) > Math.abs(dx)) flip(dy < 0 ? 1 : -1);
+          else if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+            // A stationary tap. Two within 300ms and ~34px = double-tap → zoom.
+            var now = Date.now();
+            if (now - lastTapT < 300 && Math.abs(t.clientX - lastTapX) < 34 && Math.abs(t.clientY - lastTapY) < 34) {
+              lastTapT = 0;
+              doubleTapZoom(t.clientX, t.clientY);
+            } else {
+              lastTapT = now; lastTapX = t.clientX; lastTapY = t.clientY;
+            }
+          }
         }
       }
       // Pinch finished → re-rasterize crisply at the final zoom (unless a second

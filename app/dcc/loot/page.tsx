@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_ITEMS } from "@/lib/data/dcc-items";
@@ -133,6 +134,8 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Loot" subtitle={<>{DCC_ITEMS.length} items{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>} />
+
       <DccHomebrew campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/dcc/loot" className="mb-4 flex gap-2">

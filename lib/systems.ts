@@ -1,13 +1,16 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { SYSTEMS, isSystemKey, type SystemKey } from "@/components/systemStore";
 
 // Site-wide system visibility. The SystemSetting table only ever holds the
 // systems an admin has hidden from the homepage switcher (a row with
 // hidden=true). A system with no row is visible — the default. Reads here are
-// tiny (at most one row per system) and cached per request by Next.
+// tiny (at most one row per system). They're deduplicated per request with
+// React's cache() — Prisma does NOT dedupe on its own, and the layout plus the
+// page both ask for this on every navigation.
 
 // The keys of every system currently hidden from the homepage switcher.
-export async function getHiddenSystemKeys(): Promise<SystemKey[]> {
+export const getHiddenSystemKeys = cache(async function getHiddenSystemKeys(): Promise<SystemKey[]> {
   try {
     const rows = await prisma.systemSetting.findMany({
       where: { hidden: true },
@@ -19,7 +22,7 @@ export async function getHiddenSystemKeys(): Promise<SystemKey[]> {
     // every system stays visible rather than the dashboard going blank.
     return [];
   }
-}
+});
 
 // The keys still visible on the homepage switcher, in SYSTEMS display order.
 export async function getVisibleSystemKeys(): Promise<SystemKey[]> {

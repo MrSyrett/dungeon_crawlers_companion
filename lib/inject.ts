@@ -1,4 +1,5 @@
 import type { ToolDef } from "@/lib/tools";
+import { miniBar, miniBarHead, type MiniBarLink } from "@/lib/minibar";
 
 function inlineJson(value: unknown): string {
   return JSON.stringify(value ?? {}).replace(/</g, "\\u003c");
@@ -105,29 +106,52 @@ const SHIM = `
     } catch (e) { return; }
   }
 
+  // Save status → the mini-bar's chip (window.__ddStatus, provided by the bar).
+  // Before this the sheet was completely silent: a 401 (session expired) and
+  // every network error were swallowed, so edits were dropped with no sign.
+  function status(kind, text) {
+    try { if (typeof window.__ddStatus === "function") window.__ddStatus(kind, text); } catch (e) {}
+  }
+  var signedOut = false;
+  var lastData = null;   // the newest data handed to save(), for retries
+
   function save(data) {
-    if (conflicted) return;                 // refused once — don't keep fighting
+    if (conflicted || signedOut) return;     // refused once — don't keep fighting
+    lastData = data;
     var json;
     try { json = JSON.stringify(data); } catch (e) { json = null; }
     // Nothing actually changed since our last save/load → don't write at all.
     if (json !== null && json === lastSavedJson) return;
     if (saving) { queued = data; return; }
     saving = true;
+    status("saving", "Saving…");
     var body = { data: data };
     if (curRev !== null) body.baseRev = curRev;
     // keepalive lets the request survive navigation back to the dashboard
     patch(body, true)
       .then(function(r) {
-        if (r.status === 401) { return; }
-        if (r.status === 409) { conflicted = true; showConflict(); return; }
+        if (r.status === 401) {
+          // Session expired: say so, and stop pretending to save.
+          signedOut = true;
+          status("error", "Signed out — changes not saved");
+          return;
+        }
+        if (r.status === 409) { conflicted = true; status("error", "Changed elsewhere — not saved"); showConflict(); return; }
         if (!r.ok) throw new Error(r.status);
         if (json !== null) lastSavedJson = json;
+        status("saved", "Saved");
         return applyRev(r);
       })
-      .catch(function(e) {})
+      .catch(function(e) {
+        // Network/server failure: keep lastSavedJson as it was so this data is
+        // still "unsaved", and try again shortly (every 5s while it keeps failing).
+        status("error", "Save failed — retrying");
+        // Retry the NEWEST data (never this call's possibly-stale snapshot).
+        setTimeout(function () { if (!saving && !conflicted && !signedOut && lastData) save(lastData); }, 5000);
+      })
       .finally(function() {
         saving = false;
-        if (queued && !conflicted) { var d = queued; queued = null; save(d); }
+        if (queued && !conflicted && !signedOut) { var d = queued; queued = null; save(d); }
         else { queued = null; }
       });
   }
@@ -140,7 +164,7 @@ const SHIM = `
     if (!title || title === lastTitle || conflicted) return;
     lastTitle = title;
     patch({ title: title }, true).then(function (r) { if (r && r.ok) return applyRev(r); }, function () {}).catch(function(e) {});
-    var label = document.querySelector("#dd-chrome .dd-title");
+    var label = document.querySelector("#dd-bar .dd-title");
     if (label) label.textContent = title;
     try { document.title = title; } catch (e) {}
   }
@@ -167,7 +191,7 @@ const PREVIEW = `
      GM Screen's Adventure pane shows a blank band at the top. body-qualified
      to out-specify the builder's own !important rule. */
   body .preview-area { margin-top: 0 !important; }
-  #dd-chrome { display: none !important; }
+  #dd-bar { display: none !important; }
 </style>
 <script>
 (function () {
@@ -178,15 +202,14 @@ const PREVIEW = `
 })();
 </script>`;
 
-function chrome(opts: { backHref: string; backLabel: string }): string {
-  const btn = "color:#cfcabd;background:rgba(8,8,9,.7);border:1px solid #3a3a40;border-radius:5px;padding:6px 10px;text-decoration:none";
-  // Just the Home button. The character/session name used to sit here too, but
-  // it's already shown inside the sheet, so the tag was redundant and in the way.
-  // (saveTitle() still pushes the name to the server for the dashboard card; it
-  // no longer has an on-page label to update, which its `if (label)` guard allows.)
-  return `<div id="dd-chrome" style="position:fixed;top:8px;left:8px;z-index:2147483647;display:flex;gap:10px;align-items:center;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase">
-<a href="${opts.backHref}" style="${btn}">&larr; ${opts.backLabel}</a>
-</div>`;
+// The sheet's dark-mode localStorage key, derived from its template filename
+// ("sd_character_sheet.html" → "sd_dark"). Every sheet follows this convention
+// (body.dark toggled, "<prefix>_dark" = "1"/"0"), which is what lets ONE global
+// theme preference drive all fourteen.
+function themeKeyFor(def: ToolDef): string | undefined {
+  if (def.kind !== "character") return undefined;
+  const m = /^([a-z0-9]+)_/.exec(def.file);
+  return m ? `${m[1]}_dark` : undefined;
 }
 
 export function renderToolPage(
@@ -206,6 +229,9 @@ export function renderToolPage(
     /** Framed by our first-party VTT popup (same-origin): hide the Home chrome
      *  but keep the sheet fully editable. */
     embed?: boolean;
+    /** Page-specific places to go next, shown in the mini-bar menu (e.g. the
+     *  sheet's campaign, its Tabletop / Owlbear room). */
+    context?: MiniBarLink[];
   },
 ): string {
   const cfg = {
@@ -215,23 +241,37 @@ export function renderToolPage(
     ...(typeof opts.rev === "number" ? { rev: opts.rev } : {}),
     ...(opts.vttToken ? { vttToken: opts.vttToken } : {}),
   };
+  const framed = !!opts.vttToken || !!opts.previewOnly || !!opts.embed;
+  const themeKey = themeKeyFor(opts.def);
   // The tool templates are standalone HTML, not rendered by the app's layout,
   // so they never pick up its favicon. Without this the browser falls back to
   // whatever /favicon.ico serves — the tab for a character sheet shouldn't be
   // the odd one out.
   const favicon = `<link rel="icon" type="image/png" href="/icon-64.png">`;
-  const bootstrap = `${favicon}\n<script>window.__DD__=${inlineJson(cfg)};</script>\n<script>${SHIM}</script>${opts.previewOnly ? PREVIEW : ""}`;
+  // Shared tokens + this system's accent + the global theme seed go in FIRST
+  // (before the template's own <style>s) so the sheet can still override.
+  // In framed/preview modes the theme seed is skipped: the framing page owns
+  // appearance there.
+  const head = miniBarHead(opts.def.system, framed ? undefined : themeKey);
+  const bootstrap = `${favicon}\n${head}\n<script>window.__DD__=${inlineJson(cfg)};</script>\n<script>${SHIM}</script>${opts.previewOnly ? PREVIEW : ""}`;
 
   let out = html.replace(/<head[^>]*>/i, (m) => `${m}\n${bootstrap}`);
 
   // Framed by a VTT the sheet is the *contents* of a panel: the popover around
   // it provides the back button, the title and the size switch, and the panel
-  // is small enough that a floating bar would just cover the sheet. It also
-  // must not navigate itself anywhere, since the popover owns the Owlbear
-  // connection.
-  if (!opts.vttToken && !opts.previewOnly && !opts.embed) {
-    out = out.replace(/<body[^>]*>/i, (m) =>
-      `${m}\n${chrome({ backHref: "/dashboard", backLabel: "Home" })}`);
+  // is small enough that a bar would just cover the sheet. It also must not
+  // navigate itself anywhere, since the popover owns the Owlbear connection.
+  // Otherwise: the shared mini-bar (site navigation, system, save status).
+  if (!framed) {
+    const bar = miniBar({
+      system: opts.def.system,
+      crumb: opts.def.kind === "character" ? "Characters" : "Adventures",
+      title: opts.title,
+      context: opts.context,
+      status: true,
+      themeKey,
+    });
+    out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${bar}`);
   }
   return out;
 }

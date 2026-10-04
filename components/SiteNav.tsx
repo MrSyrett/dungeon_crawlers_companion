@@ -16,7 +16,14 @@ import {
   getViewServerSnapshot,
   type SystemKey,
 } from "./systemStore";
-import { compendiumFor, homebrewFor, systemForPath, TOOLS_NAV } from "./navConfig";
+import {
+  compendiumFor,
+  homebrewFor,
+  systemForPath,
+  compendiumCounterpart,
+  STAY_ON_SWITCH,
+  TOOLS_NAV,
+} from "./navConfig";
 import { logout } from "@/app/actions/auth";
 
 // The single site-wide top navbar.
@@ -83,21 +90,53 @@ export default function SiteNav({
   // Close any open menu on navigation.
   useEffect(() => { setMenu(null); }, [pathname]);
 
+  const sys = list.find((s) => s.key === effective) ?? list[0];
+
+  // The selected system "dresses" the whole app: publish its accent as --sys on
+  // <html> (plus data-system) so any page — dashboard heading, spinner, chips,
+  // hover states — can tint itself with var(--sys) and follow the switch live.
+  // Uses the *display* system, so a compendium page wears its own system's color.
+  useEffect(() => {
+    try {
+      const root = document.documentElement;
+      root.style.setProperty("--sys", sys.accent);
+      root.dataset.system = sys.key;
+    } catch {
+      /* non-browser */
+    }
+  }, [sys.accent, sys.key]);
+
   if (HIDDEN_ON.includes(pathname)) return null;
 
-  const sys = list.find((s) => s.key === effective) ?? list[0];
   const onDashboard = pathname === "/dashboard";
   const compendium = compendiumFor(effective);
   const homebrewHref = homebrewFor(effective);
 
   function chooseSystem(key: SystemKey) {
-    // Switch systems from anywhere → land on that system's Characters page.
     setSystem(key);
-    setView("characters");
     setMenu(null);
+    // Stay where it makes sense to stay:
+    //  • a system-agnostic shelf (the Rulebooks page filters itself) → stay put;
+    //  • a homebrew hub → that system's hub;
+    //  • a compendium page → the new system's matching page (Classes → Classes);
+    //  • anywhere else → that system's Characters list on the dashboard.
+    if (STAY_ON_SWITCH.has(pathname)) return;
+    const curHub = homebrewFor(effective);
+    if (curHub && pathname === curHub) {
+      const nextHub = homebrewFor(key);
+      router.push(nextHub ?? "/dashboard");
+      return;
+    }
+    const counterpart = compendiumCounterpart(pathname, key);
+    if (counterpart) { router.push(counterpart); return; }
+    setView("characters");
     router.push("/dashboard");
   }
   function openTab(v: "characters" | "adventures") {
+    // From a compendium page the bar shows THAT page's system; clicking
+    // Characters/Adventures should take you to that system's lists, not snap
+    // the label back to whatever was stored.
+    if (pathSystem && pathSystem !== storedSystem) setSystem(effective);
     setView(v);
     setMenu(null);
     if (!onDashboard) router.push("/dashboard");
@@ -127,7 +166,9 @@ export default function SiteNav({
         {/* Logo → home */}
         <Link href="/dashboard" className="flex shrink-0 items-center gap-2" title="Dungeon Crawler's Companion">
           <Image src="/logo-white.png" alt="" width={36} height={36} priority className="h-8 w-8" />
-          <span className="hidden font-display text-sm font-black tracking-wide lg:inline">DCC</span>
+          {/* "Companion", not "DCC": that abbreviation is also the Dungeon
+              Crawler Carl *system*, so it read as a system name in the bar. */}
+          <span className="hidden font-display text-sm font-black tracking-wide lg:inline">Companion</span>
         </Link>
 
         {/* System selector */}
@@ -198,12 +239,20 @@ export default function SiteNav({
             </Link>
           ) : null}
 
-          {/* Tools — individual links, always the same */}
-          {TOOLS_NAV.map((t) => (
-            <a key={t.href} href={t.href} className={`${item} ${pathname === t.href ? on : off}`}>
-              {t.label}
-            </a>
-          ))}
+          {/* Tools — individual links, always the same. Route-handler tools
+              (`hard`) are plain <a>; Next pages get <Link> so they navigate
+              client-side instead of a full white-flash reload. */}
+          {TOOLS_NAV.map((t) =>
+            t.hard ? (
+              <a key={t.href} href={t.href} className={`${item} ${pathname === t.href ? on : off}`}>
+                {t.label}
+              </a>
+            ) : (
+              <Link key={t.href} href={t.href} className={`${item} ${pathname === t.href ? on : off}`}>
+                {t.label}
+              </Link>
+            ),
+          )}
         </div>
 
         {/* Account block — always visible: name, with Admin · Sign out beneath */}
@@ -249,11 +298,14 @@ export default function SiteNav({
 
           <p className="mt-3 px-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Tools</p>
           <div className="mt-1 grid grid-cols-2 gap-1">
-            {TOOLS_NAV.map((t) => (
-              <a key={t.href} href={t.href} onClick={() => setMenu(null)} className="rounded border border-[var(--border)] px-3 py-2 text-[12px] font-semibold text-[var(--muted)] hover:text-[var(--text)]">
-                {t.label}
-              </a>
-            ))}
+            {TOOLS_NAV.map((t) => {
+              const cls = "rounded border border-[var(--border)] px-3 py-2 text-[12px] font-semibold text-[var(--muted)] hover:text-[var(--text)]";
+              return t.hard ? (
+                <a key={t.href} href={t.href} onClick={() => setMenu(null)} className={cls}>{t.label}</a>
+              ) : (
+                <Link key={t.href} href={t.href} onClick={() => setMenu(null)} className={cls}>{t.label}</Link>
+              );
+            })}
           </div>
         </div>
       ) : null}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the ICRPG (Index Card RPG) reference pages (app/icrpg/*).
 // Same pieces as D62eRef / SwRef — header with "My Homebrew" + "← Home" links,
@@ -44,9 +45,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
 }
 
 export function IcrpgHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SPELLS, type Spell } from "@/lib/data/spells";
@@ -122,6 +123,8 @@ export default async function SpellsPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Spells" subtitle={<>{SPELLS.length} Shadowdark spells{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
+
       <HomebrewManager type="spell" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/spells" className="mb-4 flex gap-2">

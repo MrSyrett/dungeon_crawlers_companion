@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SD_BACKGROUNDS } from "@/lib/data/backgrounds";
@@ -58,6 +59,8 @@ export default async function BackgroundsPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Backgrounds" subtitle={<>{SD_BACKGROUNDS.length} Shadowdark backgrounds{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
+
       <HomebrewManager type="background" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/backgrounds" className="mb-4 flex gap-2">

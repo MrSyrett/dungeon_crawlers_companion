@@ -31,14 +31,26 @@
   // the channel, which showed up as players stuck reloading). `chan.dc()` returns the
   // live RTCDataChannel (may change on reconnect) and `chan.open()` whether it's up.
   function makeOutbox(chan) {
-    var q = [], pumping = false;
-    function push(str) {
-      if (str.length <= MAXMSG) { q.push(str); }
-      else {
+    var q = [], pumping = false; // q: [{ s: string, k: key|null }]
+    // `key` marks a message as superseding any QUEUED message with the same key,
+    // or with a sub-key of it ("tok" supersedes queued "tok" AND "tok:move";
+    // "tok:move" supersedes only queued "tok:move" — a position delta must never
+    // replace a waiting full list it was computed on top of). While the channel
+    // is congested (a map streaming, a slow link) a burst of token-position
+    // updates used to pile up behind it and then play back one by one on the far
+    // side, so a player watched a token stutter through every intermediate spot
+    // the GM had long since left. Only the newest keyed message still waiting is
+    // worth sending. Fragmented (oversized) messages are never coalesced — their
+    // frames must go out whole and in order.
+    function push(str, key) {
+      if (str.length <= MAXMSG) {
+        if (key) { var i2 = 0; while (i2 < q.length) { var k2 = q[i2].k; if (k2 && (k2 === key || k2.indexOf(key + ":") === 0)) q.splice(i2, 1); else i2++; } }
+        q.push({ s: str, k: key || null });
+      } else {
         var id = "f" + (fragSeq++) + "_" + Date.now().toString(36);
-        q.push(JSON.stringify({ t: "_f0", id: id }));
-        for (var i = 0; i < str.length; i += MAXMSG) q.push(JSON.stringify({ t: "_f", id: id, s: str.slice(i, i + MAXMSG) }));
-        q.push(JSON.stringify({ t: "_fx", id: id }));
+        q.push({ s: JSON.stringify({ t: "_f0", id: id }), k: null });
+        for (var i = 0; i < str.length; i += MAXMSG) q.push({ s: JSON.stringify({ t: "_f", id: id, s: str.slice(i, i + MAXMSG) }), k: null });
+        q.push({ s: JSON.stringify({ t: "_fx", id: id }), k: null });
       }
       pump();
     }
@@ -51,7 +63,7 @@
         while (dc && q.length) {
           // Keep the send buffer modest so a big token/map streams in gentle bursts.
           if (dc.bufferedAmount > 512 * 1024) { pumping = false; setTimeout(pump, 25); return; }
-          try { dc.send(q[0]); q.shift(); }
+          try { dc.send(q[0].s); q.shift(); }
           catch (e) { pumping = false; setTimeout(pump, 40); return; } // over-buffer/closed: back off, retry
         }
         pumping = false;
@@ -150,7 +162,7 @@
       if (peers[peerId]) { try { peers[peerId].pc.close(); } catch (e) {} }
       var pc = rtc(iceServers);
       var dc = pc.createDataChannel("vtt");
-      var peer = peers[peerId] = { pc: pc, dc: dc, ice: [], open: false };
+      var peer = peers[peerId] = { pc: pc, dc: dc, ice: [], open: false, sent: null };
       peer.out = makeOutbox({ dc: function () { return peer.dc; }, open: function () { return peer.open; } });
       peer.reasm = makeReasm();
       pc.onicecandidate = function (e) { if (e.candidate) transport.send(peerId, "ice", e.candidate.toJSON()); };
@@ -182,14 +194,35 @@
     }
     // Players never receive tokens the GM has hidden — they're filtered out here
     // (not merely undrawn), so a hidden monster's position never leaves the GM.
-    function visibleWire() {
-      return board.state.tokens.filter(function (t) { return !t.hidden; }).map(tokenWire);
+    function visibleTokens() {
+      return board.state.tokens.filter(function (t) { return !t.hidden; });
+    }
+    // The per-PEER token list. Token art travels as a data URL (an uploaded photo
+    // can be hundreds of KB), and the old wire re-sent every token's image in
+    // every update — every 60ms during a drag. Each peer now remembers which image
+    // it has already delivered per token (`peer.sent.img`) and omits an unchanged
+    // one, flagging `img: 1` ("keep the art you have"). The guest's syncTokens
+    // honours the flag. A new peer / reconnect starts with `sent = null`, so its
+    // first list always carries everything. `sent.sig`/`sent.pos` let pushTokens
+    // tell a pure move from a real change (see there).
+    function tokensFor(peer) {
+      var prev = peer.sent, next = { img: {}, sig: {}, pos: {} };
+      var out = visibleTokens().map(function (t) {
+        var w = tokenWire(t);
+        next.img[t.id] = w.imageUrl || null;
+        next.sig[t.id] = tokenSig(w);
+        next.pos[t.id] = [w.x, w.y, w.rot];
+        if (prev && prev.img[t.id] !== undefined && prev.img[t.id] === (w.imageUrl || null)) { delete w.imageUrl; w.img = 1; }
+        return w;
+      });
+      peer.sent = next;
+      return out;
     }
     // `shipping` tells the guest an embedded image is (re)coming right after this
     // scene, so it applies the new geometry atomically at mapEnd instead of now.
     // `snap` carries the GM's grid-snap setting so players snap like the GM does.
-    function scenePayload(shipping) {
-      var p = { t: "scene", map: mapPayload(), tokens: visibleWire(), fog: { enabled: board.state.fog.enabled, snap: !!(board.getSnap && board.getSnap()), grid: !!board.state.grid } };
+    function scenePayload(shipping, peer) {
+      var p = { t: "scene", map: mapPayload(), tokens: tokensFor(peer), fog: { enabled: board.state.fog.enabled, snap: !!(board.getSnap && board.getSnap()), grid: !!board.state.grid } };
       p.map.shipping = !!shipping;
       return p;
     }
@@ -198,13 +231,16 @@
       return (m.srcType !== "url" && typeof m.src === "string" && m.src.length) ? m.src : null;
     }
 
-    function sendObj(peer, obj) { if (peer.open && peer.out) peer.out.push(JSON.stringify(obj)); }
-    function broadcast(obj) { Object.keys(peers).forEach(function (k) { sendObj(peers[k], obj); }); }
+    function sendObj(peer, obj, key) { if (peer.open && peer.out) peer.out.push(JSON.stringify(obj), key); }
+    function broadcast(obj, key) { Object.keys(peers).forEach(function (k) { sendObj(peers[k], obj, key); }); }
+    function openPeers(fn) { Object.keys(peers).forEach(function (k) { if (peers[k].open) fn(peers[k]); }); }
 
     function pushFull(peer) {
-      // A joining player immediately gets the GM's current scene + tokens.
+      // A joining player immediately gets the GM's current scene + tokens — the
+      // whole list with every image (nothing is known to be on their side yet).
+      peer.sent = null;
       var src = embeddedSrc();
-      sendObj(peer, scenePayload(!!src));
+      sendObj(peer, scenePayload(!!src, peer));
       if (src) shipMap(peer, src);
     }
     // Ship the embedded map as mapBegin/mapChunk/mapEnd (chunked for a live progress
@@ -218,7 +254,43 @@
       peer.out.push(JSON.stringify({ t: "mapEnd" }));
     }
 
-    function pushTokens() { broadcast({ t: "tokens", tokens: visibleWire() }); }
+    // Token updates, per peer, as the smallest message that carries the change:
+    //  - the SAME set of tokens with nothing but positions/rotations changed (the
+    //    common case: someone is dragging) → `tokmove`, just {id,x,y,rot} for the
+    //    tokens that actually moved — a few dozen bytes instead of the full list;
+    //  - anything else (a token added/removed/renamed, HP, a condition, new art)
+    //    → the full `tokens` list, minus images the peer already holds.
+    // Both are keyed ("tok" / "tok:move") so a stale update still waiting behind
+    // a congested channel is replaced by the newest, never played back.
+    function pushTokens() {
+      var list = visibleTokens();
+      openPeers(function (peer) {
+        var prev = peer.sent;
+        if (prev && sameShape(prev, list)) {
+          var moves = [];
+          list.forEach(function (t) {
+            var p = prev.pos[t.id], rot = t.rot || 0;
+            if (p[0] !== t.x || p[1] !== t.y || p[2] !== rot) { moves.push({ id: t.id, x: t.x, y: t.y, rot: rot }); p[0] = t.x; p[1] = t.y; p[2] = rot; }
+          });
+          if (moves.length) sendObj(peer, { t: "tokmove", m: moves }, "tok:move");
+          return;
+        }
+        sendObj(peer, { t: "tokens", tokens: tokensFor(peer) }, "tok");
+      });
+    }
+    // Same token ids, same non-positional fields and same art as the peer last got?
+    function sameShape(prev, list) {
+      var n = 0;
+      for (var k in prev.sig) if (Object.prototype.hasOwnProperty.call(prev.sig, k)) n++;
+      if (n !== list.length) return false;
+      for (var i = 0; i < list.length; i++) {
+        var t = list[i];
+        if (prev.sig[t.id] === undefined) return false;
+        if (prev.img[t.id] !== (t.imageUrl || null)) return false;
+        if (prev.sig[t.id] !== tokenSig(t)) return false;
+      }
+      return true;
+    }
 
     // Live presence overlays (laser pointer, measure line, range rings): positions
     // are throttled, a "clear" (kind:null) always goes out at once.
@@ -240,10 +312,10 @@
       // Re-ship the (embedded) map image only when it actually changed — a wall,
       // door or lighting edit updates metadata without re-sending the whole map.
       var src = embeddedSrc(), willShip = !!src && src !== lastShipSrc;
-      broadcast(scenePayload(willShip));
+      openPeers(function (peer) { sendObj(peer, scenePayload(willShip, peer)); });
       if (willShip) {
         lastShipSrc = src;
-        Object.keys(peers).forEach(function (k) { if (peers[k].open) shipMap(peers[k], src); });
+        openPeers(function (peer) { shipMap(peer, src); });
       }
     }
     // Broadcast the GM's table settings (fog on/off, grid snap, grid visibility) so
@@ -267,9 +339,10 @@
           var c = board.clampMovement(t.x, t.y, nx, ny, board.moveRadius ? board.moveRadius(t) : 0);
           nx = c.x; ny = c.y;
           board.setRemoteApply(true);
-          t.x = nx; t.y = ny; if (typeof msg.rot === "number") t.rot = msg.rot;
+          // Through moveTokens so the GM's view glides the token too (visual only;
+          // the authoritative position is set at once).
+          board.moveTokens([{ id: t.id, x: nx, y: ny, rot: typeof msg.rot === "number" ? msg.rot : t.rot }]);
           board.setRemoteApply(false);
-          board.render();
           scheduleTokens();
         }
       } else if (msg.t === "ping") {
@@ -418,6 +491,9 @@
         if (typeof msg.grid === "boolean") board.setGrid(msg.grid);
       } else if (msg.t === "tokens") {
         board.setRemoteApply(true); board.syncTokens(msg.tokens || []); board.setRemoteApply(false);
+      } else if (msg.t === "tokmove") {
+        // Position-only delta for tokens we already hold (see host pushTokens).
+        board.setRemoteApply(true); board.moveTokens(msg.m || []); board.setRemoteApply(false);
       } else if (msg.t === "ping") { board.ping(msg.x, msg.y, "#4ea3ff"); }
       else if (msg.t === "overlay") { board.setOverlay(msg.from || "gm", msg.o || { kind: null }); }
       else if (msg.t === "door") { board.setDoor(msg.index, { closed: msg.closed, locked: msg.locked }); }
@@ -495,6 +571,11 @@
     };
     // NB: `hidden` is deliberately NOT wired — hidden tokens are filtered out
     // before send, so a guest never learns they exist.
+  }
+  // Everything on the wire EXCEPT position/rotation and the image: if this is
+  // unchanged for every token, an update is a pure move (host pushTokens).
+  function tokenSig(t) {
+    return JSON.stringify([t.name, t.w, t.h, t.ownerId, t.characterDocId, !!t.isViewer, t.color, t.vision, t.hp, !!t.ring, t.ringColor, Array.isArray(t.conditions) ? t.conditions : []]);
   }
 
   root.VTTNet = { httpTransport: httpTransport, host: host, guest: guest };

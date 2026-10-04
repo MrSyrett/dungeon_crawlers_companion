@@ -33,6 +33,10 @@
   --jlu: #2f6fed;
   /* Ghostbusters accent — ectoplasm slime green. */
   --gb: #8bc53f;
+  /* The SELECTED system's accent. SiteNav republishes this on <html> whenever
+     the system changes (and sets data-system), so any surface can tint itself
+     with var(--sys) and follow the switch live. Gold until the client sets it. */
+  --sys: var(--gold);
 }
 
 @theme inline {
@@ -81,4 +85,18 @@ body {
   .dcc-ico {
     color: var(--gold);
   }
+}
+
+/* Switching systems should feel like switching worlds, not text swapping in
+   place: the dashboard body (keyed by system) replays this short fade on each
+   switch. Honors reduced-motion. */
+@keyframes dcc-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+.dcc-fade-in {
+  animation: dcc-fade-in 160ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dcc-fade-in { animation: none; }
 }

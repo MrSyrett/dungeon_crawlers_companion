@@ -1,5 +1,6 @@
 import { scrypt as _scrypt, randomBytes, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
@@ -39,7 +40,10 @@ export async function createSession(userId: string): Promise<void> {
   });
 }
 
-export async function getCurrentUser() {
+// Deduplicated per request with React's cache(): the layout AND every page call
+// this on each navigation, and Prisma does NOT dedupe on its own — without this
+// wrapper each navigation paid for the session lookup twice.
+export const getCurrentUser = cache(async function getCurrentUser() {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(COOKIE_NAME)?.value;
   if (!sessionId) return null;
@@ -55,7 +59,7 @@ export async function getCurrentUser() {
     return null;
   }
   return session.user;
-}
+});
 
 // The id of the caller's current session, if any. Lets a password change keep
 // *this* session alive while signing out every other one.

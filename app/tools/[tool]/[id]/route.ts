@@ -26,6 +26,21 @@ export async function GET(req: Request, ctx: Ctx) {
   // editable but hide the floating Home chrome (the popup provides its own).
   const embed = new URL(req.url).searchParams.get("embed") === "1";
 
+  // Context links for the mini-bar menu: where this document's campaign plays.
+  // A sheet used to be a dead end (its only exit was Home); now its campaign,
+  // the Tabletop and any Owlbear room are one tap away.
+  const context: { label: string; href: string; external?: boolean }[] = [];
+  if (doc.linkedCampaignId && !previewOnly && !embed) {
+    const camp = await prisma.campaign
+      .findUnique({ where: { id: doc.linkedCampaignId }, select: { id: true, name: true, vttUrl: true } })
+      .catch(() => null);
+    if (camp) {
+      context.push({ label: `Campaign: ${camp.name}`, href: "/campaigns" });
+      context.push({ label: "Open Tabletop", href: `/play/${camp.id}` });
+      if (camp.vttUrl) context.push({ label: "Open in Owlbear", href: camp.vttUrl, external: true });
+    }
+  }
+
   const template = await loadToolTemplate(def.file);
   const html = renderToolPage(template, {
     docId: doc.id,
@@ -38,6 +53,7 @@ export async function GET(req: Request, ctx: Ctx) {
     rev: doc.updatedAt.getTime(),
     previewOnly,
     embed,
+    context,
   });
 
   return new Response(html, {

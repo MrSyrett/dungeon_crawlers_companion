@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the Nimble reference pages (app/nimble/*) — same pieces as
 // AceRef / KobRef in the Nimble emerald.
@@ -19,9 +20,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
   const s = sp.toString(); return s ? `${base}?${s}` : base;
 }
 export function NimbleHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {
   return (

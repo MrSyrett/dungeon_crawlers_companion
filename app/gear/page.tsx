@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { GEAR, type GearItem } from "@/lib/data/gear";
@@ -196,6 +197,8 @@ export default async function GearPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Gear" subtitle={<>{GEAR.length} Shadowdark items{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
+
       <HomebrewManager type="gear" campaigns={campaigns} initial={hbOwn} ammoOptions={ammoOptions} />
 
       <form method="get" action="/gear" className="mb-4 flex gap-2">

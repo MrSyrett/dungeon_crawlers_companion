@@ -1,0 +1,42 @@
+/* ============================================================================
+   Dungeon Crawler's Companion — shared design tokens
+   ----------------------------------------------------------------------------
+   ONE palette for every surface. The Next.js app defines these same values in
+   app/globals.css (Tailwind needs them there); this file serves them to the
+   surfaces that aren't rendered by Next — the standalone character sheets, the
+   GM Screen, the Map Maker and the Tabletop (VTT) — so a panel, a border, a
+   muted label or the gold accent look identical no matter which page you're on.
+
+   KEEP IN SYNC with the :root block in app/globals.css. (Rule of thumb: if you
+   change a color there, change it here.)
+
+   --sys is the SELECTED SYSTEM's accent. The app's navbar publishes it on <html>
+   for Next pages; the tool/VTT routes inject it per document/campaign. Default
+   gold until something sets it.
+   ========================================================================== */
+:root {
+  --bg: #070707;
+  --panel: #111113;
+  --panel-2: #161618;
+  --border: #26262a;
+  --muted: #8a8a93;
+  --text: #ece9e1;
+  --gold: #c8a020;
+  --red: #b82018;
+
+  /* Per-system accents (same values as the app). */
+  --ace: #3aa8e0;
+  --kob: #a56ee8;
+  --nimble: #3fb97a;
+  --sw: #f0c020;
+  --dnd: #c8102e;
+  --d62e: #e07b39;
+  --icrpg: #c8501e;
+  --candela: #2fa595;
+  --yze: #16bdd6;
+  --mmrpg: #EC1D24;
+  --jlu: #2f6fed;
+  --gb: #8bc53f;
+
+  --sys: var(--gold);
+}

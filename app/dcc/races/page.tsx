@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_RACES } from "@/lib/data/dcc-races";
@@ -100,6 +101,8 @@ export default async function DccRacesPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Races" subtitle={<>{DCC_RACES.length} races{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>} />
+
       <DccHomebrewEditor kind="dcc-race" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/dcc/races" className="mb-4 flex gap-2">

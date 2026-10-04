@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the Year Zero Engine reference pages (app/yze/*) — same
 // pieces as CandelaRef / IcrpgRef / NimbleRef (header with "My Homebrew" +
@@ -25,9 +26,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
 }
 
 export function YzeHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {

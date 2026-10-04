@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SD_CLASSES, type SdClass } from "@/lib/data/classes";
@@ -163,6 +164,8 @@ export default async function ClassesPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Classes" subtitle={<>{SD_CLASSES.length} Shadowdark classes{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
+
       <HomebrewManager
         type="class"
         campaigns={campaigns}

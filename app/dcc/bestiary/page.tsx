@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_MONSTERS } from "@/lib/data/dcc-monsters";
@@ -131,6 +132,8 @@ export default async function DccBestiaryPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <PageHeader title="Bestiary" subtitle={<>{DCC_MONSTERS.length} mobs, bosses &amp; NPCs{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>} />
+
       <DccHomebrewEditor kind="dcc-monster" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/dcc/bestiary" className="mb-4 flex gap-2">

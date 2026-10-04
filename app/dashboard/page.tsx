@@ -50,12 +50,14 @@ export default async function DashboardPage() {
     const tool = doc.tool as ToolId;
     if (!byTool.has(tool)) continue;
     const cid = doc.linkedCampaignId;
-    const vttHref = cid ? vttByCampaign.get(cid) ?? `/play/${cid}` : null;
+    const owlbear = cid ? vttByCampaign.get(cid) : undefined;
+    const vttHref = cid ? owlbear ?? `/play/${cid}` : null;
     byTool.get(tool)!.push({
       id: doc.id,
       title: doc.title,
       updatedAt: doc.updatedAt.getTime(),
       vttHref,
+      vttKind: !cid ? null : owlbear ? "owlbear" : "tabletop",
     });
   }
 

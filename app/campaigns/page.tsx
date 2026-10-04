@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
@@ -9,6 +8,7 @@ import CopyCodeButton from "@/components/CopyCodeButton";
 import { deleteCampaign, renameCampaign, setCampaignVttUrl, setCampaignSystem } from "@/app/actions/campaigns";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 import { CampaignSystemSelect } from "@/components/CampaignSystemSelect";
+import OpenGmScreenButton from "@/components/OpenGmScreenButton";
 
 export const dynamic = "force-dynamic";
 
@@ -432,13 +432,32 @@ export default async function CampaignsPage() {
                     ) : null}
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
-                    <Link
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    {/* Plain <a>s: /play and /gm-screen are route handlers that
+                        return standalone HTML, so <Link> would prefetch/RSC-fetch
+                        a whole document for nothing. Same words + same behavior
+                        as the dashboard: Tabletop (ours) opens here; an Owlbear
+                        room (external) opens in a new tab. */}
+                    <a
                       href={`/play/${c.id}`}
                       className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[#1a1a1a] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                     >
                       Open Tabletop
-                    </Link>
+                    </a>
+                    {c.vttUrl ? (
+                      <a
+                        href={c.vttUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                      >
+                        Open in Owlbear ↗
+                      </a>
+                    ) : null}
+                    <OpenGmScreenButton
+                      campaign={{ id: c.id, name: c.name, code: c.code, system: c.system, vttUrl: c.vttUrl }}
+                      className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                    />
                     <form action={deleteCampaign} className="shrink-0">
                       <input type="hidden" name="id" value={c.id} />
                       <ConfirmButton
@@ -495,8 +514,8 @@ export default async function CampaignsPage() {
                 </form>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
                   {c.vttUrl
-                    ? "Characters linked to this campaign show a Launch VTT button on the home page."
-                    : "Paste your Owlbear Rodeo room link to add a Launch VTT button to this campaign\u2019s characters."}
+                    ? "Characters linked to this campaign open this Owlbear room from the home page (instead of the built-in Tabletop)."
+                    : "Characters linked to this campaign open the built-in Tabletop from the home page. Paste an Owlbear Rodeo room link here to use Owlbear instead."}
                 </p>
               </li>
             );
@@ -556,12 +575,12 @@ export default async function CampaignsPage() {
                     </div>
                   ) : null}
                   <div className="mt-3">
-                    <Link
+                    <a
                       href={`/play/${c.id}`}
                       className="inline-block rounded border border-[var(--gold)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)]"
                     >
                       Open Tabletop
-                    </Link>
+                    </a>
                   </div>
                 </li>
               );

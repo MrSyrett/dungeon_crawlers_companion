@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 
 // Shared shell for the D&D 2024 reference pages (app/dnd/*) — same pieces as
 // NimbleRef / AceRef, in the D&D red (var(--dnd), #f0a37f accent text).
@@ -19,9 +20,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
   const s = sp.toString(); return s ? `${base}?${s}` : base;
 }
 export function DndHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 export function ModeRow({ base, current, param, options, active }: { base: string; current: Query; param: string; options: { key: string; label: string }[]; active: string }) {
   return (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "./PageHeader";
 import { ACE_SETTINGS } from "@/lib/data/ace-settings";
 import type { AceSettingKey } from "@/lib/data/ace-types";
 
@@ -47,9 +48,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
 }
 
 export function AceHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    null
-  );
+  return <PageHeader title={title} subtitle={subtitle} />;
 }
 
 export function SearchForm({
