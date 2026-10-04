@@ -444,7 +444,7 @@ export default async function CampaignsPage() {
                       href={`/play/${c.id}`}
                       className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[#1a1a1a] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                     >
-                      Open Tabletop
+                      Open VTT
                     </a>
                     {c.vttUrl ? (
                       <a
@@ -579,7 +579,7 @@ export default async function CampaignsPage() {
                       href={`/play/${c.id}`}
                       className="inline-block rounded border border-[var(--gold)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)]"
                     >
-                      Open Tabletop
+                      Open VTT
                     </a>
                   </div>
                 </li>

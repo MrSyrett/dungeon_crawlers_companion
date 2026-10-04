@@ -257,14 +257,24 @@ export function renderToolPage(
   const favicon = `<link rel="icon" type="image/png" href="/icon-64.png">`;
   // Shared tokens + this system's accent + the global theme seed go in FIRST
   // (before the template's own <style>s) so the sheet can still override.
-  // In framed/preview modes the theme seed is skipped: the framing page owns
-  // appearance there.
-  // The system's skin (public/tokens.css): the ground the sheet floats on, the
-  // prep builder's palette and display face, the masthead's wordmark. Only on
-  // the standalone tools, and only when we're drawing the chrome ourselves —
-  // framed by a VTT or served as a preview, the page around us owns appearance.
-  const themed = !framed && hasThemeFor(opts.def.system);
-  const head = miniBarHead(opts.def.system, framed ? undefined : themeKey, themed);
+  //
+  // The system's skin (public/tokens.css) is NOT tied to being framed. It used to
+  // be — `!framed && hasThemeFor(...)` — on the reasoning that "the page around us
+  // owns appearance", which conflated two different things. The host page owns the
+  // CHROME, and `framed` still suppresses that (no navbar). But a character sheet's
+  // own paper, palette and faces belong to the sheet, so the same Shadowdark sheet
+  // looked skinned on its own page and unskinned inside the Tabletop or the Owlbear
+  // popover — one template, two different appearances, for no reason the reader
+  // benefits from.
+  //
+  // The dark-mode seed rides along for the same reason: without it a framed sheet
+  // painted light and then flipped once the sheet's own init read the preference.
+  //
+  // previewOnly stays unskinned: that is a prep document embedded read-only in the
+  // GM Screen's Adventure pane, not a sheet someone is playing from, and restyling
+  // the inside of the console is a separate decision from this one.
+  const themed = !opts.previewOnly && hasThemeFor(opts.def.system);
+  const head = miniBarHead(opts.def.system, opts.previewOnly ? undefined : themeKey, themed);
   const bootstrap = `${favicon}\n${head}\n<script>window.__DD__=${inlineJson(cfg)};</script>\n<script>${SHIM}</script>${opts.previewOnly ? PREVIEW : ""}`;
 
   let out = html.replace(/<head[^>]*>/i, (m) => `${m}\n${bootstrap}`);

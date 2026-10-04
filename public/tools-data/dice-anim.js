@@ -471,7 +471,13 @@
     if(host.querySelector('.da-gear')) return;
     var g=document.createElement('button'); g.className='da-gear'; g.type='button'; g.title='Dice animation settings'; g.setAttribute('aria-label','Dice animation settings'); g.textContent='🎲';
     g.onclick=function(){ togglePop(g); };
-    var clear=host.querySelector('.log-clear');
+    // The LAST .log-clear, not the first. The header now also holds the roll
+    // log's VTT button, which borrows .log-clear for its styling and sits to
+    // the left of Clear; anchoring off the first match would drop the gear
+    // ahead of it. Clear is always last, so the order stays VTT · dice · Clear
+    // — and with only one .log-clear this is exactly what it did before.
+    var clears=host.querySelectorAll('.log-clear');
+    var clear=clears.length ? clears[clears.length-1] : null;
     if(clear && clear.parentNode){ clear.parentNode.insertBefore(g, clear); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───

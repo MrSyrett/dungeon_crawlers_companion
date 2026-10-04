@@ -106,11 +106,11 @@ function DocList({
                     title={
                       doc.vttKind === "owlbear"
                         ? "Open this campaign's OBR room in a new tab"
-                        : "Open this campaign's tabletop"
+                        : "Open this campaign's VTT"
                     }
                     className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
                   >
-                    {doc.vttKind === "owlbear" ? "Open in OBR ↗" : "Open Tabletop"}
+                    {doc.vttKind === "owlbear" ? "Open in OBR ↗" : "Open VTT"}
                   </a>
                 ) : null}
                 <form action={deleteDocument}>
