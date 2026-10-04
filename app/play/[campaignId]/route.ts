@@ -123,10 +123,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ campaignId: str
         system: isSystemKey(campaign.system) ? campaign.system : null,
         crumb: "Tabletop",
         title: campaign.name,
-        context: [
-          { label: `Campaign: ${campaign.name}`, href: "/campaigns" },
-          ...(role === "gm" ? [{ label: "Open GM Screen", href: "/gm-screen" }] : []),
-        ],
         status: false,
       });
 

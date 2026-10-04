@@ -37,6 +37,11 @@
      the system changes (and sets data-system), so any surface can tint itself
      with var(--sys) and follow the switch live. Gold until the client sets it. */
   --sys: var(--gold);
+
+  /* The selected system's typefaces. A system that sets neither keeps the
+     app's own pair, so an unthemed system looks exactly as it does today. */
+  --sys-display: var(--font-cinzel);
+  --sys-text: var(--font-barlow);
 }
 
 @theme inline {
@@ -70,11 +75,106 @@ body {
 }
 
 body {
-  font-family: var(--font-barlow), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--sys-text), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-display {
-  font-family: var(--font-cinzel), "Cinzel", serif;
+  font-family: var(--sys-display), "Cinzel", serif;
+}
+
+/* ===========================================================================
+   CHROME
+   The furniture that must not change when the system does: the navbar, and
+   anything else that is about the app rather than about one game. It resets
+   the palette and the type back to the app's own, so a theme set on <body>
+   cannot reach inside it. See the THEMES block below.
+   ========================================================================= */
+.dcc-chrome {
+  --panel: #111113;
+  --panel-2: #161618;
+  --border: #26262a;
+  --text: #ece9e1;
+  --muted: #8a8a93;
+  --sys-display: var(--font-cinzel);
+  --sys-text: var(--font-barlow);
+  font-family: var(--font-barlow), "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ===========================================================================
+   THEMES
+   One block per system. Each sets only colours, the two faces and a ground —
+   never a size, weight, spacing or radius, which belong to the base so a skin
+   can never push a layout around.
+
+   The tokens are set on `body`, not `:root`, so the navbar (which resets them
+   via .dcc-chrome) keeps the standard look while the page below wears the
+   system's. SiteNav publishes data-system from the DISPLAYED system, so a
+   compendium page wears its own game's skin even when another is selected.
+
+   Grounds are `fixed` so the texture belongs to the window rather than
+   scrolling away with a long bestiary.
+   ========================================================================= */
+
+/* --- Shadowdark: black and white, gold only as an occasional highlight ---- */
+:root[data-system="SD"] body {
+  --panel: #0f0f11;
+  --panel-2: #141418;
+  --border: #2a2a2e;
+  --text: #f6f5f2;
+  --muted: #9a9aa0;
+  --sys-display: var(--font-unifraktur);
+  --sys-text: var(--font-montserrat);
+  background-color: #08080a;
+  background-image:
+    radial-gradient(112% 70% at 50% -4%, rgba(252, 250, 244, 0.085) 0%, rgba(252, 250, 244, 0.026) 36%, rgba(8, 8, 10, 0) 66%),
+    radial-gradient(74% 40% at 50% -2%, rgba(200, 160, 32, 0.05) 0%, rgba(8, 8, 10, 0) 64%),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.84) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* Creature and entry names take the old newspaper face; the blackletter is
+   kept for the page title alone, where it is large enough to read. */
+:root[data-system="SD"] body h2,
+:root[data-system="SD"] body h3 {
+  font-family: var(--font-imfell), "IM Fell English", serif;
+}
+
+/* --- D&D 2024: a worn module cover. Black, white, red, light brown -------- */
+:root[data-system="DND"] body {
+  --panel: #140d0e;
+  --panel-2: #1b1314;
+  --border: #332224;
+  --text: #f5efe3;
+  --muted: #c2b3a0;
+  --sys-display: var(--font-cinzel);
+  --sys-text: var(--font-garamond);
+  background-color: #28070b;
+  background-image: url("/themes/dnd-cover.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Dungeon Crawler Carl: black, gold and magenta, thrown splatter ------- */
+:root[data-system="DCC"] body {
+  --panel: #121016;
+  --panel-2: #19161f;
+  --border: #2b2430;
+  --text: #ece9e1;
+  --muted: #9a94a0;
+  --sys-display: var(--font-anton);
+  --sys-text: var(--font-barlow);
+  background-color: #060507;
+  background-image:
+    url("/themes/dcc-splatter.webp"),
+    radial-gradient(85% 40% at 50% 0%, rgba(232, 39, 95, 0.17) 0%, rgba(6, 5, 7, 0) 72%),
+    radial-gradient(125% 92% at 50% 46%, rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, 0.84) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 /* Icon color policy: gold on the app's black/light surfaces, white on

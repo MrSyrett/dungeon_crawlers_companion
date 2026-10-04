@@ -39,4 +39,10 @@
   --gb: #8bc53f;
 
   --sys: var(--gold);
+
+  /* The selected system's typefaces. The standalone surfaces (sheets, Map
+     Maker, Tabletop) keep the app's pair unless a theme sets otherwise; the
+     GM Screen deliberately ignores both and stays on the app's own chrome. */
+  --sys-display: var(--font-cinzel, "Cinzel", serif);
+  --sys-text: var(--font-barlow, "Barlow Condensed", ui-sans-serif, system-ui, sans-serif);
 }

@@ -26,13 +26,14 @@
   --green: #2d7a2d;
   --green-light: #4caf50;
   --amber: #c08020;
-  /* Accent — follows the selected game system (--sys, set by the mini-bar /
-     /tokens.css); cyan is only the fallback. --accent-2 (violet) stays as the
-     GM Screen's secondary texture. */
-  --accent: var(--sys, #24d3ee);
+  /* Accent — the app's own gold. The GM Screen is chrome, not a skin: you
+     open it with two campaigns on different systems and the controls must sit
+     in the same place, the same colour, every time. It deliberately does NOT
+     follow --sys. --accent-2 (violet) stays as the secondary texture. */
+  --accent: #c8a020;
   --accent-2: #7b5cff;
-  --accent-dim: color-mix(in srgb, var(--sys, #24d3ee) 55%, #000);
-  --glow: color-mix(in srgb, var(--sys, #24d3ee) 45%, transparent);
+  --accent-dim: color-mix(in srgb, #c8a020 55%, #000);
+  --glow: color-mix(in srgb, #c8a020 45%, transparent);
   --glow-2: rgba(123,92,255,.40);
 }
 

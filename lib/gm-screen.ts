@@ -1,6 +1,6 @@
 import { loadToolTemplate } from "@/lib/tools";
 import { getHiddenSystemKeys } from "@/lib/systems";
-import { miniBar, miniBarHead, type MiniBarLink } from "@/lib/minibar";
+import { miniBar, miniBarHead } from "@/lib/minibar";
 import { isSystemKey, type SystemKey } from "@/components/systemStore";
 
 // Shared builder for the GM Screen HTML page. Two routes render it:
@@ -450,7 +450,7 @@ export async function buildGmScreenHtml(opts: {
   try { hiddenSystems = await getHiddenSystemKeys(); } catch { hiddenSystems = []; }
   const hiddenScript = `<script>window.__gmHiddenSystems__ = ${JSON.stringify(hiddenSystems)};</script>\n`;
 
-  // The linked campaign (if any) gives the mini-bar its system + context links.
+  // The linked campaign (if any) gives the mini-bar its system and its title.
   const camp = campaignOf(opts.savedState);
 
   // Shared tokens + this system's accent go right after <head> (BEFORE the
@@ -477,17 +477,10 @@ export async function buildGmScreenHtml(opts: {
   if (opts.vttToken) {
     chrome = CHROME_EMBED;
   } else {
-    const context: MiniBarLink[] = [];
-    if (camp) {
-      context.push({ label: `Campaign: ${camp.name}`, href: "/campaigns" });
-      context.push({ label: "Open Tabletop", href: `/play/${camp.id}` });
-      if (camp.vttUrl) context.push({ label: "Open in OBR", href: camp.vttUrl, external: true });
-    }
     chrome = miniBar({
       system: camp?.system ?? null,   // unlinked board → the bar adopts the site-wide choice
       crumb: "GM Screen",
       title: camp?.name,
-      context,
       status: true,
     });
   }

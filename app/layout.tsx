@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
-import { Cinzel, Barlow_Condensed } from "next/font/google";
+import {
+  Cinzel,
+  Barlow_Condensed,
+  UnifrakturMaguntia,
+  IM_Fell_English,
+  Montserrat,
+  EB_Garamond,
+  Anton,
+} from "next/font/google";
 import "./globals.css";
 import PullToRefresh from "@/components/PullToRefresh";
 import SiteNav from "@/components/SiteNav";
@@ -18,6 +26,50 @@ const barlow = Barlow_Condensed({
   variable: "--font-barlow",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
+});
+
+// ---------------------------------------------------------------------------
+// Per-system theme faces (app/globals.css picks one pair per data-system).
+// next/font self-hosts and subsets these at build time, so there is no runtime
+// request to Google and no render-blocking stylesheet. A browser only fetches
+// a face when something on screen actually uses it, so a reader on a
+// Shadowdark page never downloads the Marvel or D&D faces.
+// ---------------------------------------------------------------------------
+const unifraktur = UnifrakturMaguntia({
+  variable: "--font-unifraktur",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+const imFell = IM_Fell_English({
+  variable: "--font-imfell",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["400", "600", "800"],
+  display: "swap",
+});
+
+const ebGaramond = EB_Garamond({
+  variable: "--font-garamond",
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const anton = Anton({
+  variable: "--font-anton",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -57,7 +109,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cinzel.variable} ${barlow.variable} h-full antialiased`}
+      className={`${cinzel.variable} ${barlow.variable} ${unifraktur.variable} ${imFell.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PullToRefresh />

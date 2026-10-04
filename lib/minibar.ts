@@ -15,8 +15,7 @@ import { TOOLS_NAV, compendiumFor } from "@/components/navConfig";
 //
 //   [logo] [SYSTEM] Characters › Kira                      [Saved] [☰]
 //
-// The ☰ menu: Dashboard · Characters · Adventures · Campaigns, any context
-// links the caller passes (Campaign · Tabletop · OBR), the Tools group,
+// The ☰ menu: Characters · Adventures, the Tools group,
 // that system's Compendium (+ Rulebooks), and — on sheets — the Light/Dark
 // theme toggle. Colors come from /tokens.css; the system chip (and anything
 // using var(--sys)) wears the current system's accent.
@@ -30,8 +29,6 @@ export type MiniBarOpts = {
   crumb: string;
   /** The document's name (a character, an adventure). Live-updated via .dd-title. */
   title?: string;
-  /** Page-specific places to go next (Campaign · Tabletop · OBR …). */
-  context?: MiniBarLink[];
   /** Show the save-status chip (#dd-status) — sheets and the GM Screen. */
   status?: boolean;
   /** The sheet's own dark-mode localStorage key (e.g. "sd_dark"): shows the
@@ -89,7 +86,6 @@ export function miniBar(opts: MiniBarOpts): string {
 #dd-menu .dd-menu-sec.one{grid-template-columns:1fr}
 #dd-menu a,#dd-menu button{display:block;width:100%;box-sizing:border-box;text-align:left;padding:8px 10px;border:1px solid var(--border,#26262a);border-radius:5px;background:transparent;color:var(--muted,#8a8a93);font:inherit;cursor:pointer}
 #dd-menu a:hover,#dd-menu button:hover{color:var(--text,#ece9e1);border-color:var(--sys,var(--gold,#c8a020));background:var(--panel-2,#161618)}
-#dd-menu .dd-menu-ctx a{color:var(--sys,var(--gold,#c8a020));border-color:var(--sys,var(--gold,#c8a020))}
 #dd-bar .dd-backdrop{position:fixed;inset:0;z-index:2147482999;background:transparent}
 @media (max-width:640px){#dd-bar{gap:7px;padding:0 8px}#dd-bar .dd-crumb .dd-crumb-k{display:none}#dd-bar .dd-crumb .dd-sep{display:none}}
 @media (prefers-reduced-motion:no-preference){#dd-menu{animation:dd-menu-in .12s ease-out}}
@@ -100,10 +96,6 @@ export function miniBar(opts: MiniBarOpts): string {
     opts.title ? `<span class="dd-sep">›</span><span class="dd-title">${esc(opts.title)}</span>` : ""
   }</span>`;
 
-  const ctx = opts.context && opts.context.length
-    ? `<div class="dd-menu-h">This ${esc(opts.crumb.replace(/s$/, "").toLowerCase())}</div><div class="dd-menu-sec dd-menu-ctx">${opts.context.map(link).join("")}</div>`
-    : "";
-
   const tools = `<div class="dd-menu-h">Tools</div><div class="dd-menu-sec">${TOOLS_NAV.map(link).join("")}</div>`;
   const comp = compendium.length
     ? `<div class="dd-menu-h">${s ? esc(s.name) + " " : ""}Compendium</div><div class="dd-menu-sec">${compendium.map(link).join("")}</div>`
@@ -113,8 +105,8 @@ export function miniBar(opts: MiniBarOpts): string {
     : "";
 
   const menu = `<div id="dd-menu" hidden>
-<div class="dd-menu-sec"><a href="/dashboard">Dashboard</a><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a><a href="/campaigns">Campaigns</a></div>
-${ctx}${tools}${comp}${theme}</div>`;
+<div class="dd-menu-sec"><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a></div>
+${tools}${comp}${theme}</div>`;
 
   const bar = `<div id="dd-bar" role="navigation" aria-label="Site">
 <a class="dd-logo" href="/dashboard" title="Dashboard"><img src="/logo-white.png" alt="Dashboard" width="22" height="22"></a>

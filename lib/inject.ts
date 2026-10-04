@@ -1,5 +1,5 @@
 import type { ToolDef } from "@/lib/tools";
-import { miniBar, miniBarHead, type MiniBarLink } from "@/lib/minibar";
+import { miniBar, miniBarHead } from "@/lib/minibar";
 
 function inlineJson(value: unknown): string {
   return JSON.stringify(value ?? {}).replace(/</g, "\\u003c");
@@ -231,7 +231,6 @@ export function renderToolPage(
     embed?: boolean;
     /** Page-specific places to go next, shown in the mini-bar menu (e.g. the
      *  sheet's campaign, its Tabletop / Owlbear room). */
-    context?: MiniBarLink[];
   },
 ): string {
   const cfg = {
@@ -267,7 +266,6 @@ export function renderToolPage(
       system: opts.def.system,
       crumb: opts.def.kind === "character" ? "Characters" : "Adventures",
       title: opts.title,
-      context: opts.context,
       status: true,
       themeKey,
     });

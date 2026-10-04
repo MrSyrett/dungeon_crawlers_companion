@@ -147,7 +147,7 @@ export default function SiteNav({
   const off = "text-[var(--muted)] hover:text-[var(--text)]";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--panel)]">
+    <nav className="dcc-chrome sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--panel)]">
       {menu ? <button aria-hidden="true" tabIndex={-1} className="fixed inset-0 z-0 cursor-default" onClick={() => setMenu(null)} /> : null}
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center gap-x-2 gap-y-1 px-3 py-2 sm:px-5">
