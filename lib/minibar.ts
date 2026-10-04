@@ -93,6 +93,17 @@ const THEME_FONTS: Partial<Record<SystemKey, string>> = {
   SW: "family=Archivo+Black&family=Libre+Franklin:ital,wght@0,400;0,600;0,700;1,400",
   MMRPG: "family=Oswald:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400",
   ACE: "family=Lilita+One&family=Nunito:ital,wght@0,400;0,600;0,700;1,400",
+  // Kids on Bikes' display face (Dreadful) and Ghostbusters' logo face are
+  // self-hosted — public/tokens.css declares them with @font-face from
+  // /fonts, so only the body faces are fetched from Google here.
+  KOB: "family=Mulish:ital,wght@0,400;0,600;0,700;1,400",
+  D62E: "family=Saira+Condensed:wght@500;600;700&family=Saira:ital,wght@0,400;0,600;0,700;1,400",
+  GB: "family=Anton&family=Asap:ital,wght@0,400;0,600;0,700;1,400",
+  CO: "family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,600;0,700;1,400",
+  NIM: "family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400&family=Figtree:ital,wght@0,400;0,600;0,700;1,400",
+  ICRPG: "family=Permanent+Marker&family=Archivo:ital,wght@0,400;0,600;0,700;1,400",
+  YZE: "family=Archivo+Narrow:ital,wght@0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400",
+  JLU: "family=Russo+One&family=Rubik:ital,wght@0,400;0,600;0,700;1,400",
 };
 
 // What goes in <head>: the shared tokens (BEFORE the tool's own CSS so the tool

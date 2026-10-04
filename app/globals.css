@@ -26,6 +26,34 @@
   src: url("/fonts/old-newspaper.woff2") format("woff2");
 }
 
+/* Kids on Bikes' display face. Not on Google, so it is served from /fonts the
+   way Shadowdark's two are, subset to Latin and converted to woff2 (43 KB of
+   OTF down to 14). Unlike the Ghostbusters face below it has a full lowercase
+   and full digits, so it can carry headings all the way down to h3. */
+@font-face {
+  font-family: "Dreadful";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dreadful.woff2") format("woff2");
+}
+
+/* Ghostbusters' logo face. TWO THINGS GOVERN WHERE THIS CAN GO:
+     1. it is CAPS-ONLY — lowercase maps to the same capital shapes;
+     2. the CAPITAL O is the no-ghost logo glyph; a lowercase o is a plain O.
+   So it is used on h1 and nowhere else, and the GB block below must never put
+   `text-transform: uppercase` on that h1 — the font makes the caps itself,
+   with ordinary letterforms. Uppercasing in CSS would put a ghost in the
+   middle of every creature called "Owlbear". Type a real capital O when the
+   ghost is what you want. Everything below h1 wears Anton. */
+@font-face {
+  font-family: "Ghostbusters";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ghostbusters.woff2") format("woff2");
+}
+
 /* ===========================================================================
    THE SITE'S OWN LOOK
    Everything below the system accents is the app talking, not a game. Four
@@ -66,8 +94,9 @@
   --ace: #3aa8e0;
   /* Kids on Bikes accent — the books' purple. */
   --kob: #a56ee8;
-  /* Nimble accent — a heroic emerald. */
-  --nimble: #3fb97a;
+  /* Nimble accent. Was #3fb97a, which never matched nimble_character_sheet's
+     own --nim; the sheet is right and this token had drifted. */
+  --nimble: #2f9b63;
   /* Star Wars accent — WEG cover yellow. */
   --sw: #f0c020;
   /* D&D accent — the classic dragon red. */
@@ -118,6 +147,44 @@
      the modal titles and the rules-list headings. Kept clear of Star Wars'
      crawl gold by lightness rather than hue — 0.62 against 0.53. */
   --ace-yellow: #f4d84a;
+  /* ---- Sets 3–5 -----------------------------------------------------------
+     Same rule as set 2: read each colour off that system's own character
+     sheet and land it where the sheet already spends it. Three of these eight
+     sheets (D6 2e, Index Card RPG, Year Zero Engine) declare a second hue and
+     never use it, so those three skins stay on ONE colour rather than
+     inventing a second. */
+  /* Kids on Bikes. The lilac is the sheet's own --kob-dk in dark mode and
+     carries the text there; the purple above it only ever fills. The sheet's
+     own --kob is #7c4dbd, which fails here three ways — 2.77:1 on the panel,
+     2.91:1 as a filled control, saturation 0.46 inside the band the chrome
+     owns — so --kob stays at the app's value. The SHEET is the odd one out.
+     The teal is the sheet's --teal, spent there on `.stat-roll.power` (the
+     Powered stat), lifted from #1f8a8a to clear 4.5:1 on both panels. */
+  --kob-ink: #c9aaff;
+  --kob-teal: #25a5a5;
+  /* D6 System 2e — the sheet's dark-mode --d62e-dk, straight across. */
+  --d62e-ink: #f0a050;
+  /* Ghostbusters' --ecto, spent on the active subtab underline, a CRITICAL
+     roll and the roll button. The brand green clears 8.24:1 by itself, so
+     unlike Marvel and JLU this system needs no lifted ink at all. */
+  --gb-ecto: #b6e34a;
+  /* Candela's gold is a BRAND colour beside the teal, not trim — its covers
+     use both. The sheet's --gild #a97f22 is a light-mode value (4.86:1 here);
+     this is it lifted to 8.32. The sheet has no dark-mode gild. */
+  --candela-gold: #d8b24a;
+  /* Nimble's dark-mode --nim-dk, and the --blue it spends on exactly one rule
+     (`.feat.sub b`, the bold lead-in in feature text — the same single
+     placement Star Wars has). */
+  --nimble-ink: #7fd39a;
+  --nimble-blue: #8ab4f8;
+  /* Index Card RPG — the sheet's dark-mode --icrpg-dk, straight across. */
+  --icrpg-ink: #e8823c;
+  /* JLU. The sheet's --jlu-dk #1c49a8 measures 1.92:1 on its dark panel, so
+     this lift is the app's, not the sheet's — the same hole Marvel had. The
+     gold is the sheet's own, spent on the masthead subtitle, the field labels
+     and the active subtab underline, which is to say: labels. */
+  --jlu-ink: #6293f2;
+  --jlu-gold: #e2b23a;
   /* The SELECTED system's accent. SiteNav republishes this on <html> whenever
      the system changes (and sets data-system), so any surface can tint itself
      with var(--sys) and follow the switch live. The app's own accent until the
@@ -422,6 +489,251 @@ body {
 :root[data-system="ACE"]:not([data-chrome]) body h2,
 :root[data-system="ACE"]:not([data-chrome]) body h3 {
   font-family: var(--font-lilita), "Lilita One", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --- Kids on Bikes: the sunset, in halftone --------------------------------
+   Dreadful over Mulish. The purple only ever fills (2.77:1 as type); the
+   lilac is what the sheet's own dark mode uses for text, so it takes --gold
+   and every entry name and label re-skins with no page edit. */
+:root[data-system="KOB"]:not([data-chrome]) body {
+  --panel: #232128;
+  --panel-2: #2e2b38;
+  --border: #3a3842;
+  --text: #e8e4dc;
+  --muted: #a7a7ad;
+  --gold: var(--kob-ink);
+  --sys-display: "Dreadful";
+  --sys-text: var(--font-mulish);
+  --sys-label: var(--font-mulish);
+  background-color: #15141a;
+  background-image:
+    url("/themes/kob-halftone.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.72) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="KOB"]:not([data-chrome]) body h1,
+:root[data-system="KOB"]:not([data-chrome]) body h2,
+:root[data-system="KOB"]:not([data-chrome]) body h3 {
+  font-family: "Dreadful", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --- D6 System 2e: a blueprint ---------------------------------------------
+   Saira Condensed over Saira — one superfamily at two widths, because a
+   genre-agnostic system shouldn't borrow a genre's typeface. One colour: the
+   sheet declares --blue and never uses it, so nothing is invented here.
+   The ground is neutral graphite on purpose; see the Index Card RPG note. */
+:root[data-system="D62E"]:not([data-chrome]) body {
+  --panel: #1c1a1e;
+  --panel-2: #262329;
+  --border: #3a363c;
+  --text: #eae6e8;
+  --muted: #aaa6a4;
+  --gold: var(--d62e-ink);
+  --sys-display: var(--font-saira-cond);
+  --sys-text: var(--font-saira);
+  --sys-label: var(--font-saira-cond);
+  background-color: #121214;
+  background-image:
+    url("/themes/d62e-blueprint.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.62) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="D62E"]:not([data-chrome]) body h1,
+:root[data-system="D62E"]:not([data-chrome]) body h2,
+:root[data-system="D62E"]:not([data-chrome]) body h3 {
+  font-family: var(--font-saira-cond), "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --- Ghostbusters: ectoplasm on the glass ----------------------------------
+   The slime green clears 8.24:1 on its own, so one value carries fills and
+   text alike — no lifted ink, unlike Marvel and JLU. */
+:root[data-system="GB"]:not([data-chrome]) body {
+  --panel: #181e11;
+  --panel-2: #1e2614;
+  --border: #2c3720;
+  --text: #e9f0dc;
+  --muted: #93a17c;
+  --gold: var(--gb);
+  --sys-display: var(--font-anton);
+  --sys-text: var(--font-asap);
+  --sys-label: var(--font-asap);
+  background-color: #0e120a;
+  background-image:
+    url("/themes/gb-ectoplasm.webp"),
+    radial-gradient(128% 94% at 50% 52%, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.6) 100%);
+  background-attachment: fixed;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* h2 and h3 take Anton; only the page title gets the logo face, and it must
+   NOT be uppercased in CSS — see the @font-face note at the top of this file.
+   Anton is shared with Dungeon Crawler Carl, the only such overlap in the
+   fourteen, and it costs nothing: that theme already loads it. */
+:root[data-system="GB"]:not([data-chrome]) body h2,
+:root[data-system="GB"]:not([data-chrome]) body h3 {
+  font-family: var(--font-anton), "Anton", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-system="GB"]:not([data-chrome]) body h1 {
+  font-family: "Ghostbusters", var(--font-anton), ui-sans-serif, system-ui, sans-serif;
+  text-transform: none;
+}
+
+/* --- Candela Obscura: gaslamp, and the stain on an old case file -----------
+   Cormorant Garamond over Lora: the type on an 1890s calling card, with a
+   warm book serif underneath that still holds at body size.
+   Gold and teal are CO-BRANDS here, which is the one place --gold still
+   means gold on a non-Shadowdark skin: the gold takes the headings and
+   labels, the teal keeps every fill, rule and structural mark. */
+:root[data-system="CO"]:not([data-chrome]) body {
+  --panel: #12201c;
+  --panel-2: #16241f;
+  --border: #2b433c;
+  --text: #e7efeb;
+  --muted: #8ba39c;
+  --gold: var(--candela-gold);
+  --sys-display: var(--font-cormorant);
+  --sys-text: var(--font-lora);
+  --sys-label: var(--font-lora);
+  background-color: #0c1512;
+  background-image:
+    url("/themes/co-grunge.webp"),
+    radial-gradient(118% 64% at 50% -4%, rgba(47, 165, 149, 0.085) 0%, rgba(12, 21, 18, 0) 66%),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.76) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="CO"]:not([data-chrome]) body h1,
+:root[data-system="CO"]:not([data-chrome]) body h2,
+:root[data-system="CO"]:not([data-chrome]) body h3 {
+  font-family: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+}
+
+/* --- Nimble: no texture at all ---------------------------------------------
+   Fraunces over Figtree — modern heroic fantasy, briskly designed rather than
+   antiqued. The ground is two gradients and nothing else: a contour map and
+   every other pattern read as busy here, and a gradient can't. */
+:root[data-system="NIM"]:not([data-chrome]) body {
+  --panel: #212623;
+  --panel-2: #2a312d;
+  --border: #3a423d;
+  --text: #e8e4dc;
+  --muted: #a7ada9;
+  --gold: var(--nimble-ink);
+  --sys-display: var(--font-fraunces);
+  --sys-text: var(--font-figtree);
+  --sys-label: var(--font-figtree);
+  background-color: #141816;
+  background-image:
+    radial-gradient(118% 66% at 50% -6%, rgba(127, 211, 154, 0.090) 0%, rgba(127, 211, 154, 0.024) 38%, rgba(20, 24, 22, 0) 68%),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.58) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="NIM"]:not([data-chrome]) body h1,
+:root[data-system="NIM"]:not([data-chrome]) body h2,
+:root[data-system="NIM"]:not([data-chrome]) body h3 {
+  font-family: var(--font-fraunces), "Fraunces", Georgia, serif;
+}
+
+/* --- Index Card RPG: marker on card stock ----------------------------------
+   Permanent Marker is not a flourish: Hankerin Ferinale draws the entire book
+   in marker on 3x5 cards. Archivo underneath keeps it a voice rather than the
+   page. One colour — the sheet declares --blue and never uses it.
+   The ground is pulled warm, and D6 2e's is pulled neutral, because the two
+   sheets carry BYTE-IDENTICAL dark palettes and their accents sit 6 degrees
+   apart; without that they would be indistinguishable. */
+:root[data-system="ICRPG"]:not([data-chrome]) body {
+  --panel: #1f1914;
+  --panel-2: #2a221b;
+  --border: #45392c;
+  --text: #eae2d8;
+  --muted: #aca69c;
+  --gold: var(--icrpg-ink);
+  --sys-display: var(--font-marker);
+  --sys-text: var(--font-archivo);
+  --sys-label: var(--font-archivo);
+  background-color: #14100d;
+  background-image:
+    url("/themes/icrpg-grain.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.6) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: repeat;
+  background-size: 900px 560px, cover;
+}
+:root[data-system="ICRPG"]:not([data-chrome]) body h1,
+:root[data-system="ICRPG"]:not([data-chrome]) body h2,
+:root[data-system="ICRPG"]:not([data-chrome]) body h3 {
+  font-family: var(--font-marker), "Permanent Marker", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --- Year Zero Engine: a CRT raster ----------------------------------------
+   Archivo Narrow over IBM Plex Sans: Free League's condensed caps over a
+   neutral sans with a technical edge. ONE colour, and the sheet is emphatic
+   about it — it declares --green, --red and --gild and uses none of them;
+   all 24 accent rules are --yz-dk. The most single-minded of the fourteen. */
+:root[data-system="YZE"]:not([data-chrome]) body {
+  --panel: #0e1c20;
+  --panel-2: #132225;
+  --border: #28454a;
+  --text: #e2eef0;
+  --muted: #8ba3a8;
+  --gold: var(--yze);
+  --sys-display: var(--font-archivo-narrow);
+  --sys-text: var(--font-plex);
+  --sys-label: var(--font-archivo-narrow);
+  background-color: #07161a;
+  background-image:
+    url("/themes/yze-raster.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.56) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="YZE"]:not([data-chrome]) body h1,
+:root[data-system="YZE"]:not([data-chrome]) body h2,
+:root[data-system="YZE"]:not([data-chrome]) body h3 {
+  font-family: var(--font-archivo-narrow), "Archivo Narrow", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --- Justice League Unlimited: an art-deco skyline -------------------------
+   Russo One over Rubik. Bruce Timm's design language is flat, geometric and
+   squared off, with no texture and no gradient in the drawing itself.
+   The gold takes the labels, which is exactly what the sheet spends it on. */
+:root[data-system="JLU"]:not([data-chrome]) body {
+  --panel: #182339;
+  --panel-2: #1f2c47;
+  --border: #2b3a58;
+  --text: #e8eefb;
+  --muted: #93a1c4;
+  --gold: var(--jlu-ink);
+  --sys-display: var(--font-russo);
+  --sys-text: var(--font-rubik);
+  --sys-label: var(--font-rubik);
+  background-color: #0f1626;
+  background-image:
+    url("/themes/jlu-skyline.webp"),
+    radial-gradient(128% 94% at 50% 44%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.6) 100%);
+  background-attachment: fixed;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="JLU"]:not([data-chrome]) body h1,
+:root[data-system="JLU"]:not([data-chrome]) body h2,
+:root[data-system="JLU"]:not([data-chrome]) body h3 {
+  font-family: var(--font-russo), "Russo One", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Icon color policy: gold on the app's black/light surfaces, white on

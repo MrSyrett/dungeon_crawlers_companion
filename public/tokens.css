@@ -260,6 +260,243 @@
   background-size: cover;
 }
 
+/* --- Kids on Bikes --------------------------------------------------------
+   Dreadful isn't on Google, so a standalone surface needs its own @font-face;
+   the file is the same one app/globals.css points at. */
+@font-face {
+  font-family: "Dreadful";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dreadful.woff2") format("woff2");
+}
+:root[data-themed][data-system="KOB"] {
+  --sys-display: "Dreadful", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Mulish", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Mulish", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #232128;
+  --ui-panel: #2e2b38;
+  --ui-border: #3a3842;
+  --ui-text: #e8e4dc;
+  --ui-muted: #a7a7ad;
+  --ui-accent: #a56ee8;
+  --ui-highlight: #25a5a5;
+  --font-display: "Dreadful", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="KOB"] body,
+:root[data-themed][data-system="KOB"] .preview-area {
+  background-color: #15141a;
+  background-image:
+    url("/themes/kob-halftone.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.72) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- D6 System 2e ---------------------------------------------------------- */
+:root[data-themed][data-system="D62E"] {
+  --sys-display: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Saira", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #1c1a1e;
+  --ui-panel: #262329;
+  --ui-border: #3a363c;
+  --ui-text: #eae6e8;
+  --ui-muted: #aaa6a4;
+  --ui-accent: #e07b39;
+  /* One colour: the sheet declares --blue and never uses it, so the highlight
+     is the same hue lifted rather than a second one invented. */
+  --ui-highlight: #f0a050;
+  --font-display: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="D62E"] body,
+:root[data-themed][data-system="D62E"] .preview-area {
+  background-color: #121214;
+  background-image:
+    url("/themes/d62e-blueprint.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.62) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Ghostbusters ---------------------------------------------------------
+   The logo face is CAPS-ONLY and its capital O is the no-ghost glyph, so it
+   is confined to .lg-word (the masthead, one word, set from --sys-display).
+   Everything else here is Anton. */
+@font-face {
+  font-family: "Ghostbusters";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ghostbusters.woff2") format("woff2");
+}
+:root[data-themed][data-system="GB"] {
+  --sys-display: "Ghostbusters", "Anton", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Asap", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Asap", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #181e11;
+  --ui-panel: #1e2614;
+  --ui-border: #2c3720;
+  --ui-text: #e9f0dc;
+  --ui-muted: #93a17c;
+  --ui-accent: #8bc53f;
+  /* The sheet's --ecto, which it spends on the active subtab underline and a
+     critical roll. */
+  --ui-highlight: #b6e34a;
+  --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="GB"] body,
+:root[data-themed][data-system="GB"] .preview-area {
+  background-color: #0e120a;
+  background-image:
+    url("/themes/gb-ectoplasm.webp"),
+    radial-gradient(128% 94% at 50% 52%, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.6) 100%);
+  background-attachment: fixed;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Candela Obscura ------------------------------------------------------- */
+:root[data-themed][data-system="CO"] {
+  --sys-display: "Cormorant Garamond", Georgia, serif;
+  --sys-text: "Lora", Georgia, serif;
+  --sys-label: "Lora", Georgia, serif;
+  --ui-bg: #12201c;
+  --ui-panel: #16241f;
+  --ui-border: #2b433c;
+  --ui-text: #e7efeb;
+  --ui-muted: #8ba39c;
+  --ui-accent: #2fa595;
+  /* Gold is a co-brand here, not trim — the sheet's --gild lifted for a dark
+     ground. It marks a GILDED roll, Candela's signature mechanic. */
+  --ui-highlight: #d8b24a;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+}
+:root[data-themed][data-system="CO"] body,
+:root[data-themed][data-system="CO"] .preview-area {
+  background-color: #0c1512;
+  background-image:
+    url("/themes/co-grunge.webp"),
+    radial-gradient(118% 64% at 50% -4%, rgba(47, 165, 149, 0.085) 0%, rgba(12, 21, 18, 0) 66%),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.76) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Nimble ---------------------------------------------------------------
+   No texture file: every pattern read as busy here, and a gradient can't. */
+:root[data-themed][data-system="NIM"] {
+  --sys-display: "Fraunces", Georgia, serif;
+  --sys-text: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #212623;
+  --ui-panel: #2a312d;
+  --ui-border: #3a423d;
+  --ui-text: #e8e4dc;
+  --ui-muted: #a7ada9;
+  --ui-accent: #2f9b63;
+  --ui-highlight: #8ab4f8;
+  --font-display: "Fraunces", Georgia, serif;
+}
+:root[data-themed][data-system="NIM"] body,
+:root[data-themed][data-system="NIM"] .preview-area {
+  background-color: #141816;
+  background-image:
+    radial-gradient(118% 66% at 50% -6%, rgba(127, 211, 154, 0.090) 0%, rgba(127, 211, 154, 0.024) 38%, rgba(20, 24, 22, 0) 68%),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.58) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Index Card RPG --------------------------------------------------------
+   The grain tile is 900x560 and REPEATS; everything else here covers. */
+:root[data-themed][data-system="ICRPG"] {
+  --sys-display: "Permanent Marker", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #1f1914;
+  --ui-panel: #2a221b;
+  --ui-border: #45392c;
+  --ui-text: #eae2d8;
+  --ui-muted: #aca69c;
+  --ui-accent: #c8501e;
+  --ui-highlight: #e8823c;
+  --font-display: "Permanent Marker", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="ICRPG"] body,
+:root[data-themed][data-system="ICRPG"] .preview-area {
+  background-color: #14100d;
+  background-image:
+    url("/themes/icrpg-grain.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.6) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: repeat;
+  background-size: 900px 560px, cover;
+}
+
+/* --- Year Zero Engine ------------------------------------------------------ */
+:root[data-themed][data-system="YZE"] {
+  --sys-display: "Archivo Narrow", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Archivo Narrow", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #0e1c20;
+  --ui-panel: #132225;
+  --ui-border: #28454a;
+  --ui-text: #e2eef0;
+  --ui-muted: #8ba3a8;
+  --ui-accent: #16bdd6;
+  /* One colour, and the sheet is emphatic: 24 accent rules, all --yz-dk. */
+  --ui-highlight: #16bdd6;
+  --font-display: "Archivo Narrow", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="YZE"] body,
+:root[data-themed][data-system="YZE"] .preview-area {
+  background-color: #07161a;
+  background-image:
+    url("/themes/yze-raster.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.56) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Justice League Unlimited ---------------------------------------------- */
+:root[data-themed][data-system="JLU"] {
+  --sys-display: "Russo One", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Rubik", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Rubik", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #182339;
+  --ui-panel: #1f2c47;
+  --ui-border: #2b3a58;
+  --ui-text: #e8eefb;
+  --ui-muted: #93a1c4;
+  --ui-accent: #2f6fed;
+  /* The sheet's --gold, which it spends on labels. */
+  --ui-highlight: #e2b23a;
+  --font-display: "Russo One", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="JLU"] body,
+:root[data-themed][data-system="JLU"] .preview-area {
+  background-color: #0f1626;
+  background-image:
+    url("/themes/jlu-skyline.webp"),
+    radial-gradient(128% 94% at 50% 44%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.6) 100%);
+  background-attachment: fixed;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 /* Every sheet's masthead wordmark, which all fourteen draw with .lg-word, takes
    the system's display face. The banner is one word on one line, so this is the
    one place a face can change without moving anything around it. */
