@@ -8,6 +8,12 @@ import {
   EB_Garamond,
   Anton,
   Share_Tech_Mono,
+  Archivo_Black,
+  Libre_Franklin,
+  Oswald,
+  Source_Sans_3,
+  Lilita_One,
+  Nunito,
 } from "next/font/google";
 import "./globals.css";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -91,6 +97,61 @@ const shareTech = Share_Tech_Mono({
   display: "swap",
 });
 
+// Star Wars. The 1977 logo was drawn from Helvetica Black and the opening
+// crawl is a Franklin/News Gothic grotesque; these are the open-licence
+// equivalents of both. Archivo Black ships at one weight only.
+const archivoBlack = Archivo_Black({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+const libreFranklin = Libre_Franklin({
+  variable: "--font-franklin",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Marvel. A condensed gothic for headings, the way a comic caption box is
+// lettered, with a plain workhorse underneath for rules text. Oswald has no
+// italic on Google, which is why the italics below belong to Source Sans.
+const oswald = Oswald({
+  variable: "--font-oswald",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+const sourceSans = Source_Sans_3({
+  variable: "--font-sourcesans",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// ACE!. The Awfully Cheerful Engine is an action-COMEDY game — its publisher
+// calls it a love letter to West End Games' Ghostbusters, Dangermouse and
+// TMNT — so this pair is chunky and round, a Saturday-morning cartoon rather
+// than a comic. Lilita One ships at one weight only.
+const lilitaOne = Lilita_One({
+  variable: "--font-lilita",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Dungeon Crawler's Companion",
   description: "TTRPG digital toolkit — character sheets and session prep, saved to your account.",
@@ -128,7 +189,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${chivo.variable} ${chivoMono.variable} ${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} h-full antialiased`}
+      className={`${chivo.variable} ${chivoMono.variable} ${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} ${archivoBlack.variable} ${libreFranklin.variable} ${oswald.variable} ${sourceSans.variable} ${lilitaOne.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <PullToRefresh />

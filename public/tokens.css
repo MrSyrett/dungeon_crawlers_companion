@@ -175,6 +175,91 @@
   background-size: cover;
 }
 
+/* --- Star Wars ------------------------------------------------------------ */
+/* Note what these three do NOT set: --gold, --red, or anything else the sheet
+   declares on its own :root. These selectors out-specify a template's :root,
+   so setting one here would repaint the paper — which this file deliberately
+   doesn't do. The ui-* palette and the ground are the whole brief. */
+:root[data-themed][data-system="SW"] {
+  --sys-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #111113;
+  --ui-panel: #18181b;
+  --ui-border: #2a2a2e;
+  --ui-text: #f2f4f8;
+  --ui-muted: #9a9aa2;
+  --ui-accent: #f0c020;
+  --ui-highlight: #30d5e8;
+  --font-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="SW"] body,
+:root[data-themed][data-system="SW"] .preview-area {
+  background-color: #09090a;
+  background-image:
+    url("/themes/sw-starfield.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.78) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Marvel Multiverse ----------------------------------------------------- */
+:root[data-themed][data-system="MMRPG"] {
+  --sys-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #141011;
+  --ui-panel: #1b1618;
+  --ui-border: #2e2325;
+  --ui-text: #f4f1f2;
+  --ui-muted: #a39a9c;
+  --ui-accent: #ec1d24;
+  /* The sheet's own --mv-blue. It draws the hairline under a section bar
+     there; here it picks out chapter names in the prep builder's selector. */
+  --ui-highlight: #7fc0f5;
+  --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="MMRPG"] body,
+:root[data-themed][data-system="MMRPG"] .preview-area {
+  background-color: #0b0809;
+  background-image:
+    url("/themes/mmrpg-burst.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.72) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- ACE! ------------------------------------------------------------------ */
+:root[data-themed][data-system="ACE"] {
+  --sys-display: "Lilita One", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #0e1620;
+  --ui-panel: #141e2a;
+  --ui-border: #223240;
+  --ui-text: #eef4f8;
+  --ui-muted: #93a3b0;
+  --ui-accent: #3aa8e0;
+  /* The sheet's own --yellow — the karma colour. */
+  --ui-highlight: #f4d84a;
+  --font-display: "Lilita One", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="ACE"] body,
+:root[data-themed][data-system="ACE"] .preview-area {
+  background-color: #070d14;
+  background-image:
+    url("/themes/ace-speedlines.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.62) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 /* Every sheet's masthead wordmark, which all fourteen draw with .lg-word, takes
    the system's display face. The banner is one word on one line, so this is the
    one place a face can change without moving anything around it. */

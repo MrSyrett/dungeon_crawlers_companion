@@ -90,6 +90,9 @@ const THEME_FONTS: Partial<Record<SystemKey, string>> = {
   SD: "family=Montserrat:wght@400;600;800",
   DND: "family=Cinzel:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400",
   DCC: "family=Anton&family=Barlow:wght@400;500;600&family=Share+Tech+Mono",
+  SW: "family=Archivo+Black&family=Libre+Franklin:ital,wght@0,400;0,600;0,700;1,400",
+  MMRPG: "family=Oswald:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400",
+  ACE: "family=Lilita+One&family=Nunito:ital,wght@0,400;0,600;0,700;1,400",
 };
 
 // What goes in <head>: the shared tokens (BEFORE the tool's own CSS so the tool

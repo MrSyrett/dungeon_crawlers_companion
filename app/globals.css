@@ -96,6 +96,28 @@
      the DCC panels (#e8275f lands at 4.2–4.4, which is under the bar). The
      cover magenta stays the brand colour for rules, borders and fills. */
   --dcc-ink: #ee4a78;
+  /* ---- Set 2's second colours -------------------------------------------
+     Every one of these comes out of that system's character sheet, so a sheet
+     and the pages around it finally agree. The sheets all share one structure:
+     a BRAND token for fills and anything you act on, the same hue shifted for
+     text, and a second hue spent sparingly on trim and on that system's
+     signature mechanic. The page skins follow it rather than inventing one. */
+  /* Star Wars' second colour. The sheet keeps --blue #8ab4f8 in this slot but
+     spends it on a single rule, and periwinkle isn't what this world has:
+     the holoprojector, the targeting display and the sabre are all cyan. */
+  --sw-cyan: #30d5e8;
+  /* Marvel red lifted for body-sized text. #EC1D24 lands at 4.30:1 on the
+     Marvel panels, under the bar; this clears it at 6.15. The sheet has no
+     equivalent — its --mv-dk #b3141a is a DARKER red meant for light mode and
+     would be unreadable here — so this one is the app's, not the sheet's. */
+  --mmrpg-ink: #f4616a;
+  /* Marvel's second colour, straight off the sheet's --mv-blue. There it draws
+     the hairline under a section bar and rings the vital in focus. */
+  --mmrpg-blue: #7fc0f5;
+  /* ACE!'s second colour, straight off the sheet's --yellow: the karma pips,
+     the modal titles and the rules-list headings. Kept clear of Star Wars'
+     crawl gold by lightness rather than hue — 0.62 against 0.53. */
+  --ace-yellow: #f4d84a;
   /* The SELECTED system's accent. SiteNav republishes this on <html> whenever
      the system changes (and sets data-system), so any surface can tint itself
      with var(--sys) and follow the switch live. The app's own accent until the
@@ -300,6 +322,106 @@ body {
    straight (3:1 is the bar for display type; it clears 4.7). */
 :root[data-system="DCC"]:not([data-chrome]) body h1 {
   color: var(--dcc);
+}
+
+/* --- Star Wars: black, white, crawl yellow, hologram cyan ----------------- */
+:root[data-system="SW"]:not([data-chrome]) body {
+  --panel: #111113;
+  --panel-2: #18181b;
+  --border: #2a2a2e;
+  --text: #f2f4f8;
+  --muted: #9a9aa2;
+  /* The crawl yellow takes the old gold slot, so every entry name and label
+     already written against --gold re-skins with no page edit. It is the same
+     value the sheet's dark mode already uses (--sw-dk), and it clears 11:1 on
+     these panels, so one tone carries headings and small text alike — no
+     lifted second tone the way Marvel and DCC need. */
+  --gold: var(--sw);
+  --sys-display: var(--font-archivo);
+  --sys-text: var(--font-franklin);
+  --sys-label: var(--font-franklin);
+  background-color: #09090a;
+  background-image:
+    url("/themes/sw-starfield.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.78) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* The WEG covers letter their titles in the same heavy grotesque as the logo,
+   so section and entry names take the display face, not just the page title. */
+:root[data-system="SW"]:not([data-chrome]) body h1,
+:root[data-system="SW"]:not([data-chrome]) body h2,
+:root[data-system="SW"]:not([data-chrome]) body h3 {
+  font-family: var(--font-archivo), "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --- Marvel: black, Marvel red, comic blue, a halftone starburst ---------- */
+:root[data-system="MMRPG"]:not([data-chrome]) body {
+  --panel: #141011;
+  --panel-2: #1b1618;
+  --border: #2e2325;
+  --text: #f4f1f2;
+  --muted: #a39a9c;
+  /* Both accent slots land on the lifted red: the brand #EC1D24 is under 4.5:1
+     here, so anything that ends up as text has to use the lifted one. The
+     brand itself stays available as --mmrpg for rules, borders and fills. */
+  --red: var(--mmrpg-ink);
+  --gold: var(--mmrpg-ink);
+  --sys-display: var(--font-oswald);
+  --sys-text: var(--font-sourcesans);
+  --sys-label: var(--font-oswald);
+  background-color: #0b0809;
+  background-image:
+    url("/themes/mmrpg-burst.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.72) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* A comic caption box is lettered in the condensed gothic, so headings take it
+   down to h3 the way DCC's poster type does. */
+:root[data-system="MMRPG"]:not([data-chrome]) body h1,
+:root[data-system="MMRPG"]:not([data-chrome]) body h2,
+:root[data-system="MMRPG"]:not([data-chrome]) body h3 {
+  font-family: var(--font-oswald), "Oswald", ui-sans-serif, system-ui, sans-serif;
+}
+/* The page title is the one place the brand red runs large enough to use
+   straight — 3:1 is the bar for display type and it clears 4.3. */
+:root[data-system="MMRPG"]:not([data-chrome]) body h1 {
+  color: var(--mmrpg);
+}
+
+/* --- ACE!: navy, comic-book blue, cartoon yellow, speed lines ------------- */
+:root[data-system="ACE"]:not([data-chrome]) body {
+  --panel: #0e1620;
+  --panel-2: #141e2a;
+  --border: #223240;
+  --text: #eef4f8;
+  --muted: #93a3b0;
+  /* The sheet's --ace is #2b93c9; --ace here is the same hue (200°) lifted for
+     text on a dark ground, the same two-value move the other skins make. */
+  --gold: var(--ace);
+  --sys-display: var(--font-lilita);
+  --sys-text: var(--font-nunito);
+  --sys-label: var(--font-nunito);
+  background-color: #070d14;
+  background-image:
+    url("/themes/ace-speedlines.webp"),
+    radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.62) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* Saturday-morning lettering is round and heavy everywhere, not just on the
+   title card. */
+:root[data-system="ACE"]:not([data-chrome]) body h1,
+:root[data-system="ACE"]:not([data-chrome]) body h2,
+:root[data-system="ACE"]:not([data-chrome]) body h3 {
+  font-family: var(--font-lilita), "Lilita One", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Icon color policy: gold on the app's black/light surfaces, white on
