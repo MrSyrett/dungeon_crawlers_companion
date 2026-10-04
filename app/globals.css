@@ -620,6 +620,27 @@ body {
 :root[data-system="GB"]:not([data-chrome]) body h1 {
   font-family: "Ghostbusters", var(--font-anton), ui-sans-serif, system-ui, sans-serif;
   text-transform: none;
+  /* The glow belongs to the STROKE, not the letter: a white outline around a
+     cut-out letterform, lit tightly enough to look like the outline itself is
+     glowing rather than the whole word sitting in a haze. Two shadow layers
+     only — the wide halos a diffuse glow needs would detach the light from
+     the edge it is supposed to be coming from. */
+  color: #ffffff;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 7px rgba(255, 255, 255, 0.45);
+}
+/* The cut-out fill is gated: -webkit-text-stroke is the only way to outline
+   text in CSS, and without it these letters would be ground-colour on the
+   ground — invisible. Anything that can't draw the stroke keeps the solid
+   white above. `paint-order: stroke fill` puts the stroke behind the fill so
+   it grows outward instead of eating into the letterform. */
+@supports (-webkit-text-stroke: 1px #fff) {
+  :root[data-system="GB"]:not([data-chrome]) body h1 {
+    color: #0e120a;
+    -webkit-text-stroke: 1.5px #ffffff;
+    paint-order: stroke fill;
+  }
 }
 
 /* --- Candela Obscura: gaslamp, and the stain on an old case file -----------
