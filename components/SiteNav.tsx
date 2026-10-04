@@ -159,7 +159,11 @@ export default function SiteNav({
     if (!onDashboard) router.push("/dashboard");
   }
 
-  const item = "rounded px-3 py-2 text-[12px] font-bold uppercase tracking-[0.1em] transition-colors";
+  // Measured, not guessed: with Chivo (not condensed, as Barlow Condensed
+  // was) nine uppercase links plus the logo, the system chip and the account
+  // block come to 1003px at the widest system short-name — which clears the
+  // lg breakpoint. Any more size, padding or tracking and the row wraps.
+  const item = "rounded px-1.5 py-1.5 text-[11px] font-semibold uppercase transition-colors";
   const on = "bg-[var(--panel-2)] text-[var(--text)]";
   const off = "text-[var(--muted)] hover:text-[var(--text)]";
 
@@ -167,13 +171,13 @@ export default function SiteNav({
     <nav className="dcc-chrome sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--panel)]">
       {menu ? <button aria-hidden="true" tabIndex={-1} className="fixed inset-0 z-0 cursor-default" onClick={() => setMenu(null)} /> : null}
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center gap-x-2 gap-y-1 px-3 py-2 sm:px-5">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center gap-x-1.5 gap-y-1 px-3 py-2 sm:px-5">
         {/* Mobile hamburger — left of the logo, reveals the nav links panel */}
         <button
           onClick={() => setMenu(menu === "mobile" ? null : "mobile")}
           aria-label="Menu"
           aria-expanded={menu === "mobile"}
-          className="flex shrink-0 items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 md:hidden"
+          className="flex shrink-0 items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 lg:hidden"
         >
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
             <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
@@ -193,10 +197,10 @@ export default function SiteNav({
             onClick={() => setMenu(menu === "system" ? null : "system")}
             aria-haspopup="true"
             aria-expanded={menu === "system"}
-            className="flex items-center gap-1.5 rounded border border-[var(--border)] bg-[var(--panel-2)] px-2.5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] sm:px-3"
+            className="flex items-center gap-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1.5 text-[11px] font-bold uppercase tracking-[0.03em]"
             style={{ color: sys.accent }}
           >
-            <span>{sys.name}</span>
+            <span>{sys.short}</span>
             <Caret />
           </button>
           {menu === "system" ? (
@@ -216,7 +220,7 @@ export default function SiteNav({
         </div>
 
         {/* Left nav group (desktop): tabs + Compendium + Homebrew + Tools */}
-        <div className="hidden min-w-0 flex-wrap items-center gap-1 md:flex">
+        <div className="hidden min-w-0 flex-wrap items-center gap-px lg:flex">
           <button className={`${item} ${onDashboard && view === "characters" ? on : off}`} onClick={() => openTab("characters")}>
             Characters
           </button>
@@ -277,14 +281,15 @@ export default function SiteNav({
             mini-bar on the standalone tools can point at the same page. */}
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {isAdmin ? (
-            <Link href="/admin/users" className="rounded border border-[var(--accent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
+            <Link href="/admin/users" className="rounded border border-[var(--accent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
               Admin
             </Link>
           ) : null}
           <Link
             href="/account"
             title={`${email} — account settings`}
-            className={`flex items-center gap-1.5 rounded border px-3 py-1.5 text-[12px] transition-colors ${
+            aria-label={`Account settings for ${email}`}
+            className={`flex items-center gap-1.5 rounded border px-2.5 py-1.5 text-[11px] transition-colors ${
               pathname === "/account"
                 ? "border-[var(--accent)] text-[var(--accent)]"
                 : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]"
@@ -294,7 +299,7 @@ export default function SiteNav({
               <circle cx="12" cy="8" r="3.5" />
               <path d="M4.5 20a7.5 7.5 0 0 1 15 0" strokeLinecap="round" />
             </svg>
-            <span className="max-w-[110px] truncate sm:max-w-[170px]">{email}</span>
+            <span className="hidden max-w-[150px] truncate xl:inline">{email}</span>
           </Link>
         </div>
 
@@ -302,7 +307,7 @@ export default function SiteNav({
 
       {/* Mobile panel */}
       {menu === "mobile" ? (
-        <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 md:hidden">
+        <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 lg:hidden">
           <div className="flex gap-2">
             <button className={`${item} flex-1 ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
             <button className={`${item} flex-1 ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>

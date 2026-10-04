@@ -19,7 +19,7 @@ import { TOOLS_NAV, compendiumFor } from "@/components/navConfig";
 //   [logo] [SYSTEM] Characters › Kira                      [Saved] [☰]
 //
 // The ☰ menu: Characters · Adventures, the Tools group,
-// that system's Compendium (+ Rulebooks), and a link to the account page. Colors come from /tokens.css; the system chip (and anything
+// that system's Compendium (+ Rulebooks), and the Settings link to /account. Colors come from /tokens.css; the system chip (and anything
 // using var(--sys)) wears the current system's accent.
 
 export type MiniBarLink = { label: string; href: string; external?: boolean };
@@ -167,7 +167,7 @@ ${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
   // One link, not a toggle. /account owns the light/dark preference; this page
   // still SEEDS itself from it in miniBarHead, so the sheet opens in the right
   // mode without the control being duplicated here.
-  const account = `<div class="dd-menu-h">You</div><div class="dd-menu-sec one"><a href="/account">Account &amp; appearance</a></div>`;
+  const account = `<div class="dd-menu-h">Settings</div><div class="dd-menu-sec one"><a href="/account">Account</a></div>`;
 
   const menu = `<div id="dd-menu" hidden>
 <div class="dd-menu-sec"><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a></div>
