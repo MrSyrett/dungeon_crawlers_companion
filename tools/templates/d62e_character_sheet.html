@@ -1663,7 +1663,7 @@ function clearLog() { $('log-entries').innerHTML = '<div class="log-hint">Click 
 function toggleLogCollapse() { document.querySelector('.roll-log').classList.toggle('collapsed'); }
 document.querySelector('.log-header').addEventListener('click', function(e) { if(window.innerWidth <= 768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
 (function() { if(window.innerWidth <= 768) document.querySelector('.roll-log').classList.add('collapsed'); })();
-function setDarkMode(on) { document.body.classList.toggle('dark', on); $('dm-toggle').classList.toggle('on', on); try { localStorage.setItem('d62e_dark', on ? '1' : '0'); } catch(e) {} }
+function setDarkMode(on) { document.body.classList.toggle('dark', on); try { localStorage.setItem('d62e_dark', on ? '1' : '0'); } catch(e) {} }
 function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark')); }
 function onGenreChange() { scheduleAutosave(); }
 

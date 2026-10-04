@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { isToolId, TOOLS, loadToolTemplate } from "@/lib/tools";
 import { renderToolPage } from "@/lib/inject";
+import { getHiddenSystemKeys } from "@/lib/systems";
 
 type Ctx = { params: Promise<{ tool: string; id: string }> };
 
@@ -42,6 +43,7 @@ export async function GET(req: Request, ctx: Ctx) {
     // For the navbar's account control — its tooltip and the Admin chip.
     email: user.email,
     isAdmin: isAdminEmail(user.email),
+    hiddenKeys: await getHiddenSystemKeys(),
   });
 
   return new Response(html, {

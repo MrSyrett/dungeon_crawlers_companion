@@ -44,7 +44,7 @@ export default async function IcrpgWorldsPage({ searchParams }: { searchParams: 
 
       <EmptyState noun="entry" base={BASE} hidden={shown > 0} />
       <>
-        <section className="mb-8" data-section>
+        <section className="mb-8" data-section hidden={!worlds.some(showWorld)}>
           <SectionH>Settings</SectionH>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {worlds.map((w) => (
@@ -58,7 +58,7 @@ export default async function IcrpgWorldsPage({ searchParams }: { searchParams: 
             ))}
           </ul>
         </section>
-        <section data-section>
+        <section data-section hidden={!lifeforms.some(showLife)}>
           <SectionH>Life Forms</SectionH>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {lifeforms.map((lf) => (

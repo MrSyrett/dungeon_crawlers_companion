@@ -81,7 +81,7 @@ export default async function IcrpgLootPage({ searchParams }: { searchParams: Pr
 
       <EmptyState noun="item" base={BASE} hidden={shown > 0} />
       <>
-        <section className="mb-8" data-section>
+        <section className="mb-8" data-section hidden={!loot.some(showLootRow)}>
           <SectionH>Loot Tables</SectionH>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {loot.map((l) => (
@@ -97,7 +97,7 @@ export default async function IcrpgLootPage({ searchParams }: { searchParams: Pr
             ))}
           </ul>
         </section>
-        <section data-section>
+        <section data-section hidden={!gear.some(showGearRow)}>
           <SectionH>Gear</SectionH>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {gear.map((g) => (

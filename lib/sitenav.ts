@@ -33,6 +33,12 @@ export type SiteNavOpts = {
   fixed?: boolean;
   /** Render the save-status chip that window.__ddStatus writes into. */
   status?: boolean;
+  /** Systems an admin has hidden (lib/systems.ts getHiddenSystemKeys), exactly
+   *  as app/layout.tsx hands them to SiteNav. Without this the dropdown offered
+   *  hidden systems on all 29 standalone documents, and picking one looked
+   *  broken: it wrote the hidden key and went to /dashboard, which clamps
+   *  straight back to a visible system, so the click did nothing visible. */
+  hiddenKeys?: SystemKey[];
 };
 
 /** The bar's height, and the single source of truth for it. Everything that
@@ -55,11 +61,19 @@ function esc(s: string): string {
  *  into markup so the Map Maker — which has no system of its own — can render
  *  the chip, the compendium menu and the homebrew link for whichever system is
  *  stored, and re-render them when the user switches. */
-function navData() {
-  const systems = SYSTEMS.map((s) => ({ k: s.key, n: s.name, a: s.accent }));
+function navData(hiddenKeys: SystemKey[] = [], keep: SystemKey | null = null) {
+  // Mirrors SiteNav: hidden systems drop out, and if that would empty the list
+  // the whole thing falls back to every system rather than leaving no switcher.
+  // `keep` is this document's own system — a sheet belonging to a hidden system
+  // must still show its own name in the chip, the way SiteNav lets the system of
+  // the page you are on win for display.
+  const hidden = new Set(hiddenKeys.filter((k) => k !== keep));
+  const visible = SYSTEMS.filter((s) => !hidden.has(s.key));
+  const list = visible.length ? visible : SYSTEMS;
+  const systems = list.map((s) => ({ k: s.key, n: s.name, a: s.accent }));
   const comp: Record<string, { h: string; l: string }[]> = {};
   const brew: Record<string, string | null> = {};
-  for (const s of SYSTEMS) {
+  for (const s of list) {
     comp[s.key] = compendiumFor(s.key).map((l) => ({ h: l.href, l: l.label }));
     brew[s.key] = homebrewFor(s.key);
   }
@@ -172,7 +186,7 @@ body{padding-top:var(--dd-bar-h)}
 const CARET = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
 
 export function siteNav(opts: SiteNavOpts): string {
-  const data = navData();
+  const data = navData(opts.hiddenKeys ?? [], opts.system);
   const style = `<style id="dd-nav-style">${CSS}${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
 
   const tools = data.tools

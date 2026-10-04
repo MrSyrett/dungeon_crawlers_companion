@@ -86,10 +86,15 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   // repairs was per-system — a campaign could have three linked players and a
   // fourth that never linked at all, which is exactly the case that looks like
   // "some of my party is missing" rather than "my party is empty".
+  // Scoped to the CALLER'S OWN documents. Without userId this scanned every
+  // account's unlinked sheets and wrote to the ones whose JSON named this
+  // campaign — so a caller could pull a stranger's sheet into their campaign and
+  // then read it through the GET above. A repair only ever needs to fix the rows
+  // belonging to whoever asked for it.
   let repaired = 0;
   if (req.nextUrl.searchParams.get("repair") === "1") {
     const orphans = await prisma.document.findMany({
-      where: { tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: null },
+      where: { userId: user.id, tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: null },
       select: { id: true, title: true, updatedAt: true, data: true, tool: true },
       orderBy: { updatedAt: "desc" },
       take: 300,
@@ -97,7 +102,9 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     const mine = orphans.filter((d) => campaignIdInSheet(d.tool, d.data) === id);
     if (mine.length) {
       await prisma.document.updateMany({
-        where: { id: { in: mine.map((d) => d.id) } },
+        // userId again, so the write is scoped on its own terms and not only by
+        // how `mine` happened to be derived above.
+        where: { userId: user.id, id: { in: mine.map((d) => d.id) } },
         data: { linkedCampaignId: id },
       });
       repaired = mine.length;

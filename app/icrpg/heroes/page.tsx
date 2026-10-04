@@ -84,7 +84,7 @@ export default async function IcrpgHeroesPage({ searchParams }: { searchParams: 
 
       <EmptyState noun="hero option" base={BASE} hidden={shown > 0} />
       <>
-        <section className="mb-8" data-section>
+        <section className="mb-8" data-section hidden={!types.some(showType)}>
           <SectionH>Hero Types</SectionH>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {types.map((t) => (
@@ -101,7 +101,7 @@ export default async function IcrpgHeroesPage({ searchParams }: { searchParams: 
             ))}
           </ul>
         </section>
-        <section data-section>
+        <section data-section hidden={!abilities.some(showAbility)}>
           <SectionH>Abilities, Powers &amp; Augments</SectionH>
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {abilities.map((a) => (

@@ -98,7 +98,7 @@ export default async function SwEquipmentPage({ searchParams }: { searchParams: 
       <CountLine count={shown} noun="item" base={BASE} filtered={Boolean(needle || cat)} />
       <EmptyState noun="item" base={BASE} hidden={shown > 0} />
       {WEAPON_KINDS.map((k) => (
-        <section key={k} className={`${cardCls} mb-4`} data-section>
+        <section key={k} className={`${cardCls} mb-4`} data-section hidden={!weapons.some((w) => w.kind === k && showWeapon(w))}>
           <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0c020]">{k} weapons</h2>
           <div className="mt-2 overflow-x-auto"><table className="w-full text-[12px]">
             <thead><tr className="text-left text-[9px] uppercase tracking-[0.12em] text-[var(--muted)]"><th className="py-1 pr-3">Weapon</th><th className="py-1 pr-3">Damage</th><th className="py-1 pr-3">Range</th><th className="py-1 pr-3">Skill</th><th className="py-1 pr-3">Notes</th><th className="py-1">Cost</th></tr></thead>
@@ -107,7 +107,7 @@ export default async function SwEquipmentPage({ searchParams }: { searchParams: 
         </section>
       ))}
       {GEAR_CATS.map((c) => (
-        <section key={c} className={`${cardCls} mb-4`} data-section>
+        <section key={c} className={`${cardCls} mb-4`} data-section hidden={!gear.some((g) => g.category === c && showGear(g))}>
           <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0c020]">{c}</h2>
           <div className="mt-2 overflow-x-auto"><table className="w-full text-[12px]">
             <thead><tr className="text-left text-[9px] uppercase tracking-[0.12em] text-[var(--muted)]"><th className="py-1 pr-3">Item</th><th className="py-1 pr-3">Stats</th><th className="py-1 pr-3">Description</th><th className="py-1">Cost</th></tr></thead>

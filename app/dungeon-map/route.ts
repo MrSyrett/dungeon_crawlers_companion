@@ -4,6 +4,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { loadToolTemplate } from "@/lib/tools";
 import { miniBarHead } from "@/lib/minibar";
 import { siteNav } from "@/lib/sitenav";
+import { getHiddenSystemKeys } from "@/lib/systems";
 
 // Standalone Dungeon Map Maker, reached from the dashboard nav ("Map Maker").
 // Unlike the character/session tools it is NOT a saved document: the editor keeps
@@ -24,7 +25,7 @@ export async function GET() {
   // The bar reads the site-wide system (dcw_system) itself, since a map isn't
   // tied to one.
   const fit = `<style>.app{height:calc(100vh - var(--dd-bar-h))!important}</style>`;
-  const bar = siteNav({ system: null, email: user.email, isAdmin: isAdminEmail(user.email) });
+  const bar = siteNav({ system: null, email: user.email, isAdmin: isAdminEmail(user.email), hiddenKeys: await getHiddenSystemKeys() });
 
   const html = template
     .replace(/<head[^>]*>/i, (m) => `${m}\n${favicon}\n${miniBarHead(null)}\n${fit}`)

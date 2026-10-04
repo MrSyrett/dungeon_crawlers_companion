@@ -31,7 +31,7 @@ export function CandelaHeader({ title, subtitle }: { title: string; subtitle: st
 
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {
   return (
-    <form method="get" action={base} className="mb-4 flex gap-2">
+    <form method="get" action={base} className="mb-4 flex gap-2" data-search>
       <input type="search" name="q" defaultValue={q} placeholder={placeholder} className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--candela)]" />
       {Object.entries(hidden).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
       <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--candela)] hover:text-[var(--text)]">Search</button>

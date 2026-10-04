@@ -1,6 +1,7 @@
 import type { ToolDef } from "@/lib/tools";
 import { miniBarHead, hasThemeFor } from "@/lib/minibar";
 import { siteNav } from "@/lib/sitenav";
+import type { SystemKey } from "@/components/systemStore";
 
 function inlineJson(value: unknown): string {
   return JSON.stringify(value ?? {}).replace(/</g, "\\u003c");
@@ -233,6 +234,9 @@ export function renderToolPage(
     /** For the navbar's account control — its tooltip and the Admin chip. */
     email?: string;
     isAdmin?: boolean;
+    /** Systems an admin has hidden, so the bar's system dropdown matches the
+     *  one the Next pages show. */
+    hiddenKeys?: SystemKey[];
     /** Page-specific places to go next, shown in the mini-bar menu (e.g. the
      *  sheet's campaign, its Tabletop / Owlbear room). */
   },
@@ -296,6 +300,7 @@ export function renderToolPage(
       system: opts.def.system,
       email: opts.email ?? "",
       isAdmin: opts.isAdmin,
+      hiddenKeys: opts.hiddenKeys,
       status: true,
       // The adventure-prep builders lay their body out as a flex row
       // (sidebar | preview), which would turn a sticky bar into a column down

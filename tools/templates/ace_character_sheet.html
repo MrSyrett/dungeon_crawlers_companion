@@ -1421,7 +1421,6 @@ document.querySelector('.log-header').addEventListener('click', function(e) {
 
 function setDarkMode(on) {
   document.body.classList.toggle('dark', on);
-  $('dm-toggle').classList.toggle('on', on);
   try { localStorage.setItem('ace_dark', on ? '1' : '0'); } catch(e) {}
 }
 function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark')); }
