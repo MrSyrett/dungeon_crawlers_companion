@@ -4,6 +4,8 @@ import { YZE_COVER } from "@/lib/data/yze-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { YzeHeader, SearchForm, CountLine, EmptyState, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/YzeRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/yze/gear";
@@ -28,7 +30,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
-  const results = hbRows.filter((g) => !needle || [g.name, g.desc].join(" ").toLowerCase().includes(needle));
+  // Every gear row is rendered; the search box filters on the client
+  // (InstantFilter). `show` applies the URL's `q` for the initial paint. There
+  // are no chips here, so no row has any facet to test.
+  const results = hbRows;
+  const current = { q };
+  const facets = () => ({});
+  const show = (g: Row) => facetMatch(facets(), current) && (!needle || [g.name, g.desc].join(" ").toLowerCase().includes(needle));
+  const shown = results.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -79,18 +88,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
         </p>
         <div className="mb-6"><HomebrewEditor kind="yze-gear" campaigns={campaigns} initial={hbOwn} /></div>
 
+        <InstantFilter>
         <SearchForm base={BASE} q={q} placeholder="Search your gear…" hidden={{}} />
-        <CountLine count={results.length} noun="item" base={BASE} filtered={Boolean(needle)} />
-        {results.length === 0 ? (
-          hbRows.length === 0 ? (
-            <p className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6 text-sm text-[var(--muted)]">No homebrew gear yet — add some above.</p>
-          ) : (
-            <EmptyState noun="item" base={BASE} />
-          )
+        <CountLine count={shown} noun="item" base={BASE} filtered={Boolean(needle)} />
+        {hbRows.length === 0 ? (
+          <p className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6 text-sm text-[var(--muted)]">No homebrew gear yet — add some above.</p>
         ) : (
-          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+          <EmptyState noun="item" base={BASE} hidden={shown > 0} />
+        )}
+        <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {results.map((g, i) => (
-              <li key={`${g.name}-${i}`} className={cardCls}>
+              <li key={`${g.name}-${i}`} className={cardCls} hidden={!show(g)} data-f={facetAttr(facets())}>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h3 className={nameCls}>{g.name}</h3>
                   <span className={hbBadge}>{g.weight} wt</span>
@@ -98,8 +106,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                 {g.desc ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{g.desc}</p> : null}
               </li>
             ))}
-          </ul>
-        )}
+        </ul>
+        </InstantFilter>
       </section>
     </div>
   );

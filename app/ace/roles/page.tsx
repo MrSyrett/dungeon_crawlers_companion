@@ -8,6 +8,8 @@ import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery,
 } from "@/components/AceRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/ace/roles";
@@ -33,13 +35,6 @@ function hbToRole(data: Record<string, unknown>, name: string): Row {
   };
 }
 
-function matches(r: Row, q: string, book: string, cat: string): boolean {
-  if (book && r.setting !== book) return false;
-  if (cat && r.category !== cat) return false;
-  if (!q) return true;
-  return r.name.toLowerCase().includes(q) || r.ability.toLowerCase().includes(q) || r.category.toLowerCase().includes(q);
-}
-
 export default async function AceRolesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -61,8 +56,15 @@ export default async function AceRolesPage({ searchParams }: { searchParams: Pro
   const cat = CATEGORIES.some((c) => c.key === one(raw.cat)) ? one(raw.cat) : "";
   const needle = q.toLowerCase();
   const current: Query = { q, book, cat };
-  const results = ALL.filter((r) => matches(r, needle, book, cat)).sort((a, b) => a.name.localeCompare(b.name, "en"));
   const filtered = Boolean(needle || book || cat);
+
+  // Every role is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = ALL.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const facets = (r: Row) => ({ book: r.setting, cat: r.category });
+  const show = (r: Row) => facetMatch(facets(r), current) && (!needle || r.name.toLowerCase().includes(needle) || r.ability.toLowerCase().includes(needle) || r.category.toLowerCase().includes(needle));
+  const shown = list.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -72,17 +74,15 @@ export default async function AceRolesPage({ searchParams }: { searchParams: Pro
         <HomebrewEditor kind="ace-role" campaigns={campaigns} initial={hbOwn} />
       </div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search roles or abilities…" hidden={{ book, cat }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />
       <ChipRow label="Group" base={BASE} current={current} param="cat" options={CATEGORIES} active={cat} />
-      <CountLine count={results.length} noun="role" base={BASE} filtered={filtered} />
-
-      {results.length === 0 ? (
-        <EmptyState noun="role" base={BASE} />
-      ) : (
+      <CountLine count={shown} noun="role" base={BASE} filtered={filtered} />
+      <EmptyState noun="role" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {results.map((r) => (
-            <li key={`${r.homebrew ? "hb" : "bk"}-${r.setting}-${r.name}`} className={cardCls}>
+          {list.map((r) => (
+            <li key={`${r.homebrew ? "hb" : "bk"}-${r.setting}-${r.name}`} className={cardCls} hidden={!show(r)} data-f={facetAttr(facets(r))}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{r.name}</h2>
                 <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{r.category}</span>
@@ -100,7 +100,7 @@ export default async function AceRolesPage({ searchParams }: { searchParams: Pro
             </li>
           ))}
         </ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

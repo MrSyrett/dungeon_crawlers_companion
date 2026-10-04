@@ -5,6 +5,8 @@ import type { DndBackground } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, one, type RawQuery } from "@/components/DndRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/backgrounds";
@@ -16,7 +18,6 @@ export default async function DndBackgroundsPage({ searchParams }: { searchParam
   const raw = await searchParams;
   const q = one(raw.q).trim().toLowerCase();
   const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
-  const srcOk = (x: { source?: string }) => (src === "hb" ? x.source === "Homebrew" : src === "book" ? x.source !== "Homebrew" : true);
 
   const [hbBgV, hbBgOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-background" }),
@@ -26,20 +27,26 @@ export default async function DndBackgroundsPage({ searchParams }: { searchParam
   const hbBgs = hbBgV.map((h) => h.data as unknown as DndBackground);
   const isHb = (x: { source?: string }) => x.source === "Homebrew";
 
-  let list = [...hbBgs, ...DND_BACKGROUNDS].filter(srcOk);
-  if (q) list = list.filter((b) => b.name.toLowerCase().includes(q) || b.feat.toLowerCase().includes(q));
-  list.sort((a, b) => a.name.localeCompare(b.name));
+  // Every background is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = [...hbBgs, ...DND_BACKGROUNDS].sort((a, b) => a.name.localeCompare(b.name));
+  const current = { q: one(raw.q), src };
+  const facets = (b: DndBackground) => ({ src: isHb(b) ? "hb" : "book" });
+  const show = (b: DndBackground) => facetMatch(facets(b), current) && (!q || b.name.toLowerCase().includes(q) || b.feat.toLowerCase().includes(q));
+  const shown = list.filter(show).length;
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Backgrounds" subtitle="2024 origins" />
       <DndHomebrewEditor kind="dnd-background" campaigns={campaigns} initial={hbBgOwn} />
+      <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search backgrounds…" hidden={{ src }} />
-      {hbBgs.length ? <ChipRow label="Source" base={BASE} current={{ q: one(raw.q), src }} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
-      <CountLine count={list.length} noun="background" base={BASE} filtered={!!q || !!src} />
-      {list.length === 0 ? <EmptyState noun="background" base={BASE} /> : (
+      {hbBgs.length ? <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
+      <CountLine count={shown} noun="background" base={BASE} filtered={!!q || !!src} />
+      <EmptyState noun="background" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
           {list.map((b, i) => (
-            <li key={`${b.name}-${i}`} className={cardCls}>
+            <li key={`${b.name}-${i}`} className={cardCls} hidden={!show(b)} data-f={facetAttr(facets(b))}>
               <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{b.name} {isHb(b) ? <span className={hbBadge}>HB</span> : null}</h3>
               <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{b.description}</p>
               <dl className="mt-2 grid gap-y-0.5 text-[12px] text-[var(--muted)]">
@@ -52,7 +59,7 @@ export default async function DndBackgroundsPage({ searchParams }: { searchParam
             </li>
           ))}
         </ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

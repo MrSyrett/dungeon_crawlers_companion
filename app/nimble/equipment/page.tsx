@@ -6,6 +6,8 @@ import type { NimbleItem } from "@/lib/data/nimble-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, hbBadge, one, type Query, type RawQuery } from "@/components/NimbleRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/nimble/equipment";
@@ -46,25 +48,36 @@ export default async function NimbleEquipmentPage({ searchParams }: { searchPara
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
   const cat = CATS.some((c) => c.key === one(raw.cat)) ? one(raw.cat) : "";
   const current: Query = { q, cat };
-  const results = ALL.filter((i) => (!cat || i.category === cat) && (!needle || [i.name, i.description ?? "", i.properties ?? "", i.damage ?? ""].join(" ").toLowerCase().includes(needle)));
-  const groups = CATS.filter((c) => results.some((i) => i.category === c.key));
+  // Every item is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const results = ALL;
+  const facets = (i: ItemRow) => ({ cat: i.category });
+  const show = (i: ItemRow) => facetMatch(facets(i), current) && (!needle || [i.name, i.description ?? "", i.properties ?? "", i.damage ?? ""].join(" ").toLowerCase().includes(needle));
+  const shown = results.filter(show).length;
+  // Every category still gets a section (it groups the items); `data-section`
+  // hides the heading and its table when all of its items are filtered out.
+  const groups = CATS;
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Equipment" subtitle={`${NIMBLE_ITEMS.length} items${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · armor, weapons, gear & magic`} />
       <div className="mb-6"><HomebrewEditor kind="nimble-item" campaigns={campaigns} initial={hbOwn} /></div>
       <details className="mb-5 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"><summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.15em] text-[#9fe3bd]">Weapon properties</summary><ul className="mt-2 grid gap-1 md:grid-cols-2">{NIMBLE_TABLES.weaponProperties.map((p) => <li key={p.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{p.name}.</span> {p.text}</li>)}</ul></details>
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search equipment…" hidden={{ cat }} />
       <ChipRow label="Type" base={BASE} current={current} param="cat" options={CATS} active={cat} />
-      <CountLine count={results.length} noun="item" base={BASE} filtered={Boolean(needle || cat)} />
-      {results.length === 0 ? <EmptyState noun="item" base={BASE} /> : groups.map((g) => (
-        <section key={g.key} className={`${cardCls} mb-4`}>
+      <CountLine count={shown} noun="item" base={BASE} filtered={Boolean(needle || cat)} />
+      <EmptyState noun="item" base={BASE} hidden={shown > 0} />
+      {groups.map((g) => (
+        <section key={g.key} className={`${cardCls} mb-4`} data-section hidden={!results.some((i) => i.category === g.key && show(i))}>
           <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#9fe3bd]">{g.label}</h2>
           <div className="mt-2 overflow-x-auto"><table className="w-full text-[12px]">
             <thead><tr className="text-left text-[9px] uppercase tracking-[0.12em] text-[var(--muted)]"><th className="py-1 pr-3">Item</th><th className="py-1 pr-3">{/Weapon/.test(g.key) ? "Damage" : /Cloth|Leather|Mail|Plate|Shield/.test(g.key) ? "Armor" : "Rarity"}</th><th className="py-1 pr-3">Properties / description</th><th className="py-1">Cost</th></tr></thead>
-            <tbody>{results.filter((i) => i.category === g.key).map((i) => <tr key={`${i.homebrew ? "hb" : "bk"}-${i.name}`} className="border-t border-[var(--border)] align-top"><td className="py-1.5 pr-3 font-semibold text-[var(--text)]">{i.name}{i.homebrew ? <span className={`${hbBadge} ml-2`}>Homebrew</span> : null}</td><td className="py-1.5 pr-3 font-mono text-[#9fe3bd]">{i.damage ?? i.armor ?? i.rarity ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{[i.properties, i.description].filter(Boolean).join(" — ")}</td><td className="py-1.5 whitespace-nowrap text-[var(--muted)]">{i.cost ?? ""}</td></tr>)}</tbody>
+            <tbody>{results.filter((i) => i.category === g.key).map((i) => <tr key={`${i.homebrew ? "hb" : "bk"}-${i.name}`} className="border-t border-[var(--border)] align-top" hidden={!show(i)} data-f={facetAttr(facets(i))}><td className="py-1.5 pr-3 font-semibold text-[var(--text)]">{i.name}{i.homebrew ? <span className={`${hbBadge} ml-2`}>Homebrew</span> : null}</td><td className="py-1.5 pr-3 font-mono text-[#9fe3bd]">{i.damage ?? i.armor ?? i.rarity ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{[i.properties, i.description].filter(Boolean).join(" — ")}</td><td className="py-1.5 whitespace-nowrap text-[var(--muted)]">{i.cost ?? ""}</td></tr>)}</tbody>
           </table></div>
         </section>
       ))}
+      </InstantFilter>
     </div>
   );
 }

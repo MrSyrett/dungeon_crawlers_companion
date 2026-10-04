@@ -100,3 +100,19 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .dcc-fade-in { animation: none; }
 }
+
+/* The compendium's instant filtering (components/InstantFilter) shows and hides
+   entries, section wrappers and controls with the plain `hidden` attribute.
+   Tailwind's Preflight styles `[hidden]` with the same specificity as a utility
+   class, so an element whose own classes set `display` — a card that is
+   `flex`, a `<tr>`, a grid section — would stay on screen while "hidden".
+   These selectors are more specific than any single utility, so hiding wins
+   wherever the filter uses it. */
+[data-f][hidden],
+[data-section][hidden],
+[data-empty][hidden],
+[data-count][hidden],
+[data-clear][hidden],
+[data-when][hidden] {
+  display: none !important;
+}

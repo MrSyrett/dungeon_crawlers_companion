@@ -5,6 +5,8 @@ import type { DndClass, DndSubclass } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, ChipRow, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/classes";
@@ -35,17 +37,24 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
 
   if (!selected) {
     // "Homebrew" narrows the list to classes that have at least one homebrew subclass.
-    const list = src === "hb" ? classes.filter((c) => (subsByClass.get(c.name.toLowerCase()) ?? []).length) : classes;
+    // Every class is rendered; the chip filters on the client (InstantFilter).
+    // `show` applies the URL's filter for the initial paint, through the same
+    // facet match the client uses (a toggle: the facet holds "hb" only when it applies).
+    const list = classes;
+    const current = { src };
+    const facets = (c: DndClass) => ({ src: (subsByClass.get(c.name.toLowerCase()) ?? []).length ? ["hb"] : [] });
+    const show = (c: DndClass) => facetMatch(facets(c), current);
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes${hbSubs.length ? ` · +${hbSubs.length} homebrew subclass${hbSubs.length === 1 ? "" : "es"}` : ""} · levels 1–20`} />
         <DndHomebrewEditor kind="dnd-subclass" campaigns={campaigns} initial={hbOwn} />
-        {hbSubs.length ? <ChipRow label="Source" base={BASE} current={{ src }} param="src" options={[{ key: "hb", label: "Has homebrew subclasses" }]} active={src} /> : null}
+        <InstantFilter>
+        {hbSubs.length ? <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "hb", label: "Has homebrew subclasses" }]} active={src} /> : null}
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
           {list.map((c) => {
             const hb = subsByClass.get(c.name.toLowerCase()) ?? [];
             return (
-            <li key={c.name} className={cardCls}>
+            <li key={c.name} className={cardCls} hidden={!show(c)} data-f={facetAttr(facets(c))}>
               <div className="flex items-start justify-between gap-2">
                 <a href={`${BASE}?cls=${encodeURIComponent(c.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f] hover:underline">{c.name}</a>
                 <span className={badge}>{sourceLabel[c.source] ?? c.source}</span>
@@ -59,6 +68,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
             </li>
           );})}
         </ul>
+        </InstantFilter>
       </div>
     );
   }

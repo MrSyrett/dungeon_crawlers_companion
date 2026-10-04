@@ -5,6 +5,8 @@ import type { DndFeat } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/feats";
@@ -18,7 +20,6 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
   const q = one(raw.q).trim().toLowerCase();
   const cat = one(raw.cat);
   const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
-  const srcOk = (x: { source?: string }) => (src === "hb" ? x.source === "Homebrew" : src === "book" ? x.source !== "Homebrew" : true);
 
   const [hbFeatV, hbFeatOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-feat" }),
@@ -28,23 +29,28 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
   const hbFeats = hbFeatV.map((h) => h.data as unknown as DndFeat);
   const isHb = (x: { source?: string }) => x.source === "Homebrew";
 
-  let list = [...hbFeats, ...DND_FEATS].filter(srcOk);
-  if (cat) list = list.filter((f) => f.category === cat);
-  if (q) list = list.filter((f) => f.name.toLowerCase().includes(q) || f.benefits.some((x) => x.toLowerCase().includes(q)));
-  list.sort((a, b) => a.name.localeCompare(b.name));
+  // Every feat is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = [...hbFeats, ...DND_FEATS].sort((a, b) => a.name.localeCompare(b.name));
+  const current = { q: one(raw.q), cat, src };
+  const facets = (f: DndFeat) => ({ cat: f.category, src: isHb(f) ? "hb" : "book" });
+  const show = (f: DndFeat) => facetMatch(facets(f), current) && (!q || f.name.toLowerCase().includes(q) || f.benefits.some((x) => x.toLowerCase().includes(q)));
+  const shown = list.filter(show).length;
   const cats = CATS.filter((c) => [...hbFeats, ...DND_FEATS].some((f) => f.category === c));
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Feats" subtitle="2024 feats" />
       <DndHomebrewEditor kind="dnd-feat" campaigns={campaigns} initial={hbFeatOwn} />
+      <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search feats…" hidden={{ cat, src }} />
-      <ChipRow label="Category" base={BASE} current={{ q: one(raw.q), cat, src }} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />
-      {hbFeats.length ? <ChipRow label="Source" base={BASE} current={{ q: one(raw.q), cat, src }} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
-      <CountLine count={list.length} noun="feat" base={BASE} filtered={!!(q || cat || src)} />
-      {list.length === 0 ? <EmptyState noun="feat" base={BASE} /> : (
+      <ChipRow label="Category" base={BASE} current={current} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />
+      {hbFeats.length ? <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
+      <CountLine count={shown} noun="feat" base={BASE} filtered={!!(q || cat || src)} />
+      <EmptyState noun="feat" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
           {list.map((f, i) => (
-            <li key={`${f.name}-${i}`} className={cardCls}>
+            <li key={`${f.name}-${i}`} className={cardCls} hidden={!show(f)} data-f={facetAttr(facets(f))}>
               <div className="flex items-start justify-between gap-2">
                 <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{f.name}{f.repeatable ? <span className="ml-1 text-[10px] text-[var(--muted)]">(repeatable)</span> : null} {isHb(f) ? <span className={hbBadge}>HB</span> : null}</h3>
                 <span className={badge}>{f.category}</span>
@@ -57,7 +63,7 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
             </li>
           ))}
         </ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

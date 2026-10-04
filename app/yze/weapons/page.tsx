@@ -4,6 +4,8 @@ import { YZE_WEAPONS } from "@/lib/data/yze-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { YzeHeader, SearchForm, CountLine, EmptyState, one, type RawQuery } from "@/components/YzeRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/yze/weapons";
@@ -33,7 +35,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
-  const results = ALL.filter((w) => !needle || [w.name, w.range, w.skill].join(" ").toLowerCase().includes(needle));
+  // Every weapon is rendered; the search box filters on the client
+  // (InstantFilter). `show` applies the URL's `q` for the initial paint. There
+  // are no chips here, so no row has any facet to test.
+  const results = ALL;
+  const current = { q };
+  const facets = () => ({});
+  const show = (w: Row) => facetMatch(facets(), current) && (!needle || [w.name, w.range, w.skill].join(" ").toLowerCase().includes(needle));
+  const shown = results.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -41,12 +50,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
       <div className="mb-6"><HomebrewEditor kind="yze-weapon" campaigns={campaigns} initial={hbOwn} /></div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search weapons…" hidden={{}} />
-      <CountLine count={results.length} noun="weapon" base={BASE} filtered={Boolean(needle)} />
+      <CountLine count={shown} noun="weapon" base={BASE} filtered={Boolean(needle)} />
 
-      {results.length === 0 ? (
-        <EmptyState noun="weapon" base={BASE} />
-      ) : (
+      <EmptyState noun="weapon" base={BASE} hidden={shown > 0} />
         <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
           <table className="w-full border-collapse text-[13px]">
             <thead>
@@ -56,7 +64,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             </thead>
             <tbody>
               {results.map((w, i) => (
-                <tr key={`${w.homebrew ? "hb" : "bk"}-${w.name}-${i}`} className="border-t border-[var(--border)]">
+                <tr key={`${w.homebrew ? "hb" : "bk"}-${w.name}-${i}`} className="border-t border-[var(--border)]" hidden={!show(w)} data-f={facetAttr(facets())}>
                   <td className="p-2 font-semibold text-[#3fd0e6]">{w.name}{w.homebrew ? <span className="ml-2 rounded border border-[var(--yze)] px-1 py-0.5 text-[8px] uppercase tracking-[0.1em] text-[#3fd0e6]">HB</span> : null}</td>
                   <td className="p-2 text-[var(--muted)]">{w.grip}</td>
                   <td className="p-2 font-mono">{w.bonus}</td>
@@ -69,7 +77,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             </tbody>
           </table>
         </div>
-      )}
+      </InstantFilter>
     </div>
   );
 }

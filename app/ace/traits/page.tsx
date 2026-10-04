@@ -8,6 +8,8 @@ import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   cardCls, bookBadge, hbBadge, type Query, type RawQuery,
 } from "@/components/AceRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/ace/traits";
@@ -17,12 +19,6 @@ type Row = AceTrait & { homebrew?: boolean };
 function hbToTrait(data: Record<string, unknown>, name: string): Row {
   const s = (k: string) => (typeof data[k] === "string" ? (data[k] as string) : "");
   return { name, setting: (s("setting") || "core") as AceSettingKey, description: s("description") || undefined, homebrew: true };
-}
-
-function matches(t: Row, q: string, book: string): boolean {
-  if (book && t.setting !== book) return false;
-  if (!q) return true;
-  return t.name.toLowerCase().includes(q) || (t.description ?? "").toLowerCase().includes(q);
 }
 
 export default async function AceTraitsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
@@ -42,8 +38,15 @@ export default async function AceTraitsPage({ searchParams }: { searchParams: Pr
   const book = BOOKS.some((b) => b.key === one(raw.book)) ? one(raw.book) : "";
   const needle = q.toLowerCase();
   const current: Query = { q, book };
-  const results = ALL.filter((t) => matches(t, needle, book)).sort((a, b) => a.name.localeCompare(b.name, "en"));
   const filtered = Boolean(needle || book);
+
+  // Every trait is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = ALL.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const facets = (t: Row) => ({ book: t.setting });
+  const show = (t: Row) => facetMatch(facets(t), current) && (!needle || t.name.toLowerCase().includes(needle) || (t.description ?? "").toLowerCase().includes(needle));
+  const shown = list.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -53,16 +56,14 @@ export default async function AceTraitsPage({ searchParams }: { searchParams: Pr
         <HomebrewEditor kind="ace-trait" campaigns={campaigns} initial={hbOwn} />
       </div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search traits…" hidden={{ book }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS.filter((b) => ALL.some((t) => t.setting === b.key))} active={book} />
-      <CountLine count={results.length} noun="trait" base={BASE} filtered={filtered} />
-
-      {results.length === 0 ? (
-        <EmptyState noun="trait" base={BASE} />
-      ) : (
+      <CountLine count={shown} noun="trait" base={BASE} filtered={filtered} />
+      <EmptyState noun="trait" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-2 items-start gap-2 sm:grid-cols-3 lg:grid-cols-4">
-          {results.map((t) => (
-            <li key={`${t.homebrew ? "hb" : "bk"}-${t.setting}-${t.name}`} className={cardCls}>
+          {list.map((t) => (
+            <li key={`${t.homebrew ? "hb" : "bk"}-${t.setting}-${t.name}`} className={cardCls} hidden={!show(t)} data-f={facetAttr(facets(t))}>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <h2 className="text-[15px] font-bold uppercase tracking-[0.1em] text-[#8ad4ff]">{t.name}</h2>
                 {t.homebrew ? <span className={hbBadge}>HB</span> : t.setting !== "core" ? <span className={bookBadge}>{settingName(t.setting)}</span> : null}
@@ -71,7 +72,7 @@ export default async function AceTraitsPage({ searchParams }: { searchParams: Pr
             </li>
           ))}
         </ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

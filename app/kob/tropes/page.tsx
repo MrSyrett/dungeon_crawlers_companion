@@ -5,6 +5,8 @@ import { KOB_STATS, type KobTrope, type KobBook, type KobDie, type KobStat } fro
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { KobHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, isBook, bookName, one, nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery } from "@/components/KobRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/kob/tropes";
@@ -37,9 +39,8 @@ function hbToTrope(data: Record<string, unknown>, name: string): Row {
   return row;
 }
 
-function matches(t: Row, q: string, book: string, age: string): boolean {
-  if (book && t.book !== book) return false;
-  if (age && !t.ages.includes(age) && !t.ages.includes("Any")) return false;
+// The book/age chips are facets now (see `facets` below); this is the q predicate.
+function matches(t: Row, q: string): boolean {
   if (!q) return true;
   return [t.name, ...t.suggestedStrengths, ...t.suggestedFlaws, ...t.questions].join(" ").toLowerCase().includes(q);
 }
@@ -63,7 +64,14 @@ export default async function KobTropesPage({ searchParams }: { searchParams: Pr
   const age = AGES.some((a) => a.key === one(raw.age)) ? one(raw.age) : "";
   const needle = q.toLowerCase();
   const current: Query = { q, book, age };
-  const results = ALL.filter((t) => matches(t, needle, book, age));
+  // Every trope is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses. A trope whose ages include "Any" matches every
+  // age chip, so its facet is the full list of age keys.
+  const ageKeys = AGES.map((a) => a.key);
+  const facets = (t: Row) => ({ book: t.book, age: t.ages.includes("Any") ? ageKeys : t.ages });
+  const show = (t: Row) => facetMatch(facets(t), current) && matches(t, needle);
+  const shown = ALL.filter(show).length;
   const filtered = Boolean(needle || book || age);
 
   return (
@@ -72,16 +80,15 @@ export default async function KobTropesPage({ searchParams }: { searchParams: Pr
       <div className="mb-6">
         <HomebrewEditor kind="kob-trope" campaigns={campaigns} initial={hbOwn} />
       </div>
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search tropes, strengths, flaws…" hidden={{ book, age }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />
       <ChipRow label="Age / grade" base={BASE} current={current} param="age" options={AGES.filter((a) => a.key !== "Any")} active={age} />
-      <CountLine count={results.length} noun="trope" base={BASE} filtered={filtered} />
-      {results.length === 0 ? (
-        <EmptyState noun="trope" base={BASE} />
-      ) : (
-        <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {results.map((t) => (
-            <li key={`${t.homebrew ? "hb" : "bk"}-${t.book}-${t.name}`} className={cardCls}>
+      <CountLine count={shown} noun="trope" base={BASE} filtered={filtered} />
+      <EmptyState noun="trope" base={BASE} hidden={shown > 0} />
+      <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+        {ALL.map((t) => (
+          <li key={`${t.homebrew ? "hb" : "bk"}-${t.book}-${t.name}`} className={cardCls} hidden={!show(t)} data-f={facetAttr(facets(t))}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{t.name}</h2>
                 <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{t.ages.join(" / ")}</span>
@@ -102,9 +109,9 @@ export default async function KobTropesPage({ searchParams }: { searchParams: Pr
                 {t.questions.map((qq, i) => <li key={i}>{qq}</li>)}
               </ol>
             </li>
-          ))}
-        </ul>
-      )}
+        ))}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

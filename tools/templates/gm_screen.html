@@ -5343,6 +5343,43 @@ function migrateToolState(tools) {
   return tools;
 }
 
+// ---- attachments ----------------------------------------------------------
+// Maps, PDFs and docs dropped into the Maps / Adventure panes used to be saved
+// INSIDE the board blob as base64 data URLs: every autosave re-serialized and
+// re-sent every attachment (megabytes per keystroke-triggered save), and the
+// save route dropped anything over 5 MB, so big files silently never came back.
+// Each file is now POSTed once to /api/gm-screen/files and the board keeps only
+// its id. Failures are non-fatal: put() resolves null and the caller falls back
+// to inlining the data URL exactly as before, so a file is never lost to a
+// flaky upload — it just costs a fat save that one session.
+//
+// `var`, not `const`: lib/tools.ts lifts each inline <script> into its own
+// deferred file, and the panes that use this live in a later one. A top-level
+// `var` becomes a property of window and so is shared across them (as the
+// function declarations around it already are); a top-level `const` would be a
+// lexical binding that is harder to reason about across that split.
+var ddAttach = {
+  put(name, dataUrl) {
+    if(!dataUrl || dataUrl.indexOf('data:') !== 0) return Promise.resolve(null);
+    return fetch('/api/gm-screen/files', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: name || '', data: dataUrl }),
+    }).then(r => r.ok ? r.json() : null).then(j => (j && j.id) || null).catch(() => null);
+  },
+  get(id) {
+    if(!id) return Promise.resolve(null);
+    return fetch('/api/gm-screen/files?id=' + encodeURIComponent(id))
+      .then(r => r.ok ? r.json() : null)
+      .then(j => (j && j.data) ? j : null)
+      .catch(() => null);
+  },
+  // Best effort — an attachment the board no longer points at.
+  drop(id) {
+    if(!id) return;
+    fetch('/api/gm-screen/files?id=' + encodeURIComponent(id), { method: 'DELETE' }).catch(() => {});
+  },
+};
+
 // Push generated content (an adventure doc, a map image, …) into a tool,
 // opening a window for it if none is showing it.
 function loadIntoTool(tool, dataUrl, fileName) {
@@ -5533,7 +5570,8 @@ function initDocTool(root) {
   let mediaType = null;
   let naturalW = 0, naturalH = 0;
   let savedFileName = '';
-  let savedDataUrl = ''; // base64 data URL stored for _getState
+  let savedDataUrl = ''; // base64 data URL, kept in memory for this session
+  let savedFileId = null; // id of this doc's stored attachment (what _getState saves)
   let htmlScaler = null; // wrapper that gives the scaled iframe a real layout box
   let restoreZoom = null; // zoom to apply once an html doc finishes loading
   const HTML_BASE_W = 900; // logical width for two-column (fixed) builder layout
@@ -5684,6 +5722,7 @@ function initDocTool(root) {
     fileInput.value = '';
     mediaEl = null; mediaType = null; naturalW = 0; naturalH = 0;
     htmlScaler = null; restoreZoom = null;
+    if(savedFileId) { ddAttach.drop(savedFileId); savedFileId = null; }
     savedFileName = ''; savedDataUrl = '';
   }
 
@@ -5692,7 +5731,9 @@ function initDocTool(root) {
   clearBtn.addEventListener('click', () => { if(isMaps && activeMapId != null) removeMap(activeMapId); else clearDoc(); });
 
   // Core loader — works from either a File object or a pre-existing data URL
-  function loadFromDataUrl(dataUrl, fileName) {
+  // `fileId` is passed when we're RESTORING a file we already stored; otherwise
+  // this is a fresh drop and we store it now, so the next save carries just the id.
+  function loadFromDataUrl(dataUrl, fileName, fileId) {
     const ext = fileName.split('.').pop().toLowerCase();
     filenameEl.textContent = fileName;
     emptyEl.style.display = 'none';
@@ -5705,6 +5746,15 @@ function initDocTool(root) {
     naturalW = 0; naturalH = 0;
     savedFileName = fileName;
     savedDataUrl = dataUrl;
+    if(fileId) { savedFileId = fileId; }
+    else {
+      if(savedFileId) ddAttach.drop(savedFileId);   // replacing a previously stored file
+      savedFileId = null;
+      ddAttach.put(fileName, dataUrl).then(id => {
+        // Only adopt the id if this is still the file on screen.
+        if(id && savedDataUrl === dataUrl) { savedFileId = id; if(window.__ddScheduleSave) window.__ddScheduleSave(); }
+      });
+    }
 
     if(ext === 'html' || ext === 'htm') {
       // Zoomable HTML doc (e.g. a saved session prep). Wide panes render the
@@ -6023,16 +6073,35 @@ function initDocTool(root) {
   // Show whatever a tab holds: a live VTT iframe, or an image in the pan/zoom viewer.
   function activateTab(tab) {
     if(!tab) return;
-    if(tab.vtt) { showVtt(tab.url); }
-    else { hideVtt(); loadFromDataUrl(tab.dataUrl, tab.name); }
+    if(tab.vtt) { showVtt(tab.url); return; }
+    hideVtt();
+    // Pass the tab's own id: this image is already stored, so the loader must
+    // not upload it again (switching tabs would otherwise duplicate every map).
+    if(tab.dataUrl) { loadFromDataUrl(tab.dataUrl, tab.name, tab.fileId || null); return; }
+    if(tab.fileId && !tab.missing) {
+      // Restored board: fetch this map's image the first time its tab is opened,
+      // so reopening a board with ten maps doesn't pull all ten up front.
+      filenameEl.textContent = tab.name + ' — loading…';
+      ddAttach.get(tab.fileId).then(f => {
+        if(mapTabs.indexOf(tab) < 0 || tab.id !== activeMapId) return;
+        if(f && f.data) { tab.dataUrl = f.data; loadFromDataUrl(f.data, tab.name, tab.fileId); }
+        else { tab.missing = true; filenameEl.textContent = tab.name + ' (attachment missing — reload manually)'; }
+      });
+      return;
+    }
+    filenameEl.textContent = tab.name + ' (attachment missing — reload manually)';
   }
 
-  function addMap(dataUrl, name) {
+  function addMap(dataUrl, name, fileId) {
     name = name || ('Map ' + nextMapId);
     // Same image loaded twice → just focus the existing tab.
     const existing = mapTabs.find(t => !t.vtt && t.name === name && t.dataUrl === dataUrl);
     if(existing) { switchMap(existing.id); return; }
-    const tab = { id: nextMapId++, name: name, dataUrl: dataUrl };
+    const tab = { id: nextMapId++, name: name, dataUrl: dataUrl, fileId: fileId || null };
+    // A freshly dropped map is stored once; the save then carries only its id.
+    if(!tab.fileId) ddAttach.put(name, dataUrl).then(id => {
+      if(id && mapTabs.indexOf(tab) >= 0) { tab.fileId = id; if(window.__ddScheduleSave) window.__ddScheduleSave(); }
+    });
     mapTabs.push(tab);
     activeMapId = tab.id;
     renderMapTabs();
@@ -6060,6 +6129,7 @@ function initDocTool(root) {
     if(i < 0) return;
     const wasActive = mapTabs[i].id === activeMapId;
     const wasVtt = !!mapTabs[i].vtt;
+    if(mapTabs[i].fileId) ddAttach.drop(mapTabs[i].fileId);
     mapTabs.splice(i, 1);
     if(wasVtt) destroyVtt();
     if(!mapTabs.length) { activeMapId = null; renderMapTabs(); hideVtt(); clearDoc(); return; }
@@ -6070,8 +6140,10 @@ function initDocTool(root) {
   fileInput.addEventListener('change', () => {
     const file = fileInput.files[0];
     if(!file) return;
-    // Warn immediately if the file is too large to persist across reloads
-    const MAX_SAVE_MB = 3.75; // ~5MB as base64 after encoding
+    // Warn immediately if the file is too large to persist across reloads.
+    // Attachments are stored on their own now (see ddAttach), so the ceiling is
+    // that store's, not the board blob's — roughly 24 MB of actual file.
+    const MAX_SAVE_MB = 24; // ~32MB as base64 after encoding
     if(file.size > MAX_SAVE_MB * 1024 * 1024) {
       filenameEl.textContent = file.name + ' too large to auto-save (will need reloading)';
     }
@@ -6081,9 +6153,11 @@ function initDocTool(root) {
     fileInput.value = '';   // let the same file be re-picked into a new tab
   });
 
-  // State hooks — save file data as base64 for files under 5MB (encoded).
-  // Larger files (like big PDFs) must be reloaded each session.
-  const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB base64 limit
+  // State hooks. Attachments are saved by ID (see ddAttach) so the board blob
+  // stays small however much is attached. `fileData` is still written as a
+  // fallback when a file has no id yet (its upload is in flight or failed) and
+  // still fits the old board-blob budget — so nothing is lost either way.
+  const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB base64 limit (fallback path only)
 
   root._getState = () => {
     // Maps persist every tab whose image fits the per-file save budget; the rest
@@ -6094,15 +6168,18 @@ function initDocTool(root) {
       const tabs = mapTabs
         .map(t => t.vtt
           ? { name: t.name, vtt: true, url: t.url || '' }
-          : { name: t.name, dataUrl: (t.dataUrl && t.dataUrl.length < MAX_FILE_BYTES) ? t.dataUrl : null })
-        .filter(t => t.vtt || t.dataUrl);
+          : t.fileId
+            ? { name: t.name, fileId: t.fileId }
+            : { name: t.name, dataUrl: (t.dataUrl && t.dataUrl.length < MAX_FILE_BYTES) ? t.dataUrl : null })
+        .filter(t => t.vtt || t.fileId || t.dataUrl);
       const active = mapTabs.find(t => t.id === activeMapId);
       return { maps: tabs, activeName: active ? active.name : '' };
     }
     return {
       fileName: savedFileName,
-      fileData: savedDataUrl && savedDataUrl.length < MAX_FILE_BYTES ? savedDataUrl : null,
-      fileTooLarge: savedDataUrl && savedDataUrl.length >= MAX_FILE_BYTES ? savedFileName : null,
+      fileId: savedFileId,
+      fileData: (!savedFileId && savedDataUrl && savedDataUrl.length < MAX_FILE_BYTES) ? savedDataUrl : null,
+      fileTooLarge: (!savedFileId && savedDataUrl && savedDataUrl.length >= MAX_FILE_BYTES) ? savedFileName : null,
       zoom,
       // Adventure only: which session-prep the hub had open, so a refresh
       // restores the interactive hub, not just the printable preview.
@@ -6115,8 +6192,21 @@ function initDocTool(root) {
         mapTabs = []; nextMapId = 1; activeMapId = null;
         s.maps.forEach(m => {
           if(m && m.vtt) mapTabs.push({ id: nextMapId++, name: m.name || 'Live VTT', vtt: true, url: m.url || '' });
-          else if(m && m.dataUrl) mapTabs.push({ id: nextMapId++, name: m.name || ('Map ' + nextMapId), dataUrl: m.dataUrl });
+          else if(m && m.fileId) mapTabs.push({ id: nextMapId++, name: m.name || ('Map ' + nextMapId), dataUrl: null, fileId: m.fileId });
+          // Legacy board: the image is inline. Keep it, and let the tab's upload
+          // below move it into the attachment store so the next save is small.
+          else if(m && m.dataUrl) mapTabs.push({ id: nextMapId++, name: m.name || ('Map ' + nextMapId), dataUrl: m.dataUrl, fileId: null, migrate: true });
         });
+        // Legacy inline images: move each into the attachment store once, so the
+        // next save of this board carries ids instead of megabytes.
+        mapTabs.forEach(t => {
+          if(!t.migrate || !t.dataUrl) return;
+          t.migrate = false;
+          ddAttach.put(t.name, t.dataUrl).then(id => {
+            if(id && mapTabs.indexOf(t) >= 0) { t.fileId = id; if(window.__ddScheduleSave) window.__ddScheduleSave(); }
+          });
+        });
+        // Images that live only as an id are fetched by activateTab, on demand.
         const act = mapTabs.find(t => t.name === s.activeName) || mapTabs[0];
         if(act) { activeMapId = act.id; renderMapTabs(); activateTab(act); }
       }
@@ -6128,21 +6218,35 @@ function initDocTool(root) {
       root._advLoadPrep(s.advPrep);
       return;
     }
-    if(s && s.fileData && s.fileName) {
+    const applySavedZoom = () => {
+      if(s.zoom && s.zoom !== 1) {
+        setTimeout(() => { if(mediaType === 'image') { zoom = s.zoom; applyZoom(); } }, 100);
+      }
+    };
+    if(s && s.fileId && s.fileName) {
+      // Stored attachment: fetch it, then load exactly as a fresh drop would,
+      // passing the id so it isn't re-uploaded.
+      restoreZoom = (typeof s.zoom === 'number' && s.zoom > 0) ? s.zoom : null;
+      filenameEl.textContent = s.fileName;
+      ddAttach.get(s.fileId).then(f => {
+        if(f && f.data) { loadFromDataUrl(f.data, s.fileName, s.fileId); applySavedZoom(); }
+        else { filenameEl.textContent = s.fileName + ' (attachment missing — reload manually)'; }
+      });
+    } else if(s && s.fileData && s.fileName) {
+      // Legacy board with the file inline: load it, and let loadFromDataUrl's
+      // own upload move it into the attachment store for the next save.
       // For html docs the zoom is applied once the iframe fires 'load'
       // (see the html branch); for images the timeout below handles it.
       restoreZoom = (typeof s.zoom === 'number' && s.zoom > 0) ? s.zoom : null;
       loadFromDataUrl(s.fileData, s.fileName);
-      if(s.zoom && s.zoom !== 1) {
-        setTimeout(() => { if(mediaType === 'image') { zoom = s.zoom; applyZoom(); } }, 100);
-      }
+      applySavedZoom();
     } else if(s && s.fileTooLarge) {
       filenameEl.textContent = s.fileTooLarge + ' (too large to auto-restore — reload manually)';
     }
   };
   // Allow other tools to programmatically load a map/image in. Maps open it as a
   // new tab; the single-doc Adventure viewer just replaces its content.
-  root._loadDataUrl = (dataUrl, fileName) => { if(isMaps) addMap(dataUrl, fileName); else loadFromDataUrl(dataUrl, fileName); };
+  root._loadDataUrl = (dataUrl, fileName) => { if(isMaps) addMap(dataUrl, fileName); else loadFromDataUrl(dataUrl, fileName); };  // no id: a fresh drop, stored by the loader
   // Open our first-party tabletop as a live tab in the Maps pane (maps tool only).
   root._openVttTab = (url, name) => { if(isMaps) openVttTab(url, name); };
 

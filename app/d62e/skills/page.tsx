@@ -5,6 +5,8 @@ import { D62E_ATTRIBUTE_INFO } from "@/lib/data/d62e-attributes";
 import type { D62eSkill } from "@/lib/data/d62e-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 import {
   D62eHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, badge, hbBadge,
   genreBadge, genreName, one, GENRES, matchesGenre, type Query, type RawQuery,
@@ -46,18 +48,27 @@ export default async function D62eSkillsPage({ searchParams }: { searchParams: P
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
   const genre = GENRES.some((g) => g.key === one(raw.genre)) ? one(raw.genre) : "";
   const current: Query = { q, genre };
-  const results = ALL.filter((s) =>
-    matchesGenre(s.genre, genre) &&
-    (!needle || [s.name, s.attribute, s.description, (s.specializations ?? []).join(" ")].join(" ").toLowerCase().includes(needle)),
-  );
+  // Every skill is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses. The genre chip's matchesGenre(row, genre) is
+  // the array facet [s.genre]: "All" ("") matches everything, a genre key
+  // matches only the rows of that genre.
+  const list = ALL;
+  const facets = (s: Row) => ({ genre: [s.genre] });
+  const show = (s: Row) =>
+    facetMatch(facets(s), current) &&
+    (!needle || [s.name, s.attribute, s.description, (s.specializations ?? []).join(" ")].join(" ").toLowerCase().includes(needle));
+  const shown = list.filter(show).length;
   const filtered = Boolean(needle || genre);
 
   // Attribute order: the info list first (core + genre attributes), then any
-  // attribute a skill references that isn't in the info list.
+  // attribute a skill references that isn't in the info list. Every attribute
+  // with skills gets its section; a section hides (data-section) when all of
+  // its entries are hidden.
   const infoOrder = D62E_ATTRIBUTE_INFO.map((a) => a.name);
-  const extra = [...new Set(results.map((s) => s.attribute))].filter((a) => !infoOrder.includes(a));
+  const extra = [...new Set(list.map((s) => s.attribute))].filter((a) => !infoOrder.includes(a));
   const order = [...infoOrder, ...extra];
-  const groups = order.filter((a) => results.some((s) => s.attribute === a));
+  const groups = order.filter((a) => list.some((s) => s.attribute === a));
   const attrInfo = (name: string) => D62E_ATTRIBUTE_INFO.find((a) => a.name === name);
   const introAttrs = D62E_ATTRIBUTE_INFO.filter((a) => matchesGenre(a.genre, genre));
 
@@ -82,20 +93,21 @@ export default async function D62eSkillsPage({ searchParams }: { searchParams: P
 
       <div className="mb-6"><HomebrewEditor kind="d62e-skill" campaigns={campaigns} initial={hbOwn} /></div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search skills…" hidden={{ genre }} />
       <ChipRow label="Genre" base={BASE} current={current} param="genre" options={GENRES} active={genre} />
-      <CountLine count={results.length} noun="skill" base={BASE} filtered={filtered} />
+      <CountLine count={shown} noun="skill" base={BASE} filtered={filtered} />
 
-      {results.length === 0 ? <EmptyState noun="skill" base={BASE} /> : null}
+      <EmptyState noun="skill" base={BASE} hidden={shown > 0} />
       {groups.map((a) => {
         const info = attrInfo(a);
         return (
-          <section key={a} className={`${cardCls} mb-4`}>
+          <section key={a} className={`${cardCls} mb-4`} data-section hidden={!list.some((s) => s.attribute === a && show(s))}>
             <SectionH>{a}</SectionH>
             {info ? <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{info.description}</p> : null}
             <ul className="mt-3 grid gap-3 md:grid-cols-2">
-              {results.filter((s) => s.attribute === a).map((s) => (
-                <li key={`${s.homebrew ? "hb" : "bk"}-${s.name}`} className="text-[12px] leading-relaxed text-[var(--muted)]">
+              {list.filter((s) => s.attribute === a).map((s) => (
+                <li key={`${s.homebrew ? "hb" : "bk"}-${s.name}`} className="text-[12px] leading-relaxed text-[var(--muted)]" hidden={!show(s)} data-f={facetAttr(facets(s))} data-s={s.attribute}>
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="font-bold uppercase tracking-[0.08em] text-[var(--text)]">{s.name}</span>
                     {s.homebrew ? <span className={hbBadge}>Homebrew</span> : s.genre !== "core" ? <span className={genreBadge}>{genreName(s.genre)}</span> : null}
@@ -109,6 +121,7 @@ export default async function D62eSkillsPage({ searchParams }: { searchParams: P
           </section>
         );
       })}
+      </InstantFilter>
     </div>
   );
 }

@@ -7,6 +7,8 @@ import {
   CandelaHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
   one, type Query, type RawQuery,
 } from "@/components/CandelaRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/candela/abilities";
@@ -40,11 +42,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
   const source = SOURCES.some((s) => s.key === one(raw.source)) ? one(raw.source) : "";
   const current: Query = { q, source };
-  const results = ALL.filter((a) =>
-    (!source || a.source === source) &&
-    (!needle || [a.name, a.owner, a.desc].join(" ").toLowerCase().includes(needle)),
-  );
   const filtered = Boolean(needle || source);
+
+  // Every ability is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = ALL;
+  const facets = (a: Row) => ({ source: a.source });
+  const show = (a: Row) => facetMatch(facets(a), current) && (!needle || [a.name, a.owner, a.desc].join(" ").toLowerCase().includes(needle));
+  const shown = list.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -52,16 +58,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
       <div className="mb-6"><HomebrewEditor kind="co-ability" campaigns={campaigns} initial={hbOwn} /></div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search abilities…" hidden={{ source }} />
       <ChipRow label="Source" base={BASE} current={current} param="source" options={SOURCES} active={source} />
-      <CountLine count={results.length} noun="ability" base={BASE} filtered={filtered} />
-
-      {results.length === 0 ? (
-        <EmptyState noun="ability" base={BASE} />
-      ) : (
+      <CountLine count={shown} noun="ability" base={BASE} filtered={filtered} />
+      <EmptyState noun="ability" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {results.map((a, i) => (
-            <li key={`${a.homebrew ? "hb" : "bk"}-${a.name}-${i}`} className={cardCls}>
+          {list.map((a, i) => (
+            <li key={`${a.homebrew ? "hb" : "bk"}-${a.name}-${i}`} className={cardCls} hidden={!show(a)} data-f={facetAttr(facets(a))} data-s={a.owner}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{a.name}</h2>
                 {a.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{a.source}{a.owner ? ` · ${a.owner}` : ""}</span>}
@@ -70,7 +74,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             </li>
           ))}
         </ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

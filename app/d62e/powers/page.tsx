@@ -4,9 +4,11 @@ import { D62E_POWERS } from "@/lib/data/d62e-powers";
 import type { D62ePower } from "@/lib/data/d62e-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 import {
   D62eHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge,
-  genreBadge, genreName, one, GENRES, matchesGenre, type Query, type RawQuery,
+  genreBadge, genreName, one, GENRES, type Query, type RawQuery,
 } from "@/components/D62eRef";
 
 export const dynamic = "force-dynamic";
@@ -55,12 +57,20 @@ export default async function D62ePowersPage({ searchParams }: { searchParams: P
   const genre = GENRES.some((g) => g.key === one(raw.genre)) ? one(raw.genre) : "";
   const kind = KINDS.some((k) => k.key === one(raw.kind)) ? one(raw.kind) : "";
   const current: Query = { q, genre, kind };
-  const results = ALL.filter((p) =>
-    (!kind || p.kind === kind) &&
-    matchesGenre(p.genre, genre) &&
-    (!needle || [p.name, p.kind, p.skill ?? "", p.description].join(" ").toLowerCase().includes(needle)),
-  );
-  const groups = KINDS.map((k) => k.key).filter((k) => results.some((p) => p.kind === k));
+  // Every power is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses. The genre chip's matchesGenre(row, genre) is
+  // the array facet [p.genre]: "All" ("") matches everything, a genre key
+  // matches only the rows of that genre.
+  const list = ALL;
+  const facets = (p: Row) => ({ kind: p.kind, genre: [p.genre] });
+  const show = (p: Row) =>
+    facetMatch(facets(p), current) &&
+    (!needle || [p.name, p.kind, p.skill ?? "", p.description].join(" ").toLowerCase().includes(needle));
+  const shown = list.filter(show).length;
+  // Every kind that has rows gets its section; a section hides (data-section)
+  // when all of its entries are hidden.
+  const groups = KINDS.map((k) => k.key).filter((k) => list.some((p) => p.kind === k));
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -68,18 +78,19 @@ export default async function D62ePowersPage({ searchParams }: { searchParams: P
 
       <div className="mb-6"><HomebrewEditor kind="d62e-power" campaigns={campaigns} initial={hbOwn} /></div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search powers…" hidden={{ genre, kind }} />
       <ChipRow label="Kind" base={BASE} current={current} param="kind" options={KINDS} active={kind} />
       <ChipRow label="Genre" base={BASE} current={current} param="genre" options={GENRES} active={genre} />
-      <CountLine count={results.length} noun="power" base={BASE} filtered={Boolean(needle || genre || kind)} />
+      <CountLine count={shown} noun="power" base={BASE} filtered={Boolean(needle || genre || kind)} />
 
-      {results.length === 0 ? <EmptyState noun="power" base={BASE} /> : null}
+      <EmptyState noun="power" base={BASE} hidden={shown > 0} />
       {groups.map((k) => (
-        <section key={k} className={`${cardCls} mb-4`}>
+        <section key={k} className={`${cardCls} mb-4`} data-section hidden={!list.some((p) => p.kind === k && show(p))}>
           <SectionH>{KIND_HEADING[k]}</SectionH>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
-            {results.filter((p) => p.kind === k).map((p) => (
-              <article key={`${p.homebrew ? "hb" : "bk"}-${p.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
+            {list.filter((p) => p.kind === k).map((p) => (
+              <article key={`${p.homebrew ? "hb" : "bk"}-${p.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={!show(p)} data-f={facetAttr(facets(p))} data-s={p.kind}>
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h3 className={nameCls}>{p.name}</h3>
                   {p.homebrew ? <span className={hbBadge}>Homebrew</span> : p.genre !== "core" ? <span className={genreBadge}>{genreName(p.genre)}</span> : null}
@@ -98,6 +109,7 @@ export default async function D62ePowersPage({ searchParams }: { searchParams: P
           </div>
         </section>
       ))}
+      </InstantFilter>
     </div>
   );
 }

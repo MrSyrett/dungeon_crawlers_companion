@@ -9,6 +9,8 @@ import MmrpgHeadquarters from "@/components/MmrpgHeadquarters";
 import MmrpgStarships from "@/components/MmrpgStarships";
 import { MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, badge, hbBadge, one, withParams, type Query, type RawQuery } from "@/components/MmrpgRef";
 import MmrpgRefTokens from "@/components/MmrpgRefTokens";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/mmrpg/equipment";
@@ -25,16 +27,20 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 type EquipRow = MmrpgEquipment & { homebrew?: boolean };
 const tierOf = (e: EquipRow) => e.tier || "Common";
 const typeOf = (e: EquipRow) => e.type || e.category || "Weapon";
-const matches = (e: EquipRow, needle: string) =>
-  !needle || [e.name, e.owner ?? "", tierOf(e), typeOf(e), e.weaponClass ?? "", e.range ?? "", e.notes ?? "", e.special ?? "", e.speed ?? "", e.powers ?? "", e.weapons ?? "", e.grantsPowers ?? "", e.grantsOrigin ?? ""].join(" ").toLowerCase().includes(needle);
+// Everything the search looks at. Some of it (the tier, a non-vehicle's speed /
+// powers / weapons) isn't in the card's own text, so the card carries it as
+// `data-s` for the client-side search.
+const searchText = (e: EquipRow) =>
+  [e.name, e.owner ?? "", tierOf(e), typeOf(e), e.weaponClass ?? "", e.range ?? "", e.notes ?? "", e.special ?? "", e.speed ?? "", e.powers ?? "", e.weapons ?? "", e.grantsPowers ?? "", e.grantsOrigin ?? ""].join(" ");
+const matches = (e: EquipRow, needle: string) => !needle || searchText(e).toLowerCase().includes(needle);
 
-function EquipCard({ e }: { e: EquipRow }) {
+function EquipCard({ e, hidden, dataF, dataS }: { e: EquipRow; hidden?: boolean; dataF?: string; dataS?: string }) {
   const isVehicle = typeOf(e) === "Vehicle";
   const hasDetails = Boolean(
     e.notes || e.grantsPowers || e.restrictions?.length || (isVehicle && e.powers) || (isVehicle && e.weapons) || e.special,
   );
   return (
-    <article className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
+    <article className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={hidden} data-f={dataF} data-s={dataS}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className={nameCls}>{e.name}</h3>
         <span className="flex items-center gap-1.5">
@@ -128,52 +134,68 @@ export default async function MmrpgEquipmentPage({ searchParams }: { searchParam
       {tab === "gear" ? (() => {
         const tier = GEAR_TIERS.includes(one(raw.tier)) ? one(raw.tier) : "";
         const type = GEAR_TYPES.includes(one(raw.type)) ? one(raw.type) : "";
-        const current: Query = { q, tier, type, tab };
-        const results = gearAll.filter((e) => (!tier || tierOf(e) === tier) && (!type || typeOf(e) === type) && matches(e, needle));
-        const groups = GEAR_TIERS.filter((t) => results.some((e) => tierOf(e) === t));
+        const current: Query = { q, tier, type, tab };   // every param — for the server-rendered hrefs
+        // Every item is rendered; the chips filter on the client (InstantFilter).
+        // `show` applies the URL's filters for the initial paint, through the
+        // same facet match the client uses. `tab` picks the view, not a filter,
+        // so it is not part of the filter state.
+        const state = { q, tier, type };
+        const facets = (e: EquipRow) => ({ tier: tierOf(e), type: typeOf(e) });
+        const show = (e: EquipRow) => facetMatch(facets(e), state) && matches(e, needle);
+        const shown = gearAll.filter(show).length;
+        const groups = GEAR_TIERS.filter((t) => gearAll.some((e) => tierOf(e) === t));
         return (
           <>
             <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Everyday gear — <b>Common</b> weapons, items and armor, <b>Narrative</b> story items, and <b>Vehicles</b>. Weapons add a bonus to your damage multiplier (use the greater of the weapon bonus and any power bonus — they don&rsquo;t stack); a range of <b>Reach</b> is a close weapon, a number is a ranged weapon in spaces. A <b>vehicle</b> has its own Health, Damage Reduction, speed, size and passenger capacity.</p>
+            <InstantFilter>
             <SearchForm base={BASE} q={q} placeholder="Search equipment…" hidden={{ tier, type, tab }} />
             <ChipRow label="Tier" base={BASE} current={current} param="tier" options={GEAR_TIERS.map((t) => ({ key: t, label: t }))} active={tier} />
             <ChipRow label="Type" base={BASE} current={current} param="type" options={GEAR_TYPES.map((t) => ({ key: t, label: t + "s" }))} active={type} />
-            <CountLine count={results.length} noun="item" base={withParams(BASE, {}, { tab })} filtered={Boolean(needle || tier || type)} />
-            {results.length === 0 ? <EmptyState noun="item" base={withParams(BASE, {}, { tab })} /> : null}
+            <CountLine count={shown} noun="item" base={withParams(BASE, {}, { tab })} filtered={Boolean(needle || tier || type)} />
+            <EmptyState noun="item" base={withParams(BASE, {}, { tab })} hidden={shown > 0} />
             {groups.map((t) => (
-              <section key={t} className={`${cardCls} mb-4`}>
+              <section key={t} className={`${cardCls} mb-4`} data-section hidden={!gearAll.some((e) => tierOf(e) === t && show(e))}>
                 <SectionH>{t}</SectionH>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  {results.filter((e) => tierOf(e) === t).map((e) => <EquipCard key={`${e.homebrew ? "hb" : "bk"}-${e.name}`} e={e} />)}
+                  {gearAll.filter((e) => tierOf(e) === t).map((e) => <EquipCard key={`${e.homebrew ? "hb" : "bk"}-${e.name}`} e={e} hidden={!show(e)} dataF={facetAttr(facets(e))} dataS={searchText(e)} />)}
                 </div>
               </section>
             ))}
+            </InstantFilter>
           </>
         );
       })() : null}
 
       {tab === "iconic" ? (() => {
         const type = ICONIC_TYPES.includes(one(raw.type)) ? one(raw.type) : "";
-        const current: Query = { q, type, tab };
-        const results = iconicAll.filter((e) => (!type || typeOf(e) === type) && matches(e, needle));
-        const groups = ICONIC_TYPES.filter((t) => results.some((e) => typeOf(e) === t));
+        const current: Query = { q, type, tab };   // every param — for the server-rendered hrefs
+        // As the gear tab: every iconic item is rendered, the Type chip and the
+        // search box filter on the client, `tab` picks the view.
+        const state = { q, type };
+        const facets = (e: EquipRow) => ({ type: typeOf(e) });
+        const show = (e: EquipRow) => facetMatch(facets(e), state) && matches(e, needle);
+        const shown = iconicAll.filter(show).length;
+        const groups = ICONIC_TYPES.filter((t) => iconicAll.some((e) => typeOf(e) === t));
         return (
           <>
             <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">An <b>Iconic Item</b> is a signature weapon, suit of armor or gadget tied to a hero — like Captain America&rsquo;s Shield or the Iron Man Armor. It grants an origin and a list of powers, costs a number of power picks equal to its <b>Power Value</b>, and usually carries restrictions. Build your own below, then browse the catalog.</p>
             <div className="mb-5">
               <HomebrewEditor kind="mmrpg-iconic" campaigns={campaigns} initial={hbIconicOwn} />
             </div>
+            <InstantFilter>
             <SearchForm base={BASE} q={q} placeholder="Search iconic items…" hidden={{ type, tab }} />
             <ChipRow label="Type" base={BASE} current={current} param="type" options={ICONIC_TYPES.map((t) => ({ key: t, label: t + "s" }))} active={type} />
-            <CountLine count={results.length} noun="iconic item" base={withParams(BASE, {}, { tab })} filtered={Boolean(needle || type)} />
-            {results.length === 0 ? <EmptyState noun="iconic item" base={withParams(BASE, {}, { tab })} /> : null}
+            <CountLine count={shown} noun="iconic item" base={withParams(BASE, {}, { tab })} filtered={Boolean(needle || type)} />
+            <EmptyState noun="iconic item" base={withParams(BASE, {}, { tab })} hidden={shown > 0} />
             {groups.map((t) => (
-              <section key={t} className={`${cardCls} mb-4`}>
+              <section key={t} className={`${cardCls} mb-4`} data-section hidden={!iconicAll.some((e) => typeOf(e) === t && show(e))}>
                 <SectionH>{t}s</SectionH>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  {results.filter((e) => typeOf(e) === t).map((e) => <EquipCard key={`${e.homebrew ? "hb" : "bk"}-${e.name}`} e={e} />)}
+                  {iconicAll.filter((e) => typeOf(e) === t).map((e) => <EquipCard key={`${e.homebrew ? "hb" : "bk"}-${e.name}`} e={e} hidden={!show(e)} dataF={facetAttr(facets(e))} dataS={searchText(e)} />)}
                 </div>
               </section>
             ))}
+            </InstantFilter>
           </>
         );
       })() : null}

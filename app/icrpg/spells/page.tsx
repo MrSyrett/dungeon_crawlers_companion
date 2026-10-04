@@ -8,6 +8,8 @@ import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
   one, type Query, type RawQuery,
 } from "@/components/IcrpgRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/icrpg/spells";
@@ -39,10 +41,15 @@ export default async function IcrpgSpellsPage({ searchParams }: { searchParams: 
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
   const school = schoolSet.includes(one(raw.school)) ? one(raw.school) : "";
   const current: Query = { q, school };
-  const results = ALL.filter((s) =>
-    (!school || s.school === school) &&
-    (!needle || [s.name, s.school, s.desc, s.target ?? "", s.effort ?? ""].join(" ").toLowerCase().includes(needle)),
-  ).sort((a, b) => a.name.localeCompare(b.name, "en"));
+  // Every spell is rendered; the School chip and the search filter on the
+  // client (InstantFilter). `show` applies the URL's filters for the initial
+  // paint, through the same facet match the client uses.
+  const results = ALL.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const facets = (s: Row) => ({ school: s.school });
+  const show = (s: Row) =>
+    facetMatch(facets(s), current) &&
+    (!needle || [s.name, s.school, s.desc, s.target ?? "", s.effort ?? ""].join(" ").toLowerCase().includes(needle));
+  const shown = results.filter(show).length;
   const filtered = Boolean(needle || school);
 
   return (
@@ -52,27 +59,26 @@ export default async function IcrpgSpellsPage({ searchParams }: { searchParams: 
 
       <div className="mb-6"><HomebrewEditor kind="icrpg-spell" campaigns={campaigns} initial={hbOwn} /></div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search spells…" hidden={{ school }} />
       {SCHOOLS.length > 1 ? <ChipRow label="School" base={BASE} current={current} param="school" options={SCHOOLS} active={school} /> : null}
-      <CountLine count={results.length} noun="spell" base={BASE} filtered={filtered} />
+      <CountLine count={shown} noun="spell" base={BASE} filtered={filtered} />
 
-      {results.length === 0 ? (
-        <EmptyState noun="spell" base={BASE} />
-      ) : (
-        <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {results.map((s) => (
-            <li key={`${s.homebrew ? "hb" : "bk"}-${s.name}`} className={cardCls}>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className={nameCls}>{s.name}</h2>
-                {s.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{s.school}</span>}
-                {s.target ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{s.target}</span> : null}
-              </div>
-              {s.effort ? <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Effort:</span> {s.effort}</p> : null}
-              {s.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{s.desc}</p> : null}
-            </li>
-          ))}
-        </ul>
-      )}
+      <EmptyState noun="spell" base={BASE} hidden={shown > 0} />
+      <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+        {results.map((s) => (
+          <li key={`${s.homebrew ? "hb" : "bk"}-${s.name}`} className={cardCls} hidden={!show(s)} data-f={facetAttr(facets(s))} data-s={s.school}>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className={nameCls}>{s.name}</h2>
+              {s.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{s.school}</span>}
+              {s.target ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{s.target}</span> : null}
+            </div>
+            {s.effort ? <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Effort:</span> {s.effort}</p> : null}
+            {s.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{s.desc}</p> : null}
+          </li>
+        ))}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

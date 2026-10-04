@@ -5,6 +5,8 @@ import type { DndSpell } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/spells";
@@ -42,32 +44,31 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
   const hbSpells = hbVisible.map((h) => h.data as unknown as DndSpell);
   const isHb = (x: { source?: string }) => x.source === "Homebrew";
 
-  let list = [...hbSpells, ...DND_SPELLS];
-  if (src === "hb") list = list.filter(isHb);
-  if (src === "book") list = list.filter((s) => !isHb(s));
-  if (lvl !== "") list = list.filter((s) => String(s.level) === lvl);
-  if (cls) list = list.filter((s) => s.classes.some((c) => c === cls));
-  if (school) list = list.filter((s) => s.school === school);
-  if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q));
-  list.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
-
+  // Every spell is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = [...hbSpells, ...DND_SPELLS].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
   const current = { q: one(raw.q), lvl, cls, school, src };
   const filtered = !!(q || lvl !== "" || cls || school || src);
+  const facets = (s: DndSpell) => ({ lvl: String(s.level), cls: s.classes, school: s.school, src: isHb(s) ? "hb" : "book" });
+  const show = (s: DndSpell) => facetMatch(facets(s), current) && (!q || s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q));
+  const shown = list.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Spells" subtitle={`${DND_SPELLS.length} spells${hbSpells.length ? ` + ${hbSpells.length} homebrew` : ""} · cantrips–level 9`} />
       <DndHomebrewEditor kind="dnd-spell" campaigns={campaigns} initial={hbOwn} />
+      <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search spells by name or effect…" hidden={{ lvl, cls, school, src }} />
       <ChipRow label="Level" base={BASE} current={current} param="lvl" options={[...Array(10).keys()].map((n) => ({ key: String(n), label: n === 0 ? "Cantrip" : String(n) }))} active={lvl} />
       <ChipRow label="Class" base={BASE} current={current} param="cls" options={CLASSES.map((c) => ({ key: c, label: c }))} active={cls} />
       <ChipRow label="School" base={BASE} current={current} param="school" options={SCHOOLS.map((s) => ({ key: s, label: s }))} active={school} />
       <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} />
-      <CountLine count={list.length} noun="spell" base={BASE} filtered={filtered} />
-      {list.length === 0 ? <EmptyState noun="spell" base={BASE} /> : (
+      <CountLine count={shown} noun="spell" base={BASE} filtered={filtered} />
+      <EmptyState noun="spell" base={BASE} hidden={shown > 0} />
         <div className="flex flex-col gap-3">
           {list.map((s, i) => (
-            <article key={`${s.name}-${i}`} className={cardCls}>
+            <article key={`${s.name}-${i}`} className={cardCls} hidden={!show(s)} data-f={facetAttr(facets(s))}>
               <div className="flex items-start justify-between gap-3">
                 <h3 className="text-base font-bold uppercase tracking-[0.1em] text-[#f0a37f]">{s.name} {isHb(s) ? <span className={hbBadge}>HB</span> : null}</h3>
                 <span className={badge}>{lvlLabel(s.level)} · {s.school}</span>
@@ -87,7 +88,7 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
             </article>
           ))}
         </div>
-      )}
+      </InstantFilter>
     </div>
   );
 }

@@ -7,6 +7,8 @@ import {
   MmrpgHeader, SearchForm, CountLine, EmptyState, RefDetails, cardCls, nameCls, hbBadge,
   one, type RawQuery,
 } from "@/components/MmrpgRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/mmrpg/traits";
@@ -29,7 +31,12 @@ export default async function MmrpgTraitsPage({ searchParams }: { searchParams: 
 
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
-  const results = ALL.filter((t) => (!needle || [t.name, t.description].join(" ").toLowerCase().includes(needle)));
+  // Every trait is rendered; the search box filters on the client (InstantFilter).
+  // `show` applies the URL's `q` for the initial paint, through the same predicate.
+  const current = { q };
+  const facets = () => ({});
+  const show = (t: Row) => facetMatch(facets(), current) && (!needle || [t.name, t.description].join(" ").toLowerCase().includes(needle));
+  const shown = ALL.filter(show).length;
   const hbCount = ALL.filter((t) => t.homebrew).length;
 
   return (
@@ -40,22 +47,23 @@ export default async function MmrpgTraitsPage({ searchParams }: { searchParams: 
         <HomebrewEditor kind="mmrpg-trait" campaigns={campaigns} initial={hbTraitOwn} />
       </div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search traits…" hidden={{}} />
-      <CountLine count={results.length} noun="trait" base={BASE} filtered={Boolean(needle)} />
+      <CountLine count={shown} noun="trait" base={BASE} filtered={Boolean(needle)} />
 
-      {results.length === 0 ? <EmptyState noun="trait" base={BASE} /> : (
-        <div className="grid gap-3 md:grid-cols-2">
-          {results.map((t) => (
-            <article key={`${t.homebrew ? "hb" : "bk"}-${t.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className={nameCls}>{t.name}</h3>
-                {t.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
-              </div>
-              {t.description ? <RefDetails><p className="text-[12px] leading-relaxed text-[var(--muted)]">{t.description}</p></RefDetails> : null}
-            </article>
-          ))}
-        </div>
-      )}
+      <EmptyState noun="trait" base={BASE} hidden={shown > 0} />
+      <div className="grid gap-3 md:grid-cols-2">
+        {ALL.map((t) => (
+          <article key={`${t.homebrew ? "hb" : "bk"}-${t.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={!show(t)} data-f={facetAttr(facets())}>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className={nameCls}>{t.name}</h3>
+              {t.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+            </div>
+            {t.description ? <RefDetails><p className="text-[12px] leading-relaxed text-[var(--muted)]">{t.description}</p></RefDetails> : null}
+          </article>
+        ))}
+      </div>
+      </InstantFilter>
     </div>
   );
 }

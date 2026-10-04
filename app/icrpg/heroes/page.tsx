@@ -9,6 +9,8 @@ import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge,
   WORLDS, worldName, one, type Query, type RawQuery,
 } from "@/components/IcrpgRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/icrpg/heroes";
@@ -54,10 +56,16 @@ export default async function IcrpgHeroesPage({ searchParams }: { searchParams: 
   const world = WORLDS.some((w) => w.key === one(raw.world)) ? one(raw.world) : "";
   const current: Query = { q, world };
 
-  const matchWorld = (w: string) => !world || (w || "core") === world;
-  const types = typeRows.filter((t) => matchWorld(t.world) && (!needle || [t.name, t.desc, t.statFocus ?? "", (t.abilities ?? []).join(" ")].join(" ").toLowerCase().includes(needle))).sort((a, b) => a.name.localeCompare(b.name, "en"));
-  const abilities = abilityRows.filter((a) => matchWorld(a.world) && (!needle || [a.name, a.kind, a.desc].join(" ").toLowerCase().includes(needle))).sort((a, b) => a.name.localeCompare(b.name, "en"));
-  const total = types.length + abilities.length;
+  // Every type and ability is rendered; the World chip and the search filter on
+  // the client (InstantFilter). `show*` applies the URL's filters for the
+  // initial paint, through the same facet match the client uses.
+  const types = typeRows.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const abilities = abilityRows.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const typeFacets = (t: TypeRow) => ({ world: t.world || "core" });
+  const abilityFacets = (a: AbilityRow) => ({ world: a.world || "core" });
+  const showType = (t: TypeRow) => facetMatch(typeFacets(t), current) && (!needle || [t.name, t.desc, t.statFocus ?? "", (t.abilities ?? []).join(" ")].join(" ").toLowerCase().includes(needle));
+  const showAbility = (a: AbilityRow) => facetMatch(abilityFacets(a), current) && (!needle || [a.name, a.kind, a.desc].join(" ").toLowerCase().includes(needle));
+  const shown = types.filter(showType).length + abilities.filter(showAbility).length;
   const filtered = Boolean(needle || world);
 
   return (
@@ -69,52 +77,47 @@ export default async function IcrpgHeroesPage({ searchParams }: { searchParams: 
         <HomebrewEditor kind="icrpg-ability" campaigns={campaigns} initial={ownAbilities} />
       </div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search heroes…" hidden={{ world }} />
       <ChipRow label="World" base={BASE} current={current} param="world" options={WORLDS} active={world} />
-      <CountLine count={total} noun="entry" base={BASE} filtered={filtered} />
+      <CountLine count={shown} noun="entry" base={BASE} filtered={filtered} />
 
-      {total === 0 ? (
-        <EmptyState noun="hero option" base={BASE} />
-      ) : (
-        <>
-          {types.length ? (
-            <section className="mb-8">
-              <SectionH>Hero Types</SectionH>
-              <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-                {types.map((t) => (
-                  <li key={`${t.homebrew ? "hb" : "bk"}-t-${t.name}`} className={cardCls}>
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h3 className={nameCls}>{t.name}</h3>
-                      {t.homebrew ? <span className={hbBadge}>Homebrew</span> : (t.world && t.world !== "core") ? <span className={badge}>{worldName(t.world)}</span> : null}
-                      {t.statFocus ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{t.statFocus}</span> : null}
-                    </div>
-                    {t.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{t.desc}</p> : null}
-                    {t.startingLoot?.length ? <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Loot:</span> {t.startingLoot.join(", ")}</p> : null}
-                    {t.abilities?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Abilities:</span> {t.abilities.join(", ")}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-          {abilities.length ? (
-            <section>
-              <SectionH>Abilities, Powers &amp; Augments</SectionH>
-              <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-                {abilities.map((a) => (
-                  <li key={`${a.homebrew ? "hb" : "bk"}-a-${a.name}`} className={cardCls}>
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h3 className={nameCls}>{a.name}</h3>
-                      <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{a.kind}</span>
-                      {a.homebrew ? <span className={hbBadge}>Homebrew</span> : (a.world && a.world !== "core") ? <span className={badge}>{worldName(a.world)}</span> : null}
-                    </div>
-                    {a.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{a.desc}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </>
-      )}
+      <EmptyState noun="hero option" base={BASE} hidden={shown > 0} />
+      <>
+        <section className="mb-8" data-section>
+          <SectionH>Hero Types</SectionH>
+          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+            {types.map((t) => (
+              <li key={`${t.homebrew ? "hb" : "bk"}-t-${t.name}`} className={cardCls} hidden={!showType(t)} data-f={facetAttr(typeFacets(t))}>
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className={nameCls}>{t.name}</h3>
+                  {t.homebrew ? <span className={hbBadge}>Homebrew</span> : (t.world && t.world !== "core") ? <span className={badge}>{worldName(t.world)}</span> : null}
+                  {t.statFocus ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{t.statFocus}</span> : null}
+                </div>
+                {t.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{t.desc}</p> : null}
+                {t.startingLoot?.length ? <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Loot:</span> {t.startingLoot.join(", ")}</p> : null}
+                {t.abilities?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Abilities:</span> {t.abilities.join(", ")}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section data-section>
+          <SectionH>Abilities, Powers &amp; Augments</SectionH>
+          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+            {abilities.map((a) => (
+              <li key={`${a.homebrew ? "hb" : "bk"}-a-${a.name}`} className={cardCls} hidden={!showAbility(a)} data-f={facetAttr(abilityFacets(a))}>
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className={nameCls}>{a.name}</h3>
+                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{a.kind}</span>
+                  {a.homebrew ? <span className={hbBadge}>Homebrew</span> : (a.world && a.world !== "core") ? <span className={badge}>{worldName(a.world)}</span> : null}
+                </div>
+                {a.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{a.desc}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </>
+      </InstantFilter>
     </div>
   );
 }

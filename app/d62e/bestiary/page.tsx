@@ -4,9 +4,11 @@ import { D62E_CREATURES } from "@/lib/data/d62e-creatures";
 import type { D62eCreature } from "@/lib/data/d62e-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 import {
   D62eHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
-  genreBadge, genreName, code, one, GENRES, matchesGenre, type Query, type RawQuery,
+  genreBadge, genreName, code, one, GENRES, type Query, type RawQuery,
 } from "@/components/D62eRef";
 
 export const dynamic = "force-dynamic";
@@ -57,10 +59,17 @@ export default async function D62eBestiaryPage({ searchParams }: { searchParams:
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
   const genre = GENRES.some((g) => g.key === one(raw.genre)) ? one(raw.genre) : "";
   const current: Query = { q, genre };
-  const results = ALL.filter((c) =>
-    matchesGenre(c.genre, genre) &&
-    (!needle || [c.name, c.kind ?? "", c.description ?? "", (c.skills ?? []).join(" "), (c.powers ?? []).join(" ")].join(" ").toLowerCase().includes(needle)),
-  ).sort((a, b) => a.name.localeCompare(b.name, "en"));
+  // Every creature is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses. The genre chip's matchesGenre(row, genre) is
+  // the array facet [c.genre]: "All" ("") matches everything, a genre key
+  // matches only the rows of that genre.
+  const list = ALL.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const facets = (c: Row) => ({ genre: [c.genre] });
+  const show = (c: Row) =>
+    facetMatch(facets(c), current) &&
+    (!needle || [c.name, c.kind ?? "", c.description ?? "", (c.skills ?? []).join(" "), (c.powers ?? []).join(" ")].join(" ").toLowerCase().includes(needle));
+  const shown = list.filter(show).length;
   const filtered = Boolean(needle || genre);
 
   return (
@@ -69,43 +78,42 @@ export default async function D62eBestiaryPage({ searchParams }: { searchParams:
 
       <div className="mb-6"><HomebrewEditor kind="d62e-creature" campaigns={campaigns} initial={hbOwn} /></div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search creatures…" hidden={{ genre }} />
       <ChipRow label="Genre" base={BASE} current={current} param="genre" options={GENRES} active={genre} />
-      <CountLine count={results.length} noun="creature" base={BASE} filtered={filtered} />
+      <CountLine count={shown} noun="creature" base={BASE} filtered={filtered} />
 
-      {results.length === 0 ? (
-        <EmptyState noun="creature" base={BASE} />
-      ) : (
-        <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {results.map((c) => (
-            <li key={`${c.homebrew ? "hb" : "bk"}-${c.name}`} className={cardCls}>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className={nameCls}>{c.name}</h2>
-                {c.kind ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{c.kind}</span> : null}
-                {c.homebrew ? <span className={hbBadge}>Homebrew</span> : c.genre !== "core" ? <span className={genreBadge}>{genreName(c.genre)}</span> : null}
-                {c.move ? <span className={badge}>Move {c.move}</span> : null}
-              </div>
+      <EmptyState noun="creature" base={BASE} hidden={shown > 0} />
+      <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+        {list.map((c) => (
+          <li key={`${c.homebrew ? "hb" : "bk"}-${c.name}`} className={cardCls} hidden={!show(c)} data-f={facetAttr(facets(c))}>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className={nameCls}>{c.name}</h2>
+              {c.kind ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{c.kind}</span> : null}
+              {c.homebrew ? <span className={hbBadge}>Homebrew</span> : c.genre !== "core" ? <span className={genreBadge}>{genreName(c.genre)}</span> : null}
+              {c.move ? <span className={badge}>Move {c.move}</span> : null}
+            </div>
 
-              {Object.keys(c.attributes).length ? (
-                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
-                  {Object.entries(c.attributes).map(([k, v]) => (
-                    <div key={k}>
-                      <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
-                      <dd className="font-mono text-[13px] text-[#ef9455]">{code(v)}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
+            {Object.keys(c.attributes).length ? (
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
+                {Object.entries(c.attributes).map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
+                    <dd className="font-mono text-[13px] text-[#ef9455]">{code(v)}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
 
-              {c.skills?.length ? <p className="mt-3 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Skills:</span> {c.skills.join(", ")}</p> : null}
-              {c.special?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Special:</span> {c.special.join(", ")}</p> : null}
-              {c.talents?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Talents:</span> {c.talents.join(", ")}</p> : null}
-              {c.powers?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Powers:</span> {c.powers.join(", ")}</p> : null}
-              {c.description ? <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{c.description}</p> : null}
-            </li>
-          ))}
-        </ul>
-      )}
+            {c.skills?.length ? <p className="mt-3 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Skills:</span> {c.skills.join(", ")}</p> : null}
+            {c.special?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Special:</span> {c.special.join(", ")}</p> : null}
+            {c.talents?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Talents:</span> {c.talents.join(", ")}</p> : null}
+            {c.powers?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Powers:</span> {c.powers.join(", ")}</p> : null}
+            {c.description ? <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{c.description}</p> : null}
+          </li>
+        ))}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

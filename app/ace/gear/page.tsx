@@ -9,6 +9,8 @@ import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery,
 } from "@/components/AceRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/ace/gear";
@@ -28,14 +30,6 @@ function hbToGear(data: Record<string, unknown>, name: string): Row {
     description: s("description"), damage: n("damage"), defence: n("defence"),
     page: 0, homebrew: true,
   };
-}
-
-function matches(g: Row, q: string, book: string, tier: string, cat: string): boolean {
-  if (book && g.setting !== book) return false;
-  if (tier && g.tier !== tier) return false;
-  if (cat && g.category !== cat) return false;
-  if (!q) return true;
-  return g.name.toLowerCase().includes(q) || g.description.toLowerCase().includes(q) || g.category.toLowerCase().includes(q);
 }
 
 export default async function AceGearPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
@@ -58,8 +52,15 @@ export default async function AceGearPage({ searchParams }: { searchParams: Prom
   const cat = CATEGORIES.some((c) => c.key === one(raw.cat)) ? one(raw.cat) : "";
   const needle = q.toLowerCase();
   const current: Query = { q, book, tier, cat };
-  const results = ALL.filter((g) => matches(g, needle, book, tier, cat));
   const filtered = Boolean(needle || book || tier || cat);
+
+  // Every item is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = ALL;
+  const facets = (g: Row) => ({ book: g.setting, tier: g.tier, cat: g.category });
+  const show = (g: Row) => facetMatch(facets(g), current) && (!needle || g.name.toLowerCase().includes(needle) || g.description.toLowerCase().includes(needle) || g.category.toLowerCase().includes(needle));
+  const shown = list.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -86,18 +87,16 @@ export default async function AceGearPage({ searchParams }: { searchParams: Prom
         <HomebrewEditor kind="ace-gear" campaigns={campaigns} initial={hbOwn} />
       </div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search gear…" hidden={{ book, tier, cat }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />
       <ChipRow label="Cost" base={BASE} current={current} param="tier" options={TIERS} active={tier} />
       <ChipRow label="Type" base={BASE} current={current} param="cat" options={CATEGORIES} active={cat} />
-      <CountLine count={results.length} noun="item" base={BASE} filtered={filtered} />
-
-      {results.length === 0 ? (
-        <EmptyState noun="item" base={BASE} />
-      ) : (
+      <CountLine count={shown} noun="item" base={BASE} filtered={filtered} />
+      <EmptyState noun="item" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {results.map((g) => (
-            <li key={`${g.homebrew ? "hb" : "bk"}-${g.setting}-${g.name}`} className={cardCls}>
+          {list.map((g) => (
+            <li key={`${g.homebrew ? "hb" : "bk"}-${g.setting}-${g.name}`} className={cardCls} hidden={!show(g)} data-f={facetAttr(facets(g))}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{g.name}</h2>
                 <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
@@ -110,7 +109,7 @@ export default async function AceGearPage({ searchParams }: { searchParams: Prom
             </li>
           ))}
         </ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

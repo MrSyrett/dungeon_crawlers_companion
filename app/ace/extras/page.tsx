@@ -8,6 +8,8 @@ import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
   nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery,
 } from "@/components/AceRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/ace/extras";
@@ -46,13 +48,8 @@ function hbToExtra(data: Record<string, unknown>, name: string): Row {
   };
 }
 
-function matches(e: Row, q: string, book: string, type: string): boolean {
-  if (book && e.setting !== book) return false;
-  if (type && e.type !== type) return false;
-  if (!q) return true;
-  const hay = [e.name, e.type, e.description ?? "", ...e.notes, ...e.attacks.map((a) => a.name)].join(" ").toLowerCase();
-  return hay.includes(q);
-}
+const hay = (e: Row): string =>
+  [e.name, e.type, e.description ?? "", ...e.notes, ...e.attacks.map((a) => a.name)].join(" ").toLowerCase();
 
 function Stat({ label, value, focus }: { label: string; value: number | null | undefined; focus?: { name: string; dice?: number }[] }) {
   return (
@@ -85,8 +82,15 @@ export default async function AceExtrasPage({ searchParams }: { searchParams: Pr
   const type = TYPES.some((t) => t.key === one(raw.type)) ? one(raw.type) : "";
   const needle = q.toLowerCase();
   const current: Query = { q, book, type };
-  const results = ALL.filter((e) => matches(e, needle, book, type));
   const filtered = Boolean(needle || book || type);
+
+  // Every extra is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = ALL;
+  const facets = (e: Row) => ({ book: e.setting, type: e.type });
+  const show = (e: Row) => facetMatch(facets(e), current) && (!needle || hay(e).includes(needle));
+  const shown = list.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -96,19 +100,17 @@ export default async function AceExtrasPage({ searchParams }: { searchParams: Pr
         <HomebrewEditor kind="ace-extra" campaigns={campaigns} initial={hbOwn} />
       </div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search extras…" hidden={{ book, type }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />
       <ChipRow label="Type" base={BASE} current={current} param="type" options={TYPES} active={type} />
-      <CountLine count={results.length} noun="extra" base={BASE} filtered={filtered} />
-
-      {results.length === 0 ? (
-        <EmptyState noun="extra" base={BASE} />
-      ) : (
+      <CountLine count={shown} noun="extra" base={BASE} filtered={filtered} />
+      <EmptyState noun="extra" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {results.map((e) => {
+          {list.map((e) => {
             const fo = (stat: string) => e.focuses.filter((f) => f.stat === stat);
             return (
-              <li key={`${e.homebrew ? "hb" : "bk"}-${e.setting}-${e.name}-${e.page}`} className={cardCls}>
+              <li key={`${e.homebrew ? "hb" : "bk"}-${e.setting}-${e.name}-${e.page}`} className={cardCls} hidden={!show(e)} data-f={facetAttr(facets(e))}>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h2 className={nameCls}>{e.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{e.type}</span>
@@ -150,7 +152,7 @@ export default async function AceExtrasPage({ searchParams }: { searchParams: Pr
             );
           })}
         </ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

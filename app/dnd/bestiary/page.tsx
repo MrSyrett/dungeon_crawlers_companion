@@ -5,6 +5,8 @@ import type { DndMonster, DndMonsterAction } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, withParams, type RawQuery } from "@/components/DndRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/bestiary";
@@ -114,44 +116,43 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
     );
   }
 
-  let list = allMonsters.slice();
-  if (src === "hb") list = list.filter(isHb);
-  if (src === "book") list = list.filter((m) => !isHb(m));
-  if (group) list = list.filter((m) => m.group === group);
-  if (cr) list = list.filter((m) => m.cr === cr);
-  if (q) { const n = q.toLowerCase(); list = list.filter((m) => m.name.toLowerCase().includes(n) || m.type.toLowerCase().includes(n)); }
-  list.sort((a, b) => crVal(a.cr) - crVal(b.cr) || a.name.localeCompare(b.name));
-
+  // Every creature is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const list = allMonsters.slice().sort((a, b) => crVal(a.cr) - crVal(b.cr) || a.name.localeCompare(b.name));
   const current = { q, group, cr, src };
   const filtered = !!(q || group || cr || src);
+  const facets = (m: DndMonster) => ({ group: m.group, cr: m.cr, src: isHb(m) ? "hb" : "book" });
+  const n = q.toLowerCase();
+  const show = (m: DndMonster) => facetMatch(facets(m), current) && (!n || m.name.toLowerCase().includes(n) || m.type.toLowerCase().includes(n));
+  const shown = list.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <DndHeader title="Bestiary" subtitle={`${DND_MONSTERS.length} creatures${hbMonsters.length ? ` + ${hbMonsters.length} homebrew` : ""} · CR 0–30`} />
       <DndHomebrewEditor kind="dnd-monster" campaigns={campaigns} initial={hbOwn} />
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search creatures by name or type…" hidden={{ group, cr, src }} />
       <ChipRow label="Type" base={BASE} current={current} param="group" options={groups.map((g) => ({ key: g, label: g }))} active={group} />
       <ChipRow label="CR" base={BASE} current={current} param="cr" options={crs.map((c) => ({ key: c, label: c }))} active={cr} />
       <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} />
-      <CountLine count={list.length} noun="creature" base={BASE} filtered={filtered} />
-      {list.length === 0 ? (
-        <EmptyState noun="creature" base={BASE} />
-      ) : (
-        <ul className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((m, i) => (
-            <li key={`${m.name}-${i}`} className={cardCls}>
-              <a href={withParams(BASE, current, { m: m.name })} className="text-base font-bold uppercase tracking-[0.1em] text-[#f0a37f] hover:underline">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</a>
-              <p className="mt-0.5 text-[11px] italic text-[var(--muted)]">{m.size} {m.type}</p>
-              <p className="mt-1.5 flex flex-wrap gap-2 text-[11px] text-[var(--muted)]">
-                <span><span className="font-semibold text-[var(--text)]">CR</span> {m.cr}</span>
-                <span><span className="font-semibold text-[var(--text)]">AC</span> {m.ac}</span>
-                <span><span className="font-semibold text-[var(--text)]">HP</span> {m.hp}</span>
-                {m.legendaryActions?.length ? <span className="text-[#e8c84a]">Legendary</span> : null}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
+      <CountLine count={shown} noun="creature" base={BASE} filtered={filtered} />
+      <EmptyState noun="creature" base={BASE} hidden={shown > 0} />
+      <ul className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((m, i) => (
+          <li key={`${m.name}-${i}`} className={cardCls} hidden={!show(m)} data-f={facetAttr(facets(m))}>
+            <a href={withParams(BASE, {}, { m: m.name })} className="text-base font-bold uppercase tracking-[0.1em] text-[#f0a37f] hover:underline">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</a>
+            <p className="mt-0.5 text-[11px] italic text-[var(--muted)]">{m.size} {m.type}</p>
+            <p className="mt-1.5 flex flex-wrap gap-2 text-[11px] text-[var(--muted)]">
+              <span><span className="font-semibold text-[var(--text)]">CR</span> {m.cr}</span>
+              <span><span className="font-semibold text-[var(--text)]">AC</span> {m.ac}</span>
+              <span><span className="font-semibold text-[var(--text)]">HP</span> {m.hp}</span>
+              {m.legendaryActions?.length ? <span className="text-[#e8c84a]">Legendary</span> : null}
+            </p>
+          </li>
+        ))}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

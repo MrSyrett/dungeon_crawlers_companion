@@ -7,6 +7,8 @@ import type { KobStrength, KobFlaw, KobBook } from "@/lib/data/kob-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { KobHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, isBook, bookName, one, nameCls, cardCls, bookBadge, hbBadge, type Query, type RawQuery } from "@/components/KobRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/kob/strengths";
@@ -57,10 +59,26 @@ export default async function KobStrengthsPage({ searchParams }: { searchParams:
   const kind = KINDS.some((k) => k.key === one(raw.kind)) ? one(raw.kind) : "";
   const needle = q.toLowerCase();
   const current: Query = { q, book, kind };
-  const strengths = kind === "flaw" ? [] : ALL_STRENGTHS.filter((s) => (!book || s.book === book) && (!needle || (s.name + " " + s.description).toLowerCase().includes(needle)));
-  const flaws = kind === "strength" ? [] : ALL_FLAWS.filter((f) => (!book || f.book === book) && (!needle || (f.name + " " + (f.description ?? "")).toLowerCase().includes(needle)));
+  // Every strength and flaw is rendered; the chips filter on the client
+  // (InstantFilter). `show*` applies the URL's filters for the initial paint,
+  // through the same facet match the client uses. The "Show" chip is a facet
+  // too: a strength is kind "strength", a flaw kind "flaw".
+  const sFacets = (s: SRow) => ({ kind: "strength", book: s.book });
+  const showS = (s: SRow) => facetMatch(sFacets(s), current) && (!needle || (s.name + " " + s.description).toLowerCase().includes(needle));
+
+  // One entry per distinct flaw NAME, as before — but built from every flaw now,
+  // so a name that appears in several books gets all of them as its book facet.
+  const flawNames = [...new Set(ALL_FLAWS.map((f) => f.name))].sort();
+  const flawGroups = flawNames.map((n) => {
+    const rows = ALL_FLAWS.filter((f) => f.name === n);
+    return { name: n, rows, desc: rows.find((f) => f.description)?.description, isHb: rows.some((f) => f.homebrew) };
+  });
+  type FlawGroup = (typeof flawGroups)[number];
+  const fFacets = (g: FlawGroup) => ({ kind: "flaw", book: [...new Set(g.rows.map((r) => r.book))] });
+  const showF = (g: FlawGroup) => facetMatch(fFacets(g), current) && (!needle || g.rows.some((f) => (f.name + " " + (f.description ?? "")).toLowerCase().includes(needle)));
+
+  const shown = ALL_STRENGTHS.filter(showS).length + flawGroups.filter(showF).length;
   const filtered = Boolean(needle || book || kind);
-  const flawNames = [...new Set(flaws.map((f) => f.name))].sort();
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -79,43 +97,36 @@ export default async function KobStrengthsPage({ searchParams }: { searchParams:
           </div>
         ))}
       </div>
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search strengths and flaws…" hidden={{ book, kind }} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />
       <ChipRow label="Show" base={BASE} current={current} param="kind" options={KINDS} active={kind} />
-      <CountLine count={strengths.length + flaws.length} noun="entry" base={BASE} filtered={filtered} />
-      {strengths.length + flaws.length === 0 ? <EmptyState noun="entry" base={BASE} /> : null}
-      {strengths.length ? (
-        <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {strengths.map((s) => (
-            <li key={`${s.homebrew ? "hb" : "bk"}-${s.book}-${s.name}`} className={cardCls}>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className={nameCls}>{s.name}</h2>
-                <span className="font-mono text-[11px] text-[var(--muted)]">{s.cost}</span>
-                {s.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={bookBadge}>{bookName(s.book)} · p.{s.page}</span>}
-              </div>
-              <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{s.description}</p>
+      <CountLine count={shown} noun="entry" base={BASE} filtered={filtered} />
+      <EmptyState noun="entry" base={BASE} hidden={shown > 0} />
+      <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+        {ALL_STRENGTHS.map((s) => (
+          <li key={`${s.homebrew ? "hb" : "bk"}-${s.book}-${s.name}`} className={cardCls} hidden={!showS(s)} data-f={facetAttr(sFacets(s))}>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className={nameCls}>{s.name}</h2>
+              <span className="font-mono text-[11px] text-[var(--muted)]">{s.cost}</span>
+              {s.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={bookBadge}>{bookName(s.book)} · p.{s.page}</span>}
+            </div>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{s.description}</p>
+          </li>
+        ))}
+      </ul>
+      <section className={`${cardCls} mt-4`} data-section hidden={!flawGroups.some(showF)}>
+        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">Flaws{book ? ` · ${bookName(book)}` : ""}</h2>
+        <p className="mt-1 text-[12px] text-[var(--muted)]">Any Flaw is fair game as long as it won&rsquo;t spoil anyone else&rsquo;s fun; talk to the GM to invent your own.</p>
+        <ul className="mt-3 flex flex-wrap gap-2">
+          {flawGroups.map((g) => (
+            <li key={g.name} className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-1.5 text-[13px] text-[var(--text)]" title={g.desc ?? ""} hidden={!showF(g)} data-f={facetAttr(fFacets(g))} data-s={g.rows.map((f) => f.description ?? "").join(" ")}>
+              {g.name}{g.isHb ? <span className={`ml-2 ${hbBadge}`}>Homebrew</span> : !book ? <span className="ml-2 text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">{g.rows.map((r) => bookName(r.book).replace("Kids ", "").replace("on ", "").replace("in ", "")).join(" · ")}</span> : null}
             </li>
           ))}
         </ul>
-      ) : null}
-      {flaws.length ? (
-        <section className={`${cardCls} mt-4`}>
-          <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">Flaws{book ? ` · ${bookName(book)}` : ""}</h2>
-          <p className="mt-1 text-[12px] text-[var(--muted)]">Any Flaw is fair game as long as it won&rsquo;t spoil anyone else&rsquo;s fun; talk to the GM to invent your own.</p>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {flawNames.map((n) => {
-              const rows = flaws.filter((f) => f.name === n);
-              const desc = rows.find((f) => f.description)?.description;
-              const isHb = rows.some((f) => f.homebrew);
-              return (
-                <li key={n} className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-1.5 text-[13px] text-[var(--text)]" title={desc ?? ""}>
-                  {n}{isHb ? <span className={`ml-2 ${hbBadge}`}>Homebrew</span> : !book ? <span className="ml-2 text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">{rows.map((r) => bookName(r.book).replace("Kids ", "").replace("on ", "").replace("in ", "")).join(" · ")}</span> : null}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
+      </section>
+      </InstantFilter>
     </div>
   );
 }

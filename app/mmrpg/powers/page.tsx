@@ -7,6 +7,8 @@ import {
   MmrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, RefDetails, cardCls, nameCls, badge, hbBadge,
   one, type Query, type RawQuery,
 } from "@/components/MmrpgRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/mmrpg/powers";
@@ -38,11 +40,15 @@ export default async function MmrpgPowersPage({ searchParams }: { searchParams: 
   const setOpts = sets.map((s) => ({ key: s, label: s === "None" ? "Basic" : s }));
   const set = sets.includes(one(raw.set)) ? one(raw.set) : "";
   const current: Query = { q, set };
-  const results = ALL.filter((p) =>
-    (!set || p.powerSet === set) &&
-    (!needle || [p.name, p.powerSet, p.effect, p.prerequisites ?? ""].join(" ").toLowerCase().includes(needle)),
-  );
-  const groups = sets.filter((s) => results.some((p) => p.powerSet === s));
+  // Every power is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses.
+  const facets = (p: Row) => ({ set: p.powerSet });
+  const show = (p: Row) =>
+    facetMatch(facets(p), current) &&
+    (!needle || [p.name, p.powerSet, p.effect, p.prerequisites ?? ""].join(" ").toLowerCase().includes(needle));
+  const shown = ALL.filter(show).length;
+  const groups = sets.filter((s) => ALL.some((p) => p.powerSet === s));
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -50,17 +56,18 @@ export default async function MmrpgPowersPage({ searchParams }: { searchParams: 
 
       <div className="mb-6"><HomebrewEditor kind="mmrpg-power" campaigns={campaigns} initial={hbOwn} /></div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search powers…" hidden={{ set }} />
       <ChipRow label="Power set" base={BASE} current={current} param="set" options={setOpts} active={set} />
-      <CountLine count={results.length} noun="power" base={BASE} filtered={Boolean(needle || set)} />
+      <CountLine count={shown} noun="power" base={BASE} filtered={Boolean(needle || set)} />
 
-      {results.length === 0 ? <EmptyState noun="power" base={BASE} /> : null}
+      <EmptyState noun="power" base={BASE} hidden={shown > 0} />
       {groups.map((s) => (
-        <section key={s} className={`${cardCls} mb-4`}>
+        <section key={s} className={`${cardCls} mb-4`} data-section hidden={!ALL.some((p) => p.powerSet === s && show(p))}>
           <SectionH>{s === "None" ? "Basic Powers" : s}</SectionH>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
-            {results.filter((p) => p.powerSet === s).map((p) => (
-              <article key={`${p.homebrew ? "hb" : "bk"}-${p.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
+            {ALL.filter((p) => p.powerSet === s).map((p) => (
+              <article key={`${p.homebrew ? "hb" : "bk"}-${p.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={!show(p)} data-f={facetAttr(facets(p))} data-s={`${p.powerSet} ${p.prerequisites ?? ""}`}>
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h3 className={nameCls}>{p.name}</h3>
                   {p.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
@@ -82,6 +89,7 @@ export default async function MmrpgPowersPage({ searchParams }: { searchParams: 
           </div>
         </section>
       ))}
+      </InstantFilter>
     </div>
   );
 }

@@ -6,6 +6,8 @@ import type { NimbleMonster } from "@/lib/data/nimble-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, type Query, type RawQuery } from "@/components/NimbleRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/nimble/bestiary";
@@ -56,20 +58,28 @@ export default async function NimbleBestiaryPage({ searchParams }: { searchParam
   const fam = FAMILIES.some((f) => f.key === one(raw.fam)) ? one(raw.fam) : "";
   const kind = ["regular", "legendary", "minion"].includes(one(raw.kind)) ? one(raw.kind) : "";
   const current: Query = { q, fam, kind };
-  const results = ALL.filter((m) => (!fam || m.family === fam) && (!kind || (kind === "legendary" ? m.legendary : kind === "minion" ? m.minion : !m.legendary)) && (!needle || [m.name, m.family, m.description ?? "", ...m.abilities.map((a) => a.name + " " + a.text)].join(" ").toLowerCase().includes(needle))).sort((a, b) => levelNum(a.level) - levelNum(b.level) || a.name.localeCompare(b.name));
+  // Every monster is rendered; the chips filter on the client (InstantFilter).
+  // `show` applies the URL's filters for the initial paint, through the same
+  // facet match the client uses. "Regular" means "not legendary", so a minion
+  // that isn't legendary matches both chips — hence the array facet.
+  const results = ALL.slice().sort((a, b) => levelNum(a.level) - levelNum(b.level) || a.name.localeCompare(b.name));
+  const facets = (m: MonRow) => ({ fam: m.family, kind: [m.legendary ? "legendary" : "regular", ...(m.minion ? ["minion"] : [])] });
+  const show = (m: MonRow) => facetMatch(facets(m), current) && (!needle || [m.name, m.family, m.description ?? "", ...m.abilities.map((a) => a.name + " " + a.text)].join(" ").toLowerCase().includes(needle));
+  const shown = results.filter(show).length;
   const famInfo = fam ? NIMBLE_FAMILIES.find((f) => f.name === fam) : null;
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Bestiary" subtitle={`${NIMBLE_MONSTERS.length} monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · ${NIMBLE_FAMILIES.length} families`} />
       <div className="mb-6"><HomebrewEditor kind="nimble-monster" campaigns={campaigns} initial={hbOwn} /></div>
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search monsters…" hidden={{ fam, kind }} />
       <ChipRow label="Family" base={BASE} current={current} param="fam" options={FAMILIES} active={fam} />
       <ChipRow label="Kind" base={BASE} current={current} param="kind" options={[{ key: "regular", label: "Regular" }, { key: "legendary", label: "Legendary" }, { key: "minion", label: "Minions" }]} active={kind} />
       {famInfo ? <section className={`${cardCls} mb-4`}><h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#9fe3bd]">{famInfo.name}</h2><p className="mt-1 text-[12px] italic text-[var(--muted)]">{famInfo.blurb}</p>{famInfo.trait ? <p className="mt-1 text-[12px] text-[var(--text)]">{famInfo.trait}</p> : null}{famInfo.sampleEncounters?.length ? <ul className="mt-2 text-[12px] text-[var(--muted)]">{famInfo.sampleEncounters.map((s, i) => <li key={i}>{s}</li>)}</ul> : null}{famInfo.loot ? <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Loot:</span> {famInfo.loot}</p> : null}</section> : null}
-      <CountLine count={results.length} noun="monster" base={BASE} filtered={Boolean(needle || fam || kind)} />
-      {results.length === 0 ? <EmptyState noun="monster" base={BASE} /> : (
+      <CountLine count={shown} noun="monster" base={BASE} filtered={Boolean(needle || fam || kind)} />
+      <EmptyState noun="monster" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">{results.map((m) => (
-          <li key={`${m.homebrew ? "hb" : "bk"}-${m.family}-${m.name}`} className={cardCls}>
+          <li key={`${m.homebrew ? "hb" : "bk"}-${m.family}-${m.name}`} className={cardCls} hidden={!show(m)} data-f={facetAttr(facets(m))} data-s={m.family}>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className={nameCls}>{m.name}</h2>
               <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Lvl {m.level}{m.legendary ? " Solo" : ""}{m.size ? ` · ${m.size}` : ""}</span>
@@ -80,7 +90,7 @@ export default async function NimbleBestiaryPage({ searchParams }: { searchParam
             {m.familyTrait ? <p className="mt-1 text-[12px] text-[var(--muted)]">{m.familyTrait}</p> : null}
             <ul className="mt-2 flex flex-col gap-1">{m.abilities.map((a, i) => <li key={i} className="text-[13px] leading-relaxed text-[var(--text)]"><span className="font-semibold">{a.name}.</span> <span className="text-[var(--muted)]">{a.text}</span></li>)}</ul>
           </li>))}</ul>
-      )}
+      </InstantFilter>
     </div>
   );
 }

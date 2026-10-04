@@ -6,6 +6,8 @@ import type { SwWeapon, SwGear, SwBook } from "@/lib/data/sw-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, hbBadge, code, one, BookTag, type Query, type RawQuery } from "@/components/SwRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/sw/equipment";
@@ -72,9 +74,17 @@ export default async function SwEquipmentPage({ searchParams }: { searchParams: 
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
   const cat = CATS.some((c) => c.key === one(raw.cat)) ? one(raw.cat) : "";
   const current: Query = { q, cat };
-  const weapons = ALL_WEAPONS.filter((w) => (!cat || cat === "w:" + w.kind) && (!needle || [w.name, w.kind, w.notes ?? "", w.skill ?? "", w.damageText ?? ""].join(" ").toLowerCase().includes(needle)));
-  const gear = ALL_GEAR.filter((g) => (!cat || cat === "g:" + g.category) && (!needle || [g.name, g.category, g.description, g.stats ?? ""].join(" ").toLowerCase().includes(needle)));
-  const count = weapons.length + gear.length;
+  // Every weapon and item is rendered; the Type chip and the search filter on
+  // the client (InstantFilter). `show*` applies the URL's filters for the
+  // initial paint, through the same facet match the client uses. One chip row
+  // covers both lists, so a row's facet carries the chip's own "w:"/"g:" key.
+  const weapons = ALL_WEAPONS;
+  const gear = ALL_GEAR;
+  const weaponFacets = (w: WeaponRow) => ({ cat: "w:" + w.kind });
+  const gearFacets = (g: GearRow) => ({ cat: "g:" + g.category });
+  const showWeapon = (w: WeaponRow) => facetMatch(weaponFacets(w), current) && (!needle || [w.name, w.kind, w.notes ?? "", w.skill ?? "", w.damageText ?? ""].join(" ").toLowerCase().includes(needle));
+  const showGear = (g: GearRow) => facetMatch(gearFacets(g), current) && (!needle || [g.name, g.category, g.description, g.stats ?? ""].join(" ").toLowerCase().includes(needle));
+  const shown = weapons.filter(showWeapon).length + gear.filter(showGear).length;
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <SwHeader title="Weapons & Equipment" subtitle={`${SW_WEAPONS.length} weapons · ${SW_GEAR.length} items of gear${hbCount ? ` + ${hbCount} homebrew` : ""}`} />
@@ -82,28 +92,30 @@ export default async function SwEquipmentPage({ searchParams }: { searchParams: 
         <HomebrewEditor kind="sw-weapon" campaigns={campaigns} initial={hbWeaponsOwn} />
         <HomebrewEditor kind="sw-gear" campaigns={campaigns} initial={hbGearOwn} />
       </div>
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search weapons & gear…" hidden={{ cat }} />
       <ChipRow label="Type" base={BASE} current={current} param="cat" options={CATS} active={cat} />
-      <CountLine count={count} noun="item" base={BASE} filtered={Boolean(needle || cat)} />
-      {count === 0 ? <EmptyState noun="item" base={BASE} /> : null}
-      {WEAPON_KINDS.filter((k) => weapons.some((w) => w.kind === k)).map((k) => (
-        <section key={k} className={`${cardCls} mb-4`}>
+      <CountLine count={shown} noun="item" base={BASE} filtered={Boolean(needle || cat)} />
+      <EmptyState noun="item" base={BASE} hidden={shown > 0} />
+      {WEAPON_KINDS.map((k) => (
+        <section key={k} className={`${cardCls} mb-4`} data-section>
           <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0c020]">{k} weapons</h2>
           <div className="mt-2 overflow-x-auto"><table className="w-full text-[12px]">
             <thead><tr className="text-left text-[9px] uppercase tracking-[0.12em] text-[var(--muted)]"><th className="py-1 pr-3">Weapon</th><th className="py-1 pr-3">Damage</th><th className="py-1 pr-3">Range</th><th className="py-1 pr-3">Skill</th><th className="py-1 pr-3">Notes</th><th className="py-1">Cost</th></tr></thead>
-            <tbody>{weapons.filter((w) => w.kind === k).map((w) => <tr key={`${w.homebrew ? "hb" : "bk"}-${w.name}-${w.book}`} className="border-t border-[var(--border)] align-top"><td className="py-1.5 pr-3 font-semibold text-[var(--text)]">{w.name}{w.homebrew ? <span className={`${hbBadge} ml-2`}>Homebrew</span> : <BookTag book={w.book} />}</td><td className="py-1.5 pr-3 whitespace-nowrap font-mono text-[#f0c020]">{w.damageText ?? code(w.damage)}</td><td className="py-1.5 pr-3 whitespace-nowrap font-mono text-[var(--muted)]">{w.range ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{w.skill ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{[w.notes, w.availability].filter(Boolean).join(" · ")}</td><td className="py-1.5 whitespace-nowrap text-[var(--muted)]">{w.cost ?? ""}</td></tr>)}</tbody>
+            <tbody>{weapons.filter((w) => w.kind === k).map((w) => <tr key={`${w.homebrew ? "hb" : "bk"}-${w.name}-${w.book}`} className="border-t border-[var(--border)] align-top" hidden={!showWeapon(w)} data-f={facetAttr(weaponFacets(w))} data-s={w.kind}><td className="py-1.5 pr-3 font-semibold text-[var(--text)]">{w.name}{w.homebrew ? <span className={`${hbBadge} ml-2`}>Homebrew</span> : <BookTag book={w.book} />}</td><td className="py-1.5 pr-3 whitespace-nowrap font-mono text-[#f0c020]">{w.damageText ?? code(w.damage)}</td><td className="py-1.5 pr-3 whitespace-nowrap font-mono text-[var(--muted)]">{w.range ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{w.skill ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{[w.notes, w.availability].filter(Boolean).join(" · ")}</td><td className="py-1.5 whitespace-nowrap text-[var(--muted)]">{w.cost ?? ""}</td></tr>)}</tbody>
           </table></div>
         </section>
       ))}
-      {GEAR_CATS.filter((c) => gear.some((g) => g.category === c)).map((c) => (
-        <section key={c} className={`${cardCls} mb-4`}>
+      {GEAR_CATS.map((c) => (
+        <section key={c} className={`${cardCls} mb-4`} data-section>
           <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0c020]">{c}</h2>
           <div className="mt-2 overflow-x-auto"><table className="w-full text-[12px]">
             <thead><tr className="text-left text-[9px] uppercase tracking-[0.12em] text-[var(--muted)]"><th className="py-1 pr-3">Item</th><th className="py-1 pr-3">Stats</th><th className="py-1 pr-3">Description</th><th className="py-1">Cost</th></tr></thead>
-            <tbody>{gear.filter((g) => g.category === c).map((g) => <tr key={`${g.homebrew ? "hb" : "bk"}-${g.name}-${g.book}`} className="border-t border-[var(--border)] align-top"><td className="py-1.5 pr-3 font-semibold text-[var(--text)]">{g.name}{g.homebrew ? <span className={`${hbBadge} ml-2`}>Homebrew</span> : <BookTag book={g.book} />}</td><td className="py-1.5 pr-3 font-mono text-[#f0c020]">{g.stats ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{g.description}</td><td className="py-1.5 whitespace-nowrap text-[var(--muted)]">{g.cost ?? ""}</td></tr>)}</tbody>
+            <tbody>{gear.filter((g) => g.category === c).map((g) => <tr key={`${g.homebrew ? "hb" : "bk"}-${g.name}-${g.book}`} className="border-t border-[var(--border)] align-top" hidden={!showGear(g)} data-f={facetAttr(gearFacets(g))} data-s={g.category}><td className="py-1.5 pr-3 font-semibold text-[var(--text)]">{g.name}{g.homebrew ? <span className={`${hbBadge} ml-2`}>Homebrew</span> : <BookTag book={g.book} />}</td><td className="py-1.5 pr-3 font-mono text-[#f0c020]">{g.stats ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{g.description}</td><td className="py-1.5 whitespace-nowrap text-[var(--muted)]">{g.cost ?? ""}</td></tr>)}</tbody>
           </table></div>
         </section>
       ))}
+      </InstantFilter>
     </div>
   );
 }

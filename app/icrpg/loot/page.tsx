@@ -9,6 +9,8 @@ import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, nameCls, badge, hbBadge,
   WORLDS, worldName, one, type Query, type RawQuery,
 } from "@/components/IcrpgRef";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/icrpg/loot";
@@ -48,11 +50,19 @@ export default async function IcrpgLootPage({ searchParams }: { searchParams: Pr
   const world = WORLDS.some((w) => w.key === one(raw.world)) ? one(raw.world) : "";
   const current: Query = { q, world };
 
-  // Loot tables aren't world-tagged, so the world chip only narrows Gear.
-  const loot = lootRows.filter((l) => !needle || [l.name, l.table, l.desc, (l.effects ?? []).join(" ")].join(" ").toLowerCase().includes(needle)).sort((a, b) => a.name.localeCompare(b.name, "en"));
-  const gear = gearRows.filter((g) => (!world || (g.world || "core") === world) && (!needle || [g.name, g.category, g.desc, (g.effects ?? []).join(" ")].join(" ").toLowerCase().includes(needle))).sort((a, b) => a.name.localeCompare(b.name, "en"));
-  const showLoot = !world; // hide loot section when a world is selected
-  const total = (showLoot ? loot.length : 0) + gear.length;
+  // Every row is rendered; the World chip and the search filter on the client
+  // (InstantFilter). `show*` applies the URL's filters for the initial paint,
+  // through the same facet match the client uses.
+  const loot = lootRows.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const gear = gearRows.slice().sort((a, b) => a.name.localeCompare(b.name, "en"));
+  // Loot tables aren't world-tagged, so the world chip only narrows Gear: an
+  // empty facet means a loot row matches no World chip at all (the section's
+  // heading hides with its rows).
+  const lootFacets = () => ({ world: [] as string[] });
+  const gearFacets = (g: GearRow) => ({ world: g.world || "core" });
+  const showLootRow = (l: LootRow) => facetMatch(lootFacets(), current) && (!needle || [l.name, l.table, l.desc, (l.effects ?? []).join(" ")].join(" ").toLowerCase().includes(needle));
+  const showGearRow = (g: GearRow) => facetMatch(gearFacets(g), current) && (!needle || [g.name, g.category, g.desc, (g.effects ?? []).join(" ")].join(" ").toLowerCase().includes(needle));
+  const shown = loot.filter(showLootRow).length + gear.filter(showGearRow).length;
   const filtered = Boolean(needle || world);
 
   return (
@@ -64,52 +74,47 @@ export default async function IcrpgLootPage({ searchParams }: { searchParams: Pr
         <HomebrewEditor kind="icrpg-gear" campaigns={campaigns} initial={ownGear} />
       </div>
 
+      <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search loot &amp; gear…" hidden={{ world }} />
       <ChipRow label="World (gear)" base={BASE} current={current} param="world" options={WORLDS} active={world} />
-      <CountLine count={total} noun="entry" base={BASE} filtered={filtered} />
+      <CountLine count={shown} noun="entry" base={BASE} filtered={filtered} />
 
-      {total === 0 ? (
-        <EmptyState noun="item" base={BASE} />
-      ) : (
-        <>
-          {showLoot && loot.length ? (
-            <section className="mb-8">
-              <SectionH>Loot Tables</SectionH>
-              <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-                {loot.map((l) => (
-                  <li key={`${l.homebrew ? "hb" : "bk"}-l-${l.table}-${l.name}`} className={cardCls}>
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h3 className={nameCls}>{l.name}</h3>
-                      {l.roll ? <span className="font-mono text-[11px] text-[#e8823c]">{l.roll}</span> : null}
-                      {l.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{l.table}</span>}
-                    </div>
-                    {l.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{l.desc}</p> : null}
-                    {l.effects?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Effects:</span> {l.effects.join(", ")}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-          {gear.length ? (
-            <section>
-              <SectionH>Gear</SectionH>
-              <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-                {gear.map((g) => (
-                  <li key={`${g.homebrew ? "hb" : "bk"}-g-${g.name}`} className={cardCls}>
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h3 className={nameCls}>{g.name}</h3>
-                      <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{g.category}</span>
-                      {g.homebrew ? <span className={hbBadge}>Homebrew</span> : (g.world && g.world !== "core") ? <span className={badge}>{worldName(g.world)}</span> : null}
-                    </div>
-                    {g.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{g.desc}</p> : null}
-                    {g.effects?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Effects:</span> {g.effects.join(", ")}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </>
-      )}
+      <EmptyState noun="item" base={BASE} hidden={shown > 0} />
+      <>
+        <section className="mb-8" data-section>
+          <SectionH>Loot Tables</SectionH>
+          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+            {loot.map((l) => (
+              <li key={`${l.homebrew ? "hb" : "bk"}-l-${l.table}-${l.name}`} className={cardCls} hidden={!showLootRow(l)} data-f={facetAttr(lootFacets())} data-s={l.table}>
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className={nameCls}>{l.name}</h3>
+                  {l.roll ? <span className="font-mono text-[11px] text-[#e8823c]">{l.roll}</span> : null}
+                  {l.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{l.table}</span>}
+                </div>
+                {l.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{l.desc}</p> : null}
+                {l.effects?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Effects:</span> {l.effects.join(", ")}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section data-section>
+          <SectionH>Gear</SectionH>
+          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+            {gear.map((g) => (
+              <li key={`${g.homebrew ? "hb" : "bk"}-g-${g.name}`} className={cardCls} hidden={!showGearRow(g)} data-f={facetAttr(gearFacets(g))}>
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className={nameCls}>{g.name}</h3>
+                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{g.category}</span>
+                  {g.homebrew ? <span className={hbBadge}>Homebrew</span> : (g.world && g.world !== "core") ? <span className={badge}>{worldName(g.world)}</span> : null}
+                </div>
+                {g.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{g.desc}</p> : null}
+                {g.effects?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Effects:</span> {g.effects.join(", ")}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </>
+      </InstantFilter>
     </div>
   );
 }
