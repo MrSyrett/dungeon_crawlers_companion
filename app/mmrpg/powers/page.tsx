@@ -81,7 +81,7 @@ export default async function MmrpgPowersPage({ searchParams }: { searchParams: 
                 {p.effect || p.fantastic ? (
                   <RefDetails>
                     {p.effect ? <p className="text-[12px] leading-relaxed text-[var(--muted)]">{p.effect}</p> : null}
-                    {p.fantastic ? <p className="mt-2 text-[11px] leading-relaxed text-[#f4737a]"><span className="font-semibold">Fantastic:</span> {p.fantastic}</p> : null}
+                    {p.fantastic ? <p className="mt-2 text-[11px] leading-relaxed text-[var(--sys-link)]"><span className="font-semibold">Fantastic:</span> {p.fantastic}</p> : null}
                   </RefDetails>
                 ) : null}
               </article>

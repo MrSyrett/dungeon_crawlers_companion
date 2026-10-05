@@ -90,7 +90,7 @@ export default async function KobStrengthsPage({ searchParams }: { searchParams:
       <div className="mb-5 grid gap-2 md:grid-cols-3">
         {KOB_BOOKS.map((b) => (
           <div key={b.key} className={cardCls}>
-            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">{b.name}</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{b.name}</div>
             <ul className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">
               {b.ageGroups.map((a) => <li key={a.name}><span className="font-semibold text-[var(--text)]">{a.name}:</span> +1 {a.statBonus.join(" & ")} · {a.freeStrength}</li>)}
             </ul>
@@ -116,7 +116,7 @@ export default async function KobStrengthsPage({ searchParams }: { searchParams:
         ))}
       </ul>
       <section className={`${cardCls} mt-4`} data-section hidden={!flawGroups.some(showF)}>
-        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">Flaws{book ? ` · ${bookName(book)}` : ""}</h2>
+        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--bad)]">Flaws{book ? ` · ${bookName(book)}` : ""}</h2>
         <p className="mt-1 text-[12px] text-[var(--muted)]">Any Flaw is fair game as long as it won&rsquo;t spoil anyone else&rsquo;s fun; talk to the GM to invent your own.</p>
         <ul className="mt-3 flex flex-wrap gap-2">
           {flawGroups.map((g) => (

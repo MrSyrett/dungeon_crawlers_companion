@@ -32,7 +32,7 @@ const chipBase =
   "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 const chipOff =
   "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
-const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
+const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[var(--sys-link)]";
 const badge =
   "rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]";
 
@@ -53,7 +53,7 @@ function Card({ children }: { children: ReactNode }): ReactNode {
 function CardTitle({ name, aside }: { name: string; aside?: ReactNode }): ReactNode {
   return (
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-      <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">{name}</h3>
+      <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{name}</h3>
       {aside}
     </div>
   );
@@ -127,7 +127,7 @@ function SkillLinks({ names }: { names: string[] }): ReactNode {
           <span key={i}>
             <Link
               href={`/dcc/${hit.page}?q=${encodeURIComponent(hit.name)}`}
-              className="text-[#f0a8a3] underline decoration-dotted underline-offset-2 hover:text-[var(--text)]"
+              className="text-[var(--sys-link)] underline decoration-dotted underline-offset-2 hover:text-[var(--text)]"
             >
               {raw}
             </Link>
@@ -193,7 +193,7 @@ function DeitiesSection({ q }: { q: string }): ReactNode {
                 <div className="mt-3 flex flex-col gap-2 border-t border-[var(--border)] pt-3">
                   {d.tiers.map((t) => (
                     <div key={t.tier}>
-                      <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#f0a8a3]">{t.tier}</div>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--sys-link)]">{t.tier}</div>
                       <ul className="mt-1 flex flex-col gap-0.5">
                         {t.benefits.map((b, bi) => (
                           <li key={bi} className="text-[13px] leading-relaxed text-[var(--muted)]">• {b}</li>
@@ -222,7 +222,7 @@ function DebuffsSection({ q }: { q: string }): ReactNode {
       <Grid>
         {rows.map((d, i) => (
           <Card key={`${d.name}-${i}`}>
-            <CardTitle name={d.name} aside={d.stackable ? <span className="rounded border border-[var(--red)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[#f0a8a3]">Stackable</span> : undefined} />
+            <CardTitle name={d.name} aside={d.stackable ? <span className="rounded border border-[var(--red)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">Stackable</span> : undefined} />
             <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{d.effect}</p>
             <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold uppercase tracking-[0.08em]">Duration:</span> {d.duration}</p>
           </Card>
@@ -345,7 +345,7 @@ export default function DccOptions(): ReactNode {
             onClick={() => setTab(t.key)}
             className={`rounded border px-3.5 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] transition-colors ${
               tab === t.key
-                ? "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]"
+                ? "border-[var(--red)] bg-[var(--panel-2)] text-[var(--sys-link)]"
                 : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]"
             }`}
           >

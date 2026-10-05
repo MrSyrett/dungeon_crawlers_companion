@@ -72,7 +72,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
         <ul className="mt-2 space-y-1.5">
           {CO_MARKS.map((m) => (
             <li key={m.name} className="text-[13px] leading-relaxed text-[var(--text)]">
-              <span className="font-semibold text-[#3fc2b0]">{m.name}.</span> {m.desc}
+              <span className="font-semibold text-[var(--sys-link)]">{m.name}.</span> {m.desc}
             </li>
           ))}
         </ul>

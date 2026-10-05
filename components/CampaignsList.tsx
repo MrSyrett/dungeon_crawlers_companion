@@ -111,7 +111,7 @@ export default function CampaignsList({
               aria-label="New campaign name"
               className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--gold)]"
             />
-            <button className="shrink-0 rounded border border-[var(--gold)] bg-[var(--gold)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[#1a1a1a] hover:opacity-90">
+            <button className="shrink-0 rounded border border-[var(--gold)] bg-[var(--gold)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--on-accent)] hover:opacity-90">
               Create
             </button>
           </form>
@@ -204,7 +204,7 @@ export default function CampaignsList({
                           room (external) opens in a new tab. */}
                       <a
                         href={`/play/${c.id}`}
-                        className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[#1a1a1a] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                        className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--on-accent)] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                       >
                         Open VTT
                       </a>
@@ -233,7 +233,7 @@ export default function CampaignsList({
                               : "\n") +
                             `This cannot be undone.`
                           }
-                          className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[#f0a8a3] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                          className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                         >
                           Delete
                         </ConfirmButton>

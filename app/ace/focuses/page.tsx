@@ -77,7 +77,7 @@ export default async function AceFocusesPage({ searchParams }: { searchParams: P
         <div className="flex flex-col gap-4">
           {STATS.map((s) => (
             <section key={s.key} className={cardCls} data-section hidden={!list.some((f) => f.stat === s.key && show(f))}>
-              <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#8ad4ff]">{s.label}</h2>
+              <h2 className="text-base font-bold uppercase tracking-[0.12em]">{s.label}</h2>
               <p className="mt-1 text-[12px] text-[var(--muted)]">{s.blurb}</p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {list.filter((f) => f.stat === s.key).map((f) => (

@@ -57,7 +57,7 @@ export default async function D62eTemplatesPage({ searchParams }: { searchParams
               {Object.entries(t.attributes).map(([k, v]) => (
                 <div key={k}>
                   <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
-                  <dd className="font-mono text-[13px] text-[#ef9455]">{code(v)}</dd>
+                  <dd className="font-mono text-[13px] text-[var(--sys-link)]">{code(v)}</dd>
                 </div>
               ))}
             </dl>

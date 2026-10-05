@@ -48,7 +48,7 @@ export default async function DndSpeciesPage({ searchParams }: { searchParams: P
           {list.map((s, i) => (
             <li key={`${s.name}-${i}`} className={cardCls} hidden={!show(s)} data-f={facetAttr(facets(s))}>
               <div className="flex items-start justify-between gap-2">
-                <a href={`${BASE}?sp=${encodeURIComponent(s.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f] hover:underline">{s.name}</a>
+                <a href={`${BASE}?sp=${encodeURIComponent(s.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:underline">{s.name}</a>
                 <span className={badge}>{sourceLabel[s.source] ?? s.source}</span>
               </div>
               <p className="mt-1 text-[12px] italic text-[var(--muted)]">{s.flavor}</p>
@@ -74,7 +74,7 @@ export default async function DndSpeciesPage({ searchParams }: { searchParams: P
         <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Size:</span> {sizeText(s.size)} · <span className="font-semibold text-[var(--text)]">Speed:</span> {s.speed} ft.{s.darkvision ? <> · <span className="font-semibold text-[var(--text)]">Darkvision:</span> {s.darkvision} ft.</> : null}</p>
       </section>
       <section className={`${cardCls} mt-4`}>
-        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">Traits</h3>
+        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Traits</h3>
         <div className="flex flex-col gap-2">
           {s.traits.map((t, i) => (
             <p key={i} className="text-[12.5px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{t.name}.</span> {t.description}</p>
@@ -83,7 +83,7 @@ export default async function DndSpeciesPage({ searchParams }: { searchParams: P
       </section>
       {s.lineages?.length ? (
         <section className="mt-4">
-          <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">Lineages</h3>
+          <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Lineages</h3>
           <div className="flex flex-col gap-3">
             {s.lineages.map((l) => (
               <div key={l.name} className={cardCls}>

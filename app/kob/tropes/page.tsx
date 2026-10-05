@@ -103,7 +103,7 @@ export default async function KobTropesPage({ searchParams }: { searchParams: Pr
                 ))}
               </div>
               <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Strengths:</span> {t.suggestedStrengths.join(", ")}</p>
-              <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[#f0a8a3]">Flaws:</span> {t.suggestedFlaws.join(", ")}</p>
+              <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--bad)]">Flaws:</span> {t.suggestedFlaws.join(", ")}</p>
               {t.suggestedRide ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Bike:</span> {t.suggestedRide}</p> : null}
               <ol className="mt-2 list-decimal pl-5 text-[12px] leading-relaxed text-[var(--text)]">
                 {t.questions.map((qq, i) => <li key={i}>{qq}</li>)}

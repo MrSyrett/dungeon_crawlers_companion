@@ -91,7 +91,7 @@ function TabBar({ active }: { active: string }) {
           href={`${BASE}?tab=${t.key}`}
           className={`-mb-px rounded-t border-x border-t px-4 py-2 text-[12px] font-bold uppercase tracking-[0.12em] transition-colors ${
             active === t.key
-              ? "border-[var(--border)] bg-[var(--panel)] text-[#f4737a]"
+              ? "border-[var(--border)] bg-[var(--panel)] text-[var(--sys-link)]"
               : "border-transparent text-[var(--muted)] hover:text-[var(--text)]"
           }`}
         >

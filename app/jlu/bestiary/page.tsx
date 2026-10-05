@@ -33,7 +33,7 @@ export default function JluBestiaryPage() {
             <div className="mt-2 flex flex-wrap gap-1.5">
               {ATTR_ORDER.map(([k, lbl]) => (
                 <span key={lbl} className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px]">
-                  <span className="text-[var(--muted)]">{lbl}</span> <span className="font-semibold text-[#5b8dfb]">{sign(c.attributes[k])}</span>
+                  <span className="text-[var(--muted)]">{lbl}</span> <span className="font-semibold text-[var(--sys-link)]">{sign(c.attributes[k])}</span>
                 </span>
               ))}
             </div>
@@ -45,7 +45,7 @@ export default function JluBestiaryPage() {
             {c.attacks?.length ? (
               <div className="mt-1.5 text-[12.5px]">
                 {c.attacks.map((a) => (
-                  <div key={a.name}><span className="font-semibold text-[#5b8dfb]">{a.name}</span> {sign(a.bonus)} · {a.damage}{a.type ? ` (${a.type})` : ""}{a.range ? ` · ${a.range}` : ""}</div>
+                  <div key={a.name}><span className="font-semibold text-[var(--sys-link)]">{a.name}</span> {sign(a.bonus)} · {a.damage}{a.type ? ` (${a.type})` : ""}{a.range ? ` · ${a.range}` : ""}</div>
                 ))}
               </div>
             ) : null}
@@ -54,7 +54,7 @@ export default function JluBestiaryPage() {
             {c.traits?.length ? <p className="mt-1 text-[12px]"><span className="font-semibold text-[var(--jlu)]">Traits:</span> {c.traits.join(", ")}</p> : null}
             {c.equipment?.length ? <p className="mt-1 text-[12px]"><span className="font-semibold text-[var(--jlu)]">Equipment:</span> {c.equipment.join(", ")}</p> : null}
             {(c.abilities || []).concat(c.archetypeSkills || []).map((a) => (
-              <p key={a.name} className="mt-1.5 text-[12px] leading-relaxed"><span className="font-semibold text-[#5b8dfb]">{a.name}:</span> <span className="text-[var(--text)]">{a.text}</span></p>
+              <p key={a.name} className="mt-1.5 text-[12px] leading-relaxed"><span className="font-semibold text-[var(--sys-link)]">{a.name}:</span> <span className="text-[var(--text)]">{a.text}</span></p>
             ))}
             {c.limitations?.length ? c.limitations.map((l) => (
               <p key={l.name} className="mt-1 text-[12px] leading-relaxed"><span className="font-semibold text-[var(--jlu)]">{l.name}:</span> <span className="text-[var(--muted)]">{l.text}</span></p>

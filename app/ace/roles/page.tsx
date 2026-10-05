@@ -86,7 +86,7 @@ export default async function AceRolesPage({ searchParams }: { searchParams: Pro
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{r.name}</h2>
                 <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{r.category}</span>
-                {r.power ? <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8ad4ff]">✦ Power</span> : null}
+                {r.power ? <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">✦ Power</span> : null}
                 {r.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={bookBadge}>{settingName(r.setting)} · p.{r.page}</span>}
               </div>
               <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{r.ability}</p>

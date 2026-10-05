@@ -65,7 +65,7 @@ export default async function AceTraitsPage({ searchParams }: { searchParams: Pr
           {list.map((t) => (
             <li key={`${t.homebrew ? "hb" : "bk"}-${t.setting}-${t.name}`} className={cardCls} hidden={!show(t)} data-f={facetAttr(facets(t))}>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <h2 className="text-[15px] font-bold uppercase tracking-[0.1em] text-[#8ad4ff]">{t.name}</h2>
+                <h2 className="text-[15px] font-bold uppercase tracking-[0.1em]">{t.name}</h2>
                 {t.homebrew ? <span className={hbBadge}>HB</span> : t.setting !== "core" ? <span className={bookBadge}>{settingName(t.setting)}</span> : null}
               </div>
               {t.description ? <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{t.description}</p> : null}

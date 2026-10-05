@@ -76,7 +76,7 @@ export default async function AceGearPage({ searchParams }: { searchParams: Prom
             {ACE_TABLES.purchase.map((p) => (
               <tr key={p.amount} className="border-t border-[var(--border)]">
                 <td className="px-3 py-1.5 text-[var(--text)]">{p.amount}</td>
-                <td className="px-3 py-1.5 font-mono text-[#8ad4ff]">{p.tn ?? "—"}</td>
+                <td className="px-3 py-1.5 font-mono text-[var(--sys-link)]">{p.tn ?? "—"}</td>
                 <td className="px-3 py-1.5 text-[var(--muted)]">{p.examples}</td>
               </tr>
             ))}

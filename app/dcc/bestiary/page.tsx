@@ -93,6 +93,9 @@ const srcBadge =
 
 // Health-bar segment colour, red→orange→yellow→green across the bar — mirrors the
 // GM screen tracker's dccSegColor so a creature reads the same in both places.
+// theme-literal-ok: pinned to mirror the GM screen's own dccSegColor copy. The GM
+// screen is a route handler serving standalone HTML, so it cannot read these as
+// tokens; tokenising only this side would let the two ramps drift apart silently.
 const HB_BANDS = ["#b82018", "#c08020", "#c8a020", "#4caf50"];
 function segColor(i: number, total: number): string {
   return HB_BANDS[Math.min(3, Math.floor((i * 4) / Math.max(1, total)))];

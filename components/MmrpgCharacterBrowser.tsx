@@ -13,7 +13,7 @@ import MmrpgCharacterDetail from "@/components/MmrpgCharacterDetail";
 
 const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--mmrpg)] hover:text-[var(--text)]";
-const chipOn = "border-[var(--mmrpg)] bg-[var(--panel-2)] text-[#f4737a]";
+const chipOn = "border-[var(--mmrpg)] bg-[var(--panel-2)] text-[var(--sys-link)]";
 const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 
 const ALL = MMRPG_CHARACTERS as MmrpgCharacter[];
@@ -86,7 +86,7 @@ export default function MmrpgCharacterBrowser() {
 
       {groups.map((r) => (
         <section key={r} className={`${cardCls} mb-4`}>
-          <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f4737a]">Rank {r}</h2>
+          <h2 className="text-base font-bold uppercase tracking-[0.12em]">Rank {r}</h2>
           <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {results.filter((c) => c.rank === r).map((c) => (
               <MmrpgCharacterCard key={c.id} c={c} onOpen={open} />

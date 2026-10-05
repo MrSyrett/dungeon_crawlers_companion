@@ -66,7 +66,7 @@ export default async function IcrpgWorldsPage({ searchParams }: { searchParams: 
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h3 className={nameCls}>{lf.name}</h3>
                   {(lf.world && lf.world !== "core") ? <span className={badge}>{worldName(lf.world)}</span> : null}
-                  {lf.statBonus ? <span className="font-mono text-[11px] text-[#e8823c]">{lf.statBonus}</span> : null}
+                  {lf.statBonus ? <span className="font-mono text-[11px] text-[var(--sys-link)]">{lf.statBonus}</span> : null}
                 </div>
                 {lf.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{lf.desc}</p> : null}
               </li>

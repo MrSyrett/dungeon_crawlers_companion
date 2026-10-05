@@ -76,7 +76,7 @@ export default async function AdminRulebooksPage({
       </p>
 
       {nouser ? (
-        <div className="mb-6 rounded-lg border border-[var(--red)] bg-[var(--panel)] p-4 text-[13px] text-[#f0a8a3]">
+        <div className="mb-6 rounded-lg border border-[var(--red)] bg-[var(--panel)] p-4 text-[13px] text-[var(--bad)]">
           No account found for <span className="font-semibold">{nouser}</span>. Ask them to sign up
           first, then grant access.
         </div>
@@ -106,7 +106,7 @@ export default async function AdminRulebooksPage({
                     {prettyName(file)}
                   </h2>
                   <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
-                    <span className={everyone ? "text-[#8fd19e]" : undefined}>
+                    <span className={everyone ? "text-[var(--good)]" : undefined}>
                       {everyone ? "· everyone signed in" : "· private"}
                     </span>{" "}
                     · {SYSTEM_LABEL[system]}

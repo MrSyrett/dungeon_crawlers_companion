@@ -279,7 +279,7 @@ const labelCls = "mb-1 block text-[11px] font-semibold uppercase tracking-[0.12e
 const btn =
   "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)] disabled:opacity-50";
 const btnRed =
-  "rounded border border-[var(--red)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0a8a3] hover:bg-[var(--red)] hover:text-white disabled:opacity-50";
+  "rounded border border-[var(--red)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:bg-[var(--red)] hover:text-white disabled:opacity-50";
 const miniBtn =
   "rounded border border-[var(--border)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
 
@@ -389,7 +389,7 @@ export default function DccHomebrewEditor({
             <ul className="mb-4 flex flex-col gap-2">
               {items.map((rec) => (
                 <li key={rec.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2">
-                  <span className="font-bold text-[#f0a8a3]">{rec.name}</span>
+                  <span className="font-bold text-[var(--sys-link)]">{rec.name}</span>
                   <span className="text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{schema.summary(rec.data || {})}</span>
                   {rec.campaignIds.length ? (
                     <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--muted)]">shared: {rec.campaignIds.map(campaignName).join(", ")}</span>
@@ -442,7 +442,7 @@ export default function DccHomebrewEditor({
                 </div>
               ) : null}
 
-              {error ? <p className="mt-3 text-[13px] text-[#f0a8a3]">{error}</p> : null}
+              {error ? <p className="mt-3 text-[13px] text-[var(--bad)]">{error}</p> : null}
 
               <div className="mt-4 flex gap-2">
                 <button className={btnRed} disabled={busy} onClick={submit}>
@@ -682,9 +682,9 @@ function RaceClassBody({ kind, form, setForm }: BodyProps & { kind: "dcc-race" |
           <span>Budget <b className="text-[var(--text)]">{budget}</b></span>
           <span>Spent <b className="text-[var(--text)]">{sum.benefitPoints}</b></span>
           <span>Detriments <b className="text-[var(--text)]">+{sum.detrimentPoints}</b>{sum.detrimentPoints >= DETRIMENT_CAP ? <span className="text-[var(--muted)]"> (cap)</span> : null}</span>
-          <span className={over ? "text-[#f0a8a3] font-bold" : ""}>Remaining <b>{remaining}</b></span>
+          <span className={over ? "text-[var(--bad)] font-bold" : ""}>Remaining <b>{remaining}</b></span>
         </div>
-        {over ? <p className="mt-1 text-[11px] text-[#f0a8a3]">Over budget by {-remaining} — remove a benefit or add a detriment. The book says leftover points are lost and you can’t overspend.</p> : null}
+        {over ? <p className="mt-1 text-[11px] text-[var(--bad)]">Over budget by {-remaining} — remove a benefit or add a detriment. The book says leftover points are lost and you can’t overspend.</p> : null}
       </div>
 
       {/* selected */}
@@ -700,7 +700,7 @@ function RaceClassBody({ kind, form, setForm }: BodyProps & { kind: "dcc-race" |
               return (
                 <li key={i} className="rounded border border-[var(--border)] bg-[var(--panel)] p-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${sel.kind === "detriment" ? "text-[#8fce8f]" : "text-[#f0a8a3]"}`}>
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${sel.kind === "detriment" ? "text-[var(--good)]" : "text-[var(--bad)]"}`}>
                       {sel.kind === "detriment" ? `+${cost}` : `−${cost}`} pt
                     </span>
                     <span className="text-[12px] text-[var(--text)]">{label}</span>
@@ -885,7 +885,7 @@ function MonsterBody({ form, setForm }: BodyProps) {
           <span className="font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Stat points</span>
           <span>Base <b className="text-[var(--text)]">{statBase(role)}</b> each</span>
           <span>Budget <b className="text-[var(--text)]">{budget}</b> ({boss ? `${boss.statsPerLevel}/Level, Boss` : "3/Level, Mob"})</span>
-          <span className={statsLeft < 0 ? "text-[#f0a8a3] font-bold" : ""}>Left <b>{statsLeft}</b></span>
+          <span className={statsLeft < 0 ? "text-[var(--bad)] font-bold" : ""}>Left <b>{statsLeft}</b></span>
         </div>
         <div className="grid grid-cols-5 gap-1.5">
           {STAT_IDS.map((k) => {

@@ -10,7 +10,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/backgrounds";
-const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#f0a37f]";
+const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]";
 
 export default async function DndBackgroundsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -47,11 +47,11 @@ export default async function DndBackgroundsPage({ searchParams }: { searchParam
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
           {list.map((b, i) => (
             <li key={`${b.name}-${i}`} className={cardCls} hidden={!show(b)} data-f={facetAttr(facets(b))}>
-              <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{b.name} {isHb(b) ? <span className={hbBadge}>HB</span> : null}</h3>
+              <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{b.name} {isHb(b) ? <span className={hbBadge}>HB</span> : null}</h3>
               <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{b.description}</p>
               <dl className="mt-2 grid gap-y-0.5 text-[12px] text-[var(--muted)]">
                 <div><dt className="inline font-semibold text-[var(--text)]">Ability Scores:</dt> <dd className="inline">{b.abilityScores.join(", ")}</dd></div>
-                <div><dt className="inline font-semibold text-[var(--text)]">Feat:</dt> <dd className="inline text-[#f0a37f]">{b.feat}</dd></div>
+                <div><dt className="inline font-semibold text-[var(--text)]">Feat:</dt> <dd className="inline text-[var(--sys-link)]">{b.feat}</dd></div>
                 <div><dt className="inline font-semibold text-[var(--text)]">Skills:</dt> <dd className="inline">{b.skillProficiencies.join(", ")}</dd></div>
                 <div><dt className="inline font-semibold text-[var(--text)]">Tool:</dt> <dd className="inline">{b.toolProficiencies.join(", ") || "—"}</dd></div>
                 <div><dt className="inline font-semibold text-[var(--text)]">Equipment:</dt> <dd className="inline">{b.equipment.join(" — or — ")}</dd></div>

@@ -44,7 +44,7 @@ export default function JluPowersPage() {
                           const meta = [a.passive ? "Passive" : "", a.activation || "", a.cost ? `Cost ${a.cost}` : ""].filter(Boolean).join(" · ");
                           return (
                             <li key={a.name} className="text-[12.5px] leading-relaxed">
-                              <span className="font-semibold text-[#5b8dfb]">{a.name}</span>
+                              <span className="font-semibold text-[var(--sys-link)]">{a.name}</span>
                               {meta ? <span className="ml-1 text-[10px] uppercase tracking-[0.05em] text-[var(--muted)]">{meta}</span> : null}
                               <br />
                               <span className="text-[var(--text)]">{a.text}</span>

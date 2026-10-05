@@ -88,7 +88,7 @@ export default async function IcrpgLootPage({ searchParams }: { searchParams: Pr
               <li key={`${l.homebrew ? "hb" : "bk"}-l-${l.table}-${l.name}`} className={cardCls} hidden={!showLootRow(l)} data-f={facetAttr(lootFacets())} data-s={l.table}>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h3 className={nameCls}>{l.name}</h3>
-                  {l.roll ? <span className="font-mono text-[11px] text-[#e8823c]">{l.roll}</span> : null}
+                  {l.roll ? <span className="font-mono text-[11px] text-[var(--sys-link)]">{l.roll}</span> : null}
                   {l.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{l.table}</span>}
                 </div>
                 {l.desc ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{l.desc}</p> : null}

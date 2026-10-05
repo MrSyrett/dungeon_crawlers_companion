@@ -22,7 +22,7 @@ export default function JluGearPage() {
             <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--text)]">{k.summary}</p>
             <ul className="mt-2 space-y-1">
               {k.abilities.map((a) => (
-                <li key={a.name} className="text-[12px] leading-relaxed"><span className="font-semibold text-[#5b8dfb]">{a.name}:</span> <span className="text-[var(--muted)]">{a.text}</span></li>
+                <li key={a.name} className="text-[12px] leading-relaxed"><span className="font-semibold text-[var(--sys-link)]">{a.name}:</span> <span className="text-[var(--muted)]">{a.text}</span></li>
               ))}
             </ul>
           </div>
@@ -61,7 +61,7 @@ export default function JluGearPage() {
               {list.map((e) => (
                 <div key={e.name} className={cardCls}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h4 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#5b8dfb]">{e.name}</h4>
+                    <h4 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">{e.name}</h4>
                     <span className={catBadge}>{e.cost}</span>
                   </div>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--text)]">{e.text}</p>

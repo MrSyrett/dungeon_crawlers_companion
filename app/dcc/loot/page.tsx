@@ -42,8 +42,8 @@ const SORTS: { key: string; label: string; cmp: (a: Row, b: Row) => number }[] =
 ];
 
 const TIER_COLOR: Record<string, string> = {
-  Bronze: "#c88a5a", Silver: "#c7ccd1", Gold: "#e6c15a", Platinum: "#9fd6e6",
-  Legendary: "#d08be6", Celestial: "#f0a8a3",
+  Bronze: "var(--bronze)", Silver: "var(--silver)", Gold: "var(--grade-5)", Platinum: "var(--grade-3)",
+  Legendary: "var(--grade-4)", Celestial: "var(--grade-6)",
 };
 
 // A homebrew record's data blob → a DccItem-shaped display row.

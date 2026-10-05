@@ -15,8 +15,8 @@ export const dynamic = "force-dynamic";
 const BASE = "/dnd/equipment";
 const th = "border-b border-[var(--border)] px-2 py-1 text-left text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]";
 const td = "border-b border-[var(--border)] px-2 py-1 text-[12px] text-[var(--muted)]";
-const rarityColor: Record<string, string> = { Common: "#a7a7ad", Uncommon: "#5fbf72", Rare: "#5aa0e8", "Very Rare": "#b07de0", Legendary: "#e8a838", Artifact: "#e06a5a" };
-const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#f0a37f]";
+const rarityColor: Record<string, string> = { Common: "var(--grade-1)", Uncommon: "var(--grade-2)", Rare: "var(--grade-3)", "Very Rare": "var(--grade-4)", Legendary: "var(--grade-5)", Artifact: "var(--bad)" };
+const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]";
 const isHb = (x: { source?: string }) => x.source === "Homebrew";
 // The only chip on every view is Source; each entry's facets are just that.
 const facets = (x: { source?: string }) => ({ src: isHb(x) ? "hb" : "book" });
@@ -87,7 +87,7 @@ export default async function DndEquipmentPage({ searchParams }: { searchParams:
                 <td className={`${td} font-semibold text-[var(--text)]`}>{w.name} {isHb(w) ? <span className={hbBadge}>HB</span> : null}</td>
                 <td className={td}>{w.category} {w.kind}</td>
                 <td className={`${td} font-mono`}>{w.damage} {w.damageType}</td>
-                <td className={td}><span className="text-[#f0a37f]">{w.mastery}</span></td>
+                <td className={td}><span className="text-[var(--sys-link)]">{w.mastery}</span></td>
                 <td className={td}>{w.properties.join(", ") || "—"}</td>
                 <td className={`${td} font-mono`}>{w.cost}</td>
                 <td className={`${td} font-mono`}>{w.weight}</td>
@@ -113,7 +113,7 @@ export default async function DndEquipmentPage({ searchParams }: { searchParams:
                 <td className={td}>{a.category}</td>
                 <td className={`${td} font-mono`}>{a.baseAC}</td>
                 <td className={td}>{a.strength || "—"}</td>
-                <td className={td}>{a.stealthDisadvantage ? <span className="text-[#e06a5a]">Disadvantage</span> : "—"}</td>
+                <td className={td}>{a.stealthDisadvantage ? <span className="text-[var(--bad)]">Disadvantage</span> : "—"}</td>
                 <td className={`${td} font-mono`}>{a.cost}</td>
                 <td className={`${td} font-mono`}>{a.weight}</td>
               </tr>
@@ -133,7 +133,7 @@ export default async function DndEquipmentPage({ searchParams }: { searchParams:
           {list.map((g, i) => (
             <li key={`${g.name}-${i}`} className={cardCls} hidden={!show(g)} data-f={facetAttr(facets(g))}>
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-[#f0a37f]">{g.name} {isHb(g) ? <span className={hbBadge}>HB</span> : null}</h3>
+                <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">{g.name} {isHb(g) ? <span className={hbBadge}>HB</span> : null}</h3>
                 <span className={badge}>{g.category}</span>
               </div>
               <p className="mt-0.5 font-mono text-[11px] text-[var(--muted)]">{g.cost}{g.weight && g.weight !== "—" ? ` · ${g.weight}` : ""}</p>
@@ -154,7 +154,7 @@ export default async function DndEquipmentPage({ searchParams }: { searchParams:
         {list.map((m, i) => (
           <li key={`${m.name}-${i}`} className={cardCls} hidden={!show(m)} data-f={facetAttr(facets(m))}>
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-[#f0a37f]">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</h3>
+              <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</h3>
               <span className={badge} style={{ color: rarityColor[m.rarity] }}>{m.rarity}</span>
             </div>
             <p className="mt-0.5 text-[11px] italic text-[var(--muted)]">{m.type}{m.attunement ? ` · requires attunement${m.attunementNote ? " " + m.attunementNote : ""}` : ""}</p>

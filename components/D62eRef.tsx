@@ -15,15 +15,15 @@ export type RawQuery = Record<string, string | string[] | undefined>;
 export const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
 // The accent used for text on the dark ground (brighter than the --d62e border).
-const ACCENT = "#ef9455";
+const ACCENT = "var(--sys-link)";
 
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--d62e)] hover:text-[var(--text)]";
-export const chipOn = "border-[var(--d62e)] bg-[var(--panel-2)] text-[#ef9455]";
-export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#ef9455]";
+export const chipOn = "border-[var(--d62e)] bg-[var(--panel-2)] text-[var(--sys-link)]";
+export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
-export const hbBadge = "rounded border border-[var(--d62e)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#ef9455]";
+export const hbBadge = "rounded border border-[var(--d62e)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 export const genreBadge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
 
 // ── Genres ───────────────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ export function EmptyState({ noun, base, hidden }: { noun: string; base: string;
 
 /** Section heading used across the pages. */
 export function SectionH({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#ef9455]">{children}</h2>;
+  return <h2 className="text-base font-bold uppercase tracking-[0.12em]">{children}</h2>;
 }
 
 export { ACCENT };

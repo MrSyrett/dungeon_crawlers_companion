@@ -117,7 +117,7 @@ export function ResetPasswordForm({ token, valid, action }: Props) {
         </label>
 
         {state.error && (
-          <p className="rounded border border-[var(--red)]/50 bg-[var(--red)]/10 px-3 py-2 text-sm text-[#f0a8a3]">
+          <p className="rounded border border-[var(--red)]/50 bg-[var(--red)]/10 px-3 py-2 text-sm text-[var(--bad)]">
             {state.error}
           </p>
         )}

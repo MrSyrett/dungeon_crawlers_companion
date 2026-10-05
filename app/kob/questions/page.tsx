@@ -62,7 +62,7 @@ export default async function KobQuestionsPage({ searchParams }: { searchParams:
       <div className="flex flex-col gap-4">
         {groups.map((g) => (
           <section key={g.key} className={cardCls} data-section hidden={!results.some((x) => x.kind === g.key && show(x))}>
-            <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">{g.label}</h2>
+            <h2 className="text-base font-bold uppercase tracking-[0.12em]">{g.label}</h2>
             <ol className="mt-2 grid gap-x-6 gap-y-1 text-[13px] leading-relaxed text-[var(--text)] md:grid-cols-2">
               {/* `[&[hidden]]:hidden` so the `flex` display utility can't out-rank [hidden] */}
               {results.filter((x) => x.kind === g.key).map((x) => <li key={x.n} className="flex gap-2 [&[hidden]]:hidden" hidden={!show(x)} data-f={facetAttr(facets(x))}><span className="w-6 shrink-0 font-mono text-[var(--muted)]">{x.n}.</span><span>{x.text}</span></li>)}

@@ -77,7 +77,7 @@ export default async function SwSkillsPage({ searchParams }: { searchParams: Pro
       <EmptyState noun="skill or power" base={BASE} hidden={shown > 0} />
       {groups.map((a) => (
         <section key={a} className={`${cardCls} mb-4`} data-section hidden={!results.some((s) => s.attribute === a && showSkill(s))}>
-          <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0c020]">{a}</h2>
+          <h2 className="text-base font-bold uppercase tracking-[0.12em]">{a}</h2>
           <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{info(a)}</p>
           <ul className="mt-3 grid gap-3 md:grid-cols-2">
             {results.filter((s) => s.attribute === a).map((s) => (
@@ -91,9 +91,9 @@ export default async function SwSkillsPage({ searchParams }: { searchParams: Pro
         </section>
       ))}
       <section className={`${cardCls} mb-4`} data-section hidden={!powers.some(showPower)}>
-        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0c020]">The Force</h2>
+        <h2 className="text-base font-bold uppercase tracking-[0.12em]">The Force</h2>
         <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">Force powers are rolled with Control, Sense and Alter (a power that uses two or three needs a roll on each). Using a power is an action; Force Points double every die for a round; calling on the dark side is always easier, and always costs.</p>
-        <details className="mt-3"><summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.15em] text-[#f0c020]">Force rules ({SW_TABLES.force.length})</summary><dl className="mt-2 grid gap-x-6 gap-y-2 md:grid-cols-2">{SW_TABLES.force.map((r) => <div key={r.name}><dt className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">{r.name}</dt><dd className="text-[12px] leading-relaxed text-[var(--muted)]">{r.text}</dd></div>)}</dl>
+        <details className="mt-3"><summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Force rules ({SW_TABLES.force.length})</summary><dl className="mt-2 grid gap-x-6 gap-y-2 md:grid-cols-2">{SW_TABLES.force.map((r) => <div key={r.name}><dt className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">{r.name}</dt><dd className="text-[12px] leading-relaxed text-[var(--muted)]">{r.text}</dd></div>)}</dl>
           {SW_TABLES.superseded.force ? <details className="mt-3"><summary className="cursor-pointer text-[10px] uppercase tracking-[0.12em] text-[var(--sw)]">Core rulebook Force rules ({SW_TABLES.superseded.force.length})</summary><dl className="mt-2 grid gap-x-6 gap-y-2 md:grid-cols-2">{SW_TABLES.superseded.force.map((r, i) => <div key={i}><dt className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">{r.name}</dt><dd className="text-[12px] leading-relaxed text-[var(--muted)]">{r.text}</dd></div>)}</dl></details> : null}
         </details>
         {powerGroups.map((g) => (

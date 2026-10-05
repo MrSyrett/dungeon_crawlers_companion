@@ -27,7 +27,7 @@ function HqCard({ hq }: { hq: Hq }) {
   return (
     <article className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f4737a]">{hq.name}</h3>
+        <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{hq.name}</h3>
         <span className="flex items-center gap-1.5">
           {hq.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
           <span className={badge}>Rank {hq.teamRank}</span>
@@ -68,7 +68,7 @@ export default function MmrpgHeadquarters({ campaigns, own, visible }: { campaig
       </div>
 
       <details className="mt-5 rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
-        <summary className="cursor-pointer text-[12px] font-bold uppercase tracking-[0.12em] text-[#f4737a]">Headquarters traits &amp; tags reference</summary>
+        <summary className="cursor-pointer text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Headquarters traits &amp; tags reference</summary>
         <div className="mt-3 grid gap-4 md:grid-cols-2">
           <div>
             <h4 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Traits — downtime activity</h4>

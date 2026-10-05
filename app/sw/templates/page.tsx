@@ -45,9 +45,9 @@ export default async function SwTemplatesPage({ searchParams }: { searchParams: 
         {results.map((t) => (
           <article key={t.name} className={cardCls} hidden={!show(t)} data-f={facetAttr(facets(t))}>
             <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className={nameCls}>{t.name}</h2><span className={badge}>p.{t.page}{isForce(t) ? " · Force" : ""}</span></div>
-            <div className="mt-3 grid grid-cols-3 gap-1 sm:grid-cols-6">{SW_ATTRIBUTES.map((a) => <div key={a} className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-1 py-1.5 text-center"><div className="text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{a.slice(0, 4)}</div><div className="font-mono text-[13px] text-[#f0c020]">{code(t.attributes[a])}</div></div>)}</div>
+            <div className="mt-3 grid grid-cols-3 gap-1 sm:grid-cols-6">{SW_ATTRIBUTES.map((a) => <div key={a} className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-1 py-1.5 text-center"><div className="text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{a.slice(0, 4)}</div><div className="font-mono text-[13px] text-[var(--sys-link)]">{code(t.attributes[a])}</div></div>)}</div>
             {t.quote ? <p className="mt-3 text-[13px] italic leading-relaxed text-[var(--text)]">&ldquo;{t.quote}&rdquo;</p> : null}
-            <details className="mt-2"><summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.15em] text-[#f0c020]">Background & personality</summary>
+            <details className="mt-2"><summary className="cursor-pointer text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Background & personality</summary>
               <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{t.background}</p>
               <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Personality.</span> {t.personality}</p>
               {t.connection ? <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Connection.</span> {t.connection}</p> : null}

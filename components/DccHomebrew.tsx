@@ -53,7 +53,7 @@ const label = "mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em] 
 const btn =
   "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)] disabled:opacity-50";
 const btnRed =
-  "rounded border border-[var(--red)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0a8a3] hover:bg-[var(--red)] hover:text-white disabled:opacity-50";
+  "rounded border border-[var(--red)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:bg-[var(--red)] hover:text-white disabled:opacity-50";
 
 function blank(): Form {
   return { id: null, name: "", category: "mundane", tier: "", slot: "", price: "", effect: "", benefits: [], campaignIds: [] };
@@ -229,7 +229,7 @@ export default function DccHomebrew({
                   key={rec.id}
                   className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2"
                 >
-                  <span className="font-bold text-[#f0a8a3]">{rec.name}</span>
+                  <span className="font-bold text-[var(--sys-link)]">{rec.name}</span>
                   <span className="text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">
                     {String(rec.data?.category ?? "")}
                     {rec.data?.tier ? ` · ${String(rec.data.tier)}` : ""}
@@ -344,7 +344,7 @@ export default function DccHomebrew({
                 ) : null}
               </div>
 
-              {error ? <p className="mt-3 text-[13px] text-[#f0a8a3]">{error}</p> : null}
+              {error ? <p className="mt-3 text-[13px] text-[var(--bad)]">{error}</p> : null}
 
               <div className="mt-4 flex gap-2">
                 <button className={btnRed} disabled={busy} onClick={submit}>

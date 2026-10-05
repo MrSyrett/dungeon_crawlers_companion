@@ -35,7 +35,7 @@ export default async function NimbleClassesPage({ searchParams }: { searchParams
       ) : (
         <div className="flex flex-col gap-4">
           <section className={cardCls}>
-            <h2 className="text-xl font-bold uppercase tracking-[0.12em] text-[#9fe3bd]">{selected.name}</h2>
+            <h2 className="text-xl font-bold uppercase tracking-[0.12em]">{selected.name}</h2>
             <p className="mt-1 text-[12px] italic text-[var(--muted)]">{selected.tagline}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{selected.description}</p>
             <dl className="mt-3 grid gap-x-6 gap-y-1 text-[12px] text-[var(--muted)] md:grid-cols-2">
@@ -48,7 +48,7 @@ export default async function NimbleClassesPage({ searchParams }: { searchParams
             </dl>
           </section>
           <section className={cardCls}>
-            <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#9fe3bd]">Level features</h3>
+            <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Level features</h3>
             <div className="mt-2 flex flex-col">
               {selected.features.map((f, i) => (
                 <div key={i} className="flex gap-3 border-t border-[var(--border)] py-1.5 text-[12px] leading-relaxed">
@@ -60,14 +60,14 @@ export default async function NimbleClassesPage({ searchParams }: { searchParams
           </section>
           {[selected.abilityPool, ...(selected.extraPools ?? [])].filter(Boolean).map((pool) => pool ? (
             <section key={pool.name} className={cardCls}>
-              <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#9fe3bd]">{pool.name}</h3>
+              <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{pool.name}</h3>
               {pool.note ? <p className="mt-1 text-[11px] italic text-[var(--muted)]">{pool.note}</p> : null}
               <ul className="mt-2 grid gap-2 md:grid-cols-2">{pool.abilities.map((a) => <li key={a.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{a.name}.</span> {a.text}</li>)}</ul>
             </section>
           ) : null)}
           {selected.subclasses.map((s) => (
             <section key={s.name} className={cardCls}>
-              <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#9fe3bd]">{s.name}{s.story ? <span className="ml-2 text-[10px] text-[var(--muted)]">story-based</span> : null}</h3>
+              <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{s.name}{s.story ? <span className="ml-2 text-[10px] text-[var(--muted)]">story-based</span> : null}</h3>
               <p className="mt-1 text-[12px] text-[var(--muted)]">{s.description}</p>
               {s.story ? <p className="mt-1 text-[12px] italic text-[var(--muted)]">{s.story}</p> : null}
               <div className="mt-2 flex flex-col">{s.features.map((f, i) => <div key={i} className="flex gap-3 border-t border-[var(--border)] py-1.5 text-[12px] leading-relaxed"><span className="w-10 shrink-0 font-mono text-[var(--nimble)]">{f.level ? "L" + f.level : "—"}</span><span className="text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{f.name}.</span> {f.text}</span></div>)}</div>

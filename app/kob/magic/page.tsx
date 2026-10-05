@@ -15,9 +15,9 @@ export default async function KobMagicPage() {
   const sp = KOB_TABLES.spell;
   const modTable = (title: string, rows: { name: string; mod: number; text: string }[]) => (
     <div>
-      <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">{title}</div>
+      <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{title}</div>
       <table className="mt-1 w-full text-[12px]"><tbody>
-        {rows.map((r) => <tr key={r.name} className="border-t border-[var(--border)]"><td className="py-1 text-[var(--text)]">{r.name}</td><td className="py-1 font-mono text-[#d9c2ff]">+{r.mod}</td><td className="py-1 text-[var(--muted)]">{r.text}</td></tr>)}
+        {rows.map((r) => <tr key={r.name} className="border-t border-[var(--border)]"><td className="py-1 text-[var(--text)]">{r.name}</td><td className="py-1 font-mono text-[var(--sys-link)]">+{r.mod}</td><td className="py-1 text-[var(--muted)]">{r.text}</td></tr>)}
       </tbody></table>
     </div>
   );
@@ -32,19 +32,19 @@ export default async function KobMagicPage() {
       <KobHeader title="Magic" subtitle="Kids on Brooms · wands, brooms, familiars & spell checks" />
 
       <section className={`${cardCls} mb-4`}>
-        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Types of magic</h2>
+        <h2 className="text-base font-bold uppercase tracking-[0.12em]">Types of magic</h2>
         <ul className="mt-2 grid gap-2 md:grid-cols-2">
           {sp.magicTypes.map((m) => <li key={m.stat} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-bold uppercase tracking-[0.08em] text-[var(--text)]">{m.stat}.</span> {m.text}{m.classes ? <span className="italic"> {m.classes}</span> : null}</li>)}
         </ul>
       </section>
 
       <section className={`${cardCls} mb-4`}>
-        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Spell difficulty</h2>
+        <h2 className="text-base font-bold uppercase tracking-[0.12em]">Spell difficulty</h2>
         <p className="mt-1 text-[12px] text-[var(--muted)]">Add one modifier from each table. The GM must tell you the difficulty before you decide to cast.</p>
         <div className="mt-3 grid gap-4 md:grid-cols-2">
           {modTable("Magnitude of effect", sp.magnitude)}{modTable("Area of effect", sp.area)}{modTable("Duration", sp.duration)}{modTable("Experience", sp.experience)}
         </div>
-        <div className="mt-4 text-[11px] font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Results</div>
+        <div className="mt-4 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Results</div>
         <table className="mt-1 w-full text-[12px]"><tbody>
           {sp.failure.map((f) => <tr key={f.range} className="border-t border-[var(--border)]"><td className="py-1 font-mono text-[var(--text)]">{f.range}</td><td className="py-1 text-[var(--muted)]">{f.text}</td></tr>)}
         </tbody></table>
@@ -52,24 +52,24 @@ export default async function KobMagicPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <section className={cardCls}>
-          <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Wand woods</h2>
+          <h2 className="text-base font-bold uppercase tracking-[0.12em]">Wand woods</h2>
           <p className="mt-1 text-[12px] text-[var(--muted)]">Each wood gives +1 to one type of magic.</p>
           <ul className="mt-2 text-[13px] text-[var(--text)]">{byStat(woods).map(([s, names]) => <li key={s}><span className="font-semibold">{s}:</span> {names.join(", ")}</li>)}</ul>
-          <h3 className="mt-4 text-[11px] font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Wand cores</h3>
+          <h3 className="mt-4 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Wand cores</h3>
           <ul className="mt-1 text-[13px] text-[var(--text)]">{byStat(cores).map(([s, names]) => <li key={s}><span className="font-semibold">{s}:</span> {names.join(", ")}</li>)}</ul>
         </section>
         <section className={cardCls}>
-          <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Brooms</h2>
+          <h2 className="text-base font-bold uppercase tracking-[0.12em]">Brooms</h2>
           <p className="mt-1 text-[12px] text-[var(--muted)]">Benefits only apply while you&rsquo;re on the broom.</p>
           <ul className="mt-2 flex flex-col gap-1">{brooms.map((b) => <li key={b.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{b.name}</span>{b.tag ? <span className="text-[10px] uppercase tracking-[0.1em]"> · {b.tag}</span> : null} — {b.benefit}</li>)}</ul>
         </section>
         <section className={cardCls}>
-          <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Familiars</h2>
+          <h2 className="text-base font-bold uppercase tracking-[0.12em]">Familiars</h2>
           <p className="mt-1 text-[12px] text-[var(--muted)]">Small enough to carry; a one-way psychic bond; simple tasks decided narratively.</p>
           <ul className="mt-2 flex flex-wrap gap-2">{familiars.map((f) => <li key={f.name} className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-1.5 text-[13px] text-[var(--text)]" title={f.description ?? ""}>{f.name}</li>)}</ul>
         </section>
         <section className={cardCls}>
-          <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]">Classes</h2>
+          <h2 className="text-base font-bold uppercase tracking-[0.12em]">Classes</h2>
           <ul className="mt-2 flex flex-col gap-1">{classes.map((c) => <li key={c.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{c.name}</span>{c.tag ? <span className="text-[10px] uppercase tracking-[0.1em]"> · {c.tag}</span> : null}{c.description ? ` — ${c.description}` : ""}</li>)}</ul>
         </section>
       </div>

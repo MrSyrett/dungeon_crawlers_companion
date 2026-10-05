@@ -57,7 +57,7 @@ function Stat({ label, value, focus }: { label: string; value: number | null | u
       <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">{label}</div>
       <div className="font-mono text-lg font-bold text-[var(--text)]">{value == null ? "—" : value}</div>
       {focus && focus.length ? (
-        <div className="text-[10px] leading-tight text-[#8ad4ff]">{focus.map((f) => f.name + (f.dice ? ` ${f.dice}` : "")).join(", ")}</div>
+        <div className="text-[10px] leading-tight text-[var(--sys-link)]">{focus.map((f) => f.name + (f.dice ? ` ${f.dice}` : "")).join(", ")}</div>
       ) : null}
     </div>
   );

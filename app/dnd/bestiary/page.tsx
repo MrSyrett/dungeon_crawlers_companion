@@ -10,7 +10,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/bestiary";
-const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#f0a37f]";
+const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]";
 const isHb = (x: { source?: string }) => x.source === "Homebrew";
 
 // CR sort key so "1/8" < "1/2" < "1" < "10".
@@ -27,7 +27,7 @@ function ActionList({ title, items, color }: { title: string; items?: DndMonster
   if (!items || !items.length) return null;
   return (
     <section className="mt-3">
-      <h4 className="mb-1 border-b border-[var(--border)] pb-1 text-[12px] font-bold uppercase tracking-[0.14em]" style={{ color: color ?? "#f0a37f" }}>{title}</h4>
+      <h4 className="mb-1 border-b border-[var(--border)] pb-1 text-[12px] font-bold uppercase tracking-[0.14em]" style={{ color: color ?? "var(--sys-link)" }}>{title}</h4>
       <div className="flex flex-col gap-1.5">
         {items.map((a, i) => (
           <p key={i} className="text-[12.5px] leading-relaxed text-[var(--muted)]">
@@ -45,7 +45,7 @@ function StatBlock({ m }: { m: DndMonster }) {
     <div className={`${cardCls} border-l-4`} style={{ borderLeftColor: "var(--dnd)" }}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold uppercase tracking-[0.1em] text-[#f0a37f]">{m.name}</h2>
+          <h2 className="text-xl font-bold uppercase tracking-[0.1em]">{m.name}</h2>
           <p className="text-[12px] italic text-[var(--muted)]">{m.size} {m.type}, {m.alignment}</p>
         </div>
         <span className={badge}>CR {m.cr} · {m.xp.toLocaleString()} XP</span>
@@ -61,7 +61,7 @@ function StatBlock({ m }: { m: DndMonster }) {
           <div key={a} className="rounded border border-[var(--border)] bg-[var(--panel-2)] py-1">
             <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{a}</div>
             <div className="font-mono text-sm font-bold text-[var(--text)]">{m.abilities[a]}</div>
-            <div className="font-mono text-[10px] text-[#f0a37f]">{sgn(mod(m.abilities[a]))}</div>
+            <div className="font-mono text-[10px] text-[var(--sys-link)]">{sgn(mod(m.abilities[a]))}</div>
           </div>
         ))}
       </div>
@@ -79,7 +79,7 @@ function StatBlock({ m }: { m: DndMonster }) {
       <ActionList title="Actions" items={m.actions} />
       <ActionList title="Bonus Actions" items={m.bonusActions} />
       <ActionList title="Reactions" items={m.reactions} />
-      <ActionList title="Legendary Actions" items={m.legendaryActions} color="#e8c84a" />
+      <ActionList title="Legendary Actions" items={m.legendaryActions} color="var(--sys-sub)" />
     </div>
   );
 }
@@ -149,13 +149,13 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
       <ul className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((m, i) => (
           <li key={`${m.name}-${i}`} className={cardCls} hidden={!show(m)} data-f={facetAttr(facets(m))}>
-            <a href={withParams(BASE, {}, { m: m.name })} className="text-base font-bold uppercase tracking-[0.1em] text-[#f0a37f] hover:underline">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</a>
+            <a href={withParams(BASE, {}, { m: m.name })} className="text-base font-bold uppercase tracking-[0.1em] text-[var(--sys-link)] hover:underline">{m.name} {isHb(m) ? <span className={hbBadge}>HB</span> : null}</a>
             <p className="mt-0.5 text-[11px] italic text-[var(--muted)]">{m.size} {m.type}</p>
             <p className="mt-1.5 flex flex-wrap gap-2 text-[11px] text-[var(--muted)]">
               <span><span className="font-semibold text-[var(--text)]">CR</span> {m.cr}</span>
               <span><span className="font-semibold text-[var(--text)]">AC</span> {m.ac}</span>
               <span><span className="font-semibold text-[var(--text)]">HP</span> {m.hp}</span>
-              {m.legendaryActions?.length ? <span className="text-[#e8c84a]">Legendary</span> : null}
+              {m.legendaryActions?.length ? <span className="text-[var(--sys-sub)]">Legendary</span> : null}
             </p>
           </li>
         ))}

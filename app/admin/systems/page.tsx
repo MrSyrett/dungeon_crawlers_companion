@@ -57,7 +57,7 @@ export default async function AdminSystemsPage() {
                   </div>
                   <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)]">
                     {s.short} ·{" "}
-                    <span className={isHidden ? "text-[var(--muted)]" : "text-[#8fd19e]"}>
+                    <span className={isHidden ? "text-[var(--muted)]" : "text-[var(--good)]"}>
                       {isHidden ? "Hidden" : "Visible"}
                     </span>
                   </div>

@@ -56,7 +56,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
             return (
             <li key={c.name} className={cardCls} hidden={!show(c)} data-f={facetAttr(facets(c))}>
               <div className="flex items-start justify-between gap-2">
-                <a href={`${BASE}?cls=${encodeURIComponent(c.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f] hover:underline">{c.name}</a>
+                <a href={`${BASE}?cls=${encodeURIComponent(c.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:underline">{c.name}</a>
                 <span className={badge}>{sourceLabel[c.source] ?? c.source}</span>
               </div>
               <p className="mt-1 text-[12px] italic text-[var(--muted)]">{c.flavor}</p>
@@ -64,7 +64,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
                 <span className="font-semibold text-[var(--text)]">Hit Die:</span> d{c.hitDie} · <span className="font-semibold text-[var(--text)]">Primary:</span> {c.primaryAbility.join("/")} · <span className="font-semibold text-[var(--text)]">Saves:</span> {c.savingThrows.join(", ")}
                 {c.spellcasting !== "none" ? <> · <span className="font-semibold text-[var(--text)]">Caster:</span> {c.spellcasting}</> : null}
               </p>
-              <p className="mt-1 text-[11px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{c.subclassLabel}:</span> {c.subclasses.map((s) => s.name).join(", ")}{hb.length ? <span className="text-[#f0a37f]"> · +{hb.length} homebrew</span> : null}</p>
+              <p className="mt-1 text-[11px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{c.subclassLabel}:</span> {c.subclasses.map((s) => s.name).join(", ")}{hb.length ? <span className="text-[var(--sys-link)]"> · +{hb.length} homebrew</span> : null}</p>
             </li>
           );})}
         </ul>
@@ -94,7 +94,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
       </section>
 
       <section className={`${cardCls} mt-4 overflow-x-auto`}>
-        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">Level Progression</h3>
+        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Level Progression</h3>
         <table className="w-full border-collapse text-[11.5px]">
           <thead>
             <tr className="text-left text-[var(--muted)]">
@@ -107,7 +107,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
           <tbody>
             {c.table.map((r) => (
               <tr key={r.level} className="align-top">
-                <td className="border-b border-[var(--border)] px-2 py-1 font-mono text-[#f0a37f]">{r.level}</td>
+                <td className="border-b border-[var(--border)] px-2 py-1 font-mono text-[var(--sys-link)]">{r.level}</td>
                 <td className="border-b border-[var(--border)] px-2 py-1 font-mono text-[var(--muted)]">+{r.profBonus}</td>
                 <td className="border-b border-[var(--border)] px-2 py-1 text-[var(--muted)]">{r.features.join(", ") || "—"}</td>
                 {columns.map((col) => <td key={col} className="border-b border-[var(--border)] px-2 py-1 text-center font-mono text-[var(--muted)]">{r.columns?.[col] ?? "—"}</td>)}
@@ -118,7 +118,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
       </section>
 
       <section className={`${cardCls} mt-4`}>
-        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">Class Features</h3>
+        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">Class Features</h3>
         <div className="flex flex-col gap-2">
           {c.features.filter((f) => !f.subclass).map((f, i) => (
             <p key={i} className="text-[12.5px] leading-relaxed text-[var(--muted)]"><span className="font-mono text-[11px] text-[var(--dnd)]">L{f.level}</span> <span className="font-semibold text-[var(--text)]">{f.name}.</span> {f.description}</p>
@@ -127,7 +127,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
       </section>
 
       <section className="mt-4">
-        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{c.subclassLabel}s</h3>
+        <h3 className="mb-2 text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{c.subclassLabel}s</h3>
         <div className="flex flex-col gap-3">
           {c.subclasses.map((s) => (
             <div key={s.name} className={cardCls}>

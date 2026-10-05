@@ -113,7 +113,7 @@ export default async function D62eEquipmentPage({ searchParams }: { searchParams
             <tbody>{gear.filter((e) => e.category === k).map((e) => (
               <tr key={`${e.homebrew ? "hb" : "bk"}-${e.name}`} className="border-t border-[var(--border)] align-top" hidden={!showGear(e)} data-f={facetAttr(gearFacets(e))} data-s={e.category}>
                 <td className="py-1.5 pr-3 font-semibold text-[var(--text)]">{e.name}{e.homebrew ? <span className={`${hbBadge} ml-2`}>Homebrew</span> : e.genre !== "core" ? <span className={`${genreBadge} ml-2`}>{genreName(e.genre)}</span> : null}{e.era ? <span className="ml-2 text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">{e.era}</span> : null}</td>
-                {k === "weapon" ? <><td className="py-1.5 pr-3 whitespace-nowrap font-mono text-[#ef9455]">{e.damage ?? "—"}</td><td className="py-1.5 pr-3 font-mono text-[var(--muted)]">{e.range ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{e.skill ?? ""}</td></> : k === "armor" ? <td className="py-1.5 pr-3 font-mono text-[#ef9455]">{e.protection ?? "—"}</td> : null}
+                {k === "weapon" ? <><td className="py-1.5 pr-3 whitespace-nowrap font-mono text-[var(--sys-link)]">{e.damage ?? "—"}</td><td className="py-1.5 pr-3 font-mono text-[var(--muted)]">{e.range ?? ""}</td><td className="py-1.5 pr-3 text-[var(--muted)]">{e.skill ?? ""}</td></> : k === "armor" ? <td className="py-1.5 pr-3 font-mono text-[var(--sys-link)]">{e.protection ?? "—"}</td> : null}
                 <td className="py-1.5 pr-3 text-[var(--muted)]">{e.description}</td>
                 <td className="py-1.5 whitespace-nowrap text-[var(--muted)]">{e.cost ?? ""}</td>
               </tr>
@@ -128,7 +128,7 @@ export default async function D62eEquipmentPage({ searchParams }: { searchParams
           {vehicles.map((v) => (
             <li key={v.name} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={!showVehicle(v)} data-f={facetAttr(vehicleFacets)}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#ef9455]">{v.name}</span>
+                <span className="text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">{v.name}</span>
                 <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{v.kind}</span>
                 {v.genre !== "core" ? <span className={genreBadge}>{genreName(v.genre)}</span> : null}
               </div>

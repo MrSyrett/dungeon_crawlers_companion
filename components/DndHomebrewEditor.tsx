@@ -251,11 +251,11 @@ const labelCls = "mb-1 block text-[11px] font-semibold uppercase tracking-[0.12e
 const btn =
   "rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--dnd)] hover:text-[var(--text)] disabled:opacity-50";
 const btnRed =
-  "rounded border border-[var(--dnd)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0a37f] hover:bg-[var(--dnd)] hover:text-white disabled:opacity-50";
+  "rounded border border-[var(--dnd)] bg-[var(--panel-2)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:bg-[var(--dnd)] hover:text-white disabled:opacity-50";
 const miniBtn =
   "rounded border border-[var(--border)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--dnd)] hover:text-[var(--text)]";
 const chip = (on: boolean) =>
-  `rounded border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] ${on ? "border-[var(--dnd)] bg-[var(--panel-2)] text-[#f0a37f]" : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--dnd)]"}`;
+  `rounded border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] ${on ? "border-[var(--dnd)] bg-[var(--panel-2)] text-[var(--sys-link)]" : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--dnd)]"}`;
 
 export default function DndHomebrewEditor({
   kind, campaigns, initial,
@@ -334,7 +334,7 @@ export default function DndHomebrewEditor({
             <ul className="mb-4 flex flex-col gap-2">
               {items.map((rec) => (
                 <li key={rec.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2">
-                  <span className="font-bold text-[#f0a37f]">{rec.name}</span>
+                  <span className="font-bold text-[var(--sys-link)]">{rec.name}</span>
                   <span className="text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{schema.summary(rec.data || {})}</span>
                   {rec.campaignIds.length ? (
                     <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--muted)]">shared: {rec.campaignIds.map(campaignName).join(", ")}</span>
@@ -381,7 +381,7 @@ export default function DndHomebrewEditor({
                 </div>
               ) : null}
 
-              {error ? <p className="mt-3 text-[13px] text-[#f0a8a3]">{error}</p> : null}
+              {error ? <p className="mt-3 text-[13px] text-[var(--bad)]">{error}</p> : null}
 
               <div className="mt-4 flex gap-2">
                 <button className={btnRed} disabled={busy} onClick={submit}>

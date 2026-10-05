@@ -20,7 +20,7 @@ export default function Page() {
                 <div key={a.name} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="text-[13px] font-bold uppercase tracking-[0.08em] text-[var(--text)]">{a.name}</span>
-                    <span className="text-[11px] uppercase tracking-[0.08em] text-[#3fc2b0]">{a.sub}</span>
+                    <span className="text-[11px] uppercase tracking-[0.08em] text-[var(--sys-link)]">{a.sub}</span>
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{a.desc}</p>
                 </div>

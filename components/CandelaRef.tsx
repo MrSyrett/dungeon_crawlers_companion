@@ -10,12 +10,12 @@ export const one = (v: string | string[] | undefined): string => (Array.isArray(
 
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--candela)] hover:text-[var(--text)]";
-export const chipOn = "border-[var(--candela)] bg-[var(--panel-2)] text-[#3fc2b0]";
-export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#3fc2b0]";
+export const chipOn = "border-[var(--candela)] bg-[var(--panel-2)] text-[var(--sys-link)]";
+export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
-export const hbBadge = "rounded border border-[var(--candela)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#3fc2b0]";
-export const gildBadge = "rounded border border-[#d8b24a] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#d8b24a]";
+export const hbBadge = "rounded border border-[var(--candela)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
+export const gildBadge = "rounded border border-[var(--sys-head)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--sys-head)]";
 
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch };
@@ -59,7 +59,7 @@ export function CountLine({ count, noun, base, filtered }: { count: number; noun
 }
 
 export function SectionH({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fc2b0]">{children}</h2>;
+  return <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">{children}</h2>;
 }
 
 // `hidden` lets a page render this alongside the full list (InstantFilter

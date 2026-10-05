@@ -8,15 +8,15 @@ export type Query = Record<string, string | undefined>;
 export type RawQuery = Record<string, string | string[] | undefined>;
 export const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-const ACCENT = "#f4737a"; // brighter than --mmrpg for text on the dark ground
+const ACCENT = "var(--sys-link)"; // brighter than --mmrpg for text on the dark ground
 
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--mmrpg)] hover:text-[var(--text)]";
-export const chipOn = "border-[var(--mmrpg)] bg-[var(--panel-2)] text-[#f4737a]";
-export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#f4737a]";
+export const chipOn = "border-[var(--mmrpg)] bg-[var(--panel-2)] text-[var(--sys-link)]";
+export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
-export const hbBadge = "rounded border border-[var(--mmrpg)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f4737a]";
+export const hbBadge = "rounded border border-[var(--mmrpg)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch };
@@ -31,7 +31,7 @@ export function withParams(base: string, current: Query, patch: Query): string {
 export function RefDetails({ label = "Details", openLabel = "Hide details", children }: { label?: string; openLabel?: string; children: React.ReactNode }) {
   return (
     <details className="group mt-2">
-      <summary className="flex cursor-pointer list-none items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mmrpg)] hover:text-[#f4737a] [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mmrpg)] hover:text-[var(--sys-link)] [&::-webkit-details-marker]:hidden">
         <span className="inline-block transition-transform group-open:rotate-90">▸</span>
         <span className="group-open:hidden">{label}</span>
         <span className="hidden group-open:inline">{openLabel}</span>
@@ -84,7 +84,7 @@ export function EmptyState({ noun, base, hidden }: { noun: string; base: string;
 }
 
 export function SectionH({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f4737a]">{children}</h2>;
+  return <h2 className="text-base font-bold uppercase tracking-[0.12em]">{children}</h2>;
 }
 
 export { ACCENT };

@@ -24,7 +24,7 @@ export default function GbBestiaryPage() {
               <h3 className={nameCls}>{c.name}</h3>
               <span className="flex flex-wrap items-center gap-1.5">
                 {c.power ? <span className={catBadge}>Power {c.power}</span> : null}
-                {c.ectopresence != null ? <span className="rounded bg-[#4a2d63] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[#eabfff]">Ecto {c.ectopresence}</span> : null}
+                {c.ectopresence != null ? <span className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--sys-sub)]">Ecto {c.ectopresence}</span> : null}
               </span>
             </div>
             <div className="mt-0.5 flex flex-wrap gap-1.5 text-[11px] text-[var(--muted)]">
@@ -34,7 +34,7 @@ export default function GbBestiaryPage() {
             <div className="mt-2 flex flex-wrap gap-1.5">
               {TRAIT_KEYS.filter(([k]) => c[k]).map(([k, lbl]) => (
                 <span key={lbl} className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px]">
-                  <span className="text-[var(--muted)]">{lbl}</span> <span className="font-semibold text-[#8fce3f]">{c[k]}</span>
+                  <span className="text-[var(--muted)]">{lbl}</span> <span className="font-semibold text-[var(--sys-link)]">{c[k]}</span>
                 </span>
               ))}
             </div>
@@ -57,7 +57,7 @@ export default function GbBestiaryPage() {
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-[12px]">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-[0.08em] text-[#8fce3f]">
+            <tr className="text-left text-[11px] uppercase tracking-[0.08em] text-[var(--sys-link)]">
               <th className="border-b border-[var(--border)] px-2 py-1.5">Toughness</th>
               <th className="border-b border-[var(--border)] px-2 py-1.5">Power</th>
               <th className="border-b border-[var(--border)] px-2 py-1.5">Special Abilities</th>
@@ -84,7 +84,7 @@ export default function GbBestiaryPage() {
         {GB_GHOST_ABILITIES.map((a) => (
           <div key={a.name} className={cardCls}>
             <div className="flex items-baseline justify-between gap-2">
-              <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[#8fce3f]">{a.name}</h3>
+              <h3 className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--sys-link)]">{a.name}</h3>
               <span className={badge}>{a.category}</span>
             </div>
             <p className="mt-1 text-[12px] leading-relaxed text-[var(--text)]">{a.description}</p>

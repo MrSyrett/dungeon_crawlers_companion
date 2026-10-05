@@ -106,7 +106,7 @@ export default function MmrpgRefTokens({ text, items, kind, sep = ", " }: { text
             <button
               type="button"
               onClick={() => open(name, kind)}
-              className="border-b border-dotted border-[var(--mmrpg)] font-semibold text-[var(--mmrpg)] hover:text-[#f4737a]"
+              className="border-b border-dotted border-[var(--mmrpg)] font-semibold text-[var(--mmrpg)] hover:text-[var(--sys-link)]"
             >
               {name}
             </button>

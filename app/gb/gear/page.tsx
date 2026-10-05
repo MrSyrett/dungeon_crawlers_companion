@@ -29,7 +29,7 @@ export default function GbGearPage() {
                   </div>
                   {(e.damage || e.toHit || e.rangeMax || e.special) ? (
                     <div className="mt-1 flex flex-wrap gap-2 font-mono text-[11px] text-[var(--muted)]">
-                      {e.damage ? <span className="text-[#8fce3f]">dmg {e.damage}</span> : null}
+                      {e.damage ? <span className="text-[var(--sys-link)]">dmg {e.damage}</span> : null}
                       {e.toHit ? <span>to-hit {e.toHit}</span> : null}
                       {e.rangeMax ? <span>range {e.rangeMax}/{e.rangeIncrement}</span> : null}
                       {e.special ? <span className="text-[var(--gb)]">{e.special}</span> : null}
@@ -49,7 +49,7 @@ export default function GbGearPage() {
           <div key={g.name} className={cardCls}>
             <h3 className={nameCls}>{g.name}</h3>
             <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--text)]">{g.description}</p>
-            <p className="mt-1.5 text-[12px] leading-relaxed"><span className="font-semibold text-[#8fce3f]">Earn:</span> <span className="text-[var(--muted)]">{g.award}</span></p>
+            <p className="mt-1.5 text-[12px] leading-relaxed"><span className="font-semibold text-[var(--sys-link)]">Earn:</span> <span className="text-[var(--muted)]">{g.award}</span></p>
             <p className="mt-0.5 text-[12px] leading-relaxed"><span className="font-semibold text-[var(--gb)]">Risk:</span> <span className="text-[var(--muted)]">{g.penalty}</span></p>
           </div>
         ))}
@@ -59,7 +59,7 @@ export default function GbGearPage() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         {GB_POWERS.map((p) => (
           <div key={p.name} className={cardCls}>
-            <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#8fce3f]">{p.name}</h3>
+            <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[var(--sys-link)]">{p.name}</h3>
             <p className="mt-1 text-[12px] leading-relaxed text-[var(--text)]">{p.description}</p>
           </div>
         ))}

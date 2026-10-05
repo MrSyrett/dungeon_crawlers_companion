@@ -11,15 +11,15 @@ export type RawQuery = Record<string, string | string[] | undefined>;
 export const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
 // The accent used for text on the dark ground (brighter than the --icrpg border).
-const ACCENT = "#e8823c";
+const ACCENT = "var(--sys-link)";
 
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--icrpg)] hover:text-[var(--text)]";
-export const chipOn = "border-[var(--icrpg)] bg-[var(--panel-2)] text-[#e8823c]";
-export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#e8823c]";
+export const chipOn = "border-[var(--icrpg)] bg-[var(--panel-2)] text-[var(--sys-link)]";
+export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
-export const hbBadge = "rounded border border-[var(--icrpg)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#e8823c]";
+export const hbBadge = "rounded border border-[var(--icrpg)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 
 // ── Worlds ───────────────────────────────────────────────────────────────────
 // ICRPG's five settings. "core" applies to every game; the others are worlds.
@@ -89,7 +89,7 @@ export function EmptyState({ noun, base, hidden }: { noun: string; base: string;
 }
 
 export function SectionH({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e8823c]">{children}</h2>;
+  return <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">{children}</h2>;
 }
 
 export { ACCENT };

@@ -120,7 +120,7 @@ function DocList({
                   <input type="hidden" name="id" value={doc.id} />
                   <ConfirmButton
                     message={`Delete "${doc.title}"? This cannot be undone.`}
-                    className="min-h-11 shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[#f0a8a3] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
+                    className="min-h-11 shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
                   >
                     Delete
                   </ConfirmButton>

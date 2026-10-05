@@ -2,17 +2,17 @@ import Link from "next/link";
 import PageHeader from "./PageHeader";
 
 // Shared shell for the D&D 2024 reference pages (app/dnd/*) — same pieces as
-// NimbleRef / AceRef, in the D&D red (var(--dnd), #f0a37f accent text).
+// NimbleRef / AceRef, in the D&D red (var(--dnd), var(--sys-link) accent text).
 export type Query = Record<string, string | undefined>;
 export type RawQuery = Record<string, string | string[] | undefined>;
 export const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--dnd)] hover:text-[var(--text)]";
-export const chipOn = "border-[var(--dnd)] bg-[var(--panel-2)] text-[#f0a37f]";
-export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]";
+export const chipOn = "border-[var(--dnd)] bg-[var(--panel-2)] text-[var(--sys-link)]";
+export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
-export const accent = "#f0a37f";
+export const accent = "var(--sys-link)";
 
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch }; const sp = new URLSearchParams();

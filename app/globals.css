@@ -238,6 +238,41 @@
      and the active subtab underline, which is to say: labels. */
   --jlu-ink: #6293f2;
   --jlu-gold: var(--gold-ink);
+
+  /* ---- The semantic scale -------------------------------------------------
+     These encode DATA, not theme: an item's rarity, a loot tier's metal, a
+     benefit against a detriment, an error. They are shared across systems ON
+     PURPOSE — Legendary in D&D and the Gold tier in DCC should be the same
+     gold — and they are never re-skinned per system, because re-skinning a
+     scale destroys the thing it encodes. Six ordered grades, two materials
+     where the material IS the meaning, and the good/bad pair.
+
+       grade   D&D rarity      DCC loot tier
+       1       Common          (the grey baseline)
+       2       Uncommon
+       3       Rare            Platinum
+       4       Very Rare       Legendary
+       5       Legendary       Gold
+       6       Artifact        Celestial                                     */
+  --grade-1: #a7a7ad;
+  --grade-2: #5fbf72;
+  --grade-3: #5aa0e8;
+  --grade-4: #b07de0;
+  --grade-5: #e8a838;
+  --grade-6: #e06a5a;
+  --bronze: #c88a5a;
+  --silver: #c7ccd1;
+  /* A benefit, a save, a thing that is visible, a point gained. */
+  --good: #8fd19e;
+  /* A detriment, a penalty, a flaw, an error message. This is the pink that
+     used to be spelled #f0a8a3 in 26 places doing three unrelated jobs: DCC's
+     accent, an error message, and DCC's Celestial loot tier. It keeps exactly
+     one of them. */
+  --bad: #f0a8a3;
+  /* Ink for text sitting ON an accent fill — a gold button, a coloured pill.
+     Not black: pure black on gold vibrates. */
+  --on-accent: #1a1a1a;
+
   /* The SELECTED system's accent. SiteNav republishes this on <html> whenever
      the system changes (and sets data-system), so any surface can tint itself
      with var(--sys) and follow the switch live. The app's own accent until the
@@ -359,6 +394,27 @@ body {
 :root[data-chrome] body {
   --sys: var(--accent);
   --gold: var(--accent);
+}
+
+/* ── THE FLOOR UNDER THE FOUR ROLES ─────────────────────────────────────────
+   Markup writes `text-[var(--sys-link)]` with no fallback, and an undefined
+   custom property there is invalid at computed-value time: the colour is
+   dropped and the text renders unstyled. There are two moments when no system
+   block applies — the app's own chrome pages, and the server's FIRST PAINT,
+   because SiteNav publishes data-system in an effect and the server HTML
+   carries no such attribute — so without this the roles would flash unstyled
+   on every cold load, which is the same class of bug as the font flash.
+
+   Declared on `body`, not on :root, and that is load bearing: var() is
+   substituted where the declaration lives, so a `--sys-head: var(--gold)` on
+   :root would bake in the ROOT's gold and ignore every system block, all of
+   which re-point --gold on `body`. A bare `body` selector also loses to every
+   `:root[data-system="X"] … body` rule on specificity, which is exactly the
+   precedence wanted. */
+body {
+  --sys-head: var(--gold);
+  --sys-sub: var(--muted);
+  --sys-link: var(--sys);
 }
 
 /* ── THE VISUAL LANGUAGE ────────────────────────────────────────────────────

@@ -11,7 +11,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/feats";
 const CATS = ["Origin", "General", "Fighting Style", "Epic Boon"];
-const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#f0a37f]";
+const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]";
 
 export default async function DndFeatsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -60,7 +60,7 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
           {list.map((f, i) => (
             <li key={`${f.name}-${i}`} className={cardCls} hidden={!show(f)} data-f={facetAttr(facets(f))}>
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{f.name}{f.repeatable ? <span className="ml-1 text-[10px] text-[var(--muted)]">(repeatable)</span> : null} {isHb(f) ? <span className={hbBadge}>HB</span> : null}</h3>
+                <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{f.name}{f.repeatable ? <span className="ml-1 text-[10px] text-[var(--muted)]">(repeatable)</span> : null} {isHb(f) ? <span className={hbBadge}>HB</span> : null}</h3>
                 <span className={badge}>{f.category}</span>
               </div>
               {f.prerequisite ? <p className="mt-0.5 text-[11px] italic text-[var(--muted)]">Prerequisite: {f.prerequisite}</p> : null}

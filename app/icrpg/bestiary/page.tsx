@@ -100,7 +100,7 @@ export default async function IcrpgBestiaryPage({ searchParams }: { searchParams
                 {Object.entries(c.stats).map(([k, v]) => (
                   <div key={k}>
                     <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
-                    <dd className="font-mono text-[13px] text-[#e8823c]">{v >= 0 ? `+${v}` : v}</dd>
+                    <dd className="font-mono text-[13px] text-[var(--sys-link)]">{v >= 0 ? `+${v}` : v}</dd>
                   </div>
                 ))}
               </dl>

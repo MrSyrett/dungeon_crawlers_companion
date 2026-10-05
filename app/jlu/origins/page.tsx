@@ -33,12 +33,12 @@ export default function JluOriginsPage() {
               <span className={catBadge}>{o.canBuyOutsideKit ? "others ×2 PAX" : "kit only"}</span>
             </div>
             <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]">{o.description}</p>
-            <p className="mt-2 text-[12px]"><span className="font-semibold text-[#5b8dfb]">Power Kit:</span> {o.powerKit.join(", ")}</p>
-            <p className="mt-1 text-[12px]"><span className="font-semibold text-[#5b8dfb]">Free Power:</span> {o.freePower}</p>
+            <p className="mt-2 text-[12px]"><span className="font-semibold text-[var(--sys-link)]">Power Kit:</span> {o.powerKit.join(", ")}</p>
+            <p className="mt-1 text-[12px]"><span className="font-semibold text-[var(--sys-link)]">Free Power:</span> {o.freePower}</p>
             <ul className="mt-2 space-y-1.5">
               {o.features.map((f) => (
                 <li key={f.name} className="text-[12.5px] leading-relaxed">
-                  <span className="font-semibold text-[#5b8dfb]">{f.name}.</span> <span className="text-[var(--text)]">{f.text}</span>
+                  <span className="font-semibold text-[var(--sys-link)]">{f.name}.</span> <span className="text-[var(--text)]">{f.text}</span>
                 </li>
               ))}
             </ul>
@@ -58,7 +58,7 @@ export default function JluOriginsPage() {
             <ul className="mt-2 space-y-1.5">
               {a.abilities.map((ab) => (
                 <li key={ab.name} className="text-[12.5px] leading-relaxed">
-                  <span className="font-semibold text-[#5b8dfb]">{ab.name}.</span> <span className="text-[var(--text)]">{ab.text}</span>
+                  <span className="font-semibold text-[var(--sys-link)]">{ab.name}.</span> <span className="text-[var(--text)]">{ab.text}</span>
                 </li>
               ))}
             </ul>

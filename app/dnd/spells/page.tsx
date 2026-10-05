@@ -13,7 +13,7 @@ const BASE = "/dnd/spells";
 const CLASSES = ["Bard", "Cleric", "Druid", "Paladin", "Ranger", "Sorcerer", "Warlock", "Wizard"];
 const SCHOOLS = ["Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation"];
 const lvlLabel = (n: number) => (n === 0 ? "Cantrip" : `Level ${n}`);
-const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#f0a37f]";
+const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]";
 // Structured combat fields carried by homebrew spells (see lib/homebrew normalizeDndSpell).
 type HbCombat = { roll?: string; saveAbility?: string; damage?: string; damageType?: string; heal?: string; upcast?: string };
 function combatBits(s: unknown): string[] {
@@ -75,7 +75,7 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
           {list.map((s, i) => (
             <article key={`${s.name}-${i}`} className={cardCls} hidden={!show(s)} data-f={facetAttr(facets(s))}>
               <div className="flex items-start justify-between gap-3">
-                <h3 className="text-base font-bold uppercase tracking-[0.1em] text-[#f0a37f]">{s.name} {isHb(s) ? <span className={hbBadge}>HB</span> : null}</h3>
+                <h3 className="text-base font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">{s.name} {isHb(s) ? <span className={hbBadge}>HB</span> : null}</h3>
                 <span className={badge}>{lvlLabel(s.level)} · {s.school}</span>
               </div>
               <p className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-[var(--muted)]">
@@ -83,12 +83,12 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
                 <span><span className="font-semibold text-[var(--text)]">Range:</span> {s.range}</span>
                 <span><span className="font-semibold text-[var(--text)]">Components:</span> {s.components}</span>
                 <span><span className="font-semibold text-[var(--text)]">Duration:</span> {s.duration}</span>
-                {s.concentration ? <span className="text-[#e8c84a]">Concentration</span> : null}
-                {s.ritual ? <span className="text-[#8ad4ff]">Ritual</span> : null}
+                {s.concentration ? <span className="text-[var(--sys-sub)]">Concentration</span> : null}
+                {s.ritual ? <span className="text-[var(--sys-link)]">Ritual</span> : null}
               </p>
-              {combatBits(s).length ? <p className="mt-1 text-[11px] font-semibold text-[#f0a37f]">{combatBits(s).join(" · ")}</p> : null}
+              {combatBits(s).length ? <p className="mt-1 text-[11px] font-semibold text-[var(--sys-link)]">{combatBits(s).join(" · ")}</p> : null}
               <p className="mt-2 text-[12.5px] leading-relaxed text-[var(--text)]">{s.description}</p>
-              {s.higherLevels ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[#f0a37f]">At Higher Levels.</span> {s.higherLevels}</p> : null}
+              {s.higherLevels ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--sys-link)]">At Higher Levels.</span> {s.higherLevels}</p> : null}
               {s.classes.length ? <p className="mt-1.5 text-[11px] text-[var(--muted)]">{s.classes.join(" · ")}</p> : null}
             </article>
           ))}

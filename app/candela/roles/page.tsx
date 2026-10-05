@@ -26,7 +26,7 @@ export default function Page() {
               <ul className="mt-1 space-y-1">
                 {r.abilities.map((a) => (
                   <li key={a.name} className="text-[13px] leading-relaxed text-[var(--text)]">
-                    <span className="font-semibold text-[#3fc2b0]">{a.name}.</span> {a.desc}
+                    <span className="font-semibold text-[var(--sys-link)]">{a.name}.</span> {a.desc}
                   </li>
                 ))}
               </ul>
