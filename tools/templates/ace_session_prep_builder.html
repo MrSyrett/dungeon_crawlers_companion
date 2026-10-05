@@ -43,7 +43,10 @@ document.addEventListener("DOMContentLoaded", function() {
     --section-hdr: var(--accent-dark); --table-hdr: #4a4a4a; --preview-bg: #26262a;
     --font-display: 'Barlow Condensed', sans-serif;
     /* Masthead banner — ported from the system's character-sheet header (.hdr-row/.lg-word/.lg-sub) */
-    --banner-a: #d8b92a; --banner-b: #f4d84a; --title-color: #1a1a1a; --title-weight: 900; --sub-color: #1d6f9a;
+    --banner-a: #d8b92a; --banner-b: #f4d84a; --title-color: #1a1a1a; --title-weight: 900;
+    /* Same deep blue the skin sets, so the unskinned preview agrees with the
+       themed page instead of falling back to --accent-dark at 2.87:1. */
+    --sub-color: var(--ace-deep, #114c6a);
     /* UI (sidebar) stays dark */
     --ui-bg: #1c1c1e; --ui-panel: #2a2a2d; --ui-border: #3a3a3e;
     --ui-text: #e8e4dc; --ui-muted: #888; --ui-accent: #2b93c9; --ui-highlight: #f4d84a;

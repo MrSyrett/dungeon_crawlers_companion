@@ -139,6 +139,13 @@
   --blue-ink: #8ab4f8;
   /* ACE! accent — the comic-book sky blue of the omnibus covers. */
   --ace: #3aa8e0;
+  /* The same blue taken down far enough to sit on ACE's gold. --ace itself is
+     1.4:1 on the banner's darker stop and --accent-dark #1d6f9a is 2.87 — both
+     unreadable there, which is why the prep subtitle had been pushed all the way
+     to near-black. This keeps the hue and clears 4.5 on BOTH gradient stops
+     (4.81 on #d8b92a, 6.52 on #f4d84a), so the subtitle reads blue instead of
+     reading as a second, smaller title. */
+  --ace-deep: #114c6a;
   /* Kids on Bikes accent — the books' purple. */
   --kob: #a56ee8;
   /* Nimble accent. Was #3fb97a, which never matched nimble_character_sheet's

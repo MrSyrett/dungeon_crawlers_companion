@@ -34,6 +34,8 @@
 
   /* Per-system accents (same values as the app). */
   --ace: #3aa8e0;
+  /* --ace taken down to sit on ACE's gold banner; see app/globals.css. */
+  --ace-deep: #114c6a;
   --kob: #a56ee8;
   --nimble: #2f9b63;
   --sw: #f0c020;
@@ -790,8 +792,11 @@
 
 /* --- ACE! ------------------------------------------------------------------ */
 :root[data-themed][data-system="ACE"] {
-  /* Prep subtitle. Was #1d6f9a — 2.87:1 on ACE's own gold banner; its dark ground is 10.12 and matches the title. */
-  --sub-color: #070d14;
+  /* Prep subtitle. Was #1d6f9a (2.87:1 on the banner's darker stop), then
+     near-black, which was legible but made the subtitle read as a second title.
+     ACE's two colours are the blue and the gold: on the app's dark pages the
+     head is blue and the sub gold, so on the gold banner it goes the other way. */
+  --sub-color: var(--ace-deep);
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--ace);
