@@ -24,7 +24,9 @@
     "data:mmrpg": "node scripts/build-mmrpg-data.mjs",
     "data:jlu": "node scripts/build-jlu-data.mjs",
     "data:gb": "node scripts/build-gb-data.mjs",
-    "tools:session-builders": "node scripts/make-session-builders.mjs"
+    "tools:session-builders": "node scripts/make-session-builders.mjs",
+    "fonts:fetch": "node scripts/fetch-fonts.mjs",
+    "fonts:check": "node scripts/check-fonts.mjs"
   },
   "engines": {
     "node": ">=20"
