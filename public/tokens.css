@@ -86,6 +86,45 @@
   --sys-label: "Geist Mono", ui-monospace, monospace;
 }
 
+/* ---- The adventure title, in each system's own display face -----------------
+   The prep builders each hard-coded a font here (eleven of fourteen said
+   'Barlow Condensed'), so no adventure title wore its system's face. --sys-display
+   is already defined per system above, so one rule gives all fourteen the branded
+   face and a new system gets it for free.
+   Scoped to [data-tool="session"] because --sys-display on a CHARACTER sheet means
+   that sheet's own display face, and the two documents share variable names for
+   different jobs (see lib/inject.ts). */
+:root[data-themed][data-tool="session"] .adventure-title {
+  font-family: var(--sys-display), 'Barlow Condensed', sans-serif;
+}
+
+/* Ghostbusters' face is CAPS-ONLY and its CAPITAL O is the no-ghost logo glyph
+   (see the @font-face note in app/globals.css). The template uppercases this
+   title in CSS, and an adventure title is whatever the GM typed — "The Owlbear
+   Tomb" would come out with a ghost inside every o. Turning the transform off
+   means a lowercase o renders as a plain O and only a typed capital O gives the
+   ghost, which is the documented behaviour. The face makes its own caps. */
+:root[data-themed][data-system="GB"][data-tool="session"] .adventure-title {
+  text-transform: none;
+}
+/* ...and the wordmark is the CUT-OUT, not just the face — the same treatment the
+   page title and the dashboard list headers wear in app/globals.css. At the 28px
+   this title is set in, the counters stay open and the white outline reads against
+   the green band; it is only at 16px that the stroke closes them up.
+   Gated, like the original: without -webkit-text-stroke the letters would be fill
+   colour on the band, so anything that cannot draw the stroke keeps the flat dark
+   title from --title-color above. */
+@supports (-webkit-text-stroke: 1px #fff) {
+  :root[data-themed][data-system="GB"][data-tool="session"] .adventure-title {
+    color: #0e120a;
+    -webkit-text-stroke: 1.5px #ffffff;
+    paint-order: stroke fill;
+    text-shadow:
+      0 0 2px rgba(255, 255, 255, 0.9),
+      0 0 7px rgba(255, 255, 255, 0.45);
+  }
+}
+
 /* Shadowdark's display face, served from /fonts (next.config.ts caches it for
    a year). The Shadowdark character sheet carries its own inline copy; every
    other themed surface gets it from here. */
@@ -621,6 +660,8 @@
 
 /* --- D&D 2024 ------------------------------------------------------------- */
 :root[data-themed][data-system="DND"] {
+  /* Prep subtitle. Was #fbe7dc — a pale pink that is in no D&D palette; white is 8.16:1 on the red band. */
+  --sub-color: #ffffff;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--crimson-ink);
@@ -659,7 +700,7 @@
   --ui-border: #2b2430;
   --ui-text: #ece9e1;
   --ui-muted: #9a94a0;
-  --ui-accent: var(--dcc-ink);  /* lifted for label text on this sidebar: 4.40 -> 5.30 */
+  --ui-accent: var(--dcc-gold);  /* the panel's headers — .sidebar-title and every .section-divider read this token. 11.28:1 on the panel. */
   --ui-highlight: #f2c230;
   --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
 }
@@ -682,6 +723,8 @@
    so setting one here would repaint the paper — which this file deliberately
    doesn't do. The ui-* palette and the ground are the whole brief. */
 :root[data-themed][data-system="SW"] {
+  /* Prep subtitle. Was #8fbaf0 — periwinkle, where Star Wars' second colour is the cyan — 9.27:1 on the black band. */
+  --sub-color: var(--sw-cyan);
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--sw);
@@ -747,6 +790,8 @@
 
 /* --- ACE! ------------------------------------------------------------------ */
 :root[data-themed][data-system="ACE"] {
+  /* Prep subtitle. Was #1d6f9a — 2.87:1 on ACE's own gold banner; its dark ground is 10.12 and matches the title. */
+  --sub-color: #070d14;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--ace);
@@ -786,6 +831,8 @@
   src: url("/fonts/dreadful.woff2") format("woff2");
 }
 :root[data-themed][data-system="KOB"] {
+  /* Prep subtitle. Was #f0d27a — a gold, in a purple-and-teal palette; white is 5.75:1 on the purple band. */
+  --sub-color: #ffffff;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--kob-ink);
@@ -815,6 +862,13 @@
 
 /* --- D6 System 2e ---------------------------------------------------------- */
 :root[data-themed][data-system="D62E"] {
+  /* The adventure banner and its type. Was a mid-tone of this system's own
+     accent with #a9d6f7 at 1.93:1 — a pale blue, on a burnt-orange system. Darkened the same way Candela and DCC are, so the
+     system's colour can carry the title and white can carry the line under it. */
+  --banner-a: #121214;
+  --banner-b: #6d360f;
+  --title-color: var(--d62e-ink);
+  --sub-color: #ffffff;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--d62e-ink);
@@ -875,6 +929,8 @@
   src: url("/fonts/dndc.woff2") format("woff2");
 }
 :root[data-themed][data-system="GB"] {
+  /* The prep builder's subtitle. Was #5e2b90 — a purple with no place in a green-and-slime palette; 2.45:1 on the light end of its own banner. This is the same ink the title uses — on a light banner the hierarchy is size and weight, not hue. */
+  --sub-color: #12180a;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--gb);
@@ -906,6 +962,15 @@
 
 /* --- Candela Obscura ------------------------------------------------------- */
 :root[data-themed][data-system="CO"] {
+  /* The adventure banner. Darkened from the old #1c6b60 -> #2fa595 teal: that
+     was a mid-tone of Candela's own accent, and nothing legible sits on it —
+     white measured 3.03:1 and the gold 3.17. Dark ground to deep teal instead,
+     which is what the covers look like anyway, and the same move the DCC and
+     D&D session blocks already make. */
+  --banner-a: #0c1512;
+  --banner-b: #17564d;
+  --title-color: var(--candela-gold);
+  --sub-color: #ffffff;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--candela);
@@ -939,6 +1004,13 @@
 /* --- Nimble ---------------------------------------------------------------
    No texture file: every pattern read as busy here, and a gradient can't. */
 :root[data-themed][data-system="NIM"] {
+  /* The adventure banner and its type. Was a mid-tone of this system's own
+     accent with #f0d27a at 2.37:1 — a gold, on a green-and-blue system. Darkened the same way Candela and DCC are, so the
+     system's colour can carry the title and white can carry the line under it. */
+  --banner-a: #141816;
+  --banner-b: #175235;
+  --title-color: var(--nimble-ink);
+  --sub-color: #ffffff;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--nimble-ink);
@@ -968,6 +1040,8 @@
 /* --- Index Card RPG --------------------------------------------------------
    The grain tile is 900x560 and REPEATS; everything else here covers. */
 :root[data-themed][data-system="ICRPG"] {
+  /* Prep subtitle. Was #a9d6f7 — a pale blue, in an orange-and-red palette; white is 4.54:1 on the burnt band. */
+  --sub-color: #ffffff;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--icrpg-ink);
@@ -997,6 +1071,8 @@
 
 /* --- Year Zero Engine ------------------------------------------------------ */
 :root[data-themed][data-system="YZE"] {
+  /* The prep builder's subtitle. Was #2e2170 — the same purple problem on the cyan banner: 2.98:1, and no purple anywhere in Year Zero's palette. */
+  --sub-color: #04232a;
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--yze);
@@ -1142,6 +1218,19 @@
   --preview-bg: #060507;
   --gold: #9a7410;            /* icons on the white page */
 }
+
+/* Loot & Rewards, which the builder marks `.sl.gold`. DCC's yellow is the whole
+   point of the label, but #f2c230 measures 1.68:1 on the white preview page — so
+   the paper gets the darker gold this system already keeps for --green, and the
+   dark page gets the brand yellow itself at 10.36. */
+:root[data-themed][data-system="DCC"][data-tool="session"] .sl.gold {
+  color: #8a6a10;
+  border-bottom-color: #8a6a10;
+}
+:root[data-themed][data-system="DCC"][data-tool="session"] .page.dark-mode .sl.gold {
+  color: var(--dcc-gold);
+  border-bottom-color: var(--dcc-gold);
+}
 /* The one place the template wrote the cyan straight into the rule. */
 :root[data-themed][data-system="DCC"][data-tool="session"] .read-aloud,
 :root[data-themed][data-system="DCC"][data-tool="session"] .sb-flavor {
@@ -1217,7 +1306,7 @@
      here, and this block outranks the template's own --title-color, which is why
      setting it in dnd_session_prep_builder.html had no effect. */
   --title-color: var(--gold-ink);
-  --sub-color: #fbe7dc;       /* was gold; 4.9:1 on the band */
+  --sub-color: #ffffff;       /* was #fbe7dc, a pale pink in no D&D palette; white is 8.16:1 on the red band */
   --preview-bg: #0d0b0c;
   --gold: #8a4a22;            /* icons on the cream page */
 }

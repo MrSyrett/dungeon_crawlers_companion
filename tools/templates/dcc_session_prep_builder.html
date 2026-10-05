@@ -2052,7 +2052,7 @@ function renderPreview() {
 
     // Loot & Rewards
     if((state.rewards||[]).length){
-      let h='<div class="p-section"><div class="sl" style="color:var(--accent);border-bottom-color:var(--accent);">Loot &amp; Rewards</div>';
+      let h='<div class="p-section"><div class="sl gold">Loot &amp; Rewards</div>';
       (state.rewards||[]).forEach(r=>{h+='<div class="npc-block" style="border-left-color:var(--accent-dark);"><div class="entry-name">'+escH(r.name)+'</div>'+(r.flavor?'<div class="sb-flavor" style="margin-bottom:5px;padding:5px 7px;">'+fmtText(r.flavor)+'</div>':'')+(r.stats?'<p class="entry-desc reward-stats" style="font-family:Share Tech Mono,monospace;font-size:8px;margin-top:3px;">'+fmtText(r.stats)+'</p>':'')+'</div>';});
       sections.push(h+'</div>');
     }
