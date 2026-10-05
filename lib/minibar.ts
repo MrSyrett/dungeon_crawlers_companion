@@ -117,21 +117,30 @@ const THEME_FONTS: Partial<Record<SystemKey, string>> = {
 export function miniBarHead(system: SystemKey | null, themeKey?: string, themed?: boolean): string {
   const s = sysEntry(system);
   const accent = s ? `<style id="dd-sys">:root{--sys:${s.accent}}</style>` : "";
-  const faces = themed && system && THEME_FONTS[system]
-    ? `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${THEME_FONTS[system]}&display=swap">`
-    : "";
+  // Nothing to fetch: every family THEME_FONTS names is self-hosted in
+  // public/tokens.css, which the return below links on the same line. The remote
+  // stylesheet this used to emit was the font flash — two extra hosts to resolve
+  // and connect to before a single glyph could be drawn, for faces already
+  // sitting in /fonts/google. THEME_FONTS stays as the record of which families
+  // each skin needs; scripts/check-standalone-fonts.mjs asserts tokens.css still
+  // covers every one of them, so this can never quietly lose a face.
+  const faces = "";
   const seed = themeKey
     ? `<script>(function(){try{var t=localStorage.getItem("dd_theme")||"dark";localStorage.setItem(${JSON.stringify(themeKey)},t==="dark"?"1":"0");}catch(e){}})();</script>`
     : "";
-  // The app's own pair, on every standalone surface. A themed tool adds its
-  // system's faces on top of this.
-  // Geist's loaded weights MUST stay in step with app/layout.tsx's next/font call
-  // (currently 400, 500, 700). SiteNav styles its links font-semibold, and with no
-  // 600 loaded the CSS font-matching algorithm resolves 600 upward to 700 — so the
-  // Next navbar has always rendered them Bold. Adding a real 600 here alone made
-  // the standalone bar render Semibold and read slightly lighter than every other
-  // page. If a true 600 is ever wanted, add it to BOTH or neither.
-  const base = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;700&display=swap">`;
+  // The app's own pair used to be fetched here too; it is self-hosted now, and
+  // Geist is a VARIABLE face in tokens.css (font-weight: 400 900), so every weight
+  // resolves from one file.
+  //
+  // The warning this comment used to carry still matters, it just moved: Geist's
+  // weights must stay in step with app/layout.tsx's next/font call. SiteNav styles
+  // its links font-semibold, and with no 600 loaded the font-matching algorithm
+  // resolves 600 upward to 700 — so the Next navbar has always rendered them Bold.
+  // Giving the standalone bar a real 600 alone made it read lighter than every
+  // other page. Variable Geist now covers 600 on the standalone side, so if the
+  // Next side ever gains a true 600 the two will finally agree; until then this is
+  // the one place they can drift, and it is deliberate.
+  const base = "";
   return `<link rel="stylesheet" href="/tokens.css">\n${base}\n${faces}\n${accent}\n${seed}`;
 }
 

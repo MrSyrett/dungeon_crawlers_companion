@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- No Google Fonts link. Every family below is self-hosted: the injected
+       head links /tokens.css, whose generated @font-face block serves them
+       from /fonts/google on this origin. Fetching them remotely as well was
+       what made the type pop in a beat late. -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Map Maker</title>
@@ -9,9 +13,6 @@
      the file opened standalone / offline), the tool falls back to its own inlined
      copy below, so it still works on its own. -->
 <script src="/dungeon-engine.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0b0c0e; --panel:#14161a; --panel2:#1c1f24; --line:#2b3038;

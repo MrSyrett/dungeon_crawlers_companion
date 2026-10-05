@@ -458,8 +458,19 @@ body {
 }
 /* h3 deliberately NOT included: across these pages h3 is as often a small label
    inside a card as it is a section heading, and colouring those would reach
-   things this change has no business touching. Add it here if section h3s turn
-   out to need it. */
+   things this change has no business touching. Opt one in BY NAME instead, the
+   way the dashboard's do below. */
+
+/* The dashboard's two list headers — Characters and Adventures — are h3s, so the
+   rule above leaves them alone and they were coming out plain --text white on
+   every system. They ARE section headings, so they take --sys-head by name. This
+   is the opt-in the comment above describes: a data attribute, not a blanket h3
+   rule, so it reaches these two and nothing else.
+   (Ghostbusters additionally letters them in its wordmark face — see the GB
+   block, which targets the same attribute.) */
+:root[data-system]:not([data-chrome]) body [data-dash-head] {
+  color: var(--sys-head);
+}
 
 /* --- Shadowdark: black and white, gold only as an occasional highlight ---- */
 :root[data-system="SD"]:not([data-chrome]) body {
@@ -527,6 +538,15 @@ body {
    a creature's stat line is the last place to risk a missing numeral. */
 :root[data-system="DND"]:not([data-chrome]) body h1 {
   font-family: "DnDC", var(--font-cinzel), Georgia, serif;
+}
+/* ...which the comment above has claimed since it was written, while no rule
+   actually did it: every other system's block styles h1, h2 AND h3, and this one
+   styled h1 alone, so D&D's headings fell through to --sys-text (EB Garamond) via
+   `body`. Visible on the dashboard, where the Characters and Adventures headers
+   are h3s. This is the rule the comment was describing. */
+:root[data-system="DND"]:not([data-chrome]) body h2,
+:root[data-system="DND"]:not([data-chrome]) body h3 {
+  font-family: var(--font-cinzel), "Cinzel", Georgia, serif;
 }
 
 /* --- Dungeon Crawler Carl: black, gold and magenta, thrown splatter ------- */
