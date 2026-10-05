@@ -21,9 +21,10 @@
   --border:#2a231c;--section-hdr:#231c15;--box:#efe7d8;--input-bg:#fff;--input-border:#a08d70;
   --log-bg:#141010;--log-text:#efe6d8;
   /* The masthead yellow. The sheet's --gold #b8892a is a paper value and only
-     manages 2.58:1 on this red banner; this is the same yellow the D&D prep
-     builder calls --highlight, at 4.77. */
-  --dnd-gold:#f0c020;
+     manages 2.58:1 on this red banner. This is --gold-ink from public/tokens.css:
+     the SAME gold as D&D's headings on the site and its adventure title, so the
+     system has one gold rather than three. 5.55:1 on the dark end of the band. */
+  --dnd-gold:var(--gold-ink, #e2b23a);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}

@@ -47,6 +47,33 @@
   --gb: #8bc53f;
   --dcc: #e8275f;
   --dcc-gold: #f2c230;
+  /* ---- The systems' SECOND colours, mirrored from app/globals.css ----------
+     These were app-only until now, which is why every standalone tool invented
+     its own: a prep builder had no way to ask for "Marvel's red for text" and so
+     13 of them ended up with a generic yellow in that slot. They are here so a
+     system has ONE palette, defined once, that the app pages, the character
+     sheets and the prep builders all read from.
+     scripts/check-token-parity.mjs holds these to app/globals.css, so a change in
+     either file without the other fails the build. */
+  --crimson: #c8102e;
+  --crimson-ink: #f4616a;
+  --gold-ink: #e2b23a;
+  --blue-ink: #8ab4f8;
+  --dcc-ink: #ee4a78;
+  --sw-cyan: #30d5e8;
+  --mmrpg-ink: var(--crimson-ink);
+  --mmrpg-blue: #7fc0f5;
+  --ace-yellow: #f4d84a;
+  --kob-ink: #c9aaff;
+  --kob-teal: #25a5a5;
+  --d62e-ink: #f0a050;
+  --gb-ecto: #b6e34a;
+  --candela-gold: #d8b24a;
+  --nimble-ink: #7fd39a;
+  --nimble-blue: var(--blue-ink);
+  --icrpg-ink: #e8823c;
+  --jlu-ink: #6293f2;
+  --jlu-gold: var(--gold-ink);
   --dcc-ink: #ee4a78;
 
   --sys: var(--accent);
@@ -563,6 +590,9 @@
 
 /* --- Shadowdark ----------------------------------------------------------- */
 :root[data-themed][data-system="SD"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: #f8f8f6;
   --gold: #c8a020;
   --sys-display: "JSL Blackletter", cursive;
   --sys-text: "Montserrat", ui-sans-serif, system-ui, sans-serif;
@@ -591,6 +621,9 @@
 
 /* --- D&D 2024 ------------------------------------------------------------- */
 :root[data-themed][data-system="DND"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--crimson-ink);
   --sys-display: "DnDC", "Cinzel", serif;
   --sys-text: "EB Garamond", Georgia, serif;
   --sys-label: "Cinzel", serif;
@@ -599,7 +632,7 @@
   --ui-border: #342e30;
   --ui-text: #f5efe3;
   --ui-muted: #c2b3a0;
-  --ui-accent: #c8102e;
+  --ui-accent: var(--crimson-ink);  /* lifted for label text on this sidebar: 3.03 -> 5.73 */
   --ui-highlight: #f0a37f;
   --font-display: "Cinzel", serif;
 }
@@ -615,6 +648,9 @@
 
 /* --- Dungeon Crawler Carl -------------------------------------------------- */
 :root[data-themed][data-system="DCC"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--dcc-gold);
   --sys-display: "Anton", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Barlow", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Share Tech Mono", ui-monospace, monospace;
@@ -623,7 +659,7 @@
   --ui-border: #2b2430;
   --ui-text: #ece9e1;
   --ui-muted: #9a94a0;
-  --ui-accent: #e8275f;
+  --ui-accent: var(--dcc-ink);  /* lifted for label text on this sidebar: 4.40 -> 5.30 */
   --ui-highlight: #f2c230;
   --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
 }
@@ -646,6 +682,9 @@
    so setting one here would repaint the paper — which this file deliberately
    doesn't do. The ui-* palette and the ground are the whole brief. */
 :root[data-themed][data-system="SW"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--sw);
   --sys-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
@@ -672,6 +711,9 @@
 
 /* --- Marvel Multiverse ----------------------------------------------------- */
 :root[data-themed][data-system="MMRPG"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--mmrpg-ink);
   --sys-display: "Marvel", "Oswald", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Oswald", ui-sans-serif, system-ui, sans-serif;
@@ -705,6 +747,9 @@
 
 /* --- ACE! ------------------------------------------------------------------ */
 :root[data-themed][data-system="ACE"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--ace);
   --sys-display: "Lilita One", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Nunito", ui-sans-serif, system-ui, sans-serif;
@@ -741,6 +786,9 @@
   src: url("/fonts/dreadful.woff2") format("woff2");
 }
 :root[data-themed][data-system="KOB"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--kob-ink);
   --sys-display: "Dreadful", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Mulish", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Mulish", ui-sans-serif, system-ui, sans-serif;
@@ -767,6 +815,9 @@
 
 /* --- D6 System 2e ---------------------------------------------------------- */
 :root[data-themed][data-system="D62E"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--d62e-ink);
   --sys-display: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Saira", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
@@ -824,6 +875,9 @@
   src: url("/fonts/dndc.woff2") format("woff2");
 }
 :root[data-themed][data-system="GB"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--gb);
   --sys-display: "Ghostbusters", "Anton", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Asap", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Asap", ui-sans-serif, system-ui, sans-serif;
@@ -852,6 +906,9 @@
 
 /* --- Candela Obscura ------------------------------------------------------- */
 :root[data-themed][data-system="CO"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--candela);
   --sys-display: "Cormorant Garamond", Georgia, serif;
   --sys-text: "Lora", Georgia, serif;
   --sys-label: "Lora", Georgia, serif;
@@ -882,6 +939,9 @@
 /* --- Nimble ---------------------------------------------------------------
    No texture file: every pattern read as busy here, and a gradient can't. */
 :root[data-themed][data-system="NIM"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--nimble-ink);
   --sys-display: "Fraunces", Georgia, serif;
   --sys-text: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Figtree", ui-sans-serif, system-ui, sans-serif;
@@ -890,7 +950,7 @@
   --ui-border: #3a423d;
   --ui-text: #e8e4dc;
   --ui-muted: #a7ada9;
-  --ui-accent: #2f9b63;
+  --ui-accent: var(--nimble-ink);  /* lifted for label text on this sidebar: 4.38 -> 8.55 */
   --ui-highlight: #8ab4f8;
   --font-display: "Fraunces", Georgia, serif;
 }
@@ -908,6 +968,9 @@
 /* --- Index Card RPG --------------------------------------------------------
    The grain tile is 900x560 and REPEATS; everything else here covers. */
 :root[data-themed][data-system="ICRPG"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--icrpg-ink);
   --sys-display: "Permanent Marker", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Archivo", ui-sans-serif, system-ui, sans-serif;
@@ -916,7 +979,7 @@
   --ui-border: #45392c;
   --ui-text: #eae2d8;
   --ui-muted: #aca69c;
-  --ui-accent: #c8501e;
+  --ui-accent: var(--icrpg-ink);  /* lifted for label text on this sidebar: 3.83 -> 6.37 */
   --ui-highlight: #e8823c;
   --font-display: "Permanent Marker", ui-sans-serif, system-ui, sans-serif;
 }
@@ -934,6 +997,9 @@
 
 /* --- Year Zero Engine ------------------------------------------------------ */
 :root[data-themed][data-system="YZE"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--yze);
   --sys-display: "Archivo Narrow", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Archivo Narrow", ui-sans-serif, system-ui, sans-serif;
@@ -961,6 +1027,9 @@
 
 /* --- Justice League Unlimited ---------------------------------------------- */
 :root[data-themed][data-system="JLU"] {
+  /* Section labels on the DARK preview page. Same hue as the light page's
+     --accent-dark, lifted for the dark ground. */
+  --section-hdr-dark: var(--jlu-ink);
   --sys-display: "Russo One", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Rubik", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Rubik", ui-sans-serif, system-ui, sans-serif;
@@ -969,7 +1038,7 @@
   --ui-border: #2b3a58;
   --ui-text: #e8eefb;
   --ui-muted: #93a1c4;
-  --ui-accent: #2f6fed;
+  --ui-accent: var(--jlu-ink);  /* lifted for label text on this sidebar: 3.45 -> 5.21 */
   /* The sheet's --gold, which it spends on labels. */
   --ui-highlight: #e2b23a;
   --font-display: "Russo One", ui-sans-serif, system-ui, sans-serif;
@@ -1054,6 +1123,7 @@
    block with a magenta rule, and the masthead band goes black with a gold
    wordmark the way the covers do it. */
 :root[data-themed][data-system="DCC"][data-tool="session"] {
+  --section-hdr-dark: var(--dcc-gold);
   --accent: #cf1148;          /* 5.5:1 on the white page */
   --accent-dark: #97093a;
   --accent-red: #cf1148;
@@ -1128,6 +1198,7 @@
    Black, white, red and the light brown — so the gold highlight, the green and
    the blue NPC rule all go, and the read-aloud stops being cyan. */
 :root[data-themed][data-system="DND"][data-tool="session"] {
+  --section-hdr-dark: var(--crimson-ink);
   /* Two reds, not four: the theme red and its dark. The template shipped
      #c8102e, #8a0f1e, #9b1b22 and #6f1119, which read as a smear. */
   --accent: #c8102e;
@@ -1141,7 +1212,11 @@
   --blue-npc: #7a1119;
   --banner-a: #7a1119;
   --banner-b: #c8102e;
-  --title-color: #ffffff;
+  /* The adventure title in D&D's gold — the SAME gold as its headings on the
+     site and its sheet masthead (--gold-ink), not a third yellow. It was #ffffff
+     here, and this block outranks the template's own --title-color, which is why
+     setting it in dnd_session_prep_builder.html had no effect. */
+  --title-color: var(--gold-ink);
   --sub-color: #fbe7dc;       /* was gold; 4.9:1 on the band */
   --preview-bg: #0d0b0c;
   --gold: #8a4a22;            /* icons on the cream page */

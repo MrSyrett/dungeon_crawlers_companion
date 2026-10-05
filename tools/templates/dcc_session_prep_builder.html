@@ -186,7 +186,11 @@ document.addEventListener("DOMContentLoaded", function() {
      is white by default), and --highlight is the bright one for the dark page.
      Both are already skinned per system; only --section-hdr never was, which is
      why every system's Overview / Secrets & Clues / Notes came out red. */
-  .page.dark-mode .sl { color: var(--highlight); border-bottom-color: var(--highlight); }
+  /* --section-hdr-dark comes from this system's block in public/tokens.css, so the
+     colour lives in ONE place with the rest of that system's palette. The fallback
+     is the old behaviour, for the one case that gets no skin: a prep document
+     embedded read-only in the GM Screen (previewOnly in lib/inject.ts). */
+  .page.dark-mode .sl { color: var(--section-hdr-dark, var(--highlight)); border-bottom-color: var(--section-hdr-dark, var(--highlight)); }
   .page.dark-mode .location-block { border-bottom-color: #3a3a3e; }
   .page.dark-mode .p-footer { border-top-color: var(--accent); }
   .page.dark-mode .p2-footer { border-top-color: var(--accent); }
