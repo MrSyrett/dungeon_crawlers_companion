@@ -327,11 +327,22 @@ document.addEventListener("DOMContentLoaded", function() {
          The roll log hit the same thing with a 3px border. */
       border-right: none; border-top: none; border-bottom: none;
       flex-shrink: 0;
-      /* A BOTTOM sheet, the same as the character sheets' roll log: anchored to the
-         bottom of the screen and sliding DOWN to dock on its own grab bar. It used to
+      /* A BOTTOM sheet, the same as the character sheets' roll log: it sits at the
+         bottom of the screen and slides DOWN to dock on its own grab bar. It used to
          hang from the navbar and slide up out of sight, which left the bar at the top
-         and the panel arriving from above. */
-      position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+         and the panel arriving from above.
+         ANCHORED FROM THE TOP, not the bottom, even though it is a bottom sheet.
+         position:fixed resolves top/bottom against the LAYOUT viewport; dvh measures
+         the VISUAL one, and on iOS Safari those are not the same box. The layout
+         viewport keeps the height it had while the toolbars were expanded, so once
+         Safari minimises them — which it does here and never undoes, because this page
+         cannot scroll — `bottom:0` lands a few px ABOVE the real bottom of the screen
+         and the body background shows through underneath. That was the reported gap,
+         and it was there in both states. The navbar is fixed at top:0 in that same
+         box, so the TOP edge is the one both elements agree on: pin to it and let the
+         dvh height carry the sheet down to where the visible bottom actually is.
+         Do not put `bottom:0` back — mobileprep.mjs fails if it returns. */
+      position: fixed; left: 0; right: 0; top: var(--dd-bar-h, 0px); bottom: auto;
       z-index: 100;
       height: calc(100vh - var(--dd-bar-h, 0px));
       height: calc(100dvh - var(--dd-bar-h, 0px));

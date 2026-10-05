@@ -286,7 +286,7 @@ body.dark .pip,body.dark .dot,body.dark .diamond,body.dark .mbox,body.dark .rpip
      stays docked at the bottom of the screen rather than being translated off it.
      The bar is the log's first IN-FLOW row (see #log-collapse-btn), so nothing
      hangs above the sheet's top edge, which is where the navbar sits. */
-  .roll-log{width:100%!important;position:fixed;bottom:0;left:0;right:0;top:auto!important;
+  .roll-log{width:100%!important;position:fixed;left:0;right:0;top:var(--dd-bar-h, 0px)!important;bottom:auto!important;
     /* No border on the log: the grab bar carries it (below). A border here sits
        between the log's box edge and its first row, which pushed the grab bar 3px
        down — so docking it by `100% - tab` left those 3px off the bottom of the
@@ -300,7 +300,16 @@ body.dark .pip,body.dark .dot,body.dark .diamond,body.dark .mbox,body.dark .rpip
        became a gap under the navbar while scrolling — worse than what it was meant to
        fix, which turned out to be the browser's own toolbar area appearing and
        disappearing rather than anything in this layout. Don't switch it back.
-       100vh above is the fallback for a browser too old for dvh. */
+       100vh above is the fallback for a browser too old for dvh.
+       And that dvh height hangs off the TOP edge, not the bottom. position:fixed
+       resolves top/bottom against the LAYOUT viewport, while dvh measures the VISUAL
+       one — and on iOS Safari those are two different boxes as soon as the toolbars
+       minimise. Anchoring the bottom mixed the two, so the log stopped a few px short
+       of the screen and the page showed through underneath: the "chunk of space at the
+       bottom" reported here, and the same gap found later under the Adventure Prep
+       panel. The navbar is fixed at top:0 in that same box, so the TOP edge is the one
+       both elements agree on — pin to it and let dvh carry the far edge down to
+       wherever the visible bottom actually is. Don't put bottom:0 back. */
     height:calc(100vh - var(--dd-bar-h, 0px))!important;
     height:calc(100dvh - var(--dd-bar-h, 0px))!important;
     max-height:none!important;
