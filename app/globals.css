@@ -496,11 +496,17 @@ body {
 
 /* --- D&D 2024: a worn module cover. Black, white, red, light brown -------- */
 :root[data-system="DND"]:not([data-chrome]) body {
-  /* Red titles, gold eyebrow, the lighter red on links — a module cover. The
-     titles were coming out #c8a020, the app's old gold, purely because this
-     block never re-skinned --gold and the fallback caught it. */
-  --sys-head: var(--dnd);
-  --sys-sub: var(--gold-ink);
+  /* Gold titles, red eyebrow — a module cover, where the gold is the title
+     block and the red is the trim under it. (The titles were coming out
+     #c8a020, the app's old gold, purely because this block never re-skinned
+     --gold and the contract's fallback caught it.)
+     The eyebrow takes the LIFTED red, not --crimson: an eyebrow line is small
+     uppercase text and #c8102e measures 3.03:1 on this panel, display contrast
+     rather than text contrast. That is the same rule DCC's subheads and
+     Marvel's links follow. It does leave --sys-sub and --sys-link on the same
+     red; put links on var(--gold-ink) if they need to be told apart. */
+  --sys-head: var(--gold-ink);
+  --sys-sub: var(--crimson-ink);
   --sys-link: var(--crimson-ink);
   --panel: #1a1718;
   --panel-2: #221e1f;
