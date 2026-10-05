@@ -25,11 +25,14 @@ export async function PATCH(req: Request, ctx: Ctx) {
     | null;
   if (!body || typeof body !== "object") return new Response("Bad request", { status: 400 });
 
-  // Optimistic concurrency — same guard as /api/documents/[id]: refuse a data
-  // write whose base version is stale (another tab/device saved since) so it
-  // can't clobber newer progress. Title-only / older clients are unaffected.
+  // Optimistic concurrency — same guard as /api/documents/[id]: refuse a write
+  // whose base version is stale (another tab/device saved since) so it can't
+  // clobber newer progress. Older clients, which send no baseRev, are unaffected.
+  // Checked for title writes as well as data writes: updatedAt is the version
+  // stamp and a title write moves it, so leaving those unchecked let a stale tab
+  // adopt a fresh rev and walk straight past the guard on its next data write.
   const baseRev = typeof body.baseRev === "number" ? body.baseRev : undefined;
-  if (body.data !== undefined && baseRev !== undefined && doc.updatedAt.getTime() !== baseRev) {
+  if (baseRev !== undefined && doc.updatedAt.getTime() !== baseRev) {
     return Response.json({ conflict: true, rev: doc.updatedAt.getTime() }, { status: 409 });
   }
 

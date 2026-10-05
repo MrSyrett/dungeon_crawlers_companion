@@ -47,7 +47,19 @@ const SHIM = `
   window.__ddState = cfg.state || {};
   window.__ddDocId = cfg.docId;
 
-  var saving = false, queued = false;
+  // ONE PATCH AT A TIME, DATA AND TITLE ALIKE.
+  // saving covers any write in flight; queued holds data waiting to go next and
+  // pendingTitle a title waiting behind it. Title writes used to run loose,
+  // concurrently with data saves, and that was a live bug: saveState() in every
+  // session prep builder calls __ddSave() and then syncDocTitle() back to back,
+  // so on a new or imported adventure both went out together. The title body is
+  // a few dozen bytes and the prep payload is often megabytes of maps, so the
+  // title landed first and bumped updatedAt — and the data write that was
+  // already in flight arrived carrying a baseRev the server had just moved past.
+  // It was refused, the "changed in another tab" bar came up, saving went dead
+  // for the session, and the adventure's first write was lost. Serialising the
+  // two means each one adopts the rev the other produced.
+  var saving = false, queued = false, pendingTitle = null;
   var lastTitle = null;
   // Optimistic concurrency. curRev is the version this tab is based on (the
   // sheet's updatedAt at load, then whatever the server reports after each of
@@ -60,6 +72,8 @@ const SHIM = `
   var lastSavedJson = null;
   try { lastSavedJson = JSON.stringify(cfg.state || {}); } catch (e) {}
   var conflicted = false;
+  var recoveries = 0;      // benign rev skews we have re-synced past
+  var RECOVERY_MAX = 3;
 
   // NOTE: fetch keepalive caps the request body at 64KB. Anything bigger (a
   // sheet with a portrait, a prep doc with map images) is rejected outright, so
@@ -108,6 +122,45 @@ const SHIM = `
     } catch (e) { return; }
   }
 
+  // A 409 means the stored VERSION moved on. It does not necessarily mean the
+  // stored CONTENT did, and only the content is worth warning about: the bar
+  // exists to stop this tab overwriting someone else's work, not to punish a
+  // version stamp that drifted for a reason of our own making.
+  //
+  // So before accusing another tab, read the document back and compare what is
+  // stored against what this tab last successfully wrote. If they are the same
+  // bytes, nothing of ours is at risk — adopt the current version and retry.
+  // If they differ, something really did change elsewhere: show the bar and
+  // stop, exactly as before. Bounded, so a server that keeps refusing can't put
+  // us in a loop.
+  function refused(res) {
+    if (recoveries >= RECOVERY_MAX) return giveUp();
+    recoveries++;
+    var headers = {};
+    if (vttToken) headers["x-vtt-token"] = vttToken;
+    // The VTT endpoint is PATCH-only, so this probe 404s there and we fall
+    // through to giveUp() — the conservative answer, and what used to happen.
+    fetch(url, { credentials: "same-origin", headers: headers })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (doc) {
+        if (!doc) return giveUp();
+        var storedJson;
+        try { storedJson = JSON.stringify(doc.data); } catch (e) { return giveUp(); }
+        if (lastSavedJson === null || storedJson !== lastSavedJson) return giveUp();
+        var t = doc.updatedAt ? new Date(doc.updatedAt).getTime() : NaN;
+        if (!isFinite(t)) return giveUp();
+        curRev = t;
+        status("saving", "Saving…");
+        if (lastData) save(lastData);
+      }, giveUp)
+      .catch(giveUp);
+    function giveUp() {
+      conflicted = true;
+      status("error", "Changed elsewhere — not saved");
+      showConflict();
+    }
+  }
+
   // Save status → the mini-bar's chip (window.__ddStatus, provided by the bar).
   // Before this the sheet was completely silent: a 401 (session expired) and
   // every network error were swallowed, so edits were dropped with no sign.
@@ -138,7 +191,7 @@ const SHIM = `
           status("error", "Signed out — changes not saved");
           return;
         }
-        if (r.status === 409) { conflicted = true; status("error", "Changed elsewhere — not saved"); showConflict(); return; }
+        if (r.status === 409) { refused(r); return; }
         if (!r.ok) throw new Error(r.status);
         if (json !== null) lastSavedJson = json;
         status("saved", "Saved");
@@ -155,20 +208,59 @@ const SHIM = `
         saving = false;
         if (queued && !conflicted && !signedOut) { var d = queued; queued = null; save(d); }
         else { queued = null; }
+        flushTitle();
       });
   }
 
   // __ddSaveTitle(title) — push the document title (e.g. the character's name)
   // straight to the server so the dashboard card renames itself. Skipped when
   // the title hasn't changed, and sent with keepalive so it survives unload.
+  //
+  // The on-screen label is updated immediately either way; only the WRITE waits
+  // its turn behind a data save, because a title write bumps the same updatedAt
+  // the data save is holding as its baseRev.
   function saveTitle(title) {
     title = (title || "").trim().slice(0, 120);
     if (!title || title === lastTitle || conflicted) return;
     lastTitle = title;
-    patch({ title: title }, true).then(function (r) { if (r && r.ok) return applyRev(r); }, function () {}).catch(function(e) {});
     var label = document.querySelector("#dd-bar .dd-title, #dd-nav .dd-title");
     if (label) label.textContent = title;
     try { document.title = title; } catch (e) {}
+    if (saving) { pendingTitle = title; return; }
+    sendTitle(title);
+  }
+
+  // A title write moves the same updatedAt the data writes are versioned on, so
+  // it carries baseRev and is checked like any other write. Two reasons, and the
+  // second is the important one:
+  //   - if it is accepted, this tab really was current, so adopting the rev it
+  //     returns is sound;
+  //   - if it is NOT checked, it launders a stale tab into a current one. The
+  //     response's rev would be adopted, and the next data write would sail past
+  //     the guard and overwrite whatever the other device had saved. The bar
+  //     would never appear, which is worse than it appearing wrongly.
+  function sendTitle(title) {
+    saving = true;
+    var body = { title: title };
+    if (curRev !== null) body.baseRev = curRev;
+    patch(body, true)
+      .then(function (r) {
+        if (!r) return;
+        if (r.status === 409) { refused(r); return; }
+        if (r.ok) return applyRev(r);
+      }, function () {})
+      .catch(function (e) {})
+      .finally(function () {
+        saving = false;
+        if (queued && !conflicted && !signedOut) { var d = queued; queued = null; save(d); }
+        else { flushTitle(); }
+      });
+  }
+
+  function flushTitle() {
+    if (pendingTitle === null || saving || conflicted || signedOut) return;
+    var t = pendingTitle; pendingTitle = null;
+    sendTitle(t);
   }
 
   // __ddSave(data) — call with the data object to save directly to server

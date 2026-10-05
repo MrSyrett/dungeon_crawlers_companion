@@ -60,14 +60,21 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   });
   if (!existing) return new Response("Not found", { status: 404 });
 
-  // Optimistic concurrency: a data write carries the version it was based on
+  // Optimistic concurrency: a write carries the version it was based on
   // (baseRev = the updatedAt it loaded). If the stored version has moved on,
   // another tab or device saved in the meantime — refuse rather than clobber it,
   // and hand back the current version so the client can warn and reload. This is
-  // what stops a stale second tab from erasing a session's progress. Title-only
-  // writes and older clients (no baseRev) are unaffected.
+  // what stops a stale second tab from erasing a session's progress. Older
+  // clients, which send no baseRev, are unaffected.
+  //
+  // This check used to apply only when `data` was present, which left a hole:
+  // updatedAt is the version stamp and a TITLE write moves it too. An unchecked
+  // title write from a stale tab was accepted, and the client adopted the rev it
+  // returned — so the tab became "current" without ever having read the newer
+  // content, and its next data write overwrote it with the guard none the wiser.
+  // Any write that carries a baseRev is checked.
   const baseRev = typeof body.baseRev === "number" ? body.baseRev : undefined;
-  if (body.data !== undefined && baseRev !== undefined && existing.updatedAt.getTime() !== baseRev) {
+  if (baseRev !== undefined && existing.updatedAt.getTime() !== baseRev) {
     return Response.json({ conflict: true, rev: existing.updatedAt.getTime() }, { status: 409 });
   }
 
