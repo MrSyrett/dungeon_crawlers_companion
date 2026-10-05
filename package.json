@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/build-with-retry.mjs",
+    "build:once": "next build",
     "start": "sh scripts/start.sh",
     "lint": "eslint",
     "postinstall": "prisma generate",
