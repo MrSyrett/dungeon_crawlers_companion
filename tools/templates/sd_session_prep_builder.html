@@ -345,21 +345,26 @@
     /* Starts at the navbar's BOTTOM edge, not the top of the viewport. On a phone the
        bar is position:fixed (lib/sitenav.ts FIXED_STYLE) with a z-index far above
        this overlay, so anything left at top:0 is hidden behind it. */
-    /* Below the navbar AND below the grab bar, which is a fixed strip of its own
-       between them. Collapsed, this slides fully out (translateY(-100%)) and the bar
-       is all that is left — the same end state as the roll log docking to its bar. */
-    top: calc(var(--dd-bar-h, 0px) + var(--dd-panel-tab)); left: 0; right: 0; bottom: 0;
+    /* A BOTTOM sheet, the same as the character sheets' roll log: anchored to the
+       bottom of the screen and sliding DOWN to dock on its own grab bar, rather than
+       hanging from the navbar and sliding up out of sight. */
+    top: auto; left: 0; right: 0; bottom: 0;
     width: 100vw !important; min-width: 100vw !important;
-    height: calc(100vh - var(--dd-bar-h, 0px) - var(--dd-panel-tab)) !important;
-    height: calc(100dvh - var(--dd-bar-h, 0px) - var(--dd-panel-tab)) !important;
+    height: calc(100vh - var(--dd-bar-h, 0px)) !important;
+    height: calc(100dvh - var(--dd-bar-h, 0px)) !important;
+    /* The sheet must NOT scroll, or the grab bar would scroll away with the content.
+       .sidebar-content is already flex:1;overflow-y:auto and does the scrolling. */
+    overflow: hidden !important;
     z-index: 200;
     border-right: none;
     transform: translateY(0);
     transition: transform 0.25s ease;
     overflow-y: auto;
   }
+  /* Collapsed: down by its own height MINUS the grab bar, so the bar stays docked at
+     the bottom of the screen and is all that is left of the panel. */
   .sidebar.collapsed {
-    transform: translateY(-100%) !important;
+    transform: translateY(calc(100% - var(--dd-panel-tab))) !important;
     width: 100vw !important; min-width: 100vw !important;
   }
 
@@ -372,28 +377,32 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Exactly the grab bar, nothing more. Without this the preview started under the
-       bar and its first 34px were covered. */
-    margin-top: var(--dd-panel-tab);
+    /* No top chrome now — the panel and its bar are both at the bottom, so the preview
+       starts directly under the navbar. The docked bar does cover the bottom for good,
+       so hand that back as padding or the last rows are unreachable. */
+    margin-top: 0;
+    /* !important because the FLOW MODE block further down sets `padding: 0` on the
+       preview with a more specific selector (body.flow-mode .preview-area) — and flow
+       mode is exactly the mode a phone is always in. */
+    padding-bottom: var(--dd-panel-tab) !important;
   }
 
   /* Pages: scale down to fit mobile screen width */
   /* Pages reflow to a single fluid column on mobile via body.flow-mode
      (see the flow-mode block below); no fixed-page scaling here anymore. */
 
-  /* The grab bar: full width, pinned directly under the navbar, unmoving, present in
-     both states — the same shape the roll log uses on the character sheets. It was an
-     80px pill whose top/bottom were set from JS, so it hopped between the top and the
-     bottom of the screen and read as a stray floating button. Nothing positions it
-     now but this rule. */
+  /* The grab bar is the sheet's FIRST IN-FLOW ROW, so it travels with the panel and
+     ends up docked at the bottom of the screen when the sheet slides down — the same
+     arrangement as #log-collapse-btn in the roll log. The mobile init moves it inside
+     .sidebar for this. It was an 80px pill whose top/bottom were assigned from JS, so
+     it hopped between the top and the bottom of the screen; nothing positions it now. */
   .sidebar-pull-tab {
-    position: fixed !important;
-    top: var(--dd-bar-h, 0px) !important;
-    bottom: auto !important;
-    left: 0 !important; right: 0 !important;
+    position: static !important;
+    flex: 0 0 auto !important;
     transform: none !important;
     width: 100% !important;
     height: var(--dd-panel-tab) !important;
+    min-height: var(--dd-panel-tab) !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
     box-shadow: none !important;
@@ -2837,9 +2846,10 @@ function setPullTabMobile(pt) {
   pt.style.bottom = '';
 }
 
-/* The bar says what the tap will do, like the roll log's "Hide Log" / "Roll Log". */
+/* The bar says what the tap will do, like the roll log's "Hide Log" / "Roll Log".
+   Bottom sheet: collapsed it comes UP (▲), open it goes DOWN (▼). */
 function pullTabLabel(collapsed) {
-  return collapsed ? '▼ Show Controls' : '▲ Hide Controls';
+  return collapsed ? '▲ Show Controls' : '▼ Hide Controls';
 }
 
 // Update pull-tab position on resize
@@ -2948,7 +2958,12 @@ loadState();buildSidebarFromState();renderChapterTabs();applyFlowMode();renderPr
        preview is what you want first; the panel is one tap on the grab bar away. */
     const sb = document.querySelector('.sidebar');
     if(sb) sb.classList.add('collapsed');
-    if(pt) { setPullTabMobile(pt); pt.textContent = pullTabLabel(true); pt.title = 'Show controls'; }
+    if(pt) {
+      /* Into the sheet as its first row, so the bar travels with the panel and docks
+         at the bottom of the screen when it is closed. */
+      if(sb) sb.insertBefore(pt, sb.firstChild);
+      setPullTabMobile(pt); pt.textContent = pullTabLabel(true); pt.title = 'Show controls';
+    }
   } else if(pt) {
     pt.style.left = '320px';
     pt.textContent = '▼';

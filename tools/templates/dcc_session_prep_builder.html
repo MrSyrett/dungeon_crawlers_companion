@@ -13,13 +13,17 @@ document.addEventListener("DOMContentLoaded", function() {
   if(window.innerWidth <= 768) {
     var s = document.querySelector('.sidebar');
     if(s) { s.classList.add('collapsed'); document.body.classList.add('sidebar-collapsed'); }
-    // Move tab to body so it isn't clipped by sidebar's translateY transform
+    // Move the tab INTO the sidebar as its first row, so it travels with the panel
+    // and docks at the bottom of the screen when collapsed. It used to be appended to
+    // the body element to escape the panel's transform; the sheet now WANTS it to move
+    // with it. (Spelling that tag out literally here would be a tripwire: inject.ts
+    // places the navbar with a regex for the first body tag in the document.)
     var tab = document.querySelector('.sidebar-tab');
-    if(tab) {
-      document.body.appendChild(tab);
-      // Set correct up/down arrows for mobile (sidebar starts collapsed)
+    if(tab && s) {
+      s.insertBefore(tab, s.firstChild);
+      // Collapsed, the sheet comes UP, so the arrow points up.
       var arr = tab.querySelector('.sidebar-tab-arrow');
-      if(arr) arr.textContent = '▼';
+      if(arr) arr.textContent = '▲';
     }
   }
 });
@@ -315,27 +319,32 @@ document.addEventListener("DOMContentLoaded", function() {
     /* Sidebar: full viewport height when open, slides over preview */
     .sidebar {
       width: 100% !important; min-width: 100% !important;
-      border-right: none; border-bottom: 1px solid var(--ui-border);
+      /* No border on the sheet. A border sits between its box edge and its first row,
+         so it pushed the grab bar down by 1px — which, docking by `100% - tab`, left
+         that 1px off the bottom of the screen (measured: bar at 811-845 on an 844px
+         viewport). The grab bar is a solid accent strip and is the separation already.
+         The roll log hit the same thing with a 3px border. */
+      border-right: none; border-top: none; border-bottom: none;
       flex-shrink: 0;
-      /* Starts at the navbar's BOTTOM edge, not the top of the viewport. On a phone
-         the bar is position:fixed (lib/sitenav.ts FIXED_STYLE) with a z-index far
-         above this panel, so anything left at top:0 is simply hidden behind it —
-         which is what happened to the collapsed header row and the pull tab. */
-      position: fixed; left: 0; z-index: 100;
-      top: calc(var(--dd-bar-h, 0px) + var(--dd-panel-tab));
-      height: calc(100vh - var(--dd-bar-h, 0px) - var(--dd-panel-tab));
-      height: calc(100dvh - var(--dd-bar-h, 0px) - var(--dd-panel-tab));
+      /* A BOTTOM sheet, the same as the character sheets' roll log: anchored to the
+         bottom of the screen and sliding DOWN to dock on its own grab bar. It used to
+         hang from the navbar and slide up out of sight, which left the bar at the top
+         and the panel arriving from above. */
+      position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+      z-index: 100;
+      height: calc(100vh - var(--dd-bar-h, 0px));
+      height: calc(100dvh - var(--dd-bar-h, 0px));
       max-height: none;
-      overflow-y: auto;
+      /* The sheet itself must NOT scroll, or the grab bar would scroll away with the
+         content. .sidebar-content is already flex:1;overflow-y:auto, so it takes the
+         slack and does the scrolling — the same arrangement as .log-entries. */
+      overflow: hidden;
       transition: transform 0.25s ease;
     }
-    /* Collapsed, the panel goes ALL the way up and out. The grab bar is a separate
-       fixed strip that never moves, so it is the only thing left on screen — the
-       same end state as the roll log docking to its bar. It used to stop 52px short
-       and leave its header row showing, which is the chrome the preview was having
-       to clear. */
+    /* Collapsed: down by its own height MINUS the grab bar, so the bar stays docked at
+       the bottom of the screen and is all that is left of the panel. */
     .sidebar.collapsed {
-      transform: translateY(-100%);
+      transform: translateY(calc(100% - var(--dd-panel-tab)));
     }
     .sidebar.collapsed .sidebar-content { overflow: hidden; }
 
@@ -347,9 +356,16 @@ document.addEventListener("DOMContentLoaded", function() {
       width: 100%; flex: 1;
       overflow-x: auto; overflow-y: auto;
       padding: 16px 8px 16px;
-      /* exactly the grab bar, nothing more — this is the gap that used to show at the
-         top of the preview when the panel was collapsed */
-      margin-top: var(--dd-panel-tab);
+      /* No top chrome at all now — the panel and its bar are both at the bottom, so
+         the preview starts directly under the navbar. The docked bar does cover the
+         bottom of the screen for good, so hand that back as padding or the preview's
+         last rows are unreachable. */
+      margin-top: 0;
+      /* !important because the FLOW MODE block further down sets `padding: 0` on the
+         preview with a more specific selector (body.flow-mode .preview-area) — and flow
+         mode is exactly the mode a phone is always in, so without this the reservation
+         was silently zeroed and the docked bar covered the last rows again. */
+      padding-bottom: var(--dd-panel-tab) !important;
     }
 
     /* Scale pages down to fit mobile viewport width */
@@ -375,9 +391,11 @@ document.addEventListener("DOMContentLoaded", function() {
   
     /* Footer action buttons: fixed bottom bar on mobile */
     .sidebar-footer {
-      position: fixed !important;
-      bottom: 0; left: 0; right: 0;
-      z-index: 200;
+      /* The sheet is a proper flex column, so the footer is simply its last row. It
+         used to be position:fixed to the bottom of the SCREEN, which overlaid the
+         panel's own scroll area — and would now sit on top of the grab bar. */
+      position: static !important;
+      flex: 0 0 auto !important;
       background: var(--ui-panel);
       border-top: 2px solid var(--ui-border);
       padding: 8px 10px !important;
@@ -392,9 +410,8 @@ document.addEventListener("DOMContentLoaded", function() {
       min-width: 0;
     }
     /* Bump preview area up so it's not hidden behind the footer bar */
-    /* margin-top is set once above, from --dd-panel-strip + --dd-panel-pull; it used
-       to be repeated here as a hand-added 82px that could disagree with it. */
-    .preview-area { padding-bottom: 0 !important; }
+    /* The footer is part of the sheet now (below), so there is no fixed bar for the
+       preview to dodge — only the docked grab bar, whose room is reserved above. */
     body { padding-bottom: 0; }
 }
 
@@ -450,18 +467,21 @@ document.addEventListener("DOMContentLoaded", function() {
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
-      /* The grab bar: full width, pinned directly under the navbar, unmoving, and
-         present in both states — the same shape the roll log uses on the character
-         sheets. It was an 88px pill at left:50%, which read as a stray button
-         floating over the page rather than part of the panel. */
+      /* The grab bar is the sheet's FIRST IN-FLOW ROW, so it travels with the panel
+         and ends up docked at the bottom of the screen when the sheet slides down —
+         the same arrangement as #log-collapse-btn in the roll log. The mobile init
+         moves it inside .sidebar for this; it used to be moved to the body element and
+         pinned with position:fixed, which is exactly why it could not travel with the
+         panel. (Not spelling that tag out: inject.ts places the navbar with a regex for
+         the first body tag in the document.) */
       .sidebar-tab {
         display: flex !important;
-        position: fixed;
-        top: var(--dd-bar-h, 0px); left: 0; right: 0;
+        position: static !important;
         transform: none !important;
-        width: 100%; height: var(--dd-panel-tab);
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        height: var(--dd-panel-tab); min-height: var(--dd-panel-tab);
         box-sizing: border-box;
-        z-index: 201;
         background: var(--ui-accent, #b82018);
         color: white;
         border: none;
@@ -2456,8 +2476,9 @@ function toggleSidebar() {
   } else {
     // Mobile: toggle body class and update ▲/▼ arrow
     document.body.classList.toggle('sidebar-collapsed', collapsed);
+    // Bottom sheet: collapsed it comes UP (▲), open it goes DOWN (▼).
     var mobileArrow = document.querySelector('.sidebar-tab .sidebar-tab-arrow');
-    if(mobileArrow) mobileArrow.textContent = collapsed ? '▼' : '▲';
+    if(mobileArrow) mobileArrow.textContent = collapsed ? '▲' : '▼';
   }
 }
 
