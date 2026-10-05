@@ -298,13 +298,45 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   /* iOS zooms the page when a focused input is <16px — keep picker/spellbook search at 16px so the menu opens at its proper size */
   input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
-  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--nim);border-radius:14px 14px 0 0;z-index:200;max-height:calc(100vh - max(var(--dd-bar-h, 0px), 34px));max-height:calc(100dvh - max(var(--dd-bar-h, 0px), 34px));transition:transform .25s ease;overflow:visible !important;}
-  .log-header{border-radius:14px 14px 0 0;}
-  .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
-  .roll-log:not(.collapsed) .log-entries{max-height:calc(100vh - 260px);max-height:calc(100dvh - 260px);}
-  #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;}
-  #log-collapse-btn::after{content:"\25B2 Log";}
-  .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
+  :root{--dd-log-tab:34px}   /* the grab bar's height — the only number left in this block */
+
+  /* Mobile roll log: a bottom sheet that docks to its own grab bar.
+     EXPANDED it spans from the navbar's bottom edge to the bottom of the screen —
+     a height, not a max-height, so .log-entries (already flex:1 on every sheet)
+     absorbs whatever is left over. That is what let every magic number go: a 34px
+     top reserve, a 28px tab, and a per-sheet .log-entries cap that had drifted to
+     160 / 230 / 250 / 260 / 300px, with five sheets carrying none at all.
+     COLLAPSED it slides down by its own height MINUS the grab bar, so the bar
+     stays docked at the bottom of the screen rather than being translated off it.
+     The bar is the log's first IN-FLOW row (see #log-collapse-btn), so nothing
+     hangs above the sheet's top edge, which is where the navbar sits. */
+  .roll-log{width:100%!important;position:fixed;bottom:0;left:0;right:0;top:auto!important;
+    /* No border on the log: the grab bar carries it (below). A border here sits
+       between the log's box edge and its first row, which pushed the grab bar 3px
+       down — so docking it by `100% - tab` left those 3px off the bottom of the
+       screen. On the bar itself, with border-box sizing, the maths is exact. */
+    border-left:none;border-top:none;border-radius:14px 14px 0 0;z-index:200;
+    height:calc(100vh - var(--dd-bar-h, 0px))!important;
+    height:calc(100dvh - var(--dd-bar-h, 0px))!important;
+    max-height:none!important;
+    transition:transform .25s ease;overflow:visible!important;}
+  .roll-log.collapsed{transform:translateY(calc(100% - var(--dd-log-tab)));width:100%!important;
+    /* The desktop collapsed rule is `width:0;overflow:hidden;border:none` with no
+       media guard, so both are overridden here. */
+    overflow:visible!important;}
+  .log-header{border-radius:0;}
+  /* The grab bar. It used to be position:absolute;bottom:100% — 28px ABOVE the
+     sheet, which put it under the navbar, and the navbar paints over it (z-index
+     2147483000 against 201). As the log's own first row it cannot go up there. */
+  #log-collapse-btn{position:static!important;transform:none!important;flex:0 0 auto!important;
+    width:100%!important;height:var(--dd-log-tab)!important;min-height:var(--dd-log-tab)!important;
+    box-sizing:border-box!important;border-top:3px solid var(--nim)!important;
+    border-radius:14px 14px 0 0!important;box-shadow:none!important;font-size:12px!important;letter-spacing:.06em;padding:0!important;}
+  #log-collapse-btn::after{content:"\25BC Hide Log";}
+  .roll-log.collapsed #log-collapse-btn::after{content:"\25B2 Roll Log";}
+  /* The docked bar covers the bottom of the page for good, so give the page back
+     that much room or its last row is unreachable. */
+  body{padding-bottom:var(--dd-log-tab)!important;}
   .hdr-row{flex-direction:column;}
   .hdr-logo{border-right:none;}
   .hdr-fields{grid-template-columns:1fr 1fr;}

@@ -169,10 +169,24 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 }
 `;
 
-/** Sized so a sheet's own full-height furniture leaves room for the bar. */
+/** Sized so a sheet's own full-height furniture leaves room for the bar.
+ *
+ *  On a phone the bar goes FIXED as well. A sheet's roll log becomes a
+ *  position:fixed bottom sheet there, anchored to the VIEWPORT, while a sticky
+ *  bar is anchored to the DOCUMENT — and on a phone those two drift apart all
+ *  the time: the URL bar collapsing resizes the visual viewport, and overscroll
+ *  slides the document while a fixed element stays put. The log would meet the
+ *  bar's bottom edge one moment and slide under it the next, which is exactly
+ *  how it was reported. Fixed puts both in one coordinate system. The prep
+ *  builders have used FIXED_STYLE for their own reason since they were built,
+ *  so this is a known-good path rather than a new idea. */
 const SHEET_FIT = `
 body{min-height:calc(100vh - var(--dd-bar-h))}
 .roll-log{top:var(--dd-bar-h);height:calc(100vh - var(--dd-bar-h))}
+@media (max-width:768px){
+#dd-nav{position:fixed;left:0;right:0;top:0}
+body{padding-top:var(--dd-bar-h)}
+}
 `;
 
 /** The prep builders lay out as a 100vh row-flex; a sticky first child would be
