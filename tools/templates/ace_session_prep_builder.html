@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
     --accent-red: #c0251e; --accent-red-dark: #8a1f14;
     --muted: #555; --rule: #d8d0c0; --box-bg: #d6e9f3; --read-bg: #2a1a08;
     --read-text: #ffffff; --highlight: #f4d84a; --green: #2d6a2d; --blue-npc: #1a4a8a;
-    --section-hdr: #c0251e; --table-hdr: #4a4a4a; --preview-bg: #26262a;
+    --section-hdr: var(--accent-dark); --table-hdr: #4a4a4a; --preview-bg: #26262a;
     --font-display: 'Barlow Condensed', sans-serif;
     /* Masthead banner — ported from the system's character-sheet header (.hdr-row/.lg-word/.lg-sub) */
     --banner-a: #d8b92a; --banner-b: #f4d84a; --title-color: #1a1a1a; --title-weight: 900; --sub-color: #1d6f9a;
@@ -179,7 +179,12 @@ document.addEventListener("DOMContentLoaded", function() {
   .page.dark-mode .sb-ability { color: #c8c4bc; }
   .page.dark-mode .sb-warning { background: #1a2a3a; color: #7aaadd; border-color: #1a4a8a; }
   .page.dark-mode .sb-notes { color: #b0aca4; }
-  .page.dark-mode .sl { color: #e05040; border-bottom-color: var(--accent); }
+  /* Section labels take THIS SYSTEM's colour, not the red this template was
+     born with. --accent-dark is the paper-safe darkening of --accent (the page
+     is white by default), and --highlight is the bright one for the dark page.
+     Both are already skinned per system; only --section-hdr never was, which is
+     why every system's Overview / Secrets & Clues / Notes came out red. */
+  .page.dark-mode .sl { color: var(--highlight); border-bottom-color: var(--highlight); }
   .page.dark-mode .location-block { border-bottom-color: #3a3a3e; }
   .page.dark-mode .p-footer { border-top-color: var(--accent); }
   .page.dark-mode .p2-footer { border-top-color: var(--accent); }

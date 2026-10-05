@@ -37,10 +37,10 @@ document.addEventListener("DOMContentLoaded", function() {
     --accent-red: #9b1b22; --accent-red-dark: #6f1119;
     --muted: #555; --rule: #d8d0c0; --box-bg: #f0d9d0; --read-bg: #2a1a08;
     --read-text: #ffffff; --highlight: #f0c020; --green: #2d6a2d; --blue-npc: #1a4a8a;
-    --section-hdr: #9b1b22; --table-hdr: #4a4a4a; --preview-bg: #000000;
+    --section-hdr: var(--accent-dark); --table-hdr: #4a4a4a; --preview-bg: #000000;
     --font-display: 'Barlow Condensed', sans-serif;
     /* Masthead banner — ported from the system's character-sheet header (.hdr-row/.lg-word/.lg-sub) */
-    --banner-a: #7a1119; --banner-b: #9b1b22; --title-color: #ffffff; --title-weight: 900; --sub-color: #f0cf8a;
+    --banner-a: #7a1119; --banner-b: #9b1b22; --title-color: var(--highlight); --title-weight: 900; --sub-color: #f0cf8a;
     /* UI (sidebar) stays dark */
     --ui-bg: #1c1c1e; --ui-panel: #2a2a2d; --ui-border: #3a3a3e;
     --ui-text: #e8e4dc; --ui-muted: #888; --ui-accent: #c8102e; --ui-highlight: #f0c020;
@@ -179,7 +179,12 @@ document.addEventListener("DOMContentLoaded", function() {
   .page.dark-mode .sb-ability { color: #c8c4bc; }
   .page.dark-mode .sb-warning { background: #1a2a3a; color: #7aaadd; border-color: #1a4a8a; }
   .page.dark-mode .sb-notes { color: #b0aca4; }
-  .page.dark-mode .sl { color: #e05040; border-bottom-color: var(--accent); }
+  /* Section labels take THIS SYSTEM's colour, not the red this template was
+     born with. --accent-dark is the paper-safe darkening of --accent (the page
+     is white by default), and --highlight is the bright one for the dark page.
+     Both are already skinned per system; only --section-hdr never was, which is
+     why every system's Overview / Secrets & Clues / Notes came out red. */
+  .page.dark-mode .sl { color: var(--highlight); border-bottom-color: var(--highlight); }
   .page.dark-mode .location-block { border-bottom-color: #3a3a3e; }
   .page.dark-mode .p-footer { border-top-color: var(--accent); }
   .page.dark-mode .p2-footer { border-top-color: var(--accent); }
@@ -205,7 +210,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
   /* DCW cyan banner header */
   .page-banner { background: linear-gradient(120deg, var(--banner-a), var(--banner-b)); padding: 10px 36px 8px; display: flex; justify-content: space-between; align-items: center; }
-  .adventure-title { font-family: var(--font-display); font-size: 28px; font-weight: var(--title-weight); color: var(--title-color); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }
+  /* The D&D logo face. Declared in this file on purpose: lib/inject.ts does NOT
+     inject public/tokens.css when previewOnly is set (the GM Screen's Adventure
+     pane), so a title relying on the injected copy would quietly fall back to
+     Cinzel there. Same woff2, same origin, so no extra request in practice.
+     Cinzel stands behind it because DnDC has no digits. */
+  @font-face {
+    font-family: "DnDC";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/dndc.woff2") format("woff2");
+  }
+  .adventure-title { font-family: "DnDC", "Cinzel", Georgia, serif; font-size: 28px; font-weight: var(--title-weight); color: var(--title-color); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }
   .adventure-subtitle { font-family: var(--font-display); font-size: 13px; font-weight: 800; color: var(--sub-color); text-transform: uppercase; letter-spacing: 0.14em; margin-top: 2px; }
   .header-meta { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--title-color); opacity: 0.8; line-height: 1.7; }
   .header-meta span { display: block; }
