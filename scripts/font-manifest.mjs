@@ -40,67 +40,44 @@
 // builder exports keeps its Google <link>. That file is saved and opened outside
 // the app — often from the filesystem — where a /fonts/... path cannot resolve.
 //
-// ADDING A FACE: add it here, run `npm run fonts:fetch`, commit what lands in
-// public/fonts/google/ along with the regenerated block in public/tokens.css.
+// ADDING A FACE: add it to scripts/font-manifest.json, run the fetcher, and commit
+// what lands in public/fonts/google/ along with the regenerated block in
+// public/tokens.css. There are two fetchers and they do the same job:
+//
+//     npm run fonts:fetch                                   (needs Node)
+//     powershell -ExecutionPolicy Bypass -File scripts\\fetch-fonts.ps1
+//
 // `node scripts/check-fonts.mjs` fails if anything references a family with no
-// declared face, or if a tool page still points at fonts.googleapis.com.
+// declared face, or if a tool page still points at fonts.googleapis.com. It is the
+// safety net for BOTH fetchers: whichever one ran, the result is checked by it.
 
-/** family -> { normal: [weights], italic: [weights] } */
-export const FAMILIES = {
-  "Anton": { normal: [400] },
-  "Archivo": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Archivo Black": { normal: [400] },
-  "Archivo Narrow": { normal: [500, 600, 700], italic: [400, 500, 600, 700] },
-  "Asap": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Barlow": { normal: [400, 500, 600, 700], italic: [400] },
-  "Barlow Condensed": { normal: [400, 600, 700, 800, 900] },
-  "Cinzel": { normal: [600, 700, 800, 900] },
-  "Cormorant Garamond": { normal: [500, 600, 700], italic: [400, 500, 600, 700] },
-  "EB Garamond": { normal: [400, 600], italic: [400, 600] },
-  "Figtree": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  // Fraunces carries an optical-size axis as well as weight, and the css2 API
-  // wants every axis it is asked about listed alphabetically. `axis` is used
-  // verbatim when present — this is the same shape next/font was requesting.
-  "Fraunces": {
-    normal: [500, 700], italic: [400, 500, 700],
-    axis: "ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,700",
-  },
-  "Geist": { normal: [400, 500, 700, 900] },
-  "Geist Mono": { normal: [400, 500] },
-  "IBM Plex Sans": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Libre Franklin": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Lilita One": { normal: [400] },
-  "Lora": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "MedievalSharp": { normal: [400] },
-  "Montserrat": { normal: [400, 500, 600, 700, 800, 900], italic: [400] },
-  "Mulish": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Nunito": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Oswald": { normal: [500, 600, 700] },
-  "Permanent Marker": { normal: [400] },
-  "Rubik": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Russo One": { normal: [400] },
-  "Saira": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "Saira Condensed": { normal: [500, 600, 700] },
-  "Share Tech Mono": { normal: [400] },
-  "Source Sans 3": { normal: [400, 600, 700], italic: [400, 600, 700] },
-  "UnifrakturMaguntia": { normal: [400] },
-};
+import fs from "node:fs";
 
-// Only the Latin block of each css2 response is kept — same coverage as the
+// The data itself lives in scripts/font-manifest.json, because the PowerShell
+// fetcher reads the same file — Michael's machine has no Node, so there are two
+// fetchers, and a second hand-maintained copy of a 31-family list would drift the
+// first time anyone touched one of them. Edit the JSON; this module is the Node
+// view of it, and scripts/fetch-fonts.ps1 is the PowerShell view.
+const DATA = JSON.parse(fs.readFileSync(new URL("./font-manifest.json", import.meta.url), "utf8"));
+
+/** family -> { normal: [weights], italic: [weights], axis?: string } */
+export const FAMILIES = DATA.families;
+
+// Only the Latin block of each css2 response is kept — the same coverage as the
 // subsets:["latin"] that layout.tsx already asked for.
-export const SUBSET = "latin";
+export const SUBSET = DATA.subset;
 
 // Where the files land, and the URL prefix they are served from. next.config.ts
 // already caches /fonts/:path* for a year as immutable, so this gets that for free.
-export const OUT_DIR = "public/fonts/google";
-export const URL_PREFIX = "/fonts/google";
+export const OUT_DIR = DATA.outDir;
+export const URL_PREFIX = DATA.urlPrefix;
 
 // The generated @font-face rules are written into public/tokens.css between these
 // two markers, because every standalone tool page already loads that file — so the
 // declarations cost no extra request at all. Nothing outside the markers is touched.
-export const CSS_FILE = "public/tokens.css";
-export const BEGIN_MARK = "/* ===== BEGIN GENERATED GOOGLE FACES — npm run fonts:fetch ===== */";
-export const END_MARK = "/* ===== END GENERATED GOOGLE FACES ===== */";
+export const CSS_FILE = DATA.cssFile;
+export const BEGIN_MARK = DATA.beginMark;
+export const END_MARK = DATA.endMark;
 
 /** "Share Tech Mono" -> "share-tech-mono" */
 export function slug(family) {

@@ -187,7 +187,9 @@ for (const f of fs.existsSync(TPL) ? fs.readdirSync(TPL).filter((x) => x.endsWit
 const outAbs = path.join(ROOT, OUT_DIR);
 const onDisk = fs.existsSync(outAbs) ? new Set(fs.readdirSync(outAbs)) : new Set();
 if (!onDisk.size) {
-  console.log(`note: ${OUT_DIR} is empty — run \`npm run fonts:fetch\` on a machine with internet,`);
+  console.log(`note: ${OUT_DIR} is empty — run a fetcher on a machine with ordinary internet:`);
+  console.log("        powershell -ExecutionPolicy Bypass -File scripts\\fetch-fonts.ps1   (no Node needed)");
+  console.log("        npm run fonts:fetch                                                (needs Node)");
   console.log("      then commit what lands there together with public/tokens.css.");
 } else {
   const missing = [];
@@ -223,6 +225,60 @@ for (const f of fs.existsSync(TPL) ? fs.readdirSync(TPL).filter((x) => x.endsWit
   const rest = headEnd > 0 ? s.slice(headEnd) : "";
   if (rest.includes("fonts.googleapis.com") && !/_session_prep_builder\.html$/.test(f) && f !== "dungeon_map_maker.html") {
     fails.push(`runtime: ${f} mentions fonts.googleapis.com outside <head> and is not an export path`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 4. The two fetchers agree
+// ---------------------------------------------------------------------------
+// There are two fetchers — Node and PowerShell — because this repo's machine has no
+// Node. They read the same scripts/font-manifest.json, so the family list can't
+// drift, but the PARSING is written twice and PowerShell can't be run here to test
+// it. So: lift the block regex straight out of the .ps1 and run it, in Node, against
+// the same canned responses section 1 uses. A bad edit to the PowerShell pattern
+// fails here rather than silently producing a tokens.css with faces missing.
+const psPath = path.join(ROOT, "scripts/fetch-fonts.ps1");
+if (!fs.existsSync(psPath)) {
+  fails.push("fetchers: scripts/fetch-fonts.ps1 is missing — it is the only fetcher that can run on this repo's machine");
+} else {
+  const ps = fs.readFileSync(psPath, "utf8");
+  const psPattern = ps.match(/\$blockRe\s*=\s*'([^']+)'/)?.[1];
+  if (!psPattern) {
+    fails.push("fetchers: can't find $blockRe in fetch-fonts.ps1");
+  } else {
+    // The JS literal escapes the forward slashes it must; the PowerShell string
+    // doesn't. Normalise that one difference and the patterns should be identical.
+    const jsPattern = fs.readFileSync(path.join(ROOT, "scripts/font-css.mjs"), "utf8")
+      .match(/const re = \/(.+)\/gi;/)?.[1]?.replace(/\\\//g, "/");
+    ok(psPattern === jsPattern,
+      `fetchers: the two block patterns differ\n    ps: ${psPattern}\n    js: ${jsPattern}`);
+    // And it has to actually work, not just match the other one.
+    let psRe;
+    try { psRe = new RegExp(psPattern, "gi"); } catch (e) { fails.push(`fetchers: ps pattern is not a valid regex: ${e.message}`); }
+    if (psRe) {
+      const hits = [...STATIC.matchAll(psRe)];
+      ok(hits.length === 3, `fetchers: ps pattern found ${hits.length} blocks in the static response, expected 3`);
+      ok(hits.filter((h) => h[1] === "latin").length === 2, "fetchers: ps pattern can't tell the subsets apart");
+      ok([...VARIABLE.matchAll(new RegExp(psPattern, "gi"))].length === 2,
+        "fetchers: ps pattern misses the variable-font shape");
+      ok(/font-weight:\s*300 900/.test(hits.length ? [...VARIABLE.matchAll(new RegExp(psPattern, "gi"))][0][2] : ""),
+        "fetchers: ps pattern's body group drops the weight range");
+    }
+  }
+  // Three things in that script would corrupt the output silently if dropped, and
+  // all three look like noise to anyone tidying it up. Nail them down.
+  ok(/SecurityProtocolType\]::Tls12/.test(ps),
+    "fetchers: fetch-fonts.ps1 must force TLS 1.2 — PowerShell 5.1 defaults to 1.0 and Google refuses it");
+  ok(/UTF8Encoding\(\$false\)/.test(ps),
+    "fetchers: fetch-fonts.ps1 must write UTF-8 WITHOUT a BOM, or tokens.css gains a byte-order mark");
+  ok(/\[string\]::Join\("`n"/.test(ps),
+    "fetchers: fetch-fonts.ps1 must join the generated block with LF — tokens.css is LF throughout");
+  ok(/font-manifest\.json/.test(ps),
+    "fetchers: fetch-fonts.ps1 must read font-manifest.json rather than carry its own family list");
+  for (const family of Object.keys(FAMILIES)) {
+    if (ps.includes(`'${family}'`) || ps.includes(`"${family}"`)) {
+      fails.push(`fetchers: fetch-fonts.ps1 hardcodes the family "${family}" — it should come from the manifest`);
+    }
   }
 }
 

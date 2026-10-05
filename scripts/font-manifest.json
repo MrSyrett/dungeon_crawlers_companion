@@ -1,0 +1,300 @@
+{
+  "_comment": "Shared data for scripts/fetch-fonts.mjs (Node) and scripts/fetch-fonts.ps1 (PowerShell). See font-manifest.mjs for the full reasoning. Edit HERE, not in either script.",
+  "subset": "latin",
+  "outDir": "public/fonts/google",
+  "urlPrefix": "/fonts/google",
+  "cssFile": "public/tokens.css",
+  "beginMark": "/* ===== BEGIN GENERATED GOOGLE FACES — see scripts/fetch-fonts ===== */",
+  "endMark": "/* ===== END GENERATED GOOGLE FACES ===== */",
+  "families": {
+    "Anton": {
+      "normal": [
+        400
+      ]
+    },
+    "Archivo": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Archivo Black": {
+      "normal": [
+        400
+      ]
+    },
+    "Archivo Narrow": {
+      "normal": [
+        500,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        500,
+        600,
+        700
+      ]
+    },
+    "Asap": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Barlow": {
+      "normal": [
+        400,
+        500,
+        600,
+        700
+      ],
+      "italic": [
+        400
+      ]
+    },
+    "Barlow Condensed": {
+      "normal": [
+        400,
+        600,
+        700,
+        800,
+        900
+      ]
+    },
+    "Cinzel": {
+      "normal": [
+        600,
+        700,
+        800,
+        900
+      ]
+    },
+    "Cormorant Garamond": {
+      "normal": [
+        500,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        500,
+        600,
+        700
+      ]
+    },
+    "EB Garamond": {
+      "normal": [
+        400,
+        600
+      ],
+      "italic": [
+        400,
+        600
+      ]
+    },
+    "Figtree": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Fraunces": {
+      "normal": [
+        500,
+        700
+      ],
+      "italic": [
+        400,
+        500,
+        700
+      ],
+      "axis": "ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,700"
+    },
+    "Geist": {
+      "normal": [
+        400,
+        500,
+        700,
+        900
+      ]
+    },
+    "Geist Mono": {
+      "normal": [
+        400,
+        500
+      ]
+    },
+    "IBM Plex Sans": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Libre Franklin": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Lilita One": {
+      "normal": [
+        400
+      ]
+    },
+    "Lora": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "MedievalSharp": {
+      "normal": [
+        400
+      ]
+    },
+    "Montserrat": {
+      "normal": [
+        400,
+        500,
+        600,
+        700,
+        800,
+        900
+      ],
+      "italic": [
+        400
+      ]
+    },
+    "Mulish": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Nunito": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Oswald": {
+      "normal": [
+        500,
+        600,
+        700
+      ]
+    },
+    "Permanent Marker": {
+      "normal": [
+        400
+      ]
+    },
+    "Rubik": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Russo One": {
+      "normal": [
+        400
+      ]
+    },
+    "Saira": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "Saira Condensed": {
+      "normal": [
+        500,
+        600,
+        700
+      ]
+    },
+    "Share Tech Mono": {
+      "normal": [
+        400
+      ]
+    },
+    "Source Sans 3": {
+      "normal": [
+        400,
+        600,
+        700
+      ],
+      "italic": [
+        400,
+        600,
+        700
+      ]
+    },
+    "UnifrakturMaguntia": {
+      "normal": [
+        400
+      ]
+    }
+  }
+}
