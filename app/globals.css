@@ -826,15 +826,32 @@ body {
    face. Only those two: the Ghostbusters face is a wordmark, legible as a title
    and unreadable as running text, so it is aimed at the one element that is
    always one of those two words (see DashboardDocs). */
+/* Tracking only. Everything else about how this wordmark is drawn — the face, the
+   colour, the glow, the cut-out — is shared with the page title below, in ONE
+   place, so the two can never drift apart again. The h1 has no letter-spacing of
+   its own; at 16px the component's 0.15em pulls the letters apart, so this is the
+   one property that is genuinely size-specific. */
 :root[data-system="GB"]:not([data-chrome]) body [data-dash-head] {
-  font-family: "Ghostbusters", var(--font-anton), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0.06em;
 }
 :root[data-system="GB"]:not([data-chrome]) body h2,
 :root[data-system="GB"]:not([data-chrome]) body h3 {
   font-family: var(--font-anton), "Anton", ui-sans-serif, system-ui, sans-serif;
 }
-:root[data-system="GB"]:not([data-chrome]) body h1 {
+/* The page title AND the dashboard's two list headers. One treatment, one rule:
+   Michael's call, after seeing the alternatives rendered at 16px — the cut-out is
+   what the wordmark IS, so a lighter version of it at small size was the wrong
+   trade. The two selectors are listed together rather than copied so a change to
+   the glow or the stroke cannot reach one and miss the other.
+
+   `text-transform: none` is load bearing and applies to BOTH. The face is
+   caps-only and its CAPITAL O is the no-ghost logo glyph (see the @font-face note
+   at the top of this file), so uppercasing in CSS would put a ghost inside any
+   word containing an o. Characters and Adventures happen to contain none — but
+   the component ships `uppercase`, so this is what stops a future rename of those
+   headers from quietly growing a ghost. */
+:root[data-system="GB"]:not([data-chrome]) body h1,
+:root[data-system="GB"]:not([data-chrome]) body [data-dash-head] {
   font-family: "Ghostbusters", var(--font-anton), ui-sans-serif, system-ui, sans-serif;
   text-transform: none;
   /* The glow belongs to the STROKE, not the letter: a white outline around a
@@ -853,7 +870,8 @@ body {
    white above. `paint-order: stroke fill` puts the stroke behind the fill so
    it grows outward instead of eating into the letterform. */
 @supports (-webkit-text-stroke: 1px #fff) {
-  :root[data-system="GB"]:not([data-chrome]) body h1 {
+  :root[data-system="GB"]:not([data-chrome]) body h1,
+  :root[data-system="GB"]:not([data-chrome]) body [data-dash-head] {
     color: #0e120a;
     -webkit-text-stroke: 1.5px #ffffff;
     paint-order: stroke fill;
