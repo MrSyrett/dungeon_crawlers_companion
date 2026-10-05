@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isSystemKey } from "@/components/systemStore";
+import { makeCode } from "@/lib/campaign-code";
 
 // Delete a campaign you own.
 //
@@ -63,19 +64,40 @@ export async function setCampaignVttUrl(formData: FormData): Promise<void> {
   revalidatePath("/dashboard");
 }
 
-// Set (or clear) the game system a campaign runs. The GM Screen reads this when
-// the board is linked and switches its system automatically — no dropdown.
-export async function setCampaignSystem(formData: FormData): Promise<void> {
+// Create a campaign owned by the current user, in ONE system.
+//
+// The system arrives as a hidden field carrying whichever system the Campaigns
+// page was showing — the same shape as the dashboard's "+ New", which carries its
+// panel's tool id. It is set once here and never editable afterwards: the
+// per-campaign system dropdown (and setCampaignSystem, which saved it) are gone.
+// The GM Screen reads this when the board is linked and switches system to match.
+//
+// A system that isn't a SystemKey is refused rather than silently stored as null,
+// because a null-system campaign would not appear on a page that shows exactly
+// one system — it would be created and then be invisible.
+export async function createCampaign(formData: FormData): Promise<void> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  const rawSystem = String(formData.get("system") ?? "").trim();
+  if (!isSystemKey(rawSystem)) return;
 
-  const raw = String(formData.get("system") ?? "").trim();
-  const system = isSystemKey(raw) ? raw : null;
+  const rawName = formData.get("name");
+  const name =
+    typeof rawName === "string" && rawName.trim() ? rawName.trim().slice(0, 60) : "New Campaign";
 
-  await prisma.campaign.updateMany({ where: { id, ownerId: user.id }, data: { system } });
+  // Mirror the /api/campaigns POST: retry on the (unlikely) join-code collision.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await prisma.campaign.create({
+        data: { name, code: makeCode(), ownerId: user.id, system: rawSystem },
+      });
+      break;
+    } catch {
+      if (attempt === 4) throw new Error("Could not create campaign");
+    }
+  }
+
   revalidatePath("/campaigns");
   revalidatePath("/dashboard");
 }

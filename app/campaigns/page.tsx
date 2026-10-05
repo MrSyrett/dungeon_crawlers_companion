@@ -1,44 +1,29 @@
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { makeCode } from "@/lib/campaign-code";
-import { ConfirmButton } from "@/components/ConfirmButton";
-import CopyCodeButton from "@/components/CopyCodeButton";
-import { deleteCampaign, renameCampaign, setCampaignVttUrl, setCampaignSystem } from "@/app/actions/campaigns";
+import { getHiddenSystemKeys } from "@/lib/systems";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
-import { CampaignSystemSelect } from "@/components/CampaignSystemSelect";
-import { CampaignAutoField } from "@/components/CampaignAutoField";
-import OpenGmScreenButton from "@/components/OpenGmScreenButton";
+import { isSystemKey, type SystemKey } from "@/components/systemStore";
+import CampaignsList, {
+  type CampaignRow,
+  type CampaignsBySystem,
+  type JoinedRow,
+} from "@/components/CampaignsList";
 
 export const dynamic = "force-dynamic";
 
-// Create a campaign owned by the current user. Defined inline here (the page
-// already talks to prisma directly); move it into @/app/actions/campaigns
-// alongside the others if you'd rather keep all mutations in one module.
-async function createCampaign(formData: FormData): Promise<void> {
-  "use server";
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
-  const raw = formData.get("name");
-  const name =
-    typeof raw === "string" && raw.trim() ? raw.trim().slice(0, 60) : "New Campaign";
-
-  // Mirror the /api/campaigns POST: retry on the (unlikely) join-code collision.
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try {
-      await prisma.campaign.create({
-        data: { name, code: makeCode(), ownerId: user.id },
-      });
-      break;
-    } catch {
-      if (attempt === 4) throw new Error("Could not create campaign");
-    }
-  }
-
-  revalidatePath("/campaigns");
-}
+// Campaigns, one system at a time.
+//
+// This page used to render every campaign itself, with a per-campaign system
+// dropdown. It now does what the dashboard and the Rulebooks shelf already do:
+// the server reads EVERY system's campaigns once, shapes them into compact plain
+// rows grouped by system, and hands them to a client component that renders the
+// one system the shared store is on. Switching system is instant and re-queries
+// nothing, and the page wears that system's theme because /campaigns is no longer
+// in SiteNav's CHROME_PREFIXES.
+//
+// A campaign's system is chosen once, at creation, from whichever system you are
+// in (see createCampaign in @/app/actions/campaigns) and cannot be changed after.
 
 // Only the handful of fields we read out of a saved character sheet.
 type SheetBlob = {
@@ -225,32 +210,18 @@ function readCharMeta(
   return null;
 }
 
-function formatDate(d: Date): string {
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(d);
-}
-
-// "3 months ago" reads faster than a date when you're deciding what's dead.
-function relative(d: Date | null): string {
-  if (!d) return "never";
-  const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`;
-  const years = Math.floor(months / 12);
-  return `${years} year${years === 1 ? "" : "s"} ago`;
-}
-
 export default async function CampaignsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const campaigns = await prisma.campaign.findMany({
-    where: { ownerId: user.id },
-    orderBy: { createdAt: "desc" },
-    select: { id: true, name: true, code: true, createdAt: true, vttUrl: true, system: true },
-  });
+  const [campaigns, hiddenSystems] = await Promise.all([
+    prisma.campaign.findMany({
+      where: { ownerId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, name: true, code: true, createdAt: true, vttUrl: true, system: true },
+    }),
+    getHiddenSystemKeys(),
+  ]);
 
   const ids = campaigns.map((c) => c.id);
 
@@ -326,268 +297,52 @@ export default async function CampaignsPage() {
     ? await prisma.campaign.findMany({
         where: { id: { in: joinedIds } },
         orderBy: { name: "asc" },
-        select: { id: true, name: true, code: true },
+        // `system` is selected now: a joined campaign has to land in its own
+        // system's group, the same as one you own.
+        select: { id: true, name: true, code: true, system: true },
       })
     : [];
 
-  return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <section className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--gold)]">
-          Create a campaign
-        </h2>
-        <form action={createCampaign} className="mt-3 flex flex-col gap-2 sm:flex-row">
-          <input
-            type="text"
-            name="name"
-            required
-            maxLength={60}
-            placeholder="Campaign name…"
-            aria-label="New campaign name"
-            className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--gold)]"
-          />
-          <button className="shrink-0 rounded border border-[var(--gold)] bg-[var(--gold)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[#1a1a1a] hover:opacity-90">
-            Create
-          </button>
-        </form>
-        <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">
-          You&apos;ll be its GM/owner. Share the join code with your players so they can link their
-          character sheets. You can rename it below at any time.
-        </p>
-      </section>
+  // ── Group both lists by system ─────────────────────────────────────────────
+  // Each system's bucket is created on demand, so a system with no campaigns is
+  // simply absent and the client renders its empty state. A campaign whose system
+  // is not a SystemKey (null, or a key retired since it was saved) has no bucket
+  // to go in and is skipped — createCampaign refuses to make one, so this only
+  // ever applies to rows that predate it.
+  const bySystem: CampaignsBySystem = {};
+  const bucket = (key: SystemKey) => {
+    const existing = bySystem[key];
+    if (existing) return existing;
+    const fresh = { owned: [] as CampaignRow[], joined: [] as JoinedRow[] };
+    bySystem[key] = fresh;
+    return fresh;
+  };
 
-      {campaigns.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">No campaigns yet</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            Use the <span className="text-[var(--gold)]">Create a campaign</span> box above to
-            start one. You&apos;ll be its GM/owner — give the join code to your players and they
-            can link their character sheets to it from their own sheet.
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            Campaigns you joined but don&apos;t own won&apos;t appear here; only their owner can
-            edit or delete them.
-          </p>
-        </div>
-      ) : (
-        <ul className="flex flex-col gap-3">
-          {campaigns.map((c) => {
-            const stat = statFor.get(c.id);
-            const rolls = stat?.rolls ?? 0;
-            const last = stat?.last ?? null;
-            const party = partyFor.get(c.id) ?? [];
-            const links = party.length;
-            const quiet = rolls === 0 && links === 0;
+  for (const c of campaigns) {
+    if (!isSystemKey(c.system)) continue;
+    const stat = statFor.get(c.id);
+    bucket(c.system).owned.push({
+      id: c.id,
+      name: c.name,
+      code: c.code,
+      createdAt: c.createdAt.getTime(),
+      vttUrl: c.vttUrl,
+      system: c.system,
+      rolls: stat?.rolls ?? 0,
+      lastRoll: stat?.last ? stat.last.getTime() : null,
+      party: partyFor.get(c.id) ?? [],
+    });
+  }
 
-            return (
-              <li
-                key={c.id}
-                className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                        {c.name}
-                      </h2>
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
-                          {c.code}
-                        </span>
-                        <CopyCodeButton value={c.code} label="join code" />
-                      </span>
-                      {quiet ? (
-                        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
-                          · unused
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--muted)]">
-                      <span>Created {formatDate(c.createdAt)}</span>
-                      <span>
-                        {links} character sheet{links === 1 ? "" : "s"} linked
-                      </span>
-                      <span>
-                        {rolls} roll{rolls === 1 ? "" : "s"} · last {relative(last)}
-                      </span>
-                    </div>
+  for (const c of joinedCampaigns) {
+    if (!isSystemKey(c.system)) continue;
+    bucket(c.system).joined.push({
+      id: c.id,
+      name: c.name,
+      code: c.code,
+      chars: joinedChars.get(c.id) ?? [],
+    });
+  }
 
-                    {party.length > 0 ? (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {party.map((m) => (
-                          <span
-                            key={m.id}
-                            className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-[11px] text-[var(--text)]"
-                          >
-                            {m.name}
-                            {m.level !== null || m.cls ? (
-                              <span className="text-[var(--muted)]">
-                                {" "}
-                                {[m.level !== null ? `LV ${m.level}` : "", m.cls]
-                                  .filter(Boolean)
-                                  .join(" ")}
-                              </span>
-                            ) : null}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="flex shrink-0 flex-wrap items-center gap-2">
-                    {/* Plain <a>s: /play and /gm-screen are route handlers that
-                        return standalone HTML, so <Link> would prefetch/RSC-fetch
-                        a whole document for nothing. Same words + same behavior
-                        as the dashboard: the VTT (ours) opens here; an OBR
-                        room (external) opens in a new tab. */}
-                    <a
-                      href={`/play/${c.id}`}
-                      className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[#1a1a1a] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                    >
-                      Open VTT
-                    </a>
-                    {c.vttUrl ? (
-                      <a
-                        href={c.vttUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                      >
-                        Open in OBR ↗
-                      </a>
-                    ) : null}
-                    <OpenGmScreenButton
-                      campaign={{ id: c.id, name: c.name, code: c.code, system: c.system, vttUrl: c.vttUrl }}
-                      className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                    />
-                    <form action={deleteCampaign} className="shrink-0">
-                      <input type="hidden" name="id" value={c.id} />
-                      <ConfirmButton
-                        message={
-                          `Delete "${c.name}" (${c.code})?\n\n` +
-                          `This deletes the campaign and its ${rolls} shared roll${rolls === 1 ? "" : "s"}.\n` +
-                          (links > 0
-                            ? `${party.map((m) => m.name).join(", ")} will stop sharing rolls and will need to join a new campaign.\n\n`
-                            : "\n") +
-                          `This cannot be undone.`
-                        }
-                        className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[#f0a8a3] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                      >
-                        Delete
-                      </ConfirmButton>
-                    </form>
-                  </div>
-                </div>
-
-                {/* Saves on blur or Enter. A <form action> resets its fields when the
-                    action completes, which flashed the old name back after every
-                    rename — the bug CampaignAutoField was written for. `required`
-                    because renameCampaign falls back to "New Campaign" on a blank,
-                    so an auto-saving field must refuse to send one. */}
-                <CampaignAutoField
-                  id={c.id}
-                  field="name"
-                  value={c.name}
-                  action={renameCampaign}
-                  maxLength={60}
-                  ariaLabel={`Rename ${c.name}`}
-                  required
-                  className="mt-3 flex gap-2 border-t border-[var(--border)] pt-3"
-                />
-
-                <CampaignSystemSelect id={c.id} system={c.system ?? null} action={setCampaignSystem} />
-                <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
-                  The GM Screen switches to this system automatically when you link this campaign.
-                </p>
-
-                {/* Deliberately NOT required: clearing this field is how you go back
-                    to the built-in VTT, so an empty value must save. */}
-                <CampaignAutoField
-                  id={c.id}
-                  field="vttUrl"
-                  value={c.vttUrl ?? ""}
-                  action={setCampaignVttUrl}
-                  type="url"
-                  maxLength={500}
-                  placeholder="Virtual tabletop room URL (optional)"
-                  ariaLabel={`Virtual tabletop room for ${c.name}`}
-                />
-                <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
-                  {c.vttUrl
-                    ? "Characters linked to this campaign open this OBR room from the home page (instead of the built-in VTT)."
-                    : "Characters linked to this campaign open the built-in VTT from the home page. Paste an OBR room link here to use OBR instead."}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {campaigns.length > 0 ? (
-        <p className="mt-6 text-[12px] leading-relaxed text-[var(--muted)]">
-          Deleting a campaign removes its shared roll log. Players&apos; character sheets are left
-          untouched — they belong to the players — but any sheet still linked will quietly stop
-          sharing rolls, so tell your table before clearing one out.
-        </p>
-      ) : null}
-
-      {joinedCampaigns.length > 0 ? (
-        <section className="mt-12">
-          <div className="mb-4 border-b border-[var(--border)] pb-3">
-            <h2 className="font-display text-xl font-black tracking-wide">Campaigns you&apos;ve joined</h2>
-            <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">
-              Campaigns one of your characters is linked to. These are view-only — the owner
-              manages them.
-            </p>
-          </div>
-          <ul className="flex flex-col gap-3">
-            {joinedCampaigns.map((c) => {
-              const chars = joinedChars.get(c.id) ?? [];
-              return (
-                <li
-                  key={c.id}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-                >
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                      {c.name}
-                    </h3>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
-                        {c.code}
-                      </span>
-                      <CopyCodeButton value={c.code} label="join code" />
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
-                      · view only
-                    </span>
-                  </div>
-                  {chars.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {chars.map((name, i) => (
-                        <span
-                          key={`${c.id}-${i}`}
-                          className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-[11px] text-[var(--text)]"
-                        >
-                          {name}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                  <div className="mt-3">
-                    <a
-                      href={`/play/${c.id}`}
-                      className="inline-block rounded border border-[var(--gold)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)]"
-                    >
-                      Open VTT
-                    </a>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
-    </div>
-  );
+  return <CampaignsList bySystem={bySystem} hiddenKeys={hiddenSystems as SystemKey[]} />;
 }

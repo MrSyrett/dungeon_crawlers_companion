@@ -192,10 +192,11 @@ export function compendiumCounterpart(pathname: string, to: SystemKey): string |
   return target[0].href;
 }
 
-// Paths that are system-agnostic shelves: switching system there should NOT
-// bounce the user to the dashboard (the Rulebooks shelf even says "switch
-// systems above" and then filters itself).
-export const STAY_ON_SWITCH = new Set<string>(["/rules"]);
+// Paths that filter themselves by the selected system: switching system there
+// should NOT bounce the user to the dashboard (the Rulebooks shelf even says
+// "switch systems above" and then filters itself; Campaigns shows that system's
+// campaigns and would be a strange place to be thrown out of).
+export const STAY_ON_SWITCH = new Set<string>(["/rules", "/campaigns"]);
 
 // Infer the system a compendium route belongs to, so the navbar reflects the
 // right system when you land directly on e.g. /dcc/classes. Returns null when a

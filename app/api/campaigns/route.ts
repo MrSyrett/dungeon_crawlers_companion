@@ -4,23 +4,31 @@ import { getCurrentUser } from "@/lib/auth";
 import { getPlayUser } from "@/lib/vtt";
 import { makeCode } from "@/lib/campaign-code";
 import { participatesInCampaign } from "@/lib/homebrew";
+import { isSystemKey } from "@/components/systemStore";
 
-// POST — create a campaign. Body: { name }. Returns { id, name, code }.
+// POST — create a campaign. Body: { name, system? }. Returns { id, name, code }.
+//
+// `system` is optional here and required on the Campaigns page, which is the only
+// place that actually creates one today (nothing in the app calls this endpoint).
+// Pass it anyway if you ever do: the Campaigns page shows exactly one system at a
+// time, so a campaign saved without one is created and then invisible there. It
+// still works everywhere that addresses a campaign by id or join code.
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
-  const body = (await req.json().catch(() => null)) as { name?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { name?: unknown; system?: unknown } | null;
   const name =
     typeof body?.name === "string" && body.name.trim()
       ? body.name.trim().slice(0, 60)
       : "New Campaign";
+  const system = isSystemKey(body?.system) ? body.system : null;
 
   // Retry on the (unlikely) code collision
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const campaign = await prisma.campaign.create({
-        data: { name, code: makeCode(), ownerId: user.id },
+        data: { name, code: makeCode(), ownerId: user.id, system },
         select: { id: true, name: true, code: true },
       });
       return Response.json(campaign);
