@@ -331,6 +331,10 @@
      scroll. svh (a constant height) was tried on the roll log and reverted: the slack
      it leaves became a gap under the navbar while scrolling. vh above is the fallback
      for a browser too old for dvh. */
+  /* The grab bar's height — matches --dd-log-tab on the character sheets' roll log
+     and --dd-panel-tab in the other prep builders. */
+  :root { --dd-panel-tab: 34px; }
+
   /* Stack layout */
   body { flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 
@@ -341,10 +345,13 @@
     /* Starts at the navbar's BOTTOM edge, not the top of the viewport. On a phone the
        bar is position:fixed (lib/sitenav.ts FIXED_STYLE) with a z-index far above
        this overlay, so anything left at top:0 is hidden behind it. */
-    top: var(--dd-bar-h, 0px); left: 0; right: 0; bottom: 0;
+    /* Below the navbar AND below the grab bar, which is a fixed strip of its own
+       between them. Collapsed, this slides fully out (translateY(-100%)) and the bar
+       is all that is left — the same end state as the roll log docking to its bar. */
+    top: calc(var(--dd-bar-h, 0px) + var(--dd-panel-tab)); left: 0; right: 0; bottom: 0;
     width: 100vw !important; min-width: 100vw !important;
-    height: calc(100vh - var(--dd-bar-h, 0px)) !important;
-    height: calc(100dvh - var(--dd-bar-h, 0px)) !important;
+    height: calc(100vh - var(--dd-bar-h, 0px) - var(--dd-panel-tab)) !important;
+    height: calc(100dvh - var(--dd-bar-h, 0px) - var(--dd-panel-tab)) !important;
     z-index: 200;
     border-right: none;
     transform: translateY(0);
@@ -356,7 +363,7 @@
     width: 100vw !important; min-width: 100vw !important;
   }
 
-  /* Preview: fills the whole screen when sidebar is collapsed */
+  /* Preview: fills the screen below the grab bar when the sidebar is collapsed */
   .preview-area {
     flex: 1;
     width: 100%;
@@ -365,25 +372,39 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* Exactly the grab bar, nothing more. Without this the preview started under the
+       bar and its first 34px were covered. */
+    margin-top: var(--dd-panel-tab);
   }
 
   /* Pages: scale down to fit mobile screen width */
   /* Pages reflow to a single fluid column on mobile via body.flow-mode
      (see the flow-mode block below); no fixed-page scaling here anymore. */
 
-  /* Pull-tab on mobile: small pill, always visible, JS moves it */
+  /* The grab bar: full width, pinned directly under the navbar, unmoving, present in
+     both states — the same shape the roll log uses on the character sheets. It was an
+     80px pill whose top/bottom were set from JS, so it hopped between the top and the
+     bottom of the screen and read as a stray floating button. Nothing positions it
+     now but this rule. */
   .sidebar-pull-tab {
     position: fixed !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 80px !important;
-    height: 28px !important;
-    border-radius: 14px !important;
+    top: var(--dd-bar-h, 0px) !important;
+    bottom: auto !important;
+    left: 0 !important; right: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    height: var(--dd-panel-tab) !important;
+    box-sizing: border-box !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     z-index: 400 !important;
-    font-size: 14px !important;
-    /* top/bottom set by JS */
-    transition: top 0.25s ease, bottom 0.25s ease !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   .sidebar-footer { flex-wrap: wrap; }
@@ -2798,8 +2819,8 @@ function toggleSidebar() {
   if(pullTab) {
     pullTab.title = collapsed ? 'Show controls' : 'Hide controls';
     if(isMobile) {
-      setPullTabMobile(pullTab, collapsed);
-      pullTab.textContent = collapsed ? '▼' : '▲';
+      setPullTabMobile(pullTab);
+      pullTab.textContent = pullTabLabel(collapsed);
     } else {
       pullTab.style.left = collapsed ? '42px' : '320px';
       pullTab.textContent = collapsed ? '▶' : '◀';
@@ -2807,18 +2828,18 @@ function toggleSidebar() {
   }
 }
 
-function setPullTabMobile(pt, collapsed) {
-  if(collapsed) {
-    pt.style.bottom = 'auto';
-    /* Below the navbar, not 8px from the top of the screen — the bar is fixed and
-       paints above this tab, so at 8px it was invisible, and it is the only way to
-       reopen the panel once it is shut. --dd-bar-h is published by lib/sitenav.ts and
-       falls back to 0 when there is no bar (a framed or standalone render). */
-    pt.style.top    = 'calc(var(--dd-bar-h, 0px) + 8px)';
-  } else {
-    pt.style.top    = 'auto';
-    pt.style.bottom = '8px';   /* above bottom edge when open */
-  }
+function setPullTabMobile(pt) {
+  /* There is nothing left to position. The grab bar is a fixed, full-width strip
+     pinned under the navbar by CSS in BOTH states, so this only clears any inline
+     top/bottom an earlier version of this function left behind and hands control
+     back to the stylesheet. */
+  pt.style.top = '';
+  pt.style.bottom = '';
+}
+
+/* The bar says what the tap will do, like the roll log's "Hide Log" / "Roll Log". */
+function pullTabLabel(collapsed) {
+  return collapsed ? '▼ Show Controls' : '▲ Hide Controls';
 }
 
 // Update pull-tab position on resize
@@ -2829,8 +2850,8 @@ window.addEventListener('resize', function() {
   const isMobile  = window.innerWidth <= 768;
   const collapsed = sidebar.classList.contains('collapsed');
   if(isMobile) {
-    setPullTabMobile(pullTab, collapsed);
-    pullTab.textContent = collapsed ? '▼' : '▲';
+    setPullTabMobile(pullTab);
+    pullTab.textContent = pullTabLabel(collapsed);
   } else {
     pullTab.style.top    = '';
     pullTab.style.bottom = '';
@@ -2924,12 +2945,10 @@ loadState();buildSidebarFromState();renderChapterTabs();applyFlowMode();renderPr
     /* Start COLLAPSED on a phone, the way every other prep builder does. This used
        to load with the full-screen control overlay covering the preview, so the
        first thing you saw on a phone was the editor rather than the adventure. The
-       preview is what you want first; the panel is one tap on the pull tab away.
-       setPullTabMobile is the single place that knows where the tab sits in each
-       state (and that it has to clear the navbar), so go through it. */
+       preview is what you want first; the panel is one tap on the grab bar away. */
     const sb = document.querySelector('.sidebar');
     if(sb) sb.classList.add('collapsed');
-    if(pt) { setPullTabMobile(pt, true); pt.textContent = '▼'; pt.title = 'Show controls'; }
+    if(pt) { setPullTabMobile(pt); pt.textContent = pullTabLabel(true); pt.title = 'Show controls'; }
   } else if(pt) {
     pt.style.left = '320px';
     pt.textContent = '▼';

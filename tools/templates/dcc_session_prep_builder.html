@@ -297,12 +297,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   /* ═══ MOBILE RESPONSIVE ═══ */
   @media (max-width: 768px) {
-    /* The two heights this block needs, declared once. --dd-panel-strip is how much
-       of the sidebar stays on screen when it is collapsed (its header row);
-       --dd-panel-pull is the pull tab hanging below it. The preview's top margin was
-       written as 52px in one rule and 82px in another — the same two numbers added
-       up by hand in two places, which is how they drift apart. */
-    :root { --dd-panel-strip: 52px; --dd-panel-pull: 30px; }
+    /* The grab bar's height — the only number this block needs, and it matches the
+       roll log's --dd-log-tab on the character sheets. There used to be two: a 52px
+       sidebar header row left showing when collapsed, plus a 30px pull tab hanging
+       off it, which the preview then had to clear with 82px of margin. */
+    :root { --dd-panel-tab: 34px; }
 
     /* dvh — the LIVE viewport height — on purpose, matching the character sheets'
        roll log. The panel tracks the browser's own toolbar as it collapses and
@@ -322,15 +321,21 @@ document.addEventListener("DOMContentLoaded", function() {
          the bar is position:fixed (lib/sitenav.ts FIXED_STYLE) with a z-index far
          above this panel, so anything left at top:0 is simply hidden behind it —
          which is what happened to the collapsed header row and the pull tab. */
-      position: fixed; top: var(--dd-bar-h, 0px); left: 0; z-index: 100;
-      height: calc(100vh - var(--dd-bar-h, 0px));
-      height: calc(100dvh - var(--dd-bar-h, 0px));
+      position: fixed; left: 0; z-index: 100;
+      top: calc(var(--dd-bar-h, 0px) + var(--dd-panel-tab));
+      height: calc(100vh - var(--dd-bar-h, 0px) - var(--dd-panel-tab));
+      height: calc(100dvh - var(--dd-bar-h, 0px) - var(--dd-panel-tab));
       max-height: none;
       overflow-y: auto;
       transition: transform 0.25s ease;
     }
+    /* Collapsed, the panel goes ALL the way up and out. The grab bar is a separate
+       fixed strip that never moves, so it is the only thing left on screen — the
+       same end state as the roll log docking to its bar. It used to stop 52px short
+       and leave its header row showing, which is the chrome the preview was having
+       to clear. */
     .sidebar.collapsed {
-      transform: translateY(calc(-100% + var(--dd-panel-strip)));
+      transform: translateY(-100%);
     }
     .sidebar.collapsed .sidebar-content { overflow: hidden; }
 
@@ -342,8 +347,9 @@ document.addEventListener("DOMContentLoaded", function() {
       width: 100%; flex: 1;
       overflow-x: auto; overflow-y: auto;
       padding: 16px 8px 16px;
-      /* clears the collapsed header row and the pull tab hanging off it */
-      margin-top: calc(var(--dd-panel-strip) + var(--dd-panel-pull));
+      /* exactly the grab bar, nothing more — this is the gap that used to show at the
+         top of the preview when the panel was collapsed */
+      margin-top: var(--dd-panel-tab);
     }
 
     /* Scale pages down to fit mobile viewport width */
@@ -444,33 +450,39 @@ document.addEventListener("DOMContentLoaded", function() {
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
+      /* The grab bar: full width, pinned directly under the navbar, unmoving, and
+         present in both states — the same shape the roll log uses on the character
+         sheets. It was an 88px pill at left:50%, which read as a stray button
+         floating over the page rather than part of the panel. */
       .sidebar-tab {
-        display: flex;
+        display: flex !important;
         position: fixed;
-        /* Hangs off the bottom of the collapsed header row, so it is on screen in
-           both states. At top:0 it sat at 0-30px, entirely behind the 53px navbar,
-           and it is the only way to reopen the panel once it is shut. */
-        top: calc(var(--dd-bar-h, 0px) + var(--dd-panel-strip));
-        left: 50%;
-        transform: translateX(-50%);
+        top: var(--dd-bar-h, 0px); left: 0; right: 0;
+        transform: none !important;
+        width: 100%; height: var(--dd-panel-tab);
+        box-sizing: border-box;
         z-index: 201;
         background: var(--ui-accent, #b82018);
         color: white;
         border: none;
-        border-radius: 0 0 8px 8px;
-        width: 88px;
-        height: var(--dd-panel-pull);
+        border-radius: 0;
+        box-shadow: none;
         align-items: center;
         justify-content: center;
+        gap: 6px;
         font-family: var(--font-display);
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         writing-mode: horizontal-tb;
       }
+      /* toggleSidebar() writes the arrow into .sidebar-tab-arrow; the word beside it
+         comes from here, so the bar says what the tap will do — the way the roll log's
+         bar reads "Hide Log" / "Roll Log". */
+      .sidebar-tab::after { content: "Hide Controls"; }
+      body.sidebar-collapsed .sidebar-tab::after { content: "Show Controls"; }
       .sidebar-tab-arrow {
         display: inline-block;
         margin-right: 5px;
