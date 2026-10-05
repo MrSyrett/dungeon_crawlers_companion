@@ -336,6 +336,30 @@ body {
 }
 
 /* --- Shadowdark: black and white, gold only as an occasional highlight ---- */
+/* ── THE HEADING CONTRACT ───────────────────────────────────────────────────
+   Every system looks different and behaves the same. The visual language is
+   these three tokens; a system block supplies values and nothing more:
+
+     --sys-head : page titles (h1) and section headings
+     --sys-sub  : the eyebrow line under a title, and subheaders
+     --text     : body copy (near-white in every system)
+
+   The rules that USE them live here, once, so a new system is three values and
+   a palette rather than its own copy of the rules. A system that sets neither
+   falls back to --gold, which each block has already re-skinned to its own
+   colour — so the systems not listed below are unchanged.
+   PageHeader's subtitle reads --sys-sub (see components/PageHeader.tsx). */
+:root[data-system]:not([data-chrome]) body h1 {
+  color: var(--sys-head, var(--gold));
+}
+:root[data-system]:not([data-chrome]) body h2 {
+  color: var(--sys-head, inherit);
+}
+/* h3 deliberately NOT included: across these pages h3 is as often a small label
+   inside a card as it is a section heading, and colouring those would reach
+   things this change has no business touching. Add it here if section h3s turn
+   out to need it. */
+
 :root[data-system="SD"]:not([data-chrome]) body {
   /* Shadowdark is the one skin where --gold still means gold. */
   --gold: var(--sd);
@@ -388,6 +412,8 @@ body {
 
 /* --- Dungeon Crawler Carl: black, gold and magenta, thrown splatter ------- */
 :root[data-system="DCC"]:not([data-chrome]) body {
+  --sys-head: var(--dcc-gold);
+  --sys-sub: var(--dcc);
   --panel: #121016;
   --panel-2: #19161f;
   --border: #2b2430;
@@ -418,14 +444,14 @@ body {
 :root[data-system="DCC"]:not([data-chrome]) body h3 {
   font-family: var(--font-anton), "Anton", ui-sans-serif, system-ui, sans-serif;
 }
-/* The page title is the one place the cover magenta runs large enough to use
-   straight (3:1 is the bar for display type; it clears 4.7). */
-:root[data-system="DCC"]:not([data-chrome]) body h1 {
-  color: var(--dcc);
-}
+/* h1/h2/h3 colour comes from --sys-head above. DCC's titles are the cover
+   YELLOW and its subtitles the cover magenta, which is the reverse of how this
+   started out. */
 
 /* --- Star Wars: black, white, crawl yellow, hologram cyan ----------------- */
 :root[data-system="SW"]:not([data-chrome]) body {
+  --sys-head: var(--sw);
+  --sys-sub: var(--sw-cyan);
   --panel: #111113;
   --panel-2: #18181b;
   --border: #2a2a2e;
@@ -459,6 +485,8 @@ body {
 
 /* --- Marvel: black, Marvel red, comic blue, a halftone starburst ---------- */
 :root[data-system="MMRPG"]:not([data-chrome]) body {
+  --sys-head: var(--text);
+  --sys-sub: var(--mmrpg-blue);
   --panel: #141011;
   --panel-2: #1b1618;
   --border: #2e2325;
@@ -493,13 +521,14 @@ body {
    place the wordmark face can go. It is A–Z only, so the uppercase is load
    bearing: without it every lowercase letter drops through to Oswald. */
 :root[data-system="MMRPG"]:not([data-chrome]) body h1 {
-  color: var(--mmrpg);
   font-family: "Marvel", var(--font-oswald), ui-sans-serif, system-ui, sans-serif;
   text-transform: uppercase;
 }
 
 /* --- ACE!: navy, comic-book blue, cartoon yellow, speed lines ------------- */
 :root[data-system="ACE"]:not([data-chrome]) body {
+  --sys-head: var(--ace);
+  --sys-sub: var(--ace-yellow);
   --panel: #0e1620;
   --panel-2: #141e2a;
   --border: #223240;
@@ -613,6 +642,14 @@ body {
    NOT be uppercased in CSS — see the @font-face note at the top of this file.
    Anton is shared with Dungeon Crawler Carl, the only such overlap in the
    fourteen, and it costs nothing: that theme already loads it. */
+/* The dashboard's two list headers — Characters and Adventures — in the logo
+   face. Only those two: the Ghostbusters face is a wordmark, legible as a title
+   and unreadable as running text, so it is aimed at the one element that is
+   always one of those two words (see DashboardDocs). */
+:root[data-system="GB"]:not([data-chrome]) body [data-dash-head] {
+  font-family: "Ghostbusters", var(--font-anton), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.06em;
+}
 :root[data-system="GB"]:not([data-chrome]) body h2,
 :root[data-system="GB"]:not([data-chrome]) body h3 {
   font-family: var(--font-anton), "Anton", ui-sans-serif, system-ui, sans-serif;
@@ -650,6 +687,8 @@ body {
    means gold on a non-Shadowdark skin: the gold takes the headings and
    labels, the teal keeps every fill, rule and structural mark. */
 :root[data-system="CO"]:not([data-chrome]) body {
+  --sys-head: var(--candela-gold);
+  --sys-sub: var(--candela);
   --panel: #12201c;
   --panel-2: #16241f;
   --border: #2b433c;
@@ -770,6 +809,8 @@ body {
    squared off, with no texture and no gradient in the drawing itself.
    The gold takes the labels, which is exactly what the sheet spends it on. */
 :root[data-system="JLU"]:not([data-chrome]) body {
+  --sys-head: var(--jlu-ink);
+  --sys-sub: var(--jlu-gold);
   --panel: #182339;
   --panel-2: #1f2c47;
   --border: #2b3a58;

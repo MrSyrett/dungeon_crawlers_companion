@@ -6,9 +6,12 @@
 // at three different widths. This standardizes the title block and drops the
 // duplicate navigation; the navbar owns Home, Compendium and Homebrew.
 //
-// The subtitle (the system's eyebrow line) takes the selected system's accent
-// via --sys, so a Star Wars page is lettered in Star Wars yellow and a Marvel
-// page in Marvel red, following the switch live.
+// The subtitle (the system's eyebrow line) takes --sys-sub, the subheader half of
+// the heading contract in app/globals.css, so a Star Wars page is lettered in
+// hologram cyan under a crawl-yellow title and a Marvel page in Marvel blue under
+// a white one. It falls back to --sys (the system accent) and then --gold, which
+// is what every system did before the contract existed — so a system that hasn't
+// set --sys-sub looks exactly as it did.
 export default function PageHeader({
   title,
   subtitle,
@@ -25,7 +28,7 @@ export default function PageHeader({
       <div className="min-w-0">
         <h1 className="font-display text-3xl font-black tracking-wide">{title}</h1>
         {subtitle ? (
-          <p className="font-label mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--sys,var(--gold))] sm:text-[11px] sm:tracking-[0.35em]">
+          <p className="font-label mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--sys-sub,var(--sys,var(--gold)))] sm:text-[11px] sm:tracking-[0.35em]">
             {subtitle}
           </p>
         ) : null}

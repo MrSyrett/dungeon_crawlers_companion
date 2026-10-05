@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_CLASSES } from "@/lib/data/dcc-classes";
@@ -101,6 +102,14 @@ export default async function DccClassesPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      {/* This page was the one DCC compendium page with no title at all — every
+          sibling (Races, Loot, Options, Bestiary, Skills & Spells) has carried
+          one. Same count-line shape as those, so the set reads as a set. */}
+      <PageHeader
+        title="Classes"
+        subtitle={<>{DCC_CLASSES.length} classes{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>}
+      />
+
       <DccHomebrewEditor kind="dcc-class" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/dcc/classes" className="mb-4 flex gap-2">

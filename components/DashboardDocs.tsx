@@ -63,7 +63,10 @@ function DocList({
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)]">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-        <h3 className="text-base font-bold uppercase tracking-[0.15em] sm:text-sm">
+        {/* data-dash-head: the hook a system's theme uses to letter these two
+            words in its own display face (Ghostbusters does — see globals.css).
+            An attribute rather than a class so it survives any Tailwind churn. */}
+        <h3 data-dash-head className="text-base font-bold uppercase tracking-[0.15em] sm:text-sm">
           {kind === "characters" ? "Characters" : "Adventures"}
         </h3>
         <form action={createDocument}>
