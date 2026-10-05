@@ -23,7 +23,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { FAMILIES, SUBSET, OUT_DIR, CSS_FILE, css2Url } from "./font-manifest.mjs";
-import { parseFaces, fileFor, renderBlock, spliceBlock } from "./font-css.mjs";
+import { parseFaces, fileFor, collapseVariable, renderBlock, spliceBlock } from "./font-css.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -53,7 +53,7 @@ fs.mkdirSync(outAbs, { recursive: true });
 
 const declared = [];
 const failed = [];
-let fetched = 0, skipped = 0, bytes = 0;
+let fetched = 0, skipped = 0, bytes = 0, collapsed = 0;
 
 for (const { family, url } of plan) {
   let faces;
@@ -67,8 +67,11 @@ for (const { family, url } of plan) {
     failed.push(`${family}: no "${SUBSET}" @font-face block in the response`);
     continue;
   }
-  for (const face of faces) {
-    const file = fileFor(face);
+  // Collapse before downloading: a variable family's weights all share one url, so
+  // this is also what stops the fetcher pulling the same file three times.
+  let files = 0;
+  for (const face of collapseVariable(faces.map((f) => ({ ...f, family })))) {
+    const file = face.file;
     const abs = path.join(outAbs, file);
     if (fs.existsSync(abs) && !FORCE) {
       skipped++;
@@ -83,8 +86,11 @@ for (const { family, url } of plan) {
       }
     }
     declared.push({ family, italic: face.italic, weight: face.weight, range: face.range, file });
+    if (face.covers > 1) collapsed += face.covers - 1;
+    files++;
   }
-  console.log(`${family.padEnd(22)} ${faces.length} face(s)`);
+  console.log(`${family.padEnd(22)} ${faces.length} face(s)` +
+    (files < faces.length ? ` -> ${files} file(s) (variable)` : ""));
 }
 
 const cssAbs = path.join(ROOT, CSS_FILE);
@@ -101,7 +107,9 @@ fs.writeFileSync(
 );
 
 console.log(
-  `\n${declared.length} faces declared — ${fetched} downloaded` +
+  `\n${declared.length} faces declared` +
+  (collapsed ? ` (${collapsed} duplicate variable-font file(s) skipped)` : "") +
+  ` — ${fetched} downloaded` +
   `${bytes ? ` (${(bytes / 1048576).toFixed(2)} MB)` : ""}, ${skipped} already present.` +
   `\nWrote the @font-face block into ${CSS_FILE} and ${OUT_DIR}/manifest.json.`,
 );

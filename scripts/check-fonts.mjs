@@ -25,7 +25,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { FAMILIES, OUT_DIR, BEGIN_MARK, END_MARK, faceFile } from "./font-manifest.mjs";
-import { parseFaces, fileFor, renderBlock, spliceBlock } from "./font-css.mjs";
+import { parseFaces, fileFor, collapseVariable, renderBlock, spliceBlock } from "./font-css.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const fails = [];
@@ -95,6 +95,40 @@ ok(vari[1].italic, "parser: missed the italic variable face");
 ok(vari[0].weight === "300 900", `parser: lost the weight range (${vari[0].weight})`);
 ok(fileFor(vari[0]) === "figtree-var.woff2", `parser: variable filename ${fileFor(vari[0])}`);
 ok(fileFor(vari[1]) === "figtree-var-italic.woff2", `parser: variable italic filename ${fileFor(vari[1])}`);
+
+// THE VARIABLE-FONT COLLAPSE. This is the shape that actually came back from Google
+// for 21 of the 31 families: a request for discrete weights answered with one
+// @font-face per weight, every one pointing at the SAME url. Left alone it stored 73
+// duplicate files (2.49 MB of 3.73 MB) and made a page using three weights download
+// the same file three times.
+const VAR_WEIGHTS = `
+/* latin */
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/geist/v3/one.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+/* latin */
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 500;
+  src: url(https://fonts.gstatic.com/s/geist/v3/one.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+/* latin */
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 700;
+  src: url(https://fonts.gstatic.com/s/geist/v3/one.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+/* latin */
+@font-face { font-family: 'Geist'; font-style: italic; font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/geist/v3/two.woff2) format('woff2'); unicode-range: U+0000-00FF; }
+`;
+const varFaces = parseFaces(VAR_WEIGHTS).map((f) => ({ ...f, family: "Geist" }));
+const varRows = collapseVariable(varFaces);
+ok(varFaces.length === 4, `collapse: parsed ${varFaces.length} faces, expected 4`);
+ok(varRows.length === 2, `collapse: ${varRows.length} rows, expected 2 (one normal, one italic)`);
+const normalRow = varRows.find((r) => !r.italic);
+ok(normalRow?.weight === "400 700", `collapse: normal weight "${normalRow?.weight}", expected "400 700"`);
+ok(normalRow?.file === "geist-400.woff2",
+  `collapse: file "${normalRow?.file}" — must keep the LOWEST weight's name so a re-run matches the files already on disk`);
+ok(normalRow?.covers === 3, `collapse: covers ${normalRow?.covers}, expected 3`);
+ok(varRows.find((r) => r.italic)?.weight === "400",
+  "collapse: a single-weight group must keep its single value, not become a range");
+// A static family shares no urls, so nothing may be collapsed away.
+ok(collapseVariable(parseFaces(STATIC).map((f) => ({ ...f, family: "Oswald" }))).length === 2,
+  "collapse: a static family's distinct urls must stay as separate faces");
 
 // A response with no latin block must come back empty rather than half-right.
 ok(parseFaces("/* greek */ @font-face { font-family: 'X'; src: url(x.woff2); }").length === 0,
@@ -265,8 +299,32 @@ if (!fs.existsSync(psPath)) {
         "fetchers: ps pattern's body group drops the weight range");
     }
   }
-  // Three things in that script would corrupt the output silently if dropped, and
-  // all three look like noise to anyone tidying it up. Nail them down.
+  // THE ASCII RULE. Windows PowerShell 5.1 reads a .ps1 as Windows-1252 unless the
+  // file has a BOM, so a UTF-8 em dash (E2 80 94) arrives as three characters ending
+  // in 0x94 — which is a RIGHT CURLY QUOTE, and PowerShell accepts curly quotes as
+  // string delimiters. One em dash inside a double-quoted message closed the string
+  // mid-sentence and the whole file failed to parse:
+  //     Unexpected token 'fix' in expression or statement.
+  // It shipped that way. Nothing short of running PowerShell would have caught it,
+  // and there is no PowerShell here — so this is the check that stands in for that.
+  const nonAscii = [];
+  ps.split("\n").forEach((line, n) => {
+    const chars = [...line].filter((c) => c.codePointAt(0) > 127);
+    if (chars.length) nonAscii.push(`line ${n + 1}: ${JSON.stringify(chars.join(""))}`);
+  });
+  if (nonAscii.length) {
+    fails.push(`fetchers: fetch-fonts.ps1 must be pure ASCII (PowerShell 5.1 reads it as Windows-1252 and 0x94 is a string delimiter) — ${nonAscii.join("; ")}`);
+  }
+
+  // The generated CSS header has to be identical in both fetchers, or whichever one
+  // ran last shows up as a spurious diff on tokens.css.
+  const psHeader = [...ps.matchAll(/\[void\]\$lines\.Add\('((?:\/\*|\s{3})[^']*)'\)/g)].map((m) => m[1]);
+  const jsHeader = renderBlock([]).split("\n").slice(1, -1);
+  ok(psHeader.length === jsHeader.length && psHeader.every((l, i) => l === jsHeader[i]),
+    `fetchers: the generated CSS header differs between the two fetchers\n    ps: ${JSON.stringify(psHeader)}\n    js: ${JSON.stringify(jsHeader)}`);
+
+  // Three more things in that script would corrupt the output silently if dropped,
+  // and all three look like noise to anyone tidying it up. Nail them down.
   ok(/SecurityProtocolType\]::Tls12/.test(ps),
     "fetchers: fetch-fonts.ps1 must force TLS 1.2 — PowerShell 5.1 defaults to 1.0 and Google refuses it");
   ok(/UTF8Encoding\(\$false\)/.test(ps),
@@ -275,6 +333,67 @@ if (!fs.existsSync(psPath)) {
     "fetchers: fetch-fonts.ps1 must join the generated block with LF — tokens.css is LF throughout");
   ok(/font-manifest\.json/.test(ps),
     "fetchers: fetch-fonts.ps1 must read font-manifest.json rather than carry its own family list");
+  // CASE-INSENSITIVE VARIABLE COLLISIONS. PowerShell treats $Plan and $plan as one
+  // variable, and the script shipped with exactly that pair: a -Plan flag and a $plan
+  // array of the 31 families. Building the array made the flag truthy, so every run
+  // took the plan branch and exited without downloading anything. A second pair, $M
+  // (the manifest) and $m (a regex match), would have wiped the manifest on the first
+  // family. The file parses perfectly either way, so no syntax check can find this —
+  // which is the whole reason this check exists.
+  // Comments have to come out first: the note in that script names both spellings of
+  // each collision on purpose, and scanning the prose would report the documentation
+  // as the bug. Variables inside STRINGS still count — "$($Manifest.subset)" is a real
+  // reference — so only comments are stripped, and only a # that isn't inside quotes.
+  const stripPsComments = (text) => text
+    .replace(/<#[\s\S]*?#>/g, "")
+    .split("\n")
+    .map((line) => {
+      let qs = false, qd = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === "'" && !qd) qs = !qs;
+        else if (c === '"' && !qs) qd = !qd;
+        else if (c === "#" && !qs && !qd) return line.slice(0, i);
+      }
+      return line;
+    })
+    .join("\n");
+  const psCode = stripPsComments(ps);
+
+  const spellings = new Map();   // lowercase name -> Set of spellings seen
+  for (const m of psCode.matchAll(/\$([A-Za-z_][A-Za-z0-9_]*)/g)) {
+    const key = m[1].toLowerCase();
+    if (!spellings.has(key)) spellings.set(key, new Set());
+    spellings.get(key).add(m[1]);
+  }
+  for (const [key, seen] of spellings) {
+    if (seen.size > 1) {
+      fails.push(`fetchers: fetch-fonts.ps1 uses ${[...seen].map((s) => "$" + s).join(" and ")} — PowerShell treats those as ONE variable (case-insensitive); rename one`);
+    }
+  }
+  ok(/CASE-INSENSITIVE/.test(ps),
+    "fetchers: fetch-fonts.ps1 should keep the note explaining the case-insensitivity trap — it cost two failed runs");
+
+  // No param() block. A [switch] supplied twice binds as an array and the script dies
+  // with "Cannot convert value System.Object[] to type SwitchParameter", which says
+  // nothing about what was typed and is easy to hit when pasting a command line. That
+  // shipped once. The flags come out of $args instead.
+  ok(!/^\s*param\s*\(/m.test(ps),
+    "fetchers: fetch-fonts.ps1 must not declare a param() block — a [switch] passed twice fails with an unreadable SwitchParameter error; read $args instead");
+  ok(!/\[CmdletBinding\(\)\]/.test(ps),
+    "fetchers: fetch-fonts.ps1 must not use [CmdletBinding()] — it only exists to support the param() block that isn't there");
+  ok(/\$flags\s*-contains\s*'force'/.test(ps) && /\$flags\s*-contains\s*'plan'/.test(ps),
+    "fetchers: fetch-fonts.ps1 must read -Force and -Plan out of $args");
+  ok(/\[System\.IO\.File\]::ReadAllText\(\$manifestPath\)/.test(ps),
+    "fetchers: fetch-fonts.ps1 must read the manifest with [System.IO.File]::ReadAllText — Get-Content on 5.1 would mangle any non-ASCII the JSON carries");
+  // And the same rule applies to everything the PowerShell side reads or writes as
+  // shared data: a non-ASCII marker would come back as mojibake and the generated
+  // block would never be found again on the next run.
+  const jsonRaw = fs.readFileSync(path.join(ROOT, "scripts/font-manifest.json"), "utf8");
+  const jsonBad = [...jsonRaw].filter((c) => c.codePointAt(0) > 127);
+  if (jsonBad.length) {
+    fails.push(`fetchers: font-manifest.json must be pure ASCII — found ${JSON.stringify(jsonBad.join(""))}`);
+  }
   for (const family of Object.keys(FAMILIES)) {
     if (ps.includes(`'${family}'`) || ps.includes(`"${family}"`)) {
       fails.push(`fetchers: fetch-fonts.ps1 hardcodes the family "${family}" — it should come from the manifest`);

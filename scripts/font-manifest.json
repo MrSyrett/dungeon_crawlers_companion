@@ -4,7 +4,7 @@
   "outDir": "public/fonts/google",
   "urlPrefix": "/fonts/google",
   "cssFile": "public/tokens.css",
-  "beginMark": "/* ===== BEGIN GENERATED GOOGLE FACES — see scripts/fetch-fonts ===== */",
+  "beginMark": "/* ===== BEGIN GENERATED GOOGLE FACES - see scripts/fetch-fonts ===== */",
   "endMark": "/* ===== END GENERATED GOOGLE FACES ===== */",
   "families": {
     "Anton": {
