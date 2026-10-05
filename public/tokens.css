@@ -35,14 +35,14 @@
   /* Per-system accents (same values as the app). */
   --ace: #3aa8e0;
   --kob: #a56ee8;
-  --nimble: #3fb97a;
+  --nimble: #2f9b63;
   --sw: #f0c020;
   --dnd: #c8102e;
   --d62e: #e07b39;
   --icrpg: #c8501e;
   --candela: #2fa595;
   --yze: #16bdd6;
-  --mmrpg: #EC1D24;
+  --mmrpg: #c8102e;
   --jlu: #2f6fed;
   --gb: #8bc53f;
   --dcc: #e8275f;
@@ -680,7 +680,12 @@
   --ui-border: #2e2325;
   --ui-text: #f4f1f2;
   --ui-muted: #a39a9c;
-  --ui-accent: #ec1d24;
+  /* The LIFTED red, not the brand #c8102e. This sidebar spends --ui-accent on
+     uppercase label text as well as borders and hovers, and the brand red
+     measures 3.2:1 on --ui-bg here — display contrast on small text. Same rule
+     as --sys-sub/--sys-link in app/globals.css. Don't "fix" it back to the
+     brand value; change --mmrpg instead if the brand itself should move. */
+  --ui-accent: #f4616a;
   /* The sheet's own --mv-blue. It draws the hairline under a section bar
      there; here it picks out chapter names in the prep builder's selector. */
   --ui-highlight: #7fc0f5;
