@@ -326,16 +326,25 @@
   .mon-pick-empty { font-family: 'Montserrat', sans-serif; font-size: 10px; color: var(--ui-muted); font-style: italic; padding: 8px 7px; }
 
 @media (max-width: 768px) {
+  /* dvh — the LIVE viewport height — on purpose, matching the character sheets' roll
+     log. The panel tracks the browser's own toolbar as it collapses and expands on
+     scroll. svh (a constant height) was tried on the roll log and reverted: the slack
+     it leaves became a gap under the navbar while scrolling. vh above is the fallback
+     for a browser too old for dvh. */
   /* Stack layout */
-  body { flex-direction: column; height: 100vh; overflow: hidden; }
+  body { flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 
 
   /* Sidebar: full-screen overlay when open */
   .sidebar {
     position: fixed !important;
-    top: 0; left: 0; right: 0; bottom: 0;
+    /* Starts at the navbar's BOTTOM edge, not the top of the viewport. On a phone the
+       bar is position:fixed (lib/sitenav.ts FIXED_STYLE) with a z-index far above
+       this overlay, so anything left at top:0 is hidden behind it. */
+    top: var(--dd-bar-h, 0px); left: 0; right: 0; bottom: 0;
     width: 100vw !important; min-width: 100vw !important;
-    height: 100vh !important;
+    height: calc(100vh - var(--dd-bar-h, 0px)) !important;
+    height: calc(100dvh - var(--dd-bar-h, 0px)) !important;
     z-index: 200;
     border-right: none;
     transform: translateY(0);
@@ -2801,7 +2810,11 @@ function toggleSidebar() {
 function setPullTabMobile(pt, collapsed) {
   if(collapsed) {
     pt.style.bottom = 'auto';
-    pt.style.top    = '8px';   /* top of screen when collapsed */
+    /* Below the navbar, not 8px from the top of the screen — the bar is fixed and
+       paints above this tab, so at 8px it was invisible, and it is the only way to
+       reopen the panel once it is shut. --dd-bar-h is published by lib/sitenav.ts and
+       falls back to 0 when there is no bar (a framed or standalone render). */
+    pt.style.top    = 'calc(var(--dd-bar-h, 0px) + 8px)';
   } else {
     pt.style.top    = 'auto';
     pt.style.bottom = '8px';   /* above bottom edge when open */
@@ -2907,12 +2920,17 @@ loadState();buildSidebarFromState();renderChapterTabs();applyFlowMode();renderPr
 // Init pull-tab position
 (function(){
   const pt = document.getElementById('sidebar-pull-tab');
-  if(!pt) return;
   if(window.innerWidth <= 768) {
-    pt.style.top    = 'auto';
-    pt.style.bottom = '8px';
-    pt.textContent  = '▲';
-  } else {
+    /* Start COLLAPSED on a phone, the way every other prep builder does. This used
+       to load with the full-screen control overlay covering the preview, so the
+       first thing you saw on a phone was the editor rather than the adventure. The
+       preview is what you want first; the panel is one tap on the pull tab away.
+       setPullTabMobile is the single place that knows where the tab sits in each
+       state (and that it has to clear the navbar), so go through it. */
+    const sb = document.querySelector('.sidebar');
+    if(sb) sb.classList.add('collapsed');
+    if(pt) { setPullTabMobile(pt, true); pt.textContent = '▼'; pt.title = 'Show controls'; }
+  } else if(pt) {
     pt.style.left = '320px';
     pt.textContent = '▼';
   }
