@@ -117,6 +117,26 @@
   /* Shadowdark's accent, its own token at last. */
   --sd: #c8a020;
   --red: #b82018;
+  /* ---- Shared hues --------------------------------------------------------
+     Three colours are wanted by more than one system, so each hex lives HERE,
+     once, and the per-system tokens below alias it. Without this the same red
+     would be spelled out in three system blocks under three names, which is
+     exactly the drift this pass exists to remove. The names are deliberately
+     system-neutral: a system reaching for a shared hue shouldn't have to write
+     var(--some-other-system). `-ink` means the same hue lifted to clear 4.5:1
+     as body-sized text — the convention the per-system pairs below use.
+     NOT --red: that is the app's older, muddier brick, still in use. */
+  /* Deep crimson. D&D's dragon red, Marvel's links, Index Card RPG's
+     subheads. DISPLAY contrast only: 3.0–3.1:1 on these panels, which clears
+     the 3:1 bar for headings and misses the 4.5:1 bar for running text. */
+  --crimson: #c8102e;
+  /* The same red lifted — 6.1:1. D&D's links, Marvel's body-sized red. */
+  --crimson-ink: #f4616a;
+  /* Lifted gold for text: D&D's eyebrow line, and JLU's labels. */
+  --gold-ink: #e2b23a;
+  /* The periwinkle three character sheets declare as --blue. Nimble and
+     D6 System 2e both spend it; nothing else does. */
+  --blue-ink: #8ab4f8;
   /* ACE! accent — the comic-book sky blue of the omnibus covers. */
   --ace: #3aa8e0;
   /* Kids on Bikes accent — the books' purple. */
@@ -126,8 +146,9 @@
   --nimble: #2f9b63;
   /* Star Wars accent — WEG cover yellow. */
   --sw: #f0c020;
-  /* D&D accent — the classic dragon red. */
-  --dnd: #c8102e;
+  /* D&D accent — the classic dragon red. Marvel wears the same crimson now,
+     so the value lives in --crimson and this is an alias. */
+  --dnd: var(--crimson);
   /* D62e (D6 System 2e) accent — a genre-agnostic burnt orange. */
   --d62e: #e07b39;
   /* Index Card RPG accent — Runehammer burnt orange. */
@@ -136,8 +157,12 @@
   --candela: #2fa595;
   /* Year Zero Engine accent — sci-fi terminal cyan (Alien vibes). */
   --yze: #16bdd6;
-  /* Marvel Multiverse RPG accent — Marvel red. */
-  --mmrpg: #EC1D24;
+  /* Marvel Multiverse RPG accent — Marvel red. Was #EC1D24, the bright
+     orange-leaning red off the logo; this is the darker classic comic red, and
+     it is the same crimson D&D wears. The two systems are told apart by what
+     surrounds it (white titles and a comic blue here, gold and Cinzel there),
+     not by two near-identical reds. */
+  --mmrpg: var(--crimson);
   /* Justice League Unlimited accent — heroic DC blue. */
   --jlu: #2f6fed;
   /* Ghostbusters accent — ectoplasm slime green. */
@@ -162,11 +187,12 @@
      spends it on a single rule, and periwinkle isn't what this world has:
      the holoprojector, the targeting display and the sabre are all cyan. */
   --sw-cyan: #30d5e8;
-  /* Marvel red lifted for body-sized text. #EC1D24 lands at 4.30:1 on the
-     Marvel panels, under the bar; this clears it at 6.15. The sheet has no
+  /* Marvel red lifted for body-sized text — the shared lift, since D&D now
+     wants the same value for its links. The brand red lands at 3.1:1 on the
+     Marvel panels, well under the bar; this clears it at 6.1. The sheet has no
      equivalent — its --mv-dk #b3141a is a DARKER red meant for light mode and
      would be unreadable here — so this one is the app's, not the sheet's. */
-  --mmrpg-ink: #f4616a;
+  --mmrpg-ink: var(--crimson-ink);
   /* Marvel's second colour, straight off the sheet's --mv-blue. There it draws
      the hairline under a section bar and rings the vital in focus. */
   --mmrpg-blue: #7fc0f5;
@@ -203,7 +229,7 @@
      (`.feat.sub b`, the bold lead-in in feature text — the same single
      placement Star Wars has). */
   --nimble-ink: #7fd39a;
-  --nimble-blue: #8ab4f8;
+  --nimble-blue: var(--blue-ink);
   /* Index Card RPG — the sheet's dark-mode --icrpg-dk, straight across. */
   --icrpg-ink: #e8823c;
   /* JLU. The sheet's --jlu-dk #1c49a8 measures 1.92:1 on its dark panel, so
@@ -211,7 +237,7 @@
      gold is the sheet's own, spent on the masthead subtitle, the field labels
      and the active subtab underline, which is to say: labels. */
   --jlu-ink: #6293f2;
-  --jlu-gold: #e2b23a;
+  --jlu-gold: var(--gold-ink);
   /* The SELECTED system's accent. SiteNav republishes this on <html> whenever
      the system changes (and sets data-system), so any surface can tint itself
      with var(--sys) and follow the switch live. The app's own accent until the
@@ -335,20 +361,39 @@ body {
   --gold: var(--accent);
 }
 
-/* --- Shadowdark: black and white, gold only as an occasional highlight ---- */
-/* ── THE HEADING CONTRACT ───────────────────────────────────────────────────
-   Every system looks different and behaves the same. The visual language is
-   these three tokens; a system block supplies values and nothing more:
+/* ── THE VISUAL LANGUAGE ────────────────────────────────────────────────────
+   Every system looks different and behaves the same. The difference is a
+   palette of five or six colours; the sameness is WHERE those colours land.
+   Four roles, and a system block supplies values and nothing more:
 
-     --sys-head : page titles (h1) and section headings
+     --sys-head : page titles (h1) and section headings (h2)
      --sys-sub  : the eyebrow line under a title, and subheaders
+     --sys-link : links, entry names, anything you click or act on
      --text     : body copy (near-white in every system)
 
-   The rules that USE them live here, once, so a new system is three values and
-   a palette rather than its own copy of the rules. A system that sets neither
-   falls back to --gold, which each block has already re-skinned to its own
-   colour — so the systems not listed below are unchanged.
-   PageHeader's subtitle reads --sys-sub (see components/PageHeader.tsx). */
+   plus --muted for the small print and the panel/border pair for surfaces.
+   Six values per system, which is the whole palette — if a page needs a
+   seventh it is either data (see the semantic scale below) or drift.
+
+   ONE rule decides which value of a hue goes in which role: --sys-sub and
+   --sys-link land on body-sized text, so they take the LIFTED value (the
+   `-ink` token) wherever the brand value misses 4.5:1 — that is what every
+   `-ink` token in the palette above was created for. --sys-head is display
+   type and clears the 3:1 bar on the brand value, so it keeps it. This is why
+   DCC's subheads are --dcc-ink and not the cover magenta, and why Marvel's
+   links are the lift rather than the brand red.
+
+   The rules that USE the first two live here, once, so a new system is a
+   handful of values rather than its own copy of the rules. A system that sets
+   neither falls back to --gold, which each block has already re-skinned to its
+   own colour — so a system not listed below is unchanged.
+   PageHeader's subtitle reads --sys-sub (see components/PageHeader.tsx).
+
+   --sys-link deliberately has NO blanket rule. Half the links on these pages
+   are whole cards wrapped in an <a>, and colouring those would tint every word
+   inside them. It is the token the per-page hex literals point at as they are
+   replaced, one system at a time — the value is centralised even though the
+   selector can't be. */
 :root[data-system]:not([data-chrome]) body h1 {
   color: var(--sys-head, var(--gold));
 }
@@ -360,9 +405,15 @@ body {
    things this change has no business touching. Add it here if section h3s turn
    out to need it. */
 
+/* --- Shadowdark: black and white, gold only as an occasional highlight ---- */
 :root[data-system="SD"]:not([data-chrome]) body {
   /* Shadowdark is the one skin where --gold still means gold. */
   --gold: var(--sd);
+  /* Titles in the bone white, not the gold: the books are black and white and
+     the gold is a highlight, which is what makes it read as gold at all. */
+  --sys-head: var(--text);
+  --sys-sub: var(--sd);
+  --sys-link: var(--sd);
   --panel: #0f0f11;
   --panel-2: #141418;
   --border: #2a2a2e;
@@ -389,6 +440,12 @@ body {
 
 /* --- D&D 2024: a worn module cover. Black, white, red, light brown -------- */
 :root[data-system="DND"]:not([data-chrome]) body {
+  /* Red titles, gold eyebrow, the lighter red on links — a module cover. The
+     titles were coming out #c8a020, the app's old gold, purely because this
+     block never re-skinned --gold and the fallback caught it. */
+  --sys-head: var(--dnd);
+  --sys-sub: var(--gold-ink);
+  --sys-link: var(--crimson-ink);
   --panel: #1a1718;
   --panel-2: #221e1f;
   --border: #342e30;
@@ -413,7 +470,13 @@ body {
 /* --- Dungeon Crawler Carl: black, gold and magenta, thrown splatter ------- */
 :root[data-system="DCC"]:not([data-chrome]) body {
   --sys-head: var(--dcc-gold);
-  --sys-sub: var(--dcc);
+  /* The lifted magenta, not the cover magenta: #e8275f is 4.40:1 here, which is
+     the exact reason --dcc-ink exists. The cover value stays the brand colour
+     for rules, borders and fills. */
+  --sys-sub: var(--dcc-ink);
+  /* Links in the gold too, not a third colour: DCC's pages carried 17 copies
+     of #f0a8a3, a washed pink that belongs to neither cover colour. */
+  --sys-link: var(--dcc-gold);
   --panel: #121016;
   --panel-2: #19161f;
   --border: #2b2430;
@@ -452,6 +515,7 @@ body {
 :root[data-system="SW"]:not([data-chrome]) body {
   --sys-head: var(--sw);
   --sys-sub: var(--sw-cyan);
+  --sys-link: var(--sw);
   --panel: #111113;
   --panel-2: #18181b;
   --border: #2a2a2e;
@@ -487,14 +551,19 @@ body {
 :root[data-system="MMRPG"]:not([data-chrome]) body {
   --sys-head: var(--text);
   --sys-sub: var(--mmrpg-blue);
+  /* The darker classic red is now the BRAND red (--mmrpg, above) — fills,
+     rules, borders. Links stay on the lift because the darker one measures
+     3.2:1 on this panel and a link is body-sized text: it is the same red, two
+     stops up. Swap this to var(--crimson) for the darker value on links too. */
+  --sys-link: var(--crimson-ink);
   --panel: #141011;
   --panel-2: #1b1618;
   --border: #2e2325;
   --text: #f4f1f2;
   --muted: #a39a9c;
-  /* Both accent slots land on the lifted red: the brand #EC1D24 is under 4.5:1
-     here, so anything that ends up as text has to use the lifted one. The
-     brand itself stays available as --mmrpg for rules, borders and fills. */
+  /* Both accent slots land on the lifted red: the brand red is 3.1:1 here, so
+     anything that ends up as text has to use the lifted one. The brand itself
+     stays available as --mmrpg for rules, borders and fills. */
   --red: var(--mmrpg-ink);
   --gold: var(--mmrpg-ink);
   --sys-display: var(--font-oswald);
@@ -516,10 +585,11 @@ body {
 :root[data-system="MMRPG"]:not([data-chrome]) body h3 {
   font-family: var(--font-oswald), "Oswald", ui-sans-serif, system-ui, sans-serif;
 }
-/* The page title is the one place the brand red runs large enough to use
-   straight — 3:1 is the bar for display type and it clears 4.3 — and the one
-   place the wordmark face can go. It is A–Z only, so the uppercase is load
-   bearing: without it every lowercase letter drops through to Oswald. */
+/* The page title is where the wordmark face goes. It is A–Z only, so the
+   uppercase is load bearing: without it every lowercase letter drops through to
+   Oswald. (The title's COLOUR is --sys-head, now the near-white: a red title
+   under a red wordmark face was one red too many, and the brand red no longer
+   clears even the display bar comfortably.) */
 :root[data-system="MMRPG"]:not([data-chrome]) body h1 {
   font-family: "Marvel", var(--font-oswald), ui-sans-serif, system-ui, sans-serif;
   text-transform: uppercase;
@@ -529,6 +599,7 @@ body {
 :root[data-system="ACE"]:not([data-chrome]) body {
   --sys-head: var(--ace);
   --sys-sub: var(--ace-yellow);
+  --sys-link: var(--ace);
   --panel: #0e1620;
   --panel-2: #141e2a;
   --border: #223240;
@@ -562,6 +633,9 @@ body {
    lilac is what the sheet's own dark mode uses for text, so it takes --gold
    and every entry name and label re-skins with no page edit. */
 :root[data-system="KOB"]:not([data-chrome]) body {
+  --sys-head: var(--kob);
+  --sys-sub: var(--kob-teal);
+  --sys-link: var(--kob-ink);
   --panel: #232128;
   --panel-2: #2e2b38;
   --border: #3a3842;
@@ -588,10 +662,17 @@ body {
 
 /* --- D6 System 2e: a blueprint ---------------------------------------------
    Saira Condensed over Saira — one superfamily at two widths, because a
-   genre-agnostic system shouldn't borrow a genre's typeface. One colour: the
-   sheet declares --blue and never uses it, so nothing is invented here.
+   genre-agnostic system shouldn't borrow a genre's typeface. Two colours now:
+   the burnt orange, and the --blue the sheet declares — this skin went a round
+   with one colour and read thinner than the others for it.
    The ground is neutral graphite on purpose; see the Index Card RPG note. */
 :root[data-system="D62E"]:not([data-chrome]) body {
+  /* The blue is the second colour this skin went without. It is the --blue the
+     sheet declares and never spends, so it is the sheet's own value, not an
+     invention — and Nimble already uses it in the same slot. */
+  --sys-head: var(--d62e);
+  --sys-sub: var(--blue-ink);
+  --sys-link: var(--d62e-ink);
   --panel: #1c1a1e;
   --panel-2: #262329;
   --border: #3a363c;
@@ -620,6 +701,11 @@ body {
    The slime green clears 8.24:1 on its own, so one value carries fills and
    text alike — no lifted ink, unlike Marvel and JLU. */
 :root[data-system="GB"]:not([data-chrome]) body {
+  /* h2 takes the slime green; the page TITLE is the glowing white wordmark set
+     further down this block, which wins on source order. */
+  --sys-head: var(--gb);
+  --sys-sub: var(--gb-ecto);
+  --sys-link: var(--gb);
   --panel: #181e11;
   --panel-2: #1e2614;
   --border: #2c3720;
@@ -689,6 +775,7 @@ body {
 :root[data-system="CO"]:not([data-chrome]) body {
   --sys-head: var(--candela-gold);
   --sys-sub: var(--candela);
+  --sys-link: var(--candela);
   --panel: #12201c;
   --panel-2: #16241f;
   --border: #2b433c;
@@ -719,6 +806,9 @@ body {
    antiqued. The ground is two gradients and nothing else: a contour map and
    every other pattern read as busy here, and a gradient can't. */
 :root[data-system="NIM"]:not([data-chrome]) body {
+  --sys-head: var(--nimble);
+  --sys-sub: var(--blue-ink);
+  --sys-link: var(--nimble-ink);
   --panel: #212623;
   --panel-2: #2a312d;
   --border: #3a423d;
@@ -745,11 +835,18 @@ body {
 /* --- Index Card RPG: marker on card stock ----------------------------------
    Permanent Marker is not a flourish: Hankerin Ferinale draws the entire book
    in marker on 3x5 cards. Archivo underneath keeps it a voice rather than the
-   page. One colour — the sheet declares --blue and never uses it.
+   page. Two colours now: the marker orange, and the red it is drawn beside.
    The ground is pulled warm, and D6 2e's is pulled neutral, because the two
    sheets carry BYTE-IDENTICAL dark palettes and their accents sit 6 degrees
    apart; without that they would be indistinguishable. */
 :root[data-system="ICRPG"]:not([data-chrome]) body {
+  /* The red is the second colour this skin went without — Runehammer's marker
+     is orange and red on card stock, so the pair is in the source material.
+     The lift, not the crimson itself: #c8102e measures 2.96:1 on this warm
+     ground, which fails even the display bar, and a subhead is small text. */
+  --sys-head: var(--icrpg);
+  --sys-sub: var(--crimson-ink);
+  --sys-link: var(--icrpg-ink);
   --panel: #1f1914;
   --panel-2: #2a221b;
   --border: #45392c;
@@ -780,6 +877,11 @@ body {
    about it — it declares --green, --red and --gild and uses none of them;
    all 24 accent rules are --yz-dk. The most single-minded of the fourteen. */
 :root[data-system="YZE"]:not([data-chrome]) body {
+  /* All three roles on the one cyan, on purpose: see the note above. A CRT has
+     one phosphor. The hierarchy here is weight and size, not hue. */
+  --sys-head: var(--yze);
+  --sys-sub: var(--yze);
+  --sys-link: var(--yze);
   --panel: #0e1c20;
   --panel-2: #132225;
   --border: #28454a;
@@ -811,6 +913,7 @@ body {
 :root[data-system="JLU"]:not([data-chrome]) body {
   --sys-head: var(--jlu-ink);
   --sys-sub: var(--jlu-gold);
+  --sys-link: var(--jlu-ink);
   --panel: #182339;
   --panel-2: #1f2c47;
   --border: #2b3a58;
