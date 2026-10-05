@@ -3,9 +3,9 @@ import { OBR_FRAME_ANCESTORS } from "@/lib/vtt";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /obr/party/manifest.json — install URL for Table Tools, a third,
- * separate Owlbear Rodeo extension hosted alongside the Companion
- * (../../manifest.json) and the VTT Importer (../../vtt-import/manifest.json).
+ * GET /obr/party/manifest.json — install URL for Table Tools, the second of the
+ * two Owlbear Rodeo extensions hosted here, alongside the Companion
+ * (../../manifest.json).
  *
  *   Party   — remember each player's token (room metadata, so it survives scene
  *             changes) and drop the party into any scene already owned by them.
@@ -14,8 +14,9 @@ export const dynamic = "force-dynamic";
  *   Stage   — hide a scene behind a curtain while the GM sets it up, then
  *             make it live.
  *   Import  — Universal VTT (.dd2vtt/.uvtt/.df2vtt) to a new scene with
- *             Dynamic Fog walls, doors and lights. Replaces the standalone
- *             VTT Importer extension (/obr/vtt-import), which still works.
+ *             Dynamic Fog walls, doors and lights. This absorbed the standalone
+ *             VTT Importer extension, which used to live at /obr/vtt-import and
+ *             has been deleted — so this is the only place that import lives now.
  *
  * The background page runs in every client (GM and players); it is what draws
  * the vision preview and the players' curtain.

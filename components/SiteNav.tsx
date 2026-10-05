@@ -44,12 +44,17 @@ type Menu = "system" | "compendium" | "mobile" | null;
 const HIDDEN_ON = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
 // Surfaces that belong to the APP rather than to one game: the campaign list,
-// the Owlbear (OBR) page, the Token Maker and every admin screen. These keep
-// the standard look — no system ground, no system faces — the same way the
-// navbar does. Marked with data-chrome on <html>; app/globals.css skips its
-// theme blocks whenever that's set. (The GM Screen and the Map Maker are
-// standalone documents, not Next pages, so they never see those rules.)
-const CHROME_PREFIXES = ["/campaigns", "/vtt", "/admin", "/token-maker", "/account"];
+// the Token Maker, your account and every admin screen. These keep the standard
+// look — no system ground, no system faces — the same way the navbar does.
+// Marked with data-chrome on <html>; app/globals.css skips its theme blocks
+// whenever that's set. (The GM Screen and the Map Maker are standalone
+// documents, not Next pages, so they never see those rules.)
+//
+// /vtt was here for the Owlbear setup page. That page is gone — its contents are
+// the Owlbear Rodeo section of /account, which is already covered below — and
+// nothing under /vtt is a page any more, only route handlers the extension calls
+// and static assets, neither of which renders this navbar.
+const CHROME_PREFIXES = ["/campaigns", "/admin", "/token-maker", "/account"];
 
 function isChromePath(pathname: string): boolean {
   return CHROME_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));

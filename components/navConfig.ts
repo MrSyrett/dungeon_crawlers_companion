@@ -157,15 +157,19 @@ export function homebrewFor(system: SystemKey): string | null {
 // never change by system. Naming (site-wide): "VTT" is OUR first-party tabletop
 // at /play — every button that opens it says "Open VTT", and the page's own
 // crumb and tab title say VTT. "OBR" is the external Owlbear Rodeo integration.
-// Mind the one crossed wire this leaves: the OBR *setup* page is served at the
-// path /vtt, which is not our VTT. The nav link below labels it OBR for that
-// reason; don't "fix" the label to match the path.
+//
+// There is no OBR link here any more. Owlbear setup was a page at /vtt — a path
+// that was never our VTT, which is the crossed wire this comment used to warn
+// about — and it is now the Owlbear Rodeo section of /account: two install links
+// and one access code. Nothing under /vtt is a page now; what remains there is
+// the route handlers the Owlbear extension itself calls (/vtt/gm-screen and
+// /vtt/sheet/[id]) plus static assets under public/vtt. Don't add a page there.
+//
 // Map Maker and GM Screen are route handlers (standalone HTML), hence `hard`.
-// Order: Campaigns then OBR (the two places a table starts), the makers in the
-// middle, GM Screen last so it sits at the right-hand end of the bar.
+// Order: Campaigns first (where a table starts), the makers in the middle, GM
+// Screen last so it sits at the right-hand end of the bar.
 export const TOOLS_NAV: NavLink[] = [
   { href: "/campaigns", label: "Campaigns" },
-  { href: "/vtt", label: "OBR" },
   { href: "/dungeon-map", label: "Map Maker", hard: true },
   { href: "/token-maker", label: "Token Maker" },
   { href: "/gm-screen", label: "GM Screen", hard: true },
