@@ -348,8 +348,18 @@ body.spec-on .sk-spec-cell{display:table-cell;}
        down — so docking it by `100% - tab` left those 3px off the bottom of the
        screen. On the bar itself, with border-box sizing, the maths is exact. */
     border-left:none;border-top:none;border-radius:14px 14px 0 0;z-index:200;
+    /* svh, NOT dvh. dvh is the LIVE viewport height, so it grows and shrinks as the
+       browser's own toolbar collapses on scroll — and the log, resizing with it,
+       kept gaining and losing a chunk of space. svh is the small viewport: the
+       height with those toolbars SHOWN. It is a constant per orientation, so the
+       log is one fixed size and the grab bar docks in one fixed place no matter
+       how the page is scrolled.
+       The slack has to land somewhere when the toolbar does hide, and `bottom:0`
+       decides where: the bottom edge stays glued to the screen and any spare room
+       appears under the navbar, never below the log. 100vh above is the fallback
+       for a browser too old for svh. */
     height:calc(100vh - var(--dd-bar-h, 0px))!important;
-    height:calc(100dvh - var(--dd-bar-h, 0px))!important;
+    height:calc(100svh - var(--dd-bar-h, 0px))!important;
     max-height:none!important;
     transition:transform .25s ease;overflow:visible!important;}
   .roll-log.collapsed{transform:translateY(calc(100% - var(--dd-log-tab)));width:100%!important;
