@@ -548,6 +548,18 @@ body {
 :root[data-system="DND"]:not([data-chrome]) body h3 {
   font-family: var(--font-cinzel), "Cinzel", Georgia, serif;
 }
+/* The dashboard's two list headers get the LOGO face, the one carve-out from
+   "the page title alone" above — and the same carve-out Ghostbusters already has,
+   for the same reason: [data-dash-head] is always the single word Characters or
+   Adventures, so the two things that keep DnDC off h2/h3 generally (no digits in
+   the face, and a wordmark reading badly as running text) cannot bite here.
+   Tracking comes down from the component's 0.15em: a logo face is drawn with its
+   spacing already in it, and 0.15em pulls the letters apart. Matches the GB rule.
+   Cinzel stays behind it in the stack, as everywhere else DnDC is used. */
+:root[data-system="DND"]:not([data-chrome]) body [data-dash-head] {
+  font-family: "DnDC", var(--font-cinzel), "Cinzel", Georgia, serif;
+  letter-spacing: 0.06em;
+}
 
 /* --- Dungeon Crawler Carl: black, gold and magenta, thrown splatter ------- */
 :root[data-system="DCC"]:not([data-chrome]) body {
