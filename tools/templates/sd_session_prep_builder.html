@@ -414,40 +414,44 @@
   /* Pages reflow to a single fluid column on mobile via body.flow-mode
      (see the flow-mode block below); no fixed-page scaling here anymore. */
 
-  /* The grab bar is a full-width strip docked at the BOTTOM of the screen — the same
-     arrangement as #log-collapse-btn in the roll log. It was an 80px pill whose
-     top/bottom were assigned from JS, so it hopped between the top and the bottom of
-     the screen; nothing positions it now. */
+  /* The grab bar is the sheet's FIRST IN-FLOW ROW, so it travels with the panel: at
+     the TOP of the sheet while the sheet is open, and docked at the bottom of the
+     screen once the sheet has slid down — the same arrangement as #log-collapse-btn in
+     the roll log, and the same as .sidebar-tab in the other thirteen builders.
+     placePullTab() in the script below is what moves it inside .sidebar; without that
+     move this rule cannot work, because a child of the body does not travel with
+     anything. It was an 80px pill whose top/bottom were assigned from JS, so it hopped
+     between the top and the bottom of the screen; nothing positions it now. */
   .sidebar-pull-tab {
-    /* Shadowdark is the odd one out: its grab bar is NOT inside .sidebar, so it is a
-       flex child of the BODY and is pinned to the body's bottom rather than travelling
-       with the panel. (The init block that looks like it reparents the bar runs before
-       the <button> exists in the document, so it quietly does nothing — see the note
-       there.) The other 13 get their overshoot from the panel itself hanging past the
-       screen edge; this one has to be nudged on its own.
-       position:relative + top — not a transform, because transform:none is load-bearing
-       below, and a relative offset does not disturb the flex layout. */
-    position: relative !important;
-    top: var(--dd-overshoot, 6px);
-    /* position:relative honours `left`; position:static ignores it. That is how the
-       switch to relative silently activated the DESKTOP rule's `left: 320px` — that
-       rule is unscoped, not inside a min-width query — and threw the bar 320px off to
-       the right. !important so this also beats the inline style.left that
-       toggleSidebar()'s desktop branch writes when the window was wide at load. */
-    left: 0 !important;
+    /* STATIC — in flow, carried by the panel. Two earlier attempts to position it are
+       worth not repeating:
+         • `position: fixed` (the original) pinned it to the screen, which is precisely
+           why it could not travel with the panel.
+         • `position: relative` with a `top` nudge looked harmless and silently
+           activated the DESKTOP rule's `left: 320px` — that rule is unscoped, it is
+           not inside a min-width query — throwing the bar 320px off to the right.
+           Static ignores `left`; relative honours it.
+       The overshoot comes from the PANEL hanging past the screen edge
+       (`.sidebar { bottom: calc(-1 * var(--dd-overshoot)) }`), not from offsetting the
+       bar, so there is nothing to nudge here. top/left/right are pinned to auto anyway
+       to neutralise the desktop rule and the inline style.left that toggleSidebar()'s
+       desktop branch writes if the window was wide at load. */
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
     right: auto !important;
     flex: 0 0 auto !important;
     transform: none !important;
     width: 100% !important;
-    /* Taller by the overshoot, which hangs below the screen edge; the matching
-       padding keeps the label centred in the part you can actually see. */
+    /* Taller by the overshoot, which hangs below the screen edge when the panel is
+       docked; the matching padding keeps the label centred in the part you can
+       actually see. */
     height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 6px)) !important;
     min-height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 6px)) !important;
     padding-bottom: var(--dd-overshoot, 6px) !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    z-index: 400 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -2878,12 +2882,34 @@ function toggleSidebar() {
 }
 
 function setPullTabMobile(pt) {
-  /* There is nothing left to position. The grab bar is a fixed, full-width strip
-     pinned under the navbar by CSS in BOTH states, so this only clears any inline
-     top/bottom an earlier version of this function left behind and hands control
-     back to the stylesheet. */
+  /* Nothing left to POSITION — the mobile rule pins top/left/right to auto and the bar
+     rides in the panel's flow. This only clears inline top/bottom an earlier version of
+     this function left behind, and hands control back to the stylesheet. */
   pt.style.top = '';
   pt.style.bottom = '';
+}
+
+/* WHICH ELEMENT OWNS THE GRAB BAR, which is the whole of how it behaves.
+     mobile  — first child of .sidebar, so it is the sheet's top row when the sheet is
+               open and the only thing left on screen when the sheet slides down.
+     desktop — child of the body, so `position: fixed` can pin it to the panel's right
+               edge as a vertical pull-tab.
+   Shadowdark is the only builder that has to do this in script: the other thirteen
+   have .sidebar-tab inside .sidebar in the markup already, and CSS does the rest. The
+   <button> is declared BELOW the init script in this document, so the move has to wait
+   for DOMContentLoaded — an earlier version called insertBefore from the init block
+   itself, where getElementById still returns null, and so quietly never moved anything
+   at all. That is why this bar stayed docked at the bottom with the sheet open while
+   every other system's moved to the top. */
+function placePullTab() {
+  const pt = document.getElementById('sidebar-pull-tab');
+  const sb = document.querySelector('.sidebar');
+  if(!pt || !sb) return;
+  if(window.innerWidth <= 768) {
+    if(pt.parentElement !== sb || pt !== sb.firstElementChild) sb.insertBefore(pt, sb.firstChild);
+  } else if(pt.parentElement === sb) {
+    document.body.appendChild(pt);
+  }
 }
 
 /* The bar says what the tap will do, like the roll log's "Hide Log" / "Roll Log".
@@ -2899,6 +2925,8 @@ window.addEventListener('resize', function() {
   if(!pullTab || !sidebar) return;
   const isMobile  = window.innerWidth <= 768;
   const collapsed = sidebar.classList.contains('collapsed');
+  // Crossing the breakpoint changes which element owns the bar, not just its styling.
+  placePullTab();
   if(isMobile) {
     setPullTabMobile(pullTab);
     pullTab.textContent = pullTabLabel(collapsed);
@@ -2997,14 +3025,15 @@ if(window.innerWidth <= 768) {
   if(sb) sb.classList.add('collapsed');
 }
 
-/* The grab bar's own label. NOTE the <button id="sidebar-pull-tab"> is declared FURTHER
-   DOWN the document than this script block, so getElementById returns null here — an
-   earlier version of this init tried to reparent the bar into .sidebar from right here
-   and silently did nothing for it, which is why Shadowdark's bar is a body child while
-   the other 13 sit inside the panel. Defer to DOMContentLoaded so the element exists.
-   Position is entirely CSS's business now; this only writes text. */
+/* Put the grab bar where it belongs and give it its label. NOTE the
+   <button id="sidebar-pull-tab"> is declared FURTHER DOWN the document than this script
+   block, so getElementById returns null right here — which is exactly how an earlier
+   version of this init came to "reparent" the bar into .sidebar and silently move
+   nothing, leaving Shadowdark's bar pinned to the body while the other thirteen rode
+   inside the panel. Deferred to DOMContentLoaded so the element actually exists. */
 (function(){
-  const label = () => {
+  const init = () => {
+    placePullTab();
     const pt = document.getElementById('sidebar-pull-tab');
     const sb = document.querySelector('.sidebar');
     if(!pt || !sb) return;
@@ -3016,8 +3045,8 @@ if(window.innerWidth <= 768) {
       pt.textContent = collapsed ? '▶' : '◀';
     }
   };
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', label, { once:true });
-  else label();
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
+  else init();
 })();
 </script>
 

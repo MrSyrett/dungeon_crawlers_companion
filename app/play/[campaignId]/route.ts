@@ -162,11 +162,23 @@ function pageHtml(cfg: Record<string, unknown>, bar: string): string {
   const system = isSystemKey(cfg.system) ? cfg.system : null;
   // Shared tokens AFTER board.css so the site palette (panel, border, muted,
   // gold) wins over the board's own fallbacks — one palette on every surface.
+  // THE VIEWPORT META HAS TO BE HERE. This is a route handler that writes its own
+  // document, so it is NOT wrapped by app/layout.tsx and the `viewport` export there —
+  // which locks the rest of the site to a fixed size on mobile — never reaches the
+  // tabletop. That is precisely how the VTT ended up as the one surface still
+  // pinch-zooming after everything else was locked: the lock was added to the Next
+  // root and to tools/templates/*.html, and this file is neither.
+  //
+  // Locking the PAGE is right here, because the BOARD does its own: #vtt-canvas carries
+  // `touch-action: none` and public/vtt/board.js implements two-finger pinch-zoom and
+  // two-finger pan against the camera (see `pinch` / `updatePinch` there). Browser page
+  // zoom was competing with that, and it takes the tool rail and the Table panel
+  // off-screen along with the map. scripts/check-mobile-zoom.mjs keeps this honest.
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>${escapeHtml(title)}</title>
 <link rel="icon" type="image/png" href="/icon-64.png">
 <link rel="stylesheet" href="${asset("/vtt/board.css")}">
@@ -187,6 +199,7 @@ ${bar}
 
 function deniedHtml(): string {
   return `<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>No access</title><link rel="stylesheet" href="/vtt/board.css"></head>
 <body style="display:grid;place-items:center;height:100vh;text-align:center">
 <div><h1 style="color:var(--gold)">Not your table</h1>

@@ -9,7 +9,11 @@ const PAGE = String.raw`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Fixed size on mobile. This route handler writes its own document, so it is not
+     wrapped by app/layout.tsx and does not inherit the viewport export that locks the
+     rest of the site. Framed inside Owlbear the host page's viewport governs and this
+     is inert, but the popover can also be opened directly. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>The GM is setting the scene</title>
 <script src="/obr/sdk.js"></script>
 <style>

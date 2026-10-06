@@ -14,10 +14,17 @@
 //      public/tokens.css for the standalone tool surfaces.
 //
 //   2. `maximum-scale=1, user-scalable=no` in the viewport. This is what kills
-//      PINCH zoom. For the Next routes it is the `viewport` export in
-//      app/layout.tsx; for the standalone surfaces it is a <meta> in each of the
-//      thirty templates, which is the part most likely to go missing when a new
-//      template is added by copying an old one from before this change.
+//      PINCH zoom. For pages rendered through app/layout.tsx it is that file's
+//      `viewport` export — but a route handler that writes its own `<!doctype html>`
+//      is NOT wrapped by the layout and inherits nothing, so it needs its own <meta>,
+//      and so does each of the thirty standalone templates.
+//
+//      THE FIRST VERSION OF THIS CHECK MISSED THAT and shipped a half-lock. It
+//      asserted the templates and the Next root and declared victory, while
+//      app/play/[campaignId]/route.ts — the VTT, the one surface a GM actually runs a
+//      session on — kept pinch-zooming, along with four /obr popovers. All six write
+//      their own documents. So this now scans EVERY viewport meta in the tree, not a
+//      list of places someone remembered.
 //
 //      Note that iOS Safari honours (2) only in standalone (Home Screen) mode — it
 //      ignores both attributes in a normal browser tab, by Apple's choice since iOS
@@ -47,6 +54,9 @@ const CANVASES = [
   [path.join(TEMPLATES, "dungeon_map_maker.html"), "#map"],
   [path.join(TEMPLATES, "gm_screen.html"), ".doc-frame-wrap.maps-mode"],
   ["components/TokenMaker.tsx", "touch-none"], // Tailwind's spelling of the same thing
+  // The VTT board. Its CSS is injected from a JS string in session.js; the pinch
+  // handler that depends on it lives in public/vtt/board.js (`pinch` / `updatePinch`).
+  ["public/vtt/session.js", "#vtt-canvas"],
 ];
 
 const problems = [];
@@ -79,22 +89,60 @@ if (!fs.existsSync(LAYOUT)) {
   }
 }
 
-// ---- 2b. every standalone template's viewport meta ---------------------------
-// The FIRST meta only. gm_screen.html carries two more further down, inside the
-// HTML it writes for an export — a different document's head, and none of this
-// check's business.
+// ---- 2b. every viewport meta anywhere in the tree -----------------------------
+// Scanned by walking the source, not by consulting a list — a list is what let the
+// VTT through. Any file that declares a viewport is declaring it for a document a
+// phone can open, so it has to lock zoom.
 const metaRe = /<meta\s+name=["']viewport["']\s+content=["']([^"']*)["']\s*\/?>/i;
+const metaReG = /<meta\s+name=["']viewport["']\s+content=["']([^"']*)["']\s*\/?>/gi;
+const locks = (c) => /\bmaximum-scale\s*=\s*1\b/.test(c) && /\buser-scalable\s*=\s*no\b/.test(c);
+
+// The one deliberate exception: a diagnostic page whose entire job is to report what
+// the viewport does, and which needs viewport-fit=cover to do it.
+const EXEMPT = new Set(["public/viewport-probe.html"]);
+
+const ROOTS = ["app", "lib", "components", "public", TEMPLATES];
+const EXTS = new Set([".html", ".ts", ".tsx", ".js", ".mjs"]);
+function walk(dir, out = []) {
+  if (!fs.existsSync(dir)) return out;
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) { if (e.name !== "node_modules" && e.name !== ".next") walk(p, out); }
+    else if (EXTS.has(path.extname(e.name))) out.push(p);
+  }
+  return out;
+}
+const all = [...new Set(ROOTS.flatMap((r) => walk(r)))].sort();
+let metas = 0;
+for (const f of all) {
+  const rel = f.split(path.sep).join("/");
+  if (EXEMPT.has(rel)) continue;
+  const src = fs.readFileSync(f, "utf8");
+  // A template's own <head> is its FIRST meta. gm_screen.html carries two more further
+  // down, inside the HTML it writes for a PDF/HTML export — a different document's
+  // head, printed on paper, and none of this check's business. Everywhere else, every
+  // occurrence counts: app/play/[campaignId]/route.ts writes two real documents (the
+  // tabletop and the no-access page) from one file.
+  const inTemplates = rel.startsWith(`${TEMPLATES}/`);
+  const found = inTemplates
+    ? [metaRe.exec(src)].filter(Boolean).map((m) => m[1])
+    : [...src.matchAll(metaReG)].map((m) => m[1]);
+  for (const c of found) {
+    metas++;
+    if (!locks(c)) problems.push(`${rel} viewport does not lock zoom: "${c}"`);
+  }
+}
+
+// And every template must HAVE one — a new template copied from an old one is the
+// likeliest way for this to regress.
 const templates = fs.existsSync(TEMPLATES)
   ? fs.readdirSync(TEMPLATES).filter((f) => f.endsWith(".html")).sort()
   : [];
 if (!templates.length) problems.push(`${TEMPLATES} has no templates to check`);
 for (const f of templates) {
-  const rel = path.join(TEMPLATES, f);
-  const m = metaRe.exec(fs.readFileSync(rel, "utf8"));
-  if (!m) { problems.push(`${rel} has no viewport meta at all`); continue; }
-  const c = m[1];
-  if (!/\bmaximum-scale\s*=\s*1\b/.test(c) || !/\buser-scalable\s*=\s*no\b/.test(c))
-    problems.push(`${rel} viewport does not lock zoom: "${c}"`);
+  const rel = `${TEMPLATES}/${f}`;
+  if (!metaRe.test(fs.readFileSync(path.join(TEMPLATES, f), "utf8")))
+    problems.push(`${rel} has no viewport meta at all`);
 }
 
 // ---- 3. the in-element zoom surfaces keep touch-action: none ------------------
@@ -114,16 +162,19 @@ if (problems.length) {
   console.error(
     `\nThe site is deliberately a fixed size on mobile. Double-tap zoom is off via\n` +
       `\`touch-action: manipulation\` on <html> (app/globals.css + public/tokens.css) and\n` +
-      `pinch zoom via the viewport (app/layout.tsx + each tools/templates/*.html meta).\n` +
+      `pinch zoom via the viewport: the \`viewport\` export in app/layout.tsx for pages the\n` +
+      `layout wraps, and a <meta> in every file that writes its OWN document — the thirty\n` +
+      `templates, app/play/[campaignId]/route.ts, the /obr popovers.\n` +
       `A surface that needs magnification implements pinch on its OWN element behind\n` +
-      `\`touch-action: none\` — see the Map Maker's #map, the GM Screen's maps-mode pane\n` +
-      `and components/TokenMaker.tsx. A new template copied from an old one is the usual\n` +
-      `cause of a failure here: add the meta rather than relaxing this check.\n`
+      `\`touch-action: none\` — see the Map Maker's #map, the GM Screen's maps-mode pane,\n` +
+      `components/TokenMaker.tsx and public/vtt/board.js. Two usual causes of a failure\n` +
+      `here: a new template copied from an old one, and a new route handler that writes\n` +
+      `its own <!doctype html>. Add the meta rather than relaxing this check.\n`
   );
   process.exit(1);
 }
 console.log(
-  `check-mobile-zoom: OK — ${templates.length} standalone templates + the Next root lock ` +
-    `pinch zoom, both stylesheets kill double-tap zoom, and ${CANVASES.length} own-zoom ` +
-    `surfaces keep touch-action: none.`
+  `check-mobile-zoom: OK — ${metas} viewport metas across ${all.length} scanned files all ` +
+    `lock pinch zoom (+ the Next root export), both stylesheets kill double-tap zoom, and ` +
+    `${CANVASES.length} own-zoom surfaces keep touch-action: none.`
 );
