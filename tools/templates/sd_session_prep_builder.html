@@ -387,6 +387,23 @@
      anchorings; this makes the disagreement invisible rather than out-guessing
      it. A box-shadow paints outside the border box and an element's own overflow
      does not clip its own shadow, so the overflow:hidden above does not eat it. */
+
+  /* THE BOTTOM STRIP — why four previous fixes did nothing.
+     body{overflow:hidden} propagates its overflow to the VIEWPORT, so every box
+     the page paints is clipped at the initial containing block. On iOS Safari
+     that box ends a few px above the visible content area, and nothing inside
+     the page can reach the difference. That is why a solid 24px box-shadow under
+     .sidebar was completely invisible: it is painted outside the clip.
+     The one thing that still paints there is the CANVAS, whose background comes
+     from the ROOT element. html has no background here, so body's is propagated
+     to the canvas and the strip shows the page colour — exactly the near-black
+     that was measured off the device.
+     Give html its own background and it becomes the canvas; body's background
+     then paints on body's own box instead of propagating, so nothing else moves.
+     Match it to whatever actually reaches the bottom: the panel when open, the
+     grab bar's accent when the panel is docked. */
+  html { background: var(--ui-panel); }
+  html:has(body.sidebar-collapsed) { background: var(--ui-accent, var(--ui-panel)); }
   .sidebar { box-shadow: 0 24px 0 0 var(--ui-panel) !important; }
   .sidebar.collapsed { box-shadow: 0 24px 0 0 var(--ui-accent, var(--ui-panel)) !important; }
 

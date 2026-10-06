@@ -645,7 +645,7 @@
   --ui-border: #2a2a2e;
   --ui-text: #f6f5f2;
   --ui-muted: #9a9aa0;
-  --ui-accent: #c8a020;
+  --ui-accent: var(--sd);
   --ui-highlight: #f6f5f2;
   --font-display: "Montserrat", ui-sans-serif, system-ui, sans-serif;
 }
@@ -704,7 +704,7 @@
   --ui-text: #ece9e1;
   --ui-muted: #9a94a0;
   --ui-accent: var(--dcc-gold);  /* the panel's headers — .sidebar-title and every .section-divider read this token. 11.28:1 on the panel. */
-  --ui-highlight: #f2c230;
+  --ui-highlight: var(--dcc-gold);
   --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="DCC"] body,
@@ -739,8 +739,8 @@
   --ui-border: #2a2a2e;
   --ui-text: #f2f4f8;
   --ui-muted: #9a9aa2;
-  --ui-accent: #f0c020;
-  --ui-highlight: #30d5e8;
+  --ui-accent: var(--sw);
+  --ui-highlight: var(--sw-cyan);
   --font-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="SW"] body,
@@ -770,13 +770,15 @@
   --ui-muted: #a39a9c;
   /* The LIFTED red, not the brand #c8102e. This sidebar spends --ui-accent on
      uppercase label text as well as borders and hovers, and the brand red
-     measures 3.2:1 on --ui-bg here — display contrast on small text. Same rule
-     as --sys-sub/--sys-link in app/globals.css. Don't "fix" it back to the
-     brand value; change --mmrpg instead if the brand itself should move. */
-  --ui-accent: #f4616a;
+     measures 3.2:1 on --ui-bg here — display contrast on small text.
+     THIS WAS SPELLED OUT AS #f4616a, which is why the panel still looked pink
+     after --crimson-ink was corrected: a literal does not follow the palette.
+     It is a token now. Change --crimson-ink (or --mmrpg, for the brand) and this
+     follows; do not write the hex back in. */
+  --ui-accent: var(--mmrpg-ink);
   /* The sheet's own --mv-blue. It draws the hairline under a section bar
      there; here it picks out chapter names in the prep builder's selector. */
-  --ui-highlight: #7fc0f5;
+  --ui-highlight: var(--mmrpg-blue);
   --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="MMRPG"] body,
@@ -809,9 +811,9 @@
   --ui-border: #223240;
   --ui-text: #eef4f8;
   --ui-muted: #93a3b0;
-  --ui-accent: #3aa8e0;
+  --ui-accent: var(--ace);
   /* The sheet's own --yellow — the karma colour. */
-  --ui-highlight: #f4d84a;
+  --ui-highlight: var(--ace-yellow);
   --font-display: "Lilita One", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="ACE"] body,
@@ -850,8 +852,8 @@
   --ui-border: #3a3842;
   --ui-text: #e8e4dc;
   --ui-muted: #a7a7ad;
-  --ui-accent: #a56ee8;
-  --ui-highlight: #25a5a5;
+  --ui-accent: var(--kob);
+  --ui-highlight: var(--kob-teal);
   --font-display: "Dreadful", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="KOB"] body,
@@ -886,10 +888,10 @@
   --ui-border: #3a363c;
   --ui-text: #eae6e8;
   --ui-muted: #aaa6a4;
-  --ui-accent: #e07b39;
+  --ui-accent: var(--d62e);
   /* One colour: the sheet declares --blue and never uses it, so the highlight
      is the same hue lifted rather than a second one invented. */
-  --ui-highlight: #f0a050;
+  --ui-highlight: var(--d62e-ink);
   --font-display: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="D62E"] body,
@@ -948,10 +950,10 @@
   --ui-border: #2c3720;
   --ui-text: #e9f0dc;
   --ui-muted: #93a17c;
-  --ui-accent: #8bc53f;
+  --ui-accent: var(--gb);
   /* The sheet's --ecto, which it spends on the active subtab underline and a
      critical roll. */
-  --ui-highlight: #b6e34a;
+  --ui-highlight: var(--gb-ecto);
   --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="GB"] body,
@@ -988,10 +990,10 @@
   --ui-border: #2b433c;
   --ui-text: #e7efeb;
   --ui-muted: #8ba39c;
-  --ui-accent: #2fa595;
+  --ui-accent: var(--candela);
   /* Gold is a co-brand here, not trim — the sheet's --gild lifted for a dark
      ground. It marks a GILDED roll, Candela's signature mechanic. */
-  --ui-highlight: #d8b24a;
+  --ui-highlight: var(--candela-gold);
   --font-display: "Cormorant Garamond", Georgia, serif;
 }
 :root[data-themed][data-system="CO"] body,
@@ -1029,7 +1031,7 @@
   --ui-text: #e8e4dc;
   --ui-muted: #a7ada9;
   --ui-accent: var(--nimble-ink);  /* lifted for label text on this sidebar: 4.38 -> 8.55 */
-  --ui-highlight: #8ab4f8;
+  --ui-highlight: var(--blue-ink);
   --font-display: "Fraunces", Georgia, serif;
 }
 :root[data-themed][data-system="NIM"] body,
@@ -1060,7 +1062,7 @@
   --ui-text: #eae2d8;
   --ui-muted: #aca69c;
   --ui-accent: var(--icrpg-ink);  /* lifted for label text on this sidebar: 3.83 -> 6.37 */
-  --ui-highlight: #e8823c;
+  --ui-highlight: var(--icrpg-ink);
   --font-display: "Permanent Marker", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="ICRPG"] body,
@@ -1090,9 +1092,9 @@
   --ui-border: #28454a;
   --ui-text: #e2eef0;
   --ui-muted: #8ba3a8;
-  --ui-accent: #16bdd6;
+  --ui-accent: var(--yze);
   /* One colour, and the sheet is emphatic: 24 accent rules, all --yz-dk. */
-  --ui-highlight: #16bdd6;
+  --ui-highlight: var(--yze);
   --font-display: "Archivo Narrow", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="YZE"] body,
@@ -1122,7 +1124,7 @@
   --ui-muted: #93a1c4;
   --ui-accent: var(--jlu-ink);  /* lifted for label text on this sidebar: 3.45 -> 5.21 */
   /* The sheet's --gold, which it spends on labels. */
-  --ui-highlight: #e2b23a;
+  --ui-highlight: var(--gold-ink);
   --font-display: "Russo One", ui-sans-serif, system-ui, sans-serif;
 }
 :root[data-themed][data-system="JLU"] body,

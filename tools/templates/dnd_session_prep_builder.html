@@ -12,25 +12,40 @@
 <!-- html2canvas + jsPDF (~550KB) load on demand in loadExportLibs() when an
      export button is first clicked, instead of blocking first paint here. -->
 <script>
-// Mobile init: collapse sidebar and move tab to body so it stays visible
-document.addEventListener("DOMContentLoaded", function() {
-  if(window.innerWidth <= 768) {
-    var s = document.querySelector('.sidebar');
-    if(s) { s.classList.add('collapsed'); document.body.classList.add('sidebar-collapsed'); }
-    // Move the tab INTO the sidebar as its first row, so it travels with the panel
-    // and docks at the bottom of the screen when collapsed. It used to be appended to
-    // the body element to escape the panel's transform; the sheet now WANTS it to move
-    // with it. (Spelling that tag out literally here would be a tripwire: inject.ts
-    // places the navbar with a regex for the first body tag in the document.)
-    var tab = document.querySelector('.sidebar-tab');
-    if(tab && s) {
-      s.insertBefore(tab, s.firstChild);
-      // Collapsed, the sheet comes UP, so the arrow points up.
-      var arr = tab.querySelector('.sidebar-tab-arrow');
-      if(arr) arr.textContent = '▲';
-    }
+// Mobile chrome. The grab bar is the panel's FIRST row on a phone, so it travels
+// with the panel and docks at the bottom of the screen when the panel slides down;
+// on desktop it is the panel's LAST child, where the CSS turns it into a fixed
+// pull-tab on the panel's right edge. (Not spelling the body tag out literally in
+// a comment here: inject.ts places the navbar with a regex for the first one.)
+//
+// RE-RUN ON RESIZE. This used to run once, on DOMContentLoaded, and only when the
+// window was ALREADY narrow — so dragging a desktop window down to phone width left
+// the bar parked wherever the desktop layout had put it, with the mobile CSS applied
+// around it and no way to get the real layout short of a reload. It also means a
+// resized desktop window is not a faithful preview of the phone, which matters when
+// using one to check a mobile-only bug.
+function ddSyncMobileChrome(initial) {
+  var s = document.querySelector('.sidebar');
+  if (!s) return;
+  var mobile = window.innerWidth <= 768;
+  if (initial && mobile) s.classList.add('collapsed');
+  var tab = document.querySelector('.sidebar-tab');
+  if (tab) {
+    // firstElementChild, not firstChild: whitespace text nodes would make this
+    // compare unequal every time and re-move the bar on every resize event.
+    if (mobile) { if (s.firstElementChild !== tab) s.insertBefore(tab, s.firstElementChild); }
+    else if (s.lastElementChild !== tab) s.appendChild(tab);
+    // Each layout has its own arrow convention; toggleSidebar() owns them from here.
+    // Desktop is left/right, mobile is up/down.
+    var arr = tab.querySelector('.sidebar-tab-arrow');
+    var shut = s.classList.contains('collapsed');
+    if (arr) arr.textContent = mobile ? (shut ? '▲' : '▼') : (shut ? '▶' : '◀');
   }
-});
+  // This class only means anything on a phone.
+  document.body.classList.toggle('sidebar-collapsed', mobile && s.classList.contains('collapsed'));
+}
+document.addEventListener("DOMContentLoaded", function () { ddSyncMobileChrome(true); });
+addEventListener("resize", function () { ddSyncMobileChrome(false); });
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -396,6 +411,23 @@ document.addEventListener("DOMContentLoaded", function() {
        invisible instead of trying to out-guess it. Not clipped by the overflow
        above: a box-shadow paints outside the border box, and an element's own
        overflow does not clip its own shadow. */
+
+    /* THE BOTTOM STRIP — why four previous fixes did nothing.
+       body{overflow:hidden} propagates its overflow to the VIEWPORT, so every box
+       the page paints is clipped at the initial containing block. On iOS Safari
+       that box ends a few px above the visible content area, and nothing inside
+       the page can reach the difference. That is why a solid 24px box-shadow under
+       .sidebar was completely invisible: it is painted outside the clip.
+       The one thing that still paints there is the CANVAS, whose background comes
+       from the ROOT element. html has no background here, so body's is propagated
+       to the canvas and the strip shows the page colour — exactly the near-black
+       that was measured off the device.
+       Give html its own background and it becomes the canvas; body's background
+       then paints on body's own box instead of propagating, so nothing else moves.
+       Match it to whatever actually reaches the bottom: the panel when open, the
+       grab bar's accent when the panel is docked. */
+    html { background: var(--ui-panel); }
+    html:has(body.sidebar-collapsed) { background: var(--ui-accent, var(--ui-panel)); }
     .sidebar { box-shadow: 0 24px 0 0 var(--ui-panel); }
     /* Collapsed, the bar is what reaches the bottom, so bleed the accent. */
     .sidebar.collapsed { box-shadow: 0 24px 0 0 var(--ui-accent, var(--ui-panel)); }
