@@ -89,6 +89,28 @@
   --sys-label: "Geist Mono", ui-monospace, monospace;
 }
 
+/* ---- No accidental double-tap zoom ------------------------------------------
+   Tapping a button twice in quick succession — a dice tray, a +/- stepper, an HP
+   pip — used to make Safari zoom the page in, because the browser cannot tell a
+   fast second tap from "magnify this". `manipulation` means panning and pinching
+   are allowed but double-tap-to-zoom is not, which is exactly the distinction
+   wanted: the accident goes away, the deliberate gesture stays.
+
+   On <html> rather than on buttons because touch-action is resolved by
+   INTERSECTING the values of the touched element and its ancestors. One rule at
+   the root therefore covers every control in every standalone surface, and a
+   descendant can only restrict further — a drawing canvas's `touch-action: none`
+   still wins, it is not loosened by this.
+
+   This is the half of the mobile zoom lock that CSS can do, and the half that
+   works everywhere. Pinch-zoom is governed by the viewport meta instead, which
+   iOS Safari honours only in standalone (Home Screen) mode — see the note on the
+   metas in tools/templates/*.html and on `viewport` in app/layout.tsx. The
+   matching rule for the Next routes lives in app/globals.css. */
+html {
+  touch-action: manipulation;
+}
+
 /* ---- The adventure title, in each system's own display face -----------------
    The prep builders each hard-coded a font here (eleven of fourteen said
    'Barlow Condensed'), so no adventure title wore its system's face. --sys-display

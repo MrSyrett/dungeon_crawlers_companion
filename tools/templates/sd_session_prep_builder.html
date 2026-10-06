@@ -6,7 +6,16 @@
        from /fonts/google on this origin. Fetching them remotely as well was
        what made the type pop in a beat late. -->
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Fixed size on mobile: no pinch zoom, so the sheet behaves like an app rather
+     than a zoomable document. iOS Safari honours maximum-scale/user-scalable ONLY in
+     standalone (Home Screen) mode, not in a browser tab — Apple removed the tab
+     override in iOS 10 and has not restored it; Android Chrome honours both. The
+     companion half, which does work everywhere, is `touch-action: manipulation` on
+     <html> in public/tokens.css: that is what stops a double-tap on a dice button
+     from magnifying the page. Zooming a MAP or a TOKEN is the canvas's own job, not
+     the viewport's — see the note beside this file's zoom controls.
+     scripts/check-standalone-viewport.mjs holds the line. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Adventure Prep Builder — Shadowdark RPG</title>
 <script src="/dungeon-engine.js"></script>
 <!-- html2canvas + jsPDF (~550KB) load on demand in loadExportLibs() when an
@@ -405,20 +414,28 @@
   /* Pages reflow to a single fluid column on mobile via body.flow-mode
      (see the flow-mode block below); no fixed-page scaling here anymore. */
 
-  /* The grab bar is the sheet's FIRST IN-FLOW ROW, so it travels with the panel and
-     ends up docked at the bottom of the screen when the sheet slides down — the same
-     arrangement as #log-collapse-btn in the roll log. The mobile init moves it inside
-     .sidebar for this. It was an 80px pill whose top/bottom were assigned from JS, so
-     it hopped between the top and the bottom of the screen; nothing positions it now. */
+  /* The grab bar is a full-width strip docked at the BOTTOM of the screen — the same
+     arrangement as #log-collapse-btn in the roll log. It was an 80px pill whose
+     top/bottom were assigned from JS, so it hopped between the top and the bottom of
+     the screen; nothing positions it now. */
   .sidebar-pull-tab {
-    /* Shadowdark is the odd one out: its grab bar is NOT moved into .sidebar, so
-       it is a static flex child of the body and is pinned to the BODY's bottom
-       rather than travelling with the panel. The other 13 get their overshoot
-       from the panel hanging past the edge; this one has to be nudged itself.
-       position:relative + top (not a transform — transform:none is load-bearing
-       below, and a relative offset does not disturb the flex layout). */
+    /* Shadowdark is the odd one out: its grab bar is NOT inside .sidebar, so it is a
+       flex child of the BODY and is pinned to the body's bottom rather than travelling
+       with the panel. (The init block that looks like it reparents the bar runs before
+       the <button> exists in the document, so it quietly does nothing — see the note
+       there.) The other 13 get their overshoot from the panel itself hanging past the
+       screen edge; this one has to be nudged on its own.
+       position:relative + top — not a transform, because transform:none is load-bearing
+       below, and a relative offset does not disturb the flex layout. */
     position: relative !important;
     top: var(--dd-overshoot, 6px);
+    /* position:relative honours `left`; position:static ignores it. That is how the
+       switch to relative silently activated the DESKTOP rule's `left: 320px` — that
+       rule is unscoped, not inside a min-width query — and threw the bar 320px off to
+       the right. !important so this also beats the inline style.left that
+       toggleSidebar()'s desktop branch writes when the window was wide at load. */
+    left: 0 !important;
+    right: auto !important;
     flex: 0 0 auto !important;
     transform: none !important;
     width: 100% !important;
@@ -2971,26 +2988,36 @@ function clearAll() {
 })();
 
 loadState();buildSidebarFromState();renderChapterTabs();applyFlowMode();renderPreview();applyDarkModeInit();
-// Init pull-tab position
+/* Start COLLAPSED on a phone, the way every other prep builder does. This used to
+   load with the full-screen control overlay covering the preview, so the first thing
+   you saw on a phone was the editor rather than the adventure. The preview is what you
+   want first; the panel is one tap on the grab bar away. */
+if(window.innerWidth <= 768) {
+  const sb = document.querySelector('.sidebar');
+  if(sb) sb.classList.add('collapsed');
+}
+
+/* The grab bar's own label. NOTE the <button id="sidebar-pull-tab"> is declared FURTHER
+   DOWN the document than this script block, so getElementById returns null here — an
+   earlier version of this init tried to reparent the bar into .sidebar from right here
+   and silently did nothing for it, which is why Shadowdark's bar is a body child while
+   the other 13 sit inside the panel. Defer to DOMContentLoaded so the element exists.
+   Position is entirely CSS's business now; this only writes text. */
 (function(){
-  const pt = document.getElementById('sidebar-pull-tab');
-  if(window.innerWidth <= 768) {
-    /* Start COLLAPSED on a phone, the way every other prep builder does. This used
-       to load with the full-screen control overlay covering the preview, so the
-       first thing you saw on a phone was the editor rather than the adventure. The
-       preview is what you want first; the panel is one tap on the grab bar away. */
+  const label = () => {
+    const pt = document.getElementById('sidebar-pull-tab');
     const sb = document.querySelector('.sidebar');
-    if(sb) sb.classList.add('collapsed');
-    if(pt) {
-      /* Into the sheet as its first row, so the bar travels with the panel and docks
-         at the bottom of the screen when it is closed. */
-      if(sb) sb.insertBefore(pt, sb.firstChild);
-      setPullTabMobile(pt); pt.textContent = pullTabLabel(true); pt.title = 'Show controls';
+    if(!pt || !sb) return;
+    const collapsed = sb.classList.contains('collapsed');
+    if(window.innerWidth <= 768) {
+      pt.textContent = pullTabLabel(collapsed);
+      pt.title = collapsed ? 'Show controls' : 'Hide controls';
+    } else {
+      pt.textContent = collapsed ? '▶' : '◀';
     }
-  } else if(pt) {
-    pt.style.left = '320px';
-    pt.textContent = '▼';
-  }
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', label, { once:true });
+  else label();
 })();
 </script>
 

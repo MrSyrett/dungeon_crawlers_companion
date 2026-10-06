@@ -6,6 +6,15 @@
        from /fonts/google on this origin. Fetching them remotely as well was
        what made the type pop in a beat late. -->
 <meta charset="utf-8">
+<!-- Fixed size on mobile: no pinch zoom, so the page behaves like an app rather
+     than a zoomable document. iOS Safari honours maximum-scale/user-scalable ONLY in
+     standalone (Home Screen) mode, not in a browser tab — Apple removed the tab
+     override in iOS 10 and has not restored it; Android Chrome honours both. The
+     companion half, which does work everywhere, is `touch-action: manipulation` on
+     <html> in public/tokens.css: that is what stops a double-tap on a dice button
+     from magnifying the page. Zooming a MAP or a TOKEN is the canvas's own job, not
+     the viewport's — see the note beside this file's zoom controls.
+     scripts/check-standalone-viewport.mjs holds the line. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Map Maker</title>
 <!-- Shared generator + renderer. When served by the app this is the single source

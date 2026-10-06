@@ -341,6 +341,25 @@ body {
   color: var(--text);
 }
 
+/* No accidental double-tap zoom. Tapping a control twice quickly — a dice button,
+   a stepper, a toggle — used to make Safari zoom the page in, because the browser
+   cannot tell a fast second tap from "magnify this". `manipulation` allows panning
+   and pinching but not double-tap-to-zoom, which is the distinction wanted: the
+   accident goes, the deliberate gesture stays.
+
+   On <html> because touch-action is resolved by INTERSECTING the touched element's
+   value with its ancestors', so one root rule covers every control on every route,
+   and a descendant can only restrict further — a canvas's `touch-action: none` is
+   not loosened by this.
+
+   This is the half of the mobile zoom lock CSS can do, and the half that works in
+   every browser. Pinch-zoom is the viewport meta's business (see `viewport` in
+   app/layout.tsx), and iOS Safari honours that only in standalone mode. The
+   matching rule for the standalone tool surfaces is in public/tokens.css. */
+html {
+  touch-action: manipulation;
+}
+
 body {
   font-family: var(--sys-text), "Geist", ui-sans-serif, system-ui, sans-serif;
 }

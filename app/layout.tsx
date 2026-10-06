@@ -342,8 +342,34 @@ export const metadata: Metadata = {
 // non-zero, which every bottom-docked thing — the prep builders' grab bar above
 // all — would then have to account for. Letting iOS inset the viewport itself
 // costs a few px at the bottom and keeps all of that unnecessary.
+//
+// FIXED SIZE ON MOBILE. The site should behave like an app, not a zoomable
+// document: no pinch, no double-tap magnify, no half-scrolled-sideways page after
+// a stray gesture. Two things are needed and only one of them is here.
+//
+//   * Double-tap zoom is killed in CSS, by `touch-action: manipulation` on <html>
+//     in app/globals.css (and public/tokens.css for the standalone surfaces).
+//     That half works in every browser, in a tab or on the Home Screen.
+//   * Pinch zoom is killed by maximumScale/userScalable below — but iOS Safari
+//     IGNORES both in a normal browser tab. Apple removed the override in iOS 10
+//     on accessibility grounds and has not brought it back. They ARE honoured in
+//     standalone (Home Screen) mode, which app/manifest.ts now asks for, and
+//     Android Chrome honours them everywhere.
+//
+// So: in Safari, the lock takes effect on the Home Screen icon and not in a tab.
+// That is the platform's decision, not a bug here, and it is the reason the CSS
+// half is worth having on its own.
+//
+// Next merges `viewport` from the root down, so a route that genuinely needs
+// zoom — Token Maker, the VTT, Map Maker — exports its own with userScalable
+// back on. Those exports set the fields EXPLICITLY rather than omitting them,
+// because an omitted field inherits.
 export const viewport: Viewport = {
   themeColor: APP_BG,
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default async function RootLayout({

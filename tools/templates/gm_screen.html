@@ -8,7 +8,16 @@
 <!-- BUILD: GM Screen — 2026-09-04 -->
 <script>window.__BUILD__="GM Screen — 2026-09-04";</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Fixed size on mobile: no pinch zoom, so the page behaves like an app rather
+     than a zoomable document. iOS Safari honours maximum-scale/user-scalable ONLY in
+     standalone (Home Screen) mode, not in a browser tab — Apple removed the tab
+     override in iOS 10 and has not restored it; Android Chrome honours both. The
+     companion half, which does work everywhere, is `touch-action: manipulation` on
+     <html> in public/tokens.css: that is what stops a double-tap on a dice button
+     from magnifying the page. Zooming a MAP or a TOKEN is the canvas's own job, not
+     the viewport's — see the note beside this file's zoom controls.
+     scripts/check-standalone-viewport.mjs holds the line. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Dungeon Crawler's Companion — GM Screen</title>
 <script src="/dungeon-engine.js"></script>
 <style>
@@ -5699,19 +5708,75 @@ function initDocTool(root) {
       frameWrap.scrollLeft = imgX * zoom - cx;
       frameWrap.scrollTop  = imgY * zoom - cy;
     }, { passive: false });
+    // TWO FINGERS = pinch-zoom the map; one finger = pan it.
+    //
+    // This exists because the PAGE no longer zooms on a phone: the viewport meta at
+    // the top of this file pins the document to 1x, so a double-tap on a control
+    // cannot magnify the screen. Browser pinch used to be the only way to get a
+    // closer look at a battle map in here, and the +/- buttons are a poor substitute
+    // when you are hunting for one room. So the map window does its own, the way the
+    // Map Maker and the Token Maker already do. .maps-mode carries
+    // `touch-action: none`, so these gestures reach us instead of the browser.
+    //
+    // The arithmetic is the wheel handler's above, with finger SPREAD standing in for
+    // the wheel delta: convert the gesture midpoint to image coordinates at the old
+    // zoom, apply the new zoom, then scroll so that same image point lands back under
+    // the midpoint. Re-reading the midpoint every move is what lets a two-finger drag
+    // pan and zoom at once, which is how a map is expected to behave.
+    const pts = new Map();
+    let pinch = null;                        // { d0, z0 } for as long as two fingers are down
+    const two = () => [...pts.values()].slice(0, 2);
+    const spread = () => { const [a, b] = two(); return Math.hypot(a.x - b.x, a.y - b.y); };
+    const mid = () => { const [a, b] = two(); return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
+
     let dragging = false, sx = 0, sy = 0, sl = 0, st = 0;
     frameWrap.addEventListener('pointerdown', e => {
       if(mediaType !== 'image') return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if(pts.size === 2 && naturalW) {
+        // A second finger means "zoom", not "keep panning" — drop the one-finger drag
+        // so the map does not lurch as the gesture changes meaning.
+        dragging = false;
+        frameWrap.classList.remove('grabbing');
+        const d = spread();
+        pinch = d > 0 ? { d0: d, z0: zoom } : null;
+        return;
+      }
+      if(pts.size > 2) return;
       dragging = true; sx = e.clientX; sy = e.clientY; sl = frameWrap.scrollLeft; st = frameWrap.scrollTop;
       frameWrap.classList.add('grabbing');
       try { frameWrap.setPointerCapture(e.pointerId); } catch(_) {}
     });
     frameWrap.addEventListener('pointermove', e => {
+      if(pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if(pinch && pts.size >= 2) {
+        const d = spread();
+        if(!d) return;
+        const rect = frameWrap.getBoundingClientRect();
+        const m = mid();
+        const cx = m.x - rect.left, cy = m.y - rect.top;
+        const imgX = (frameWrap.scrollLeft + cx) / zoom;
+        const imgY = (frameWrap.scrollTop + cy) / zoom;
+        zoom = Math.max(0.05, Math.min(8, pinch.z0 * (d / pinch.d0)));
+        applyZoom();
+        frameWrap.scrollLeft = imgX * zoom - cx;
+        frameWrap.scrollTop  = imgY * zoom - cy;
+        return;
+      }
       if(!dragging) return;
       frameWrap.scrollLeft = sl - (e.clientX - sx);
       frameWrap.scrollTop  = st - (e.clientY - sy);
     });
-    const endDrag = e => { if(!dragging) return; dragging = false; frameWrap.classList.remove('grabbing'); try { frameWrap.releasePointerCapture(e.pointerId); } catch(_) {} };
+    const endDrag = e => {
+      pts.delete(e.pointerId);
+      // Lifting one finger of a pinch does NOT hand control back to the pan: the
+      // finger still down has no recorded start point, so resuming the drag from it
+      // would jump the map by however far the gesture had already travelled.
+      if(pts.size < 2) pinch = null;
+      if(!dragging) return;
+      dragging = false; frameWrap.classList.remove('grabbing');
+      try { frameWrap.releasePointerCapture(e.pointerId); } catch(_) {}
+    };
     frameWrap.addEventListener('pointerup', endDrag);
     frameWrap.addEventListener('pointercancel', endDrag);
     frameWrap.addEventListener('pointerleave', endDrag);
