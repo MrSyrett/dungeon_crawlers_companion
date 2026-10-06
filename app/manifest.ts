@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { APP_BG } from "@/lib/chrome";
 
 // The web app manifest, served at /manifest.webmanifest by Next's file convention
 // (app/manifest.ts). Together with `appleWebApp.capable` in app/layout.tsx this is
@@ -31,10 +32,12 @@ export default function manifest(): MetadataRoute.Manifest {
     // which is the behaviour wanted for an external rulebook or an OBR room.
     scope: "/",
     display: "standalone",
-    // The splash/letterbox colour while the app boots. Matches --bg in
-    // app/globals.css, so the launch does not flash white before the first paint.
-    background_color: "#0b0c0e",
-    theme_color: "#0b0c0e",
+    // The splash/letterbox colour while the app boots, so the launch does not
+    // flash white before the first paint. A manifest is JSON served to the OS —
+    // no CSS, no custom properties — so this cannot be a token; lib/chrome.ts is
+    // where the one literal lives.
+    background_color: APP_BG,
+    theme_color: APP_BG,
     orientation: "any",
     categories: ["games", "utilities", "productivity"],
     // The two real PNGs in public/. iOS uses the 180 (apple-touch-icon) and

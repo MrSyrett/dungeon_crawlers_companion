@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { APP_BG } from "@/lib/chrome";
 import {
   Geist,
   Geist_Mono,
@@ -330,8 +331,11 @@ export const metadata: Metadata = {
 };
 
 // Separate from `metadata` because Next 13.4+ wants it that way. themeColor is
-// --bg from app/globals.css, so the status bar and the splash agree with the
-// app's own ground instead of flashing white on launch.
+// the app's ground, so the status bar agrees with the page instead of flashing
+// white on launch. It comes from lib/chrome.ts rather than being written inline:
+// this value is handed to the browser, not to CSS, so it cannot be a token — but
+// it can at least have one home. (scripts/check-theme-tokens.mjs fails the build
+// on a hex literal under app/, and it was right to.)
 //
 // viewportFit is deliberately left at its default. Setting "cover" would extend
 // the page into the home-indicator area and make env(safe-area-inset-bottom)
@@ -339,7 +343,7 @@ export const metadata: Metadata = {
 // all — would then have to account for. Letting iOS inset the viewport itself
 // costs a few px at the bottom and keeps all of that unnecessary.
 export const viewport: Viewport = {
-  themeColor: "#0b0c0e",
+  themeColor: APP_BG,
 };
 
 export default async function RootLayout({
