@@ -8,7 +8,7 @@ import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 import {
   D62eHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
-  genreBadge, genreName, code, one, GENRES, type Query, type RawQuery,
+  genreBadge, genreName, code, one, withParams, GENRES, type Query, type RawQuery,
 } from "@/components/D62eRef";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +43,44 @@ function hbToCreature(data: Record<string, unknown>, name: string): Row {
   };
 }
 
+// The four core attributes (plus any genre attribute) as die codes. Shown both
+// on the summary card and in the full stat block.
+function AttrGrid({ c }: { c: Row }) {
+  if (!Object.keys(c.attributes).length) return null;
+  return (
+    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
+      {Object.entries(c.attributes).map(([k, v]) => (
+        <div key={k}>
+          <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
+          <dd className="font-mono text-[13px] text-[var(--sys-link)]">{code(v)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+// The whole creature, as the card used to render it. Reached via ?m=<name>.
+function StatBlock({ c }: { c: Row }) {
+  return (
+    <div className={cardCls}>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className={nameCls}>{c.name}</h2>
+        {c.kind ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{c.kind}</span> : null}
+        {c.homebrew ? <span className={hbBadge}>Homebrew</span> : c.genre !== "core" ? <span className={genreBadge}>{genreName(c.genre)}</span> : null}
+        {c.move ? <span className={badge}>Move {c.move}</span> : null}
+      </div>
+
+      <AttrGrid c={c} />
+
+      {c.skills?.length ? <p className="mt-3 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Skills:</span> {c.skills.join(", ")}</p> : null}
+      {c.special?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Special:</span> {c.special.join(", ")}</p> : null}
+      {c.talents?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Talents:</span> {c.talents.join(", ")}</p> : null}
+      {c.powers?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Powers:</span> {c.powers.join(", ")}</p> : null}
+      {c.description ? <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{c.description}</p> : null}
+    </div>
+  );
+}
+
 export default async function D62eBestiaryPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -57,8 +95,23 @@ export default async function D62eBestiaryPage({ searchParams }: { searchParams:
 
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
+  const pick = one(raw.m);
   const genre = GENRES.some((g) => g.key === one(raw.genre)) ? one(raw.genre) : "";
   const current: Query = { q, genre };
+
+  // ?m=<name> is the detail view. An unknown name falls through to the list
+  // rather than rendering an empty page.
+  const selected = pick ? ALL.find((c) => c.name === pick) ?? null : null;
+  if (selected) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-5 py-10">
+        <D62eHeader title="Bestiary" subtitle={`${D62E_CREATURES.length} creatures & NPCs${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
+        <a href={BASE} className="mb-4 inline-block text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:underline">← All creatures</a>
+        <StatBlock c={selected} />
+      </div>
+    );
+  }
+
   // Every creature is rendered; the chips filter on the client (InstantFilter).
   // `show` applies the URL's filters for the initial paint, through the same
   // facet match the client uses. The genre chip's matchesGenre(row, genre) is
@@ -86,30 +139,15 @@ export default async function D62eBestiaryPage({ searchParams }: { searchParams:
       <EmptyState noun="creature" base={BASE} hidden={shown > 0} />
       <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
         {list.map((c) => (
-          <li key={`${c.homebrew ? "hb" : "bk"}-${c.name}`} className={cardCls} hidden={!show(c)} data-f={facetAttr(facets(c))}>
+          <li key={`${c.homebrew ? "hb" : "bk"}-${c.name}`} className={cardCls} hidden={!show(c)} data-f={facetAttr(facets(c))} data-s={[c.description ?? "", (c.skills ?? []).join(" "), (c.powers ?? []).join(" ")].join(" ")}>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className={nameCls}>{c.name}</h2>
+              <a href={withParams(BASE, {}, { m: c.name })} className={`${nameCls} hover:underline`}>{c.name}</a>
               {c.kind ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{c.kind}</span> : null}
               {c.homebrew ? <span className={hbBadge}>Homebrew</span> : c.genre !== "core" ? <span className={genreBadge}>{genreName(c.genre)}</span> : null}
               {c.move ? <span className={badge}>Move {c.move}</span> : null}
             </div>
 
-            {Object.keys(c.attributes).length ? (
-              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
-                {Object.entries(c.attributes).map(([k, v]) => (
-                  <div key={k}>
-                    <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
-                    <dd className="font-mono text-[13px] text-[var(--sys-link)]">{code(v)}</dd>
-                  </div>
-                ))}
-              </dl>
-            ) : null}
-
-            {c.skills?.length ? <p className="mt-3 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Skills:</span> {c.skills.join(", ")}</p> : null}
-            {c.special?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Special:</span> {c.special.join(", ")}</p> : null}
-            {c.talents?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Talents:</span> {c.talents.join(", ")}</p> : null}
-            {c.powers?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Powers:</span> {c.powers.join(", ")}</p> : null}
-            {c.description ? <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{c.description}</p> : null}
+            <AttrGrid c={c} />
           </li>
         ))}
       </ul>

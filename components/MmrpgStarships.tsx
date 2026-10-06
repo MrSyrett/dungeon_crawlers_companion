@@ -39,7 +39,7 @@ function ShipCard({ s }: { s: Ship }) {
   return (
     <article className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]">{s.name}</h3>
+        <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--mmrpg-ink)]">{s.name}</h3>
         <span className="flex items-center gap-1.5">
           {s.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
           <span className={badge}>Rank {s.teamRank}</span>

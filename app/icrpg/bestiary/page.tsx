@@ -6,7 +6,7 @@ import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
   IcrpgHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
-  WORLDS, worldName, one, type Query, type RawQuery,
+  WORLDS, worldName, one, withParams, type Query, type RawQuery,
 } from "@/components/IcrpgRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
@@ -41,6 +41,48 @@ function hbToMonster(data: Record<string, unknown>, name: string): Row {
   };
 }
 
+// Hearts / HP / DEF — the headline numbers. Shown both on the summary card and
+// in the full stat block.
+function VitalsRow({ c }: { c: Row }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--muted)]">
+      {c.hearts != null ? <span><span className="font-semibold text-[var(--text)]">{c.hearts}</span> ♥</span> : null}
+      {c.hp != null ? <span><span className="font-semibold text-[var(--text)]">{c.hp}</span> HP</span> : null}
+      {c.defense != null ? <span>DEF <span className="font-semibold text-[var(--text)]">{c.defense >= 0 ? `+${c.defense}` : c.defense}</span></span> : null}
+    </div>
+  );
+}
+
+// The whole monster, as the card used to render it. Reached via ?m=<name>.
+function StatBlock({ c }: { c: Row }) {
+  return (
+    <div className={cardCls}>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className={nameCls}>{c.name}</h2>
+        {c.tier ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{c.tier}</span> : null}
+        {c.homebrew ? <span className={hbBadge}>Homebrew</span> : (c.world && c.world !== "core") ? <span className={badge}>{worldName(c.world)}</span> : null}
+      </div>
+
+      <VitalsRow c={c} />
+
+      {c.stats && Object.keys(c.stats).length ? (
+        <dl className="mt-3 grid grid-cols-3 gap-x-4 gap-y-1 sm:grid-cols-6">
+          {Object.entries(c.stats).map(([k, v]) => (
+            <div key={k}>
+              <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
+              <dd className="font-mono text-[13px] text-[var(--sys-link)]">{v >= 0 ? `+${v}` : v}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+
+      {c.attacks?.length ? <p className="mt-3 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Attacks:</span> {c.attacks.join(", ")}</p> : null}
+      {c.abilities?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Abilities:</span> {c.abilities.join(", ")}</p> : null}
+      {c.desc ? <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{c.desc}</p> : null}
+    </div>
+  );
+}
+
 export default async function IcrpgBestiaryPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -55,8 +97,23 @@ export default async function IcrpgBestiaryPage({ searchParams }: { searchParams
 
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
+  const pick = one(raw.m);
   const world = WORLDS.some((w) => w.key === one(raw.world)) ? one(raw.world) : "";
   const current: Query = { q, world };
+
+  // ?m=<name> is the detail view. An unknown name falls through to the list
+  // rather than rendering an empty page.
+  const selected = pick ? ALL.find((c) => c.name === pick) ?? null : null;
+  if (selected) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-5 py-10">
+        <IcrpgHeader title="Bestiary" subtitle={`${ICRPG_MONSTERS.length} monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
+        <a href={BASE} className="mb-4 inline-block text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:underline">← All creatures</a>
+        <StatBlock c={selected} />
+      </div>
+    );
+  }
+
   // Every monster is rendered; the World chip and the search filter on the
   // client (InstantFilter). `show` applies the URL's filters for the initial
   // paint, through the same facet match the client uses.
@@ -82,33 +139,14 @@ export default async function IcrpgBestiaryPage({ searchParams }: { searchParams
       <EmptyState noun="monster" base={BASE} hidden={shown > 0} />
       <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
         {results.map((c) => (
-          <li key={`${c.homebrew ? "hb" : "bk"}-${c.name}`} className={cardCls} hidden={!show(c)} data-f={facetAttr(facets(c))}>
+          <li key={`${c.homebrew ? "hb" : "bk"}-${c.name}`} className={cardCls} hidden={!show(c)} data-f={facetAttr(facets(c))} data-s={[c.desc ?? "", (c.attacks ?? []).join(" "), (c.abilities ?? []).join(" ")].join(" ")}>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className={nameCls}>{c.name}</h2>
+              <a href={withParams(BASE, {}, { m: c.name })} className={`${nameCls} hover:underline`}>{c.name}</a>
               {c.tier ? <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{c.tier}</span> : null}
               {c.homebrew ? <span className={hbBadge}>Homebrew</span> : (c.world && c.world !== "core") ? <span className={badge}>{worldName(c.world)}</span> : null}
             </div>
 
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--muted)]">
-              {c.hearts != null ? <span><span className="font-semibold text-[var(--text)]">{c.hearts}</span> ♥</span> : null}
-              {c.hp != null ? <span><span className="font-semibold text-[var(--text)]">{c.hp}</span> HP</span> : null}
-              {c.defense != null ? <span>DEF <span className="font-semibold text-[var(--text)]">{c.defense >= 0 ? `+${c.defense}` : c.defense}</span></span> : null}
-            </div>
-
-            {c.stats && Object.keys(c.stats).length ? (
-              <dl className="mt-3 grid grid-cols-3 gap-x-4 gap-y-1 sm:grid-cols-6">
-                {Object.entries(c.stats).map(([k, v]) => (
-                  <div key={k}>
-                    <dt className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{k}</dt>
-                    <dd className="font-mono text-[13px] text-[var(--sys-link)]">{v >= 0 ? `+${v}` : v}</dd>
-                  </div>
-                ))}
-              </dl>
-            ) : null}
-
-            {c.attacks?.length ? <p className="mt-3 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Attacks:</span> {c.attacks.join(", ")}</p> : null}
-            {c.abilities?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Abilities:</span> {c.abilities.join(", ")}</p> : null}
-            {c.desc ? <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">{c.desc}</p> : null}
+            <VitalsRow c={c} />
           </li>
         ))}
       </ul>

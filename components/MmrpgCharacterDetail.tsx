@@ -1,9 +1,10 @@
 import type { MmrpgCharacter } from "@/lib/data/mmrpg-types";
 import MmrpgRefTokens from "@/components/MmrpgRefTokens";
 
-// Full-profile body shown inside the shared Characters modal. Presentational
-// only — the <dialog> element and open/close state live in MmrpgCharacterBrowser,
-// so the page renders ONE dialog rather than one per character.
+// Full-profile body for a character. Presentational only. The Characters page
+// renders it directly on the server for `?m=<name>` and passes no `onClose`; a
+// caller that puts it in a modal passes one, and gets the ✕ button and the
+// scrolling, height-capped wrapper that only a modal wants.
 
 const ABIL: [keyof MmrpgCharacter["abilities"], string][] = [
   ["melee", "Melee"], ["agility", "Agility"], ["resilience", "Resilience"],
@@ -12,19 +13,19 @@ const ABIL: [keyof MmrpgCharacter["abilities"], string][] = [
 const sign = (n: number) => (n > 0 ? `+${n}` : `${n}`);
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter; onClose: () => void }) {
+export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter; onClose?: () => void }) {
   const speed = c.speed ?? {};
   const speedKeys = Object.keys(speed);
   const isRankX = c.narrative || String(c.rank).toUpperCase() === "X" || !c.abilities || Object.keys(c.abilities).length === 0;
   return (
-    <div className="max-h-[86vh] overflow-y-auto p-5">
+    <div className={onClose ? "max-h-[86vh] overflow-y-auto p-5" : "p-5"}>
       <header className="mb-4 flex items-start justify-between gap-3 border-b border-[var(--border)] pb-4">
         <div>
           <h2 className="font-display text-2xl font-black uppercase tracking-wide">{c.name}</h2>
           {c.realName && c.realName !== c.name ? <p className="mt-0.5 text-sm italic text-[var(--muted)]">{c.realName}</p> : null}
           <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-[var(--mmrpg)]">Rank {c.rank}{c.origin ? <> · <MmrpgRefTokens text={c.origin} kind="origin" /></> : null}{c.source ? ` · ${c.source}` : ""}</p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded border border-[var(--border)] px-2.5 py-1 text-lg leading-none text-[var(--muted)] hover:border-[var(--mmrpg)] hover:text-[var(--text)]">✕</button>
+        {onClose ? <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded border border-[var(--border)] px-2.5 py-1 text-lg leading-none text-[var(--muted)] hover:border-[var(--mmrpg)] hover:text-[var(--text)]">✕</button> : null}
       </header>
 
       {(c.occupation || c.teams || c.base) ? (
@@ -37,12 +38,12 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
 
       {isRankX ? (
         <div className="mb-4 rounded border border-[var(--mmrpg)] bg-[var(--panel-2)] p-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Rank X — Narrative Character</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Rank X — Narrative Character</p>
           <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">A cosmic being beyond the ranking scale, for the Narrator&rsquo;s use only. Rank X characters have no fixed ability, Health, or Focus numbers — when acting as a &ldquo;fallible&rdquo; being their defaults are ability 20, defense 30, damage ×10, 100 Focus/round, and they can turn any of those to infinity at will.</p>
         </div>
       ) : (
         <>
-          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Abilities</h3>
+          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Abilities</h3>
           <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
             {ABIL.map(([k, full]) => (
               <div key={k} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 text-center">
@@ -68,7 +69,7 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
 
       {c.powers && c.powers.length ? (
         <section className="mb-4">
-          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Powers</h3>
+          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Powers</h3>
           <div className="space-y-2">
             {c.powers.map((g, i) => (
               <div key={i} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-2.5">
@@ -82,13 +83,13 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
 
       {c.limitations && c.limitations.length ? (
         <section className="mb-4">
-          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Limitations</h3>
+          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Limitations</h3>
           <p className="text-[12px] leading-relaxed text-[var(--muted)]">{c.limitations.join(" · ")}</p>
         </section>
       ) : null}
       {c.items && c.items.length ? (
         <section className="mb-4">
-          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Items</h3>
+          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Items</h3>
           <p className="text-[12px] leading-relaxed text-[var(--text)]">{c.items.join(", ")}</p>
         </section>
       ) : null}
@@ -96,13 +97,13 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
       <div className="grid gap-4 sm:grid-cols-2">
         {c.traits && c.traits.length ? (
           <section>
-            <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Traits</h3>
+            <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Traits</h3>
             <p className="text-[12px] leading-relaxed text-[var(--muted)]"><MmrpgRefTokens items={c.traits} kind="trait" /></p>
           </section>
         ) : null}
         {c.tags && c.tags.length ? (
           <section>
-            <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Tags</h3>
+            <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Tags</h3>
             <p className="text-[12px] leading-relaxed text-[var(--muted)]"><MmrpgRefTokens items={c.tags} kind="tag" /></p>
           </section>
         ) : null}
@@ -113,13 +114,13 @@ export default function MmrpgCharacterDetail({ c, onClose }: { c: MmrpgCharacter
       ) : null}
       {c.history ? (
         <section className="mt-4">
-          <h3 className="mb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">History</h3>
+          <h3 className="mb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">History</h3>
           <p className="text-[12px] leading-relaxed text-[var(--muted)]">{c.history}</p>
         </section>
       ) : null}
       {c.personality ? (
         <section className="mt-4">
-          <h3 className="mb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--sys-link)]">Personality</h3>
+          <h3 className="mb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--mmrpg-ink)]">Personality</h3>
           <p className="text-[12px] leading-relaxed text-[var(--muted)]">{c.personality}</p>
         </section>
       ) : null}

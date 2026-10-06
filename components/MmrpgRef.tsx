@@ -8,12 +8,15 @@ export type Query = Record<string, string | undefined>;
 export type RawQuery = Record<string, string | string[] | undefined>;
 export const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-const ACCENT = "var(--sys-link)"; // brighter than --mmrpg for text on the dark ground
+// The blue. --sys-link is Marvel's link/token colour; entry NAMES and section
+// heads take --mmrpg-ink instead (see nameCls), so this is only for things that
+// read as links. Exported but currently unconsumed.
+const ACCENT = "var(--sys-link)";
 
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--mmrpg)] hover:text-[var(--text)]";
 export const chipOn = "border-[var(--mmrpg)] bg-[var(--panel-2)] text-[var(--sys-link)]";
-export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";
+export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--mmrpg-ink)]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
 export const hbBadge = "rounded border border-[var(--mmrpg)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--sys-link)]";

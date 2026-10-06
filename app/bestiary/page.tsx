@@ -8,8 +8,9 @@ import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
+const BASE = "/bestiary";
 
-type Query = { q?: string; lv?: string; al?: string; type?: string };
+type Query = { q?: string; lv?: string; al?: string; type?: string; m?: string };
 
 // What the URL can actually hand us — a repeated key (?q=a&q=b) arrives as an array.
 type RawQuery = { [K in keyof Query]?: string | string[] };
@@ -44,11 +45,59 @@ function withParams(current: Query, patch: Query): string {
   if (next.lv) sp.set("lv", next.lv);
   if (next.al) sp.set("al", next.al);
   if (next.type) sp.set("type", next.type);
+  if (next.m) sp.set("m", next.m);
   const s = sp.toString();
-  return s ? `/bestiary?${s}` : "/bestiary";
+  return s ? `${BASE}?${s}` : BASE;
 }
 
 type Row = Monster & { homebrew: boolean; ctype: string };
+
+const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]";
+const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
+const hbBadge = "rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]";
+
+// The one-line identity under (beside) the name — shown on the summary card and
+// again at the top of the full stat block.
+function IdentityLine({ m }: { m: Row }) {
+  return (
+    <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+      {m.ctype} · LV {m.lv} · AC {m.ac} · HP {m.hp} · {m.al}
+    </span>
+  );
+}
+
+// The whole monster, as the card used to render it. Reached via ?m=<name>.
+function StatBlock({ m }: { m: Row }) {
+  return (
+    <div className={cardCls}>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className={nameCls}>{m.name}</h2>
+        {m.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+        <IdentityLine m={m} />
+      </div>
+
+      <p className="mt-2 text-sm leading-relaxed">{m.atk}</p>
+      <p className="mt-1 text-[12px] text-[var(--muted)]">Move: {m.mv}</p>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {STAT_KEYS.map((k) => (
+          <span
+            key={k}
+            className="rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]"
+          >
+            {STAT_LABELS[k]} <span className="text-[var(--text)]">{m[k]}</span>
+          </span>
+        ))}
+      </div>
+
+      {m.notes ? (
+        <p className="mt-3 border-t border-[var(--border)] pt-3 text-[13px] leading-relaxed text-[var(--muted)]">
+          {m.notes}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 function matches(m: Row, q: string, lv: string, al: string, type: string): boolean {
   if (lv && m.lv !== lv) return false;
@@ -115,10 +164,25 @@ export default async function BestiaryPage({
   const lv = one(raw.lv);
   const al = one(raw.al);
   const type = one(raw.type);
+  const pick = one(raw.m);
   const needle = q.trim().toLowerCase();
   const activeLv = allLevels.includes(lv) ? lv : "";
   const activeAl = ALIGNMENTS.some((a) => a.key === al) ? al : "";
   const activeType = (allTypes as readonly string[]).includes(type) ? type : "";
+
+  // ?m=<name> is the detail view, looked up against the homebrew + book list so
+  // a homebrew monster is linkable too. An unknown name falls through to the
+  // list rather than rendering an empty page.
+  const selected = pick ? ALL_ROWS.find((m) => m.name === pick) ?? null : null;
+  if (selected) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-5 py-10">
+        <PageHeader title="Bestiary" subtitle={<>{MONSTERS.length} Shadowdark monsters{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}</>} />
+        <a href={BASE} className="mb-4 inline-block text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:underline">← All creatures</a>
+        <StatBlock m={selected} />
+      </div>
+    );
+  }
 
   const results = ALL_ROWS.filter((m) => matches(m, needle, activeLv, activeAl, activeType));
   const filtered = Boolean(needle || activeLv || activeAl || activeType);
@@ -236,41 +300,15 @@ export default async function BestiaryPage({
           {results.map((m) => (
             <li
               key={`${m.homebrew ? "hb" : "bk"}-${m.name}`}
-              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+              className={cardCls}
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                <a href={withParams({}, { m: m.name })} className={`${nameCls} hover:underline`}>
                   {m.name}
-                </h2>
-                {m.homebrew ? (
-                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                    Homebrew
-                  </span>
-                ) : null}
-                <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                  {m.ctype} · LV {m.lv} · AC {m.ac} · HP {m.hp} · {m.al}
-                </span>
+                </a>
+                {m.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+                <IdentityLine m={m} />
               </div>
-
-              <p className="mt-2 text-sm leading-relaxed">{m.atk}</p>
-              <p className="mt-1 text-[12px] text-[var(--muted)]">Move: {m.mv}</p>
-
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {STAT_KEYS.map((k) => (
-                  <span
-                    key={k}
-                    className="rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]"
-                  >
-                    {STAT_LABELS[k]} <span className="text-[var(--text)]">{m[k]}</span>
-                  </span>
-                ))}
-              </div>
-
-              {m.notes ? (
-                <p className="mt-3 border-t border-[var(--border)] pt-3 text-[13px] leading-relaxed text-[var(--muted)]">
-                  {m.notes}
-                </p>
-              ) : null}
             </li>
           ))}
         </ul>

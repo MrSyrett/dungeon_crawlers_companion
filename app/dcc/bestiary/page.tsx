@@ -8,8 +8,9 @@ import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
+const BASE = "/dcc/bestiary";
 
-type Query = { q?: string; role?: string; src?: string; sort?: string };
+type Query = { q?: string; role?: string; src?: string; sort?: string; m?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -52,15 +53,16 @@ const ROLE_FILTERS: { key: string; label: string; test: (r: DccMonster["role"]) 
   { key: "npc", label: "NPCs", test: (r) => r === "NPC" },
 ];
 
-function withParams(current: Query, patch: Query): string {
+function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch };
   const sp = new URLSearchParams();
   if (next.q) sp.set("q", next.q);
   if (next.role) sp.set("role", next.role);
   if (next.src) sp.set("src", next.src);
   if (next.sort) sp.set("sort", next.sort);
+  if (next.m) sp.set("m", next.m);
   const s = sp.toString();
-  return s ? `/dcc/bestiary?${s}` : "/dcc/bestiary";
+  return s ? `${base}?${s}` : base;
 }
 
 function matches(m: DccMonster, q: string, roleKey: string, src: string): boolean {
@@ -101,6 +103,106 @@ function segColor(i: number, total: number): string {
   return HB_BANDS[Math.min(3, Math.floor((i * 4) / Math.max(1, total)))];
 }
 
+// The full creature record. This is the card's old body, moved here whole: the
+// list card now carries a summary and links to `?m=<name>` for the rest.
+function StatBlock({ m }: { m: DccMonster }) {
+  const hb = m.source === "Homebrew";
+  return (
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{m.name}</h2>
+        <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+          {m.role} · {SIZE_NAMES[m.size] ?? `Size ${m.size}`} · Level {m.level}
+        </span>
+        {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{m.source}{m.page ? ` · p.${m.page}` : ""}</span>}
+      </div>
+
+      {m.tags.length ? (
+        <div className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{m.tags.join(" · ")}</div>
+      ) : null}
+
+      {m.flavor ? (
+        <p className="mt-2 text-[13px] italic leading-relaxed text-[var(--text)]">{m.flavor}</p>
+      ) : null}
+
+      {/* Derived line: Surprise / Evade / Move / DR */}
+      <div className="mt-2 grid grid-cols-4 gap-1.5 text-center">
+        {[
+          ["Surprise", m.surprise],
+          ["Evade", m.evade],
+          ["Move", m.move],
+          ["DR", String(m.dr)],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded border border-[var(--border)] px-1 py-1.5">
+            <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{label}</div>
+            <div className="text-[13px] font-semibold tabular-nums text-[var(--text)]">{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Health Bar — read-only segments (each box = one slot's HP), coloured
+          like the GM tracker. Not interactive. */}
+      {m.hbSlots.length ? (
+        <div className="mt-2">
+          <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+            Health Bar · {m.hbSlots.length} {m.hbSlots.length === 1 ? "slot" : "slots"}
+          </div>
+          <div className="flex flex-wrap gap-1" aria-label={`Health Bar, ${m.hbSlots.length} slots`}>
+            {m.hbSlots.map((hp, si) => (
+              <div
+                key={si}
+                className="flex h-6 min-w-[24px] flex-1 items-center justify-center rounded-sm text-[10px] font-bold text-black"
+                style={{ backgroundColor: segColor(si, m.hbSlots.length) }}
+              >
+                {hp}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Stat block */}
+      <div className="mt-2 grid grid-cols-5 gap-1.5 text-center">
+        {STAT_ORDER.map((st) => (
+          <div key={st} className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-1 py-1.5">
+            <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{st}</div>
+            <div className="text-[13px] font-semibold tabular-nums text-[var(--text)]">
+              {m.stats[st].score}
+              <span className="ml-0.5 text-[10px] text-[var(--muted)]">
+                ({m.stats[st].mod >= 0 ? "+" : ""}
+                {m.stats[st].mod})
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {m.attacks.length ? (
+        <div className="mt-3 flex flex-col gap-1 border-t border-[var(--border)] pt-3">
+          {m.attacks.map((a, ai) => (
+            <p key={ai} className="text-[13px] leading-relaxed text-[var(--muted)]">
+              <span className="font-semibold text-[var(--text)]">{a.name}:</span> {a.toHit} to hit, {a.damage}
+              {a.damageType ? ` ${a.damageType}` : ""}
+              {a.range ? `, ${a.range}` : ""}
+              {a.rider ? <span className="italic"> — {a.rider}</span> : null}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {m.notes.length ? (
+        <ul className={`mt-2 flex flex-col gap-0.5 ${m.attacks.length ? "" : "border-t border-[var(--border)] pt-3"}`}>
+          {m.notes.map((n, ni) => (
+            <li key={ni} className="text-[12px] leading-relaxed text-[var(--muted)]">
+              <span className="text-[var(--text)]">Note:</span> {n}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 export default async function DccBestiaryPage({
   searchParams,
 }: {
@@ -122,6 +224,7 @@ export default async function DccBestiaryPage({
   const role = one(raw.role);
   const src = one(raw.src);
   const sort = one(raw.sort);
+  const pick = one(raw.m);
   const needle = q.trim().toLowerCase();
   const activeRole = ROLE_FILTERS.some((r) => r.key === role) ? role : "";
   const activeSrc = src === "hb" || src === "book" ? src : "";
@@ -129,6 +232,19 @@ export default async function DccBestiaryPage({
   const cmp = (SORTS.find((s) => s.key === activeSort) ?? SORTS[0]).cmp;
 
   const ALL_MONSTERS = [...hbRows, ...DCC_MONSTERS].sort(cmp);
+
+  // An unknown ?m= falls through to the list rather than rendering an empty page.
+  const selected = pick ? ALL_MONSTERS.find((x) => x.name === pick) ?? null : null;
+  if (selected) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-5 py-10">
+        <PageHeader title="Bestiary" subtitle={<>{DCC_MONSTERS.length} mobs, bosses &amp; NPCs{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}</>} />
+        <a href={BASE} className="mb-4 inline-block text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:underline">← All creatures</a>
+        <StatBlock m={selected} />
+      </div>
+    );
+  }
+
   const results = ALL_MONSTERS.filter((m) => matches(m, needle, activeRole, activeSrc));
   const filtered = Boolean(needle || activeRole || activeSrc);
   const current: Query = { q: q.trim(), role: activeRole, src: activeSrc, sort: activeSort };
@@ -160,13 +276,13 @@ export default async function DccBestiaryPage({
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Role
         </span>
-        <Link href={withParams(current, { role: "" })} className={`${chipBase} ${activeRole ? chipOff : chipOn}`}>
+        <Link href={withParams(BASE, current, { role: "" })} className={`${chipBase} ${activeRole ? chipOff : chipOn}`}>
           All
         </Link>
         {ROLE_FILTERS.map((r) => (
           <Link
             key={r.key}
-            href={withParams(current, { role: r.key })}
+            href={withParams(BASE, current, { role: r.key })}
             className={`${chipBase} ${activeRole === r.key ? chipOn : chipOff}`}
           >
             {r.label}
@@ -176,15 +292,15 @@ export default async function DccBestiaryPage({
 
       <div className="mb-6 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Source</span>
-        <Link href={withParams(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
-        <Link href={withParams(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
-        <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+        <Link href={withParams(BASE, current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
+        <Link href={withParams(BASE, current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
+        <Link href={withParams(BASE, current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
         {SORTS.map((s) => (
-          <Link key={s.key || "role"} href={withParams(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+          <Link key={s.key || "role"} href={withParams(BASE, current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
         ))}
       </div>
 
@@ -217,7 +333,7 @@ export default async function DccBestiaryPage({
             return (
               <li key={`${hb ? "hb" : "bk"}-${m.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{m.name}</h2>
+                  <a href={withParams(BASE, {}, { m: m.name })} className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)] hover:underline">{m.name}</a>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
                     {m.role} · {SIZE_NAMES[m.size] ?? `Size ${m.size}`} · Level {m.level}
                   </span>
@@ -227,86 +343,6 @@ export default async function DccBestiaryPage({
                 {m.tags.length ? (
                   <div className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{m.tags.join(" · ")}</div>
                 ) : null}
-
-                {m.flavor ? (
-                  <p className="mt-2 text-[13px] italic leading-relaxed text-[var(--text)]">{m.flavor}</p>
-                ) : null}
-
-                {/* Derived line: Surprise / Evade / Move / DR */}
-                <div className="mt-2 grid grid-cols-4 gap-1.5 text-center">
-                  {[
-                    ["Surprise", m.surprise],
-                    ["Evade", m.evade],
-                    ["Move", m.move],
-                    ["DR", String(m.dr)],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded border border-[var(--border)] px-1 py-1.5">
-                      <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{label}</div>
-                      <div className="text-[13px] font-semibold tabular-nums text-[var(--text)]">{value}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Health Bar — read-only segments (each box = one slot's HP), coloured
-                    like the GM tracker. Not interactive. */}
-                {m.hbSlots.length ? (
-                  <div className="mt-2">
-                    <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-                      Health Bar · {m.hbSlots.length} {m.hbSlots.length === 1 ? "slot" : "slots"}
-                    </div>
-                    <div className="flex flex-wrap gap-1" aria-label={`Health Bar, ${m.hbSlots.length} slots`}>
-                      {m.hbSlots.map((hp, si) => (
-                        <div
-                          key={si}
-                          className="flex h-6 min-w-[24px] flex-1 items-center justify-center rounded-sm text-[10px] font-bold text-black"
-                          style={{ backgroundColor: segColor(si, m.hbSlots.length) }}
-                        >
-                          {hp}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Stat block */}
-                <div className="mt-2 grid grid-cols-5 gap-1.5 text-center">
-                  {STAT_ORDER.map((st) => (
-                    <div key={st} className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-1 py-1.5">
-                      <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{st}</div>
-                      <div className="text-[13px] font-semibold tabular-nums text-[var(--text)]">
-                        {m.stats[st].score}
-                        <span className="ml-0.5 text-[10px] text-[var(--muted)]">
-                          ({m.stats[st].mod >= 0 ? "+" : ""}
-                          {m.stats[st].mod})
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {m.attacks.length ? (
-                  <div className="mt-3 flex flex-col gap-1 border-t border-[var(--border)] pt-3">
-                    {m.attacks.map((a, ai) => (
-                      <p key={ai} className="text-[13px] leading-relaxed text-[var(--muted)]">
-                        <span className="font-semibold text-[var(--text)]">{a.name}:</span> {a.toHit} to hit, {a.damage}
-                        {a.damageType ? ` ${a.damageType}` : ""}
-                        {a.range ? `, ${a.range}` : ""}
-                        {a.rider ? <span className="italic"> — {a.rider}</span> : null}
-                      </p>
-                    ))}
-                  </div>
-                ) : null}
-
-                {m.notes.length ? (
-                  <ul className={`mt-2 flex flex-col gap-0.5 ${m.attacks.length ? "" : "border-t border-[var(--border)] pt-3"}`}>
-                    {m.notes.map((n, ni) => (
-                      <li key={ni} className="text-[12px] leading-relaxed text-[var(--muted)]">
-                        <span className="text-[var(--text)]">Note:</span> {n}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-
               </li>
             );
           })}

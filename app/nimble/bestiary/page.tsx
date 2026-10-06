@@ -5,7 +5,7 @@ import { NIMBLE_FAMILIES } from "@/lib/data/nimble-families";
 import type { NimbleMonster } from "@/lib/data/nimble-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
-import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, type Query, type RawQuery } from "@/components/NimbleRef";
+import { NimbleHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, withParams, type Query, type RawQuery } from "@/components/NimbleRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -40,6 +40,34 @@ function hbToMonster(data: Record<string, unknown>, name: string): MonRow {
   };
 }
 
+// The headline row: level / size, the vitals, and the source-or-homebrew badge.
+// Shown both on the summary card and at the top of the full stat block — the
+// only difference is that the card's name is a link into the detail view.
+function HeadRow({ m, link }: { m: MonRow; link?: boolean }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+      {link
+        ? <a href={withParams(BASE, {}, { m: m.name })} className={`${nameCls} hover:underline`}>{m.name}</a>
+        : <h2 className={nameCls}>{m.name}</h2>}
+      <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Lvl {m.level}{m.legendary ? " Solo" : ""}{m.size ? ` · ${m.size}` : ""}</span>
+      <span className="font-mono text-[12px] text-[var(--text)]">{m.minion ? "minion" : `${m.hp ?? "—"} HP`}{m.armor ? ` · ${m.armor}` : ""}{m.saves ? ` · ${m.saves}` : ""}</span>
+      {m.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{m.family} · p.{m.page}</span>}
+    </div>
+  );
+}
+
+// The whole monster, as the card used to render it. Reached via ?m=<name>.
+function StatBlock({ m }: { m: MonRow }) {
+  return (
+    <div className={cardCls}>
+      <HeadRow m={m} />
+      {m.description ? <p className="mt-1 text-[12px] italic text-[var(--muted)]">{m.description}</p> : null}
+      {m.familyTrait ? <p className="mt-1 text-[12px] text-[var(--muted)]">{m.familyTrait}</p> : null}
+      <ul className="mt-2 flex flex-col gap-1">{m.abilities.map((a, i) => <li key={i} className="text-[13px] leading-relaxed text-[var(--text)]"><span className="font-semibold">{a.name}.</span> <span className="text-[var(--muted)]">{a.text}</span></li>)}</ul>
+    </div>
+  );
+}
+
 export default async function NimbleBestiaryPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -55,9 +83,25 @@ export default async function NimbleBestiaryPage({ searchParams }: { searchParam
 
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
+  const pick = one(raw.m);
   const fam = FAMILIES.some((f) => f.key === one(raw.fam)) ? one(raw.fam) : "";
   const kind = ["regular", "legendary", "minion"].includes(one(raw.kind)) ? one(raw.kind) : "";
   const current: Query = { q, fam, kind };
+
+  // ?m=<name> is the detail view, looked up against the homebrew + book list so
+  // a homebrew monster is linkable too. An unknown name falls through to the
+  // list rather than rendering an empty page.
+  const selected = pick ? ALL.find((m) => m.name === pick) ?? null : null;
+  if (selected) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-5 py-10">
+        <NimbleHeader title="Bestiary" subtitle={`${NIMBLE_MONSTERS.length} monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · ${NIMBLE_FAMILIES.length} families`} />
+        <a href={BASE} className="mb-4 inline-block text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--sys-link)] hover:underline">← All creatures</a>
+        <StatBlock m={selected} />
+      </div>
+    );
+  }
+
   // Every monster is rendered; the chips filter on the client (InstantFilter).
   // `show` applies the URL's filters for the initial paint, through the same
   // facet match the client uses. "Regular" means "not legendary", so a minion
@@ -79,16 +123,8 @@ export default async function NimbleBestiaryPage({ searchParams }: { searchParam
       <CountLine count={shown} noun="monster" base={BASE} filtered={Boolean(needle || fam || kind)} />
       <EmptyState noun="monster" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">{results.map((m) => (
-          <li key={`${m.homebrew ? "hb" : "bk"}-${m.family}-${m.name}`} className={cardCls} hidden={!show(m)} data-f={facetAttr(facets(m))} data-s={m.family}>
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className={nameCls}>{m.name}</h2>
-              <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Lvl {m.level}{m.legendary ? " Solo" : ""}{m.size ? ` · ${m.size}` : ""}</span>
-              <span className="font-mono text-[12px] text-[var(--text)]">{m.minion ? "minion" : `${m.hp ?? "—"} HP`}{m.armor ? ` · ${m.armor}` : ""}{m.saves ? ` · ${m.saves}` : ""}</span>
-              {m.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{m.family} · p.{m.page}</span>}
-            </div>
-            {m.description ? <p className="mt-1 text-[12px] italic text-[var(--muted)]">{m.description}</p> : null}
-            {m.familyTrait ? <p className="mt-1 text-[12px] text-[var(--muted)]">{m.familyTrait}</p> : null}
-            <ul className="mt-2 flex flex-col gap-1">{m.abilities.map((a, i) => <li key={i} className="text-[13px] leading-relaxed text-[var(--text)]"><span className="font-semibold">{a.name}.</span> <span className="text-[var(--muted)]">{a.text}</span></li>)}</ul>
+          <li key={`${m.homebrew ? "hb" : "bk"}-${m.family}-${m.name}`} className={cardCls} hidden={!show(m)} data-f={facetAttr(facets(m))} data-s={[m.family, m.description ?? "", ...m.abilities.map((a) => a.name + " " + a.text)].join(" ")}>
+            <HeadRow m={m} link />
           </li>))}</ul>
       </InstantFilter>
     </div>
