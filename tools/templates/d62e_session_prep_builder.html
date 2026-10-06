@@ -376,6 +376,18 @@ document.addEventListener("DOMContentLoaded", function() {
     .sidebar.collapsed {
       transform: translateY(calc(100% - var(--dd-panel-tab)));
     }
+
+    /* Whatever the box ends up measuring, paint past its bottom edge in its own
+       colour so a few stray pixels can never show the page through. iOS Safari's
+       fixed-positioning viewport and its visible content area have disagreed by
+       ~6px here across three different anchorings; this makes the disagreement
+       invisible instead of trying to out-guess it. Not clipped by the overflow
+       above: a box-shadow paints outside the border box, and an element's own
+       overflow does not clip its own shadow. */
+    .sidebar { box-shadow: 0 24px 0 0 var(--ui-panel); }
+    /* Collapsed, the bar is what reaches the bottom, so bleed the accent. */
+    .sidebar.collapsed { box-shadow: 0 24px 0 0 var(--ui-accent, var(--ui-panel)); }
+
     .sidebar.collapsed .sidebar-content { overflow: hidden; }
 
     /* Collapse button arrow */

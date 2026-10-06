@@ -381,6 +381,15 @@
     width: 100vw !important; min-width: 100vw !important;
   }
 
+  /* Paint past the bottom edge in the panel's own colour, so a few stray pixels
+     can never show the page through. iOS Safari's fixed-positioning viewport and
+     its visible content area have disagreed by ~6px here across three different
+     anchorings; this makes the disagreement invisible rather than out-guessing
+     it. A box-shadow paints outside the border box and an element's own overflow
+     does not clip its own shadow, so the overflow:hidden above does not eat it. */
+  .sidebar { box-shadow: 0 24px 0 0 var(--ui-panel) !important; }
+  .sidebar.collapsed { box-shadow: 0 24px 0 0 var(--ui-accent, var(--ui-panel)) !important; }
+
   /* Preview: fills the screen below the grab bar when the sidebar is collapsed */
   .preview-area {
     flex: 1;
