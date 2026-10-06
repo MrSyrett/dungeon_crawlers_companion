@@ -345,7 +345,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
        roll log's --dd-log-tab on the character sheets. There used to be two: a 52px
        sidebar header row left showing when collapsed, plus a 30px pull tab hanging
        off it, which the preview then had to clear with 82px of margin. */
-    :root { --dd-panel-tab: 34px; }
+    :root { --dd-panel-tab: 34px; --dd-overshoot: 8px; }
 
     /* dvh — the LIVE viewport height — on purpose, matching the character sheets'
        roll log. The panel tracks the browser's own toolbar as it collapses and
@@ -388,7 +388,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
          why `bottom: 0` is safe here. Regenerated files: change DCC, not this. */
       position: fixed; left: 0; right: 0;
       top: var(--dd-bar-h, 0px);
-      bottom: 0;
+      bottom: calc(-1 * var(--dd-overshoot, 8px));
       z-index: 100;
       height: auto;
       max-height: none;
@@ -401,36 +401,8 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
     /* Collapsed: down by its own height MINUS the grab bar, so the bar stays docked at
        the bottom of the screen and is all that is left of the panel. */
     .sidebar.collapsed {
-      transform: translateY(calc(100% - var(--dd-panel-tab)));
+      transform: translateY(calc(100% - var(--dd-panel-tab) - var(--dd-overshoot, 8px)));
     }
-
-    /* Whatever the box ends up measuring, paint past its bottom edge in its own
-       colour so a few stray pixels can never show the page through. iOS Safari's
-       fixed-positioning viewport and its visible content area have disagreed by
-       ~6px here across three different anchorings; this makes the disagreement
-       invisible instead of trying to out-guess it. Not clipped by the overflow
-       above: a box-shadow paints outside the border box, and an element's own
-       overflow does not clip its own shadow. */
-
-    /* THE BOTTOM STRIP — why four previous fixes did nothing.
-       body{overflow:hidden} propagates its overflow to the VIEWPORT, so every box
-       the page paints is clipped at the initial containing block. On iOS Safari
-       that box ends a few px above the visible content area, and nothing inside
-       the page can reach the difference. That is why a solid 24px box-shadow under
-       .sidebar was completely invisible: it is painted outside the clip.
-       The one thing that still paints there is the CANVAS, whose background comes
-       from the ROOT element. html has no background here, so body's is propagated
-       to the canvas and the strip shows the page colour — exactly the near-black
-       that was measured off the device.
-       Give html its own background and it becomes the canvas; body's background
-       then paints on body's own box instead of propagating, so nothing else moves.
-       Match it to whatever actually reaches the bottom: the panel when open, the
-       grab bar's accent when the panel is docked. */
-    html { background: var(--ui-panel); }
-    html:has(body.sidebar-collapsed) { background: var(--ui-accent, var(--ui-panel)); }
-    .sidebar { box-shadow: 0 24px 0 0 var(--ui-panel); }
-    /* Collapsed, the bar is what reaches the bottom, so bleed the accent. */
-    .sidebar.collapsed { box-shadow: 0 24px 0 0 var(--ui-accent, var(--ui-panel)); }
 
     .sidebar.collapsed .sidebar-content { overflow: hidden; }
 
@@ -566,7 +538,11 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
         transform: none !important;
         flex: 0 0 auto !important;
         width: 100% !important;
-        height: var(--dd-panel-tab); min-height: var(--dd-panel-tab);
+        /* Taller by the overshoot, which hangs below the screen edge; the matching
+           padding keeps the label centred in the part you can actually see. */
+        height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 8px));
+        min-height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 8px));
+        padding-bottom: var(--dd-overshoot, 8px);
         box-sizing: border-box;
         background: var(--ui-accent, #b82018);
         color: white;
