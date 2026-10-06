@@ -130,8 +130,17 @@
      subheads. DISPLAY contrast only: 3.0–3.1:1 on these panels, which clears
      the 3:1 bar for headings and misses the 4.5:1 bar for running text. */
   --crimson: #c8102e;
-  /* The same red lifted — 6.1:1. D&D's links, Marvel's body-sized red. */
-  --crimson-ink: #f4616a;
+  /* The same red made readable on the dark panels — D&D's links and eyebrow,
+     Marvel's body-sized red, and the section labels on the dark preview page.
+     Was #f4616a, which read PINK: at R244 G97 B106 the blue channel sat level
+     with the green, and that balance is salmon, not red.
+     Luminance has to come from somewhere to clear 4.5:1 on a near-black panel,
+     and WHICH channel supplies it decides the hue. Green carries 71% of
+     luminance, so lifting through green walks a red toward scarlet; lifting
+     through blue as well walks it toward rose. Hence a red that keeps blue well
+     under green. Worst case 4.65:1 (D&D's sidebar #221e1f); 4.89 on the dark
+     preview page, 5.0–5.3 on Marvel's. */
+  --crimson-ink: #ff3b30;
   /* Lifted gold for text: D&D's eyebrow line, and JLU's labels. */
   --gold-ink: #e2b23a;
   /* The periwinkle three character sheets declare as --blue. Nimble and

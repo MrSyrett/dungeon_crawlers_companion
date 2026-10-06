@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viewport probe</title>
+<style>
+  :root { --dd-panel-tab: 34px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #111216; color: #e9edf2;
+    font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+    height: 100vh; height: 100dvh; overflow: hidden;
+  }
+
+  /* A fake navbar, the same shape as the real one: fixed at the top, and it
+     publishes its measured height as --dd-bar-h exactly as lib/sitenav.ts does. */
+  #bar {
+    position: fixed; left: 0; right: 0; top: 0; z-index: 200;
+    height: 52px; border-bottom: 1px solid #2b3038;
+    background: #15161a; color: #9fb0c0;
+    display: flex; align-items: center; padding: 0 12px;
+    font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 11px;
+  }
+
+  #readout {
+    position: absolute; left: 0; right: 0; top: 53px; bottom: 0;
+    overflow: auto; padding: 10px 12px 60px;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  td { padding: 2px 6px 2px 0; vertical-align: top; }
+  td.k { color: #8d96a3; white-space: nowrap; }
+  td.v { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  h2 { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+       color: #8d96a3; margin: 14px 0 4px; font-weight: 700; }
+  h2:first-child { margin-top: 0; }
+  .verdict { margin-top: 12px; padding: 10px; border-radius: 6px;
+             background: #1c1f24; border: 1px solid #2b3038; line-height: 1.5; }
+  .big { font-size: 20px; font-weight: 700; }
+  .ok   { color: #5bd98a; }
+  .bad  { color: #ff6b63; }
+
+  /* THE THING UNDER TEST — character-for-character the construct the prep
+     builders use for the editing panel on a phone (tools/templates/*,
+     @media max-width:768px). If this bar does not sit flush on the bottom of
+     the screen, the numbers above it say why. */
+  #sheet {
+    position: fixed; left: 0; right: 0; top: var(--dd-bar-h, 0px); bottom: auto;
+    z-index: 100;
+    height: calc(100vh - var(--dd-bar-h, 0px));
+    height: calc(100dvh - var(--dd-bar-h, 0px));
+    max-height: none; overflow: hidden;
+    transform: translateY(calc(100% - var(--dd-panel-tab)));
+    pointer-events: none;
+    display: flex; flex-direction: column;
+  }
+  /* The grab bar is the sheet's FIRST in-flow row, exactly as .sidebar-tab is in
+     the templates — that is what makes it travel with the panel and end up
+     docked at the bottom once the sheet has slid down by its own height minus
+     one tab. Putting it at the panel's BOTTOM instead (the obvious-looking
+     reading) sends it a whole viewport below the screen; this probe did that on
+     its first run and reported a 757px gap, which is how I know the arrangement
+     matters. */
+  #grab {
+    flex: 0 0 auto;
+    height: var(--dd-panel-tab); min-height: var(--dd-panel-tab);
+    background: #f2c230; color: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  }
+  /* A second copy anchored the OLD way, bottom:0, drawn as a thin outline only,
+     so the two anchorings can be compared in one screenshot. */
+  #oldway {
+    position: fixed; left: 0; right: 0; bottom: 0; height: var(--dd-panel-tab);
+    border: 2px dashed #30d5e8; z-index: 101; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="bar"><span id="barlabel">nav row</span></div>
+
+<div id="readout">
+  <h2>what the browser reports</h2>
+  <table id="t1"></table>
+  <h2>css length units, measured</h2>
+  <table id="t2"></table>
+  <h2>safe-area insets</h2>
+  <table id="t3"></table>
+  <h2>the panel construct</h2>
+  <table id="t4"></table>
+  <div class="verdict" id="verdict"></div>
+  <div class="verdict" style="color:#8d96a3">
+    Gold bar = the panel docked the way the prep builders do it now (top-anchored,
+    height&nbsp;=&nbsp;100dvh&nbsp;&minus;&nbsp;bar). Dashed cyan outline = where
+    <code>bottom:0</code> would put it. Scroll, rotate, and tap the URL bar to collapse
+    the toolbars — the numbers follow live.
+  </div>
+</div>
+
+<div id="sheet"><div id="grab">show controls</div></div>
+<div id="oldway"></div>
+
+<script>
+(function () {
+  // Measure a CSS unit by letting the browser resolve it on a real element.
+  var probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;left:-9999px;top:0;width:0;pointer-events:none";
+  document.body.appendChild(probe);
+  function unit(u) {
+    probe.style.height = "100" + u;
+    var h = probe.getBoundingClientRect().height;
+    return h ? Math.round(h * 100) / 100 : null;   // null = this browser lacks the unit
+  }
+  function envInset(side) {
+    probe.style.height = "env(safe-area-inset-" + side + ", 0px)";
+    return Math.round(probe.getBoundingClientRect().height * 100) / 100;
+  }
+
+  // Republish the bar height the same way lib/sitenav.ts does, so the construct
+  // below is driven by a measured value and not a guess.
+  var bar = document.getElementById("bar");
+  function publishBarH() {
+    var h = Math.round(bar.getBoundingClientRect().height) + 1;
+    if (h > 1) document.body.style.setProperty("--dd-bar-h", h + "px");
+    return h;
+  }
+
+  function rows(table, pairs) {
+    table.innerHTML = pairs.map(function (p) {
+      return '<tr><td class="k">' + p[0] + '</td><td class="v">' +
+        (p[1] === null ? "<i>not supported</i>" : p[1]) + "</td></tr>";
+    }).join("");
+  }
+
+  function paint() {
+    var barH = publishBarH();
+    var vv = window.visualViewport;
+    var sheet = document.getElementById("sheet").getBoundingClientRect();
+    var grab  = document.getElementById("grab").getBoundingClientRect();
+
+    var dvh = unit("dvh"), svh = unit("svh"), lvh = unit("lvh"), vh = unit("vh");
+
+    rows(document.getElementById("t1"), [
+      ["window.innerHeight", window.innerHeight],
+      ["documentElement.clientHeight", document.documentElement.clientHeight],
+      ["visualViewport.height", vv ? Math.round(vv.height * 100) / 100 : null],
+      ["visualViewport.offsetTop", vv ? Math.round(vv.offsetTop * 100) / 100 : null],
+      ["visualViewport.pageTop", vv ? Math.round(vv.pageTop * 100) / 100 : null],
+      ["visualViewport.scale", vv ? vv.scale : null],
+      ["devicePixelRatio", window.devicePixelRatio],
+      ["screen.height", screen.height],
+    ]);
+    rows(document.getElementById("t2"), [
+      ["100vh", vh], ["100dvh", dvh], ["100svh", svh], ["100lvh", lvh],
+    ]);
+    rows(document.getElementById("t3"), [
+      ["safe-area-inset-top", envInset("top")],
+      ["safe-area-inset-bottom", envInset("bottom")],
+    ]);
+    rows(document.getElementById("t4"), [
+      ["--dd-bar-h (measured)", barH + "px"],
+      ["panel top", Math.round(sheet.top * 100) / 100],
+      ["panel height", Math.round(sheet.height * 100) / 100],
+      ["grab bar top", Math.round(grab.top * 100) / 100],
+      ["grab bar bottom", Math.round(grab.bottom * 100) / 100],
+    ]);
+
+    // The question this page exists to answer: how far is the docked bar's
+    // bottom edge from each candidate for "the bottom of the screen"?
+    var cands = [
+      ["innerHeight", window.innerHeight],
+      ["visualViewport.height", vv ? vv.height : null],
+      ["clientHeight", document.documentElement.clientHeight],
+      ["100dvh", dvh],
+    ];
+    var lines = cands.map(function (c) {
+      if (c[1] === null) return "";
+      var d = Math.round((c[1] - grab.bottom) * 100) / 100;
+      var cls = Math.abs(d) < 0.6 ? "ok" : "bad";
+      return '<div><span class="' + cls + '">' + (d > 0 ? "+" + d : d) +
+             'px</span> short of ' + c[0] + "</div>";
+    }).join("");
+
+    var gap = Math.round((window.innerHeight - grab.bottom) * 100) / 100;
+    document.getElementById("verdict").innerHTML =
+      '<div class="big ' + (Math.abs(gap) < 0.6 ? "ok" : "bad") + '">gap = ' + gap + 'px</div>' +
+      lines;
+    document.getElementById("barlabel").textContent =
+      "viewport probe — " + window.innerWidth + "x" + window.innerHeight;
+  }
+
+  paint();
+  addEventListener("resize", paint);
+  addEventListener("scroll", paint, { passive: true });
+  addEventListener("orientationchange", function () { setTimeout(paint, 300); });
+  if (window.visualViewport) {
+    visualViewport.addEventListener("resize", paint);
+    visualViewport.addEventListener("scroll", paint);
+  }
+  setInterval(paint, 500);   // Safari changes these without always firing an event
+})();
+</script>
+</body>
+</html>

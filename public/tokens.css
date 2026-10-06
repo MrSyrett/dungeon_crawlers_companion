@@ -58,7 +58,8 @@
      scripts/check-token-parity.mjs holds these to app/globals.css, so a change in
      either file without the other fails the build. */
   --crimson: #c8102e;
-  --crimson-ink: #f4616a;
+  /* Was #f4616a, which read pink — see app/globals.css for why. */
+  --crimson-ink: #ff3b30;
   --gold-ink: #e2b23a;
   --blue-ink: #8ab4f8;
   --dcc-ink: #ee4a78;
@@ -675,7 +676,7 @@
   --ui-border: #342e30;
   --ui-text: #f5efe3;
   --ui-muted: #c2b3a0;
-  --ui-accent: var(--crimson-ink);  /* lifted for label text on this sidebar: 3.03 -> 5.73 */
+  --ui-accent: var(--crimson-ink);  /* lifted for label text on this sidebar: 3.03 -> 4.65 */
   --ui-highlight: #f0a37f;
   --font-display: "Cinzel", serif;
 }
