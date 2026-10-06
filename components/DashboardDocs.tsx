@@ -71,7 +71,7 @@ function DocList({
         </h3>
         <form action={createDocument}>
           <input type="hidden" name="tool" value={toolId} />
-          <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] transition-colors hover:border-[var(--sys,var(--gold))] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]">
+          <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] transition-colors hover:border-[var(--sys-hilite)] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]">
             + New
           </button>
         </form>
@@ -90,7 +90,7 @@ function DocList({
                     then fetch it a second time on click. */}
                 <a
                   href={`/tools/${toolId}/${doc.id}`}
-                  className="block truncate py-1 text-lg font-semibold transition-colors hover:text-[var(--sys,var(--gold))] sm:py-0 sm:text-base"
+                  className="block truncate py-1 text-lg font-semibold transition-colors hover:text-[var(--sys-hilite)] sm:py-0 sm:text-base"
                 >
                   {doc.title}
                 </a>
@@ -111,7 +111,7 @@ function DocList({
                         ? "Open this campaign's OBR room in a new tab"
                         : "Open this campaign's VTT"
                     }
-                    className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
+                    className="min-h-11 shrink-0 rounded border border-[var(--sys-action)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--sys-action)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
                   >
                     {doc.vttKind === "owlbear" ? "Open in OBR ↗" : "Open VTT"}
                   </a>

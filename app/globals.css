@@ -431,6 +431,17 @@ body {
   --sys-head: var(--gold);
   --sys-sub: var(--muted);
   --sys-link: var(--sys);
+  /* The two interactive accents on a dashboard row, split because they are not
+     the same colour today and collapsing them would silently restyle 9 systems:
+     --gold and --sys agree only on SD, SW, ACE, GB and YZE.
+       --sys-action  the outlined action button on a row (Open VTT / Open in OBR)
+       --sys-hilite  the hover highlight — a row's name, the + New button's edge
+     Each floor is exactly what that call site hard-coded before, so every system
+     keeps the colour it had and only the ones that re-point these change. If the
+     two should ever be unified, it is now one line per system rather than a hunt
+     through the markup. */
+  --sys-action: var(--gold);
+  --sys-hilite: var(--sys, var(--gold));
 }
 
 /* ── THE VISUAL LANGUAGE ────────────────────────────────────────────────────
@@ -666,6 +677,16 @@ body {
      3.2:1 on this panel and a link is body-sized text: it is the same red, two
      stops up. Swap this to var(--crimson) for the darker value on links too. */
   --sys-link: var(--crimson-ink);
+  /* The comic blue does the interactive work on the Characters and Adventures
+     lists, because everything else here is already red — the headings, the
+     links, the rules, the ground — and a page with one colour has no emphasis
+     left to spend. The blue is the second half of Marvel's own palette (it is
+     already --sys-sub) and it is also far more readable: 9.7:1 on --panel
+     against the 5.3 the button had, and against the 3.2 the row hover had,
+     which was under the 4.5 bar for a 16px semibold title. Delete keeps the
+     red, which is the one place a warning colour earns its keep. */
+  --sys-action: var(--mmrpg-blue);
+  --sys-hilite: var(--mmrpg-blue);
   --panel: #141011;
   --panel-2: #1b1618;
   --border: #2e2325;
@@ -710,6 +731,12 @@ body {
   --sys-head: var(--ace);
   --sys-sub: var(--ace-yellow);
   --sys-link: var(--ace);
+  /* The karma yellow takes the interactive work, as Marvel's blue and JLU's gold
+     do — the heads, the links and the sky-blue ground were all one hue here too.
+     12.79:1 on --panel against the 6.81 the blue had. The three systems now share
+     one rule: the second colour acts, the first colour speaks. */
+  --sys-action: var(--ace-yellow);
+  --sys-hilite: var(--ace-yellow);
   --panel: #0e1620;
   --panel-2: #141e2a;
   --border: #223240;
@@ -1042,6 +1069,14 @@ body {
   --sys-head: var(--jlu-ink);
   --sys-sub: var(--jlu-gold);
   --sys-link: var(--jlu-ink);
+  /* Same move as Marvel's, for the same reason in the other hue: these lists
+     were blue on blue on a blue ground, so the gold takes the interactive work
+     and gives the page somewhere to look. It is Marvel's case exactly — the
+     second colour the system already owns, and a large readability gain:
+     7.97:1 on --panel against the 5.21 the button had, and the 3.45 the row
+     hover had, which was under the 4.5 bar. */
+  --sys-action: var(--jlu-gold);
+  --sys-hilite: var(--jlu-gold);
   --panel: #182339;
   --panel-2: #1f2c47;
   --border: #2b3a58;
