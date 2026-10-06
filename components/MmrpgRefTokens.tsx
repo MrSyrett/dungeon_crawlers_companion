@@ -100,13 +100,18 @@ export default function MmrpgRefTokens({ text, items, kind, sep = ", " }: { text
         const { name, rest } = analyze(raw, kind);
         const lead = i > 0 ? sep : "";
         if (!name) return <span key={i}>{lead}{raw.trim()}</span>;
+        // The inline glossary token — the most link-like thing on these pages,
+        // dotted underline and all. It used to REST on the brand red (3.2:1 at this
+        // size) and hover to --sys-link. Now it rests on --sys-link, which is the
+        // blue, and hovers to --text, so the hover is still a visible change rather
+        // than blue on blue.
         return (
           <span key={i}>
             {lead}
             <button
               type="button"
               onClick={() => open(name, kind)}
-              className="border-b border-dotted border-[var(--mmrpg)] font-semibold text-[var(--mmrpg)] hover:text-[var(--sys-link)]"
+              className="border-b border-dotted border-[var(--sys-link)] font-semibold text-[var(--sys-link)] hover:text-[var(--text)]"
             >
               {name}
             </button>

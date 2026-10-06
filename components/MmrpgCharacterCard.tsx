@@ -15,10 +15,15 @@ export default function MmrpgCharacterCard({ c, onOpen }: { c: MmrpgCharacter; o
     <button
       type="button"
       onClick={() => onOpen(c)}
-      className="group w-full rounded border border-[var(--border)] bg-[var(--panel-2)] p-3 text-left transition-colors hover:border-[var(--mmrpg)]"
+      className="group w-full rounded border border-[var(--border)] bg-[var(--panel-2)] p-3 text-left transition-colors hover:border-[var(--sys-hilite)]"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-2">
-        <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)] group-hover:text-[var(--mmrpg)]">{c.name}</h3>
+        {/* The name rests on --sys-link and brightens to --text on hover. It used
+            to go the other way — blue name, RED on hover — which inverted the
+            hierarchy and landed on 3.2:1 exactly when the pointer was on it. The
+            card edge takes --sys-hilite, the same hover token the dashboard rows
+            use. */}
+        <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--sys-link)] group-hover:text-[var(--text)]">{c.name}</h3>
         <span className="flex items-center gap-1">
           {c.source ? <span className="rounded bg-[var(--mmrpg)]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--mmrpg)]">{c.source}</span> : null}
           <span className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Rank {c.rank}</span>
@@ -44,7 +49,10 @@ export default function MmrpgCharacterCard({ c, onOpen }: { c: MmrpgCharacter; o
           </p>
         </>
       )}
-      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--mmrpg)] opacity-0 transition-opacity group-hover:opacity-100">View full profile →</p>
+      {/* The hover affordance, so it takes --sys-hilite like the card edge above.
+          Left on the brand red it would be the one red thing on a card whose
+          border has gone blue and whose title has gone white. */}
+      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--sys-hilite)] opacity-0 transition-opacity group-hover:opacity-100">View full profile →</p>
     </button>
   );
 }

@@ -69,7 +69,9 @@ export function CountLine({ count, noun, base, filtered }: { count: number; noun
   return (
     <div className="mb-4 mt-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
       <span data-count data-noun={noun} aria-live="polite">{count} {count === 1 ? noun : noun + "s"}</span>
-      <Link href={base} data-clear hidden={!filtered} className="text-[var(--mmrpg)] hover:underline">Clear filters</Link>
+      {/* A real link, so it takes the link colour. On the brand red it measured
+          3.2:1 at 11px — the worst contrast on the page as well as more red. */}
+      <Link href={base} data-clear hidden={!filtered} className="text-[var(--sys-link)] hover:underline">Clear filters</Link>
     </div>
   );
 }

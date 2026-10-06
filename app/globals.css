@@ -672,11 +672,15 @@ body {
 :root[data-system="MMRPG"]:not([data-chrome]) body {
   --sys-head: var(--text);
   --sys-sub: var(--mmrpg-blue);
-  /* The darker classic red is now the BRAND red (--mmrpg, above) — fills,
-     rules, borders. Links stay on the lift because the darker one measures
-     3.2:1 on this panel and a link is body-sized text: it is the same red, two
-     stops up. Swap this to var(--crimson) for the darker value on links too. */
-  --sys-link: var(--crimson-ink);
+  /* Links and entry names are the BLUE now, not a red at all. This token is the
+     single biggest surface on the compendium — every entry name, every stat
+     label, every in-card section head across Characters, Powers, Equipment,
+     Traits, Tags, Origins, Occupations, Vehicles and Rules reads it — so with it
+     on red those pages were red text on red-accented cards on a red-lit ground.
+     The red keeps the structure (--mmrpg: fills, rules, chip and badge borders)
+     and the blue takes the language. 9.16:1 on --panel-2 against the lifted
+     red's 5.0, and 9.68 on --panel. */
+  --sys-link: var(--mmrpg-blue);
   /* The comic blue does the interactive work on the Characters and Adventures
      lists, because everything else here is already red — the headings, the
      links, the rules, the ground — and a page with one colour has no emphasis
