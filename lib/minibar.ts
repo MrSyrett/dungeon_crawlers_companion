@@ -172,7 +172,13 @@ export function miniBar(opts: MiniBarOpts): string {
 #dd-bar #dd-status.is-error{color:#fff;background:var(--red,#b82018);border-color:var(--red,#b82018)}
 #dd-bar .dd-menu-btn{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2);cursor:pointer;font:inherit}
 #dd-bar .dd-menu-btn:hover,#dd-bar .dd-menu-btn[aria-expanded="true"]{border-color:var(--accent,#5490c4)}
-#dd-menu{position:absolute;right:8px;top:40px;width:min(92vw,330px);max-height:calc(100vh - 56px);overflow:auto;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:6px;z-index:2147483001;text-transform:none;letter-spacing:.02em;font-weight:600;font-size:13px}
+/* The account icon, mirroring SiteNav's .nav-acct (same 1px box, same muted
+   colour, same hover) so these surfaces read like the rest of the site: menu at
+   the left end, account at the right. */
+#dd-bar .dd-acct{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--border,#2b3038);border-radius:4px;color:var(--muted,#8d96a3);transition:color .15s,border-color .15s}
+#dd-bar .dd-acct:hover{color:var(--text,#e9edf2);border-color:var(--muted,#8d96a3)}
+/* Opens under the menu button, which now sits at the LEFT end of the bar. */
+#dd-menu{position:absolute;left:8px;top:40px;width:min(92vw,330px);max-height:calc(100vh - 56px);overflow:auto;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:6px;z-index:2147483001;text-transform:none;letter-spacing:.02em;font-weight:600;font-size:13px}
 #dd-menu[hidden]{display:none}
 #dd-menu .dd-menu-h{padding:8px 10px 4px;font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#8d96a3)}
 #dd-menu .dd-menu-sec{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px}
@@ -193,22 +199,27 @@ ${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
   const comp = compendium.length
     ? `<div class="dd-menu-h">${s ? esc(s.name) + " " : ""}Compendium</div><div class="dd-menu-sec">${compendium.map(link).join("")}</div>`
     : "";
-  // One link, not a toggle. /account owns the light/dark preference; this page
-  // still SEEDS itself from it in miniBarHead, so the sheet opens in the right
-  // mode without the control being duplicated here.
-  const account = `<div class="dd-menu-h">Settings</div><div class="dd-menu-sec one"><a href="/account">Account</a></div>`;
-
+  // Account is the icon at the right end of the bar now, not a row in this menu —
+  // the same arrangement SiteNav uses, whose mobile panel likewise has no Account
+  // entry. /account still owns the light/dark preference; this page SEEDS itself
+  // from it in miniBarHead, so the sheet opens in the right mode without the
+  // control being duplicated here.
   const menu = `<div id="dd-menu" hidden>
 <div class="dd-menu-sec"><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a></div>
-${tools}${comp}${account}</div>`;
+${tools}${comp}</div>`;
 
+  // ORDER MIRRORS SiteNav: menu button, logo, system, crumb — then the account
+  // icon at the far right. The menu button used to sit at the right end with no
+  // account icon at all, which made these two surfaces the odd ones out against
+  // every other page and against the phone layout.
   const bar = `<div id="dd-bar" role="navigation" aria-label="Site">
+<button type="button" class="dd-menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="dd-menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg></button>
 <a class="dd-logo" href="/dashboard" title="Dashboard"><img src="/logo-white.png" alt="Dashboard" width="22" height="22"></a>
 ${s ? `<span class="dd-sys" title="Current system">${esc(s.name)}</span>` : ""}
 ${crumb}
 <span class="dd-spacer"></span>
 ${opts.status ? `<span id="dd-status" role="status" aria-live="polite"></span>` : ""}
-<button type="button" class="dd-menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="dd-menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg></button>
+<a class="dd-acct" href="/account" title="Account settings" aria-label="Account settings"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round"></path></svg></a>
 ${menu}
 </div>`;
 
