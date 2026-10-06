@@ -354,10 +354,16 @@ document.addEventListener("DOMContentLoaded", function() {
          box, so the TOP edge is the one both elements agree on: pin to it and let the
          dvh height carry the sheet down to where the visible bottom actually is.
          Do not put `bottom:0` back — mobileprep.mjs fails if it returns. */
-      position: fixed; left: 0; right: 0; top: var(--dd-bar-h, 0px); bottom: auto;
+      /* ANCHORED AT BOTH EDGES — no viewport unit in this box, on purpose. With
+         `top: B; height: calc(100dvh - B)` the bottom edge is B + 100dvh - B = 100dvh:
+         B cancels, and on a photo of the real device dvh measured 6.0 CSS px short.
+         See the long note in dcc_session_prep_builder.html for the full history and
+         why `bottom: 0` is safe here. Regenerated files: change DCC, not this. */
+      position: fixed; left: 0; right: 0;
+      top: var(--dd-bar-h, 0px);
+      bottom: 0;
       z-index: 100;
-      height: calc(100vh - var(--dd-bar-h, 0px));
-      height: calc(100dvh - var(--dd-bar-h, 0px));
+      height: auto;
       max-height: none;
       /* The sheet itself must NOT scroll, or the grab bar would scroll away with the
          content. .sidebar-content is already flex:1;overflow-y:auto, so it takes the

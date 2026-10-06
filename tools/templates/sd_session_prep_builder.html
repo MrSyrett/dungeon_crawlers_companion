@@ -351,21 +351,20 @@
     /* A BOTTOM sheet, the same as the character sheets' roll log: it sits at the
        bottom of the screen and slides DOWN to dock on its own grab bar, rather than
        hanging from the navbar and sliding up out of sight.
-       ANCHORED FROM THE TOP, not the bottom, even though it is a bottom sheet.
-       position:fixed resolves top/bottom against the LAYOUT viewport; dvh measures the
-       VISUAL one, and on iOS Safari those are not the same box. The layout viewport
-       keeps the height it had while the toolbars were expanded, so once Safari
-       minimises them — which it does here and never undoes, because this page cannot
-       scroll — `bottom:0` lands a few px ABOVE the real bottom of the screen and the
-       body background shows through underneath. That was the reported gap, in both
-       states. The navbar is fixed at top:0 in that same box, so the TOP edge is the
-       one both elements agree on: pin to it and let the dvh height carry the sheet
-       down to where the visible bottom actually is.
-       Do not put `bottom:0` back — mobileprep.mjs fails if it returns. */
-    top: var(--dd-bar-h, 0px); left: 0; right: 0; bottom: auto;
+       ANCHORED AT BOTH EDGES — no viewport unit in this box, on purpose. With
+           top: B   height: calc(100dvh - B)
+       the bottom edge is B + 100dvh - B = 100dvh: B cancels, so the far edge was only
+       ever as good as dvh, and on a photo of the real device dvh measured 6.0 CSS px
+       short (body background showing under a correct 34.0px grab bar, both states).
+       The character sheets' roll log uses this construct character for character and
+       does not gap — because those pages SCROLL, so iOS minimises its toolbars there,
+       while this page sets `body{height:100dvh;overflow:hidden}` and keeps them
+       EXPANDED for good. dvh is short only in that state. See the long note in
+       dcc_session_prep_builder.html, and /viewport-probe.html on a real device. */
+    top: var(--dd-bar-h, 0px); left: 0; right: 0;
+    bottom: 0;
     width: 100vw !important; min-width: 100vw !important;
-    height: calc(100vh - var(--dd-bar-h, 0px)) !important;
-    height: calc(100dvh - var(--dd-bar-h, 0px)) !important;
+    height: auto !important;
     /* The sheet must NOT scroll, or the grab bar would scroll away with the content.
        .sidebar-content is already flex:1;overflow-y:auto and does the scrolling. */
     overflow: hidden !important;
