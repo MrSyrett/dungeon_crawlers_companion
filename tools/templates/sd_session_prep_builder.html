@@ -336,7 +336,7 @@
      for a browser too old for dvh. */
   /* The grab bar's height — matches --dd-log-tab on the character sheets' roll log
      and --dd-panel-tab in the other prep builders. */
-  :root { --dd-panel-tab: 34px; --dd-overshoot: 8px; }
+  :root { --dd-panel-tab: 34px; --dd-overshoot: 6px; }
 
   /* Stack layout */
   body { flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
@@ -362,7 +362,7 @@
        EXPANDED for good. dvh is short only in that state. See the long note in
        dcc_session_prep_builder.html, and /viewport-probe.html on a real device. */
     top: var(--dd-bar-h, 0px); left: 0; right: 0;
-    bottom: calc(-1 * var(--dd-overshoot, 8px));
+    bottom: calc(-1 * var(--dd-overshoot, 6px));
     width: 100vw !important; min-width: 100vw !important;
     height: auto !important;
     /* The sheet must NOT scroll, or the grab bar would scroll away with the content.
@@ -377,7 +377,7 @@
   /* Collapsed: down by its own height MINUS the grab bar, so the bar stays docked at
      the bottom of the screen and is all that is left of the panel. */
   .sidebar.collapsed {
-    transform: translateY(calc(100% - var(--dd-panel-tab) - var(--dd-overshoot, 8px))) !important;
+    transform: translateY(calc(100% - var(--dd-panel-tab) - var(--dd-overshoot, 6px))) !important;
     width: 100vw !important; min-width: 100vw !important;
   }
 
@@ -411,15 +411,22 @@
      .sidebar for this. It was an 80px pill whose top/bottom were assigned from JS, so
      it hopped between the top and the bottom of the screen; nothing positions it now. */
   .sidebar-pull-tab {
-    position: static !important;
+    /* Shadowdark is the odd one out: its grab bar is NOT moved into .sidebar, so
+       it is a static flex child of the body and is pinned to the BODY's bottom
+       rather than travelling with the panel. The other 13 get their overshoot
+       from the panel hanging past the edge; this one has to be nudged itself.
+       position:relative + top (not a transform — transform:none is load-bearing
+       below, and a relative offset does not disturb the flex layout). */
+    position: relative !important;
+    top: var(--dd-overshoot, 6px);
     flex: 0 0 auto !important;
     transform: none !important;
     width: 100% !important;
     /* Taller by the overshoot, which hangs below the screen edge; the matching
        padding keeps the label centred in the part you can actually see. */
-    height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 8px)) !important;
-    min-height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 8px)) !important;
-    padding-bottom: var(--dd-overshoot, 8px) !important;
+    height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 6px)) !important;
+    min-height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 6px)) !important;
+    padding-bottom: var(--dd-overshoot, 6px) !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
     box-shadow: none !important;

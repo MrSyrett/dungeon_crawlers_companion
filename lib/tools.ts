@@ -6,7 +6,7 @@
 //           seeds these from the document's saved data and the injected shim
 //           persists changes back to the server.
 
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
@@ -350,7 +350,22 @@ export function campaignIdInSheet(tool: string, data: unknown): string | null {
 // Repeat opens of the GM Screen go from ~288 KB (gzipped) of HTML to ~20 KB.
 // The injected per-document pieces (state, shims, mini-bar) are NOT part of the
 // template and stay inline — they're small and must run first.
-const templateCache = new Map<string, string>();
+// Keyed by file, and INVALIDATED ON MTIME. It used to be a plain
+// Map<string, string> with no invalidation at all, so each template was read once
+// per Node process and then held forever.
+//
+// That quietly made "tools/templates/* is live on deploy" false whenever a deploy
+// did not restart the process: the server kept serving whichever version of a
+// template it happened to read first. It cost most of a day — four fixes to the
+// prep builders' mobile layout appeared to do nothing, and a stylesheet-hash check
+// gave a false all-clear because the one template it sampled had happened to be
+// read fresh. The tell, in the end, was that exactly ONE system picked up a change
+// that was on disk for all fourteen: that was the only template the running process
+// had not already cached.
+//
+// One stat() per request is nothing against rendering a 150 KB document, and it
+// makes the deploy behave the way every comment in this repo already claims.
+const templateCache = new Map<string, { mtimeMs: number; template: string }>();
 
 // name (e.g. "3f9a…c2.js") → { body, type }
 const assetStore = new Map<string, { body: string; type: string }>();
@@ -431,13 +446,24 @@ async function splitTemplate(html: string): Promise<string> {
 }
 
 export async function loadToolTemplate(file: string): Promise<string> {
+  const full = path.join(process.cwd(), "tools", "templates", file);
+  // stat first: a cached template is reused only while the file on disk has not
+  // moved. If stat itself fails, fall back to whatever is cached rather than
+  // failing the request — a readable cache beats a 500.
+  let mtimeMs: number | null = null;
+  try {
+    mtimeMs = (await stat(full)).mtimeMs;
+  } catch {
+    const stale = templateCache.get(file);
+    if (stale) return stale.template;
+    throw new Error(`tool template not readable: ${file}`);
+  }
   const hit = templateCache.get(file);
-  if (hit !== undefined) return hit;
-  const raw = await readFile(
-    path.join(process.cwd(), "tools", "templates", file),
-    "utf8",
-  );
+  if (hit !== undefined && hit.mtimeMs === mtimeMs) return hit.template;
+  const raw = await readFile(full, "utf8");
   const template = await splitTemplate(raw);
-  templateCache.set(file, template);
+  templateCache.set(file, { mtimeMs, template });
+  // The old hashed assets this template used stay in assetStore on purpose: a page
+  // already in a browser is still asking for them, and they are small.
   return template;
 }

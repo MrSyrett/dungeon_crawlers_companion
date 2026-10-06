@@ -336,7 +336,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
        roll log's --dd-log-tab on the character sheets. There used to be two: a 52px
        sidebar header row left showing when collapsed, plus a 30px pull tab hanging
        off it, which the preview then had to clear with 82px of margin. */
-    :root { --dd-panel-tab: 34px; --dd-overshoot: 8px; }
+    :root { --dd-panel-tab: 34px; --dd-overshoot: 6px; }
 
     /* dvh — the LIVE viewport height — on purpose, matching the character sheets'
        roll log. The panel tracks the browser's own toolbar as it collapses and
@@ -379,7 +379,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
          why `bottom: 0` is safe here. Regenerated files: change DCC, not this. */
       position: fixed; left: 0; right: 0;
       top: var(--dd-bar-h, 0px);
-      bottom: calc(-1 * var(--dd-overshoot, 8px));
+      bottom: calc(-1 * var(--dd-overshoot, 6px));
       z-index: 100;
       height: auto;
       max-height: none;
@@ -392,7 +392,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
     /* Collapsed: down by its own height MINUS the grab bar, so the bar stays docked at
        the bottom of the screen and is all that is left of the panel. */
     .sidebar.collapsed {
-      transform: translateY(calc(100% - var(--dd-panel-tab) - var(--dd-overshoot, 8px)));
+      transform: translateY(calc(100% - var(--dd-panel-tab) - var(--dd-overshoot, 6px)));
     }
 
     .sidebar.collapsed .sidebar-content { overflow: hidden; }
@@ -531,9 +531,9 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
         width: 100% !important;
         /* Taller by the overshoot, which hangs below the screen edge; the matching
            padding keeps the label centred in the part you can actually see. */
-        height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 8px));
-        min-height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 8px));
-        padding-bottom: var(--dd-overshoot, 8px);
+        height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 6px));
+        min-height: calc(var(--dd-panel-tab) + var(--dd-overshoot, 6px));
+        padding-bottom: var(--dd-overshoot, 6px);
         box-sizing: border-box;
         background: var(--ui-accent, #b82018);
         color: white;

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Geist,
   Geist_Mono,
@@ -300,13 +300,46 @@ const rubik = Rubik({
 export const metadata: Metadata = {
   title: "Dungeon Crawler's Companion",
   description: "TTRPG digital toolkit — character sheets and session prep, saved to your account.",
-  // The label under the home-screen icon. Without this iOS uses `title`, which
-  // truncates to something like "Dungeon Crawler'…". Nothing else about the
-  // icon needs code — `app/apple-icon.png` is a Next file convention and the
-  // <link rel="apple-touch-icon"> tag is emitted automatically.
+  // app/manifest.ts generates this; the link tag is what lets Android offer to
+  // install, and it carries display:standalone for browsers that read it.
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
+    // The label under the home-screen icon. Without this iOS uses `title`, which
+    // truncates to something like "Dungeon Crawler'…". Nothing else about the
+    // icon needs code — `app/apple-icon.png` is a Next file convention and the
+    // <link rel="apple-touch-icon"> tag is emitted automatically.
     title: "DCCompanion",
+    // THIS is the switch. It emits <meta name="apple-mobile-web-app-capable">,
+    // and on iOS that is what makes a Home Screen launch open in its own window
+    // with no address bar and no bottom toolbar — a real app shell rather than a
+    // Safari tab wearing an icon. It changes nothing for ordinary browsing.
+    //
+    // Two consequences to keep in mind:
+    //   - No browser Back button. Every route must be escapable through the
+    //     site's own chrome (SiteNav / the mini-bar), which is the case today.
+    //   - An icon already on the Home Screen keeps the mode it was added with,
+    //     so this only shows up after removing and re-adding it.
+    capable: true,
+    // Opaque black, NOT "black-translucent". Translucent would run the page up
+    // under the clock and battery, and the navbar is position:fixed at top:0 —
+    // it would slide underneath unless everything gained a safe-area inset.
+    // Opaque keeps the content starting below the status bar, so no layout
+    // anywhere has to change.
+    statusBarStyle: "black",
   },
+};
+
+// Separate from `metadata` because Next 13.4+ wants it that way. themeColor is
+// --bg from app/globals.css, so the status bar and the splash agree with the
+// app's own ground instead of flashing white on launch.
+//
+// viewportFit is deliberately left at its default. Setting "cover" would extend
+// the page into the home-indicator area and make env(safe-area-inset-bottom)
+// non-zero, which every bottom-docked thing — the prep builders' grab bar above
+// all — would then have to account for. Letting iOS inset the viewport itself
+// costs a few px at the bottom and keeps all of that unnecessary.
+export const viewport: Viewport = {
+  themeColor: "#0b0c0e",
 };
 
 export default async function RootLayout({
