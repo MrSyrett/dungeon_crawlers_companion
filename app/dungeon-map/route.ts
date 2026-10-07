@@ -25,7 +25,11 @@ export async function GET() {
   // The bar reads the site-wide system (dcw_system) itself, since a map isn't
   // tied to one.
   const fit = `<style>.app{height:calc(100vh - var(--dd-bar-h))!important}</style>`;
-  const bar = siteNav({ system: null, email: user.email, isAdmin: isAdminEmail(user.email), hiddenKeys: await getHiddenSystemKeys() });
+  // onSystemSwitch "stay": a map belongs to no system, so picking one should
+  // re-skin the bar and leave you in the editor rather than throwing you to the
+  // dashboard — the same call /rules and /campaigns make on the Next side. It
+  // matters more here than anywhere: you could be mid-map with unsaved work.
+  const bar = siteNav({ system: null, email: user.email, isAdmin: isAdminEmail(user.email), onSystemSwitch: "stay", hiddenKeys: await getHiddenSystemKeys() });
 
   const html = template
     .replace(/<head[^>]*>/i, (m) => `${m}\n${favicon}\n${miniBarHead(null)}\n${fit}`)

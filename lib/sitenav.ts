@@ -33,6 +33,30 @@ export type SiteNavOpts = {
   fixed?: boolean;
   /** Render the save-status chip that window.__ddStatus writes into. */
   status?: boolean;
+  /** WHERE PICKING A SYSTEM FROM THIS BAR SHOULD GO.
+   *
+   *  It used to be unconditionally `/dashboard` with the view forced to
+   *  "characters", on every standalone surface. The Next navbar meanwhile sends you
+   *  to the equivalent page in the new system (SiteNav -> compendiumCounterpart:
+   *  Bestiary to Bestiary, else that system's first reference page). So the same
+   *  gesture did two different things depending on which bar you happened to be
+   *  looking at, which is the inconsistency Michael reported.
+   *
+   *  There is no counterpart for a document — you cannot open a Shadowdark sheet as
+   *  D&D — so the destination is the matching dashboard LIST, picked by what kind of
+   *  document you were in:
+   *
+   *    "characters" — a character sheet, so the Characters list.
+   *    "adventures" — an Adventure Prep doc, so the Adventures list.
+   *    "stay"       — the Map Maker: not tied to a system at all, so just re-skin
+   *                   the bar and stay put, the way /rules and /campaigns do on the
+   *                   Next side. (paint() re-skins the page too, since docSys is
+   *                   null there.)
+   *
+   *  The GM Screen and the VTT are not here: they use miniBar(), which has no system
+   *  dropdown, because their system is locked to the campaign.
+   */
+  onSystemSwitch?: "characters" | "adventures" | "stay";
   /** Systems an admin has hidden (lib/systems.ts getHiddenSystemKeys), exactly
    *  as app/layout.tsx hands them to SiteNav. Without this the dropdown offered
    *  hidden systems on all 29 standalone documents, and picking one looked
@@ -200,7 +224,8 @@ body{padding-top:var(--dd-bar-h)}
 const CARET = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
 
 export function siteNav(opts: SiteNavOpts): string {
-  const data = navData(opts.hiddenKeys ?? [], opts.system);
+  const data = { ...navData(opts.hiddenKeys ?? [], opts.system),
+                 onSwitch: opts.onSystemSwitch ?? "characters" };
   const style = `<style id="dd-nav-style">${CSS}${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
 
   const tools = data.tools
@@ -335,7 +360,13 @@ document.getElementById("dd-nav-burger").addEventListener("click",function(){
 sysPop.addEventListener("click",function(e){
   var b=e.target.closest("button[data-k]");if(!b)return;
   var k=b.getAttribute("data-k");
-  try{localStorage.setItem("dcw_system",k);localStorage.setItem("dcw_dash_view","characters");}catch(e2){}
+  try{localStorage.setItem("dcw_system",k);}catch(e2){}
+  // "stay" (the Map Maker): nothing here belongs to a system, so repaint and stop.
+  // paint() re-skins the page and rebuilds the Compendium + Homebrew links for the
+  // new system, so the bar is fully switched without a navigation.
+  if(D.onSwitch==="stay"){cur=k;paint();shut();return;}
+  // A document: go to the dashboard list of the SAME KIND you were looking at.
+  try{localStorage.setItem("dcw_dash_view",D.onSwitch==="adventures"?"adventures":"characters");}catch(e2){}
   location.href="/dashboard";
 });
 nav.addEventListener("click",function(e){

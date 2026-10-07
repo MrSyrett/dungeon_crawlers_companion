@@ -175,10 +175,79 @@ export const TOOLS_NAV: NavLink[] = [
   { href: "/gm-screen", label: "GM Screen", hard: true },
 ];
 
+// WHAT EACH REFERENCE PAGE IS ABOUT, so switching system can find the equivalent
+// page even when the two systems call it something different.
+//
+// Exact label matching alone is not enough: only 150 of the 936 possible
+// compendium switches share a label, so 786 of them used to dump you on the new
+// system's FIRST page. "Gear & Goals" (Ghostbusters) and "Equipment" (Marvel) are
+// the same shelf; nothing in the labels said so.
+//
+// A label may list more than one concept, in priority order, for pages that
+// genuinely cover two things — "Skills & Spells" is DCC's magic page and its skills
+// page. Matching tries the current page's concepts in order, so the primary one
+// wins when the target system separates them.
+//
+// KEEP THIS IN STEP WITH COMPENDIUM. A label that is missing here still works — it
+// falls back to the first page, which is the old behaviour — but it stops finding
+// its equivalent, silently. If you add a system, add its labels.
+const CONCEPT: Record<string, string[]> = {
+  // creatures and NPC rosters
+  Bestiary: ["creatures"],
+  "Ghosts & Extras": ["creatures"],
+  Alien: ["creatures"],
+  Characters: ["creatures"],
+  // what you are
+  Classes: ["archetype"],
+  Roles: ["archetype"],
+  Templates: ["archetype"],
+  Tropes: ["archetype"],
+  Heroes: ["archetype"],
+  Origins: ["archetype"],
+  "Origins & Archetypes": ["archetype", "ancestry"],
+  // where you come from
+  Ancestries: ["ancestry"],
+  Species: ["ancestry"],
+  Races: ["ancestry"],
+  Backgrounds: ["background"],
+  Questions: ["background"],
+  Occupations: ["background", "archetype"],
+  // what you carry
+  Gear: ["gear"],
+  Equipment: ["gear"],
+  Loot: ["gear"],
+  Weapons: ["gear"],
+  "Gear & Goals": ["gear"],
+  "Gear & Traits": ["gear", "traits"],
+  // what you cast
+  Spells: ["magic"],
+  Magic: ["magic"],
+  Powers: ["magic"],
+  "Capes & Powers": ["magic"],
+  "Skills & Spells": ["magic", "skills"],
+  // what you can do
+  Skills: ["skills"],
+  Actions: ["skills"],
+  Abilities: ["skills", "magic"],
+  // how you are distinctive
+  Traits: ["traits"],
+  Feats: ["traits"],
+  Options: ["traits"],
+  "Strengths & Flaws": ["traits"],
+  Tags: ["traits"],
+  "Traits & Talents": ["traits"],
+  Focuses: ["traits"],
+  // one-offs, which have no equivalent anywhere and fall back by design
+  Worlds: ["setting"],
+  Starships: ["vehicles"],
+  Combat: ["rules"],
+};
+
 // When the user switches system while on a compendium page, keep them in the
-// compendium: the new system's page with the same label (Classes → Classes,
-// Bestiary → Bestiary) when it has one, else its first reference page. Returns
-// null when the current path isn't a compendium page (caller decides).
+// compendium. In order: the new system's page with the SAME LABEL (Bestiary →
+// Bestiary), then the nearest page by CONCEPT (Gear & Goals → Equipment), then its
+// first reference page. Returns null when the current path isn't a compendium page
+// (caller decides).
 export function compendiumCounterpart(pathname: string, to: SystemKey): string | null {
   const from = systemForPath(pathname);
   if (!from) return null;
@@ -188,6 +257,16 @@ export function compendiumCounterpart(pathname: string, to: SystemKey): string |
   if (current) {
     const same = target.find((l) => l.label === current.label);
     if (same) return same.href;
+    // Nearest by concept. The current page's concepts are tried in priority order,
+    // and within each, a target page whose PRIMARY concept matches beats one that
+    // only lists it second — so DCC's "Skills & Spells" prefers a system's Spells
+    // page over its Skills page, and reaches Skills when there is no magic page.
+    for (const c of CONCEPT[current.label] ?? []) {
+      const primary = target.find((l) => (CONCEPT[l.label] ?? [])[0] === c);
+      if (primary) return primary.href;
+      const secondary = target.find((l) => (CONCEPT[l.label] ?? []).includes(c));
+      if (secondary) return secondary.href;
+    }
   }
   return target[0].href;
 }
@@ -196,7 +275,15 @@ export function compendiumCounterpart(pathname: string, to: SystemKey): string |
 // should NOT bounce the user to the dashboard (the Rulebooks shelf even says
 // "switch systems above" and then filters itself; Campaigns shows that system's
 // campaigns and would be a strange place to be thrown out of).
-export const STAY_ON_SWITCH = new Set<string>(["/rules", "/campaigns"]);
+export const STAY_ON_SWITCH = new Set<string>([
+  "/rules",
+  "/campaigns",
+  // Not tied to a system at all, so switching one should change the label and
+  // leave you where you are. These used to fall through to the dashboard, which
+  // threw you out of a tool you were in the middle of using.
+  "/token-maker",
+  "/account",
+]);
 
 // Infer the system a compendium route belongs to, so the navbar reflects the
 // right system when you land directly on e.g. /dcc/classes. Returns null when a

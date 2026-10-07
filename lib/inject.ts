@@ -407,6 +407,10 @@ export function renderToolPage(
       // the left edge. The sheets are flex columns and want the sticky bar.
       fixed: opts.def.kind === "session",
       sheetFit: opts.def.kind === "character",
+      // Switching system from a document has no counterpart to go to, so it goes
+      // to the dashboard list of the same KIND — a sheet lands on Characters, an
+      // Adventure Prep doc on Adventures. It used to always say Characters.
+      onSystemSwitch: opts.def.kind === "session" ? "adventures" : "characters",
     });
     out = out.replace(/<body[^>]*>/i, (m) => `${m}\n${bar}`);
   }
