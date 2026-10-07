@@ -509,16 +509,25 @@ export async function buildGmScreenHtml(opts: {
   //
   // So the live campaign row wins. One indexed lookup by id; on any error we keep
   // the snapshot's value, which is what the page used before this existed.
+  // The NAME is read here for the same reason, and it is not cosmetic: the bar's
+  // pin is the only thing on the screen that says which table you are running,
+  // and the board's snapshot keeps whatever the campaign was called when it was
+  // last saved. Renaming on the Campaigns page used to leave the GM Screen
+  // showing the old name. The client reconciles it too (loadList in the template),
+  // but doing it here as well means the FIRST paint is already right rather than
+  // correcting itself a beat later.
   let liveSystem: SystemKey | null = camp?.system ?? null;
+  let liveName: string | null = camp?.name ?? null;
   if (camp?.id) {
     try {
       const row = await prisma.campaign.findUnique({
         where: { id: camp.id },
-        select: { system: true },
+        select: { system: true, name: true },
       });
       if (row?.system && isSystemKey(row.system)) liveSystem = row.system;
+      if (row?.name) liveName = row.name;
     } catch {
-      /* keep the snapshot's system */
+      /* keep the snapshot's system and name */
     }
   }
 
@@ -554,16 +563,17 @@ export async function buildGmScreenHtml(opts: {
     // is the only thing that says which table you are running. It links back to
     // /campaigns, which is where a campaign is now changed.
     //
-    // `camp` is this board's own snapshot and may be a stale NAME (liveSystem
-    // above re-reads the system, not the name). That is fine: the template calls
-    // window.__ddSetPin once GMCamp has restored, which overwrites it with the
-    // board's actual link. This value only has to be right for the first paint.
+    // liveName, not camp.name: the board's snapshot is whatever the campaign was
+    // called when it was last saved. (An earlier version of this comment claimed
+    // the template would correct it on restore — it would not. GMCamp.restore
+    // replays that same snapshot, so the stale name survived the round trip. See
+    // the note on liveName above.)
     chrome = miniBar({
       system: liveSystem,   // unlinked board → null, and the bar adopts the site-wide choice
       status: true,
       slot: true,           // Export + Import move in here on DOMContentLoaded
-      pin: camp?.name
-        ? { label: camp.name, href: "/campaigns", title: `Running ${camp.name} — manage campaigns` }
+      pin: liveName
+        ? { label: liveName, href: "/campaigns", title: `Running ${liveName} — manage campaigns` }
         : { label: "No campaign", href: "/campaigns", title: "Open a campaign to link this screen" },
     });
   }

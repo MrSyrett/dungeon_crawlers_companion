@@ -11,7 +11,7 @@ import {
 } from "./systemStore";
 import { createCampaign, deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
 import CopyCodeButton from "./CopyCodeButton";
-import CampaignEditDialog from "./CampaignEditDialog";
+import CampaignDialog from "./CampaignDialog";
 import OpenGmScreenButton from "./OpenGmScreenButton";
 
 // The Campaigns body: shows ONE system's campaigns at a time, driven by the same
@@ -20,9 +20,15 @@ import OpenGmScreenButton from "./OpenGmScreenButton";
 // server ships every system's compact campaign data once, so switching system is
 // instant and never re-queries.
 //
+// IT IS LAID OUT AS DashboardDocs IS, deliberately and down to the class names:
+// one bordered panel, a header carrying the word and a "+ New", then a divided
+// list of rows. Campaigns, Characters and Adventures are the three things a GM
+// keeps per system and they sit next to each other in the navbar, so looking at
+// one should tell you how to read the other two. This page used to be a stack of
+// fat cards instead, which made it read like a different product.
+//
 // A campaign's system is set once, at creation, from whichever system you are in
-// (the hidden field below) and is never editable afterwards. The per-campaign
-// system dropdown this page used to carry is gone with it.
+// and is never editable afterwards. The per-campaign system dropdown is gone.
 
 export type PartyMember = { id: string; name: string; cls: string; level: number | null };
 
@@ -64,6 +70,11 @@ function relative(ms: number | null): string {
   return `${years} year${years === 1 ? "" : "s"} ago`;
 }
 
+// The row buttons, sized exactly as DashboardDocs sizes its row buttons: a 44px
+// tap target on a phone, compact from sm up.
+const ACTION =
+  "min-h-11 shrink-0 rounded border px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]";
+
 export default function CampaignsList({
   bySystem,
   hiddenKeys = [],
@@ -86,69 +97,56 @@ export default function CampaignsList({
   const name = systemName(system);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-10">
+    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-5">
       {/* key={system}: remounting on a system switch replays the fade-in, so
           changing systems reads as "switching worlds" rather than rows swapping
           in place. The navbar's system chip already names the game, and the
           page's own theme says it again, so there's no system title here. */}
       <div key={system} className="dcc-fade-in">
-        <section className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--gold)]">
-            Create a {name} campaign
-          </h2>
-          <form action={createCampaign} className="mt-3 flex flex-col gap-2 sm:flex-row">
-            {/* The system is not a choice. It comes from whichever system you are
-                in, the way the dashboard's "+ New" carries its panel's tool id,
-                and the server validates it against SystemKey before writing. */}
-            <input type="hidden" name="system" value={system} />
-            <input
-              type="text"
-              name="name"
-              required
-              maxLength={60}
-              placeholder="Campaign name…"
-              aria-label="New campaign name"
-              className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--gold)]"
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+            {/* data-dash-head: the hook a system's theme uses to letter this word
+                in its own display face (Ghostbusters, D&D and Star Wars do — see
+                globals.css). The dashboard's two headers carry it, and this is
+                the third of the same family, so it carries it too. */}
+            <h3 data-dash-head className="text-base font-bold uppercase tracking-[0.15em] sm:text-sm">
+              Campaigns
+            </h3>
+            {/* "+ New" opens the same dialog Edit does. The system is not a
+                choice — it comes from whichever system you are in, the way the
+                dashboard's "+ New" carries its panel's tool id — and the server
+                validates it against SystemKey before writing. */}
+            <CampaignDialog
+              mode="create"
+              system={system}
+              systemLabel={name}
+              create={createCampaign}
+              className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] transition-colors hover:border-[var(--sys-hilite)] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]"
             />
-            <button className="shrink-0 rounded border border-[var(--gold)] bg-[var(--gold)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--on-accent)] hover:opacity-90">
-              Create
-            </button>
-          </form>
-        </section>
-
-        {campaigns.length === 0 ? (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-            <h2 className="text-base font-bold uppercase tracking-[0.15em]">No {name} campaigns yet</h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-              Use the <span className="text-[var(--gold)]">Create a {name} campaign</span> box above
-              to start one. You&apos;ll be its GM/owner — give the join code to your players and they
-              can link their character sheets to it from their own sheet.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-              This page shows one system at a time. Campaigns in your other systems are under their
-              own system in the navbar, and ones you joined but don&apos;t own appear below rather
-              than here.
-            </p>
           </div>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {campaigns.map((c) => {
-              const links = c.party.length;
-              const quiet = c.rolls === 0 && links === 0;
 
-              return (
-                <li
-                  key={c.id}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
+          {campaigns.length === 0 ? (
+            <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">
+              No {name} campaigns yet. Hit + New to start one — you&apos;ll be its GM, and the join
+              code lets your players link their sheets.
+            </p>
+          ) : (
+            <ul className="divide-y divide-[var(--border)]">
+              {campaigns.map((c) => {
+                const links = c.party.length;
+                const quiet = c.rolls === 0 && links === 0;
+                return (
+                  <li
+                    key={c.id}
+                    className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                          {c.name}
-                        </h2>
+                      <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                        {/* Not a link: a campaign has no page of its own. The two
+                            things you can open from it are the buttons. */}
+                        <span className="truncate text-lg font-semibold sm:text-base">{c.name}</span>
                         <span className="inline-flex items-center gap-1.5">
-                          <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
+                          <span className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--muted)]">
                             {c.code}
                           </span>
                           <CopyCodeButton value={c.code} label="join code" />
@@ -159,82 +157,50 @@ export default function CampaignsList({
                           </span>
                         ) : null}
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--muted)]">
-                        <span>Created {formatDate(c.createdAt)}</span>
-                        <span>
-                          {links} character sheet{links === 1 ? "" : "s"} linked
-                        </span>
-                        <span>
-                          {c.rolls} roll{c.rolls === 1 ? "" : "s"} · last {relative(c.lastRoll)}
-                        </span>
-                      </div>
-
-                      {c.party.length > 0 ? (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {c.party.map((m) => (
-                            <span
-                              key={m.id}
-                              className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-[11px] text-[var(--text)]"
-                            >
-                              {m.name}
-                              {m.level !== null || m.cls ? (
-                                <span className="text-[var(--muted)]">
-                                  {" "}
-                                  {[m.level !== null ? `LV ${m.level}` : "", m.cls]
-                                    .filter(Boolean)
-                                    .join(" ")}
-                                </span>
-                              ) : null}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
+                      {/* One meta line, the way a dashboard row carries "Updated …".
+                          The party used to be a row of chips under a fat card; in
+                          a table row that is a second block of content, so the
+                          names fold into the line that already counts them. */}
+                      <span className="block text-[13px] text-[var(--muted)] sm:text-[11px]">
+                        Created {formatDate(c.createdAt)} · {links} sheet{links === 1 ? "" : "s"}
+                        {links > 0 ? ` (${c.party.map((m) => m.name).join(", ")})` : ""} · {c.rolls}{" "}
+                        roll{c.rolls === 1 ? "" : "s"}, last {relative(c.lastRoll)}
+                      </span>
                     </div>
 
-                    <div className="flex shrink-0 flex-wrap items-center gap-2">
-                      {/* THREE BUTTONS, and only three. Open the table, open the
-                          GM's screen for it, or change the thing. Everything you
-                          can CHANGE moved behind Edit — the rename box, the
-                          Owlbear URL and Delete — because a page listing four
-                          campaigns was four blocks of settings nobody was reading
-                          sitting on top of the two buttons they came for.
-
-                          ONE VTT BUTTON, not two. It opens whichever tabletop this
+                    <div className="flex shrink-0 items-center gap-2">
+                      {/* ONE VTT BUTTON, not two. It opens whichever tabletop this
                           campaign actually uses: the built-in one, or the Owlbear
                           room when a URL is set. That is already exactly what a
-                          PLAYER gets from the dashboard, so the GM's button now
-                          agrees with the players' instead of offering both and
-                          leaving them to know which one the table is on.
+                          PLAYER gets from the dashboard, so the GM's button agrees
+                          with the players' instead of offering both and leaving
+                          them to know which one the table is on.
 
                           Plain <a>: /play is a route handler returning standalone
                           HTML, so <Link> would prefetch a whole document for
                           nothing. The OBR case is external, hence the new tab. */}
-                      {c.vttUrl ? (
-                        <a
-                          href={c.vttUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--on-accent)] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                        >
-                          Open VTT ↗
-                        </a>
-                      ) : (
-                        <a
-                          href={`/play/${c.id}`}
-                          className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--on-accent)] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                        >
-                          Open VTT
-                        </a>
-                      )}
+                      <a
+                        href={c.vttUrl ?? `/play/${c.id}`}
+                        {...(c.vttUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        title={
+                          c.vttUrl
+                            ? "Open this campaign's OBR room in a new tab"
+                            : "Open this campaign's VTT"
+                        }
+                        className={`${ACTION} border-[var(--sys-action)] text-[var(--sys-action)] hover:bg-[var(--panel-2)]`}
+                      >
+                        {c.vttUrl ? "Open VTT ↗" : "Open VTT"}
+                      </a>
                       {/* THE ONLY WAY INTO THE GM SCREEN. It is out of the navbar
                           (see TOOLS_NAV in components/navConfig.ts): a GM Screen
                           is one campaign's party, roll log, board and system data,
                           and a nav link could not say which campaign it meant. */}
                       <OpenGmScreenButton
                         campaign={{ id: c.id, name: c.name, code: c.code, system: c.system, vttUrl: c.vttUrl }}
-                        className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                        className={`${ACTION} border-[var(--border)] text-[var(--muted)] hover:border-[var(--sys-hilite)] hover:text-[var(--text)]`}
                       />
-                      <CampaignEditDialog
+                      <CampaignDialog
+                        mode="edit"
                         id={c.id}
                         name={c.name}
                         code={c.code}
@@ -244,70 +210,58 @@ export default function CampaignsList({
                         rename={renameCampaign}
                         setVttUrl={setCampaignVttUrl}
                         remove={deleteCampaign}
-                        className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                        className={`${ACTION} border-[var(--border)] text-[var(--muted)] hover:border-[var(--sys-hilite)] hover:text-[var(--text)]`}
                       />
                     </div>
-                  </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
 
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
+        {/* Campaigns one of your characters is linked to. Same panel, no "+ New"
+            and no Edit — the owner manages these, you only play in them. */}
         {joined.length > 0 ? (
-          <section className="mt-12">
-            <div className="mb-4 border-b border-[var(--border)] pb-3">
-              <h2 className="font-display text-xl font-black tracking-wide">Campaigns you&apos;ve joined</h2>
-              <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">
-                Campaigns one of your characters is linked to. These are view-only — the owner
-                manages them.
-              </p>
+          <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+              <h3 className="text-base font-bold uppercase tracking-[0.15em] sm:text-sm">Joined</h3>
+              <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                View only
+              </span>
             </div>
-            <ul className="flex flex-col gap-3">
+            <ul className="divide-y divide-[var(--border)]">
               {joined.map((c) => (
                 <li
                   key={c.id}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+                  className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                      {c.name}
-                    </h3>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
-                        {c.code}
-                      </span>
-                      <CopyCodeButton value={c.code} label="join code" />
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
-                      · view only
-                    </span>
-                  </div>
-                  {c.chars.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {c.chars.map((n, i) => (
-                        <span
-                          key={`${c.id}-${i}`}
-                          className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-[11px] text-[var(--text)]"
-                        >
-                          {n}
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                      <span className="truncate text-lg font-semibold sm:text-base">{c.name}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--muted)]">
+                          {c.code}
                         </span>
-                      ))}
+                        <CopyCodeButton value={c.code} label="join code" />
+                      </span>
                     </div>
-                  ) : null}
-                  <div className="mt-3">
-                    <a
-                      href={`/play/${c.id}`}
-                      className="inline-block rounded border border-[var(--gold)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)]"
-                    >
-                      Open VTT
-                    </a>
+                    {c.chars.length > 0 ? (
+                      <span className="block text-[13px] text-[var(--muted)] sm:text-[11px]">
+                        Your {c.chars.length === 1 ? "character" : "characters"}: {c.chars.join(", ")}
+                      </span>
+                    ) : null}
                   </div>
+                  <a
+                    href={`/play/${c.id}`}
+                    className={`${ACTION} border-[var(--sys-action)] text-[var(--sys-action)] hover:bg-[var(--panel-2)]`}
+                  >
+                    Open VTT
+                  </a>
                 </li>
               ))}
             </ul>
-          </section>
+          </div>
         ) : null}
       </div>
     </div>

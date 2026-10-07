@@ -86,11 +86,21 @@ export async function createCampaign(formData: FormData): Promise<void> {
   const name =
     typeof rawName === "string" && rawName.trim() ? rawName.trim().slice(0, 60) : "New Campaign";
 
+  // The Owlbear room can be set AT CREATION now, not only afterwards — the "+ New"
+  // dialog asks for it, because a GM who already has a room is otherwise made to
+  // create the campaign, find it in the list and edit it. Optional: an empty or
+  // unparseable value stores null, exactly as clearing the field later does.
+  //
+  // safeVttUrl, not a trim: a stored `javascript:` URL becomes a script that runs
+  // when a player clicks Open VTT. This is the one path into that column that did
+  // not exist before, so it goes through the same gate as the other one.
+  const vttUrl = safeVttUrl(String(formData.get("vttUrl") ?? ""));
+
   // Mirror the /api/campaigns POST: retry on the (unlikely) join-code collision.
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       await prisma.campaign.create({
-        data: { name, code: makeCode(), ownerId: user.id, system: rawSystem },
+        data: { name, code: makeCode(), ownerId: user.id, system: rawSystem, vttUrl },
       });
       break;
     } catch {

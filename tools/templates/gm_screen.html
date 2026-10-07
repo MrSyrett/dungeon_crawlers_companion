@@ -2369,6 +2369,16 @@ const GMCamp = (function() {
         // Keep the board's saved snapshot in step with the account's live values so
         // a cleared/changed Owlbear link (or system) doesn't linger in old boards.
         campaign.vttUrl = m.vttUrl || null;
+        // THE NAME TOO. It was the one live field this did not pick up, and the
+        // board's serialized snapshot is the ONLY other place it comes from — so
+        // renaming a campaign on the Campaigns page left the GM Screen showing
+        // the old name forever, not just until the next load. /api/campaigns has
+        // always returned it; nothing read it.
+        if(m.name && m.name !== campaign.name) {
+          campaign.name = m.name;
+          renderBtn();                       // the bar's pin says the campaign's name
+          if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 300);
+        }
         if(m.system && m.system !== campaign.system) {
           campaign.system = m.system;
           // No reload here. The page is served with only the linked system's data

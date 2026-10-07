@@ -121,13 +121,27 @@ export default function CampaignEditDialog({
       </button>
 
       {/* onClose fires for Escape and for the backdrop, so the open flag can
-          never drift out of step with the element's own state. */}
+          never drift out of step with the element's own state.
+
+          m-auto IS LOAD BEARING. The browser centres a modal <dialog> itself,
+          with `position:fixed; inset:0; margin:auto` in the user-agent
+          stylesheet — but app/globals.css opens with @import "tailwindcss", and
+          Tailwind's preflight zeroes the margin on every element. An author rule
+          beats the UA, so that reset silently turned `margin:auto` into
+          `margin:0` and pinned this to the top-left corner, which is where
+          Michael found it. Restoring the margin restores the native centring,
+          including the part where it recentres as the content grows.
+
+          The height cap and overflow come with it: once the dialog is centred it
+          can run off a short screen (a laptop in landscape, a phone with the
+          keyboard up), and the UA's own max-height only applies while the margin
+          is doing its job. */}
       <dialog
         ref={ref}
         onClose={() => setOpen(false)}
         onCancel={() => setOpen(false)}
         aria-label={`Edit ${name}`}
-        className="w-[min(92vw,420px)] rounded-lg border border-[var(--border)] bg-[var(--panel)] p-0 text-[var(--text)] backdrop:bg-black/60"
+        className="m-auto max-h-[85vh] w-[min(92vw,420px)] overflow-auto rounded-lg border border-[var(--border)] bg-[var(--panel)] p-0 text-[var(--text)] backdrop:bg-black/60"
       >
         <div className="flex flex-col gap-4 p-5">
           <div className="flex items-baseline justify-between gap-3">
