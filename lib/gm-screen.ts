@@ -548,9 +548,23 @@ export async function buildGmScreenHtml(opts: {
   } else {
     // No crumb and no title: the bar's logo and system chip already say where you
     // are, and "GM Screen > <campaign>" only restated the page you were looking at.
+    //
+    // The campaign is a PIN, not a crumb, and it is here because the screen is
+    // now locked to it — there is no campaign picker inside any more, so the bar
+    // is the only thing that says which table you are running. It links back to
+    // /campaigns, which is where a campaign is now changed.
+    //
+    // `camp` is this board's own snapshot and may be a stale NAME (liveSystem
+    // above re-reads the system, not the name). That is fine: the template calls
+    // window.__ddSetPin once GMCamp has restored, which overwrites it with the
+    // board's actual link. This value only has to be right for the first paint.
     chrome = miniBar({
       system: liveSystem,   // unlinked board → null, and the bar adopts the site-wide choice
       status: true,
+      slot: true,           // Export + Import move in here on DOMContentLoaded
+      pin: camp?.name
+        ? { label: camp.name, href: "/campaigns", title: `Running ${camp.name} — manage campaigns` }
+        : { label: "No campaign", href: "/campaigns", title: "Open a campaign to link this screen" },
     });
   }
   html = html.replace(/<body([^>]*)>/i, (m) => `${m}\n${chrome}`);

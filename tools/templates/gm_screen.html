@@ -80,6 +80,14 @@ body::before {
 }
 
 /* ═══ TOP BAR ═══ */
+/* Export + Import once they have been reparented into the mini-bar (see the
+   moveIo() block below the GMCamp module). The bar is 36px; these were sized for
+   the top bar's taller row, so they are trimmed to fit and lose the icon-only
+   collapse the narrow top bar gave them. */
+#dd-bar .io-row { display: flex; align-items: center; gap: 6px; }
+#dd-bar .io-row .io-btn { height: 24px; padding: 0 8px; font-size: 10px; line-height: 1; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+#dd-bar .io-row .io-btn svg { width: 12px; height: 12px; }
+@media (max-width: 640px) { #dd-bar .io-row .io-btn span { display: none; } #dd-bar .io-row .io-btn { padding: 0 7px; } }
 .topbar {
   position: relative; z-index: 2;
   display: flex;
@@ -136,8 +144,6 @@ body::before {
 .io-cluster { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; min-width: 0; }
 .io-row { display: flex; align-items: center; gap: 3px; }
 .io-btn { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-start; padding: 3px 8px; min-height: 0; }
-.camp-btn-wide { width: 100%; justify-content: center; }
-.camp-btn-wide .camp-btn-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .io-btn span { font-family: 'Geist', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
 #gmc-topbar #gmc-party-bubbles { flex: 1 1 auto; min-width: 60px; }
 #gmc-topbar .scene-strip { margin-left: 0; }
@@ -1316,7 +1322,6 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   /* 2. Session controls: VTT · Export · Import · Campaign all inline on one row
         (they stack VTT/Export/Import over Campaign on desktop). */
   .io-cluster { flex-direction: row; align-items: center; flex-wrap: wrap; }
-  .camp-btn-wide { width: auto; }
 
   /* 3. Maps needs real height on mobile. The shared `.doc-body { flex:none }`
         rule above is right for Adventure (its PDF/HTML frames carry explicit
@@ -1440,47 +1445,6 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-camp-panel { padding: 6px 0 2px; }
 /* System toggle (SD / DCC) — top bar, next to Campaign */
 /* Read-only system indicator (the linked campaign drives the system now). */
-/* Campaign link — top bar button + popover */
-#camp-btn.on { background: rgba(84,144,196,0.14); color: var(--gold); border-color: var(--gold); }
-#camp-popover {
-  position: fixed; inset: 0; z-index: 400; display: none;
-  align-items: center; justify-content: center;
-  background: rgba(4,6,10,.6); backdrop-filter: blur(2px); padding: 16px;
-}
-#camp-popover .camp-card {
-  width: min(420px, 94vw); max-height: 82vh; overflow-y: auto;
-  background: linear-gradient(180deg,#161922,#101319); border: 1px solid var(--accent-dim);
-  border-radius: 14px; padding: 14px; box-shadow: 0 24px 70px rgba(0,0,0,.65), 0 0 0 1px rgba(84,144,196,.18);
-}
-#camp-popover .camp-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-#camp-popover .camp-card-title { flex: 1; font-family: 'Geist', sans-serif; font-weight: 900; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--white); }
-#camp-popover .camp-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
-#camp-popover .camp-row:last-child { margin-bottom: 0; }
-#camp-popover input {
-  flex: 1; min-width: 60px; padding: 6px 8px; background: var(--panel); border: 1px solid var(--border);
-  border-radius: 4px; color: var(--light); font-family: 'Geist', sans-serif; font-size: 11px; outline: none;
-}
-#camp-popover button {
-  padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;
-  font-family: 'Geist', sans-serif; font-weight: 900; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
-}
-#camp-popover .camp-hint { font-family: 'Geist', sans-serif; font-size: 9px; color: var(--dim); line-height: 1.5; }
-#camp-popover .camp-err { font-family: 'Geist', sans-serif; font-size: 10px; color: #df6a6a; min-height: 12px; }
-#camp-popover .camp-live { font-family: 'Geist', sans-serif; font-size: 11px; color: var(--gold); flex: 1; }
-#camp-popover .camp-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; margin-bottom: 4px; }
-#camp-popover .camp-item {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  width: 100%; padding: 8px 10px; text-align: left;
-  background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
-  color: var(--light); cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 700;
-}
-#camp-popover .camp-item:hover { border-color: var(--dim); }
-#camp-popover .camp-item.active { background: rgba(84,144,196,0.14); border-color: var(--gold); color: var(--gold); }
-#camp-popover .camp-item-name { font-family: 'Geist', sans-serif; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#camp-popover .camp-item-code { font-family: 'Geist', sans-serif; font-size: 10px; letter-spacing: .12em; color: var(--dim); flex-shrink: 0; }
-#camp-popover .camp-item.active .camp-item-code { color: var(--gold); }
-#camp-popover .camp-sep { height: 1px; background: var(--border); margin: 8px 0; }
-@media (max-width: 760px) { #camp-popover .camp-card { width: 100%; } }
 .dice-camp-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
 .dice-log-entry.remote { border-left: 3px solid #8a7ac8; background: #1c1a24; }
 /* ══ ROUNDED BUTTONS ══════════════════════════════════════════════════════
@@ -2135,18 +2099,16 @@ body[data-cview="free"] .cst-log-rail{display:none}
     <div class="gmc-home-spacer" aria-hidden="true"></div>
     <div class="io-cluster">
       <div class="io-row">
-        <a class="btn small ghost vtt-launch io-btn" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg><span>VTT</span></a>
-        <button class="btn small ghost io-btn" id="save-btn" onclick="saveSession()" title="Export / save session" aria-label="Export session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg><span>Export</span></button>
+                <button class="btn small ghost io-btn" id="save-btn" onclick="saveSession()" title="Export / save session" aria-label="Export session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg><span>Export</span></button>
         <label class="btn small ghost io-btn" title="Import / load session" aria-label="Import a saved session" style="cursor:pointer;">
           <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg><span>Import</span>
           <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
         </label>
       </div>
-      <button class="btn small ghost io-btn camp-btn-wide" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> <span class="camp-btn-label">Campaign</span></button>
-    </div>
+          </div>
   </div>
 
-  <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Link a campaign to see your party</div></div>
+  <div class="mon-group" id="gmc-party-bubbles"><div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div></div>
   <div class="mon-group" id="gmc-timers"></div>
   <div class="gmc-round" id="gmc-round">
     <div class="gmc-round-info"><span class="gmc-round-lbl">Round</span><span class="gmc-round-num" id="gmc-round-num">1</span></div>
@@ -2162,8 +2124,6 @@ body[data-cview="free"] .cst-log-rail{display:none}
   </div>
 </div>
 
-<!-- Campaign link popover — anchored under the top bar -->
-<div id="camp-popover" style="display:none;"></div>
 
 <script>
 // ══════════════════════════════════════════
@@ -2254,7 +2214,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 
 <script>
 // ══════════════════════════════════════════
-// CAMPAIGN LINK (top bar)
+// CAMPAIGN LINK (read-only — set by the link that opened this screen)
 // The campaign used to live inside the Roll Log (then "Dice Tray"), which meant it vanished
 // whenever that tool wasn't on screen. It now lives here — one connection,
 // owned by the page, that the Dice Tray broadcasts to and the Party tool reads.
@@ -2265,13 +2225,10 @@ const GMCamp = (function() {
   let hideRolls = false;    // GM can keep their own rolls off the shared log
   let lastId    = 0;
   let timer     = null;
-  let panelOpen = false;
   const listeners = new Set();   // fn(roll) — the Dice Tray's log
   const watchers  = new Set();   // fn() — told whenever the link or hide state changes
   let pending = [];              // rolls that arrived before anyone was listening
 
-  const btn = () => document.getElementById('camp-btn');
-  const pop = () => document.getElementById('camp-popover');
   const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   // ── Roll traffic ──
@@ -2356,16 +2313,33 @@ const GMCamp = (function() {
   }
 
   // ── UI ──
+  // THE LINK IS NOW READ-ONLY FROM IN HERE. There is no campaign picker on this
+  // screen any more: a GM Screen carries one campaign's party, roll log, board
+  // and system data, and being able to swap all four mid-session from a button
+  // in the corner is how you end up running one table on another table's screen.
+  // The way in is the Open GM Screen button on a campaign card, which names the
+  // campaign it will open; the way to change it is to go back there.
+  //
+  // So this no longer draws a button — it writes the campaign into the shared
+  // mini-bar's pin chip, beside the system chip, where it states which table you
+  // are running and links back to /campaigns. The server already renders that
+  // chip from the board it served (lib/gm-screen.ts); this call is what keeps it
+  // honest afterwards, because the board is RESTORED after the bar is painted.
+  // Set once the board has had its say — by restore() applying a saved link, or
+  // by set() being handed one. Until then an EMPTY link means "we have not looked
+  // yet", not "there is no campaign", and the pin the server already rendered
+  // from the board it served is the better answer. Without this guard the bar
+  // flashed "No campaign" on every load: this module's render() runs at script
+  // time, and the board is restored a moment later.
+  let settled = false;
   function renderBtn() {
-    const b = btn();
-    if(!b) return;
-    b.classList.toggle('on', !!campaign);
-    // Show the campaign NAME on the button (the icon stays); the code lives in
-    // the tooltip. Update the label span so we don't wipe the SVG.
-    const lbl = b.querySelector('.camp-btn-label');
-    if(lbl) lbl.textContent = campaign ? campaign.name : 'Campaign';
-    else b.textContent = campaign ? campaign.name : 'Campaign';
-    b.title = campaign ? 'Campaign: ' + campaign.name + ' (' + campaign.code + ')' : 'Campaign link';
+    if(typeof window.__ddSetPin !== 'function') return;
+    if(!campaign && !settled) return;
+    window.__ddSetPin(campaign
+      ? { label: campaign.name, href: '/campaigns',
+          title: 'Running ' + campaign.name + ' (' + (campaign.code || '') + ') — manage campaigns' }
+      : { label: 'No campaign', href: '/campaigns', empty: true,
+          title: 'This board is not linked. Open a campaign from the Campaigns page.' });
   }
 
   // The Dice Tray subscribes so its hide-rolls button appears, disappears, and
@@ -2407,62 +2381,9 @@ const GMCamp = (function() {
         }
       }
     }
-    if(panelOpen) renderPanel();
     notify();                       // let the Launch VTT button resolve its URL
   }
 
-  function renderPanel() {
-    const el = pop();
-    if(!el) return;
-    el.style.display = panelOpen ? 'flex' : 'none';
-    if(!panelOpen) return;
-    // Close when the scrim (not the card) is clicked.
-    el.onclick = e => { if(e.target === el) { panelOpen = false; renderPanel(); } };
-
-    // ── The account's campaigns, as a pick-list ──
-    let listHtml;
-    if(campList === null) {
-      listHtml = '<div class="camp-hint">Loading campaigns…</div>';
-    } else if(!campList.length) {
-      listHtml = '<div class="camp-hint">No campaigns on your account yet — create one on the Campaigns page.</div>';
-    } else {
-      listHtml = '<div class="camp-list">' + campList.map(c =>
-          '<button class="camp-item' + ((campaign && String(campaign.id) === String(c.id)) ? ' active' : '') + '" data-id="' + esc(c.id) + '">'
-        +   '<span class="camp-item-name">' + esc(c.name) + '</span>'
-        +   '<span class="camp-item-code">' + esc(c.code) + '</span>'
-        + '</button>'
-      ).join('') + '</div>';
-    }
-
-    el.innerHTML =
-        '<div class="camp-card">'
-      + '<div class="camp-card-head"><span class="camp-card-title">Campaign Link</span><button class="pop-x camp-close" type="button" aria-label="Close">✕</button></div>'
-      + listHtml
-      + (campaign
-          ? '<button class="camp-leave" style="background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;margin-top:8px;">Disconnect ' + esc(campaign.code) + '</button>'
-          : '')
-      + '<div class="camp-err"></div>'
-      + '<div class="camp-hint">Pick a campaign to connect this screen. Rolls sync both ways and linked players show in the Party tool. Campaigns are created and managed on the Campaigns page.</div>'
-      + '</div>';
-
-    const closeBtn = el.querySelector('.camp-close');
-    if(closeBtn) closeBtn.onclick = () => { panelOpen = false; renderPanel(); };
-
-    // Connect to a campaign the user picked from the list
-    el.querySelectorAll('.camp-item').forEach(b => {
-      b.onclick = () => {
-        const c = (campList || []).find(x => String(x.id) === String(b.getAttribute('data-id')));
-        if(c) { panelOpen = false; renderPanel(); switchBoard(c); }
-      };
-    });
-
-    const leaveBtn = el.querySelector('.camp-leave');
-    if(leaveBtn) leaveBtn.onclick = () => { panelOpen = false; renderPanel(); switchBoard(null); };
-
-    // Create and Join were removed from the GM Screen: campaigns are created on
-    // the Campaigns page, and players join from their character sheets. This
-    // panel only lists the account's campaigns and connects the screen to one.
-  }
 
   // Switching campaigns swaps the whole board. The saved board for each campaign
   // lives server-side keyed by (user, campaign), so we: (1) save the board we're
@@ -2489,6 +2410,7 @@ const GMCamp = (function() {
   }
 
   function set(c) {
+    settled = true;
     campaign = (c && c.id) ? c : null;
     lastId = 0;
     pending = [];
@@ -2503,23 +2425,12 @@ const GMCamp = (function() {
     if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 300);   // persist the link
   }
 
-  function togglePanel() {
-    panelOpen = !panelOpen;
-    renderPanel();                 // instant: shows cached list (or a loading line first time)
-    if(panelOpen) loadList();      // refresh in the background, re-renders when it lands
-  }
   function toggleHide()  {
     hideRolls = !hideRolls;
     notify();
     if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 300);
   }
 
-  // Click outside closes the popover
-  document.addEventListener('click', e => {
-    if(!panelOpen) return;
-    if(e.target.closest('#camp-popover') || e.target.closest('#camp-btn')) return;
-    panelOpen = false; renderPanel();
-  });
 
   return {
     get: () => campaign,
@@ -2541,12 +2452,12 @@ const GMCamp = (function() {
     broadcast,
     send,
     toggleHide,
-    togglePanel,
     isHidden: () => hideRolls,
     setHidden: v => { hideRolls = !!v; renderBtn(); },
     serialize: () => ({ campaign, hideRolls }),
     restore: (s) => {
-      if(!s) return;
+      settled = true;
+      if(!s) { renderBtn(); return; }
       if(typeof s.hideRolls === 'boolean') hideRolls = s.hideRolls;
       if(s.campaign && s.campaign.id) set(s.campaign); else { renderBtn(); notify(); }
     },
@@ -2556,27 +2467,32 @@ const GMCamp = (function() {
 window.GMCamp = GMCamp;
 window.__gmCampaign = () => GMCamp.get();   // Party tool reads the linked campaign from here
 
-// ── Launch VTT button ──  Shows whenever a campaign is linked. No chooser: an
-// Owlbear room (can't embed) opens in a new browser tab; our own tabletop embeds
-// straight into the Maps pane as a live tab (you can pop it out from there).
+// ── Launch VTT ──  Shows whenever a campaign is linked. No chooser: an Owlbear
+// room (can't embed) opens in its own window; our own tabletop embeds straight
+// into the Maps pane as a live tab (you can pop it out from there).
+//
+// THE BUTTON LIVES IN THE MAPS TOOLBAR NOW, not the top bar — that is where it
+// puts the tabletop, so that is where it belongs, and the top bar got its space
+// back. It is a CLASS, because a GM can have more than one Maps window open and
+// each needs a working launcher; so this walks all of them, and it also runs
+// whenever a Maps pane is created (see the Maps toolbar hookup).
+//
+// It is idempotent on purpose: re-running it on a pane that already has a
+// handler just rewrites the same one.
 function updateVttBtn() {
-  const a = document.getElementById('vtt-btn');
-  if(!a) return;
   const camp = (typeof GMCamp !== 'undefined' && GMCamp.get) ? GMCamp.get() : null;
-  if(camp && camp.id) {
-    a.style.display = 'inline-block';
-    a.removeAttribute('href');          // handled in JS so we can route by link type
-    a.onclick = (e) => {
+  const linked = !!(camp && camp.id);
+  document.querySelectorAll('.maps-vtt').forEach(a => {
+    a.style.display = linked ? 'inline-flex' : 'none';
+    a.onclick = linked ? ((e) => {
       e.preventDefault();
       const obr = (GMCamp.vttUrl && GMCamp.vttUrl()) || null;
       if(obr) { window.open(obr, '_blank', 'noopener'); return; }   // external Owlbear room
       embedVttInMaps('/play/' + camp.id + '?embed=1');              // our tabletop, in the Maps pane
-    };
-  } else {
-    a.style.display = 'none';
-    a.onclick = null;
-  }
+    }) : null;
+  });
 }
+window.__gmUpdateVttBtn = updateVttBtn;
 
 // Bring the Maps station on-screen (console modes 'explore'/'master'/'combat' show
 // it; in Free/window view ensureToolWindow opens a Maps window), then open the
@@ -2592,6 +2508,35 @@ function embedVttInMaps(url) {
 GMCamp.onChange(updateVttBtn);
 GMCamp.render();
 updateVttBtn();
+
+// ── EXPORT + IMPORT MOVE INTO THE SITE BAR ──
+//
+// They are session-wide actions, not monitors, and the top bar is where the
+// party bubbles, timers, round counter and clock live — things you watch during
+// play. Moving these two up to the shared mini-bar's slot (lib/minibar.ts) gives
+// that row its space back and puts save/load where every other surface keeps
+// its chrome.
+//
+// REPARENTED, not re-declared. The buttons keep their own handlers, their own
+// hidden <input type="file">, and their own markup; only their parent changes.
+// A second copy in the bar would be two Import inputs fighting over one id.
+//
+// On DOMContentLoaded, NOT inline: the mini-bar is injected right after <body>
+// by lib/gm-screen.ts, but this script block sits above the markup that declares
+// .io-row, so running now would find nothing. That exact mistake made the
+// Shadowdark prep builder's grab-bar reparent a silent no-op for weeks — see
+// claude/sd-grab-bar-reparent-2026-10-06.md.
+(function(){
+  function moveIo(){
+    var row = document.querySelector('.io-cluster .io-row') || document.querySelector('.io-row');
+    var slot = document.querySelector('#dd-bar .dd-slot');
+    if(!row || !slot || row.parentElement === slot) return;
+    slot.appendChild(row);
+    document.body.classList.add('io-in-bar');
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', moveIo);
+  else moveIo();
+})();
 </script>
 
 <script>
@@ -3019,6 +2964,14 @@ GMScenes.renderPins();
         <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 3.2 7 8.2l1.6 1.6 2.3-2.3V15h2.2V7.5l2.3 2.3L19 8.2z"/><path d="M4.5 13.5h2.2v4.3h10.6v-4.3h2.2v5.4a1.4 1.4 0 0 1-1.4 1.4H5.9a1.4 1.4 0 0 1-1.4-1.4z"/></svg>
         <input type="file" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" style="display:none;">
       </label>
+      <!-- THE VTT LAUNCHER LIVES HERE, not in the top bar. It belongs to the Maps
+           pane because that is where it puts the tabletop: the first-party VTT
+           embeds as a live tab in THIS pane (embedVttInMaps), and an Owlbear room
+           opens in its own window because OBR refuses to embed. A class rather
+           than an id, because a GM can open more than one Maps window and every
+           one of them needs a working launcher. Hidden until a campaign is
+           linked; updateVttBtn() shows it and wires the click. -->
+      <button class="btn small ghost maps-vtt" type="button" title="Open this campaign's virtual tabletop" aria-label="Open VTT" style="display:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg><span>VTT</span></button>
       <span class="doc-filename" style="display:none"></span>
       <div class="toolbar-spacer"></div>
       <div class="doc-controls" style="display:none;">
@@ -4512,6 +4465,12 @@ function buildToolNode(toolType) {
   const initFn = window['init_' + toolType];
   if(initFn) { try { initFn(node); } catch(e) { console.error('init failed for ' + toolType, e); } }
   else console.error('No init function found for tool: ' + toolType);
+  // A Maps pane is built on demand, long after updateVttBtn() last ran, and it
+  // arrives with its own .maps-vtt button unwired. This is the one place every
+  // pane is created, so it is the one place that has to know.
+  if(toolType === 'maps' && typeof window.__gmUpdateVttBtn === 'function') {
+    try { window.__gmUpdateVttBtn(); } catch(e) {}
+  }
   return node;
 }
 
@@ -5031,7 +4990,7 @@ function renderPartyStrip(roster){
   if(!el) return;
   roster = roster || window.GM_ROSTER || [];
   gmcRoster = roster;
-  if(!roster.length){ el.innerHTML = '<div class="party-empty" id="party-empty">Link a campaign to see your party</div>'; return; }
+  if(!roster.length){ el.innerHTML = '<div class="party-empty" id="party-empty">Open this screen from a campaign to see your party</div>'; return; }
   el.innerHTML = gmcBubblesHTML(roster);
 }
 document.addEventListener('gm-roster', e => renderPartyStrip(e.detail));
@@ -6135,7 +6094,7 @@ function initDocTool(root) {
     if(vttPop.popped) { vttWrap.dataset.url = url; buildPopped(url); return; }
     if(!url) {
       vttWrap.dataset.url = '';
-      vttWrap.innerHTML = '<div style="margin:auto;text-align:center;color:var(--dim);font-size:13px;padding:24px">Link a campaign to open its tabletop here.</div>';
+      vttWrap.innerHTML = '<div style="margin:auto;text-align:center;color:var(--dim);font-size:13px;padding:24px">Open this screen from a campaign to use its tabletop.</div>';
       vttWrap.style.display = 'flex';
       vttFrame = null;
       return;

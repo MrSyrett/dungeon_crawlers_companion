@@ -10,9 +10,8 @@ import {
   type SystemKey,
 } from "./systemStore";
 import { createCampaign, deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
-import { ConfirmButton } from "./ConfirmButton";
 import CopyCodeButton from "./CopyCodeButton";
-import { CampaignAutoField } from "./CampaignAutoField";
+import CampaignEditDialog from "./CampaignEditDialog";
 import OpenGmScreenButton from "./OpenGmScreenButton";
 
 // The Campaigns body: shows ONE system's campaigns at a time, driven by the same
@@ -115,10 +114,6 @@ export default function CampaignsList({
               Create
             </button>
           </form>
-          <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">
-            You&apos;ll be its GM/owner. Share the join code with your players so they can link their
-            character sheets. You can rename it below at any time.
-          </p>
         </section>
 
         {campaigns.length === 0 ? (
@@ -197,96 +192,68 @@ export default function CampaignsList({
                     </div>
 
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
-                      {/* Plain <a>s: /play and /gm-screen are route handlers that
-                          return standalone HTML, so <Link> would prefetch/RSC-fetch
-                          a whole document for nothing. Same words + same behavior
-                          as the dashboard: the VTT (ours) opens here; an OBR
-                          room (external) opens in a new tab. */}
-                      <a
-                        href={`/play/${c.id}`}
-                        className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--on-accent)] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                      >
-                        Open VTT
-                      </a>
+                      {/* THREE BUTTONS, and only three. Open the table, open the
+                          GM's screen for it, or change the thing. Everything you
+                          can CHANGE moved behind Edit — the rename box, the
+                          Owlbear URL and Delete — because a page listing four
+                          campaigns was four blocks of settings nobody was reading
+                          sitting on top of the two buttons they came for.
+
+                          ONE VTT BUTTON, not two. It opens whichever tabletop this
+                          campaign actually uses: the built-in one, or the Owlbear
+                          room when a URL is set. That is already exactly what a
+                          PLAYER gets from the dashboard, so the GM's button now
+                          agrees with the players' instead of offering both and
+                          leaving them to know which one the table is on.
+
+                          Plain <a>: /play is a route handler returning standalone
+                          HTML, so <Link> would prefetch a whole document for
+                          nothing. The OBR case is external, hence the new tab. */}
                       {c.vttUrl ? (
                         <a
                           href={c.vttUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                          className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--on-accent)] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                         >
-                          Open in OBR ↗
+                          Open VTT ↗
                         </a>
-                      ) : null}
+                      ) : (
+                        <a
+                          href={`/play/${c.id}`}
+                          className="min-h-11 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--on-accent)] hover:opacity-90 sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                        >
+                          Open VTT
+                        </a>
+                      )}
+                      {/* THE ONLY WAY INTO THE GM SCREEN. It is out of the navbar
+                          (see TOOLS_NAV in components/navConfig.ts): a GM Screen
+                          is one campaign's party, roll log, board and system data,
+                          and a nav link could not say which campaign it meant. */}
                       <OpenGmScreenButton
                         campaign={{ id: c.id, name: c.name, code: c.code, system: c.system, vttUrl: c.vttUrl }}
+                        className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+                      />
+                      <CampaignEditDialog
+                        id={c.id}
+                        name={c.name}
+                        code={c.code}
+                        vttUrl={c.vttUrl}
+                        rolls={c.rolls}
+                        partyNames={c.party.map((m) => m.name)}
+                        rename={renameCampaign}
+                        setVttUrl={setCampaignVttUrl}
+                        remove={deleteCampaign}
                         className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
                       />
-                      <form action={deleteCampaign} className="shrink-0">
-                        <input type="hidden" name="id" value={c.id} />
-                        <ConfirmButton
-                          message={
-                            `Delete "${c.name}" (${c.code})?\n\n` +
-                            `This deletes the campaign and its ${c.rolls} shared roll${c.rolls === 1 ? "" : "s"}.\n` +
-                            (links > 0
-                              ? `${c.party.map((m) => m.name).join(", ")} will stop sharing rolls and will need to join a new campaign.\n\n`
-                              : "\n") +
-                            `This cannot be undone.`
-                          }
-                          className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                        >
-                          Delete
-                        </ConfirmButton>
-                      </form>
                     </div>
                   </div>
 
-                  {/* Saves on blur or Enter. A <form action> resets its fields when the
-                      action completes, which flashed the old name back after every
-                      rename — the bug CampaignAutoField was written for. `required`
-                      because renameCampaign falls back to "New Campaign" on a blank,
-                      so an auto-saving field must refuse to send one. */}
-                  <CampaignAutoField
-                    id={c.id}
-                    field="name"
-                    value={c.name}
-                    action={renameCampaign}
-                    maxLength={60}
-                    ariaLabel={`Rename ${c.name}`}
-                    required
-                    className="mt-3 flex gap-2 border-t border-[var(--border)] pt-3"
-                  />
-
-                  {/* Deliberately NOT required: clearing this field is how you go back
-                      to the built-in VTT, so an empty value must save. */}
-                  <CampaignAutoField
-                    id={c.id}
-                    field="vttUrl"
-                    value={c.vttUrl ?? ""}
-                    action={setCampaignVttUrl}
-                    type="url"
-                    maxLength={500}
-                    placeholder="Virtual tabletop room URL (optional)"
-                    ariaLabel={`Virtual tabletop room for ${c.name}`}
-                  />
-                  <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--muted)]">
-                    {c.vttUrl
-                      ? "Characters linked to this campaign open this OBR room from the home page (instead of the built-in VTT)."
-                      : "Characters linked to this campaign open the built-in VTT from the home page. Paste an OBR room link here to use OBR instead."}
-                  </p>
                 </li>
               );
             })}
           </ul>
         )}
-
-        {campaigns.length > 0 ? (
-          <p className="mt-6 text-[12px] leading-relaxed text-[var(--muted)]">
-            Deleting a campaign removes its shared roll log. Players&apos; character sheets are left
-            untouched — they belong to the players — but any sheet still linked will quietly stop
-            sharing rolls, so tell your table before clearing one out.
-          </p>
-        ) : null}
 
         {joined.length > 0 ? (
           <section className="mt-12">

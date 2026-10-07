@@ -36,6 +36,17 @@ export type MiniBarOpts = {
   title?: string;
   /** Show the save-status chip (#dd-status) — sheets and the GM Screen. */
   status?: boolean;
+  /** A second chip, right of the system chip, naming the thing this page is
+   *  locked to. Only the GM Screen uses it today, for its campaign: that screen
+   *  can no longer be pointed at another campaign from inside, so the bar has to
+   *  say which one you are running. `href` makes it a link. Live-updatable from
+   *  the page via window.__ddSetPin. */
+  pin?: { label: string; href?: string; title?: string };
+  /** Reserve an empty .dd-slot in the bar for the page to move its own controls
+   *  into. The GM Screen fills it with Export and Import, which were taking space
+   *  in its monitor bar. The bar does not know what goes in it — a page that asks
+   *  for the slot owns it. */
+  slot?: boolean;
   /** The sheet's own dark-mode localStorage key (e.g. "sd_dark"). Used only to
    *  SEED the sheet from the global dd_theme preference before its script runs;
    *  the control itself lives on /account. */
@@ -165,6 +176,18 @@ export function miniBar(opts: MiniBarOpts): string {
 #dd-bar .dd-logo{display:flex;align-items:center;flex:0 0 auto}
 #dd-bar .dd-logo img{width:22px;height:22px;display:block}
 #dd-bar .dd-sys{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--sys,var(--accent,#5490c4));white-space:nowrap}
+/* The pin chip. Same box as the system chip so the pair reads as one statement —
+   WHICH GAME, then WHICH TABLE — but in --text, because the accent is the
+   system's and this is not a system. It shrinks before anything else in the bar:
+   a long campaign name must not push the save status or the account icon off. */
+#dd-bar .dd-pin{flex:0 1 auto;min-width:0;padding:4px 8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2);text-transform:none;letter-spacing:.02em;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28vw}
+#dd-bar a.dd-pin:hover{border-color:var(--accent,#5490c4)}
+#dd-bar .dd-pin.is-empty{color:var(--muted,#8d96a3)}
+/* The page's own controls. The bar owns the box they sit in, not their styling:
+   whatever a page moves in here keeps its own look, shrunk to the bar's height. */
+#dd-bar .dd-slot{flex:0 0 auto;display:flex;align-items:center;gap:6px}
+#dd-bar .dd-slot:empty{display:none}
+@media (max-width:640px){#dd-bar .dd-pin{max-width:34vw}}
 #dd-bar .dd-crumb{display:flex;align-items:center;gap:6px;min-width:0;color:var(--muted,#8d96a3)}
 #dd-bar .dd-crumb .dd-title{color:var(--text,#e9edf2);text-transform:none;letter-spacing:.02em;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
 #dd-bar .dd-spacer{flex:1 1 auto}
@@ -202,6 +225,13 @@ ${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
       }</span>`
     : "";
 
+  // The pin chip, if this page is locked to something.
+  const pin = opts.pin
+    ? (opts.pin.href
+        ? `<a class="dd-pin" href="${esc(opts.pin.href)}" title="${esc(opts.pin.title || opts.pin.label)}">${esc(opts.pin.label)}</a>`
+        : `<span class="dd-pin" title="${esc(opts.pin.title || opts.pin.label)}">${esc(opts.pin.label)}</span>`)
+    : "";
+
   const tools = `<div class="dd-menu-h">Tools</div><div class="dd-menu-sec">${TOOLS_NAV.map(link).join("")}</div>`;
   const comp = compendium.length
     ? `<div class="dd-menu-h">${s ? esc(s.name) + " " : ""}Compendium</div><div class="dd-menu-sec">${compendium.map(link).join("")}</div>`
@@ -224,8 +254,10 @@ ${comp}${tools}</div>`;
 <button type="button" class="dd-menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="dd-menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg></button>
 <a class="dd-logo" href="/" title="Home"><img src="/logo-white.png" alt="Home" width="22" height="22"></a>
 ${s ? `<span class="dd-sys" title="Current system">${esc(s.name)}</span>` : ""}
+${pin}
 ${crumb}
 <span class="dd-spacer"></span>
+${opts.slot ? `<span class="dd-slot"></span>` : ""}
 ${opts.status ? `<span id="dd-status" role="status" aria-live="polite"></span>` : ""}
 <a class="dd-acct" href="/account" title="Account settings" aria-label="Account settings"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round"></path></svg></a>
 ${menu}
@@ -246,6 +278,17 @@ window.__ddSetSystem=function(key,opts){opts=opts||{};var s=SYS[key];if(!s)retur
   var chip=bar.querySelector(".dd-sys");if(chip){chip.textContent=s.name;}else{chip=document.createElement("span");chip.className="dd-sys";chip.title="Current system";chip.textContent=s.name;var lg=bar.querySelector(".dd-logo");lg&&lg.insertAdjacentElement("afterend",chip);}
   try{document.documentElement.style.setProperty("--sys",s.accent);document.documentElement.dataset.system=key;}catch(x){}
   if(!opts.silent){try{localStorage.setItem("dcw_system",key);}catch(x){}}};
+// window.__ddSetPin({label,href,title}) — or null to say "nothing pinned". The GM
+// Screen calls this once its saved board has been applied, because the server
+// renders the bar from the board it served and the board is restored after.
+window.__ddSetPin=function(p){var el=bar.querySelector(".dd-pin");
+  if(!p||!p.label){if(el)el.remove();return;}
+  var want=p.href?"A":"SPAN";
+  if(el&&el.tagName!==want){el.remove();el=null;}
+  if(!el){el=document.createElement(p.href?"a":"span");el.className="dd-pin";var anchor=bar.querySelector(".dd-sys")||bar.querySelector(".dd-logo");anchor&&anchor.insertAdjacentElement("afterend",el);}
+  el.textContent=p.label;el.title=p.title||p.label;
+  if(p.href)el.setAttribute("href",p.href);else el.removeAttribute("href");
+  el.classList.toggle("is-empty",!!p.empty);};
 var btn=bar.querySelector(".dd-menu-btn"),menu=document.getElementById("dd-menu"),bd=null;
 function close(){menu.hidden=true;btn.setAttribute("aria-expanded","false");if(bd){bd.remove();bd=null;}document.removeEventListener("keydown",onKey,true);}
 function open(){menu.hidden=false;btn.setAttribute("aria-expanded","true");bd=document.createElement("div");bd.className="dd-backdrop";bd.addEventListener("pointerdown",close);bar.appendChild(bd);document.addEventListener("keydown",onKey,true);}

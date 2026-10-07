@@ -165,8 +165,16 @@ export function homebrewFor(system: SystemKey): string | null {
 // the route handlers the Owlbear extension itself calls (/vtt/gm-screen and
 // /vtt/sheet/[id]) plus static assets under public/vtt. Don't add a page there.
 //
-// Map Maker and GM Screen are route handlers (standalone HTML), hence `hard`.
-// Order: the makers first, GM Screen last so it sits at the right-hand end of the bar.
+// Map Maker is a route handler (standalone HTML), hence `hard`.
+//
+// THE GM SCREEN IS NOT HERE ANY MORE, and that is the whole point of it. A GM
+// Screen is only meaningful once it is linked to a campaign: it carries that
+// campaign's party, its shared roll log, its board and its system's data. A nav
+// link could not supply one, so it opened whichever board happened to be
+// last-used — which is how a GM ends up running one table on another table's
+// screen. The way in is now the Open GM Screen button on each campaign card
+// (components/OpenGmScreenButton.tsx), which names the campaign it will open,
+// and the screen is locked to it once there.
 //
 // CAMPAIGNS IS NOT HERE ANY MORE. It was, back when a campaign belonged to no
 // system — which is what this group is for. Campaigns are per-system now (the page
@@ -180,7 +188,6 @@ export function homebrewFor(system: SystemKey): string | null {
 export const TOOLS_NAV: NavLink[] = [
   { href: "/dungeon-map", label: "Map Maker", hard: true },
   { href: "/token-maker", label: "Token Maker" },
-  { href: "/gm-screen", label: "GM Screen", hard: true },
 ];
 
 // The per-system page that is a LINK rather than a dashboard view. Characters and
