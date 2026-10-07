@@ -1,5 +1,5 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
-import { TOOLS_NAV, compendiumFor } from "@/components/navConfig";
+import { TOOLS_NAV, compendiumFor, CAMPAIGNS_LINK } from "@/components/navConfig";
 
 // The shared "mini-bar": the site's navigation chrome for every surface that
 // is NOT rendered by the Next.js layout — the standalone character sheets, the
@@ -213,6 +213,7 @@ ${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
   // control being duplicated here.
   const menu = `<div id="dd-menu" hidden>
 <div class="dd-menu-sec"><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a></div>
+<div class="dd-menu-sec one"><a href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a></div>
 ${comp}${tools}</div>`;
 
   // ORDER MIRRORS SiteNav: menu button, logo, system, crumb — then the account

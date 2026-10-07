@@ -166,14 +166,27 @@ export function homebrewFor(system: SystemKey): string | null {
 // /vtt/sheet/[id]) plus static assets under public/vtt. Don't add a page there.
 //
 // Map Maker and GM Screen are route handlers (standalone HTML), hence `hard`.
-// Order: Campaigns first (where a table starts), the makers in the middle, GM
-// Screen last so it sits at the right-hand end of the bar.
+// Order: the makers first, GM Screen last so it sits at the right-hand end of the bar.
+//
+// CAMPAIGNS IS NOT HERE ANY MORE. It was, back when a campaign belonged to no
+// system — which is what this group is for. Campaigns are per-system now (the page
+// shows one system's campaigns and creates in that system), so it sits with the
+// other per-system destinations instead: Characters, Adventures, CAMPAIGNS,
+// Compendium, Homebrew. Grouping it with the Map Maker said it was system-agnostic,
+// which stopped being true.
+//
+// It is also deliberately absent from the home page's tool list (app/page.tsx) for
+// the same reason — that page is the system-agnostic surface.
 export const TOOLS_NAV: NavLink[] = [
-  { href: "/campaigns", label: "Campaigns" },
   { href: "/dungeon-map", label: "Map Maker", hard: true },
   { href: "/token-maker", label: "Token Maker" },
   { href: "/gm-screen", label: "GM Screen", hard: true },
 ];
+
+// The per-system page that is a LINK rather than a dashboard view. Characters and
+// Adventures are view toggles on the dashboard; this is a real route, so each bar
+// renders it as an anchor beside them.
+export const CAMPAIGNS_LINK: NavLink = { href: "/campaigns", label: "Campaigns" };
 
 // WHAT EACH REFERENCE PAGE IS ABOUT, so switching system can find the equivalent
 // page even when the two systems call it something different.

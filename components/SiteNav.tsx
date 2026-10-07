@@ -23,6 +23,7 @@ import {
   compendiumCounterpart,
   STAY_ON_SWITCH,
   TOOLS_NAV,
+  CAMPAIGNS_LINK,
 } from "./navConfig";
 
 // The single site-wide top navbar.
@@ -247,6 +248,11 @@ export default function SiteNav({
           <button className={`${item} ${onDashboard && view === "adventures" ? on : off}`} onClick={() => openTab("adventures")}>
             Adventures
           </button>
+          {/* Per-system, like the two tabs above it — not a Tool. It is a real route
+              rather than a dashboard view, hence a Link among the buttons. */}
+          <Link href={CAMPAIGNS_LINK.href} className={`${item} ${pathname === CAMPAIGNS_LINK.href ? on : off}`}>
+            {CAMPAIGNS_LINK.label}
+          </Link>
 
           <div className="relative">
             <button
@@ -331,6 +337,7 @@ export default function SiteNav({
           <div className="flex gap-2">
             <button className={`${item} flex-1 ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
             <button className={`${item} flex-1 ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>
+            <Link href={CAMPAIGNS_LINK.href} onClick={() => setMenu(null)} className={`${item} flex-1 ${pathname === CAMPAIGNS_LINK.href ? on : off} border border-[var(--border)] text-center`}>{CAMPAIGNS_LINK.label}</Link>
           </div>
 
           <p className="mt-3 px-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Compendium</p>

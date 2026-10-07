@@ -1,5 +1,5 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
-import { TOOLS_NAV, compendiumFor, homebrewFor } from "@/components/navConfig";
+import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK } from "@/components/navConfig";
 
 // The site navbar, for the surfaces that are NOT Next pages.
 //
@@ -246,6 +246,8 @@ export function siteNav(opts: SiteNavOpts): string {
   <div class="nav-links">
     <button class="nav-item" type="button" data-view="characters">Characters</button>
     <button class="nav-item" type="button" data-view="adventures">Adventures</button>
+    <!-- Per-system, like the two tabs before it. A real route, so an anchor. -->
+    <a class="nav-item" href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a>
     <div class="nav-wrap">
       <button class="nav-item has-caret" type="button" id="dd-nav-compbtn" aria-haspopup="true" aria-expanded="false">Compendium ${CARET}</button>
       <div class="nav-pop" id="dd-nav-comppop" hidden></div>
@@ -260,7 +262,7 @@ export function siteNav(opts: SiteNavOpts): string {
   </div>
 </div>
 <div class="nav-panel" id="dd-nav-panel" hidden>
-  <div class="nav-tabs"><button class="nav-item" type="button" data-view="characters">Characters</button><button class="nav-item" type="button" data-view="adventures">Adventures</button></div>
+  <div class="nav-tabs"><button class="nav-item" type="button" data-view="characters">Characters</button><button class="nav-item" type="button" data-view="adventures">Adventures</button><a class="nav-item" href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a></div>
   <h4>Compendium</h4>
   <div class="nav-grid" id="dd-nav-panelcomp"></div>
   <h4>Tools</h4>

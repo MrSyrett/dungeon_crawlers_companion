@@ -73,6 +73,24 @@
    and Cinzel sits behind it in the stack to catch any numeral. Per-glyph
    fallback is what makes this safe: a heading like "Chapter 3" sets the word
    in the logo face and the 3 in Cinzel rather than losing it. */
+/* Star Wars. The actual logo letterform: Star Jedi Logo MonoLine, 1998 by Boba
+   Fonts (Davide Canavero). The archive's own font guide states "These fonts are
+   freeware". Supplied by Michael; subset to Latin and converted to woff2 here,
+   50 KB of TTF down to 10.8 KB.
+   Chosen from seven faces in that archive by rendering "Star Wars" in each: the
+   MonoLine is the solid single-colour logo letterform. The DoubleLine pair needs
+   two layers to look right and the Hollow/Outline cuts are too fine at tile size.
+   Caps-only by design: the face draws the same letterforms for "Star Wars" and
+   "STAR WARS", so nothing needs to uppercase it. Archivo Black stays behind it in
+   the stack, as the page's own display face. */
+@font-face {
+  font-family: "Star Jedi";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/star-jedi-logo.woff2") format("woff2");
+}
+
 @font-face {
   font-family: "DnDC";
   font-style: normal;
@@ -1167,3 +1185,214 @@ body {
 [data-when][hidden] {
   display: none !important;
 }
+
+/* ===========================================================================
+   THE HOME PAGE'S GAME TILES
+   ===========================================================================
+   Each tile at / wears its own system's identity — display face, accent, ground
+   and cover texture — so the grid reads as fourteen games rather than fourteen
+   boxes. It is the one place on that page where per-system styling belongs;
+   everything else there is deliberately system-agnostic (the page is flagged
+   data-chrome, see isChromePath in components/SiteNav.tsx).
+
+   WHY THESE RULES LIVE HERE AND NOT IN THE COMPONENT. The ingredients are all
+   global: the --font-* tokens come from next/font on <html>, the accents are
+   tokens above, and "JSL Blackletter" / "Dreadful" are @font-face declared at
+   the top of this file. What is NOT global is the MAPPING of system to face —
+   that lives in each :root[data-system="X"] block, which only ever applies to
+   the one system the page is currently dressed as. A tile grid needs all
+   fourteen mappings at once, so it needs its own. The values below are copied
+   from those blocks and must stay in step with them.
+
+   Textures: twelve of the fourteen have cover art in public/themes. Shadowdark
+   and Nimble have none, so their tiles carry the ground and the face alone —
+   which is correct, not a gap to fill. Every tile gets its system's --tile-bg
+   for that reason: it is what gives those two a character of their own.
+
+   SCRIM TUNING, which took two passes. The first version put the texture at 0.45
+   under a near-opaque gradient and the result was fourteen black boxes with
+   coloured names — the art was simply not there. These textures were drawn as
+   full-page grounds at low contrast, so at thumbnail size they need most of their
+   opacity to read at all. The texture now sits high and the scrim is a flat, even
+   wash, because the name is centred and no single edge needs protecting. If you
+   change either, re-render and re-read the four busiest — DCC's splatter, Marvel's
+   burst, ICRPG's grain, JLU's skyline — since those are where a name goes first.
+   claude/harnesses/home-tiles-render.mjs does exactly that. */
+.home-tile {
+  --tile-accent: var(--gold);
+  --tile-face: var(--font-chrome);
+  --tile-tex: none;
+  --tile-bg: var(--panel);
+  --tile-size: 17px;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 118px;
+  overflow: hidden;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--tile-bg);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.home-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--tile-tex);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.85;
+}
+/* Even, not bottom-weighted: the name is centred now, so there is no one edge to
+   protect. Flat rather than a gradient because it has to work under twelve very
+   different textures, and a gradient that suits the starfield ruins the halftone.
+   Held as low as the busiest art allows — see the note above before raising it. */
+.home-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.55);
+}
+.home-tile > .home-tile-name {
+  position: relative;
+  z-index: 2;
+  /* inline-block + max-width, not a full-width block: the box has to HUG the text
+     so Marvel's red plate wraps the wordmark rather than banding the whole tile,
+     and so the fitter in components/HomeSystems.tsx can measure the real rendered
+     size against the room available. */
+  display: inline-block;
+  max-width: 100%;
+  font-family: var(--tile-face), "Geist", ui-sans-serif, system-ui, sans-serif;
+  /* Names run from "ACE!" to "Justice League Unlimited" and the faces differ
+     wildly in width, so this wraps rather than truncates and balances the lines.
+     A fixed one-line tile would clip half of them. */
+  text-wrap: balance;
+  text-align: center;
+  font-size: var(--tile-size);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+  color: var(--tile-accent);
+  /* The art behind a name is never uniform — a shadow is what keeps the light
+     patches of the starfield and the halftone from eating a letter. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.7);
+}
+.home-tile:hover {
+  border-color: var(--tile-accent);
+  box-shadow: 0 0 0 1px var(--tile-accent);
+}
+.home-tile:hover::before { opacity: 1; }
+
+/* The fourteen mappings, copied from the :root[data-system] blocks above. */
+/* The fourteen mappings. The FACE and GROUND are copied from each system's
+   :root[data-system] block. The NAME COLOUR is not always that system's accent:
+   several of these wordmarks are a brand colour of their own — Shadowdark and
+   Nimble are white, D&D is its cover gold, Marvel is white — so --tile-accent is
+   the *wordmark* colour, and the border/hover follows it.
+
+   --tile-size is the size BEFORE the fitter runs, and the size that stands if
+   script never runs at all. fitTileNames() in components/HomeSystems.tsx then
+   sizes every name to fill its own tile, which is what makes the grid look even:
+   the faces differ enormously in ink height (a capital H at 100px measures 60 in
+   DnDC and 91 in Shadowdark's blackletter) and the names differ in length, and
+   fitting the rendered box handles both at once. Two systems used to carry a
+   hand-tuned size here to compensate; the fitter made that unnecessary.
+
+   Four systems use a self-hosted BRAND face rather than their page display face,
+   with the page face kept behind it in the stack exactly as the h1 rules do:
+   "DnDC" for D&D, "Marvel" for Marvel, "Ghostbusters" for GB, "JSL Blackletter"
+   for Shadowdark. Those files are @font-face'd at the top of this stylesheet. */
+.home-tile[data-sys="SD"]    { --tile-accent: var(--text);          --tile-face: "JSL Blackletter";          --tile-bg: #08080a; }
+.home-tile[data-sys="ICRPG"] { --tile-accent: var(--icrpg);       --tile-face: var(--font-marker);         --tile-bg: #14100d; --tile-tex: url("/themes/icrpg-grain.webp"); }
+.home-tile[data-sys="NIM"]   { --tile-accent: var(--text);        --tile-face: var(--font-fraunces);       --tile-bg: #141816; }
+.home-tile[data-sys="DND"]   { --tile-accent: var(--gold-ink);    --tile-face: "DnDC", var(--font-cinzel); --tile-bg: #0d0b0c; --tile-tex: url("/themes/dnd-cover.webp"); }
+.home-tile[data-sys="DCC"]   { --tile-accent: var(--dcc-gold);    --tile-face: var(--font-anton);          --tile-bg: #060507; --tile-tex: url("/themes/dcc-splatter.webp"); }
+.home-tile[data-sys="KOB"]   { --tile-accent: var(--kob);         --tile-face: "Dreadful";                 --tile-bg: #15141a; --tile-tex: url("/themes/kob-halftone.webp"); }
+.home-tile[data-sys="CO"]    { --tile-accent: var(--candela-gold); --tile-face: var(--font-cormorant);     --tile-bg: #0c1512; --tile-tex: url("/themes/co-grunge.webp"); }
+.home-tile[data-sys="ACE"]   { --tile-accent: var(--ace-yellow);  --tile-face: var(--font-lilita);         --tile-bg: #070d14; --tile-tex: url("/themes/ace-speedlines.webp"); }
+.home-tile[data-sys="SW"]    { --tile-accent: var(--sw);          --tile-face: "Star Jedi", var(--font-archivo-black); --tile-bg: #09090a; --tile-tex: url("/themes/sw-starfield.webp"); }
+.home-tile[data-sys="D62E"]  { --tile-accent: var(--d62e);        --tile-face: var(--font-saira-cond);     --tile-bg: #121214; --tile-tex: url("/themes/d62e-blueprint.webp"); }
+.home-tile[data-sys="YZE"]   { --tile-accent: var(--yze);         --tile-face: var(--font-archivo-narrow); --tile-bg: #07161a; --tile-tex: url("/themes/yze-raster.webp"); }
+.home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
+.home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); }
+.home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); }
+
+/* Dungeon Crawler Carl's wordmark is two colours — the cover's gold and its
+   magenta. The component splits the name into .tn-1 / .tn-2 for any system that
+   needs it (see NAME_PARTS in components/HomeSystems.tsx); DCC is the only one
+   today, and the generic hook is there so the next one does not need new markup.
+   --dcc-ink rather than the raw cover magenta: that is the lifted value, and the
+   reason it exists (see the DCC block above). */
+.home-tile[data-sys="DCC"] .tn-1 { color: var(--dcc-gold); }
+.home-tile[data-sys="DCC"] .tn-2 { color: var(--dcc-ink); }
+
+/* Marvel: the red plate carries the word MARVEL and nothing else, the way the
+   logo does — "MULTIVERSE RPG" sits plain underneath. The name is split into
+   .tn-1 / .tn-2 by NAME_PARTS in components/HomeSystems.tsx (the same hook DCC's
+   two-colour wordmark uses) because one element cannot be half-plated.
+   --mmrpg is the cover red #c8102e, not the lifted --mmrpg-ink: this is a fill
+   behind white, not type on a ground, so it wants the brand value. Both parts are
+   blocks so the lockup stacks and centres; no text-shadow on the plated part,
+   where the plate is the contrast. */
+.home-tile[data-sys="MMRPG"] .home-tile-name {
+  text-transform: uppercase;
+  /* --text, per the heading contract, which gives Marvel --text for its heads. */
+  color: var(--text);
+}
+.home-tile[data-sys="MMRPG"] .tn-1 {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 0.1em;
+  /* Tight to the caps. This face has no descenders in "MARVEL" but the line box
+     still reserves room for them, so symmetric padding reads bottom-heavy and
+     side-heavy at once — the plate has to hug the letters, not the line box.
+     line-height:1 collapses the slack, then the padding is set from the caps. */
+  line-height: 1;
+  padding: 0.12em 0.18em 0.06em;
+  background: var(--mmrpg);
+  border-radius: 2px;
+  text-shadow: none;
+}
+.home-tile[data-sys="MMRPG"] .tn-2 {
+  display: block;
+}
+
+/* Ghostbusters: the SAME treatment its h1 carries, not an approximation of it.
+   The rule above (:root[data-system="GB"] body h1) says it outright — "the glow
+   belongs to the STROKE, not the letter" — and does it in two layers: white text
+   with two tight shadows, then, where -webkit-text-stroke is available, a
+   ground-coloured FILL inside a white stroke, so what glows is the outline around
+   a cut-out letterform. An earlier version of this tile used only the first layer,
+   which is white text with a halo — a different thing, and visibly not the logo.
+
+   The fill is var(--tile-bg), which for GB is the same #0e120a the page rule uses,
+   so the letters read as punched out of the glow.
+
+   Stroke width is in em rather than the page rule's 1.5px because the fitter sets
+   these names anywhere from 17px to 34px, and a fixed stroke would be heavy on a
+   phone and thin on a desktop.
+
+   text-transform stays none — this face's capital O is the no-ghost logo glyph, so
+   anything that uppercases "Ghostbusters" grows a ghost in the middle of it. */
+.home-tile[data-sys="GB"] .home-tile-name {
+  text-transform: none;
+  color: #ffffff;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 7px rgba(255, 255, 255, 0.45);
+}
+@supports (-webkit-text-stroke: 1px #fff) {
+  .home-tile[data-sys="GB"] .home-tile-name {
+    color: var(--tile-bg);
+    -webkit-text-stroke: 0.045em #ffffff;
+    paint-order: stroke fill;
+  }
+}
+
