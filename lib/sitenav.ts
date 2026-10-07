@@ -238,7 +238,7 @@ export function siteNav(opts: SiteNavOpts): string {
   const markup = `<nav id="dd-nav" class="dcc-chrome" data-sys="${esc(opts.system ?? "")}">
 <div class="nav-row">
   <button class="nav-burger" type="button" id="dd-nav-burger" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"></path></svg></button>
-  <a class="nav-logo" href="/dashboard" title="Dungeon Crawler's Companion"><img src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width="32" height="32"></a>
+  <a class="nav-logo" href="/" title="Dungeon Crawler's Companion"><img src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width="32" height="32"></a>
   <div class="nav-wrap">
     <button class="nav-sysbtn" type="button" id="dd-nav-sysbtn" aria-haspopup="true" aria-expanded="false"><span id="dd-nav-sysname">&nbsp;</span>${CARET}</button>
     <div class="nav-pop" id="dd-nav-syspop" hidden></div>

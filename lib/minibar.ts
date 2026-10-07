@@ -221,7 +221,7 @@ ${comp}${tools}</div>`;
   // every other page and against the phone layout.
   const bar = `<div id="dd-bar" role="navigation" aria-label="Site">
 <button type="button" class="dd-menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="dd-menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg></button>
-<a class="dd-logo" href="/dashboard" title="Dashboard"><img src="/logo-white.png" alt="Dashboard" width="22" height="22"></a>
+<a class="dd-logo" href="/" title="Home"><img src="/logo-white.png" alt="Home" width="22" height="22"></a>
 ${s ? `<span class="dd-sys" title="Current system">${esc(s.name)}</span>` : ""}
 ${crumb}
 <span class="dd-spacer"></span>

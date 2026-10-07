@@ -60,7 +60,11 @@ const HIDDEN_ON = ["/login", "/signup", "/forgot-password", "/reset-password"];
 // system's ground, faces and colours like the dashboard and the compendium do.
 const CHROME_PREFIXES = ["/admin", "/token-maker", "/account"];
 
+// The home page is chrome too, but it CANNOT go in the list above: "/" is a prefix
+// of every path, so `pathname.startsWith("/" + "/")` is a near miss away from
+// matching the whole site. Matched exactly instead.
 function isChromePath(pathname: string): boolean {
+  if (pathname === "/") return true;
   return CHROME_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
@@ -203,7 +207,7 @@ export default function SiteNav({
         {/* Logo → home */}
         {/* The mark alone — no wordmark. The title attribute carries the name
             for anyone who hovers, and the alt text for screen readers. */}
-        <Link href="/dashboard" className="flex shrink-0 items-center" title="Dungeon Crawler's Companion">
+        <Link href="/" className="flex shrink-0 items-center" title="Dungeon Crawler's Companion">
           <Image src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width={36} height={36} priority className="h-8 w-8" />
         </Link>
 
