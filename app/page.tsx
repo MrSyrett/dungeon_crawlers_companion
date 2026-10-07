@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import PageHeader from "@/components/PageHeader";
 import HomeSystems from "@/components/HomeSystems";
 import { getCurrentUser } from "@/lib/auth";
 import { getHiddenSystemKeys } from "@/lib/systems";
@@ -35,9 +34,13 @@ export const dynamic = "force-dynamic";
 //
 // Campaigns is absent for the same reason — it shows one system's campaigns and
 // creates in that system, which is also why it moved out of TOOLS_NAV.
-const TOOLS: { href: string; label: string; blurb: string }[] = [
-  { href: "/dungeon-map", label: "Map Maker", blurb: "Draw a battle map and export it" },
-  { href: "/token-maker", label: "Token Maker", blurb: "Round VTT tokens from any image" },
+//
+// No blurbs. They said what the names already say ("Map Maker" / "Draw a battle
+// map"), and a tile with a centred wordmark has nowhere to put a second line
+// without unbalancing it. `tool` picks the drawn ground in app/globals.css.
+const TOOLS: { href: string; label: string; tool: "map" | "token" }[] = [
+  { href: "/dungeon-map", label: "Map Maker", tool: "map" },
+  { href: "/token-maker", label: "Token Maker", tool: "token" },
 ];
 
 export default async function Home() {
@@ -46,9 +49,13 @@ export default async function Home() {
   const hiddenKeys = await getHiddenSystemKeys();
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <PageHeader title="Dungeon Crawler's Companion" />
-
+    // NO PAGE HEADER, and this is the only page without one. PageHeader draws a
+    // title and a rule under it, which earns its place on a compendium page where
+    // the title says which of a hundred pages you are on. Here the title could
+    // only be the site's own name — already in the navbar directly above it — and
+    // the rule then cut the page in half before it had said anything. The two
+    // section labels carry all the structure this page needs.
+    <div className="mx-auto w-full max-w-5xl px-5 py-8">
       <section aria-labelledby="home-systems">
         <h2
           id="home-systems"
@@ -66,20 +73,18 @@ export default async function Home() {
         >
           Tools
         </h2>
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {/* .home-tools rather than .home-grid: the same flex wrap, but two across
+            at every width instead of the games' 2/3/4, so a pair of tools fills
+            its row rather than sitting as two quarter-width stubs under fourteen
+            games. Both classes are in app/globals.css. */}
+        <ul className="home-grid home-tools">
           {TOOLS.map((t) => (
             <li key={t.href}>
               {/* The Map Maker is a route handler serving its own HTML document,
                   not a Next page, so these are plain <a> — a next/link client
                   navigation to it would be wrong. */}
-              <a
-                href={t.href}
-                className="block rounded-lg border border-[var(--border)] bg-[var(--panel)] px-4 py-4 transition-colors hover:border-[var(--gold)] hover:bg-[var(--panel-2)]"
-              >
-                <span className="font-display block text-[15px] font-black tracking-wide text-[var(--text)]">
-                  {t.label}
-                </span>
-                <span className="mt-1 block text-[13px] text-[var(--muted)]">{t.blurb}</span>
+              <a href={t.href} data-tool={t.tool} className="home-tile w-full">
+                <span className="home-tile-name">{t.label}</span>
               </a>
             </li>
           ))}

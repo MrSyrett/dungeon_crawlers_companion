@@ -1300,6 +1300,13 @@ body {
 @media (min-width: 1024px) {
   .home-grid > li { flex-basis: calc((100% - 2.25rem) / 4); }
 }
+/* The tools row. Two across at every width, overriding the games' 2/3/4 - there
+   are only two of them, and at the games' lg basis they would be a pair of
+   quarter-width stubs floating under a full grid. Listed after the media queries
+   so it wins at every breakpoint without !important. */
+.home-tools > li {
+  flex-basis: calc((100% - 0.75rem) / 2);
+}
 
 .home-tile {
   --tile-accent: var(--gold);
@@ -1311,16 +1318,32 @@ body {
      the tile, which is what every tile used to do and what the three tiles with
      big, coarse art still do. See the note on ::before. */
   --tile-zoom: 1;
+  /* The wordmark's own colour. It defaults to the accent, which is what thirteen
+     of the game tiles want. It exists separately because --tile-accent is ALSO
+     the border and hover-ring colour: the two tool tiles below are light, so
+     their ink is near-black, and a near-black hover ring on a dark page reads as
+     the border vanishing. They keep the gold ring and swap only the ink. */
+  --tile-ink: var(--tile-accent);
+  /* The art behind a name is never uniform - a shadow is what keeps the light
+     patches of the starfield and the halftone from eating a letter. On a LIGHT
+     tile the same shadow is a dark halo round dark text, so it inverts. */
+  --tile-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.7);
   /* How hard the black wash over the texture is pressed. See the note on ::after:
      this is a per-tile knob because the twelve textures are nowhere near equally
      bright, and one value that keeps a name readable over the halftone buries the
      starfield entirely. */
   --tile-scrim: 0.55;
+  --tile-wash: rgba(0, 0, 0, var(--tile-scrim));
   /* Where in its texture a zoomed tile is anchored. Two of the twelve keep their
      subject on one edge rather than in the middle - JLU's skyline sits along the
      bottom, GB's ectoplasm drips down from the top - and centre-cropping a zoom
      throws exactly that away. */
   --tile-tex-pos: center;
+  /* A tilt, for the one tile that wants one. It comes with --tile-inset, because
+     a rotated rectangle does not cover the box it started in: the corners pull
+     away. Growing the layer first is what keeps the tile's corners painted. */
+  --tile-rotate: 0deg;
+  --tile-inset: 0;
 
   position: relative;
   display: flex;
@@ -1352,12 +1375,17 @@ body {
 .home-tile::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: var(--tile-inset);
   z-index: 0;
   background-image: var(--tile-tex);
-  background-size: cover;
+  /* Per LAYER, which is why it is a variable: the token tile below stacks a rim
+     drawn at the element's size over a checkerboard that has to TILE at 22px, and
+     one `cover` cannot do both. Everything else keeps cover. */
+  background-size: var(--tile-tex-size, cover);
   background-position: var(--tile-tex-pos);
-  transform: scale(var(--tile-zoom));
+  /* Also per layer: the token tile's check has to tile and its token must not. */
+  background-repeat: var(--tile-tex-repeat, repeat);
+  transform: rotate(var(--tile-rotate)) scale(var(--tile-zoom));
   opacity: 0.85;
 }
 /* Even, not bottom-weighted: the name is centred now, so there is no one edge to
@@ -1369,7 +1397,10 @@ body {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: rgba(0, 0, 0, var(--tile-scrim));
+  /* --tile-wash, not a bare rgba: --tile-scrim stays the knob for the twelve dark
+     tiles (it is just this value's alpha), and a LIGHT tile overrides the whole
+     colour to wash white instead of black. A black scrim over parchment is mud. */
+  background: var(--tile-wash);
 }
 .home-tile > .home-tile-name {
   position: relative;
@@ -1390,10 +1421,8 @@ body {
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: 0.01em;
-  color: var(--tile-accent);
-  /* The art behind a name is never uniform — a shadow is what keeps the light
-     patches of the starfield and the halftone from eating a letter. */
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.7);
+  color: var(--tile-ink);
+  text-shadow: var(--tile-shadow);
 }
 .home-tile:hover {
   border-color: var(--tile-accent);
@@ -1434,6 +1463,135 @@ body {
 .home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
 .home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
 .home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
+
+/* ===========================================================================
+   THE HOME PAGE'S TWO TOOL TILES
+   ===========================================================================
+   Map Maker and Token Maker are the only two surfaces on the site that need no
+   system chosen, which is why they are the only two on this page. They wear the
+   same tile as the games - same box, same scrim, same centred wordmark - so the
+   page reads as one grid of things you can open rather than a grid and a list.
+
+   But their grounds are DRAWN, not photographed. Every game tile's texture is a
+   cover-art crop from public/themes; these two have no cover art because they are
+   not games, and inventing some would be pretending they are. So each is given
+   the thing it makes: a battle-map grid, and a token's concentric rings. A CSS
+   gradient is the right medium for both - they are rulings and circles, they stay
+   sharp at any tile size, and they add no bytes to the page.
+
+   --tile-tex is a background-image value, so a gradient list drops straight into
+   the machinery the game tiles already use. background-size: cover sizes each
+   layer to the tile and the repeating-* functions then tile inside it.
+
+   The ink is color-mix off --gold rather than a written-out rgba, so these follow
+   the palette like everything else - change --gold and both grounds follow. It is
+   the first color-mix in this file; it is baseline-supported and it is the only
+   way to take a token to a transparency without minting a second token for it. */
+.home-tile[data-tool] {
+  --tile-accent: var(--gold);
+  /* No fitter runs on these. fitTileNames (components/HomeSystems.tsx) exists
+     because fourteen display faces disagree about what a font-size is; these two
+     are short, near-identical in length and set in the same chrome face, so a
+     fixed size is honest and leaves this page's tools in a server component. */
+  --tile-size: 22px;
+}
+/* The two tool tiles. They wear the same box as the games, but each one shows
+   ITS OWN TOOL'S WORKSPACE rather than a cover: Map Maker gets a map drawn in
+   the Map Maker, Token Maker gets the Token Maker's canvas and the token it
+   cuts. That is why one is parchment and the other is near-black - they are not
+   a matched pair of decorations, they are two windows. */
+.home-tile[data-tool] {
+  --tile-accent: var(--gold);
+  /* No fitter runs on these. fitTileNames (components/HomeSystems.tsx) exists
+     because fourteen display faces disagree about what a font-size is; these two
+     are short, near-identical in length and set in the same chrome face, so a
+     fixed size is honest and leaves this page's tools in a server component. */
+  --tile-size: 22px;
+}
+
+/* MAP MAKER wears an actual map, drawn in the Map Maker: public/themes/tool-map.webp,
+   supplied by Michael, cropped to its rooms and converted to webp.
+
+   It is TILTED 45 degrees, which is the reason --tile-inset exists. A rotated
+   rectangle does not cover the box it started in - at 45 degrees the four
+   corners pull a long way inside - so the layer is grown to twice the tile in
+   each direction FIRST and rotated after. Growing it also does the zooming: at
+   -50% the layer is 2x the tile, `cover` sizes the map to that larger box, and
+   the tile then shows half of it, which is a clean 2x with no second number to
+   keep in step. --tile-zoom is still there on top for fine adjustment.
+
+   This tile is LIGHT, and alone on the page in that. The wash is a parchment
+   wash, not a black one - a black scrim over parchment is mud - and its only job
+   is to take the contrast off the ink lines so the name sits on top of them
+   rather than in among them. The ink goes near-black and the wordmark's halo
+   goes white. The ACCENT stays gold, because it is also the border and the hover
+   ring, and a near-black ring on this page reads as the border vanishing. */
+.home-tile[data-tool="map"] {
+  --tile-bg: #efe8d7;
+  --tile-ink: #231f1a;
+  --tile-shadow: 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 9px rgba(255, 255, 255, 0.9);
+  --tile-wash: rgba(239, 232, 215, 0.42);
+  --tile-tex: url("/themes/tool-map.webp");
+  --tile-rotate: 45deg;
+  /* THESE TWO NUMBERS ARE DERIVED, NOT TASTE. A layer rotated 45 degrees covers
+     the tile only if, for every tile corner (w/2, h/2), the corner rotated back
+     by -45 lands inside the layer's half-extents. Both of those work out to the
+     same number: (w + h) / (2 * sqrt 2).
+
+       desktop 506x118 -> 220.6, so the layer must be at least 441 x 441
+       phone   130x118 ->  87.7, so at least 175 x 175
+
+     With --tile-inset: -150% -25% the layer is 759x472 on desktop and 195x472 on
+     a phone, and both clear it. An earlier cut used -50% and the layer was only
+     1012x236: it needed 441 of HEIGHT and had 236, so the map ran out partway
+     across the tile and the rest was bare ground. It was invisible in a render
+     only because --tile-bg is the parchment's own colour, so "no map here"
+     and "more parchment" look identical. Michael spotted it as the map looking
+     cut off. The harness now proves coverage by re-rendering this tile with a
+     magenta --tile-bg and counting the magenta.
+
+     Growing the layer is also the zoom, which is why --tile-zoom stays at 1:
+     `cover` sizes the map to the LARGER box, so the tile shows a fraction of it.
+     Here that lands the map's 55px grid squares at 29px on desktop and 26px on a
+     phone, against 19px before this turn - Michael's "zoom in a bit". */
+  --tile-inset: -150% -25%;
+}
+
+/* TOKEN MAKER wears the Token Maker's actual canvas, matched to the component
+   rather than approximated:
+
+   - THE CHECKERBOARD is the one in components/TokenMaker.tsx - the same
+     #1a1a1d ground, the same #232327 squares, the same four 45deg gradients at
+     24px with the same four offsets. Copied, not eyeballed; if that preview is
+     ever restyled, this is the other place to change.
+   - THE TOKEN is not a CSS drawing of a ring. public/themes/tool-token.webp is
+     rendered by the tool's OWN drawSteelGlass, cut out of TokenMaker.tsx and run
+     against a real canvas with no image and the component's own default colour
+     (see claude/harnesses/tool-token-render.mjs). The brushed-steel bezel, the
+     domed glass and the top-left glint are the tool's, down to the pixel, which
+     is the whole point - a hand-drawn radial-gradient ring was the previous cut
+     and it was a guess at this.
+
+   An earlier cut had this tile light with a white checkerboard. That was wrong
+   twice over: the tool's canvas is dark, and a light check made the steel
+   disappear into it. It is dark again, so it keeps the shared ink and halo.
+
+   The token is sized in px rather than by `cover` so it stays a circle: the tile
+   is 118px tall and the layer list is token-then-check, which is the order
+   --tile-tex-size and --tile-tex-pos below are written in. */
+.home-tile[data-tool="token"] {
+  --tile-bg: #1a1a1d;
+  --tile-scrim: 0.22;
+  --tile-tex:
+    url("/themes/tool-token.webp"),
+    linear-gradient(45deg, #232327 25%, transparent 25%),
+    linear-gradient(-45deg, #232327 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #232327 75%),
+    linear-gradient(-45deg, transparent 75%, #232327 75%);
+  --tile-tex-size: 88px 88px, 24px 24px, 24px 24px, 24px 24px, 24px 24px;
+  --tile-tex-pos: center, 0 0, 0 12px, 12px -12px, -12px 0;
+  --tile-tex-repeat: no-repeat, repeat, repeat, repeat, repeat;
+}
 
 /* Star Wars, the mirror image of Marvel below: its logo face draws its capitals
    from the LOWERCASE slots, and its real uppercase slots hold alternate glyphs
