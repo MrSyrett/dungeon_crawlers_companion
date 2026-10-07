@@ -316,7 +316,7 @@ const rubik = Rubik({
 
 export const metadata: Metadata = {
   title: "Dungeon Crawler's Companion",
-  description: "TTRPG digital toolkit — character sheets and session prep, saved to your account.",
+  description: "TTRPG digital toolkit — character sheets and adventure prep, saved to your account.",
   // app/manifest.ts generates this; the link tag is what lets Android offer to
   // install, and it carries display:standalone for browsers that read it.
   manifest: "/manifest.webmanifest",

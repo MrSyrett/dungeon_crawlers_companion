@@ -17,7 +17,7 @@
      the viewport's — see the note beside this file's zoom controls.
      scripts/check-standalone-viewport.mjs holds the line. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Session Prep Builder — Nimble</title>
+<title>Adventure Prep Builder — Nimble</title>
 <!-- html2canvas + jsPDF (~550KB) load on demand in loadExportLibs() when an
      export button is first clicked, instead of blocking first paint here. -->
 <script>
@@ -2366,7 +2366,7 @@ function importHTML(input) {
     const html=e.target.result;
     const match=html.match(/data-spb="([^"]+)"/);
     if(!match){
-      alert("This HTML file does not contain Session Prep Builder data.\n\nOnly files exported from this builder can be imported.");
+      alert("This HTML file does not contain Adventure Prep Builder data.\n\nOnly files exported from this builder can be imported.");
       input.value="";
       return;
     }

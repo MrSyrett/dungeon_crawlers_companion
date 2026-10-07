@@ -24,7 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
     // app/layout.tsx); this is the same string so the two can't drift.
     short_name: "DCCompanion",
     description:
-      "TTRPG digital toolkit — character sheets and session prep, saved to your account.",
+      "TTRPG digital toolkit — character sheets and adventure prep, saved to your account.",
     // Launch straight into the desk rather than the marketing root; signed-out
     // visitors get redirected to /login from here anyway.
     start_url: "/dashboard",
