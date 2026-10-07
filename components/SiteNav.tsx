@@ -145,6 +145,7 @@ export default function SiteNav({
     //  • a system-agnostic shelf (the Rulebooks page filters itself) → stay put;
     //  • a homebrew hub → that system's hub;
     //  • a compendium page → the new system's matching page (Classes → Classes);
+    //  • the dashboard itself → stay, keeping the list you were looking at;
     //  • anywhere else → that system's Characters list on the dashboard.
     if (STAY_ON_SWITCH.has(pathname)) return;
     const curHub = homebrewFor(effective);
@@ -155,6 +156,10 @@ export default function SiteNav({
     }
     const counterpart = compendiumCounterpart(pathname, key);
     if (counterpart) { router.push(counterpart); return; }
+    // ALREADY ON THE DASHBOARD: switch the system and leave the view alone. This
+    // used to fall through to setView("characters"), so switching system while
+    // looking at the Adventures list silently threw you back to Characters.
+    if (onDashboard) return;
     setView("characters");
     router.push("/dashboard");
   }

@@ -546,10 +546,10 @@ export async function buildGmScreenHtml(opts: {
   if (opts.vttToken) {
     chrome = CHROME_EMBED;
   } else {
+    // No crumb and no title: the bar's logo and system chip already say where you
+    // are, and "GM Screen > <campaign>" only restated the page you were looking at.
     chrome = miniBar({
       system: liveSystem,   // unlinked board → null, and the bar adopts the site-wide choice
-      crumb: "GM Screen",
-      title: camp?.name,
       status: true,
     });
   }

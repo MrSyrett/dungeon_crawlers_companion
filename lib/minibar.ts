@@ -27,8 +27,11 @@ export type MiniBarLink = { label: string; href: string; external?: boolean };
 export type MiniBarOpts = {
   /** Tints the chip and sets --sys for the page. */
   system: SystemKey | null;
-  /** What this page is: "Characters", "Adventures", "GM Screen", "Map Maker", "VTT". */
-  crumb: string;
+  /** What this page is: "Characters", "Adventures", "GM Screen", "Map Maker", "VTT".
+   *  Optional, and the GM Screen and the VTT deliberately omit it: the bar already
+   *  carries the logo and the system chip, and on those two the crumb only restated
+   *  the page you were obviously looking at plus the campaign name. */
+  crumb?: string;
   /** The document's name (a character, an adventure). Live-updated via .dd-title. */
   title?: string;
   /** Show the save-status chip (#dd-status) — sheets and the GM Screen. */
@@ -191,9 +194,13 @@ export function miniBar(opts: MiniBarOpts): string {
 @keyframes dd-menu-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 ${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
 
-  const crumb = `<span class="dd-crumb"><span class="dd-crumb-k">${esc(opts.crumb)}</span>${
-    opts.title ? `<span class="dd-sep">›</span><span class="dd-title">${esc(opts.title)}</span>` : ""
-  }</span>`;
+  // Nothing at all when there is no crumb, rather than an empty span that still
+  // takes its gap in the flex row.
+  const crumb = opts.crumb
+    ? `<span class="dd-crumb"><span class="dd-crumb-k">${esc(opts.crumb)}</span>${
+        opts.title ? `<span class="dd-sep">›</span><span class="dd-title">${esc(opts.title)}</span>` : ""
+      }</span>`
+    : "";
 
   const tools = `<div class="dd-menu-h">Tools</div><div class="dd-menu-sec">${TOOLS_NAV.map(link).join("")}</div>`;
   const comp = compendium.length
@@ -206,7 +213,7 @@ ${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
   // control being duplicated here.
   const menu = `<div id="dd-menu" hidden>
 <div class="dd-menu-sec"><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a></div>
-${tools}${comp}</div>`;
+${comp}${tools}</div>`;
 
   // ORDER MIRRORS SiteNav: menu button, logo, system, crumb — then the account
   // icon at the far right. The menu button used to sit at the right end with no

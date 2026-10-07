@@ -119,10 +119,10 @@ export async function GET(req: Request, ctx: { params: Promise<{ campaignId: str
   const embed = new URL(req.url).searchParams.get("embed") === "1";
   const bar = embed
     ? ""
+    // No crumb and no title — see the note in lib/gm-screen.ts. The logo and the
+    // system chip are enough; "VTT > <campaign>" was restating the obvious.
     : miniBar({
         system: isSystemKey(campaign.system) ? campaign.system : null,
-        crumb: "VTT",
-        title: campaign.name,
         status: false,
       });
 
