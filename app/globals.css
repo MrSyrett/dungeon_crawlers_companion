@@ -80,15 +80,41 @@
    Chosen from seven faces in that archive by rendering "Star Wars" in each: the
    MonoLine is the solid single-colour logo letterform. The DoubleLine pair needs
    two layers to look right and the Hollow/Outline cuts are too fine at tile size.
-   Caps-only by design: the face draws the same letterforms for "Star Wars" and
-   "STAR WARS", so nothing needs to uppercase it. Archivo Black stays behind it in
-   the stack, as the page's own display face. */
+
+   THE unicode-range IS LOAD BEARING, AND SO IS text-transform: lowercase
+   EVERYWHERE THIS FACE IS USED. This is a LOGO font, not a text font, and it is
+   safe only on the subset below. Every slot was rendered before this was written:
+
+     lowercase a-z   a clean, correct A-Z alphabet - all 26 right
+     UPPERCASE A-Z   wrong from I on: I->H  O->N  Q->M  U->K  V->R  X->R  Z->A.
+                     "ADVENTURE" comes out "ADRENTKRE"
+     digits 0-9      every one is a piece of the STAR WARS LOGO LOCKUP; "1977"
+                     draws the logo
+     most symbols    ; -> E    ! -> "OF THE"    & -> "THE"    / and @ -> the logo
+                     ^ { } -> the Boba Fonts helmet    _ -> U    [ -> K    ] -> W
+
+   So the range admits a-z, the space, and the NINE marks that were rendered and
+   verified to draw themselves: . , : ? ' " - ( ). Everything else - every digit,
+   every other symbol - falls outside the range and through to Archivo Black,
+   which is why that is kept behind this in every stack.
+
+   This is WORSE than the D&D case two blocks up, which is why the same fallback
+   trick is not enough on its own. DnDC has no digits at all, so Cinzel catches
+   them. Star Jedi HAS digit glyphs - they are just logo artwork - so no fallback
+   can rescue them. The range is the only thing that can.
+
+   text-transform: lowercase is what makes a typed capital safe: the face draws
+   caps from its LOWERCASE slots, so lowercasing the input gets the right
+   letterform for every letter and loses nothing on screen. Do not remove it and
+   do not swap it for `uppercase` or `none` - an adventure title is whatever the
+   GM typed, and a page title carries character names. */
 @font-face {
   font-family: "Star Jedi";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url("/fonts/star-jedi-logo.woff2") format("woff2");
+  unicode-range: U+0020, U+0022, U+0027-0029, U+002C-002E, U+003A, U+003F, U+0061-007A;
 }
 
 @font-face {
@@ -708,6 +734,26 @@ body {
 :root[data-system="SW"]:not([data-chrome]) body h3 {
   font-family: var(--font-archivo-black), "Archivo Black", ui-sans-serif, system-ui, sans-serif;
 }
+/* The page title AND the dashboard's two list headers get the LOGO face - the
+   same two places D&D and Ghostbusters put theirs, and for the same reasons. h2
+   and h3 keep Archivo Black outright: a wordmark reads badly as running text,
+   and a stat line is the last place to want a digit falling to a second face.
+
+   text-transform: lowercase and the unicode-range on the @font-face at the top
+   of this file are what make this safe at all - read that note before touching
+   either. Archivo Black behind it in the stack is not decoration; it is what
+   catches every digit and symbol the range deliberately excludes. */
+:root[data-system="SW"]:not([data-chrome]) body h1,
+:root[data-system="SW"]:not([data-chrome]) body [data-dash-head] {
+  font-family: "Star Jedi", var(--font-archivo-black), "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+  text-transform: lowercase;
+}
+/* Tracking only, at the size the dashboard headers are set - the same carve-out
+   GB and D&D already have. A logo face is drawn with its spacing already in it
+   and the component ships 0.15em, which pulls the letters apart at 16px. */
+:root[data-system="SW"]:not([data-chrome]) body [data-dash-head] {
+  letter-spacing: 0.06em;
+}
 
 /* --- Marvel: black, Marvel red, comic blue, a halftone starburst ---------- */
 :root[data-system="MMRPG"]:not([data-chrome]) body {
@@ -1218,12 +1264,63 @@ body {
    change either, re-render and re-read the four busiest — DCC's splatter, Marvel's
    burst, ICRPG's grain, JLU's skyline — since those are where a name goes first.
    claude/harnesses/home-tiles-render.mjs does exactly that. */
+/* The grid itself is a FLEX wrap, not a CSS grid, for one reason: a short last row.
+   Fourteen systems in four columns leaves two on the bottom row, and a grid pins
+   them to the left-hand tracks — `justify-content` on a grid centres the whole
+   grid, not an incomplete row. Flex wrapping with justify-content:center centres
+   whichever row is short, and the count is not fixed anyway (an admin can hide
+   systems, so the remainder changes).
+
+   The basis arithmetic reproduces the column counts this replaced — 2, then 3 at
+   Tailwind's sm, then 4 at lg — subtracting the gaps between the items in a row.
+   The gap is in rem, matching the gap-3 it replaced, so it still scales with the
+   root font size rather than drifting from a hard 12px. */
+.home-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.home-grid > li {
+  flex: 0 0 calc((100% - 0.75rem) / 2);
+  /* min-width: 0 IS LOAD BEARING. A flex item defaults to min-width:auto, which
+     means it refuses to go below its MIN-CONTENT width - and "Ghostbusters" is
+     one unbreakable word in a wide display face. At the 17px --tile-size that
+     stands before the fitter runs, that word's min-content came to 168px, so the
+     GB tile ignored its 130px basis, blew the row, and wrapped onto a line of its
+     own with JLU stranded on the line above it.
+     It is also a feedback loop, which is why the fitter could not rescue it: the
+     fitter measures the room the tile HAS and sizes the name to it, so a tile
+     that has already grown to fit its own oversized text just keeps it. */
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .home-grid > li { flex-basis: calc((100% - 1.5rem) / 3); }
+}
+@media (min-width: 1024px) {
+  .home-grid > li { flex-basis: calc((100% - 2.25rem) / 4); }
+}
+
 .home-tile {
   --tile-accent: var(--gold);
   --tile-face: var(--font-chrome);
   --tile-tex: none;
   --tile-bg: var(--panel);
   --tile-size: 17px;
+  /* How far into its own texture a tile is zoomed. 1 = the whole image fitted to
+     the tile, which is what every tile used to do and what the three tiles with
+     big, coarse art still do. See the note on ::before. */
+  --tile-zoom: 1;
+  /* How hard the black wash over the texture is pressed. See the note on ::after:
+     this is a per-tile knob because the twelve textures are nowhere near equally
+     bright, and one value that keeps a name readable over the halftone buries the
+     starfield entirely. */
+  --tile-scrim: 0.55;
+  /* Where in its texture a zoomed tile is anchored. Two of the twelve keep their
+     subject on one edge rather than in the middle - JLU's skyline sits along the
+     bottom, GB's ectoplasm drips down from the top - and centre-cropping a zoom
+     throws exactly that away. */
+  --tile-tex-pos: center;
 
   position: relative;
   display: flex;
@@ -1239,6 +1336,19 @@ body {
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
+/* ZOOM, not a bigger background-size. These textures were drawn as FULL-PAGE
+   grounds: at 1600x1000 fitted into a tile ~235px wide, every tile showed the
+   whole image at roughly a quarter scale, so the grain, the splatter and the
+   halftone dots all shrank to noise and read as "a slightly uneven black". The
+   fix is to show a CROP at something near its drawn size instead.
+
+   Done with transform on this layer rather than a percentage background-size
+   because `cover` already solves "which axis do I fit?" for twelve images of
+   three different aspect ratios, and scaling the covered layer keeps that answer
+   correct at any zoom - a percentage would stop covering on some of them and
+   leave a bare edge. The tile's overflow:hidden does the cropping. There is
+   plenty of resolution for it: cover already shrinks these to ~0.3x, so even 2.5x
+   is still sampling the image down, not blowing it up. */
 .home-tile::before {
   content: "";
   position: absolute;
@@ -1246,7 +1356,8 @@ body {
   z-index: 0;
   background-image: var(--tile-tex);
   background-size: cover;
-  background-position: center;
+  background-position: var(--tile-tex-pos);
+  transform: scale(var(--tile-zoom));
   opacity: 0.85;
 }
 /* Even, not bottom-weighted: the name is centred now, so there is no one edge to
@@ -1258,7 +1369,7 @@ body {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, var(--tile-scrim));
 }
 .home-tile > .home-tile-name {
   position: relative;
@@ -1310,19 +1421,29 @@ body {
    "DnDC" for D&D, "Marvel" for Marvel, "Ghostbusters" for GB, "JSL Blackletter"
    for Shadowdark. Those files are @font-face'd at the top of this stylesheet. */
 .home-tile[data-sys="SD"]    { --tile-accent: var(--text);          --tile-face: "JSL Blackletter";          --tile-bg: #08080a; }
-.home-tile[data-sys="ICRPG"] { --tile-accent: var(--icrpg);       --tile-face: var(--font-marker);         --tile-bg: #14100d; --tile-tex: url("/themes/icrpg-grain.webp"); }
+.home-tile[data-sys="ICRPG"] { --tile-accent: var(--icrpg);       --tile-face: var(--font-marker);         --tile-bg: #14100d; --tile-tex: url("/themes/icrpg-grain.webp"); --tile-zoom: 2.6; --tile-scrim: 0.30; }
 .home-tile[data-sys="NIM"]   { --tile-accent: var(--text);        --tile-face: var(--font-fraunces);       --tile-bg: #141816; }
-.home-tile[data-sys="DND"]   { --tile-accent: var(--gold-ink);    --tile-face: "DnDC", var(--font-cinzel); --tile-bg: #0d0b0c; --tile-tex: url("/themes/dnd-cover.webp"); }
-.home-tile[data-sys="DCC"]   { --tile-accent: var(--dcc-gold);    --tile-face: var(--font-anton);          --tile-bg: #060507; --tile-tex: url("/themes/dcc-splatter.webp"); }
-.home-tile[data-sys="KOB"]   { --tile-accent: var(--kob);         --tile-face: "Dreadful";                 --tile-bg: #15141a; --tile-tex: url("/themes/kob-halftone.webp"); }
-.home-tile[data-sys="CO"]    { --tile-accent: var(--candela-gold); --tile-face: var(--font-cormorant);     --tile-bg: #0c1512; --tile-tex: url("/themes/co-grunge.webp"); }
+.home-tile[data-sys="DND"]   { --tile-accent: var(--gold-ink);    --tile-face: "DnDC", var(--font-cinzel); --tile-bg: #0d0b0c; --tile-tex: url("/themes/dnd-cover.webp"); --tile-zoom: 1; --tile-scrim: 0.18; }
+.home-tile[data-sys="DCC"]   { --tile-accent: var(--dcc-gold);    --tile-face: var(--font-anton);          --tile-bg: #060507; --tile-tex: url("/themes/dcc-splatter.webp"); --tile-zoom: 2.2; --tile-scrim: 0.38; }
+.home-tile[data-sys="KOB"]   { --tile-accent: var(--kob);         --tile-face: "Dreadful";                 --tile-bg: #15141a; --tile-tex: url("/themes/kob-halftone.webp"); --tile-zoom: 3; --tile-scrim: 0.32; }
+.home-tile[data-sys="CO"]    { --tile-accent: var(--candela-gold); --tile-face: var(--font-cormorant);     --tile-bg: #0c1512; --tile-tex: url("/themes/co-grunge.webp"); --tile-zoom: 2.2; --tile-scrim: 0.16; }
 .home-tile[data-sys="ACE"]   { --tile-accent: var(--ace-yellow);  --tile-face: var(--font-lilita);         --tile-bg: #070d14; --tile-tex: url("/themes/ace-speedlines.webp"); }
-.home-tile[data-sys="SW"]    { --tile-accent: var(--sw);          --tile-face: "Star Jedi", var(--font-archivo-black); --tile-bg: #09090a; --tile-tex: url("/themes/sw-starfield.webp"); }
-.home-tile[data-sys="D62E"]  { --tile-accent: var(--d62e);        --tile-face: var(--font-saira-cond);     --tile-bg: #121214; --tile-tex: url("/themes/d62e-blueprint.webp"); }
+.home-tile[data-sys="SW"]    { --tile-accent: var(--sw);          --tile-face: "Star Jedi", var(--font-archivo-black); --tile-bg: #09090a; --tile-tex: url("/themes/sw-starfield.webp"); --tile-zoom: 2; --tile-scrim: 0.10; }
+.home-tile[data-sys="D62E"]  { --tile-accent: var(--d62e);        --tile-face: var(--font-saira-cond);     --tile-bg: #121214; --tile-tex: url("/themes/d62e-blueprint.webp"); --tile-zoom: 2.8; --tile-scrim: 0.18; }
 .home-tile[data-sys="YZE"]   { --tile-accent: var(--yze);         --tile-face: var(--font-archivo-narrow); --tile-bg: #07161a; --tile-tex: url("/themes/yze-raster.webp"); }
 .home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
-.home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); }
-.home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); }
+.home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1.8; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
+.home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
+
+/* Star Wars, the mirror image of Marvel below: its logo face draws its capitals
+   from the LOWERCASE slots, and its real uppercase slots hold alternate glyphs
+   (O draws an N, U draws a K). "Star Wars" survived on this tile only because S
+   and W happen to be two of the slots that are correct - a rename to anything
+   with an O or a U in it would have garbled silently. Lowercasing the input is
+   what makes that impossible. See the @font-face note at the top of this file. */
+.home-tile[data-sys="SW"] .home-tile-name {
+  text-transform: lowercase;
+}
 
 /* Dungeon Crawler Carl's wordmark is two colours — the cover's gold and its
    magenta. The component splits the name into .tn-1 / .tn-2 for any system that

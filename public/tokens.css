@@ -129,6 +129,13 @@ html {
    Tomb" would come out with a ghost inside every o. Turning the transform off
    means a lowercase o renders as a plain O and only a typed capital O gives the
    ghost, which is the documented behaviour. The face makes its own caps. */
+/* And the adventure title, which is whatever the GM typed - the one place here
+   that carries arbitrary text, so the one place the lowercase guard matters most.
+   Any digits in the title (an "Episode 4") fall to Archivo Black by the
+   unicode-range, which is the intended outcome, not a defect. */
+:root[data-themed][data-system="SW"][data-tool="session"] .adventure-title {
+  text-transform: lowercase;
+}
 :root[data-themed][data-system="GB"][data-tool="session"] .adventure-title {
   text-transform: none;
 }
@@ -753,7 +760,12 @@ html {
   /* Section labels on the DARK preview page. Same hue as the light page's
      --accent-dark, lifted for the dark ground. */
   --section-hdr-dark: var(--sw);
-  --sys-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+  /* The logo face, with Archivo Black behind it - which is not a courtesy, it is
+     what catches every digit and symbol the unicode-range excludes. --sys-display
+     is read by exactly two rules on these surfaces: .lg-word (the masthead) and
+     .adventure-title. Both are lowercased for SW below. --font-display, which the
+     prep builders spend in two dozen places, stays Archivo Black. */
+  --sys-display: "Star Jedi", "Archivo Black", ui-sans-serif, system-ui, sans-serif;
   --sys-text: "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
   --ui-bg: #111113;
@@ -957,6 +969,22 @@ html {
   font-weight: 400;
   font-display: swap;
   src: url("/fonts/dndc.woff2") format("woff2");
+}
+/* Star Wars' logo face. A LOGO font, not a text font: its real uppercase slots
+   hold alternate glyphs ("ADVENTURE" comes out "ADRENTKRE"), its digits are
+   pieces of the STAR WARS logo lockup, and most symbols are words from the crawl
+   or the foundry's helmet. The unicode-range admits only a-z, the space and the
+   nine marks that were rendered and verified to draw themselves; everything else
+   falls through to Archivo Black. It is paired with text-transform: lowercase
+   below, which is what makes a typed capital safe - the face draws its caps FROM
+   the lowercase slots. The long version of this note is in app/globals.css. */
+@font-face {
+  font-family: "Star Jedi";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/star-jedi-logo.woff2") format("woff2");
+  unicode-range: U+0020, U+0022, U+0027-0029, U+002C-002E, U+003A, U+003F, U+0061-007A;
 }
 :root[data-themed][data-system="GB"] {
   /* The prep builder's subtitle. Was #5e2b90 — a purple with no place in a green-and-slime palette; 2.45:1 on the light end of its own banner. This is the same ink the title uses — on a light banner the hierarchy is size and weight, not hue. */
@@ -1193,6 +1221,15 @@ html {
    or half the wordmark falls through to Oswald. */
 :root[data-themed][data-system="MMRPG"] .lg-word {
   text-transform: uppercase;
+}
+
+/* Star Wars is the exact mirror of Marvel above, and the reason is the same one
+   read backwards: its face draws caps from the LOWERCASE slots, and its real
+   uppercase slots hold alternate letterforms. The SW sheet's .lg-word ships
+   `text-transform: uppercase` in the template, so without this the masthead
+   would read STAR WARS as "STAR WARS" through the broken slots. */
+:root[data-themed][data-system="SW"] .lg-word {
+  text-transform: lowercase;
 }
 
 /* Every sheet's masthead wordmark, which all fourteen draw with .lg-word, takes

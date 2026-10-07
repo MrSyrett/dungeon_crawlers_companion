@@ -44,11 +44,23 @@ const MAX_PX = 34;
 // eye would, from the thing the eye actually judges, and a new system needs no
 // entry anywhere.
 //
-// Measured by bounding rect rather than scrollWidth/scrollHeight: the name is an
-// inline-block (Marvel's plate has to hug its text), so its own box IS the ink
-// box, while scrollWidth on an inline-block reports its content width and would
-// miss horizontal overflow entirely.
+// MEASURED TWO WAYS, AND THE BIGGER ONE WINS. Neither measurement is sufficient
+// on its own, and using only the first is a bug this already had:
+//
+//   - The ELEMENT's own rect catches Marvel's red plate, whose padding is part of
+//     the lockup and has to be paid for. But the name carries `max-width: 100%`,
+//     so when a single unbreakable word is too wide to fit — "Shadowdark",
+//     "Ghostbusters" — the element's box is CLAMPED at the room available while
+//     the text spills out of it. Every size then measures as fitting, the search
+//     runs all the way up to MAX_PX, and the word is drawn clipped at both ends.
+//   - A RANGE over the contents measures the text's real boxes, overflow and all,
+//     so it catches exactly that. But a range measures text, not padding, so on
+//     its own it would let Marvel's plate run past the edge.
+//
+// scrollWidth is no use for either: on an inline-block it reports the content
+// width and misses horizontal overflow entirely.
 function fitTileNames(root: HTMLElement) {
+  const range = document.createRange();
   for (const name of Array.from(root.querySelectorAll<HTMLElement>(".home-tile-name"))) {
     const tile = name.parentElement;
     if (!tile) continue;
@@ -65,8 +77,12 @@ function fitTileNames(root: HTMLElement) {
     for (let i = 0; i < 8; i++) {
       const mid = (lo + hi) / 2;
       name.style.fontSize = `${mid}px`;
-      const r = name.getBoundingClientRect();
-      if (r.width <= roomW + 0.5 && r.height <= roomH + 0.5) {
+      const box = name.getBoundingClientRect();
+      range.selectNodeContents(name);
+      const ink = range.getBoundingClientRect();
+      const w = Math.max(box.width, ink.width);
+      const h = Math.max(box.height, ink.height);
+      if (w <= roomW + 0.5 && h <= roomH + 0.5) {
         best = mid;
         lo = mid;
       } else {
@@ -131,8 +147,11 @@ export default function HomeSystems({ hiddenKeys }: { hiddenKeys: SystemKey[] })
     router.push("/dashboard");
   }
 
+  // .home-grid (app/globals.css) rather than Tailwind's grid utilities: it is a
+  // flex wrap, so a short last row centres instead of hugging the left. A CSS
+  // grid can't do that — justify-content centres the whole grid, not its last row.
   return (
-    <ul ref={gridRef} className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+    <ul ref={gridRef} className="home-grid">
       {list.map((s) => (
         <li key={s.key}>
           <button type="button" data-sys={s.key} onClick={() => open(s.key)} className="home-tile w-full">
