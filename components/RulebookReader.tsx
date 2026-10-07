@@ -189,8 +189,21 @@ export default function RulebookReader({
   // with side rules) instead of spanning the whole window — matching the GM
   // Screen pane. The host has a definite height either way (parent is h-screen;
   // row-flex stretch), so the reader's fit-to-page math works.
+  //
+  // data-no-pull-refresh: PullToRefresh is mounted in the root layout, so it is on
+  // this page too, and it listens on `window` gated only on `window.scrollY <= 0`.
+  // This reader is 100dvh and pdf.js scrolls its OWN container, so the window never
+  // scrolls, that gate stood permanently open, and every downward drag in here was
+  // swallowed as a pull — cancelling the scroll pdf.js needed and reloading the page
+  // instead of going back a page. Opting out is unconditional on purpose: even on
+  // page 1, a drag downward inside a book should move the book.
   return (
-    <div ref={wrapRef} className="flex justify-center" style={{ height: "100dvh" }}>
+    <div
+      ref={wrapRef}
+      data-no-pull-refresh
+      className="flex justify-center"
+      style={{ height: "100dvh" }}
+    >
       <div
         ref={hostRef}
         className="min-h-0 w-full max-w-[1024px] border-[var(--border)] sm:border-x"

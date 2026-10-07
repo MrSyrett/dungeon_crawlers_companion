@@ -115,8 +115,24 @@ const shareTech = Share_Tech_Mono({
 // Star Wars. The 1977 logo was drawn from Helvetica Black and the opening
 // crawl is a Franklin/News Gothic grotesque; these are the open-licence
 // equivalents of both. Archivo Black ships at one weight only.
+//
+// --font-archivo-BLACK, not --font-archivo. It carried the plain name until
+// 2026-10-07, and so did the `Archivo` call further down this file — two
+// different faces writing one custom property, both classes on the same <html>
+// element (see the className below). Same specificity, same element, so whichever
+// rule Next emitted later simply won, and Archivo is declared second: Star Wars'
+// headings were rendering in regular Archivo at 400 and its whole display
+// identity — the thing this comment describes — was not happening. The
+// `"Archivo Black"` fallback in the globals.css stack never rescued it either,
+// because a fallback is only reached when the var resolves to nothing, and this
+// one resolved to a real family.
+//
+// The two cannot share a token: ICRPG spends the regular on --sys-text and
+// --sys-label, i.e. body copy, which needs the 600/700 and the italics that
+// Archivo Black does not have. --font-archivo-narrow (Year Zero, below) was
+// already separate; this is the one that was missed.
 const archivoBlack = Archivo_Black({
-  variable: "--font-archivo",
+  variable: "--font-archivo-black",
   subsets: ["latin"],
   weight: ["400"],
   display: "swap",

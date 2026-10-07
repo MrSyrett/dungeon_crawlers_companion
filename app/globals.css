@@ -667,7 +667,11 @@ body {
      these panels, so one tone carries headings and small text alike — no
      lifted second tone the way Marvel and DCC need. */
   --gold: var(--sw);
-  --sys-display: var(--font-archivo);
+  /* Archivo BLACK — the 1977-logo weight. This read `var(--font-archivo)` until
+     2026-10-07, which app/layout.tsx bound to two different faces at once; the
+     regular won and these headings lost their weight silently. See the note on
+     the Archivo_Black call there. */
+  --sys-display: var(--font-archivo-black);
   --sys-text: var(--font-franklin);
   --sys-label: var(--font-franklin);
   background-color: #09090a;
@@ -684,7 +688,7 @@ body {
 :root[data-system="SW"]:not([data-chrome]) body h1,
 :root[data-system="SW"]:not([data-chrome]) body h2,
 :root[data-system="SW"]:not([data-chrome]) body h3 {
-  font-family: var(--font-archivo), "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-archivo-black), "Archivo Black", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* --- Marvel: black, Marvel red, comic blue, a halftone starburst ---------- */

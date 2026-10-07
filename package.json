@@ -13,7 +13,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "prebuild": "node scripts/check-theme-tokens.mjs && node scripts/check-token-parity.mjs && node scripts/check-standalone-fonts.mjs && node scripts/check-mobile-zoom.mjs && node scripts/clean-binary-sources.mjs && node scripts/extract-game-data.mjs",
+    "prebuild": "node scripts/check-theme-tokens.mjs && node scripts/check-token-parity.mjs && node scripts/check-standalone-fonts.mjs && node scripts/check-font-tokens.mjs && node scripts/check-mobile-zoom.mjs && node scripts/clean-binary-sources.mjs && node scripts/extract-game-data.mjs",
     "data:dcc": "node scripts/build-dcc-data.mjs",
     "data:ace": "node scripts/build-ace-data.mjs",
     "data:kob": "node scripts/build-kob-data.mjs",
@@ -30,6 +30,7 @@
     "theme:check": "node scripts/check-theme-tokens.mjs",
     "theme:parity": "node scripts/check-token-parity.mjs",
     "zoom:check": "node scripts/check-mobile-zoom.mjs",
+    "fonts:tokens": "node scripts/check-font-tokens.mjs",
     "fonts:standalone": "node scripts/check-standalone-fonts.mjs"
   },
   "engines": {

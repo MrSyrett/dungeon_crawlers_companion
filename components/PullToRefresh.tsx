@@ -46,9 +46,48 @@ export default function PullToRefresh() {
     const atTop = () =>
       (window.scrollY || document.documentElement.scrollTop || 0) <= 0;
 
+    // WHOSE GESTURE IS THIS? `atTop()` alone is not enough, and getting that wrong
+    // broke reading rulebooks on a phone.
+    //
+    // RulebookReader is `height: 100dvh` and pdf.js scrolls its OWN container, so
+    // the window never scrolls and `window.scrollY` is pinned at 0 — `atTop()` was
+    // therefore always true on /rules?book=…. Every single-finger downward drag in
+    // the reader (which in any reader means "go back a page") was taken as a pull,
+    // `preventDefault()` cancelled the scroll pdf.js was relying on, and past the
+    // 70px threshold it fired router.refresh(). Measured: a 190px drag inside a
+    // 100dvh inner scroller, all of it captured.
+    //
+    // So before claiming a gesture, walk up from the touch target: if the first
+    // real scroll container above it is NOT itself at the top, that container owns
+    // the gesture and we keep out of it. Once it IS at its top, a further downward
+    // drag has nowhere to go inside it, and a pull-to-refresh is the right reading
+    // — which is how a native app behaves.
+    //
+    // This also covers the homebrew editors, the Marvel token/detail panels and
+    // anything else with its own scroller, not just the reader.
+    const innerScrollerOwnsIt = (target: EventTarget | null): boolean => {
+      let n = target instanceof Element ? target : null;
+      while (n && n !== document.body && n !== document.documentElement) {
+        // An element that opts out entirely — the reader sets this, because even at
+        // page 1 a stray downward drag should turn pages, not reload the book.
+        if (n.hasAttribute("data-no-pull-refresh")) return true;
+        const oy = getComputedStyle(n).overflowY;
+        if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight + 1) {
+          return n.scrollTop > 0;
+        }
+        n = n.parentElement;
+      }
+      return false;
+    };
+
     const onStart = (e: TouchEvent) => {
       const g = gesture.current;
-      if (busyRef.current || e.touches.length !== 1 || !atTop()) {
+      if (
+        busyRef.current ||
+        e.touches.length !== 1 ||
+        !atTop() ||
+        innerScrollerOwnsIt(e.target)
+      ) {
         g.active = false;
         return;
       }
