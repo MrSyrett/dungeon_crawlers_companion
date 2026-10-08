@@ -224,7 +224,7 @@ export default function CampaignsList({
                         }
                         className={`${ACTION} border-[var(--sys-action)] text-[var(--sys-action)] hover:bg-[var(--panel-2)]`}
                       >
-                        {c.vttUrl ? "Open VTT ↗" : "Open VTT"}
+                        {c.vttUrl ? "VTT ↗" : "VTT"}
                       </a>
                       {/* THE ONLY WAY INTO THE GM SCREEN. It is out of the navbar
                           (see TOOLS_NAV in components/navConfig.ts): a GM Screen
@@ -291,7 +291,7 @@ export default function CampaignsList({
                     href={`/play/${c.id}`}
                     className={`${ACTION} border-[var(--sys-action)] text-[var(--sys-action)] hover:bg-[var(--panel-2)]`}
                   >
-                    Open VTT
+                    VTT
                   </a>
                 </li>
               ))}

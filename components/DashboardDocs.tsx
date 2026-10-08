@@ -113,7 +113,11 @@ function DocList({
                     }
                     className="min-h-11 shrink-0 rounded border border-[var(--sys-action)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--sys-action)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
                   >
-                    {doc.vttKind === "owlbear" ? "Open in OBR ↗" : "Open VTT"}
+                    {/* "VTT", matching the Campaigns rows. The arrow is what
+                        says the Owlbear room leaves the site; naming the vendor
+                        as well made this the longest button in a row that has to
+                        fit a phone. */}
+                    {doc.vttKind === "owlbear" ? "VTT ↗" : "VTT"}
                   </a>
                 ) : null}
                 <form action={deleteDocument}>

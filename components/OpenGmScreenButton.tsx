@@ -34,7 +34,12 @@ export default function OpenGmScreenButton({
   }
   return (
     <button type="button" onClick={go} disabled={busy} className={className} title="Open the GM Screen linked to this campaign">
-      {busy ? "Opening…" : "Open GM Screen"}
+      {/* "GM Screen", not "Open GM Screen". It sits in a row with VTT and Edit,
+          and on a phone those three have to fit one line — in Shadowdark's skin
+          especially, whose body face is Montserrat and runs wider than the app's
+          Geist. The verb was carried by the other two as well and said nothing
+          the row's position did not. */}
+      {busy ? "Opening…" : "GM Screen"}
     </button>
   );
 }

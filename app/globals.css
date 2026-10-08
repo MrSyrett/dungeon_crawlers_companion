@@ -497,7 +497,7 @@ body {
   /* The two interactive accents on a dashboard row, split because they are not
      the same colour today and collapsing them would silently restyle 9 systems:
      --gold and --sys agree only on SD, SW, ACE, GB and YZE.
-       --sys-action  the outlined action button on a row (Open VTT / Open in OBR)
+       --sys-action  the outlined action button on a row (VTT / VTT ↗)
        --sys-hilite  the hover highlight — a row's name, the + New button's edge
      Each floor is exactly what that call site hard-coded before, so every system
      keeps the colour it had and only the ones that re-point these change. If the
