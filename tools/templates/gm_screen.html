@@ -182,9 +182,19 @@ body::before {
    What it fixes: on a wrapped phone bar the Round block and the clock land on a
    row of their own, and the auto margin shoved the clock to the far edge — which
    left Round stranded against the left margin with ~210px of nothing between
-   them. Desktop keeps the auto margin, where it is doing its real job. */
+   them. Desktop keeps the auto margin, where it is doing its real job.
+
+   THE PAIR GOES RIGHT, NOT LEFT. The auto margin moves onto the ROUND block
+   instead, so it absorbs the row's free space and carries both itself and the
+   clock over to the right-hand edge; the clock's own auto margin is zeroed so it
+   stays hugging the round rather than splitting off again. A first pass at this
+   read the mobile block's "pack every control to the left" comment as the intent
+   and packed the pair left — which is not what this row should do. Round and
+   session time are the two things a GM glances at mid-combat, and on a phone the
+   right edge is where a thumb already is. */
 @media (max-width: 760px) {
   #gmc-topbar .tel-clock { margin-left: 0; }
+  #gmc-topbar .gmc-round { margin-left: auto; }
 }
 #gmc-topbar .view-controls { flex-shrink: 0; }
 
