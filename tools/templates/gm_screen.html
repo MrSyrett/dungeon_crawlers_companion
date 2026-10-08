@@ -171,6 +171,21 @@ body::before {
 #gmc-topbar #gmc-party-bubbles { flex: 1 1 auto; min-width: 60px; }
 #gmc-topbar .scene-strip { margin-left: 0; }
 #gmc-topbar .tel-clock { padding: 0 12px; }
+/* THE CLOCK'S margin-left:auto, KILLED ON A PHONE.
+   The mobile block further down says "pack every top-bar control to the left"
+   and neutralises the flexible spacer — but .tel-clock sets `margin-left:auto`
+   in its own base rule ~650 lines BELOW that block, at the same specificity, so
+   a plain `.tel-clock{margin-left:0}` there loses on source order and does
+   nothing. (That is exactly what a first attempt at this did.) An ID wins
+   wherever it sits, so the override lives up here with the bar's other
+   id-scoped rules.
+   What it fixes: on a wrapped phone bar the Round block and the clock land on a
+   row of their own, and the auto margin shoved the clock to the far edge — which
+   left Round stranded against the left margin with ~210px of nothing between
+   them. Desktop keeps the auto margin, where it is doing its real job. */
+@media (max-width: 760px) {
+  #gmc-topbar .tel-clock { margin-left: 0; }
+}
 #gmc-topbar .view-controls { flex-shrink: 0; }
 
 /* Mobile-only handle that collapses the top bar (with its pinned scenes) to
@@ -1233,8 +1248,16 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   .pane-picker { flex: 1; min-width: 0; }
   .pane-picker-label { display: none; }
   /* Pack every top-bar control to the left rather than splitting them across
-     the row: drop the flexible spacer and the auto margin that pushed View to
-     the far right. */
+     the row: drop the flexible spacer and the auto margins that pushed View and
+     the session clock to the far right.
+     THE CLOCK'S margin-left:auto WAS THE ONE LEFT BEHIND. This block said "every
+     top-bar control" and neutralised two of the three; .tel-clock kept its auto
+     margin (set in the base rule, and already neutralised for one other
+     arrangement by `.scene-strip + .tel-clock`). On a wrapped phone bar the Round
+     block and the clock land on a row of their own, so that one auto margin
+     shoved the clock to the far edge and left Round sitting alone against the
+     left margin with ~290px of nothing beside it — which is what it looked like,
+     and what Michael reported. */
   .topbar .topbar-spacer { display: none; }
   .view-controls { margin-left: 0; }
 
@@ -1276,7 +1299,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   /* Mobile GM Screen = the single-pane view: hide the desktop command bar
      (its modes + quick tools are reachable from the window's tool dropdown),
      and let the one pane fill the screen. The monitor/top bar stays collapsible
-     via the "Show / Hide controls" toggle above it. */
+     via the "Show / Hide Monitor" toggle above it. */
   #bottom-bar { display: none !important; }
   body.gm-mobile .console-workspace { display: none !important; }
   body.gm-mobile .main-area { flex: 1; min-height: 0; }
@@ -2771,7 +2794,11 @@ GMScenes.renderPins();
   catch(e) { hidden = false; }
   function apply(){
     document.body.classList.toggle('hdr-hidden', hidden);
-    toggle.innerHTML = hidden ? '&#9776;&nbsp; Show controls' : '&#10005;&nbsp; Hide controls';
+    // "Monitor", not "controls": what this collapses is the MONITOR BAR — the
+    // party bubbles, timers, round counter and session clock you watch during
+    // play. The tool panes below it are full of controls and are not affected,
+    // so "Hide controls" named the wrong half of the screen.
+    toggle.innerHTML = hidden ? '&#9776;&nbsp; Show Monitor' : '&#10005;&nbsp; Hide Monitor';
   }
   function flip(){ hidden = !hidden; try { localStorage.setItem(KEY, hidden ? '1' : '0'); } catch(e){} apply(); }
   toggle.addEventListener('click', flip);
