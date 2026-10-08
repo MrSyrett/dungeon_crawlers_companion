@@ -85,9 +85,32 @@ body::before {
    the top bar's taller row, so they are trimmed to fit and lose the icon-only
    collapse the narrow top bar gave them. */
 #dd-bar .io-row { display: flex; align-items: center; gap: 6px; }
-#dd-bar .io-row .io-btn { height: 24px; padding: 0 8px; font-size: 10px; line-height: 1; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-#dd-bar .io-row .io-btn svg { width: 12px; height: 12px; }
-@media (max-width: 640px) { #dd-bar .io-row .io-btn span { display: none; } #dd-bar .io-row .io-btn { padding: 0 7px; } }
+/* 28px tall, which is the account chip's height (.dd-acct in lib/minibar.ts) —
+   these two sit in the same 36px bar as that chip and should agree with it. */
+#dd-bar .io-row .io-btn { height: 28px; min-height: 0; padding: 0 9px; font-size: 10px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; }
+#dd-bar .io-row .io-btn svg { width: 13px; height: 13px; }
+/* ON A PHONE THESE BECOME THE ACCOUNT CHIP'S TWIN: 30x28, icon only.
+   !important is not decoration here. The MOBILE TOUCH-TARGET PASS further down
+   this file sets `.btn.small { min-height: 46px !important; padding: 11px 15px
+   !important }` for every button on the page, and it is right to — a button
+   inside a tool pane is something you hit with a thumb mid-combat. But these two
+   were reparented OUT of the page and into the 36px site bar, where a 46px
+   button simply does not fit; it was overflowing the bar and dwarfing the
+   account icon beside it. An id beats a class even between two !important
+   declarations, so this wins wherever it sits in the file.
+   Matched to 760px, the touch pass's own breakpoint, so there is no band where
+   the label is hidden but the box is still the big one. */
+@media (max-width: 760px) {
+  #dd-bar .io-row .io-btn {
+    width: 30px; height: 28px;
+    min-height: 0 !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    gap: 0;
+  }
+  #dd-bar .io-row .io-btn span { display: none; }
+  #dd-bar .io-row .io-btn svg { width: 14px; height: 14px; }
+}
 .topbar {
   position: relative; z-index: 2;
   display: flex;

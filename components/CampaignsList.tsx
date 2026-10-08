@@ -22,7 +22,9 @@ import OpenGmScreenButton from "./OpenGmScreenButton";
 //
 // IT IS LAID OUT AS DashboardDocs IS, deliberately and down to the class names:
 // one bordered panel, a header carrying the word and a "+ New", then a divided
-// list of rows. Campaigns, Characters and Adventures are the three things a GM
+// list of rows. The one place it carries MORE than a dashboard row does is the
+// party line: a campaign's whole reason to exist is the characters linked to it,
+// so they are named, levelled and classed under the counts rather than summed. Campaigns, Characters and Adventures are the three things a GM
 // keeps per system and they sit next to each other in the navbar, so looking at
 // one should tell you how to read the other two. This page used to be a stack of
 // fat cards instead, which made it read like a different product.
@@ -157,18 +159,51 @@ export default function CampaignsList({
                           </span>
                         ) : null}
                       </div>
-                      {/* One meta line, the way a dashboard row carries "Updated …".
-                          The party used to be a row of chips under a fat card; in
-                          a table row that is a second block of content, so the
-                          names fold into the line that already counts them. */}
+                      {/* The meta line, the way a dashboard row carries "Updated …".
+                          It counts the sheets; the line below names them. */}
                       <span className="block text-[13px] text-[var(--muted)] sm:text-[11px]">
-                        Created {formatDate(c.createdAt)} · {links} sheet{links === 1 ? "" : "s"}
-                        {links > 0 ? ` (${c.party.map((m) => m.name).join(", ")})` : ""} · {c.rolls}{" "}
-                        roll{c.rolls === 1 ? "" : "s"}, last {relative(c.lastRoll)}
+                        Created {formatDate(c.createdAt)} · {links} sheet{links === 1 ? "" : "s"} ·{" "}
+                        {c.rolls} roll{c.rolls === 1 ? "" : "s"}, last {relative(c.lastRoll)}
                       </span>
+
+                      {/* THE PARTY, on its own line. It was briefly folded into the
+                          count above as a bare comma list, which lost the level and
+                          the class — and those are the whole point: a GM glancing at
+                          this row wants to know the party is third level and has no
+                          cleric, not merely that four sheets are attached.
+                          Chips rather than prose because the names are a SET, and
+                          one run-on sentence of "Brannos LV 3 Fighter, Vel LV 3
+                          Thief" is unreadable at this size. Smaller than the chips
+                          on the old card: a table row has less room than a card. */}
+                      {links > 0 ? (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {c.party.map((m) => (
+                            <span
+                              key={m.id}
+                              className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-1.5 py-0.5 text-[11px] text-[var(--text)]"
+                            >
+                              {m.name}
+                              {m.level !== null || m.cls ? (
+                                <span className="text-[var(--muted)]">
+                                  {" "}
+                                  {[m.level !== null ? `LV ${m.level}` : "", m.cls]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                                </span>
+                              ) : null}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-2">
+                    {/* WRAPS ON A PHONE, shrink-0 only from sm up. DashboardDocs
+                        carries two buttons here and this row carries three, and at
+                        390px the third ran clean off the right edge — shrink-0 on
+                        a nowrap row means "never give up width", so there was
+                        nothing to stop it. Caught by rendering the page at phone
+                        width; it is invisible on a desktop. */}
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:shrink-0">
                       {/* ONE VTT BUTTON, not two. It opens whichever tabletop this
                           campaign actually uses: the built-in one, or the Owlbear
                           room when a URL is set. That is already exactly what a
