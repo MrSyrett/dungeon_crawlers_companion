@@ -503,13 +503,14 @@
         var e=(un<-3.0)?REST:0; _rn.crossVectors(_rr,DOWN); var k=1+s.iInv*_rn.lengthSq(); var j=-(1+e)*un/k;
         applyImpulse(s,_rr,UP,j);
         _u.crossVectors(s.av,_rr).add(s.v); _t.set(_u.x,0,_u.z); var ut=_t.length(); if(ut>1e-4){ _t.multiplyScalar(1/ut); _rn.crossVectors(_rr,_t); var kt=1+s.iInv*_rn.lengthSq(); var jt=Math.min(MU*j, ut/kt); applyImpulse(s,_rr,_t,-jt); } } } }
-    // Walls (the near/far lips and both ends). The wall on the side the dice
-    // come in from (s.side: +1 right, -1 left) only exists once a die is
-    // inside the tray: dice start beyond it and fly in over it.
-    if(s.side>0 ? maxX<WX-0.05 : minX>-WX+0.05) s.inside=true;
-    if((s.side<0 || s.inside) && maxX>WX){ s.p.x-=maxX-WX; if(s.v.x>0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
-    if((s.side>0 || s.inside) && minX<-WX){ s.p.x+=-WX-minX; if(s.v.x<0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
-    if(maxZ>WZ){ s.p.z-=maxZ-WZ; if(s.v.z>0) s.v.z=-s.v.z*WALL_REST; } if(minZ<-WZ){ s.p.z+=-WZ-minZ; if(s.v.z<0) s.v.z=-s.v.z*WALL_REST; }
+    // Walls (both lips and both ends). The wall the dice come in over —
+    // the x wall on the throwing side (s.side: +1 right, -1 left), or the
+    // bottom lip (+z) when the throw comes up from the bottom (s.fromBottom)
+    // — only exists once a die is inside the tray.
+    if(!s.inside){ var inX=s.fromBottom || (s.side>0 ? maxX<WX-0.05 : minX>-WX+0.05), inZ=!s.fromBottom || maxZ<WZ-0.05; if(inX&&inZ) s.inside=true; }
+    if((s.inside || s.fromBottom || s.side<0) && maxX>WX){ s.p.x-=maxX-WX; if(s.v.x>0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
+    if((s.inside || s.fromBottom || s.side>0) && minX<-WX){ s.p.x+=-WX-minX; if(s.v.x<0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
+    if((s.inside || !s.fromBottom) && maxZ>WZ){ s.p.z-=maxZ-WZ; if(s.v.z>0) s.v.z=-s.v.z*WALL_REST; } if(minZ<-WZ){ s.p.z+=-WZ-minZ; if(s.v.z<0) s.v.z=-s.v.z*WALL_REST; }
     // Damping: air drag on spin is tiny; on the floor rolling resistance bleeds
     // spin and speed so a die that is rolling, not sliding, still stops.
     if(grounded){ var fr=Math.pow(DRAG,dt); s.v.x*=fr; s.v.z*=fr; s.av.multiplyScalar(Math.pow(s.spinDamp,dt)); } else { s.av.multiplyScalar(Math.pow(0.9,dt)); }
@@ -526,24 +527,34 @@
     if(grounded && slow && s.flat<0.9995){ _n.copy(s.groups[di].n).applyQuaternion(s.q).normalize(); _corr.setFromUnitVectors(_n,DOWN); _dq.identity().slerp(_corr,Math.min(0.3,8*dt)); s.q.premultiply(_dq).normalize(); s.v.set(0,0,0); s.av.set(0,0,0); }
     if(grounded && slow && s.flat>=0.9995){ s.v.set(0,0,0); s.av.set(0,0,0); } }
   function atRest(s){ return s.spawned && s.v.length()<0.3 && s.av.length()<0.6 && s.flat>0.9995; }
-  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,verts:s.verts,iInv:s.iInv,spinDamp:s.spinDamp,groups:s.groups,flat:s.flat||0,spawnStep:s.spawnStep||0,spawned:!(s.spawnStep>0),inside:!!s.inside,side:s.side||1}; }
+  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,verts:s.verts,iInv:s.iInv,spinDamp:s.spinDamp,groups:s.groups,flat:s.flat||0,spawnStep:s.spawnStep||0,spawned:!(s.spawnStep>0),inside:!!s.inside,side:s.side||1,fromBottom:!!s.fromBottom}; }
   // Where a die starts and how hard it's thrown. They come from the RIGHT (most
   // players are right-handed), just off the edge of the screen, staggered back
   // so they arrive one after another rather than as a clump; low and fast
   // with a little lift, spinning hard, so the first floor hit is a skip and a
   // tumble rather than a thud.
-  // The hand setting picks the side: a right-hander's dice come in from the
-  // bottom-right corner heading up and across, a left-hander's from the
-  // bottom-left. (Screen "bottom" is +z: the camera's up is -z.)
-  function makeInit(sides,i,n,hull){ var rank=Math.floor(i/2), ry=FLOORY+dieRest(sides), side=(S.hand==='left')?-1:1;
-    var z=WZ*(0.1+Math.random()*0.55), vx=-side*(THROW_V*(1+Math.random()*0.45));
-    return { p:new THREE.Vector3(side*(WX+1.0+rank*1.2+Math.random()*0.6), ry+1.0+Math.random()*1.2, z),
-    v:new THREE.Vector3(vx, 1.0+Math.random()*3.0, -(1.5+Math.random()*3.0)),
-    // spin mostly about the axis a die rolling that way would spin about (ω = v × up / r),
-    // plus a little wobble, so it tumbles with its travel rather than pirouetting
-    av:new THREE.Vector3((Math.random()-0.5)*10,(Math.random()-0.5)*8,-side*(10+Math.random()*16)),
+  // The hand setting picks the corner: a right-hander's dice come in from the
+  // bottom-right, a left-hander's from the bottom-left. Each roll comes either
+  // in over the SIDE of that corner (heading up and across) or up from the
+  // BOTTOM of it (heading up the screen and drifting across) — decided once
+  // per roll in play3D, so a handful arrives together. (Screen "bottom" is
+  // +z: the camera's up is −z.)
+  function makeInit(sides,i,n,hull,fromBottom){ var rank=Math.floor(i/2), ry=FLOORY+dieRest(sides), side=(S.hand==='left')?-1:1, p,v,av;
+    // Spin is TOPSPIN in the direction of travel — ω = up × v / r, i.e. the
+    // spin a die already rolling that way would have (ω.z = −v.x/r, ω.x =
+    // v.z/r) — plus a little wobble. Backspin (the sign the first version
+    // had) made every die lose most of its speed the instant it touched down.
+    if(fromBottom){ var vz=THROW_V*(0.85+Math.random()*0.4);
+      p=new THREE.Vector3(side*WX*(0.45+Math.random()*0.3), ry+1.0+Math.random()*1.2, WZ+1.0+rank*1.2+Math.random()*0.6);
+      v=new THREE.Vector3(-side*vz*(0.25+Math.random()*0.3), 1.0+Math.random()*3.0, -vz);
+      av=new THREE.Vector3(-(10+Math.random()*16),(Math.random()-0.5)*8,side*(2+Math.random()*6)); }
+    else { var vx=-side*(THROW_V*(1+Math.random()*0.45));
+      p=new THREE.Vector3(side*(WX+1.0+rank*1.2+Math.random()*0.6), ry+1.0+Math.random()*1.2, WZ*(0.1+Math.random()*0.55));
+      v=new THREE.Vector3(vx, 1.0+Math.random()*3.0, -(1.5+Math.random()*3.0));
+      av=new THREE.Vector3((Math.random()-0.5)*10,(Math.random()-0.5)*8,side*(10+Math.random()*16)); }
+    return { p:p, v:v, av:av,
     q:new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random()*6,Math.random()*6,Math.random()*6)),
-    restY:ry, radius:hull.radius, verts:hull.verts, iInv:1/(0.4*hull.radius*hull.radius), spinDamp:(sides===2?0.1:ROLL_DAMP), groups:null, flat:0, inside:false, side:side }; }
+    restY:ry, radius:hull.radius, verts:hull.verts, iInv:1/(0.4*hull.radius*hull.radius), spinDamp:(sides===2?0.1:ROLL_DAMP), groups:null, flat:0, inside:false, side:side, fromBottom:!!fromBottom }; }
   // Die-vs-die stays a soft sphere push (hull-vs-hull is not worth its weight
   // here); the spheres are the hull radius scaled down so dice can get close.
   function stepWorld(states,dt,step){ for(var i=0;i<states.length;i++) stepState(states[i],dt,step);
@@ -564,7 +575,7 @@
   function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
     _camTilt = dice.some(function(d){ return d.sides===4; }); applyCam();   // tip the camera for a d4 so its up-vertex number faces the viewer
     if(floor3d) floor3d.material.opacity=SHADOW_OP;
-    var metas=[],inits=[],maxSpawn=0; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i,dice.length,gg.hull); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
+    var metas=[],inits=[],maxSpawn=0, fromBottom=Math.random()<0.5; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i,dice.length,gg.hull,fromBottom); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
     var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS+maxSpawn){ stepWorld(probe,FDT,steps); steps++; if(allRest(probe))break; }
     var live=inits.map(cloneState),meshes=[],shadows=[];
     metas.forEach(function(m,i){ var rs=m.display, d4=null;
@@ -578,7 +589,7 @@
       var g=buildDie(m.geo,m.groups,labels,m.sides,rs,m.color,d4); g.position.copy(live[i].p); g.quaternion.copy(live[i].q);
       var sh=makeShadow(); if(inits[i].spawnStep>0){ g.visible=false; sh.visible=false; } scene.add(sh); scene.add(g); meshes.push(g); shadows.push(sh); });
     world3d={ live:live, meshes:meshes, shadows:shadows, crit:(crit||'normal'), emph:false, acc:0, rested:false, stepCount:0, maxSteps:steps, phase:'roll', tStart:performance.now() };
-    lastRoll={ dice:dice.length, steps:steps, ms:Math.round(steps*FDT*1000), capped:steps>=MAXSTEPS+maxSpawn };
+    lastRoll={ dice:dice.length, steps:steps, ms:Math.round(steps*FDT*1000), capped:steps>=MAXSTEPS+maxSpawn, fromBottom:fromBottom };
     lastT=performance.now(); startLoop(); }
   function applyCrit(W){ if(W.crit!=='crit'&&W.crit!=='fumble')return; var em=W.crit==='crit'?0x7a5c00:0x4a0300, gc=W.crit==='crit'?0xffd24a:0xff2e2e; W.glows=[];
     W.meshes.forEach(function(g){ var m=g.children[0].material; if(m){ m.emissive.setHex(em); m.emissiveIntensity=(W.crit==='crit'?0.85:0.55); }
