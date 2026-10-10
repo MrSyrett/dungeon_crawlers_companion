@@ -438,7 +438,7 @@
     groups.forEach(function(g,idx){ var isR=labels[idx]===resultStr;
       var pl=new THREE.Mesh(new THREE.PlaneGeometry(size,size), labelMat(labels[idx]));
       var pp=g.labelPos ? g.labelPos.clone().addScaledVector(g.n,0.03) : g.n.clone().multiplyScalar(g.c.dot(g.n)*1.02); pl.position.copy(pp);
-      pl.up.copy(numberUp(g)); pl.lookAt(pp.clone().add(g.n)); group.add(pl); });
+      pl.up.copy(numberUp(g,sides)); pl.lookAt(pp.clone().add(g.n)); group.add(pl); });
     return group; }
   // Which way is "up" for the number on a face. Real dice don't print every
   // number the same way round: on a triangle (d8, d20) the top of the digit
@@ -449,8 +449,13 @@
   // the same every roll — and hands lookAt an up vector in the face plane.
   // Before this every label used the default up and the digits all leaned the
   // same way regardless of which face they were on.
-  function numberUp(g){ var dir;
+  function numberUp(g,sides){ var dir;
     if(g.up){ dir=new THREE.Vector3().subVectors(g.up,g.c); }
+    else if(sides===8){ // d8 = two pyramids base to base: every number's top points at the pyramid's apex (the
+      // pole on the die's axis) and its base sits along the shared square. The generic "highest corner" rule
+      // got the top pyramid right and the bottom one wrong (its pole is the LOWEST corner). Michael, 2026-10-10.
+      var V=g.verts||[], pole=V[0]; V.forEach(function(p){ if(Math.abs(p.y)>Math.abs(pole.y)) pole=p; });
+      dir=new THREE.Vector3().subVectors(pole,g.c); }
     else { var V=g.verts||[], cands=[];
       if(V.length===4){ // square: aim at an edge midpoint (edges = the two nearest neighbours of each corner)
         var e=1e9; for(var i=0;i<4;i++) for(var j=i+1;j<4;j++){ var d=V[i].distanceTo(V[j]); if(d<e) e=d; }
