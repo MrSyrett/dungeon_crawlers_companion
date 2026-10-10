@@ -5,12 +5,13 @@ import {
   SYSTEMS,
   subscribeSystem,
   getSystemSnapshot,
-  getSystemServerSnapshot,
+  serverSystem,
   subscribeView,
   getViewSnapshot,
-  getViewServerSnapshot,
+  serverView,
   systemName,
   type SystemKey,
+  type DashView,
 } from "./systemStore";
 import { createDocument, deleteDocument } from "@/app/actions/documents";
 import { ConfirmButton } from "./ConfirmButton";
@@ -145,12 +146,20 @@ function DocList({
 export default function DashboardDocs({
   panels,
   hiddenKeys = [],
+  initialSystem,
+  initialView,
 }: {
   panels: SystemPanels;
   hiddenKeys?: SystemKey[];
+  // What the server rendered, read from the cookie the store mirrors
+  // (lib/system-cookie.ts). Hydration must match the server's HTML, so the
+  // server snapshot is this value, not Shadowdark; the live store takes over
+  // after hydration as before.
+  initialSystem?: SystemKey;
+  initialView?: DashView;
 }) {
-  const storedSystem = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
-  const view = useSyncExternalStore(subscribeView, getViewSnapshot, getViewServerSnapshot);
+  const storedSystem = useSyncExternalStore(subscribeSystem, getSystemSnapshot, serverSystem(initialSystem));
+  const view = useSyncExternalStore(subscribeView, getViewSnapshot, serverView(initialView));
 
   const hidden = new Set(hiddenKeys);
   const visible = SYSTEMS.map((s) => s.key).filter((k) => !hidden.has(k));

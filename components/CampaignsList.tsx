@@ -5,12 +5,13 @@ import {
   SYSTEMS,
   subscribeSystem,
   getSystemSnapshot,
-  getSystemServerSnapshot,
+  serverSystem,
   systemName,
   type SystemKey,
 } from "./systemStore";
 import { clearCampaignRolls, createCampaign, deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
 import CopyCodeButton from "./CopyCodeButton";
+import InviteLinkButton from "./InviteLinkButton";
 import CampaignDialog from "./CampaignDialog";
 import OpenGmScreenButton from "./OpenGmScreenButton";
 
@@ -80,11 +81,13 @@ const ACTION =
 export default function CampaignsList({
   bySystem,
   hiddenKeys = [],
+  initialSystem,
 }: {
+  initialSystem?: SystemKey;
   bySystem: CampaignsBySystem;
   hiddenKeys?: SystemKey[];
 }) {
-  const storedSystem = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
+  const storedSystem = useSyncExternalStore(subscribeSystem, getSystemSnapshot, serverSystem(initialSystem));
 
   // Same fallback chain as DashboardDocs: never land on a system an admin has
   // hidden, and never end up with no system at all.
@@ -129,8 +132,9 @@ export default function CampaignsList({
 
           {campaigns.length === 0 ? (
             <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">
-              No {name} campaigns yet. Hit + New to start one — you&apos;ll be its GM, and the join
-              code lets your players link their sheets.
+              No {name} campaigns yet. Hit + New to start one — you&apos;ll be its GM, with an invite
+              link to send your players. Playing in someone else&apos;s game? Ask your GM for their
+              invite link, or open your character sheet and tap Link to enter their code.
             </p>
           ) : (
             <ul className="divide-y divide-[var(--border)]">
@@ -152,6 +156,10 @@ export default function CampaignsList({
                             {c.code}
                           </span>
                           <CopyCodeButton value={c.code} label="join code" />
+                          {/* The invite link: /join/<code>. A player who opens it
+                              picks or creates a sheet and it links itself — no
+                              code to type, nothing to explain. */}
+                          <InviteLinkButton code={c.code} />
                         </span>
                         {quiet ? (
                           <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">

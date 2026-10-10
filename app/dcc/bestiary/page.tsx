@@ -6,6 +6,8 @@ import { DCC_MONSTERS } from "@/lib/data/dcc-monsters";
 import type { DccMonster, DccStat } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrewEditor from "@/components/DccHomebrewEditor";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dcc/bestiary";
@@ -65,13 +67,16 @@ function withParams(base: string, current: Query, patch: Query): string {
   return s ? `${base}?${s}` : base;
 }
 
+// The facets the chips test, per creature — the same object the client reads
+// back from `data-f` (lib/facets), so server and client always agree. `role`
+// is the filter key its role falls under (several book roles → one chip).
+const facets = (m: DccMonster) => ({
+  role: ROLE_FILTERS.find((r) => r.test(m.role))?.key,
+  src: m.source === "Homebrew" ? "hb" : "book",
+});
+
 function matches(m: DccMonster, q: string, roleKey: string, src: string): boolean {
-  if (roleKey) {
-    const f = ROLE_FILTERS.find((r) => r.key === roleKey);
-    if (f && !f.test(m.role)) return false;
-  }
-  if (src === "hb" && m.source !== "Homebrew") return false;
-  if (src === "book" && m.source === "Homebrew") return false;
+  if (!facetMatch(facets(m), { role: roleKey, src })) return false;
   if (!q) return true;
   return (
     m.name.toLowerCase().includes(q) ||
@@ -245,7 +250,10 @@ export default async function DccBestiaryPage({
     );
   }
 
-  const results = ALL_MONSTERS.filter((m) => matches(m, needle, activeRole, activeSrc));
+  // Every creature is rendered; the chips and the search filter on the client
+  // (InstantFilter). `show` applies the URL's filters for the initial paint.
+  const show = (m: DccMonster) => matches(m, needle, activeRole, activeSrc);
+  const shown = ALL_MONSTERS.filter(show).length;
   const filtered = Boolean(needle || activeRole || activeSrc);
   const current: Query = { q: q.trim(), role: activeRole, src: activeSrc, sort: activeSort };
 
@@ -255,7 +263,8 @@ export default async function DccBestiaryPage({
 
       <DccHomebrewEditor kind="dcc-monster" campaigns={campaigns} initial={hbOwn} />
 
-      <form method="get" action="/dcc/bestiary" className="mb-4 flex gap-2">
+      <InstantFilter>
+      <form method="get" action="/dcc/bestiary" className="mb-4 flex gap-2" data-search>
         <input
           type="search"
           name="q"
@@ -272,82 +281,85 @@ export default async function DccBestiaryPage({
         </button>
       </form>
 
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Role
         </span>
-        <Link href={withParams(BASE, current, { role: "" })} className={`${chipBase} ${activeRole ? chipOff : chipOn}`}>
+        <a href={withParams(BASE, current, { role: "" })} data-chip="role:" aria-pressed={!activeRole} className={`${chipBase} ${activeRole ? chipOff : chipOn}`}>
           All
-        </Link>
+        </a>
         {ROLE_FILTERS.map((r) => (
-          <Link
+          <a
             key={r.key}
             href={withParams(BASE, current, { role: r.key })}
+            data-chip={`role:${r.key}`}
+            aria-pressed={activeRole === r.key}
             className={`${chipBase} ${activeRole === r.key ? chipOn : chipOff}`}
           >
             {r.label}
-          </Link>
+          </a>
         ))}
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Source</span>
-        <Link href={withParams(BASE, current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
-        <Link href={withParams(BASE, current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
-        <Link href={withParams(BASE, current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+        <a href={withParams(BASE, current, { src: "" })} data-chip="src:" aria-pressed={!activeSrc} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</a>
+        <a href={withParams(BASE, current, { src: "book" })} data-chip="src:book" aria-pressed={activeSrc === "book"} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</a>
+        <a href={withParams(BASE, current, { src: "hb" })} data-chip="src:hb" aria-pressed={activeSrc === "hb"} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</a>
       </div>
 
+      {/* Sorting re-orders on the server, so these stay real navigations;
+          data-nav keeps their hrefs in step with the live filters. */}
       <div className="mb-6 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
         {SORTS.map((s) => (
-          <Link key={s.key || "role"} href={withParams(BASE, current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+          <Link key={s.key || "role"} href={withParams(BASE, current, { sort: s.key })} data-nav={`sort:${s.key}`} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
         ))}
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>
-          {results.length} {results.length === 1 ? "creature" : "creatures"}
+        <span data-count data-noun="creature" aria-live="polite">
+          {shown} {shown === 1 ? "creature" : "creatures"}
         </span>
-        {filtered ? (
-          <Link href="/dcc/bestiary" className="text-[var(--red)] hover:underline">
-            Clear filters
-          </Link>
-        ) : null}
+        <Link href="/dcc/bestiary" data-clear hidden={!filtered} className="text-[var(--red)] hover:underline">
+          Clear filters
+        </Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No creature matches those filters. Try a broader search or{" "}
-            <Link href="/dcc/bestiary" className="text-[var(--red)] underline">
-              clear them
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {results.map((m, i) => {
-            const hb = m.source === "Homebrew";
-            return (
-              <li key={`${hb ? "hb" : "bk"}-${m.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <a href={withParams(BASE, {}, { m: m.name })} className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)] hover:underline">{m.name}</a>
-                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                    {m.role} · {SIZE_NAMES[m.size] ?? `Size ${m.size}`} · Level {m.level}
-                  </span>
-                  {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{m.source}{m.page ? ` · p.${m.page}` : ""}</span>}
-                </div>
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No creature matches those filters. Try a broader search or{" "}
+          <Link href="/dcc/bestiary" data-clear className="text-[var(--red)] underline">
+            clear them
+          </Link>
+          .
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
+        {ALL_MONSTERS.map((m, i) => {
+          const hb = m.source === "Homebrew";
+          // The summary card omits notes, attacks and flavor, which the search
+          // reads; data-s lets the client search them too.
+          const extra = [...m.notes, ...m.attacks.map((a) => a.name), m.flavor ?? ""].join(" ");
+          return (
+            <li key={`${hb ? "hb" : "bk"}-${m.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4" hidden={!show(m)} data-f={facetAttr(facets(m))} data-s={extra}>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <a href={withParams(BASE, {}, { m: m.name })} className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)] hover:underline">{m.name}</a>
+                <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                  {m.role} · {SIZE_NAMES[m.size] ?? `Size ${m.size}`} · Level {m.level}
+                </span>
+                {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{m.source}{m.page ? ` · p.${m.page}` : ""}</span>}
+              </div>
 
-                {m.tags.length ? (
-                  <div className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{m.tags.join(" · ")}</div>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              {m.tags.length ? (
+                <div className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{m.tags.join(" · ")}</div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

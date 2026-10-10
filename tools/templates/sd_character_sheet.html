@@ -5811,7 +5811,7 @@ async function campaignJoin() {
   if(!code) { campaignError('Enter a join code.'); return; }
   try {
     const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials: 'same-origin' });
-    if(r.status === 404) { campaignError('No campaign found with that code.'); return; }
+    if(r.status === 429){ campaignError('Too many tries — wait a few minutes and try again.'); return; } if(r.status === 404) { campaignError('No campaign found with that code.'); return; }
     if(!r.ok) throw new Error(r.status);
     _campaign = await r.json();
     campaignConnected();

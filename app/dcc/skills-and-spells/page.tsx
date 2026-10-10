@@ -7,13 +7,17 @@ import { DCC_SPELLS } from "@/lib/data/dcc-spells";
 import type { DccSkill, DccSpell } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrewEditor from "@/components/DccHomebrewEditor";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 // Skills and Spells share one page (two sub-tabs) so the DCC toolbar fits on a
 // single row. Each sub-tab keeps its own homebrew editor, filters, and cards —
 // the logic is ported verbatim from the old /dcc/skills and /dcc/spells pages,
 // with the form/link base pointed here and a `tab` param threaded through. Only
 // the active sub-tab renders (and fetches its homebrew), so their filter query
-// params never collide.
+// params never collide. The tab switch is a real navigation (two different
+// views); within a tab the chips and search filter on the client
+// (InstantFilter), which carries `tab` through untouched.
 
 export const dynamic = "force-dynamic";
 
@@ -78,11 +82,12 @@ function withSkill(current: SkillQuery, patch: SkillQuery): string {
   return `${BASE}?${sp.toString()}`;
 }
 
+// The facets the chips test, per skill — the same object the client reads back
+// from `data-f` (lib/facets), so server and client always agree.
+const skillFacets = (s: DccSkill) => ({ cat: s.category, group: s.group, src: s.source === "Homebrew" ? "hb" : "book" });
+
 function matchesSkill(s: DccSkill, q: string, cat: string, group: string, src: string): boolean {
-  if (cat && s.category !== cat) return false;
-  if (group && s.group !== group) return false;
-  if (src === "hb" && s.source !== "Homebrew") return false;
-  if (src === "book" && s.source === "Homebrew") return false;
+  if (!facetMatch(skillFacets(s), { cat, group, src })) return false;
   if (!q) return true;
   return s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || (s.group ?? "").toLowerCase().includes(q);
 }
@@ -119,18 +124,37 @@ async function SkillsSection({ userId, raw }: { userId: string; raw: Raw }) {
   const activeSort = SKILL_SORTS.some((s) => s.key === sort && s.key) ? sort : "";
   const cmp = (SKILL_SORTS.find((s) => s.key === activeSort) ?? SKILL_SORTS[0]).cmp;
 
-  const results = ALL_SKILLS.filter((s) => matchesSkill(s, needle, activeCat, activeGroup, activeSrc)).sort(cmp);
+  // Every skill is rendered; the chips and the search filter on the client
+  // (InstantFilter). `show` applies the URL's filters for the initial paint.
+  const list = ALL_SKILLS.slice().sort(cmp);
+  const show = (s: DccSkill) => matchesSkill(s, needle, activeCat, activeGroup, activeSrc);
+  const shown = list.filter(show).length;
   const filtered = Boolean(needle || activeCat || activeGroup || activeSrc);
   const current: SkillQuery = { q: q.trim(), cat: activeCat, group: activeGroup, src: activeSrc, sort: activeSort };
   const activeMeta = SKILL_CATEGORIES.find((c) => c.key === activeCat);
   const noun = activeMeta?.noun ?? "skill";
   const plural = activeMeta?.plural ?? "skills";
 
+  // The weapon-group row only applies to attack skills, so it shows while the
+  // category is "All" or "Attack" and goes away under "Utility". The client
+  // can only tie a panel to ONE chip value (data-when), so the row is rendered
+  // once per value it shows under; a group chip also sets cat=attack.
+  const groupRow = (when: string, hidden: boolean) => (
+    <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff} data-when={`cat:${when}`} hidden={hidden}>
+      <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Weapon group</span>
+      <a href={withSkill(current, { group: "" })} data-chip="group:" aria-pressed={!activeGroup} className={`${chipBase} ${activeGroup ? chipOff : chipOn}`}>Any</a>
+      {GROUPS.map((g) => (
+        <a key={g} href={withSkill({ ...current, cat: "attack" }, { group: g })} data-chip={`group:${g};cat:attack`} aria-pressed={activeGroup === g} className={`${chipBase} ${activeGroup === g ? chipOn : chipOff}`}>{g}</a>
+      ))}
+    </div>
+  );
+
   return (
     <>
       <DccHomebrewEditor kind="dcc-skill" campaigns={campaigns} initial={hbOwn} />
 
-      <form method="get" action={BASE} className="mb-4 flex gap-2">
+      <InstantFilter>
+      <form method="get" action={BASE} className="mb-4 flex gap-2" data-search>
         <input type="hidden" name="tab" value="skills" />
         <input
           type="search"
@@ -149,94 +173,94 @@ async function SkillsSection({ userId, raw }: { userId: string; raw: Raw }) {
         </button>
       </form>
 
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Category</span>
-        <Link href={withSkill(current, { cat: "", group: "" })} className={`${chipBase} ${activeCat ? chipOff : chipOn}`}>All</Link>
+        <a href={withSkill(current, { cat: "", group: "" })} data-chip="cat:;group:" aria-pressed={!activeCat} className={`${chipBase} ${activeCat ? chipOff : chipOn}`}>All</a>
         {SKILL_CATEGORIES.map((c) => (
-          <Link
+          <a
             key={c.key}
             href={withSkill(current, { cat: c.key, group: c.key === "utility" ? "" : current.group })}
+            data-chip={c.key === "utility" ? "cat:utility;group:" : `cat:${c.key}`}
+            aria-pressed={activeCat === c.key}
             className={`${chipBase} ${activeCat === c.key ? chipOn : chipOff}`}
           >
             {c.label}
-          </Link>
+          </a>
         ))}
       </div>
 
-      {activeCat !== "utility" && GROUPS.length ? (
-        <div className="mb-3 flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Weapon group</span>
-          <Link href={withSkill(current, { group: "" })} className={`${chipBase} ${activeGroup ? chipOff : chipOn}`}>Any</Link>
-          {GROUPS.map((g) => (
-            <Link key={g} href={withSkill({ ...current, cat: "attack" }, { group: g })} className={`${chipBase} ${activeGroup === g ? chipOn : chipOff}`}>{g}</Link>
-          ))}
-        </div>
-      ) : null}
+      {GROUPS.length ? groupRow("", activeCat !== "") : null}
+      {GROUPS.length ? groupRow("attack", activeCat !== "attack") : null}
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Source</span>
-        <Link href={withSkill(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
-        <Link href={withSkill(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
-        <Link href={withSkill(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+        <a href={withSkill(current, { src: "" })} data-chip="src:" aria-pressed={!activeSrc} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</a>
+        <a href={withSkill(current, { src: "book" })} data-chip="src:book" aria-pressed={activeSrc === "book"} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</a>
+        <a href={withSkill(current, { src: "hb" })} data-chip="src:hb" aria-pressed={activeSrc === "hb"} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</a>
       </div>
 
+      {/* Sorting re-orders on the server, so these stay real navigations;
+          data-nav keeps their hrefs in step with the live filters. */}
       <div className="mb-6 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
         {SKILL_SORTS.map((s) => (
-          <Link key={s.key || "cat"} href={withSkill(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+          <Link key={s.key || "cat"} href={withSkill(current, { sort: s.key })} data-nav={`sort:${s.key}`} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
         ))}
       </div>
 
+      {/* The noun follows the active category ("attack skills"), so there is
+          one count line per category, shown only while that category is set. */}
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>{results.length} {results.length === 1 ? noun : plural}</span>
-        {filtered ? <Link href={`${BASE}?tab=skills`} className="text-[var(--red)] hover:underline">Clear filters</Link> : null}
+        <span data-count data-noun="skill" aria-live="polite" data-when="cat:" hidden={activeCat !== ""}>{shown} {shown === 1 ? noun : plural}</span>
+        {SKILL_CATEGORIES.map((c) => (
+          <span key={c.key} data-count data-noun={c.noun} data-plural={c.plural} aria-live="polite" data-when={`cat:${c.key}`} hidden={activeCat !== c.key}>{shown} {shown === 1 ? noun : plural}</span>
+        ))}
+        <Link href={`${BASE}?tab=skills`} data-clear hidden={!filtered} className="text-[var(--red)] hover:underline">Clear filters</Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No skill matches those filters. Try a broader search or{" "}
-            <Link href={`${BASE}?tab=skills`} className="text-[var(--red)] underline">clear them</Link>.
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {results.map((s, i) => {
-            const catLabel = SKILL_CATEGORIES.find((c) => c.key === s.category)?.label ?? s.category;
-            const metaBits = [catLabel, s.group, s.stat ?? undefined].filter(Boolean).join(" · ");
-            const hb = s.source === "Homebrew";
-            return (
-              <li key={`${hb ? "hb" : "bk"}-${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{s.name}</h2>
-                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{metaBits}</span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{s.source}{s.page ? ` · p.${s.page}` : ""}</span>}
-                  {s.passive ? <span className={badge}><span className="text-[var(--text)]">Passive</span></span> : null}
-                  {s.interrupt ? <span className={badge}><span className="text-[var(--text)]">Interrupt</span></span> : null}
-                  {s.damage ? <Badge label="Damage" value={s.damage + (s.damageType ? ` ${s.damageType}` : "")} /> : null}
-                  {s.range ? <Badge label="Range" value={s.range} /> : null}
-                  {s.cooldown ? <Badge label="Cooldown" value={s.cooldown} /> : null}
-                  {s.limitations ? <Badge label="Limits" value={s.limitations} /> : null}
-                </div>
-                {s.desc ? <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{s.desc}</p> : null}
-                {s.upgrades.length ? (
-                  <dl className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-3">
-                    {s.upgrades.map((u) => (
-                      <div key={u.rank} className="flex gap-2 text-[12px] leading-relaxed">
-                        <dt className="shrink-0 font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Rank {u.rank}</dt>
-                        <dd className="text-[var(--muted)]">{u.text}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No skill matches those filters. Try a broader search or{" "}
+          <Link href={`${BASE}?tab=skills`} data-clear className="text-[var(--red)] underline">clear them</Link>.
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
+        {list.map((s, i) => {
+          const catLabel = SKILL_CATEGORIES.find((c) => c.key === s.category)?.label ?? s.category;
+          const metaBits = [catLabel, s.group, s.stat ?? undefined].filter(Boolean).join(" · ");
+          const hb = s.source === "Homebrew";
+          return (
+            <li key={`${hb ? "hb" : "bk"}-${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4" hidden={!show(s)} data-f={facetAttr(skillFacets(s))}>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{s.name}</h2>
+                <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{metaBits}</span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{s.source}{s.page ? ` · p.${s.page}` : ""}</span>}
+                {s.passive ? <span className={badge}><span className="text-[var(--text)]">Passive</span></span> : null}
+                {s.interrupt ? <span className={badge}><span className="text-[var(--text)]">Interrupt</span></span> : null}
+                {s.damage ? <Badge label="Damage" value={s.damage + (s.damageType ? ` ${s.damageType}` : "")} /> : null}
+                {s.range ? <Badge label="Range" value={s.range} /> : null}
+                {s.cooldown ? <Badge label="Cooldown" value={s.cooldown} /> : null}
+                {s.limitations ? <Badge label="Limits" value={s.limitations} /> : null}
+              </div>
+              {s.desc ? <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{s.desc}</p> : null}
+              {s.upgrades.length ? (
+                <dl className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-3">
+                  {s.upgrades.map((u) => (
+                    <div key={u.rank} className="flex gap-2 text-[12px] leading-relaxed">
+                      <dt className="shrink-0 font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Rank {u.rank}</dt>
+                      <dd className="text-[var(--muted)]">{u.text}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      </InstantFilter>
     </>
   );
 }
@@ -267,11 +291,12 @@ function withSpell(current: SpellQuery, patch: SpellQuery): string {
   return `${BASE}?${sp.toString()}`;
 }
 
+// The facets the chips test, per spell — the same object the client reads back
+// from `data-f` (lib/facets), so server and client always agree.
+const spellFacets = (s: DccSpell) => ({ type: s.type, stat: s.stat, src: s.source === "Homebrew" ? "hb" : "book" });
+
 function matchesSpell(s: DccSpell, q: string, type: string, stat: string, src: string): boolean {
-  if (type && s.type !== type) return false;
-  if (stat && s.stat !== stat) return false;
-  if (src === "hb" && s.source !== "Homebrew") return false;
-  if (src === "book" && s.source === "Homebrew") return false;
+  if (!facetMatch(spellFacets(s), { type, stat, src })) return false;
   if (!q) return true;
   return s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q);
 }
@@ -304,7 +329,11 @@ async function SpellsSection({ userId, raw }: { userId: string; raw: Raw }) {
   const activeSort = SPELL_SORTS.some((s) => s.key === sort && s.key) ? sort : "";
   const cmp = (SPELL_SORTS.find((s) => s.key === activeSort) ?? SPELL_SORTS[0]).cmp;
 
-  const results = ALL_SPELLS.filter((s) => matchesSpell(s, needle, activeType, activeStat, activeSrc)).sort(cmp);
+  // Every spell is rendered; the chips and the search filter on the client
+  // (InstantFilter). `show` applies the URL's filters for the initial paint.
+  const list = ALL_SPELLS.slice().sort(cmp);
+  const show = (s: DccSpell) => matchesSpell(s, needle, activeType, activeStat, activeSrc);
+  const shown = list.filter(show).length;
   const filtered = Boolean(needle || activeType || activeStat || activeSrc);
   const current: SpellQuery = { q: q.trim(), type: activeType, stat: activeStat, src: activeSrc, sort: activeSort };
   const activeMeta = SPELL_TYPES.find((t) => t.key === activeType);
@@ -315,7 +344,8 @@ async function SpellsSection({ userId, raw }: { userId: string; raw: Raw }) {
     <>
       <DccHomebrewEditor kind="dcc-spell" campaigns={campaigns} initial={hbOwn} />
 
-      <form method="get" action={BASE} className="mb-4 flex gap-2">
+      <InstantFilter>
+      <form method="get" action={BASE} className="mb-4 flex gap-2" data-search>
         <input type="hidden" name="tab" value="spells" />
         <input
           type="search"
@@ -334,81 +364,86 @@ async function SpellsSection({ userId, raw }: { userId: string; raw: Raw }) {
         </button>
       </form>
 
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Type</span>
-        <Link href={withSpell(current, { type: "" })} className={`${chipBase} ${activeType ? chipOff : chipOn}`}>All</Link>
+        <a href={withSpell(current, { type: "" })} data-chip="type:" aria-pressed={!activeType} className={`${chipBase} ${activeType ? chipOff : chipOn}`}>All</a>
         {SPELL_TYPES.map((t) => (
-          <Link key={t.key} href={withSpell(current, { type: t.key })} className={`${chipBase} ${activeType === t.key ? chipOn : chipOff}`}>{t.label}</Link>
+          <a key={t.key} href={withSpell(current, { type: t.key })} data-chip={`type:${t.key}`} aria-pressed={activeType === t.key} className={`${chipBase} ${activeType === t.key ? chipOn : chipOff}`}>{t.label}</a>
         ))}
       </div>
 
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Stat</span>
-        <Link href={withSpell(current, { stat: "" })} className={`${chipBase} ${activeStat ? chipOff : chipOn}`}>Any</Link>
+        <a href={withSpell(current, { stat: "" })} data-chip="stat:" aria-pressed={!activeStat} className={`${chipBase} ${activeStat ? chipOff : chipOn}`}>Any</a>
         {STATS.map((st) => (
-          <Link key={st} href={withSpell(current, { stat: st })} className={`${chipBase} ${activeStat === st ? chipOn : chipOff}`}>{st}</Link>
+          <a key={st} href={withSpell(current, { stat: st })} data-chip={`stat:${st}`} aria-pressed={activeStat === st} className={`${chipBase} ${activeStat === st ? chipOn : chipOff}`}>{st}</a>
         ))}
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Source</span>
-        <Link href={withSpell(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
-        <Link href={withSpell(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
-        <Link href={withSpell(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+        <a href={withSpell(current, { src: "" })} data-chip="src:" aria-pressed={!activeSrc} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</a>
+        <a href={withSpell(current, { src: "book" })} data-chip="src:book" aria-pressed={activeSrc === "book"} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</a>
+        <a href={withSpell(current, { src: "hb" })} data-chip="src:hb" aria-pressed={activeSrc === "hb"} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</a>
       </div>
 
+      {/* Sorting re-orders on the server, so these stay real navigations;
+          data-nav keeps their hrefs in step with the live filters. */}
       <div className="mb-6 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
         {SPELL_SORTS.map((s) => (
-          <Link key={s.key || "name"} href={withSpell(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+          <Link key={s.key || "name"} href={withSpell(current, { sort: s.key })} data-nav={`sort:${s.key}`} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
         ))}
       </div>
 
+      {/* The noun follows the active type ("healing spells"), so there is one
+          count line per type, shown only while that type is set. */}
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>{results.length} {results.length === 1 ? noun : plural}</span>
-        {filtered ? <Link href={`${BASE}?tab=spells`} className="text-[var(--red)] hover:underline">Clear filters</Link> : null}
+        <span data-count data-noun="spell" aria-live="polite" data-when="type:" hidden={activeType !== ""}>{shown} {shown === 1 ? noun : plural}</span>
+        {SPELL_TYPES.map((t) => (
+          <span key={t.key} data-count data-noun={t.noun} data-plural={t.plural} aria-live="polite" data-when={`type:${t.key}`} hidden={activeType !== t.key}>{shown} {shown === 1 ? noun : plural}</span>
+        ))}
+        <Link href={`${BASE}?tab=spells`} data-clear hidden={!filtered} className="text-[var(--red)] hover:underline">Clear filters</Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No spell matches those filters. Try a broader search or{" "}
-            <Link href={`${BASE}?tab=spells`} className="text-[var(--red)] underline">clear them</Link>.
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {results.map((s, i) => {
-            const typeLabel = SPELL_TYPES.find((t) => t.key === s.type)?.label ?? s.type;
-            const hb = s.source === "Homebrew";
-            return (
-              <li key={`${hb ? "hb" : "bk"}-${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{s.name}</h2>
-                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{typeLabel} · {s.mana} Mana · {s.stat}</span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{s.source}{s.page ? ` · p.${s.page}` : ""}</span>}
-                  {s.passive ? <span className={badge}><span className="text-[var(--text)]">Passive</span></span> : null}
-                  {typeof s.aiFavor === "number" ? <span className={badge}>AI Favor <span className="text-[var(--text)]">{s.aiFavor}</span></span> : null}
-                </div>
-                {s.desc ? <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{s.desc}</p> : null}
-                {s.upgrades.length ? (
-                  <dl className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-3">
-                    {s.upgrades.map((u) => (
-                      <div key={u.rank} className="flex gap-2 text-[12px] leading-relaxed">
-                        <dt className="shrink-0 font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Rank {u.rank}</dt>
-                        <dd className="text-[var(--muted)]">{u.text}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No spell matches those filters. Try a broader search or{" "}
+          <Link href={`${BASE}?tab=spells`} data-clear className="text-[var(--red)] underline">clear them</Link>.
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
+        {list.map((s, i) => {
+          const typeLabel = SPELL_TYPES.find((t) => t.key === s.type)?.label ?? s.type;
+          const hb = s.source === "Homebrew";
+          return (
+            <li key={`${hb ? "hb" : "bk"}-${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4" hidden={!show(s)} data-f={facetAttr(spellFacets(s))}>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">{s.name}</h2>
+                <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{typeLabel} · {s.mana} Mana · {s.stat}</span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{s.source}{s.page ? ` · p.${s.page}` : ""}</span>}
+                {s.passive ? <span className={badge}><span className="text-[var(--text)]">Passive</span></span> : null}
+                {typeof s.aiFavor === "number" ? <span className={badge}>AI Favor <span className="text-[var(--text)]">{s.aiFavor}</span></span> : null}
+              </div>
+              {s.desc ? <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{s.desc}</p> : null}
+              {s.upgrades.length ? (
+                <dl className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-3">
+                  {s.upgrades.map((u) => (
+                    <div key={u.rank} className="flex gap-2 text-[12px] leading-relaxed">
+                      <dt className="shrink-0 font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Rank {u.rank}</dt>
+                      <dd className="text-[var(--muted)]">{u.text}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      </InstantFilter>
     </>
   );
 }

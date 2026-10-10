@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getPlayUser } from "@/lib/vtt";
+import { blocked, strike, CODE_MISSES_PER_USER, TOO_MANY } from "@/lib/rate-limit";
 import { makeCode } from "@/lib/campaign-code";
 import { participatesInCampaign } from "@/lib/homebrew";
 import { isSystemKey } from "@/components/systemStore";
@@ -65,11 +66,23 @@ export async function GET(req: NextRequest) {
   const user = await getPlayUser(req);
   if (!user) return new Response("Unauthorized", { status: 401 });
 
+  // Join codes are short enough to be guessable with patience, so an account
+  // that keeps asking for codes that don't exist is cut off for a while. Only
+  // MISSES count: a sheet re-reads its own (real) code on every open, and that
+  // must never be what trips this.
+  const missKey = `code:user:${user.id}`;
+  if (blocked(missKey, CODE_MISSES_PER_USER)) {
+    return new Response(TOO_MANY, { status: 429, headers: { "retry-after": "600" } });
+  }
+
   const campaign = await prisma.campaign.findUnique({
     where: { code },
     select: { id: true, name: true, code: true, vttUrl: true },
   });
-  if (!campaign) return new Response("Not found", { status: 404 });
+  if (!campaign) {
+    strike(missKey);
+    return new Response("Not found", { status: 404 });
+  }
 
   // `vttUrl` goes out only to someone already IN the campaign — the GM who owns
   // it, or a player with a sheet linked to it (participatesInCampaign is the

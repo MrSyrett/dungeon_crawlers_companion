@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { GEAR, type GearItem } from "@/lib/data/gear";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 
@@ -62,8 +64,10 @@ function weaponKind(t: string | undefined): string {
   return t ?? "";
 }
 
-function matches(g: Row, q: string, cat: string): boolean {
-  if (cat && g.category !== cat) return false;
+// The values the chips test, per row (lib/facets); the search is separate.
+const facets = (g: Row) => ({ cat: g.category });
+
+function matches(g: Row, q: string): boolean {
   if (!q) return true;
   return (
     g.name.toLowerCase().includes(q) ||
@@ -188,9 +192,13 @@ export default async function GearPage({
   const needle = q.trim().toLowerCase();
   const activeCat = CATEGORIES.some((c) => c.key === cat) ? cat : "";
 
-  const results = ALL_ROWS.filter((g) => matches(g, needle, activeCat));
   const filtered = Boolean(needle || activeCat);
   const current: Query = { q: q.trim(), cat: activeCat };
+  // Every item is rendered; the chips and the search filter on the client
+  // (InstantFilter). `show` applies the URL's filters for the initial paint,
+  // through the same facet match the client uses.
+  const show = (g: Row) => facetMatch(facets(g), current) && matches(g, needle);
+  const shown = ALL_ROWS.filter(show).length;
   const activeMeta = CATEGORIES.find((c) => c.key === activeCat);
   const noun = activeMeta?.noun ?? "item";
   const plural = activeMeta?.plural ?? "items";
@@ -201,7 +209,8 @@ export default async function GearPage({
 
       <HomebrewManager type="gear" campaigns={campaigns} initial={hbOwn} ammoOptions={ammoOptions} />
 
-      <form method="get" action="/gear" className="mb-4 flex gap-2">
+      <InstantFilter>
+      <form method="get" action="/gear" className="mb-4 flex gap-2" data-search>
         <input
           type="search"
           name="q"
@@ -215,101 +224,105 @@ export default async function GearPage({
         </button>
       </form>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Type
         </span>
-        <Link
+        <a
           href={withParams(current, { cat: "" })}
+          data-chip="cat:"
+          aria-pressed={!activeCat}
           className={`${chipBase} ${activeCat ? chipOff : chipOn}`}
         >
           All
-        </Link>
+        </a>
         {CATEGORIES.map((c) => (
-          <Link
+          <a
             key={c.key}
             href={withParams(current, { cat: c.key })}
+            data-chip={`cat:${c.key}`}
+            aria-pressed={activeCat === c.key}
             className={`${chipBase} ${activeCat === c.key ? chipOn : chipOff}`}
           >
             {c.label}
-          </Link>
+          </a>
         ))}
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>
-          {results.length} {results.length === 1 ? noun : plural}
+        {/* The server picks the noun for the active category; a client-side
+            change counts plain "items", since the noun can't follow the chip. */}
+        <span data-count data-noun="item" aria-live="polite">
+          {shown} {shown === 1 ? noun : plural}
         </span>
-        {filtered ? (
-          <Link href="/gear" className="text-[var(--gold)] hover:underline">
-            Clear filters
-          </Link>
-        ) : null}
+        <Link href="/gear" data-clear hidden={!filtered} className="text-[var(--gold)] hover:underline">
+          Clear filters
+        </Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No gear matches those filters. Try a broader search or{" "}
-            <Link href="/gear" className="text-[var(--gold)] underline">
-              clear them
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {results.map((g, i) => {
-            const catLabel = CATEGORIES.find((c) => c.key === g.category)?.label ?? "";
-            return (
-              <li
-                key={`${g.homebrew ? "hb" : "bk"}-${g.category}-${g.name}-${i}`}
-                className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-              >
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                    {g.name}
-                  </h2>
-                  {g.homebrew ? (
-                    <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                      Homebrew
-                    </span>
-                  ) : null}
-                  <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                    {g.category === "magic" && g.magicType ? g.magicType : catLabel}
-                    {g.cost ? ` · ${g.cost}` : ""}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No gear matches those filters. Try a broader search or{" "}
+          <Link href="/gear" data-clear className="text-[var(--gold)] underline">
+            clear them
+          </Link>
+          .
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
+        {ALL_ROWS.map((g, i) => {
+          const catLabel = CATEGORIES.find((c) => c.key === g.category)?.label ?? "";
+          return (
+            <li
+              key={`${g.homebrew ? "hb" : "bk"}-${g.category}-${g.name}-${i}`}
+              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+              hidden={!show(g)}
+              data-f={facetAttr(facets(g))}
+            >
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  {g.name}
+                </h2>
+                {g.homebrew ? (
+                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                    Homebrew
                   </span>
+                ) : null}
+                <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                  {g.category === "magic" && g.magicType ? g.magicType : catLabel}
+                  {g.cost ? ` · ${g.cost}` : ""}
+                </span>
+              </div>
+
+              {g.category === "weapon" ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {g.damage ? <Badge label="Damage" value={g.damage} /> : null}
+                  {g.range ? <Badge label="Range" value={g.range} /> : null}
+                  {g.weaponType ? <Badge label="Type" value={weaponKind(g.weaponType)} /> : null}
+                  {g.cost ? <Badge label="Cost" value={g.cost} /> : null}
                 </div>
+              ) : null}
 
-                {g.category === "weapon" ? (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {g.damage ? <Badge label="Damage" value={g.damage} /> : null}
-                    {g.range ? <Badge label="Range" value={g.range} /> : null}
-                    {g.weaponType ? <Badge label="Type" value={weaponKind(g.weaponType)} /> : null}
-                    {g.cost ? <Badge label="Cost" value={g.cost} /> : null}
-                  </div>
-                ) : null}
+              {g.category === "basic" || g.category === "armor" || g.category === "ammo" ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {g.qty ? <Badge label="Qty" value={g.qty} /> : null}
+                  {g.cost ? <Badge label="Cost" value={g.cost} /> : null}
+                </div>
+              ) : null}
 
-                {g.category === "basic" || g.category === "armor" || g.category === "ammo" ? (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {g.qty ? <Badge label="Qty" value={g.qty} /> : null}
-                    {g.cost ? <Badge label="Cost" value={g.cost} /> : null}
-                  </div>
-                ) : null}
+              {g.category === "weapon" && g.props ? (
+                <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{g.props}</p>
+              ) : null}
 
-                {g.category === "weapon" && g.props ? (
-                  <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{g.props}</p>
-                ) : null}
-
-                {g.desc ? (
-                  <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{g.desc}</p>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              {g.desc ? (
+                <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{g.desc}</p>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

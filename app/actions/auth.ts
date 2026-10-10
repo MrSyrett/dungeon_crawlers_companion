@@ -4,6 +4,11 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createSession, destroySession, hashPassword, verifyPassword } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
+import { safeNext } from "@/lib/safe-next";
+import {
+  actionIp, blocked, strike, take,
+  LOGIN_PER_IP, LOGIN_PER_EMAIL, SIGNUP_PER_IP, TOO_MANY,
+} from "@/lib/rate-limit";
 
 export type AuthState = { error?: string; notice?: string };
 
@@ -15,6 +20,10 @@ export async function signup(_prev: AuthState, formData: FormData): Promise<Auth
 
   if (!EMAIL_RE.test(email)) return { error: "Enter a valid email address." };
   if (password.length < 8) return { error: "Password must be at least 8 characters." };
+
+  // A handful of new accounts an hour per address is plenty for a family
+  // signing up at the table; a script making hundreds is not welcome.
+  if (!take(`signup:ip:${await actionIp()}`, SIGNUP_PER_IP)) return { error: TOO_MANY };
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return { error: "An account with that email already exists." };
@@ -42,8 +51,20 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
+  // Only WRONG guesses count (lib/rate-limit.ts), keyed by both the address
+  // and the account: a script hammering one account from many addresses hits
+  // the per-email budget, one address trying many accounts hits the per-IP one,
+  // and a household that all sign in correctly never notices either.
+  const ipKey = `login:ip:${await actionIp()}`;
+  const emailKey = `login:email:${email}`;
+  if (blocked(ipKey, LOGIN_PER_IP) || blocked(emailKey, LOGIN_PER_EMAIL)) {
+    return { error: TOO_MANY };
+  }
+
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    strike(ipKey);
+    strike(emailKey);
     return { error: "Invalid email or password." };
   }
   // Gate access on approval (admins are always allowed, even if a stale row
@@ -52,7 +73,7 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
     return { error: "Your account is awaiting admin approval. You'll be able to sign in once it's approved." };
   }
   await createSession(user.id);
-  redirect("/dashboard");
+  redirect(safeNext(formData.get("next")));
 }
 
 export async function logout(): Promise<void> {

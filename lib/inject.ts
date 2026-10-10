@@ -266,6 +266,34 @@ const SHIM = `
   // __ddSave(data) — call with the data object to save directly to server
   window.__ddSave = save;
   window.__ddSaveTitle = saveTitle;
+
+  // INVITE LINK. A sheet opened as /tools/<tool>/<id>?join=<code> (from the
+  // /join/<code> page, or straight from + New there) joins that campaign by
+  // driving the sheet's OWN Link dialog: open it, fill the code, submit — the
+  // same three steps a player does by hand, so the link is stored the one way
+  // every sheet already stores it. All 14 sheets share openCampaign() /
+  // campaignJoin() / #campaign-code-input; if a sheet ever lacks them the
+  // code is simply left in the URL for the player to type. The param is then
+  // removed from the address bar so a reload or a bookmark doesn't re-join.
+  (function autoJoin() {
+    var m = /[?&]join=([A-Za-z0-9]{4,12})/.exec(window.location.search);
+    if (!m || cfg.previewOnly) return;
+    var code = m[1].toUpperCase();
+    function go() {
+      try {
+        if (typeof window.openCampaign !== 'function' || typeof window.campaignJoin !== 'function') return;
+        window.openCampaign();
+        var input = document.getElementById('campaign-code-input');
+        if (!input) return;            // already linked: the dialog shows which campaign; the player decides
+        input.value = code;
+        window.campaignJoin();
+        try { var u = new URL(window.location.href); u.searchParams.delete('join'); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch (e) {}
+      } catch (e) {}
+    }
+    // After the sheet's own scripts have defined their functions and restored state.
+    if (document.readyState === 'complete') setTimeout(go, 250);
+    else window.addEventListener('load', function () { setTimeout(go, 250); });
+  })();
 })();
 `;
 
@@ -337,6 +365,7 @@ export function renderToolPage(
     state: opts.data ?? {},
     ...(typeof opts.rev === "number" ? { rev: opts.rev } : {}),
     ...(opts.vttToken ? { vttToken: opts.vttToken } : {}),
+    ...(opts.previewOnly ? { previewOnly: true } : {}),
   };
   const framed = !!opts.vttToken || !!opts.previewOnly || !!opts.embed;
   const themeKey = themeKeyFor(opts.def);

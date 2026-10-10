@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { visibleRulebooks, prettyName } from "@/lib/rulebooks";
 import RulebookGrid from "@/components/RulebookGrid";
 import RulebookReader from "@/components/RulebookReader";
+import { readSystemCookie } from "@/lib/system-cookie";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function RulesPage({
       url: `/api/rulebooks/${encodeURIComponent(b.file)}`,
       system: b.system,
     }));
-    return <RulebookReader books={list} active={selected} />;
+    return <RulebookReader books={list} active={selected} initialSystem={await readSystemCookie()} />;
   }
 
   return (
@@ -61,6 +62,7 @@ export default async function RulesPage({
       ) : (
         <RulebookGrid
           books={books.map((b) => ({ file: b.file, title: prettyName(b.file), system: b.system }))}
+          initialSystem={await readSystemCookie()}
         />
       )}
     </div>

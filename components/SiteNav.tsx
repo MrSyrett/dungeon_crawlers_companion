@@ -9,14 +9,16 @@ import {
   setSystem,
   subscribeSystem,
   getSystemSnapshot,
-  getSystemServerSnapshot,
+  serverSystem,
   subscribeView,
   setView,
   getViewSnapshot,
-  getViewServerSnapshot,
+  serverView,
   type SystemKey,
+  type DashView,
 } from "./systemStore";
 import {
+  CHROME_PREFIXES,
   compendiumFor,
   homebrewFor,
   systemForPath,
@@ -59,7 +61,9 @@ const HIDDEN_ON = ["/login", "/signup", "/forgot-password", "/reset-password"];
 // /campaigns is deliberately NOT here. Campaigns are per-system now — the page
 // shows one system's campaigns and is created in that system — so it wears that
 // system's ground, faces and colours like the dashboard and the compendium do.
-const CHROME_PREFIXES = ["/admin", "/token-maker", "/account"];
+// (The list itself lives in navConfig.ts so the root layout's pre-paint theme
+// script — a server component — can read it; a value exported from this
+// "use client" module would reach the server as a client reference, not a list.)
 
 // The home page is chrome too, but it CANNOT go in the list above: "/" is a prefix
 // of every path, so `pathname.startsWith("/" + "/")` is a near miss away from
@@ -81,15 +85,21 @@ export default function SiteNav({
   email,
   isAdmin,
   hiddenKeys = [],
+  initialSystem,
+  initialView,
 }: {
   email: string;
   isAdmin: boolean;
   hiddenKeys?: SystemKey[];
+  // What the server rendered (the cookie the store mirrors), so the system chip
+  // and the Characters/Adventures tabs hydrate right instead of as Shadowdark.
+  initialSystem?: SystemKey;
+  initialView?: DashView;
 }) {
   const pathname = usePathname() || "/";
   const router = useRouter();
-  const storedSystem = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
-  const view = useSyncExternalStore(subscribeView, getViewSnapshot, getViewServerSnapshot);
+  const storedSystem = useSyncExternalStore(subscribeSystem, getSystemSnapshot, serverSystem(initialSystem));
+  const view = useSyncExternalStore(subscribeView, getViewSnapshot, serverView(initialView));
   const [menu, setMenu] = useState<Menu>(null);
 
   const hidden = new Set(hiddenKeys);

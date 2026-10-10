@@ -6,7 +6,8 @@ import {
   SYSTEMS,
   subscribeSystem,
   getSystemSnapshot,
-  getSystemServerSnapshot,
+  serverSystem,
+  type SystemKey,
 } from "./systemStore";
 import type { RulebookSystem } from "@/lib/rulebooks";
 
@@ -19,8 +20,8 @@ export type RulebookListItem = { file: string; title: string; system: RulebookSy
  * control happened on the server, so `books` already contains only what this
  * user may read.
  */
-export default function RulebookGrid({ books }: { books: RulebookListItem[] }) {
-  const active = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
+export default function RulebookGrid({ books, initialSystem }: { books: RulebookListItem[]; initialSystem?: SystemKey }) {
+  const active = useSyncExternalStore(subscribeSystem, getSystemSnapshot, serverSystem(initialSystem));
   const shown = books.filter((b) => b.system === "BOTH" || b.system === active);
   const hidden = books.length - shown.length;
   const activeName = SYSTEMS.find((s) => s.key === active)?.name ?? active;

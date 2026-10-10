@@ -9,6 +9,7 @@ import {
   userIdForResetToken,
   consumeResetToken,
 } from "@/lib/password-reset";
+import { actionIp, take, RESET_PER_IP, RESET_PER_EMAIL, TOO_MANY } from "@/lib/rate-limit";
 
 export type ForgotState = { error?: string; sent?: boolean };
 export type ResetState = { error?: string; done?: boolean };
@@ -35,6 +36,15 @@ export async function requestPasswordReset(
 ): Promise<ForgotState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!EMAIL_RE.test(email)) return { error: "Enter a valid email address." };
+
+  // Every request here sends real mail (when the account exists), so every
+  // request counts: a few per address per quarter hour, a few per account per
+  // hour. Both budgets are checked BEFORE the lookup and give the same answer
+  // whether or not the account exists, so this still leaks nothing about
+  // which emails are registered.
+  if (!take(`reset:ip:${await actionIp()}`, RESET_PER_IP) || !take(`reset:email:${email}`, RESET_PER_EMAIL)) {
+    return { error: TOO_MANY };
+  }
 
   const user = await prisma.user.findUnique({ where: { email } });
 

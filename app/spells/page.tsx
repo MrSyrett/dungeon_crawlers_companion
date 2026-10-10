@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { SPELLS, type Spell } from "@/lib/data/spells";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 
@@ -48,21 +50,15 @@ function withParams(current: Query, patch: Query): string {
   return s ? `/spells?${s}` : "/spells";
 }
 
-function castBy(spell: Spell, caster: string): boolean {
-  if (!caster) return true;
-  if (spell.caster === caster) return true;
-  // Wizard and Priest both learn from the shared "Both" list.
-  return spell.caster === "Both" && (caster === "Wizard" || caster === "Priest");
-}
+// The values the chips test, per row (lib/facets); the search is separate.
+// Wizard and Priest both learn from the shared "Both" list, so a "Both" spell
+// is on each of those lists; a homebrew spell is only on the "Homebrew" list.
+const facets = (r: Row) => ({
+  tier: r.tier,
+  caster: r.homebrew ? "Homebrew" : r.caster === "Both" ? ["Wizard", "Priest"] : r.caster,
+});
 
-function rowMatches(r: Row, q: string, tier: string, caster: string): boolean {
-  if (tier && r.tier !== tier) return false;
-  if (caster === "Homebrew") {
-    if (!r.homebrew) return false;
-  } else if (caster) {
-    if (r.homebrew) return false; // a specific class list never contains homebrew
-    if (!castBy(r, caster)) return false;
-  }
+function rowMatches(r: Row, q: string): boolean {
   if (!q) return true;
   return r.name.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
 }
@@ -117,9 +113,13 @@ export default async function SpellsPage({
   const casterOptions = hbRows.length ? [...CASTERS, "Homebrew"] : CASTERS;
   const activeCaster = casterOptions.includes(caster) ? caster : "";
 
-  const results = ALL_ROWS.filter((s) => rowMatches(s, needle, activeTier, activeCaster));
   const filtered = Boolean(needle || activeTier || activeCaster);
   const current: Query = { q: q.trim(), tier: activeTier, caster: activeCaster };
+  // Every spell is rendered; the chips and the search filter on the client
+  // (InstantFilter). `show` applies the URL's filters for the initial paint,
+  // through the same facet match the client uses.
+  const show = (s: Row) => facetMatch(facets(s), current) && rowMatches(s, needle);
+  const shown = ALL_ROWS.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -127,7 +127,8 @@ export default async function SpellsPage({
 
       <HomebrewManager type="spell" campaigns={campaigns} initial={hbOwn} />
 
-      <form method="get" action="/spells" className="mb-4 flex gap-2">
+      <InstantFilter>
+      <form method="get" action="/spells" className="mb-4 flex gap-2" data-search>
         <input
           type="search"
           name="q"
@@ -142,114 +143,120 @@ export default async function SpellsPage({
         </button>
       </form>
 
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Tier
         </span>
-        <Link
+        <a
           href={withParams(current, { tier: "" })}
+          data-chip="tier:"
+          aria-pressed={!activeTier}
           className={`${chipBase} ${activeTier ? chipOff : chipOn}`}
         >
           Any
-        </Link>
+        </a>
         {TIERS.map((t) => (
-          <Link
+          <a
             key={t}
             href={withParams(current, { tier: t })}
+            data-chip={`tier:${t}`}
+            aria-pressed={activeTier === t}
             className={`${chipBase} ${activeTier === t ? chipOn : chipOff}`}
           >
             {t}
-          </Link>
+          </a>
         ))}
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           List
         </span>
-        <Link
+        <a
           href={withParams(current, { caster: "" })}
+          data-chip="caster:"
+          aria-pressed={!activeCaster}
           className={`${chipBase} ${activeCaster ? chipOff : chipOn}`}
         >
           All
-        </Link>
+        </a>
         {casterOptions.map((c) => (
-          <Link
+          <a
             key={c}
             href={withParams(current, { caster: c })}
+            data-chip={`caster:${c}`}
+            aria-pressed={activeCaster === c}
             className={`${chipBase} ${activeCaster === c ? chipOn : chipOff}`}
           >
             {c}
-          </Link>
+          </a>
         ))}
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>
-          {results.length} {results.length === 1 ? "spell" : "spells"}
+        <span data-count data-noun="spell" aria-live="polite">
+          {shown} {shown === 1 ? "spell" : "spells"}
         </span>
-        {filtered ? (
-          <Link href="/spells" className="text-[var(--gold)] hover:underline">
-            Clear filters
-          </Link>
-        ) : null}
+        <Link href="/spells" data-clear hidden={!filtered} className="text-[var(--gold)] hover:underline">
+          Clear filters
+        </Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No spell matches those filters. Try a broader search or{" "}
-            <Link href="/spells" className="text-[var(--gold)] underline">
-              clear them
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {results.map((s, i) => (
-            <li
-              key={`${s.homebrew ? "hb" : "bk"}-${s.caster}-${s.name}-${i}`}
-              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-            >
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                  {s.name}
-                </h2>
-                {s.homebrew ? (
-                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                    Homebrew
-                  </span>
-                ) : null}
-                <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                  Tier {s.tier} · {s.caster} · DC {10 + (parseInt(s.tier) || 1)}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No spell matches those filters. Try a broader search or{" "}
+          <Link href="/spells" data-clear className="text-[var(--gold)] underline">
+            clear them
+          </Link>
+          .
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
+        {ALL_ROWS.map((s, i) => (
+          <li
+            key={`${s.homebrew ? "hb" : "bk"}-${s.caster}-${s.name}-${i}`}
+            className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+            hidden={!show(s)}
+            data-f={facetAttr(facets(s))}
+          >
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                {s.name}
+              </h2>
+              {s.homebrew ? (
+                <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  Homebrew
                 </span>
-              </div>
-
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {[
-                  ["Range", s.range],
-                  ["Duration", s.duration],
-                  ...(s.damage ? ([["Damage", s.damage]] as [string, string][]) : []),
-                  ...(s.heal ? ([["Healing", s.heal]] as [string, string][]) : []),
-                ].map(([labelText, value]) => (
-                  <span
-                    key={labelText}
-                    className="rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]"
-                  >
-                    {labelText} <span className="text-[var(--text)]">{value}</span>
-                  </span>
-                ))}
-              </div>
-
-              {s.desc ? (
-                <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{s.desc}</p>
               ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
+              <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                Tier {s.tier} · {s.caster} · DC {10 + (parseInt(s.tier) || 1)}
+              </span>
+            </div>
+
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {[
+                ["Range", s.range],
+                ["Duration", s.duration],
+                ...(s.damage ? ([["Damage", s.damage]] as [string, string][]) : []),
+                ...(s.heal ? ([["Healing", s.heal]] as [string, string][]) : []),
+              ].map(([labelText, value]) => (
+                <span
+                  key={labelText}
+                  className="rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]"
+                >
+                  {labelText} <span className="text-[var(--text)]">{value}</span>
+                </span>
+              ))}
+            </div>
+
+            {s.desc ? (
+              <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{s.desc}</p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

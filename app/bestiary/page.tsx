@@ -6,6 +6,8 @@ import { MONSTERS, type Monster } from "@/lib/data/monsters";
 import { MONSTER_TYPES, typeOf } from "@/lib/data/monster-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/bestiary";
@@ -99,10 +101,10 @@ function StatBlock({ m }: { m: Row }) {
   );
 }
 
-function matches(m: Row, q: string, lv: string, al: string, type: string): boolean {
-  if (lv && m.lv !== lv) return false;
-  if (al && m.al !== al) return false;
-  if (type && m.ctype !== type) return false;
+// The values the chips test, per row (lib/facets); the search is separate.
+const facets = (m: Row) => ({ type: m.ctype, lv: m.lv, al: m.al });
+
+function matches(m: Row, q: string): boolean {
   if (!q) return true;
   // Search the text a GM actually scans for: name, what it does, and its notes.
   return (
@@ -184,9 +186,13 @@ export default async function BestiaryPage({
     );
   }
 
-  const results = ALL_ROWS.filter((m) => matches(m, needle, activeLv, activeAl, activeType));
   const filtered = Boolean(needle || activeLv || activeAl || activeType);
   const current: Query = { q: q.trim(), lv: activeLv, al: activeAl, type: activeType };
+  // Every monster is rendered; the chips and the search filter on the client
+  // (InstantFilter). `show` applies the URL's filters for the initial paint,
+  // through the same facet match the client uses.
+  const show = (m: Row) => facetMatch(facets(m), current) && matches(m, needle);
+  const shown = ALL_ROWS.filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -199,8 +205,9 @@ export default async function BestiaryPage({
         monsterTypes={[...MONSTER_TYPES]}
       />
 
+      <InstantFilter>
       {/* A plain GET form, so search works with JavaScript disabled. */}
-      <form method="get" action="/bestiary" className="mb-4 flex gap-2">
+      <form method="get" action="/bestiary" className="mb-4 flex gap-2" data-search>
         <input
           type="search"
           name="q"
@@ -216,103 +223,110 @@ export default async function BestiaryPage({
         </button>
       </form>
 
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Type
         </span>
-        <Link
+        <a
           href={withParams(current, { type: "" })}
+          data-chip="type:"
+          aria-pressed={!activeType}
           className={`${chipBase} ${activeType ? chipOff : chipOn}`}
         >
           Any
-        </Link>
+        </a>
         {allTypes.map((t) => (
-          <Link
+          <a
             key={t}
             href={withParams(current, { type: t })}
+            data-chip={`type:${t}`}
+            aria-pressed={activeType === t}
             className={`${chipBase} ${activeType === t ? chipOn : chipOff}`}
           >
             {t}
-          </Link>
+          </a>
         ))}
       </div>
 
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Level
         </span>
-        <Link href={withParams(current, { lv: "" })} className={`${chipBase} ${activeLv ? chipOff : chipOn}`}>
+        <a href={withParams(current, { lv: "" })} data-chip="lv:" aria-pressed={!activeLv} className={`${chipBase} ${activeLv ? chipOff : chipOn}`}>
           Any
-        </Link>
+        </a>
         {allLevels.map((l) => (
-          <Link
+          <a
             key={l}
             href={withParams(current, { lv: l })}
+            data-chip={`lv:${l}`}
+            aria-pressed={activeLv === l}
             className={`${chipBase} ${activeLv === l ? chipOn : chipOff}`}
           >
             {l}
-          </Link>
+          </a>
         ))}
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Align
         </span>
-        <Link href={withParams(current, { al: "" })} className={`${chipBase} ${activeAl ? chipOff : chipOn}`}>
+        <a href={withParams(current, { al: "" })} data-chip="al:" aria-pressed={!activeAl} className={`${chipBase} ${activeAl ? chipOff : chipOn}`}>
           Any
-        </Link>
+        </a>
         {ALIGNMENTS.map((a) => (
-          <Link
+          <a
             key={a.key}
             href={withParams(current, { al: a.key })}
+            data-chip={`al:${a.key}`}
+            aria-pressed={activeAl === a.key}
             className={`${chipBase} ${activeAl === a.key ? chipOn : chipOff}`}
           >
             {a.label}
-          </Link>
+          </a>
         ))}
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>
-          {results.length} {results.length === 1 ? "monster" : "monsters"}
+        <span data-count data-noun="monster" aria-live="polite">
+          {shown} {shown === 1 ? "monster" : "monsters"}
         </span>
-        {filtered ? (
-          <Link href="/bestiary" className="text-[var(--gold)] hover:underline">
-            Clear filters
-          </Link>
-        ) : null}
+        <Link href="/bestiary" data-clear hidden={!filtered} className="text-[var(--gold)] hover:underline">
+          Clear filters
+        </Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No monster matches those filters. Try a broader search or{" "}
-            <Link href="/bestiary" className="text-[var(--gold)] underline">
-              clear them
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {results.map((m) => (
-            <li
-              key={`${m.homebrew ? "hb" : "bk"}-${m.name}`}
-              className={cardCls}
-            >
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <a href={withParams({}, { m: m.name })} className={`${nameCls} hover:underline`}>
-                  {m.name}
-                </a>
-                {m.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
-                <IdentityLine m={m} />
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No monster matches those filters. Try a broader search or{" "}
+          <Link href="/bestiary" data-clear className="text-[var(--gold)] underline">
+            clear them
+          </Link>
+          .
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
+        {ALL_ROWS.map((m) => (
+          <li
+            key={`${m.homebrew ? "hb" : "bk"}-${m.name}`}
+            className={cardCls}
+            hidden={!show(m)}
+            data-f={facetAttr(facets(m))}
+            data-s={`${m.atk} ${m.notes}`}
+          >
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <a href={withParams({}, { m: m.name })} className={`${nameCls} hover:underline`}>
+                {m.name}
+              </a>
+              {m.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+              <IdentityLine m={m} />
+            </div>
+          </li>
+        ))}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

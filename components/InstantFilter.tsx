@@ -13,7 +13,19 @@ import { facetMatch, type Facets, type FilterState } from "@/lib/facets";
 // copied link or a no-JS visit still works through the server.
 //
 // Everything is wired by data attributes (see each system's *Ref.tsx):
-//   [data-chip="param:value"]       a chip (value "" = All / default)
+//   [data-chip="param:value"]       a chip (value "" = All / default). Several
+//                                   pairs joined by ";" set them all at once
+//                                   ("cat:attack;group:" — a chip that also
+//                                   resets another row); the FIRST pair decides
+//                                   whether the chip shows as pressed.
+//   [data-chip="opt:"][data-toggle="0"]  a switch: pressed (lit) while the param
+//                                   holds the chip's value, and clicking it then
+//                                   sets the data-toggle value instead ("include
+//                                   optional": lit while opt is unset, opt=0 off)
+//   [data-nav="param:value"]        a link that stays a real navigation (a sort
+//                                   order, which re-orders on the server) but
+//                                   whose href is kept in step with the current
+//                                   filters, so sorting never drops them
 //   [data-chiprow] data-base/-on/-off  the chip row, with its class lists
 //   form[data-search] input[name=q] the search box
 //   [data-count] data-noun=".."     "N nouns" line (data-plural overrides noun+"s")
@@ -41,11 +53,15 @@ export default function InstantFilter({ children }: { children: React.ReactNode 
     // are therefore dropped, not carried.
     const params = new Set<string>(["q"]);
     const known: Record<string, Set<string>> = {};
+    // "param:value" → [param, value]; "a:x;b:" → [["a","x"],["b",""]].
+    const pairs = (spec: string): [string, string][] => spec.split(";").filter(Boolean).map((part) => { const i = part.indexOf(":"); return [part.slice(0, i), part.slice(i + 1)]; });
     root.querySelectorAll<HTMLElement>("[data-chip]").forEach((c) => {
-      const spec = c.dataset.chip || "", i = spec.indexOf(":");
-      const p = spec.slice(0, i);
-      params.add(p);
-      (known[p] || (known[p] = new Set<string>())).add(spec.slice(i + 1));
+      const ps = pairs(c.dataset.chip || "");
+      for (const [p, v] of ps) {
+        params.add(p);
+        (known[p] || (known[p] = new Set<string>())).add(v);
+      }
+      if (ps.length && c.hasAttribute("data-toggle")) known[ps[0][0]].add(c.dataset.toggle || "");
     });
     const state: FilterState = {}, extra: FilterState = {};
     try {
@@ -87,14 +103,23 @@ export default function InstantFilter({ children }: { children: React.ReactNode 
       });
       let any = !!q; // is any chip- or search-controlled filter set? (a view-mode param doesn't count)
       root!.querySelectorAll<HTMLElement>("[data-chip]").forEach((el) => {
-        const spec = el.dataset.chip || "", i = spec.indexOf(":");
-        const p = spec.slice(0, i), v = spec.slice(i + 1);
+        const ps = pairs(el.dataset.chip || "");
+        if (!ps.length) return;
+        const [p, v] = ps[0];
         const row = el.closest<HTMLElement>("[data-chiprow]");
         if (state[p]) any = true;
         const on = (state[p] || "") === v;
         if (row) el.className = `${row.dataset.base || ""} ${on ? row.dataset.on || "" : row.dataset.off || ""}`;
         el.setAttribute("aria-pressed", on ? "true" : "false");
-        el.setAttribute("href", hrefFor({ [p]: v }));
+        const patch: FilterState = {};
+        for (const [pp, vv] of ps) patch[pp] = vv;
+        if (on && el.hasAttribute("data-toggle")) patch[p] = el.dataset.toggle || "";
+        el.setAttribute("href", hrefFor(patch));
+      });
+      root!.querySelectorAll<HTMLElement>("[data-nav]").forEach((el) => {
+        const patch: FilterState = {};
+        for (const [pp, vv] of pairs(el.dataset.nav || "")) patch[pp] = vv;
+        el.setAttribute("href", hrefFor(patch));
       });
       // Panels tied to one chip value (a family blurb, a per-book note): shown
       // only while that param holds that value, so they can't go stale behind a
@@ -113,6 +138,7 @@ export default function InstantFilter({ children }: { children: React.ReactNode 
     }
 
     function set(p: string, v: string) { if (v) state[p] = v; else delete state[p]; apply(); }
+    function setAll(patch: FilterState) { for (const k in patch) { const v = patch[k]; if (v) state[k] = v; else delete state[k]; } apply(); }
 
     function onClick(e: MouseEvent) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -120,8 +146,13 @@ export default function InstantFilter({ children }: { children: React.ReactNode 
       const chip = t && t.closest<HTMLElement>("[data-chip]");
       if (chip && root!.contains(chip)) {
         e.preventDefault();
-        const spec = chip.dataset.chip || "", i = spec.indexOf(":");
-        set(spec.slice(0, i), spec.slice(i + 1));
+        const ps = pairs(chip.dataset.chip || "");
+        if (!ps.length) return;
+        const patch: FilterState = {};
+        for (const [p, v] of ps) patch[p] = v;
+        // A switch clicked while pressed flips to its other value.
+        if (chip.hasAttribute("data-toggle") && (state[ps[0][0]] || "") === ps[0][1]) patch[ps[0][0]] = chip.dataset.toggle || "";
+        setAll(patch);
         return;
       }
       const clear = t && t.closest<HTMLElement>("[data-clear]");

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 import { isSystemKey, type SystemKey } from "@/components/systemStore";
+import { readSystemCookie } from "@/lib/system-cookie";
 import CampaignsList, {
   type CampaignRow,
   type CampaignsBySystem,
@@ -344,5 +345,5 @@ export default async function CampaignsPage() {
     });
   }
 
-  return <CampaignsList bySystem={bySystem} hiddenKeys={hiddenSystems as SystemKey[]} />;
+  return <CampaignsList bySystem={bySystem} hiddenKeys={hiddenSystems as SystemKey[]} initialSystem={await readSystemCookie()} />;
 }

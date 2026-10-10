@@ -4,16 +4,15 @@ import { MMRPG_ORIGINS } from "@/lib/data/mmrpg-origins";
 import { MmrpgHeader, SearchForm, CountLine, EmptyState, RefDetails, cardCls, nameCls, one, type RawQuery } from "@/components/MmrpgRef";
 import MmrpgRefTokens from "@/components/MmrpgRefTokens";
 import InstantFilter from "@/components/InstantFilter";
-import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/mmrpg/origins";
 
 type Row = { name: string; description: string; tags?: string; traits?: string; powers?: string; occupation?: string; limitation?: string; examples?: string };
 
-function Card({ o, hidden, dataF }: { o: Row; hidden?: boolean; dataF?: string }) {
+function Card({ o, hidden }: { o: Row; hidden: boolean }) {
   return (
-    <article className={cardCls} hidden={hidden} data-f={dataF}>
+    <article className={cardCls} hidden={hidden} data-f="{}" data-s={[o.tags, o.traits, o.powers].filter(Boolean).join(" ")}>
       <h3 className={nameCls}>{o.name}</h3>
       <dl className="mt-2 space-y-0.5 text-[11px] text-[var(--muted)]">
         {o.tags ? <div><span className="font-semibold text-[var(--text)]">Tags:</span> <MmrpgRefTokens text={o.tags} kind="tag" /></div> : null}
@@ -35,13 +34,9 @@ export default async function MmrpgOriginsPage({ searchParams }: { searchParams:
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
 
-  // Every origin is rendered; the search box filters on the client (InstantFilter).
-  // `show` applies the URL's `q` for the initial paint, through the same predicate.
-  const origins = MMRPG_ORIGINS as Row[];
-  const current = { q };
-  const facets = () => ({});
-  const show = (o: Row) => facetMatch(facets(), current) && (!needle || [o.name, o.description, o.tags ?? "", o.traits ?? "", o.powers ?? ""].join(" ").toLowerCase().includes(needle));
-  const shown = origins.filter(show).length;
+  // Every origin is rendered; the search filters on the client (InstantFilter).
+  const show = (o: Row) => !needle || [o.name, o.description, o.tags ?? "", o.traits ?? "", o.powers ?? ""].join(" ").toLowerCase().includes(needle);
+  const shown = (MMRPG_ORIGINS as Row[]).filter(show).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -51,7 +46,7 @@ export default async function MmrpgOriginsPage({ searchParams }: { searchParams:
       <CountLine count={shown} noun="origin" base={BASE} filtered={Boolean(needle)} />
       <EmptyState noun="origin" base={BASE} hidden={shown > 0} />
       <div className="grid gap-3 md:grid-cols-2">
-        {origins.map((o) => <Card key={o.name} o={o} hidden={!show(o)} dataF={facetAttr(facets())} />)}
+        {(MMRPG_ORIGINS as Row[]).map((o) => <Card key={o.name} o={o} hidden={!show(o)} />)}
       </div>
       </InstantFilter>
     </div>

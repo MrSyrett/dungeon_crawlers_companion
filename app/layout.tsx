@@ -33,6 +33,9 @@ import {
 import "./globals.css";
 import PullToRefresh from "@/components/PullToRefresh";
 import SiteNav from "@/components/SiteNav";
+import { SYSTEMS, DEFAULT_SYSTEM } from "@/components/systemStore";
+import { pathSystemTable, CHROME_PREFIXES } from "@/components/navConfig";
+import { readSystemCookie, readViewCookie } from "@/lib/system-cookie";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { getHiddenSystemKeys } from "@/lib/systems";
@@ -409,6 +412,25 @@ export default async function RootLayout({
   } catch {
     email = null;
   }
+  const [initialSystem, initialView] = await Promise.all([readSystemCookie(), readViewCookie()]);
+
+  // THEME BEFORE FIRST PAINT. SiteNav sets data-system / --sys / data-chrome on
+  // <html> from an effect, i.e. after hydration, so every hard load painted the
+  // default look and then re-painted in the user's system — the "Shadowdark
+  // flash" from the 2026-10-10 audit. This inline script runs as the body
+  // starts parsing, before anything is painted, and sets the same three things
+  // from the same inputs (stored system, hidden systems, the path→system
+  // table, the chrome prefixes). SiteNav's effect then finds them already set.
+  const visibleSystems = SYSTEMS.filter((s) => !hiddenKeys.includes(s.key));
+  const themeBoot = {
+    accents: Object.fromEntries(SYSTEMS.map((s) => [s.key, s.accent])),
+    hidden: hiddenKeys,
+    first: (visibleSystems[0] ?? SYSTEMS[0]).key,
+    fallback: initialSystem ?? DEFAULT_SYSTEM,
+    paths: pathSystemTable(),
+    chrome: CHROME_PREFIXES,
+  };
+  const themeScript = `(function(){try{var B=${JSON.stringify(themeBoot)};var k=null;try{k=localStorage.getItem("dcw_system")}catch(e){}if(!k||!B.accents[k])k=B.fallback;if(B.hidden.indexOf(k)>=0)k=B.first;var p=location.pathname,ps=B.paths.exact[p]||null;if(!ps){for(var i=0;i<B.paths.prefixes.length;i++){if(p.indexOf(B.paths.prefixes[i].prefix)===0){ps=B.paths.prefixes[i].key;break}}}if(ps&&B.hidden.indexOf(ps)<0)k=ps;var chrome=p==="/"||B.chrome.some(function(c){return p===c||p.indexOf(c+"/")===0});var r=document.documentElement;r.dataset.system=k;r.style.setProperty("--sys",B.accents[k]);if(chrome)r.dataset.chrome="1"}catch(e){}})();`;
 
   return (
     <html
@@ -416,9 +438,10 @@ export default async function RootLayout({
       className={`${geist.variable} ${geistMono.variable} ${cinzel.variable} ${barlow.variable} ${montserrat.variable} ${ebGaramond.variable} ${anton.variable} ${shareTech.variable} ${archivoBlack.variable} ${libreFranklin.variable} ${oswald.variable} ${sourceSans.variable} ${lilitaOne.variable} ${nunito.variable} ${mulish.variable} ${sairaCond.variable} ${saira.variable} ${asap.variable} ${cormorant.variable} ${lora.variable} ${fraunces.variable} ${figtree.variable} ${permanentMarker.variable} ${archivo.variable} ${archivoNarrow.variable} ${plexSans.variable} ${russoOne.variable} ${rubik.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <PullToRefresh />
         {email ? (
-          <SiteNav email={email} isAdmin={isAdmin} hiddenKeys={hiddenKeys} />
+          <SiteNav email={email} isAdmin={isAdmin} hiddenKeys={hiddenKeys} initialSystem={initialSystem} initialView={initialView} />
         ) : null}
         {children}
       </body>

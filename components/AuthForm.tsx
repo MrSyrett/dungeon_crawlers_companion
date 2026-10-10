@@ -8,9 +8,11 @@ import type { AuthState } from "@/app/actions/auth";
 type Props = {
   mode: "login" | "signup";
   action: (state: AuthState, formData: FormData) => Promise<AuthState>;
+  /** Path to land on after signing in (an invite link); the action validates it. */
+  next?: string;
 };
 
-export function AuthForm({ mode, action }: Props) {
+export function AuthForm({ mode, action, next }: Props) {
   const [state, formAction, pending] = useActionState(action, {});
   const isSignup = mode === "signup";
 
@@ -33,6 +35,7 @@ export function AuthForm({ mode, action }: Props) {
         </div>
 
         <form action={formAction} className="flex flex-col gap-4 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-7">
+          {next ? <input type="hidden" name="next" value={next} /> : null}
           <h2 className="text-lg font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
             {isSignup ? "Create account" : "Sign in"}
           </h2>

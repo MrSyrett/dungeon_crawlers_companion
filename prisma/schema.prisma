@@ -147,9 +147,15 @@ model Homebrew {
 // cookie is SameSite=Lax, so it is never sent when a page of ours is framed by
 // another site — a VTT needs its own credential.
 //
-// Deliberately narrow: a token only ever grants read + save on its owner's
-// CHARACTER SHEETS. It cannot touch campaigns, homebrew, or delete anything, so
-// pasting one into a VTT can't cost more than the sheets it is for.
+// Scope: what its owner needs WHILE PLAYING, framed in a tabletop — reading
+// and saving their own character sheets and GM Screen board, listing their
+// own campaigns and preps for the screen's pickers, reading and posting rolls
+// to campaigns they are in, reading shared homebrew, rulebooks and sounds, and
+// uploading the screen's own map/handout files. It never creates or deletes a
+// campaign, never writes homebrew, never touches the account or admin pages:
+// those stay behind the session cookie (see lib/vtt.ts getPlayUser). The
+// account's approval is re-checked on every use, so revoking a member also
+// revokes their tokens.
 //
 // Only a SHA-256 hash is stored. The token is shown once at creation; losing it
 // means creating a new one, which is cheap.

@@ -5,6 +5,7 @@ import { TOOLS, TOOL_ORDER, type ToolId } from "@/lib/tools";
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import DashboardDocs, { type SystemPanels, type DocRow } from "@/components/DashboardDocs";
+import { readSystemCookie, readViewCookie } from "@/lib/system-cookie";
 
 // The homepage. The top navbar (SiteNav, in the root layout) owns system
 // selection, the Characters/Adventures tabs, Compendium and Tools; this page
@@ -18,6 +19,8 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const hiddenSystems = await getHiddenSystemKeys();
+  // The system/view the browser last chose, so the first paint is already theirs.
+  const [initialSystem, initialView] = await Promise.all([readSystemCookie(), readViewCookie()]);
 
   const docs = await prisma.document.findMany({
     where: { userId: user.id },
@@ -72,5 +75,5 @@ export default async function DashboardPage() {
     panels[s.key] = entry;
   }
 
-  return <DashboardDocs panels={panels} hiddenKeys={hiddenSystems as SystemKey[]} />;
+  return <DashboardDocs panels={panels} hiddenKeys={hiddenSystems as SystemKey[]} initialSystem={initialSystem} initialView={initialView} />;
 }

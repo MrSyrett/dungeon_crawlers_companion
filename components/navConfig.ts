@@ -333,3 +333,17 @@ export function systemForPath(pathname: string): SystemKey | null {
   const hit = PREFIX_SYSTEM.find((p) => pathname.startsWith(p.prefix));
   return hit ? hit.key : null;
 }
+
+// Paths that are the app's own chrome rather than a system's surface: the
+// navbar publishes the system accent there but flags the page so the system's
+// ground and faces stay out of it. "/" is chrome too but is matched exactly by
+// the callers (it is a prefix of every path).
+export const CHROME_PREFIXES = ["/admin", "/token-maker", "/account"];
+
+// The same table in a shape the root layout can serialise into its pre-paint
+// theme script (app/layout.tsx), so the script and systemForPath can't drift.
+export function pathSystemTable(): { exact: Record<string, SystemKey>; prefixes: { prefix: string; key: SystemKey }[] } {
+  const exact: Record<string, SystemKey> = {};
+  for (const p of SD_PATHS) exact[p] = "SD";
+  return { exact, prefixes: PREFIX_SYSTEM };
+}

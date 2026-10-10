@@ -3,12 +3,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { MMRPG_TAGS } from "@/lib/data/mmrpg-tags";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
+import InstantFilter from "@/components/InstantFilter";
 import {
   MmrpgHeader, SearchForm, CountLine, EmptyState, RefDetails, cardCls, nameCls, hbBadge,
   one, type RawQuery,
 } from "@/components/MmrpgRef";
-import InstantFilter from "@/components/InstantFilter";
-import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/mmrpg/tags";
@@ -31,11 +30,8 @@ export default async function MmrpgTagsPage({ searchParams }: { searchParams: Pr
 
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
-  // Every tag is rendered; the search box filters on the client (InstantFilter).
-  // `show` applies the URL's `q` for the initial paint, through the same predicate.
-  const current = { q };
-  const facets = () => ({});
-  const show = (t: Row) => facetMatch(facets(), current) && (!needle || [t.name, t.description].join(" ").toLowerCase().includes(needle));
+  // Every tag is rendered; the search filters on the client (InstantFilter).
+  const show = (t: Row) => !needle || [t.name, t.description].join(" ").toLowerCase().includes(needle);
   const shown = ALL.filter(show).length;
   const hbCount = ALL.filter((t) => t.homebrew).length;
 
@@ -50,18 +46,18 @@ export default async function MmrpgTagsPage({ searchParams }: { searchParams: Pr
       <InstantFilter>
       <SearchForm base={BASE} q={q} placeholder="Search tags…" hidden={{}} />
       <CountLine count={shown} noun="tag" base={BASE} filtered={Boolean(needle)} />
-
       <EmptyState noun="tag" base={BASE} hidden={shown > 0} />
+
       <div className="grid gap-3 md:grid-cols-2">
-        {ALL.map((t) => (
-          <article key={`${t.homebrew ? "hb" : "bk"}-${t.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={!show(t)} data-f={facetAttr(facets())}>
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className={nameCls}>{t.name}</h3>
-              {t.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
-            </div>
-            {t.description ? <RefDetails><p className="text-[12px] leading-relaxed text-[var(--muted)]">{t.description}</p></RefDetails> : null}
-          </article>
-        ))}
+          {ALL.map((t) => (
+            <article key={`${t.homebrew ? "hb" : "bk"}-${t.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3" hidden={!show(t)} data-f="{}">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className={nameCls}>{t.name}</h3>
+                {t.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+              </div>
+              {t.description ? <RefDetails><p className="text-[12px] leading-relaxed text-[var(--muted)]">{t.description}</p></RefDetails> : null}
+            </article>
+          ))}
       </div>
       </InstantFilter>
     </div>

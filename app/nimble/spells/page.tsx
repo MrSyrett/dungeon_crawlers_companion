@@ -48,17 +48,12 @@ export default async function NimbleSpellsPage({ searchParams }: { searchParams:
   const school = SCHOOLS.some((s) => s.key === one(raw.school)) ? one(raw.school) : "";
   const tier = TIERS.some((t) => t.key === one(raw.tier)) ? one(raw.tier) : "";
   const current: Query = { q, school, tier };
-  // Every spell is rendered; the chips filter on the client (InstantFilter).
-  // `show` applies the URL's filters for the initial paint, through the same
-  // facet match the client uses. A utility spell answers to the "Utility" tier
-  // chip only, a normal one only to its own tier — hence the array facet.
-  const results = ALL.slice().sort((a, b) => a.school.localeCompare(b.school) || Number(a.utility) - Number(b.utility) || a.tier - b.tier);
-  const facets = (s: SpellRow) => ({ school: s.school, tier: s.utility ? ["u"] : [String(s.tier)] });
+  // Every spell is rendered; the chips and the search filter on the client
+  // (InstantFilter). A utility spell's tier chip is "u", so that is its facet.
+  const facets = (s: SpellRow) => ({ school: s.school, tier: s.utility ? "u" : String(s.tier) });
   const show = (s: SpellRow) => facetMatch(facets(s), current) && (!needle || (s.name + " " + s.text).toLowerCase().includes(needle));
-  const shown = results.filter(show).length;
-  // Every school still gets a section (it groups the spells); `data-section`
-  // hides the heading when all of its spells are filtered out.
-  const groups = SCHOOLS;
+  const sorted = [...ALL].sort((a, b) => a.school.localeCompare(b.school) || Number(a.utility) - Number(b.utility) || a.tier - b.tier);
+  const shown = sorted.filter(show).length;
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <NimbleHeader title="Spells" subtitle={`${NIMBLE_SPELLS.length} spells${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} · six schools + utility`} />
@@ -70,10 +65,10 @@ export default async function NimbleSpellsPage({ searchParams }: { searchParams:
       <ChipRow label="Tier" base={BASE} current={current} param="tier" options={TIERS} active={tier} />
       <CountLine count={shown} noun="spell" base={BASE} filtered={Boolean(needle || school || tier)} />
       <EmptyState noun="spell" base={BASE} hidden={shown > 0} />
-      {groups.map((g) => (
-        <section key={g.key} className="mb-6" data-section hidden={!results.some((s) => s.school === g.key && show(s))}>
+      {SCHOOLS.map((g) => (
+        <section key={g.key} className="mb-6" data-section hidden={!sorted.some((s) => s.school === g.key && show(s))}>
           <h2 className="mb-2 text-[13px] font-bold uppercase tracking-[0.3em] text-[var(--muted)]">{g.label}</h2>
-          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">{results.filter((s) => s.school === g.key).map((s) => (
+          <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">{sorted.filter((s) => s.school === g.key).map((s) => (
             <li key={`${s.homebrew ? "hb" : "bk"}-${s.name}`} className={cardCls} hidden={!show(s)} data-f={facetAttr(facets(s))}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1"><h3 className={nameCls}>{s.name}</h3><span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{s.utility ? "Utility" : s.tier ? `Tier ${s.tier}` : "Cantrip"} · {s.actions}{s.targeting ? ` · ${s.targeting}` : ""}</span>{s.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>p.{s.page}</span>}</div>
               <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{s.text}</p>

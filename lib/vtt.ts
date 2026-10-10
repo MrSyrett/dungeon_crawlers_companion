@@ -1,11 +1,13 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin";
 import { TOOLS, TOOL_ORDER, type ToolId } from "@/lib/tools";
 
-// A VTT token may only ever reach character sheets — never session prep,
-// campaigns or homebrew. Derived from the registry so a new sheet tool is
-// covered automatically.
+// The tools a token may OPEN as a framed page (/vtt/sheet/:id and the picker
+// behind it): character sheets only. The GM Screen has its own framed route
+// (/vtt/gm-screen). Derived from the registry so a new sheet tool is covered
+// automatically.
 export const CHARACTER_TOOLS: ToolId[] = TOOL_ORDER.filter((id) => TOOLS[id].kind === "character");
 
 export function generateToken(): string {
@@ -47,10 +49,14 @@ export async function ownerForToken(raw: string | null): Promise<VttOwner | null
       tokenHash: true,
       revokedAt: true,
       lastUsedAt: true,
-      user: { select: { id: true, email: true } },
+      user: { select: { id: true, email: true, approved: true } },
     },
   });
   if (!row || row.revokedAt) return null;
+  // A token is only as good as the account behind it: a member whose approval
+  // was revoked loses their VTT access along with their sign-in, instead of
+  // keeping a back door open through Owlbear for as long as the token lives.
+  if (!row.user.approved && !isAdminEmail(row.user.email)) return null;
 
   const a = Buffer.from(row.tokenHash);
   const b = Buffer.from(hash);
@@ -82,10 +88,14 @@ const DEFAULT_FRAME_ANCESTORS = "https://www.owlbear.rodeo https://owlbear.rodeo
  * VTT token when the page is framed by a tabletop (where the cookie is never
  * sent).
  *
- * Use this only on the endpoints a player needs *while playing* — reading their
- * campaigns, exchanging rolls, reading shared homebrew. Anything that creates or
- * destroys stays cookie-only, so a token pasted into a VTT still can't do more
- * than run the character it was made for.
+ * Use this only on the endpoints a player or GM needs *while playing* — their
+ * own sheets and GM Screen board (and its map/handout uploads), their own
+ * campaign and prep lists for the screen's pickers, the rolls of campaigns they
+ * are in, shared homebrew, rulebooks and sounds. Creating or deleting a
+ * campaign, writing homebrew, and anything under the account or admin pages
+ * stays cookie-only (getCurrentUser), so a token pasted into a VTT can run the
+ * table it was made for and nothing beyond it. That is the contract the
+ * VttToken model in prisma/schema.prisma describes; keep the two in step.
  */
 export async function getPlayUser(req: Request): Promise<{ id: string; email: string } | null> {
   const user = await getCurrentUser();

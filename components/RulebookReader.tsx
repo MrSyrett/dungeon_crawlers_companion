@@ -4,7 +4,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react";
 import {
   subscribeSystem,
   getSystemSnapshot,
-  getSystemServerSnapshot,
+  serverSystem,
   setSystem,
   isSystemKey,
   type SystemKey,
@@ -67,9 +67,11 @@ function loadScript(src: string): Promise<void> {
 export default function RulebookReader({
   books,
   active,
+  initialSystem,
 }: {
   books: Book[];
   active: string;
+  initialSystem?: SystemKey;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -80,7 +82,7 @@ export default function RulebookReader({
   const activeSystem = useSyncExternalStore(
     subscribeSystem,
     getSystemSnapshot,
-    getSystemServerSnapshot,
+    serverSystem(initialSystem),
   );
   const sysRef = useRef(activeSystem);
   sysRef.current = activeSystem;

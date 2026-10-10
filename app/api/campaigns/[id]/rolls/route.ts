@@ -1,11 +1,15 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPlayUser } from "@/lib/vtt";
+import { isCampaignMember } from "@/lib/campaign-member";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 const clip = (v: unknown, max: number, fallback = ""): string =>
   typeof v === "string" ? v.slice(0, max) : fallback;
+
+const notInCampaign = () =>
+  Response.json({ error: "not-in-campaign", message: "You are not in this campaign." }, { status: 403 });
 
 // Roll types the log understands. Beyond dice results (crit/fumble/normal),
 // the GM screen broadcasts achievements, free-form system messages, sealed
@@ -27,6 +31,9 @@ export async function POST(req: NextRequest, ctx: Ctx) {
 
   const campaign = await prisma.campaign.findUnique({ where: { id }, select: { id: true } });
   if (!campaign) return new Response("Not found", { status: 404 });
+
+  // Only the table may post to the table (see lib/campaign-member.ts).
+  if (!(await isCampaignMember(user.id, id))) return notInCampaign();
 
   const roll = await prisma.campaignRoll.create({
     data: {
@@ -61,6 +68,11 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const { id } = await ctx.params;
+  // Only the table may read the table's log (see lib/campaign-member.ts). A
+  // sheet that gets this simply tries again next poll, so a player who has
+  // just linked is reading within one tick of their first save landing.
+  if (!(await isCampaignMember(user.id, id))) return notInCampaign();
+
   const sinceRaw = req.nextUrl.searchParams.get("since");
   const since = sinceRaw !== null ? parseInt(sinceRaw, 10) : null;
 

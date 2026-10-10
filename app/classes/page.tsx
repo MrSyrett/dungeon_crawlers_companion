@@ -8,6 +8,8 @@ import { SPELLS } from "@/lib/data/spells";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import { effectLabel } from "@/lib/effects";
 import HomebrewManager from "@/components/HomebrewManager";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 
@@ -66,9 +68,11 @@ function withParams(current: Query, patch: Query): string {
   return s ? `/classes?${s}` : "/classes";
 }
 
-function matches(c: Row, needle: string, cast: string): boolean {
-  if (cast === "caster" && !c.caster) return false;
-  if (cast === "martial" && c.caster) return false;
+// The values the chips test, per row (lib/facets); the search is separate.
+// `opt=0` hides the optional classes, so only the others carry that facet.
+const facets = (c: Row) => ({ cast: c.caster ? "caster" : "martial", opt: c.optional ? undefined : "0" });
+
+function matches(c: Row, needle: string): boolean {
   if (!needle) return true;
   return (
     c.name.toLowerCase().includes(needle) ||
@@ -159,7 +163,11 @@ export default async function ClassesPage({
   const opt = one(raw.opt) === "0" ? "0" : "";
   const current: Query = { q, cast, opt };
 
-  const results = ALL.filter((c) => matches(c, needle, cast) && (opt !== "0" || !c.optional));
+  // Every class is rendered; the chips and the search filter on the client
+  // (InstantFilter). `show` applies the URL's filters for the initial paint,
+  // through the same facet match the client uses.
+  const show = (c: Row) => facetMatch(facets(c), current) && matches(c, needle);
+  const shown = ALL.filter(show).length;
   const filtered = Boolean(needle || cast || opt);
 
   return (
@@ -175,7 +183,8 @@ export default async function ClassesPage({
         spellListOptions={SPELL_LIST_OPTIONS}
       />
 
-      <form method="get" action="/classes" className="mb-4 flex gap-2">
+      <InstantFilter>
+      <form method="get" action="/classes" className="mb-4 flex gap-2" data-search>
         <input
           type="search"
           name="q"
@@ -189,153 +198,164 @@ export default async function ClassesPage({
         </button>
       </form>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Type
         </span>
-        <Link href={withParams(current, { cast: "" })} className={`${chipBase} ${cast ? chipOff : chipOn}`}>
+        <a href={withParams(current, { cast: "" })} data-chip="cast:" aria-pressed={!cast} className={`${chipBase} ${cast ? chipOff : chipOn}`}>
           All
-        </Link>
-        <Link
+        </a>
+        <a
           href={withParams(current, { cast: "caster" })}
+          data-chip="cast:caster"
+          aria-pressed={cast === "caster"}
           className={`${chipBase} ${cast === "caster" ? chipOn : chipOff}`}
         >
           Casters
-        </Link>
-        <Link
+        </a>
+        <a
           href={withParams(current, { cast: "martial" })}
+          data-chip="cast:martial"
+          aria-pressed={cast === "martial"}
           className={`${chipBase} ${cast === "martial" ? chipOn : chipOff}`}
         >
           Martial
-        </Link>
+        </a>
         <span className="mx-1 h-4 w-px bg-[var(--border)]" aria-hidden />
-        <Link
-          href={withParams(current, { opt: opt === "0" ? "" : "0" })}
-          className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}
-        >
-          Optional
-        </Link>
+        {/* A switch: lit (pressed) while optional classes are shown, i.e. opt
+            unset; clicking it then sets opt=0 (InstantFilter's data-toggle).
+            Its own chip row, since the Type chips share this flex row;
+            `contents` keeps it a flex item of the row above. */}
+        <span className="contents" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
+          <a
+            href={withParams(current, { opt: opt === "0" ? "" : "0" })}
+            data-chip="opt:"
+            data-toggle="0"
+            aria-pressed={opt !== "0"}
+            className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}
+          >
+            Optional
+          </a>
+        </span>
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>
-          {results.length} {results.length === 1 ? "class" : "classes"}
+        <span data-count data-noun="class" data-plural="classes" aria-live="polite">
+          {shown} {shown === 1 ? "class" : "classes"}
         </span>
-        {filtered ? (
-          <Link href="/classes" className="text-[var(--gold)] hover:underline">
-            Clear filters
-          </Link>
-        ) : null}
+        <Link href="/classes" data-clear hidden={!filtered} className="text-[var(--gold)] hover:underline">
+          Clear filters
+        </Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No class matches those filters.{" "}
-            <Link href="/classes" className="text-[var(--gold)] underline">
-              Clear them
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
-          {results.map((c, idx) => (
-            <li
-              key={`${c.homebrew ? "hb" : "bk"}-${c.name}-${idx}`}
-              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-            >
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className="text-lg font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                  {c.name}
-                </h2>
-                <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.12em] text-[var(--text)]">
-                  HP {c.hd}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No class matches those filters.{" "}
+          <Link href="/classes" data-clear className="text-[var(--gold)] underline">
+            Clear them
+          </Link>
+          .
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
+        {ALL.map((c, idx) => (
+          <li
+            key={`${c.homebrew ? "hb" : "bk"}-${c.name}-${idx}`}
+            className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+            hidden={!show(c)}
+            data-f={facetAttr(facets(c))}
+          >
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="text-lg font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                {c.name}
+              </h2>
+              <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.12em] text-[var(--text)]">
+                HP {c.hd}
+              </span>
+              {c.caster ? (
+                <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  Spellcaster
                 </span>
-                {c.caster ? (
-                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                    Spellcaster
-                  </span>
-                ) : null}
-                {c.homebrew ? (
-                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                    Homebrew
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <div className="text-[12px] text-[var(--muted)]">
-                  <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
-                    Weapons:
-                  </span>{" "}
-                  {c.weapons || "—"}
-                </div>
-                <div className="text-[12px] text-[var(--muted)]">
-                  <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
-                    Armor:
-                  </span>{" "}
-                  {c.armor || "—"}
-                </div>
-              </div>
-
-              {c.features.length > 0 ? (
-                <div className="mt-3">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
-                    Features
-                  </div>
-                  <ul className="mt-1 flex flex-col gap-1">
-                    {c.features.map((f, i) => (
-                      <li key={i} className="text-[13px] leading-relaxed text-[var(--muted)]">
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               ) : null}
-
-              {c.talent.length > 0 ? (
-                <details className="mt-3 border-t border-[var(--border)] pt-3">
-                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] hover:text-[var(--text)]">
-                    Talent table ({c.talent.length})
-                  </summary>
-                  <ol className="mt-2 flex flex-col gap-1">
-                    {c.talent.map((t, i) => (
-                      <li key={i} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
-                        <span className="shrink-0 font-semibold text-[var(--gold)]">
-                          {c.talentRolls.length ? c.talentRolls[i] : `${i + 1}.`}
-                        </span>
-                        <span>{t}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </details>
+              {c.homebrew ? (
+                <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  Homebrew
+                </span>
               ) : null}
+            </div>
 
-              {c.titles ? (
-                <details className="mt-2">
-                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] hover:text-[var(--text)]">
-                    Titles by alignment
-                  </summary>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                    {(["Lawful", "Neutral", "Chaotic"] as const).map((al) => (
-                      <div key={al}>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text)]">
-                          {al}
-                        </div>
-                        <div className="text-[12px] text-[var(--muted)]">
-                          {c.titles![al].filter((t) => t.trim()).join(", ") || "—"}
-                        </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="text-[12px] text-[var(--muted)]">
+                <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
+                  Weapons:
+                </span>{" "}
+                {c.weapons || "—"}
+              </div>
+              <div className="text-[12px] text-[var(--muted)]">
+                <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
+                  Armor:
+                </span>{" "}
+                {c.armor || "—"}
+              </div>
+            </div>
+
+            {c.features.length > 0 ? (
+              <div className="mt-3">
+                <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
+                  Features
+                </div>
+                <ul className="mt-1 flex flex-col gap-1">
+                  {c.features.map((f, i) => (
+                    <li key={i} className="text-[13px] leading-relaxed text-[var(--muted)]">
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {c.talent.length > 0 ? (
+              <details className="mt-3 border-t border-[var(--border)] pt-3">
+                <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] hover:text-[var(--text)]">
+                  Talent table ({c.talent.length})
+                </summary>
+                <ol className="mt-2 flex flex-col gap-1">
+                  {c.talent.map((t, i) => (
+                    <li key={i} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
+                      <span className="shrink-0 font-semibold text-[var(--gold)]">
+                        {c.talentRolls.length ? c.talentRolls[i] : `${i + 1}.`}
+                      </span>
+                      <span>{t}</span>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            ) : null}
+
+            {c.titles ? (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] hover:text-[var(--text)]">
+                  Titles by alignment
+                </summary>
+                <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {(["Lawful", "Neutral", "Chaotic"] as const).map((al) => (
+                    <div key={al}>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text)]">
+                        {al}
                       </div>
-                    ))}
-                  </div>
-                </details>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
+                      <div className="text-[12px] text-[var(--muted)]">
+                        {c.titles![al].filter((t) => t.trim()).join(", ") || "—"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      </InstantFilter>
     </div>
   );
 }

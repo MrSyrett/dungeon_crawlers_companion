@@ -61,6 +61,29 @@ export function systemName(key: SystemKey): string {
 const STORAGE_KEY = "dcw_system";
 const listeners = new Set<() => void>();
 
+// THE CHOICE IS ALSO A COOKIE. localStorage is where the browser-side store
+// lives, but the server can't read it, so every hard load used to render
+// Shadowdark and the page then swapped to your own system after hydration —
+// a visible flash of the wrong theme and "No Shadowdark characters yet" for
+// everyone who doesn't play Shadowdark (Michael, 2026-10-10 audit). A cookie
+// with the same value lets the server render the right system the first time
+// (lib/system-cookie.ts reads it; the pages hand it to their client
+// components as `initialSystem`). The cookie is a mirror, never the source of
+// truth: the store still reads localStorage, and the two are re-synced on
+// every read in case one was cleared.
+export const SYSTEM_COOKIE = "dcw_system";
+export const VIEW_COOKIE = "dcw_dash_view";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+function writeCookie(name: string, value: string): void {
+  try {
+    if (typeof document === "undefined") return;
+    if (document.cookie.split("; ").includes(`${name}=${value}`)) return;
+    document.cookie = `${name}=${value}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  } catch {
+    /* cookies disabled */
+  }
+}
+
 export function subscribeSystem(cb: () => void): () => void {
   listeners.add(cb);
   window.addEventListener("storage", cb);
@@ -73,16 +96,23 @@ export function subscribeSystem(cb: () => void): () => void {
 export function getSystemSnapshot(): SystemKey {
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
-    return isSystemKey(v) ? v : DEFAULT_SYSTEM;
+    const key = isSystemKey(v) ? v : DEFAULT_SYSTEM;
+    writeCookie(SYSTEM_COOKIE, key);
+    return key;
   } catch {
     return DEFAULT_SYSTEM; // private mode / storage disabled
   }
 }
 
-// The server always renders Shadowdark; the client swaps to the saved choice
-// after hydration.
+// What the server rendered. Pages that know the cookie pass it through
+// `serverSystem(initial)`; anything that doesn't still gets Shadowdark, which
+// is also what the server assumes when there is no cookie yet.
 export function getSystemServerSnapshot(): SystemKey {
   return DEFAULT_SYSTEM;
+}
+export function serverSystem(initial?: SystemKey | null): () => SystemKey {
+  const key = isSystemKey(initial) ? initial : DEFAULT_SYSTEM;
+  return () => key;
 }
 
 export function setSystem(key: SystemKey): void {
@@ -91,6 +121,7 @@ export function setSystem(key: SystemKey): void {
   } catch {
     /* ignore — the toggle still works for this page view */
   }
+  writeCookie(SYSTEM_COOKIE, key);
   listeners.forEach((l) => l());
 }
 
@@ -115,7 +146,9 @@ export function subscribeView(cb: () => void): () => void {
 
 export function getViewSnapshot(): DashView {
   try {
-    return window.localStorage.getItem(VIEW_KEY) === "adventures" ? "adventures" : "characters";
+    const view: DashView = window.localStorage.getItem(VIEW_KEY) === "adventures" ? "adventures" : "characters";
+    writeCookie(VIEW_COOKIE, view);
+    return view;
   } catch {
     return "characters";
   }
@@ -124,6 +157,10 @@ export function getViewSnapshot(): DashView {
 export function getViewServerSnapshot(): DashView {
   return "characters";
 }
+export function serverView(initial?: string | null): () => DashView {
+  const view: DashView = initial === "adventures" ? "adventures" : "characters";
+  return () => view;
+}
 
 export function setView(view: DashView): void {
   try {
@@ -131,5 +168,6 @@ export function setView(view: DashView): void {
   } catch {
     /* ignore */
   }
+  writeCookie(VIEW_COOKIE, view);
   viewListeners.forEach((l) => l());
 }

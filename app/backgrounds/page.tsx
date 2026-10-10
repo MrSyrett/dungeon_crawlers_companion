@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { SD_BACKGROUNDS } from "@/lib/data/backgrounds";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
+import InstantFilter from "@/components/InstantFilter";
+import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 
@@ -50,11 +52,16 @@ export default async function BackgroundsPage({
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
   const opt = one(raw.opt) === "0" ? "0" : "";
-  const results = ALL.filter(
-    (b) =>
-      (!needle || b.name.toLowerCase().includes(needle) || b.desc.toLowerCase().includes(needle)) &&
-      (opt !== "0" || !b.optional),
-  );
+  const current = { q, opt };
+  // Every background is rendered; the Optional toggle and the search filter on
+  // the client (InstantFilter). `opt=0` hides the optional ones, so only the
+  // non-optional rows carry the facet it tests. `show` applies the URL's
+  // filters for the initial paint, through the same facet match the client uses.
+  const facets = (b: Row) => ({ opt: b.optional ? undefined : "0" });
+  const show = (b: Row) =>
+    facetMatch(facets(b), current) &&
+    (!needle || b.name.toLowerCase().includes(needle) || b.desc.toLowerCase().includes(needle));
+  const shown = ALL.filter(show).length;
   const filtered = Boolean(needle || opt);
 
   return (
@@ -63,7 +70,8 @@ export default async function BackgroundsPage({
 
       <HomebrewManager type="background" campaigns={campaigns} initial={hbOwn} />
 
-      <form method="get" action="/backgrounds" className="mb-4 flex gap-2">
+      <InstantFilter>
+      <form method="get" action="/backgrounds" className="mb-4 flex gap-2" data-search>
         <input
           type="search"
           name="q"
@@ -76,58 +84,58 @@ export default async function BackgroundsPage({
         </button>
       </form>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
-        <Link href={optHref(q, opt === "0" ? "" : "0")} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
+      {/* A switch: lit (pressed) while optional entries are shown, i.e. opt
+          unset; clicking it then sets opt=0 (InstantFilter's data-toggle). */}
+      <div className="mb-6 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>
+        <a href={optHref(q, opt === "0" ? "" : "0")} data-chip="opt:" data-toggle="0" aria-pressed={opt !== "0"} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
           Optional
-        </Link>
+        </a>
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-        <span>
-          {results.length} {results.length === 1 ? "background" : "backgrounds"}
+        <span data-count data-noun="background" aria-live="polite">
+          {shown} {shown === 1 ? "background" : "backgrounds"}
         </span>
-        {filtered ? (
-          <Link href="/backgrounds" className="text-[var(--gold)] hover:underline">
-            Clear
-          </Link>
-        ) : null}
+        <Link href="/backgrounds" data-clear hidden={!filtered} className="text-[var(--gold)] hover:underline">
+          Clear
+        </Link>
       </div>
 
-      {results.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
-          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            No background matches that search.{" "}
-            <Link href="/backgrounds" className="text-[var(--gold)] underline">
-              Clear it
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {results.map((b, i) => (
-            <li
-              key={`${b.homebrew ? "hb" : "bk"}-${b.name}-${i}`}
-              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-            >
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                  {b.name}
-                </h2>
-                {b.homebrew ? (
-                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                    Homebrew
-                  </span>
-                ) : null}
-              </div>
-              {b.desc ? (
-                <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{b.desc}</p>
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6" data-empty hidden={shown > 0}>
+        <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+          No background matches that search.{" "}
+          <Link href="/backgrounds" data-clear className="text-[var(--gold)] underline">
+            Clear it
+          </Link>
+          .
+        </p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
+        {ALL.map((b, i) => (
+          <li
+            key={`${b.homebrew ? "hb" : "bk"}-${b.name}-${i}`}
+            className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+            hidden={!show(b)}
+            data-f={facetAttr(facets(b))}
+          >
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                {b.name}
+              </h2>
+              {b.homebrew ? (
+                <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  Homebrew
+                </span>
               ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+            {b.desc ? (
+              <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{b.desc}</p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      </InstantFilter>
 
       <p className="mt-6 text-[12px] leading-relaxed text-[var(--muted)]">
         In Shadowdark, your background is a roll on a d20 table that suggests where your character

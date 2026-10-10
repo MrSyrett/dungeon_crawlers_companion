@@ -144,9 +144,22 @@ export async function GET(req: NextRequest) {
   }
   if (!upstream) return new Response("Too many redirects", { status: 502 });
 
+  // Only sound comes through here. An allowlist rather than "anything but
+  // HTML": the old check let the proxy relay scripts, SVG, PDFs — anything a
+  // host chose to label — from our own origin, which is the one place a
+  // browser trusts most. Hosts that label sound badly still work: the bare
+  // octet-stream the accept header asks for is allowed, and so is video/*,
+  // because some podcast and drive hosts serve audio under it. An empty
+  // content-type is treated as octet-stream, as it was before.
   const contentType = (upstream.headers.get("content-type") || "").toLowerCase();
-  // Refuse an HTML page so this can't be turned into a general web proxy.
-  if (contentType.startsWith("text/html")) {
+  const mime = contentType.split(";")[0].trim();
+  const soundLike =
+    mime === "" ||
+    mime.startsWith("audio/") ||
+    mime.startsWith("video/") ||
+    mime === "application/ogg" ||
+    mime === "application/octet-stream";
+  if (!soundLike) {
     return new Response("Not an audio file", { status: 415 });
   }
 
@@ -168,6 +181,9 @@ export async function GET(req: NextRequest) {
   // reuse it within the session.
   headers.set("cache-control", "private, max-age=3600");
   headers.set("referrer-policy", "no-referrer");
+  // Belt and braces with the allowlist above: the browser must take the type
+  // we send at its word and never sniff a stream into something runnable.
+  headers.set("x-content-type-options", "nosniff");
 
   return new Response(upstream.body, { status: upstream.status, headers });
 }

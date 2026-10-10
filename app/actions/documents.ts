@@ -17,7 +17,10 @@ export async function createDocument(formData: FormData): Promise<void> {
   const doc = await prisma.document.create({
     data: { userId: user.id, tool, title: `New ${def.systemName} ${def.label}` },
   });
-  redirect(`/tools/${tool}/${doc.id}`);
+  // From an invite page (/join/<code>): the new sheet opens with the code on
+  // its URL and joins the campaign itself (see lib/inject.ts).
+  const join = String(formData.get("join") ?? "").trim().toUpperCase();
+  redirect(/^[A-Z0-9]{4,12}$/.test(join) ? `/tools/${tool}/${doc.id}?join=${join}` : `/tools/${tool}/${doc.id}`);
 }
 
 // Titles now sync automatically from inside each tool (character name /
