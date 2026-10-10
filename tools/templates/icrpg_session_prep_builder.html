@@ -1874,7 +1874,7 @@ const SB_CONFIG = {
     [{ key:'str', label:'STR', ph:'+0' }, { key:'dex', label:'DEX', ph:'+0' }, { key:'con', label:'CON', ph:'+0' }, { key:'int', label:'INT', ph:'+0' }, { key:'wis', label:'WIS', ph:'+0' }, { key:'cha', label:'CHA', ph:'+0' }],
   ],
   abilitiesLabel: 'Attacks & Abilities', abilitiesPlaceholder: 'One per line — ATK: Claw d6 · Ability: effect',
-  mobs: { placeholder: 'Search the ICRPG Bestiary…', pool: () => (typeof ICRPG_MONSTERS !== 'undefined' && Array.isArray(ICRPG_MONSTERS)) ? ICRPG_MONSTERS : [], toCard: m => { const s = m.stats || {}; const st = k => s[k] == null ? '' : ((s[k] >= 0 ? '+' : '') + s[k]); return {
+  mobs: { placeholder: 'Search the ICRPG Bestiary…', pool: () => ((typeof ICRPG_MONSTERS !== 'undefined' && Array.isArray(ICRPG_MONSTERS)) ? ICRPG_MONSTERS : []).concat(_hbMobs), toCard: m => { const s = m.stats || {}; const st = k => s[k] == null ? '' : ((s[k] >= 0 ? '+' : '') + s[k]); return {
     sbtype: /boss|big five|villain/i.test(m.tier||'') ? 'boss' : 'mob', name: m.name || '',
     type: ['MONSTER', (m.tier||'').toUpperCase(), String(m.world||'').toUpperCase()].filter(Boolean).join(' // '), flavor: m.desc || '',
     tier: m.tier || '', hearts: m.hearts != null ? String(m.hearts) : '', hp: m.hp != null ? String(m.hp) : '', def: m.defense != null ? String(m.defense) : '',
@@ -1906,6 +1906,34 @@ function dccMobToCard(m) {
   };
 }
 /* SB_CONFIG_END */
+// ── Homebrew monsters in the bestiary picker ──────────────────────────────
+// Pull the viewer's brewed monsters and merge them into the picker pool.
+// Standalone-safe: no /api/homebrew (or a 401/offline) leaves the list book-only.
+let _hbMobs = [];
+async function loadHomebrewMobs() {
+  let rows;
+  try {
+    const r = await fetch('/api/homebrew?type=icrpg-monster', { credentials: 'same-origin' });
+    if(!r.ok) return;
+    const data = await r.json();
+    rows = Array.isArray(data.items) ? data.items : [];
+  } catch(e) { return; }
+  const seen = new Set();
+  const next = [];
+  rows.forEach(row => {
+    if(!row || row.type !== 'icrpg-monster' || !row.data) return;
+    const d = row.data;
+    const nm = String(d.name || '').trim();
+    if(!nm || seen.has(nm.toLowerCase())) return;
+    seen.add(nm.toLowerCase());
+    // Homebrew data already uses the book field names (name, world, tier, hearts,
+    // hp, defense, stats{STR…} as numbers, attacks[] strings, abilities[] strings).
+    next.push(Object.assign({ homebrew: true }, d, { name: nm }));
+  });
+  _hbMobs = next;
+  try { const list = document.getElementById('mobpick-list'); if(list && list.classList.contains('show') && typeof mobSearch === 'function') mobSearch(); } catch(e) {}
+}
+loadHomebrewMobs();
 // Values of the schema-driven stat fields on a card, keyed by field key.
 function sbFieldValues(card) {
   const out = {};
@@ -1927,7 +1955,7 @@ function mobSearch() {
   if(!hits.length) { list.innerHTML = '<div class="mob-pick-empty">No match.</div>'; list.classList.add('show'); return; }
   list.innerHTML = hits.map(m =>
     '<button type="button" class="mob-pick-item" data-mon="'+escA(m.name)+'" onclick="mobAdd(this.dataset.mon)">'+
-    escH(m.name)+' <span style="opacity:.55">— '+escH(SB_CONFIG.mobs.sub(m))+'</span></button>'
+    escH(m.name)+' <span style="opacity:.55">— '+escH(SB_CONFIG.mobs.sub(m))+'</span>'+(m.homebrew?' <span style="opacity:.5;font-style:italic">· homebrew</span>':'')+'</button>'
   ).join('');
   list.classList.add('show');
 }

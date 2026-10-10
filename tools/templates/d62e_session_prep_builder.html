@@ -1874,7 +1874,7 @@ const SB_CONFIG = {
     [{ key:'dodge', label:'DODGE' }, { key:'parry', label:'PARRY' }, { key:'move', label:'MOVE' }],
   ],
   abilitiesLabel: 'Skills, Powers & Notes', abilitiesPlaceholder: 'One per line — brawling 4D · Special: night vision',
-  mobs: { placeholder: 'Search the D62e Bestiary…', pool: () => (typeof D62E_CREATURES !== 'undefined' && Array.isArray(D62E_CREATURES)) ? D62E_CREATURES : [], toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _d6Code(A[k]); return {
+  mobs: { placeholder: 'Search the D62e Bestiary…', pool: () => ((typeof D62E_CREATURES !== 'undefined' && Array.isArray(D62E_CREATURES)) ? D62E_CREATURES : []).concat(_hbMobs), toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _d6Code(A[k]); return {
     sbtype: /villain|boss|dragon|giant|robot/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'boss' : /npc|ally|civilian|detective|medic/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'npc' : 'mob', name: m.name || '',
     type: [String(m.kind||'Foe').toUpperCase(), m.genre && m.genre !== 'core' ? String(m.genre).toUpperCase() : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     agi: c('Agility'), bra: c('Brawn'), kno: c('Knowledge'), per: c('Perception'),
@@ -1906,6 +1906,48 @@ function dccMobToCard(m) {
   };
 }
 /* SB_CONFIG_END */
+// ── Homebrew creatures in the bestiary picker ─────────────────────────────
+// Pull the viewer's brewed creatures and merge them into the picker pool.
+// Standalone-safe: no /api/homebrew (or a 401/offline) leaves the list book-only.
+let _hbMobs = [];
+// "3D+2" → pips (3×3+2). The card's toCard runs _d6Code() on pips, so we store
+// attributes as pip numbers to match the book creature shape.
+function _d6Pips(code) {
+  if(typeof code === 'number') return code;
+  const m = String(code||'').match(/(\d+)\s*D?(?:\s*\+\s*(\d+))?/i);
+  if(!m) return 0;
+  return (parseInt(m[1],10)||0) * 3 + (parseInt(m[2],10)||0);
+}
+async function loadHomebrewMobs() {
+  let rows;
+  try {
+    const r = await fetch('/api/homebrew?type=d62e-creature', { credentials: 'same-origin' });
+    if(!r.ok) return;
+    const data = await r.json();
+    rows = Array.isArray(data.items) ? data.items : [];
+  } catch(e) { return; }
+  const seen = new Set();
+  const next = [];
+  const ATTRS = ['Agility','Brawn','Knowledge','Perception'];
+  rows.forEach(row => {
+    if(!row || row.type !== 'd62e-creature' || !row.data) return;
+    const d = row.data;
+    const nm = String(d.name || '').trim();
+    if(!nm || seen.has(nm.toLowerCase())) return;
+    seen.add(nm.toLowerCase());
+    // Canonical stored shape carries attributes{Agility…} as pip numbers; if an
+    // item only has the editor's top-level code strings, convert those to pips.
+    let attributes = d.attributes;
+    if(!attributes || typeof attributes !== 'object' || !Object.keys(attributes).length) {
+      attributes = {};
+      ATTRS.forEach(k => { if(d[k] != null && d[k] !== '') attributes[k] = _d6Pips(d[k]); });
+    }
+    next.push(Object.assign({ homebrew: true }, d, { name: nm, attributes }));
+  });
+  _hbMobs = next;
+  try { const list = document.getElementById('mobpick-list'); if(list && list.classList.contains('show') && typeof mobSearch === 'function') mobSearch(); } catch(e) {}
+}
+loadHomebrewMobs();
 // Values of the schema-driven stat fields on a card, keyed by field key.
 function sbFieldValues(card) {
   const out = {};
@@ -1927,7 +1969,7 @@ function mobSearch() {
   if(!hits.length) { list.innerHTML = '<div class="mob-pick-empty">No match.</div>'; list.classList.add('show'); return; }
   list.innerHTML = hits.map(m =>
     '<button type="button" class="mob-pick-item" data-mon="'+escA(m.name)+'" onclick="mobAdd(this.dataset.mon)">'+
-    escH(m.name)+' <span style="opacity:.55">— '+escH(SB_CONFIG.mobs.sub(m))+'</span></button>'
+    escH(m.name)+' <span style="opacity:.55">— '+escH(SB_CONFIG.mobs.sub(m))+'</span>'+(m.homebrew?' <span style="opacity:.5;font-style:italic">· homebrew</span>':'')+'</button>'
   ).join('');
   list.classList.add('show');
 }

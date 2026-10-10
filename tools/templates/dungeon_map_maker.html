@@ -653,6 +653,7 @@
         <button class="btn" id="import" title="Open a previously exported map file">⬆ Import</button>
       </div>
       <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+      <button class="btn wide" id="shareBtn" style="margin-top:8px" title="Send this map straight to a campaign's VTT, or attach it to a session prep — no export-and-upload">⤴ Send to table</button>
       <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
         (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>)<br>
         and <a href="https://axebane.com/" target="_blank" rel="noopener noreferrer">Axebane Games</a>
@@ -706,6 +707,32 @@
       <span id="zoomPct">100%</span>
       <button id="zoomIn">+</button>
     </div>
+  </div>
+</div>
+
+<!-- Send to table: drop the current map straight into a campaign's VTT (as a
+     new scene) or attach it to a session prep, instead of export-then-upload. -->
+<div id="shareModal" hidden style="position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px">
+  <div style="width:min(94vw,420px);max-height:86vh;overflow:auto;background:var(--panel,#1b1b22);border:1px solid var(--line,#3a3a44);border-radius:10px;padding:18px;color:var(--text,#e9e2d4)">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+      <h3 style="margin:0;font-size:15px">Send this map to your table</h3>
+      <button class="btn" id="shareClose" style="padding:2px 10px">✕</button>
+    </div>
+
+    <div style="margin-top:14px">
+      <label class="fld">Campaign — add as a VTT scene</label>
+      <select id="shareCampaign" style="width:100%;margin-top:4px"></select>
+      <input id="shareSceneName" placeholder="Scene name" maxlength="120" style="width:100%;margin-top:6px">
+      <button class="btn gold wide" id="shareToVtt" style="margin-top:8px">⤴ Add as a VTT scene</button>
+    </div>
+
+    <div style="margin-top:16px;border-top:1px solid var(--line,#3a3a44);padding-top:14px">
+      <label class="fld">Session prep — attach to its Maps tab</label>
+      <select id="sharePrep" style="width:100%;margin-top:4px"></select>
+      <button class="btn wide" id="shareToPrep" style="margin-top:8px">📎 Attach to prep</button>
+    </div>
+
+    <p id="shareStatus" style="margin:12px 0 0;font-size:12px;min-height:16px;color:var(--muted,#9a948a)"></p>
   </div>
 </div>
 
@@ -6814,6 +6841,112 @@
   if($("exCancel"))  $("exCancel").onclick=closeExportModal;
   if($("exportModal")) $("exportModal").onclick=e=>{ if(e.target===$("exportModal")) closeExportModal(); };
   if($("exGo"))      $("exGo").onclick=()=>{ try{ runExport(); }catch(err){ toast(err.message||"Export failed."); } };
+
+  // ── Send to table: VTT scene + prep attach ────────────────────────────────
+  // Drop the current map straight into a campaign's VTT (a new scene built from
+  // a rendered PNG) or attach it to a session prep's Maps tab, instead of the
+  // export-then-upload dance. All client-side against the existing APIs; the
+  // Map Maker stays a standalone tool and nothing is saved to the account here.
+  (function shareToTable(){
+    var modal=$("shareModal"); if(!modal) return;
+    var campSel=$("shareCampaign"), prepSel=$("sharePrep"), statusEl=$("shareStatus");
+    var campsLoaded=false, prepsLoaded=false;
+    function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+    function setStatus(msg, bad){ if(!statusEl) return; statusEl.textContent=msg||""; statusEl.style.color = bad ? "#e06a5a" : "var(--muted,#9a948a)"; }
+    function openShare(){
+      modal.hidden=false; modal.style.display="flex"; setStatus("");
+      var sn=$("shareSceneName"); if(sn) sn.value=(map&&map.name?map.name:"Map");
+      loadCampaigns(); loadPreps();
+    }
+    function closeShare(){ modal.hidden=true; modal.style.display="none"; }
+    function loadCampaigns(){
+      if(campsLoaded) return; campsLoaded=true;
+      fetch("/api/campaigns",{credentials:"same-origin"}).then(function(r){ return r.ok?r.json():[]; }).then(function(list){
+        var arr=Array.isArray(list)?list:[];
+        if(campSel) campSel.innerHTML = arr.length ? arr.map(function(c){ return '<option value="'+esc(c.id)+'">'+esc(c.name||"Campaign")+'</option>'; }).join("") : '<option value="">No campaigns you run</option>';
+        var b=$("shareToVtt"); if(b) b.disabled = !arr.length;
+      }).catch(function(){ campsLoaded=false; if(campSel) campSel.innerHTML='<option value="">Couldn\'t load</option>'; });
+    }
+    function loadPreps(){
+      if(prepsLoaded) return; prepsLoaded=true;
+      fetch("/api/documents?kind=session",{credentials:"same-origin"}).then(function(r){ return r.ok?r.json():[]; }).then(function(list){
+        var arr=Array.isArray(list)?list:[];
+        if(prepSel) prepSel.innerHTML = arr.length ? arr.map(function(d){ return '<option value="'+esc(d.id)+'">'+esc(d.title||"Untitled")+'</option>'; }).join("") : '<option value="">No session preps yet</option>';
+        var b=$("shareToPrep"); if(b) b.disabled = !arr.length;
+      }).catch(function(){ prepsLoaded=false; if(prepSel) prepSel.innerHTML='<option value="">Couldn\'t load</option>'; });
+    }
+    // A PNG data-url of the current map at `ppc` pixels/cell, via the export
+    // renderer (_pngBlob). Returns null if there's nothing to render.
+    function mapPng(ppc){
+      var r; try{ r=_pngBlob(false, ppc, null); }catch(e){ r=null; }
+      if(!r||!r.blob) return Promise.resolve(null);
+      return new Promise(function(res){ var fr=new FileReader(); fr.onload=function(){ res(fr.result); }; fr.onerror=function(){ res(null); }; fr.readAsDataURL(r.blob); });
+    }
+    // Render as large as fits under `cap` chars, stepping the grid resolution
+    // down for big maps so the embedded image stays within the store's limits.
+    // Resolves { url, ppc } (ppc = the grid size the image was rendered at, so
+    // the VTT can line its grid up with the map) or null.
+    function mapPngFitting(cap){
+      var ppcs=[70,50,36], i=0;
+      function next(){
+        if(i>=ppcs.length) return Promise.resolve(null);
+        var ppc=ppcs[i++];
+        return mapPng(ppc).then(function(u){ if(u && u.length<=cap) return { url:u, ppc:ppc }; return next(); });
+      }
+      return next();
+    }
+    function sceneName(){ var sn=$("shareSceneName"); return ((sn&&sn.value)||(map&&map.name)||"Map").slice(0,120); }
+    function sendToVtt(){
+      var cid=campSel&&campSel.value; if(!cid){ setStatus("Pick a campaign first.", true); return; }
+      setStatus("Rendering the map…");
+      mapPngFitting(16000000).then(function(res){
+        if(!res){ setStatus("Nothing to send yet — draw or generate a map first.", true); return; }
+        var img=new Image();
+        img.onload=function(){ postScene(cid, res, img.naturalWidth, img.naturalHeight); };
+        img.onerror=function(){ postScene(cid, res, 0, 0); };
+        img.src=res.url;
+      });
+    }
+    function postScene(cid, res, w, h){
+      var name=sceneName();
+      var data={ kind:"dcc-vtt-scene", version:1, name:name, map:{ srcType:"embedded", src:res.url, ppg:res.ppc, widthPx:w||undefined, heightPx:h||undefined, walls:[], windows:[], doors:[], lights:[] }, tokens:[], fog:true, feetPerCell:5 };
+      setStatus("Sending to the VTT…");
+      fetch("/api/vtt/scenes",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({ campaignId:cid, title:name, data:data })})
+        .then(function(r){ if(r.status===403){ setStatus("That campaign isn't yours to add scenes to.", true); return null; } if(r.status===413){ setStatus("Map's too large for a scene — export it and import it in the VTT.", true); return null; } if(!r.ok) throw 0; return r.json(); })
+        .then(function(j){ if(j) setStatus('Added "'+name+'" to the VTT. Open the GM Screen for that campaign to show it.'); })
+        .catch(function(){ setStatus("Couldn't send that scene. Try again.", true); });
+    }
+    function attachToPrep(){
+      var id=prepSel&&prepSel.value; if(!id){ setStatus("Pick a session prep first.", true); return; }
+      setStatus("Rendering the map…");
+      // Preps carry the image as base64 inside their JSON state, so keep it well
+      // under the document store's comfort zone — a smaller cap than the VTT's.
+      mapPngFitting(8000000).then(function(res){
+        if(!res){ setStatus("Nothing to attach yet — draw or generate a map first.", true); return; }
+        setStatus("Attaching to the prep…");
+        fetch("/api/documents/"+encodeURIComponent(id),{credentials:"same-origin"}).then(function(r){ return r.ok?r.json():null; }).then(function(doc){
+          if(!doc||!doc.data){ setStatus("Couldn't read that prep.", true); return; }
+          var data=doc.data, key=null;
+          for(var k in data){ if(typeof data[k]==="string"){ key=k; break; } } // the prep's own JSON-state blob
+          if(!key){ setStatus("That prep has no editable state.", true); return; }
+          var state; try{ state=JSON.parse(data[key]); }catch(e){ setStatus("That prep looks corrupted — open it once and try again.", true); return; }
+          if(!state || typeof state!=="object"){ setStatus("That prep looks corrupted.", true); return; }
+          if(!Array.isArray(state.maps)) state.maps=[];
+          state.maps.push({ name:(map&&map.name?map.name:"Map"), src:res.url });
+          data[key]=JSON.stringify(state);
+          fetch("/api/documents/"+encodeURIComponent(id),{method:"PATCH",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({ data:data, baseRev:new Date(doc.updatedAt).getTime() })})
+            .then(function(r){ if(r.status===409){ setStatus("That prep was just edited elsewhere — reopen it and try again.", true); return null; } if(!r.ok) throw 0; return r.json(); })
+            .then(function(j){ if(j) setStatus("Attached to the prep's Maps tab. Open the prep to see it."); })
+            .catch(function(){ setStatus("Couldn't attach to that prep. Try again.", true); });
+        }).catch(function(){ setStatus("Couldn't read that prep.", true); });
+      });
+    }
+    if($("shareBtn")) $("shareBtn").onclick=openShare;
+    if($("shareClose")) $("shareClose").onclick=closeShare;
+    modal.addEventListener("click", function(e){ if(e.target===modal) closeShare(); });
+    if($("shareToVtt")) $("shareToVtt").onclick=sendToVtt;
+    if($("shareToPrep")) $("shareToPrep").onclick=attachToPrep;
+  })();
   if($("exRes"))     $("exRes").onchange=e=>{ const c=$("exResCustom"); if(c){ c.style.display = e.target.value==="custom" ? "" : "none"; } };
   if($("exGrid"))    $("exGrid").oninput=e=>{ if($("exGridV")) $("exGridV").textContent=e.target.value+"%"; };
   if($("exDark"))    $("exDark").oninput=e=>{ if($("exDarkV")) $("exDarkV").textContent=e.target.value+"%"; };

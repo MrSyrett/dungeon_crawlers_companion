@@ -72,6 +72,10 @@ const SHIM = `
   var lastSavedJson = null;
   try { lastSavedJson = JSON.stringify(cfg.state || {}); } catch (e) {}
   var conflicted = false;
+  // There is unsaved data the server hasn't accepted yet (a failed save). We
+  // already retry on a timer; this flag also lets us flush the instant the
+  // network comes back (the online listener below), not waiting out the timer.
+  var dirty = false;
   var recoveries = 0;      // benign rev skews we have re-synced past
   var RECOVERY_MAX = 3;
 
@@ -194,12 +198,14 @@ const SHIM = `
         if (r.status === 409) { refused(r); return; }
         if (!r.ok) throw new Error(r.status);
         if (json !== null) lastSavedJson = json;
+        dirty = false;
         status("saved", "Saved");
         return applyRev(r);
       })
       .catch(function(e) {
         // Network/server failure: keep lastSavedJson as it was so this data is
         // still "unsaved", and try again shortly (every 5s while it keeps failing).
+        dirty = true;
         status("error", "Save failed — retrying");
         // Retry the NEWEST data (never this call's possibly-stale snapshot).
         setTimeout(function () { if (!saving && !conflicted && !signedOut && lastData) save(lastData); }, 5000);
@@ -266,6 +272,22 @@ const SHIM = `
   // __ddSave(data) — call with the data object to save directly to server
   window.__ddSave = save;
   window.__ddSaveTitle = saveTitle;
+
+  // Flush the instant the network returns. The browser's "online" event fires
+  // when connectivity comes back; if we're holding a save the server never
+  // accepted, push it right away rather than waiting out the 5s retry timer.
+  // The edit itself was never at risk — the tool keeps its working copy in the
+  // browser (that's what a reload restores from) — this just gets it to the
+  // server sooner. Guarded by the same flags as the timer so it can't fight a
+  // conflict banner or a signed-out state.
+  try {
+    window.addEventListener("online", function () {
+      if (dirty && !saving && !conflicted && !signedOut && lastData) {
+        status("saving", "Back online — saving");
+        save(lastData);
+      }
+    });
+  } catch (e) {}
 
   // INVITE LINK. A sheet opened as /tools/<tool>/<id>?join=<code> (from the
   // /join/<code> page, or straight from + New there) joins that campaign by

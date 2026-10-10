@@ -244,7 +244,7 @@ ${opts.fixed ? FIXED_STYLE : ""}${opts.sheetFit ? SHEET_FIT : ""}</style>`;
   const menu = `<div id="dd-menu" hidden>
 <div class="dd-menu-sec"><a href="/dashboard" data-view="characters">Characters</a><a href="/dashboard" data-view="adventures">Adventures</a></div>
 <div class="dd-menu-sec one"><a href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a></div>
-${comp}${tools}</div>`;
+${comp}${tools}<div class="dd-menu-sec one"><button type="button" id="dd-reload" title="Reload this page">↻ Reload page</button></div></div>`;
 
   // ORDER MIRRORS SiteNav: menu button, logo, system, crumb — then the account
   // icon at the far right. The menu button used to sit at the right end with no
@@ -294,6 +294,10 @@ function close(){menu.hidden=true;btn.setAttribute("aria-expanded","false");if(b
 function open(){menu.hidden=false;btn.setAttribute("aria-expanded","true");bd=document.createElement("div");bd.className="dd-backdrop";bd.addEventListener("pointerdown",close);bar.appendChild(bd);document.addEventListener("keydown",onKey,true);}
 function onKey(e){if(e.key==="Escape"){e.preventDefault();close();}}
 btn.addEventListener("click",function(){menu.hidden?open():close();});
+// Reload control: tool surfaces (sheets, GM Screen, Map Maker) run as their own
+// standalone documents — in home-screen/standalone mode there's no browser
+// reload button, so a stuck page had no way back but force-quit. This is it.
+var rl=document.getElementById("dd-reload");if(rl)rl.addEventListener("click",function(){try{location.reload();}catch(e){}});
 // Characters / Adventures: pick the dashboard tab before going there.
 menu.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[data-view]");if(a){try{localStorage.setItem("dcw_dash_view",a.getAttribute("data-view"));}catch(x){}}});
 // ONE notion of "current system": opening a tool for system X means you're in
