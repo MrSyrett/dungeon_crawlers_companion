@@ -1070,6 +1070,21 @@ function renderTray(){ $('tray-edge').textContent=edges; $('tray-trouble').textC
 // ═══ POWERS / TRAITS / TAGS ═════════════════════════════════════════════════
 // A single collapsible power/trait/tag card. When it has a description the head
 // toggles it open/closed; the ✕ and info clicks never trigger the toggle.
+//
+// THEY START CLOSED. A built Marvel character carries a dozen or more powers,
+// each with a paragraph of effect text, plus its traits and tags — opened out,
+// those three tabs are a wall of prose you have to scroll past to find the one
+// power you are using this turn. Closed, each tab is a scannable list of names
+// with their action/duration/cost beside them, and the text is one tap away.
+//
+// A card with NO description has nothing to hide and no caret, so it is left
+// alone (`no-desc`) rather than given a collapsed state it cannot leave.
+//
+// Known and accepted: this is render-time, not remembered state, so anything
+// that re-renders the list (adding or deleting an item, an undo, a reload)
+// closes the open cards again. Persisting it would mean keying open-ness to
+// something stable across a rebuild, and these lists are rebuilt wholesale from
+// S.powers / S.traits / S.tags on every change.
 function pcToggle(el){ var c=el.closest('.pc-card'); if(c) c.classList.toggle('collapsed'); }
 function pcCardHTML(kind, i, name, meta, desc){
   var head='<div class="pc-head"'+(desc?' onclick="pcToggle(this)"':'')+'>'
@@ -1077,7 +1092,7 @@ function pcCardHTML(kind, i, name, meta, desc){
     +'<span class="pc-name">'+esc(name)+'</span>'
     +(meta?'<span class="pc-meta">'+esc(meta)+'</span>':'')
     +'<button class="row-x" onclick="event.stopPropagation();delItem(\''+kind+'\','+i+')">✕</button></div>';
-  return '<div class="pc-card'+(desc?'':' no-desc')+'">'+head+(desc?'<div class="pc-desc">'+esc(desc)+'</div>':'')+'</div>';
+  return '<div class="pc-card'+(desc?' collapsed':' no-desc')+'">'+head+(desc?'<div class="pc-desc">'+esc(desc)+'</div>':'')+'</div>';
 }
 // Powers are grouped under their Power Set, the set name serving as the section
 // header; each power within is its own collapsible card.
