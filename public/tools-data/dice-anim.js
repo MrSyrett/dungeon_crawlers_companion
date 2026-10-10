@@ -38,7 +38,7 @@
 .da-pop .da-hint{font-size:10px;color:#666;margin-top:8px;line-height:1.4;}
 `; (document.head||document.documentElement).appendChild(st); } }catch(e){} })();
   var LS='dcw_diceanim';  // shared across all sheets
-  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, mat:'plastic', sound:true };
+  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, mat:'plastic', hand:'right', sound:true };
   var MATS=['plastic','metal','worn'];
   // Older saves (and sheet JSON from before 2026-10-10) carry finish/tex instead of mat.
   function legacyMat(o){ if(o.mat&&MATS.indexOf(o.mat)>=0) return o.mat; if(o.tex==='worn') return 'worn'; if(o.tex==='metal') return 'metal'; return 'plastic'; }
@@ -144,7 +144,8 @@
   var THREE_URL='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
   var threeState=0; // 0 none, 1 loading, 2 ready, 3 failed
   var renderer,scene,camera,keyLight,rafId,world3d=null,lastT=0,_camTilt=false,floor3d=null,lastRoll=null;
-  // THE THROW. Dice fly in from the right, off the tray, skip across it, bounce
+  // THE THROW. Dice fly in from one bottom corner (right hand by default, left
+  // hand by setting), off the tray, skip across it, bounce
   // off the far wall and tumble to a stop — the shape of a real toss. Before
   // this they were dropped from a height onto the middle, two at a time from
   // either side, and killed their own speed so fast that a roll was a drop and
@@ -220,12 +221,13 @@
   function faceGroups(geo){ var p=geo.attributes.position.array, tris=[];
     for(var i=0;i<p.length;i+=9){ var ax=p[i],ay=p[i+1],az=p[i+2],bx=p[i+3],by=p[i+4],bz=p[i+5],cx=p[i+6],cy=p[i+7],cz=p[i+8];
       var ux=bx-ax,uy=by-ay,uz=bz-az,vx=cx-ax,vy=cy-ay,vz=cz-az; var nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx; var L=Math.hypot(nx,ny,nz)||1;
-      tris.push({n:new THREE.Vector3(nx/L,ny/L,nz/L), c:new THREE.Vector3((ax+bx+cx)/3,(ay+by+cy)/3,(az+bz+cz)/3)}); }
+      tris.push({n:new THREE.Vector3(nx/L,ny/L,nz/L), c:new THREE.Vector3((ax+bx+cx)/3,(ay+by+cy)/3,(az+bz+cz)/3), v:[[ax,ay,az],[bx,by,bz],[cx,cy,cz]]}); }
     // Group coplanar triangles into faces. The comparison normal MUST stay a
     // unit vector (keep the first triangle's), or an accumulated sum grows in
     // magnitude and wrongly merges non-coplanar faces (e.g. a d12 → 4 groups).
-    var g=[]; tris.forEach(function(t){ var m=null; for(var k=0;k<g.length;k++){ if(g[k].n.dot(t.n)>0.98){m=g[k];break;} } if(!m){m={n:t.n.clone(),c:t.c.clone(),cnt:1};g.push(m);} else {m.c.add(t.c);m.cnt++;} });
-    g.forEach(function(m){ m.c.divideScalar(m.cnt); m.n.normalize(); if(m.n.dot(m.c)<0) m.n.negate(); }); return g; }
+    var g=[]; tris.forEach(function(t){ var m=null; for(var k=0;k<g.length;k++){ if(g[k].n.dot(t.n)>0.98){m=g[k];break;} } if(!m){m={n:t.n.clone(),c:t.c.clone(),cnt:1,verts:[],_vk:{}};g.push(m);} else {m.c.add(t.c);m.cnt++;}
+      t.v.forEach(function(q){ var key=q[0].toFixed(3)+','+q[1].toFixed(3)+','+q[2].toFixed(3); if(!m._vk[key]){ m._vk[key]=1; m.verts.push(new THREE.Vector3(q[0],q[1],q[2])); } }); });
+    g.forEach(function(m){ m.c.divideScalar(m.cnt); m.n.normalize(); if(m.n.dot(m.c)<0) m.n.negate(); delete m._vk; }); return g; }
   // A proper 10-sided die: pentagonal trapezohedron (10 kite faces). Built with
   // an explicit face list so each kite is one group (labelled 0-9 / percentile).
   function d10GeoGroups(){
@@ -250,15 +252,15 @@
       if(n.dot(c)<0) n.negate();
       function tri(a,bb,cc){ var nn=new THREE.Vector3().subVectors(bb,a).cross(new THREE.Vector3().subVectors(cc,a)); if(nn.dot(n)<0){var t=bb;bb=cc;cc=t;} pos.push(a.x,a.y,a.z,bb.x,bb.y,bb.z,cc.x,cc.y,cc.z); }
       tri(fc[0],fc[1],fc[2]); tri(fc[0],fc[2],fc[3]);
-      groups.push({n:n,c:c,labelPos:c.clone()});
+      groups.push({n:n,c:c,labelPos:c.clone(),up:fc[0].clone()});   // fc[0] is the pole: the number's top points at it
     });
     var geo=new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); geo.computeVertexNormals();
     return {geo:geo, groups:groups};
   }
   function coinGeoGroups(){
     var r=1.12, th=0.34, geo=new THREE.CylinderGeometry(r,r,th,26).toNonIndexed();
-    var groups=[ {n:new THREE.Vector3(0,1,0),  c:new THREE.Vector3(0, th/2,0), labelPos:new THREE.Vector3(0, th/2,0)},
-                 {n:new THREE.Vector3(0,-1,0), c:new THREE.Vector3(0,-th/2,0), labelPos:new THREE.Vector3(0,-th/2,0)} ];
+    var groups=[ {n:new THREE.Vector3(0,1,0),  c:new THREE.Vector3(0, th/2,0), labelPos:new THREE.Vector3(0, th/2,0), up:new THREE.Vector3(0, th/2,-1)},
+                 {n:new THREE.Vector3(0,-1,0), c:new THREE.Vector3(0,-th/2,0), labelPos:new THREE.Vector3(0,-th/2,0), up:new THREE.Vector3(0,-th/2,-1)} ];
     return {geo:geo, groups:groups};
   }
   // A real d4 reads at the VERTEX pointing up: each corner carries a number, the
@@ -435,8 +437,29 @@
     var size=sides===2?1.15:sides===6?1.0:sides===4?0.8:sides===10?0.52:sides===8?0.7:0.64;
     groups.forEach(function(g,idx){ var isR=labels[idx]===resultStr;
       var pl=new THREE.Mesh(new THREE.PlaneGeometry(size,size), labelMat(labels[idx]));
-      var pp=g.labelPos ? g.labelPos.clone().addScaledVector(g.n,0.03) : g.n.clone().multiplyScalar(g.c.dot(g.n)*1.02); pl.position.copy(pp); pl.lookAt(pp.clone().add(g.n)); group.add(pl); });
+      var pp=g.labelPos ? g.labelPos.clone().addScaledVector(g.n,0.03) : g.n.clone().multiplyScalar(g.c.dot(g.n)*1.02); pl.position.copy(pp);
+      pl.up.copy(numberUp(g)); pl.lookAt(pp.clone().add(g.n)); group.add(pl); });
     return group; }
+  // Which way is "up" for the number on a face. Real dice don't print every
+  // number the same way round: on a triangle (d8, d20) the top of the digit
+  // points at a corner and its base sits parallel to the opposite edge; on a
+  // pentagon (d12) likewise; on a square (d6) the digit squares up with an
+  // edge; on a d10 kite it points at the pole. This picks that corner (or
+  // edge) per face — the one highest in the die's own frame, so the choice is
+  // the same every roll — and hands lookAt an up vector in the face plane.
+  // Before this every label used the default up and the digits all leaned the
+  // same way regardless of which face they were on.
+  function numberUp(g){ var dir;
+    if(g.up){ dir=new THREE.Vector3().subVectors(g.up,g.c); }
+    else { var V=g.verts||[], cands=[];
+      if(V.length===4){ // square: aim at an edge midpoint (edges = the two nearest neighbours of each corner)
+        var e=1e9; for(var i=0;i<4;i++) for(var j=i+1;j<4;j++){ var d=V[i].distanceTo(V[j]); if(d<e) e=d; }
+        for(var a=0;a<4;a++) for(var b=a+1;b<4;b++){ if(Math.abs(V[a].distanceTo(V[b])-e)<1e-3) cands.push(new THREE.Vector3().addVectors(V[a],V[b]).multiplyScalar(0.5)); } }
+      else cands=V.slice();
+      if(!cands.length) return new THREE.Vector3(0,1,0);
+      var best=cands[0], bs=-1e9; cands.forEach(function(p){ var sc=p.y*1000+p.z*10+p.x; if(sc>bs){bs=sc;best=p;} });
+      dir=new THREE.Vector3().subVectors(best,g.c); }
+    dir.addScaledVector(g.n,-dir.dot(g.n)); if(dir.lengthSq()<1e-8) return new THREE.Vector3(0,1,0); return dir.normalize(); }
   function dieRest(s){ return s===2?0.17:s===4?0.4:s===6?0.75:s===8?0.72:s===10?0.5:s===12?0.9:s===20?0.9:0.8; }
   function dieRadius(s){ return s===2?1.1:s===4?0.9:s===6?1.0:s===8?0.95:s===10?1.0:s===12?1.0:s===20?1.05:1.0; }
   var _shTex=null;
@@ -480,11 +503,12 @@
         var e=(un<-3.0)?REST:0; _rn.crossVectors(_rr,DOWN); var k=1+s.iInv*_rn.lengthSq(); var j=-(1+e)*un/k;
         applyImpulse(s,_rr,UP,j);
         _u.crossVectors(s.av,_rr).add(s.v); _t.set(_u.x,0,_u.z); var ut=_t.length(); if(ut>1e-4){ _t.multiplyScalar(1/ut); _rn.crossVectors(_rr,_t); var kt=1+s.iInv*_rn.lengthSq(); var jt=Math.min(MU*j, ut/kt); applyImpulse(s,_rr,_t,-jt); } } } }
-    // Walls (the near/far lips and the far end). The RIGHT wall only exists once
-    // a die is inside the tray: dice start beyond it and fly in over it.
-    if(maxX<WX-0.05) s.inside=true;
-    if(s.inside && maxX>WX){ s.p.x-=maxX-WX; if(s.v.x>0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
-    if(minX<-WX){ s.p.x+=-WX-minX; if(s.v.x<0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
+    // Walls (the near/far lips and both ends). The wall on the side the dice
+    // come in from (s.side: +1 right, -1 left) only exists once a die is
+    // inside the tray: dice start beyond it and fly in over it.
+    if(s.side>0 ? maxX<WX-0.05 : minX>-WX+0.05) s.inside=true;
+    if((s.side<0 || s.inside) && maxX>WX){ s.p.x-=maxX-WX; if(s.v.x>0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
+    if((s.side>0 || s.inside) && minX<-WX){ s.p.x+=-WX-minX; if(s.v.x<0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
     if(maxZ>WZ){ s.p.z-=maxZ-WZ; if(s.v.z>0) s.v.z=-s.v.z*WALL_REST; } if(minZ<-WZ){ s.p.z+=-WZ-minZ; if(s.v.z<0) s.v.z=-s.v.z*WALL_REST; }
     // Damping: air drag on spin is tiny; on the floor rolling resistance bleeds
     // spin and speed so a die that is rolling, not sliding, still stops.
@@ -502,21 +526,24 @@
     if(grounded && slow && s.flat<0.9995){ _n.copy(s.groups[di].n).applyQuaternion(s.q).normalize(); _corr.setFromUnitVectors(_n,DOWN); _dq.identity().slerp(_corr,Math.min(0.3,8*dt)); s.q.premultiply(_dq).normalize(); s.v.set(0,0,0); s.av.set(0,0,0); }
     if(grounded && slow && s.flat>=0.9995){ s.v.set(0,0,0); s.av.set(0,0,0); } }
   function atRest(s){ return s.spawned && s.v.length()<0.3 && s.av.length()<0.6 && s.flat>0.9995; }
-  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,verts:s.verts,iInv:s.iInv,spinDamp:s.spinDamp,groups:s.groups,flat:s.flat||0,spawnStep:s.spawnStep||0,spawned:!(s.spawnStep>0),inside:!!s.inside}; }
+  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,verts:s.verts,iInv:s.iInv,spinDamp:s.spinDamp,groups:s.groups,flat:s.flat||0,spawnStep:s.spawnStep||0,spawned:!(s.spawnStep>0),inside:!!s.inside,side:s.side||1}; }
   // Where a die starts and how hard it's thrown. They come from the RIGHT (most
   // players are right-handed), just off the edge of the screen, staggered back
   // so they arrive one after another rather than as a clump; low and fast
   // with a little lift, spinning hard, so the first floor hit is a skip and a
   // tumble rather than a thud.
-  function makeInit(sides,i,n,hull){ var rank=Math.floor(i/2), ry=FLOORY+dieRest(sides);
-    var z=(Math.random()*2-1)*WZ*0.6, vx=-(THROW_V*(1+Math.random()*0.45));
-    return { p:new THREE.Vector3(WX+1.0+rank*1.2+Math.random()*0.6, ry+1.0+Math.random()*1.2, z),
-    v:new THREE.Vector3(vx, 1.0+Math.random()*3.0, -z*0.5+(Math.random()-0.5)*3.0),
-    // spin mostly about the axis a die rolling leftward would spin about (ω = v × up / r),
+  // The hand setting picks the side: a right-hander's dice come in from the
+  // bottom-right corner heading up and across, a left-hander's from the
+  // bottom-left. (Screen "bottom" is +z: the camera's up is -z.)
+  function makeInit(sides,i,n,hull){ var rank=Math.floor(i/2), ry=FLOORY+dieRest(sides), side=(S.hand==='left')?-1:1;
+    var z=WZ*(0.1+Math.random()*0.55), vx=-side*(THROW_V*(1+Math.random()*0.45));
+    return { p:new THREE.Vector3(side*(WX+1.0+rank*1.2+Math.random()*0.6), ry+1.0+Math.random()*1.2, z),
+    v:new THREE.Vector3(vx, 1.0+Math.random()*3.0, -(1.5+Math.random()*3.0)),
+    // spin mostly about the axis a die rolling that way would spin about (ω = v × up / r),
     // plus a little wobble, so it tumbles with its travel rather than pirouetting
-    av:new THREE.Vector3((Math.random()-0.5)*10,(Math.random()-0.5)*8,-(10+Math.random()*16)),
+    av:new THREE.Vector3((Math.random()-0.5)*10,(Math.random()-0.5)*8,-side*(10+Math.random()*16)),
     q:new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random()*6,Math.random()*6,Math.random()*6)),
-    restY:ry, radius:hull.radius, verts:hull.verts, iInv:1/(0.4*hull.radius*hull.radius), spinDamp:(sides===2?0.1:ROLL_DAMP), groups:null, flat:0, inside:false }; }
+    restY:ry, radius:hull.radius, verts:hull.verts, iInv:1/(0.4*hull.radius*hull.radius), spinDamp:(sides===2?0.1:ROLL_DAMP), groups:null, flat:0, inside:false, side:side }; }
   // Die-vs-die stays a soft sphere push (hull-vs-hull is not worth its weight
   // here); the spheres are the hull radius scaled down so dice can get close.
   function stepWorld(states,dt,step){ for(var i=0;i<states.length;i++) stepState(states[i],dt,step);
@@ -670,6 +697,7 @@
       +'<div class="da-row"><span class="k">Show dice</span><div class="da-sw" data-k="on"></div></div>'
       +'<div class="da-row"><span class="k">Sound</span><div class="da-sw" data-k="sound"></div></div>'
       +'<div class="da-row"><span class="k">Style</span><div class="da-seg" data-k="mode"><button data-v="2d">2D</button><button data-v="3d">3D</button></div></div>'
+      +'<div class="da-row"><span class="k">Throw from</span><div class="da-seg" data-k="hand"><button data-v="right">Right hand</button><button data-v="left">Left hand</button></div></div>'
       +'<div class="da-row"><span class="k">Material</span><div class="da-seg" data-k="mat"><button data-v="plastic">Plastic</button><button data-v="metal">Metal</button><button data-v="worn">Worn</button></div></div>'
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Dice colour</span><div class="da-swatches" data-k="dice"></div></div>'
@@ -687,6 +715,7 @@
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){}); }; });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.onclick=function(){ setS('linger', +b.dataset.v); }; });
     pop.querySelectorAll('[data-k="mat"] button').forEach(function(b){ b.onclick=function(){ setS('mat', b.dataset.v); }; });
+    pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.onclick=function(){ setS('hand', b.dataset.v); }; });
     syncPop();
   }
   function syncPop(){ if(!pop)return; pop.querySelector('[data-k="on"]').classList.toggle('on', !!S.on);
@@ -694,6 +723,7 @@
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===S.mode); });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.classList.toggle('on', +b.dataset.v===(S.linger||1000)); });
     pop.querySelectorAll('[data-k="mat"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.mat||'plastic')); });
+    pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.hand||'right')); });
     var dc=pop.querySelector('[data-k="dice"] .da-custom'); if(dc && S.dice&&String(S.dice)[0]==='#')dc.value=S.dice; var nc=pop.querySelector('[data-k="num"] .da-custom'); if(nc)nc.value=S.num;
     var rb=pop.querySelector('.da-rand'); if(rb) rb.classList.toggle('sel', S.dice==='random'); }
   function setS(k,v){ S[k]=v; persist(); syncPop(); }
@@ -723,8 +753,8 @@
     if(clear && clear.parentNode){ clear.parentNode.insertBefore(g, clear); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
-  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,mat:S.mat,sound:S.sound}; },
-    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.mat||o.finish||o.tex)S.mat=legacyMat(o); if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
+  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, _world:function(){ return world3d; }, _groups:function(sides){ return getGeoGroups(sides).groups; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,mat:S.mat,hand:S.hand,sound:S.sound}; },
+    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.mat||o.finish||o.tex)S.mat=legacyMat(o); if(o.hand==='left'||o.hand==='right')S.hand=o.hand; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
   // Persist settings into the saved sheet too, as a fallback for VTT webviews
