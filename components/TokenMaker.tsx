@@ -360,6 +360,14 @@ export default function TokenMaker() {
   const [dragging, setDragging] = useState(false);
   const [dropActive, setDropActive] = useState(false);
 
+  // "Save to campaign tokens" — the GM's own campaigns and the current pick.
+  const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
+  const [campId, setCampId] = useState<string>("");
+  const [saveMsg, setSaveMsg] = useState<{ kind: "idle" | "saving" | "ok" | "err"; text: string }>({
+    kind: "idle",
+    text: "",
+  });
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragState = useRef<{ startX: number; startY: number; ox: number; oy: number } | null>(null);
@@ -522,6 +530,101 @@ export default function TokenMaker() {
       else out.toBlob((png) => save(png, "png"), "image/png"); // fallback: encoder ignored WebP
     }, "image/webp", 0.92);
   }, [params, image, fileName]);
+
+  // The GM's own campaigns, for "Save to campaign tokens". The token library is
+  // GM-only (the API gates on ownsCampaign), and /api/campaigns with no code
+  // returns exactly the campaigns this account owns, which is the right set.
+  useEffect(() => {
+    let live = true;
+    fetch("/api/campaigns", { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: unknown) => {
+        if (!live || !Array.isArray(list)) return;
+        const mine = list
+          .filter((c): c is { id: string; name: string } => !!c && typeof c.id === "string")
+          .map((c) => ({ id: c.id, name: typeof c.name === "string" ? c.name : "Campaign" }));
+        setCampaigns(mine);
+        setCampId((cur) => cur || (mine[0]?.id ?? ""));
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  // Drop the finished round token straight into a campaign's VTT token library,
+  // so a GM never has to download-then-re-upload. The library PUT replaces the
+  // whole set, so this reads the current one, appends, and writes it back. The
+  // token art is the same WebP (PNG fallback) the Download button produces,
+  // stored inline the way the VTT's own uploaded tokens are.
+  const saveToCampaign = useCallback(async () => {
+    if (!image || !campId) return;
+    setSaveMsg({ kind: "saving", text: "" });
+
+    const out = document.createElement("canvas");
+    out.width = EXPORT_SIZE;
+    out.height = EXPORT_SIZE;
+    const ctx = out.getContext("2d");
+    if (!ctx) {
+      setSaveMsg({ kind: "err", text: "Couldn't render the token." });
+      return;
+    }
+    drawToken(ctx, EXPORT_SIZE, params, image);
+    let url = "";
+    try {
+      url = out.toDataURL("image/webp", 0.92);
+    } catch {
+      url = "";
+    }
+    if (!url.startsWith("data:image/webp")) {
+      try {
+        url = out.toDataURL("image/png");
+      } catch {
+        url = "";
+      }
+    }
+    if (!url) {
+      setSaveMsg({ kind: "err", text: "Couldn't render the token." });
+      return;
+    }
+
+    const camp = campaigns.find((c) => c.id === campId);
+    try {
+      const cur = await fetch(`/api/vtt/tokens?campaignId=${encodeURIComponent(campId)}`, {
+        credentials: "same-origin",
+      });
+      if (cur.status === 403) {
+        setSaveMsg({ kind: "err", text: "That campaign isn't yours to add tokens to." });
+        return;
+      }
+      const curData = cur.ok ? await cur.json() : { tokens: [] };
+      const tokens = Array.isArray(curData.tokens) ? curData.tokens : [];
+      // Match the VTT library's own id and token shape (public/vtt/session.js).
+      const token = {
+        id: "lt" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: fileName || "Token",
+        imageUrl: url,
+        size: 1,
+      };
+      const res = await fetch("/api/vtt/tokens", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ campaignId: campId, tokens: [...tokens, token] }),
+      });
+      if (res.status === 413) {
+        setSaveMsg({ kind: "err", text: "That campaign's token library is full." });
+        return;
+      }
+      if (!res.ok) {
+        setSaveMsg({ kind: "err", text: "That didn't save. Try again." });
+        return;
+      }
+      setSaveMsg({ kind: "ok", text: `Saved to ${camp ? camp.name : "the campaign"}'s tokens.` });
+    } catch {
+      setSaveMsg({ kind: "err", text: "That didn't save. Try again." });
+    }
+  }, [image, campId, campaigns, params, fileName]);
 
   const reset = () => {
     setZoom(1);
@@ -719,6 +822,52 @@ export default function TokenMaker() {
           >
             Download WebP · {EXPORT_SIZE}px
           </button>
+
+          {/* Save straight to a campaign's VTT token library (GM campaigns
+              only). No download/re-upload round-trip; the token shows up in the
+              GM Screen's Tokens tab, ready to drag onto the map. */}
+          {campaigns.length > 0 ? (
+            <div className="mt-3">
+              <div className="flex gap-2">
+                <select
+                  value={campId}
+                  onChange={(e) => {
+                    setCampId(e.target.value);
+                    setSaveMsg({ kind: "idle", text: "" });
+                  }}
+                  aria-label="Campaign to save the token to"
+                  className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-[13px] text-[var(--text)] outline-none focus:border-[var(--gold)]"
+                >
+                  {campaigns.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={saveToCampaign}
+                  disabled={!image || !campId || saveMsg.kind === "saving"}
+                  className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)] transition-colors hover:border-[var(--gold)] hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:text-[var(--muted)] disabled:hover:border-[var(--border)] disabled:hover:text-[var(--muted)]"
+                >
+                  {saveMsg.kind === "saving" ? "Saving…" : "Save to campaign tokens"}
+                </button>
+              </div>
+              {saveMsg.kind === "ok" || saveMsg.kind === "err" ? (
+                <p
+                  className={`mt-2 text-[12px] ${
+                    saveMsg.kind === "ok" ? "text-[var(--gold)]" : "text-[var(--bad)]"
+                  }`}
+                >
+                  {saveMsg.text}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">
+              Own a campaign to save tokens straight to its VTT library.
+            </p>
+          )}
         </div>
       </div>
     </div>

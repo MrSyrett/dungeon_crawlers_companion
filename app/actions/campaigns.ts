@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isSystemKey } from "@/components/systemStore";
 import { makeCode } from "@/lib/campaign-code";
+import { CHARACTER_TOOL_IDS, sheetKeyFor } from "@/lib/tools";
 
 // Delete a campaign you own.
 //
@@ -141,4 +142,110 @@ export async function renameCampaign(formData: FormData): Promise<void> {
 
   await prisma.campaign.updateMany({ where: { id, ownerId: user.id }, data: { name } });
   revalidatePath("/campaigns");
+}
+
+// Mint a fresh join code for a campaign you own.
+//
+// The point is to kill invite links that leaked or went stale: a new code breaks
+// every /join/<old code> link and anyone still holding the old one. Players who
+// have ALREADY joined are unaffected — the link between a sheet and a campaign is
+// stored by campaign id, not by code, so regenerating the code never kicks the
+// party, it only stops new joins on the old code.
+//
+// update() in a retry loop rather than updateMany(): the code column is unique,
+// so a (vanishingly unlikely) collision throws, and we try again — the same
+// shape createCampaign uses. Ownership is confirmed first so a non-owner is a
+// silent no-op, like the other actions here.
+export async function regenerateCampaignCode(formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const owned = await prisma.campaign.count({ where: { id, ownerId: user.id } });
+  if (!owned) return;
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await prisma.campaign.update({ where: { id }, data: { code: makeCode() } });
+      break;
+    } catch {
+      if (attempt === 4) return;
+    }
+  }
+  revalidatePath("/campaigns");
+  revalidatePath("/dashboard");
+}
+
+// Remove `campaign` from a character sheet's own JSON body, whatever system it
+// is, so the save route (which re-derives the link from the body on every save)
+// can't quietly re-link the player after we clear the indexed column. Only the
+// campaign-link fields are touched — the character itself is left exactly as it
+// was. Returns the data object to write back, or null if there was nothing to
+// change (so the caller can skip the write).
+function stripSheetCampaign(tool: string, data: unknown): object | null {
+  const key = sheetKeyFor(tool);
+  if (!key) return null;
+  const blob = (data ?? {}) as Record<string, unknown>;
+  const raw = blob[key];
+  if (typeof raw !== "string") return null;
+  let sheet: Record<string, unknown>;
+  try {
+    sheet = JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  let changed = false;
+  if ("campaign" in sheet) {
+    delete sheet.campaign;
+    changed = true;
+  }
+  const inner = sheet._sheet as Record<string, unknown> | undefined;
+  if (inner && typeof inner === "object" && "campaign" in inner) {
+    delete inner.campaign;
+    changed = true;
+  }
+  if (!changed) return null;
+  return { ...blob, [key]: JSON.stringify(sheet) };
+}
+
+// Remove one player's character from a campaign you own ("remove a player").
+//
+// A player is "in" a campaign because their character sheet is linked to it
+// (Document.linkedCampaignId, mirrored from the sheet's own JSON). Removing them
+// severs that link: we clear the JSON record (stripSheetCampaign) AND the indexed
+// column, so the sheet stops appearing in the party and stops exchanging rolls.
+//
+// Two deliberate limits. First, we only ever touch the campaign-link fields of a
+// sheet that is actually linked to THIS campaign, and only the owner of the
+// campaign can do it — the GM can't reach into arbitrary documents. Second, a
+// player who has that sheet OPEN at the moment can re-link by saving (their live
+// page still holds the connection in memory); this is a between-sessions tidy-up,
+// not a hard ban. A true block-list would be a schema change; this isn't that.
+export async function removeCampaignMember(formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const campaignId = String(formData.get("campaignId") ?? "");
+  const docId = String(formData.get("docId") ?? "");
+  if (!campaignId || !docId) return;
+
+  const owns = await prisma.campaign.count({ where: { id: campaignId, ownerId: user.id } });
+  if (!owns) return;
+
+  const doc = await prisma.document.findFirst({
+    where: { id: docId, linkedCampaignId: campaignId, tool: { in: CHARACTER_TOOL_IDS } },
+    select: { id: true, tool: true, data: true },
+  });
+  if (!doc) return;
+
+  const stripped = stripSheetCampaign(doc.tool, doc.data);
+  await prisma.document.update({
+    where: { id: doc.id },
+    data: { linkedCampaignId: null, ...(stripped ? { data: stripped } : {}) },
+  });
+
+  revalidatePath("/campaigns");
+  revalidatePath("/dashboard");
 }

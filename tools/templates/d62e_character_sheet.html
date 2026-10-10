@@ -818,13 +818,19 @@ const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'
 const $ = id => document.getElementById(id);
 const num = v => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
 const norm = s => String(s || '').replace(/[’‘]/g, "'").trim().toLowerCase();
+// Book content PLUS the viewer's homebrew (window.D62E_HB_*, filled by
+// d62e-homebrew.js once /api/homebrew answers). Every picker reads through this
+// map, so concatenating here is the one place homebrew has to be merged — a
+// skill / gear / power / trait / limitation you brewed shows up in its picker
+// beside the book entries. The pools are empty (or absent) until the loader
+// runs, so `|| []` keeps this safe standalone and on first paint.
 const D = {
-  skills:    () => (typeof D62E_SKILLS         !== 'undefined' ? D62E_SKILLS         : []),
+  skills:    () => (typeof D62E_SKILLS         !== 'undefined' ? D62E_SKILLS         : []).concat(window.D62E_HB_SKILLS || []),
   templates: () => (typeof D62E_TEMPLATES       !== 'undefined' ? D62E_TEMPLATES       : []),
-  equipment: () => (typeof D62E_EQUIPMENT       !== 'undefined' ? D62E_EQUIPMENT       : []),
-  perks:     () => (typeof D62E_PERKS           !== 'undefined' ? D62E_PERKS           : []),
-  powers:    () => (typeof D62E_POWERS          !== 'undefined' ? D62E_POWERS          : []),
-  limitations:() => (typeof D62E_LIMITATIONS    !== 'undefined' ? D62E_LIMITATIONS     : []),
+  equipment: () => (typeof D62E_EQUIPMENT       !== 'undefined' ? D62E_EQUIPMENT       : []).concat(window.D62E_HB_GEAR || []),
+  perks:     () => (typeof D62E_PERKS           !== 'undefined' ? D62E_PERKS           : []).concat(window.D62E_HB_TRAITS || []),
+  powers:    () => (typeof D62E_POWERS          !== 'undefined' ? D62E_POWERS          : []).concat(window.D62E_HB_POWERS || []),
+  limitations:() => (typeof D62E_LIMITATIONS    !== 'undefined' ? D62E_LIMITATIONS     : []).concat(window.D62E_HB_LIMITS || []),
   attrInfo:  () => (typeof D62E_ATTRIBUTE_INFO  !== 'undefined' ? D62E_ATTRIBUTE_INFO  : []),
   tables:    () => (typeof D62E_TABLES          !== 'undefined' ? D62E_TABLES          : null),
 };
@@ -1896,9 +1902,30 @@ campaignUpdateBtn();
 <script src="/tools-data/d62e-powers.js"></script>
 <script src="/tools-data/d62e-limitations.js"></script>
 <script src="/tools-data/d62e-sheet-builder.js"></script>
+<script src="/tools-data/d62e-homebrew.js"></script>
 <script>
 buildStats();
 autoLoad();
+// Pull the viewer's homebrew into the pickers once the loader is ready. It runs
+// after the page is usable; if a picker is already open when it lands, re-render
+// that one so the new rows appear without a reopen.
+if (window.D62eHomebrew) {
+  try {
+    window.D62eHomebrew.load(function () {
+      var open = [
+        ['skill-overlay', renderSkillPicker],
+        ['power-overlay', renderPowerPicker],
+        ['trait-overlay', renderTraitPicker],
+        ['limit-overlay', renderLimitPicker],
+        ['gearstore-overlay', renderGearPicker],
+      ];
+      open.forEach(function (o) {
+        var el = document.getElementById(o[0]);
+        if (el && el.classList.contains('open')) { try { o[1](); } catch (e) {} }
+      });
+    });
+  } catch (e) {}
+}
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->
 <script src="/tools-data/dice-anim.js"></script>

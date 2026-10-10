@@ -934,9 +934,19 @@ function collectRows(kind){
 var _pk=null;
 function pickerPool(kind){
   var world=$('f-world').value;
-  if(kind==='abil') return ABILITIES.map(function(x){return {name:x.name,tag:x.kind||'Ability',note:x.desc||'',world:x.world,facet:x.kind||'Ability'};});
-  if(kind==='spell') return SPELLS.map(function(x){return {name:x.name,tag:x.school||'Magic',note:x.desc||'',world:'core',facet:x.school||'Magic'};});
-  return LOOT.map(function(x){return {name:x.name,tag:x.table||'Loot',note:x.desc||'',world:'core',facet:x.table||'Loot'};})
+  // The viewer's homebrew (window.ICRPG_HB_*, filled by icrpg-homebrew.js once
+  // /api/homebrew answers) FIRST, then the book content — mapped into the same
+  // shape so a brewed ability / spell / loot / gear shows up in its picker. It
+  // goes first on purpose: renderPicker() caps the list at 300 rows, and the
+  // loot shelf alone is longer than that, so appending would push homebrew off
+  // the end. Pools are absent until the loader runs, so `|| []` is safe.
+  if(kind==='abil') return (window.ICRPG_HB_ABILITIES||[]).map(function(x){return {name:x.name,tag:x.kind||'Ability',note:x.desc||'',world:x.world,facet:x.kind||'Ability'};})
+    .concat(ABILITIES.map(function(x){return {name:x.name,tag:x.kind||'Ability',note:x.desc||'',world:x.world,facet:x.kind||'Ability'};}));
+  if(kind==='spell') return (window.ICRPG_HB_SPELLS||[]).map(function(x){return {name:x.name,tag:x.school||'Magic',note:x.desc||'',world:'core',facet:x.school||'Magic'};})
+    .concat(SPELLS.map(function(x){return {name:x.name,tag:x.school||'Magic',note:x.desc||'',world:'core',facet:x.school||'Magic'};}));
+  return (window.ICRPG_HB_LOOT||[]).map(function(x){return {name:x.name,tag:x.table||'Loot',note:x.desc||'',world:'core',facet:x.table||'Loot'};})
+    .concat((window.ICRPG_HB_GEAR||[]).map(function(x){return {name:x.name,tag:x.category||'Gear',note:x.desc||'',world:x.world,facet:x.category||'Gear'};}))
+    .concat(LOOT.map(function(x){return {name:x.name,tag:x.table||'Loot',note:x.desc||'',world:'core',facet:x.table||'Loot'};}))
     .concat(GEAR.map(function(x){return {name:x.name,tag:x.category||'Gear',note:x.desc||'',world:x.world,facet:x.category||'Gear'};}));
 }
 function openPicker(kind){
@@ -1309,6 +1319,7 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 <script src="/tools-data/icrpg-gear.js"></script>
 <script src="/tools-data/icrpg-spells.js"></script>
 <script src="/tools-data/icrpg-sheet-builder.js"></script>
+<script src="/tools-data/icrpg-homebrew.js"></script>
 
 <script>
 // ═══ BOOT ═══════════════════════════════════════════════════════════════════
@@ -1329,6 +1340,9 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
   var data=null; if(saved){ try{ data=JSON.parse(saved); }catch(e){} }
   if(data) applySheet(data); else applySheet({});
   var fb=$('foot-build'); if(fb) fb.textContent=window.__BUILD__||'';
+  // Pull the viewer's homebrew into the pickers once the loader is ready. If a
+  // picker is open when it lands, re-render it so the new rows appear.
+  if(window.IcrpgHomebrew){ try{ window.IcrpgHomebrew.load(function(){ if(_pk) renderPicker(); }); }catch(e){} }
 })();
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->

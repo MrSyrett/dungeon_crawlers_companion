@@ -15,6 +15,7 @@ import {
 } from "./systemStore";
 import { createDocument, deleteDocument } from "@/app/actions/documents";
 import { ConfirmButton } from "./ConfirmButton";
+import MyCampaigns, { type PlayerCampaign } from "./MyCampaigns";
 
 // Compact per-document row the server hands us — no Prisma objects, no rendered
 // panels, just what a list item needs. `vttHref` is where the sheet's campaign
@@ -145,11 +146,14 @@ function DocList({
 // is instant and never re-queries.
 export default function DashboardDocs({
   panels,
+  myCampaigns = [],
   hiddenKeys = [],
   initialSystem,
   initialView,
 }: {
   panels: SystemPanels;
+  /** Campaigns the viewer plays in, for the "My campaigns" card. */
+  myCampaigns?: PlayerCampaign[];
   hiddenKeys?: SystemKey[];
   // What the server rendered, read from the cookie the store mirrors
   // (lib/system-cookie.ts). Hydration must match the server's HTML, so the
@@ -175,6 +179,10 @@ export default function DashboardDocs({
           chip already says which game this is, and the page's own theme says
           it again. */}
       <div key={system} className="dcc-fade-in">
+        {/* The player-facing campaign overview sits above the Characters list
+            (it's about your sheets and the games they're in); the Adventures
+            view is the GM's prep surface, so it stays uncluttered. */}
+        {view === "characters" ? <MyCampaigns campaigns={myCampaigns} system={system} /> : null}
         <DocList
           kind={view}
           system={system}

@@ -42,11 +42,14 @@ type EditProps = Common & {
   vttUrl: string | null;
   /** Shown in the delete confirmation so the GM knows what they are breaking. */
   rolls: number;
-  partyNames: string[];
+  /** The linked characters — id so one can be removed, name to show. */
+  party: { id: string; name: string }[];
   rename: (formData: FormData) => Promise<void>;
   setVttUrl: (formData: FormData) => Promise<void>;
   remove: (formData: FormData) => Promise<void>;
   clearRolls: (formData: FormData) => Promise<void>;
+  regenerateCode: (formData: FormData) => Promise<void>;
+  removeMember: (formData: FormData) => Promise<void>;
 };
 
 export default function CampaignDialog(props: CreateProps | EditProps) {
@@ -57,6 +60,10 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
   const [draftUrl, setDraftUrl] = useState(editing ? props.vttUrl ?? "" : "");
   // Which destructive control is asking "are you sure?" — at most one at a time.
   const [confirming, setConfirming] = useState<null | "delete" | "clear">(null);
+  // Regenerate-code and remove-player confirms live on their own (they sit in the
+  // body, not the footer slot), but still only one thing is ever mid-confirm.
+  const [regenConfirm, setRegenConfirm] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -75,6 +82,8 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
   function show() {
     setErr(null);
     setConfirming(null);
+    setRegenConfirm(false);
+    setRemovingId(null);
     setDraftName(seedName);
     setDraftUrl(seedUrl);
     setOpen(true);
@@ -186,11 +195,50 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
               {editing ? "Edit campaign" : `New ${props.systemLabel} campaign`}
             </h2>
             {editing ? (
-              <span className="text-[11px] font-bold tracking-[0.15em] text-[var(--muted)]">
-                {props.code}
+              <span className="flex items-baseline gap-2">
+                <span className="text-[11px] font-bold tracking-[0.15em] text-[var(--muted)]">
+                  {props.code}
+                </span>
+                {/* New code: breaks old invite links; the party stays (they're
+                    linked by id, not code). Confirmed below, since it's not
+                    something to do by accident. */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirming(null);
+                    setRemovingId(null);
+                    setRegenConfirm(true);
+                  }}
+                  className="text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] underline hover:text-[var(--gold)]"
+                >
+                  New code
+                </button>
               </span>
             ) : null}
           </div>
+
+          {editing && regenConfirm ? (
+            <form
+              action={props.regenerateCode}
+              className="flex flex-wrap items-center gap-2 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2"
+              onSubmit={() => setRegenConfirm(false)}
+            >
+              <input type="hidden" name="id" value={props.id} />
+              <span className="text-[11px] text-[var(--muted)]">
+                New code for {props.code}? Your current invite links stop working. Players already in stay in.
+              </span>
+              <button className="ml-auto rounded border border-[var(--gold)] bg-[var(--gold)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--on-accent)]">
+                New code
+              </button>
+              <button
+                type="button"
+                onClick={() => setRegenConfirm(false)}
+                className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)] hover:text-[var(--text)]"
+              >
+                Keep
+              </button>
+            </form>
+          ) : null}
 
           <div className="flex flex-col gap-1.5">
             <label className={label} htmlFor={`camp-name-${uid}`}>
@@ -223,6 +271,60 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
             />
           </div>
 
+          {/* Players: the characters linked to this campaign. A GM can remove
+              one — it severs that sheet's link (it leaves the party and stops
+              sharing rolls); the character itself is untouched and the player
+              keeps their sheet. Edit-only, and only when someone's actually in. */}
+          {editing && props.party.length > 0 ? (
+            <div className="flex flex-col gap-1.5">
+              <span className={label}>Players</span>
+              <ul className="flex flex-col divide-y divide-[var(--border)] rounded border border-[var(--border)]">
+                {props.party.map((m) =>
+                  removingId === m.id ? (
+                    <li key={m.id}>
+                      <form
+                        action={props.removeMember}
+                        className="flex flex-wrap items-center gap-2 px-3 py-2"
+                        onSubmit={() => setRemovingId(null)}
+                      >
+                        <input type="hidden" name="campaignId" value={props.id} />
+                        <input type="hidden" name="docId" value={m.id} />
+                        <span className="text-[11px] text-[var(--muted)]">
+                          Remove {m.name}? They leave the party and stop sharing rolls.
+                        </span>
+                        <button className="ml-auto rounded border border-[var(--red)] bg-[var(--red)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white">
+                          Remove
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRemovingId(null)}
+                          className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)] hover:text-[var(--text)]"
+                        >
+                          Keep
+                        </button>
+                      </form>
+                    </li>
+                  ) : (
+                    <li key={m.id} className="flex items-center justify-between gap-2 px-3 py-2">
+                      <span className="min-w-0 truncate text-[13px] text-[var(--text)]">{m.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setConfirming(null);
+                          setRegenConfirm(false);
+                          setRemovingId(m.id);
+                        }}
+                        className="shrink-0 rounded border border-[var(--border)] px-2.5 py-1 text-[10px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)]"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          ) : null}
+
           {err ? <p className="text-[12px] text-[var(--bad)]">{err}</p> : null}
 
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -243,8 +345,8 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
                   <span className="text-[11px] text-[var(--muted)]">
                     Delete {props.code}
                     {props.rolls > 0 ? ` and ${props.rolls} roll${props.rolls === 1 ? "" : "s"}` : ""}?
-                    {props.partyNames.length > 0
-                      ? ` ${props.partyNames.join(", ")} stop sharing rolls.`
+                    {props.party.length > 0
+                      ? ` ${props.party.map((m) => m.name).join(", ")} stop sharing rolls.`
                       : ""}
                   </span>
                   <button className="rounded border border-[var(--red)] bg-[var(--red)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white">

@@ -9,7 +9,7 @@ import {
   systemName,
   type SystemKey,
 } from "./systemStore";
-import { clearCampaignRolls, createCampaign, deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
+import { clearCampaignRolls, createCampaign, deleteCampaign, renameCampaign, setCampaignVttUrl, regenerateCampaignCode, removeCampaignMember } from "@/app/actions/campaigns";
 import CopyCodeButton from "./CopyCodeButton";
 import InviteLinkButton from "./InviteLinkButton";
 import CampaignDialog from "./CampaignDialog";
@@ -249,11 +249,13 @@ export default function CampaignsList({
                         code={c.code}
                         vttUrl={c.vttUrl}
                         rolls={c.rolls}
-                        partyNames={c.party.map((m) => m.name)}
+                        party={c.party.map((m) => ({ id: m.id, name: m.name }))}
                         rename={renameCampaign}
                         setVttUrl={setCampaignVttUrl}
                         remove={deleteCampaign}
                         clearRolls={clearCampaignRolls}
+                        regenerateCode={regenerateCampaignCode}
+                        removeMember={removeCampaignMember}
                         className={`${ACTION} border-[var(--border)] text-[var(--muted)] hover:border-[var(--sys-hilite)] hover:text-[var(--text)]`}
                       />
                     </div>
