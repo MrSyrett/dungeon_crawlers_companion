@@ -23,7 +23,12 @@
 :root {
   --bg:#e8e4e0;--paper:#f5f3f0;--ink:#1a1a1a;--muted:#555;--rule:#b0a898;
   --red:#c0251e;--gold:#c8a020;--border:#2a2a2a;--section-hdr:#1a1a1a;
-  --dcc-dk:#9e1e18;--dcc-lt:#f2dad8;
+  /* Section headers (STATS, DEFENSE, ATTACKS…), table heads and tab hovers read --dcc-dk; the hairline
+     under a section bar and the tab-hover wash read --dcc-lt. Gold, not red: the red banner, buttons and
+     active tab were already red and the red headers on top of them made the whole sheet read as one
+     colour (Michael, 2026-10-10: "too much magenta"). Deep gold on the paper (5.3:1 on white), the
+     banner's own bright gold on the dark page. */
+  --dcc-dk:#8f6f0a;--dcc-lt:#f3e7c2;
   --box:#ede9e4;--input-bg:#fff;--input-border:#888;
   --log-bg:#111;--log-text:#e8e4dc;
 }
@@ -349,7 +354,7 @@ body.dark {
   --bg:#1a1a1e; --paper:#242428; --ink:#e8e4dc; --muted:#aaa; --rule:#3a3a42;
   --border:#4a4a52; --section-hdr:#0a0a0a; --box:#2e2e36; --input-bg:#1e1e24;
   --input-border:#4a4a52;
-  --dcc-dk:#eb8a83; --dcc-lt:#3a2422;
+  --dcc-dk:#f2c230; --dcc-lt:#3b3420;
 }
 body.dark .sheet{border-color:#4a4a52;}
 body.dark .hdr-logo{background:#0a0a0a;}
