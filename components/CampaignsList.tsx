@@ -9,7 +9,7 @@ import {
   systemName,
   type SystemKey,
 } from "./systemStore";
-import { createCampaign, deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
+import { clearCampaignRolls, createCampaign, deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
 import CopyCodeButton from "./CopyCodeButton";
 import CampaignDialog from "./CampaignDialog";
 import OpenGmScreenButton from "./OpenGmScreenButton";
@@ -245,6 +245,7 @@ export default function CampaignsList({
                         rename={renameCampaign}
                         setVttUrl={setCampaignVttUrl}
                         remove={deleteCampaign}
+                        clearRolls={clearCampaignRolls}
                         className={`${ACTION} border-[var(--border)] text-[var(--muted)] hover:border-[var(--sys-hilite)] hover:text-[var(--text)]`}
                       />
                     </div>

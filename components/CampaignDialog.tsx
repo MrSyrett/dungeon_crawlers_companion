@@ -46,6 +46,7 @@ type EditProps = Common & {
   rename: (formData: FormData) => Promise<void>;
   setVttUrl: (formData: FormData) => Promise<void>;
   remove: (formData: FormData) => Promise<void>;
+  clearRolls: (formData: FormData) => Promise<void>;
 };
 
 export default function CampaignDialog(props: CreateProps | EditProps) {
@@ -54,7 +55,8 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
   const [open, setOpen] = useState(false);
   const [draftName, setDraftName] = useState(editing ? props.name : "");
   const [draftUrl, setDraftUrl] = useState(editing ? props.vttUrl ?? "" : "");
-  const [confirming, setConfirming] = useState(false);
+  // Which destructive control is asking "are you sure?" — at most one at a time.
+  const [confirming, setConfirming] = useState<null | "delete" | "clear">(null);
   const [err, setErr] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -72,7 +74,7 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
 
   function show() {
     setErr(null);
-    setConfirming(false);
+    setConfirming(null);
     setDraftName(seedName);
     setDraftUrl(seedUrl);
     setOpen(true);
@@ -224,11 +226,14 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
           {err ? <p className="text-[12px] text-[var(--bad)]">{err}</p> : null}
 
           <div className="flex flex-wrap items-center justify-end gap-2">
-            {/* Delete sits with the other actions but reads as the odd one out:
-                it is the only control here that cannot be undone. Creating has
-                nothing to delete, so this whole corner is edit-only. */}
+            {/* The two destructive controls sit left of Cancel/Save and share
+                one confirm slot, so the dialog never asks two questions at
+                once. Delete removes the campaign; Clear only empties its roll
+                log (the GM's between-sessions tidy-up) and leaves everything
+                else — code, party, URL — exactly as it was. Creating has
+                nothing to delete or clear, so this whole corner is edit-only. */}
             {editing ? (
-              confirming ? (
+              confirming === "delete" ? (
                 <form
                   action={props.remove}
                   className="mr-auto flex items-center gap-2"
@@ -247,20 +252,52 @@ export default function CampaignDialog(props: CreateProps | EditProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setConfirming(false)}
+                    onClick={() => setConfirming(null)}
+                    className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)] hover:text-[var(--text)]"
+                  >
+                    Keep
+                  </button>
+                </form>
+              ) : confirming === "clear" ? (
+                <form
+                  action={props.clearRolls}
+                  className="mr-auto flex items-center gap-2"
+                  onSubmit={() => hide()}
+                >
+                  <input type="hidden" name="id" value={props.id} />
+                  <span className="text-[11px] text-[var(--muted)]">
+                    Clear {props.rolls} roll{props.rolls === 1 ? "" : "s"} from the log? Open sheets keep theirs until they reload.
+                  </span>
+                  <button className="rounded border border-[var(--red)] bg-[var(--red)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white">
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirming(null)}
                     className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)] hover:text-[var(--text)]"
                   >
                     Keep
                   </button>
                 </form>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setConfirming(true)}
-                  className="mr-auto rounded border border-[var(--border)] px-3 py-2 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)]"
-                >
-                  Delete
-                </button>
+                <div className="mr-auto flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirming("delete")}
+                    className="rounded border border-[var(--border)] px-3 py-2 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)]"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirming("clear")}
+                    disabled={props.rolls === 0}
+                    title={props.rolls === 0 ? "The roll log is already empty" : "Empty this campaign's roll log"}
+                    className="rounded border border-[var(--border)] px-3 py-2 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--bad)] disabled:cursor-default disabled:opacity-40 disabled:hover:border-[var(--border)] disabled:hover:text-[var(--muted)]"
+                  >
+                    Clear rolls
+                  </button>
+                </div>
               )
             ) : null}
 

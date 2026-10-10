@@ -26,12 +26,18 @@
 :root {
   --bg:#f8f8f6; --ink:#0a0a0a; --muted:#555; --rule:#c0c0c0;
   --red:#c0251e; --gold:#c8a020; --black:#0a0a0a;
+  /* The sheet's one accent is gold (Michael, 2026-10-10: "all be the gold/yellow instead of red and gold").
+     --gold-ink is the gold for TEXT and thin borders: #c8a020 is 2.4:1 on this near-white page, so
+     text uses a deeper cut of it here and the true gold on the dark page below. --red is kept for
+     the few things that must stay red (fumbles, warnings). */
+  --gold-ink:#8a6c0c; --on-gold:#161616;
   --box:#efefed; --input-bg:#fff; --border:#0a0a0a;
   --log-bg:#111; --log-text:#e8e4dc;
   --section-bar:#0a0a0a; --section-bar-text:#f8f8f6;
 }
 body.dark {
   --bg:#141414; --ink:#e8e4dc; --muted:#999; --rule:#333;
+  --gold-ink:#c8a020;
   --box:#1e1e1e; --input-bg:#1a1a1a; --border:#444;
   --section-bar:#000; --section-bar-text:#e8e4dc;
 }
@@ -84,7 +90,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
   border: 2px solid var(--log-bg);
 }
 .roll-log::-webkit-scrollbar-thumb:hover,
-.log-entries::-webkit-scrollbar-thumb:hover { background: var(--red); }
+.log-entries::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 /* Corner where two bars meet, otherwise a grey square in the palette's face. */
 ::-webkit-scrollbar-corner { background: transparent; }
 
@@ -92,7 +98,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 /* collapse */
 .roll-log{transition:width .2s ease;}
 .roll-log.collapsed{width:0!important;overflow:hidden;border:none;}
-#log-collapse-btn{position:fixed;right:260px;top:50%;transform:translateY(-50%);z-index:201;background:var(--red);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+#log-collapse-btn{position:fixed;right:260px;top:50%;transform:translateY(-50%);z-index:201;background:var(--gold);color:var(--on-gold);border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 
 /* The tab's position and glyph follow the .collapsed class rather than being
    set by JS at click time. Inline styles survived a viewport change, so
@@ -105,7 +111,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .log-header{padding:10px 12px;background:var(--black);display:flex;justify-content:space-between;align-items:center;gap:6px;}
 .log-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:white;white-space:nowrap;}
 .log-clear{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;cursor:pointer;}
-.log-clear:hover{background:var(--red);}
+.log-clear:hover{background:var(--gold);color:var(--on-gold);}
 .log-actions{display:flex;flex-wrap:wrap;gap:3px;padding:6px 8px;border-bottom:1px solid #222;}
 .log-action-btn{flex:1 1 0;min-width:0;padding:6px 3px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
 .log-action-btn.save{background:#1e3a1e;color:#6dbf6d;border:1px solid #2d5a2d;}
@@ -150,12 +156,12 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .adv-btn.dis-active{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
 .dice-btns{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:5px;}
 .dice-btn{min-width:0;padding:4px 1px;background:#1a1a1a;border:1px solid #333;color:#999;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;cursor:pointer;text-align:center;}
-.dice-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+.dice-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--on-gold);}
 .dice-pool-display{font-size:9px;color:#666;min-height:14px;margin-bottom:5px;font-family:'Montserrat',sans-serif;}
 .dice-pool-display span{color:#c8a020;}
 .dice-tray-actions{display:flex;gap:3px;}
-.dice-roll-btn{flex:1;padding:5px;background:var(--red);border:none;color:white;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
-.dice-roll-btn:hover{background:var(--red);}
+.dice-roll-btn{flex:1;padding:5px;background:var(--gold);border:none;color:var(--on-gold);font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
+.dice-roll-btn:hover{background:var(--gold);filter:brightness(1.08);}
 .dice-clear-btn{padding:5px 8px;background:#1a1a1a;border:1px solid #333;color:#555;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;cursor:pointer;}
 .dice-clear-btn:hover{background:#333;color:#aaa;}
 .btn-die{font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-size:1.05em;line-height:1;vertical-align:-1px;}
@@ -164,7 +170,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .dm-toggle-wrap{display:flex;align-items:center;gap:5px;}
 .dm-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.6);}
 .dm-toggle-btn{width:32px;height:16px;background:#333;border:1px solid #555;border-radius:8px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
-.dm-toggle-btn.on{background:var(--red);}
+.dm-toggle-btn.on{background:var(--gold);color:var(--on-gold);}
 .dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;background:white;border-radius:50%;transition:left .2s;}
 .dm-toggle-btn.on::after{left:18px;}
 
@@ -252,8 +258,8 @@ body.hd-mode .sd-vital-ac{display:none;}
 .stat-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:0;text-align:left;flex:1;min-width:0;}
 .stat-val-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;}
 .stat-val{width:48px;height:40px;border:1px solid var(--rule);border-radius:6px;background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
-.stat-mod{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--red);width:56px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--red);border-radius:8px;text-align:center;cursor:pointer;}
-.stat-mod:hover{background:var(--red);color:white;}
+.stat-mod{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--gold-ink);width:56px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--gold);border-radius:8px;text-align:center;cursor:pointer;}
+.stat-mod:hover{background:var(--gold);color:var(--on-gold);}
 
 /* LEFT INFO */
 
@@ -294,8 +300,8 @@ body.hd-mode .sd-vital-ac{display:none;}
 .attacks-table th{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:3px 6px;border-bottom:1px solid var(--rule);text-align:left;background:var(--bg);}
 .attacks-table td{border-bottom:1px solid var(--rule);padding:1px 4px;}
 .attacks-table td input{width:100%;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;padding:4px 2px;color:var(--ink);}
-.atk-roll-btn{padding:2px 5px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--red);}
-.atk-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+.atk-roll-btn{padding:2px 5px;background:transparent;border:1px solid var(--gold);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--gold-ink);}
+.atk-roll-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--on-gold);}
 
 /* RIGHT — talents + spells */
 .right-col{grid-column:3;grid-row:1/3;border-left:2px solid var(--border);}
@@ -338,8 +344,8 @@ body.hd-mode .sd-vital-ac{display:none;}
 .spell-row[data-src='wand']{border-left:3px solid #2d5a7a;}
 .spell-input{border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:3px 2px;min-width:0;}
 .spell-level{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:1px 0;}
-.spell-cast-btn{padding:1px 3px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--red);width:100%;}
-.spell-cast-btn:hover{background:var(--red);color:white;}
+.spell-cast-btn{padding:1px 3px;background:transparent;border:1px solid var(--gold);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--gold-ink);width:100%;}
+.spell-cast-btn:hover{background:var(--gold);color:var(--on-gold);}
 .spell-adv-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
 .spell-adv-btn.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 .spell-lost-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
@@ -400,7 +406,7 @@ body.hd-mode .sd-vital-ac{display:none;}
 .tabs-bar{display:flex;gap:0;background:var(--section-bar);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
 .tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.55);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
 .tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(192,37,30,.28);}
+.tab-btn.on{color:#fff;border-bottom-color:var(--gold);background:rgba(200,160,32,.28);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;}
 /* Softer 'bubble' feel: round the sheet shell and the coin row cells */
@@ -425,7 +431,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   transform: translateX(-50%);
   z-index: 9999;
   background: rgba(10,10,12,0.93);
-  border: 2px solid var(--red, #b82018);
+  border: 2px solid var(--gold, #c8a020);
   border-radius: 8px;
   padding: 10px 20px;
   text-align: center;
@@ -528,7 +534,7 @@ body.dark .sl::after{background:#3a3320;}
 }
 @media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
 </style>
-<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
+<style>/* icon color policy: gold on black/light backgrounds, ink on the gold buttons */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico,.dice-roll-btn .dcc-ico,.dice-btn:hover .dcc-ico,.atk-roll-btn:hover .dcc-ico,.spell-cast-btn:hover .dcc-ico,.stat-mod:hover .dcc-ico{color:var(--on-gold,#161616)}.atk-roll-btn .dcc-ico,.spell-cast-btn .dcc-ico{color:var(--gold-ink,#8a6c0c)}</style>
 </head>
 <body>
 <script>

@@ -563,6 +563,8 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-tab:hover { color: var(--light); }
 .advh-tab.on { color: var(--white); border-bottom-color: var(--accent); }
 .advh-tab[data-empty="1"] { opacity: .45; }
+.advh-notes { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.advh-notes .advh-scene-lbl { margin-bottom: 6px; }
 .advh-n { font-family: 'Geist Mono', monospace; font-size: 9.5px; color: var(--accent); }
 .advh-body { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .advh-row { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: transparent; border: 0; color: var(--text); cursor: pointer; padding: 0; min-width: 0; }
@@ -6510,10 +6512,17 @@ function wireSessionPrepLoader(root) {
     const c = counts();
     const multi = prepChapters.length > 1;
     const meta = [prep.floor, prep.session ? 'Session ' + prep.session : '', prep.players ? prep.players + ' players' : '', prep.duration].map(s => String(s || '').trim()).filter(Boolean).join(' · ');
-    // Reorder per spec: Overview · Scenes · Notes · Clues · Loot · Tables · NPCs · Maps.
-    const TABS = [['overview','Overview'],['scenes','Scenes'],['notes','Notes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
-    // Text-only tabs (Overview / Notes) show no count badge, just dim when empty.
-    const NOCOUNT = { overview: 1, notes: 1 };
+    // Overview · Scenes · Clues · Loot · Tables · NPCs · Maps — but only the
+    // sections this adventure actually has. An empty tab was a dead end to
+    // click into (and a dimmed row of eight on a phone), so a prep with no
+    // tables simply has no Tables tab. Overview is always there: it is the
+    // landing tab, and it now carries the GM notes too (see sectionHtml), so a
+    // prep that is only notes still has somewhere to show them.
+    const ALL = [['overview','Overview'],['scenes','Scenes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
+    const TABS = ALL.filter(([k]) => k === 'overview' || c[k]);
+    if(!TABS.some(([k]) => k === activeSec)) activeSec = 'overview';   // the chapter just switched to lacks the open tab
+    // Overview shows no count badge, just dims when there is nothing to read.
+    const NOCOUNT = { overview: 1 };
     // The adventure title is shared across chapters; the current chapter's name is
     // its Subtitle (shown in the switcher when there's more than one chapter).
     const advTitle = (prepChapters[0] && prepChapters[0].title) || prep.title || prep._docTitle || 'Adventure';
@@ -6533,7 +6542,7 @@ function wireSessionPrepLoader(root) {
         + '</div></div>';
     }
     h += '<div class="advh-tabs">' + TABS.map(([k, l]) =>
-      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] ? ' data-empty="1"' : '') + '>' + l
+      '<button class="advh-tab' + (k === activeSec ? ' on' : '') + '" data-sec="' + k + '"' + (!c[k] && !c.notes ? ' data-empty="1"' : '') + '>' + l
       + (!NOCOUNT[k] && c[k] ? ' <span class="advh-n">' + c[k] + '</span>' : '') + '</button>').join('') + '</div>';
     h += '<div class="advh-body">' + sectionHtml(activeSec) + '</div>';
     hub.innerHTML = h;
@@ -6542,10 +6551,14 @@ function wireSessionPrepLoader(root) {
 
   function sectionHtml(sec){
     if(sec === 'overview'){
-      return prep.overview ? '<div class="advh-prose">' + advText(prep.overview) + '</div>' : '<div class="advh-empty">No overview written for this adventure.</div>';
-    }
-    if(sec === 'notes'){
-      return (prep.notes && prep.notes.trim()) ? '<div class="advh-prose">' + advText(prep.notes) + '</div>' : '<div class="advh-empty">No GM notes in this prep.</div>';
+      // Overview first, then the GM notes under their own small heading. Notes
+      // used to be a tab of their own; they are the GM's asides on the same
+      // material, so they read better directly under it than a click away.
+      const hasNotes = !!(prep.notes && prep.notes.trim());
+      let h = prep.overview ? '<div class="advh-prose">' + advText(prep.overview) + '</div>'
+            : (hasNotes ? '' : '<div class="advh-empty">No overview written for this adventure.</div>');
+      if(hasNotes) h += '<div class="advh-notes"><div class="advh-scene-lbl">GM notes</div><div class="advh-prose">' + advText(prep.notes) + '</div></div>';
+      return h;
     }
     if(sec === 'scenes'){
       const list = scenes();

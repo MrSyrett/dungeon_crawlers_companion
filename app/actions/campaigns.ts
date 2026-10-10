@@ -29,6 +29,25 @@ export async function deleteCampaign(formData: FormData): Promise<void> {
   revalidatePath("/dashboard");
 }
 
+// Empty a campaign's roll log without touching the campaign.
+//
+// Ownership is checked through the relation in the where clause, so clearing
+// someone else's log is a silent no-op, same as deleteCampaign. Rolls are
+// autoincrement ids and every open sheet / GM Screen polls with ?since=<last
+// id>, so the live feeds simply see nothing new; only a reload shows the log
+// empty. Nothing else refers to rolls, so there is nothing to cascade.
+export async function clearCampaignRolls(formData: FormData): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await prisma.campaignRoll.deleteMany({ where: { campaignId: id, campaign: { ownerId: user.id } } });
+  // The row's "N rolls" line reads from the count.
+  revalidatePath("/campaigns");
+}
+
 /**
  * Only ever store an http(s) URL. A stored `javascript:` or `data:` URL would
  * become a script that runs when a player clicks Launch, so anything else is
