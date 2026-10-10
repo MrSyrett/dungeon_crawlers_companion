@@ -1307,12 +1307,19 @@ html {
 
 /* --- DCC · character sheet ------------------------------------------------
    The sheet is essentially one colour used sixty times, and that colour was
-   the app's brick red. */
+   the app's brick red.
+   --dcc-dk / --dcc-lt are the SECTION HEADERS (STATS, DEFENSE, ATTACKS,
+   HOTLIST), the column heads inside the tabs and the tab-hover wash. They were
+   the magenta too, which put the one colour on headers, banner, buttons and
+   active tab alike. Michael (2026-10-10): "too much magenta. Lets change the
+   Headers to be the yellow/gold color." This block out-ranks the template's
+   own :root, so the change has to live HERE — editing the sheet alone did
+   nothing on the site. */
 :root[data-themed][data-system="DCC"][data-tool="character"] body:not(.dark) {
   --red: #cf1148;
   --gold: #9a7410;            /* gold held down far enough to read on paper */
-  --dcc-dk: #b00d3e;
-  --dcc-lt: #fbe0e9;
+  --dcc-dk: #9a7410;          /* headers: the same paper gold (5.1:1 on white) */
+  --dcc-lt: #f3e7c2;
 }
 /* The sheet's own dark mode was a neutral grey (#1a1a1e / #242428). That is
    two problems at once: it isn't the theme's near-black, and it is light
@@ -1330,8 +1337,8 @@ html {
   --ink: #ece9e1;
   --muted: #9a94a0;
   --red: #ee4a78;             /* 5.2 on the paper, 4.7 on a box, 5.3 in a field */
-  --dcc-dk: #ee4a78;
-  --dcc-lt: #3a1020;
+  --dcc-dk: #f2c230;          /* headers: the theme gold, same as the masthead wordmark */
+  --dcc-lt: #3b3420;
   --gold: #f2c230;
 }
 /* The sheet draws its own border as a literal under body.dark. */
