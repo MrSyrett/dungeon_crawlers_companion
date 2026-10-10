@@ -42,6 +42,11 @@ const ALLOW_FILES = {
   "components/TokenMaker.tsx":
     "ring and metal paint swatches, canvas gradients and a transparency " +
     "checkerboard — paint the user picks for a token they are drawing, not theme",
+  "app/global-error.tsx":
+    "the root error boundary. Next replaces the whole app — layout included — " +
+    "with this file when the root layout throws, so globals.css never loads and " +
+    "a var() token would resolve to no colour. Inline literals are the only way " +
+    "it can still look like the app",
 };
 
 // Whole subtrees, same rule.
