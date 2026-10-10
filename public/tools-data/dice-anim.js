@@ -38,10 +38,13 @@
 .da-pop .da-hint{font-size:10px;color:#666;margin-top:8px;line-height:1.4;}
 `; (document.head||document.documentElement).appendChild(st); } }catch(e){} })();
   var LS='dcw_diceanim';  // shared across all sheets
-  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'shiny', sound:true };
+  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, mat:'plastic', sound:true };
+  var MATS=['plastic','metal','worn'];
+  // Older saves (and sheet JSON from before 2026-10-10) carry finish/tex instead of mat.
+  function legacyMat(o){ if(o.mat&&MATS.indexOf(o.mat)>=0) return o.mat; if(o.tex==='worn') return 'worn'; if(o.tex==='metal') return 'metal'; return 'plastic'; }
   var S=Object.assign({},DEF);
   var hadLS=false;  // did localStorage hold a real saved preference? (false in webviews where LS is unreliable)
-  try{ var raw=localStorage.getItem(LS); if(raw){ Object.assign(S, JSON.parse(raw)||{}); hadLS=true; } }catch(e){}
+  try{ var raw=localStorage.getItem(LS); if(raw){ var saved=JSON.parse(raw)||{}; Object.assign(S, saved); S.mat=legacyMat(saved); delete S.finish; delete S.tex; hadLS=true; } }catch(e){}
   function persistLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
   function persist(){ persistLocal(); if(typeof window.saveSheet==='function'){ try{ window.saveSheet(true); }catch(e){} } }
 
@@ -140,9 +143,22 @@
   // ═══════════ 3D physics dice (three.js, lazy-loaded) ═══════════
   var THREE_URL='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
   var threeState=0; // 0 none, 1 loading, 2 ready, 3 failed
-  var renderer,scene,camera,rafId,world3d=null,lastT=0,_camTilt=false;
-  var FLOORY=-1.9,WALLX=3.3,WALLZ=1.5,GRAV=-38,REST=0.36,FRIC=0.7,FDT=1/60,MAXSTEPS=420,HOLD=850,FADE=440,WAVE_STEPS=28;
-  var DOWN,_n,_axis,_dq,_corr;
+  var renderer,scene,camera,keyLight,rafId,world3d=null,lastT=0,_camTilt=false,floor3d=null,lastRoll=null;
+  // THE THROW. Dice fly in from the right, off the tray, skip across it, bounce
+  // off the far wall and tumble to a stop — the shape of a real toss. Before
+  // this they were dropped from a height onto the middle, two at a time from
+  // either side, and killed their own speed so fast that a roll was a drop and
+  // a half-second of spinning in place.
+  //   GRAV       heavy on purpose: a toss should feel snappy, not lunar.
+  //   REST       floor bounce on a hard impact; WALL_REST the walls.
+  //   MU         floor friction (Coulomb) — what turns a slide into a tumble.
+  //   DRAG       per-second fraction of floor speed kept; ROLL_DAMP the same
+  //              for spin while on the floor (rolling resistance).
+  //   THROW_V    base throw speed (scales with the tray width); each die gets up to 45% more.
+  var FLOORY=-1.9,GRAV=-70,REST=0.45,WALL_REST=0.8,MU=0.3,DRAG=0.75,ROLL_DAMP=0.5,FDT=1/60,MAXSTEPS=420,HOLD=850,FADE=440,WAVE_STEPS=28;
+  var WX=3.3,WZ=1.5,THROW_V=12;   // the tray is the whole window: set from the camera in applyCam()
+  var SHADOW_OP=0.42;   // shadow-map floor darkness; faded with the dice
+  var DOWN,UP,_n,_axis,_dq,_corr;
   var HAS_WEBGL=(function(){ try{ var c=document.createElement('canvas'); return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){ return false; } })();
   function loadThree(cb){ if(threeState===2){cb(true);return;} if(threeState===3){cb(false);return;}
     if(threeState===1){ var iv=setInterval(function(){ if(threeState===2){clearInterval(iv);cb(true);} else if(threeState===3){clearInterval(iv);cb(false);} },80); return; }
@@ -150,20 +166,52 @@
     sc.onload=function(){ threeState=window.THREE?2:3; cb(threeState===2); };
     sc.onerror=function(){ threeState=3; cb(false); }; document.head.appendChild(sc); }
   function initGL(){ if(!window.THREE||!HAS_WEBGL) return false;
-    DOWN=new THREE.Vector3(0,-1,0); _n=new THREE.Vector3(); _axis=new THREE.Vector3(); _dq=new THREE.Quaternion(); _corr=new THREE.Quaternion();
+    DOWN=new THREE.Vector3(0,-1,0); UP=new THREE.Vector3(0,1,0); _n=new THREE.Vector3(); _rr=new THREE.Vector3(); _u=new THREE.Vector3(); _t=new THREE.Vector3(); _rn=new THREE.Vector3(); _imp=new THREE.Vector3(); _cx=new THREE.Vector3(); for(var wi=0;wi<160;wi++) _w.push(new THREE.Vector3()); _axis=new THREE.Vector3(); _dq=new THREE.Quaternion(); _corr=new THREE.Quaternion();
     var cv=document.createElement('canvas'); cv.className='da-canvas'; overlay.appendChild(cv);
     renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true}); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-    scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(42,1,0.1,100);
-    scene.add(new THREE.AmbientLight(0xffffff,0.6));
-    var key=new THREE.DirectionalLight(0xffffff,1.0); key.position.set(2,8,4); scene.add(key);
-    var rim=new THREE.DirectionalLight(0x99bbff,0.35); rim.position.set(-4,2,-3); scene.add(rim);
+    // Real shadows. The dice cast onto an invisible floor that only shows the
+    // shadow it receives (ShadowMaterial), so the sheet stays visible beneath.
+    renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(24,1,0.1,200);
+    scene.add(new THREE.AmbientLight(0xffffff,0.28));
+    var key=new THREE.DirectionalLight(0xffffff,0.85); key.position.set(5,14,4); key.castShadow=true; keyLight=key;
+    key.shadow.mapSize.set(1024,1024); key.shadow.camera.left=-8; key.shadow.camera.right=8; key.shadow.camera.top=8; key.shadow.camera.bottom=-8; key.shadow.camera.near=1; key.shadow.camera.far=60; key.shadow.bias=-0.0015; key.shadow.radius=3;
+    scene.add(key);
+    var rim=new THREE.DirectionalLight(0x99bbff,0.3); rim.position.set(-4,2,-3); scene.add(rim);
+    floor3d=new THREE.Mesh(new THREE.PlaneGeometry(400,400), new THREE.ShadowMaterial({opacity:SHADOW_OP})); floor3d.rotation.x=-Math.PI/2; floor3d.position.y=FLOORY; floor3d.receiveShadow=true; scene.add(floor3d);
+    // Something to reflect. A metallic material with nothing around it just
+    // goes dark, which is why "Shiny" used to look like flat yellow paint. This
+    // is a small studio built from gradients — a soft grey ceiling (the camera
+    // looks straight down, so the top faces mirror it: a bright one would wash
+    // them out), a bright horizon band on the walls, dark floor — pre-filtered (PMREM) so roughness
+    // blurs it the way it should. No image to download; it's drawn on canvases.
+    try{ var env=studioEnv(); if(env) scene.environment=env; }catch(e){}
     sizeGL(); window.addEventListener('resize', sizeGL); return true; }
-  // Camera is straight-down by default; a d4 in the pool tilts it ~34° so the
-  // tetrahedron's near-vertical faces (and their numbers) turn toward the viewer.
-  function applyCam(){ if(!camera) return;
-    if(_camTilt){ camera.position.set(0,15,11.5); camera.up.set(0,1,0); }
-    else { camera.position.set(0,20,0.0001); camera.up.set(0,0,-1); }
-    camera.lookAt(0,FLOORY,0); camera.updateProjectionMatrix(); }
+  function studioEnv(){ if(!THREE.PMREMGenerator) return null;
+    function face(fn){ var s=64,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d'); fn(g,s); return c; }
+    function wall(g,s){ var gr=g.createLinearGradient(0,0,0,s); gr.addColorStop(0,'#d9dde6'); gr.addColorStop(0.42,'#8d939e'); gr.addColorStop(0.58,'#b9bec8'); gr.addColorStop(0.75,'#5e636b'); gr.addColorStop(1,'#2a2d33'); g.fillStyle=gr; g.fillRect(0,0,s,s); }
+    function top(g,s){ var gr=g.createRadialGradient(s/2,s/2,2,s/2,s/2,s*0.7); gr.addColorStop(0,'#9ea4ac'); gr.addColorStop(0.5,'#80868f'); gr.addColorStop(1,'#565b63'); g.fillStyle=gr; g.fillRect(0,0,s,s); }
+    function bottom(g,s){ g.fillStyle='#24272c'; g.fillRect(0,0,s,s); }
+    var cube=new THREE.CubeTexture([face(wall),face(wall),face(top),face(bottom),face(wall),face(wall)]); cube.needsUpdate=true;
+    var pm=new THREE.PMREMGenerator(renderer); var rt=pm.fromCubemap(cube); pm.dispose(); cube.dispose(); return rt.texture; }
+  // Camera and tray. The tray is the whole window — the dice are thrown in
+  // from the right edge of the screen and can roll to the left edge, which
+  // is how Dice So Nice reads: the table is your screen. The camera looks
+  // straight down (a d4 in the pool tips it so the up-vertex number faces the
+  // viewer) through a narrow lens, so dice near the edges aren't distorted,
+  // from whatever distance makes a d6 a fixed on-screen size: a fifth of the
+  // window's short side, between 76 and 120 px. Phone and desktop get the
+  // same-sized dice; the desktop just has more table.
+  function applyCam(){ if(!camera||!renderer) return;
+    var w=overlay.clientWidth||window.innerWidth, h=overlay.clientHeight||window.innerHeight;
+    var edgePx=Math.max(76,Math.min(120,Math.min(w,h)*0.2)), ppu=edgePx/1.5;
+    var tanV=Math.tan(camera.fov*Math.PI/360), visW=w/ppu, visH=h/ppu, d=visH/(2*tanV);
+    var tilt=(_camTilt?30:0)*Math.PI/180;
+    WX=Math.max(2.2, visW/2-1.1); WZ=Math.max(1.6, visH/2-1.1); if(_camTilt) WZ*=0.72;
+    THROW_V=Math.max(11, WX*2.1);
+    camera.position.set(0, FLOORY+d*Math.cos(tilt), d*Math.sin(tilt)+0.0001); camera.up.set(0,0,-1);
+    camera.lookAt(0,FLOORY,0); camera.updateProjectionMatrix();
+    if(keyLight){ var sc=keyLight.shadow.camera, ext=Math.max(WX,WZ)+3; sc.left=-ext; sc.right=ext; sc.top=ext; sc.bottom=-ext; sc.updateProjectionMatrix(); } }
   function sizeGL(){ if(!renderer) return; var w=overlay.clientWidth||window.innerWidth, h=overlay.clientHeight||window.innerHeight;
     renderer.setSize(w,h,false); if(camera){ camera.aspect=w/h; applyCam(); } }
   function makeGeo(s){ if(s===4)return new THREE.TetrahedronGeometry(1.15).toNonIndexed(); if(s===6)return new THREE.BoxGeometry(1.5,1.5,1.5).toNonIndexed();
@@ -222,21 +270,155 @@
       var C=new THREE.Vector3().add(verts[a]).add(verts[b]).add(verts[c]).multiplyScalar(1/3);
       var n=new THREE.Vector3().subVectors(verts[b],verts[a]).cross(new THREE.Vector3().subVectors(verts[c],verts[a])).normalize(); if(n.dot(C)<0) n.negate();
       faces.push({corners:[a,b,c], c:C, n:n}); } return {verts:verts, faces:faces}; }
-  function getGeoGroups(sides){ if(sides===2) return coinGeoGroups(); if(sides===10) return d10GeoGroups(); var geo=makeGeo(sides); var r={geo:geo, groups:faceGroups(geo)}; if(sides===4) r.tetra=tetraData(geo); return r; }
+  // ─── hulls ───
+  // Each die's convex hull, cut from a block by its face planes (constructive
+  // solid geometry on a convex solid — just polygon clipping). The hull's
+  // vertices are what the physics uses for contacts, so what you see touching
+  // the floor is what the simulation thinks is touching the floor.
+  //
+  // The builder can also chamfer: one extra plane per edge and per corner gives
+  // the small facets real dice have. We tried it (2026-10-10) and Michael found
+  // the facets overdone — "too many facets" — so the dice are drawn as the plain
+  // polyhedra again (ce = cv = 0) and the physics hull is the same plain shape.
+  var chamferBuild=(function(){
+    var EPS=1e-6;
+    // Clip a convex polyhedron (array of {v:[Vector3], tag}) by the half-space
+    // n·x <= d. Returns the clipped polyhedron with a new cap face tagged `tag`.
+    function clip(faces,n,d,tag){
+      var out=[],pts=[];
+      function addPt(x){ for(var k=0;k<pts.length;k++){ if(pts[k].distanceToSquared(x)<1e-8) return; } pts.push(x); }
+      for(var f=0;f<faces.length;f++){ var poly=faces[f].v, keep=[];
+        for(var i=0;i<poly.length;i++){ var a=poly[i], b=poly[(i+1)%poly.length]; var da=a.dot(n)-d, db=b.dot(n)-d;
+          if(da<=EPS){ keep.push(a); if(da>-EPS) addPt(a); }
+          if((da<-EPS && db>EPS) || (da>EPS && db<-EPS)){ var t=da/(da-db); var x=new THREE.Vector3().lerpVectors(a,b,t); keep.push(x); addPt(x); } }
+        if(keep.length>=3) out.push({v:keep,tag:faces[f].tag}); }
+      if(pts.length>=3){ // the cap is convex: order its points by angle about their centre, wound outward (along n)
+        var c=new THREE.Vector3(); pts.forEach(function(p){c.add(p);}); c.multiplyScalar(1/pts.length);
+        var u=new THREE.Vector3().subVectors(pts[0],c).normalize(), w=new THREE.Vector3().crossVectors(n,u).normalize();
+        pts.sort(function(p,q){ var dp=new THREE.Vector3().subVectors(p,c), dq=new THREE.Vector3().subVectors(q,c); return Math.atan2(dp.dot(w),dp.dot(u))-Math.atan2(dq.dot(w),dq.dot(u)); });
+        out.push({v:pts,tag:tag}); }
+      return out; }
+    function box(s){ var P=function(x,y,z){return new THREE.Vector3(x,y,z);};
+      return [ {v:[P(-s,-s,-s),P(-s,-s,s),P(-s,s,s),P(-s,s,-s)],tag:-1}, {v:[P(s,-s,-s),P(s,s,-s),P(s,s,s),P(s,-s,s)],tag:-1},
+               {v:[P(-s,-s,-s),P(s,-s,-s),P(s,-s,s),P(-s,-s,s)],tag:-1}, {v:[P(-s,s,-s),P(-s,s,s),P(s,s,s),P(s,s,-s)],tag:-1},
+               {v:[P(-s,-s,-s),P(-s,s,-s),P(s,s,-s),P(s,-s,-s)],tag:-1}, {v:[P(-s,-s,s),P(s,-s,s),P(s,s,s),P(-s,s,s)],tag:-1} ]; }
+    // planes: [{n,d,tag}] (n unit, keep n·x<=d). ce = edge chamfer depth, cv = vertex chamfer depth.
+    function build(planes,ce,cv){
+      var poly=box(10); planes.forEach(function(pl){ poly=clip(poly,pl.n,pl.d,pl.tag); });
+      var base=poly;
+      // edges: every polygon edge shared by two faces
+      var extra=[];
+      if(ce>0){ var seen={};
+        for(var f=0;f<base.length;f++){ var P=base[f].v; for(var i=0;i<P.length;i++){ var a=P[i],b=P[(i+1)%P.length];
+          var key=[a,b].map(function(p){return p.x.toFixed(4)+','+p.y.toFixed(4)+','+p.z.toFixed(4);}).sort().join('|'); if(seen[key]) continue; seen[key]=true;
+          // the other face sharing this edge
+          var g=-1; for(var f2=0;f2<base.length;f2++){ if(f2===f) continue; var Q=base[f2].v, hit=0; for(var j=0;j<Q.length;j++){ if(Q[j].distanceToSquared(a)<1e-8||Q[j].distanceToSquared(b)<1e-8) hit++; } if(hit>=2){g=f2;break;} }
+          if(g<0) continue;
+          var n=new THREE.Vector3().addVectors(faceN(base[f]),faceN(base[g])).normalize(); var m=new THREE.Vector3().addVectors(a,b).multiplyScalar(0.5);
+          extra.push({n:n,d:n.dot(m)-ce,tag:-2}); } } }
+      if(cv>0){ var vs=[], vseen={};
+        base.forEach(function(F){ F.v.forEach(function(p){ var k=p.x.toFixed(4)+','+p.y.toFixed(4)+','+p.z.toFixed(4); if(!vseen[k]){vseen[k]=true;vs.push(p);} }); });
+        vs.forEach(function(p){ var n=p.clone().normalize(); extra.push({n:n,d:p.length()-cv,tag:-3}); }); }
+      extra.forEach(function(pl){ poly=clip(poly,pl.n,pl.d,pl.tag); });
+      // hull vertices (for contacts) and non-indexed triangle geometry
+      var pos=[], verts=[], vseen2={};
+      poly.forEach(function(F){ var P=F.v; for(var i=1;i<P.length-1;i++){ pos.push(P[0].x,P[0].y,P[0].z,P[i].x,P[i].y,P[i].z,P[i+1].x,P[i+1].y,P[i+1].z); }
+        P.forEach(function(p){ var k=p.x.toFixed(4)+','+p.y.toFixed(4)+','+p.z.toFixed(4); if(!vseen2[k]){vseen2[k]=true;verts.push(p.clone());} }); });
+      var geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); geo.computeVertexNormals();
+      var r=0; verts.forEach(function(p){ r=Math.max(r,p.length()); });
+      return {geo:geo, verts:verts, radius:r, faces:poly.length};
+    }
+    function faceN(F){ var P=F.v; return new THREE.Vector3().subVectors(P[1],P[0]).cross(new THREE.Vector3().subVectors(P[2],P[0])).normalize(); }
+    return build; })();
+  var _hullCache={};
+  function hullFor(sides,groups){ var k=String(sides); if(_hullCache[k]) return _hullCache[k];
+    var ce=0, cv=0;   // chamfer depths — see the note above; try d6 .09/.14, d20 .06/.09 to bring the facets back
+    var planes=groups.map(function(g,i){ return {n:g.n.clone().normalize(), d:g.n.dot(g.c), tag:i}; });
+    if(sides===2){ for(var a=0;a<26;a++){ var th=a*2*Math.PI/26, nn=new THREE.Vector3(Math.cos(th),0,Math.sin(th)); planes.push({n:nn,d:1.12,tag:-1}); } }
+    var h=chamferBuild(planes,ce,cv); h.geo.dispose(); _hullCache[k]={verts:h.verts, radius:h.radius}; return _hullCache[k]; }
+  function getGeoGroups(sides){ var r; if(sides===2) r=coinGeoGroups(); else if(sides===10) r=d10GeoGroups(); else { var geo=makeGeo(sides); r={geo:geo, groups:faceGroups(geo)}; if(sides===4) r.tetra=tetraData(geo); }
+    // the physics hull is cut from the same face planes as the drawn geometry, so they agree exactly
+    r.hull=hullFor(sides,r.groups); return r; }
   // Face labels for a die: 1..N normally, 0-9 for a d10, 00-90 for a percentile die.
   function labelSet(faceSet,N){ var a=[],i;
     if(faceSet==='units'){ for(i=0;i<N;i++)a.push(String(i%10)); return a; }
     if(faceSet==='tens'){ for(i=0;i<N;i++){ var v=(i%10)*10; a.push(v<10?('0'+v):String(v)); } return a; }
     for(i=0;i<N;i++)a.push(String(i+1)); return a; }
-  function faceTex(text,glow){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d');
-    g.fillStyle=S.num; g.font='bold '+(text.length>1?64:82)+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4);
-    if(text==='6'||text==='9'){ g.fillRect(s/2-21, s/2+37, 42, 8); }
+  // Face numbers: an ink layer (the digit, transparent elsewhere) and a bump
+  // layer (the same digit as a dent, with a soft shadow on one side) so the
+  // number sits IN the face and its rim catches the light — engraved and
+  // inked, the way real dice are made, not a sticker.
+  function drawDigit(g,s,text){ g.font='bold '+(text.length>1?70:92)+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4);
+    if(text==='6'||text==='9'){ g.fillRect(s/2-24, s/2+42, 48, 8); } }
+  function faceTex(text){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d');
+    g.fillStyle=S.num; drawDigit(g,s,text); var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
+  function bumpTex(text){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d');
+    g.fillStyle='#808080'; g.fillRect(0,0,s,s); g.shadowColor='#000'; g.shadowOffsetX=1; g.shadowOffsetY=1; g.shadowBlur=3; g.fillStyle='#000'; drawDigit(g,s,text);
     var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
+  function labelMat(text,extra){ var o={map:faceTex(text),bumpMap:bumpTex(text),bumpScale:0.012,roughness:0.8,metalness:0,envMapIntensity:0.08,transparent:true,depthWrite:false};
+    if(extra) for(var k in extra) o[k]=extra[k]; return new THREE.MeshStandardMaterial(o); }
+  // ─── the worn surface ───
+  // Drawn in code, greyscale; the die colour tints it (a map multiplies the
+  // material colour), so one texture serves every colour. Nothing to download,
+  // nothing to license. It is the ancient-dice look from Michael's photo: pale,
+  // slightly mottled plastic with dark grime gathered in the middle of every
+  // face around the number and rubbed off toward the edges, pitted here and
+  // there. Value noise on a 64-cell lattice so every octave tiles at 256.
+  var _wornTex=null;
+  function wornCanvas(){ if(_wornTex) return _wornTex;
+    var N=256, P=64, lat=new Float32Array(P*P), seed=1337;
+    function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
+    for(var i=0;i<P*P;i++) lat[i]=rnd();
+    function sm(t){ return t*t*(3-2*t); }
+    function vnoise(x,y){ var xi=Math.floor(x), yi=Math.floor(y), fx=sm(x-xi), fy=sm(y-yi), x0=((xi%P)+P)%P, y0=((yi%P)+P)%P, x1=(x0+1)%P, y1=(y0+1)%P;
+      var a=lat[y0*P+x0], b=lat[y0*P+x1], c=lat[y1*P+x0], d=lat[y1*P+x1]; return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy; }
+    function fbm(u,v,oct,f0,gain){ var sum=0,amp=1,norm=0,f=f0||4; for(var o=0;o<oct;o++){ sum+=amp*vnoise(u*f,v*f); norm+=amp; amp*=gain||0.5; f*=2; } return sum/norm; }
+    var c=document.createElement('canvas'); c.width=c.height=N; var g=c.getContext('2d'), img=g.createImageData(N,N), d=img.data;
+    for(var y=0;y<N;y++){ for(var x=0;x<N;x++){ var u=x/N, v=y/N;
+      var base=0.68+0.18*fbm(u,v,4,4,0.5); var dx=u-0.5, dy=v-0.5, r=Math.sqrt(dx*dx+dy*dy);
+      var grime=Math.max(0,Math.min(1,(fbm(u+0.2,v+0.6,5,6,0.6)-0.36)*2.4));          // cloudy, high-contrast dirt
+      var centre=1-Math.min(1,r/0.36); centre=centre*centre*(3-2*centre);               // gathered in the middle of the face
+      var rim=Math.max(0,Math.min(1,(r-0.34)/0.12));                                     // rubbed pale toward the edges
+      var pit=fbm(u*2,v*2,2,64,0.5);
+      var L=base*(1-0.74*centre*(0.35+0.65*grime))+0.10*rim-0.22*Math.max(0,pit-0.62)*3;
+      L=Math.max(0,Math.min(1,L)); var k=(y*N+x)*4, b=Math.round(L*255); d[k]=d[k+1]=d[k+2]=b; d[k+3]=255; } }
+    g.putImageData(img,0,0); _wornTex=c; return c; }
+  function wornTexture(){ var t=new THREE.CanvasTexture(wornCanvas()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4; return t; }
+  // Per-face planar UVs: every triangle of a face maps through the same basis
+  // in that face's plane, so the pattern is continuous across the face and
+  // simply cuts at the edges. The face centre lands on the texture centre
+  // (where the grime is) and the face's far corner at radius 0.42, so the
+  // grime sits around the number on every face and the pale rim meets the
+  // edge; each face is rotated by the golden angle so no two read the same.
+  function faceUVs(geo,groups){ var centred=true; var pos=geo.attributes.position.array, n=pos.length/3, uv=new Float32Array(n*2);
+    var bases=groups.map(function(gp,i){ var N=gp.n.clone().normalize(); var a=Math.abs(N.x)<0.8?new THREE.Vector3(1,0,0):new THREE.Vector3(0,1,0);
+      var U=new THREE.Vector3().crossVectors(N,a).normalize(), V=new THREE.Vector3().crossVectors(N,U).normalize();
+      var ang=(i*2.399)%(Math.PI*2); var cu=Math.cos(ang), su=Math.sin(ang); var U2=U.clone().multiplyScalar(cu).addScaledVector(V,su), V2=V.clone().multiplyScalar(cu).addScaledVector(U,-su);
+      return {U:U2,V:V2,c:gp.c,ox:(i*0.618)%1,oy:(i*0.382)%1,r:0}; });
+    var P=new THREE.Vector3(), tmp=new THREE.Vector3();
+    if(centred){ for(var t=0;t<n;t++){ P.set(pos[t*3],pos[t*3+1],pos[t*3+2]); var gi=bestGroup(groups,P,t,pos); var b=bases[gi]; var rr=tmp.subVectors(P,b.c).length(); if(rr>b.r) b.r=rr; } }
+    for(var i=0;i<n;i++){ P.set(pos[i*3],pos[i*3+1],pos[i*3+2]); var g=bestGroup(groups,P,i,pos), bb=bases[g]; tmp.subVectors(P,bb.c);
+      var sc=centred?(0.42/Math.max(0.3,bb.r)):0.5; uv[i*2]=0.5+tmp.dot(bb.U)*sc+(centred?0:bb.ox); uv[i*2+1]=0.5+tmp.dot(bb.V)*sc+(centred?0:bb.oy); }
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv,2)); }
+  var _fn=null;
+  function bestGroup(groups,P,i,pos){ // the face this vertex's triangle belongs to, by the triangle's normal
+    var t=i-(i%3); if(!_fn) _fn={a:new THREE.Vector3(),b:new THREE.Vector3(),c:new THREE.Vector3(),n:new THREE.Vector3()};
+    _fn.a.set(pos[t*3],pos[t*3+1],pos[t*3+2]); _fn.b.set(pos[t*3+3],pos[t*3+4],pos[t*3+5]); _fn.c.set(pos[t*3+6],pos[t*3+7],pos[t*3+8]);
+    _fn.n.subVectors(_fn.b,_fn.a).cross(_fn.c.sub(_fn.a)).normalize(); var best=0,bd=-2; for(var k=0;k<groups.length;k++){ var dd=groups[k].n.dot(_fn.n); if(dd>bd){bd=dd;best=k;} } return best; }
   function buildDie(geo,groups,labels,sides,resultStr,color,d4){
-    var matte=(S.finish==='matte');
-    var mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:matte?0.0:0.35, roughness:matte?0.95:0.3, flatShading:true, transparent:true, opacity:1,
-      emissive:0x000000, emissiveIntensity:0 });
-    var group=new THREE.Group(); group.add(new THREE.Mesh(geo,mat));
+    var kind=S.mat||'plastic', mat;
+    // Three materials. Plastic is cast resin under a clear coat (the gloss sits
+    // on top of the colour). Metal is the colour as polished metal — the studio
+    // environment is what it reflects. Worn is matte plastic wearing the grime
+    // texture above, with the grit as a bump. (Glass was tried and dropped:
+    // without refraction it only read as see-through plastic, and real glass —
+    // transmission plus back faces — is too heavy for phones.)
+    if(kind==='metal'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0.92, roughness:0.34, envMapIntensity:1.1, flatShading:true, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
+    else if(kind==='worn'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0, roughness:0.95, envMapIntensity:0.3, flatShading:true, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
+      faceUVs(geo,groups); mat.map=wornTexture(); mat.bumpMap=wornTexture(); mat.bumpScale=0.01; }
+    else { mat=new THREE.MeshPhysicalMaterial({ color:threeColor(color), metalness:0, roughness:0.45, clearcoat:0.7, clearcoatRoughness:0.25, envMapIntensity:0.4, flatShading:true, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
+    var body=new THREE.Mesh(geo,mat); body.castShadow=true;
+    var group=new THREE.Group(); group.add(body);
     if(d4){ // vertex-numbered d4: 3 corner numbers per face, each oriented toward its vertex
       var vsize=0.92;
       d4.faces.forEach(function(f){ f.corners.forEach(function(vi){ var V=d4.verts[vi], C=f.c, N=f.n;
@@ -247,12 +429,12 @@
         // Opaque alpha-tested decal (writes depth, front-side only, depth-biased toward
         // the camera) so the 3 co-located copies of each vertex number don't z-fight /
         // flicker and the back-face copies are culled instead of bleeding through.
-        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), new THREE.MeshBasicMaterial({map:faceTex(d4.vlabels[vi]),alphaTest:0.5,depthWrite:true,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));
+        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), labelMat(d4.vlabels[vi],{alphaTest:0.5,depthWrite:true,transparent:false,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));
         pl.position.copy(pos); pl.quaternion.setFromRotationMatrix(m4); group.add(pl); }); });
       return group; }
-    var size=sides===2?1.15:sides===6?0.95:sides===4?0.8:sides===10?0.5:0.62;
+    var size=sides===2?1.15:sides===6?1.0:sides===4?0.8:sides===10?0.52:sides===8?0.7:0.64;
     groups.forEach(function(g,idx){ var isR=labels[idx]===resultStr;
-      var pl=new THREE.Mesh(new THREE.PlaneGeometry(size,size), new THREE.MeshBasicMaterial({map:faceTex(labels[idx]),transparent:true,depthWrite:false}));
+      var pl=new THREE.Mesh(new THREE.PlaneGeometry(size,size), labelMat(labels[idx]));
       var pp=g.labelPos ? g.labelPos.clone().addScaledVector(g.n,0.03) : g.n.clone().multiplyScalar(g.c.dot(g.n)*1.02); pl.position.copy(pp); pl.lookAt(pp.clone().add(g.n)); group.add(pl); });
     return group; }
   function dieRest(s){ return s===2?0.17:s===4?0.4:s===6?0.75:s===8?0.72:s===10?0.5:s===12?0.9:s===20?0.9:0.8; }
@@ -263,42 +445,99 @@
   function makeShadow(){ var m=new THREE.Mesh(new THREE.PlaneGeometry(2.2,2.2), new THREE.MeshBasicMaterial({map:shTex(),transparent:true,depthWrite:false})); m.rotation.x=-Math.PI/2; m.position.y=FLOORY+0.012; return m; }
   var _glowTex=null;
   function glowTex(){ if(_glowTex)return _glowTex; var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,4,s/2,s/2,s/2); gr.addColorStop(0,'rgba(255,255,255,0.95)'); gr.addColorStop(0.45,'rgba(255,255,255,0.35)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,s,s); _glowTex=new THREE.CanvasTexture(c); return _glowTex; }
-  function stepState(s,dt,step){ if(s.spawnStep && (step||0)<s.spawnStep) return; s.spawned=true; s.v.y+=GRAV*dt; s.p.x+=s.v.x*dt; s.p.y+=s.v.y*dt; s.p.z+=s.v.z*dt; var grounded=s.p.y<=s.restY+0.004;
-    if(s.p.y<s.restY){ s.p.y=s.restY; if(s.v.y<0){ s.v.y=-s.v.y*REST; s.v.x*=FRIC; s.v.z*=FRIC; s.av.multiplyScalar(0.55); if(Math.abs(s.v.y)<1.3)s.v.y=0; } }
-    if(s.p.x>WALLX){s.p.x=WALLX;s.v.x=-Math.abs(s.v.x)*REST;s.av.multiplyScalar(0.8);} if(s.p.x<-WALLX){s.p.x=-WALLX;s.v.x=Math.abs(s.v.x)*REST;s.av.multiplyScalar(0.8);}
-    if(s.p.z>WALLZ){s.p.z=WALLZ;s.v.z=-Math.abs(s.v.z)*REST;} if(s.p.z<-WALLZ){s.p.z=-WALLZ;s.v.z=Math.abs(s.v.z)*REST;}
+  // ─── physics ───
+  // A die is a rigid body whose HULL VERTICES touch the floor. That is what makes
+  // it tumble and come to rest on a face by itself: a die landing on an edge gets
+  // a torque from the two contact points and falls onto a face, like the real
+  // thing. The previous model was a sphere on a plane with a "magnet" that
+  // slerped the die flat once it slowed — it could never rock, catch a corner,
+  // or skip, and that was most of why it read as a cartoon.
+  //
+  // Deterministic on purpose: the roll is simulated once up front (the "probe")
+  // to learn which face lands up, the labels are swapped so the result is on
+  // that face, then the same simulation is replayed live. Any randomness in
+  // here would desync the replay from the probe and the number on top from the
+  // result. All randomness lives in makeInit.
+  var _w=[],_rr,_u,_t,_rn,_imp,_cx;   // scratch; allocated in initGL once three.js is here
+  function applyImpulse(s,r,dir,j){ s.v.addScaledVector(dir,j); _imp.copy(dir).multiplyScalar(j); _rn.crossVectors(r,_imp); s.av.addScaledVector(_rn,s.iInv); }
+  function stepState(s,dt,step){ if(s.spawnStep && (step||0)<s.spawnStep) return; s.spawned=true;
+    s.v.y+=GRAV*dt; s.p.x+=s.v.x*dt; s.p.y+=s.v.y*dt; s.p.z+=s.v.z*dt;
     var ang=s.av.length(); if(ang>1e-5){ _axis.copy(s.av).multiplyScalar(1/ang); _dq.setFromAxisAngle(_axis,ang*dt); s.q.premultiply(_dq).normalize(); }
-    if(grounded){ var sp=s.v.length(); var fr=Math.pow(0.05,dt); s.v.x*=fr; s.v.z*=fr;
-      if(sp<3.2){ var di=-1,dY=2; for(var i=0;i<s.groups.length;i++){ var wy=_n.copy(s.groups[i].n).applyQuaternion(s.q).y; if(wy<dY){dY=wy;di=i;} }
-        _n.copy(s.groups[di].n).applyQuaternion(s.q).normalize(); s.flat=-_n.y; _corr.setFromUnitVectors(_n,DOWN);
-        var slowEase=Math.min(1,(3.2-sp)/3.2); var k=Math.min(0.2,5*dt)*(0.55+0.45*slowEase); _dq.identity().slerp(_corr,k); s.q.premultiply(_dq).normalize(); s.av.multiplyScalar(Math.pow(0.05,dt)); } }
-    else { s.flat=0; s.av.multiplyScalar(1-0.5*dt); } }
-  function atRest(s){ return s.spawned && s.p.y<=s.restY+0.02 && s.v.length()<0.55 && s.av.length()<0.8 && s.flat>0.995; }
-  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,groups:s.groups,flat:s.flat||0,spawnStep:s.spawnStep||0,spawned:!(s.spawnStep>0)}; }
-  function makeInit(sides,i){ var fl=(i%2===0); return { p:new THREE.Vector3((fl?-1:1)*(2.4+Math.random()*0.7),2.1+Math.random()*0.9,(Math.random()-0.5)*1.4),
-    v:new THREE.Vector3((fl?1:-1)*(3.4+Math.random()*1.8),0.3+Math.random()*0.7,(Math.random()-0.5)*2.4),
-    av:new THREE.Vector3((Math.random()-0.5)*22,(Math.random()-0.5)*22,(Math.random()-0.5)*22),
+    // world-space hull vertices, and the die's lowest point
+    var V=s.verts, n=V.length, minY=1e9, maxX=-1e9, minX=1e9, maxZ=-1e9, minZ=1e9;
+    for(var i=0;i<n;i++){ var w=_w[i].copy(V[i]).applyQuaternion(s.q).add(s.p); if(w.y<minY)minY=w.y; if(w.x>maxX)maxX=w.x; if(w.x<minX)minX=w.x; if(w.z>maxZ)maxZ=w.z; if(w.z<minZ)minZ=w.z; }
+    if(minY<FLOORY){ var lift=FLOORY-minY; s.p.y+=lift; for(var i1=0;i1<n;i1++) _w[i1].y+=lift; minY=FLOORY; }
+    var grounded=minY<=FLOORY+0.012;
+    // Floor contacts: every vertex at the floor, impulse along the normal
+    // (bouncy only on a real impact) then Coulomb friction along the slide.
+    // Two passes so a face resting on four corners shares the load.
+    // Three or more vertices down means a face is down: one contact at their
+    // centre, or the corners would take turns pushing and the die would rock.
+    var cn=0; if(grounded){ _cx.set(0,0,0); for(var ic=0;ic<n;ic++){ if(_w[ic].y<=FLOORY+0.045){ cn++; _cx.add(_w[ic]); } }
+      var faceDown=cn>=3; if(faceDown) _cx.multiplyScalar(1/cn);
+      for(var pass=0;pass<2;pass++){ for(var i2=0;i2<(faceDown?1:n);i2++){ var wv=faceDown?_cx:_w[i2]; if(wv.y>FLOORY+0.045) continue;
+        _rr.subVectors(wv,s.p); _u.crossVectors(s.av,_rr).add(s.v); var un=_u.y; if(un>=0) continue;
+        var e=(un<-3.0)?REST:0; _rn.crossVectors(_rr,DOWN); var k=1+s.iInv*_rn.lengthSq(); var j=-(1+e)*un/k;
+        applyImpulse(s,_rr,UP,j);
+        _u.crossVectors(s.av,_rr).add(s.v); _t.set(_u.x,0,_u.z); var ut=_t.length(); if(ut>1e-4){ _t.multiplyScalar(1/ut); _rn.crossVectors(_rr,_t); var kt=1+s.iInv*_rn.lengthSq(); var jt=Math.min(MU*j, ut/kt); applyImpulse(s,_rr,_t,-jt); } } } }
+    // Walls (the near/far lips and the far end). The RIGHT wall only exists once
+    // a die is inside the tray: dice start beyond it and fly in over it.
+    if(maxX<WX-0.05) s.inside=true;
+    if(s.inside && maxX>WX){ s.p.x-=maxX-WX; if(s.v.x>0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
+    if(minX<-WX){ s.p.x+=-WX-minX; if(s.v.x<0){ s.v.x=-s.v.x*WALL_REST; s.av.multiplyScalar(0.85); } }
+    if(maxZ>WZ){ s.p.z-=maxZ-WZ; if(s.v.z>0) s.v.z=-s.v.z*WALL_REST; } if(minZ<-WZ){ s.p.z+=-WZ-minZ; if(s.v.z<0) s.v.z=-s.v.z*WALL_REST; }
+    // Damping: air drag on spin is tiny; on the floor rolling resistance bleeds
+    // spin and speed so a die that is rolling, not sliding, still stops.
+    if(grounded){ var fr=Math.pow(DRAG,dt); s.v.x*=fr; s.v.z*=fr; s.av.multiplyScalar(Math.pow(s.spinDamp,dt)); } else { s.av.multiplyScalar(Math.pow(0.9,dt)); }
+    // How flat: the most-downward face normal. A resting die has flat ≈ 1.
+    var dY=2, di=-1; for(var g=0;g<s.groups.length;g++){ var wy=_n.copy(s.groups[g].n).applyQuaternion(s.q).y; if(wy<dY){dY=wy;di=g;} } s.flat=-dY;
+    // Settling. Real contacts do the rocking; these two rules only finish it.
+    // (1) Last-inch assist: a die that is nearly stopped but still a degree or
+    // two off its face is eased down onto it — velocities zeroed while it does,
+    // or friction at the contact fights the tilt and the die creeps sideways —
+    // so the probe always terminates (a die cannot balance on a corner forever). (2) Sleep: lying flat and
+    // nearly still means still — zero it, or the contact solver hums at the
+    // sub-pixel level for a second after the eye has already called it done.
+    var slow=s.v.length()<0.7 && s.av.length()<1.5;
+    if(grounded && slow && s.flat<0.9995){ _n.copy(s.groups[di].n).applyQuaternion(s.q).normalize(); _corr.setFromUnitVectors(_n,DOWN); _dq.identity().slerp(_corr,Math.min(0.3,8*dt)); s.q.premultiply(_dq).normalize(); s.v.set(0,0,0); s.av.set(0,0,0); }
+    if(grounded && slow && s.flat>=0.9995){ s.v.set(0,0,0); s.av.set(0,0,0); } }
+  function atRest(s){ return s.spawned && s.v.length()<0.3 && s.av.length()<0.6 && s.flat>0.9995; }
+  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,verts:s.verts,iInv:s.iInv,spinDamp:s.spinDamp,groups:s.groups,flat:s.flat||0,spawnStep:s.spawnStep||0,spawned:!(s.spawnStep>0),inside:!!s.inside}; }
+  // Where a die starts and how hard it's thrown. They come from the RIGHT (most
+  // players are right-handed), just off the edge of the screen, staggered back
+  // so they arrive one after another rather than as a clump; low and fast
+  // with a little lift, spinning hard, so the first floor hit is a skip and a
+  // tumble rather than a thud.
+  function makeInit(sides,i,n,hull){ var rank=Math.floor(i/2), ry=FLOORY+dieRest(sides);
+    var z=(Math.random()*2-1)*WZ*0.6, vx=-(THROW_V*(1+Math.random()*0.45));
+    return { p:new THREE.Vector3(WX+1.0+rank*1.2+Math.random()*0.6, ry+1.0+Math.random()*1.2, z),
+    v:new THREE.Vector3(vx, 1.0+Math.random()*3.0, -z*0.5+(Math.random()-0.5)*3.0),
+    // spin mostly about the axis a die rolling leftward would spin about (ω = v × up / r),
+    // plus a little wobble, so it tumbles with its travel rather than pirouetting
+    av:new THREE.Vector3((Math.random()-0.5)*10,(Math.random()-0.5)*8,-(10+Math.random()*16)),
     q:new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random()*6,Math.random()*6,Math.random()*6)),
-    restY:FLOORY+dieRest(sides), radius:dieRadius(sides), groups:null, flat:0 }; }
+    restY:ry, radius:hull.radius, verts:hull.verts, iInv:1/(0.4*hull.radius*hull.radius), spinDamp:(sides===2?0.1:ROLL_DAMP), groups:null, flat:0, inside:false }; }
+  // Die-vs-die stays a soft sphere push (hull-vs-hull is not worth its weight
+  // here); the spheres are the hull radius scaled down so dice can get close.
   function stepWorld(states,dt,step){ for(var i=0;i<states.length;i++) stepState(states[i],dt,step);
-    for(var i2=0;i2<states.length;i2++){ for(var j=i2+1;j<states.length;j++){ var a=states[i2],b=states[j]; if(!a.spawned||!b.spawned) continue; var dx=b.p.x-a.p.x,dy=b.p.y-a.p.y,dz=b.p.z-a.p.z; var dist=Math.sqrt(dx*dx+dy*dy+dz*dz)||0.0001,mn=a.radius+b.radius;
+    for(var i2=0;i2<states.length;i2++){ for(var j=i2+1;j<states.length;j++){ var a=states[i2],b=states[j]; if(!a.spawned||!b.spawned) continue; var dx=b.p.x-a.p.x,dy=b.p.y-a.p.y,dz=b.p.z-a.p.z; var dist=Math.sqrt(dx*dx+dy*dy+dz*dz)||0.0001,mn=(a.radius+b.radius)*0.86;
       if(dist<mn){ var nx=dx/dist,ny=dy/dist,nz=dz/dist,push=(mn-dist)*0.5; a.p.x-=nx*push;a.p.y-=ny*push;a.p.z-=nz*push; b.p.x+=nx*push;b.p.y+=ny*push;b.p.z+=nz*push;
-        var rel=(b.v.x-a.v.x)*nx+(b.v.y-a.v.y)*ny+(b.v.z-a.v.z)*nz; if(rel<0){ var im=-1.15*rel*0.5; a.v.x-=nx*im;a.v.y-=ny*im;a.v.z-=nz*im; b.v.x+=nx*im;b.v.y+=ny*im;b.v.z+=nz*im; a.av.x+=nz*im;a.av.z-=nx*im; b.av.x-=nz*im;b.av.z+=nx*im; }
-        if(a.p.y<a.restY)a.p.y=a.restY; if(b.p.y<b.restY)b.p.y=b.restY; } } } }
+        var rel=(b.v.x-a.v.x)*nx+(b.v.y-a.v.y)*ny+(b.v.z-a.v.z)*nz; if(rel<0){ var im=-1.15*rel*0.5; a.v.x-=nx*im;a.v.y-=ny*im;a.v.z-=nz*im; b.v.x+=nx*im;b.v.y+=ny*im;b.v.z+=nz*im; a.av.x+=nz*im;a.av.z-=nx*im; b.av.x-=nz*im;b.av.z+=nx*im; } } } } }
   function allRest(st){ for(var i=0;i<st.length;i++){ if(!atRest(st[i]))return false; } return true; }
   function upFace(groups,q){ var best=-1,bY=-2; for(var i=0;i<groups.length;i++){ var wy=_n.copy(groups[i].n).applyQuaternion(q).y; if(wy>bY){bY=wy;best=i;} } return best; }
   function upVertex(verts,q){ var best=0,bY=-9; for(var i=0;i<verts.length;i++){ var wy=_n.copy(verts[i]).applyQuaternion(q).y; if(wy>bY){bY=wy;best=i;} } return best; }
   // Free a die's GPU resources on clear. Geometries and face textures are built
   // fresh every roll, so they're always safe to dispose; the shared shadow/glow
   // textures (_shTex/_glowTex) are cached and must survive, so skip those maps.
-  function _disposeMat(mm){ if(!mm) return; if(mm.map && mm.map!==_shTex && mm.map!==_glowTex && mm.map.dispose) mm.map.dispose(); if(mm.dispose) mm.dispose(); }
+  function _disposeMat(mm){ if(!mm) return; if(mm.map && mm.map!==_shTex && mm.map!==_glowTex && mm.map.dispose) mm.map.dispose(); if(mm.bumpMap && mm.bumpMap.dispose) mm.bumpMap.dispose(); if(mm.dispose) mm.dispose(); }
   function _disposeObj(o){ if(!o) return; if(o.geometry && o.geometry.dispose) o.geometry.dispose();
     if(o.material){ (Array.isArray(o.material)?o.material:[o.material]).forEach(_disposeMat); }
     if(o.children){ o.children.forEach(_disposeObj); } }
   function clearWorld(){ if(!world3d)return; world3d.meshes.forEach(function(g){scene.remove(g); _disposeObj(g);}); world3d.shadows.forEach(function(s){scene.remove(s); _disposeObj(s);}); if(world3d.glows)world3d.glows.forEach(function(s){scene.remove(s); _disposeObj(s);}); world3d=null; }
   function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
     _camTilt = dice.some(function(d){ return d.sides===4; }); applyCam();   // tip the camera for a d4 so its up-vertex number faces the viewer
-    var metas=[],inits=[],maxSpawn=0; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
+    if(floor3d) floor3d.material.opacity=SHADOW_OP;
+    var metas=[],inits=[],maxSpawn=0; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i,dice.length,gg.hull); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
     var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS+maxSpawn){ stepWorld(probe,FDT,steps); steps++; if(allRest(probe))break; }
     var live=inits.map(cloneState),meshes=[],shadows=[];
     metas.forEach(function(m,i){ var rs=m.display, d4=null;
@@ -312,6 +551,7 @@
       var g=buildDie(m.geo,m.groups,labels,m.sides,rs,m.color,d4); g.position.copy(live[i].p); g.quaternion.copy(live[i].q);
       var sh=makeShadow(); if(inits[i].spawnStep>0){ g.visible=false; sh.visible=false; } scene.add(sh); scene.add(g); meshes.push(g); shadows.push(sh); });
     world3d={ live:live, meshes:meshes, shadows:shadows, crit:(crit||'normal'), emph:false, acc:0, rested:false, stepCount:0, maxSteps:steps, phase:'roll', tStart:performance.now() };
+    lastRoll={ dice:dice.length, steps:steps, ms:Math.round(steps*FDT*1000), capped:steps>=MAXSTEPS+maxSpawn };
     lastT=performance.now(); startLoop(); }
   function applyCrit(W){ if(W.crit!=='crit'&&W.crit!=='fumble')return; var em=W.crit==='crit'?0x7a5c00:0x4a0300, gc=W.crit==='crit'?0xffd24a:0xff2e2e; W.glows=[];
     W.meshes.forEach(function(g){ var m=g.children[0].material; if(m){ m.emissive.setHex(em); m.emissiveIntensity=(W.crit==='crit'?0.85:0.55); }
@@ -321,8 +561,10 @@
     if(W){ if(W.phase==='roll'){ W.acc+=real; var guard=0; while(W.acc>=FDT && !W.rested && guard<6){ stepWorld(W.live,FDT,W.stepCount); W.stepCount++; W.acc-=FDT; guard++; if(allRest(W.live)||W.stepCount>=W.maxSteps){W.rested=true;W.restAt=now;} }
         for(var i=0;i<W.live.length;i++){ W.meshes[i].position.copy(W.live[i].p); W.meshes[i].quaternion.copy(W.live[i].q); if(W.live[i].spawned){ W.meshes[i].visible=true; W.shadows[i].visible=true; } } if(W.rested){ W.phase='hold'; if(!W.emph){ W.emph=true; applyCrit(W); } } }
       else if(W.phase==='hold'){ if(now-W.restAt>(S.linger||1000)){ W.phase='fade'; W.fadeAt=now; } }
-      else { var ft=(now-W.fadeAt)/FADE; if(ft>=1){ clearWorld(); } else { for(var i2=0;i2<W.meshes.length;i2++){ var g=W.meshes[i2]; g.children.forEach(function(ch){ if(ch.material)ch.material.opacity=1-ft; }); g.scale.setScalar(1-ft*0.2); W.shadows[i2].material.opacity=(1-ft)*0.9; } } }
-      if(world3d){ for(var i3=0;i3<W.live.length;i3++){ var gg=W.meshes[i3],ss=W.shadows[i3]; var h=Math.max(0,gg.position.y-W.live[i3].restY); ss.position.x=gg.position.x; ss.position.z=gg.position.z; ss.scale.setScalar(1+h*0.32); if(W.phase==='roll')ss.material.opacity=Math.max(0.12,0.85-h*0.14);
+      else { var ft=(now-W.fadeAt)/FADE; if(ft>=1){ clearWorld(); } else { for(var i2=0;i2<W.meshes.length;i2++){ var g=W.meshes[i2]; g.children.forEach(function(ch){ if(ch.material)ch.material.opacity=1-ft; }); g.scale.setScalar(1-ft*0.2); W.shadows[i2].material.opacity=(1-ft)*0.45; } if(floor3d) floor3d.material.opacity=SHADOW_OP*(1-ft); } }
+      // The soft blob under each die is contact darkening only now; the real
+      // shadow comes from the shadow map, so the blob stays faint.
+      if(world3d){ for(var i3=0;i3<W.live.length;i3++){ var gg=W.meshes[i3],ss=W.shadows[i3]; var h=Math.max(0,gg.position.y-W.live[i3].restY); ss.position.x=gg.position.x; ss.position.z=gg.position.z; ss.scale.setScalar(1+h*0.32); if(W.phase==='roll')ss.material.opacity=Math.max(0.06,0.45-h*0.1);
           if(W.glows && W.glows[i3]){ var gl=W.glows[i3]; gl.position.set(gg.position.x, gg.position.y+0.15, gg.position.z);
             var gt=(W.phase==='fade')?0.8*Math.max(0,1-((now-W.fadeAt)/FADE)):(W.phase==='hold'?0.8:0); gl.material.opacity += (gt-gl.material.opacity)*0.25; } } } }
     if(renderer) renderer.render(scene,camera); if(world3d){ rafId=requestAnimationFrame(frame); } else { rafId=null; } }
@@ -419,7 +661,7 @@
   if(typeof window.init_dice==='function'){ var _idf=window.init_dice; window.init_dice=function(root){ var res=_idf.apply(this,arguments); try{ mountGmGear(root); }catch(e){} return res; }; }
 
   // ─── settings UI ───
-  var PRESETS_DICE=['#d8b24a','#c0251e','#3b7dd8','#3fa45b','#8a6fd6','#e8e2d0','#20232b'];
+  var PRESETS_DICE=['#d8b24a','#c0251e','#3b7dd8','#3fa45b','#8a6fd6','#e8e2d0','#9a9ea4','#20232b'];
   var PRESETS_NUM=['#2a2007','#ffffff','#101319','#7a1210','#0e2e17'];
   var pop=null;
   function buildPop(){ pop=document.createElement('div'); pop.className='da-pop'; pop.style.display='none';
@@ -428,7 +670,7 @@
       +'<div class="da-row"><span class="k">Show dice</span><div class="da-sw" data-k="on"></div></div>'
       +'<div class="da-row"><span class="k">Sound</span><div class="da-sw" data-k="sound"></div></div>'
       +'<div class="da-row"><span class="k">Style</span><div class="da-seg" data-k="mode"><button data-v="2d">2D</button><button data-v="3d">3D</button></div></div>'
-      +'<div class="da-row"><span class="k">Finish</span><div class="da-seg" data-k="finish"><button data-v="shiny">Shiny</button><button data-v="matte">Matte</button></div></div>'
+      +'<div class="da-row"><span class="k">Material</span><div class="da-seg" data-k="mat"><button data-v="plastic">Plastic</button><button data-v="metal">Metal</button><button data-v="worn">Worn</button></div></div>'
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Dice colour</span><div class="da-swatches" data-k="dice"></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Number colour</span><div class="da-swatches" data-k="num"></div></div>'
@@ -444,14 +686,14 @@
     pop.querySelector('[data-k="sound"]').onclick=function(){ setS('sound', S.sound===false); };
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){}); }; });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.onclick=function(){ setS('linger', +b.dataset.v); }; });
-    pop.querySelectorAll('[data-k="finish"] button').forEach(function(b){ b.onclick=function(){ setS('finish', b.dataset.v); }; });
+    pop.querySelectorAll('[data-k="mat"] button').forEach(function(b){ b.onclick=function(){ setS('mat', b.dataset.v); }; });
     syncPop();
   }
   function syncPop(){ if(!pop)return; pop.querySelector('[data-k="on"]').classList.toggle('on', !!S.on);
     pop.querySelector('[data-k="sound"]').classList.toggle('on', S.sound!==false);
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===S.mode); });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.classList.toggle('on', +b.dataset.v===(S.linger||1000)); });
-    pop.querySelectorAll('[data-k="finish"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.finish||'shiny')); });
+    pop.querySelectorAll('[data-k="mat"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.mat||'plastic')); });
     var dc=pop.querySelector('[data-k="dice"] .da-custom'); if(dc && S.dice&&String(S.dice)[0]==='#')dc.value=S.dice; var nc=pop.querySelector('[data-k="num"] .da-custom'); if(nc)nc.value=S.num;
     var rb=pop.querySelector('.da-rand'); if(rb) rb.classList.toggle('sel', S.dice==='random'); }
   function setS(k,v){ S[k]=v; persist(); syncPop(); }
@@ -481,8 +723,8 @@
     if(clear && clear.parentNode){ clear.parentNode.insertBefore(g, clear); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
-  window.DiceAnim={ get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,sound:S.sound}; },
-    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish)S.finish=o.finish; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
+  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,mat:S.mat,sound:S.sound}; },
+    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.mat||o.finish||o.tex)S.mat=legacyMat(o); if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
   // Persist settings into the saved sheet too, as a fallback for VTT webviews
