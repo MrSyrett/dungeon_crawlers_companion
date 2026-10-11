@@ -1530,6 +1530,17 @@ body {
     paint-order: stroke fill;
   }
 }
+/* Per-system wordmark fixes, mirroring the game tiles' name rules. */
+/* Star Wars: the Star Jedi logo face draws its capitals from the LOWERCASE slots
+   (its real uppercase slots hold alternate glyphs), so the input must be lowercased
+   or letters like S and W fall back to the wrong face. Same as the SW tile. */
+.roster-sys[data-sys="SW"] .roster-sys-name { text-transform: lowercase; }
+/* Marvel's logo face is all caps. */
+.roster-sys[data-sys="MMRPG"] .roster-sys-name { text-transform: uppercase; }
+/* Dungeon Crawler Carl's wordmark is two colours: gold "Dungeon", magenta
+   "Crawler Carl" (split into .tn-1 / .tn-2 by NAME_PARTS in app/page.tsx). */
+.roster-sys[data-sys="DCC"] .tn-1 { color: var(--dcc-gold); }
+.roster-sys[data-sys="DCC"] .tn-2 { color: var(--dcc-ink); }
 .roster-cards {
   list-style: none;
   margin: 0;

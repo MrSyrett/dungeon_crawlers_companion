@@ -43,6 +43,15 @@ function metaLine(level: number | null, cls: string): string {
   return [level !== null ? `LV ${level}` : "", cls].filter(Boolean).join(" · ");
 }
 
+// Wordmarks that are more than one colour, split into the pieces the stylesheet
+// colours (.tn-1 / .tn-2 under .roster-sys[data-sys="…"] in app/globals.css) —
+// the same hook the game tiles use (NAME_PARTS in components/HomeSystems.tsx).
+// Dungeon Crawler Carl is the only one today: gold "Dungeon", magenta "Crawler
+// Carl". The parts must spell the system's own name exactly.
+const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = {
+  DCC: ["Dungeon", "Crawler Carl"],
+};
+
 export default async function Home() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -105,7 +114,20 @@ export default async function Home() {
         ) : (
           charSystems.map((s) => (
             <section key={s.key} className="roster-sys" data-sys={s.key}>
-              <h3 className="roster-sys-name">{s.name}</h3>
+              {/* The label is wrapped so the flex divider line (::after) doesn't
+                  gap-space the two-colour DCC wordmark's halves apart. */}
+              <h3 className="roster-sys-name">
+                <span className="roster-sys-label">
+                  {NAME_PARTS[s.key] ? (
+                    <>
+                      <span className="tn-1">{NAME_PARTS[s.key]![0]}</span>{" "}
+                      <span className="tn-2">{NAME_PARTS[s.key]![1]}</span>
+                    </>
+                  ) : (
+                    s.name
+                  )}
+                </span>
+              </h3>
               <ul className="roster-cards">
                 {charsBySystem.get(s.key)!.map((c) => {
                   const ml = metaLine(c.level, c.cls);
