@@ -447,14 +447,21 @@
       var wear=edge*(0.74+0.45*nHi) + edge*(nLo-0.5)*0.8 + spec;  // rim wear + colour-zone freckles
       wear=Math.max(wear, ss(0.40,0.52,r));                       // the outer edge/corner goes fully bone
       wear=Math.max(0,Math.min(1,wear));
-      var lum=1+(nHi-0.5)*0.08;                                   // a touch more surface mottle
+      // Mottle lives in the COLOUR and fades out as the texture reaches bone. The
+      // rounded bevels sample the texture RIM (bone), where a per-face planar map
+      // stretches any high-frequency noise into streaks along the edge — a SMOOTH
+      // bone rim kills that fade-out artifacting while the colour keeps its grain.
+      var lum=1+(nHi-0.5)*0.09*(1-wear);
       var k=(y*N+x)*4;
       d[k]  =Math.max(0,Math.min(255,Math.round((col[0]+(bone[0]-col[0])*wear)*lum*255)));
       d[k+1]=Math.max(0,Math.min(255,Math.round((col[1]+(bone[1]-col[1])*wear)*lum*255)));
       d[k+2]=Math.max(0,Math.min(255,Math.round((col[2]+(bone[2]-col[2])*wear)*lum*255)));
       d[k+3]=255; } }
     g.putImageData(img,0,0); _wornCache[key]=c; return c; }
-  function wornTexture(hex){ var t=new THREE.CanvasTexture(wornCanvas(hex)); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4; return t; }
+  function wornTexture(hex){ var t=new THREE.CanvasTexture(wornCanvas(hex)); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4;
+    // No mipmaps: the bevels sample the clamped texture rim at a grazing angle,
+    // where lower mips bleed the colour across the fade and shimmer the edge.
+    t.minFilter=THREE.LinearFilter; t.generateMipmaps=false; return t; }
   var _wornBump=null;
   function wornBumpCanvas(){ if(_wornBump) return _wornBump; var N=256,c=document.createElement('canvas'); c.width=c.height=N; var g=c.getContext('2d'),img=g.createImageData(N,N),d=img.data;
     for(var y=0;y<N;y++)for(var x=0;x<N;x++){ var L=0.5+(_fbm(x/N+5.3,y/N+2.1,3,18,0.5)-0.5)*0.7; L=Math.max(0,Math.min(1,L)); var k=(y*N+x)*4,b=Math.round(L*255); d[k]=d[k+1]=d[k+2]=b; d[k+3]=255; }
