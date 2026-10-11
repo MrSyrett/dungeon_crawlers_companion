@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import type { CSSProperties } from "react";
 import HomeSystems from "@/components/HomeSystems";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -158,7 +157,7 @@ export default async function Home() {
           <p className="roster-empty">No characters yet — pick a game below and roll one up.</p>
         ) : (
           charSystems.map((s) => (
-            <section key={s.key} className="roster-sys" data-sys={s.key} style={{ "--rsys": s.accent } as CSSProperties}>
+            <section key={s.key} className="roster-sys" data-sys={s.key}>
               <h3 className="roster-sys-name">{s.name}</h3>
               <ul className="roster-cards">
                 {charsBySystem.get(s.key)!.map((c) => {
@@ -191,7 +190,7 @@ export default async function Home() {
           </p>
         ) : (
           campSystems.map((s) => (
-            <section key={s.key} className="roster-sys" data-sys={s.key} style={{ "--rsys": s.accent } as CSSProperties}>
+            <section key={s.key} className="roster-sys" data-sys={s.key}>
               <h3 className="roster-sys-name">{s.name}</h3>
               <ul className="roster-cards">
                 {campsBySystem.get(s.key)!.map((c) => (

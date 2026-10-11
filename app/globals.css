@@ -1471,22 +1471,33 @@ body {
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.
-   Each .roster-sys group carries data-sys (for the system display --tile-face,
-   above) and an inline --rsys = that system's accent (from SYSTEMS[].accent). The
-   accent only ever reaches the eye through color-mix with a theme token, so every
-   system stays legible in both light and dark however saturated its brand colour.
-   =========================================================================== */
-.roster-sys + .roster-sys { margin-top: 1.1rem; }
+   Each .roster-sys group carries data-sys, so it inherits the SAME identity
+   tokens the Choose-a-Game tiles use (the [data-sys] map above): --tile-accent
+   (the wordmark colour), --tile-face (the display face), --tile-bg (the dark
+   ground), --tile-tex / --tile-zoom / --tile-tex-pos (the cover art) and
+   --tile-scrim. So a system's bubble reads exactly like its tile — same colour,
+   same font, same texture — instead of a second, drifting palette. The app is
+   dark-only and every system is a dark cover, so the body text is a fixed light
+   wash, as on the tiles. --rtsh is the tiles' name shadow, which keeps light
+   text legible over busy art. =========================================================================== */
+.home-roster { --rtsh: 0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,0,0,0.7); }
+.roster-sys + .roster-sys { margin-top: 1.4rem; }
+/* The system wordmark, on a chip of its own dark ground so its real accent (white
+   for Shadowdark/Marvel, green for Ghostbusters, gold for DCC…) always reads. */
 .roster-sys-name {
-  font-family: var(--tile-face, inherit);
+  display: inline-block;
+  margin: 0 0 0.6rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.45rem;
+  background-color: var(--tile-bg, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--tile-accent, var(--border)) 45%, var(--border));
+  font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
   font-size: 1.15rem;
   line-height: 1.1;
   letter-spacing: 0.02em;
-  margin: 0 0 0.55rem;
-  padding-bottom: 0.4rem;
-  color: color-mix(in srgb, var(--rsys, var(--text)) 62%, var(--text));
-  border-bottom: 1px solid color-mix(in srgb, var(--rsys, var(--border)) 32%, var(--border));
+  color: var(--tile-ink, var(--tile-accent, var(--text)));
+  text-shadow: var(--rtsh);
 }
 .roster-cards {
   list-style: none;
@@ -1498,34 +1509,61 @@ body {
 }
 @media (min-width: 640px)  { .roster-cards { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 1024px) { .roster-cards { grid-template-columns: 1fr 1fr 1fr; } }
+/* A bubble built like a mini game tile: the system's dark ground, its cover art
+   (::before), a black scrim (::after), content above. */
 .roster-card {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 0.12rem;
+  gap: 0.14rem;
   min-width: 0;
   height: 100%;
-  padding: 0.6rem 0.75rem 0.6rem 0.85rem;
+  padding: 0.7rem 0.85rem;
   border: 1px solid var(--border);
-  border-left: 3px solid color-mix(in srgb, var(--rsys, var(--border)) 72%, var(--border));
-  border-radius: 0.55rem;
-  background: var(--panel);
+  border-radius: 0.6rem;
+  background-color: var(--tile-bg, var(--panel));
+  color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
-  transition: border-color 0.12s, background 0.12s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-a.roster-card:hover {
-  background: var(--panel-2);
-  border-color: color-mix(in srgb, var(--rsys, var(--border)) 50%, var(--border));
+.roster-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--tile-tex, none);
+  background-size: cover;
+  background-position: var(--tile-tex-pos, center);
+  transform: scale(var(--tile-zoom, 1));
+  opacity: 0.85;
 }
+/* Floor the scrim well above the tiles' values: a tile guards one centred
+   wordmark, a bubble carries several lines, so it needs a darker, steadier wash
+   over the same textures (SW's starfield sits at 0.10 on its tile). */
+.roster-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0, 0, 0, max(var(--tile-scrim, 0.55), 0.6));
+}
+.roster-card > * { position: relative; z-index: 2; }
+a.roster-card:hover { border-color: var(--tile-accent); box-shadow: 0 0 0 1px var(--tile-accent); }
+a.roster-card:hover::before { opacity: 1; }
+/* The primary line — character name / campaign name — in the system face + accent,
+   like the tile wordmark. */
 .roster-card-name {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
   min-width: 0;
+  font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 0.9rem;
-  color: var(--text);
+  letter-spacing: 0.02em;
+  color: var(--tile-ink, var(--tile-accent, #fff));
+  text-shadow: var(--rtsh);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1534,14 +1572,16 @@ a.roster-card:hover {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: color-mix(in srgb, var(--rsys, var(--muted)) 45%, var(--muted));
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .roster-card-camp {
   font-size: 0.72rem;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.62);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1552,21 +1592,24 @@ a.roster-card:hover {
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  padding: 0.05rem 0.3rem;
+  padding: 0.05rem 0.32rem;
   border-radius: 0.25rem;
-  color: var(--on-accent, #fff);
-  background: color-mix(in srgb, var(--rsys, var(--gold)) 70%, var(--text));
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  text-shadow: none;
 }
-.roster-party { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.roster-party { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.1rem; }
 .roster-chip {
-  border: 1px solid var(--border);
-  background: var(--panel-2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.4);
   border-radius: 0.35rem;
-  padding: 0.1rem 0.4rem;
+  padding: 0.1rem 0.42rem;
   font-size: 0.7rem;
-  color: var(--text);
+  color: rgba(255, 255, 255, 0.92);
 }
-.roster-chip .m { color: var(--muted); }
+.roster-chip .m { color: rgba(255, 255, 255, 0.6); }
+/* The one roster surface with no system — the empty state — stays theme-neutral. */
 .roster-empty {
   border: 1px solid var(--border);
   background: var(--panel);

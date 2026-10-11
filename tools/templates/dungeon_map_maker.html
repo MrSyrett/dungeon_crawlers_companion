@@ -326,7 +326,31 @@
           <button type="button" id="exClose" style="border:none;background:none;color:inherit;font-size:20px;cursor:pointer;line-height:1">×</button>
         </div>
         <div style="padding:14px 18px;overflow:auto;font-size:13px">
-          <div class="fld" style="margin-top:0">Formats</div>
+          <!-- SEND TO TABLE — at the top, because sending to the table is the point
+               of the popup for most people; the file formats below are the fallback.
+               Two optional destinations, checked here and sent by the one Export
+               button (alongside any file formats). Each uses this export's
+               resolution, crop and appearance. A VTT scene takes the UniversalVTT
+               build (walls, doors & lights); an Adventure (session prep) takes a
+               plain PNG on its Maps tab. -->
+          <div class="fld" style="margin-top:0">Send to your table <span style="color:var(--muted)">(uses this export's resolution, crop &amp; appearance)</span></div>
+          <label style="display:flex;align-items:center;gap:8px;margin:6px 0"><input type="checkbox" id="exToVtt"> Add to VTT <span style="color:var(--muted)">— a scene with walls, doors &amp; lights</span></label>
+          <div id="exVttOpts" hidden style="margin:2px 0 8px 24px">
+            <select id="exShareCampaign" class="sel" style="width:100%"></select>
+            <input id="exShareSceneName" placeholder="Scene name" maxlength="120"
+                   style="width:100%;margin-top:6px;padding:8px 10px;background:var(--panel,#17171c);border:1px solid var(--line,#3a3a44);border-radius:7px;color:var(--fg,#e8e8ec);font-size:13px;outline:none;box-sizing:border-box"
+                   onfocus="this.style.borderColor='var(--gold,#e8c84a)'" onblur="this.style.borderColor='var(--line,#3a3a44)'">
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;margin:6px 0"><input type="checkbox" id="exToPrep"> Add to Adventure <span style="color:var(--muted)">— a map on its Maps tab</span></label>
+          <div id="exPrepOpts" hidden style="margin:2px 0 8px 24px">
+            <select id="exSharePrep" class="sel" style="width:100%"></select>
+            <input id="exSharePrepName" placeholder="Map title (optional)" maxlength="120"
+                   style="width:100%;margin-top:6px;padding:8px 10px;background:var(--panel,#17171c);border:1px solid var(--line,#3a3a44);border-radius:7px;color:var(--fg,#e8e8ec);font-size:13px;outline:none;box-sizing:border-box"
+                   onfocus="this.style.borderColor='var(--gold,#e8c84a)'" onblur="this.style.borderColor='var(--line,#3a3a44)'">
+          </div>
+          <p id="exShareStatus" style="margin:8px 0 0;font-size:12px;min-height:16px;color:var(--muted,#9a948a)"></p>
+
+          <div class="fld" style="margin-top:16px;border-top:1px solid var(--line,#3a3a44);padding-top:14px">Formats</div>
           <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exPNG" checked> PNG image</label>
           <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exPNGT"> PNG — transparent background (floors only)</label>
           <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exUVTT"> UniversalVTT (.dd2vtt) — walls, doors &amp; lights</label>
@@ -368,24 +392,6 @@
           </select>
           <label class="fld" style="margin-top:8px">Darkness <b id="exDarkV">0%</b></label>
           <input type="range" id="exDark" min="0" max="100" value="0">
-
-          <!-- SEND TO TABLE — two optional destinations, checked here and sent by
-               the one Export button below (alongside any file formats). Each shares
-               the popup's resolution, crop and appearance. A VTT scene takes the
-               UniversalVTT build (walls, doors & lights); an Adventure (session
-               prep) takes a plain PNG on its Maps tab. -->
-          <div class="fld" style="margin-top:16px;border-top:1px solid var(--line,#3a3a44);padding-top:14px">Send to your table <span style="color:var(--muted)">(uses the resolution, crop &amp; appearance above)</span></div>
-          <label style="display:flex;align-items:center;gap:8px;margin:6px 0"><input type="checkbox" id="exToVtt"> Add to VTT <span style="color:var(--muted)">— a scene with walls, doors &amp; lights</span></label>
-          <div id="exVttOpts" hidden style="margin:2px 0 6px 24px">
-            <select id="exShareCampaign" class="sel" style="width:100%"></select>
-            <input id="exShareSceneName" placeholder="Scene name" maxlength="120" style="width:100%;margin-top:6px">
-          </div>
-          <label style="display:flex;align-items:center;gap:8px;margin:6px 0"><input type="checkbox" id="exToPrep"> Add to Adventure <span style="color:var(--muted)">— a map on its Maps tab</span></label>
-          <div id="exPrepOpts" hidden style="margin:2px 0 6px 24px">
-            <select id="exSharePrep" class="sel" style="width:100%"></select>
-            <input id="exSharePrepName" placeholder="Map title (optional)" maxlength="120" style="width:100%;margin-top:6px">
-          </div>
-          <p id="exShareStatus" style="margin:10px 0 0;font-size:12px;min-height:16px;color:var(--muted,#9a948a)"></p>
         </div>
         <div style="display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line,#3a3a44)">
           <button class="btn" id="exCancel" style="flex:1">Cancel</button>
