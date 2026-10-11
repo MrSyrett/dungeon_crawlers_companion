@@ -27,6 +27,11 @@
 .da-seg{display:inline-flex;border:1px solid #3a3d47;border-radius:7px;overflow:hidden;}
 .da-seg button{background:#1f2128;border:none;color:#9aa0ab;font-size:11px;font-weight:700;padding:5px 9px;cursor:pointer;}
 .da-seg button.on{background:#e8c84a;color:#2a2205;}
+.da-select{background:#1f2128;border:1px solid #3a3d47;border-radius:7px;color:#e8e6df;font-size:11px;font-weight:700;padding:5px 24px 5px 9px;cursor:pointer;max-width:140px;
+  -webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%239aa0ab' stroke-width='1.6' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 8px center;}
+.da-select:focus{outline:none;border-color:#e8c84a;}
+.da-select optgroup{background:#17181d;color:#8a8f98;}
+.da-select option{background:#1f2128;color:#e8e6df;font-weight:600;}
 .da-sw{position:relative;width:42px;height:23px;flex:none;cursor:pointer;background:#2a2f3a;border:1px solid #444;border-radius:999px;transition:.18s;}
 .da-sw.on{background:rgba(232,200,74,.28);border-color:#e8c84a;}
 .da-sw::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#7c8494;transition:.18s;}
@@ -39,7 +44,7 @@
 `; (document.head||document.documentElement).appendChild(st); } }catch(e){} })();
   var LS='dcw_diceanim';  // shared across all sheets
   var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, mat:'plastic', hand:'right', sound:true };
-  var MATS=['plastic','metal','worn'];
+  var MATS=['plastic','metal','worn','fog','liquid','marble','wood','rock','smoke','stains','steel'];
   // Older saves (and sheet JSON from before 2026-10-10) carry finish/tex instead of mat.
   function legacyMat(o){ if(o.mat&&MATS.indexOf(o.mat)>=0) return o.mat; if(o.tex==='worn') return 'worn'; if(o.tex==='metal') return 'metal'; return 'plastic'; }
   var S=Object.assign({},DEF);
@@ -304,8 +309,32 @@
       return [ {v:[P(-s,-s,-s),P(-s,-s,s),P(-s,s,s),P(-s,s,-s)],tag:-1}, {v:[P(s,-s,-s),P(s,s,-s),P(s,s,s),P(s,-s,s)],tag:-1},
                {v:[P(-s,-s,-s),P(s,-s,-s),P(s,-s,s),P(-s,-s,s)],tag:-1}, {v:[P(-s,s,-s),P(-s,s,s),P(s,s,s),P(s,s,-s)],tag:-1},
                {v:[P(-s,-s,-s),P(-s,s,-s),P(s,s,-s),P(s,-s,-s)],tag:-1}, {v:[P(-s,-s,s),P(s,-s,s),P(s,s,s),P(-s,s,s)],tag:-1} ]; }
-    // planes: [{n,d,tag}] (n unit, keep n·x<=d). ce = edge chamfer depth, cv = vertex chamfer depth.
-    function build(planes,ce,cv){
+    // Fillet-style smooth normals on NON-INDEXED geometry, driven by the ORIGINAL
+    // face planes (before edge/corner cuts). Each vertex takes the sum of the
+    // normals of the original faces whose PLANE it sits on:
+    //   • a vertex of a number face lies only on that face's plane → its own flat
+    //     normal, so the whole face stays dead flat right to the cut line (no
+    //     doming — the problem a plain area-average gives on a d20/d8 where a face
+    //     is a single triangle);
+    //   • a bevel strip runs between face A's cut line (verts on plane A → nA) and
+    //     face B's (verts on plane B → nB), so across the strip the normal rolls
+    //     nA→nB — a rounded edge with no crease where it meets either face;
+    //   • a corner cap vertex sits on no original plane, so it blends the few
+    //     nearest faces → a rounded corner.
+    // Non-indexed triangle soup is preserved, so faceUVs / bestGroup (which read
+    // it per-triangle) still work for the worn texture.
+    function smoothNorm(pos,planes){
+      var n=pos.length/3, out=new Float32Array(n*3), i,j, ON=1.5e-3;
+      for(i=0;i<n;i++){ var px=pos[i*3],py=pos[i*3+1],pz=pos[i*3+2]; var sx=0,sy=0,sz=0,cnt=0, mn=1e9;
+        for(j=0;j<planes.length;j++){ var pl=planes[j], d=Math.abs(px*pl.n.x+py*pl.n.y+pz*pl.n.z-pl.d); if(d<mn)mn=d; if(d<ON){ sx+=pl.n.x; sy+=pl.n.y; sz+=pl.n.z; cnt++; } }
+        if(cnt===0){ var th=mn+0.045; for(j=0;j<planes.length;j++){ var pl2=planes[j]; if(Math.abs(px*pl2.n.x+py*pl2.n.y+pz*pl2.n.z-pl2.d)<=th){ sx+=pl2.n.x; sy+=pl2.n.y; sz+=pl2.n.z; } } }
+        var L=Math.hypot(sx,sy,sz)||1; out[i*3]=sx/L; out[i*3+1]=sy/L; out[i*3+2]=sz/L; }
+      return out;
+    }
+    // planes: [{n,d,tag}] (n unit, keep n·x<=d). ce = edge chamfer depth, cv =
+    // vertex chamfer depth. smooth → round the cut edges with area-weighted
+    // normals (for the drawn die); the physics hull leaves it off (flat).
+    function build(planes,ce,cv,smooth){
       var poly=box(10); planes.forEach(function(pl){ poly=clip(poly,pl.n,pl.d,pl.tag); });
       var base=poly;
       // edges: every polygon edge shared by two faces
@@ -326,7 +355,8 @@
       var pos=[], verts=[], vseen2={};
       poly.forEach(function(F){ var P=F.v; for(var i=1;i<P.length-1;i++){ pos.push(P[0].x,P[0].y,P[0].z,P[i].x,P[i].y,P[i].z,P[i+1].x,P[i+1].y,P[i+1].z); }
         P.forEach(function(p){ var k=p.x.toFixed(4)+','+p.y.toFixed(4)+','+p.z.toFixed(4); if(!vseen2[k]){vseen2[k]=true;verts.push(p.clone());} }); });
-      var geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); geo.computeVertexNormals();
+      var geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+      if(smooth) geo.setAttribute('normal',new THREE.Float32BufferAttribute(smoothNorm(pos,planes),3)); else geo.computeVertexNormals();
       var r=0; verts.forEach(function(p){ r=Math.max(r,p.length()); });
       return {geo:geo, verts:verts, radius:r, faces:poly.length};
     }
@@ -334,13 +364,29 @@
     return build; })();
   var _hullCache={};
   function hullFor(sides,groups){ var k=String(sides); if(_hullCache[k]) return _hullCache[k];
-    var ce=0, cv=0;   // chamfer depths — see the note above; try d6 .09/.14, d20 .06/.09 to bring the facets back
+    var ce=0, cv=0;   // physics hull stays the plain polyhedron — a sub-0.1 cosmetic bevel doesn't move the resting-face contacts, so the tuned physics is untouched
     var planes=groups.map(function(g,i){ return {n:g.n.clone().normalize(), d:g.n.dot(g.c), tag:i}; });
     if(sides===2){ for(var a=0;a<26;a++){ var th=a*2*Math.PI/26, nn=new THREE.Vector3(Math.cos(th),0,Math.sin(th)); planes.push({n:nn,d:1.12,tag:-1}); } }
     var h=chamferBuild(planes,ce,cv); h.geo.dispose(); _hullCache[k]={verts:h.verts, radius:h.radius}; return _hullCache[k]; }
+  // ── Rounded edges for the DRAWN die ──
+  // Cut a small bevel at every edge (ce) and corner (cv) and smooth-shade it, so
+  // the hard crease becomes a soft rounded edge while the number faces stay flat.
+  // [edge, corner] depths per die, in die units (face half-widths run ~0.6–0.95);
+  // kept subtle — enough to catch a highlight, not the faceted look Michael nixed.
+  // The face PLANES are unchanged, so a face still rests flat on the floor at the
+  // same height and the number decals (placed off group.n/.c) still land true.
+  var ROUND_EDGE={ 4:[0.05,0.09], 6:[0.06,0.10], 8:[0.045,0.075], 10:[0.04,0.055], 12:[0.038,0.062], 20:[0.036,0.058] };
+  // Built fresh per die (not cached): each die mesh owns its geometry and
+  // clearWorld disposes it, and the worn material mutates its UVs in place.
+  function roundedGeo(sides,groups){ var d=ROUND_EDGE[sides]; if(!d) return null;
+    var planes=groups.map(function(g){ return {n:g.n.clone().normalize(), d:g.n.dot(g.c), tag:-1}; });
+    return chamferBuild(planes, d[0], d[1], true).geo; }
   function getGeoGroups(sides){ var r; if(sides===2) r=coinGeoGroups(); else if(sides===10) r=d10GeoGroups(); else { var geo=makeGeo(sides); r={geo:geo, groups:faceGroups(geo)}; if(sides===4) r.tetra=tetraData(geo); }
     // the physics hull is cut from the same face planes as the drawn geometry, so they agree exactly
-    r.hull=hullFor(sides,r.groups); return r; }
+    r.hull=hullFor(sides,r.groups);
+    // swap the sharp drawn polyhedron for the rounded-edge build (coin keeps its cylinder)
+    var rg=roundedGeo(sides,r.groups); if(rg){ if(r.geo&&r.geo!==rg&&r.geo.dispose) r.geo.dispose(); r.geo=rg; }
+    return r; }
   // Face labels for a die: 1..N normally, 0-9 for a d10, 00-90 for a percentile die.
   function labelSet(faceSet,N){ var a=[],i;
     if(faceSet==='units'){ for(i=0;i<N;i++)a.push(String(i%10)); return a; }
@@ -386,6 +432,27 @@
       L=Math.max(0,Math.min(1,L)); var k=(y*N+x)*4, b=Math.round(L*255); d[k]=d[k+1]=d[k+2]=b; d[k+3]=255; } }
     g.putImageData(img,0,0); _wornTex=c; return c; }
   function wornTexture(){ var t=new THREE.CanvasTexture(wornCanvas()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4; return t; }
+  // ── Image-tile materials (Michael's own / CC0 tiles, shipped in
+  // /tools-data/dice-textures) ── Each is a greyscale surface the die colour
+  // tints (the map multiplies the material colour), mapped per-face like the
+  // worn grime. The decoded <img> is cached; a FRESH THREE.Texture is made per
+  // die, because clearWorld disposes each die material's map (same reason the
+  // geometry is rebuilt per die). Marble is white veins on transparent, so it is
+  // flattened onto a mid-grey base first, otherwise the tint would have nothing
+  // to sit on.
+  var TEX_FILE={ fog:'Fog', liquid:'Liquid', marble:'Marbeling', wood:'Natural', rock:'Rock', smoke:'Smoke', stains:'Stains', steel:'Steel' };
+  // per-tile finish: metalness / roughness / env reflection / clearcoat
+  var TEX_MAT={ fog:[0,0.70,0.40,0.30], liquid:[0,0.32,0.65,0.85], marble:[0,0.42,0.55,0.60], wood:[0,0.75,0.28,0.12], rock:[0,0.88,0.28,0.08], smoke:[0,0.70,0.40,0.30], stains:[0,0.82,0.30,0.18], steel:[0.85,0.40,1.05,0.0] };
+  var _texImg={};
+  function texImg(name){ if(_texImg[name]) return _texImg[name]; var f=TEX_FILE[name]; var im=new Image(); _texImg[name]=im; if(f) im.src='/tools-data/dice-textures/'+f+'.webp'; return im; }
+  function dieTexture(name){ var t;
+    if(name==='marble'){ var c=document.createElement('canvas'); c.width=c.height=256; var g=c.getContext('2d'); g.fillStyle='#6a6a6a'; g.fillRect(0,0,256,256);
+      var bi=texImg('marble'); t=new THREE.CanvasTexture(c);
+      if(bi.complete&&bi.naturalWidth){ g.drawImage(bi,0,0,256,256); t.needsUpdate=true; } else bi.addEventListener('load',function(){ g.drawImage(bi,0,0,256,256); t.needsUpdate=true; },{once:true}); }
+    else { var img=texImg(name); t=new THREE.Texture(img); if(img.complete&&img.naturalWidth) t.needsUpdate=true; else img.addEventListener('load',function(){ t.needsUpdate=true; },{once:true}); }
+    t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4;
+    if('colorSpace' in t && THREE.SRGBColorSpace) t.colorSpace=THREE.SRGBColorSpace; else if('encoding' in t && THREE.sRGBEncoding) t.encoding=THREE.sRGBEncoding;
+    return t; }
   // Per-face planar UVs: every triangle of a face maps through the same basis
   // in that face's plane, so the pattern is continuous across the face and
   // simply cuts at the edges. The face centre lands on the texture centre
@@ -415,10 +482,17 @@
     // texture above, with the grit as a bump. (Glass was tried and dropped:
     // without refraction it only read as see-through plastic, and real glass —
     // transmission plus back faces — is too heavy for phones.)
-    if(kind==='metal'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0.92, roughness:0.34, envMapIntensity:1.1, flatShading:true, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
-    else if(kind==='worn'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0, roughness:0.95, envMapIntensity:0.3, flatShading:true, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
+    // flatShading OFF so the dice use the mesh's own vertex normals: the rounded
+    // builds (roundedGeo) carry area-weighted normals that keep faces flat and
+    // soften only the bevels; the coin/labels are non-indexed so their normals
+    // are still per-triangle (i.e. flat) with no visual change.
+    if(kind==='metal'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0.92, roughness:0.34, envMapIntensity:1.1, flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
+    else if(kind==='worn'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0, roughness:0.95, envMapIntensity:0.3, flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
       faceUVs(geo,groups); mat.map=wornTexture(); mat.bumpMap=wornTexture(); mat.bumpScale=0.01; }
-    else { mat=new THREE.MeshPhysicalMaterial({ color:threeColor(color), metalness:0, roughness:0.45, clearcoat:0.7, clearcoatRoughness:0.25, envMapIntensity:0.4, flatShading:true, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
+    else if(TEX_MAT[kind]){ var tm=TEX_MAT[kind];   // image-tile finishes: metal, rough, env, clearcoat
+      mat=new THREE.MeshPhysicalMaterial({ color:threeColor(color), metalness:tm[0], roughness:tm[1], clearcoat:tm[3], clearcoatRoughness:0.3, envMapIntensity:tm[2], flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
+      faceUVs(geo,groups); mat.map=dieTexture(kind); }
+    else { mat=new THREE.MeshPhysicalMaterial({ color:threeColor(color), metalness:0, roughness:0.45, clearcoat:0.7, clearcoatRoughness:0.25, envMapIntensity:0.4, flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
     var body=new THREE.Mesh(geo,mat); body.castShadow=true;
     var group=new THREE.Group(); group.add(body);
     if(d4){ // vertex-numbered d4: 3 corner numbers per face, each oriented toward its vertex
@@ -714,7 +788,10 @@
       +'<div class="da-row"><span class="k">Sound</span><div class="da-sw" data-k="sound"></div></div>'
       +'<div class="da-row"><span class="k">Style</span><div class="da-seg" data-k="mode"><button data-v="2d">2D</button><button data-v="3d">3D</button></div></div>'
       +'<div class="da-row"><span class="k">Throw from</span><div class="da-seg" data-k="hand"><button data-v="right">Right hand</button><button data-v="left">Left hand</button></div></div>'
-      +'<div class="da-row"><span class="k">Material</span><div class="da-seg" data-k="mat"><button data-v="plastic">Plastic</button><button data-v="metal">Metal</button><button data-v="worn">Worn</button></div></div>'
+      +'<div class="da-row"><span class="k">Material</span><select class="da-select" data-k="mat">'
+        +'<optgroup label="Finish"><option value="plastic">Plastic</option><option value="metal">Metal</option><option value="worn">Worn</option></optgroup>'
+        +'<optgroup label="Texture"><option value="fog">Fog</option><option value="liquid">Liquid</option><option value="marble">Marble</option><option value="wood">Wood</option><option value="rock">Rock</option><option value="smoke">Smoke</option><option value="stains">Stains</option><option value="steel">Steel</option></optgroup>'
+        +'</select></div>'
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Dice colour</span><div class="da-swatches" data-k="dice"></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Number colour</span><div class="da-swatches" data-k="num"></div></div>'
@@ -730,7 +807,7 @@
     pop.querySelector('[data-k="sound"]').onclick=function(){ setS('sound', S.sound===false); };
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){}); }; });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.onclick=function(){ setS('linger', +b.dataset.v); }; });
-    pop.querySelectorAll('[data-k="mat"] button').forEach(function(b){ b.onclick=function(){ setS('mat', b.dataset.v); }; });
+    var matSel=pop.querySelector('select[data-k="mat"]'); if(matSel) matSel.onchange=function(){ setS('mat', matSel.value); };
     pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.onclick=function(){ setS('hand', b.dataset.v); }; });
     syncPop();
   }
@@ -738,7 +815,7 @@
     pop.querySelector('[data-k="sound"]').classList.toggle('on', S.sound!==false);
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===S.mode); });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.classList.toggle('on', +b.dataset.v===(S.linger||1000)); });
-    pop.querySelectorAll('[data-k="mat"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.mat||'plastic')); });
+    var matSel=pop.querySelector('select[data-k="mat"]'); if(matSel) matSel.value=(S.mat||'plastic');
     pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.hand||'right')); });
     var dc=pop.querySelector('[data-k="dice"] .da-custom'); if(dc && S.dice&&String(S.dice)[0]==='#')dc.value=S.dice; var nc=pop.querySelector('[data-k="num"] .da-custom'); if(nc)nc.value=S.num;
     var rb=pop.querySelector('.da-rand'); if(rb) rb.classList.toggle('sel', S.dice==='random'); }
