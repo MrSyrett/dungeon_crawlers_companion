@@ -43,13 +43,28 @@
 .da-pop .da-hint{font-size:10px;color:#666;margin-top:8px;line-height:1.4;}
 `; (document.head||document.documentElement).appendChild(st); } }catch(e){} })();
   var LS='dcw_diceanim';  // shared across all sheets
-  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, mat:'plastic', hand:'right', sound:true };
-  var MATS=['plastic','metal','worn','fog','liquid','marble','wood','rock','smoke','stains','steel'];
-  // Older saves (and sheet JSON from before 2026-10-10) carry finish/tex instead of mat.
-  function legacyMat(o){ if(o.mat&&MATS.indexOf(o.mat)>=0) return o.mat; if(o.tex==='worn') return 'worn'; if(o.tex==='metal') return 'metal'; return 'plastic'; }
+  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'plastic', texture:'none', hand:'right', sound:true };
+  // Two independent axes: FINISH (how the surface catches light) × TEXTURE (the
+  // pattern on it). Any pair is valid — glossy marble, matte wood, metal steel…
+  var FINISHES=['plastic','metal','matte'];
+  var TEXTURES=['none','fog','liquid','marble','wood','rock','smoke','stains','steel','worn'];
+  // Migrate any saved shape to {finish, texture}: the new pair, the single `mat`
+  // it replaced (2026-10-10 → 11), or the older finish/tex (shiny/matte + worn/metal).
+  function migrate(o){ o=o||{};
+    if(FINISHES.indexOf(o.finish)>=0 && TEXTURES.indexOf(o.texture)>=0) return {finish:o.finish, texture:o.texture};
+    var m=o.mat;
+    if(m==='plastic') return {finish:'plastic', texture:'none'};
+    if(m==='metal')   return {finish:'metal',   texture:'none'};
+    if(m==='worn')    return {finish:'matte',   texture:'worn'};
+    if(m==='steel')   return {finish:'metal',   texture:'steel'};
+    if(TEXTURES.indexOf(m)>=0) return {finish:'plastic', texture:m};
+    if(o.tex==='worn')  return {finish:'matte', texture:'worn'};
+    if(o.tex==='metal') return {finish:'metal', texture:'none'};
+    if(o.finish==='matte') return {finish:'matte', texture:'none'};
+    return {finish:'plastic', texture:'none'}; }
   var S=Object.assign({},DEF);
   var hadLS=false;  // did localStorage hold a real saved preference? (false in webviews where LS is unreliable)
-  try{ var raw=localStorage.getItem(LS); if(raw){ var saved=JSON.parse(raw)||{}; Object.assign(S, saved); S.mat=legacyMat(saved); delete S.finish; delete S.tex; hadLS=true; } }catch(e){}
+  try{ var raw=localStorage.getItem(LS); if(raw){ var saved=JSON.parse(raw)||{}; Object.assign(S, saved); var mt0=migrate(saved); S.finish=mt0.finish; S.texture=mt0.texture; delete S.mat; delete S.tex; hadLS=true; } }catch(e){}
   function persistLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
   function persist(){ persistLocal(); if(typeof window.saveSheet==='function'){ try{ window.saveSheet(true); }catch(e){} } }
 
@@ -406,32 +421,45 @@
   function labelMat(text,extra){ var o={map:faceTex(text),bumpMap:bumpTex(text),bumpScale:0.012,roughness:0.8,metalness:0,envMapIntensity:0.08,transparent:true,depthWrite:false};
     if(extra) for(var k in extra) o[k]=extra[k]; return new THREE.MeshStandardMaterial(o); }
   // ─── the worn surface ───
-  // Drawn in code, greyscale; the die colour tints it (a map multiplies the
-  // material colour), so one texture serves every colour. Nothing to download,
-  // nothing to license. It is the ancient-dice look from Michael's photo: pale,
-  // slightly mottled plastic with dark grime gathered in the middle of every
-  // face around the number and rubbed off toward the edges, pitted here and
-  // there. Value noise on a 64-cell lattice so every octave tiles at 256.
-  var _wornTex=null;
-  function wornCanvas(){ if(_wornTex) return _wornTex;
-    var N=256, P=64, lat=new Float32Array(P*P), seed=1337;
-    function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
-    for(var i=0;i<P*P;i++) lat[i]=rnd();
-    function sm(t){ return t*t*(3-2*t); }
-    function vnoise(x,y){ var xi=Math.floor(x), yi=Math.floor(y), fx=sm(x-xi), fy=sm(y-yi), x0=((xi%P)+P)%P, y0=((yi%P)+P)%P, x1=(x0+1)%P, y1=(y0+1)%P;
-      var a=lat[y0*P+x0], b=lat[y0*P+x1], c=lat[y1*P+x0], d=lat[y1*P+x1]; return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy; }
-    function fbm(u,v,oct,f0,gain){ var sum=0,amp=1,norm=0,f=f0||4; for(var o=0;o<oct;o++){ sum+=amp*vnoise(u*f,v*f); norm+=amp; amp*=gain||0.5; f*=2; } return sum/norm; }
+  // The chosen colour, richest in the flat CENTRE of each face, worn away to a
+  // bone white toward and ON the edges — the colour rubbed off where a die takes
+  // the most handling. The gradient is BAKED per colour (a plain map only
+  // multiplies, i.e. can only darken, so it can't fade a colour up to white):
+  // the material colour is left white and this texture carries both the colour
+  // and the wear. faceUVs puts each face's centre at the texture centre (0.5,0.5)
+  // and its corners near the rim, so centre = full colour, edges = bone. Value
+  // noise on a 64-cell lattice (every octave tiles at 256) makes the wear edge
+  // uneven and ramps the unevenness out from the centre so the middle stays clean.
+  var _wnLat=null;
+  function _wn(){ if(_wnLat) return _wnLat; var P=64, lat=new Float32Array(P*P), seed=1337; for(var i=0;i<P*P;i++){ seed=(seed*1103515245+12345)&0x7fffffff; lat[i]=seed/0x7fffffff; } _wnLat={P:P,lat:lat}; return _wnLat; }
+  function _vn(x,y){ var o=_wn(),P=o.P,lat=o.lat; function sm(t){return t*t*(3-2*t);} var xi=Math.floor(x),yi=Math.floor(y),fx=sm(x-xi),fy=sm(y-yi),x0=((xi%P)+P)%P,y0=((yi%P)+P)%P,x1=(x0+1)%P,y1=(y0+1)%P; var a=lat[y0*P+x0],b=lat[y0*P+x1],c=lat[y1*P+x0],d=lat[y1*P+x1]; return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy; }
+  function _fbm(u,v,oct,f0,gain){ var sum=0,amp=1,norm=0,f=f0||4; for(var o=0;o<oct;o++){ sum+=amp*_vn(u*f,v*f); norm+=amp; amp*=gain||0.5; f*=2; } return sum/norm; }
+  function _hex3(h){ h=String(h||'#d8b24a'); if(h[0]==='#')h=h.slice(1); if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; var n=parseInt(h,16)||0; return [((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255]; }
+  var _wornCache={};
+  function wornCanvas(hex){ var key=hex||'#d8b24a'; if(_wornCache[key]) return _wornCache[key];
+    var N=256, col=_hex3(key), bone=[0.902,0.871,0.796];   // warm bone white ≈ #E6DECB
+    function ss(a,b,x){ x=Math.max(0,Math.min(1,(x-a)/(b-a))); return x*x*(3-2*x); }
     var c=document.createElement('canvas'); c.width=c.height=N; var g=c.getContext('2d'), img=g.createImageData(N,N), d=img.data;
-    for(var y=0;y<N;y++){ for(var x=0;x<N;x++){ var u=x/N, v=y/N;
-      var base=0.68+0.18*fbm(u,v,4,4,0.5); var dx=u-0.5, dy=v-0.5, r=Math.sqrt(dx*dx+dy*dy);
-      var grime=Math.max(0,Math.min(1,(fbm(u+0.2,v+0.6,5,6,0.6)-0.36)*2.4));          // cloudy, high-contrast dirt
-      var centre=1-Math.min(1,r/0.36); centre=centre*centre*(3-2*centre);               // gathered in the middle of the face
-      var rim=Math.max(0,Math.min(1,(r-0.34)/0.12));                                     // rubbed pale toward the edges
-      var pit=fbm(u*2,v*2,2,64,0.5);
-      var L=base*(1-0.74*centre*(0.35+0.65*grime))+0.10*rim-0.22*Math.max(0,pit-0.62)*3;
-      L=Math.max(0,Math.min(1,L)); var k=(y*N+x)*4, b=Math.round(L*255); d[k]=d[k+1]=d[k+2]=b; d[k+3]=255; } }
-    g.putImageData(img,0,0); _wornTex=c; return c; }
-  function wornTexture(){ var t=new THREE.CanvasTexture(wornCanvas()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4; return t; }
+    for(var y=0;y<N;y++){ for(var x=0;x<N;x++){ var u=x/N, v=y/N, dx=u-0.5, dy=v-0.5, r=Math.sqrt(dx*dx+dy*dy);
+      var nLo=_fbm(u,v,4,4,0.5), nHi=_fbm(u+3.1,v+1.7,5,10,0.55);
+      var edge=ss(0.10,0.40,r);                                   // the rim gradient, brought in a touch from before
+      var spec=Math.max(0,(nHi-0.60))*0.5;                        // worn freckles that reach INTO the colour, so faces don't read 'clean' (esp. the d20's small ones)
+      var wear=edge*(0.74+0.45*nHi) + edge*(nLo-0.5)*0.8 + spec;  // rim wear + colour-zone freckles
+      wear=Math.max(wear, ss(0.40,0.52,r));                       // the outer edge/corner goes fully bone
+      wear=Math.max(0,Math.min(1,wear));
+      var lum=1+(nHi-0.5)*0.08;                                   // a touch more surface mottle
+      var k=(y*N+x)*4;
+      d[k]  =Math.max(0,Math.min(255,Math.round((col[0]+(bone[0]-col[0])*wear)*lum*255)));
+      d[k+1]=Math.max(0,Math.min(255,Math.round((col[1]+(bone[1]-col[1])*wear)*lum*255)));
+      d[k+2]=Math.max(0,Math.min(255,Math.round((col[2]+(bone[2]-col[2])*wear)*lum*255)));
+      d[k+3]=255; } }
+    g.putImageData(img,0,0); _wornCache[key]=c; return c; }
+  function wornTexture(hex){ var t=new THREE.CanvasTexture(wornCanvas(hex)); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4; return t; }
+  var _wornBump=null;
+  function wornBumpCanvas(){ if(_wornBump) return _wornBump; var N=256,c=document.createElement('canvas'); c.width=c.height=N; var g=c.getContext('2d'),img=g.createImageData(N,N),d=img.data;
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){ var L=0.5+(_fbm(x/N+5.3,y/N+2.1,3,18,0.5)-0.5)*0.7; L=Math.max(0,Math.min(1,L)); var k=(y*N+x)*4,b=Math.round(L*255); d[k]=d[k+1]=d[k+2]=b; d[k+3]=255; }
+    g.putImageData(img,0,0); _wornBump=c; return c; }
+  function wornBump(){ var t=new THREE.CanvasTexture(wornBumpCanvas()); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4; return t; }
   // ── Image-tile materials (Michael's own / CC0 tiles, shipped in
   // /tools-data/dice-textures) ── Each is a greyscale surface the die colour
   // tints (the map multiplies the material colour), mapped per-face like the
@@ -441,8 +469,9 @@
   // flattened onto a mid-grey base first, otherwise the tint would have nothing
   // to sit on.
   var TEX_FILE={ fog:'Fog', liquid:'Liquid', marble:'Marbeling', wood:'Natural', rock:'Rock', smoke:'Smoke', stains:'Stains', steel:'Steel' };
-  // per-tile finish: metalness / roughness / env reflection / clearcoat
-  var TEX_MAT={ fog:[0,0.70,0.40,0.30], liquid:[0,0.32,0.65,0.85], marble:[0,0.42,0.55,0.60], wood:[0,0.75,0.28,0.12], rock:[0,0.88,0.28,0.08], smoke:[0,0.70,0.40,0.30], stains:[0,0.82,0.30,0.18], steel:[0.85,0.40,1.05,0.0] };
+  // How each FINISH catches light: metalness / roughness / clearcoat / clearcoatRoughness / envMapIntensity.
+  // The TEXTURE is a separate choice — it only supplies the colour map — so any finish pairs with any texture.
+  var FINISH_MAT={ plastic:[0,0.45,0.70,0.25,0.40], metal:[0.90,0.35,0.0,0.3,1.05], matte:[0,0.90,0.0,0.3,0.30] };
   var _texImg={};
   function texImg(name){ if(_texImg[name]) return _texImg[name]; var f=TEX_FILE[name]; var im=new Image(); _texImg[name]=im; if(f) im.src='/tools-data/dice-textures/'+f+'.webp'; return im; }
   function dieTexture(name){ var t;
@@ -475,24 +504,19 @@
     _fn.a.set(pos[t*3],pos[t*3+1],pos[t*3+2]); _fn.b.set(pos[t*3+3],pos[t*3+4],pos[t*3+5]); _fn.c.set(pos[t*3+6],pos[t*3+7],pos[t*3+8]);
     _fn.n.subVectors(_fn.b,_fn.a).cross(_fn.c.sub(_fn.a)).normalize(); var best=0,bd=-2; for(var k=0;k<groups.length;k++){ var dd=groups[k].n.dot(_fn.n); if(dd>bd){bd=dd;best=k;} } return best; }
   function buildDie(geo,groups,labels,sides,resultStr,color,d4){
-    var kind=S.mat||'plastic', mat;
-    // Three materials. Plastic is cast resin under a clear coat (the gloss sits
-    // on top of the colour). Metal is the colour as polished metal — the studio
-    // environment is what it reflects. Worn is matte plastic wearing the grime
-    // texture above, with the grit as a bump. (Glass was tried and dropped:
-    // without refraction it only read as see-through plastic, and real glass —
-    // transmission plus back faces — is too heavy for phones.)
-    // flatShading OFF so the dice use the mesh's own vertex normals: the rounded
-    // builds (roundedGeo) carry area-weighted normals that keep faces flat and
-    // soften only the bevels; the coin/labels are non-indexed so their normals
-    // are still per-triangle (i.e. flat) with no visual change.
-    if(kind==='metal'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0.92, roughness:0.34, envMapIntensity:1.1, flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
-    else if(kind==='worn'){ mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0, roughness:0.95, envMapIntensity:0.3, flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
-      faceUVs(geo,groups); mat.map=wornTexture(); mat.bumpMap=wornTexture(); mat.bumpScale=0.01; }
-    else if(TEX_MAT[kind]){ var tm=TEX_MAT[kind];   // image-tile finishes: metal, rough, env, clearcoat
-      mat=new THREE.MeshPhysicalMaterial({ color:threeColor(color), metalness:tm[0], roughness:tm[1], clearcoat:tm[3], clearcoatRoughness:0.3, envMapIntensity:tm[2], flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
-      faceUVs(geo,groups); mat.map=dieTexture(kind); }
-    else { mat=new THREE.MeshPhysicalMaterial({ color:threeColor(color), metalness:0, roughness:0.45, clearcoat:0.7, clearcoatRoughness:0.25, envMapIntensity:0.4, flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 }); }
+    // FINISH (optical) × TEXTURE (pattern) — two independent axes. The finish
+    // sets how the surface catches light; the texture supplies the colour map.
+    // Plastic = cast resin under a clear coat; Metal = the colour as polished
+    // metal reflecting the studio env; Matte = flat, no coat. Texture 'none' is a
+    // solid colour; 'worn' bakes the colour→bone wear gradient (so its base
+    // colour is white); every other texture is a tile the die colour tints.
+    // flatShading OFF so the dice use the rounded builds' own vertex normals.
+    var finish=S.finish||'plastic', texture=S.texture||'none', mat;
+    var F=FINISH_MAT[finish]||FINISH_MAT.plastic, worn=(texture==='worn');
+    mat=new THREE.MeshPhysicalMaterial({ color:(worn?0xffffff:threeColor(color)), metalness:F[0], roughness:F[1], clearcoat:F[2], clearcoatRoughness:F[3], envMapIntensity:F[4], flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
+    if(texture!=='none'){ faceUVs(geo,groups);
+      if(worn){ mat.map=wornTexture(color); mat.bumpMap=wornBump(); mat.bumpScale=0.012; }
+      else { mat.map=dieTexture(texture); } }
     var body=new THREE.Mesh(geo,mat); body.castShadow=true;
     var group=new THREE.Group(); group.add(body);
     if(d4){ // vertex-numbered d4: 3 corner numbers per face, each oriented toward its vertex
@@ -788,10 +812,8 @@
       +'<div class="da-row"><span class="k">Sound</span><div class="da-sw" data-k="sound"></div></div>'
       +'<div class="da-row"><span class="k">Style</span><div class="da-seg" data-k="mode"><button data-v="2d">2D</button><button data-v="3d">3D</button></div></div>'
       +'<div class="da-row"><span class="k">Throw from</span><div class="da-seg" data-k="hand"><button data-v="right">Right hand</button><button data-v="left">Left hand</button></div></div>'
-      +'<div class="da-row"><span class="k">Material</span><select class="da-select" data-k="mat">'
-        +'<optgroup label="Finish"><option value="plastic">Plastic</option><option value="metal">Metal</option><option value="worn">Worn</option></optgroup>'
-        +'<optgroup label="Texture"><option value="fog">Fog</option><option value="liquid">Liquid</option><option value="marble">Marble</option><option value="wood">Wood</option><option value="rock">Rock</option><option value="smoke">Smoke</option><option value="stains">Stains</option><option value="steel">Steel</option></optgroup>'
-        +'</select></div>'
+      +'<div class="da-row"><span class="k">Finish</span><select class="da-select" data-k="finish"><option value="plastic">Plastic</option><option value="metal">Metal</option><option value="matte">Matte</option></select></div>'
+      +'<div class="da-row"><span class="k">Texture</span><select class="da-select" data-k="texture"><option value="none">None</option><option value="fog">Fog</option><option value="liquid">Liquid</option><option value="marble">Marble</option><option value="wood">Wood</option><option value="rock">Rock</option><option value="smoke">Smoke</option><option value="stains">Stains</option><option value="steel">Steel</option><option value="worn">Worn</option></select></div>'
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Dice colour</span><div class="da-swatches" data-k="dice"></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Number colour</span><div class="da-swatches" data-k="num"></div></div>'
@@ -807,7 +829,8 @@
     pop.querySelector('[data-k="sound"]').onclick=function(){ setS('sound', S.sound===false); };
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){}); }; });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.onclick=function(){ setS('linger', +b.dataset.v); }; });
-    var matSel=pop.querySelector('select[data-k="mat"]'); if(matSel) matSel.onchange=function(){ setS('mat', matSel.value); };
+    var finSel=pop.querySelector('select[data-k="finish"]'); if(finSel) finSel.onchange=function(){ setS('finish', finSel.value); };
+    var texSel=pop.querySelector('select[data-k="texture"]'); if(texSel) texSel.onchange=function(){ setS('texture', texSel.value); };
     pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.onclick=function(){ setS('hand', b.dataset.v); }; });
     syncPop();
   }
@@ -815,7 +838,8 @@
     pop.querySelector('[data-k="sound"]').classList.toggle('on', S.sound!==false);
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===S.mode); });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.classList.toggle('on', +b.dataset.v===(S.linger||1000)); });
-    var matSel=pop.querySelector('select[data-k="mat"]'); if(matSel) matSel.value=(S.mat||'plastic');
+    var finSel=pop.querySelector('select[data-k="finish"]'); if(finSel) finSel.value=(S.finish||'plastic');
+    var texSel=pop.querySelector('select[data-k="texture"]'); if(texSel) texSel.value=(S.texture||'none');
     pop.querySelectorAll('[data-k="hand"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.hand||'right')); });
     var dc=pop.querySelector('[data-k="dice"] .da-custom'); if(dc && S.dice&&String(S.dice)[0]==='#')dc.value=S.dice; var nc=pop.querySelector('[data-k="num"] .da-custom'); if(nc)nc.value=S.num;
     var rb=pop.querySelector('.da-rand'); if(rb) rb.classList.toggle('sel', S.dice==='random'); }
@@ -846,8 +870,8 @@
     if(clear && clear.parentNode){ clear.parentNode.insertBefore(g, clear); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
-  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, _world:function(){ return world3d; }, _groups:function(sides){ return getGeoGroups(sides).groups; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,mat:S.mat,hand:S.hand,sound:S.sound}; },
-    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.mat||o.finish||o.tex)S.mat=legacyMat(o); if(o.hand==='left'||o.hand==='right')S.hand=o.hand; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
+  window.DiceAnim={ lastRoll:function(){ return lastRoll; }, _world:function(){ return world3d; }, _groups:function(sides){ return getGeoGroups(sides).groups; }, get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,texture:S.texture,hand:S.hand,sound:S.sound}; },
+    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish||o.texture||o.mat||o.tex){ var mt=migrate(o); S.finish=mt.finish; S.texture=mt.texture; } if(o.hand==='left'||o.hand==='right')S.hand=o.hand; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
   // Persist settings into the saved sheet too, as a fallback for VTT webviews
