@@ -48,11 +48,7 @@
     background-clip:content-box}
   .sidebar::-webkit-scrollbar-thumb:active, .objgrid::-webkit-scrollbar-thumb:active{background:var(--gold-dim);
     background-clip:content-box}
-  .hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
-    padding:12px 16px;border-bottom:1px solid var(--line)}
-  .sidebar h1{font-family:"Geist",ui-sans-serif,system-ui,sans-serif;font-size:14px;letter-spacing:.04em;
-    color:var(--gold);margin:0;padding:0;border:none;line-height:1.2}
-  /* dark-mode toggle switch (header, right-aligned) */
+  /* toggle switch (used by the Textures / Lighting / Dark-lights options) */
   .switch{position:relative;display:inline-block;width:38px;height:20px;flex:0 0 auto}
   .switch input{position:absolute;opacity:0;width:0;height:0}
   .switch .slider{position:absolute;inset:0;background:var(--panel2);border:1px solid var(--line);
@@ -265,9 +261,6 @@
     body:not(.embed) .sidebar{ order:2; width:auto; flex:1 1 auto; min-height:0;
       border-right:none; border-top:1px solid var(--line);
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); }
-    /* Bigger header tap targets on touch — the 🗂 Maps (Save/Load) and ⌨ Shortcuts
-       buttons are only 26×24 on desktop, too small for a fingertip. */
-    body:not(.embed) #mapsBtn, body:not(.embed) #shortcutsBtn{ width:40px!important; height:36px!important; font-size:17px; }
   }
   /* Small screens — portrait phones (narrow) OR landscape phones (short): drop the
      10-icon grid, which either eats the map (portrait) or runs off-screen (landscape),
@@ -292,14 +285,6 @@
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="hdr">
-      <h1>⚔ Map Maker</h1>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button type="button" id="mapsBtn" title="Your saved maps — keep and switch between several" style="border:1px solid var(--line,#3a3a44);background:none;color:inherit;border-radius:6px;width:26px;height:24px;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center">🗂</button>
-        <button type="button" id="shortcutsBtn" title="Keyboard shortcuts (?)" style="border:1px solid var(--line,#3a3a44);background:none;color:inherit;border-radius:6px;width:26px;height:24px;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center">⌨</button>
-        <label class="switch" title="Dark mode — darkens the background only"><input type="checkbox" id="darkToggle"><span class="slider"></span></label>
-      </div>
-    </div>
     <div id="mapsModal" style="display:none;position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;z-index:9999;background:rgba(0,0,0,.5)">
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:560px;width:calc(100% - 40px);max-height:82vh;display:flex;flex-direction:column;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
@@ -675,6 +660,10 @@
       <div class="row">
         <button class="btn gold" id="exportBtn" title="Export the map — pick formats, resolution, a crop area, and lighting for the output">⬇ Export…</button>
         <button class="btn" id="import" title="Open a previously exported map file">⬆ Import</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="mapsBtn" title="Your saved maps — keep and switch between several">🗂 Saved Maps</button>
+        <button class="btn" id="shortcutsBtn" title="Keyboard shortcuts (?)">⌨ Shortcuts</button>
       </div>
       <input type="file" id="importFile" accept=".json,application/json" style="display:none">
       <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
@@ -6799,7 +6788,7 @@
     syncSnapUI();
     scheduleSave(); toast("Snap to grid "+(snapOn?"on":"off")); }
   syncSnapUI();   // reflect the initial snap state on the toolbar button
-  $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
+  if($("darkToggle")) $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
   // ── Keyboard-shortcuts popup ──
   const SHORTCUTS=[
     ["Tools", [
@@ -7226,7 +7215,7 @@
     resize();
     $("gridInteriorToggle").checked=!!map.gridInterior;
     snapOn=map.snap!==false; if(typeof syncSnapUI==="function") syncSnapUI();
-    $("darkToggle").checked = map.theme==="dark";
+    if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
     initAdvanced();
     syncGridOp(); syncZUI();
