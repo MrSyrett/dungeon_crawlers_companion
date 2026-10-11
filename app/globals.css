@@ -1482,22 +1482,27 @@ body {
    text legible over busy art. =========================================================================== */
 .home-roster { --rtsh: 0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,0,0,0.7); }
 .roster-sys + .roster-sys { margin-top: 1.4rem; }
-/* The system wordmark, on a chip of its own dark ground so its real accent (white
-   for Shadowdark/Marvel, green for Ghostbusters, gold for DCC…) always reads. */
+/* The system label — plain text (the system's face + accent) followed by a
+   divider line to the row's edge. No bubble: the page is dark, so every accent
+   reads straight on it (white for Shadowdark/Marvel, green for Ghostbusters, gold
+   for DCC…). */
 .roster-sys-name {
-  display: inline-block;
-  margin: 0 0 0.6rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 0.45rem;
-  background-color: var(--tile-bg, var(--panel));
-  border: 1px solid color-mix(in srgb, var(--tile-accent, var(--border)) 45%, var(--border));
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.65rem;
   font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
   font-size: 1.15rem;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: 0.02em;
   color: var(--tile-ink, var(--tile-accent, var(--text)));
-  text-shadow: var(--rtsh);
+}
+.roster-sys-name::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: color-mix(in srgb, var(--tile-accent, var(--border)) 38%, var(--border));
 }
 .roster-cards {
   list-style: none;
@@ -1551,33 +1556,35 @@ body {
 .roster-card > * { position: relative; z-index: 2; }
 a.roster-card:hover { border-color: var(--tile-accent); box-shadow: 0 0 0 1px var(--tile-accent); }
 a.roster-card:hover::before { opacity: 1; }
-/* The primary line — character name / campaign name — in the system face + accent,
-   like the tile wordmark. */
+/* The name — the character's name — in the PRIMARY (body) font and colour, so it
+   stays clean and readable; the flavour is the secondary line below it. */
 .roster-card-name {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
   min-width: 0;
-  font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--tile-ink, var(--tile-accent, #fff));
+  letter-spacing: 0.01em;
+  color: var(--text);
   text-shadow: var(--rtsh);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* The secondary line — level / class / equivalent — in the system ACCENT colour
+   and the system DISPLAY FACE: the flavour the clean name leaves out. */
 .roster-card-meta {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  color: var(--tile-accent, rgba(255, 255, 255, 0.82));
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* The campaign a character belongs to — tertiary, a quiet light line. */
 .roster-card-camp {
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.62);
@@ -1586,29 +1593,6 @@ a.roster-card:hover::before { opacity: 1; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.roster-card--camp { gap: 0.3rem; }
-.roster-gm {
-  flex: 0 0 auto;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 0.05rem 0.32rem;
-  border-radius: 0.25rem;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  text-shadow: none;
-}
-.roster-party { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.1rem; }
-.roster-chip {
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 0.35rem;
-  padding: 0.1rem 0.42rem;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.92);
-}
-.roster-chip .m { color: rgba(255, 255, 255, 0.6); }
 /* The one roster surface with no system — the empty state — stays theme-neutral. */
 .roster-empty {
   border: 1px solid var(--border);
