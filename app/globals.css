@@ -1454,23 +1454,28 @@ body {
    (.roster-sys) — picks up the same display face; the tiles keep their own,
    higher-specificity .home-tile[data-sys] match, so their look is unchanged. The
    roster reads only --tile-face; the rest are inert unless a .home-tile reads them. */
-/* --tile-sub is the roster's SECONDARY accent (the class/level colour): it mirrors
-   each system's --sys-sub — gold for Shadowdark, cyan for Star Wars, etc. — which
-   is distinct from --tile-accent (the wordmark/header colour: white, yellow…). */
-[data-sys="SD"],    .home-tile[data-sys="SD"]    { --tile-accent: var(--text);          --tile-sub: var(--sd);          --tile-face: "JSL Blackletter";          --tile-bg: #08080a; }
-[data-sys="ICRPG"], .home-tile[data-sys="ICRPG"] { --tile-accent: var(--icrpg);       --tile-sub: var(--crimson-ink); --tile-face: var(--font-marker);         --tile-bg: #14100d; --tile-tex: url("/themes/icrpg-grain.webp"); --tile-zoom: 2.6; --tile-scrim: 0.30; }
-[data-sys="NIM"],   .home-tile[data-sys="NIM"]   { --tile-accent: var(--text);        --tile-sub: var(--blue-ink);    --tile-face: var(--font-fraunces);       --tile-bg: #141816; }
-[data-sys="DND"],   .home-tile[data-sys="DND"]   { --tile-accent: var(--gold-ink);    --tile-sub: var(--crimson-ink); --tile-face: "DnDC", var(--font-cinzel); --tile-bg: #0d0b0c; --tile-tex: url("/themes/dnd-cover.webp"); --tile-zoom: 1; --tile-scrim: 0.18; }
-[data-sys="DCC"],   .home-tile[data-sys="DCC"]   { --tile-accent: var(--dcc-gold);    --tile-sub: var(--dcc-ink);     --tile-face: var(--font-anton);          --tile-bg: #060507; --tile-tex: url("/themes/dcc-splatter.webp"); --tile-zoom: 2.2; --tile-scrim: 0.38; }
-[data-sys="KOB"],   .home-tile[data-sys="KOB"]   { --tile-accent: var(--kob);         --tile-sub: var(--kob-teal);    --tile-face: "Dreadful";                 --tile-bg: #15141a; --tile-tex: url("/themes/kob-halftone.webp"); --tile-zoom: 3; --tile-scrim: 0.32; }
-[data-sys="CO"],    .home-tile[data-sys="CO"]    { --tile-accent: var(--candela-gold); --tile-sub: var(--candela);    --tile-face: var(--font-cormorant);     --tile-bg: #0c1512; --tile-tex: url("/themes/co-grunge.webp"); --tile-zoom: 2.2; --tile-scrim: 0.16; }
-[data-sys="ACE"],   .home-tile[data-sys="ACE"]   { --tile-accent: var(--ace-yellow);  --tile-sub: var(--ace-yellow);  --tile-face: var(--font-lilita);         --tile-bg: #070d14; --tile-tex: url("/themes/ace-speedlines.webp"); }
-[data-sys="SW"],    .home-tile[data-sys="SW"]    { --tile-accent: var(--sw);          --tile-sub: var(--sw-cyan);     --tile-face: "Star Jedi", var(--font-archivo-black); --tile-bg: #09090a; --tile-tex: url("/themes/sw-starfield.webp"); --tile-zoom: 2; --tile-scrim: 0.10; }
-[data-sys="D62E"],  .home-tile[data-sys="D62E"]  { --tile-accent: var(--d62e);        --tile-sub: var(--blue-ink);    --tile-face: var(--font-saira-cond);     --tile-bg: #121214; --tile-tex: url("/themes/d62e-blueprint.webp"); --tile-zoom: 2.8; --tile-scrim: 0.18; }
-[data-sys="YZE"],   .home-tile[data-sys="YZE"]   { --tile-accent: var(--yze);         --tile-sub: var(--yze);         --tile-face: var(--font-archivo-narrow); --tile-bg: #07161a; --tile-tex: url("/themes/yze-raster.webp"); }
-[data-sys="MMRPG"], .home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-sub: var(--mmrpg-blue); --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
-[data-sys="JLU"],   .home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-sub: var(--jlu-gold);    --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
-[data-sys="GB"],    .home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-sub: var(--gb-ecto);     --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
+/* Two roster-only tokens on this map besides the tile's own:
+   --tile-sub is the SECONDARY accent (the class/level colour) — each system's
+   --sys-sub (gold for SD, cyan for SW…), distinct from --tile-accent (the
+   wordmark/header colour: white, yellow…).
+   --tile-namefont is the READABLE per-system name font — each system's --sys-text,
+   the very font its character names are set in on the dashboard (Montserrat for
+   SD, Franklin for SW, Asap for GB…). Character names use it instead of the
+   display face, which several systems make hard to read. */
+[data-sys="SD"],    .home-tile[data-sys="SD"]    { --tile-accent: var(--text);          --tile-sub: var(--sd);          --tile-namefont: var(--font-montserrat); --tile-face: "JSL Blackletter";          --tile-bg: #08080a; }
+[data-sys="ICRPG"], .home-tile[data-sys="ICRPG"] { --tile-accent: var(--icrpg);       --tile-sub: var(--crimson-ink); --tile-namefont: var(--font-archivo);    --tile-face: var(--font-marker);         --tile-bg: #14100d; --tile-tex: url("/themes/icrpg-grain.webp"); --tile-zoom: 2.6; --tile-scrim: 0.30; }
+[data-sys="NIM"],   .home-tile[data-sys="NIM"]   { --tile-accent: var(--text);        --tile-sub: var(--blue-ink);    --tile-namefont: var(--font-figtree);    --tile-face: var(--font-fraunces);       --tile-bg: #141816; }
+[data-sys="DND"],   .home-tile[data-sys="DND"]   { --tile-accent: var(--gold-ink);    --tile-sub: var(--crimson-ink); --tile-namefont: var(--font-garamond);   --tile-face: "DnDC", var(--font-cinzel); --tile-bg: #0d0b0c; --tile-tex: url("/themes/dnd-cover.webp"); --tile-zoom: 1; --tile-scrim: 0.18; }
+[data-sys="DCC"],   .home-tile[data-sys="DCC"]   { --tile-accent: var(--dcc-gold);    --tile-sub: var(--dcc-ink);     --tile-namefont: var(--font-barlow);     --tile-face: var(--font-anton);          --tile-bg: #060507; --tile-tex: url("/themes/dcc-splatter.webp"); --tile-zoom: 2.2; --tile-scrim: 0.38; }
+[data-sys="KOB"],   .home-tile[data-sys="KOB"]   { --tile-accent: var(--kob);         --tile-sub: var(--kob-teal);    --tile-namefont: var(--font-mulish);     --tile-face: "Dreadful";                 --tile-bg: #15141a; --tile-tex: url("/themes/kob-halftone.webp"); --tile-zoom: 3; --tile-scrim: 0.32; }
+[data-sys="CO"],    .home-tile[data-sys="CO"]    { --tile-accent: var(--candela-gold); --tile-sub: var(--candela);    --tile-namefont: var(--font-lora);       --tile-face: var(--font-cormorant);     --tile-bg: #0c1512; --tile-tex: url("/themes/co-grunge.webp"); --tile-zoom: 2.2; --tile-scrim: 0.16; }
+[data-sys="ACE"],   .home-tile[data-sys="ACE"]   { --tile-accent: var(--ace-yellow);  --tile-sub: var(--ace-yellow);  --tile-namefont: var(--font-nunito);     --tile-face: var(--font-lilita);         --tile-bg: #070d14; --tile-tex: url("/themes/ace-speedlines.webp"); }
+[data-sys="SW"],    .home-tile[data-sys="SW"]    { --tile-accent: var(--sw);          --tile-sub: var(--sw-cyan);     --tile-namefont: var(--font-franklin);   --tile-face: "Star Jedi", var(--font-archivo-black); --tile-bg: #09090a; --tile-tex: url("/themes/sw-starfield.webp"); --tile-zoom: 2; --tile-scrim: 0.10; }
+[data-sys="D62E"],  .home-tile[data-sys="D62E"]  { --tile-accent: var(--d62e);        --tile-sub: var(--blue-ink);    --tile-namefont: var(--font-saira);      --tile-face: var(--font-saira-cond);     --tile-bg: #121214; --tile-tex: url("/themes/d62e-blueprint.webp"); --tile-zoom: 2.8; --tile-scrim: 0.18; }
+[data-sys="YZE"],   .home-tile[data-sys="YZE"]   { --tile-accent: var(--yze);         --tile-sub: var(--yze);         --tile-namefont: var(--font-plex);       --tile-face: var(--font-archivo-narrow); --tile-bg: #07161a; --tile-tex: url("/themes/yze-raster.webp"); }
+[data-sys="MMRPG"], .home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-sub: var(--mmrpg-blue); --tile-namefont: var(--font-sourcesans); --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
+[data-sys="JLU"],   .home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-sub: var(--jlu-gold);    --tile-namefont: var(--font-rubik);      --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
+[data-sys="GB"],    .home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-sub: var(--gb-ecto);     --tile-namefont: var(--font-asap);       --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.
@@ -1506,6 +1511,24 @@ body {
   flex: 1 1 auto;
   height: 1px;
   background: color-mix(in srgb, var(--tile-accent, var(--border)) 38%, var(--border));
+}
+/* Ghostbusters title: the logo's glowing white outline round cut-out letters — the
+   same treatment the GB game tile uses (see .home-tile[data-sys="GB"] .home-tile-name).
+   The glow belongs to the STROKE, not the letter: white text with two tight white
+   shadows, then (where -webkit-text-stroke exists) a ground-coloured fill inside a
+   white stroke, so the letters read as punched out of the glow. text-transform stays
+   none — this face's capital O is the no-ghost glyph. */
+.roster-sys[data-sys="GB"] .roster-sys-name {
+  text-transform: none;
+  color: #ffffff;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.9), 0 0 7px rgba(255, 255, 255, 0.45);
+}
+@supports (-webkit-text-stroke: 1px #fff) {
+  .roster-sys[data-sys="GB"] .roster-sys-name {
+    color: var(--tile-bg);
+    -webkit-text-stroke: 0.04em #ffffff;
+    paint-order: stroke fill;
+  }
 }
 .roster-cards {
   list-style: none;
@@ -1559,16 +1582,18 @@ body {
 .roster-card > * { position: relative; z-index: 2; }
 a.roster-card:hover { border-color: var(--tile-accent); box-shadow: 0 0 0 1px var(--tile-accent); }
 a.roster-card:hover::before { opacity: 1; }
-/* The name — the character's name — in the system's HEADER face (--tile-face,
-   the wordmark font: Blackletter for Shadowdark, Star Jedi for Star Wars…) and
-   its HEADER colour (--tile-accent: white for Shadowdark, yellow for Star Wars). */
+/* The name — the character's name — in the system's READABLE NAME font
+   (--tile-namefont, the same --sys-text its names use on the dashboard: Montserrat
+   for Shadowdark, Franklin for Star Wars…) and its HEADER colour (--tile-accent:
+   white for Shadowdark, yellow for Star Wars). The display/wordmark face is kept
+   for the system TITLE only — several make poor reading for a name. */
 .roster-card-name {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
   min-width: 0;
-  font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
-  font-size: 1.05rem;
+  font-family: var(--tile-namefont, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--tile-accent, #fff);
