@@ -437,7 +437,7 @@
   function _hex3(h){ h=String(h||'#d8b24a'); if(h[0]==='#')h=h.slice(1); if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; var n=parseInt(h,16)||0; return [((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255]; }
   var _wornCache={};
   function wornCanvas(hex){ var key=hex||'#d8b24a'; if(_wornCache[key]) return _wornCache[key];
-    var N=256, col=_hex3(key), bone=[0.902,0.871,0.796];   // warm bone white ≈ #E6DECB
+    var N=256, col=_hex3(key), bone=[0.604,0.588,0.549];   // worn-to a muted warm grey ≈ #9A968C (not a bright bone white — the light edges were blowing out)
     function ss(a,b,x){ x=Math.max(0,Math.min(1,(x-a)/(b-a))); return x*x*(3-2*x); }
     var c=document.createElement('canvas'); c.width=c.height=N; var g=c.getContext('2d'), img=g.createImageData(N,N), d=img.data;
     for(var y=0;y<N;y++){ for(var x=0;x<N;x++){ var u=x/N, v=y/N, dx=u-0.5, dy=v-0.5, r=Math.sqrt(dx*dx+dy*dy);
@@ -458,10 +458,12 @@
       d[k+2]=Math.max(0,Math.min(255,Math.round((col[2]+(bone[2]-col[2])*wear)*lum*255)));
       d[k+3]=255; } }
     g.putImageData(img,0,0); _wornCache[key]=c; return c; }
-  function wornTexture(hex){ var t=new THREE.CanvasTexture(wornCanvas(hex)); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4;
-    // No mipmaps: the bevels sample the clamped texture rim at a grazing angle,
-    // where lower mips bleed the colour across the fade and shimmer the edge.
-    t.minFilter=THREE.LinearFilter; t.generateMipmaps=false; return t; }
+  function wornTexture(hex){ var t=new THREE.CanvasTexture(wornCanvas(hex)); t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;
+    // Mipmaps ON (trilinear) with high anisotropy: as the die tumbles and fades,
+    // the texture is minified at grazing angles, and without mipmaps that aliases
+    // into shimmer/popping. The bone rim is now a smooth, low-contrast grey (and
+    // the mottle is gated out of it), so the coarse mips no longer bleed the fade.
+    t.anisotropy=8; t.minFilter=THREE.LinearMipmapLinearFilter; t.generateMipmaps=true; return t; }
   var _wornBump=null;
   function wornBumpCanvas(){ if(_wornBump) return _wornBump; var N=256,c=document.createElement('canvas'); c.width=c.height=N; var g=c.getContext('2d'),img=g.createImageData(N,N),d=img.data;
     for(var y=0;y<N;y++)for(var x=0;x<N;x++){ var L=0.5+(_fbm(x/N+5.3,y/N+2.1,3,18,0.5)-0.5)*0.7; L=Math.max(0,Math.min(1,L)); var k=(y*N+x)*4,b=Math.round(L*255); d[k]=d[k+1]=d[k+2]=b; d[k+3]=255; }
@@ -486,9 +488,12 @@
       var bi=texImg('marble'); t=new THREE.CanvasTexture(c);
       if(bi.complete&&bi.naturalWidth){ g.drawImage(bi,0,0,256,256); t.needsUpdate=true; } else bi.addEventListener('load',function(){ g.drawImage(bi,0,0,256,256); t.needsUpdate=true; },{once:true}); }
     else { var img=texImg(name); t=new THREE.Texture(img); if(img.complete&&img.naturalWidth) t.needsUpdate=true; else img.addEventListener('load',function(){ t.needsUpdate=true; },{once:true}); }
-    t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4;
+    t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=8;
     if('colorSpace' in t && THREE.SRGBColorSpace) t.colorSpace=THREE.SRGBColorSpace; else if('encoding' in t && THREE.sRGBEncoding) t.encoding=THREE.sRGBEncoding;
     return t; }
+  // Start decoding the tile images at load, so a textured die never pops from
+  // blank to texture mid-roll — by the time anyone rolls they're ready.
+  (function(){ try{ for(var _k in TEX_FILE) texImg(_k); }catch(e){} })();
   // Per-face planar UVs: every triangle of a face maps through the same basis
   // in that face's plane, so the pattern is continuous across the face and
   // simply cuts at the edges. The face centre lands on the texture centre
@@ -520,7 +525,10 @@
     // flatShading OFF so the dice use the rounded builds' own vertex normals.
     var finish=S.finish||'plastic', texture=S.texture||'none', mat;
     var F=FINISH_MAT[finish]||FINISH_MAT.plastic, worn=(texture==='worn');
-    mat=new THREE.MeshPhysicalMaterial({ color:(worn?0xffffff:threeColor(color)), metalness:F[0], roughness:F[1], clearcoat:F[2], clearcoatRoughness:F[3], envMapIntensity:F[4], flatShading:false, transparent:true, opacity:1, emissive:0x000000, emissiveIntensity:0 });
+    // OPAQUE during the roll/hold: a transparent body is sorted per-object each
+    // frame, so overlapping dice flip draw order and pop. It only needs
+    // transparency to fade out, which the fade phase turns on (see frame()).
+    mat=new THREE.MeshPhysicalMaterial({ color:(worn?0xffffff:threeColor(color)), metalness:F[0], roughness:F[1], clearcoat:F[2], clearcoatRoughness:F[3], envMapIntensity:F[4], flatShading:false, transparent:false, opacity:1, emissive:0x000000, emissiveIntensity:0 });
     if(texture!=='none'){ faceUVs(geo,groups);
       if(worn){ mat.map=wornTexture(color); mat.bumpMap=wornBump(); mat.bumpScale=0.012; }
       else { mat.map=dieTexture(texture); } }
@@ -683,7 +691,7 @@
     if(o.children){ o.children.forEach(_disposeObj); } }
   function clearWorld(){ if(!world3d)return; world3d.meshes.forEach(function(g){scene.remove(g); _disposeObj(g);}); world3d.shadows.forEach(function(s){scene.remove(s); _disposeObj(s);}); if(world3d.glows)world3d.glows.forEach(function(s){scene.remove(s); _disposeObj(s);}); world3d=null; }
   function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
-    _camTilt = dice.some(function(d){ return d.sides===4; }); applyCam();   // tip the camera for a d4 so its up-vertex number faces the viewer
+    _camTilt = true; applyCam();   // always tip the camera 30° (the d4 angle) — reads better and separates overlapping dice in depth
     if(floor3d) floor3d.material.opacity=SHADOW_OP;
     var metas=[],inits=[],maxSpawn=0, fromBottom=Math.random()<0.5; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i,dice.length,gg.hull,fromBottom); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
     var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS+maxSpawn){ stepWorld(probe,FDT,steps); steps++; if(allRest(probe))break; }
@@ -709,7 +717,7 @@
     if(W){ if(W.phase==='roll'){ W.acc+=real; var guard=0; while(W.acc>=FDT && !W.rested && guard<6){ stepWorld(W.live,FDT,W.stepCount); W.stepCount++; W.acc-=FDT; guard++; if(allRest(W.live)||W.stepCount>=W.maxSteps){W.rested=true;W.restAt=now;} }
         for(var i=0;i<W.live.length;i++){ W.meshes[i].position.copy(W.live[i].p); W.meshes[i].quaternion.copy(W.live[i].q); if(W.live[i].spawned){ W.meshes[i].visible=true; W.shadows[i].visible=true; } } if(W.rested){ W.phase='hold'; if(!W.emph){ W.emph=true; applyCrit(W); } } }
       else if(W.phase==='hold'){ if(now-W.restAt>(S.linger||1000)){ W.phase='fade'; W.fadeAt=now; } }
-      else { var ft=(now-W.fadeAt)/FADE; if(ft>=1){ clearWorld(); } else { for(var i2=0;i2<W.meshes.length;i2++){ var g=W.meshes[i2]; g.children.forEach(function(ch){ if(ch.material)ch.material.opacity=1-ft; }); g.scale.setScalar(1-ft*0.2); W.shadows[i2].material.opacity=(1-ft)*0.45; } if(floor3d) floor3d.material.opacity=SHADOW_OP*(1-ft); } }
+      else { var ft=(now-W.fadeAt)/FADE; if(ft>=1){ clearWorld(); } else { for(var i2=0;i2<W.meshes.length;i2++){ var g=W.meshes[i2]; g.children.forEach(function(ch){ if(ch.material){ if(!ch.material.transparent){ ch.material.transparent=true; ch.material.needsUpdate=true; } ch.material.opacity=1-ft; } }); g.scale.setScalar(1-ft*0.2); W.shadows[i2].material.opacity=(1-ft)*0.45; } if(floor3d) floor3d.material.opacity=SHADOW_OP*(1-ft); } }
       // The soft blob under each die is contact darkening only now; the real
       // shadow comes from the shadow map, so the blob stays faint.
       if(world3d){ for(var i3=0;i3<W.live.length;i3++){ var gg=W.meshes[i3],ss=W.shadows[i3]; var h=Math.max(0,gg.position.y-W.live[i3].restY); ss.position.x=gg.position.x; ss.position.z=gg.position.z; ss.scale.setScalar(1+h*0.32); if(W.phase==='roll')ss.material.opacity=Math.max(0.06,0.45-h*0.1);
