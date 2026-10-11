@@ -121,7 +121,9 @@ export default function MmrpgRefTokens({ text, items, kind, sep = ", " }: { text
       })}
       {active ? (
         <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:p-8" onClick={() => setActive(null)}>
-          <div className="w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--panel)] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          {/* my-auto centers the card vertically when it fits and lets it scroll
+              from the top (never clipped) when taller than the viewport. */}
+          <div className="my-auto w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--panel)] shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 border-b border-[var(--border)] p-3">
               <h3 className="flex-1 text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--mmrpg)]">{detail?.title ?? active.name}</h3>
               <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{active.kind}</span>

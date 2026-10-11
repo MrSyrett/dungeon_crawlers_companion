@@ -300,7 +300,7 @@
         <label class="switch" title="Dark mode — darkens the background only"><input type="checkbox" id="darkToggle"><span class="slider"></span></label>
       </div>
     </div>
-    <div id="mapsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
+    <div id="mapsModal" style="display:none;position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;z-index:9999;background:rgba(0,0,0,.5)">
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:560px;width:calc(100% - 40px);max-height:82vh;display:flex;flex-direction:column;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
           <strong style="font-size:15px">🗂 Your maps</strong>
@@ -319,7 +319,7 @@
     </div>
 
     <!-- EXPORT dialog: one button → formats, resolution, crop, export-only lighting -->
-    <div id="exportModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
+    <div id="exportModal" style="display:none;position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;z-index:9999;background:rgba(0,0,0,.5)">
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:460px;width:calc(100% - 40px);max-height:88vh;display:flex;flex-direction:column;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
           <strong style="font-size:15px">⬇ Export map</strong>
@@ -406,7 +406,7 @@
       <button class="btn gold" id="cropDone" style="font-weight:600">Apply crop</button>
     </div>
 
-    <div id="shortcutsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
+    <div id="shortcutsModal" style="display:none;position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;z-index:9999;background:rgba(0,0,0,.5)">
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:560px;width:calc(100% - 40px);max-height:82vh;overflow:auto;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
           <strong style="font-size:15px">⌨ Keyboard &amp; mouse shortcuts</strong>
@@ -512,7 +512,7 @@
       </div>
     </div>
 
-    <div id="prefabSaveModal" style="display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);align-items:center;justify-content:center">
+    <div id="prefabSaveModal" style="display:none;position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;z-index:80;background:rgba(0,0,0,.5);align-items:center;justify-content:center">
       <div style="background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;width:300px;max-width:90vw;box-shadow:0 10px 40px rgba(0,0,0,.5)">
         <p style="margin:0 0 10px;font-weight:600;font-size:14px" id="pfSaveTitle">Save as prefab</p>
         <label class="fld">Name</label>

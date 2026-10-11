@@ -171,6 +171,11 @@ export function miniBar(opts: MiniBarOpts): string {
     `<a href="${esc(l.href)}"${l.external ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(l.label)}${l.external ? " ↗" : ""}</a>`;
 
   const style = `<style id="dd-bar-style">
+/* Expose the bar's height as a variable so any popup on a tool surface can clear
+   it (inset:var(--dd-bar-h,0px) 0 0 0). It is set only while the bar exists, so
+   var(--dd-bar-h, 0px) is 0 on a surface with no bar. The GM Screen declares the
+   same token for the same reason. */
+body:has(#dd-bar){--dd-bar-h:36px}
 #dd-bar{position:sticky;top:0;z-index:2147483000;flex:0 0 auto;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;box-sizing:border-box;background:var(--panel,#14161a);border-bottom:1px solid var(--border,#2b3038);color:var(--text,#e9edf2);font:500 11px/1 "Geist",system-ui,-apple-system,sans-serif;letter-spacing:.08em;text-transform:uppercase;-webkit-user-select:none;user-select:none}
 #dd-bar a{color:inherit;text-decoration:none}
 #dd-bar .dd-logo{display:flex;align-items:center;flex:0 0 auto}

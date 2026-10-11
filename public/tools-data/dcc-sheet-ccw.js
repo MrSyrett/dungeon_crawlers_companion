@@ -357,8 +357,8 @@
     const st = document.createElement("style");
     st.id = "dccw-css";
     st.textContent = `
-    .dccw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto;}
-    .dccw-modal{background:#141416;color:#ece9e1;border:1px solid #2a2a2e;border-radius:12px;max-width:740px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5);font-family:inherit;}
+    .dccw-overlay{position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto;}
+    .dccw-modal{margin:auto;background:#141416;color:#ece9e1;border:1px solid #2a2a2e;border-radius:12px;max-width:740px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5);font-family:inherit;}
     .dccw-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid #2a2a2e;}
     .dccw-title{font-weight:800;font-size:18px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:0;}
     .dccw-x{background:transparent;border:1px solid #333;color:#888;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:16px;line-height:1;}
