@@ -1449,20 +1449,132 @@ body {
    with the page face kept behind it in the stack exactly as the h1 rules do:
    "DnDC" for D&D, "Marvel" for Marvel, "Ghostbusters" for GB, "JSL Blackletter"
    for Shadowdark. Those files are @font-face'd at the top of this stylesheet. */
-.home-tile[data-sys="SD"]    { --tile-accent: var(--text);          --tile-face: "JSL Blackletter";          --tile-bg: #08080a; }
-.home-tile[data-sys="ICRPG"] { --tile-accent: var(--icrpg);       --tile-face: var(--font-marker);         --tile-bg: #14100d; --tile-tex: url("/themes/icrpg-grain.webp"); --tile-zoom: 2.6; --tile-scrim: 0.30; }
-.home-tile[data-sys="NIM"]   { --tile-accent: var(--text);        --tile-face: var(--font-fraunces);       --tile-bg: #141816; }
-.home-tile[data-sys="DND"]   { --tile-accent: var(--gold-ink);    --tile-face: "DnDC", var(--font-cinzel); --tile-bg: #0d0b0c; --tile-tex: url("/themes/dnd-cover.webp"); --tile-zoom: 1; --tile-scrim: 0.18; }
-.home-tile[data-sys="DCC"]   { --tile-accent: var(--dcc-gold);    --tile-face: var(--font-anton);          --tile-bg: #060507; --tile-tex: url("/themes/dcc-splatter.webp"); --tile-zoom: 2.2; --tile-scrim: 0.38; }
-.home-tile[data-sys="KOB"]   { --tile-accent: var(--kob);         --tile-face: "Dreadful";                 --tile-bg: #15141a; --tile-tex: url("/themes/kob-halftone.webp"); --tile-zoom: 3; --tile-scrim: 0.32; }
-.home-tile[data-sys="CO"]    { --tile-accent: var(--candela-gold); --tile-face: var(--font-cormorant);     --tile-bg: #0c1512; --tile-tex: url("/themes/co-grunge.webp"); --tile-zoom: 2.2; --tile-scrim: 0.16; }
-.home-tile[data-sys="ACE"]   { --tile-accent: var(--ace-yellow);  --tile-face: var(--font-lilita);         --tile-bg: #070d14; --tile-tex: url("/themes/ace-speedlines.webp"); }
-.home-tile[data-sys="SW"]    { --tile-accent: var(--sw);          --tile-face: "Star Jedi", var(--font-archivo-black); --tile-bg: #09090a; --tile-tex: url("/themes/sw-starfield.webp"); --tile-zoom: 2; --tile-scrim: 0.10; }
-.home-tile[data-sys="D62E"]  { --tile-accent: var(--d62e);        --tile-face: var(--font-saira-cond);     --tile-bg: #121214; --tile-tex: url("/themes/d62e-blueprint.webp"); --tile-zoom: 2.8; --tile-scrim: 0.18; }
-.home-tile[data-sys="YZE"]   { --tile-accent: var(--yze);         --tile-face: var(--font-archivo-narrow); --tile-bg: #07161a; --tile-tex: url("/themes/yze-raster.webp"); }
-.home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
-.home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
-.home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
+/* Each system's identity tokens. The bare [data-sys="X"] selector is here too so
+   anything that carries data-sys — the game tiles AND the home-screen rosters
+   (.roster-sys) — picks up the same display face; the tiles keep their own,
+   higher-specificity .home-tile[data-sys] match, so their look is unchanged. The
+   roster reads only --tile-face; the rest are inert unless a .home-tile reads them. */
+[data-sys="SD"],    .home-tile[data-sys="SD"]    { --tile-accent: var(--text);          --tile-face: "JSL Blackletter";          --tile-bg: #08080a; }
+[data-sys="ICRPG"], .home-tile[data-sys="ICRPG"] { --tile-accent: var(--icrpg);       --tile-face: var(--font-marker);         --tile-bg: #14100d; --tile-tex: url("/themes/icrpg-grain.webp"); --tile-zoom: 2.6; --tile-scrim: 0.30; }
+[data-sys="NIM"],   .home-tile[data-sys="NIM"]   { --tile-accent: var(--text);        --tile-face: var(--font-fraunces);       --tile-bg: #141816; }
+[data-sys="DND"],   .home-tile[data-sys="DND"]   { --tile-accent: var(--gold-ink);    --tile-face: "DnDC", var(--font-cinzel); --tile-bg: #0d0b0c; --tile-tex: url("/themes/dnd-cover.webp"); --tile-zoom: 1; --tile-scrim: 0.18; }
+[data-sys="DCC"],   .home-tile[data-sys="DCC"]   { --tile-accent: var(--dcc-gold);    --tile-face: var(--font-anton);          --tile-bg: #060507; --tile-tex: url("/themes/dcc-splatter.webp"); --tile-zoom: 2.2; --tile-scrim: 0.38; }
+[data-sys="KOB"],   .home-tile[data-sys="KOB"]   { --tile-accent: var(--kob);         --tile-face: "Dreadful";                 --tile-bg: #15141a; --tile-tex: url("/themes/kob-halftone.webp"); --tile-zoom: 3; --tile-scrim: 0.32; }
+[data-sys="CO"],    .home-tile[data-sys="CO"]    { --tile-accent: var(--candela-gold); --tile-face: var(--font-cormorant);     --tile-bg: #0c1512; --tile-tex: url("/themes/co-grunge.webp"); --tile-zoom: 2.2; --tile-scrim: 0.16; }
+[data-sys="ACE"],   .home-tile[data-sys="ACE"]   { --tile-accent: var(--ace-yellow);  --tile-face: var(--font-lilita);         --tile-bg: #070d14; --tile-tex: url("/themes/ace-speedlines.webp"); }
+[data-sys="SW"],    .home-tile[data-sys="SW"]    { --tile-accent: var(--sw);          --tile-face: "Star Jedi", var(--font-archivo-black); --tile-bg: #09090a; --tile-tex: url("/themes/sw-starfield.webp"); --tile-zoom: 2; --tile-scrim: 0.10; }
+[data-sys="D62E"],  .home-tile[data-sys="D62E"]  { --tile-accent: var(--d62e);        --tile-face: var(--font-saira-cond);     --tile-bg: #121214; --tile-tex: url("/themes/d62e-blueprint.webp"); --tile-zoom: 2.8; --tile-scrim: 0.18; }
+[data-sys="YZE"],   .home-tile[data-sys="YZE"]   { --tile-accent: var(--yze);         --tile-face: var(--font-archivo-narrow); --tile-bg: #07161a; --tile-tex: url("/themes/yze-raster.webp"); }
+[data-sys="MMRPG"], .home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
+[data-sys="JLU"],   .home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
+[data-sys="GB"],    .home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
+
+/* ===========================================================================
+   HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.
+   Each .roster-sys group carries data-sys (for the system display --tile-face,
+   above) and an inline --rsys = that system's accent (from SYSTEMS[].accent). The
+   accent only ever reaches the eye through color-mix with a theme token, so every
+   system stays legible in both light and dark however saturated its brand colour.
+   =========================================================================== */
+.roster-sys + .roster-sys { margin-top: 1.1rem; }
+.roster-sys-name {
+  font-family: var(--tile-face, inherit);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.55rem;
+  padding-bottom: 0.4rem;
+  color: color-mix(in srgb, var(--rsys, var(--text)) 62%, var(--text));
+  border-bottom: 1px solid color-mix(in srgb, var(--rsys, var(--border)) 32%, var(--border));
+}
+.roster-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+@media (min-width: 640px)  { .roster-cards { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1024px) { .roster-cards { grid-template-columns: 1fr 1fr 1fr; } }
+.roster-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+  height: 100%;
+  padding: 0.6rem 0.75rem 0.6rem 0.85rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid color-mix(in srgb, var(--rsys, var(--border)) 72%, var(--border));
+  border-radius: 0.55rem;
+  background: var(--panel);
+  text-decoration: none;
+  transition: border-color 0.12s, background 0.12s;
+}
+a.roster-card:hover {
+  background: var(--panel-2);
+  border-color: color-mix(in srgb, var(--rsys, var(--border)) 50%, var(--border));
+}
+.roster-card-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.9rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.roster-card-meta {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: color-mix(in srgb, var(--rsys, var(--muted)) 45%, var(--muted));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.roster-card-camp {
+  font-size: 0.72rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.roster-card--camp { gap: 0.3rem; }
+.roster-gm {
+  flex: 0 0 auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  color: var(--on-accent, #fff);
+  background: color-mix(in srgb, var(--rsys, var(--gold)) 70%, var(--text));
+}
+.roster-party { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.roster-chip {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  border-radius: 0.35rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  color: var(--text);
+}
+.roster-chip .m { color: var(--muted); }
+.roster-empty {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 0.55rem;
+  padding: 0.9rem 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
 
 /* ===========================================================================
    THE HOME PAGE'S TWO TOOL TILES

@@ -367,6 +367,8 @@ export default function TokenMaker() {
     kind: "idle",
     text: "",
   });
+  // The campaign picker is a popup, opened by the "Save to Campaign" button.
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -825,44 +827,20 @@ export default function TokenMaker() {
 
           {/* Save straight to a campaign's VTT token library (GM campaigns
               only). No download/re-upload round-trip; the token shows up in the
-              GM Screen's Tokens tab, ready to drag onto the map. */}
+              GM Screen's Tokens tab, ready to drag onto the map. The campaign
+              pick is a popup so the panel stays uncluttered until you want it. */}
           {campaigns.length > 0 ? (
-            <div className="mt-3">
-              <div className="flex gap-2">
-                <select
-                  value={campId}
-                  onChange={(e) => {
-                    setCampId(e.target.value);
-                    setSaveMsg({ kind: "idle", text: "" });
-                  }}
-                  aria-label="Campaign to save the token to"
-                  className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-[13px] text-[var(--text)] outline-none focus:border-[var(--gold)]"
-                >
-                  {campaigns.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={saveToCampaign}
-                  disabled={!image || !campId || saveMsg.kind === "saving"}
-                  className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)] transition-colors hover:border-[var(--gold)] hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:text-[var(--muted)] disabled:hover:border-[var(--border)] disabled:hover:text-[var(--muted)]"
-                >
-                  {saveMsg.kind === "saving" ? "Saving…" : "Save to campaign tokens"}
-                </button>
-              </div>
-              {saveMsg.kind === "ok" || saveMsg.kind === "err" ? (
-                <p
-                  className={`mt-2 text-[12px] ${
-                    saveMsg.kind === "ok" ? "text-[var(--gold)]" : "text-[var(--bad)]"
-                  }`}
-                >
-                  {saveMsg.text}
-                </p>
-              ) : null}
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSaveMsg({ kind: "idle", text: "" });
+                setPickerOpen(true);
+              }}
+              disabled={!image}
+              className="mt-3 w-full rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)] transition-colors hover:border-[var(--gold)] hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:text-[var(--muted)] disabled:hover:border-[var(--border)] disabled:hover:text-[var(--muted)]"
+            >
+              Save to Campaign…
+            </button>
           ) : (
             <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">
               Own a campaign to save tokens straight to its VTT library.
@@ -870,6 +848,85 @@ export default function TokenMaker() {
           )}
         </div>
       </div>
+
+      {/* Campaign picker popup — opened by "Save to Campaign". Closes on the
+          backdrop, ✕, or Cancel/Done, but never mid-save. */}
+      {pickerOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Save token to a campaign"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && saveMsg.kind !== "saving") setPickerOpen(false);
+          }}
+        >
+          <div className="w-full max-w-sm rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5 shadow-2xl">
+            <div className="flex items-baseline justify-between gap-3">
+              <h3 className="text-[15px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">
+                Save to campaign
+              </h3>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(false)}
+                disabled={saveMsg.kind === "saving"}
+                aria-label="Close"
+                className="shrink-0 text-[18px] leading-none text-[var(--muted)] transition-colors hover:text-[var(--text)] disabled:opacity-50"
+              >
+                ✕
+              </button>
+            </div>
+
+            <label className="mt-4 block text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
+              Campaign
+            </label>
+            <select
+              value={campId}
+              onChange={(e) => {
+                setCampId(e.target.value);
+                setSaveMsg({ kind: "idle", text: "" });
+              }}
+              aria-label="Campaign to save the token to"
+              className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-[13px] text-[var(--text)] outline-none focus:border-[var(--gold)]"
+            >
+              {campaigns.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            {saveMsg.kind === "ok" || saveMsg.kind === "err" ? (
+              <p
+                className={`mt-3 text-[12px] ${
+                  saveMsg.kind === "ok" ? "text-[var(--gold)]" : "text-[var(--bad)]"
+                }`}
+              >
+                {saveMsg.text}
+              </p>
+            ) : null}
+
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPickerOpen(false)}
+                disabled={saveMsg.kind === "saving"}
+                className="flex-1 rounded border border-[var(--border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] transition-colors hover:border-[var(--text)] hover:text-[var(--text)] disabled:opacity-50"
+              >
+                {saveMsg.kind === "ok" ? "Done" : "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={saveToCampaign}
+                disabled={!image || !campId || saveMsg.kind === "saving"}
+                className="flex-1 rounded border border-[var(--gold)] bg-[var(--gold)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.1em] text-[#141208] transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:bg-[var(--panel)] disabled:text-[var(--muted)]"
+              >
+                {saveMsg.kind === "saving" ? "Saving…" : "Save token"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
