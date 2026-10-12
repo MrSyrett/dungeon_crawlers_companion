@@ -222,10 +222,9 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-move{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);text-transform:uppercase;flex:0 0 auto;}
 .turn-move .tm-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;}
 .turn-move .tm-val{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--ink);}
-.turn-move .tm-val b{color:var(--dnd-dk);font-size:15px;}
+.turn-move .tm-val b{color:var(--dnd-dk);font-size:15px;min-width:18px;display:inline-block;text-align:center;border-bottom:1px dashed transparent;outline:none;cursor:text;padding:0 2px;}
+.turn-move .tm-val b:hover,.turn-move .tm-val b:focus{border-bottom-color:var(--dnd);background:var(--panel-2);border-radius:3px 3px 0 0;}
 .turn-move .tm-slash{color:var(--muted);margin:0 1px;}
-.turn-move .tm-btn{background:var(--panel-2);border:1px solid var(--rule);color:var(--dnd-dk);border-radius:5px;width:26px;height:24px;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:12px;cursor:pointer;line-height:1;}
-.turn-move .tm-btn:hover{background:var(--dnd-lt);}
 .turn-slots{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
 .tslot{display:flex;align-items:center;gap:4px;}
 .tslot-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
@@ -261,7 +260,7 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-sec-body .spell-row.turn-dis{opacity:.42;}
 .turn-sec-body .spell-row.turn-dis .cast-btn{background:var(--muted);pointer-events:none;}
 .turn-sec-body .spell-row.turn-dis .sp-name-txt{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted);}
-.sp-name-txt{flex:1;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sp-name-txt{flex:1 1 auto;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;color:var(--ink);line-height:1.2;}
 .turn-empty{font-size:12px;color:var(--muted);padding:12px;line-height:1.5;}
 .mini-roll.dis,.sneak-btn.dis{opacity:.4;}
 
@@ -499,22 +498,29 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .res-reset-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;cursor:pointer;}
 .res-reset-btn:hover{background:var(--dnd-lt);color:var(--dnd-dk);}
 .sp-granted{font-family:'Barlow Condensed',sans-serif;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;background:var(--dnd);border-radius:3px;padding:1px 5px;white-space:nowrap;}
-.spell-row{display:flex;gap:8px;align-items:center;padding:4px 10px;border-bottom:1px solid var(--rule);}
+.spell-row{display:flex;gap:8px;align-items:center;padding:5px 10px;border-bottom:1px solid var(--rule);}
 .spell-row:hover{background:var(--box);}
 .sp-prep{width:14px;height:14px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
 .sp-prep.on{background:var(--dnd);}
-.sp-name-input{flex:1 1 90px;min-width:60px;background:transparent;border:none;border-bottom:1px dashed transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;outline:none;padding:1px 0;}
+.sp-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px;}
+.sp-name-line{display:flex;align-items:center;gap:6px;min-width:0;}
+.sp-name-input{flex:1 1 auto;min-width:0;width:100%;background:transparent;border:none;border-bottom:1px dashed transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;outline:none;padding:1px 0;}
 .sp-name-input:hover,.sp-name-input:focus{border-bottom-color:var(--rule);}
-.sp-info{flex:1 1 auto;text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sp-info{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;min-width:0;line-height:1.25;}
+.sp-ctrls{flex:0 0 auto;display:flex;align-items:center;gap:6px;}
 .sp-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;}
 .sp-x:hover{color:var(--red);}
 .cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .cast-btn:hover{background:var(--dnd-dk);}
 .atk-grp{display:flex;gap:5px;align-items:flex-end;}
+.atk-subline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:3px;}
 .atk-field{display:flex;flex-direction:column;gap:1px;}
 .atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
 .atk-mastery{background:transparent;border:1px dashed var(--rule);border-radius:3px;color:var(--dnd);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:2px 6px;letter-spacing:.02em;}
 .atk-mastery:hover{background:var(--box);border-style:solid;}
+/* Locked: the ability picker reads as plain text (no dropdown arrow). */
+body:not(.unlocked) .atk-abil{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none;text-align:center;text-align-last:center;padding-right:4px;}
+body:not(.unlocked) .atk-abil::-ms-expand{display:none;}
 .sneak-btn{background:transparent;border:1px solid #8a5cc0;color:#8a5cc0;border-radius:3px;padding:5px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;margin-right:4px;}
 .sneak-btn:hover{background:#8a5cc0;color:#fff;}
 .upcast-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 6px;font-size:11px;line-height:1;cursor:pointer;margin-right:3px;}
@@ -792,6 +798,12 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}
+/* Stylized scrollbars for the tab scroll areas (Turn, Spells, Equipment, etc.). */
+.tab-panel.on,.tab-split .tab-scroll,#spells-by-level,#tab-equipment .tbl-scroll{scrollbar-width:thin;scrollbar-color:var(--dnd) var(--panel-2);}
+.tab-panel.on::-webkit-scrollbar,.tab-split .tab-scroll::-webkit-scrollbar,#spells-by-level::-webkit-scrollbar,#tab-equipment .tbl-scroll::-webkit-scrollbar{width:10px;}
+.tab-panel.on::-webkit-scrollbar-track,.tab-split .tab-scroll::-webkit-scrollbar-track,#spells-by-level::-webkit-scrollbar-track,#tab-equipment .tbl-scroll::-webkit-scrollbar-track{background:var(--panel-2);border-radius:6px;}
+.tab-panel.on::-webkit-scrollbar-thumb,.tab-split .tab-scroll::-webkit-scrollbar-thumb,#spells-by-level::-webkit-scrollbar-thumb,#tab-equipment .tbl-scroll::-webkit-scrollbar-thumb{background:var(--dnd);border-radius:6px;border:2px solid var(--panel-2);background-clip:padding-box;}
+.tab-panel.on::-webkit-scrollbar-thumb:hover,.tab-split .tab-scroll::-webkit-scrollbar-thumb:hover,#spells-by-level::-webkit-scrollbar-thumb:hover,#tab-equipment .tbl-scroll::-webkit-scrollbar-thumb:hover{background:var(--dnd-dk);}
 select option{background:var(--input-bg);color:var(--ink);}
 /* Found-loot + loot boxes (shared with the other sheets / GM screen) */
 .log-foundloot,.log-system{border-left:3px solid #c8a020 !important;background:#221f16 !important;}
@@ -1091,13 +1103,11 @@ body.dark .tabs-bar{background:#1a1a1f;}
             <button class="turn-end-btn" onclick="endTurn()" title="Start a new turn — regain your action, bonus action, reaction and movement">⟳ End Turn</button>
           </div>
           <div class="turn-row2">
-            <div class="turn-move" title="Movement used this turn">
-              <span class="tm-lbl">Move</span>
-              <button class="tm-btn" onclick="spendMove(5)" title="Spend 5 ft">−5</button>
-              <span class="tm-val"><b id="turn-move-left">30</b><span class="tm-slash">/</span><span id="turn-move-max">30</span> ft</span>
-              <button class="tm-btn" onclick="spendMove(-5)" title="Give back 5 ft">+5</button>
-            </div>
             <div class="turn-slots" id="turn-slots"></div>
+            <div class="turn-move" title="Movement left this turn — type to set">
+              <span class="tm-lbl">Move</span>
+              <span class="tm-val"><b id="turn-move-left" contenteditable="true" inputmode="numeric" spellcheck="false" onfocus="moveFocus(this)" onblur="setMoveLeft(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">30</b><span class="tm-slash">/</span><span id="turn-move-max">30</span> ft</span>
+            </div>
           </div>
           <div class="turn-subtabs">
             <button class="turn-subtab on" data-sub="action" onclick="setTurnSub('action')">Actions</button>
@@ -1725,15 +1735,18 @@ function addAttackRow(a){
   const bonus = num(a.bonus) + num(a.magic || 0);         // magic +N folds into the visible Bonus (applies to hit + damage)
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
-    '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()"></td>' +
+    '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()">' +
+      '<div class="atk-subline">' +
+        '<div class="atk-field"><span class="atk-sub">Type</span><input type="text" class="atk-dtype mono" value="' + esc(a.type) + '" placeholder="slashing" style="width:72px;font-size:10px;" oninput="scheduleAutosave()"></div>' +
+        (a.mastery ? '<div class="atk-field"><span class="atk-sub">Mastery</span><button class="atk-mastery" onclick="openMastery(\'' + esc(a.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(a.mastery) + '</button></div>' : '') +
+      '</div>' +
+    '</td>' +
     '<td><div class="atk-grp">' +
       '<div class="atk-field"><span class="atk-sub">Ability</span><select class="atk-abil" onchange="scheduleAutosave()" style="width:46px;">' + abilOpts + '</select></div>' +
       '<div class="atk-field"><span class="atk-sub">Bonus</span><input type="number" class="atk-bonus mono" value="' + bonus + '" title="To-hit and damage bonus (magic weapons fill this automatically)" style="width:40px;" oninput="scheduleAutosave()"></div>' +
     '</div></td>' +
     '<td><div class="atk-grp">' +
       '<div class="atk-field"><span class="atk-sub">Damage</span><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:66px;" oninput="scheduleAutosave()"></div>' +
-      '<div class="atk-field"><span class="atk-sub">Type</span><input type="text" class="atk-dtype mono" value="' + esc(a.type) + '" placeholder="slashing" style="width:62px;font-size:10px;" oninput="scheduleAutosave()"></div>' +
-      (a.mastery ? '<div class="atk-field"><span class="atk-sub">Mastery</span><button class="atk-mastery" onclick="openMastery(\'' + esc(a.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(a.mastery) + '</button></div>' : '') +
     '</div></td>' +
     '<td class="roll-cell atk-actions" style="white-space:nowrap;text-align:right;"></td>';
   $('attacks-body').appendChild(tr);
@@ -1802,16 +1815,18 @@ function _atkRow(btn){ return btn.closest('tr'); }
 // One button: roll to-hit (adv/dis) and damage together. Crit (nat 20) doubles the damage dice.
 function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
 // Core attack roll. sneakD6 > 0 adds that many d6 of Sneak Attack damage (doubled on a crit).
-function doAttack(tr, sneakD6){
+function doAttack(tr, sneakD6, asReaction){
   if(rollsOff()) return;
-  // Turn economy: attacking spends your Attack action; with Extra Attack you keep
-  // attacking until all attacks are made.
-  if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){
+  // Turn economy: a normal attack spends your Attack action (Extra Attack lets you
+  // keep attacking until all attacks are made); an Opportunity Attack spends your Reaction.
+  if(asReaction){
+    if(_turn.reaction){ addLog('Opportunity Attack', '—', 'Reaction already used this turn — End Turn to refresh', 'normal'); return; }
+  } else if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){
     addLog('Attack', '—', 'No attack left this turn — End Turn to refresh', 'normal'); return;
   }
   sneakD6 = sneakD6 || 0;
   const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
-  const bonus = num(tr.querySelector('.atk-bonus').value), name = (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
+  const bonus = num(tr.querySelector('.atk-bonus').value), name = (asReaction ? 'Opportunity Attack: ' : '') + (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
   const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
   // to-hit (Bonus adds to hit)
   const ctx = rollCtx('attack');
@@ -1843,7 +1858,8 @@ function doAttack(tr, sneakD6){
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
   const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (ctx.note ? ' · ' + ctx.note : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
-  _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++;   // spend the Attack action
+  if(asReaction){ _turn.reaction = true; }                                 // spend the Reaction
+  else { _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; }   // spend the Attack action
   if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn();
 }
 
@@ -2743,13 +2759,19 @@ function spellRowHTML(sk, sp, opts){
   const castCall = opts.turnSub ? ('turnCastSpell(\'' + q + '\',\'' + opts.turnSub + '\')') : ('castSpellFull(\'' + q + '\')');
   return '<div class="spell-row' + (opts.disabled ? ' turn-dis' : '') + '">' +
     (opts.prep ? '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + q + '\')" title="Prepared"></span>' : '') +
-    (opts.nameInput ? '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">'
-                    : '<span class="sp-name-txt">' + esc(sk.display || sk.name) + '</span>') +
-    (sk.granted ? '<span class="sp-granted" title="Granted by a feature or trait — always prepared">granted</span>' : '') +
-    '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
-    '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
-    ((!opts.noUpcast && sp && (sp.higherLevels || sp.upcast) && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
-    '<button class="cast-btn" onclick="' + castCall + '" title="Cast this spell">Cast</button>' +
+    '<div class="sp-main">' +
+      '<div class="sp-name-line">' +
+        (opts.nameInput ? '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">'
+                        : '<span class="sp-name-txt">' + esc(sk.display || sk.name) + '</span>') +
+        (sk.granted ? '<span class="sp-granted" title="Granted by a feature or trait — always prepared">granted</span>' : '') +
+      '</div>' +
+      '<div class="sp-info">' + esc(spellInfoLine(sp)) + '</div>' +
+    '</div>' +
+    '<div class="sp-ctrls">' +
+      '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
+      ((!opts.noUpcast && sp && (sp.higherLevels || sp.upcast) && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
+      '<button class="cast-btn" onclick="' + castCall + '" title="Cast this spell">Cast</button>' +
+    '</div>' +
   '</div>';
 }
 function renderSpells(){
@@ -3044,9 +3066,6 @@ const STANDARD_ACTIONS = [
   { name:'Study', desc:'Make an Intelligence check to recall or discern lore.' },
   { name:'Utilize', desc:'Use a nonmagical object, or a magic item that requires an action.' },
 ];
-const STANDARD_REACTIONS = [
-  { name:'Opportunity Attack', desc:'One melee attack against a creature that leaves your reach.' },
-];
 
 function tcClip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n-1) + '…' : s; }
 function turnMoveMax(){ const el = $('f-speed'); const n = parseInt((el ? el.textContent : '') || '', 10); return isNaN(n) ? 30 : n; }
@@ -3131,6 +3150,32 @@ function castableSpells(sub){
 }
 function turnCastSpell(name, sub){ castSpellFull(name); _turn[sub] = true; afterTurnAction(); }
 function toggleTurnSec(id){ _turnCollapsed[id] = !_turnCollapsed[id]; renderTurn(); scheduleAutosave(); }
+// ── Opportunity Attack: mirrors the Attacks section, melee options only ──
+// Unarmed Strikes and melee weapons qualify; ranged weapons and spell-attack rows don't.
+// A hand-typed row (no catalog link) is treated as melee since its reach is unknown.
+function isMeleeAttackRow(tr){
+  if(tr.dataset.spell) return false;
+  if(tr.dataset.unarmed) return true;
+  if(tr.dataset.weapon){ const w = (typeof D !== 'undefined' && D.weapons ? D.weapons() : []).find(x => norm(x.name) === norm(tr.dataset.weapon)); if(w) return norm(w.kind) !== 'ranged'; }
+  return true;
+}
+function oppAttack(i){ if(_turn.reaction) return; const tr = document.querySelectorAll('#attacks-body tr')[i]; if(tr) doAttack(tr, 0, true); }
+function turnOppAttacksHTML(){
+  const rows = [...document.querySelectorAll('#attacks-body tr')].map((tr, i) => ({ tr, i })).filter(x => isMeleeAttackRow(x.tr));
+  if(!rows.length) return '<p class="turn-empty">No melee attacks — add a melee weapon in the Attacks section to make Opportunity Attacks.</p>';
+  const dis = _turn.reaction;
+  let h = '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody>';
+  rows.forEach(({ tr, i }) => {
+    const name = (tr.querySelector('.atk-name').value || '').trim() || 'Attack';
+    const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
+    const bonus = num(tr.querySelector('.atk-bonus').value);
+    const hit = modOf(abil) + (prof ? profBonus() : 0) + bonus;
+    const dmg = tr.querySelector('.atk-dmg').value, dtype = tr.querySelector('.atk-dtype').value;
+    h += '<tr><td>' + esc(name) + '</td><td class="mono">' + sgn(hit) + '</td><td class="mono">' + esc(dmg + (dtype ? ' ' + dtype : '')) + '</td>' +
+      '<td class="roll-cell" style="white-space:nowrap;text-align:right;"><button class="mini-roll' + (dis ? ' dis' : '') + '" onclick="oppAttack(' + i + ')" title="Make this as an Opportunity Attack (uses your Reaction)">Attack</button></td></tr>';
+  });
+  return h + '</tbody></table></div>';
+}
 
 // ── render helpers ──
 function turnSecHTML(id, title, bodyHTML, note){
@@ -3146,7 +3191,7 @@ function turnCardsHTML(opts){
     return '<div class="turn-card' + (o.disabled ? ' disabled' : '') + '">' +
       '<div class="tc-main" onclick="useTurnOpt(' + i + ')"><div class="tc-name">' + esc(o.name) + '</div>' + (o.meta ? '<div class="tc-sub">' + esc(o.meta) + '</div>' : '') + '</div>' +
       (o.usesHTML ? '<div class="tc-uses">' + o.usesHTML + '</div>' : '') +
-      '<button class="tc-do" onclick="useTurnOpt(' + i + ')">' + (o.disabled ? '—' : 'Do') + '</button>' +
+      '<button class="tc-do" onclick="useTurnOpt(' + i + ')">' + (o.disabled ? '—' : 'Use') + '</button>' +
     '</div>';
   }).join('');
 }
@@ -3204,7 +3249,7 @@ function renderTurn(){
     h += turnSecHTML('b-feats', 'Features', turnCardsHTML(activatedFeatures().filter(f => f.type === 'bonus').map(featureOpt)));
     if(!h) h = '<p class="turn-empty">No bonus actions yet — bonus-action spells and features show up here.</p>';
   } else {
-    h += turnSecHTML('r-standard', 'Reactions', turnCardsHTML(STANDARD_REACTIONS.map(a => standardOpt(a, 'reaction'))));
+    h += turnSecHTML('r-oa', 'Opportunity Attack', turnOppAttacksHTML());
     h += turnSecHTML('r-spells', 'Spells', turnSpellsHTML('reaction'));
     h += turnSecHTML('r-feats', 'Features', turnCardsHTML(activatedFeatures().filter(f => f.type === 'reaction').map(featureOpt)));
   }
@@ -3220,6 +3265,9 @@ function toggleEcon(type){
   renderTurn(); scheduleAutosave();
 }
 function spendMove(ft){ const mv = turnMoveMax(); _turn.move = Math.max(0, Math.min(mv, _turn.move + ft)); renderTurn(); scheduleAutosave(); }
+// Movement is edited directly: type the feet you have left this turn.
+function moveFocus(el){ el.textContent = String(Math.max(0, turnMoveMax() - _turn.move)); const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+function setMoveLeft(el){ const mv = turnMoveMax(); let left = parseInt((el.textContent||'').replace(/[^0-9]/g,''), 10); if(isNaN(left)) left = mv - _turn.move; left = Math.max(0, Math.min(mv, left)); _turn.move = mv - left; renderTurn(); scheduleAutosave(); }
 function setTurnSub(sub){ _turnSub = sub; renderTurn(); }
 function endTurn(){
   _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0 };
