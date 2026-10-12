@@ -178,6 +178,7 @@
   //   THROW_V    base throw speed (scales with the tray width); each die gets up to 45% more.
   var FLOORY=-1.9,GRAV=-70,REST=0.45,WALL_REST=0.8,MU=0.3,DRAG=0.75,ROLL_DAMP=0.5,FDT=1/60,MAXSTEPS=420,HOLD=850,FADE=440,WAVE_STEPS=28;
   var WX=3.3,WZ=1.5,THROW_V=12;   // the tray is the whole window: set from the camera in applyCam()
+  var CAM_TILT=18;                 // degrees the camera tips off straight-down — gentle, so the up face still reads clearly
   var SHADOW_OP=0.42;   // shadow-map floor darkness; faded with the dice
   var DOWN,UP,_n,_axis,_dq,_corr;
   var HAS_WEBGL=(function(){ try{ var c=document.createElement('canvas'); return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){ return false; } })();
@@ -227,8 +228,8 @@
     var w=overlay.clientWidth||window.innerWidth, h=overlay.clientHeight||window.innerHeight;
     var edgePx=Math.max(76,Math.min(120,Math.min(w,h)*0.2)), ppu=edgePx/1.5;
     var tanV=Math.tan(camera.fov*Math.PI/360), visW=w/ppu, visH=h/ppu, d=visH/(2*tanV);
-    var tilt=(_camTilt?30:0)*Math.PI/180;
-    WX=Math.max(2.2, visW/2-1.1); WZ=Math.max(1.6, visH/2-1.1); if(_camTilt) WZ*=0.72;
+    var tilt=(_camTilt?CAM_TILT:0)*Math.PI/180;
+    WX=Math.max(2.2, visW/2-1.1); WZ=Math.max(1.6, visH/2-1.1); if(_camTilt) WZ*=0.86;
     THROW_V=Math.max(11, WX*2.1);
     camera.position.set(0, FLOORY+d*Math.cos(tilt), d*Math.sin(tilt)+0.0001); camera.up.set(0,0,-1);
     camera.lookAt(0,FLOORY,0); camera.updateProjectionMatrix();
@@ -413,12 +414,29 @@
   // inked, the way real dice are made, not a sticker.
   function drawDigit(g,s,text){ g.font='bold '+(text.length>1?70:92)+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4);
     if(text==='6'||text==='9'){ g.fillRect(s/2-24, s/2+42, 48, 8); } }
-  function faceTex(text){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d');
-    g.fillStyle=S.num; drawDigit(g,s,text); var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
-  function bumpTex(text){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d');
-    g.fillStyle='#808080'; g.fillRect(0,0,s,s); g.shadowColor='#000'; g.shadowOffsetX=1; g.shadowOffsetY=1; g.shadowBlur=3; g.fillStyle='#000'; drawDigit(g,s,text);
+  // One edge-band inner shadow: a solid-with-glyph-hole mask is drawn clipped to
+  // the glyph (source-atop) with an offset blurred shadow, so the glyph's own
+  // outline casts a soft band just INSIDE one edge — and only near that edge, so
+  // the ink stays crisp (an offset full copy floods the whole glyph and greys it).
+  function innerShadow(g,s,text,color,blur,dy){ var is=document.createElement('canvas'); is.width=is.height=s; var h=is.getContext('2d'); h.textAlign='center'; h.textBaseline='middle';
+    h.fillStyle='#000'; h.fillRect(0,0,s,s); h.globalCompositeOperation='destination-out'; drawDigit(h,s,text);   // solid field with a glyph-shaped hole
+    g.save(); g.globalCompositeOperation='source-atop'; g.shadowColor=color; g.shadowBlur=blur; g.shadowOffsetX=0; g.shadowOffsetY=dy; g.drawImage(is,0,0); g.restore(); }
+  // The inked digit WITH a baked inner shadow, so it reads as carved into the
+  // face at any viewing/lighting angle (the bump below adds light-driven depth):
+  // a dark band inside the top edge (shaded upper groove wall) + a light band
+  // inside the bottom edge (the lit lower lip).
+  function faceTex(text){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d'); g.textAlign='center'; g.textBaseline='middle';
+    g.fillStyle=S.num; drawDigit(g,s,text);                       // crisp inked digit
+    innerShadow(g,s,text,'rgba(0,0,0,0.7)',3,2.6);                // shaded upper wall
+    innerShadow(g,s,text,'rgba(255,255,255,0.55)',2.6,-2.6);      // lit lower lip
     var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
-  function labelMat(text,extra){ var o={map:faceTex(text),bumpMap:bumpTex(text),bumpScale:0.012,roughness:0.8,metalness:0,envMapIntensity:0.08,transparent:true,depthWrite:false};
+  // Bump profile for the engraving: mid-grey field, the digit as a soft dark
+  // depression (blurred walls so the normal ramps across the groove, not a hard rim).
+  function bumpTex(text){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d');
+    g.fillStyle='#808080'; g.fillRect(0,0,s,s); g.textAlign='center'; g.textBaseline='middle';
+    g.shadowColor='#000'; g.shadowOffsetX=0; g.shadowOffsetY=0; g.shadowBlur=2.4; g.fillStyle='#000'; drawDigit(g,s,text); drawDigit(g,s,text);
+    var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
+  function labelMat(text,extra){ var o={map:faceTex(text),bumpMap:bumpTex(text),bumpScale:0.05,roughness:0.82,metalness:0,envMapIntensity:0.08,transparent:true,depthWrite:false};
     if(extra) for(var k in extra) o[k]=extra[k]; return new THREE.MeshStandardMaterial(o); }
   // ─── the worn surface ───
   // The chosen colour, richest in the flat CENTRE of each face, worn away to a
@@ -535,7 +553,7 @@
     var body=new THREE.Mesh(geo,mat); body.castShadow=true;
     var group=new THREE.Group(); group.add(body);
     if(d4){ // vertex-numbered d4: 3 corner numbers per face, each oriented toward its vertex
-      var vsize=0.92;
+      var vsize=0.6;   // smaller than the face corner so every number stays on the die
       d4.faces.forEach(function(f){ f.corners.forEach(function(vi){ var V=d4.verts[vi], C=f.c, N=f.n;
         var pos=new THREE.Vector3().lerpVectors(C, V, 0.46).addScaledVector(N, 0.03);
         var up=new THREE.Vector3().subVectors(V, C); up.addScaledVector(N, -up.dot(N)); up.normalize();      // toward the vertex, in the face plane
