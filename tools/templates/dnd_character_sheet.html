@@ -195,7 +195,7 @@ body:not(.unlocked) .atk-name,body:not(.unlocked) .atk-bonus,body:not(.unlocked)
 .comp-note{width:100%;min-height:44px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Barlow',sans-serif;font-size:12px;color:var(--ink);padding:5px 7px;outline:none;resize:vertical;line-height:1.4;white-space:pre-wrap;}
 .comp-note:focus{border-color:var(--dnd);}
 .tab-panel{display:none;}
-.tab-panel.on{display:block;height:620px;overflow-y:auto;overflow-x:hidden;}
+.tab-panel.on{display:block;height:var(--tab-h,620px);overflow-y:auto;overflow-x:hidden;}
 .tab-panel.on .section-bar{position:sticky;top:0;z-index:2;background:#fff;}
 body.dark .tab-panel.on .section-bar{background:#22222a;}
 /* Tabs with a locked header: the header stays put and only the list below scrolls,
@@ -227,7 +227,9 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-move .tm-slash{color:var(--muted);margin:0 1px;}
 .turn-slots{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
 .tslot{display:flex;align-items:center;gap:4px;}
-.tslot-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.tslot-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:0;cursor:pointer;}
+.tslot-lbl:hover{color:var(--dnd-dk);}
+#spell-slots .slot-slots{padding:9px 10px;gap:10px 16px;}
 .tslot-pip{width:12px;height:12px;border:1.5px solid var(--dnd);border-radius:50%;background:var(--dnd);cursor:pointer;flex-shrink:0;}
 .tslot-pip.used{background:transparent;}
 .tslot-none{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
@@ -409,6 +411,8 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .tbl td{padding:3px 6px;border-bottom:1px solid var(--rule);vertical-align:middle;}
 .tbl input,.tbl select{width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
 .tbl input:focus,.tbl select:focus{border-bottom-color:var(--dnd);}
+/* Font unification — Attacks & Equipment names match the Spells-tab name (.sp-name-input). */
+.tbl .atk-name,.tbl .inv-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;}
 .tbl .num{width:52px;}.tbl .mono{font-family:'Share Tech Mono',monospace;font-size:12px;}
 .tbl .roll-cell{width:40px;text-align:center;}
 .mini-roll{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
@@ -444,7 +448,7 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .inv-actions{white-space:nowrap;text-align:right;width:1%;}
 .inv-qty-cell{width:44px;}
 .tbl .inv-qty{width:36px;text-align:center;}
-.inv-detail{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);line-height:1.3;letter-spacing:.01em;white-space:normal;}
+.inv-detail{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;color:var(--muted);line-height:1.25;letter-spacing:.02em;text-transform:uppercase;white-space:normal;}
 .inv-detail .inv-cost{font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:var(--ink);white-space:nowrap;}
 .inv-detail .inv-cost + .inv-notes{margin-left:2px;}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
@@ -513,14 +517,19 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .cast-btn:hover{background:var(--dnd-dk);}
 .atk-grp{display:flex;gap:5px;align-items:flex-end;}
-.atk-subline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:3px;}
+/* Attack detail line (Ability · Type · Mastery) — styled like the Spells-tab detail line. */
+.atk-detail{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);line-height:1.25;}
+.atk-detail .atk-dot{color:var(--muted);opacity:.55;}
+.atk-detail select.atk-abil{width:auto;flex:0 0 auto;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;padding:0;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;}
+.atk-detail select.atk-abil::-ms-expand{display:none;}
+.atk-detail input.atk-dtype{width:62px;flex:0 1 auto;min-width:36px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;padding:0;border:none;border-bottom:1px solid transparent;background:transparent;outline:none;}
+.atk-detail input.atk-dtype:focus{border-bottom-color:var(--dnd);}
+.atk-detail .atk-mastery{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--dnd);background:transparent;border:none;border-bottom:1px dashed var(--rule);border-radius:0;padding:0 0 1px;cursor:pointer;}
+.atk-detail .atk-mastery:hover{color:var(--dnd-dk);border-bottom-style:solid;}
 .atk-field{display:flex;flex-direction:column;gap:1px;}
 .atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
 .atk-mastery{background:transparent;border:1px dashed var(--rule);border-radius:3px;color:var(--dnd);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:2px 6px;letter-spacing:.02em;}
 .atk-mastery:hover{background:var(--box);border-style:solid;}
-/* Locked: the ability picker reads as plain text (no dropdown arrow). */
-body:not(.unlocked) .atk-abil{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none;text-align:center;text-align-last:center;padding-right:4px;}
-body:not(.unlocked) .atk-abil::-ms-expand{display:none;}
 .sneak-btn{background:transparent;border:1px solid #8a5cc0;color:#8a5cc0;border-radius:3px;padding:5px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;margin-right:4px;}
 .sneak-btn:hover{background:#8a5cc0;color:#fff;}
 .upcast-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 6px;font-size:11px;line-height:1;cursor:pointer;margin-right:3px;}
@@ -1118,7 +1127,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
         <div class="tab-scroll" id="turn-scroll">
           <section class="turn-sec" id="turn-attacks-sec">
             <div class="turn-sec-hd" onclick="toggleTurnSec('attacks')"><span class="tsh-caret">▾</span><span class="tsh-title">Attacks</span><span class="tsh-note" id="turn-atk-note"></span></div>
-            <div class="turn-sec-body"><div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div></div>
+            <div class="turn-sec-body"><div class="tbl-scroll"><table class="tbl atk-tbl"><thead><tr><th>Name</th><th>Bonus</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div></div>
           </section>
           <div id="turn-body"></div>
         </div>
@@ -1736,18 +1745,14 @@ function addAttackRow(a){
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
     '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()">' +
-      '<div class="atk-subline">' +
-        '<div class="atk-field"><span class="atk-sub">Type</span><input type="text" class="atk-dtype mono" value="' + esc(a.type) + '" placeholder="slashing" style="width:72px;font-size:10px;" oninput="scheduleAutosave()"></div>' +
-        (a.mastery ? '<div class="atk-field"><span class="atk-sub">Mastery</span><button class="atk-mastery" onclick="openMastery(\'' + esc(a.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(a.mastery) + '</button></div>' : '') +
+      '<div class="atk-detail">' +
+        '<select class="atk-abil" onchange="scheduleAutosave()" title="Ability used for this attack">' + abilOpts + '</select>' +
+        '<span class="atk-dot">·</span><input type="text" class="atk-dtype" value="' + esc(a.type) + '" placeholder="type" title="Damage type" oninput="scheduleAutosave()">' +
+        (a.mastery ? '<span class="atk-dot">·</span><button class="atk-mastery" onclick="openMastery(\'' + esc(a.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(a.mastery) + '</button>' : '') +
       '</div>' +
     '</td>' +
-    '<td><div class="atk-grp">' +
-      '<div class="atk-field"><span class="atk-sub">Ability</span><select class="atk-abil" onchange="scheduleAutosave()" style="width:46px;">' + abilOpts + '</select></div>' +
-      '<div class="atk-field"><span class="atk-sub">Bonus</span><input type="number" class="atk-bonus mono" value="' + bonus + '" title="To-hit and damage bonus (magic weapons fill this automatically)" style="width:40px;" oninput="scheduleAutosave()"></div>' +
-    '</div></td>' +
-    '<td><div class="atk-grp">' +
-      '<div class="atk-field"><span class="atk-sub">Damage</span><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:66px;" oninput="scheduleAutosave()"></div>' +
-    '</div></td>' +
+    '<td><input type="number" class="atk-bonus mono" value="' + bonus + '" title="To-hit and damage bonus (magic weapons fill this automatically)" oninput="scheduleAutosave()"></td>' +
+    '<td><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" oninput="scheduleAutosave()"></td>' +
     '<td class="roll-cell atk-actions" style="white-space:nowrap;text-align:right;"></td>';
   $('attacks-body').appendChild(tr);
   renderAtkActions(tr);
@@ -2728,26 +2733,29 @@ function slotArray(){
   const mcl = multiCasterLevel(); return (mcl >= 1 && t.fullCasterSlots) ? t.fullCasterSlots[mcl-1] : null;
 }
 function pactInfo(){ const w = warlockEntry(), t = D.tables(); if(!w || !t || !t.pactMagic) return null; return t.pactMagic[num(w.cl.level)-1] || null; }
+// Shared spell-slot pips (the Turn-tab style, used on both the Turn and Spells tabs).
+// Slots are consumed right-to-left: a pip is "used" when it is among the rightmost
+// `used` pips of its level, so the leftmost pips are the ones that stay available.
+function slotPipsHTML(){
+  if(!isCaster()) return '';
+  const arr = slotArray(); let h = '';
+  const group = (key, lbl, max) => {
+    const used = slotUsed[key] || 0; let pips = '';
+    for(let j=1;j<=max;j++) pips += '<span class="tslot-pip' + (j > max - used ? ' used' : '') + '" onclick="toggleSlot(\'' + key + '\',' + j + ',' + max + ')"></span>';
+    return '<span class="tslot"><button class="tslot-lbl" onclick="resetSlot(\'' + key + '\')" title="Reset ' + esc(lbl) + ' slots">' + esc(lbl) + '</button>' + pips + '</span>';
+  };
+  if(arr) arr.forEach((max, i) => { if(max > 0) h += group(String(i+1), 'L' + (i+1), max); });
+  const pm = pactInfo();
+  if(pm && pm.slots > 0) h += group('pact', 'Pact L' + pm.level, pm.slots);
+  return h;
+}
 function renderSlots(){
   if(!isCaster()){ $('spell-slots').innerHTML=''; renderSpells(); return; }
-  const box = $('spell-slots'); box.innerHTML = '';
-  const cols = document.createElement('div'); cols.className = 'slot-cols';
-  const arr = slotArray();
-  if(arr) arr.forEach((max, i) => { if(max > 0) cols.appendChild(slotCol(String(i+1), 'Lvl ' + (i+1), max)); });
-  const pm = pactInfo();
-  if(pm && pm.slots > 0) cols.appendChild(slotCol('pact', 'Pact ' + pm.level, pm.slots));
-  if(cols.children.length) box.appendChild(cols);
+  const pips = slotPipsHTML();
+  $('spell-slots').innerHTML = pips ? '<div class="turn-slots slot-slots">' + pips + '</div>' : '';
   renderSpells();
 }
-// One column per spell level: pips on top, the "Lvl N" label below (click to reset).
-function slotCol(key, label, max){
-  const wrap = document.createElement('div'); wrap.className = 'slot-col';
-  const used = slotUsed[key] || 0;
-  let pips = ''; for(let i=1;i<=max;i++) pips += '<span class="slot-pip' + (i<=used?' used':'') + '" onclick="toggleSlot(\'' + key + '\',' + i + ',' + max + ')"></span>';
-  wrap.innerHTML = '<div class="slot-col-pips">' + pips + '</div><button class="slot-col-lbl" onclick="resetSlot(\'' + key + '\')" title="Reset ' + esc(label) + ' slots">' + esc(label) + '</button>';
-  return wrap;
-}
-function toggleSlot(key, i, max){ const used = slotUsed[key] || 0; slotUsed[key] = (i <= used ? i-1 : i); renderSlots(); scheduleAutosave(); }
+function toggleSlot(key, i, max){ const used = slotUsed[key] || 0; slotUsed[key] = (i > max - used ? max - i : max - i + 1); renderSlots(); scheduleAutosave(); }
 function resetSlot(key){ slotUsed[key] = 0; renderSlots(); scheduleAutosave(); }
 function spellByName(n){ return D.spells().find(s => norm(s.name) === norm(n)) || null; }
 // Shared spell-row markup. opts: prep (show the Prepared checkbox), nameInput
@@ -3033,8 +3041,19 @@ function setTab(name){
     const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
   });
   if(name === 'turn') renderTurn();
+  syncTabHeight();
 }
 function setDefaultTab(){ setTab(_tab || (isCaster() ? 'spells' : 'features')); }
+// Size the tab panel so its bottom lines up with the bottom of the Abilities
+// column (the left region). No-op in the single-column (narrow) layout.
+function syncTabHeight(){
+  const lr = document.querySelector('.left-region'), bar = document.querySelector('.tabs-bar');
+  if(!lr || !bar) return;
+  if(getComputedStyle(lr).display === 'contents'){ document.documentElement.style.removeProperty('--tab-h'); return; }
+  const h = Math.round(lr.getBoundingClientRect().bottom - bar.getBoundingClientRect().bottom);
+  if(h >= 320) document.documentElement.style.setProperty('--tab-h', h + 'px');
+  else document.documentElement.style.removeProperty('--tab-h');
+}
 
 // ═══ TURN HUB ═════════════════════════════════════════════════════════════
 // A per-turn action-economy dashboard. Each subtab lists every Action / Bonus
@@ -3215,10 +3234,7 @@ function turnSpellsHTML(sub){
 function renderTurnSlots(){
   const box = $('turn-slots'); if(!box) return;
   if(!isCaster()){ box.innerHTML = ''; return; }
-  const arr = slotArray(); let h = '';
-  if(arr) arr.forEach((max, i) => { if(max > 0){ const key = String(i+1), used = slotUsed[key]||0; let pips = ''; for(let j=1;j<=max;j++) pips += '<span class="tslot-pip' + (j<=used?' used':'') + '" onclick="toggleSlot(\'' + key + '\',' + j + ',' + max + ')"></span>'; h += '<span class="tslot"><span class="tslot-lbl">L' + (i+1) + '</span>' + pips + '</span>'; } });
-  const pm = pactInfo(); if(pm && pm.slots > 0){ const used = slotUsed['pact']||0; let pips = ''; for(let j=1;j<=pm.slots;j++) pips += '<span class="tslot-pip' + (j<=used?' used':'') + '" onclick="toggleSlot(\'pact\',' + j + ',' + pm.slots + ')"></span>'; h += '<span class="tslot"><span class="tslot-lbl">Pact L' + pm.level + '</span>' + pips + '</span>'; }
-  box.innerHTML = h || '<span class="tslot-none">No spell slots</span>';
+  box.innerHTML = slotPipsHTML() || '<span class="tslot-none">No spell slots</span>';
 }
 function renderTurn(){
   const panel = $('tab-turn'); if(!panel) return;
@@ -3615,6 +3631,11 @@ document.addEventListener('blur', function(e){ const t = e.target; if(t && ((t.d
 // ═══ INIT (core) ══════════════════════════════════════════════════════════
 try { if(localStorage.getItem('dnd_dark') === '1') setDarkMode(true); } catch(e){}
 buildAbilities();
+// Keep the tab panel's bottom aligned with the Abilities column as content/size changes.
+window.addEventListener('resize', syncTabHeight);
+window.addEventListener('load', syncTabHeight);
+try { const _lr = document.querySelector('.left-region'); if(_lr && window.ResizeObserver){ new ResizeObserver(() => syncTabHeight()).observe(_lr); } } catch(e){}
+setTimeout(syncTabHeight, 0);
 </script>
 
 <script>
