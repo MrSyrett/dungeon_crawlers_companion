@@ -124,10 +124,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-logo{min-width:0;}
 .hdr-name-row{display:flex;align-items:flex-end;gap:10px;min-width:0;}
 .hdr-name-row .name-primary{flex:1 1 auto;min-width:0;}
-.lock-toggle{display:inline-flex;align-items:center;justify-content:center;align-self:flex-end;flex:0 0 auto;width:38px;height:38px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:9px;cursor:pointer;transition:background .12s,border-color .12s;}
-.lock-toggle:hover{background:rgba(255,255,255,.26);}
-.lock-toggle.on{background:rgba(110,220,140,.26);border-color:rgba(150,240,170,.8);}
-.lock-toggle .lk-ico{font-size:18px;line-height:1;}
+.log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
+.log-lock:hover{background:rgba(255,255,255,.35);}
+.log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
+.log-lock .lk-ico{font-size:15px;line-height:1;}
 /* Unlocked: show which automated fields are now hand-editable. */
 body.unlocked #f-ac[contenteditable="true"],body.unlocked #f-speed[contenteditable="true"],body.unlocked #f-hp-max[contenteditable="true"],body.unlocked #c-init[contenteditable="true"],body.unlocked #c-prof[contenteditable="true"]{outline:1px dashed var(--dnd);outline-offset:2px;border-radius:4px;cursor:text;}
 body.unlocked .abil-score{border-color:var(--dnd)!important;cursor:text;}
@@ -262,7 +262,7 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-sec-body .spell-row.turn-dis{opacity:.42;}
 .turn-sec-body .spell-row.turn-dis .cast-btn{background:var(--muted);pointer-events:none;}
 .turn-sec-body .spell-row.turn-dis .sp-name-txt{text-decoration:line-through;text-decoration-thickness:1px;color:var(--muted);}
-.sp-name-txt{flex:1 1 auto;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;color:var(--ink);line-height:1.2;}
+.sp-name-txt{flex:1 1 auto;min-width:0;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;color:var(--ink);line-height:1.2;}
 .turn-empty{font-size:12px;color:var(--muted);padding:12px;line-height:1.5;}
 .mini-roll.dis,.sneak-btn.dis{opacity:.4;}
 
@@ -436,11 +436,13 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .row-i{background:transparent;border:none;color:#5a9bd4;cursor:pointer;font-size:14px;padding:0 4px;line-height:1;}
 .row-i:hover{color:var(--dnd);}
 .cbt input.auto{color:var(--dnd-dk);}
-.conc-bar{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:4px 10px;background:rgba(90,155,212,.12);border:1px solid #5a9bd4;border-radius:4px;}
-.conc-bar .conc-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#5a9bd4;}
-.conc-bar .conc-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--ink);}
-.conc-bar .conc-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;}
-.conc-bar .conc-x:hover{color:var(--red);}
+/* Concentration badge — shared by the Spells header and the Turn tab. */
+.conc-badge{display:inline-flex;align-items:center;gap:5px;max-width:190px;background:rgba(90,155,212,.16);border:1px solid #5a9bd4;border-radius:12px;padding:1px 5px 1px 8px;flex:0 0 auto;}
+.conc-badge .cb-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#4d8bc4;flex:0 0 auto;}
+.conc-badge .cb-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;color:#2f6b9e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body.dark .conc-badge .cb-name{color:#8fc3ec;}
+.conc-badge .cb-x{background:transparent;border:none;color:#5a9bd4;cursor:pointer;font-size:12px;line-height:1;padding:0 1px;flex:0 0 auto;}
+.conc-badge .cb-x:hover{color:var(--red);}
 .cast-lvls{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
 .cast-lvl-btn{flex:1 1 30%;}
 .base-pick-btn{display:block;width:100%;text-align:left;margin-bottom:4px;}
@@ -449,8 +451,10 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .inv-qty-cell{width:44px;}
 .tbl .inv-qty{width:36px;text-align:center;}
 .inv-detail{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;color:var(--muted);line-height:1.25;letter-spacing:.02em;text-transform:uppercase;white-space:normal;}
-.inv-detail .inv-cost{font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:var(--ink);white-space:nowrap;}
-.inv-detail .inv-cost + .inv-notes{margin-left:2px;}
+.inv-subline{margin-top:2px;}
+.inv-subline:empty{display:none;}
+.inv-val-cell{width:64px;white-space:nowrap;}
+.inv-cost-val{font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;color:var(--ink);}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
 .notes-box{padding:8px 10px;}
 .notes-box textarea{width:100%;min-height:80px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:13px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
@@ -462,8 +466,8 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .tap-more{font-family:'Barlow Condensed',sans-serif;font-size:9px;color:var(--dnd);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
 
 /* SPELLS */
-.spell-head{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;padding:8px 10px;border-bottom:1px solid var(--rule);}
-.spell-head .sh-box{flex:0 1 auto;min-width:72px;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:5px 8px;text-align:center;}
+.spell-head{display:flex;flex-wrap:nowrap;gap:8px;padding:8px 10px;border-bottom:1px solid var(--rule);}
+.spell-head .sh-box{flex:1 1 0;min-width:0;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:5px 8px;text-align:center;}
 .spell-head .sh-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.1;}
 .spell-head .sh-val{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--dnd-dk);}
 .spell-head .sh-val.click{cursor:pointer;}.spell-head .sh-box.click:hover{background:var(--dnd-lt);}
@@ -998,7 +1002,6 @@ body.dark .tabs-bar{background:#1a1a1f;}
         <div class="lg-word">Dungeons &amp; Dragons</div><div class="lg-sub">2024 Character Sheet</div>
       </div>
       <div class="hdr-name-row">
-        <button id="lock-toggle" class="lock-toggle" onclick="toggleLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (automated). Click to unlock for manual editing."><span class="lk-ico">🔒</span></button>
         <div class="hdr-field name-primary"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
       </div>
     </div>
@@ -1113,6 +1116,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
           </div>
           <div class="turn-row2">
             <div class="turn-slots" id="turn-slots"></div>
+            <span class="conc-badge" id="turn-conc" style="display:none;"></span>
             <div class="turn-move" title="Movement left this turn — type to set">
               <span class="tm-lbl">Move</span>
               <span class="tm-val"><b id="turn-move-left" contenteditable="true" inputmode="numeric" spellcheck="false" onfocus="moveFocus(this)" onblur="setMoveLeft(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">30</b><span class="tm-slash">/</span><span id="turn-move-max">30</span> ft</span>
@@ -1135,14 +1139,13 @@ body.dark .tabs-bar{background:#1a1a1f;}
 
       <!-- SPELLS TAB -->
       <div class="tab-panel tab-split" id="tab-spells">
-        <div class="section-bar"><span>Spellcasting</span><span class="sb-ability" id="sp-ability" title="Spellcasting ability"></span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">Spells</button></span></div>
-        <div id="conc-bar" class="conc-bar" style="display:none;"></div>
+        <div class="section-bar"><span>Spellcasting</span><span class="hdr-right"><span class="conc-badge" id="sp-conc" style="display:none;"></span><span class="sb-ability" id="sp-ability" title="Spellcasting ability"></span><button class="hdr-btn" onclick="openBook()">Spells</button></span></div>
         <div id="spell-block" style="display:none;">
           <div class="spell-head">
             <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk" data-ov="spAtk">+0</div></div>
             <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc" data-ov="spDC">8</div></div>
-            <div class="sh-box" id="sp-prep-box" style="display:none;" title="Leveled spells prepared vs your maximum (edit the max when unlocked)"><div class="sh-lbl">Prepared Spells</div><div class="sh-val" id="sp-prep-val" data-ov="prepMax">0/0</div></div>
             <div class="sh-box" id="sp-prep-cantrip-box" style="display:none;" title="Cantrips prepared vs your maximum (edit the max when unlocked)"><div class="sh-lbl">Prepared Cantrips</div><div class="sh-val" id="sp-prep-cantrip-val" data-ov="cantripMax">0/0</div></div>
+            <div class="sh-box" id="sp-prep-box" style="display:none;" title="Leveled spells prepared vs your maximum (edit the max when unlocked)"><div class="sh-lbl">Prepared Spells</div><div class="sh-val" id="sp-prep-val" data-ov="prepMax">0/0</div></div>
           </div>
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
@@ -1175,7 +1178,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
           <label style="font-size:11px;color:var(--muted);">CP <input id="f-cp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
           <span id="carry-weight" style="margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;" title="Carried weight vs carrying capacity (STR × 15 lb)"></span>
         </div>
-        <div class="tbl-scroll"><table class="tbl inv-tbl"><thead><tr><th>Item</th><th>Qty</th><th>Details</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+        <div class="tbl-scroll"><table class="tbl inv-tbl"><thead><tr><th>Item</th><th>Qty</th><th>Value</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
       </div>
 
       <!-- NOTES TAB -->
@@ -1210,7 +1213,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
   <div class="log-header">
     <div class="log-title">Roll Log</div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear" onclick="clearLog()">Clear</button>
+      <button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (automated). Click to unlock for manual editing."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button>
     </div>
   </div>
   <div class="log-actions">
@@ -1695,10 +1698,12 @@ function concentrationCheck(dmg){
   addLog('Concentration', (ok ? 'Held ' : 'Broken ') + sgn(total), 'DC ' + dc + ' CON save · ' + d20Detail(r) + ' ' + sgn(mod) + (ctx.note ? ' · ' + ctx.note : ''), ok ? 'normal' : 'fumble');
   if(!ok) dropConcentration(true);
 }
+function concBadgeHTML(){
+  return '<span class="cb-lbl">Conc</span><span class="cb-name">' + esc(_concentration) + '</span><button class="cb-x" onclick="dropConcentration()" title="Stop concentrating on ' + esc(_concentration) + '">✕</button>';
+}
 function renderConcentration(){
-  const bar = $('conc-bar'); if(!bar) return;
-  if(_concentration){ bar.style.display = ''; bar.innerHTML = '<span class="conc-lbl">Concentrating</span><span class="conc-name">' + esc(_concentration) + '</span><button class="conc-x" onclick="dropConcentration()" title="Stop concentrating">✕</button>'; }
-  else { bar.style.display = 'none'; bar.innerHTML = ''; }
+  const show = !!_concentration, html = show ? concBadgeHTML() : '';
+  ['sp-conc','turn-conc'].forEach(id => { const el = $(id); if(el){ el.style.display = show ? '' : 'none'; el.innerHTML = html; } });
 }
 // ── Dice-pool tray: tap dice to build a pool, then roll the whole pool ──
 let dicePool = [];
@@ -1882,9 +1887,9 @@ function addInvRow(it){
   if(num(it.plus)) tr.dataset.plus = num(it.plus);   // a +N base weapon/armor (magic enhancement)
   if(it.scroll) tr.dataset.scroll = it.scroll;       // the spell a Spell Scroll contains
   tr.innerHTML =
-    '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></td>' +
+    '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"><div class="inv-detail inv-subline"></div></td>' +
     '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" oninput="scheduleAutosave();updateCarry()"></td>' +
-    '<td class="inv-detail"></td>' +
+    '<td class="inv-val-cell"><span class="inv-cost-val"></span></td>' +
     '<td class="inv-actions"></td>';
   $('inv-body').appendChild(tr);
   renderInvActions(tr);
@@ -1892,13 +1897,14 @@ function addInvRow(it){
   const nm = tr.querySelector('.inv-name'); if(nm) nm.readOnly = _locked;
   return tr;
 }
-// A compact read-out for the Details column: gold value + weapon damage/props,
-// armor AC, or magic rarity/attunement — pulled from the resolved catalog item.
-function invDetailHTML(tr){
+// The item's Value (gold cost) and its detail notes (weapon damage/props, armor AC,
+// magic rarity/attunement, gear category) — pulled from the resolved catalog item.
+// Value shows in its own column next to Qty; notes go on a second line under the name.
+function invRowParts(tr){
   // A Spell Scroll shows the contained spell's info instead of the generic scroll blurb.
-  if(tr.dataset.scroll){ const sp = spellByName(tr.dataset.scroll); if(sp) return '<span class="inv-notes">' + esc((sp.level === 0 ? 'Cantrip' : 'Lvl ' + sp.level) + ' · ' + sp.school + ' · ' + shortCastTime(sp.castingTime) + ' · ' + sp.range) + '</span>'; }
+  if(tr.dataset.scroll){ const sp = spellByName(tr.dataset.scroll); if(sp) return { cost:'', notes: (sp.level === 0 ? 'Cantrip' : 'Lvl ' + sp.level) + ' · ' + sp.school + ' · ' + shortCastTime(sp.castingTime) + ' · ' + sp.range }; }
   const it = itemData(invRowRef(tr));
-  if(!it) return '';
+  if(!it) return { cost:'', notes:'' };
   const notes = [];
   const plus = num(tr.dataset.plus || 0); if(plus) notes.push('+' + plus + ' magic');
   if(it.damage){                                   // weapon
@@ -1915,11 +1921,13 @@ function invDetailHTML(tr){
   } else if(it.category){                           // gear
     notes.push(it.category);
   }
-  const cost = it.cost ? '<span class="inv-cost">' + esc(it.cost) + '</span>' : '';
-  const note = notes.length ? '<span class="inv-notes">' + esc(notes.join(' · ')) + '</span>' : '';
-  return [cost, note].filter(Boolean).join(' ');
+  return { cost: it.cost ? String(it.cost) : '', notes: notes.join(' · ') };
 }
-function renderInvDetail(tr){ const cell = tr.querySelector('.inv-detail'); if(cell) cell.innerHTML = invDetailHTML(tr); }
+function renderInvDetail(tr){
+  const parts = invRowParts(tr);
+  const sub = tr.querySelector('.inv-subline'); if(sub) sub.textContent = parts.notes;
+  const val = tr.querySelector('.inv-cost-val'); if(val) val.textContent = parts.cost;
+}
 function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
 function onInvNameChange(input){
   const tr = input.closest('tr');
@@ -2707,7 +2715,6 @@ function renderSpellHeader(){
     // left alone while being edited.
     if(document.activeElement !== $('sp-dc')) $('sp-dc').textContent = spellDC();
     if(document.activeElement !== $('sp-atk')) $('sp-atk').textContent = sgn(spellAtkBonus());
-    $('spell-note').textContent = casterType().charAt(0).toUpperCase() + casterType().slice(1) + ' caster';
     const pmax = preparedMax(), pbox = $('sp-prep-box');
     if(pbox){
       if(pmax > 0){ pbox.style.display = ''; const now = preparedNow(), el = $('sp-prep-val'); if(document.activeElement !== el){ el.textContent = now + '/' + pmax; el.style.color = now > pmax ? 'var(--red)' : ''; } }
@@ -2718,7 +2725,7 @@ function renderSpellHeader(){
       if(cmax > 0){ cbox.style.display = ''; const now = preparedCantripNow(), el = $('sp-prep-cantrip-val'); if(document.activeElement !== el){ el.textContent = now + '/' + cmax; el.style.color = now > cmax ? 'var(--red)' : ''; } }
       else cbox.style.display = 'none';
     }
-  } else { $('spell-note').textContent = 'No spellcasting'; $('sp-ability').textContent = ''; }
+  } else { $('sp-ability').textContent = ''; }
 }
 // Regular (Vancian) slots: a single caster uses its own table; multiple casters use
 // the full-caster table at the combined caster level (RAW multiclass rule).
