@@ -21,7 +21,7 @@ export const DND_ABILITY_NAMES: Record<DndAbility, string> = {
 
 /** Source book an entry comes from; "srd" marks CC-BY licensed text.
  *  "Homebrew" marks a user-created entry (lib/homebrew.ts) merged into a pool. */
-export type DndSource = "phb" | "dmg" | "mm" | "srd" | "eberron" | "forgotten-realms" | "Homebrew";
+export type DndSource = "phb" | "dmg" | "mm" | "srd" | "eberron" | "forgotten-realms" | "arcana-unleashed" | "Homebrew";
 
 export type DndDamageType =
   | "acid" | "bludgeoning" | "cold" | "fire" | "force" | "lightning"
