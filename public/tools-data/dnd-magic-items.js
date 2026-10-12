@@ -1504,6 +1504,429 @@ const DND_MAGIC_ITEMS = [
     "attunement": true,
     "description": "Naming a target as your sworn enemy grants Advantage against it, extra 3d6 piercing damage on hits, and other benefits, but leaves you with Disadvantage on attacks against other creatures until the enemy is dead or you rest.",
     "source": "srd"
+  },
+  {
+    "name": "Conjurer's Canopy",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "A magical walking stick you can plant in the ground to project a 20-foot Cube canopy of transparent force for 1 hour, keeping the area comfortable and dry regardless of weather. Creatures and effects pass through freely. Once it ends, the stick can't be used again for 1d12 hours.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Dictation Quill",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "Set beside paper and ink, this quill transcribes your spoken or signed words at 25 words per minute for up to 1 hour (or until it runs out of paper or ink, or you command it to stop).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Elocutionist's Lexicon",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "While holding this dictionary, you can take a Magic action to recall a word, and the book opens automatically to the page containing it.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Ensorcelled Missive",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "A sheet of parchment you can seal with a spoken or signed word. Anyone who unseals it without the same word sees the writing as unintelligible script.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Evergreen Fertilizer",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "Sprinkled on the soil around a nonmagical plant, this powder keeps the plant healthy for 365 days.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Homeward Compass",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "You can orient this brass compass to your current location, after which its needle always points there until you reorient it. It spins aimlessly when unset or on a different plane than its target.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Lucky Foot",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "When you roll a 1 on a saving throw or ability check, you can reroll using this preserved rabbit foot (you must use the new roll); the foot then disintegrates.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Spell Component Ring",
+    "type": "Ring",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "Stores the Material component of one prepared spell (no listed cost, not consumed). While you wear the ring, you don't need a free hand to access that component when casting the stored spell.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Sweeping Broom",
+    "type": "Wondrous Item",
+    "rarity": "Common",
+    "attunement": false,
+    "description": "On command, this broom animates and sweeps dust and detritus from a 20-foot square you designate within 60 feet, continuing until you deactivate it.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Boon Companions' Bands",
+    "type": "Ring",
+    "rarity": "Uncommon",
+    "attunement": false,
+    "description": "A matched pair of rings. When you cast a spell or use a feature forcing an area save, the wearer of the matching band automatically succeeds and takes no damage from it. Usable once per dawn; if one band is destroyed the other crumbles.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Dispelling Ammunition",
+    "type": "Weapon (any ammunition)",
+    "rarity": "Uncommon",
+    "attunement": false,
+    "description": "When this ammunition damages a target, any ongoing spell of level 3 or lower on the target ends. It then becomes nonmagical.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Goading Ammunition",
+    "type": "Weapon (any ammunition)",
+    "rarity": "Uncommon",
+    "attunement": false,
+    "description": "When this ammunition hits and damages a creature, it makes a DC 13 Charisma save or can't take Reactions until the start of its next turn. It then becomes nonmagical.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Magewright's Gloves",
+    "type": "Wondrous Item",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "description": "While worn, you work as efficiently as two characters when crafting nonmagical items with Alchemist's Supplies, Brewer's Supplies, Calligrapher's Supplies, Cartographer's Tools, Glassblower's Tools, or Jeweler's Tools.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Martialist's Quarterstaff",
+    "type": "Weapon (quarterstaff)",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "description": "A Quarterstaff with 4 charges (regains 1d4 at dawn). Expend charges to cast Searing Smite (DC 13), to give the staff the Thrown property that returns it to your hand, or to gain Advantage on a melee attack that can knock the target Prone.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Orb of Divination Detection",
+    "type": "Wondrous Item",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "description": "When you are targeted by a Divination spell, this glass orb glows bright green for the spell's duration. It can also serve as an Arcane Focus.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Orb of Sorcery",
+    "type": "Wondrous Item",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "attunementNote": "by a Sorcerer",
+    "description": "As a Magic action you can regain up to 2 expended Sorcery Points (once per dawn). The orb also serves as a Spellcasting Focus for your Sorcerer spells.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Potion of Dragon's Breath",
+    "type": "Potion",
+    "rarity": "Uncommon",
+    "attunement": false,
+    "description": "When drunk, grants the effect of the Dragon's Breath spell for 1 minute (save DC 13, no Concentration). The damage type (acid, lightning, poison, fire, or cold) depends on the potion's color.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Potion of Tirelessness",
+    "type": "Potion",
+    "rarity": "Uncommon",
+    "attunement": false,
+    "description": "For 24 hours after drinking, you don't need to sleep and can't be magically put to sleep, and you can finish a Long Rest in 4 hours of quiet, conscious focus.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Ring of Dedicated Focus",
+    "type": "Ring",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "description": "When you fail a Constitution save to maintain Concentration, you can roll up to two unexpended Hit Dice and add the total to the save, possibly turning the failure into a success. The dice are then expended.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Spell-Slinger's Puppet",
+    "type": "Wondrous Item",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "description": "As a Bonus Action you can make this ventriloquist's doll levitate and hover within 30 feet, moving it with later Bonus Actions, for up to 1 minute. While it hovers nearby you can speak through its mouth — letting you cast spells with Verbal components even when you can't speak.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Thespian's Playbill",
+    "type": "Wondrous Item",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "description": "While holding this theater program, when you take the Study action and make an Intelligence check you add your Charisma modifier (minimum +1) to the check.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Thief's Thimble",
+    "type": "Wondrous Item",
+    "rarity": "Uncommon",
+    "attunement": true,
+    "description": "While worn, if you trigger a trap and take damage, the thimble (30 HP) takes it instead. If reduced to 0 HP it breaks and you take any remaining damage.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Wand of Freshness",
+    "type": "Wand",
+    "rarity": "Uncommon",
+    "attunement": false,
+    "description": "A wand with 4 charges (regains 1d4+1 at dawn). Expend 1 charge to cast Purify Food and Drink.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Arcane Chatelaine",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": false,
+    "description": "An ornate clasp with six spectral keys. As a Magic action, touch a key to a closed door, container, or hatch to cast Arcane Lock on it; the key then vanishes. When all six are gone, the chatelaine disappears.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Arcanist's Bestiary",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": true,
+    "description": "A monster tome. Cast Charm Monster (DC 15) from it once per dawn (non-Humanoids have Disadvantage on the save). Gain a chosen Arcana/History/Nature/Religion proficiency while attuned, and when you Study an Aberration, Construct, Elemental, Fey, or Monstrosity you can see, a successful Arcana check reveals its Immunities, Resistances, and Vulnerabilities.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Bellows of Strangulation",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": false,
+    "description": "A bellows with 6 charges (regains 1d6+1 at dawn). Spend charges for one of three command-word effects: Incapacitate one creature within 60 feet (DC 15 Con), Incapacitate creatures in a 30-foot Cone, or cast Cloudkill (DC 17). If you spend its last charge, roll 1d20; on a 1 it is lost.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Blood Amulet",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": true,
+    "description": "A spiked heart-shaped amulet with 3 charges (regains 1d3 at dawn). When you deal damage, expend 1 charge to deal an extra 2d10 Necrotic damage and force a DC 15 Constitution save; on a failure the target gains 1 Exhaustion level.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Dissuader",
+    "type": "Staff",
+    "rarity": "Rare",
+    "attunement": true,
+    "description": "A Quarterstaff granting +1 to attack and damage rolls. Each of the following works once per dawn: cast Calm Emotions (DC 15); create a 30-foot Emanation that can Frighten creatures (DC 15 Wis); or, as a Reaction when a creature comes within 5 feet, push chosen creatures up to 30 feet (DC 15 Str).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Dream Weaver",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": true,
+    "description": "A tapestry that reweaves to depict your dreams. While hung and within 30 feet: during a Long Rest you can study it to bank a d20 result to replace one later D20 Test; if you're targeted by Dream, it records the caster; and while Unconscious you have Advantage on Int, Wis, and Cha saves.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Mage Breaker",
+    "type": "Weapon (dagger)",
+    "rarity": "Rare",
+    "attunement": false,
+    "description": "A magic Dagger granting +1 to attack and damage rolls. When you hit and damage a concentrating creature, it has Disadvantage on the save to maintain Concentration.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Mage's Manacle",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": false,
+    "description": "As a Magic action, target a Large or smaller Grappled or Incapacitated creature within 5 feet; it makes a DC 15 Dexterity save or is bound by a spectral chain, Restrained and moving with you, for 8 hours or until released. Only Disintegrate can break it. Usable once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Namer's Needle",
+    "type": "Weapon (dagger)",
+    "rarity": "Rare",
+    "attunement": false,
+    "description": "A magic Dagger granting +1 to attack and damage rolls. On a hit you can force a DC 15 Wisdom save or the target must clearly state its name. Alternatively, say the target's name on a hit to turn it into a Critical Hit (once per dawn).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Prismatic Rune",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": true,
+    "attunementNote": "by a Spellcaster",
+    "description": "A quartz stone with 6 charges (regains 1d6 at dawn). On each Long Rest choose Acid, Cold, Fire, Lightning, or Thunder. When you cast a damaging spell, expend 1 charge to change its damage type to the chosen type.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Scholar's Anchoring Bangle",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": true,
+    "description": "While worn: when you Study using a skill you're proficient in, you can treat a d20 roll of 9 or lower as a 10; and when you fail a Constitution save to maintain Concentration, you can take a Reaction to succeed instead (once per dawn).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Secret Keeper's Circlet",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": true,
+    "description": "As a Magic action, set a trigger; for 24 hours, if that trigger occurs the circlet erases your memories from the time you set it until the trigger fired. Only a Wish spell can restore them. Usable once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Spell Duelist's Trophy",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": true,
+    "attunementNote": "by a Spellcaster",
+    "description": "A worn hand or talon. On a hit with a melee spell attack you can cast Dispel Magic on the target as part of the attack (once per dawn). You can cast your spells without Somatic components, and you can cast Mage Hand from the trophy.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Wand of Slumber",
+    "type": "Wand",
+    "rarity": "Rare",
+    "attunement": true,
+    "description": "A wand with 7 charges (regains 1d6+1 at dawn). Expend charges to cast Catnap (3 charges) or Sleep (1 charge, DC 15). If you spend the last charge, roll 1d20; on a 1 it crumbles to sand.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Wand of Teeth",
+    "type": "Wand",
+    "rarity": "Rare",
+    "attunement": false,
+    "description": "A wand with 10 charges (regains 1d10 at dawn). As a Magic action, expend up to 3 charges to spray spectral teeth in a 30-foot Cone; creatures make a DC 15 Dexterity save, taking Piercing damage (one d8 per charge) and the Poisoned condition on a failure, half damage on a success. If you spend the last charge, roll 1d20; on a 1 it is destroyed.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Staff of the Lost",
+    "type": "Staff",
+    "rarity": "Very Rare",
+    "attunement": true,
+    "description": "A Quarterstaff granting +1 to attack and damage rolls, with 3 charges. Expend 1 charge to cast Maze (DC 18) or Teleport; at 0 charges it becomes nonmagical. Cursed: while attuned you won't part with it, never know which way is north, and have Disadvantage on Survival checks to navigate — and on a 1 when expending a charge, 1d4 minotaurs appear and attack.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Tramontane Armor",
+    "type": "Armor (any light or medium)",
+    "rarity": "Very Rare",
+    "attunement": true,
+    "description": "Armor disguised as a robe, granting +1 AC. Difficult Terrain of snow, ice, rubble, or undergrowth costs you no extra movement. As a Magic action, activate ribbonlike tendrils; as a Bonus Action, force creatures in a 20-foot Emanation to make a DC 15 Strength save or be Grappled and pulled up to 20 feet toward you. Active 1 minute, once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Workshop Wrecker",
+    "type": "Wondrous Item",
+    "rarity": "Very Rare",
+    "attunement": false,
+    "description": "A metal ball that, when activated, ricochets through an enclosed area for 1 minute. On activation and at the start of each of your turns, creatures in the area make a Dexterity save (DC and Bludgeoning damage scale with how confined the space is, from 6d6+5 in a 15-foot Cube down to 1d6+1 in a 100-foot Cube). Usable once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Diamond Staff",
+    "type": "Staff",
+    "rarity": "Legendary",
+    "attunement": true,
+    "attunementNote": "by a Sorcerer, Warlock, or Wizard",
+    "description": "A crystal Quarterstaff granting +3 to attack and damage rolls, with 20 charges (regains 1d6+4 at dawn). Grants Advantage on Arcana checks; can shed Bright Light; can cast several spells (Detect Magic, Light, Identify, Knock, Tongues, True Seeing, Legend Lore, Maze) at varying charge costs; and lets you expend 2 charges on a melee hit to Stun the target (DC 17 Con). On a 1 when spending the last charge, it is destroyed.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Grave Reaper",
+    "type": "Weapon (sickle)",
+    "rarity": "Legendary",
+    "attunement": true,
+    "description": "A magic Sickle granting +2 to attack and damage rolls; hits deal an extra 2d8 Necrotic damage. You can cast Spirit Lantern (chapter 2) from it, with the lantern holding up to five soul fragments and a save DC of 17, once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Traveler's Pearl",
+    "type": "Wondrous Item",
+    "rarity": "Legendary",
+    "attunement": true,
+    "description": "On a command word, cast the Teleport spell from this pearl. Usable once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Queen Ehlissa's Marvelous Nightingale",
+    "type": "Wondrous Item",
+    "rarity": "Artifact",
+    "attunement": true,
+    "description": "A mechanical golden songbird that comes to life for 10 minutes to sing (audible within 300 feet). It has 6 charges (regains 1d6+1 at dawn) and can cast a range of spells (save DC 18) such as Calm Emotions, Compulsion, Delayed Blast Fireball, Greater Restoration, Prismatic Spray, and Slow at varying costs. While singing it projects a 15-foot Zone of Truth (DC 18) and lets you Reaction-cast Counterspell (DC 18, once per dawn). Carries the standard Artifact random properties; destroyed only by release into a whirlwind in Limbo.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Universal Pantograph",
+    "type": "Wondrous Item",
+    "rarity": "Artifact",
+    "attunement": false,
+    "description": "A 2-foot oak-and-silver box. A nonmagical item placed inside and closed is perfectly duplicated beside the box. As a Magic action it can grow to hold a Medium creature; with diamond dust worth 100+ GP it casts Clone on the creature inside, forming the duplicate over 120 days. Destroyed only by 999 years submerged in a Feywild bog.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Necklace of the Beastly Familiar",
+    "type": "Wondrous Item",
+    "rarity": "Varies",
+    "attunement": true,
+    "attunementNote": "by a Spellcaster",
+    "description": "A gem-set necklace with a matching charm for your familiar. Cast Find Familiar from it once per dawn. As a Magic action, transform your familiar within 60 feet into a Beast form for 10 minutes (gaining Temporary HP equal to the form's HP); the gemstone sets the form and the item's rarity — Azurite/Giant Octopus (Uncommon), Chrysoprase/Giant Scorpion and Zircon/Hippopotamus (Rare), Topaz/Mammoth (Very Rare), Fire opal/Tyrannosaurus Rex (Legendary).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Blossom Rod",
+    "type": "Rod",
+    "rarity": "Varies",
+    "attunement": true,
+    "attunementNote": "by a Spellcaster",
+    "description": "An evolving rod of living plant stems. Budding (Uncommon): cast Druidcraft or Plant Growth (Overgrowth, once/dawn) and rejuvenate plants in a 5-foot Cube. Flowering (Rare): also cast Insect Plague (bumblebees, once/dawn). Somniferous (Very Rare): also expel sleep pollen in a 30-foot Emanation (DC 17 Con or Unconscious 1 hour, once/dawn).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Idol of Good Fortunes",
+    "type": "Wondrous Item",
+    "rarity": "Varies",
+    "attunement": true,
+    "description": "An evolving elephant idol. Blemished (Uncommon): cast Augury from it once per dawn. Tarnished (Rare): +1 AC while attuned, and transform a nonmagical trade bar or gemstone into coins of equal value. Golden (Very Rare): also cast Globe of Invulnerability from it once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Keyholes Dagger",
+    "type": "Weapon (dagger)",
+    "rarity": "Varies",
+    "attunement": true,
+    "description": "An evolving Dagger with keyhole-adorned hilt. Three (Uncommon): +1 to attack and damage, and on the Attack action transform it into a Handaxe or Mace (use Str or Dex). Ten (Rare): +2, and transform into any Simple Melee weapon. Many (Very Rare): +3, transform into more martial weapons, and once per dawn reroll a missed attack.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Staff of Skulls",
+    "type": "Staff",
+    "rarity": "Varies",
+    "attunement": true,
+    "attunementNote": "by a Spellcaster",
+    "description": "An evolving staff of interlocking bones. Ominous (Uncommon): cast Chill Touch, Advantage on Intimidation checks, and the staff sheds Dim Light. Chattering (Rare): Reaction to impose Disadvantage on an attack roll within 30 feet. Pulverizing (Very Rare): point at a Humanoid you can see for 10d8 Necrotic damage and Prone (DC 17 Con, half on success), once per dawn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Wave-Swept Weapon",
+    "type": "Weapon (greatsword, longsword, rapier, scimitar, or shortsword)",
+    "rarity": "Varies",
+    "attunement": true,
+    "description": "An evolving ocean-themed weapon. Barnacled (Uncommon): +1 to attack and damage, and infuse up to a gallon of liquid with brine. Aquatic (Rare): +2, sheds light, grants waterbreathing and a 30-foot Swim Speed. Ascendant (Very Rare): +3 and a 30-foot Fly Speed.",
+    "source": "arcana-unleashed"
   }
 ];
 if (typeof window !== "undefined") window.DND_MAGIC_ITEMS = DND_MAGIC_ITEMS;
