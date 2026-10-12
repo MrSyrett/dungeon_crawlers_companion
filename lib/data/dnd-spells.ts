@@ -6930,5 +6930,614 @@ export const DND_SPELLS: DndSpell[] = [
     ],
     "description": "The most potent spell known, Wish lets you alter reality by speaking your desire aloud. Its simplest use duplicates any spell of 8th level or lower without needing that spell's components, but you can also do things like restore up to 20 creatures to full Hit Points, grant resistances, or undo recent events. When you push beyond the basic uses, the strain risks harming you: you take 1d10 Necrotic damage per spell level of any effect you replicate beyond the standard use, your Strength drops to 3 for several days, and there's a chance you can never cast Wish again.",
     "source": "srd"
+  },
+  {
+    "name": "Battle Familiar",
+    "level": 2,
+    "school": "Conjuration",
+    "castingTime": "Action",
+    "range": "10 feet",
+    "components": "V, S, M (a diamond worth 25+ GP)",
+    "duration": "1 hour",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Druid",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "You conjure a combat-ready familiar (a Celestial, Fey, or Fiend) in a Brute, Flyer, or Stalker form, using the Battle Familiar stat block. It is your ally, rolls its own Initiative, and makes Rend attacks (Force damage) scaling with the spell's level. You can have only one at a time. If you already have a Find Familiar familiar, this empowers it instead, replacing its statistics and granting it Temporary HP for the duration.",
+    "higherLevels": "Use the spell slot's level as the spell's level in the stat block (raising the familiar's HP and attacks).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Disruptive Tune",
+    "level": 2,
+    "school": "Abjuration",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "V, S",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Sorcerer",
+      "Wizard"
+    ],
+    "description": "A distracting melody fills a 20-foot-radius Sphere within range. Each creature in it makes a Constitution save; on a failure it loses Concentration and has Disadvantage on Constitution saves to maintain Concentration for the duration.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Dueling Ground",
+    "level": 2,
+    "school": "Abjuration",
+    "castingTime": "10 Minutes",
+    "range": "Touch",
+    "components": "V, S, M (a silk flag worth 100+ GP)",
+    "duration": "1 hour",
+    "concentration": false,
+    "ritual": true,
+    "classes": [
+      "Artificer",
+      "Bard",
+      "Cleric",
+      "Druid",
+      "Paladin",
+      "Ranger",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "You create a rune-scribed 15-foot-radius dueling circle and designate two willing creatures within it as targets. The spell ends if any other creature enters. A target reduced to 0 HP (or hit by an instant-death effect) is instead made Stable, Unconscious if needed, and teleported just outside the circle rather than dying.",
+    "higherLevels": "You can designate one additional willing creature for each slot level above 2.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Uncertain Footing",
+    "level": 2,
+    "school": "Illusion",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "V, S, M (a distorted lens)",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Artificer",
+      "Bard",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "Illusory obstacles confuse up to three creatures you can see. Each makes an Intelligence save; on a failure its Speed is halved and it can't Dash. An affected creature repeats the save at the end of each turn, ending the effect on itself on a success.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Wither and Bloom",
+    "level": 2,
+    "school": "Necromancy",
+    "castingTime": "Action",
+    "range": "60 feet",
+    "components": "V, S, M (a withered vine twisted into a loop)",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Druid",
+      "Sorcerer",
+      "Wizard"
+    ],
+    "description": "In a 10-foot-radius Sphere, each creature you choose makes a Constitution save, taking 3d6 Necrotic damage (half on a success); nonmagical plants wither. One creature you choose in the area can also spend one Hit Point Die to regain HP equal to the roll plus your spellcasting modifier.",
+    "higherLevels": "Damage increases by 1d6 and one more Hit Point Die can be spent for each slot level above 2 (the modifier is added only once).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Catnap",
+    "level": 3,
+    "school": "Enchantment",
+    "castingTime": "Action",
+    "range": "30 feet",
+    "components": "S, M (a pinch of sand)",
+    "duration": "10 minutes",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Artificer",
+      "Bard",
+      "Sorcerer",
+      "Wizard"
+    ],
+    "description": "Up to three willing creatures you can see fall Unconscious for the duration. The effect ends on a target that takes damage or is shaken awake. A target that stays under for the full duration gains the benefits of a Short Rest and can't be affected again until it finishes a Long Rest.",
+    "higherLevels": "You can target one additional willing creature for each slot level above 3.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Inflict Doubt",
+    "level": 3,
+    "school": "Enchantment",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "V, S",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A creature you can see must succeed on a Wisdom save or have Disadvantage on D20 Tests for the duration, repeating the save at the end of each of its turns to end the effect.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Distorted Distance",
+    "level": 4,
+    "school": "Illusion",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "V, S",
+    "duration": "Concentration, up to 10 minutes",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Artificer",
+      "Bard",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "An illusory spatial dilation fills a 60-foot-radius Sphere. For each creature you can see in it you choose an effect: Dizzying Elongation (Intelligence save or 2d10 Psychic damage and the Sphere is Difficult Terrain for it) or Shortened Space (+20 feet Speed until the end of its next turn). You can reapply an effect whenever a creature enters the Sphere or ends its turn there, once per turn.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Festering Blast",
+    "level": 4,
+    "school": "Necromancy",
+    "castingTime": "Action",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "1 minute",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Druid",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A 60-foot Line of miasma blasts from you. Each creature makes a Constitution save, taking 4d10 Necrotic damage and the Poisoned condition on a failure. A creature Poisoned this way takes 2d10 Poison damage at the start of its turns and repeats the save at the end of each, ending the effect on itself on a success.",
+    "higherLevels": "The initial damage increases by 1d10 for each slot level above 4.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Zone of Amicability",
+    "level": 4,
+    "school": "Enchantment",
+    "castingTime": "Action",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "10 minutes",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Warlock"
+    ],
+    "description": "A 60-foot Emanation of amicability radiates from you. When you make an ability check to influence a creature in the area, you can treat a d20 roll of 9 or lower as a 10.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Enervation",
+    "level": 5,
+    "school": "Necromancy",
+    "castingTime": "Action",
+    "range": "60 feet",
+    "components": "V, S",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A tendril of darkness drains a creature you can see. It makes a Dexterity save, taking 6d8 Necrotic damage on a failure (half, and the spell ends, on a success). On each later turn you can use a Bonus Action to deal 2d8 Necrotic damage automatically; the spell ends if the target leaves range or gains Total Cover. You regain HP equal to half the Necrotic damage dealt.",
+    "higherLevels": "The initial damage increases by 1d8 for each slot level above 5.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Grave Ground",
+    "level": 5,
+    "school": "Necromancy",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "V, S, M (a handful of grave dirt)",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Cleric",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "Skeletal hands burst from up to four contiguous 10-foot squares, making that area Difficult Terrain for your enemies. An enemy there (or entering or ending its turn there) makes a Strength save once per turn, taking 6d6 Necrotic damage and subtracting 1d6 from its damage rolls until the end of its next turn on a failure.",
+    "higherLevels": "The damage increases by 1d6 for each slot level above 5.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Mordenkainen's Lucubration",
+    "level": 5,
+    "school": "Divination",
+    "castingTime": "Action",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Wizard"
+    ],
+    "description": "You recover up to two expended spell slots of level 2 or lower.",
+    "higherLevels": "The maximum slot level you can recover rises to 3 (cast with a level 6–7 slot) or 4 (cast with a level 8+ slot).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Negative Energy Flood",
+    "level": 5,
+    "school": "Necromancy",
+    "castingTime": "Action",
+    "range": "60 feet",
+    "components": "V, M (a broken bone and a square of black silk)",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "Ribbons of negative energy strike one creature you can see. A non-Undead target makes a Constitution save, taking 3d10 + 25 Necrotic damage (half on a success); a Humanoid killed by it rises as a Zombie under your command for 24 hours. An Undead target instead gains 3d10 Temporary HP.",
+    "higherLevels": "The damage increases by 1d10 for each slot level above 5.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Spirit Lantern",
+    "level": 5,
+    "school": "Necromancy",
+    "castingTime": "Action",
+    "range": "Self",
+    "components": "V, S, M (a black lantern)",
+    "duration": "10 minutes",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Artificer",
+      "Cleric",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A ghostly lantern hovers above you, shedding Dim Light in a 60-foot radius. When an enemy dies within that light, a soul fragment flies into the lantern (holding up to your spellcasting modifier). As a Bonus Action you can spend a fragment to Drain Life (Constitution save, 4d8 + mod Necrotic), Repair Undead (heal 4d8 + mod), or Ward Ally (attackers have Disadvantage against a chosen creature until your next turn).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Summon Plant",
+    "level": 5,
+    "school": "Conjuration",
+    "castingTime": "Action",
+    "range": "90 feet",
+    "components": "V, S, M (herbs worth 500+ GP)",
+    "duration": "Concentration, up to 1 hour",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Druid",
+      "Ranger"
+    ],
+    "description": "You call a plant spirit (Fungus, Tree, or Vine) using the Plant Spirit stat block. It is your ally, acts just after your turn on your Initiative, and obeys your verbal commands, making melee attacks (and the Fungus's poisoning Spore Spray) that scale with the spell's level. It vanishes at 0 HP or when the spell ends.",
+    "higherLevels": "Use the spell slot's level as the spell's level in the stat block.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Waves of Exhaustion",
+    "level": 5,
+    "school": "Necromancy",
+    "castingTime": "Bonus Action",
+    "range": "Self",
+    "components": "V, S, M (a piece of dried meat)",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A nimbus of gray light surrounds you. For the duration you can take a Magic action to emit a 60-foot Cone; creatures in it must succeed on a Constitution save or gain 1 Exhaustion level (never above 4 from this spell). Exhaustion gained this way is removed when the spell ends.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Summon Dinosaur",
+    "level": 6,
+    "school": "Conjuration",
+    "castingTime": "Action",
+    "range": "90 feet",
+    "components": "V, S, M (a polished scale worth 600+ GP)",
+    "duration": "Concentration, up to 1 hour",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Druid"
+    ],
+    "description": "You call a primeval dinosaur spirit (Ankylosaur, Triceratops, or Tyrannosaur) using the Dinosaur Spirit stat block. It is your ally, acts just after your turn on your Initiative, and obeys your verbal commands, making powerful attacks (grappling Bite, charging Gore, or Slam) that scale with the spell's level. It vanishes at 0 HP or when the spell ends.",
+    "higherLevels": "Use the spell slot's level as the spell's level in the stat block.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Aura of Evasion",
+    "level": 7,
+    "school": "Abjuration",
+    "castingTime": "Action",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A 30-foot Emanation of alacrity radiates from you. You and your allies in it have Advantage on Dexterity saves, and when an affected creature makes a Dexterity save for half damage it instead takes no damage on a success and half on a failure. Incapacitated creatures gain no benefit.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Fractured Awareness",
+    "level": 7,
+    "school": "Divination",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "V, S",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "Conflicting visions of possible futures assail a creature you can see. It makes an Intelligence save, taking 12d10 Psychic damage and Disadvantage on D20 Tests for the duration on a failure (half damage, and the spell ends, on a success). It repeats the save at the end of each turn, ending the effect on a success.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Power Word Pain",
+    "level": 7,
+    "school": "Enchantment",
+    "castingTime": "Action",
+    "range": "60 feet",
+    "components": "V",
+    "duration": "1 minute",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "One creature you can see takes 6d8 Force damage; if it has 100 HP or fewer it is also Charmed for the duration. While Charmed its Speed is at most 10 feet, it has Disadvantage on D20 Tests except Constitution saves, and casting a spell requires a Constitution save or the casting is wasted. It repeats the Constitution save at the end of each turn, ending the effect on a success.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Reweave Fate",
+    "level": 7,
+    "school": "Divination",
+    "castingTime": "Reaction",
+    "range": "60 feet",
+    "components": "S",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Cleric",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "Taken when a creature you can see within 60 feet fails a D20 Test. That creature rerolls the test with Advantage and must use the new roll; if it then succeeds, it gains 6d10 Temporary HP.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Transfix",
+    "level": 7,
+    "school": "Enchantment",
+    "castingTime": "Action",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "Your appearance becomes alluring. One creature within 60 feet must succeed on a Charisma save or be Charmed and Incapacitated, moving toward you each turn; if it ends its turn within 5 feet it takes 4d8 Psychic damage. It repeats the save before entering damaging terrain. Each turn you can take a Magic action to target another creature that hasn't already saved against this casting.",
+    "higherLevels": "The damage increases by 1d8 for each slot level above 7.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Entrancing Mirrors",
+    "level": 8,
+    "school": "Illusion",
+    "castingTime": "Action",
+    "range": "90 feet",
+    "components": "V, S, M (a mirror shard)",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "Illusory mirrors confuse up to three creatures you can see. Each makes an Intelligence save, taking 7d6 Psychic damage and the Stunned condition (Speed halved while Stunned) on a failure, or half damage on a success. A Stunned target repeats the save at the end of each turn, ending the spell on itself on a success.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Illusory Dragon",
+    "level": 8,
+    "school": "Illusion",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "S",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Wizard"
+    ],
+    "description": "You create a Huge shadow dragon that occupies its space and is immune to all damage and conditions. Enemies that see it appear make a Wisdom save or drop what they hold and are Frightened. As a Bonus Action you move it up to 60 feet and can have it exhale a 60-foot Cone (Intelligence save, 6d6 damage of a type you chose, half on a success). A creature that Studies it can discern the illusion with an Investigation check against your save DC, gaining Advantage against its effects.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Iron Body",
+    "level": 8,
+    "school": "Transmutation",
+    "castingTime": "Action",
+    "range": "Touch",
+    "components": "V, S, M (diamond dust worth 250+ GP, which the spell consumes)",
+    "duration": "Concentration, up to 1 hour",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "One willing creature becomes living metal. Until the spell ends its Exhaustion can't increase; it has Resistance to Bludgeoning, Fire, Piercing, and Slashing damage and Immunity to Poison damage and the Paralyzed, Petrified, and Poisoned conditions; and any of those conditions it already has end immediately.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Lightning Ring",
+    "level": 8,
+    "school": "Evocation",
+    "castingTime": "Bonus Action",
+    "range": "Self",
+    "components": "V, S, M (a bit of fur and a glass ring)",
+    "duration": "Concentration, up to 10 minutes",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Druid",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A 10-foot Emanation of crackling electricity surrounds you. A creature the ring reaches, or that enters or ends its turn in it, makes a Constitution save, taking 3d6 Lightning plus 3d6 Thunder damage and the Deafened condition on a failure (half on a success). As a Magic action you can instead emit a 60-foot Line (Dexterity save, 6d6 Lightning, half on a success).",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Moment of Prescience",
+    "level": 8,
+    "school": "Divination",
+    "castingTime": "Reaction",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Wizard"
+    ],
+    "description": "Taken when you fail a D20 Test or a creature hits you with an attack roll. You turn your failed D20 Test into a 20, or turn the triggering attack roll into a 1.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Detonate",
+    "level": 9,
+    "school": "Evocation",
+    "castingTime": "Action",
+    "range": "500 feet",
+    "components": "V, S, M (a piece of tinder)",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "An explosive seed forms inside a creature you can see. It makes a Constitution save, taking 10d10 Fire damage (half on a success). An explosion then bursts in a 60-foot Emanation from the target; each other creature makes a Dexterity save (with Disadvantage if the target dropped to 0 HP), taking 10d10 Fire damage, half on a success. Unattended flammable objects in the area ignite.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Hindsight",
+    "level": 9,
+    "school": "Divination",
+    "castingTime": "10 Minutes",
+    "range": "500 feet",
+    "components": "V, S, M (a tiny hourglass worth 500+ GP, which the spell consumes)",
+    "duration": "Concentration, up to 1 hour",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Wizard"
+    ],
+    "description": "You peer backward through time, watching events that occurred within range over the past 10 years at roughly 1 day per second. You can freely slow, pause, rewind, or fast-forward through these visions.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Invulnerability",
+    "level": 9,
+    "school": "Abjuration",
+    "castingTime": "Action",
+    "range": "Self",
+    "components": "V, S, M (a piece of adamantine worth 500+ GP, which the spell consumes)",
+    "duration": "Concentration, up to 10 minutes",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Wizard"
+    ],
+    "description": "You have Immunity to all damage until the spell ends.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Vision of Elapsing Eons",
+    "level": 9,
+    "school": "Illusion",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": "V, S",
+    "duration": "1 minute",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Bard",
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "A creature you can see believes it and its surroundings are crumbling across eons. It must succeed on an Intelligence save or take 10d12 Psychic damage and be Paralyzed for the duration. While Paralyzed it repeats the save at the end of each turn, gaining 1 Exhaustion level on a failure and ending the spell on a success. Someone within 5 feet can use an action to shake it free.",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Wail of the Banshee",
+    "level": 9,
+    "school": "Necromancy",
+    "castingTime": "Action",
+    "range": "60 feet",
+    "components": "V",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Sorcerer",
+      "Warlock",
+      "Wizard"
+    ],
+    "description": "You emit a deadly scream. Choose up to ten creatures within range that can hear you. Each with 50 HP or fewer dies; the rest make a Constitution save, taking 12d10 Psychic damage and the Deafened condition for 1 hour on a failure, or half damage on a success.",
+    "source": "arcana-unleashed"
   }
 ];
