@@ -4,7 +4,7 @@ import { DND_SPECIES } from "@/lib/data/dnd-species";
 import type { DndSpecies } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, ChipRow, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ChipRow, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -18,7 +18,7 @@ export default async function DndSpeciesPage({ searchParams }: { searchParams: P
   if (!user) redirect("/login");
   const raw = await searchParams;
   const pick = one(raw.sp);
-  const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
+  const src = ["core", "au", "eberron", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-species" }),
@@ -30,20 +30,19 @@ export default async function DndSpeciesPage({ searchParams }: { searchParams: P
   const selected = allSpecies.find((s) => s.name === pick) ?? null;
 
   if (!selected) {
-    const isHb = (s: DndSpecies) => s.source === "Homebrew";
     // Every species is rendered; the chips filter on the client (InstantFilter).
     // `show` applies the URL's filters for the initial paint, through the same
     // facet match the client uses.
     const list = allSpecies;
     const current = { src };
-    const facets = (s: DndSpecies) => ({ src: isHb(s) ? "hb" : "book" });
+    const facets = (s: DndSpecies) => ({ src: srcKey(s.source) });
     const show = (s: DndSpecies) => facetMatch(facets(s), current);
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Species" subtitle={`${DND_SPECIES.length} species${hbSpecies.length ? ` + ${hbSpecies.length} homebrew` : ""}`} />
         <DndHomebrewEditor kind="dnd-species" campaigns={campaigns} initial={hbOwn} />
         <InstantFilter>
-        {hbSpecies.length ? <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
+        <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(allSpecies.map((x) => x.source))} active={src} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
           {list.map((s, i) => (
             <li key={`${s.name}-${i}`} className={cardCls} hidden={!show(s)} data-f={facetAttr(facets(s))}>

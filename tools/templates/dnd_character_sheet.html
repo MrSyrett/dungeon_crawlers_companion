@@ -208,24 +208,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .exh-box #exh-pips{display:inline-flex;gap:5px;}
 .exh-pip{display:inline-block;width:26px;height:26px;border:2px solid var(--muted);border-radius:5px;cursor:pointer;background:transparent;font-family:'Share Tech Mono',monospace;font-size:13px;line-height:22px;text-align:center;color:var(--muted);vertical-align:middle;}
 .exh-pip.on{background:var(--red);border-color:var(--red);color:#fff;}
-/* Nimble 5e mode chrome */
-.nimble-badge{margin-top:5px;background:#2a1b3a;color:#c9a7ff;border:1px solid #7b4fb0;border-radius:4px;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.09em;cursor:pointer;text-align:center;white-space:nowrap;}
-.nimble-badge:hover{background:#7b4fb0;color:#fff;}
-.actions-body{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
-.nc-pips{display:inline-flex;gap:6px;}
-.act-pip{display:inline-block;width:20px;height:20px;border:2px solid #a878e0;border-radius:4px;cursor:pointer;background:transparent;box-sizing:border-box;vertical-align:middle;}
-.act-pip.used{background:#a878e0;border-color:#a878e0;}
-.nc-reset{background:var(--box);color:var(--ink);border:1px solid var(--muted);border-radius:4px;cursor:pointer;font-size:11px;line-height:1;padding:4px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
-.nc-reset:hover{border-color:#a878e0;color:#c9a7ff;}
-.defend-readout{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;color:#c9a7ff;line-height:1;text-align:center;margin:2px 0 3px;}
-.defend-readout .dr-when{display:block;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
-.ac-tile.nimble input#f-ac{font-size:15px;opacity:.8;}
-.spell-head .sh-box.mana-box{border-color:#7b4fb0;}
-.spell-head .mana-box .sh-lbl{color:#c9a7ff;}
-.mana-ctl{display:flex;align-items:center;justify-content:center;gap:5px;}
-.mana-ctl .sh-val{color:#c9a7ff;min-width:34px;}
-.mana-mini{width:18px;height:18px;background:#2a1b3a;color:#c9a7ff;border:1px solid #7b4fb0;border-radius:3px;cursor:pointer;font-size:13px;line-height:1;padding:0;}
-.mana-mini:hover{background:#7b4fb0;color:#fff;}
 
 /* REST BUTTONS */
 .rest-btns{display:flex;gap:6px;}
@@ -886,7 +868,6 @@ body.dark .tabs-bar{background:#1a1a1f;}
     <div class="hdr-top">
       <div class="hdr-logo">
         <div class="lg-word">Dungeons &amp; Dragons</div><div class="lg-sub">2024 Character Sheet</div>
-        <div id="nimble-badge" class="nimble-badge" onclick="openNimbleRules()" title="Nimble 5e mode is on — click for the rules summary" style="display:none;">NIMBLE</div>
       </div>
       <div class="hdr-field name-primary"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
     </div>
@@ -941,8 +922,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
       <div class="combat-strip">
         <div class="cbt-left">
           <div class="cbt ac-tile"><div class="c-lbl" id="ac-lbl">Armor Class</div>
-            <div id="defend-readout" class="defend-readout" style="display:none;">−<b id="nimble-defend">2</b><span class="dr-when">reduce a hit you Defend</span></div>
-            <input id="f-ac" value="10" oninput="scheduleAutosave();if(typeof renderNimble==='function')renderNimble();">
+            <input id="f-ac" value="10" oninput="scheduleAutosave()">
             <div class="ac-fx">
               <label class="ac-chk" title="Mage Armor — while wearing no armor, AC = 13 + DEX"><input type="checkbox" id="f-mage-armor" onchange="onMageArmor()"><span>MA</span></label>
               <input id="f-ac-temp" class="ac-temp" inputmode="numeric" value="" placeholder="+0" title="Situational AC on top of your armor: Shield spell (+5), Haste / cover (+2)…" oninput="onTempAC()">
@@ -959,10 +939,6 @@ body.dark .tabs-bar{background:#1a1a1f;}
                 <span id="death-fail" title="Failures"></span>
               </div>
               <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲 Roll</button>
-            </div>
-            <div class="actions-body" id="actions-nimble-body" style="display:none;">
-              <span id="nimble-actions" class="nc-pips"></span>
-              <button class="nc-reset" onclick="resetActions()" title="New turn — regain all 3 Actions">↺ Turn</button>
             </div>
           </div>
         </div>
@@ -1017,10 +993,6 @@ body.dark .tabs-bar{background:#1a1a1f;}
             <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk">+0</div></div>
             <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc">8</div></div>
             <div class="sh-box" id="sp-prep-box" style="display:none;" title="Spells prepared vs your maximum (spellcasting-class Prepared Spells)"><div class="sh-lbl">Prepared</div><div class="sh-val" id="sp-prep-val">0/0</div></div>
-            <div class="sh-box mana-box" id="sp-mana-box" style="display:none;" title="Mana (Nimble 5e). Casting deducts automatically; recovers on a Long Rest.">
-              <div class="sh-lbl">Mana</div>
-              <div class="mana-ctl"><button class="mana-mini" onclick="adjustMana(1)" title="Spend 1 Mana">−</button><span class="sh-val" id="sp-mana-val">0/0</span><button class="mana-mini" onclick="adjustMana(-1)" title="Regain 1 Mana">+</button></div>
-            </div>
           </div>
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
@@ -1243,11 +1215,11 @@ let _lastRoll = null;
 // reaction (reduce damage by AC−8), Mana in place of spell slots, and 2-Action
 // leveled spells. Abilities & skills stay standard 5e; the broader table rules
 // are surfaced in the reference panel (openNimbleRules).
-function defaultOptions(){ return { nimble:false }; }
+function defaultOptions(){ return {}; }
 let options = defaultOptions();
 let manaUsed = 0;      // Mana spent this "day" (max derived from caster level/type)
 let actionsUsed = 0;   // Actions spent this turn (of 3)
-function nimbleOn(){ return !!(options && options.nimble); }
+function nimbleOn(){ return false; }
 
 function levelNow(){ return totalLevel(); }
 function profBonus(){ const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
@@ -3223,7 +3195,7 @@ function applySheet(d){
   ensureUnarmed();
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   refreshSubclassList(); refreshSpellPicker();
-  renderDeath(); renderFeatures(); renderResources(); renderConditions(); fillDamageTypes(); renderDefenses(); fillCompanionDatalist(); renderCompanions(); renderConcentration(); renderAttuneCount(); recalc(); renderNimble(); setDefaultTab();
+  renderDeath(); renderFeatures(); renderResources(); renderConditions(); fillDamageTypes(); renderDefenses(); fillCompanionDatalist(); renderCompanions(); renderConcentration(); renderAttuneCount(); recalc(); setDefaultTab();
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
 }
 function saveSheet(quiet){

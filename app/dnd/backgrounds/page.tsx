@@ -4,7 +4,7 @@ import { DND_BACKGROUNDS } from "@/lib/data/dnd-backgrounds";
 import type { DndBackground } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, one, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -17,7 +17,7 @@ export default async function DndBackgroundsPage({ searchParams }: { searchParam
   if (!user) redirect("/login");
   const raw = await searchParams;
   const q = one(raw.q).trim().toLowerCase();
-  const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
+  const src = ["core", "au", "eberron", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbBgV, hbBgOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-background" }),
@@ -32,7 +32,7 @@ export default async function DndBackgroundsPage({ searchParams }: { searchParam
   // facet match the client uses.
   const list = [...hbBgs, ...DND_BACKGROUNDS].sort((a, b) => a.name.localeCompare(b.name));
   const current = { q: one(raw.q), src };
-  const facets = (b: DndBackground) => ({ src: isHb(b) ? "hb" : "book" });
+  const facets = (b: DndBackground) => ({ src: srcKey(b.source) });
   const show = (b: DndBackground) => facetMatch(facets(b), current) && (!q || b.name.toLowerCase().includes(q) || b.feat.toLowerCase().includes(q));
   const shown = list.filter(show).length;
   return (
@@ -41,7 +41,7 @@ export default async function DndBackgroundsPage({ searchParams }: { searchParam
       <DndHomebrewEditor kind="dnd-background" campaigns={campaigns} initial={hbBgOwn} />
       <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search backgrounds…" hidden={{ src }} />
-      {hbBgs.length ? <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
+      <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(list.map((x) => x.source))} active={src} />
       <CountLine count={shown} noun="background" base={BASE} filtered={!!q || !!src} />
       <EmptyState noun="background" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">

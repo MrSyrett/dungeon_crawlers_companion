@@ -4,7 +4,7 @@ import { DND_FEATS } from "@/lib/data/dnd-feats";
 import type { DndFeat } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -19,7 +19,7 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
   const raw = await searchParams;
   const q = one(raw.q).trim().toLowerCase();
   const rawCat = one(raw.cat);
-  const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
+  const src = ["core", "au", "eberron", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbFeatV, hbFeatOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-feat" }),
@@ -43,7 +43,7 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
   const cat = cats.includes(rawCat) ? rawCat : "";
 
   const current = { q: one(raw.q), cat, src };
-  const facets = (f: DndFeat) => ({ cat: f.category, src: isHb(f) ? "hb" : "book" });
+  const facets = (f: DndFeat) => ({ cat: f.category, src: srcKey(f.source) });
   const show = (f: DndFeat) => facetMatch(facets(f), current) && (!q || f.name.toLowerCase().includes(q) || f.benefits.some((x) => x.toLowerCase().includes(q)));
   const shown = list.filter(show).length;
   return (
@@ -53,7 +53,7 @@ export default async function DndFeatsPage({ searchParams }: { searchParams: Pro
       <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search feats…" hidden={{ cat, src }} />
       <ChipRow label="Category" base={BASE} current={current} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />
-      {hbFeats.length ? <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
+      <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(list.map((x) => x.source))} active={src} />
       <CountLine count={shown} noun="feat" base={BASE} filtered={!!(q || cat || src)} />
       <EmptyState noun="feat" base={BASE} hidden={shown > 0} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">

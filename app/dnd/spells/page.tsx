@@ -4,7 +4,7 @@ import { DND_SPELLS } from "@/lib/data/dnd-spells";
 import type { DndSpell } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -39,7 +39,7 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
   const lvl = /^[0-9]$/.test(one(raw.lvl)) ? one(raw.lvl) : "";
   const cls = CLASSES.includes(one(raw.cls)) ? one(raw.cls) : "";
   const school = SCHOOLS.includes(one(raw.school)) ? one(raw.school) : "";
-  const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
+  const src = ["core", "au", "eberron", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-spell" }),
@@ -55,7 +55,7 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
   const list = [...hbSpells, ...DND_SPELLS].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
   const current = { q: one(raw.q), lvl, cls, school, src };
   const filtered = !!(q || lvl !== "" || cls || school || src);
-  const facets = (s: DndSpell) => ({ lvl: String(s.level), cls: s.classes, school: s.school, src: isHb(s) ? "hb" : "book" });
+  const facets = (s: DndSpell) => ({ lvl: String(s.level), cls: s.classes, school: s.school, src: srcKey(s.source) });
   const show = (s: DndSpell) => facetMatch(facets(s), current) && (!q || s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q));
   const shown = list.filter(show).length;
 
@@ -68,7 +68,7 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
       <ChipRow label="Level" base={BASE} current={current} param="lvl" options={[...Array(10).keys()].map((n) => ({ key: String(n), label: n === 0 ? "Cantrip" : String(n) }))} active={lvl} />
       <ChipRow label="Class" base={BASE} current={current} param="cls" options={CLASSES.map((c) => ({ key: c, label: c }))} active={cls} />
       <ChipRow label="School" base={BASE} current={current} param="school" options={SCHOOLS.map((s) => ({ key: s, label: s }))} active={school} />
-      <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} />
+      <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(list.map((x) => x.source))} active={src} />
       <CountLine count={shown} noun="spell" base={BASE} filtered={filtered} />
       <EmptyState noun="spell" base={BASE} hidden={shown > 0} />
         <div className="flex flex-col gap-3">

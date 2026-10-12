@@ -4,7 +4,7 @@ import { DND_MONSTERS } from "@/lib/data/dnd-monsters";
 import type { DndMonster, DndMonsterAction } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, withParams, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, withParams, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -92,7 +92,7 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
   const rawGroup = one(raw.group);
   const rawCr = one(raw.cr);
   const pick = one(raw.m);
-  const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
+  const src = ["core", "au", "eberron", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-monster" }),
@@ -130,7 +130,7 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
   const list = allMonsters.slice().sort((a, b) => crVal(a.cr) - crVal(b.cr) || a.name.localeCompare(b.name));
   const current = { q, group, cr, src };
   const filtered = !!(q || group || cr || src);
-  const facets = (m: DndMonster) => ({ group: m.group, cr: m.cr, src: isHb(m) ? "hb" : "book" });
+  const facets = (m: DndMonster) => ({ group: m.group, cr: m.cr, src: srcKey(m.source) });
   const n = q.toLowerCase();
   const show = (m: DndMonster) => facetMatch(facets(m), current) && (!n || m.name.toLowerCase().includes(n) || m.type.toLowerCase().includes(n));
   const shown = list.filter(show).length;
@@ -143,7 +143,7 @@ export default async function DndBestiaryPage({ searchParams }: { searchParams: 
       <SearchForm base={BASE} q={q} placeholder="Search creatures by name or type…" hidden={{ group, cr, src }} />
       <ChipRow label="Type" base={BASE} current={current} param="group" options={groups.map((g) => ({ key: g, label: g }))} active={group} />
       <ChipRow label="CR" base={BASE} current={current} param="cr" options={crs.map((c) => ({ key: c, label: c }))} active={cr} />
-      <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} />
+      <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(allMonsters.map((x) => x.source))} active={src} />
       <CountLine count={shown} noun="creature" base={BASE} filtered={filtered} />
       <EmptyState noun="creature" base={BASE} hidden={shown > 0} />
       <ul className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -39,7 +39,7 @@
     const ref = canonRef(t);
     return ref ? { name: ref, ref } : { name: t, ref: "" };
   }
-  const STEPS = ["Class","Subclass","Species","Background","Abilities","Skills","Choices","Advancement","Spells","Equipment","Review"];
+  const STEPS = ["Options","Class","Subclass","Species","Background","Abilities","Skills","Choices","Advancement","Spells","Equipment","Review"];
   // Level-1 (and level-gated) class decisions the builder can offer from data.
   const CLASS_CHOICES = {
     Fighter: [{ kind:"style", level:1 }],
@@ -60,13 +60,25 @@
     return { cls:"", level:1, subclass:"", species:"", lineage:"", background:"",
              method:"array", base:{ STR:8,DEX:8,CON:8,INT:8,WIS:8,CHA:8 }, arrayPick:{},
              bg2:"", bg1:"", classSkills:[], multiclass:[],
-             name:"", alignment:"", nimble:false,
+             name:"", alignment:"", eberron:true, au:true,
              fightingStyle:"", expertise:[], orders:{}, advances:[],
              pickedCantrips:[], pickedSpells:[], equipChoice:"gear" };
   }
   function clsData() { return D.classes().find((c) => c.name === st.cls) || null; }
   function spData() { return D.species().find((s) => s.name === st.species) || null; }
   function bgData() { return D.backgrounds().find((b) => b.name === st.background) || null; }
+  // Expansion gating: hide Eberron / Arcana Unleashed content when its box is off.
+  function allowSrc(x) { return (!x || ((x.source !== "eberron" || st.eberron) && (x.source !== "arcana-unleashed" || st.au))); }
+  function pruneDisallowed() {
+    if (st.cls) { const c = D.classes().find((x) => x.name === st.cls); if (c && !allowSrc(c)) { st.cls = ""; st.subclass = ""; st.multiclass = []; st.fightingStyle = ""; st.expertise = []; st.orders = {}; st.pickedCantrips = []; st.pickedSpells = []; } }
+    if (st.subclass) { const c = clsData(); const sub = c && (c.subclasses || []).find((x) => x.name === st.subclass); if (sub && !allowSrc(sub)) st.subclass = ""; }
+    if (st.species) { const sp = D.species().find((x) => x.name === st.species); if (sp && !allowSrc(sp)) { st.species = ""; st.lineage = ""; } }
+    if (st.background) { const b = D.backgrounds().find((x) => x.name === st.background); if (b && !allowSrc(b)) st.background = ""; }
+    st.multiclass = (st.multiclass || []).filter((m) => { const c = D.classes().find((x) => x.name === m.cls); return c && allowSrc(c); });
+    (st.advances || []).forEach((av) => { if (av.feat) { const f = D.feats().find((x) => x.name === av.feat); if (f && !allowSrc(f)) av.feat = ""; } });
+    (st.pickedSpells || []).forEach((n, i) => {}); st.pickedSpells = (st.pickedSpells || []).filter((n) => { const sp = D.spells().find((x) => x.name === n); return !sp || allowSrc(sp); });
+    st.pickedCantrips = (st.pickedCantrips || []).filter((n) => { const sp = D.spells().find((x) => x.name === n); return !sp || allowSrc(sp); });
+  }
   // Multiclass: secondary classes take some of the total level; the primary keeps the rest.
   function secondaryTotal() { return (st.multiclass || []).reduce((s, m) => s + (num(m.level) || 0), 0); }
   function primaryLevel() { return Math.max(1, (num(st.level) || 1) - secondaryTotal()); }
@@ -101,10 +113,10 @@
   function spellsFor(minL, maxL) {
     const nm = st.cls;
     const inList = (window.DNDCALC && window.DNDCALC.spellInList) ? window.DNDCALC.spellInList : (s, c) => (s.classes || []).includes(c);
-    return D.spells().filter((s) => s.level >= minL && s.level <= maxL && inList(s, nm))
+    return D.spells().filter((s) => s.level >= minL && s.level <= maxL && inList(s, nm) && allowSrc(s))
       .sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name));
   }
-  function fightingStyles() { return D.feats().filter((f) => (f.category || "") === "Fighting Style"); }
+  function fightingStyles() { return D.feats().filter((f) => (f.category || "") === "Fighting Style" && allowSrc(f)); }
   function classChoices() { return (CLASS_CHOICES[st.cls] || []).filter((ch) => primaryLevel() >= (ch.level || 1)); }
   function proficientSkills() { const b = bgData(); const bg = b ? (b.skillProficiencies || []) : []; const out = []; bg.concat(st.classSkills).forEach((s) => { const r = matchSkill(s); if (r && out.indexOf(r) < 0) out.push(r); }); return out; }
 
@@ -152,7 +164,7 @@
     $("dndb-step").textContent = stepLabel();
     $("dndb-back").style.visibility = step === 0 ? "hidden" : "visible";
     $("dndb-next").textContent = STEPS[step] === "Review" ? "Build character ✓" : "Next →";
-    const fn = { Class:rClass, Subclass:rSubclass, Species:rSpecies, Background:rBackground, Abilities:rAbilities, Skills:rSkills, Choices:rChoices, Advancement:rAdvancement, Spells:rSpells, Equipment:rEquipment, Review:rReview }[STEPS[step]];
+    const fn = { Options:rOptions, Class:rClass, Subclass:rSubclass, Species:rSpecies, Background:rBackground, Abilities:rAbilities, Skills:rSkills, Choices:rChoices, Advancement:rAdvancement, Spells:rSpells, Equipment:rEquipment, Review:rReview }[STEPS[step]];
     const body = $("dndb-body");
     // Keep the scroll position on in-step re-renders (e.g. picking a spell); reset only on a step change.
     const sameStep = render._step === step, prevScroll = body.scrollTop;
@@ -167,15 +179,21 @@
       '<div class="dc-title">' + esc(title) + '</div>' + (sub ? '<div class="dc-sub">' + esc(sub) + '</div>' : "") + '</div>';
 
   // ── steps ──────────────────────────────────────────────────────────────
-  function rClass() {
-    let h = '<p class="m-hint">Name your hero, then pick a class and starting level. The sheet fills in its features, saving throws, and (for casters) spellcasting.</p>';
-    h += '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">' +
+  function rOptions() {
+    let h = '<p class="m-hint">Name your hero and set a starting level, then choose which content is available as you build.</p>';
+    h += '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">' +
          '<label style="flex:1 1 220px;"><span class="m-lbl">Character name</span><input type="text" id="dndb-name" class="m-input" placeholder="Aelric Thornwood" value="' + esc(st.name) + '"></label>' +
-         '<label><span class="m-lbl">Level</span> <input type="number" id="dndb-level" class="m-input" style="width:80px;" min="1" max="20" value="' + st.level + '"></label>' +
+         '<label><span class="m-lbl">Starting level</span> <input type="number" id="dndb-level" class="m-input" style="width:80px;" min="1" max="20" value="' + st.level + '"></label>' +
          '</div>';
-    h += '<div class="dndb-nimble' + (st.nimble ? " on" : "") + '" id="dndb-nimble"><div class="dnb-main"><span class="dnb-check">' + (st.nimble ? "✓" : "") + '</span><div><div class="dnb-ttl">Nimble 5e mode</div><div class="dnb-sub">Faster play: no attack rolls (the damage die decides hit/miss/crit), Mana instead of spell slots, 3 Actions a turn, a Defend reaction. Abilities &amp; skills stay standard 5e. You can turn this on or off later on the sheet.</div></div></div></div>';
+    h += '<span class="m-lbl">Expansion content</span><p class="m-hint" style="margin:2px 0 8px;">Leave an expansion unchecked to hide its options \u2014 classes, subclasses, species, backgrounds, feats, and spells \u2014 throughout character creation.</p>';
+    h += '<div class="dndb-opt' + (st.eberron ? " on" : "") + '" id="dndb-opt-eberron"><div class="dnb-main"><span class="dnb-check">' + (st.eberron ? "\u2713" : "") + '</span><div><div class="dnb-ttl">Eberron: Forge of the Artificer</div><div class="dnb-sub">The Artificer class; Changeling, Kalashtar, Khoravar, Shifter &amp; Warforged species; dragonmark backgrounds &amp; feats; and Eberron magic items.</div></div></div></div>';
+    h += '<div class="dndb-opt' + (st.au ? " on" : "") + '" id="dndb-opt-au"><div class="dnb-main"><span class="dnb-check">' + (st.au ? "\u2713" : "") + '</span><div><div class="dnb-ttl">Arcana Unleashed</div><div class="dnb-sub">New subclasses, backgrounds, feats, spells, and magic items from the Arcana Unleashed expansion.</div></div></div></div>';
+    return h;
+  }
+  function rClass() {
+    let h = '<p class="m-hint">Pick your class. The sheet fills in its features, saving throws, and (for casters) spellcasting.</p>';
     h += '<div class="dndb-grid">';
-    D.classes().forEach((c) => {
+    D.classes().filter(allowSrc).forEach((c) => {
       const cast = c.spellcasting && c.spellcasting !== "none" ? c.spellcasting + " caster" : "martial";
       h += card('data-cls="' + esc(c.name) + '"', st.cls === c.name, c.name, "d" + c.hitDie + " · " + (c.primaryAbility||[]).join("/") + " · " + cast);
     });
@@ -196,7 +214,7 @@
     });
     h += '</div>';
     const taken = new Set([norm(st.cls)].concat((st.multiclass || []).map((m) => norm(m.cls))));
-    const others = D.classes().filter((c) => !taken.has(norm(c.name)));
+    const others = D.classes().filter((c) => !taken.has(norm(c.name)) && allowSrc(c));
     if (others.length && secondaryTotal() < num(st.level) - 1){
       h += '<select id="dndb-mc-add" class="m-input" style="margin-top:6px;"><option value="">+ Add a class…</option>' +
         others.map((c) => '<option value="' + esc(c.name) + '">' + esc(c.name) + '</option>').join("") + '</select>';
@@ -206,7 +224,7 @@
   function rSubclass() {
     const c = clsData(); if (!c) return "<p>Pick a class first.</p>";
     let h = '<p class="m-hint">Your ' + esc(c.name) + ' chooses a ' + esc(c.subclassLabel || "subclass") + ' at level ' + (c.subclassLevel||3) + '.</p><div class="dndb-grid">';
-    (c.subclasses || []).forEach((s) => h += card('data-sub="' + esc(s.name) + '"', st.subclass === s.name, s.name, s.source === "srd" ? "SRD" : (s.source||"").toUpperCase()));
+    (c.subclasses || []).filter(allowSrc).forEach((s) => h += card('data-sub="' + esc(s.name) + '"', st.subclass === s.name, s.name, s.source === "srd" ? "SRD" : (s.source||"").toUpperCase()));
     h += "</div>";
     const sub = (c.subclasses||[]).find((s) => s.name === st.subclass);
     if (sub) h += '<div class="dndb-note">' + esc(sub.flavor || "") + '</div>';
@@ -214,7 +232,7 @@
   }
   function rSpecies() {
     let h = '<p class="m-hint">Choose a species. Some have a lineage to pick as well.</p><div class="dndb-grid">';
-    D.species().forEach((s) => h += card('data-sp="' + esc(s.name) + '"', st.species === s.name, s.name, "Speed " + s.speed + (s.darkvision ? " · Darkvision " + s.darkvision : "")));
+    D.species().filter(allowSrc).forEach((s) => h += card('data-sp="' + esc(s.name) + '"', st.species === s.name, s.name, "Speed " + s.speed + (s.darkvision ? " · Darkvision " + s.darkvision : "")));
     h += "</div>";
     const sp = spData();
     if (sp && sp.lineages && sp.lineages.length) {
@@ -227,7 +245,7 @@
   }
   function rBackground() {
     let h = '<p class="m-hint">Your background grants two skills, a tool, an Origin feat, and three ability scores you can raise.</p><div class="dndb-grid">';
-    D.backgrounds().forEach((b) => h += card('data-bg="' + esc(b.name) + '"', st.background === b.name, b.name, (b.abilityScores||[]).join("/") + " · " + b.feat));
+    D.backgrounds().filter(allowSrc).forEach((b) => h += card('data-bg="' + esc(b.name) + '"', st.background === b.name, b.name, (b.abilityScores||[]).join("/") + " · " + b.feat));
     h += "</div>";
     const b = bgData();
     if (b) h += '<div class="dndb-note"><b>' + esc(b.name) + '.</b> ' + esc(b.description || "") + '<br>Skills: <b>' + esc((b.skillProficiencies||[]).join(", ")) + '</b> · Feat: <b>' + esc(b.feat) + '</b></div>';
@@ -348,7 +366,7 @@
       h += '<div class="dndb-seg" style="margin:4px 0 8px;"><button class="dndb-seg-btn' + (av.mode!=="feat"?" on":"") + '" data-advmode="asi" data-i="' + i + '">Ability Scores</button><button class="dndb-seg-btn' + (av.mode==="feat"?" on":"") + '" data-advmode="feat" data-i="' + i + '">Feat</button></div>';
       if (av.mode === "feat") {
         h += '<select class="m-input dndb-adv-feat" data-i="' + i + '"><option value="">Select a feat…</option>' +
-          D.feats().filter((f) => (f.category||"") !== "Fighting Style").slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (av.feat===f.name?" selected":"") + '>' + esc(f.name) + " — " + esc(f.category) + '</option>').join("") + '</select>';
+          D.feats().filter((f) => (f.category||"") !== "Fighting Style" && allowSrc(f)).slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (av.feat===f.name?" selected":"") + '>' + esc(f.name) + " — " + esc(f.category) + '</option>').join("") + '</select>';
         const f = D.feats().find((x) => x.name === av.feat);
         if (f) h += '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || "") + '</div>';
       } else {
@@ -423,7 +441,6 @@
     }
     const c2 = clsData(); const eq = c2 && c2.startingEquipment ? c2.startingEquipment : [];
     h += '<div class="dr-line">Starting gear: <b>' + esc(st.equipChoice === "gold" ? ((String(eq[1] || "").match(/(\d+)\s*GP/i) || [])[1] || "0") + " GP" : "Equipment package") + '</b></div>';
-    if (st.nimble) h += '<div class="dr-line">Rules: <b>Nimble 5e mode</b> — no attack rolls, Mana casting, 3 Actions</div>';
     h += "</div>";
     return h;
   }
@@ -434,7 +451,8 @@
     const lvl = $("dndb-level"); if (lvl) lvl.addEventListener("input", () => { st.level = Math.max(1, Math.min(20, parseInt(lvl.value,10) || 1)); while (secondaryTotal() > st.level - 1 && st.multiclass.length) st.multiclass.pop(); render(); });
     const nm = $("dndb-name"); if (nm) nm.addEventListener("input", () => { st.name = nm.value; });
     const al = $("dndb-align"); if (al) al.addEventListener("change", () => { st.alignment = al.value; });
-    const nb = $("dndb-nimble"); if (nb) nb.addEventListener("click", () => { st.nimble = !st.nimble; render(); });
+    const ebx = $("dndb-opt-eberron"); if (ebx) ebx.addEventListener("click", () => { st.eberron = !st.eberron; pruneDisallowed(); render(); });
+    const aux = $("dndb-opt-au"); if (aux) aux.addEventListener("click", () => { st.au = !st.au; pruneDisallowed(); render(); });
     body.querySelectorAll("[data-cls]").forEach((el) => el.addEventListener("click", () => { st.cls = el.dataset.cls; st.subclass = ""; st.multiclass = []; st.fightingStyle = ""; st.expertise = []; st.orders = {}; st.pickedCantrips = []; st.pickedSpells = []; render(); }));
     body.querySelectorAll("[data-mc]").forEach((el) => el.addEventListener("click", () => { const i = num(el.dataset.mc), d = num(el.dataset.d); const m = st.multiclass[i]; if(!m) return; const nv = num(m.level) + d; if(nv < 1){ st.multiclass.splice(i,1); } else if(secondaryTotal() - num(m.level) + nv <= num(st.level) - 1){ m.level = nv; } render(); }));
     body.querySelectorAll("[data-mcx]").forEach((el) => el.addEventListener("click", () => { st.multiclass.splice(num(el.dataset.mcx),1); render(); }));
@@ -513,6 +531,7 @@
   }
   function canProceed() {
     switch (STEPS[step]) {
+      case "Options": return true;
       case "Class": return !!st.cls;
       case "Subclass": return !hasSubclass() || !!st.subclass;
       case "Species": { const sp = spData(); if (!st.species) return false; if (sp && sp.lineages && sp.lineages.length && !st.lineage) return false; return true; }
@@ -610,7 +629,7 @@
       customFeatures, addedFeats, spellsKnown, slotUsed:{},
       forceSpells: false, spellAbility: (spellcasts && c.spellcastingAbility) ? c.spellcastingAbility : "",
       lineage: st.lineage,
-      options: { nimble: !!st.nimble }, manaUsed: 0, actionsUsed: 0,
+      options: { eberron: !!st.eberron, au: !!st.au }, manaUsed: 0, actionsUsed: 0,
     };
     if (typeof window.applySheet === "function") window.applySheet(data);
     if (document.getElementById("f-lineage")) document.getElementById("f-lineage").value = st.lineage || "";
@@ -660,12 +679,12 @@
     ".dndb-mc-row{display:flex;align-items:center;gap:8px;}" +
     ".dndb-mc-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:#ece3d6;}" +
     ".dndb-mc-x{background:transparent;border:none;color:#a99e90;cursor:pointer;font-size:13px;}.dndb-mc-x:hover{color:#e08a70;}" +
-    ".dndb-nimble{border:1px solid #5a3f7a;border-radius:6px;background:#231a2e;padding:9px 11px;margin:0 0 12px;cursor:pointer;transition:.1s;}" +
-    ".dndb-nimble:hover{border-color:#7b4fb0;}" +
-    ".dndb-nimble.on{border-color:#a878e0;background:#2e2140;box-shadow:0 0 0 1px #a878e0 inset;}" +
-    ".dndb-nimble .dnb-main{display:flex;align-items:flex-start;gap:10px;}" +
+    ".dndb-opt{border:1px solid #5a3f7a;border-radius:6px;background:#231a2e;padding:9px 11px;margin:0 0 12px;cursor:pointer;transition:.1s;}" +
+    ".dndb-opt:hover{border-color:#7b4fb0;}" +
+    ".dndb-opt.on{border-color:#a878e0;background:#2e2140;box-shadow:0 0 0 1px #a878e0 inset;}" +
+    ".dndb-opt .dnb-main{display:flex;align-items:flex-start;gap:10px;}" +
     ".dnb-check{flex:0 0 20px;width:20px;height:20px;border:2px solid #7b4fb0;border-radius:4px;color:#fff;text-align:center;line-height:18px;font-size:13px;font-weight:800;margin-top:1px;}" +
-    ".dndb-nimble.on .dnb-check{background:#a878e0;border-color:#a878e0;}" +
+    ".dndb-opt.on .dnb-check{background:#a878e0;border-color:#a878e0;}" +
     ".dnb-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:#d9c2ff;letter-spacing:.02em;}" +
     ".dnb-sub{font-size:11px;color:#b7add0;line-height:1.45;margin-top:3px;}";
   document.head.appendChild(css);

@@ -4,7 +4,7 @@ import { DND_CLASSES } from "@/lib/data/dnd-classes";
 import type { DndClass, DndSubclass } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, ChipRow, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ChipRow, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -33,7 +33,7 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
   };
   const classes = DND_CLASSES.map(withSubs);
   const selected = classes.find((c) => c.name === pick) ?? null;
-  const src = one(raw.src) === "hb" ? "hb" : "";
+  const src = ["core", "au", "eberron", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   if (!selected) {
     // "Homebrew" narrows the list to classes that have at least one homebrew subclass.
@@ -42,14 +42,14 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
     // facet match the client uses (a toggle: the facet holds "hb" only when it applies).
     const list = classes;
     const current = { src };
-    const facets = (c: DndClass) => ({ src: (subsByClass.get(c.name.toLowerCase()) ?? []).length ? ["hb"] : [] });
+    const facets = (c: DndClass) => ({ src: [...new Set([srcKey(c.source), ...c.subclasses.map((s) => srcKey(s.source))])] });
     const show = (c: DndClass) => facetMatch(facets(c), current);
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes${hbSubs.length ? ` · +${hbSubs.length} homebrew subclass${hbSubs.length === 1 ? "" : "es"}` : ""} · levels 1–20`} />
         <DndHomebrewEditor kind="dnd-subclass" campaigns={campaigns} initial={hbOwn} />
         <InstantFilter>
-        {hbSubs.length ? <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "hb", label: "Has homebrew subclasses" }]} active={src} /> : null}
+        <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips(classes.flatMap((c) => [c.source, ...c.subclasses.map((s) => s.source)]))} active={src} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
           {list.map((c) => {
             const hb = subsByClass.get(c.name.toLowerCase()) ?? [];

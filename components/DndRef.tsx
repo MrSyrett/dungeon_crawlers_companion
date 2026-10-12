@@ -14,6 +14,25 @@ export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
 export const accent = "var(--sys-link)";
 
+// ── Source filter ──────────────────────────────────────────────────────────
+// Every official source collapses to one of three filter buckets — Core (the
+// base game: SRD/PHB/DMG/MM/FR), the Arcana Unleashed expansion, and the
+// Eberron: Forge of the Artificer expansion — plus Homebrew. `srcKey` maps a
+// raw `source` value to its bucket; `srcChips` builds the Source chip row from
+// just the buckets actually present on a page (so no chip filters to nothing).
+export const srcKey = (source?: string): string =>
+  source === "Homebrew" ? "hb" : source === "arcana-unleashed" ? "au" : source === "eberron" ? "eberron" : "core";
+const SRC_ORDER: { key: string; label: string }[] = [
+  { key: "core", label: "Core" },
+  { key: "au", label: "Arcana Unleashed" },
+  { key: "eberron", label: "Eberron" },
+  { key: "hb", label: "Homebrew" },
+];
+export function srcChips(sources: (string | undefined)[]): { key: string; label: string }[] {
+  const present = new Set(sources.map(srcKey));
+  return SRC_ORDER.filter((o) => present.has(o.key));
+}
+
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch }; const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(next)) if (v) sp.set(k, v);

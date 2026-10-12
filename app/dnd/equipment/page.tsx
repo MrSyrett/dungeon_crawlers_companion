@@ -7,7 +7,7 @@ import { DND_MAGIC_ITEMS } from "@/lib/data/dnd-magic-items";
 import type { DndWeapon, DndArmor, DndGear, DndMagicItem } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, srcKey, srcChips, type RawQuery } from "@/components/DndRef";
 import InstantFilter from "@/components/InstantFilter";
 import { facetMatch, facetAttr } from "@/lib/facets";
 
@@ -19,7 +19,7 @@ const rarityColor: Record<string, string> = { Common: "var(--grade-1)", Uncommon
 const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]";
 const isHb = (x: { source?: string }) => x.source === "Homebrew";
 // The only chip on every view is Source; each entry's facets are just that.
-const facets = (x: { source?: string }) => ({ src: isHb(x) ? "hb" : "book" });
+const facets = (x: { source?: string }) => ({ src: srcKey(x.source) });
 
 export default async function DndEquipmentPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -27,7 +27,7 @@ export default async function DndEquipmentPage({ searchParams }: { searchParams:
   const raw = await searchParams;
   const mode = ["armor", "gear", "magic"].includes(one(raw.mode)) ? one(raw.mode) : "weapons";
   const q = one(raw.q).trim().toLowerCase();
-  const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
+  const src = ["core", "au", "eberron", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
 
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-equipment" }),
@@ -65,7 +65,7 @@ export default async function DndEquipmentPage({ searchParams }: { searchParams:
       {head()}
       <InstantFilter>
       <SearchForm base={BASE} q={one(raw.q)} placeholder={`Search ${mode}…`} hidden={{ mode, src }} />
-      <ChipRow label="Source" base={BASE} current={current} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} />
+      <ChipRow label="Source" base={BASE} current={current} param="src" options={srcChips([...DND_WEAPONS, ...DND_ARMOR, ...DND_GEAR, ...DND_MAGIC_ITEMS, ...hbW, ...hbA, ...hbG, ...hbM].map((x) => x.source))} active={src} />
       {inner}
       </InstantFilter>
     </div>
