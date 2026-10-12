@@ -928,8 +928,7 @@ function addSkillRow(s) {
     + '<td class="sk-spec-cell"><label title="Advanced Skill: rolls only its own dice"><input type="checkbox" class="sk-adv"' + (s.adv ? ' checked' : '') + ' onchange="onSkillAdvChange(this)">Adv</label>'
       + '<label title="Specialization applies: +1D to this roll"><input type="checkbox" class="sk-spec"' + (s.spec ? ' checked' : '') + ' onchange="scheduleAutosave()">Spec</label>'
       + '<input type="text" class="sk-specname" value="' + esc(s.specName || '') + '" placeholder="spec" title="Specialization name" oninput="scheduleAutosave()"></td>'
-    + '<td class="sk-total" onclick="rollSkillRow(this.parentNode)" title="Roll this skill">0D</td>'
-    + '<td style="width:20px;"><button class="row-x" onclick="this.closest(\'tr\').remove();recalc();scheduleAutosave()">✕</button></td>';
+    + '<td class="sk-total" onclick="rollSkillRow(this.parentNode)" title="Roll this skill">0D</td>';
   body.appendChild(tr); recalc(); return tr;
 }
 function cycleAttr(el) {
