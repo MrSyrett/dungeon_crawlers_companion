@@ -111,6 +111,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--dnd-lt);}
 .section-bar.red{background:transparent;color:var(--dnd-dk);}
 .section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:none;color:var(--muted);}
+.section-bar .sb-ability{font-family:'Share Tech Mono',monospace;font-weight:700;font-size:11px;letter-spacing:0;text-transform:none;color:var(--dnd-dk);border:1px solid var(--rule);border-radius:4px;padding:1px 6px;margin-left:7px;}
+.section-bar .sb-ability:empty{display:none;}
 .section-bar .sb-note b{color:var(--dnd-dk);}
 .hdr-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd-dk);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .hdr-btn:hover{background:var(--dnd-lt);}
@@ -244,6 +246,7 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .abil-save .sv-val{font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:var(--dnd-dk);}
 .abil-save:hover{color:var(--dnd);}
 .prof-dot{width:11px;height:11px;border:2px solid var(--dnd-dk);border-radius:50%;background:transparent;cursor:pointer;flex-shrink:0;}
+.prof-dot.locked{cursor:default;}
 .prof-dot.on{background:var(--dnd);}
 .prof-dot.exp{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset;}
 
@@ -278,9 +281,9 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .cbt .c-val{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--dnd-dk);line-height:1.1;}
 .cbt input{width:100%;max-width:74px;margin:2px auto 0;display:block;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;padding:1px 0;}
 .cbt.click{cursor:pointer;}.cbt.click:hover{background:var(--dnd-lt);}
-.ac-tile .ac-fx{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:1px;}
+.ac-tile .ac-fx{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:1px;}
 .ac-tile .ac-bonus-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
-.ac-tile input.ac-temp{width:30px!important;font-size:11px!important;font-weight:700;border:1px solid var(--rule)!important;border-radius:4px;padding:1px 2px;color:var(--muted)!important;}
+.ac-tile input.ac-temp{width:30px!important;font-size:11px!important;font-weight:700;border:1px solid var(--rule)!important;border-radius:4px;padding:1px 2px;margin:0!important;color:var(--muted)!important;}
 .ac-tile input.ac-temp:disabled{opacity:.35;cursor:not-allowed;}
 /* No number-spinner arrows on the HP and Temp fields. */
 .hp-row input::-webkit-outer-spin-button,.hp-row input::-webkit-inner-spin-button,.hp-sub input::-webkit-outer-spin-button,.hp-sub input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
@@ -299,8 +302,8 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .sr-of{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9a8f8f;}
 .sr-ft{display:flex;justify-content:flex-end;margin-top:4px;}
 .sr-rest{min-width:110px;padding:8px 16px;font-size:13px;background:var(--dnd);color:#fff;border-color:var(--dnd);}
-.hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
-.hp-row input{width:66px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
+.hp-row{display:flex;align-items:center;justify-content:flex-start;gap:7px;padding-left:8px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
+.hp-row input{width:66px;margin:0;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .hp-row .slash{color:var(--muted);font-size:24px;}
 .hp-row .hp-max-val{font-size:30px;line-height:1;}
 .hp-adjust{display:flex;align-items:center;justify-content:center;gap:6px;width:max-content;max-width:100%;margin:0 auto;}
@@ -388,8 +391,8 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .tap-more{font-family:'Barlow Condensed',sans-serif;font-size:9px;color:var(--dnd);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
 
 /* SPELLS */
-.spell-head{display:flex;flex-wrap:nowrap;gap:8px;padding:8px 10px;border-bottom:1px solid var(--rule);}
-.spell-head .sh-box{flex:1 1 0;min-width:0;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:5px 4px;text-align:center;}
+.spell-head{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px;padding:8px 10px;border-bottom:1px solid var(--rule);}
+.spell-head .sh-box{flex:0 1 auto;min-width:72px;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:5px 8px;text-align:center;}
 .spell-head .sh-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.1;}
 .spell-head .sh-val{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--dnd-dk);}
 .spell-head .sh-val.click{cursor:pointer;}.spell-head .sh-box.click:hover{background:var(--dnd-lt);}
@@ -432,7 +435,6 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .spell-row:hover{background:var(--box);}
 .sp-prep{width:14px;height:14px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
 .sp-prep.on{background:var(--dnd);}
-.sp-prep-gap{width:14px;flex-shrink:0;}
 .sp-name-input{flex:1 1 90px;min-width:60px;background:transparent;border:none;border-bottom:1px dashed transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;outline:none;padding:1px 0;}
 .sp-name-input:hover,.sp-name-input:focus{border-bottom-color:var(--rule);}
 .sp-info{flex:1 1 auto;text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1018,14 +1020,14 @@ body.dark .tabs-bar{background:#1a1a1f;}
 
       <!-- SPELLS TAB -->
       <div class="tab-panel tab-split" id="tab-spells">
-        <div class="section-bar"><span>Spellcasting</span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">Spells</button></span></div>
+        <div class="section-bar"><span>Spellcasting</span><span class="sb-ability" id="sp-ability" title="Spellcasting ability"></span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">Spells</button></span></div>
         <div id="conc-bar" class="conc-bar" style="display:none;"></div>
         <div id="spell-block" style="display:none;">
           <div class="spell-head">
-            <div class="sh-box"><div class="sh-lbl">Spell Ability</div><div class="sh-val" id="sp-ability">—</div></div>
             <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk">+0</div></div>
             <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc">8</div></div>
-            <div class="sh-box" id="sp-prep-box" style="display:none;" title="Spells prepared vs your maximum (spellcasting-class Prepared Spells)"><div class="sh-lbl">Prepared</div><div class="sh-val" id="sp-prep-val">0/0</div></div>
+            <div class="sh-box" id="sp-prep-box" style="display:none;" title="Leveled spells prepared vs your maximum"><div class="sh-lbl">Prepared Spells</div><div class="sh-val" id="sp-prep-val">0/0</div></div>
+            <div class="sh-box" id="sp-prep-cantrip-box" style="display:none;" title="Cantrips prepared vs your maximum"><div class="sh-lbl">Prepared Cantrips</div><div class="sh-val" id="sp-prep-cantrip-val">0/0</div></div>
           </div>
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
@@ -1303,13 +1305,14 @@ function buildAbilities(){
       '<div class="abil-mod" id="mod-' + a.id + '" onclick="rollAbility(\'' + a.id + '\')" title="Roll a ' + a.name + ' check">+0</div>' +
       '<input class="abil-score" id="sc-' + a.id + '" type="number" value="10" readonly tabindex="-1" title="Set at character creation, level-up, or by items">' +
       '<div class="abil-save" onclick="rollSave(\'' + a.id + '\')" title="Roll a ' + a.name + ' save">' +
-        '<span class="prof-dot" id="svp-' + a.id + '" onclick="event.stopPropagation();toggleSaveProf(\'' + a.id + '\')" title="Toggle save proficiency"></span>' +
+        '<span class="prof-dot locked" id="svp-' + a.id + '" title="Save proficiency — set at character creation and level-up"></span>' +
         '<span>Save</span><span class="sv-val" id="sv-' + a.id + '">+0</span>' +
       '</div>';
     list.appendChild(box);
   });
 }
-function toggleSaveProf(id){ saveProf[id] = !saveProf[id]; recalc(); scheduleAutosave(); }
+// Save & skill proficiencies are locked on the sheet — set by the builder at
+// creation and by the level-up wizard. (No manual toggle; the dots are display-only.)
 
 // ═══ BUILD SKILLS ═════════════════════════════════════════════════════════
 function buildSkills(){
@@ -1319,7 +1322,7 @@ function buildSkills(){
     row.className = 'skill-row';
     row.dataset.skill = sk.name; row.dataset.abil = sk.ability;
     row.innerHTML =
-      '<span class="prof-dot" onclick="cycleSkill(\'' + esc(sk.name) + '\')" id="skp-' + cssId(sk.name) + '" title="None → Proficient → Expertise"></span>' +
+      '<span class="prof-dot locked" id="skp-' + cssId(sk.name) + '" title="Skill proficiency — set at character creation and level-up"></span>' +
       '<span class="sk-abil">' + sk.ability + '</span>' +
       '<span class="sk-name" onclick="rollSkill(\'' + esc(sk.name) + '\')" title="' + esc(sk.description) + '">' + esc(sk.name) + '</span>' +
       '<span class="sk-val" id="skv-' + cssId(sk.name) + '" onclick="rollSkill(\'' + esc(sk.name) + '\')">+0</span>';
@@ -1327,7 +1330,6 @@ function buildSkills(){
   });
 }
 function cssId(name){ return String(name).replace(/[^a-z0-9]/gi,'_'); }
-function cycleSkill(name){ skillProf[name] = ((skillProf[name] || 0) + 1) % 3; recalc(); scheduleAutosave(); }
 
 // ═══ RECALC ═══════════════════════════════════════════════════════════════
 function recalc(){
@@ -1346,8 +1348,8 @@ function recalc(){
     const nm = row.dataset.skill, ab = row.dataset.abil, lvl = skillProf[nm] || 0;
     const v = modOf(ab) + lvl * PB;
     $('skv-' + cssId(nm)).textContent = sgn(v);
-    const dot = $('skp-' + cssId(nm)); dot.className = 'prof-dot' + (lvl === 1 ? ' on' : lvl === 2 ? ' exp' : '');
-    dot.title = lvl === 0 ? 'Not proficient' : lvl === 1 ? 'Proficient' : 'Expertise';
+    const dot = $('skp-' + cssId(nm)); dot.className = 'prof-dot locked' + (lvl === 1 ? ' on' : lvl === 2 ? ' exp' : '');
+    dot.title = (lvl === 0 ? 'Not proficient' : lvl === 1 ? 'Proficient' : 'Expertise') + ' — set at creation and level-up';
     if(nm === 'Perception') perceptionVal = v;
     else if(nm === 'Investigation') investigationVal = v;
     else if(nm === 'Insight') insightVal = v;
@@ -2489,6 +2491,17 @@ function preparedMax(){
 }
 // Granted always-prepared spells don't count against the prepared limit.
 function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level > 0 && sk.prepared && !sk.granted; }).length; }
+// Cantrips known/prepared: max from each caster class's "Cantrips" table column
+// (Warlock/pact casters know cantrips too, so unlike preparedMax we don't skip pact).
+function cantripMax(){
+  let total = 0;
+  spellcastingClasses().forEach(({cl,c}) => {
+    const row = (c.table||[]).find(r => Number(r.level) === num(cl.level));
+    if(row){ const col = row.columns ? parseInt(row.columns['Cantrips'], 10) : NaN; const kn = row.cantripsKnown != null ? Number(row.cantripsKnown) : NaN; const n = Math.max(isNaN(col)?0:col, isNaN(kn)?0:kn); total += n; }
+  });
+  return total;
+}
+function preparedCantripNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level === 0 && sk.prepared && !sk.granted; }).length; }
 function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
@@ -2505,7 +2518,12 @@ function renderSpellHeader(){
       if(pmax > 0){ pbox.style.display = ''; const now = preparedNow(), el = $('sp-prep-val'); el.textContent = now + '/' + pmax; el.style.color = now > pmax ? 'var(--red)' : ''; }
       else pbox.style.display = 'none';
     }
-  } else { $('spell-note').textContent = 'No spellcasting'; }
+    const cmax = cantripMax(), cbox = $('sp-prep-cantrip-box');
+    if(cbox){
+      if(cmax > 0){ cbox.style.display = ''; const now = preparedCantripNow(), el = $('sp-prep-cantrip-val'); el.textContent = now + '/' + cmax; el.style.color = now > cmax ? 'var(--red)' : ''; }
+      else cbox.style.display = 'none';
+    }
+  } else { $('spell-note').textContent = 'No spellcasting'; $('sp-ability').textContent = ''; }
 }
 // Regular (Vancian) slots: a single caster uses its own table; multiple casters use
 // the full-caster table at the combined caster level (RAW multiclass rule).
@@ -2554,7 +2572,7 @@ function renderSpells(){
       const row = document.createElement('div'); row.className = 'spell-row';
       const q = esc(sk.name).replace(/'/g,"\\'");
       row.innerHTML =
-        (lvl > 0 ? '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + q + '\')" title="Prepared"></span>' : '<span class="sp-prep-gap"></span>') +
+        '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + q + '\')" title="Prepared"></span>' +
         '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">' +
         (sk.granted ? '<span class="sp-granted" title="Granted by a feature or trait — always prepared">granted</span>' : '') +
         '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
@@ -2565,7 +2583,17 @@ function renderSpells(){
     });
   });
 }
-function addSpellByName(n){ if(!spellsKnown.some(s => norm(s.name) === norm(n))) spellsKnown.push({ name:n, prepared:true }); renderSpells(); renderSpellHeader(); scheduleAutosave(); }
+function addSpellByName(n){
+  if(!spellsKnown.some(s => norm(s.name) === norm(n))){
+    // Add to the known list; prepare it only if there's room under the class limit
+    // (cantrips and leveled spells each have their own cap). Otherwise it's added
+    // known-but-unprepared — the player un-prepares another to make room.
+    const sp = spellByName(n), isCantrip = sp && sp.level === 0;
+    const room = isCantrip ? (preparedCantripNow() < cantripMax()) : (sp && sp.level > 0 ? (preparedNow() < preparedMax()) : true);
+    spellsKnown.push({ name:n, prepared: room });
+  }
+  renderSpells(); renderSpellHeader(); scheduleAutosave();
+}
 // Compact info line for a spell row: casting time · range · duration · damage.
 function shortCastTime(ct){ ct = String(ct || ''); if(/bonus/i.test(ct)) return 'Bonus'; if(/reaction/i.test(ct)) return 'Reaction'; if(/^\s*action\s*$/i.test(ct)) return 'Action'; return ct; }
 function spellInfoLine(sp){
@@ -2579,7 +2607,17 @@ function spellInfoLine(sp){
   if(sp.ritual) parts.push('Ritual');
   return parts.join(' · ');
 }
-function togglePrep(n){ const s = spellsKnown.find(x => x.name === n); if(s) s.prepared = !s.prepared; renderSpells(); renderSpellHeader(); scheduleAutosave(); }
+function togglePrep(n){
+  const s = spellsKnown.find(x => x.name === n); if(!s) return;
+  // Preparing (not un-preparing): block if already at the class limit. Cantrips and
+  // leveled spells have separate limits; granted always-prepared spells don't count.
+  if(!s.prepared && !s.granted){
+    const sp = spellByName(n), isCantrip = sp && sp.level === 0;
+    if(isCantrip){ if(preparedCantripNow() >= cantripMax()){ addLog('Cantrips', '✗', 'At your cantrip limit (' + cantripMax() + ') — un-prepare one first', 'fumble'); return; } }
+    else { if(preparedNow() >= preparedMax()){ addLog('Prepared Spells', '✗', 'At your prepared limit (' + preparedMax() + ') — un-prepare one first', 'fumble'); return; } }
+  }
+  s.prepared = !s.prepared; renderSpells(); renderSpellHeader(); scheduleAutosave();
+}
 function onSpellRename(n, val){ const s = spellsKnown.find(x => norm(x.name) === norm(n)); if(s) s.display = val; scheduleAutosave(); }
 function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.spell || '') === norm(n)) tr.remove(); }); renderSpells(); renderSpellHeader(); scheduleAutosave(); }
 // Attack spells (those calling for a spell attack roll) get an Attacks/Spellcasting row.
