@@ -99,7 +99,7 @@
     if(totalOf(cur) >= 20){ if(window.addLog) window.addLog("Level Up","✗","Already at level 20","fumble"); return; }
     // ensure the character is in managed mode so classLevels drives the engine
     if(window.setClassLevels) window.setClassLevels(cur);
-    lu = { targetCls: cur[0].cls, subclass:"", hp:null, hpMethod:"avg", asiMode:"asi", asi:{}, feat:"", pickedCantrips:[], pickedSpells:[] };
+    lu = { targetCls: cur[0].cls, subclass:"", hp:null, hpMethod:"avg", asiMode:"asi", asi:{}, feat:"", pickedCantrips:[], pickedSpells:[], spellsAvail:true };
     ctx = buildCtx(); computeSteps(); step = 0;
     $("dndlu-overlay").classList.add("open"); render();
   }
@@ -187,25 +187,31 @@
   }
   function rSpells(){
     const c = ctx.c, known = knownSpellSet();
+    const avail = lu.spellsAvail !== false, inList = (s) => _spellInList(s, c.name);
+    // Spells the character already knows are left out entirely — you only choose
+    // from what's new — so spells added freely from the sheet's Spellbook don't
+    // count toward this level's "choose N".
     let h = '<p class="m-hint">Your ' + esc(lu.targetCls) + ' learns new magic at this level.</p>';
+    h += '<label class="brow-check spl-avail"><input type="checkbox" data-spavail' + (avail ? " checked" : "") + '> Spells available to me</label>';
     if(ctx.newCantrips > 0){
-      h += '<span class="m-lbl">New cantrips — choose ' + ctx.newCantrips + ' <span style="color:#8ad4ff;">(' + lu.pickedCantrips.length + '/' + ctx.newCantrips + ')</span></span><div class="dndb-grid">';
-      D.spells().filter((s) => s.level===0 && _spellInList(s, c.name) && !known.has(norm(s.name))).sort((a,b)=>a.name.localeCompare(b.name))
-        .forEach((s) => h += spellCard(s, "cantrip", ctx.newCantrips));
-      h += "</div>";
+      h += '<span class="m-lbl">New cantrips — choose ' + ctx.newCantrips + ' <span style="color:#8ad4ff;">(' + lu.pickedCantrips.length + '/' + ctx.newCantrips + ')</span></span>';
+      const cs = D.spells().filter((s) => s.level===0 && !known.has(norm(s.name)) && (avail ? inList(s) : true)).sort((a,b)=>a.name.localeCompare(b.name));
+      h += RULES().spellPickerHTML(cs, {
+        selected: (n) => lu.pickedCantrips.includes(n),
+        disabledAdd: (s) => !inList(s) || lu.pickedCantrips.length >= ctx.newCantrips,
+        emptyHTML: '<p class="spl-empty">No new cantrips available.</p>',
+      });
     }
     if(ctx.newSpells > 0 && ctx.maxSL >= 1){
-      h += '<span class="m-lbl">New spells — choose ' + ctx.newSpells + ' (up to level ' + ctx.maxSL + ') <span style="color:#8ad4ff;">(' + lu.pickedSpells.length + '/' + ctx.newSpells + ')</span></span><div class="dndb-grid">';
-      D.spells().filter((s) => s.level>=1 && s.level<=ctx.maxSL && _spellInList(s, c.name) && !known.has(norm(s.name))).sort((a,b)=>(a.level-b.level)||a.name.localeCompare(b.name))
-        .forEach((s) => h += spellCard(s, "spell", ctx.newSpells));
-      h += "</div>";
+      h += '<span class="m-lbl">New spells — choose ' + ctx.newSpells + ' (up to level ' + ctx.maxSL + ') <span style="color:#8ad4ff;">(' + lu.pickedSpells.length + '/' + ctx.newSpells + ')</span></span>';
+      const ss = D.spells().filter((s) => s.level>=1 && s.level<=ctx.maxSL && !known.has(norm(s.name)) && (avail ? inList(s) : true)).sort((a,b)=>(a.level-b.level)||a.name.localeCompare(b.name));
+      h += RULES().spellPickerHTML(ss, {
+        selected: (n) => lu.pickedSpells.includes(n),
+        disabledAdd: (s) => !inList(s) || lu.pickedSpells.length >= ctx.newSpells,
+        emptyHTML: '<p class="spl-empty">No new spells available.</p>',
+      });
     }
     return h;
-  }
-  // Card markup is shared with the builder (DNDCALC); `on` = already picked here.
-  function spellCard(s, kind, max){
-    const arr = kind === "cantrip" ? lu.pickedCantrips : lu.pickedSpells;
-    return RULES().spellCard(s, kind, max, arr.includes(s.name));
   }
   function rReview(){
     const cur = curClasses();
@@ -243,10 +249,13 @@
       lu.asi[a] = nv; if(!nv) delete lu.asi[a]; render();
     }));
     const fs = $("dndlu-feat"); if(fs) fs.addEventListener("change", () => { lu.feat = fs.value; render(); });
-    body.querySelectorAll("[data-info]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const c = el.closest("[data-spell]"); const d = c && c.querySelector(".sp-pick-desc"); if(d) d.hidden = !d.hidden; }));
-    body.querySelectorAll("[data-spell]").forEach((el) => el.addEventListener("click", () => {
-      const n = el.dataset.spell, kind = el.dataset.kind, max = num(el.dataset.max), arr = kind==="cantrip"?lu.pickedCantrips:lu.pickedSpells;
-      const i = arr.indexOf(n); if(i>=0) arr.splice(i,1); else { if(arr.length>=max) arr.shift(); arr.push(n); }
+    body.querySelectorAll("[data-spavail]").forEach((el) => el.addEventListener("change", () => { lu.spellsAvail = el.checked; render(); }));
+    body.querySelectorAll("[data-sp-exp]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const row = el.closest("[data-sp]"); if(row){ row.classList.toggle("open"); const d = row.querySelector(".spl-desc"); if(d) d.hidden = !row.classList.contains("open"); } }));
+    body.querySelectorAll("[data-sp-pick]").forEach((el) => el.addEventListener("click", () => {
+      if(el.disabled) return;
+      const n = el.getAttribute("data-sp-pick"), sp = D.spells().find((x) => x.name === n);
+      const arr = (sp && sp.level === 0) ? lu.pickedCantrips : lu.pickedSpells;
+      const i = arr.indexOf(n); if(i>=0) arr.splice(i,1); else arr.push(n);
       render();
     }));
   }

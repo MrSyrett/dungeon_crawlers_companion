@@ -62,7 +62,7 @@
              bg2:"", bg1:"", classSkills:[], multiclass:[],
              name:"", alignment:"", eberron:true, au:true,
              fightingStyle:"", expertise:[], orders:{}, advances:[],
-             pickedCantrips:[], pickedSpells:[], equipChoice:"gear" };
+             pickedCantrips:[], pickedSpells:[], spellsAvail:true, equipChoice:"gear" };
   }
   function clsData() { return D.classes().find((c) => c.name === st.cls) || null; }
   function spData() { return D.species().find((s) => s.name === st.species) || null; }
@@ -110,10 +110,18 @@
     if (m < 1 && preparedCount() > 0) m = 1;   // half-casters prepare 1st-level spells at level 1
     return m;
   }
-  function spellsFor(minL, maxL) {
-    const nm = st.cls;
-    const inList = (window.DNDCALC && window.DNDCALC.spellInList) ? window.DNDCALC.spellInList : (s, c) => (s.classes || []).includes(c);
-    return D.spells().filter((s) => s.level >= minL && s.level <= maxL && inList(s, nm) && allowSrc(s))
+  function spellInList(s, nm) {
+    const fn = (window.DNDCALC && window.DNDCALC.spellInList) ? window.DNDCALC.spellInList : (sp, c) => (sp.classes || []).includes(c);
+    return fn(s, nm);
+  }
+  // A spell is pickable only if it's on this class's list (regardless of the
+  // "available to me" browse toggle).
+  function classEligible(s) { return spellInList(s, st.cls); }
+  // The picker's spell list. "available to me" on → only this class's spells;
+  // off → every class's spells in range (to browse), with non-eligible ones
+  // shown but their +Add disabled.
+  function spellsFor(minL, maxL, avail) {
+    return D.spells().filter((s) => s.level >= minL && s.level <= maxL && allowSrc(s) && (avail === false ? true : classEligible(s)))
       .sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name));
   }
   function fightingStyles() { return D.feats().filter((f) => (f.category || "") === "Fighting Style" && allowSrc(f)); }
@@ -382,25 +390,26 @@
   function rSpells() {
     if (!isCaster()) return '<p class="m-hint">This class doesn\'t cast spells at this level.</p>';
     const cCount = cantripCount(), sCount = preparedCount(), maxL = maxSpellLevel();
+    const avail = st.spellsAvail !== false;
     let h = '<p class="m-hint">Choose your starting spells for the ' + esc(st.cls) + '. You can change these on the sheet anytime.</p>';
+    h += '<label class="brow-check spl-avail"><input type="checkbox" data-spavail' + (avail ? " checked" : "") + '> Spells available to me</label>';
     if (cCount > 0) {
-      const cs = spellsFor(0, 0);
-      h += '<span class="m-lbl">Cantrips — choose ' + cCount + ' <span style="color:#8ad4ff;">(' + st.pickedCantrips.length + '/' + cCount + ')</span></span><div class="dndb-grid">';
-      cs.forEach((s) => h += spellCard(s, "cantrip", cCount));
-      h += "</div>";
+      h += '<span class="m-lbl">Cantrips — choose ' + cCount + ' <span style="color:#8ad4ff;">(' + st.pickedCantrips.length + '/' + cCount + ')</span></span>';
+      h += window.DNDCALC.spellPickerHTML(spellsFor(0, 0, avail), {
+        selected: (n) => st.pickedCantrips.includes(n),
+        disabledAdd: (s) => !classEligible(s) || st.pickedCantrips.length >= cCount,
+        emptyHTML: '<p class="spl-empty">No cantrips available.</p>',
+      });
     }
     if (sCount > 0 && maxL >= 1) {
-      const ss = spellsFor(1, maxL);
-      h += '<span class="m-lbl">Spells — choose ' + sCount + ' (up to level ' + maxL + ') <span style="color:#8ad4ff;">(' + st.pickedSpells.length + '/' + sCount + ')</span></span><div class="dndb-grid">';
-      ss.forEach((s) => h += spellCard(s, "spell", sCount));
-      h += "</div>";
+      h += '<span class="m-lbl">Spells — choose ' + sCount + ' (up to level ' + maxL + ') <span style="color:#8ad4ff;">(' + st.pickedSpells.length + '/' + sCount + ')</span></span>';
+      h += window.DNDCALC.spellPickerHTML(spellsFor(1, maxL, avail), {
+        selected: (n) => st.pickedSpells.includes(n),
+        disabledAdd: (s) => !classEligible(s) || st.pickedSpells.length >= sCount,
+        emptyHTML: '<p class="spl-empty">No spells available.</p>',
+      });
     }
     return h;
-  }
-  // Card markup is shared with the level-up wizard (window.DNDCALC).
-  function spellCard(s, kind, max) {
-    const arr = kind === "cantrip" ? st.pickedCantrips : st.pickedSpells;
-    return window.DNDCALC.spellCard(s, kind, max, arr.includes(s.name));
   }
   function rEquipment() {
     const c = clsData();
@@ -494,13 +503,16 @@
       av.asi[a] = nv; if (!nv) delete av.asi[a]; render();
     }));
     body.querySelectorAll(".dndb-adv-feat").forEach((el) => el.addEventListener("change", () => { st.advances[num(el.dataset.i)].feat = el.value; render(); }));
-    // spells: ⓘ toggles the inline description without selecting the card
-    body.querySelectorAll("[data-info]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const c = el.closest("[data-spell]"); const d = c && c.querySelector(".sp-pick-desc"); if(d) d.hidden = !d.hidden; }));
-    body.querySelectorAll("[data-spell]").forEach((el) => el.addEventListener("click", () => {
-      const n = el.dataset.spell, kind = el.dataset.kind, max = parseInt(el.dataset.max,10);
-      const arr = kind === "cantrip" ? st.pickedCantrips : st.pickedSpells;
+    // spells: "available to me" toggle, expand-on-click, +Add / −Remove (cap
+    // enforced by the Add button being disabled when the pool is full).
+    body.querySelectorAll("[data-spavail]").forEach((el) => el.addEventListener("change", () => { st.spellsAvail = el.checked; render(); }));
+    body.querySelectorAll("[data-sp-exp]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const row = el.closest("[data-sp]"); if(row){ row.classList.toggle("open"); const d = row.querySelector(".spl-desc"); if(d) d.hidden = !row.classList.contains("open"); } }));
+    body.querySelectorAll("[data-sp-pick]").forEach((el) => el.addEventListener("click", () => {
+      if (el.disabled) return;
+      const n = el.getAttribute("data-sp-pick"), sp = D.spells().find((x) => x.name === n);
+      const arr = (sp && sp.level === 0) ? st.pickedCantrips : st.pickedSpells;
       const i = arr.indexOf(n);
-      if (i >= 0) arr.splice(i,1); else { if (arr.length >= max) arr.shift(); arr.push(n); }
+      if (i >= 0) arr.splice(i, 1); else arr.push(n);
       render();
     }));
     // equipment
@@ -671,10 +683,6 @@
     ".drs-v{display:block;font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:#f0e0d6;}" +
     ".drs-m{display:block;font-family:'Share Tech Mono',monospace;font-size:11px;color:#e08a70;}" +
     ".dndb-review .dr-line{font-size:13px;color:#cdc3b6;line-height:1.6;margin-top:6px;}.dndb-review b{color:#f0e0d6;}" +
-    ".dndb-card.spellpick .sp-pick-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}" +
-    ".sp-pick-i{background:transparent;border:none;color:#8ad4ff;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;}" +
-    ".sp-pick-i:hover{color:#c8e8ff;}" +
-    ".sp-pick-desc{font-size:11px;color:#cdc3b6;line-height:1.45;margin-top:5px;border-top:1px solid #3a3a41;padding-top:5px;}" +
     ".dndb-mc-rows{display:flex;flex-direction:column;gap:6px;margin:6px 0;}" +
     ".dndb-mc-row{display:flex;align-items:center;gap:8px;}" +
     ".dndb-mc-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:#ece3d6;}" +

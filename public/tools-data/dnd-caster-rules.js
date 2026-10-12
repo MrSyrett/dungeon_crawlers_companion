@@ -38,12 +38,46 @@
     if (s.ritual) tags.push("Ritual");
     return tags;
   }
-  function spellCard(s, kind, max, on) {
-    return '<div class="dndb-card small spellpick' + (on ? " on" : "") + '" data-spell="' + esc(s.name) + '" data-kind="' + kind + '" data-max="' + max + '">' +
-      '<div class="sp-pick-hd"><span class="dc-title">' + esc(s.name) + '</span><button class="sp-pick-i" data-info="' + esc(s.name) + '" title="Show details">&#9432;</button></div>' +
-      '<div class="dc-sub">' + esc(spellTags(s).join(" · ")) + '</div>' +
-      '<div class="sp-pick-desc" hidden>' + esc(s.description || "") + (s.higherLevels ? '<br><b>At Higher Levels.</b> ' + esc(s.higherLevels) : "") + '</div>' +
+  // ── Unified spell picker (shared by the sheet Spellbook, the creation
+  //    builder, and the level-up wizard) ───────────────────────────────────
+  // One collapsed row per spell (click the row to expand its description), the
+  // rows grouped into sections by spell level with a sticky header, and a
+  // +Add / −Remove control on each row. Pure markup: each caller wires the two
+  // data hooks (`[data-sp-exp]` to expand, `[data-sp-pick]` to add/remove) and
+  // supplies the selection + add-gating predicates through `opts`.
+  const spellLevelLabel = (L) => L === 0 ? "Cantrips" : "Level " + L;
+  function spellRow(s, opts) {
+    const name = s.name;
+    const sel = opts.selected(name);
+    const blocked = !sel && opts.disabledAdd(s);
+    const label = sel ? (opts.removeLabel || "− Remove") : (opts.addLabel || "+ Add");
+    const cls = "spl-pick" + (sel ? " on" : "") + (blocked ? " disabled" : "");
+    return '<div class="spl-row" data-sp="' + esc(name) + '">' +
+      '<button class="spl-head" data-sp-exp type="button">' +
+        '<span class="spl-caret">▸</span>' +
+        '<span class="spl-hd-txt"><span class="spl-name">' + esc(name) + '</span>' +
+        '<span class="spl-tags">' + esc(spellTags(s).join(" · ")) + '</span></span>' +
+      '</button>' +
+      '<button class="' + cls + '" type="button" data-sp-pick="' + esc(name) + '"' + (blocked ? " disabled" : "") + '>' + label + '</button>' +
+      '<div class="spl-desc" hidden>' + esc(s.description || "") + (s.higherLevels ? '<br><b>At Higher Levels.</b> ' + esc(s.higherLevels) : "") + '</div>' +
     '</div>';
+  }
+  // `spells` is already filtered + sorted by the caller. opts: { selected(name),
+  // disabledAdd(spell), addLabel, removeLabel, emptyHTML }.
+  function spellPickerHTML(spells, opts) {
+    opts = opts || {};
+    const o = {
+      selected: opts.selected || (() => false),
+      disabledAdd: opts.disabledAdd || (() => false),
+      addLabel: opts.addLabel, removeLabel: opts.removeLabel,
+    };
+    if (!spells || !spells.length) return opts.emptyHTML || '<p class="spl-empty">No spells match.</p>';
+    const byLevel = {};
+    spells.forEach((s) => { const L = s.level || 0; (byLevel[L] = byLevel[L] || []).push(s); });
+    return Object.keys(byLevel).map(Number).sort((a, b) => a - b).map((L) =>
+      '<div class="spl-sec"><div class="spl-sec-hd">' + spellLevelLabel(L) + '</div>' +
+      byLevel[L].map((s) => spellRow(s, o)).join("") + '</div>'
+    ).join("");
   }
 
   // ── class-table lookups ────────────────────────────────────────────────
@@ -97,7 +131,7 @@
   window.DNDCALC = {
     num, norm, esc, classByName, isCasterClass, spellListName, spellInList,
     ASI_LEVELS, ASI_DEFAULT, grantsASI, asiLevelsUpTo,
-    shortCastTime, spellDmgStr, spellTags, spellCard,
+    shortCastTime, spellDmgStr, spellTags, spellLevelLabel, spellRow, spellPickerHTML,
     tableRow, colAt, cantripsAt, preparedAt,
     maxSpellLevelSingle, combinedCasterLevel, maxSpellLevelMulti, profBonus, featEffects,
   };

@@ -514,6 +514,25 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
 .brow-add:hover{background:#b93b3b;}
 .brow-add.alt{background:var(--gold);}
 .brow-add.have{background:transparent;color:#6a8a5a;border:1px solid #3a4a30;cursor:default;}
+/* Unified spell picker (sheet Spellbook + creation/level-up wizards, via DNDCALC.spellPickerHTML).
+   Collapsed rows grouped into sticky-headed sections by spell level; click a row to expand its text. */
+.spl-sec{margin:2px 0 8px;}
+.spl-sec-hd{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#ec4456;padding:6px 2px 4px;border-bottom:1px solid #332c2c;position:sticky;top:0;background:#151519;z-index:1;}
+.spl-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #2a2422;}
+.spl-head{display:flex;align-items:center;gap:7px;background:transparent;border:none;text-align:left;cursor:pointer;padding:0;min-width:0;}
+.spl-caret{color:#8a7f72;font-size:10px;transition:transform .12s;flex-shrink:0;}
+.spl-row.open .spl-caret{transform:rotate(90deg);}
+.spl-hd-txt{min-width:0;display:flex;flex-direction:column;gap:1px;}
+.spl-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#f0e0d6;letter-spacing:.01em;line-height:1.1;}
+.spl-tags{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#a99e90;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;}
+.spl-pick{flex-shrink:0;background:var(--dnd);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.spl-pick:hover{background:#b93b3b;}
+.spl-pick.on{background:transparent;color:#c98a8a;border:1px solid #6a3535;}
+.spl-pick.on:hover{background:#3a1e1e;color:#fff;}
+.spl-pick.disabled,.spl-pick:disabled{background:transparent;color:#6a6258;border:1px solid #39332c;cursor:default;}
+.spl-desc{grid-column:1 / -1;font-size:11.5px;color:#cdc3b6;line-height:1.45;margin-top:4px;padding:5px 2px 2px;border-top:1px dashed #332c2c;}
+.spl-empty{font-size:12px;color:#a99e90;padding:10px 4px;}
+.spl-avail{margin:6px 0 2px;}
 .rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#ec4456;margin:12px 0 3px;}
 .rules-list p{font-size:12px;line-height:1.5;color:#cdc3b6;}
 .rules-cat{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#8ad4ff;margin:14px 0 4px;border-bottom:1px solid #332c2c;padding-bottom:3px;}
@@ -689,6 +708,7 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
   .res-pip{width:24px;height:24px;}
   /* Modal (Spellbook / Item Store / Builder / Level-Up) controls */
   .brow-add{min-height:38px;padding:8px 12px;font-size:12px;}
+  .spl-pick{min-height:38px;padding:8px 12px;font-size:12px;}
   .brow-check input{width:22px;height:22px;}
   .m-input{min-height:42px;}
   .m-btn{min-height:44px;}
@@ -1140,7 +1160,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
         <select id="book-class" class="m-input brow-sel" onchange="renderBook()"></select>
         <select id="book-level" class="m-input brow-sel" onchange="renderBook()"></select>
       </div>
-      <label class="brow-check"><input type="checkbox" id="book-mine" onchange="renderBook()"> Only spells available to me</label>
+      <label class="brow-check"><input type="checkbox" id="book-mine" checked onchange="renderBook()"> Spells available to me</label>
     </div>
     <div class="modal-bd brow-list" id="book-body"></div>
   </div>
@@ -1981,9 +2001,13 @@ function openBook(){
     cls.innerHTML = '<option value="">All classes</option>' + classes.map(c => '<option>' + esc(c) + '</option>').join('');
     $('book-level').innerHTML = '<option value="">All levels</option>' + [0,1,2,3,4,5,6,7,8,9].map(l => '<option value="' + l + '">' + (l===0?'Cantrips':'Level ' + l) + '</option>').join('');
     $('book-body').addEventListener('click', (e) => {
-      const add = e.target.closest('[data-add-spell]'); if(add){ addSpellByName(add.dataset.addSpell); renderBook(); return; }
-      const rem = e.target.closest('[data-remove-spell]'); if(rem){ removeSpell(rem.dataset.removeSpell); renderBook(); return; }
-      const read = e.target.closest('[data-read-spell]'); if(read){ openSpell(read.dataset.readSpell); }
+      const pick = e.target.closest('[data-sp-pick]');
+      if(pick){ if(pick.disabled) return; const nm = pick.getAttribute('data-sp-pick');
+        const known = new Set(spellsKnown.map(s => norm(s.name)));
+        if(known.has(norm(nm))) removeSpell(nm); else addSpellByName(nm);
+        renderBook(); return; }
+      const exp = e.target.closest('[data-sp-exp]');
+      if(exp){ const row = exp.closest('[data-sp]'); if(row){ row.classList.toggle('open'); const d = row.querySelector('.spl-desc'); if(d) d.hidden = !row.classList.contains('open'); } }
     });
     _bookInit = true;
   }
@@ -2004,27 +2028,22 @@ function sheetMaxSpellLevel(){
 function renderBook(){
   const q = norm($('book-search').value), fc = $('book-class').value, fl = $('book-level').value;
   const mine = $('book-mine').checked, myClass = (classData() || {}).name, maxL = sheetMaxSpellLevel();
+  const inList = (window.DNDCALC && DNDCALC.spellInList) ? DNDCALC.spellInList : (s, c) => (s.classes || []).includes(c);
   const list = D.spells().filter(s => {
-    if(mine){ if(!myClass || !(s.classes || []).includes(myClass)) return false; if(s.level > maxL) return false; }
+    if(mine){ if(!myClass || !inList(s, myClass)) return false; if(s.level > maxL) return false; }
     else if(fc && !(s.classes || []).includes(fc)) return false;
     if(fl !== '' && String(s.level) !== String(fl)) return false;
     if(q && !(norm(s.name).includes(q) || norm(s.school).includes(q))) return false;
     return true;
   }).sort((a,b) => (a.level - b.level) || a.name.localeCompare(b.name));
   const known = new Set(spellsKnown.map(s => norm(s.name)));
-  const box = $('book-body');
-  if(!list.length){ box.innerHTML = '<p class="m-hint" style="padding:10px 4px;">No spells match.</p>'; return; }
-  box.innerHTML = list.map(s => {
-    const have = known.has(norm(s.name));
-    const meta = (s.level===0?'Cantrip':'Lvl ' + s.level) + ' · ' + esc(s.school) + ' · ' + esc(s.castingTime) + ' · ' + esc(s.range) + (s.concentration?' · Conc':'') + (s.ritual?' · Ritual':'');
-    const btn = have
-      ? '<button class="brow-add remove" data-remove-spell="' + esc(s.name) + '">− Remove</button>'
-      : '<button class="brow-add" data-add-spell="' + esc(s.name) + '">+ Add</button>';
-    return '<div class="brow-item">' +
-      '<div class="brow-main"><div class="brow-name" data-read-spell="' + esc(s.name) + '" style="cursor:pointer;">' + esc(s.name) + '</div>' +
-        '<div class="brow-meta">' + meta + '</div><div class="brow-desc">' + esc(s.description || '') + '</div></div>' + btn +
-    '</div>';
-  }).join('');
+  // The Spellbook manages spells freely (no cap) — unlike the creation/level-up
+  // wizards, spells added here don't count toward a level's "choose N".
+  $('book-body').innerHTML = DNDCALC.spellPickerHTML(list, {
+    selected: n => known.has(norm(n)),
+    addLabel: '+ Add', removeLabel: '− Remove',
+    emptyHTML: '<p class="m-hint" style="padding:10px 4px;">No spells match.</p>',
+  });
 }
 
 // ═══ ITEM STORE (browse & add gear/weapons/armor/magic) ═══════════════════
