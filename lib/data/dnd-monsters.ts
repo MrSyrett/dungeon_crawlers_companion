@@ -12662,5 +12662,1123 @@ export const DND_MONSTERS: DndMonster[] = [
     ],
     "group": "Plants",
     "source": "srd"
+  },
+  {
+    "name": "Abjurer Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 198,
+    "hpFormula": "198 (36d8 + 36)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, History +10, Perception +7",
+    "damageImmunities": "Psychic",
+    "conditionImmunities": "Charmed (with Mind Blank)",
+    "senses": "Passive Perception 17",
+    "languages": "Common plus five other languages",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes three Arcane Burst attacks."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 27 (4d10 + 5) Force damage."
+      },
+      {
+        "name": "Banishing Blast (Recharge 6)",
+        "description": "Charisma Saving Throw: DC 18, each creature in a 60-foot Cone. Failure: 45 (10d8) Force damage, and the target is Incapacitated and banished to a harmless demiplane until the start of the archmage's next turn, when it reappears in the space it left (or the nearest unoccupied space). Success: Half damage only."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Arcane Lock, Detect Magic, Mage Armor (included in AC), Mage Hand, Prestidigitation. 2/Day Each: Fireball (level 7 version), Nondetection, Otiluke's Resilient Sphere. 1/Day Each: Mind Blank (cast before combat), Teleport."
+      }
+    ],
+    "bonusActions": [
+      {
+        "name": "Fortify (Recharge 4–6)",
+        "description": "The archmage gains 40 Temporary Hit Points."
+      },
+      {
+        "name": "Magic Disruption (2/Day)",
+        "description": "The archmage casts Dispel Magic or Globe of Invulnerability."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Counterspell (3/Day)",
+        "description": "The archmage casts Counterspell in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Conjurer Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 225,
+    "hpFormula": "225 (41d8 + 41)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, History +10, Perception +7",
+    "senses": "Passive Perception 17",
+    "languages": "Common plus five other languages",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes four Arcane Burst attacks."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 27 (4d10 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Detect Magic, Find Familiar, Mage Armor (included in AC), Mage Hand, Prestidigitation, Unseen Servant. 2/Day: Dimension Door. 1/Day Each: Incendiary Cloud, Lightning Bolt (level 8 version), Plane Shift, Teleport."
+      }
+    ],
+    "bonusActions": [
+      {
+        "name": "Benign Transposition (3/Day)",
+        "description": "The archmage teleports up to 30 feet to an unoccupied space it can see, or swaps places with a willing creature in range."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic (3/Day)",
+        "description": "The archmage casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Diviner Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 176,
+    "hpFormula": "176 (32d8 + 32)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, History +10, Insight +7, Investigation +10, Perception +7",
+    "senses": "Truesight 60 ft., Passive Perception 17",
+    "languages": "All",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and similar effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes four Arcane Burst attacks. It can replace one attack with a use of Spellcasting to cast Mind Spike (level 4 version)."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 24 (3d12 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Detect Magic, Detect Thoughts, Mage Armor (included in AC), Mage Hand, Mind Spike (level 4 version), Prestidigitation. 2/Day Each: Scrying, Sending. 1/Day Each: Foresight (cast before combat), Telepathy."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic (3/Day)",
+        "description": "The archmage casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Enchanter Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 214,
+    "hpFormula": "214 (39d8 + 39)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, History +10, Perception +7, Persuasion +13",
+    "senses": "Passive Perception 17",
+    "languages": "Common plus five other languages",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes four Arcane Burst attacks."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 21 (3d10 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Detect Magic, Mage Armor (included in AC), Mage Hand, Prestidigitation. 2/Day Each: Fireball (level 7 version), Geas, Modify Memory."
+      }
+    ],
+    "bonusActions": [
+      {
+        "name": "Dominate Person (1/Day)",
+        "description": "The archmage casts Dominate Person."
+      },
+      {
+        "name": "Duplicitous Magic (2/Day)",
+        "description": "The archmage casts Charm Person, Hold Person, or Sleep."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic (3/Day)",
+        "description": "The archmage casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Evoker Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 214,
+    "hpFormula": "214 (39d8 + 39)",
+    "speed": "30 ft., fly 30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, History +10, Intimidation +8, Perception +7",
+    "senses": "Passive Perception 17",
+    "languages": "Common plus five other languages",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Evocation Sculptor",
+        "description": "When the archmage casts a spell with an area of effect, it can choose itself and up to five other creatures it can see to automatically succeed on their save against the spell and take no damage if they would normally take half on a success."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes four Arcane Burst attacks. It can replace one attack with a use of Spellcasting to cast Shatter."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 27 (4d10 + 5) Force damage."
+      },
+      {
+        "name": "Evocation Barrage (Recharge 5–6)",
+        "description": "The archmage casts Fireball, Ice Storm, or Lightning Bolt twice in any combination."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Detect Magic, Mage Armor (included in AC), Mage Hand, Prestidigitation, Shatter (level 3 version)."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic (3/Day)",
+        "description": "The archmage casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Illusionist Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 220,
+    "hpFormula": "220 (40d8 + 40)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, Deception +8, Perception +7, Stealth +8",
+    "senses": "Passive Perception 17",
+    "languages": "Common plus five other languages",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes four Arcane Burst attacks."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 21 (3d10 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Detect Magic, Disguise Self, Invisibility, Mage Armor (included in AC), Mage Hand, Minor Illusion, Prestidigitation. 2/Day Each: Creation, Major Image, Nystul's Magic Aura, Seeming. 1/Day Each: Mirage Arcane, Weird."
+      }
+    ],
+    "bonusActions": [
+      {
+        "name": "Beguiling Spells (2/Day)",
+        "description": "The archmage casts Hypnotic Pattern or Mirror Image."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic (3/Day)",
+        "description": "The archmage casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Necromancer Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 225,
+    "hpFormula": "225 (41d8 + 41)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, History +10, Intimidation +8, Perception +7",
+    "damageResistances": "Necrotic",
+    "senses": "Passive Perception 17",
+    "languages": "Common plus five other languages",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and other magical effects."
+      },
+      {
+        "name": "Marshal Undead",
+        "description": "Undead of the archmage's choice in a 60-foot Emanation have Advantage on attack rolls and saving throws, unless the archmage is Incapacitated."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes four Arcane Burst attacks. It can replace one attack with a use of Spellcasting to cast Blight."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 21 (3d10 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Blight, Detect Magic, Mage Armor (included in AC), Mage Hand, Prestidigitation, Speak with Dead. 1/Day Each: Circle of Death (level 7 version), Create Undead."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic (3/Day)",
+        "description": "The archmage casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Transmuter Archmage",
+    "size": "Medium",
+    "type": "Humanoid (Wizard)",
+    "alignment": "Neutral",
+    "ac": 16,
+    "hp": 220,
+    "hpFormula": "220 (40d8 + 40)",
+    "speed": "40 ft., fly 30 ft.",
+    "abilities": {
+      "STR": 10,
+      "DEX": 16,
+      "CON": 12,
+      "INT": 20,
+      "WIS": 15,
+      "CHA": 16
+    },
+    "savingThrows": "Con +6, Int +10, Wis +7",
+    "skills": "Arcana +15, History +10, Perception +7",
+    "senses": "Darkvision 60 ft., Passive Perception 17",
+    "languages": "Common plus five other languages",
+    "cr": "15",
+    "xp": 13000,
+    "proficiencyBonus": 5,
+    "traits": [
+      {
+        "name": "Magic Resistance",
+        "description": "The archmage has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The archmage makes four Arcane Burst attacks."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +10, reach 5 ft. or range 150 ft. Hit: 27 (4d10 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The archmage casts one of the following spells (save DC 18, Intelligence). At Will: Alter Self, Detect Magic, Knock, Mage Armor (included in AC), Mage Hand, Polymorph, Prestidigitation. 2/Day: Gaseous Form. 1/Day: Reverse Gravity."
+      }
+    ],
+    "bonusActions": [
+      {
+        "name": "Slow (2/Day)",
+        "description": "The archmage casts Slow."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic (3/Day)",
+        "description": "The archmage casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Spellguard",
+    "size": "Medium",
+    "type": "Humanoid",
+    "alignment": "Lawful Neutral",
+    "ac": 20,
+    "hp": 105,
+    "hpFormula": "105 (14d8 + 42)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 18,
+      "DEX": 11,
+      "CON": 16,
+      "INT": 12,
+      "WIS": 13,
+      "CHA": 10
+    },
+    "savingThrows": "Con +6, Wis +4",
+    "skills": "Arcana +4, Athletics +7, Perception +4",
+    "senses": "Passive Perception 14",
+    "languages": "Common",
+    "cr": "5",
+    "xp": 1800,
+    "proficiencyBonus": 3,
+    "traits": [
+      {
+        "name": "Superior Magic Resistance",
+        "description": "The spellguard has Advantage on saving throws against spells and other magical effects, and spell attack rolls have Disadvantage against it."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The spellguard makes two attacks, using Force Flail or Javelin in any combination."
+      },
+      {
+        "name": "Force Flail",
+        "description": "Melee Attack Roll: +7, reach 5 ft. Hit: 8 (1d8 + 4) Bludgeoning damage plus 7 (2d6) Force damage."
+      },
+      {
+        "name": "Javelin",
+        "description": "Melee or Ranged Attack Roll: +7, reach 5 ft. or range 30/120 ft. Hit: 14 (3d6 + 4) Piercing damage."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Defensive Divination",
+        "description": "Trigger: A creature the spellguard can see hits an ally within 5 feet with an attack, or such an ally fails a save against a magical effect. Response: The spellguard rolls 1d20 and chooses whether to use that roll in place of the triggering d20."
+      }
+    ],
+    "group": "Humanoids",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Baelnorn",
+    "size": "Medium",
+    "type": "Undead (Wizard)",
+    "alignment": "Neutral Good",
+    "ac": 18,
+    "hp": 255,
+    "hpFormula": "255 (34d8 + 102)",
+    "speed": "30 ft.",
+    "abilities": {
+      "STR": 11,
+      "DEX": 16,
+      "CON": 16,
+      "INT": 21,
+      "WIS": 14,
+      "CHA": 16
+    },
+    "savingThrows": "Dex +9, Con +9, Int +11, Wis +8",
+    "skills": "Arcana +17, History +11, Insight +8, Perception +8",
+    "damageResistances": "Lightning, Radiant",
+    "damageImmunities": "Necrotic, Poison",
+    "conditionImmunities": "Charmed, Exhaustion, Frightened, Paralyzed, Poisoned",
+    "senses": "Truesight 120 ft., Passive Perception 18",
+    "languages": "All",
+    "cr": "18",
+    "xp": 20000,
+    "proficiencyBonus": 6,
+    "traits": [
+      {
+        "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
+        "description": "If the baelnorn fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The baelnorn has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The baelnorn makes three attacks, using Arcane Burst or Paralyzing Touch in any combination. It can replace two attacks with a use of Spellcasting to cast Lightning Bolt (level 4 version)."
+      },
+      {
+        "name": "Arcane Burst",
+        "description": "Melee or Ranged Attack Roll: +11, reach 5 ft. or range 120 ft. Hit: 31 (4d12 + 5) Force damage."
+      },
+      {
+        "name": "Paralyzing Touch",
+        "description": "Melee Attack Roll: +11, reach 5 ft. Hit: 10 (2d4 + 5) Cold damage, and the target is Paralyzed until the start of the baelnorn's next turn."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The baelnorn casts one of the following spells (save DC 19, Intelligence). At Will: Detect Magic, Detect Thoughts, Dispel Magic, Invisibility, Lightning Bolt (level 4 version), Mage Hand, Prestidigitation. 2/Day Each: Dimension Door, Scrying. 1/Day Each: Clone, Guards and Wards."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Counterspell",
+        "description": "The baelnorn casts Counterspell in response to the spell's trigger."
+      }
+    ],
+    "legendaryActions": [
+      {
+        "name": "Frightening Glance",
+        "description": "The baelnorn casts Fear. It can't take this action again until the start of its next turn."
+      },
+      {
+        "name": "Overwhelming Radiance",
+        "description": "Constitution Saving Throw: DC 19, each creature in a 20-foot Emanation (Undead have Disadvantage). Failure: 11 (2d10) Radiant damage. Success: Half damage."
+      },
+      {
+        "name": "Recuperative Teleport",
+        "description": "The baelnorn teleports up to 60 feet to an unoccupied space it can see and regains 11 (2d10) Hit Points. It can't take this action again until the start of its next turn."
+      }
+    ],
+    "group": "Undead",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Darkenbeast",
+    "size": "Medium",
+    "type": "Monstrosity",
+    "alignment": "Neutral Evil",
+    "ac": 15,
+    "hp": 60,
+    "hpFormula": "60 (8d8 + 24)",
+    "speed": "20 ft., fly 40 ft.",
+    "abilities": {
+      "STR": 17,
+      "DEX": 14,
+      "CON": 16,
+      "INT": 5,
+      "WIS": 10,
+      "CHA": 13
+    },
+    "savingThrows": "Str +5",
+    "skills": "Perception +2, Stealth +4",
+    "conditionImmunities": "Frightened",
+    "senses": "Darkvision 60 ft., Passive Perception 12",
+    "languages": "None",
+    "cr": "4",
+    "xp": 1100,
+    "proficiencyBonus": 2,
+    "traits": [
+      {
+        "name": "Spell Imprint",
+        "description": "At creation, the darkenbeast's creator stores one spell of level 5 or lower (casting time of an action) within it. While within 30 feet, the creator can cast that stored spell with no components, its effects originating from the darkenbeast — which then immediately dies in a flash of purple flame."
+      },
+      {
+        "name": "Sunlight Sensitivity",
+        "description": "While in sunlight, the darkenbeast has Disadvantage on ability checks and attack rolls."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The darkenbeast makes three Rend attacks."
+      },
+      {
+        "name": "Rend",
+        "description": "Melee Attack Roll: +5, reach 5 ft. Hit: 12 (2d8 + 3) Slashing damage."
+      }
+    ],
+    "bonusActions": [
+      {
+        "name": "Shadow Stalker",
+        "description": "While in Dim Light or Darkness, the darkenbeast takes the Disengage or Hide action."
+      }
+    ],
+    "group": "Monstrosities",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Groundling Grunt",
+    "size": "Medium",
+    "type": "Monstrosity",
+    "alignment": "Neutral Evil",
+    "ac": 14,
+    "hp": 45,
+    "hpFormula": "45 (7d8 + 14)",
+    "speed": "30 ft., burrow 10 ft.",
+    "abilities": {
+      "STR": 16,
+      "DEX": 15,
+      "CON": 14,
+      "INT": 7,
+      "WIS": 10,
+      "CHA": 8
+    },
+    "savingThrows": "Con +4",
+    "skills": "Perception +2, Stealth +4, Survival +2",
+    "damageResistances": "Poison",
+    "senses": "Darkvision 120 ft., Passive Perception 12",
+    "languages": "Common",
+    "cr": "1",
+    "xp": 200,
+    "proficiencyBonus": 2,
+    "traits": [],
+    "actions": [
+      {
+        "name": "Claw",
+        "description": "Melee Attack Roll: +5, reach 5 ft. Hit: 7 (1d8 + 3) Slashing damage. If the target is a Medium or smaller creature, it has the Grappled condition (escape DC 13) from one of two paws."
+      },
+      {
+        "name": "Sling",
+        "description": "Ranged Attack Roll: +4, range 30/120 ft. Hit: 7 (2d4 + 2) Bludgeoning damage."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Go to Ground",
+        "description": "Trigger: The groundling is hit by an attack while on the ground. Response: It halves the damage (round down) from that attack."
+      }
+    ],
+    "group": "Monstrosities",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Groundling Stalker",
+    "size": "Medium",
+    "type": "Monstrosity",
+    "alignment": "Neutral Evil",
+    "ac": 15,
+    "hp": 52,
+    "hpFormula": "52 (8d8 + 16)",
+    "speed": "30 ft., burrow 10 ft.",
+    "abilities": {
+      "STR": 16,
+      "DEX": 16,
+      "CON": 14,
+      "INT": 8,
+      "WIS": 12,
+      "CHA": 8
+    },
+    "savingThrows": "Dex +5, Con +4",
+    "skills": "Perception +3, Stealth +5, Survival +3",
+    "damageResistances": "Poison",
+    "senses": "Darkvision 120 ft., Passive Perception 13",
+    "languages": "Common",
+    "cr": "2",
+    "xp": 450,
+    "proficiencyBonus": 2,
+    "traits": [],
+    "actions": [
+      {
+        "name": "Claw",
+        "description": "Melee Attack Roll: +5, reach 5 ft. Hit: 12 (2d8 + 3) Slashing damage. If the target is a Medium or smaller creature, it has the Grappled condition (escape DC 13) from one of two paws."
+      },
+      {
+        "name": "Heavy Crossbow",
+        "description": "Ranged Attack Roll: +5, range 100/400 ft. Hit: 14 (2d10 + 3) Piercing damage."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Go to Ground",
+        "description": "Trigger: The groundling is hit by an attack while on the ground. Response: It halves the damage (round down) from that attack."
+      }
+    ],
+    "group": "Monstrosities",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Groundling Slayer",
+    "size": "Medium",
+    "type": "Monstrosity",
+    "alignment": "Neutral Evil",
+    "ac": 15,
+    "hp": 58,
+    "hpFormula": "58 (9d8 + 18)",
+    "speed": "30 ft., burrow 20 ft.",
+    "abilities": {
+      "STR": 17,
+      "DEX": 16,
+      "CON": 15,
+      "INT": 10,
+      "WIS": 13,
+      "CHA": 8
+    },
+    "savingThrows": "Dex +5, Con +4",
+    "skills": "Perception +3, Stealth +7, Survival +3",
+    "damageResistances": "Poison",
+    "senses": "Darkvision 120 ft., Passive Perception 13",
+    "languages": "Common",
+    "cr": "3",
+    "xp": 700,
+    "proficiencyBonus": 2,
+    "traits": [],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The groundling makes two attacks, using Claw or Dagger in any combination."
+      },
+      {
+        "name": "Claw",
+        "description": "Melee Attack Roll: +5, reach 5 ft. Hit: 12 (2d8 + 3) Slashing damage. If the target is a Medium or smaller creature, it has the Grappled condition (escape DC 13) from one of two paws."
+      },
+      {
+        "name": "Dagger",
+        "description": "Melee or Ranged Attack Roll: +5, reach 5 ft. or range 20/60 ft. Hit: 5 (1d4 + 3) Piercing damage plus 7 (2d6) Poison damage."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Go to Ground",
+        "description": "Trigger: The groundling is hit by an attack while on the ground. Response: It halves the damage (round down) from that attack."
+      }
+    ],
+    "group": "Monstrosities",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Living Cone of Cold",
+    "size": "Large",
+    "type": "Construct",
+    "alignment": "Unaligned",
+    "ac": 15,
+    "hp": 105,
+    "hpFormula": "105 (10d10 + 50)",
+    "speed": "25 ft., fly 25 ft. (hover)",
+    "abilities": {
+      "STR": 10,
+      "DEX": 15,
+      "CON": 20,
+      "INT": 3,
+      "WIS": 11,
+      "CHA": 6
+    },
+    "damageImmunities": "Cold",
+    "conditionImmunities": "Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Poisoned, Prone, Restrained",
+    "senses": "Blindsight 60 ft., Passive Perception 10",
+    "languages": "None",
+    "cr": "7",
+    "xp": 2900,
+    "proficiencyBonus": 3,
+    "traits": [
+      {
+        "name": "Amorphous",
+        "description": "The living spell can move through a space as narrow as 1 inch without expending extra movement."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The living spell has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The living spell makes two Magical Strike attacks."
+      },
+      {
+        "name": "Magical Strike",
+        "description": "Melee Attack Roll: +8, reach 10 ft. Hit: 27 (5d8 + 5) Cold damage."
+      },
+      {
+        "name": "Spell Mimicry (Recharge 5–6)",
+        "description": "Constitution Saving Throw: DC 16, each creature in a 60-foot Cone. Failure: 36 (8d8) Cold damage. Success: Half damage."
+      }
+    ],
+    "group": "Constructs",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Living Thunderwave",
+    "size": "Medium",
+    "type": "Construct",
+    "alignment": "Unaligned",
+    "ac": 15,
+    "hp": 30,
+    "hpFormula": "30 (4d8 + 12)",
+    "speed": "25 ft., fly 25 ft. (hover)",
+    "abilities": {
+      "STR": 10,
+      "DEX": 13,
+      "CON": 16,
+      "INT": 3,
+      "WIS": 6,
+      "CHA": 6
+    },
+    "damageImmunities": "Thunder",
+    "conditionImmunities": "Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Poisoned, Prone, Restrained",
+    "senses": "Blindsight 60 ft., Passive Perception 8",
+    "languages": "None",
+    "cr": "1",
+    "xp": 200,
+    "proficiencyBonus": 2,
+    "traits": [
+      {
+        "name": "Amorphous",
+        "description": "The living spell can move through a space as narrow as 1 inch without expending extra movement."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The living spell has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Magical Strike",
+        "description": "Melee Attack Roll: +5, reach 5 ft. Hit: 6 (1d6 + 3) Thunder damage."
+      },
+      {
+        "name": "Spell Mimicry (Recharge 5–6)",
+        "description": "Constitution Saving Throw: DC 13, each creature in a 15-foot Cube originating from the living spell. Failure: 9 (2d8) Thunder damage, and the target is pushed 10 feet away. Success: Half damage only. Failure or Success: A thunderous boom is audible within 300 feet."
+      }
+    ],
+    "group": "Constructs",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Living Vitriolic Sphere",
+    "size": "Large",
+    "type": "Construct",
+    "alignment": "Unaligned",
+    "ac": 15,
+    "hp": 76,
+    "hpFormula": "76 (8d10 + 32)",
+    "speed": "25 ft., fly 25 ft. (hover)",
+    "abilities": {
+      "STR": 10,
+      "DEX": 15,
+      "CON": 18,
+      "INT": 3,
+      "WIS": 10,
+      "CHA": 6
+    },
+    "damageImmunities": "Acid",
+    "conditionImmunities": "Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Poisoned, Prone, Restrained",
+    "senses": "Blindsight 60 ft., Passive Perception 10",
+    "languages": "None",
+    "cr": "5",
+    "xp": 1800,
+    "proficiencyBonus": 3,
+    "traits": [
+      {
+        "name": "Amorphous",
+        "description": "The living spell can move through a space as narrow as 1 inch without expending extra movement."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The living spell has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The living spell makes two Magical Strike attacks."
+      },
+      {
+        "name": "Magical Strike",
+        "description": "Melee Attack Roll: +7, reach 10 ft. Hit: 21 (5d6 + 4) Acid damage."
+      },
+      {
+        "name": "Spell Mimicry (Recharge 5–6)",
+        "description": "Dexterity Saving Throw: DC 15, each creature in a 20-foot-radius Sphere centered on a point within 150 feet. Failure: 25 (10d4) Acid damage, and 12 (5d4) Acid damage at the end of the target's next turn. Success: Half initial damage only."
+      }
+    ],
+    "group": "Constructs",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Taisus",
+    "size": "Huge",
+    "type": "Aberration",
+    "alignment": "Chaotic Neutral",
+    "ac": 18,
+    "hp": 310,
+    "hpFormula": "310 (27d12 + 135)",
+    "speed": "40 ft., fly 60 ft. (hover)",
+    "abilities": {
+      "STR": 17,
+      "DEX": 18,
+      "CON": 20,
+      "INT": 25,
+      "WIS": 22,
+      "CHA": 19
+    },
+    "savingThrows": "Dex +10, Con +11, Int +13, Wis +12",
+    "skills": "Arcana +19, Insight +12, Perception +12",
+    "damageImmunities": "Poison",
+    "conditionImmunities": "Charmed, Exhaustion, Frightened, Grappled, Paralyzed, Petrified, Poisoned, Restrained",
+    "senses": "Truesight 120 ft., Passive Perception 22",
+    "languages": "All; telepathy 120 ft.",
+    "cr": "19",
+    "xp": 22000,
+    "proficiencyBonus": 6,
+    "traits": [
+      {
+        "name": "Arcane Immortality",
+        "description": "If the taisus dies, its body crumbles to dust and it gains a new body after 1d10 days (reviving with all its Hit Points in an unoccupied space within 5 feet of a location it designated at creation), unless a Wish spell is cast on its remains to prevent this."
+      },
+      {
+        "name": "Legendary Resistance (4/Day)",
+        "description": "If the taisus fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "The taisus has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "The taisus makes two Brain Drain attacks."
+      },
+      {
+        "name": "Brain Drain",
+        "description": "Melee Attack Roll: +13, reach 20 ft. Hit: 20 (3d8 + 7) Force damage plus 16 (3d10) Psychic damage. If the target has spell slots, it makes a DC 21 Constitution save; on a failure its highest-level unexpended spell slot is expended."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "The taisus casts one of the following spells (save DC 21, Intelligence), requiring no Material components. At Will: Detect Magic, Fireball (level 5 version), Invisibility, Mage Hand. 2/Day Each: Jallarzi's Storm of Radiance, Plane Shift, Scrying. 1/Day Each: Befuddlement, Disintegrate."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic",
+        "description": "The taisus casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "legendaryActions": [
+      {
+        "name": "Deadly Drain",
+        "description": "The taisus makes a Brain Drain attack. It can't take this action again until the start of its next turn."
+      },
+      {
+        "name": "Teleport",
+        "description": "The taisus teleports itself or a willing creature within 10 feet up to 120 feet to an unoccupied space it can see."
+      }
+    ],
+    "group": "Aberrations",
+    "source": "arcana-unleashed"
+  },
+  {
+    "name": "Venger",
+    "size": "Medium",
+    "type": "Fiend",
+    "alignment": "Neutral Evil",
+    "ac": 19,
+    "hp": 202,
+    "hpFormula": "202 (27d8 + 81)",
+    "speed": "30 ft., fly 30 ft.",
+    "abilities": {
+      "STR": 18,
+      "DEX": 20,
+      "CON": 16,
+      "INT": 17,
+      "WIS": 14,
+      "CHA": 21
+    },
+    "savingThrows": "Con +9, Wis +8",
+    "skills": "Arcana +9, Deception +11, Intimidation +11, Perception +8",
+    "damageResistances": "Cold, Fire, Lightning, Poison",
+    "conditionImmunities": "Poisoned",
+    "senses": "Darkvision 120 ft. (unimpeded by magical Darkness), Passive Perception 18",
+    "languages": "Abyssal, Common, Infernal",
+    "cr": "17",
+    "xp": 18000,
+    "proficiencyBonus": 6,
+    "traits": [
+      {
+        "name": "Fiendish Restoration",
+        "description": "If Venger dies, his body dissipates into crimson dust and he gains a new body in 1d10 days, reviving with all his Hit Points somewhere in one of his lairs."
+      },
+      {
+        "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
+        "description": "If Venger fails a saving throw, he can choose to succeed instead."
+      },
+      {
+        "name": "Magic Resistance",
+        "description": "Venger has Advantage on saving throws against spells and magical effects."
+      },
+      {
+        "name": "Mounted Adept",
+        "description": "While mounted, Venger and his mount have Advantage on Dexterity saves, and he can force an attack targeting his mount to target him instead (not while Incapacitated)."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "description": "Venger makes three attacks, using Crimson Claw or Crimson Blast in any combination."
+      },
+      {
+        "name": "Crimson Claw",
+        "description": "Melee Attack Roll: +11, reach 5 ft. Hit: 14 (2d8 + 5) Slashing damage plus 10 (3d6) Fire damage."
+      },
+      {
+        "name": "Crimson Blast",
+        "description": "Ranged Attack Roll: +11, range 120 ft. Hit: 24 (3d12 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "Venger casts one of the following spells (save DC 19, Charisma). At Will: Detect Magic, Invisibility, Mage Hand, Silent Image. 2/Day Each: Alter Self, Contact Other Plane, Create Undead, Dimension Door. 1/Day Each: Control Weather, Imprisonment."
+      }
+    ],
+    "bonusActions": [
+      {
+        "name": "Telekinesis (2/Day)",
+        "description": "Venger casts Telekinesis."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic",
+        "description": "Venger casts Counterspell or Shield in response to the spell's trigger."
+      }
+    ],
+    "legendaryActions": [
+      {
+        "name": "Booming Censure",
+        "description": "Wisdom Saving Throw: DC 19, one creature Venger can see within 60 feet. Failure: 14 (4d6) Psychic damage, and the target is Frightened until the end of its next turn. Success: Half damage only."
+      },
+      {
+        "name": "Crimson Strike",
+        "description": "Venger makes one Crimson Claw or Crimson Blast attack."
+      },
+      {
+        "name": "Magic-Binding Chains",
+        "description": "Dexterity Saving Throw: DC 19, one creature Venger can see within 30 feet. Failure: The target is Restrained until the end of its next turn and can't take the Magic action. Failure or Success: Venger can't take this action again until the start of his next turn."
+      }
+    ],
+    "group": "Fiends",
+    "source": "arcana-unleashed"
   }
 ];
