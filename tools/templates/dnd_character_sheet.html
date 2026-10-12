@@ -282,8 +282,6 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .ac-tile .ac-bonus-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 .ac-tile input.ac-temp{width:30px!important;font-size:11px!important;font-weight:700;border:1px solid var(--rule)!important;border-radius:4px;padding:1px 2px;color:var(--muted)!important;}
 .ac-tile input.ac-temp:disabled{opacity:.35;cursor:not-allowed;}
-/* Locked (automated) combat fields read like Initiative / Prof Bonus — no editable chrome. */
-.cbt input[readonly],.hp-row input[readonly]{border-color:transparent;background:transparent;cursor:default;}
 /* No number-spinner arrows on the HP and Temp fields. */
 .hp-row input::-webkit-outer-spin-button,.hp-row input::-webkit-inner-spin-button,.hp-sub input::-webkit-outer-spin-button,.hp-sub input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .hp-row input,.hp-sub input{-moz-appearance:textfield;}
@@ -304,6 +302,7 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
 .hp-row input{width:66px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .hp-row .slash{color:var(--muted);font-size:24px;}
+.hp-row .hp-max-val{font-size:30px;line-height:1;}
 .hp-adjust{display:flex;align-items:center;justify-content:center;gap:6px;width:max-content;max-width:100%;margin:0 auto;}
 .hp-adjust input{width:52px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:4px 0;}
 .hp-adj-btn{border:none;border-radius:4px;padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:#fff;}
@@ -684,11 +683,10 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
   /* Saving-throw roll row under each ability */
   .abil-save{min-height:32px;font-size:11px;padding:4px 0;}
   .abil-save .sv-val{font-size:13px;}
-  /* Pips: death saves, spell slots, per-day resources, nimble actions */
+  /* Pips: death saves, spell slots, per-day resources */
   .death-pip{width:24px;height:24px;margin:0 4px;}
   .slot-pip{width:22px;height:22px;}
   .res-pip{width:24px;height:24px;}
-  .act-pip{width:24px;height:24px;}
   /* Modal (Spellbook / Item Store / Builder / Level-Up) controls */
   .brow-add{min-height:38px;padding:8px 12px;font-size:12px;}
   .brow-check input{width:22px;height:22px;}
@@ -943,13 +941,13 @@ body.dark .tabs-bar{background:#1a1a1f;}
       <div class="combat-strip">
         <div class="cbt-left">
           <div class="cbt ac-tile"><div class="c-lbl" id="ac-lbl">Armor Class</div>
-            <input id="f-ac" value="10" readonly title="Set from armor, shield, class features and magic items, plus your AC bonus">
+            <div class="c-val" id="f-ac" title="Set from armor, shield, class features and magic items, plus your AC bonus">10</div>
             <div class="ac-fx">
               <span class="ac-bonus-lbl">Bonus</span>
               <input id="f-ac-temp" class="ac-temp" inputmode="numeric" value="" placeholder="+0" title="AC bonus on top of your armor — Mage Armor, Shield spell (+5), Haste / cover (+2)…" oninput="onTempAC()">
             </div>
           </div>
-          <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" readonly title="Set from your species and features"></div>
+          <div class="cbt"><div class="c-lbl">Speed</div><div class="c-val" id="f-speed" title="Set from your species and features">30</div></div>
           <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
           <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
           <div class="cbt death-box">
@@ -965,7 +963,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
         </div>
         <div class="cbt hp-box">
           <div class="c-lbl">Hit Points <span class="hp-boost" id="hp-boost" title="Bonus to your HP maximum from an equipped magic item (included above)" style="display:none;"></span></div>
-          <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><input id="f-hp-max" type="number" value="10" readonly title="Maximum HP — set at creation and level-up"></div>
+          <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><span class="c-val hp-max-val" id="f-hp-max" title="Maximum HP — set at creation and level-up">10</span></div>
           <div class="hp-adjust">
             <button class="hp-adj-btn dmg" onclick="adjustHP(-1)" title="Take damage by the amount entered (resistances applied, then temp HP absorbs)">Damage</button>
             <input id="f-hp-adjust" type="number" min="0" placeholder="0" title="Amount to heal or take as damage" onkeydown="if(event.key==='Enter')adjustHP(-1)">
@@ -1225,18 +1223,9 @@ let _spellAbility = '';            // manual override
 let _concentration = null;         // name of the spell currently concentrated on
 let attunedRefs = [];              // catalog refs of attuned magic items (max 3)
 let _lastRoll = null;
-// ── Nimble 5e mode ─────────────────────────────────────────────────────────
-// A character-creation option (like D62e's optional modules) that swaps in the
-// Nimble 5e "hack" rules: no attack rolls (the weapon's primary damage die
-// decides hit/miss/crit, exploding on a crit), 3 Actions a turn, a Defend
-// reaction (reduce damage by AC−8), Mana in place of spell slots, and 2-Action
-// leveled spells. Abilities & skills stay standard 5e; the broader table rules
-// are surfaced in the reference panel (openNimbleRules).
+// Character-creation options (expansion toggles) persisted with the sheet.
 function defaultOptions(){ return {}; }
 let options = defaultOptions();
-let manaUsed = 0;      // Mana spent this "day" (max derived from caster level/type)
-let actionsUsed = 0;   // Actions spent this turn (of 3)
-function nimbleOn(){ return false; }
 
 function levelNow(){ return totalLevel(); }
 function profBonus(){ const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
@@ -1447,7 +1436,7 @@ function updateHitDiceUI(){
 function adjustHP(sign){
   const amtEl = $('f-hp-adjust'); const amt = Math.abs(num(amtEl.value)); if(!amt){ amtEl.focus(); return; }
   const curEl = $('f-hp-cur'), maxEl = $('f-hp-max'), tempEl = $('f-hp-temp');
-  const max = num(maxEl.value); let cur = num(curEl.value), temp = num(tempEl.value);
+  const max = num(maxEl.textContent); let cur = num(curEl.value), temp = num(tempEl.value);
   if(sign > 0){
     const wasDown = cur === 0;
     cur = Math.min(max || cur + amt, cur + amt); curEl.value = cur;
@@ -1579,7 +1568,7 @@ function sneakDice(){ return Math.max(1, Math.ceil(rogueLevel() / 2)); }
 function renderAtkActions(tr){
   const cell = tr.querySelector('.atk-actions'); if(!cell) return;
   const sneak = isRogue() ? '<button class="sneak-btn" onclick="rollSneak(this)" title="Roll Sneak Attack damage (' + sneakDice() + 'd6, once per turn)">Sneak</button>' : '';
-  const atkTitle = nimbleOn() ? 'Nimble: roll damage — the primary die decides hit/miss/crit (no to-hit roll)' : 'Roll to hit and damage together';
+  const atkTitle = 'Roll to hit and damage together';
   cell.innerHTML = sneak + '<button class="mini-roll" onclick="rollAttackFull(this)" title="' + atkTitle + '">Attack</button>';
 }
 function refreshAtkActions(){ [...document.querySelectorAll('#attacks-body tr')].forEach(renderAtkActions); }
@@ -1634,7 +1623,6 @@ function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
 // Core attack roll. sneakD6 > 0 adds that many d6 of Sneak Attack damage (doubled on a crit).
 function doAttack(tr, sneakD6){
   sneakD6 = sneakD6 || 0;
-  if(nimbleOn()){ doNimbleAttack(tr, sneakD6); return; }
   const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
   const bonus = num(tr.querySelector('.atk-bonus').value), name = (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
   const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
@@ -1668,108 +1656,6 @@ function doAttack(tr, sneakD6){
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
   const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (ctx.note ? ' · ' + ctx.note : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
-}
-// ── Nimble 5e damage roll ───────────────────────────────────────────────────
-// Roll a dice expression the Nimble way: the primary (first) die decides the
-// outcome. A 1 on the primary die is a MISS (no damage); its max value is a CRIT
-// and the primary die explodes (re-roll and add while it keeps rolling max);
-// anything else is a hit. Remaining dice + flatMod add only on a hit. Advantage /
-// disadvantage roll an extra primary die and keep the higher / lower.
-function nimbleRollDamage(expr, flatMod, mode){
-  flatMod = flatMod || 0;
-  const m = String(expr || '').match(/(\d*)d(\d+)/i);
-  if(!m){   // flat-only damage (e.g. Unarmed Strike "1") — always connects
-    const fm = String(expr || '').match(/\d+/); const base = fm ? num(fm[0]) : 0;
-    return { hit:true, crit:false, total: base + flatMod, detail: base + (flatMod ? ' ' + sgn(flatMod) : '') };
-  }
-  const nDice = num(m[1]) || 1, sides = num(m[2]);
-  const rd = () => dN(sides);
-  let primary;
-  if(mode === 'adv'){ const a = rd(), b = rd(); primary = Math.max(a, b); }
-  else if(mode === 'dis'){ const a = rd(), b = rd(); primary = Math.min(a, b); }
-  else primary = rd();
-  if(primary === 1) return { hit:false, crit:false, total:0, detail:'primary d' + sides + ':1' };
-  const crit = primary === sides;
-  const chain = [primary]; let pSum = primary;
-  if(crit){ let x = rd(); while(true){ chain.push(x); pSum += x; if(x === sides) x = rd(); else break; } }
-  const others = []; let oSum = 0;
-  for(let i = 1; i < nDice; i++){ const f = rd(); others.push(f); oSum += f; }
-  const total = pSum + oSum + flatMod;
-  const detail = 'primary d' + sides + '(' + chain.join('+') + ')' + (crit ? '' : '') + (others.length ? ' +' + others.join('+') : '') + (flatMod ? ' ' + sgn(flatMod) : '');
-  return { hit:true, crit, total, detail };
-}
-// Nimble 5e attack: no roll to hit. The weapon's primary damage die decides
-// hit/miss/crit; the ability mod + Bonus add to damage (in Nimble a to-hit bonus
-// becomes a damage bonus). Adv/Dis add or drop a primary die.
-function doNimbleAttack(tr, sneakD6){
-  sneakD6 = sneakD6 || 0;
-  const abil = tr.querySelector('.atk-abil').value;
-  const bonus = num(tr.querySelector('.atk-bonus').value);
-  const name = (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
-  const dtype = tr.querySelector('.atk-dtype').value, dmg = (tr.querySelector('.atk-dmg').value || '').trim();
-  const ctx = rollCtx('attack');
-  const em = dmg.match(/([+-]\s*\d+)\s*$/); const explicitFlat = em ? num(em[1].replace(/\s+/g,'')) : null;
-  const flatMod = (explicitFlat != null ? explicitFlat : modOf(abil)) + bonus;
-  const res = nimbleRollDamage(dmg, flatMod, ctx.mode);
-  let total = res.total, detail = res.detail;
-  if(res.hit && sneakD6 > 0){
-    const sf = []; let ss = 0; for(let i = 0; i < sneakD6; i++){ const f = dN(6); sf.push(f); ss += f; }
-    total += ss; detail += ' + sneak ' + sneakD6 + 'd6(' + sf.join('+') + ')';
-  }
-  const dt = dtype ? ' ' + dtype : '';
-  const result = res.hit ? (total + dt + ' dmg' + (res.crit ? ' — CRIT!' : '')) : 'Miss';
-  addLog(name, result, (res.hit ? '' : 'MISS · ') + detail + (ctx.note ? ' · ' + ctx.note : ''), res.crit ? 'crit' : (res.hit ? 'normal' : 'fumble'));
-}
-// ── Nimble 5e sheet chrome: badge, 3-Action tracker, Defend readout, rules ──
-function renderNimble(){
-  const on = nimbleOn();
-  const badge = $('nimble-badge'); if(badge) badge.style.display = on ? '' : 'none';
-  // Death Saves box → Actions tracker
-  const dsBody = $('death-saves-body'), acWrap = $('actions-nimble-body'), dsLbl = $('deathbox-lbl');
-  if(dsBody) dsBody.style.display = on ? 'none' : '';
-  if(acWrap) acWrap.style.display = on ? '' : 'none';
-  if(dsLbl) dsLbl.textContent = on ? 'Actions' : 'Death Saves';
-  // AC box → Defend readout (AC−8)
-  const acLbl = $('ac-lbl'), dr = $('defend-readout'), acTile = document.querySelector('.ac-tile');
-  if(acLbl) acLbl.textContent = on ? 'Defend' : 'Armor Class';
-  if(dr) dr.style.display = on ? '' : 'none';
-  if(acTile) acTile.classList.toggle('nimble', on);
-  if(on){
-    const dv = $('nimble-defend'); if(dv) dv.textContent = Math.max(0, (num($('f-ac').value) || 10) - 8);
-    renderActions();
-  }
-  renderConditions();
-  refreshAtkActions();
-}
-function renderActions(){
-  const box = $('nimble-actions'); if(!box) return;
-  let h = ''; for(let i = 1; i <= 3; i++) h += '<span class="act-pip' + (i <= actionsUsed ? ' used' : '') + '" onclick="toggleAction(' + i + ')" title="Action ' + i + ' — tap to spend"></span>';
-  box.innerHTML = h;
-}
-function toggleAction(i){ actionsUsed = (i <= actionsUsed ? i - 1 : i); renderActions(); scheduleAutosave(); }
-function resetActions(){ actionsUsed = 0; renderActions(); scheduleAutosave(); }
-const NIMBLE_RULES_HTML =
-  '<p style="margin:0 0 8px;">Nimble 5e is a faster, lighter way to run D&amp;D. This sheet automates the parts below; the rest are table rules for you and your GM.</p>' +
-  '<p style="margin:8px 0 3px;font-weight:800;color:#c9a7ff;">Automated on this sheet</p>' +
-  '<ul style="margin:0 0 8px;padding-left:18px;line-height:1.5;">' +
-  '<li><b>Attacks don\'t roll to hit.</b> Roll the weapon\'s damage; the <i>primary</i> (first) die decides it — a <b>1 misses</b>, the max value <b>crits and explodes</b> (re-roll &amp; add while it keeps maxing), anything else hits. Your ability mod + Bonus add to damage.</li>' +
-  '<li><b>Mana</b> replaces spell slots (full caster = level + spell slots, half = level + PB, quarter = slots + PB). A leveled spell costs Mana equal to its level and <b>2 Actions</b>; cantrips are free and <b>1 Action</b>. Save spells &amp; crits ignore armor. Mana recovers on a Long Rest.</li>' +
-  '<li><b>3 Actions</b> a turn (the tracker replaces Death Saves in Combat). <b>Defend</b> reaction (replaces the AC box) reduces one hit by your AC−8.</li>' +
-  '<li><b>Dying</b> &amp; <b>Dazed</b> are added to Conditions. At <b>0 HP</b> you\'re Dying — still 1 Action, not unconscious. <b>Exhaustion</b> stacks to 6 = death (pip track under Conditions).</li>' +
-  '</ul>' +
-  '<p style="margin:8px 0 3px;font-weight:800;color:#c9a7ff;">Table rules (not automated)</p>' +
-  '<ul style="margin:0;padding-left:18px;line-height:1.5;">' +
-  '<li><b>Rushed Attacks:</b> after your first attack you may attack again, each at −1 die (disadvantage). Use the dice tray\'s Dis switch.</li>' +
-  '<li><b>Heroic Reactions:</b> Defend, Opportunity Attack (heroes only, disadvantage), Interpose, Help, Assess (DC 12).</li>' +
-  '<li><b>Resting:</b> a safe-place Long Rest restores all HP + Mana and removes 1 Exhaustion; a 15-min Short Rest spends Hit Dice + STR.</li>' +
-  '<li><b>Monster armor:</b> Medium AC 14–17 "just the dice" (ignore modifiers); Heavy 18+ "half the dice." Minions have 1 HP.</li>' +
-  '<li><b>Optional build overhaul</b> (not enabled here): 4 abilities (STR absorbs CON, WIL = WIS+CHA) and 10 point-buy skills. This mode keeps standard 5e abilities &amp; skills so your existing build still works.</li>' +
-  '</ul>';
-function openNimbleRules(){
-  if(!$('desc-overlay')) return;
-  $('desc-title').textContent = 'Nimble 5e Mode';
-  $('desc-body').innerHTML = NIMBLE_RULES_HTML;
-  $('desc-overlay').classList.add('open');
 }
 
 // ═══ INVENTORY ════════════════════════════════════════════════════════════
@@ -2004,7 +1890,7 @@ let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
   const tempEl = $('f-ac-temp'); if(tempEl) tempEl.disabled = false;   // the AC bonus field is always live
-  acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto');
+  acEl.textContent = computeAC();
   acEl.title = 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
 }
 function onTempAC(){ reconcileAC(); scheduleAutosave(); }
@@ -2071,7 +1957,7 @@ function applyMagicInputBonuses(){
     _magicApplied[key] = desired;
   });
   const hpDesired = magicSum('hp'), hpDelta = hpDesired - (_magicApplied.hp || 0);
-  if(hpDelta){ const mx = $('f-hp-max'); if(mx){ const newMax = (num(mx.value) || 0) + hpDelta; mx.value = String(newMax); const cu = $('f-hp-cur'); if(cu && num(cu.value) > newMax) cu.value = String(newMax); } }  // adjust max only; clamp current down if it now exceeds
+  if(hpDelta){ const mx = $('f-hp-max'); if(mx){ const newMax = (num(mx.textContent) || 0) + hpDelta; mx.textContent = String(newMax); const cu = $('f-hp-cur'); if(cu && num(cu.value) > newMax) cu.value = String(newMax); } }  // adjust max only; clamp current down if it now exceeds
   _magicApplied.hp = hpDesired;
   _applyingMagicInputs = false;
 }
@@ -2410,7 +2296,7 @@ function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
 function reconcileSpeed(){
   const el = $('f-speed'); if(!el) return;
   if(!speciesData() && !classList().length) return;              // nothing to base it on yet
-  el.value = autoSpeed(); el.classList.add('auto'); el.title = 'Auto-calculated from your species and features';
+  el.textContent = autoSpeed(); el.title = 'Auto-calculated from your species and features';
 }
 
 // ── Monk Martial Arts die on Unarmed + Monk weapons (#5) ───────────────────
@@ -2615,52 +2501,7 @@ function slotArray(){
   const mcl = multiCasterLevel(); return (mcl >= 1 && t.fullCasterSlots) ? t.fullCasterSlots[mcl-1] : null;
 }
 function pactInfo(){ const w = warlockEntry(), t = D.tables(); if(!w || !t || !t.pactMagic) return null; return t.pactMagic[num(w.cl.level)-1] || null; }
-// ── Nimble 5e Mana (replaces Vancian spell slots) ───────────────────────────
-// Max Mana per the hack (page 10 examples are authoritative):
-//   full caster    = caster level + number of spell slots  (L7 Wizard = 7 + 11 = 18)
-//   half-caster    = caster level + PB                      (L7 Ranger = 7 + 3 = 10)
-//   quarter/third/pact = number of spell slots + PB         (L20 EK/AT = 11 + 6 = 17)
-// A level-1 Wizard therefore has 1 + 2 slots = 3 Mana. A spell costs Mana equal
-// to its (cast) level; cantrips are free. Mana recovers on a Long Rest.
-function nimbleSlotTotal(){ let n = 0; const arr = slotArray(); if(arr) arr.forEach(x => n += (num(x) || 0)); const pm = pactInfo(); if(pm) n += (pm.slots || 0); return n; }
-function nimbleMaxMana(){
-  const PB = profBonus();
-  const casters = spellcastingClasses().slice().sort((a,b) => num(b.cl.level) - num(a.cl.level));
-  if(!casters.length) return _forceSpells ? Math.max(1, nimbleSlotTotal() + PB) : 0;
-  if(casters.length === 1){
-    const { cl, c } = casters[0], lvl = num(cl.level);
-    if(c.spellcasting === 'full') return Math.max(1, lvl + nimbleSlotTotal());
-    if(c.spellcasting === 'half' || c.spellcasting === 'artificer') return lvl + PB;
-    return nimbleSlotTotal() + PB;   // third / pact / quarter
-  }
-  // Multiclass (approximate): full casters add their levels + the shared slot pool;
-  // half/quarter casters add their levels and PB once.
-  let base = 0, addPB = false;
-  casters.forEach(({ cl, c }) => { const lvl = num(cl.level);
-    if(c.spellcasting === 'full') base += lvl;
-    else { base += lvl; addPB = true; } });
-  return Math.max(1, base + nimbleSlotTotal() + (addPB ? PB : 0));
-}
-// Mana lives in a bubble next to Prepared in the spell header (no slot columns,
-// no dedicated rest button — the Short/Long Rest header buttons handle recovery).
-function renderMana(){
-  const slots = $('spell-slots'); if(slots) slots.innerHTML = '';
-  const mb = $('sp-mana-box'); if(!mb) return;
-  if(!nimbleOn() || !isCaster()){ mb.style.display = 'none'; return; }
-  const max = nimbleMaxMana(); if(manaUsed > max) manaUsed = max; if(manaUsed < 0) manaUsed = 0;
-  mb.style.display = '';
-  const v = $('sp-mana-val'); if(v) v.textContent = (max - manaUsed) + '/' + max;
-}
-function adjustMana(spend){ const max = nimbleMaxMana(); manaUsed = Math.max(0, Math.min(max, manaUsed + spend)); renderMana(); scheduleAutosave(); }
-function restoreMana(){ manaUsed = 0; renderMana(); scheduleAutosave(); }
-function nimbleSpendMana(cost, label){
-  const max = nimbleMaxMana();
-  if(manaUsed + cost > max){ addLog('Cast ' + label, '✗', 'Not enough Mana — ' + (max - manaUsed) + ' left, need ' + cost, 'fumble'); return false; }
-  manaUsed += cost; renderMana(); scheduleAutosave(); return true;
-}
 function renderSlots(){
-  if(nimbleOn()){ renderMana(); renderSpells(); return; }
-  { const mb = $('sp-mana-box'); if(mb) mb.style.display = 'none'; }   // no Mana bubble outside Nimble
   if(!isCaster()){ $('spell-slots').innerHTML=''; renderSpells(); return; }
   const box = $('spell-slots'); box.innerHTML = '';
   const cols = document.createElement('div'); cols.className = 'slot-cols';
@@ -2832,16 +2673,10 @@ function castSpellFull(name, castLevel){
   // a higher level spends a real slot to boost them.
   const isGranted = !!(sk && sk.granted);
   if(lvl > 0){
-    if(nimbleOn()){
-      const cost = isGranted ? (useLevel > lvl ? useLevel : 0) : useLevel;
-      if(cost > 0 && !nimbleSpendMana(cost, label)) return;
-    }
-    else if(isGranted){ if(useLevel > lvl){ if(!spendSlotAt(useLevel, label)) return; } }
+    if(isGranted){ if(useLevel > lvl){ if(!spendSlotAt(useLevel, label)) return; } }
     else if(castLevel != null){ if(!spendSlotAt(useLevel, label)) return; }
     else { if(!spendSpellSlot(lvl, label)) return; }
   }
-  // Nimble action cost: leveled spells cost 2 Actions, cantrips 1.
-  const actNote = nimbleOn() ? (lvl === 0 ? ' · 1 Action' : ' · 2 Actions') : '';
   const dmgInfo = spellDamage(sp);
   let diceExpr = dmgInfo.dice;
   if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
@@ -2863,31 +2698,24 @@ function castSpellFull(name, castLevel){
   if(/^magic missile$/i.test(sp.name)){
     const darts = 3 + Math.max(0, useLevel - 1); let total = 0; const parts = [];
     for(let i=0;i<darts;i++){ const f = dN(4) + 1; total += f; parts.push(String(f)); }
-    addLog(label + upLabel, total + ' force', darts + ' darts · 1d4+1 each: ' + parts.join(' + ') + actNote, 'normal');
+    addLog(label + upLabel, total + ' force', darts + ' darts · 1d4+1 each: ' + parts.join(' + '), 'normal');
     return;
   }
   if(diceExpr && spellIsAttack(sp)){
     const ctx = rollCtx('attack');
-    if(nimbleOn()){
-      // No spell attack roll in Nimble — the primary damage die decides the hit.
-      const res = nimbleRollDamage(diceExpr, 0, ctx.mode);
-      const rl = res.hit ? (res.total + dtype + healRes) : ('Miss' + healRes);
-      addLog(label + upLabel, rl, (res.hit ? 'dmg ' : 'MISS · ') + res.detail + (res.crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : '') + actNote + healDet, res.crit ? 'crit' : (res.hit ? 'normal' : 'fumble'));
-    } else {
-      const r = rawD20(ctx.mode), atkMod = spellAtkBonus(ab) + ctx.pen, hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
-      const dd = rollDiceExpr(diceExpr, crit);
-      addLog(label + upLabel, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype + healRes, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : '') + actNote + healDet, crit ? 'crit' : fumble ? 'fumble' : 'normal');
-    }
+    const r = rawD20(ctx.mode), atkMod = spellAtkBonus(ab) + ctx.pen, hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
+    const dd = rollDiceExpr(diceExpr, crit);
+    addLog(label + upLabel, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype + healRes, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : '') + healDet, crit ? 'crit' : fumble ? 'fumble' : 'normal');
   } else if(diceExpr && save){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(label + upLabel, dd.total + dtype + healRes, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail + actNote + healDet, 'normal');
+    addLog(label + upLabel, dd.total + dtype + healRes, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail + healDet, 'normal');
   } else if(diceExpr){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(label + upLabel, dd.total + dtype + healRes, 'damage ' + dd.detail + actNote + healDet, 'normal');
+    addLog(label + upLabel, dd.total + dtype + healRes, 'damage ' + dd.detail + healDet, 'normal');
   } else if(healExpr){
-    addLog(label + upLabel, '+' + healTotal + ' HP', healDetail + (save ? ' · DC ' + dc + ' ' + save + ' save' : '') + actNote + ' · in Heal box — click Heal to apply to yourself', 'normal');
+    addLog(label + upLabel, '+' + healTotal + ' HP', healDetail + (save ? ' · DC ' + dc + ' ' + save + ' save' : '') + ' · in Heal box — click Heal to apply to yourself', 'normal');
   } else {
-    addLog(label + upLabel, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp) + actNote, 'normal');
+    addLog(label + upLabel, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
   }
   if(sp.concentration) startConcentration(label);
 }
@@ -2995,16 +2823,10 @@ function compHP(i, sign){ const c = companions[i]; if(!c) return; const amtEl = 
   scheduleAutosave(); }
 
 // ═══ CONDITIONS & EXHAUSTION ══════════════════════════════════════════════
-// Nimble 5e adds two conditions not in the SRD list.
-const NIMBLE_CONDITIONS = [
-  { name:'Dying', description:'Nimble 5e: at 0 HP you\'re Dying, not Unconscious — you still get 1 Action on your turn. Roll death saves as your table uses them; being healed above 0 HP ends it.' },
-  { name:'Dazed', description:'Nimble 5e: a Dazed creature has 1 fewer Action next turn. It stacks — each stack strips more agency (slow, then incapacitate); a monster fully stacked is out of the fight. Clears one stack at the end of the turn.' },
-];
 // The full condition list (minus Exhaustion, which has its own tracker),
-// used by the add-picker. Nimble mode adds its two extra conditions.
+// used by the add-picker.
 function availableConditions(){
-  let conds = D.conditions().filter(c => norm(c.name) !== 'exhaustion');
-  if(nimbleOn()){ const have = new Set(conds.map(c => norm(c.name))); conds = NIMBLE_CONDITIONS.filter(c => !have.has(norm(c.name))).concat(conds); }
+  const conds = D.conditions().filter(c => norm(c.name) !== 'exhaustion');
   return conds;
 }
 function condDesc(name){ const c = availableConditions().find(x => norm(x.name) === norm(name)); return c ? c.description : ''; }
@@ -3025,7 +2847,7 @@ function toggleCondition(name){
   else { activeConditions.push(name); addLog('Condition', '⚠', name + ' applied', 'fumble'); }
   renderConditions(); scheduleAutosave();
 }
-function condInfo(name){ const c = D.conditions().find(x => norm(x.name) === norm(name)) || NIMBLE_CONDITIONS.find(x => norm(x.name) === norm(name)); if(c){ $('desc-title').textContent = c.name; $('desc-body').innerHTML = '<p>' + esc(c.description) + '</p>'; $('desc-overlay').classList.add('open'); } }
+function condInfo(name){ const c = D.conditions().find(x => norm(x.name) === norm(name)); if(c){ $('desc-title').textContent = c.name; $('desc-body').innerHTML = '<p>' + esc(c.description) + '</p>'; $('desc-overlay').classList.add('open'); } }
 
 // ── Damage defenses: resistance (½) / immunity (0) / vulnerability (×2) ────────
 const DAMAGE_TYPES = ['acid','bludgeoning','cold','fire','force','lightning','necrotic','piercing','poison','psychic','radiant','slashing','thunder'];
@@ -3103,7 +2925,7 @@ function completeShortRest(){
     const con = modOf('CON');
     for(let i = 0; i < n; i++){ const r = dN(sides); healed += Math.max(1, r + con); rolls.push(r); }
     le.value = avail - n;
-    const cur = $('f-hp-cur'), max = num($('f-hp-max').value);
+    const cur = $('f-hp-cur'), max = num($('f-hp-max').textContent);
     cur.value = max ? Math.min(max, num(cur.value) + healed) : num(cur.value) + healed;
   }
   // Other short-rest automations: Pact Magic slots + short-rest resources.
@@ -3117,8 +2939,8 @@ function completeShortRest(){
   scheduleAutosave();
 }
 function longRest(){
-  $('f-hp-cur').value = $('f-hp-max').value; $('f-hp-temp').value = 0;
-  slotUsed = {}; manaUsed = 0; actionsUsed = 0; deathSucc = 0; deathFail = 0; dropConcentration(true); setUnconscious(false);
+  $('f-hp-cur').value = $('f-hp-max').textContent; $('f-hp-temp').value = 0;
+  slotUsed = {}; deathSucc = 0; deathFail = 0; dropConcentration(true); setUnconscious(false);
   if(exhaustion > 0) exhaustion -= 1;   // 2024: a Long Rest removes one Exhaustion level
   // Regain half your Hit Dice (rounded down, minimum 1).
   const t = hitDiceTotal(); const le = $('f-hd-left'); const regained = Math.min(t - num(le.value), Math.max(1, Math.floor(t/2))); le.value = Math.min(t, num(le.value) + regained);
@@ -3163,7 +2985,7 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 
 // ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
 function collectSheet(){
-  const v = id => { const el = $(id); return el ? el.value : ''; };
+  const v = id => { const el = $(id); return el ? ('value' in el ? el.value : el.textContent) : ''; };
   // Store BASE scores/HP (shown − magic-item delta) so a reload can't double-count.
   const scores = {}; ABILITIES.forEach(a => scores[a.id] = num($('sc-' + a.id).value) - (_magicApplied[a.id.toLowerCase()] || 0));
   // Effective (as-displayed) values for read-only consumers like the GM Party tool,
@@ -3192,14 +3014,14 @@ function collectSheet(){
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
     customFeatures, addedFeats, resourceUsed, customResources, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
     concentration: _concentration, attunedRefs,
-    options, manaUsed, actionsUsed,
+    options,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id:_campaign.id, code:_campaign.code, name:_campaign.name } : null,
   };
 }
 function applySheet(d){
   d = d || {};
   _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };   // stored scores/HP are base; recalc re-adds the magic delta
-  const set = (id, val) => { const el = $(id); if(el) el.value = (val == null ? '' : val); };
+  const set = (id, val) => { const el = $(id); if(!el) return; const sv = (val == null ? '' : val); if('value' in el) el.value = sv; else el.textContent = sv; };
   set('f-name', d.name); set('f-class', d.cls); set('f-level', d.level || 1); set('f-subclass', d.subclass);
   classLevels = Array.isArray(d.classLevels) ? d.classLevels.slice() : []; syncClassFields();
   set('f-species', d.species); set('f-background', d.background); set('f-alignment', d.alignment);
@@ -3218,7 +3040,7 @@ function applySheet(d){
   resourceUsed = d.resourceUsed || {}; customResources = d.customResources || [];
   spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
   _concentration = d.concentration || null; attunedRefs = Array.isArray(d.attunedRefs) ? d.attunedRefs.slice() : [];
-  options = Object.assign(defaultOptions(), d.options || {}); manaUsed = d.manaUsed || 0; actionsUsed = d.actionsUsed || 0;
+  options = Object.assign(defaultOptions(), d.options || {});
   $('attacks-body').innerHTML = ''; (d.attacks || []).filter(a => !a.spell).forEach(addAttackRow);   // spells now live only in the Spells tab
   ensureUnarmed();
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
