@@ -207,6 +207,47 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 #tab-spells #spell-block>.spell-head,#tab-spells #spell-block>#spell-slots{flex:0 0 auto;}
 #tab-spells #spell-block>#spells-by-level{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;min-height:0;}
 #tab-equipment.tab-split>.tbl-scroll{flex:1 1 auto;overflow-y:auto;min-height:0;}
+#tab-turn.tab-split>.turn-top{flex:0 0 auto;}
+/* ── TURN HUB ── */
+.turn-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.turn-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px 6px;flex-wrap:wrap;}
+.turn-end-btn{background:var(--dnd);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.turn-end-btn:hover{background:#b93b3b;}
+.turn-move{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.turn-move .tm-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;}
+.turn-move .tm-val{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--ink);}
+.turn-move .tm-val b{color:var(--dnd-dk);font-size:15px;}
+.turn-move .tm-slash{color:var(--muted);margin:0 1px;}
+.turn-move .tm-btn{background:var(--panel-2);border:1px solid var(--rule);color:var(--dnd-dk);border-radius:5px;width:26px;height:24px;font-family:'Share Tech Mono',monospace;font-weight:700;font-size:12px;cursor:pointer;line-height:1;}
+.turn-move .tm-btn:hover{background:var(--dnd-lt);}
+.turn-econ{display:flex;gap:6px;padding:0 10px 7px;flex-wrap:wrap;}
+.econ-chip{flex:1 1 0;min-width:84px;display:flex;flex-direction:column;align-items:center;gap:1px;background:var(--panel-2);border:1.5px solid var(--rule);border-radius:7px;padding:5px 6px;cursor:pointer;transition:.1s;}
+.econ-chip .ec-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.1;}
+.econ-chip .ec-state{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;}
+.econ-chip.avail{border-color:#3a7d4a;background:rgba(74,160,90,.14);}
+.econ-chip.avail .ec-state{color:#3a7d4a;}
+.econ-chip.used{opacity:.6;}
+.econ-chip.used .ec-state{color:var(--muted);}
+body.dark .econ-chip.avail{background:rgba(90,200,120,.16);}
+body.dark .econ-chip.avail .ec-state{color:#7ad48a;}
+.turn-subtabs{display:flex;gap:0;border-top:1px solid var(--rule);}
+.turn-subtab{flex:1;padding:9px 4px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.turn-subtab.on{color:var(--dnd-dk);border-bottom-color:var(--dnd);background:var(--panel-2);}
+#turn-body{padding:6px 10px 10px;}
+.turn-group-hd{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#ec4456;padding:8px 2px 4px;}
+.turn-card{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--rule);}
+.turn-card .tc-main{flex:1;min-width:0;cursor:pointer;}
+.turn-card .tc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--dnd-dk);line-height:1.15;}
+.turn-card .tc-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.turn-card .tc-uses{flex:0 0 auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);text-align:right;white-space:nowrap;}
+.turn-card .tc-uses b{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--dnd-dk);}
+.turn-card .tc-do{flex:0 0 auto;background:var(--dnd);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.turn-card .tc-do:hover{background:#b93b3b;}
+.turn-card.disabled{opacity:.42;}
+.turn-card.disabled .tc-main{cursor:default;}
+.turn-card.disabled .tc-do{background:var(--muted);cursor:default;pointer-events:none;}
+.turn-card.disabled .tc-name,.turn-card.disabled .tc-uses b{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.turn-empty{font-size:12px;color:var(--muted);padding:12px 2px;line-height:1.5;}
 
 /* CONDITIONS */
 .cond-wrap{padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--rule);}
@@ -1025,11 +1066,34 @@ body.dark .tabs-bar{background:#1a1a1f;}
       <!-- TABS -->
       <div class="mc-tabs">
       <div class="tabs-bar">
+        <button class="tab-btn" data-tab="turn" onclick="setTab('turn')">Turn</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="features" onclick="setTab('features')">Features &amp; Traits</button>
         <button class="tab-btn" data-tab="equipment" onclick="setTab('equipment')">Equipment</button>
         <button class="tab-btn" data-tab="companions" onclick="setTab('companions')">Companions</button>
-        <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes &amp; Backstory</button>
+        <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
+      </div>
+
+      <!-- TURN TAB — the player's action-economy hub -->
+      <div class="tab-panel tab-split" id="tab-turn">
+        <div class="turn-top">
+          <div class="turn-bar">
+            <button class="turn-end-btn" onclick="endTurn()" title="Reset your action, bonus action, reaction and movement for a new turn">⟳ End Turn</button>
+            <div class="turn-move" title="Movement used this turn — click to spend 5 ft">
+              <span class="tm-lbl">Move</span>
+              <button class="tm-btn" onclick="spendMove(5)">−5</button>
+              <span class="tm-val"><b id="turn-move-left">30</b><span class="tm-slash">/</span><span id="turn-move-max">30</span> ft</span>
+              <button class="tm-btn" onclick="spendMove(-5)">+5</button>
+            </div>
+          </div>
+          <div class="turn-econ" id="turn-econ"></div>
+          <div class="turn-subtabs">
+            <button class="turn-subtab on" data-sub="action" onclick="setTurnSub('action')">Actions</button>
+            <button class="turn-subtab" data-sub="bonus" onclick="setTurnSub('bonus')">Bonus Actions</button>
+            <button class="turn-subtab" data-sub="reaction" onclick="setTurnSub('reaction')">Reactions</button>
+          </div>
+        </div>
+        <div class="tab-scroll" id="turn-body"></div>
       </div>
 
       <!-- SPELLS TAB -->
@@ -2521,11 +2585,12 @@ function renderResources(){
       '</span></div><div class="res-pips">' + pips + '</div></div>';
   }).join('');
 }
-function toggleResource(key, i, max){ const u = resourceUsed[key] || 0; resourceUsed[key] = (i <= u ? i-1 : i); renderResources(); renderFeatures(); scheduleAutosave(); }
-function resetResource(key){ resourceUsed[key] = 0; renderResources(); renderFeatures(); scheduleAutosave(); }
+function toggleResource(key, i, max){ const u = resourceUsed[key] || 0; resourceUsed[key] = (i <= u ? i-1 : i); renderResources(); renderFeatures(); refreshTurnHub(); scheduleAutosave(); }
+function resetResource(key){ resourceUsed[key] = 0; renderResources(); renderFeatures(); refreshTurnHub(); scheduleAutosave(); }
 function addCustomResource(){ const n = ($('res-name').value || '').trim(), m = num($('res-max').value); if(!n || m < 1) return; customResources.push({ name:n, max:m, reset:$('res-reset').value || 'long' }); $('res-name').value=''; $('res-max').value=''; renderResources(); scheduleAutosave(); }
 function removeCustomResource(n){ customResources = customResources.filter(r => r.name !== n); delete resourceUsed[n]; renderResources(); scheduleAutosave(); }
-function resetResources(kind){ allResources().forEach(r => { if(kind === 'long' || r.reset === 'short') resourceUsed[r.key] = 0; }); renderResources(); renderFeatures(); }
+function resetResources(kind){ allResources().forEach(r => { if(kind === 'long' || r.reset === 'short') resourceUsed[r.key] = 0; }); renderResources(); renderFeatures(); refreshTurnHub(); }
+function refreshTurnHub(){ if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn(); }
 
 // ═══ SPELLCASTING ═════════════════════════════════════════════════════════
 let spellsKnown = [];   // [{name, prepared}]
@@ -2648,6 +2713,7 @@ function renderSpells(){
     });
   });
   document.querySelectorAll('#spells-by-level .sp-name-input').forEach(el => { el.readOnly = _locked; });
+  if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn();
 }
 function addSpellByName(n){
   if(!spellsKnown.some(s => norm(s.name) === norm(n))){
@@ -2889,12 +2955,185 @@ function closeRules(){ $('rules-overlay').classList.remove('open'); }
 // ═══ TABS ═════════════════════════════════════════════════════════════════
 function setTab(name){
   _tab = name;
-  ['spells','features','equipment','companions','notes'].forEach(t => {
+  ['turn','spells','features','equipment','companions','notes'].forEach(t => {
     const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
     const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
   });
+  if(name === 'turn') renderTurn();
 }
 function setDefaultTab(){ setTab(_tab || (isCaster() ? 'spells' : 'features')); }
+
+// ═══ TURN HUB ═════════════════════════════════════════════════════════════
+// A per-turn action-economy dashboard. Each subtab lists every Action / Bonus
+// Action / Reaction the character has — attacks, castable spells, activated
+// features, and the universal standard actions — with uses remaining. Options
+// that are spent (economy slot used, or out of slots/charges) grey out so a
+// player can see at a glance what's still available. Clicking performs it:
+// attacks roll, spells cast (spending the slot), features spend a use — and it
+// marks the economy slot used and logs it. End Turn resets the economy.
+let _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0 };
+let _turnSub = 'action';
+let _turnOpts = [];
+
+const STANDARD_ACTIONS = [
+  { name:'Dash', desc:'Gain extra movement equal to your Speed for this turn.' },
+  { name:'Disengage', desc:"Your movement doesn't provoke Opportunity Attacks this turn." },
+  { name:'Dodge', desc:'Until your next turn, attacks against you have Disadvantage and you make Dexterity saves with Advantage.' },
+  { name:'Hide', desc:'Make a Dexterity (Stealth) check to gain the Invisible condition.' },
+  { name:'Help', desc:"Give an ally Advantage on an attack or help with a task you're proficient in." },
+  { name:'Search', desc:'Make a Wisdom (Perception) or Intelligence (Investigation) check.' },
+  { name:'Ready', desc:'Choose a trigger and a prepared response; it uses your Reaction when it fires.' },
+  { name:'Influence', desc:"Make a check to shift a creature's attitude (Persuasion, Deception, Intimidation…)." },
+  { name:'Study', desc:'Make an Intelligence check to recall or discern lore.' },
+  { name:'Utilize', desc:'Use a nonmagical object, or a magic item that requires an action.' },
+];
+const STANDARD_REACTIONS = [
+  { name:'Opportunity Attack', desc:'One melee attack against a creature that leaves your reach.' },
+];
+
+function tcClip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n-1) + '…' : s; }
+function turnMoveMax(){ const el = $('f-speed'); const n = parseInt((el ? el.textContent : '') || '', 10); return isNaN(n) ? 30 : n; }
+function hasSlotTracking(){ return !!(slotArray() || pactInfo()); }
+function freeSlotsAtOrAbove(lvl){
+  let n = 0; const arr = slotArray();
+  if(arr) for(let i = Math.max(1, lvl); i <= 9; i++){ n += Math.max(0, (arr[i-1]||0) - (slotUsed[String(i)]||0)); }
+  const pm = pactInfo(); if(pm && pm.level >= lvl) n += Math.max(0, pm.slots - (slotUsed['pact']||0));
+  return n;
+}
+// Attacks granted by one Attack action (Extra Attack).
+function attacksPerAction(){
+  let extra = 0;
+  const f = classList().find(cl => norm(cl.cls) === 'fighter');
+  if(f){ const L = num(f.level); extra = L>=20?3:L>=11?2:L>=5?1:0; }
+  if(!extra && typeof autoFeatures === 'function' && autoFeatures().some(x => /extra attack/i.test(x.name))) extra = 1;
+  return 1 + extra;
+}
+// Guess a feature's action cost from its text: reaction > bonus > action, else
+// null. Only an explicit "as a(n) … action/bonus action/reaction" counts —
+// phrases like "when you take the Attack action" describe a trigger, not a cost,
+// so passive traits (Extra Attack, etc.) are correctly left out of the hub.
+function featureActionType(text){
+  const t = String(text || '');
+  if(/\b(?:as|using|take|spend) (?:a |an |your )?reaction\b/i.test(t)) return 'reaction';
+  if(/\b(?:as|using|take|spend|costs?) (?:a |an |your )?bonus action\b/i.test(t)) return 'bonus';
+  if(/\bas (?:a|an) (?:magic )?action\b/i.test(t)) return 'action';
+  return null;
+}
+// Class/subclass/species/feat features that cost an action, bonus action or reaction.
+function activatedFeatures(){
+  const out = [], seen = {};
+  const add = (name, desc) => { const type = featureActionType(desc); if(!type) return; if(seen[norm(name)]) return; seen[norm(name)] = 1; out.push({ name, desc, type }); };
+  classList().forEach(cl => {
+    const c = classDataByName(cl.cls); if(!c) return;
+    (c.features||[]).filter(f => !f.subclass && f.level <= cl.level).forEach(f => add(f.name, f.description));
+    const sub = (c.subclasses||[]).find(s => norm(s.name) === norm(cl.subclass));
+    if(sub) (sub.features||[]).filter(f => f.level <= cl.level).forEach(f => add(f.name, f.description));
+  });
+  const sp = speciesData();
+  if(sp){ (sp.traits||[]).forEach(t => add(t.name, t.description));
+    const ln = norm(_lineage); (sp.lineages||[]).filter(l => !ln || norm(l.name)===ln).forEach(l => (l.traits||[]).forEach(t => add(t.name, t.description))); }
+  (addedFeats||[]).forEach(fn => { const fe = (window.DND_FEATS||[]).find(x => norm(x.name)===norm(fn)); if(fe) add(fe.name, (fe.benefits||[]).join(' ') + ' ' + (fe.description||'')); });
+  return out;
+}
+function turnCastType(ct){ const s = shortCastTime(ct); return /bonus/i.test(s) ? 'bonus' : /reaction/i.test(s) ? 'reaction' : /^action$/i.test(s) ? 'action' : null; }
+
+// ── option builders (each returns {name, meta, usesHTML, disabled, run}) ──
+function attackOpt(tr){
+  const name = tr.querySelector('.atk-name').value || 'Attack';
+  const dmg = tr.querySelector('.atk-dmg').value, dtype = tr.querySelector('.atk-dtype').value;
+  const per = attacksPerAction(), made = _turn.actionType === 'attack' ? _turn.attacksMade : 0;
+  const disabled = (_turn.action && _turn.actionType !== 'attack') || (_turn.actionType === 'attack' && _turn.attacksMade >= per);
+  const usesHTML = per > 1 ? ('<b>' + Math.max(0, per - made) + '</b>/' + per + ' atk') : '';
+  return { name, meta: (dmg || '') + (dtype ? ' ' + dtype : ''), usesHTML, disabled,
+    run(){ doAttack(tr, 0); _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; afterTurnAction(); } };
+}
+function spellOpt(sk, sp, sub){
+  const atWill = sp.level === 0;
+  const free = atWill ? Infinity : freeSlotsAtOrAbove(sp.level);
+  const noRes = !atWill && hasSlotTracking() && free <= 0;
+  const disabled = _turn[sub] || noRes;
+  const usesHTML = atWill ? 'At will' : (hasSlotTracking() ? ('<b>' + free + '</b> slot' + (free === 1 ? '' : 's')) : 'At will');
+  return { name: sk.display || sk.name, meta: (atWill ? 'Cantrip' : 'Lvl ' + sp.level) + ' · ' + sp.school, usesHTML, disabled,
+    run(){ castSpellFull(sk.name); _turn[sub] = true; afterTurnAction(); } };
+}
+function featureOpt(f){
+  const res = resourcesForFeature(f.name)[0];
+  let usesHTML = 'At will', noRes = false;
+  if(res){ const left = Math.max(0, res.max - (resourceUsed[res.key]||0)); usesHTML = '<b>' + left + '</b>/' + res.max; noRes = left <= 0; }
+  const disabled = _turn[f.type] || noRes;
+  return { name: f.name, meta: tcClip(f.desc, 95), usesHTML, disabled,
+    run(){ if(res){ resourceUsed[res.key] = (resourceUsed[res.key]||0) + 1; renderResources(); } _turn[f.type] = true;
+      addLog(f.name, '✦', res ? ('used · ' + Math.max(0, res.max - (resourceUsed[res.key]||0)) + ' left') : 'used', 'normal'); afterTurnAction(); } };
+}
+function standardOpt(a, sub){
+  return { name: a.name, meta: a.desc, usesHTML: '', disabled: _turn[sub],
+    run(){ _turn[sub] = true; if(sub === 'action') _turn.actionType = 'other';
+      addLog(a.name, sub === 'action' ? 'Action' : sub === 'bonus' ? 'Bonus' : 'Reaction', tcClip(a.desc, 110), 'normal'); afterTurnAction(); } };
+}
+function castableSpells(sub){
+  if(!isCaster()) return [];
+  return spellsKnown.map(sk => ({ sk, sp: spellByName(sk.name) }))
+    .filter(x => x.sp && (x.sp.level === 0 || x.sk.prepared))
+    .filter(x => turnCastType(x.sp.castingTime) === sub)
+    .sort((a, b) => (a.sp.level - b.sp.level) || a.sk.name.localeCompare(b.sk.name))
+    .map(x => spellOpt(x.sk, x.sp, sub));
+}
+function buildTurnGroups(sub){
+  const groups = [];
+  if(sub === 'action'){
+    const atks = [...document.querySelectorAll('#attacks-body tr')].map(attackOpt);
+    if(atks.length){ const per = attacksPerAction(); groups.push({ title: 'Attacks' + (per > 1 ? ' · Extra Attack (' + per + ')' : ''), opts: atks }); }
+    const sp = castableSpells('action'); if(sp.length) groups.push({ title: 'Spells', opts: sp });
+    const ft = activatedFeatures().filter(f => f.type === 'action').map(featureOpt); if(ft.length) groups.push({ title: 'Features', opts: ft });
+    groups.push({ title: 'Standard Actions', opts: STANDARD_ACTIONS.map(a => standardOpt(a, 'action')) });
+  } else if(sub === 'bonus'){
+    const sp = castableSpells('bonus'); if(sp.length) groups.push({ title: 'Spells', opts: sp });
+    const ft = activatedFeatures().filter(f => f.type === 'bonus').map(featureOpt); if(ft.length) groups.push({ title: 'Features', opts: ft });
+  } else {
+    groups.push({ title: 'Standard', opts: STANDARD_REACTIONS.map(a => standardOpt(a, 'reaction')) });
+    const sp = castableSpells('reaction'); if(sp.length) groups.push({ title: 'Spells', opts: sp });
+    const ft = activatedFeatures().filter(f => f.type === 'reaction').map(featureOpt); if(ft.length) groups.push({ title: 'Features', opts: ft });
+  }
+  return groups;
+}
+function renderTurn(){
+  const panel = $('tab-turn'); if(!panel) return;
+  const mv = turnMoveMax(); if(_turn.move > mv) _turn.move = mv;
+  const mvl = $('turn-move-left'), mvm = $('turn-move-max'); if(mvl) mvl.textContent = Math.max(0, mv - _turn.move); if(mvm) mvm.textContent = mv;
+  const econ = $('turn-econ');
+  if(econ){
+    const chip = (type, lbl) => { const used = _turn[type]; return '<button class="econ-chip ' + (used ? 'used' : 'avail') + '" onclick="toggleEcon(\'' + type + '\')" title="Click to toggle used/ready"><span class="ec-lbl">' + lbl + '</span><span class="ec-state">' + (used ? 'Used' : 'Ready') + '</span></button>'; };
+    econ.innerHTML = chip('action', 'Action') + chip('bonus', 'Bonus Action') + chip('reaction', 'Reaction');
+  }
+  document.querySelectorAll('.turn-subtab').forEach(b => b.classList.toggle('on', b.dataset.sub === _turnSub));
+  _turnOpts = [];
+  const body = $('turn-body'); if(!body) return;
+  let h = '';
+  buildTurnGroups(_turnSub).forEach(g => {
+    if(!g.opts.length) return;
+    h += '<div class="turn-group-hd">' + esc(g.title) + '</div>';
+    g.opts.forEach(o => {
+      const i = _turnOpts.length; _turnOpts.push(o);
+      h += '<div class="turn-card' + (o.disabled ? ' disabled' : '') + '">' +
+        '<div class="tc-main" onclick="useTurnOpt(' + i + ')"><div class="tc-name">' + esc(o.name) + '</div>' + (o.meta ? '<div class="tc-sub">' + esc(o.meta) + '</div>' : '') + '</div>' +
+        (o.usesHTML ? '<div class="tc-uses">' + o.usesHTML + '</div>' : '') +
+        '<button class="tc-do" onclick="useTurnOpt(' + i + ')">' + (o.disabled ? '—' : 'Do') + '</button>' +
+      '</div>';
+    });
+  });
+  if(!h) h = '<p class="turn-empty">No ' + (_turnSub === 'action' ? 'actions' : _turnSub === 'bonus' ? 'bonus actions' : 'reactions') + ' available right now.</p>';
+  body.innerHTML = h;
+}
+function useTurnOpt(i){ const o = _turnOpts[i]; if(o && !o.disabled && o.run) o.run(); }
+function afterTurnAction(){ renderTurn(); scheduleAutosave(); }
+function toggleEcon(type){ _turn[type] = !_turn[type]; if(type === 'action' && !_turn.action){ _turn.actionType = null; _turn.attacksMade = 0; } renderTurn(); scheduleAutosave(); }
+function spendMove(ft){ const mv = turnMoveMax(); _turn.move = Math.max(0, Math.min(mv, _turn.move + ft)); renderTurn(); scheduleAutosave(); }
+function setTurnSub(sub){ _turnSub = sub; renderTurn(); }
+function endTurn(){
+  _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0 };
+  addLog('End Turn', '⟳', 'Action, Bonus Action, Reaction & Movement reset', 'normal');
+  renderTurn(); scheduleAutosave();
+}
 
 // ═══ COMPANIONS & SUMMONS ═════════════════════════════════════════════════
 // Lightweight stat-block + HP tracker for familiars, beast companions, wild
@@ -3133,6 +3372,7 @@ function collectSheet(){
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
     speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
     locked: _locked, cInit: v('c-init'), cProf: v('c-prof'),
+    turn: _turn, turnSub: _turnSub,
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -3145,6 +3385,8 @@ function collectSheet(){
 function applySheet(d){
   d = d || {};
   _locked = d.locked !== false;   // default locked; set before recalc so its guards see the right state
+  _turn = Object.assign({ action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0 }, d.turn || {});
+  _turnSub = d.turnSub || 'action';
   _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };   // stored scores/HP are base; recalc re-adds the magic delta
   const set = (id, val) => { const el = $(id); if(!el) return; const sv = (val == null ? '' : val); if('value' in el) el.value = sv; else el.textContent = sv; };
   set('f-name', d.name); set('f-class', d.cls); set('f-level', d.level || 1); set('f-subclass', d.subclass);
