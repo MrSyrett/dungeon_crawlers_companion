@@ -371,6 +371,12 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .sr-of{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9a8f8f;}
 .sr-ft{display:flex;justify-content:flex-end;margin-top:4px;}
 .sr-rest{min-width:110px;padding:8px 16px;font-size:13px;background:var(--dnd);color:#fff;border-color:var(--dnd);}
+/* Rest modal "what this restores" list (Short + Long Rest) */
+.rest-list-wrap{margin:14px 0 12px;}
+.rest-list-hd{font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:10px;color:#9a8f8f;margin-bottom:7px;}
+.rest-list{display:flex;flex-direction:column;gap:6px;}
+.rest-item{display:flex;align-items:flex-start;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:.01em;color:#e8e0d4;line-height:1.3;}
+.rest-item .ri-ic{color:#5fb36a;font-weight:800;flex:0 0 auto;}
 .hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
 .hp-row input{width:66px;margin:0;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .hp-row .slash{color:var(--muted);font-size:24px;}
@@ -530,13 +536,13 @@ body.dark .conc-badge .cb-name{color:#8fc3ec;}
 .atk-detail input.atk-dtype:focus{border-bottom-color:var(--dnd);}
 /* Read-only mirror of an attack name (Opportunity Attacks) — matches .atk-name. */
 .atk-name-txt{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;color:var(--ink);line-height:1.2;}
-.atk-detail .atk-mastery{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--dnd);background:transparent;border:none;border-bottom:1px dashed var(--rule);border-radius:0;padding:0 0 1px;cursor:pointer;}
-.atk-detail .atk-mastery:hover{color:var(--dnd-dk);border-bottom-style:solid;}
+.atk-detail .atk-mastery{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--dnd);background:transparent;border:none;border-radius:0;padding:0;cursor:pointer;outline:none;}
+.atk-detail .atk-mastery:hover{color:var(--dnd-dk);}
 /* Attacks table: Name + details take the room; Bonus/Damage hug the right by the Attack button. */
 .atk-tbl th:first-child,.atk-tbl td:first-child{width:100%;}
 .atk-tbl th:nth-child(2),.atk-tbl td:nth-child(2),.atk-tbl th:nth-child(3),.atk-tbl td:nth-child(3){width:1%;white-space:nowrap;text-align:center;}
-.atk-tbl .atk-bonus{width:42px;text-align:center;}
-.atk-tbl .atk-dmg{width:60px;text-align:center;}
+.atk-tbl .atk-bonus{width:34px;text-align:center;}
+.atk-tbl .atk-dmg{width:44px;text-align:center;}
 .atk-field{display:flex;flex-direction:column;gap:1px;}
 .atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
 .atk-mastery{background:transparent;border:1px dashed var(--rule);border-radius:3px;color:var(--dnd);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:2px 6px;letter-spacing:.02em;}
@@ -1206,10 +1212,6 @@ body.dark .tabs-bar{background:#1a1a1f;}
     </div>
   </div>
 
-  <div class="section-bar" style="justify-content:space-between;">
-    <span style="font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.7);">D&amp;D 2024 — Dungeon Crawler's Companion</span>
-    <span style="font-size:10px;letter-spacing:.06em;color:rgba(255,255,255,.7);">Mechanics are game facts; descriptions are original / SRD 5.2.</span>
-  </div>
 
 </div><!-- sheet -->
 </div><!-- sheet-wrap -->
@@ -3442,21 +3444,37 @@ function setExhaustion(n){ exhaustion = (exhaustion === n ? n-1 : n); renderExha
 
 // ═══ RESTS ════════════════════════════════════════════════════════════════
 function shortRest(){ openShortRestModal(); }
+// Shared "what this rest restores" list for the rest modals.
+function restListHTML(items){
+  if(!items || !items.length) return '';
+  return '<div class="rest-list-wrap"><div class="rest-list-hd">This rest restores</div><div class="rest-list">' +
+    items.map(t => '<div class="rest-item"><span class="ri-ic">✓</span><span>' + esc(t) + '</span></div>').join('') + '</div></div>';
+}
+function resNames(kind){ return allResources().filter(r => kind === 'long' || r.reset === 'short').map(r => r.name); }
 // Short Rest: pick how many Hit Dice to roll, then heal + run short-rest automations.
 let _srPick = 0;
 function openShortRestModal(){ _srPick = 0; renderShortRestModal(); $('desc-overlay').classList.add('open'); }
 function srAdjust(d){ const avail = num($('f-hd-left').value); _srPick = Math.max(0, Math.min(avail, _srPick + d)); const el = $('sr-n'); if(el) el.textContent = _srPick; }
+function shortRestRestoreItems(){
+  const items = [];
+  if(num($('f-hd-left').value) > 0) items.push('Hit Points — roll any Hit Dice you spend above');
+  if(casterType() === 'pact') items.push('Pact Magic spell slots');
+  const sres = allResources().filter(r => r.reset === 'short').map(r => r.name);
+  if(sres.length) items.push('Short-rest resources: ' + sres.join(', '));
+  return items;
+}
 function renderShortRestModal(){
   const avail = num($('f-hd-left').value), sides = hitDieSides(), con = modOf('CON');
   _srPick = Math.max(0, Math.min(avail, _srPick));
   $('desc-title').textContent = 'Short Rest';
   let h = '';
   if(avail <= 0){
-    h += '<p>You have no Hit Dice remaining. Resting will still restore short-rest resources' + (casterType() === 'pact' ? ' and Pact Magic slots' : '') + '.</p>';
+    h += '<p>You have no Hit Dice remaining — no Hit Points to roll. The rest still restores everything below.</p>';
   } else {
     h += '<p class="dm-meta">' + avail + ' Hit Dice available (d' + sides + ') · each heals its roll ' + sgn(con) + ' CON</p>';
     h += '<div class="sr-pick"><span class="sr-lbl">Spend</span><button class="sr-step" onclick="srAdjust(-1)">&minus;</button><span class="sr-n" id="sr-n">' + _srPick + '</span><button class="sr-step" onclick="srAdjust(1)">+</button><span class="sr-of">of ' + avail + '</span></div>';
   }
+  h += restListHTML(shortRestRestoreItems());
   h += '<div class="sr-ft"><button class="rest-btn sr-rest" onclick="completeShortRest()">Rest</button></div>';
   $('desc-body').innerHTML = h;
 }
@@ -3480,7 +3498,31 @@ function completeShortRest(){
   closeDesc();
   scheduleAutosave();
 }
-function longRest(){
+// Long Rest: no Hit Dice are spent, so the modal just lists what it restores.
+function longRest(){ openLongRestModal(); }
+function openLongRestModal(){ renderLongRestModal(); $('desc-overlay').classList.add('open'); }
+function longRestRegain(){ const t = hitDiceTotal(); return Math.min(t - num($('f-hd-left').value), Math.max(1, Math.floor(t/2))); }
+function longRestRestoreItems(){
+  const items = ['Hit Points restored to full'];
+  if(num($('f-hp-temp').value) > 0) items.push('Temporary HP cleared');
+  if(isCaster()) items.push('All spell slots' + (casterType() === 'pact' ? ' (including Pact Magic)' : ''));
+  const regained = longRestRegain(); if(regained > 0) items.push('Hit Dice regained (+' + regained + ')');
+  if(exhaustion > 0) items.push('Exhaustion reduced by 1');
+  if(deathSucc || deathFail) items.push('Death saves cleared');
+  if(activeCond('Unconscious')) items.push('Unconscious condition removed');
+  if(_concentration) items.push('Concentration on ' + _concentration + ' ended');
+  const res = resNames('long');
+  if(res.length) items.push(res.length <= 4 ? ('Resources reset: ' + res.join(', ')) : (res.length + ' resource trackers reset'));
+  return items;
+}
+function renderLongRestModal(){
+  $('desc-title').textContent = 'Long Rest';
+  let h = '<p class="dm-meta">A long rest fully restores you — no Hit Dice are spent.</p>';
+  h += restListHTML(longRestRestoreItems());
+  h += '<div class="sr-ft"><button class="rest-btn sr-rest" onclick="completeLongRest()">Rest</button></div>';
+  $('desc-body').innerHTML = h;
+}
+function completeLongRest(){
   $('f-hp-cur').value = $('f-hp-max').textContent; $('f-hp-temp').value = 0;
   slotUsed = {}; deathSucc = 0; deathFail = 0; dropConcentration(true); setUnconscious(false);
   if(exhaustion > 0) exhaustion -= 1;   // 2024: a Long Rest removes one Exhaustion level
@@ -3489,6 +3531,7 @@ function longRest(){
   resetResources('long');
   renderDeath(); renderSlots(); renderExhaustion();
   addLog('Long Rest', '☀', 'Full HP, all spell slots, death saves cleared' + (exhaustion >= 0 ? ', −1 Exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice', 'crit');
+  closeDesc();
   scheduleAutosave();
 }
 
