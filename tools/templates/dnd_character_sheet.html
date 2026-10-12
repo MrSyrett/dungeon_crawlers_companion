@@ -122,6 +122,17 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-row{display:flex;flex-direction:column;gap:9px;background:linear-gradient(120deg,var(--dnd-dk),var(--dnd));color:#fff;padding:14px 18px;}
 .hdr-top{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center;}
 .hdr-logo{min-width:0;}
+.hdr-name-row{display:flex;align-items:flex-end;gap:10px;min-width:0;}
+.hdr-name-row .name-primary{flex:1 1 auto;min-width:0;}
+.lock-toggle{display:inline-flex;align-items:center;gap:6px;align-self:flex-end;flex:0 0 auto;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .12s,border-color .12s;}
+.lock-toggle:hover{background:rgba(255,255,255,.26);}
+.lock-toggle.on{background:rgba(110,220,140,.24);border-color:rgba(150,240,170,.75);color:#eafff0;}
+.lock-toggle .lk-ico{font-size:13px;line-height:1;}
+/* Unlocked: show which automated fields are now hand-editable. */
+body.unlocked #f-ac[contenteditable="true"],body.unlocked #f-speed[contenteditable="true"],body.unlocked #f-hp-max[contenteditable="true"],body.unlocked #c-init[contenteditable="true"],body.unlocked #c-prof[contenteditable="true"]{outline:1px dashed var(--dnd);outline-offset:2px;border-radius:4px;cursor:text;}
+body.unlocked .abil-score{border-color:var(--dnd)!important;cursor:text;}
+/* Locked: the editable-looking row inputs read as managed, not hand-entry. */
+body:not(.unlocked) .atk-name,body:not(.unlocked) .atk-bonus,body:not(.unlocked) .atk-dmg,body:not(.unlocked) .atk-dtype,body:not(.unlocked) .sp-name-input,body:not(.unlocked) .inv-name{cursor:default;}
 .hdr-logo .lg-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;line-height:.9;color:var(--dnd-gold);letter-spacing:.02em;text-transform:uppercase;}
 .hdr-logo .lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;color:#f0cf8a;letter-spacing:.24em;text-transform:uppercase;margin-top:3px;}
 .hdr-metarow{display:flex;gap:7px;flex-wrap:wrap;}
@@ -281,7 +292,7 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .cbt .c-val{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--dnd-dk);line-height:1.1;}
 .cbt input{width:100%;max-width:74px;margin:2px auto 0;display:block;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;padding:1px 0;}
 .cbt.click{cursor:pointer;}.cbt.click:hover{background:var(--dnd-lt);}
-.ac-tile .ac-fx{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:1px;}
+.ac-tile .ac-fx{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:1px;}
 .ac-tile .ac-bonus-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 .ac-tile input.ac-temp{width:30px!important;font-size:11px!important;font-weight:700;border:1px solid var(--rule)!important;border-radius:4px;padding:1px 2px;margin:0!important;color:var(--muted)!important;}
 .ac-tile input.ac-temp:disabled{opacity:.35;cursor:not-allowed;}
@@ -302,7 +313,7 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .sr-of{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9a8f8f;}
 .sr-ft{display:flex;justify-content:flex-end;margin-top:4px;}
 .sr-rest{min-width:110px;padding:8px 16px;font-size:13px;background:var(--dnd);color:#fff;border-color:var(--dnd);}
-.hp-row{display:flex;align-items:center;justify-content:flex-start;gap:7px;padding-left:8px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
+.hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
 .hp-row input{width:66px;margin:0;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .hp-row .slash{color:var(--muted);font-size:24px;}
 .hp-row .hp-max-val{font-size:30px;line-height:1;}
@@ -910,7 +921,10 @@ body.dark .tabs-bar{background:#1a1a1f;}
       <div class="hdr-logo">
         <div class="lg-word">Dungeons &amp; Dragons</div><div class="lg-sub">2024 Character Sheet</div>
       </div>
-      <div class="hdr-field name-primary"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
+      <div class="hdr-name-row">
+        <div class="hdr-field name-primary"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
+        <button id="lock-toggle" class="lock-toggle" onclick="toggleLock()" aria-pressed="false" title="Sheet locked (automated). Unlock to edit every field by hand."><span class="lk-ico">🔒</span><span class="lk-txt">Locked</span></button>
+      </div>
     </div>
     <div class="hdr-metarow">
       <div class="lockfield" style="flex:1.3 1 0;"><label>Class</label><input type="text" id="f-class" list="dl-classes" placeholder="Fighter" oninput="onClassChange()"></div>
@@ -1231,6 +1245,7 @@ const D = {
 };
 
 // ── state ──────────────────────────────────────────────────────────────────
+let _locked = true;                // Sheet lock: true = automated (fields read-only); false = manual editing. Default locked.
 let saveProf = {};                 // { STR:true, ... }
 let skillProf = {};                // { Athletics:1 } (0 none, 1 prof, 2 expertise)
 let slotUsed = {};                 // { 1:2, 2:0, pact:1 }
@@ -1303,16 +1318,19 @@ function buildAbilities(){
       '<span class="abil-boost" id="ab-boost-' + a.id + '" title="Bonus from an equipped magic item (included in the score)" style="display:none;"></span>' +
       '<div class="abil-name">' + a.name + '</div>' +
       '<div class="abil-mod" id="mod-' + a.id + '" onclick="rollAbility(\'' + a.id + '\')" title="Roll a ' + a.name + ' check">+0</div>' +
-      '<input class="abil-score" id="sc-' + a.id + '" type="number" value="10" readonly tabindex="-1" title="Set at character creation, level-up, or by items">' +
+      '<input class="abil-score" id="sc-' + a.id + '" type="number" value="10" readonly tabindex="-1" oninput="onStatInput()" title="Set at character creation, level-up, or by items">' +
       '<div class="abil-save" onclick="rollSave(\'' + a.id + '\')" title="Roll a ' + a.name + ' save">' +
-        '<span class="prof-dot locked" id="svp-' + a.id + '" title="Save proficiency — set at character creation and level-up"></span>' +
+        '<span class="prof-dot locked" id="svp-' + a.id + '" onclick="event.stopPropagation();toggleSaveProf(\'' + a.id + '\')" title="Save proficiency — unlock the sheet to edit"></span>' +
         '<span>Save</span><span class="sv-val" id="sv-' + a.id + '">+0</span>' +
       '</div>';
     list.appendChild(box);
   });
 }
-// Save & skill proficiencies are locked on the sheet — set by the builder at
-// creation and by the level-up wizard. (No manual toggle; the dots are display-only.)
+// Save & skill proficiencies are automated (builder at creation, level-up wizard).
+// The dots are display-only while the sheet is LOCKED; unlocking the sheet makes
+// them clickable again for manual editing.
+function toggleSaveProf(id){ if(_locked) return; saveProf[id] = !saveProf[id]; recalc(); scheduleAutosave(); }
+function cycleSkill(name){ if(_locked) return; skillProf[name] = ((skillProf[name] || 0) + 1) % 3; recalc(); scheduleAutosave(); }
 
 // ═══ BUILD SKILLS ═════════════════════════════════════════════════════════
 function buildSkills(){
@@ -1322,7 +1340,7 @@ function buildSkills(){
     row.className = 'skill-row';
     row.dataset.skill = sk.name; row.dataset.abil = sk.ability;
     row.innerHTML =
-      '<span class="prof-dot locked" id="skp-' + cssId(sk.name) + '" title="Skill proficiency — set at character creation and level-up"></span>' +
+      '<span class="prof-dot locked" id="skp-' + cssId(sk.name) + '" onclick="cycleSkill(\'' + esc(sk.name) + '\')" title="Skill proficiency — unlock the sheet to edit"></span>' +
       '<span class="sk-abil">' + sk.ability + '</span>' +
       '<span class="sk-name" onclick="rollSkill(\'' + esc(sk.name) + '\')" title="' + esc(sk.description) + '">' + esc(sk.name) + '</span>' +
       '<span class="sk-val" id="skv-' + cssId(sk.name) + '" onclick="rollSkill(\'' + esc(sk.name) + '\')">+0</span>';
@@ -1348,15 +1366,15 @@ function recalc(){
     const nm = row.dataset.skill, ab = row.dataset.abil, lvl = skillProf[nm] || 0;
     const v = modOf(ab) + lvl * PB;
     $('skv-' + cssId(nm)).textContent = sgn(v);
-    const dot = $('skp-' + cssId(nm)); dot.className = 'prof-dot locked' + (lvl === 1 ? ' on' : lvl === 2 ? ' exp' : '');
-    dot.title = (lvl === 0 ? 'Not proficient' : lvl === 1 ? 'Proficient' : 'Expertise') + ' — set at creation and level-up';
+    const dot = $('skp-' + cssId(nm)); dot.className = 'prof-dot' + (_locked ? ' locked' : '') + (lvl === 1 ? ' on' : lvl === 2 ? ' exp' : '');
+    dot.title = (lvl === 0 ? 'Not proficient' : lvl === 1 ? 'Proficient' : 'Expertise') + (_locked ? ' — unlock the sheet to edit' : '');
     if(nm === 'Perception') perceptionVal = v;
     else if(nm === 'Investigation') investigationVal = v;
     else if(nm === 'Insight') insightVal = v;
   });
-  // derived
-  $('c-prof').textContent = sgn(PB);
-  const init = modOf('DEX') + magicSum('init'); $('c-init').textContent = sgn(init);
+  // derived (skipped while unlocked so a manual override isn't clobbered)
+  if(_locked) $('c-prof').textContent = sgn(PB);
+  const init = modOf('DEX') + magicSum('init'); if(_locked) $('c-init').textContent = sgn(init);
   renderMagicBadges();
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
   const pinv = $('d-pinv'); if(pinv) pinv.textContent = 10 + investigationVal;
@@ -1372,6 +1390,49 @@ function recalc(){
   renderSpellHeader();
   renderSlots();   // ends with renderSpells(), reflecting any newly-granted spells
 }
+
+// ═══ SHEET LOCK ═══════════════════════════════════════════════════════════
+// Locked (default): every automated value is read-only and driven by the build
+// (creation + level-up). Unlocked: the whole sheet becomes hand-editable, like
+// the Shadowdark sheet — stats, AC/Speed/Init/Prof/Max HP, the attack rows,
+// spell names, item names, and the proficiency dots. Automation is paused while
+// unlocked so it can't overwrite manual edits; re-locking re-runs it.
+function applyLock(){
+  const locked = _locked;
+  document.body.classList.toggle('unlocked', !locked);
+  // Ability scores (the real source values)
+  ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el){ el.readOnly = locked; el.tabIndex = locked ? -1 : 0; } });
+  // Derived number displays — editable overrides via contenteditable
+  ['f-ac','f-speed','f-hp-max','c-init','c-prof'].forEach(id => { const el = $(id); if(el) el.contentEditable = locked ? 'false' : 'true'; });
+  // Attack rows (name / bonus / damage / type inputs, ability <select>)
+  document.querySelectorAll('.atk-name, .atk-bonus, .atk-dmg, .atk-dtype').forEach(el => { el.readOnly = locked; });
+  document.querySelectorAll('.atk-abil').forEach(el => { el.style.pointerEvents = locked ? 'none' : ''; el.tabIndex = locked ? -1 : 0; });
+  // Spell names & item names
+  document.querySelectorAll('.sp-name-input').forEach(el => { el.readOnly = locked; });
+  document.querySelectorAll('.inv-name').forEach(el => { el.readOnly = locked; });
+  // Proficiency dots — cursor only (click is gated by _locked in the handlers)
+  document.querySelectorAll('.prof-dot').forEach(el => el.classList.toggle('locked', locked));
+  // Toggle button
+  const btn = $('lock-toggle');
+  if(btn){
+    btn.classList.toggle('on', !locked);
+    btn.setAttribute('aria-pressed', String(!locked));
+    btn.title = locked ? 'Sheet locked (automated). Unlock to edit every field by hand.'
+                       : 'Sheet unlocked (manual editing). Lock to re-automate from your build.';
+    const ico = btn.querySelector('.lk-ico'); if(ico) ico.textContent = locked ? '🔒' : '🔓';
+    const txt = btn.querySelector('.lk-txt'); if(txt) txt.textContent = locked ? 'Locked' : 'Unlocked';
+  }
+}
+function setLocked(v){
+  _locked = !!v;
+  applyLock();
+  if(_locked){ recalc(); }   // re-automate: recompute every derived value from the build
+  scheduleAutosave();
+}
+function toggleLock(){ setLocked(!_locked); }
+// Editing a stat by hand (only possible when unlocked) refreshes the derived mods,
+// saves and skills live; Init/Prof/AC/Speed stay as the player set them.
+function onStatInput(){ if(!_locked) recalc(); scheduleAutosave(); }
 
 // ═══ ROLL ENGINE ══════════════════════════════════════════════════════════
 function dN(n){ return Math.floor(Math.random() * n) + 1; }
@@ -1581,6 +1642,7 @@ function addAttackRow(a){
     '<td class="roll-cell atk-actions" style="white-space:nowrap;text-align:right;"></td>';
   $('attacks-body').appendChild(tr);
   renderAtkActions(tr);
+  if(_locked){ tr.querySelectorAll('.atk-name, .atk-bonus, .atk-dmg, .atk-dtype').forEach(e => e.readOnly = true); const ab = tr.querySelector('.atk-abil'); if(ab){ ab.style.pointerEvents = 'none'; ab.tabIndex = -1; } }
   return tr;
 }
 // Rogues get a Sneak Attack button to the left of Attack; refreshed when class/level changes.
@@ -1701,6 +1763,7 @@ function addInvRow(it){
   $('inv-body').appendChild(tr);
   renderInvActions(tr);
   renderInvDetail(tr);
+  const nm = tr.querySelector('.inv-name'); if(nm) nm.readOnly = _locked;
   return tr;
 }
 // A compact read-out for the Details column: gold value + weapon damage/props,
@@ -1912,6 +1975,7 @@ let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
   const tempEl = $('f-ac-temp'); if(tempEl) tempEl.disabled = false;   // the AC bonus field is always live
+  if(!_locked){ acEl.title = 'AC — manual (sheet unlocked)'; return; }   // unlocked: don't clobber a manual AC
   acEl.textContent = computeAC();
   acEl.title = 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
 }
@@ -2316,6 +2380,7 @@ function autoSpeed(){
 function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
 function reconcileSpeed(){
   const el = $('f-speed'); if(!el) return;
+  if(!_locked) return;                                          // unlocked: don't clobber a manual Speed
   if(!speciesData() && !classList().length) return;              // nothing to base it on yet
   el.textContent = autoSpeed(); el.title = 'Auto-calculated from your species and features';
 }
@@ -2582,6 +2647,7 @@ function renderSpells(){
       box.appendChild(row);
     });
   });
+  document.querySelectorAll('#spells-by-level .sp-name-input').forEach(el => { el.readOnly = _locked; });
 }
 function addSpellByName(n){
   if(!spellsKnown.some(s => norm(s.name) === norm(n))){
@@ -3066,6 +3132,7 @@ function collectSheet(){
     scores, saveProf, skillProf,
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
     speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
+    locked: _locked, cInit: v('c-init'), cProf: v('c-prof'),
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -3077,6 +3144,7 @@ function collectSheet(){
 }
 function applySheet(d){
   d = d || {};
+  _locked = d.locked !== false;   // default locked; set before recalc so its guards see the right state
   _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };   // stored scores/HP are base; recalc re-adds the magic delta
   const set = (id, val) => { const el = $(id); if(!el) return; const sv = (val == null ? '' : val); if('value' in el) el.value = sv; else el.textContent = sv; };
   set('f-name', d.name); set('f-class', d.cls); set('f-level', d.level || 1); set('f-subclass', d.subclass);
@@ -3085,6 +3153,7 @@ function applySheet(d){
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el) el.value = (d.scores && d.scores[a.id]) || 10; });
   saveProf = d.saveProf || {}; skillProf = d.skillProf || {};
   set('f-speed', d.speed || '30'); _speedManual = !!d.speedManual; set('f-ac', d.ac || '10');
+  if(d.cInit != null) set('c-init', d.cInit); if(d.cProf != null) set('c-prof', d.cProf);   // manual Init/Prof overrides (kept while unlocked)
   set('f-ac-temp', d.acTemp || '');
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
   set('f-hd-left', d.hdLeft != null ? d.hdLeft : hitDiceTotal());
@@ -3103,6 +3172,7 @@ function applySheet(d){
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   refreshSubclassList(); refreshSpellPicker();
   renderDeath(); renderFeatures(); renderResources(); renderConditions(); fillDamageTypes(); renderDefenses(); fillCompanionDatalist(); renderCompanions(); renderConcentration(); renderAttuneCount(); recalc(); setDefaultTab();
+  applyLock();   // apply lock/unlock editability across all fields (after rows are built)
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
 }
 function saveSheet(quiet){
@@ -3141,6 +3211,12 @@ document.addEventListener('click', function(e){ const a = e.target.closest && e.
 var _autoSaveTimer = null;
 function scheduleAutosave(){ if(!_pageReady) return; if(_autoSaveTimer) clearTimeout(_autoSaveTimer); _autoSaveTimer = setTimeout(function(){ try { saveSheet(true); } catch(e){} }, 1500); }
 $('f-name').addEventListener('change', syncDocTitle);
+// Manual edits to the contenteditable number displays (only reachable when the
+// sheet is unlocked) persist on autosave; keep them single-line.
+['f-ac','f-speed','f-hp-max','c-init','c-prof'].forEach(id => { const el = $(id); if(!el) return;
+  el.addEventListener('input', scheduleAutosave);
+  el.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); el.blur(); } });
+});
 
 // ═══ INIT (core) ══════════════════════════════════════════════════════════
 try { if(localStorage.getItem('dnd_dark') === '1') setDarkMode(true); } catch(e){}
