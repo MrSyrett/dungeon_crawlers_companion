@@ -124,10 +124,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-logo{min-width:0;}
 .hdr-name-row{display:flex;align-items:flex-end;gap:10px;min-width:0;}
 .hdr-name-row .name-primary{flex:1 1 auto;min-width:0;}
-.lock-toggle{display:inline-flex;align-items:center;gap:6px;align-self:flex-end;flex:0 0 auto;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:7px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .12s,border-color .12s;}
+.lock-toggle{display:inline-flex;align-items:center;justify-content:center;align-self:flex-end;flex:0 0 auto;width:38px;height:38px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:9px;cursor:pointer;transition:background .12s,border-color .12s;}
 .lock-toggle:hover{background:rgba(255,255,255,.26);}
-.lock-toggle.on{background:rgba(110,220,140,.24);border-color:rgba(150,240,170,.75);color:#eafff0;}
-.lock-toggle .lk-ico{font-size:13px;line-height:1;}
+.lock-toggle.on{background:rgba(110,220,140,.26);border-color:rgba(150,240,170,.8);}
+.lock-toggle .lk-ico{font-size:18px;line-height:1;}
 /* Unlocked: show which automated fields are now hand-editable. */
 body.unlocked #f-ac[contenteditable="true"],body.unlocked #f-speed[contenteditable="true"],body.unlocked #f-hp-max[contenteditable="true"],body.unlocked #c-init[contenteditable="true"],body.unlocked #c-prof[contenteditable="true"]{outline:1px dashed var(--dnd);outline-offset:2px;border-radius:4px;cursor:text;}
 body.unlocked .abil-score{border-color:var(--dnd)!important;cursor:text;}
@@ -963,8 +963,8 @@ body.dark .tabs-bar{background:#1a1a1f;}
         <div class="lg-word">Dungeons &amp; Dragons</div><div class="lg-sub">2024 Character Sheet</div>
       </div>
       <div class="hdr-name-row">
+        <button id="lock-toggle" class="lock-toggle" onclick="toggleLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (automated). Click to unlock for manual editing."><span class="lk-ico">🔒</span></button>
         <div class="hdr-field name-primary"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
-        <button id="lock-toggle" class="lock-toggle" onclick="toggleLock()" aria-pressed="false" title="Sheet locked (automated). Unlock to edit every field by hand."><span class="lk-ico">🔒</span><span class="lk-txt">Locked</span></button>
       </div>
     </div>
     <div class="hdr-metarow">
@@ -1018,15 +1018,15 @@ body.dark .tabs-bar{background:#1a1a1f;}
       <div class="combat-strip">
         <div class="cbt-left">
           <div class="cbt ac-tile"><div class="c-lbl" id="ac-lbl">Armor Class</div>
-            <div class="c-val" id="f-ac" title="Set from armor, shield, class features and magic items, plus your AC bonus">10</div>
+            <div class="c-val" id="f-ac" data-ov="ac" title="Set from armor, shield, class features and magic items, plus your AC bonus">10</div>
             <div class="ac-fx">
               <span class="ac-bonus-lbl">Bonus</span>
               <input id="f-ac-temp" class="ac-temp" inputmode="numeric" value="" placeholder="+0" title="AC bonus on top of your armor — Mage Armor, Shield spell (+5), Haste / cover (+2)…" oninput="onTempAC()">
             </div>
           </div>
-          <div class="cbt"><div class="c-lbl">Speed</div><div class="c-val" id="f-speed" title="Set from your species and features">30</div></div>
-          <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
-          <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
+          <div class="cbt"><div class="c-lbl">Speed</div><div class="c-val" id="f-speed" data-ov="speed" title="Set from your species and features">30</div></div>
+          <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init" data-ov="init">+0</div></div>
+          <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof" data-ov="prof">+2</div></div>
           <div class="cbt death-box">
             <div class="c-lbl" id="deathbox-lbl">Death Saves</div>
             <div class="death-body" id="death-saves-body">
@@ -1102,10 +1102,10 @@ body.dark .tabs-bar{background:#1a1a1f;}
         <div id="conc-bar" class="conc-bar" style="display:none;"></div>
         <div id="spell-block" style="display:none;">
           <div class="spell-head">
-            <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk">+0</div></div>
-            <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc">8</div></div>
-            <div class="sh-box" id="sp-prep-box" style="display:none;" title="Leveled spells prepared vs your maximum"><div class="sh-lbl">Prepared Spells</div><div class="sh-val" id="sp-prep-val">0/0</div></div>
-            <div class="sh-box" id="sp-prep-cantrip-box" style="display:none;" title="Cantrips prepared vs your maximum"><div class="sh-lbl">Prepared Cantrips</div><div class="sh-val" id="sp-prep-cantrip-val">0/0</div></div>
+            <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk" data-ov="spAtk">+0</div></div>
+            <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc" data-ov="spDC">8</div></div>
+            <div class="sh-box" id="sp-prep-box" style="display:none;" title="Leveled spells prepared vs your maximum (edit the max when unlocked)"><div class="sh-lbl">Prepared Spells</div><div class="sh-val" id="sp-prep-val" data-ov="prepMax">0/0</div></div>
+            <div class="sh-box" id="sp-prep-cantrip-box" style="display:none;" title="Cantrips prepared vs your maximum (edit the max when unlocked)"><div class="sh-lbl">Prepared Cantrips</div><div class="sh-val" id="sp-prep-cantrip-val" data-ov="cantripMax">0/0</div></div>
           </div>
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
@@ -1310,6 +1310,11 @@ const D = {
 
 // ── state ──────────────────────────────────────────────────────────────────
 let _locked = true;                // Sheet lock: true = automated (fields read-only); false = manual editing. Default locked.
+let _ov = {};                      // Manual overrides for computed display fields (key → value). Set while unlocked; honored by the automation so re-locking keeps edited numbers and only recomputes what wasn't overridden.
+// Write a computed value to a display element, UNLESS the player has overridden it
+// (then write the override) or is actively editing it (then leave it alone).
+function setAuto(id, key, computed){ const el = $(id); if(!el || document.activeElement === el) return; el.textContent = (_ov[key] != null && String(_ov[key]) !== '') ? _ov[key] : computed; }
+function ovNum(key, fallback){ return (_ov[key] != null && String(_ov[key]) !== '' && !isNaN(parseInt(_ov[key],10))) ? parseInt(_ov[key],10) : fallback; }
 let saveProf = {};                 // { STR:true, ... }
 let skillProf = {};                // { Athletics:1 } (0 none, 1 prof, 2 expertise)
 let slotUsed = {};                 // { 1:2, 2:0, pact:1 }
@@ -1407,7 +1412,7 @@ function buildSkills(){
       '<span class="prof-dot locked" id="skp-' + cssId(sk.name) + '" onclick="cycleSkill(\'' + esc(sk.name) + '\')" title="Skill proficiency — unlock the sheet to edit"></span>' +
       '<span class="sk-abil">' + sk.ability + '</span>' +
       '<span class="sk-name" onclick="rollSkill(\'' + esc(sk.name) + '\')" title="' + esc(sk.description) + '">' + esc(sk.name) + '</span>' +
-      '<span class="sk-val" id="skv-' + cssId(sk.name) + '" onclick="rollSkill(\'' + esc(sk.name) + '\')">+0</span>';
+      '<span class="sk-val" id="skv-' + cssId(sk.name) + '" data-ov="skv-' + cssId(sk.name) + '" onclick="rollSkill(\'' + esc(sk.name) + '\')">+0</span>';
     list.appendChild(row);
   });
 }
@@ -1429,16 +1434,16 @@ function recalc(){
   document.querySelectorAll('.skill-row').forEach(row => {
     const nm = row.dataset.skill, ab = row.dataset.abil, lvl = skillProf[nm] || 0;
     const v = modOf(ab) + lvl * PB;
-    $('skv-' + cssId(nm)).textContent = sgn(v);
+    setAuto('skv-' + cssId(nm), 'skv-' + cssId(nm), sgn(v));
     const dot = $('skp-' + cssId(nm)); dot.className = 'prof-dot' + (_locked ? ' locked' : '') + (lvl === 1 ? ' on' : lvl === 2 ? ' exp' : '');
     dot.title = (lvl === 0 ? 'Not proficient' : lvl === 1 ? 'Proficient' : 'Expertise') + (_locked ? ' — unlock the sheet to edit' : '');
     if(nm === 'Perception') perceptionVal = v;
     else if(nm === 'Investigation') investigationVal = v;
     else if(nm === 'Insight') insightVal = v;
   });
-  // derived (skipped while unlocked so a manual override isn't clobbered)
-  if(_locked) $('c-prof').textContent = sgn(PB);
-  const init = modOf('DEX') + magicSum('init'); if(_locked) $('c-init').textContent = sgn(init);
+  // derived — honor a manual override (and never clobber the focused field)
+  setAuto('c-prof', 'prof', sgn(PB));
+  const init = modOf('DEX') + magicSum('init'); setAuto('c-init', 'init', sgn(init));
   renderMagicBadges();
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
   const pinv = $('d-pinv'); if(pinv) pinv.textContent = 10 + investigationVal;
@@ -1466,8 +1471,11 @@ function applyLock(){
   document.body.classList.toggle('unlocked', !locked);
   // Ability scores (the real source values)
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el){ el.readOnly = locked; el.tabIndex = locked ? -1 : 0; } });
-  // Derived number displays — editable overrides via contenteditable
-  ['f-ac','f-speed','f-hp-max','c-init','c-prof'].forEach(id => { const el = $(id); if(el) el.contentEditable = locked ? 'false' : 'true'; });
+  // Identity fields that are set at creation
+  ['f-species','f-background','f-alignment'].forEach(id => { const el = $(id); if(el) el.readOnly = locked; });
+  // Computed number displays — editable overrides via contenteditable
+  ['f-ac','f-speed','f-hp-max','c-init','c-prof','sp-dc','sp-atk','sp-prep-val','sp-prep-cantrip-val'].forEach(id => { const el = $(id); if(el) el.contentEditable = locked ? 'false' : 'true'; });
+  document.querySelectorAll('.skill-row .sk-val').forEach(el => { el.contentEditable = locked ? 'false' : 'true'; });
   // Attack rows (name / bonus / damage / type inputs, ability <select>)
   document.querySelectorAll('.atk-name, .atk-bonus, .atk-dmg, .atk-dtype').forEach(el => { el.readOnly = locked; });
   document.querySelectorAll('.atk-abil').forEach(el => { el.style.pointerEvents = locked ? 'none' : ''; el.tabIndex = locked ? -1 : 0; });
@@ -1476,27 +1484,26 @@ function applyLock(){
   document.querySelectorAll('.inv-name').forEach(el => { el.readOnly = locked; });
   // Proficiency dots — cursor only (click is gated by _locked in the handlers)
   document.querySelectorAll('.prof-dot').forEach(el => el.classList.toggle('locked', locked));
-  // Toggle button
+  // Toggle button — icon only
   const btn = $('lock-toggle');
   if(btn){
     btn.classList.toggle('on', !locked);
     btn.setAttribute('aria-pressed', String(!locked));
-    btn.title = locked ? 'Sheet locked (automated). Unlock to edit every field by hand.'
-                       : 'Sheet unlocked (manual editing). Lock to re-automate from your build.';
+    btn.title = locked ? 'Sheet locked (automated). Click to unlock for manual editing.'
+                       : 'Sheet unlocked (manual editing; rolling disabled). Click to lock.';
     const ico = btn.querySelector('.lk-ico'); if(ico) ico.textContent = locked ? '🔒' : '🔓';
-    const txt = btn.querySelector('.lk-txt'); if(txt) txt.textContent = locked ? 'Locked' : 'Unlocked';
   }
 }
 function setLocked(v){
   _locked = !!v;
   applyLock();
-  if(_locked){ recalc(); }   // re-automate: recompute every derived value from the build
+  // Re-automate: recompute everything, honoring any manual overrides (so edited
+  // numbers are kept and stat changes flow through) — never a revert to old values.
+  recalc();
   scheduleAutosave();
 }
 function toggleLock(){ setLocked(!_locked); }
-// Editing a stat by hand (only possible when unlocked) refreshes the derived mods,
-// saves and skills live; Init/Prof/AC/Speed stay as the player set them.
-function onStatInput(){ if(!_locked) recalc(); scheduleAutosave(); }
+function onStatInput(){ recalc(); scheduleAutosave(); }   // stat edits flow into mods/saves/skills (honoring overrides)
 
 // ═══ ROLL ENGINE ══════════════════════════════════════════════════════════
 function dN(n){ return Math.floor(Math.random() * n) + 1; }
@@ -1546,16 +1553,22 @@ function d20Check(label, mod, opts){
   addLog(label, sgn(total), detail, type);
   return { total, nat: r.nat, type };
 }
-function rollAbility(id){ d20Check(id + ' check', modOf(id), { kind:'check' }); }
-function rollSave(id){ const PB = profBonus(), ms = magicSaveBonus(); d20Check(id + ' save', modOf(id) + (saveProf[id] ? PB : 0) + ms, { kind: id === 'DEX' ? 'saveDex' : 'save', note: ms ? ('+' + ms + ' magic') : '' }); }
+// Rolling is disabled while the sheet is unlocked (you're editing, not playing).
+function rollsOff(){ if(_locked) return false; addLog('Rolling off', '🔓', 'Lock the sheet to roll', 'fumble'); return true; }
+function rollAbility(id){ if(rollsOff()) return; d20Check(id + ' check', modOf(id), { kind:'check' }); }
+function rollSave(id){ if(rollsOff()) return; const PB = profBonus(), ms = magicSaveBonus(); d20Check(id + ' save', modOf(id) + (saveProf[id] ? PB : 0) + ms, { kind: id === 'DEX' ? 'saveDex' : 'save', note: ms ? ('+' + ms + ' magic') : '' }); }
 function rollSkill(name){
+  if(rollsOff()) return;
   const row = [...document.querySelectorAll('.skill-row')].find(r => r.dataset.skill === name); if(!row) return;
   const ab = row.dataset.abil, PB = profBonus(), lvl = skillProf[name] || 0;
-  d20Check(name + ' (' + ab + ')', modOf(ab) + lvl * PB, { kind:'check' });
+  const key = 'skv-' + cssId(name);
+  const base = (_ov[key] != null && String(_ov[key]) !== '' && !isNaN(parseInt(_ov[key],10))) ? parseInt(_ov[key],10) : (modOf(ab) + lvl * PB);
+  d20Check(name + ' (' + ab + ')', base, { kind:'check' });
 }
-function rollInitiative(){ d20Check('Initiative', modOf('DEX') + magicSum('init'), { kind:'check' }); }
-function rollSpellAttack(){ d20Check('Spell Attack', spellAtkBonus(), { kind:'attack' }); }
+function rollInitiative(){ if(rollsOff()) return; d20Check('Initiative', modOf('DEX') + magicSum('init'), { kind:'check' }); }
+function rollSpellAttack(){ if(rollsOff()) return; d20Check('Spell Attack', spellAtkBonus(), { kind:'attack' }); }
 function rollDeathSave(){
+  if(rollsOff()) return;
   const ctx = rollCtx('save');
   const r = rawD20(ctx.mode);
   const eff = r.nat + ctx.pen;   // exhaustion lowers the effective result
@@ -1662,6 +1675,7 @@ function updateDicePoolDisplay(){
 }
 function clearDicePool(){ dicePool = []; updateDicePoolDisplay(); }
 function rollDicePool(){
+  if(rollsOff()) return;
   if(!dicePool.length){ addLog('Dice Pool', '—', 'No dice in the pool — tap dice to add', 'normal'); return; }
   const parts = []; let total = 0;
   dicePool.forEach(sides => {
@@ -1770,6 +1784,7 @@ function _atkRow(btn){ return btn.closest('tr'); }
 function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
 // Core attack roll. sneakD6 > 0 adds that many d6 of Sneak Attack damage (doubled on a crit).
 function doAttack(tr, sneakD6){
+  if(rollsOff()) return;
   sneakD6 = sneakD6 || 0;
   const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
   const bonus = num(tr.querySelector('.atk-bonus').value), name = (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
@@ -2039,9 +2054,8 @@ let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
   const tempEl = $('f-ac-temp'); if(tempEl) tempEl.disabled = false;   // the AC bonus field is always live
-  if(!_locked){ acEl.title = 'AC — manual (sheet unlocked)'; return; }   // unlocked: don't clobber a manual AC
-  acEl.textContent = computeAC();
-  acEl.title = 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
+  setAuto('f-ac', 'ac', String(computeAC()));   // honors a manual AC override; skipped while being edited
+  acEl.title = (_ov.ac != null && String(_ov.ac) !== '') ? 'AC — manual override (unlock to change)' : 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
 }
 function onTempAC(){ reconcileAC(); scheduleAutosave(); }
 // ── Magic items: parse worn bonuses, apply to AC / saves / attacks ────────
@@ -2444,9 +2458,9 @@ function autoSpeed(){
 function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
 function reconcileSpeed(){
   const el = $('f-speed'); if(!el) return;
-  if(!_locked) return;                                          // unlocked: don't clobber a manual Speed
-  if(!speciesData() && !classList().length) return;              // nothing to base it on yet
-  el.textContent = autoSpeed(); el.title = 'Auto-calculated from your species and features';
+  if(_ov.speed == null || String(_ov.speed) === ''){ if(!speciesData() && !classList().length) return; }   // nothing to base it on yet (unless overridden)
+  setAuto('f-speed', 'speed', String(autoSpeed()));   // honors a manual Speed override
+  el.title = (_ov.speed != null && String(_ov.speed) !== '') ? 'Speed — manual override (unlock to change)' : 'Auto-calculated from your species and features';
 }
 
 // ── Monk Martial Arts die on Unarmed + Monk weapons (#5) ───────────────────
@@ -2605,12 +2619,13 @@ function multiCasterLevel(){ let lvl = 0; nonPactCasters().forEach(({cl,c}) => {
 function casterType(){ const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); return cs.length ? cs[0].c.spellcasting : (_forceSpells ? 'third' : 'none'); }
 function spellAbilityId(){ if(_spellAbility) return _spellAbility; const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); if(cs.length && cs[0].c.spellcastingAbility) return cs[0].c.spellcastingAbility; const c = classData(); return (c && c.spellcastingAbility) ? c.spellcastingAbility : 'INT'; }
 function abilityForSpell(sp){ if(_spellAbility) return _spellAbility; const owner = spellcastingClasses().find(x => (sp.classes||[]).some(n => norm(n)===norm(x.c.name))); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
-function spellDC(ab){ return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC'); }
-function spellAtkBonus(ab){ return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
+function spellDC(ab){ if(_ov.spDC != null && String(_ov.spDC) !== '') return ovNum('spDC', 8); return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC'); }
+function spellAtkBonus(ab){ if(_ov.spAtk != null && String(_ov.spAtk) !== '') return ovNum('spAtk', 0); return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
 // A racial/feature-granted spell (e.g. High Elf's cantrip on a Fighter) also opens the Spells tab.
 function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted); }
 // Prepared-spell budget (A5): sum each non-pact caster class's Prepared Spells (or Spells Known) at its level.
 function preparedMax(){
+  if(_ov.prepMax != null && String(_ov.prepMax) !== '') return ovNum('prepMax', 0);
   let total = 0;
   spellcastingClasses().forEach(({cl,c}) => {
     if(c.spellcasting === 'pact') return;
@@ -2624,6 +2639,7 @@ function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName
 // Cantrips known/prepared: max from each caster class's "Cantrips" table column
 // (Warlock/pact casters know cantrips too, so unlike preparedMax we don't skip pact).
 function cantripMax(){
+  if(_ov.cantripMax != null && String(_ov.cantripMax) !== '') return ovNum('cantripMax', 0);
   let total = 0;
   spellcastingClasses().forEach(({cl,c}) => {
     const row = (c.table||[]).find(r => Number(r.level) === num(cl.level));
@@ -2640,17 +2656,19 @@ function renderSpellHeader(){
   if(stb){ stb.classList.toggle('no-cast', !on); stb.title = on ? '' : 'This class has no spellcasting'; }
   if(on){
     $('sp-ability').textContent = spellAbilityId();
-    $('sp-dc').textContent = spellDC();
-    $('sp-atk').textContent = sgn(spellAtkBonus());
+    // Save DC / Spell Attack honor a manual override (spellDC/spellAtkBonus) and are
+    // left alone while being edited.
+    if(document.activeElement !== $('sp-dc')) $('sp-dc').textContent = spellDC();
+    if(document.activeElement !== $('sp-atk')) $('sp-atk').textContent = sgn(spellAtkBonus());
     $('spell-note').textContent = casterType().charAt(0).toUpperCase() + casterType().slice(1) + ' caster';
     const pmax = preparedMax(), pbox = $('sp-prep-box');
     if(pbox){
-      if(pmax > 0){ pbox.style.display = ''; const now = preparedNow(), el = $('sp-prep-val'); el.textContent = now + '/' + pmax; el.style.color = now > pmax ? 'var(--red)' : ''; }
+      if(pmax > 0){ pbox.style.display = ''; const now = preparedNow(), el = $('sp-prep-val'); if(document.activeElement !== el){ el.textContent = now + '/' + pmax; el.style.color = now > pmax ? 'var(--red)' : ''; } }
       else pbox.style.display = 'none';
     }
     const cmax = cantripMax(), cbox = $('sp-prep-cantrip-box');
     if(cbox){
-      if(cmax > 0){ cbox.style.display = ''; const now = preparedCantripNow(), el = $('sp-prep-cantrip-val'); el.textContent = now + '/' + cmax; el.style.color = now > cmax ? 'var(--red)' : ''; }
+      if(cmax > 0){ cbox.style.display = ''; const now = preparedCantripNow(), el = $('sp-prep-cantrip-val'); if(document.activeElement !== el){ el.textContent = now + '/' + cmax; el.style.color = now > cmax ? 'var(--red)' : ''; } }
       else cbox.style.display = 'none';
     }
   } else { $('spell-note').textContent = 'No spellcasting'; $('sp-ability').textContent = ''; }
@@ -2850,6 +2868,7 @@ function upcastSpell(name){
 }
 // Cast a spell: pick/spend a slot (with upcasting), then roll/report by type — attack roll, saving throw, plain damage, or effect text.
 function castSpellFull(name, castLevel){
+  if(rollsOff()) return;
   const sk = spellsKnown.find(s => norm(s.name) === norm(name));
   const label = (sk && sk.display) || name;
   const sp = spellByName(name);
@@ -3371,7 +3390,7 @@ function collectSheet(){
     scores, saveProf, skillProf,
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
     speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
-    locked: _locked, cInit: v('c-init'), cProf: v('c-prof'),
+    locked: _locked, ov: _ov,
     turn: _turn, turnSub: _turnSub,
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
@@ -3384,7 +3403,8 @@ function collectSheet(){
 }
 function applySheet(d){
   d = d || {};
-  _locked = d.locked !== false;   // default locked; set before recalc so its guards see the right state
+  _locked = d.locked !== false;   // default locked; set before recalc so overrides/guards see the right state
+  _ov = (d.ov && typeof d.ov === 'object') ? d.ov : {};
   _turn = Object.assign({ action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0 }, d.turn || {});
   _turnSub = d.turnSub || 'action';
   _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };   // stored scores/HP are base; recalc re-adds the magic delta
@@ -3395,7 +3415,6 @@ function applySheet(d){
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el) el.value = (d.scores && d.scores[a.id]) || 10; });
   saveProf = d.saveProf || {}; skillProf = d.skillProf || {};
   set('f-speed', d.speed || '30'); _speedManual = !!d.speedManual; set('f-ac', d.ac || '10');
-  if(d.cInit != null) set('c-init', d.cInit); if(d.cProf != null) set('c-prof', d.cProf);   // manual Init/Prof overrides (kept while unlocked)
   set('f-ac-temp', d.acTemp || '');
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
   set('f-hd-left', d.hdLeft != null ? d.hdLeft : hitDiceTotal());
@@ -3453,12 +3472,23 @@ document.addEventListener('click', function(e){ const a = e.target.closest && e.
 var _autoSaveTimer = null;
 function scheduleAutosave(){ if(!_pageReady) return; if(_autoSaveTimer) clearTimeout(_autoSaveTimer); _autoSaveTimer = setTimeout(function(){ try { saveSheet(true); } catch(e){} }, 1500); }
 $('f-name').addEventListener('change', syncDocTitle);
-// Manual edits to the contenteditable number displays (only reachable when the
-// sheet is unlocked) persist on autosave; keep them single-line.
-['f-ac','f-speed','f-hp-max','c-init','c-prof'].forEach(id => { const el = $(id); if(!el) return;
+// Max HP is a source value (never recomputed) — just persist hand-edits.
+(function(){ const el = $('f-hp-max'); if(!el) return;
   el.addEventListener('input', scheduleAutosave);
   el.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); el.blur(); } });
+})();
+// Override fields ([data-ov]): typing stores a manual override that the automation
+// honors (so re-locking keeps it); clearing the field falls back to auto. Enter
+// commits; on blur the sheet re-derives everything (honoring the overrides).
+document.addEventListener('input', function(e){
+  const t = e.target, key = (t && t.dataset) ? t.dataset.ov : null; if(!key) return;
+  const txt = (t.textContent || '').trim();
+  if(key === 'prepMax' || key === 'cantripMax'){ const m = txt.match(/(\d+)\s*$/); _ov[key] = m ? m[1] : ''; }
+  else _ov[key] = txt;
+  scheduleAutosave();
 });
+document.addEventListener('keydown', function(e){ const t = e.target; if(e.key === 'Enter' && t && t.dataset && t.dataset.ov){ e.preventDefault(); t.blur(); } });
+document.addEventListener('blur', function(e){ const t = e.target; if(t && ((t.dataset && t.dataset.ov) || t.id === 'f-hp-max')){ recalc(); } }, true);
 
 // ═══ INIT (core) ══════════════════════════════════════════════════════════
 try { if(localStorage.getItem('dnd_dark') === '1') setDarkMode(true); } catch(e){}
