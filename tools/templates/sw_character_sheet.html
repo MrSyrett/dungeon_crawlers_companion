@@ -37,7 +37,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
 .sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;container-type:inline-size;}
 .roll-log{width:280px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--sw);position:sticky;top:0;height:100vh;overflow:hidden;}
-#log-collapse-btn{position:fixed;right:280px;top:50%;transform:translateY(-50%);z-index:201;background:var(--cyan);color:var(--on-cyan);border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+#log-collapse-btn{position:fixed;right:280px;top:50%;transform:translateY(-50%);z-index:201;background:var(--sw);color:#fff;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 #log-collapse-btn::after{content:"\25C0";}
 .roll-log.collapsed #log-collapse-btn{right:0;}
 .roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
@@ -134,7 +134,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.08em;color:var(--sw-dk);cursor:pointer;}
 .stat-cell .sn:hover{color:var(--sw-dk);}
 .stat-cell input{width:54px;height:36px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--ink);outline:none;margin:4px 0;}
-.attr-btn{width:60px;height:38px;margin:4px auto 0;border:2px solid var(--cyan);border-radius:6px;background:var(--box);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--sw-dk);cursor:pointer;text-align:center;display:block;}
+.attr-btn{width:60px;height:38px;margin:4px auto 0;border:2px solid var(--sw-dk);border-radius:6px;background:var(--box);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--sw-dk);cursor:pointer;text-align:center;display:block;}
 .attr-btn:hover{background:var(--cyan);color:var(--on-cyan);}
 .save-toggle{display:flex;justify-content:center;gap:3px;}
 .save-toggle button{width:22px;height:20px;border:1px solid var(--rule);background:transparent;cursor:pointer;font-size:11px;font-weight:900;color:var(--muted);border-radius:2px;line-height:1;}

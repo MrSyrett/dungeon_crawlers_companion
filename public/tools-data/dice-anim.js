@@ -407,6 +407,7 @@
   function labelSet(faceSet,N){ var a=[],i;
     if(faceSet==='units'){ for(i=0;i<N;i++)a.push(String(i%10)); return a; }
     if(faceSet==='tens'){ for(i=0;i<N;i++){ var v=(i%10)*10; a.push(v<10?('0'+v):String(v)); } return a; }
+    if(faceSet==='marvel'){ a.push('M'); for(i=1;i<N;i++)a.push(String(i+1)); return a; }   // the Marvel die: the 1 face is the M (Fantastic)
     for(i=0;i<N;i++)a.push(String(i+1)); return a; }
   // Face numbers: an ink layer (the digit, transparent elsewhere) and a bump
   // layer (the same digit as a dent, with a soft shadow on one side) so the

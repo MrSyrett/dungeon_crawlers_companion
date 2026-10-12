@@ -1036,7 +1036,7 @@ function animate616(r){
   if(!(window.DiceAnim&&window.DiceAnim.play))return;
   try{ window.DiceAnim.play([
     {sides:6, display:String(r.d1)},
-    {sides:6, display:String(r.m), color:MARVEL_DIE_COLOR},
+    {sides:6, display:(r.m===1?'M':String(r.m)), faceSet:'marvel', color:MARVEL_DIE_COLOR},
     {sides:6, display:String(r.d2)}
   ], r.fantastic?'crit':'normal'); }catch(e){}
 }
