@@ -269,10 +269,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cbt input{width:100%;max-width:74px;margin:2px auto 0;display:block;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;padding:1px 0;}
 .cbt.click{cursor:pointer;}.cbt.click:hover{background:var(--dnd-lt);}
 .ac-tile .ac-fx{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:1px;}
-.ac-tile .ac-chk{display:inline-flex;align-items:center;gap:2px;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;}
-.ac-tile .ac-chk input{width:auto!important;margin:0;font-size:inherit!important;cursor:pointer;}
+.ac-tile .ac-bonus-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 .ac-tile input.ac-temp{width:30px!important;font-size:11px!important;font-weight:700;border:1px solid var(--rule)!important;border-radius:4px;padding:1px 2px;color:var(--muted)!important;}
 .ac-tile input.ac-temp:disabled{opacity:.35;cursor:not-allowed;}
+/* Locked (automated) combat fields read like Initiative / Prof Bonus — no editable chrome. */
+.cbt input[readonly],.hp-row input[readonly]{border-color:transparent;background:transparent;cursor:default;}
+/* No number-spinner arrows on the HP and Temp fields. */
+.hp-row input::-webkit-outer-spin-button,.hp-row input::-webkit-inner-spin-button,.hp-sub input::-webkit-outer-spin-button,.hp-sub input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.hp-row input,.hp-sub input{-moz-appearance:textfield;}
 .hp-box{display:flex;flex-direction:column;justify-content:center;gap:8px;}
 .hp-hd{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;}
 .hp-hd .hd-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
@@ -283,7 +287,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
 .hp-row input{width:66px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .hp-row .slash{color:var(--muted);font-size:24px;}
-.hp-adjust{display:flex;align-items:center;justify-content:center;gap:5px;}
+.hp-adjust{display:flex;align-items:center;justify-content:center;gap:6px;width:max-content;max-width:100%;margin:0 auto;}
 .hp-adjust input{width:52px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:4px 0;}
 .hp-adj-btn{border:none;border-radius:4px;padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:#fff;}
 .hp-adj-btn.heal{background:var(--green);}
@@ -633,7 +637,7 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
   .abil-box{margin:6px 4px;}
   .combat-strip{grid-template-columns:1fr;}
   .hp-row input{width:80px;font-size:34px;}
-  .hp-adj-btn{min-height:38px;flex:1;}
+  .hp-adj-btn{min-height:38px;}
   .hp-adjust input{min-height:38px;}
   .death-strip{gap:6px;}
   .cond-chip{padding:7px 13px;font-size:13px;}
@@ -922,13 +926,13 @@ body.dark .tabs-bar{background:#1a1a1f;}
       <div class="combat-strip">
         <div class="cbt-left">
           <div class="cbt ac-tile"><div class="c-lbl" id="ac-lbl">Armor Class</div>
-            <input id="f-ac" value="10" oninput="scheduleAutosave()">
+            <input id="f-ac" value="10" readonly title="Set from armor, shield, class features and magic items, plus your AC bonus">
             <div class="ac-fx">
-              <label class="ac-chk" title="Mage Armor — while wearing no armor, AC = 13 + DEX"><input type="checkbox" id="f-mage-armor" onchange="onMageArmor()"><span>MA</span></label>
-              <input id="f-ac-temp" class="ac-temp" inputmode="numeric" value="" placeholder="+0" title="Situational AC on top of your armor: Shield spell (+5), Haste / cover (+2)…" oninput="onTempAC()">
+              <span class="ac-bonus-lbl">Bonus</span>
+              <input id="f-ac-temp" class="ac-temp" inputmode="numeric" value="" placeholder="+0" title="AC bonus on top of your armor — Mage Armor, Shield spell (+5), Haste / cover (+2)…" oninput="onTempAC()">
             </div>
           </div>
-          <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" oninput="onSpeedInput()"></div>
+          <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" readonly title="Set from your species and features"></div>
           <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
           <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
           <div class="cbt death-box">
@@ -944,11 +948,11 @@ body.dark .tabs-bar{background:#1a1a1f;}
         </div>
         <div class="cbt hp-box">
           <div class="c-lbl">Hit Points <span class="hp-boost" id="hp-boost" title="Bonus to your HP maximum from an equipped magic item (included above)" style="display:none;"></span></div>
-          <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><input id="f-hp-max" type="number" value="10" oninput="scheduleAutosave()"></div>
+          <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><input id="f-hp-max" type="number" value="10" readonly title="Maximum HP — set at creation and level-up"></div>
           <div class="hp-adjust">
-            <button class="hp-adj-btn heal" onclick="adjustHP(1)" title="Heal by the amount entered">Heal</button>
-            <input id="f-hp-adjust" type="number" min="0" placeholder="0" title="Amount to heal or take as damage" onkeydown="if(event.key==='Enter')adjustHP(-1)">
             <button class="hp-adj-btn dmg" onclick="adjustHP(-1)" title="Take damage by the amount entered (resistances applied, then temp HP absorbs)">Damage</button>
+            <input id="f-hp-adjust" type="number" min="0" placeholder="0" title="Amount to heal or take as damage" onkeydown="if(event.key==='Enter')adjustHP(-1)">
+            <button class="hp-adj-btn heal" onclick="adjustHP(1)" title="Heal by the amount entered">Heal</button>
           </div>
           <div class="hp-dtype">
             <select id="f-dmg-type" class="dtype-sel" title="Damage type — applies your defenses below (resistance halves, immunity negates, vulnerability doubles)"></select>
@@ -1976,18 +1980,16 @@ function unarmoredACBase(dex){
   if(hasFeature('Draconic Resilience')) best = Math.max(best, 13 + dex);                                    // shield allowed
   return best;
 }
-// Active effects: Mage Armor (13+DEX while unarmored) and a situational AC bonus
-// (Shield spell, Haste, cover…) that applies on top of an auto-calculated base.
-function mageArmorOn(){ const el = $('f-mage-armor'); return !!(el && el.checked); }
+// A situational AC bonus (Mage Armor, Shield spell, Haste, cover…) added on top of
+// the auto-calculated base via the Bonus field.
 // The situational field is only live when there's an auto-calculated base to add to;
 // in pure-manual mode the user types their whole AC, so it stays disabled (contributes 0).
 function acTempBonus(){ const el = $('f-ac-temp'); return (el && !el.disabled) ? num(el.value) : 0; }
-function acHasAutoBase(){ return !!(equippedItemName('armor') || equippedItemName('shield') || equippedMagicArmorRow() || magicACBonus() > 0 || hasUnarmoredDefense() || mageArmorOn()); }
+function acHasAutoBase(){ return !!(equippedItemName('armor') || equippedItemName('shield') || equippedMagicArmorRow() || magicACBonus() > 0 || hasUnarmoredDefense()); }
 function computeAC(){
   const dex = modOf('DEX');
   const { armor, plus } = equippedArmorInfo();
   let base = armor ? armorACValue(armor, dex) + plus : unarmoredACBase(dex);
-  if(!armor && mageArmorOn()) base = Math.max(base, 13 + dex);   // Mage Armor: 13+DEX, no armor, best-of with Unarmored Defense
   let ac = base;
   if(equippedItemName('shield')) ac += 2 + equippedRowPlus('shield');
   ac += magicACBonus();
@@ -1999,17 +2001,10 @@ function computeAC(){
 let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
-  const tempEl = $('f-ac-temp');
-  const auto = acHasAutoBase();
-  if(tempEl) tempEl.disabled = !auto;   // situational bonus only makes sense on an auto base
-  if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from armor / shield / class features / magic items / Mage Armor, plus any situational bonus'; }
-  else {
-    if(_acWasAuto) acEl.value = computeAC();   // just unequipped the last source → unarmored value
-    acEl.readOnly = false; acEl.classList.remove('auto'); acEl.title = '';
-  }
-  _acWasAuto = auto;
+  const tempEl = $('f-ac-temp'); if(tempEl) tempEl.disabled = false;   // the AC bonus field is always live
+  acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto');
+  acEl.title = 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
 }
-function onMageArmor(){ reconcileAC(); scheduleAutosave(); }
 function onTempAC(){ reconcileAC(); scheduleAutosave(); }
 // ── Magic items: parse worn bonuses, apply to AC / saves / attacks ────────
 function magicData(ref){ const n = norm(ref); return D.magicItems().find(x => norm(x.name) === n) || null; }
@@ -2413,8 +2408,7 @@ function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
 function reconcileSpeed(){
   const el = $('f-speed'); if(!el) return;
   if(!speciesData() && !classList().length) return;              // nothing to base it on yet
-  if(_speedManual){ el.classList.remove('auto'); el.title = ''; return; }
-  el.value = autoSpeed(); el.classList.add('auto'); el.title = 'Auto-calculated from species + features (edit to override)';
+  el.value = autoSpeed(); el.classList.add('auto'); el.title = 'Auto-calculated from your species and features';
 }
 
 // ── Monk Martial Arts die on Unarmed + Monk weapons (#5) ───────────────────
@@ -3158,7 +3152,7 @@ function collectSheet(){
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
-    speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), mageArmor: !!($('f-mage-armor') && $('f-mage-armor').checked), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
+    speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -3178,7 +3172,7 @@ function applySheet(d){
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el) el.value = (d.scores && d.scores[a.id]) || 10; });
   saveProf = d.saveProf || {}; skillProf = d.skillProf || {};
   set('f-speed', d.speed || '30'); _speedManual = !!d.speedManual; set('f-ac', d.ac || '10');
-  { const ma = $('f-mage-armor'); if(ma) ma.checked = !!d.mageArmor; } set('f-ac-temp', d.acTemp || '');
+  set('f-ac-temp', d.acTemp || '');
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
   set('f-hd-left', d.hdLeft != null ? d.hdLeft : hitDiceTotal());
   $('insp-btn').classList.toggle('on', !!d.inspiration);
