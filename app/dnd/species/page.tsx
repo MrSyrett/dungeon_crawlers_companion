@@ -10,7 +10,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/species";
-const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB", Homebrew: "Homebrew" };
+const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB", eberron: "Eberron", "arcana-unleashed": "AU", Homebrew: "Homebrew" };
 const sizeText = (s: string | string[]) => Array.isArray(s) ? s.join(" or ") : s;
 
 export default async function DndSpeciesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {

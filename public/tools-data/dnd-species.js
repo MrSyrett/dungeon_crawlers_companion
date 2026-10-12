@@ -361,6 +361,187 @@ const DND_SPECIES = [
         "description": "Starting at level 3, as a Bonus Action you can transform for 1 minute, once per Long Rest. Choose one form when you gain this trait: Heavenly Wings (a Fly Speed and extra radiant damage), Inner Radiance (emit light, deal radiant damage to nearby foes), or Necrotic Shroud (frighten nearby foes and deal extra necrotic damage). While transformed, once per turn you add extra damage of the form's type to one attack or harmful spell."
       }
     ]
+  },
+  {
+    "name": "Changeling",
+    "size": [
+      "Medium",
+      "Small"
+    ],
+    "speed": 30,
+    "darkvision": 0,
+    "creatureType": "Fey",
+    "flavor": "Mutable folk born of Feywild essence who can shift their face at will, living unseen among many peoples.",
+    "source": "eberron",
+    "traits": [
+      {
+        "name": "Changeling Instincts",
+        "description": "You gain proficiency in two of your choice from Deception, Insight, Intimidation, Performance, or Persuasion."
+      },
+      {
+        "name": "Shape-Shifter",
+        "description": "As an action you change your appearance and voice: coloration, hair, sex, height, weight, and size (Medium or Small), and you can look like another playable species without changing any game statistics. You can't copy an individual you've never seen or change your basic limb arrangement, and it doesn't alter clothing or gear. While shape-shifted you have Advantage on Charisma checks, and you stay in the new form until you take an action to revert."
+      }
+    ]
+  },
+  {
+    "name": "Kalashtar",
+    "size": "Medium",
+    "speed": 30,
+    "darkvision": 0,
+    "creatureType": "Aberration",
+    "flavor": "Humans bonded to renegade dream-spirits called quori, granting them minor psionic gifts and a guarded mind.",
+    "source": "eberron",
+    "traits": [
+      {
+        "name": "Dual Mind",
+        "description": "You have Advantage on Wisdom and Charisma saving throws."
+      },
+      {
+        "name": "Mental Discipline",
+        "description": "You have Resistance to Psychic damage."
+      },
+      {
+        "name": "Mind Link",
+        "description": "You have telepathy with a range in feet equal to 10 times your level. While speaking telepathically to a creature with this trait, you can take a Magic action to let it speak telepathically back to you for 1 hour or until you end the effect with another Magic action."
+      },
+      {
+        "name": "Severed from Dreams",
+        "description": "You can't be targeted by the Dream spell. In addition, each time you finish a Long Rest you gain proficiency in one skill of your choice, lasting until your next Long Rest."
+      }
+    ]
+  },
+  {
+    "name": "Khoravar",
+    "size": [
+      "Medium",
+      "Small"
+    ],
+    "speed": 30,
+    "darkvision": 60,
+    "creatureType": "Humanoid",
+    "flavor": "Descendants of humans and elves who name themselves \"children of Khorvaire\" and see themselves as the bridge between cultures.",
+    "source": "eberron",
+    "traits": [
+      {
+        "name": "Darkvision",
+        "description": "You have Darkvision with a range of 60 feet."
+      },
+      {
+        "name": "Fey Ancestry",
+        "description": "You have Advantage on saving throws to avoid or end the Charmed condition."
+      },
+      {
+        "name": "Fey Gift",
+        "description": "You know the Friends cantrip. When you finish a Long Rest you can swap it for another cantrip from the Cleric, Druid, or Wizard list. Your spellcasting ability for it is Intelligence, Wisdom, or Charisma (chosen when you select this species)."
+      },
+      {
+        "name": "Lethargy Resilience",
+        "description": "When you fail a saving throw to avoid or end the Unconscious condition, you can succeed instead. Once used, you can't do so again until you finish 1d4 Long Rests."
+      },
+      {
+        "name": "Skill Versatility",
+        "description": "You gain proficiency in one skill or tool of your choice, and can replace it with another skill or tool proficiency whenever you finish a Long Rest."
+      }
+    ]
+  },
+  {
+    "name": "Shifter",
+    "size": [
+      "Medium",
+      "Small"
+    ],
+    "speed": 30,
+    "darkvision": 60,
+    "creatureType": "Humanoid",
+    "flavor": "Bestial humanoids descended from lycanthropes who can briefly sharpen their animal traits in a surge called shifting.",
+    "source": "eberron",
+    "traits": [
+      {
+        "name": "Bestial Instincts",
+        "description": "You gain proficiency in one of your choice from Acrobatics, Athletics, Intimidation, or Survival."
+      },
+      {
+        "name": "Darkvision",
+        "description": "You have Darkvision with a range of 60 feet."
+      },
+      {
+        "name": "Shifting",
+        "description": "As a Bonus Action you take on a more bestial form for 1 minute (or until you end it as a Bonus Action), gaining Temporary Hit Points equal to twice your proficiency bonus. You can shift a number of times equal to your proficiency bonus, regaining all uses on a Long Rest. Each shift also grants the benefit of your chosen shifting option below (chosen when you select this species)."
+      }
+    ],
+    "lineages": [
+      {
+        "name": "Beasthide",
+        "traits": [
+          {
+            "name": "Beasthide",
+            "description": "You gain 1d6 additional Temporary Hit Points when you shift, and while shifted you have a +1 bonus to Armor Class."
+          }
+        ]
+      },
+      {
+        "name": "Longtooth",
+        "traits": [
+          {
+            "name": "Longtooth",
+            "description": "When you shift, and as a Bonus Action on later turns while shifted, you can make an Unarmed Strike with elongated fangs. On a hit you can deal Piercing damage equal to 1d6 plus your Strength modifier instead of the normal Unarmed Strike damage."
+          }
+        ]
+      },
+      {
+        "name": "Swiftstride",
+        "traits": [
+          {
+            "name": "Swiftstride",
+            "description": "While shifted, your Speed increases by 10 feet, and you can move up to 10 feet as a Reaction when a creature ends its turn within 5 feet of you. This reactive movement doesn't provoke Opportunity Attacks."
+          }
+        ]
+      },
+      {
+        "name": "Wildhunt",
+        "traits": [
+          {
+            "name": "Wildhunt",
+            "description": "While shifted, you have Advantage on Wisdom checks, and no creature within 30 feet of you can have Advantage on attack rolls against you unless you have the Incapacitated condition."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Warforged",
+    "size": [
+      "Medium",
+      "Small"
+    ],
+    "speed": 30,
+    "darkvision": 0,
+    "creatureType": "Construct",
+    "flavor": "Sentient constructs of wood and metal built as soldiers for the Last War, who nonetheless feel pain and emotion.",
+    "source": "eberron",
+    "traits": [
+      {
+        "name": "Construct Resilience",
+        "description": "You have Resistance to Poison damage and Advantage on saving throws to avoid or end the Poisoned condition."
+      },
+      {
+        "name": "Integrated Protection",
+        "description": "You gain a +1 bonus to your Armor Class, and armor you have donned can't be removed against your will while you're alive."
+      },
+      {
+        "name": "Sentry's Rest",
+        "description": "You don't need to sleep and magic can't put you to sleep. You can finish a Long Rest in 6 hours spent in an inactive, motionless state, appearing inert but remaining conscious."
+      },
+      {
+        "name": "Specialized Design",
+        "description": "You gain one skill proficiency and one tool proficiency of your choice."
+      },
+      {
+        "name": "Tireless",
+        "description": "You don't gain Exhaustion levels from dehydration, malnutrition, or suffocation."
+      }
+    ]
   }
 ];
 if (typeof window !== "undefined") window.DND_SPECIES = DND_SPECIES;
