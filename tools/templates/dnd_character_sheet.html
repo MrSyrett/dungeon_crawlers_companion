@@ -526,10 +526,17 @@ body.dark .conc-badge .cb-name{color:#8fc3ec;}
 .atk-detail .atk-dot{color:var(--muted);opacity:.55;}
 .atk-detail select.atk-abil{width:auto;flex:0 0 auto;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;padding:0;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;}
 .atk-detail select.atk-abil::-ms-expand{display:none;}
-.atk-detail input.atk-dtype{width:62px;flex:0 1 auto;min-width:36px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;padding:0;border:none;border-bottom:1px solid transparent;background:transparent;outline:none;}
+.atk-detail input.atk-dtype{field-sizing:content;width:auto;flex:0 1 auto;min-width:24px;max-width:140px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;padding:0;border:none;border-bottom:1px solid transparent;background:transparent;outline:none;}
 .atk-detail input.atk-dtype:focus{border-bottom-color:var(--dnd);}
+/* Read-only mirror of an attack name (Opportunity Attacks) — matches .atk-name. */
+.atk-name-txt{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;color:var(--ink);line-height:1.2;}
 .atk-detail .atk-mastery{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--dnd);background:transparent;border:none;border-bottom:1px dashed var(--rule);border-radius:0;padding:0 0 1px;cursor:pointer;}
 .atk-detail .atk-mastery:hover{color:var(--dnd-dk);border-bottom-style:solid;}
+/* Attacks table: Name + details take the room; Bonus/Damage hug the right by the Attack button. */
+.atk-tbl th:first-child,.atk-tbl td:first-child{width:100%;}
+.atk-tbl th:nth-child(2),.atk-tbl td:nth-child(2),.atk-tbl th:nth-child(3),.atk-tbl td:nth-child(3){width:1%;white-space:nowrap;text-align:center;}
+.atk-tbl .atk-bonus{width:42px;text-align:center;}
+.atk-tbl .atk-dmg{width:60px;text-align:center;}
 .atk-field{display:flex;flex-direction:column;gap:1px;}
 .atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
 .atk-mastery{background:transparent;border:1px dashed var(--rule);border-radius:3px;color:var(--dnd);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:2px 6px;letter-spacing:.02em;}
@@ -3186,19 +3193,29 @@ function isMeleeAttackRow(tr){
   return true;
 }
 function oppAttack(i){ if(_turn.reaction) return; const tr = document.querySelectorAll('#attacks-body tr')[i]; if(tr) doAttack(tr, 0, true); }
+// Mirrors the Attacks section (same table + row layout), melee rows only, read-only,
+// with an Attack button that spends the Reaction — the attack analogue of how the
+// Turn-tab spell rows mirror the Spells tab.
 function turnOppAttacksHTML(){
   const rows = [...document.querySelectorAll('#attacks-body tr')].map((tr, i) => ({ tr, i })).filter(x => isMeleeAttackRow(x.tr));
   if(!rows.length) return '<p class="turn-empty">No melee attacks — add a melee weapon in the Attacks section to make Opportunity Attacks.</p>';
   const dis = _turn.reaction;
-  let h = '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody>';
+  let h = '<div class="tbl-scroll"><table class="tbl atk-tbl"><thead><tr><th>Name</th><th>Bonus</th><th>Damage</th><th></th></tr></thead><tbody>';
   rows.forEach(({ tr, i }) => {
     const name = (tr.querySelector('.atk-name').value || '').trim() || 'Attack';
-    const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
-    const bonus = num(tr.querySelector('.atk-bonus').value);
-    const hit = modOf(abil) + (prof ? profBonus() : 0) + bonus;
-    const dmg = tr.querySelector('.atk-dmg').value, dtype = tr.querySelector('.atk-dtype').value;
-    h += '<tr><td>' + esc(name) + '</td><td class="mono">' + sgn(hit) + '</td><td class="mono">' + esc(dmg + (dtype ? ' ' + dtype : '')) + '</td>' +
-      '<td class="roll-cell" style="white-space:nowrap;text-align:right;"><button class="mini-roll' + (dis ? ' dis' : '') + '" onclick="oppAttack(' + i + ')" title="Make this as an Opportunity Attack (uses your Reaction)">Attack</button></td></tr>';
+    const abil = tr.querySelector('.atk-abil').value;
+    const type = (tr.querySelector('.atk-dtype').value || '').trim();
+    const mastery = tr.dataset.mastery || '';
+    const bonus = tr.querySelector('.atk-bonus').value, dmg = tr.querySelector('.atk-dmg').value;
+    let det = '<span>' + esc(abil) + '</span>';
+    if(type) det += '<span class="atk-dot">·</span><span>' + esc(type) + '</span>';
+    if(mastery) det += '<span class="atk-dot">·</span><button class="atk-mastery" onclick="openMastery(\'' + esc(mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(mastery) + '</button>';
+    h += '<tr>' +
+      '<td><div class="atk-name-txt">' + esc(name) + '</div><div class="atk-detail">' + det + '</div></td>' +
+      '<td class="mono">' + esc(bonus) + '</td>' +
+      '<td class="mono">' + esc(dmg) + '</td>' +
+      '<td class="roll-cell" style="white-space:nowrap;text-align:right;"><button class="mini-roll' + (dis ? ' dis' : '') + '" onclick="oppAttack(' + i + ')" title="Make this as an Opportunity Attack (uses your Reaction)">Attack</button></td>' +
+    '</tr>';
   });
   return h + '</tbody></table></div>';
 }
