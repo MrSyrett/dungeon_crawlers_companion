@@ -183,7 +183,17 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .comp-note:focus{border-color:var(--dnd);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;height:480px;overflow-y:auto;overflow-x:hidden;}
-.tab-panel.on .section-bar{position:sticky;top:0;z-index:2;}
+.tab-panel.on .section-bar{position:sticky;top:0;z-index:2;background:#fff;}
+body.dark .tab-panel.on .section-bar{background:#22222a;}
+/* Tabs with a locked header: the header stays put and only the list below scrolls,
+   so scrolled content is never seen behind the locked sections. */
+.tab-panel.on.tab-split{display:flex;flex-direction:column;overflow:hidden;}
+.tab-split>.section-bar,.tab-split>.blk,.tab-split>#conc-bar,.tab-split>#resources-list,.tab-split>#spell-empty{flex:0 0 auto;}
+.tab-split .tab-scroll{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;min-height:0;}
+#tab-spells.tab-split>#spell-block{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;}
+#tab-spells #spell-block>.spell-head,#tab-spells #spell-block>#spell-slots{flex:0 0 auto;}
+#tab-spells #spell-block>#spells-by-level{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;min-height:0;}
+#tab-equipment.tab-split>.tbl-scroll{flex:1 1 auto;overflow-y:auto;min-height:0;}
 
 /* CONDITIONS */
 .cond-wrap{padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--rule);}
@@ -278,12 +288,19 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hp-row input::-webkit-outer-spin-button,.hp-row input::-webkit-inner-spin-button,.hp-sub input::-webkit-outer-spin-button,.hp-sub input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .hp-row input,.hp-sub input{-moz-appearance:textfield;}
 .hp-box{display:flex;flex-direction:column;justify-content:center;gap:8px;}
-.hp-hd{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;}
-.hp-hd .hd-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
-.hp-hd input{width:38px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
-.hp-hd .hd-slash{color:var(--muted);}
-.hp-hd #hd-total{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:var(--ink);}
-.hp-hd .hd-die{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dnd-dk);font-weight:700;}
+.hp-sub .hd-inline{display:flex;align-items:center;gap:3px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.hp-sub .hd-inline input[readonly]{width:22px;border-color:transparent;background:transparent;cursor:default;color:var(--ink);font-weight:700;}
+.hp-sub .hd-inline #hd-total{font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
+.hp-sub .hd-inline .hd-die{font-family:'Share Tech Mono',monospace;color:var(--dnd-dk);font-weight:700;}
+/* Short Rest modal: Hit Dice picker */
+.sr-pick{display:flex;align-items:center;gap:10px;justify-content:center;margin:16px 0 10px;}
+.sr-pick .sr-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:#cdc3b6;}
+.sr-step{width:30px;height:30px;border-radius:6px;border:1px solid #5a3f3f;background:#241c1c;color:#ec4456;font-size:18px;font-weight:800;cursor:pointer;line-height:1;}
+.sr-step:hover{background:#3a2626;}
+.sr-n{font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:700;color:#fff;min-width:34px;text-align:center;}
+.sr-of{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9a8f8f;}
+.sr-ft{display:flex;justify-content:flex-end;margin-top:4px;}
+.sr-rest{min-width:110px;padding:8px 16px;font-size:13px;background:var(--dnd);color:#fff;border-color:var(--dnd);}
 .hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
 .hp-row input{width:66px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .hp-row .slash{color:var(--muted);font-size:24px;}
@@ -299,7 +316,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .dtype-sel:focus{border-color:var(--dnd);}
 .dtype-sel option{color:var(--ink);background:var(--input-bg);font-weight:600;letter-spacing:0;text-transform:none;}
 body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23e07a5f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");}
-.hp-sub{display:flex;gap:6px;justify-content:center;font-size:9px;}
+.hp-sub{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:9px;}
 .hp-sub label{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:3px;}
 .hp-sub input{width:40px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
 .death-row{display:flex;align-items:center;gap:4px;justify-content:center;flex-wrap:wrap;}
@@ -959,13 +976,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
           </div>
           <div class="hp-sub">
             <label>Temp <input id="f-hp-temp" type="number" value="0" oninput="scheduleAutosave()"></label>
-          </div>
-          <div class="hp-hd">
-            <span class="hd-lbl">Hit Dice</span>
-            <input id="f-hd-left" type="number" min="0" value="1" title="Hit Dice remaining" oninput="scheduleAutosave()">
-            <span class="hd-slash">/</span><span id="hd-total">1</span>
-            <span class="hd-die" id="hd-die">d8</span>
-            <button class="mini-roll" onclick="rollHitDie()" title="Spend a Hit Die to heal">🎲</button>
+            <span class="hd-inline">Hit Dice <input id="f-hd-left" type="number" value="1" readonly title="Hit Dice remaining — spend them on a Short Rest">/<span id="hd-total">1</span> <span class="hd-die" id="hd-die">d8</span></span>
             <input id="f-hitdice" type="hidden">
           </div>
         </div>
@@ -988,7 +999,7 @@ body.dark .tabs-bar{background:#1a1a1f;}
       </div>
 
       <!-- SPELLS TAB -->
-      <div class="tab-panel" id="tab-spells">
+      <div class="tab-panel tab-split" id="tab-spells">
         <div class="section-bar"><span>Spellcasting</span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">Spells</button></span></div>
         <div id="conc-bar" class="conc-bar" style="display:none;"></div>
         <div id="spell-block" style="display:none;">
@@ -1005,9 +1016,10 @@ body.dark .tabs-bar{background:#1a1a1f;}
       </div>
 
       <!-- FEATURES TAB -->
-      <div class="tab-panel" id="tab-features">
+      <div class="tab-panel tab-split" id="tab-features">
         <div class="section-bar red"><span>Class Resources</span></div>
         <div id="resources-list" class="res-wrap"></div>
+        <div class="tab-scroll">
         <div class="section-bar red"><span>Features &amp; Traits</span><span class="sb-note" id="feat-note"></span></div>
         <div id="features-list" style="padding:4px 10px 8px;"></div>
         <div class="add-row">
@@ -1015,10 +1027,11 @@ body.dark .tabs-bar{background:#1a1a1f;}
         </div>
         <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
         <div class="blk" style="border-bottom:none;"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
+        </div><!-- tab-scroll -->
       </div>
 
       <!-- EQUIPMENT TAB -->
-      <div class="tab-panel" id="tab-equipment">
+      <div class="tab-panel tab-split" id="tab-equipment">
         <div class="section-bar"><span>Equipment</span><span class="hdr-right"><span class="attune-count-lbl" title="Magic items you're attuned to (max 3)">Attuned <b id="attune-count">0/3</b></span><button class="hdr-btn" onclick="openStore()">＋ Items</button></span></div>
         <div class="blk" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Coins</span>
@@ -1426,17 +1439,6 @@ function hitDiceTotal(){ return Math.max(1, num($('f-level').value) || 1); }
 function updateHitDiceUI(){
   const t = hitDiceTotal(); $('hd-total').textContent = t; $('hd-die').textContent = 'd' + hitDieSides();
   const le = $('f-hd-left'); if(le){ le.max = t; if(le.value === '' ) le.value = t; else if(num(le.value) > t) le.value = t; }
-}
-// Spend one Hit Die: roll it + CON and heal that much (up to max HP), decrementing the pool.
-function rollHitDie(){
-  const sides = hitDieSides(), le = $('f-hd-left'); let left = num(le.value);
-  if(left <= 0){ addLog('Hit Die', '✗', 'No Hit Dice remaining — take a Long Rest', 'fumble'); return; }
-  le.value = left - 1;
-  const roll = dN(sides), con = modOf('CON'), heal = Math.max(1, roll + con);
-  const cur = $('f-hp-cur'), max = num($('f-hp-max').value);
-  cur.value = max ? Math.min(max, num(cur.value) + heal) : num(cur.value) + heal;
-  addLog('Hit Die', '+' + heal + ' HP', 'd' + sides + ': ' + roll + ' ' + sgn(con) + ' CON · ' + (left-1) + ' HD left', 'normal');
-  scheduleAutosave();
 }
 // Heal (sign +1) or Damage (sign -1) current HP by the amount in the adjust field.
 // Automates the downed state: dropping to 0 HP → Unconscious + fresh death saves;
@@ -3075,11 +3077,43 @@ function renderExhaustion(){
 function setExhaustion(n){ exhaustion = (exhaustion === n ? n-1 : n); renderExhaustion(); scheduleAutosave(); }
 
 // ═══ RESTS ════════════════════════════════════════════════════════════════
-function shortRest(){
-  // Warlocks regain Pact Magic slots on a Short Rest.
+function shortRest(){ openShortRestModal(); }
+// Short Rest: pick how many Hit Dice to roll, then heal + run short-rest automations.
+let _srPick = 0;
+function openShortRestModal(){ _srPick = 0; renderShortRestModal(); $('desc-overlay').classList.add('open'); }
+function srAdjust(d){ const avail = num($('f-hd-left').value); _srPick = Math.max(0, Math.min(avail, _srPick + d)); const el = $('sr-n'); if(el) el.textContent = _srPick; }
+function renderShortRestModal(){
+  const avail = num($('f-hd-left').value), sides = hitDieSides(), con = modOf('CON');
+  _srPick = Math.max(0, Math.min(avail, _srPick));
+  $('desc-title').textContent = 'Short Rest';
+  let h = '';
+  if(avail <= 0){
+    h += '<p>You have no Hit Dice remaining. Resting will still restore short-rest resources' + (casterType() === 'pact' ? ' and Pact Magic slots' : '') + '.</p>';
+  } else {
+    h += '<p class="dm-meta">' + avail + ' Hit Dice available (d' + sides + ') · each heals its roll ' + sgn(con) + ' CON</p>';
+    h += '<div class="sr-pick"><span class="sr-lbl">Spend</span><button class="sr-step" onclick="srAdjust(-1)">&minus;</button><span class="sr-n" id="sr-n">' + _srPick + '</span><button class="sr-step" onclick="srAdjust(1)">+</button><span class="sr-of">of ' + avail + '</span></div>';
+  }
+  h += '<div class="sr-ft"><button class="rest-btn sr-rest" onclick="completeShortRest()">Rest</button></div>';
+  $('desc-body').innerHTML = h;
+}
+function completeShortRest(){
+  const le = $('f-hd-left'), avail = num(le.value), n = Math.max(0, Math.min(avail, _srPick)), sides = hitDieSides();
+  let healed = 0; const rolls = [];
+  if(n > 0){
+    const con = modOf('CON');
+    for(let i = 0; i < n; i++){ const r = dN(sides); healed += Math.max(1, r + con); rolls.push(r); }
+    le.value = avail - n;
+    const cur = $('f-hp-cur'), max = num($('f-hp-max').value);
+    cur.value = max ? Math.min(max, num(cur.value) + healed) : num(cur.value) + healed;
+  }
+  // Other short-rest automations: Pact Magic slots + short-rest resources.
   if(casterType() === 'pact' && slotUsed['pact']){ slotUsed['pact'] = 0; renderSlots(); }
   resetResources('short');
-  addLog('Short Rest', '☾', 'Pact slots + short-rest resources restored; spend Hit Dice to heal.', 'normal');
+  const detail = n > 0
+    ? ('spent ' + n + '×d' + sides + ' (' + rolls.join(', ') + ') + CON · ' + (avail - n) + ' HD left; Pact slots + short-rest resources restored')
+    : 'no Hit Dice spent; Pact slots + short-rest resources restored';
+  addLog('Short Rest', n > 0 ? ('+' + healed + ' HP') : '☾', detail, 'normal');
+  closeDesc();
   scheduleAutosave();
 }
 function longRest(){
