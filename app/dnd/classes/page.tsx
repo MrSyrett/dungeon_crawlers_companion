@@ -10,7 +10,7 @@ import { facetMatch, facetAttr } from "@/lib/facets";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/classes";
-const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB", eberron: "Eberron", dmg: "DMG", mm: "MM", "forgotten-realms": "FR", Homebrew: "Homebrew" };
+const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB", eberron: "Eberron", dmg: "DMG", mm: "MM", "forgotten-realms": "FR", "arcana-unleashed": "AU", Homebrew: "Homebrew" };
 
 export default async function DndClassesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();

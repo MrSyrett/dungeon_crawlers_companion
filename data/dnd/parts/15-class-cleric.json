@@ -1,0 +1,528 @@
+{
+  "_note": "Cleric (2024), a full caster. Reconstructed from shipped generated data; Arcana Domain is Arcana Unleashed (mechanics + original descriptions).",
+  "classes": [
+    {
+      "name": "Cleric",
+      "primaryAbility": [
+        "WIS"
+      ],
+      "hitDie": 8,
+      "savingThrows": [
+        "WIS",
+        "CHA"
+      ],
+      "proficiencies": {
+        "armor": [
+          "Light armor",
+          "Medium armor",
+          "Shields"
+        ],
+        "weapons": [
+          "Simple weapons"
+        ],
+        "tools": [],
+        "skillsChoose": 2,
+        "skillsFrom": [
+          "History",
+          "Insight",
+          "Medicine",
+          "Persuasion",
+          "Religion"
+        ]
+      },
+      "startingEquipment": [
+        "Chain Shirt, Shield, Mace, Holy Symbol, Priest's Pack, 7 GP",
+        "or 110 GP"
+      ],
+      "spellcasting": "full",
+      "spellcastingAbility": "WIS",
+      "subclassLevel": 3,
+      "subclassLabel": "Cleric Subclass",
+      "flavor": "A divine agent who channels a god's power to heal, smite, and turn the undead — a versatile caster and stalwart support.",
+      "source": "srd",
+      "table": [
+        {
+          "level": 1,
+          "profBonus": 2,
+          "features": [
+            "Spellcasting",
+            "Divine Order"
+          ],
+          "cantripsKnown": 3,
+          "columns": {
+            "Channel Divinity": "—",
+            "Cantrips": "3",
+            "Prepared Spells": "4"
+          }
+        },
+        {
+          "level": 2,
+          "profBonus": 2,
+          "features": [
+            "Channel Divinity"
+          ],
+          "cantripsKnown": 3,
+          "columns": {
+            "Channel Divinity": "2",
+            "Cantrips": "3",
+            "Prepared Spells": "5"
+          }
+        },
+        {
+          "level": 3,
+          "profBonus": 2,
+          "features": [
+            "Cleric Subclass"
+          ],
+          "cantripsKnown": 3,
+          "columns": {
+            "Channel Divinity": "2",
+            "Cantrips": "3",
+            "Prepared Spells": "6"
+          }
+        },
+        {
+          "level": 4,
+          "profBonus": 2,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "cantripsKnown": 4,
+          "columns": {
+            "Channel Divinity": "2",
+            "Cantrips": "4",
+            "Prepared Spells": "7"
+          }
+        },
+        {
+          "level": 5,
+          "profBonus": 3,
+          "features": [
+            "Sear Undead"
+          ],
+          "cantripsKnown": 4,
+          "columns": {
+            "Channel Divinity": "2",
+            "Cantrips": "4",
+            "Prepared Spells": "9"
+          }
+        },
+        {
+          "level": 6,
+          "profBonus": 3,
+          "features": [
+            "Subclass Feature"
+          ],
+          "cantripsKnown": 4,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "4",
+            "Prepared Spells": "10"
+          }
+        },
+        {
+          "level": 7,
+          "profBonus": 3,
+          "features": [
+            "Blessed Strikes"
+          ],
+          "cantripsKnown": 4,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "4",
+            "Prepared Spells": "11"
+          }
+        },
+        {
+          "level": 8,
+          "profBonus": 3,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "cantripsKnown": 4,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "4",
+            "Prepared Spells": "12"
+          }
+        },
+        {
+          "level": 9,
+          "profBonus": 4,
+          "features": [],
+          "cantripsKnown": 4,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "4",
+            "Prepared Spells": "14"
+          }
+        },
+        {
+          "level": 10,
+          "profBonus": 4,
+          "features": [
+            "Divine Intervention"
+          ],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "15"
+          }
+        },
+        {
+          "level": 11,
+          "profBonus": 4,
+          "features": [],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "16"
+          }
+        },
+        {
+          "level": 12,
+          "profBonus": 4,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "16"
+          }
+        },
+        {
+          "level": 13,
+          "profBonus": 5,
+          "features": [],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "17"
+          }
+        },
+        {
+          "level": 14,
+          "profBonus": 5,
+          "features": [
+            "Improved Blessed Strikes"
+          ],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "17"
+          }
+        },
+        {
+          "level": 15,
+          "profBonus": 5,
+          "features": [],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "18"
+          }
+        },
+        {
+          "level": 16,
+          "profBonus": 5,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "18"
+          }
+        },
+        {
+          "level": 17,
+          "profBonus": 6,
+          "features": [
+            "Subclass Feature"
+          ],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "3",
+            "Cantrips": "5",
+            "Prepared Spells": "19"
+          }
+        },
+        {
+          "level": 18,
+          "profBonus": 6,
+          "features": [],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "4",
+            "Cantrips": "5",
+            "Prepared Spells": "20"
+          }
+        },
+        {
+          "level": 19,
+          "profBonus": 6,
+          "features": [
+            "Epic Boon"
+          ],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "4",
+            "Cantrips": "5",
+            "Prepared Spells": "21"
+          }
+        },
+        {
+          "level": 20,
+          "profBonus": 6,
+          "features": [
+            "Greater Divine Intervention"
+          ],
+          "cantripsKnown": 5,
+          "columns": {
+            "Channel Divinity": "4",
+            "Cantrips": "5",
+            "Prepared Spells": "22"
+          }
+        }
+      ],
+      "features": [
+        {
+          "name": "Spellcasting",
+          "level": 1,
+          "source": "srd",
+          "description": "You cast Cleric spells using Wisdom, preparing a growing list (shown on the table) plus cantrips from the full Cleric list each day. Save DC is 8 + Wisdom modifier + proficiency bonus; attack bonus is Wisdom modifier + proficiency bonus. You use a Holy Symbol as your focus."
+        },
+        {
+          "name": "Divine Order",
+          "level": 1,
+          "source": "srd",
+          "description": "Choose your calling: Protector (proficiency with Martial weapons and Heavy armor) or Thaumaturge (an extra Cleric cantrip, and you add your Wisdom modifier to Arcana and Religion checks)."
+        },
+        {
+          "name": "Channel Divinity",
+          "level": 2,
+          "source": "srd",
+          "description": "You can channel divine energy a number of times per rest (shown on the table; regain one on a Short Rest, all on a Long Rest). Options: Divine Spark — a Magic action to heal a creature or deal Radiant/Necrotic damage (a save for half), scaling with level; and Turn Undead — force nearby Undead to make a Wisdom save or be Frightened and forced to flee."
+        },
+        {
+          "name": "Sear Undead",
+          "level": 5,
+          "source": "srd",
+          "description": "When you use Turn Undead, you also deal Radiant damage (a number of d8s equal to your Wisdom modifier) to each Undead that fails its save."
+        },
+        {
+          "name": "Blessed Strikes",
+          "level": 7,
+          "source": "srd",
+          "description": "Choose one: Divine Strike (once per turn, add 1d8 Radiant or Necrotic damage to a weapon hit) or Potent Spellcasting (add your Wisdom modifier to the damage of your Cleric cantrips)."
+        },
+        {
+          "name": "Divine Intervention",
+          "level": 10,
+          "source": "srd",
+          "description": "As a Magic action you can cast any Cleric spell of level 5 or lower without expending a slot or providing Material components. Once per Long Rest."
+        },
+        {
+          "name": "Improved Blessed Strikes",
+          "level": 14,
+          "source": "srd",
+          "description": "Your Blessed Strikes choice improves — the extra damage increases and, for Potent Spellcasting, once per turn you can also grant Temporary HP."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "source": "srd",
+          "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level."
+        },
+        {
+          "name": "Epic Boon",
+          "level": 19,
+          "source": "srd",
+          "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Fate is a fitting choice."
+        },
+        {
+          "name": "Greater Divine Intervention",
+          "level": 20,
+          "source": "srd",
+          "description": "Your Divine Intervention can now produce the effect of any Cleric spell, and once per Long Rest you can use it without expending its normal use."
+        }
+      ],
+      "subclasses": [
+        {
+          "name": "Life Domain",
+          "className": "Cleric",
+          "flavor": "A healer channeling the positive energy of life itself, mending wounds better than any other.",
+          "source": "srd",
+          "features": [
+            {
+              "name": "Disciple of Life",
+              "level": 3,
+              "subclass": "Life Domain",
+              "source": "srd",
+              "description": "Whenever a level 1+ spell restores HP to a creature, it regains extra HP equal to 2 + the spell's level. You also gain Life Domain spells always prepared (Bless, Cure Wounds, and more as you level)."
+            },
+            {
+              "name": "Preserve Life",
+              "level": 3,
+              "subclass": "Life Domain",
+              "source": "srd",
+              "description": "A Channel Divinity option: as a Magic action you restore HP equal to five times your Cleric level, divided among creatures within 30 feet, up to half each one's HP maximum."
+            },
+            {
+              "name": "Blessed Healer",
+              "level": 6,
+              "subclass": "Life Domain",
+              "source": "srd",
+              "description": "When you cast a level 1+ spell that restores HP to another creature, you also regain HP equal to 2 + the spell's level."
+            },
+            {
+              "name": "Supreme Healing",
+              "level": 17,
+              "subclass": "Life Domain",
+              "source": "srd",
+              "description": "When you would roll dice to restore HP with a spell, you instead use the highest possible number for each die."
+            }
+          ]
+        },
+        {
+          "name": "Light Domain",
+          "className": "Cleric",
+          "flavor": "A cleric of a sun or fire god who scorches foes with radiance and blinds the wicked.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Radiance of the Dawn",
+              "level": 3,
+              "subclass": "Light Domain",
+              "source": "phb",
+              "description": "You gain the Light cantrip and Light Domain spells (Burning Hands, Faerie Fire, and more). Warding Flare: as a Reaction you can impose Disadvantage on an attack against you or a nearby creature. Radiance of the Dawn (Channel Divinity): dispel magical darkness and deal Radiant damage to enemies within 30 feet (a Constitution save for half)."
+            },
+            {
+              "name": "Improved Warding Flare",
+              "level": 6,
+              "subclass": "Light Domain",
+              "source": "phb",
+              "description": "You regain all uses of Warding Flare on a Short Rest, and when you use it you also grant the protected creature Temporary HP."
+            },
+            {
+              "name": "Corona of Light",
+              "level": 17,
+              "subclass": "Light Domain",
+              "source": "phb",
+              "description": "As a Magic action you emit an aura of sunlight for 1 minute; enemies in it have Disadvantage on saves against spells that deal Fire or Radiant damage."
+            }
+          ]
+        },
+        {
+          "name": "Trickery Domain",
+          "className": "Cleric",
+          "flavor": "A cleric of mischief and misdirection who conjures duplicates and blesses allies with stealthy cunning.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Invoke Duplicity",
+              "level": 3,
+              "subclass": "Trickery Domain",
+              "source": "phb",
+              "description": "You gain Trickery Domain spells (Charm Person, Disguise Self, and more) and Blessing of the Trickster (grant a creature Advantage on Stealth). Invoke Duplicity (Channel Divinity): create an illusory duplicate of yourself for 1 minute that you can move and cast spells through, and that gives you Advantage on attacks against creatures near it."
+            },
+            {
+              "name": "Trickster's Transposition",
+              "level": 6,
+              "subclass": "Trickery Domain",
+              "source": "phb",
+              "description": "When you or your Invoke Duplicity illusion would be targeted, you can swap places with the duplicate as a Bonus Action."
+            },
+            {
+              "name": "Improved Duplicity",
+              "level": 17,
+              "subclass": "Trickery Domain",
+              "source": "phb",
+              "description": "Your Invoke Duplicity is stronger — allies near the illusion gain benefits, and when it ends you can heal creatures near it."
+            }
+          ]
+        },
+        {
+          "name": "War Domain",
+          "className": "Cleric",
+          "flavor": "A martial priest who leads the charge, guiding weapons with divine will and fighting like a seasoned soldier.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Guided Strike",
+              "level": 3,
+              "subclass": "War Domain",
+              "source": "phb",
+              "description": "You gain proficiency with Martial weapons and Heavy armor and War Domain spells (Divine Favor, Shield of Faith, and more). War Priest: make an extra weapon attack as a Bonus Action a number of times per rest. Guided Strike (Channel Divinity): add +10 to one attack roll after seeing it."
+            },
+            {
+              "name": "War God's Blessing",
+              "level": 6,
+              "subclass": "War Domain",
+              "source": "phb",
+              "description": "You can expend a use of Channel Divinity to cast Shield of Faith or Spiritual Weapon without a spell slot."
+            },
+            {
+              "name": "Avatar of Battle",
+              "level": 17,
+              "subclass": "War Domain",
+              "source": "phb",
+              "description": "You have Resistance to Bludgeoning, Piercing, and Slashing damage."
+            }
+          ]
+        },
+        {
+          "name": "Arcana Domain",
+          "className": "Cleric",
+          "flavor": "A cleric of gods tied to knowledge, secrecy, and power, who treats magical lore not as personal power but as a gift to be shared and protected.",
+          "source": "arcana-unleashed",
+          "features": [
+            {
+              "name": "Arcana Domain Spells",
+              "level": 3,
+              "subclass": "Arcana Domain",
+              "source": "arcana-unleashed",
+              "description": "You always have domain spells prepared at the listed Cleric levels: Detect Magic, Magic Missile, Magic Weapon, and Nystul’s Magic Aura at 3; Counterspell and Dispel Magic at 5; Arcane Eye and Leomund’s Secret Chest at 7; Bigby’s Hand and Teleportation Circle at 9."
+            },
+            {
+              "name": "Modify Magic",
+              "level": 3,
+              "subclass": "Arcana Domain",
+              "source": "arcana-unleashed",
+              "description": "When you cast a spell, you can expend a use of Channel Divinity (no action required) to alter it: Fortifying Spell gives one target 2d8 + your Cleric level Temporary HP, or Tenacious Spell makes a creature that saves against the spell roll 1d6 and subtract it from its first save against the effect."
+            },
+            {
+              "name": "Student of Arcana",
+              "level": 3,
+              "subclass": "Arcana Domain",
+              "source": "arcana-unleashed",
+              "description": "You gain proficiency in Arcana (or another Cleric skill), and you learn two Wizard cantrips, swappable when you gain a Cleric level."
+            },
+            {
+              "name": "Dispelling Recovery",
+              "level": 6,
+              "subclass": "Arcana Domain",
+              "source": "arcana-unleashed",
+              "description": "Right after you cast a spell with a slot that restores HP or ends a condition, you can cast Dispel Magic as part of that same action/Bonus Action/Reaction without a slot. Once per Short or Long Rest, or restore it by expending a use of Channel Divinity."
+            },
+            {
+              "name": "Magical Mastery",
+              "level": 17,
+              "subclass": "Arcana Domain",
+              "source": "arcana-unleashed",
+              "description": "You learn four Wizard spells — one each of levels 6, 7, 8, and 9 — and always have them prepared, replacing one with another Wizard spell of the same level whenever you gain a Cleric level."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

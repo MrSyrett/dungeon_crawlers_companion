@@ -1,0 +1,499 @@
+{
+  "_note": "Ranger (2024), a half caster. Reconstructed from shipped generated data to restore the build source of truth.",
+  "classes": [
+    {
+      "name": "Ranger",
+      "primaryAbility": [
+        "DEX",
+        "WIS"
+      ],
+      "hitDie": 10,
+      "savingThrows": [
+        "STR",
+        "DEX"
+      ],
+      "proficiencies": {
+        "armor": [
+          "Light armor",
+          "Medium armor",
+          "Shields"
+        ],
+        "weapons": [
+          "Simple weapons",
+          "Martial weapons"
+        ],
+        "tools": [],
+        "skillsChoose": 3,
+        "skillsFrom": [
+          "Animal Handling",
+          "Athletics",
+          "Insight",
+          "Investigation",
+          "Nature",
+          "Perception",
+          "Stealth",
+          "Survival"
+        ]
+      },
+      "startingEquipment": [
+        "Studded Leather, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus, Explorer's Pack, 7 GP",
+        "or 150 GP"
+      ],
+      "spellcasting": "half",
+      "spellcastingAbility": "WIS",
+      "subclassLevel": 3,
+      "subclassLabel": "Ranger Subclass",
+      "flavor": "A wilderness warrior and hunter who blends martial skill, primal magic, and a relentless mark that hounds a chosen quarry.",
+      "source": "srd",
+      "table": [
+        {
+          "level": 1,
+          "profBonus": 2,
+          "features": [
+            "Spellcasting",
+            "Favored Enemy",
+            "Weapon Mastery"
+          ],
+          "columns": {
+            "Prepared Spells": "2"
+          }
+        },
+        {
+          "level": 2,
+          "profBonus": 2,
+          "features": [
+            "Deft Explorer",
+            "Fighting Style"
+          ],
+          "columns": {
+            "Prepared Spells": "3"
+          }
+        },
+        {
+          "level": 3,
+          "profBonus": 2,
+          "features": [
+            "Ranger Subclass"
+          ],
+          "columns": {
+            "Prepared Spells": "4"
+          }
+        },
+        {
+          "level": 4,
+          "profBonus": 2,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Prepared Spells": "5"
+          }
+        },
+        {
+          "level": 5,
+          "profBonus": 3,
+          "features": [
+            "Extra Attack"
+          ],
+          "columns": {
+            "Prepared Spells": "6"
+          }
+        },
+        {
+          "level": 6,
+          "profBonus": 3,
+          "features": [
+            "Roving"
+          ],
+          "columns": {
+            "Prepared Spells": "6"
+          }
+        },
+        {
+          "level": 7,
+          "profBonus": 3,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Prepared Spells": "7"
+          }
+        },
+        {
+          "level": 8,
+          "profBonus": 3,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Prepared Spells": "7"
+          }
+        },
+        {
+          "level": 9,
+          "profBonus": 4,
+          "features": [
+            "Expertise"
+          ],
+          "columns": {
+            "Prepared Spells": "9"
+          }
+        },
+        {
+          "level": 10,
+          "profBonus": 4,
+          "features": [
+            "Tireless"
+          ],
+          "columns": {
+            "Prepared Spells": "9"
+          }
+        },
+        {
+          "level": 11,
+          "profBonus": 4,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Prepared Spells": "10"
+          }
+        },
+        {
+          "level": 12,
+          "profBonus": 4,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Prepared Spells": "10"
+          }
+        },
+        {
+          "level": 13,
+          "profBonus": 5,
+          "features": [
+            "Relentless Hunter"
+          ],
+          "columns": {
+            "Prepared Spells": "11"
+          }
+        },
+        {
+          "level": 14,
+          "profBonus": 5,
+          "features": [
+            "Nature's Veil"
+          ],
+          "columns": {
+            "Prepared Spells": "11"
+          }
+        },
+        {
+          "level": 15,
+          "profBonus": 5,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Prepared Spells": "12"
+          }
+        },
+        {
+          "level": 16,
+          "profBonus": 5,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Prepared Spells": "12"
+          }
+        },
+        {
+          "level": 17,
+          "profBonus": 6,
+          "features": [
+            "Precise Hunter"
+          ],
+          "columns": {
+            "Prepared Spells": "14"
+          }
+        },
+        {
+          "level": 18,
+          "profBonus": 6,
+          "features": [
+            "Feral Senses"
+          ],
+          "columns": {
+            "Prepared Spells": "14"
+          }
+        },
+        {
+          "level": 19,
+          "profBonus": 6,
+          "features": [
+            "Epic Boon"
+          ],
+          "columns": {
+            "Prepared Spells": "15"
+          }
+        },
+        {
+          "level": 20,
+          "profBonus": 6,
+          "features": [
+            "Foe Slayer"
+          ],
+          "columns": {
+            "Prepared Spells": "15"
+          }
+        }
+      ],
+      "features": [
+        {
+          "name": "Spellcasting",
+          "level": 1,
+          "source": "srd",
+          "description": "You cast Ranger spells using Wisdom, preparing a growing list (shown on the table) from the full Ranger list; you have no cantrips. Save DC is 8 + Wisdom modifier + proficiency bonus. You can use a Druidic Focus."
+        },
+        {
+          "name": "Favored Enemy",
+          "level": 1,
+          "source": "srd",
+          "description": "You always have the Hunter's Mark spell prepared, and you can cast it without a spell slot a number of times per Long Rest equal to your proficiency bonus."
+        },
+        {
+          "name": "Weapon Mastery",
+          "level": 1,
+          "source": "srd",
+          "description": "You can use the Mastery property of two kinds of weapon you're proficient with. You can change your choices after a Long Rest."
+        },
+        {
+          "name": "Deft Explorer",
+          "level": 2,
+          "source": "srd",
+          "description": "You gain Expertise in one skill you're proficient in and learn two languages of your choice."
+        },
+        {
+          "name": "Fighting Style",
+          "level": 2,
+          "source": "srd",
+          "description": "You gain a Fighting Style feat (Archery, Defense, Druidic Warrior, or Two-Weapon Fighting are common)."
+        },
+        {
+          "name": "Extra Attack",
+          "level": 5,
+          "source": "srd",
+          "description": "You can attack twice whenever you take the Attack action on your turn."
+        },
+        {
+          "name": "Roving",
+          "level": 6,
+          "source": "srd",
+          "description": "Your Speed increases by 10 feet, and you gain a Climb Speed and a Swim Speed equal to your Speed, while you aren't wearing Heavy armor."
+        },
+        {
+          "name": "Expertise",
+          "level": 9,
+          "source": "srd",
+          "description": "Choose two skill proficiencies to gain Expertise (double proficiency)."
+        },
+        {
+          "name": "Tireless",
+          "level": 10,
+          "source": "srd",
+          "description": "As a Magic action you can give yourself Temporary HP (roll 1d8 + Wisdom modifier), a number of times per Long Rest equal to your proficiency bonus, and finishing a Short Rest reduces your Exhaustion level by 1."
+        },
+        {
+          "name": "Relentless Hunter",
+          "level": 13,
+          "source": "srd",
+          "description": "Taking damage can't break your Concentration on Hunter's Mark."
+        },
+        {
+          "name": "Nature's Veil",
+          "level": 14,
+          "source": "srd",
+          "description": "As a Bonus Action you can become Invisible until the end of your next turn, a number of times per Long Rest equal to your proficiency bonus (or by expending a spell slot)."
+        },
+        {
+          "name": "Precise Hunter",
+          "level": 17,
+          "source": "srd",
+          "description": "You have Advantage on attack rolls against the creature currently marked by your Hunter's Mark."
+        },
+        {
+          "name": "Feral Senses",
+          "level": 18,
+          "source": "srd",
+          "description": "You gain Blindsight with a range of 30 feet, letting you sense creatures you can't see nearby, and you always know the direction to your Hunter's Mark target."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "source": "srd",
+          "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level."
+        },
+        {
+          "name": "Epic Boon",
+          "level": 19,
+          "source": "srd",
+          "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Dimensional Travel is a fitting choice."
+        },
+        {
+          "name": "Foe Slayer",
+          "level": 20,
+          "source": "srd",
+          "description": "Your Hunter's Mark damage die becomes a d10, and once per turn you can add your Wisdom modifier to an attack roll or damage roll against your marked target."
+        }
+      ],
+      "subclasses": [
+        {
+          "name": "Hunter",
+          "className": "Ranger",
+          "flavor": "A monster-slayer trained to fell the great threats to civilization — whether a lone giant or a swarming horde.",
+          "source": "srd",
+          "features": [
+            {
+              "name": "Hunter's Prey",
+              "level": 3,
+              "subclass": "Hunter",
+              "source": "srd",
+              "description": "You gain Hunter's Lore (learn a marked creature's damage immunities/resistances/vulnerabilities). Choose Hunter's Prey: Colossus Slayer (once per turn, +1d8 damage to a creature below its HP maximum) or Horde Breaker (once per turn, a second attack against a different creature within 5 feet of the first)."
+            },
+            {
+              "name": "Defensive Tactics",
+              "level": 7,
+              "subclass": "Hunter",
+              "source": "srd",
+              "description": "Choose Escape the Horde (Opportunity Attacks against you have Disadvantage) or Multiattack Defense (after a creature hits you, it has Disadvantage on further attacks against you this turn)."
+            },
+            {
+              "name": "Superior Hunter's Prey",
+              "level": 11,
+              "subclass": "Hunter",
+              "source": "srd",
+              "description": "When you damage your Hunter's Mark target, you can also deal the Hunter's Mark bonus damage to one other creature nearby."
+            },
+            {
+              "name": "Superior Hunter's Defense",
+              "level": 15,
+              "subclass": "Hunter",
+              "source": "srd",
+              "description": "When you take damage, you can use a Reaction to give yourself Resistance to that damage (and to that damage type until the start of your next turn)."
+            }
+          ]
+        },
+        {
+          "name": "Beast Master",
+          "className": "Ranger",
+          "flavor": "A ranger bonded to a primal companion that fights at their side, growing fiercer as the bond deepens.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Primal Companion",
+              "level": 3,
+              "subclass": "Beast Master",
+              "source": "phb",
+              "description": "You magically summon a Primal Beast companion (Land, Sea, or Sky) that obeys you, shares your proficiency bonus, and acts on your turn — taking the Attack action when you command it as a Bonus Action. If it drops, you can revive it or resummon it after a rest."
+            },
+            {
+              "name": "Exceptional Training",
+              "level": 7,
+              "subclass": "Beast Master",
+              "source": "phb",
+              "description": "On your turn you can command your companion to take the Dash, Disengage, Dodge, or Help action as a Bonus Action, and its attacks deal Force damage if you wish."
+            },
+            {
+              "name": "Bestial Fury",
+              "level": 11,
+              "subclass": "Beast Master",
+              "source": "phb",
+              "description": "Your companion makes two attacks when it takes the Attack action, and once per turn it can add your Hunter's Mark bonus damage."
+            },
+            {
+              "name": "Share Spells",
+              "level": 15,
+              "subclass": "Beast Master",
+              "source": "phb",
+              "description": "When you cast a spell targeting yourself, you can also affect your companion if it's within 30 feet."
+            }
+          ]
+        },
+        {
+          "name": "Fey Wanderer",
+          "className": "Ranger",
+          "flavor": "A ranger touched by the Feywild — uncanny charm, dread magical strikes, and fey allies that appear at need.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Dreadful Strikes",
+              "level": 3,
+              "subclass": "Fey Wanderer",
+              "source": "phb",
+              "description": "You gain Fey Wanderer spells and Otherworldly Glamour (add your Wisdom modifier to Charisma checks, and proficiency in a Charisma skill). Once per turn, your weapon hits deal extra Psychic damage."
+            },
+            {
+              "name": "Beguiling Twist",
+              "level": 7,
+              "subclass": "Fey Wanderer",
+              "source": "phb",
+              "description": "You have Advantage on saves against being Charmed or Frightened, and when a creature near you succeeds on a save against those conditions, you can use a Reaction to redirect the effect onto another creature."
+            },
+            {
+              "name": "Fey Reinforcements",
+              "level": 11,
+              "subclass": "Fey Wanderer",
+              "source": "phb",
+              "description": "You always have Summon Fey prepared and can cast it once without a spell slot per Long Rest, and the summoned fey can turn Invisible."
+            },
+            {
+              "name": "Misty Wanderer",
+              "level": 15,
+              "subclass": "Fey Wanderer",
+              "source": "phb",
+              "description": "You can cast Misty Step without a spell slot a number of times per Long Rest equal to your Wisdom modifier, and you can bring a willing creature with you."
+            }
+          ]
+        },
+        {
+          "name": "Gloom Stalker",
+          "className": "Ranger",
+          "flavor": "An ambusher of the dark places of the world, striking first and hardest and vanishing into shadow.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Dread Ambusher",
+              "level": 3,
+              "subclass": "Gloom Stalker",
+              "source": "phb",
+              "description": "You gain Gloom Stalker spells and Umbral Sight (Darkvision, and you're invisible to creatures relying on Darkvision to see you). On your first turn of combat your Speed increases and you make an extra weapon attack that deals bonus Psychic damage, and you add your Wisdom modifier to your Initiative."
+            },
+            {
+              "name": "Iron Mind",
+              "level": 7,
+              "subclass": "Gloom Stalker",
+              "source": "phb",
+              "description": "You gain proficiency in Wisdom saving throws (or another mental save if you already have it)."
+            },
+            {
+              "name": "Stalker's Flurry",
+              "level": 11,
+              "subclass": "Gloom Stalker",
+              "source": "phb",
+              "description": "Once per turn when you miss with an attack, you can make another weapon attack as part of the same action."
+            },
+            {
+              "name": "Shadowy Dodge",
+              "level": 15,
+              "subclass": "Gloom Stalker",
+              "source": "phb",
+              "description": "When a creature attacks you and doesn't have Advantage, you can use a Reaction to impose Disadvantage on the roll and teleport up to 30 feet to an unoccupied space you can see."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

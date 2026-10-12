@@ -1,0 +1,516 @@
+{
+  "_note": "Paladin (2024), a half caster. Reconstructed from shipped generated data to restore the build source of truth.",
+  "classes": [
+    {
+      "name": "Paladin",
+      "primaryAbility": [
+        "STR",
+        "CHA"
+      ],
+      "hitDie": 10,
+      "savingThrows": [
+        "WIS",
+        "CHA"
+      ],
+      "proficiencies": {
+        "armor": [
+          "Light armor",
+          "Medium armor",
+          "Heavy armor",
+          "Shields"
+        ],
+        "weapons": [
+          "Simple weapons",
+          "Martial weapons"
+        ],
+        "tools": [],
+        "skillsChoose": 2,
+        "skillsFrom": [
+          "Athletics",
+          "Insight",
+          "Intimidation",
+          "Medicine",
+          "Persuasion",
+          "Religion"
+        ]
+      },
+      "startingEquipment": [
+        "Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest's Pack, 9 GP",
+        "or 150 GP"
+      ],
+      "spellcasting": "half",
+      "spellcastingAbility": "CHA",
+      "subclassLevel": 3,
+      "subclassLabel": "Paladin Subclass",
+      "flavor": "A holy warrior bound by a sacred oath, blending martial might with divine magic — smiting evil, warding allies with a protective aura, and healing with a touch.",
+      "source": "srd",
+      "table": [
+        {
+          "level": 1,
+          "profBonus": 2,
+          "features": [
+            "Lay On Hands",
+            "Spellcasting",
+            "Weapon Mastery"
+          ],
+          "columns": {
+            "Channel Divinity": "—",
+            "Prepared Spells": "2"
+          }
+        },
+        {
+          "level": 2,
+          "profBonus": 2,
+          "features": [
+            "Fighting Style",
+            "Paladin's Smite"
+          ],
+          "columns": {
+            "Channel Divinity": "—",
+            "Prepared Spells": "3"
+          }
+        },
+        {
+          "level": 3,
+          "profBonus": 2,
+          "features": [
+            "Channel Divinity",
+            "Paladin Subclass"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "4"
+          }
+        },
+        {
+          "level": 4,
+          "profBonus": 2,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "5"
+          }
+        },
+        {
+          "level": 5,
+          "profBonus": 3,
+          "features": [
+            "Extra Attack",
+            "Faithful Steed"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "6"
+          }
+        },
+        {
+          "level": 6,
+          "profBonus": 3,
+          "features": [
+            "Aura of Protection"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "6"
+          }
+        },
+        {
+          "level": 7,
+          "profBonus": 3,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "7"
+          }
+        },
+        {
+          "level": 8,
+          "profBonus": 3,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "7"
+          }
+        },
+        {
+          "level": 9,
+          "profBonus": 4,
+          "features": [
+            "Abjure Foes"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "9"
+          }
+        },
+        {
+          "level": 10,
+          "profBonus": 4,
+          "features": [
+            "Aura of Courage"
+          ],
+          "columns": {
+            "Channel Divinity": "2",
+            "Prepared Spells": "9"
+          }
+        },
+        {
+          "level": 11,
+          "profBonus": 4,
+          "features": [
+            "Radiant Strikes"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "10"
+          }
+        },
+        {
+          "level": 12,
+          "profBonus": 4,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "10"
+          }
+        },
+        {
+          "level": 13,
+          "profBonus": 5,
+          "features": [],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "11"
+          }
+        },
+        {
+          "level": 14,
+          "profBonus": 5,
+          "features": [
+            "Restoring Touch"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "11"
+          }
+        },
+        {
+          "level": 15,
+          "profBonus": 5,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "12"
+          }
+        },
+        {
+          "level": 16,
+          "profBonus": 5,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "12"
+          }
+        },
+        {
+          "level": 17,
+          "profBonus": 6,
+          "features": [],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "14"
+          }
+        },
+        {
+          "level": 18,
+          "profBonus": 6,
+          "features": [
+            "Aura Expansion"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "14"
+          }
+        },
+        {
+          "level": 19,
+          "profBonus": 6,
+          "features": [
+            "Epic Boon"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "15"
+          }
+        },
+        {
+          "level": 20,
+          "profBonus": 6,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Channel Divinity": "3",
+            "Prepared Spells": "15"
+          }
+        }
+      ],
+      "features": [
+        {
+          "name": "Lay On Hands",
+          "level": 1,
+          "source": "srd",
+          "description": "You have a pool of healing power that refreshes on a Long Rest, equal to five times your Paladin level. As a Bonus Action you can touch a creature and draw from the pool to restore HP; you can also spend 5 points from the pool to neutralize a poison or end a disease."
+        },
+        {
+          "name": "Spellcasting",
+          "level": 1,
+          "source": "srd",
+          "description": "You cast Paladin spells using Charisma, preparing a growing list (shown on the table) from the full Paladin list each day; you have no cantrips. Save DC is 8 + Charisma modifier + proficiency bonus. You use a Holy Symbol as your focus."
+        },
+        {
+          "name": "Weapon Mastery",
+          "level": 1,
+          "source": "srd",
+          "description": "You can use the Mastery property of two kinds of weapon you're proficient with. You can change your choices after a Long Rest."
+        },
+        {
+          "name": "Fighting Style",
+          "level": 2,
+          "source": "srd",
+          "description": "You gain a Fighting Style feat (Defense, Dueling, Great Weapon Fighting, or Protection are common)."
+        },
+        {
+          "name": "Paladin's Smite",
+          "level": 2,
+          "source": "srd",
+          "description": "You always have the Divine Smite spell prepared, and once per Long Rest you can cast it without expending a spell slot."
+        },
+        {
+          "name": "Channel Divinity",
+          "level": 3,
+          "source": "srd",
+          "description": "You can channel divine energy a number of times per rest (shown on the table; regain one on a Short Rest, all on a Long Rest). All Paladins gain Divine Sense (as a Bonus Action, know the location of Aberrations, Celestials, Fiends, and Undead nearby, and detect consecrated or desecrated places). Your subclass adds more options."
+        },
+        {
+          "name": "Extra Attack",
+          "level": 5,
+          "source": "srd",
+          "description": "You can attack twice whenever you take the Attack action on your turn."
+        },
+        {
+          "name": "Faithful Steed",
+          "level": 5,
+          "source": "srd",
+          "description": "You always have the Find Steed spell prepared, and once per Long Rest you can cast it without a spell slot."
+        },
+        {
+          "name": "Aura of Protection",
+          "level": 6,
+          "source": "srd",
+          "description": "You and allies within 10 feet add your Charisma modifier (min +1) to their saving throws while you're conscious."
+        },
+        {
+          "name": "Abjure Foes",
+          "level": 9,
+          "source": "srd",
+          "description": "A Channel Divinity option: as a Magic action you cow enemies within 60 feet — each must succeed on a Wisdom save or be Frightened (and unable to take Reactions) for a time."
+        },
+        {
+          "name": "Aura of Courage",
+          "level": 10,
+          "source": "srd",
+          "description": "You and allies within 10 feet can't be Frightened while you're conscious; if one was already Frightened, the condition is suspended in the aura."
+        },
+        {
+          "name": "Radiant Strikes",
+          "level": 11,
+          "source": "srd",
+          "description": "Each of your weapon and Unarmed Strike hits deals an extra 1d8 Radiant damage."
+        },
+        {
+          "name": "Restoring Touch",
+          "level": 14,
+          "source": "srd",
+          "description": "When you use Lay On Hands you can also end one condition (such as Blinded, Charmed, Frightened, Paralyzed, Poisoned, or Stunned) by spending 5 points from the pool per condition."
+        },
+        {
+          "name": "Aura Expansion",
+          "level": 18,
+          "source": "srd",
+          "description": "Your Aura of Protection and Aura of Courage (and other Paladin auras) expand to a 30-foot radius."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "source": "srd",
+          "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level."
+        },
+        {
+          "name": "Epic Boon",
+          "level": 19,
+          "source": "srd",
+          "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Truesight is a fitting choice."
+        }
+      ],
+      "subclasses": [
+        {
+          "name": "Oath of Devotion",
+          "className": "Paladin",
+          "flavor": "The paragon of the paladin ideal — honesty, courage, compassion, and honor — smiting evil with a blessed weapon.",
+          "source": "srd",
+          "features": [
+            {
+              "name": "Sacred Weapon",
+              "level": 3,
+              "subclass": "Oath of Devotion",
+              "source": "srd",
+              "description": "You gain Oath of Devotion spells always prepared (Protection from Evil and Good, Shield of Faith, and more). Sacred Weapon (Channel Divinity): as a Bonus Action, for 10 minutes your weapon shines with light, adds your Charisma modifier to its attack rolls, and deals Radiant damage."
+            },
+            {
+              "name": "Aura of Devotion",
+              "level": 7,
+              "subclass": "Oath of Devotion",
+              "source": "srd",
+              "description": "You and allies within your Aura of Protection can't be Charmed while you're conscious; a suspended Charm is held off within the aura."
+            },
+            {
+              "name": "Smite of Protection",
+              "level": 15,
+              "subclass": "Oath of Devotion",
+              "source": "srd",
+              "description": "Whenever you cast Divine Smite, you and allies in your aura gain Half Cover until the start of your next turn."
+            },
+            {
+              "name": "Holy Nimbus",
+              "level": 20,
+              "subclass": "Oath of Devotion",
+              "source": "srd",
+              "description": "As a Bonus Action you can shroud yourself in radiant light for 10 minutes: it sheds Bright Light, enemies that start their turn in your aura take Radiant damage, and you have Advantage on saves against spells cast by Fiends and Undead. Once per Long Rest, or by expending a spell slot."
+            }
+          ]
+        },
+        {
+          "name": "Oath of Glory",
+          "className": "Paladin",
+          "flavor": "A paladin who pursues heroic legend, empowering allies to feats of greatness and racing to their side.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Inspiring Smite",
+              "level": 3,
+              "subclass": "Oath of Glory",
+              "source": "phb",
+              "description": "You gain Oath of Glory spells. Peerless Athlete (Channel Divinity): a Bonus Action to gain Advantage on Athletics and Acrobatics and greater jump/carry for 10 minutes. Inspiring Smite (Channel Divinity): after casting Divine Smite, distribute Temporary HP among creatures you choose."
+            },
+            {
+              "name": "Aura of Alacrity",
+              "level": 7,
+              "subclass": "Oath of Glory",
+              "source": "phb",
+              "description": "Your Speed increases by 10 feet, and allies who start their turn within 5 feet of you gain +10 feet of Speed until the end of their turn."
+            },
+            {
+              "name": "Glorious Defense",
+              "level": 15,
+              "subclass": "Oath of Glory",
+              "source": "phb",
+              "description": "When you or a creature in your aura is hit by an attack, you can use a Reaction to add your Charisma modifier to their AC against it (possibly turning the hit into a miss) and, if it still misses, make a weapon attack against the attacker."
+            },
+            {
+              "name": "Living Legend",
+              "level": 20,
+              "subclass": "Oath of Glory",
+              "source": "phb",
+              "description": "As a Bonus Action for 1 minute you become the stuff of legend: you're Charismatically unstoppable (Advantage on Charisma checks), can turn a missed attack into a hit once per turn, and can force yourself to succeed on a failed save. Once per Long Rest, or by expending a spell slot."
+            }
+          ]
+        },
+        {
+          "name": "Oath of the Ancients",
+          "className": "Paladin",
+          "flavor": "A paladin sworn to the light and life of the world, warding against darkness and enduring beyond mortal limits.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Nature's Wrath",
+              "level": 3,
+              "subclass": "Oath of the Ancients",
+              "source": "phb",
+              "description": "You gain Oath of the Ancients spells (Ensnaring Strike, Speak with Animals, and more). Nature's Wrath (Channel Divinity): a Magic action to conjure spectral vines that Restrain nearby creatures that fail a save."
+            },
+            {
+              "name": "Aura of Warding",
+              "level": 7,
+              "subclass": "Oath of the Ancients",
+              "source": "phb",
+              "description": "You and allies in your aura have Resistance to Necrotic, Psychic, and Radiant damage."
+            },
+            {
+              "name": "Undying Sentinel",
+              "level": 15,
+              "subclass": "Oath of the Ancients",
+              "source": "phb",
+              "description": "When you would drop to 0 HP and don't die outright, you drop to 1 HP instead (once per Long Rest), and you don't age unwillingly."
+            },
+            {
+              "name": "Elder Champion",
+              "level": 20,
+              "subclass": "Oath of the Ancients",
+              "source": "phb",
+              "description": "As a Bonus Action you take on an ancient nature-guardian form for 1 minute: regain HP each turn, cast Paladin spells faster, and enemies in your aura have Disadvantage on saves against your spells and Channel Divinity. Once per Long Rest, or by expending a spell slot."
+            }
+          ]
+        },
+        {
+          "name": "Oath of Vengeance",
+          "className": "Paladin",
+          "flavor": "A grim avenger who hunts a foe without mercy, marking a single enemy for a relentless, focused end.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Vow of Enmity",
+              "level": 3,
+              "subclass": "Oath of Vengeance",
+              "source": "phb",
+              "description": "You gain Oath of Vengeance spells (Bane, Hunter's Mark, and more). Vow of Enmity (Channel Divinity): as a Bonus Action, mark a creature within 30 feet for 1 minute — you have Advantage on attack rolls against it (moving the vow if it drops)."
+            },
+            {
+              "name": "Relentless Avenger",
+              "level": 7,
+              "subclass": "Oath of Vengeance",
+              "source": "phb",
+              "description": "When you hit a creature with an Opportunity Attack, you can move up to half your Speed right after, and that movement doesn't provoke Opportunity Attacks."
+            },
+            {
+              "name": "Soul of Vengeance",
+              "level": 15,
+              "subclass": "Oath of Vengeance",
+              "source": "phb",
+              "description": "When a creature under your Vow of Enmity attacks, you can use a Reaction to make a melee attack against it."
+            },
+            {
+              "name": "Avenging Angel",
+              "level": 20,
+              "subclass": "Oath of Vengeance",
+              "source": "phb",
+              "description": "As a Bonus Action for 10 minutes you gain a Fly Speed and a frightful aura — enemies that start their turn within 30 feet must save or be Frightened while your form lasts. Once per Long Rest, or by expending a spell slot."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

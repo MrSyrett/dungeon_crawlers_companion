@@ -1091,6 +1091,63 @@ const DND_CLASSES = [
             "description": "You can cast Telekinesis without a spell slot (Intelligence is your spellcasting ability), and while concentrating on it you can still make one weapon attack as a Bonus Action."
           }
         ]
+      },
+      {
+        "name": "Arcane Archer",
+        "className": "Fighter",
+        "flavor": "An elven archery tradition that weaves magic into ranged attacks, unleashing supernatural Arcane Shot effects through enchanted ammunition.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Arcane Archer Lore",
+            "level": 3,
+            "subclass": "Arcane Archer",
+            "source": "arcana-unleashed",
+            "description": "You know either Druidcraft or Prestidigitation, with Intelligence as its spellcasting ability. You also gain proficiency in Arcana and Nature (if you already have one, choose another Fighter skill instead)."
+          },
+          {
+            "name": "Arcane Shot",
+            "level": 3,
+            "subclass": "Arcane Archer",
+            "source": "arcana-unleashed",
+            "description": "You learn two Arcane Shot options (and one more at Fighter 7, 10, 15, and 18, replacing one each time). Once per turn on a ranged attack with an Ammunition weapon, you can apply one option. You have Intelligence-modifier uses (min 1), regained on a Short or Long Rest. Your Arcane Shot Die is a d6 (d8 at 10, d10 at 15, d12 at 18); save DC = 8 + Int modifier + PB. Options include Banishing, Beguiling, Bursting, Enfeebling, Grasping, Piercing, Seeking, and Shadow Shot."
+          },
+          {
+            "name": "Curving Shot",
+            "level": 7,
+            "subclass": "Arcane Archer",
+            "source": "arcana-unleashed",
+            "description": "When you miss with a ranged attack from an Ammunition weapon, you can use a Bonus Action to ricochet the shot at a new creature you can see within the weapon's range and within 60 feet of the original target."
+          },
+          {
+            "name": "Magical Ammunition",
+            "level": 7,
+            "subclass": "Arcane Archer",
+            "source": "arcana-unleashed",
+            "description": "As a Magic action you imbue a piece of nonmagical ammunition with Darkening (shadows and a Perception penalty in a 15-ft Emanation), Unlocking (opens nonmagical locks/barred objects in a 15-ft Emanation), or Vine (a 120-ft climbable vine) and fire it at a surface. Once per Short or Long Rest; you can also restore it by spending a use of Second Wind."
+          },
+          {
+            "name": "Ever-Ready Shot",
+            "level": 10,
+            "subclass": "Arcane Archer",
+            "source": "arcana-unleashed",
+            "description": "When you roll Initiative and have no uses of Arcane Shot left, you regain one."
+          },
+          {
+            "name": "Indomitable Teleport",
+            "level": 15,
+            "subclass": "Arcane Archer",
+            "source": "arcana-unleashed",
+            "description": "When you use Indomitable and succeed on the save, you can teleport up to 60 feet to an unoccupied space you can see."
+          },
+          {
+            "name": "Masterful Shots",
+            "level": 18,
+            "subclass": "Arcane Archer",
+            "source": "arcana-unleashed",
+            "description": "When a creature you can see misses you with an attack, you can take a Reaction to move up to half your Speed away without provoking Opportunity Attacks, then make a ranged attack against the attacker if it is within range."
+          }
+        ]
       }
     ]
   },
@@ -2094,6 +2151,213 @@ const DND_CLASSES = [
             "description": "When you cast an Illusion spell of level 1+, you can make one inanimate, nonmagical part of the illusion real for 1 minute — a bridge you can cross, a wall that blocks, and so on."
           }
         ]
+      },
+      {
+        "name": "Conjurer",
+        "className": "Wizard",
+        "flavor": "A Wizard who treats distance and matter as flexible guidelines — teleporting across space and calling creatures from thin air to fight alongside them.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Benign Transposition",
+            "level": 3,
+            "subclass": "Conjurer",
+            "source": "arcana-unleashed",
+            "description": "As a Bonus Action you teleport up to 30 feet to an unoccupied space you can see, or swap places with a willing Medium or smaller creature. Intelligence-modifier uses (min 1), regained on a Long Rest."
+          },
+          {
+            "name": "Conjuration Savant",
+            "level": 3,
+            "subclass": "Conjurer",
+            "source": "arcana-unleashed",
+            "description": "Add two Conjuration spells (level 2 or lower) to your spellbook for free, and one more Conjuration spell each time you gain a new level of spell slots."
+          },
+          {
+            "name": "Distant Transposition",
+            "level": 6,
+            "subclass": "Conjurer",
+            "source": "arcana-unleashed",
+            "description": "Benign Transposition's range increases to 60 feet, and you can restore one use by expending a level 3+ spell slot (no action required)."
+          },
+          {
+            "name": "Durable Summons",
+            "level": 6,
+            "subclass": "Conjurer",
+            "source": "arcana-unleashed",
+            "description": "A creature you summon or create with a Conjuration spell slot gains Temporary HP equal to twice your Wizard level, and while it has them it has Resistance to every damage type except Force, Necrotic, Psychic, and Radiant."
+          },
+          {
+            "name": "Focused Conjuration",
+            "level": 10,
+            "subclass": "Conjurer",
+            "source": "arcana-unleashed",
+            "description": "Taking damage can't break your Concentration on Conjuration spells."
+          },
+          {
+            "name": "Splintered Summons",
+            "level": 14,
+            "subclass": "Conjurer",
+            "source": "arcana-unleashed",
+            "description": "When you cast a Conjuration spell that summons a spirit with a stat block, you can summon two creatures instead of one, each with half the Hit Points. Once per Long Rest, or by expending a level 5+ spell slot."
+          }
+        ]
+      },
+      {
+        "name": "Enchanter",
+        "className": "Wizard",
+        "flavor": "A Wizard whose magic clouds and captivates minds — soothing cruelty or bending others to selfish ends through charm and beguilement.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Enchanting Conversationalist",
+            "level": 3,
+            "subclass": "Enchanter",
+            "source": "arcana-unleashed",
+            "description": "Gain proficiency in Deception, Intimidation, or Persuasion. When you make a check with the chosen skill, add your Intelligence modifier (min +1) to the roll."
+          },
+          {
+            "name": "Enchantment Savant",
+            "level": 3,
+            "subclass": "Enchanter",
+            "source": "arcana-unleashed",
+            "description": "Add two Enchantment spells (level 2 or lower) to your spellbook for free, and one more Enchantment spell each time you gain a new level of spell slots."
+          },
+          {
+            "name": "Hypnotic Presence",
+            "level": 3,
+            "subclass": "Enchanter",
+            "source": "arcana-unleashed",
+            "description": "As a Magic action, a creature within 10 feet that can see or hear you must make a Wisdom save or be Charmed for 1 minute (Incapacitated, Speed 0) until it is far away, can't perceive you, or takes damage. Intelligence-modifier uses (min 1), regained on a Long Rest."
+          },
+          {
+            "name": "Split Enchantment",
+            "level": 6,
+            "subclass": "Enchanter",
+            "source": "arcana-unleashed",
+            "description": "When you cast an Enchantment spell that can target an extra creature at a higher level, you can raise its effective level by 1. Intelligence-modifier uses, regained on a Long Rest."
+          },
+          {
+            "name": "Instinctive Charm",
+            "level": 10,
+            "subclass": "Enchanter",
+            "source": "arcana-unleashed",
+            "description": "When a creature you can see within 30 feet hits you with an attack, you can take a Reaction to force a Wisdom save; on a failure the attack misses and may be redirected to another creature in range. Once per Long Rest, or restore it by casting an Enchantment spell with a slot."
+          },
+          {
+            "name": "Alter Memories",
+            "level": 14,
+            "subclass": "Enchanter",
+            "source": "arcana-unleashed",
+            "description": "When you cast an Enchantment spell that Charms using a slot, one target is unaware it was Charmed. Once before the spell ends you can make that creature fail an Intelligence save to lose 1 + your Intelligence modifier hours of memory."
+          }
+        ]
+      },
+      {
+        "name": "Necromancer",
+        "className": "Wizard",
+        "flavor": "A Wizard who manipulates the energy animating all creatures, drawing power from forbidden secrets to command the forces of death and undeath.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Necromancy Savant",
+            "level": 3,
+            "subclass": "Necromancer",
+            "source": "arcana-unleashed",
+            "description": "Add two Necromancy spells (level 2 or lower) to your spellbook for free, and one more Necromancy spell each time you gain a new level of spell slots."
+          },
+          {
+            "name": "Necromancy Spellbook",
+            "level": 3,
+            "subclass": "Necromancer",
+            "source": "arcana-unleashed",
+            "description": "You have Resistance to Necrotic damage. Find Familiar appears in your spellbook and can summon a Skeleton or Zombie (or an Undead-type normal form), and you can forgo an attack to let it attack. When you cast a Necromancy spell with a slot, an Undead you can see within 60 feet regains HP equal to the slot level + your Wizard level."
+          },
+          {
+            "name": "Grave Power",
+            "level": 6,
+            "subclass": "Necromancer",
+            "source": "arcana-unleashed",
+            "description": "While holding your spellbook: Arcane Recovery also lowers your Exhaustion by 1, and your Wizard spells and features ignore Resistance to Necrotic damage."
+          },
+          {
+            "name": "Undead Thralls",
+            "level": 6,
+            "subclass": "Necromancer",
+            "source": "arcana-unleashed",
+            "description": "You always have Animate Dead prepared and can cast it once per Long Rest without a slot, raising its effective level by 1. While holding your spellbook, Undead you create gain HP equal to your Int modifier + half your Wizard level, and Undead you control deal extra Necrotic damage equal to your Int modifier on a hit."
+          },
+          {
+            "name": "Harvest Undead",
+            "level": 10,
+            "subclass": "Necromancer",
+            "source": "arcana-unleashed",
+            "description": "Right after you become Bloodied without dropping to 0 HP, you can take a Reaction to reduce an Undead you control to 0 HP and regain HP equal to your Wizard level."
+          },
+          {
+            "name": "Death's Master",
+            "level": 14,
+            "subclass": "Necromancer",
+            "source": "arcana-unleashed",
+            "description": "While holding your spellbook: as a Bonus Action, Undead you created within 60 feet gain Temporary HP equal to your Wizard level (once per Long Rest). When an Undead you can see drops to 0 HP, it can explode for Necrotic damage in a 10-ft Emanation (half the creature's Hit Dice in d6s)."
+          }
+        ]
+      },
+      {
+        "name": "Transmuter",
+        "className": "Wizard",
+        "flavor": "A Wizard who reshapes energy and matter at reality's forge — a smith of a mutable world, from harmless tricks to the power to make and unmake.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Transmutation Savant",
+            "level": 3,
+            "subclass": "Transmuter",
+            "source": "arcana-unleashed",
+            "description": "Add two Transmutation spells (level 2 or lower) to your spellbook for free, and one more Transmutation spell each time you gain a new level of spell slots."
+          },
+          {
+            "name": "Transmuter's Stone",
+            "level": 3,
+            "subclass": "Transmuter",
+            "source": "arcana-unleashed",
+            "description": "On a Long Rest you create a magic stone usable as a Spellcasting Focus. Its bearer gains Constitution save proficiency plus one benefit you choose: Darkvision 60 ft., Resistance to a chosen damage type, or +10 ft. Speed. You can change the benefit when you cast a Transmutation spell with a slot."
+          },
+          {
+            "name": "Wondrous Alteration",
+            "level": 3,
+            "subclass": "Transmuter",
+            "source": "arcana-unleashed",
+            "description": "You always have Alter Self prepared and can cast it once per Long Rest without a slot. Each of its options gains an extra benefit (a Bonus Action Dash underwater, Advantage on Deception, or 2d6 natural-weapon damage with Concentration Advantage)."
+          },
+          {
+            "name": "Empowered Transmutation",
+            "level": 6,
+            "subclass": "Transmuter",
+            "source": "arcana-unleashed",
+            "description": "When you cast a Transmutation spell with a slot that makes no attack roll or save, you can raise its effective level by 1. Intelligence-modifier uses (min 1), regained on a Long Rest."
+          },
+          {
+            "name": "Potent Stone",
+            "level": 10,
+            "subclass": "Transmuter",
+            "source": "arcana-unleashed",
+            "description": "Your Transmuter's Stone can hold up to two benefits, now also including Mighty Build (Advantage on Strength saves, larger carrying capacity) and Tremorsense 30 ft."
+          },
+          {
+            "name": "Shape-Shifter",
+            "level": 10,
+            "subclass": "Transmuter",
+            "source": "arcana-unleashed",
+            "description": "You always have Polymorph prepared and can cast it once per Long Rest without a slot. When you target yourself, once per Long Rest you can keep your memories, mental abilities, proficiencies, class features, and feats, and cast Transmutation spells while transformed."
+          },
+          {
+            "name": "Master Transmuter",
+            "level": 14,
+            "subclass": "Transmuter",
+            "source": "arcana-unleashed",
+            "description": "As a Magic action you can consume your Transmuter's Stone (it then crumbles, unless you spend a level 7+ slot) for one effect: Major Transformation (change a nonmagical object into another of similar size), Panacea (heal half max HP and cure contagions, curses, Poisoned/Petrified), Restore Life (cast Raise Dead without components), or Restore Youth (end Exhaustion and appear 3d10 years younger)."
+          }
+        ]
       }
     ]
   },
@@ -3057,6 +3321,49 @@ const DND_CLASSES = [
             "subclass": "War Domain",
             "source": "phb",
             "description": "You have Resistance to Bludgeoning, Piercing, and Slashing damage."
+          }
+        ]
+      },
+      {
+        "name": "Arcana Domain",
+        "className": "Cleric",
+        "flavor": "A cleric of gods tied to knowledge, secrecy, and power, who treats magical lore not as personal power but as a gift to be shared and protected.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Arcana Domain Spells",
+            "level": 3,
+            "subclass": "Arcana Domain",
+            "source": "arcana-unleashed",
+            "description": "You always have domain spells prepared at the listed Cleric levels: Detect Magic, Magic Missile, Magic Weapon, and Nystul’s Magic Aura at 3; Counterspell and Dispel Magic at 5; Arcane Eye and Leomund’s Secret Chest at 7; Bigby’s Hand and Teleportation Circle at 9."
+          },
+          {
+            "name": "Modify Magic",
+            "level": 3,
+            "subclass": "Arcana Domain",
+            "source": "arcana-unleashed",
+            "description": "When you cast a spell, you can expend a use of Channel Divinity (no action required) to alter it: Fortifying Spell gives one target 2d8 + your Cleric level Temporary HP, or Tenacious Spell makes a creature that saves against the spell roll 1d6 and subtract it from its first save against the effect."
+          },
+          {
+            "name": "Student of Arcana",
+            "level": 3,
+            "subclass": "Arcana Domain",
+            "source": "arcana-unleashed",
+            "description": "You gain proficiency in Arcana (or another Cleric skill), and you learn two Wizard cantrips, swappable when you gain a Cleric level."
+          },
+          {
+            "name": "Dispelling Recovery",
+            "level": 6,
+            "subclass": "Arcana Domain",
+            "source": "arcana-unleashed",
+            "description": "Right after you cast a spell with a slot that restores HP or ends a condition, you can cast Dispel Magic as part of that same action/Bonus Action/Reaction without a slot. Once per Short or Long Rest, or restore it by expending a use of Channel Divinity."
+          },
+          {
+            "name": "Magical Mastery",
+            "level": 17,
+            "subclass": "Arcana Domain",
+            "source": "arcana-unleashed",
+            "description": "You learn four Wizard spells — one each of levels 6, 7, 8, and 9 — and always have them prepared, replacing one with another Wizard spell of the same level whenever you gain a Cleric level."
           }
         ]
       }
@@ -4142,6 +4449,49 @@ const DND_CLASSES = [
             "subclass": "Warrior of the Elements",
             "source": "phb",
             "description": "Manifest Elements no longer costs Focus to maintain, its reach and damage increase, and Elemental Burst grows larger."
+          }
+        ]
+      },
+      {
+        "name": "Warrior of the Mystic Arts",
+        "className": "Monk",
+        "flavor": "A monk who weaves Sorcerer magic through martial focus, balancing spell slots and Focus Points to blend cantrips and spells into flurries of blows.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Spellcasting",
+            "level": 3,
+            "subclass": "Warrior of the Mystic Arts",
+            "source": "arcana-unleashed",
+            "description": "You gain Sorcerer spellcasting with Wisdom as your ability. You start with two Sorcerer cantrips and three prepared level 1 spells, gaining more slots and prepared spells as you level (slots up to level 4 at Monk 19). You can use an Arcane Focus as your Spellcasting Focus."
+          },
+          {
+            "name": "Mystic Fighting Style",
+            "level": 6,
+            "subclass": "Warrior of the Mystic Arts",
+            "source": "arcana-unleashed",
+            "description": "When you take the Attack action, you can replace one Unarmed Strike with a casting of one of your Sorcerer cantrips that has a casting time of an action."
+          },
+          {
+            "name": "Mystic Focus",
+            "level": 6,
+            "subclass": "Warrior of the Mystic Arts",
+            "source": "arcana-unleashed",
+            "description": "You can expend a spell slot to regain Focus Points equal to its level (no action), and on a Short Rest (or via Uncanny Metabolism) convert Focus Points into one recovered spell slot of level 4 or lower, per the Recovering Spell Slots table."
+          },
+          {
+            "name": "Focused Strike",
+            "level": 11,
+            "subclass": "Warrior of the Mystic Arts",
+            "source": "arcana-unleashed",
+            "description": "When you use Stunning Strike, the target has Disadvantage on saving throws against your spells until the start of your next turn, whether or not it succeeded on the Stunning Strike save."
+          },
+          {
+            "name": "Improved Mystic Fighting Style",
+            "level": 17,
+            "subclass": "Warrior of the Mystic Arts",
+            "source": "arcana-unleashed",
+            "description": "When you use Flurry of Blows, you can replace two Unarmed Strikes with a casting of one of your level 1 or 2 Sorcerer spells that has a casting time of an action, cast as part of the same Bonus Action."
           }
         ]
       }
@@ -6135,6 +6485,49 @@ const DND_CLASSES = [
             "subclass": "Great Old One Patron",
             "source": "phb",
             "description": "You can cast Summon Aberration without a slot once per Long Rest, and you can Charm an Incapacitated creature you touch, making it your psychically bound thrall."
+          }
+        ]
+      },
+      {
+        "name": "Vestige Patron",
+        "className": "Warlock",
+        "flavor": "Your pact draws on a vestige — a dying, forgotten god that shares its remaining strength through a manifested companion as it seeks to reclaim its power.",
+        "source": "arcana-unleashed",
+        "features": [
+          {
+            "name": "Vestige Companion",
+            "level": 3,
+            "subclass": "Vestige Patron",
+            "source": "arcana-unleashed",
+            "description": "The vestige manifests as a Small Celestial, Fiend, or Undead (your choice) using the Vestige Companion stat block (AC 13 + Cha, HP 4 + four times your Warlock level, Fly 30 ft.). It acts on your turn, taking the Dodge action unless you spend a Bonus Action to command it or sacrifice an attack for its Vestige's Strike. It has a 1/Day Divine Power Bonus Action tied to its type, and you can resummon it in a new form after a Long Rest."
+          },
+          {
+            "name": "Vestige Spells",
+            "level": 3,
+            "subclass": "Vestige Patron",
+            "source": "arcana-unleashed",
+            "description": "Choose a Cleric domain — Life, Light, Trickery, or War. Its Domain Spells become always-prepared Warlock spells for you at the listed Warlock levels."
+          },
+          {
+            "name": "Vestige Power",
+            "level": 6,
+            "subclass": "Vestige Patron",
+            "source": "arcana-unleashed",
+            "description": "Your vestige regains Divine Power on a Short or Long Rest or when you use Magical Cunning. While within 30 feet of it, you have Resistance to the same damage types the vestige resists."
+          },
+          {
+            "name": "Vestige Recovery",
+            "level": 10,
+            "subclass": "Vestige Patron",
+            "source": "arcana-unleashed",
+            "description": "When your vestige would drop to 0 HP, you can take a Reaction and expend a Pact Magic slot to set its HP to maximum and teleport it up to 30 feet. Once per Long Rest."
+          },
+          {
+            "name": "Semblance of Life",
+            "level": 14,
+            "subclass": "Vestige Patron",
+            "source": "arcana-unleashed",
+            "description": "As a Magic action you can shape-shift your vestige for 1 hour into a Celestial, Fiendish, or Undead Spirit (per the Summon Celestial/Fiend/Undead spells) at a level equal to half your Warlock level (max 9). It keeps its personality, Divine Power, and Hit Points and gains Temporary HP equal to the spirit's HP. Once per Long Rest."
           }
         ]
       }

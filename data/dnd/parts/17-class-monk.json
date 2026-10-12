@@ -1,0 +1,612 @@
+{
+  "_note": "Monk (2024). Reconstructed from shipped generated data; Warrior of the Mystic Arts is Arcana Unleashed (mechanics + original descriptions).",
+  "classes": [
+    {
+      "name": "Monk",
+      "primaryAbility": [
+        "DEX",
+        "WIS"
+      ],
+      "hitDie": 8,
+      "savingThrows": [
+        "STR",
+        "DEX"
+      ],
+      "proficiencies": {
+        "armor": [],
+        "weapons": [
+          "Simple weapons",
+          "Martial weapons with the Light property"
+        ],
+        "tools": [
+          "One Artisan's Tools or Musical Instrument"
+        ],
+        "skillsChoose": 2,
+        "skillsFrom": [
+          "Acrobatics",
+          "Athletics",
+          "History",
+          "Insight",
+          "Religion",
+          "Stealth"
+        ]
+      },
+      "startingEquipment": [
+        "Spear, 5 Daggers, Artisan's Tools or Musical Instrument, Explorer's Pack, 11 GP",
+        "or 50 GP"
+      ],
+      "spellcasting": "none",
+      "subclassLevel": 3,
+      "subclassLabel": "Monk Subclass",
+      "flavor": "A martial artist who channels inner Focus into flurries of blows, superhuman movement, and mystical techniques — fast, evasive, and deadly unarmed.",
+      "source": "srd",
+      "table": [
+        {
+          "level": 1,
+          "profBonus": 2,
+          "features": [
+            "Martial Arts",
+            "Unarmored Defense"
+          ],
+          "columns": {
+            "Martial Arts": "1d6",
+            "Focus": "—",
+            "Unarmored Move": "—"
+          }
+        },
+        {
+          "level": 2,
+          "profBonus": 2,
+          "features": [
+            "Monk's Focus",
+            "Unarmored Movement",
+            "Uncanny Metabolism"
+          ],
+          "columns": {
+            "Martial Arts": "1d6",
+            "Focus": "2",
+            "Unarmored Move": "+10"
+          }
+        },
+        {
+          "level": 3,
+          "profBonus": 2,
+          "features": [
+            "Deflect Attacks",
+            "Monk Subclass"
+          ],
+          "columns": {
+            "Martial Arts": "1d6",
+            "Focus": "3",
+            "Unarmored Move": "+10"
+          }
+        },
+        {
+          "level": 4,
+          "profBonus": 2,
+          "features": [
+            "Ability Score Improvement",
+            "Slow Fall"
+          ],
+          "columns": {
+            "Martial Arts": "1d6",
+            "Focus": "4",
+            "Unarmored Move": "+10"
+          }
+        },
+        {
+          "level": 5,
+          "profBonus": 3,
+          "features": [
+            "Extra Attack",
+            "Stunning Strike"
+          ],
+          "columns": {
+            "Martial Arts": "1d8",
+            "Focus": "5",
+            "Unarmored Move": "+10"
+          }
+        },
+        {
+          "level": 6,
+          "profBonus": 3,
+          "features": [
+            "Empowered Strikes",
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Martial Arts": "1d8",
+            "Focus": "6",
+            "Unarmored Move": "+15"
+          }
+        },
+        {
+          "level": 7,
+          "profBonus": 3,
+          "features": [
+            "Evasion"
+          ],
+          "columns": {
+            "Martial Arts": "1d8",
+            "Focus": "7",
+            "Unarmored Move": "+15"
+          }
+        },
+        {
+          "level": 8,
+          "profBonus": 3,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Martial Arts": "1d8",
+            "Focus": "8",
+            "Unarmored Move": "+15"
+          }
+        },
+        {
+          "level": 9,
+          "profBonus": 4,
+          "features": [
+            "Acrobatic Movement"
+          ],
+          "columns": {
+            "Martial Arts": "1d8",
+            "Focus": "9",
+            "Unarmored Move": "+15"
+          }
+        },
+        {
+          "level": 10,
+          "profBonus": 4,
+          "features": [
+            "Heightened Focus",
+            "Self-Restoration"
+          ],
+          "columns": {
+            "Martial Arts": "1d8",
+            "Focus": "10",
+            "Unarmored Move": "+20"
+          }
+        },
+        {
+          "level": 11,
+          "profBonus": 4,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Martial Arts": "1d10",
+            "Focus": "11",
+            "Unarmored Move": "+20"
+          }
+        },
+        {
+          "level": 12,
+          "profBonus": 4,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Martial Arts": "1d10",
+            "Focus": "12",
+            "Unarmored Move": "+20"
+          }
+        },
+        {
+          "level": 13,
+          "profBonus": 5,
+          "features": [
+            "Deflect Energy"
+          ],
+          "columns": {
+            "Martial Arts": "1d10",
+            "Focus": "13",
+            "Unarmored Move": "+20"
+          }
+        },
+        {
+          "level": 14,
+          "profBonus": 5,
+          "features": [
+            "Disciplined Survivor"
+          ],
+          "columns": {
+            "Martial Arts": "1d10",
+            "Focus": "14",
+            "Unarmored Move": "+25"
+          }
+        },
+        {
+          "level": 15,
+          "profBonus": 5,
+          "features": [
+            "Perfect Focus"
+          ],
+          "columns": {
+            "Martial Arts": "1d10",
+            "Focus": "15",
+            "Unarmored Move": "+25"
+          }
+        },
+        {
+          "level": 16,
+          "profBonus": 5,
+          "features": [
+            "Ability Score Improvement"
+          ],
+          "columns": {
+            "Martial Arts": "1d10",
+            "Focus": "16",
+            "Unarmored Move": "+25"
+          }
+        },
+        {
+          "level": 17,
+          "profBonus": 6,
+          "features": [
+            "Subclass Feature"
+          ],
+          "columns": {
+            "Martial Arts": "1d12",
+            "Focus": "17",
+            "Unarmored Move": "+25"
+          }
+        },
+        {
+          "level": 18,
+          "profBonus": 6,
+          "features": [
+            "Superior Defense"
+          ],
+          "columns": {
+            "Martial Arts": "1d12",
+            "Focus": "18",
+            "Unarmored Move": "+30"
+          }
+        },
+        {
+          "level": 19,
+          "profBonus": 6,
+          "features": [
+            "Epic Boon"
+          ],
+          "columns": {
+            "Martial Arts": "1d12",
+            "Focus": "19",
+            "Unarmored Move": "+30"
+          }
+        },
+        {
+          "level": 20,
+          "profBonus": 6,
+          "features": [
+            "Body and Mind"
+          ],
+          "columns": {
+            "Martial Arts": "1d12",
+            "Focus": "20",
+            "Unarmored Move": "+30"
+          }
+        }
+      ],
+      "features": [
+        {
+          "name": "Martial Arts",
+          "level": 1,
+          "source": "srd",
+          "description": "Your Unarmed Strikes and Monk weapons (Simple Melee and Light Martial weapons) can use Dexterity for attack and damage, deal damage equal to your Martial Arts die, and let you make one Unarmed Strike as a Bonus Action after you Attack. The die grows from 1d6 to 1d12."
+        },
+        {
+          "name": "Unarmored Defense",
+          "level": 1,
+          "source": "srd",
+          "description": "While wearing no armor and not using a Shield, your AC equals 10 + your Dexterity modifier + your Wisdom modifier."
+        },
+        {
+          "name": "Monk's Focus",
+          "level": 2,
+          "source": "srd",
+          "description": "You gain Focus Points (equal to your Monk level) that fuel: Flurry of Blows (spend 1 for two Unarmed Strikes as a Bonus Action), Patient Defense (Disengage, or Disengage + Dodge for 1 point), and Step of the Wind (Dash, or Dash + Disengage for 1 point). Regain all on a Short or Long Rest."
+        },
+        {
+          "name": "Unarmored Movement",
+          "level": 2,
+          "source": "srd",
+          "description": "Your Speed increases while you wear no armor and use no Shield (the bonus grows to +30 feet)."
+        },
+        {
+          "name": "Uncanny Metabolism",
+          "level": 2,
+          "source": "srd",
+          "description": "Once per Long Rest, when you roll Initiative you can regain all expended Focus Points and heal (roll your Martial Arts die + Monk level)."
+        },
+        {
+          "name": "Deflect Attacks",
+          "level": 3,
+          "source": "srd",
+          "description": "When an attack deals Bludgeoning, Piercing, or Slashing damage to you, you can use a Reaction to reduce it (roll 1d10 + Dexterity modifier + Monk level). If you reduce it to 0 you can spend a Focus Point to redirect it as a thrown strike at another creature."
+        },
+        {
+          "name": "Slow Fall",
+          "level": 4,
+          "source": "srd",
+          "description": "You can use a Reaction when you fall to reduce the falling damage by five times your Monk level."
+        },
+        {
+          "name": "Extra Attack",
+          "level": 5,
+          "source": "srd",
+          "description": "You can attack twice whenever you take the Attack action on your turn."
+        },
+        {
+          "name": "Stunning Strike",
+          "level": 5,
+          "source": "srd",
+          "description": "Once per turn when you hit a creature with a Monk weapon or Unarmed Strike, you can spend 1 Focus Point to force a Constitution save; on a failure the target is Stunned until the start of your next turn (on a success, its Speed is halved and attacks against it have Advantage)."
+        },
+        {
+          "name": "Empowered Strikes",
+          "level": 6,
+          "source": "srd",
+          "description": "Your Unarmed Strikes can deal Force damage instead of their normal type, letting them bypass most resistances."
+        },
+        {
+          "name": "Evasion",
+          "level": 7,
+          "source": "srd",
+          "description": "When you make a Dexterity save for half damage, you take none on a success and only half on a failure (not while Incapacitated)."
+        },
+        {
+          "name": "Acrobatic Movement",
+          "level": 9,
+          "source": "srd",
+          "description": "While you have no armor or Shield, you can move along vertical surfaces and across liquids on your turn without falling during the move."
+        },
+        {
+          "name": "Heightened Focus",
+          "level": 10,
+          "source": "srd",
+          "description": "Your Focus abilities improve: Flurry of Blows makes three strikes, Patient Defense grants Temporary HP, and Step of the Wind lets an ally move too."
+        },
+        {
+          "name": "Self-Restoration",
+          "level": 10,
+          "source": "srd",
+          "description": "You can end the Charmed, Frightened, or Poisoned condition on yourself (no action) at the end of your turn, and you no longer need food or water."
+        },
+        {
+          "name": "Deflect Energy",
+          "level": 13,
+          "source": "srd",
+          "description": "Your Deflect Attacks can now reduce damage of any type, not just Bludgeoning/Piercing/Slashing."
+        },
+        {
+          "name": "Disciplined Survivor",
+          "level": 14,
+          "source": "srd",
+          "description": "You gain proficiency in all saving throws, and you can spend 1 Focus Point to reroll a save you fail."
+        },
+        {
+          "name": "Perfect Focus",
+          "level": 15,
+          "source": "srd",
+          "description": "When you roll Initiative with fewer than 4 Focus Points, you regain enough to have 4."
+        },
+        {
+          "name": "Superior Defense",
+          "level": 18,
+          "source": "srd",
+          "description": "As a Bonus Action you can spend 3 Focus Points to give yourself Resistance to all damage except Force for 1 minute."
+        },
+        {
+          "name": "Ability Score Improvement",
+          "level": 4,
+          "source": "srd",
+          "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level."
+        },
+        {
+          "name": "Epic Boon",
+          "level": 19,
+          "source": "srd",
+          "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Irresistible Offense is a fitting choice."
+        },
+        {
+          "name": "Body and Mind",
+          "level": 20,
+          "source": "srd",
+          "description": "Your Dexterity and Wisdom scores increase by 4, to a maximum of 25."
+        }
+      ],
+      "subclasses": [
+        {
+          "name": "Warrior of the Open Hand",
+          "className": "Monk",
+          "flavor": "A master of unarmed combat who manipulates a foe's balance and mends their own body through discipline.",
+          "source": "srd",
+          "features": [
+            {
+              "name": "Open Hand Technique",
+              "level": 3,
+              "subclass": "Warrior of the Open Hand",
+              "source": "srd",
+              "description": "Whenever you hit with a Flurry of Blows strike, you can impose one effect on the target: Addle (it can't take Opportunity Attacks until its next turn), Push (a Strength save or be pushed 15 feet), or Topple (a Dexterity save or fall Prone)."
+            },
+            {
+              "name": "Wholeness of Body",
+              "level": 6,
+              "subclass": "Warrior of the Open Hand",
+              "source": "srd",
+              "description": "As a Bonus Action you heal yourself (roll your Martial Arts die + Wisdom modifier). Uses equal to your Wisdom modifier per Long Rest."
+            },
+            {
+              "name": "Fleet Step",
+              "level": 11,
+              "subclass": "Warrior of the Open Hand",
+              "source": "srd",
+              "description": "When you take a Bonus Action other than Step of the Wind, you can also use Step of the Wind after it, for free."
+            },
+            {
+              "name": "Quivering Palm",
+              "level": 17,
+              "subclass": "Warrior of the Open Hand",
+              "source": "srd",
+              "description": "When you hit a creature with an Unarmed Strike you can spend 4 Focus Points to plant lethal vibrations in it for a number of days equal to your Monk level. While the vibrations last you can, as a Magic action, end them to force a Constitution save; on a failure the target drops to 0 HP, and on a success takes heavy Force damage."
+            }
+          ]
+        },
+        {
+          "name": "Warrior of Mercy",
+          "className": "Monk",
+          "flavor": "A physician-monk who channels Focus to knit wounds or stop hearts with the same touch.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Hand of Harm and Healing",
+              "level": 3,
+              "subclass": "Warrior of Mercy",
+              "source": "phb",
+              "description": "You gain Implements of Mercy (Insight and Medicine proficiency, a Herbalism Kit). When you hit with an Unarmed Strike you can spend a Focus Point for Hand of Harm (extra Necrotic damage) or, as a Bonus Action touch, Hand of Healing (restore HP with your Martial Arts die + Wisdom modifier)."
+            },
+            {
+              "name": "Physician's Touch",
+              "level": 6,
+              "subclass": "Warrior of Mercy",
+              "source": "phb",
+              "description": "Hand of Harm can also inflict the Poisoned condition, and Hand of Healing can also end a condition on the creature you heal."
+            },
+            {
+              "name": "Flurry of Healing and Harm",
+              "level": 11,
+              "subclass": "Warrior of Mercy",
+              "source": "phb",
+              "description": "When you use Flurry of Blows you can replace each strike with a Hand of Healing (no Focus cost), and each Flurry strike that hits can carry Hand of Harm."
+            },
+            {
+              "name": "Hand of Ultimate Mercy",
+              "level": 17,
+              "subclass": "Warrior of Mercy",
+              "source": "phb",
+              "description": "As a Magic action you can spend 5 Focus Points to touch a creature that died within the last minute and return it to life with HP and freed of conditions. Once per Long Rest."
+            }
+          ]
+        },
+        {
+          "name": "Warrior of Shadow",
+          "className": "Monk",
+          "flavor": "A ninja-like monk who wields darkness itself — cloaking, teleporting, and striking from the black.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Shadow Arts",
+              "level": 3,
+              "subclass": "Warrior of Shadow",
+              "source": "phb",
+              "description": "You gain the Minor Illusion cantrip and Darkvision, and you can spend a Focus Point to cast Darkness, seeing through the darkness you create and moving it on later turns."
+            },
+            {
+              "name": "Shadow Step",
+              "level": 6,
+              "subclass": "Warrior of Shadow",
+              "source": "phb",
+              "description": "While in Dim Light or Darkness, as a Bonus Action you can teleport up to 60 feet to an unoccupied space you can see that's also in Dim Light or Darkness, gaining Advantage on your next melee attack this turn."
+            },
+            {
+              "name": "Improved Shadow Step",
+              "level": 11,
+              "subclass": "Warrior of Shadow",
+              "source": "phb",
+              "description": "You can Shadow Step from any lighting, and after teleporting you can make an Unarmed Strike as part of the same Bonus Action."
+            },
+            {
+              "name": "Cloak of Shadows",
+              "level": 17,
+              "subclass": "Warrior of Shadow",
+              "source": "phb",
+              "description": "As a Magic action you can spend 3 Focus Points to become Invisible for 1 minute and gain the ability to move through occupied spaces and objects as if difficult terrain."
+            }
+          ]
+        },
+        {
+          "name": "Warrior of the Elements",
+          "className": "Monk",
+          "flavor": "A monk who bends the four elements, striking at range and wreathing blows in fire, cold, and lightning.",
+          "source": "phb",
+          "features": [
+            {
+              "name": "Manifest Elements",
+              "level": 3,
+              "subclass": "Warrior of the Elements",
+              "source": "phb",
+              "description": "You can spend a Focus Point as a Bonus Action to channel the elements for 10 minutes: your Unarmed Strikes gain reach and elemental (Cold, Fire, Lightning, or Thunder) damage, and you can push or pull creatures you hit."
+            },
+            {
+              "name": "Elemental Burst",
+              "level": 6,
+              "subclass": "Warrior of the Elements",
+              "source": "phb",
+              "description": "As a Magic action you can spend 2 Focus Points to hurl a 20-foot burst of elemental energy up to 120 feet; creatures make a Dexterity save for half damage."
+            },
+            {
+              "name": "Stride of the Elements",
+              "level": 11,
+              "subclass": "Warrior of the Elements",
+              "source": "phb",
+              "description": "While Manifest Elements is active you gain a Fly Speed and a Swim Speed equal to your Speed."
+            },
+            {
+              "name": "Epitome of Elements",
+              "level": 17,
+              "subclass": "Warrior of the Elements",
+              "source": "phb",
+              "description": "Manifest Elements no longer costs Focus to maintain, its reach and damage increase, and Elemental Burst grows larger."
+            }
+          ]
+        },
+        {
+          "name": "Warrior of the Mystic Arts",
+          "className": "Monk",
+          "flavor": "A monk who weaves Sorcerer magic through martial focus, balancing spell slots and Focus Points to blend cantrips and spells into flurries of blows.",
+          "source": "arcana-unleashed",
+          "features": [
+            {
+              "name": "Spellcasting",
+              "level": 3,
+              "subclass": "Warrior of the Mystic Arts",
+              "source": "arcana-unleashed",
+              "description": "You gain Sorcerer spellcasting with Wisdom as your ability. You start with two Sorcerer cantrips and three prepared level 1 spells, gaining more slots and prepared spells as you level (slots up to level 4 at Monk 19). You can use an Arcane Focus as your Spellcasting Focus."
+            },
+            {
+              "name": "Mystic Fighting Style",
+              "level": 6,
+              "subclass": "Warrior of the Mystic Arts",
+              "source": "arcana-unleashed",
+              "description": "When you take the Attack action, you can replace one Unarmed Strike with a casting of one of your Sorcerer cantrips that has a casting time of an action."
+            },
+            {
+              "name": "Mystic Focus",
+              "level": 6,
+              "subclass": "Warrior of the Mystic Arts",
+              "source": "arcana-unleashed",
+              "description": "You can expend a spell slot to regain Focus Points equal to its level (no action), and on a Short Rest (or via Uncanny Metabolism) convert Focus Points into one recovered spell slot of level 4 or lower, per the Recovering Spell Slots table."
+            },
+            {
+              "name": "Focused Strike",
+              "level": 11,
+              "subclass": "Warrior of the Mystic Arts",
+              "source": "arcana-unleashed",
+              "description": "When you use Stunning Strike, the target has Disadvantage on saving throws against your spells until the start of your next turn, whether or not it succeeded on the Stunning Strike save."
+            },
+            {
+              "name": "Improved Mystic Fighting Style",
+              "level": 17,
+              "subclass": "Warrior of the Mystic Arts",
+              "source": "arcana-unleashed",
+              "description": "When you use Flurry of Blows, you can replace two Unarmed Strikes with a casting of one of your level 1 or 2 Sorcerer spells that has a casting time of an action, cast as part of the same Bonus Action."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
