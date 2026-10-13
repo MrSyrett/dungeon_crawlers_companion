@@ -176,6 +176,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cond-grp .cg-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:3px;}
 .cond-row{display:flex;flex-wrap:wrap;gap:5px;}
 .cond{display:flex;align-items:center;gap:4px;border:1px solid var(--rule);border-radius:12px;padding:2px 8px 2px 5px;cursor:pointer;background:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--muted);}
+.crit-badge{border-color:var(--yz);color:var(--ink);background:var(--yz-lt);padding:2px 9px;}
+.crit-badge:hover{background:var(--yz);color:#fff;}
+.crit-badge:hover .cb-i{color:#fff!important;}
 .cond .cbox{width:11px;height:11px;border:1.5px solid var(--input-border);border-radius:3px;display:inline-block;}
 .cond.on{border-color:var(--red);color:var(--red);}
 .cond.on .cbox{background:var(--red);border-color:var(--red);}
@@ -222,7 +225,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tbl .eqbox{width:16px;height:16px;cursor:pointer;accent-color:var(--yz);}
 .atk-roll{background:var(--yz);color:#fff;border:none;border-radius:5px;padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 body.sheet-locked .edit-only{display:none!important;}
-body.sheet-locked .tbl .row-x{display:none!important;}
+
 .tbl-empty{padding:12px;font-size:12px;color:var(--muted);}
 
 /* Gear / encumbrance */
@@ -579,12 +582,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
       </div>
 
-      <div class="career-note alien-only" id="career-note"></div>
       </div>
 
       <div class="card">
-      <div class="section-bar accent"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Physical</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Mental</button><button class="hdr-btn" onclick="addCritBlank()">＋ Add</button></span></div>
-      <div class="blk" style="padding-top:4px;"><table class="tbl" id="crit-tbl"><thead><tr><th style="width:34%;">Injury</th><th>Effect</th><th style="width:52px;" title="Penalty to every dice pool while active">Pool</th><th style="width:26px;"></th></tr></thead><tbody id="crit-body"></tbody></table><div id="crit-empty" style="padding:4px 10px 6px;font-size:12px;color:var(--muted);">No critical injuries. Each one subtracts its Pool penalty from every dice roll until you remove it.</div></div>
+      <div class="section-bar accent"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Physical</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Mental</button></span></div>
+      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — each applies its penalty to every roll until you remove it. Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
       </div>
 
       <div class="card yze-only">
@@ -611,21 +613,26 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="tab-panel" id="tab-gear">
         <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span></div>
-        <div class="section-bar"><span>General Gear</span><span class="hdr-right"><button class="hdr-btn edit-only" onclick="openPicker('gear')">＋ Add</button></span></div>
+        <div class="section-bar"><span>General Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add</button></span></div>
         <table class="tbl" id="gear-tbl"><thead><tr><th style="width:44%;">Item</th><th style="width:16%;">Weight</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="gear-body"></tbody></table>
         <div id="gear-empty" class="tbl-empty">No general gear yet.</div>
-        <div class="section-bar"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn edit-only" onclick="openPicker('weap')">＋ Add</button></span></div>
+        <div class="section-bar"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('weap')">＋ Add</button></span></div>
         <table class="tbl" id="weap-tbl"><thead><tr><th style="width:30px;" title="Equip to add to Attacks">Eq</th><th style="width:26%;">Weapon</th><th style="width:11%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:16%;">Range</th><th style="width:9%;">Wt</th><th style="width:26px;"></th></tr></thead><tbody id="weap-body"></tbody></table>
         <div id="weap-empty" class="tbl-empty">No weapons yet.</div>
-        <div class="section-bar"><span>Armor</span><span class="hdr-right"><button class="hdr-btn edit-only" onclick="openPicker('armor')">＋ Add</button></span></div>
+        <div class="section-bar"><span>Armor</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('armor')">＋ Add</button></span></div>
         <table class="tbl" id="armor-tbl"><thead><tr><th style="width:30px;" title="Equip to add to Armor rating">Eq</th><th style="width:40%;">Armor</th><th style="width:12%;">Rating</th><th style="width:10%;">Wt</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="armor-body"></tbody></table>
         <div id="armor-empty" class="tbl-empty">No armor yet.</div>
       </div>
 
       <div class="tab-panel" id="tab-story">
-        <div class="section-bar alien-only"><span>Talents</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('talent')">＋ Add</button></span></div>
+        <div class="section-bar alien-only"><span>Talents</span></div>
         <div class="tln-list alien-only" id="tln-list"></div>
         <div class="alien-only" id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Your career offers three — pick one at creation.</div>
+        <div class="section-bar alien-only"><span>Agenda &amp; Signature</span></div>
+        <div class="blk alien-only" style="padding-top:2px;">
+          <div class="fld"><label>Personal agenda</label><input type="text" id="f-agenda" placeholder="Your secret goal — only you know it"></div>
+          <div class="fld"><label>Signature item</label><input type="text" id="f-signature" placeholder="The one thing you'd never leave behind"></div>
+        </div>
         <div class="section-bar"><span>Story</span></div>
         <div class="blk" id="traits-blk"></div>
         <div class="section-bar"><span>Relationships</span><span class="hdr-right"><button class="hdr-btn" onclick="addRelRow()">＋ Add</button></span></div>
@@ -717,7 +724,7 @@ function blankState(){
   var st={ name:'',archetype:'',pronouns:'',key:'',variant:'alien',career:'',
     attrs:{STR:2,AGI:2,WITS:2,EMP:2}, skills:{},
     health:{max:0,dmg:0}, resolve:{max:0,dmg:0}, stress:0,
-    conditions:{}, xp:0, armor:0, weapons:[], gear:[], crits:[], talents:[],
+    conditions:{}, xp:0, armor:0, weapons:[], gear:[], crits:[], talents:[], agenda:'', signature:'',
     traits:{}, relationships:[], appearance:'', notes:'' };
   // seed every skill name from BOTH variants so switching modes never loses data
   BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ if(st.skills[s.name]==null) st.skills[s.name]=0; });
@@ -740,17 +747,14 @@ function derivedMax(which){
 function renderAttrSkills(){
   var host=$('attr-skills'); if(!host)return; host.innerHTML='';
   ATTRS.forEach(function(a){
-    var v=attrVal(a.key), pips='';
-    // Pips are set at creation / advancement — display-only (locked) here.
-    for(var i=1;i<=5;i++){ pips+='<button class="pip'+(i<=v?' on':'')+'" tabindex="-1" title="'+esc(a.desc)+' — set at creation"></button>'; }
-    var apool=Math.max(0, attrVal(a.key)-condPenaltyFor(a.key));
-    var head='<div class="attr-row"><span class="a-name">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><div class="pips locked">'+pips+'</div><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
+    var cpen=(typeof critPenalty==='function')?critPenalty():0;
+    var apool=Math.max(0, attrVal(a.key)-condPenaltyFor(a.key)-cpen);
+    var head='<div class="attr-row"><span class="a-name">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
-      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key), skp='';
-      for(var j=1;j<=5;j++){ skp+='<button class="pip sk'+(j<=lvl?' on':'')+'" tabindex="-1"></button>'; }
+      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key)-cpen;
       var esn=s.name.replace(/'/g,"\\'");
-      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+'">'+s.name+'</button><div class="pips locked">'+skp+'</div><button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="roll pool = attribute + skill − conditions">'+Math.max(0,pool)+'d</button></div>';
+      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+' (level '+lvl+')">'+s.name+'</button><button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="roll pool = attribute + skill − penalties">'+Math.max(0,pool)+'d</button></div>';
     });
     var block=document.createElement('div'); block.className='as-attr';
     block.innerHTML=head+'<div class="as-skills">'+rows+'</div>';
@@ -767,9 +771,8 @@ function renderVitals(){
   ['health','resolve'].forEach(function(w){
     var host=$(w+'-boxes'), st=S[w], boxes='';
     var max=st.max||0;
+    // Health is fixed (set at creation) — just the damage track, no +/- box adjusters.
     for(var i=1;i<=max;i++){ boxes+='<button class="vbox'+(w==='resolve'?' resolve':'')+(i<=st.dmg?' on':'')+'" title="damage" onclick="setDamage(\''+w+'\','+i+')"></button>'; }
-    boxes+='<button class="v-auto" style="margin-left:2px;" onclick="bumpMax(\''+w+'\',1)" title="add a box">＋</button>';
-    if(max>0) boxes+='<button class="v-auto" onclick="bumpMax(\''+w+'\',-1)" title="remove a box">−</button>';
     host.innerHTML=boxes;
   });
   var broken = isAlien()
@@ -1079,16 +1082,20 @@ function addCritBlank(){ addCrit({name:'',effect:'',mod:0}); }
 function critEdit(i,f,v){ var c=S.crits[i]; if(!c)return; c[f]=(f==='mod')?num(v):v; scheduleAutosave(); }
 function critDel(i){ S.crits.splice(i,1); renderCrits(); scheduleAutosave(); }
 function renderCrits(){
-  var body=$('crit-body'); if(!body)return; body.innerHTML='';
-  (S.crits||[]).forEach(function(c,i){ var tr=document.createElement('tr');
-    tr.innerHTML='<td><input value="'+esc(c.name||'')+'" oninput="critEdit('+i+',\'name\',this.value)" placeholder="Injury"></td>'
-      +'<td><input value="'+esc(c.effect||'')+'" oninput="critEdit('+i+',\'effect\',this.value)" placeholder="effect"></td>'
-      +'<td><input class="cx" value="'+esc(c.mod!=null?c.mod:0)+'" oninput="critEdit('+i+',\'mod\',this.value)" title="dice removed from every pool while active"></td>'
-      +'<td style="text-align:right;"><button class="row-x" onclick="critDel('+i+')">✕</button></td>';
-    body.appendChild(tr); });
+  var host=$('crit-list'); if(!host)return; host.innerHTML='';
+  (S.crits||[]).forEach(function(c,i){
+    var modTxt=num(c.mod)?(' · pool −'+Math.abs(num(c.mod))):'';
+    var el=document.createElement('span'); el.className='cond crit-badge'; el.title=(c.effect||'')+modTxt;
+    el.innerHTML='<span class="cb-i" onclick="event.stopPropagation();critInfo('+i+')" title="details" style="cursor:help;color:var(--yz-dk);font-weight:800;">ⓘ</span>'
+      +'<span>'+esc(c.name||'Injury')+'</span>'+(num(c.mod)?'<span style="color:var(--yz-dk);font-weight:800;">−'+Math.abs(num(c.mod))+'</span>':'');
+    el.onclick=function(){ critDel(i); };
+    host.appendChild(el);
+  });
   var e=$('crit-empty'); if(e) e.style.display=(S.crits&&S.crits.length)?'none':'block';
-  relock();
 }
+function critInfo(i){ var c=(S.crits||[])[i]; var d=$('crit-detail'); if(!c||!d)return;
+  var modTxt=num(c.mod)?(' Removes '+Math.abs(num(c.mod))+' dice from every pool.'):'';
+  d.innerHTML='<b style="color:var(--ink);">'+esc(c.name||'Injury')+'.</b> '+esc(c.effect||'—')+modTxt; }
 // ── Push option ──
 function showPushOption(){
   if(!_lastRoll)return;
@@ -1151,48 +1158,36 @@ function refreshWizardButtons(){ var built=hasCharacter(), c=$('build-btn'), l=$
 // ── Experience modal (spend XP; skills/attrs raised directly on the sheet) ──
 function openAdvance(){ renderAdvance(); $('advance-overlay').classList.add('open'); }
 function closeAdvance(){ $('advance-overlay').classList.remove('open'); }
-function advStepper(label,val,minus,plus,minusDis,plusDis){
-  return '<div class="a-row"><span class="a-name2">'+esc(label)+'</span><span class="a-code">'+val+'</span>'
-    +'<button onclick="'+minus+'"'+(minusDis?' disabled':'')+'>−</button>'
-    +'<button onclick="'+plus+'"'+(plusDis?' disabled':'')+'>+</button></div>';
-}
+// ── Advancement: spend XP on skill points (5 XP each, max 5) or new talents
+//    (5 XP each). Attributes are fixed at creation. ──
+var SKILL_XP=5, TALENT_XP=5;
 function renderAdvance(){
-  var h='<p class="m-hint">Attributes &amp; skills are locked on the sheet — raise them here as your character advances, then adjust remaining <b style="color:#5fd6ea;">XP</b>.</p>';
-  // Attributes
-  h+='<div class="m-lbl">Attributes</div><div class="a-skills">';
-  h+=ATTRS.map(function(a){ var v=attrVal(a.key), max=(S.key===a.key)?5:4;
-    return advStepper(a.name+(S.key===a.key?' ★':''), v, "advAttr('"+a.key+"',-1)", "advAttr('"+a.key+"',1)", v<=0, v>=max); }).join('');
-  h+='</div>';
-  // Skills grouped by attribute
-  h+='<div class="m-lbl" style="margin-top:12px;">Skills</div>';
+  var xp=num(S.xp);
+  var h='<p class="m-hint">Spend <b style="color:#5fd6ea;">XP</b> to buy skill points (<b>'+SKILL_XP+' XP</b> per step, to a max of 5) or new talents (<b>'+TALENT_XP+' XP</b> each). Attributes are set at creation. Add session XP with ＋ below.</p>';
+  h+='<div style="display:flex;align-items:center;gap:10px;margin:4px 0 12px;"><span class="m-lbl" style="margin:0;">Experience</span>'
+    +'<span id="adv-xp" style="font-family:\'Share Tech Mono\',monospace;font-size:22px;color:#5fd6ea;min-width:30px;text-align:center;">'+xp+'</span><span class="m-hint" style="margin:0;">XP available</span>'
+    +'<span style="margin-left:auto;display:flex;gap:4px;"><button class="m-btn ghost" onclick="advXP(-1)">−1</button><button class="m-btn ghost" onclick="advXP(1)">＋1</button><button class="m-btn ghost" onclick="advXP(5)">＋5</button></span></div>';
+  h+='<div class="m-lbl">Skills <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(buy +1 for '+SKILL_XP+' XP)</span></div>';
   ATTRS.forEach(function(a){
     var list=skillsByAttr(a.key); if(!list.length)return;
     h+='<div class="a-attr">'+esc(a.name)+'</div><div class="a-skills">';
-    h+=list.map(function(s){ var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'");
-      return advStepper(s.name, v, "advSkill('"+esn+"',-1)", "advSkill('"+esn+"',1)", v<=0, v>=5); }).join('');
+    h+=list.map(function(s){ var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'"), can=v<5 && xp>=SKILL_XP;
+      return '<div class="a-row"><span class="a-name2">'+esc(s.name)+'</span><span class="a-code">'+v+'</span>'
+        +'<button onclick="buySkill(\''+esn+'\')"'+(can?'':' disabled')+' title="'+(v>=5?'At maximum':'Buy +1 for '+SKILL_XP+' XP')+'">＋'+SKILL_XP+'</button></div>'; }).join('');
     h+='</div>';
   });
-  // XP costs + adjuster
-  h+='<div class="m-lbl" style="margin-top:12px;">Experience</div>';
-  h+='<p class="m-hint" style="margin:0 0 8px;">Raise a skill to level N: <b>5 × N</b> XP. Learn a new skill (level 1): <b>5</b> XP. New specialty: <b>10</b> XP. Raise an attribute: GM\'s call (typically 5 × new level).</p>';
-  h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
-    +'<button class="m-btn ghost" onclick="advXP(-5)">−5</button><button class="m-btn ghost" onclick="advXP(-1)">−1</button>'
-    +'<span style="font-family:\'Share Tech Mono\',monospace;font-size:20px;color:#5fd6ea;min-width:40px;text-align:center;" id="adv-xp">'+num(S.xp)+'</span>'
-    +'<button class="m-btn ghost" onclick="advXP(1)">＋1</button><button class="m-btn ghost" onclick="advXP(5)">＋5</button></div>';
+  var owned={}; (S.talents||[]).forEach(function(t){ if(t&&t.name)owned[t.name]=1; });
+  var avail=ALIEN_TL.filter(function(t){ return t&&t.name&&!owned[t.name]; });
+  h+='<div class="m-lbl" style="margin-top:14px;">New Talent <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">('+TALENT_XP+' XP each)</span></div>';
+  if(!avail.length){ h+='<p class="m-hint" style="margin:0;">You have every talent.</p>'; }
+  else { h+='<div style="display:flex;flex-wrap:wrap;gap:6px;max-height:190px;overflow:auto;padding:2px;">'
+      +avail.map(function(t){ var can=xp>=TALENT_XP; return '<button class="builder-chip" onclick="buyTalent(\''+t.name.replace(/'/g,"\\'")+'\')"'+(can?'':' disabled')+' title="'+esc(t.desc||'')+'">'+esc(t.name)+'</button>'; }).join('')+'</div>'; }
   h+='<div style="margin-top:16px;text-align:right;"><button class="m-btn" onclick="closeAdvance()">Done</button></div>';
   $('advance-body').innerHTML=h;
 }
-function advAttr(k,d){
-  var cur=attrVal(k), max=(S.key===k)?5:4, nv=clamp(cur+d,0,max); if(nv===cur)return;
-  S.attrs[k]=nv;
-  if(isAlien() && k==='STR'){ S.health.max=attrVal('STR'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; }
-  renderAttrSkills(); renderVitals(); renderEnc(); renderAdvance(); scheduleAutosave();
-}
-function advSkill(name,d){
-  var cur=num(S.skills[name]), nv=clamp(cur+d,0,5); if(nv===cur)return;
-  S.skills[name]=nv; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave();
-}
-function advXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; var e=$('adv-xp'); if(e)e.textContent=S.xp; scheduleAutosave(); }
+function buySkill(name){ var v=num(S.skills[name]); if(v>=5||num(S.xp)<SKILL_XP)return; S.skills[name]=v+1; S.xp=num(S.xp)-SKILL_XP; $('f-xp').value=S.xp; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','+1 '+name,'Spent '+SKILL_XP+' XP · now '+(v+1),'crit'); }catch(e){} }
+function buyTalent(name){ if(num(S.xp)<TALENT_XP)return; var desc=''; for(var i=0;i<ALIEN_TL.length;i++){ if(ALIEN_TL[i].name===name){ desc=ALIEN_TL[i].desc||''; break; } } S.talents=S.talents||[]; S.talents.push({name:name,note:desc}); S.xp=num(S.xp)-TALENT_XP; $('f-xp').value=S.xp; renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','New talent: '+name,'Spent '+TALENT_XP+' XP','crit'); }catch(e){} }
+function advXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; var e=$('adv-xp'); if(e)e.textContent=S.xp; renderAdvance(); scheduleAutosave(); }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent=num(S.xp)?('XP '+S.xp):''; }
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
@@ -1225,6 +1220,7 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 function collectSheet(){
   S.name=$('f-name').value.trim(); S.archetype=$('f-archetype').value; S.pronouns=$('f-pronouns').value;
   S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.armor=armorRating();
+  { var fa=$('f-agenda'); if(fa)S.agenda=fa.value; var fs=$('f-signature'); if(fs)S.signature=fs.value; }
   // Key attribute and career are set at creation (read-only on the sheet) — keep S.key / S.career.
   var cls = isAlien() ? (S.career||'Alien crew') : S.archetype;
   return Object.assign({}, S, { system:'YZE', variant:'alien', class:cls, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
@@ -1237,7 +1233,7 @@ function applySheet(d){
   // skill sets are seeded — so coercing to Alien never loses points).
   S.variant='alien';
   syncVariant();
-  ['name','archetype','pronouns','key','appearance','notes','career'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
+  ['name','archetype','pronouns','key','appearance','notes','career','agenda','signature'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
   if(d.xp!=null)S.xp=num(d.xp); if(d.stress!=null)S.stress=clamp(num(d.stress),0,10);
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   // apply skills across BOTH variant skill sets so switching modes never loses data
@@ -1270,6 +1266,7 @@ function renderAll(){
   syncVariant();
   $('f-name').value=S.name||''; $('f-archetype').value=S.archetype||''; $('f-pronouns').value=S.pronouns||'';
   $('f-appearance').value=S.appearance||''; $('f-notes').value=S.notes||''; $('f-xp').value=num(S.xp);
+  { var fa=$('f-agenda'); if(fa)fa.value=S.agenda||''; var fs=$('f-signature'); if(fs)fs.value=S.signature||''; }
   renderKeyDisp(); renderCareerDisp();
   renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); renderTalents(); renderCareer(); updateFoot(); refreshWizardButtons();
 }
