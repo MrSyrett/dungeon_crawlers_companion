@@ -74,6 +74,13 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
   }
   body { font-family: 'Barlow', sans-serif; background: var(--ui-bg); color: var(--ui-text); display: flex; height: 100vh; overflow: hidden; }
 
+  /* Keep the prep UI on Oswald. The shared TWD skin (public/tokens.css) sets
+     --font-display to the Dead Kansas display face for the whole themed surface,
+     which is right for the Adventure Title (opts in below) but unreadable on the
+     small sidebar and preview labels. Re-pin the UI font to Oswald here; this
+     matches tokens.css's specificity and wins on source order. */
+  :root[data-themed][data-system="TWD"] { --font-display: 'Oswald', sans-serif; }
+
   /* SIDEBAR */
   .sidebar { width: 320px; min-width: 320px; background: var(--ui-panel); border-right: 1px solid var(--ui-border); display: flex; flex-direction: column; overflow: hidden; transition: width 0.25s, min-width 0.25s; }
   .sidebar.collapsed { width: 42px; min-width: 42px; }
@@ -241,7 +248,7 @@ addEventListener("resize", function () { ddSyncMobileChrome(false); });
 
   /* DCW cyan banner header */
   .page-banner { background: linear-gradient(120deg, var(--banner-a), var(--banner-b)); padding: 10px 36px 8px; display: flex; justify-content: space-between; align-items: center; }
-  .adventure-title { font-family: var(--font-display); font-size: 28px; font-weight: var(--title-weight); color: var(--title-color); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }
+  .adventure-title { font-family: "Dead Kansas", var(--font-display); font-size: 34px; font-weight: 400; color: var(--title-color); line-height: 0.92; text-transform: uppercase; letter-spacing: 0.03em; }
   .adventure-subtitle { font-family: var(--font-display); font-size: 13px; font-weight: 800; color: var(--sub-color); text-transform: uppercase; letter-spacing: 0.14em; margin-top: 2px; }
   .header-meta { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--title-color); opacity: 0.8; line-height: 1.7; }
   .header-meta span { display: block; }

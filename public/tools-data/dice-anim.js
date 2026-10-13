@@ -806,9 +806,18 @@
   function parseGM(detail){ return parseDice(detail); }
 
   // ─── hook addLog ───
+  // A sheet can set window.__daNext = { dice:[{sides,display,color?}...], glow:'normal'|'crit'|'fumble' }
+  // right before calling addLog to drive the animation EXPLICITLY — used by the
+  // Year Zero sheets so stress dice carry their own colour and the dice glow is
+  // decoupled from the log's success/failure styling (it glows only on the bad
+  // state). It is consumed once; everything else keeps parsing the detail string.
   var _add = window.addLog;
   window.addLog = function(label,result,detail,type){ var r = _add ? _add.apply(this, arguments) : undefined;
-    try{ if(S.on){ var dice=parseDice(detail); if(dice.length) play(dice, type||'normal'); } }catch(e){} return r; };
+    try{ if(S.on){
+      var spec = window.__daNext; window.__daNext = null;
+      if(spec && spec.dice && spec.dice.length){ play(spec.dice, spec.glow||'normal'); }
+      else { var dice=parseDice(detail); if(dice.length) play(dice, type||'normal'); }
+    } }catch(e){} return r; };
 
   // GM screen: the GM's own rolls run through GMCamp.broadcast (no addLog there)
   if(window.GMCamp && typeof window.GMCamp.broadcast==='function'){

@@ -929,15 +929,31 @@ function addCustomFromPicker(){
 function poolStr(rolls){ return rolls.length+'d6('+rolls.join(',')+')'; }
 function countPool(rolls){ var s=0,b=0; rolls.forEach(function(v){ if(v===6)s++; else if(v===1)b++; }); return {succ:s,bane:b}; }
 function tierOf(succ){ if(succ>=2) return {t:'SUCCESS ×'+succ,type:'crit'}; if(succ===1) return {t:'SUCCESS',type:'crit'}; return {t:'FAILURE',type:'fumble'}; }
-function animateRoll(rolls){ if(!(window.DiceAnim&&window.DiceAnim.play))return; try{ window.DiceAnim.play(rolls.map(function(v){ return {sides:6,display:String(v)}; }),'normal'); }catch(e){} }
+// Stress dice roll in their own colour so the extra risk dice read at a glance.
+// (Alien's Stress Dice are the yellow ones.)
+var STRESS_DIE_COLOR='#e8c020';
+// Hand the exact dice to the 3D animation: base dice in the player's colour,
+// stress dice in STRESS_DIE_COLOR, and glow RED only on the bad state (a 1 on a
+// stress die). Ordinary success/failure no longer glows — that is every roll.
+function animDice(base, stress, bad){
+  try{ var spec=[],i;
+    for(i=0;i<base.length;i++) spec.push({sides:6,display:String(base[i])});
+    for(i=0;i<stress.length;i++) spec.push({sides:6,display:String(stress[i]),color:STRESS_DIE_COLOR});
+    window.__daNext={ dice:spec, glow: bad?'fumble':'normal' };
+  }catch(e){}
+}
+// Tag appended to a roll's detail when a stress die comes up 1 (a Panic trigger).
+function badTag(ones){ return ones>0 ? ' · ⚠ Panic ('+ones+' on a Stress Die)' : ''; }
+// The bad state fired: in Alien a 1 on a Stress Die forces a Panic Roll.
+function onBad(label){ rollPanic(); }
 
 // Roll base dice, plus (Alien) a number of Stress Dice equal to stress level.
-// A 1 on a Stress Die forces a Panic Roll and blocks pushing.
+// Each 6 is a success; a 1 on a Stress Die is the Panic trigger (the bad state).
 function rollDicePool(baseSize){
   var base=[]; for(var i=0;i<baseSize;i++)base.push(die6());
-  var stress=[], panic=false;
-  if(isAlien()){ var lvl=clamp(num(S.stress),0,10); for(var k=0;k<lvl;k++){ var d=die6(); stress.push(d); if(d===1)panic=true; } }
-  return { base:base, stress:stress, all:base.concat(stress), panic:panic };
+  var stress=[], ones=0;
+  if(isAlien()){ var lvl=clamp(num(S.stress),0,10); for(var k=0;k<lvl;k++){ var d=die6(); stress.push(d); if(d===1)ones++; } }
+  return { base:base, stress:stress, all:base.concat(stress), stressOnes:ones };
 }
 function poolDetail(r, floored){
   return poolStr(r.base)+(r.stress.length?' + '+r.stress.length+' stress('+r.stress.join(',')+')':'')+(floored?' · min 1 die':'');
@@ -947,10 +963,12 @@ function doPool(label, poolSize, pushable){
   var floored=false; if(poolSize<1){ poolSize=1; floored=true; }
   poolSize=Math.min(20,poolSize);
   var r=rollDicePool(poolSize), c=countPool(r.all), t=tierOf(c.succ);
-  var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+((!isAlien()&&c.bane)?' · '+c.bane+' bane'+(c.bane>1?'s':''):'');
+  var bad=r.stressOnes>0;
+  var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+((!isAlien()&&c.bane)?' · '+c.bane+' bane'+(c.bane>1?'s':''):'')+badTag(r.stressOnes);
+  animDice(r.base, r.stress, bad);
   addLog(label, c.succ+'  '+t.t, detail, t.type);
-  if(r.panic){ _lastRoll=null; forcePanic(label); return; }
-  if(pushable && c.succ<1){ _lastRoll={label:label,base:r.base}; showPushOption(); }
+  if(bad){ _lastRoll=null; onBad(label); return; }
+  if(pushable && c.succ<1){ _lastRoll={label:label,base:r.base,stress:r.stress}; showPushOption(); }
   else _lastRoll=null;
 }
 function rollSkill(name){
@@ -971,12 +989,14 @@ function rollAttack(i){
   var mod=clamp(num($('tray-mod').value),-6,6); $('tray-mod').value='0';
   var poolSize=pool+mod, floored=false; if(poolSize<1){ poolSize=1; floored=true; } poolSize=Math.min(20,poolSize);
   var r=rollDicePool(poolSize), c=countPool(r.all), hit=c.succ>=1;
+  var bad=r.stressOnes>0;
   var dmg=hit?(num(w.damage)+(c.succ-1)):0;
   var t=hit?{t:'HIT · '+dmg+' dmg',type:'crit'}:{t:'MISS',type:'fumble'};
-  var detail=poolDetail(r,floored)+' · '+c.succ+' succ';
+  var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+badTag(r.stressOnes);
+  animDice(r.base, r.stress, bad);
   addLog(label, c.succ+'  '+t.t, detail, t.type);
-  if(r.panic){ _lastRoll=null; forcePanic(label); return; }
-  if(!hit){ _lastRoll={label:label,base:r.base}; showPushOption(); } else _lastRoll=null;
+  if(bad){ _lastRoll=null; onBad(label); return; }
+  if(!hit){ _lastRoll={label:label,base:r.base,stress:r.stress}; showPushOption(); } else _lastRoll=null;
 }
 // ── Panic (Alien) ──
 function panicLookup(total){
@@ -1000,6 +1020,7 @@ function rollArmor(){
   var r=num(S.armor); if(r<1){ addLog('Armor','—','No armor rating set','fumble'); return; }
   var rolls=[]; for(var i=0;i<Math.min(12,r);i++)rolls.push(die6());
   var c=countPool(rolls);
+  animDice(rolls, [], false);
   addLog('Armor ('+r+')', c.succ+' blocked', poolStr(rolls)+' · each 6 stops one damage', c.succ?'crit':'fumble');
 }
 function rollCrit(kind){
@@ -1026,25 +1047,31 @@ function showPushOption(){
   if(!_lastRoll)return;
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var old=$('push-choice'); if(old)old.remove();
-  var costTxt=isAlien()?'Cost: +1 Stress (a 1 on a Stress Die triggers Panic).':'Cost: a condition (or damage/stress per bane).';
+  var costTxt=isAlien()?'Cost: +1 Stress (adds a Stress Die — a 1 on a Stress Die triggers Panic).':'Cost: a condition (or damage/stress per bane).';
+  var rerollTxt=isAlien()?'Re-roll every die that isn\'t a 6 — you keep your successes. ':'Re-roll every die that isn\'t a 6 or a 1. ';
   var div=document.createElement('div'); div.className='log-entry push-choice'; div.id='push-choice';
   div.innerHTML='<div class="roll-label">'+esc(_lastRoll.label)+' — push?</div>'
-    +'<div class="roll-detail">Re-roll every base die that isn\'t a 6 or a 1. '+costTxt+'</div>'
+    +'<div class="roll-detail">'+rerollTxt+costTxt+'</div>'
     +'<div class="push-btns"><button onclick="doPush()">Push the roll</button><button onclick="cancelPush()">Keep failure</button></div>';
   entries.insertBefore(div,entries.firstChild); entries.scrollTop=0;
 }
 function cancelPush(){ var c=$('push-choice'); if(c)c.remove(); _lastRoll=null; }
 function doPush(){
   var pr=_lastRoll; var c=$('push-choice'); if(c)c.remove(); if(!pr){ return; } _lastRoll=null;
-  var base=pr.base.map(function(v){ return (v===6||v===1)?v:die6(); });
-  var alien=isAlien(), stressRolls=[], panic=false;
-  if(alien){ bumpStress(1); var lvl=clamp(num(S.stress),0,10); for(var k=0;k<lvl;k++){ var d=die6(); stressRolls.push(d); if(d===1)panic=true; } }
-  animateRoll(base);
-  var cc=countPool(base.concat(stressRolls)), t=tierOf(cc.succ);
-  var detail=poolStr(base)+(stressRolls.length?' + '+stressRolls.length+' stress('+stressRolls.join(',')+')':'')+' · '+cc.succ+' succ · PUSHED'
-    +(alien?' (+1 stress)':(cc.bane?' — a condition / '+cc.bane+' damage or stress':' — take a condition'));
+  var alien=isAlien();
+  // Pushing re-rolls every die that is NOT a success (6); you keep your 6s.
+  var base=pr.base.map(function(v){ return v===6?6:die6(); });
+  var stress=(pr.stress||[]).map(function(v){ return v===6?6:die6(); });
+  var ones=0;
+  if(alien){ bumpStress(1); stress.push(die6()); }   // +1 Stress → add one Stress Die to the re-roll
+  stress.forEach(function(v){ if(v===1)ones++; });
+  var bad=alien && ones>0;
+  var cc=countPool(base.concat(stress)), t=tierOf(cc.succ);
+  var detail=poolStr(base)+(stress.length?' + '+stress.length+' stress('+stress.join(',')+')':'')+' · '+cc.succ+' succ · PUSHED'
+    +(alien?' (+1 stress)'+badTag(ones):(cc.bane?' — a condition / '+cc.bane+' damage or stress':' — take a condition'));
+  animDice(base, stress, bad);
   addLog(pr.label+' · pushed', cc.succ+'  '+t.t, detail, t.type);
-  if(alien && panic){ forcePanic(pr.label+' · pushed'); }
+  if(bad) onBad(pr.label+' · pushed');
 }
 
 // ── Tabs ──
