@@ -135,6 +135,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .body-row{display:flex;gap:14px;padding:16px;align-items:flex-start;}
 .stats-col{width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
 .center-col{flex:1;display:flex;flex-direction:column;min-width:0;gap:14px;}
+.vit-row{display:flex;gap:14px;align-items:stretch;}
+.vit-row>.card{display:flex;flex-direction:column;}
+@media(max-width:860px){.vit-row{flex-direction:column;}}
+.push-inline{margin-top:7px;background:var(--yz);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.push-inline:hover{filter:brightness(1.1);}
 .blk{padding:10px;}
 
 /* Attributes */
@@ -227,6 +232,24 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 body.sheet-locked .edit-only{display:none!important;}
 
 .tbl-empty{padding:12px;font-size:12px;color:var(--muted);}
+.tbl td.inv-details{padding-top:3px;padding-bottom:3px;}
+.inv-details{display:flex;align-items:center;flex-wrap:wrap;gap:2px 4px;}
+.inv-details input{width:auto;}
+.inv-details input.cx{width:40px;}
+.inv-details input.inv-rng{width:74px;}
+.inv-details input.inv-note{flex:1 1 90px;min-width:70px;}
+.section-bar.cbar{flex-wrap:wrap;row-gap:2px;}
+.section-bar.cbar .hdr-right{margin-left:auto;}
+.section-bar.cbar .hdr-btn{padding:3px 7px;font-size:9px;}
+.inv-mini{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6d8489;}
+.inv-type{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--yz-dk);background:var(--yz-lt);border-radius:4px;padding:1px 5px;margin-right:4px;}
+.tbl input.inv-note{min-width:70px;flex:1 1 90px;}
+.tbl input.inv-rng{width:72px;}
+.tbl td.eq-cell{text-align:left;padding-left:8px;}
+#atk-body td{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);}
+#atk-body td.atk-name{text-align:left;}
+.picker-tabs{display:flex;gap:0;padding:4px 12px 0;flex-wrap:wrap;}
+.picker-tabs .tab-btn{flex:0 1 auto;padding:7px 12px;font-size:11px;}
 
 /* Gear / encumbrance */
 .enc-bar{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--rule);flex-wrap:wrap;}
@@ -293,6 +316,20 @@ body.sheet-locked .edit-only{display:none!important;}
 .builder-chip{background:#122023;border:1px solid #274449;color:#dde;border-radius:12px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
 .builder-chip:hover{border-color:var(--yz);}
 .builder-chip.sel{background:#123840;border-color:var(--yz);color:#5fd6ea;}
+.yzeb-steps{display:flex;gap:2px;padding:8px 12px 0;flex-wrap:wrap;border-bottom:1px solid #14262a;}
+.yzeb-step{flex:1 1 auto;display:flex;align-items:center;gap:6px;justify-content:center;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:7px 6px;white-space:nowrap;}
+.yzeb-step.on{color:var(--yz-dk);border-bottom-color:var(--yz);}
+.yzeb-step.done{color:var(--ink);}
+.yzeb-step-n{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#182a2e;color:#8ba3a8;font-size:10px;}
+.yzeb-step.on .yzeb-step-n{background:var(--yz);color:#04232a;}
+.yzeb-step.done .yzeb-step-n{background:var(--yz-dk);color:#fff;}
+.yzeb-nav{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #14262a;}
+.yzeb-list{display:flex;flex-direction:column;max-height:300px;overflow:auto;}
+.yzeb-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.yzeb-gtabs{display:flex;gap:6px;margin-top:12px;}
+.yzeb-2col{display:flex;gap:12px;flex-wrap:wrap;}
+.yzeb-2col>div{flex:1 1 150px;min-width:0;}
+.yzeb-sub{color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;}
 .a-attr{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5fd6ea;margin-top:8px;border-bottom:1px solid #274449;padding-bottom:2px;}
 .a-skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;margin-top:4px;}
 .a-row{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding:1px 0;}
@@ -300,6 +337,9 @@ body.sheet-locked .edit-only{display:none!important;}
 .a-row .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;text-align:right;min-width:34px;}
 .a-row button{width:24px;height:22px;background:#182a2e;border:1px solid #274449;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
 .a-row button:disabled{opacity:.3;cursor:default;}
+.adv-xp-bar{display:flex;align-items:center;gap:10px;margin:4px 0 12px;}
+.adv-xp-val{font-family:'Share Tech Mono',monospace;font-size:22px;color:#5fd6ea;min-width:30px;text-align:center;}
+.adv-tln-list{max-height:260px;overflow:auto;padding:2px;}
 
 /* Dark mode */
 body.dark{--bg:#07161a;--paper:#0e1c20;--ink:#e2eef0;--muted:#8ba3a8;--rule:#28454a;--border:#2f4f56;--box:#132225;--input-bg:#06141a;--input-border:#2f4f56;--section-hdr:#050f12;--yz-lt:#123840;}
@@ -570,24 +610,25 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
 
     <div class="center-col">
-      <div class="card">
+      <div class="vit-row">
+      <div class="card" style="flex:2 1 0;min-width:0;">
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
         <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
         <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Sum of equipped armor">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
-        <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><span class="stress-val" id="stress-val">0</span></div>
+        <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Resolve</span><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
         <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
       </div>
-
       </div>
 
-      <div class="card">
-      <div class="section-bar accent"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Physical</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Mental</button></span></div>
+      <div class="card" style="flex:1 1 0;min-width:0;">
+      <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Ment</button></span></div>
       <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — each applies its penalty to every roll until you remove it. Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
+      </div>
       </div>
 
       <div class="card yze-only">
@@ -614,15 +655,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="tab-panel" id="tab-gear">
         <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span></div>
-        <div class="section-bar"><span>General Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add</button></span></div>
-        <table class="tbl" id="gear-tbl"><thead><tr><th style="width:44%;">Item</th><th style="width:16%;">Weight</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="gear-body"></tbody></table>
-        <div id="gear-empty" class="tbl-empty">No general gear yet.</div>
-        <div class="section-bar"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('weap')">＋ Add</button></span></div>
-        <table class="tbl" id="weap-tbl"><thead><tr><th style="width:30px;" title="Equip to add to Attacks">Eq</th><th style="width:26%;">Weapon</th><th style="width:11%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:16%;">Range</th><th style="width:9%;">Wt</th><th style="width:26px;"></th></tr></thead><tbody id="weap-body"></tbody></table>
-        <div id="weap-empty" class="tbl-empty">No weapons yet.</div>
-        <div class="section-bar"><span>Armor</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('armor')">＋ Add</button></span></div>
-        <table class="tbl" id="armor-tbl"><thead><tr><th style="width:30px;" title="Equip to add to Armor rating">Eq</th><th style="width:40%;">Armor</th><th style="width:12%;">Rating</th><th style="width:10%;">Wt</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="armor-body"></tbody></table>
-        <div id="armor-empty" class="tbl-empty">No armor yet.</div>
+        <div class="section-bar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
+        <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:30%;">Item</th><th>Details</th><th style="width:9%;">Wt</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
+        <div id="inv-empty" class="tbl-empty">No gear yet. Tap ＋ Add Gear to add general gear, weapons, or armor.</div>
       </div>
 
       <div class="tab-panel" id="tab-story">
@@ -666,8 +701,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click a skill or weapon to roll its dice pool</div></div>
   <div class="dice-tray">
-    <div class="tray-row"><span class="tray-label">Modifier</span><span class="tray-label" style="color:#6d8489;">±dice</span><input class="tray-input" id="tray-mod" type="number" value="0" min="-6" max="6" title="situational + / − dice"></div>
-    <div class="tray-row"><span class="tray-label">Free pool</span><input class="tray-input" id="tray-qn" type="number" value="1" min="1" max="12"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
+    <div class="tray-row"><span class="tray-label">± Dice</span><input class="tray-input" id="tray-mod" type="number" value="0" min="-6" max="12" title="Adds to / subtracts from your next sheet roll — or set the size of a free d6 pool and tap Roll"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
   </div>
 </div>
 </div>
@@ -676,6 +710,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div id="picker-overlay" class="ov" onclick="if(event.target===this)closePicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl" id="picker-title">Add</div><button class="x" onclick="closePicker()">✕</button></div>
+    <div id="picker-tabs" class="picker-tabs" style="display:none;">
+      <button class="tab-btn" data-pk="gear" onclick="pickerTab('gear')">General Gear</button>
+      <button class="tab-btn" data-pk="weap" onclick="pickerTab('weap')">Weapons</button>
+      <button class="tab-btn" data-pk="armor" onclick="pickerTab('armor')">Armor</button>
+    </div>
     <div class="brow-controls"><input id="picker-search" class="m-input" placeholder="Search…" oninput="renderPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addCustomFromPicker()">＋ Add custom</button></div>
     <div class="modal-bd brow-list" id="picker-body"></div>
   </div>
@@ -753,7 +792,7 @@ function renderAttrSkills(){
   ATTRS.forEach(function(a){
     var cpen=(typeof critPenalty==='function')?critPenalty():0;
     var apool=Math.max(0, attrVal(a.key)-condPenaltyFor(a.key)-cpen);
-    var head='<div class="attr-row"><span class="a-name">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
+    var head='<div class="attr-row"><span class="a-name" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool" style="cursor:pointer;">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
       var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key)-cpen;
@@ -867,29 +906,46 @@ function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); schedu
 function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); scheduleAutosave(); }
 function invIn(i,f,val,cls,ph){ return '<input'+(cls?' class="'+cls+'"':'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
 function eqBox(i,on){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="Equip">'; }
+// One combined inventory list — general gear, weapons and armor together, in
+// S.gear order. Weapons & armor carry an equip checkbox; details adapt to kind.
 function renderInventory(){
-  var gb=$('gear-body'); if(gb){ gb.innerHTML=''; var gg=gearOf('gear');
-    gg.forEach(function(o){ var i=o.i,g=o.g; var tr=document.createElement('tr');
-      tr.innerHTML='<td>'+invIn(i,'name',g.name,'','Item')+'</td><td>'+invIn(i,'weight',g.weight,'cx','1')+'</td><td>'+invIn(i,'note',g.note,'','note')+'</td><td style="text-align:right;"><button class="row-x" onclick="gDel('+i+')">✕</button></td>';
-      gb.appendChild(tr); });
-    $('gear-empty').style.display=gg.length?'none':'block'; }
-  var wb=$('weap-body'); if(wb){ wb.innerHTML=''; var ww=gearOf('weapon');
-    ww.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
-      tr.innerHTML='<td style="text-align:center;">'+eqBox(i,w.equipped)+'</td><td>'+invIn(i,'name',w.name,'','Weapon')+'</td><td>'+invIn(i,'bonus',w.bonus,'cx')+'</td><td>'+invIn(i,'damage',w.damage,'cx')+'</td><td>'+invIn(i,'range',w.range,'')+'</td><td>'+invIn(i,'weight',w.weight,'cx')+'</td><td style="text-align:right;"><button class="row-x" onclick="gDel('+i+')">✕</button></td>';
-      wb.appendChild(tr); });
-    $('weap-empty').style.display=ww.length?'none':'block'; }
-  var ab=$('armor-body'); if(ab){ ab.innerHTML=''; var aa=gearOf('armor');
-    aa.forEach(function(o){ var i=o.i,a=o.g; var tr=document.createElement('tr');
-      tr.innerHTML='<td style="text-align:center;">'+eqBox(i,a.equipped)+'</td><td>'+invIn(i,'name',a.name,'','Armor')+'</td><td>'+invIn(i,'rating',a.rating,'cx')+'</td><td>'+invIn(i,'weight',a.weight,'cx')+'</td><td>'+invIn(i,'note',a.note,'','note')+'</td><td style="text-align:right;"><button class="row-x" onclick="gDel('+i+')">✕</button></td>';
-      ab.appendChild(tr); });
-    $('armor-empty').style.display=aa.length?'none':'block'; }
+  var body=$('inv-body');
+  if(body){
+    body.innerHTML='';
+    S.gear.forEach(function(g,i){
+      var kind=g.kind||'gear';
+      var eq=(kind==='weapon'||kind==='armor')?eqBox(i,g.equipped):'';
+      var details;
+      if(kind==='weapon'){
+        details='<span class="inv-type">Weapon</span>'
+          +'<span class="inv-mini">bonus</span>'+invIn(i,'bonus',g.bonus,'cx')
+          +'<span class="inv-mini">dmg</span>'+invIn(i,'damage',g.damage,'cx')
+          +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng');
+      } else if(kind==='armor'){
+        details='<span class="inv-type">Armor</span>'
+          +'<span class="inv-mini">rating</span>'+invIn(i,'rating',g.rating,'cx')
+          +invIn(i,'note',g.note,'inv-note','note');
+      } else {
+        details=invIn(i,'note',g.note,'inv-note','note');
+      }
+      var ph=kind==='weapon'?'Weapon':kind==='armor'?'Armor':'Item';
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td class="eq-cell">'+eq+'</td>'
+        +'<td>'+invIn(i,'name',g.name,'',ph)+'</td>'
+        +'<td class="inv-details">'+details+'</td>'
+        +'<td>'+invIn(i,'weight',g.weight,'cx')+'</td>'
+        +'<td style="text-align:right;"><button class="row-x" onclick="gDel('+i+')">✕</button></td>';
+      body.appendChild(tr);
+    });
+    var e=$('inv-empty'); if(e) e.style.display=S.gear.length?'none':'block';
+  }
   renderEnc(); renderArmorVal(); relock();
 }
 function renderAttacks(){
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
   eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
-    tr.innerHTML='<td>'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
+    tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
     body.appendChild(tr); });
   $('atk-empty').style.display=eq.length?'none':'block';
   renderArmorVal();
@@ -927,8 +983,17 @@ function pickerPool(kind){
   return g;
 }
 function openPicker(kind){
-  _pk=kind; $('picker-title').textContent=kind==='weap'?'✦ Weapons':kind==='talent'?'✦ Talents':kind==='armor'?'✦ Armor':'✦ Gear';
+  _pk=kind;
+  var gearFam=(kind==='gear'||kind==='weap'||kind==='armor');
+  var tabs=$('picker-tabs'); if(tabs) tabs.style.display=gearFam?'flex':'none';
+  $('picker-title').textContent=gearFam?'✦ Add Gear':(kind==='talent'?'✦ Talents':'✦ Add');
+  if(tabs&&gearFam){ [].forEach.call(tabs.children,function(b){ b.classList.toggle('on', b.dataset.pk===kind); }); }
   $('picker-search').value=''; renderPicker(); $('picker-overlay').classList.add('open');
+}
+function pickerTab(kind){
+  _pk=kind;
+  var tabs=$('picker-tabs'); if(tabs)[].forEach.call(tabs.children,function(b){ b.classList.toggle('on', b.dataset.pk===kind); });
+  $('picker-search').value=''; renderPicker();
 }
 function closePicker(){ $('picker-overlay').classList.remove('open'); }
 function renderPicker(){
@@ -1062,8 +1127,10 @@ function rollPanic(){
   addLog('Panic · d6 '+roll+' + stress '+stress+' − Resolve '+res+' = '+total, row?row.effect:'—', row?row.detail:'', total<=0?'normal':'fumble');
 }
 function rollQuick(){
-  var n=clamp(num($('tray-qn').value),1,12);
-  doPool(n+'d6 pool', n, false);
+  // The ±Dice field doubles as the free-pool size here. Zero it first so doPool's
+  // modifier step doesn't add it a second time, then roll a pool of that many dice.
+  var n=clamp(num($('tray-mod').value),1,12); $('tray-mod').value='0';
+  doPool(n+'d6 free pool', n, false);
 }
 function rollArmor(){
   var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab','fumble'); return; }
@@ -1113,21 +1180,19 @@ function critInfo(i){ var c=(S.crits||[])[i]; var d=$('crit-detail'); if(!c||!d)
   var modTxt=num(c.mod)?(' Removes '+Math.abs(num(c.mod))+' dice from every pool.'):'';
   d.innerHTML='<b style="color:var(--ink);">'+esc(c.name||'Injury')+'.</b> '+esc(c.effect||'—')+modTxt; }
 // ── Push option ──
+function clearPushButtons(){ var es=$('log-entries'); if(!es)return; [].forEach.call(es.querySelectorAll('.push-inline'),function(b){ b.remove(); }); }
+// Attach a single "Push" button to the roll's own log bubble (the newest entry).
 function showPushOption(){
   if(!_lastRoll)return;
-  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
-  var old=$('push-choice'); if(old)old.remove();
-  var costTxt=isAlien()?'Cost: +1 Stress (adds a Stress Die — a 1 on a Stress Die triggers a Stress Response).':'Cost: a condition (or damage/stress per bane).';
-  var rerollTxt=isAlien()?'Re-roll every die that isn\'t a 6 — you keep your successes. ':'Re-roll every die that isn\'t a 6 or a 1. ';
-  var div=document.createElement('div'); div.className='log-entry push-choice'; div.id='push-choice';
-  div.innerHTML='<div class="roll-label">'+esc(_lastRoll.label)+' — push?</div>'
-    +'<div class="roll-detail">'+rerollTxt+costTxt+'</div>'
-    +'<div class="push-btns"><button onclick="doPush()">Push the roll</button><button onclick="cancelPush()">Keep roll</button></div>';
-  entries.insertBefore(div,entries.firstChild); entries.scrollTop=0;
+  clearPushButtons();
+  var entries=$('log-entries'); var top=entries.querySelector('.log-entry'); if(!top)return;
+  var b=document.createElement('button'); b.className='push-inline'; b.textContent='Push';
+  b.title=isAlien()?'Re-roll every die that isn\'t a 6 — keep your successes. +1 Stress (a 1 on a Stress Die triggers a Stress Response).':'Re-roll every die that isn\'t a 6 or a 1 — then take a condition.';
+  b.onclick=function(){ doPush(); };
+  top.appendChild(b); entries.scrollTop=0;
 }
-function cancelPush(){ var c=$('push-choice'); if(c)c.remove(); _lastRoll=null; }
 function doPush(){
-  var pr=_lastRoll; var c=$('push-choice'); if(c)c.remove(); if(!pr){ return; } _lastRoll=null;
+  var pr=_lastRoll; clearPushButtons(); if(!pr){ return; } _lastRoll=null;
   var alien=isAlien();
   // Pushing re-rolls every die that is NOT a success (6); you keep your 6s.
   var base=pr.base.map(function(v){ return v===6?6:die6(); });
@@ -1172,39 +1237,63 @@ function hasCharacter(){
 function refreshWizardButtons(){ var built=hasCharacter(), c=$('build-btn'), l=$('level-btn'); if(c)c.style.display=built?'none':''; if(l)l.style.display=built?'':'none'; }
 
 // ── Experience modal (spend XP; skills/attrs raised directly on the sheet) ──
-function openAdvance(){ renderAdvance(); $('advance-overlay').classList.add('open'); }
-function closeAdvance(){ $('advance-overlay').classList.remove('open'); }
+// A snapshot of skills/talents taken when the Level-Up modal opens, so each
+// purchase made this session can be undone (with − / ✕) before you hit Done.
+var _advSnap=null;
+function openAdvance(){
+  _advSnap={ skills:{}, talentNames:{} };
+  BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ _advSnap.skills[s.name]=num(S.skills[s.name]); });
+  (S.talents||[]).forEach(function(t){ if(t&&t.name)_advSnap.talentNames[t.name]=1; });
+  renderAdvance(); $('advance-overlay').classList.add('open');
+}
+function closeAdvance(){ $('advance-overlay').classList.remove('open'); _advSnap=null; }
 // ── Advancement: spend XP on skill points or new talents. Attributes are fixed
 //    at creation. Evolved Edition: raising a skill to level L costs 5 × L XP
-//    (a new skill at level 1 = 5 XP); each new talent costs a flat 5 XP. ──
+//    (a new skill at level 1 = 5 XP); each new talent costs a flat 5 XP. XP is
+//    earned in play (set on the sheet), not edited inside this modal. ──
 var TALENT_XP=5;
 function skillStepCost(v){ return 5*(v+1); }   // XP to go from level v → v+1
+function talentOf(name){ for(var i=0;i<ALIEN_TL.length;i++){ if(ALIEN_TL[i].name===name)return ALIEN_TL[i]; } return null; }
 function renderAdvance(){
   var xp=num(S.xp);
-  var h='<p class="m-hint">Spend <b style="color:#5fd6ea;">XP</b> to buy skill points (<b>5 × the new level</b> XP per step, to a max of 5) or new talents (<b>'+TALENT_XP+' XP</b> each). Attributes are set at creation. Add session XP with ＋ below.</p>';
-  h+='<div style="display:flex;align-items:center;gap:10px;margin:4px 0 12px;"><span class="m-lbl" style="margin:0;">Experience</span>'
-    +'<span id="adv-xp" style="font-family:\'Share Tech Mono\',monospace;font-size:22px;color:#5fd6ea;min-width:30px;text-align:center;">'+xp+'</span><span class="m-hint" style="margin:0;">XP available</span>'
-    +'<span style="margin-left:auto;display:flex;gap:4px;"><button class="m-btn ghost" onclick="advXP(-1)">−1</button><button class="m-btn ghost" onclick="advXP(1)">＋1</button><button class="m-btn ghost" onclick="advXP(5)">＋5</button></span></div>';
-  h+='<div class="m-lbl">Skills <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(buy +1 for 5 × new level XP)</span></div>';
+  var h='<p class="m-hint">Spend <b style="color:#5fd6ea;">XP</b> to raise skills (<b>5 × the new level</b>, max 5) or learn talents (<b>'+TALENT_XP+' XP</b> each). Undo any change with − or ✕ before you commit with <b>Done</b>. XP is earned in play.</p>';
+  h+='<div class="adv-xp-bar"><span class="m-lbl" style="margin:0;">Experience</span>'
+    +'<span id="adv-xp" class="adv-xp-val">'+xp+'</span><span class="m-hint" style="margin:0;">XP available</span></div>';
+  h+='<div class="m-lbl">Skills</div>';
   ATTRS.forEach(function(a){
     var list=skillsByAttr(a.key); if(!list.length)return;
     h+='<div class="a-attr">'+esc(a.name)+'</div><div class="a-skills">';
-    h+=list.map(function(s){ var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'"), cost=skillStepCost(v), can=v<5 && xp>=cost;
+    h+=list.map(function(s){
+      var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'");
+      var base=(_advSnap&&_advSnap.skills[s.name]!=null)?_advSnap.skills[s.name]:v;
+      var cost=skillStepCost(v), canBuy=v<5 && xp>=cost, canUndo=v>base;
       return '<div class="a-row"><span class="a-name2">'+esc(s.name)+'</span><span class="a-code">'+v+'</span>'
-        +'<button onclick="buySkill(\''+esn+'\')"'+(can?'':' disabled')+' title="'+(v>=5?'At maximum':'Buy +1 (to level '+(v+1)+') for '+cost+' XP')+'">＋'+cost+'</button></div>'; }).join('');
+        +'<button onclick="undoSkill(\''+esn+'\')"'+(canUndo?'':' disabled')+' title="'+(canUndo?'Undo — refund '+(5*v)+' XP':'Nothing bought this session')+'">−</button>'
+        +'<button onclick="buySkill(\''+esn+'\')"'+(canBuy?'':' disabled')+' title="'+(v>=5?'At maximum':'Raise to level '+(v+1)+' — '+cost+' XP')+'">＋</button></div>';
+    }).join('');
     h+='</div>';
   });
-  var owned={}; (S.talents||[]).forEach(function(t){ if(t&&t.name)owned[t.name]=1; });
+  h+='<div class="m-lbl" style="margin-top:14px;">Talents</div>';
+  var owned={}, added=[]; (S.talents||[]).forEach(function(t){ if(t&&t.name){ owned[t.name]=1; if(!(_advSnap&&_advSnap.talentNames[t.name])) added.push(t.name); } });
+  if(added.length){
+    h+='<div class="m-hint" style="margin:0 0 4px;color:#5fd6ea;">Learned this session — ✕ to undo:</div>';
+    h+='<div class="adv-tln-list">'+added.map(function(n){ var t=talentOf(n)||{};
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(n)+'<span class="brow-cost">'+esc(t.career||'')+'</span></div>'
+        +(t.desc?'<div class="brow-desc">'+esc(t.desc)+'</div>':'')+'</div><button class="brow-add" style="background:#3a1a1a;color:#df8a8a;" onclick="undoTalent(\''+n.replace(/'/g,"\\'")+'\')">✕ Undo</button></div>'; }).join('')+'</div>';
+  }
   var avail=ALIEN_TL.filter(function(t){ return t&&t.name&&!owned[t.name]; });
-  h+='<div class="m-lbl" style="margin-top:14px;">New Talent <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">('+TALENT_XP+' XP each)</span></div>';
+  h+='<div class="m-hint" style="margin:8px 0 4px;">Available:</div>';
   if(!avail.length){ h+='<p class="m-hint" style="margin:0;">You have every talent.</p>'; }
-  else { h+='<div style="display:flex;flex-wrap:wrap;gap:6px;max-height:190px;overflow:auto;padding:2px;">'
-      +avail.map(function(t){ var can=xp>=TALENT_XP; return '<button class="builder-chip" onclick="buyTalent(\''+t.name.replace(/'/g,"\\'")+'\')"'+(can?'':' disabled')+' title="'+esc(t.desc||'')+'">'+esc(t.name)+'</button>'; }).join('')+'</div>'; }
+  else { h+='<div class="adv-tln-list">'+avail.map(function(t){ var can=xp>=TALENT_XP;
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(t.name)+'<span class="brow-cost">'+esc(t.career||'')+' · '+TALENT_XP+' XP</span></div>'
+        +(t.desc?'<div class="brow-desc">'+esc(t.desc)+'</div>':'')+'</div><button class="brow-add'+(can?'':' have')+'"'+(can?' onclick="buyTalent(\''+t.name.replace(/'/g,"\\'")+'\')"':' disabled')+'>＋ Learn</button></div>'; }).join('')+'</div>'; }
   h+='<div style="margin-top:16px;text-align:right;"><button class="m-btn" onclick="closeAdvance()">Done</button></div>';
   $('advance-body').innerHTML=h;
 }
 function buySkill(name){ var v=num(S.skills[name]), cost=skillStepCost(v); if(v>=5||num(S.xp)<cost)return; S.skills[name]=v+1; S.xp=num(S.xp)-cost; $('f-xp').value=S.xp; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','+1 '+name,'Spent '+cost+' XP · now level '+(v+1),'crit'); }catch(e){} }
-function buyTalent(name){ if(num(S.xp)<TALENT_XP)return; var desc=''; for(var i=0;i<ALIEN_TL.length;i++){ if(ALIEN_TL[i].name===name){ desc=ALIEN_TL[i].desc||''; break; } } S.talents=S.talents||[]; S.talents.push({name:name,note:desc}); S.xp=num(S.xp)-TALENT_XP; $('f-xp').value=S.xp; renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','New talent: '+name,'Spent '+TALENT_XP+' XP','crit'); }catch(e){} }
+function undoSkill(name){ var v=num(S.skills[name]); var base=(_advSnap&&_advSnap.skills[name]!=null)?_advSnap.skills[name]:0; if(v<=base)return; var refund=5*v; S.skills[name]=v-1; S.xp=num(S.xp)+refund; $('f-xp').value=S.xp; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','−1 '+name,'Refunded '+refund+' XP · now level '+(v-1),'normal'); }catch(e){} }
+function buyTalent(name){ if(num(S.xp)<TALENT_XP)return; var t=talentOf(name); S.talents=S.talents||[]; S.talents.push({name:name,note:(t&&t.desc)||''}); S.xp=num(S.xp)-TALENT_XP; $('f-xp').value=S.xp; renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','New talent: '+name,'Spent '+TALENT_XP+' XP','crit'); }catch(e){} }
+function undoTalent(name){ var idx=-1; for(var i=(S.talents||[]).length-1;i>=0;i--){ if(S.talents[i]&&S.talents[i].name===name){ idx=i; break; } } if(idx<0)return; S.talents.splice(idx,1); S.xp=num(S.xp)+TALENT_XP; $('f-xp').value=S.xp; renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','Removed talent: '+name,'Refunded '+TALENT_XP+' XP','normal'); }catch(e){} }
 function advXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; var e=$('adv-xp'); if(e)e.textContent=S.xp; renderAdvance(); scheduleAutosave(); }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent=num(S.xp)?('XP '+S.xp):''; }
 
@@ -1220,11 +1309,10 @@ function showRollToast(label,result,detail,type){
 function addLog(label,result,detail,type){
   type=type||'normal';
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
-  var pc=$('push-choice'); if(pc && label!==undefined) { /* leave push-choice until acted on */ }
   var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   div.innerHTML='<div class="roll-label">'+esc(label)+'</div><div class="roll-result">'+esc(result)+'</div><div class="roll-detail">'+esc(detail)+'</div>';
   if(typeof campaignBroadcast==='function') campaignBroadcast(label,result,detail,type);
-  entries.insertBefore(div, $('push-choice')||entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
+  entries.insertBefore(div, entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
   showRollToast(label,result,detail,type);
 }
 function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click a skill or weapon to roll its dice pool</div>'; _lastRoll=null; }
