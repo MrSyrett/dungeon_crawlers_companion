@@ -44,7 +44,7 @@
   const CLASS_CHOICES = {
     Fighter: [{ kind:"style", level:1 }],
     Paladin: [{ kind:"style", level:2 }],
-    Ranger:  [{ kind:"expertise", level:1, count:1, note:"Deft Explorer" }, { kind:"style", level:2 }],
+    Ranger:  [{ kind:"expertise", level:2, count:1, note:"Deft Explorer" }, { kind:"style", level:2 }],
     Rogue:   [{ kind:"expertise", level:1, count:2 }],
     Bard:    [{ kind:"expertise", level:2, count:2 }],
     Cleric:  [{ kind:"pick", level:1, name:"Divine Order", options:[
@@ -62,7 +62,7 @@
              bg2:"", bg1:"", classSkills:[], multiclass:[],
              name:"", alignment:"", eberron:true, au:true,
              fightingStyle:"", expertise:[], orders:{}, advances:[],
-             pickedCantrips:[], pickedSpells:[], spellsAvail:true, equipChoice:"gear" };
+             pickedCantrips:[], pickedSpells:[], spellsAvail:true, equipChoice:"gear", equipPkg:0 };
   }
   function clsData() { return D.classes().find((c) => c.name === st.cls) || null; }
   function spData() { return D.species().find((s) => s.name === st.species) || null; }
@@ -323,7 +323,9 @@
     let h = '<p class="m-hint">You are automatically proficient in your background skills. Choose your class skills.</p>';
     if (bgSkills.length) h += '<div class="dndb-note">From ' + esc(b.name) + ': <b>' + esc(bgSkills.join(", ")) + '</b></div>';
     if (c) {
-      const from = c.proficiencies && c.proficiencies.skillsFrom && c.proficiencies.skillsFrom.length ? c.proficiencies.skillsFrom : D.skills().map((s) => s.name);
+      let from = c.proficiencies && c.proficiencies.skillsFrom && c.proficiencies.skillsFrom.length ? c.proficiencies.skillsFrom : D.skills().map((s) => s.name);
+      // "Any" means the class chooses from the full skill list (e.g. Bard). Expand it.
+      if (from.some((s) => /^any$/i.test(String(s).trim()))) from = D.skills().map((s) => s.name);
       const n = c.proficiencies && c.proficiencies.skillsChoose ? c.proficiencies.skillsChoose : 2;
       h += '<span class="m-lbl">Choose ' + n + ' from ' + esc(c.name) + ' <span id="dndb-sk-count" style="color:#8ad4ff;"></span></span><div class="dndb-grid">';
       from.forEach((s) => { const dis = bgSkills.map((x)=>x.toLowerCase()).includes(s.toLowerCase()); h += '<div class="dndb-card small' + (st.classSkills.includes(s) ? " on" : "") + (dis ? " disabled" : "") + '" data-sk="' + esc(s) + '" data-max="' + n + '"><div class="dc-title">' + esc(s) + (dis ? " ✓bg" : "") + '</div></div>'; });
@@ -373,8 +375,10 @@
       h += '<span class="m-lbl">Improvement ' + (i+1) + '</span>';
       h += '<div class="dndb-seg" style="margin:4px 0 8px;"><button class="dndb-seg-btn' + (av.mode!=="feat"?" on":"") + '" data-advmode="asi" data-i="' + i + '">Ability Scores</button><button class="dndb-seg-btn' + (av.mode==="feat"?" on":"") + '" data-advmode="feat" data-i="' + i + '">Feat</button></div>';
       if (av.mode === "feat") {
+        // An ASI slot takes a General feat (Epic Boon only at level 19+). Origin feats come
+        // from the background, and Fighting Style feats from the class choice step.
         h += '<select class="m-input dndb-adv-feat" data-i="' + i + '"><option value="">Select a feat…</option>' +
-          D.feats().filter((f) => (f.category||"") !== "Fighting Style" && allowSrc(f)).slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (av.feat===f.name?" selected":"") + '>' + esc(f.name) + " — " + esc(f.category) + '</option>').join("") + '</select>';
+          D.feats().filter((f) => { if (!allowSrc(f)) return false; const cat = f.category || ""; if (cat === "General") return true; if (cat === "Epic Boon") return (st.level || 1) >= 19; return false; }).slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (av.feat===f.name?" selected":"") + '>' + esc(f.name) + " — " + esc(f.category) + '</option>').join("") + '</select>';
         const f = D.feats().find((x) => x.name === av.feat);
         if (f) h += '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || "") + '</div>';
       } else {
@@ -411,14 +415,34 @@
     }
     return h;
   }
+  // startingEquipment is irregular across classes: sometimes one comma-joined package
+  // string, sometimes a package spread over several array entries, sometimes multiple
+  // alternative packages. Entries beginning with "or " start a new alternative; the
+  // pure "N GP" entry is the gold option. Returns { packages:[[item,…],…], gold }.
+  function parseEquip(c) {
+    const eq = (c && c.startingEquipment) ? c.startingEquipment : [];
+    const groups = [];
+    eq.forEach((raw) => {
+      const s = String(raw).trim(), isAlt = /^or\s+/i.test(s), body = s.replace(/^or\s+/i, "");
+      if (!groups.length || isAlt) groups.push([body]); else groups[groups.length - 1].push(body);
+    });
+    const packages = []; let gold = 0;
+    groups.forEach((g) => {
+      const items = [];
+      g.forEach((part) => part.split(/,\s*/).forEach((x) => { const t = x.trim(); if (t) items.push(t); }));
+      if (items.length === 1 && /^\d+\s*GP$/i.test(items[0])) { const n = parseInt(items[0], 10) || 0; if (n > gold) gold = n; }
+      else if (items.length) packages.push(items);
+    });
+    return { packages, gold };
+  }
   function rEquipment() {
-    const c = clsData();
-    const eq = c && c.startingEquipment ? c.startingEquipment : [];
-    const gear = eq[0] || "";
-    const goldN = (String(eq[1] || "").match(/(\d+)\s*GP/i) || [])[1];
+    const c = clsData(), pe = parseEquip(c);
+    if (st.equipPkg == null || st.equipPkg >= pe.packages.length) st.equipPkg = 0;
     let h = '<p class="m-hint">Take your class\'s starting equipment package, or start with gold to buy your own gear.</p><div class="dndb-grid" style="grid-template-columns:1fr;">';
-    h += '<div class="dndb-card' + (st.equipChoice === "gear" ? " on" : "") + '" data-equip="gear"><div class="dc-title">Equipment Package</div><div class="dc-sub dc-plain">' + esc(gear || "—") + '</div></div>';
-    if (goldN) h += '<div class="dndb-card' + (st.equipChoice === "gold" ? " on" : "") + '" data-equip="gold"><div class="dc-title">Starting Gold</div><div class="dc-sub dc-plain">' + esc(goldN) + ' GP to spend on your own gear</div></div>';
+    pe.packages.forEach((items, i) => {
+      h += '<div class="dndb-card' + (st.equipChoice === "gear" && st.equipPkg === i ? " on" : "") + '" data-equip="gear" data-pkg="' + i + '"><div class="dc-title">' + (pe.packages.length > 1 ? "Equipment Option " + (i + 1) : "Equipment Package") + '</div><div class="dc-sub dc-plain">' + esc(items.join(", ")) + '</div></div>';
+    });
+    if (pe.gold) h += '<div class="dndb-card' + (st.equipChoice === "gold" ? " on" : "") + '" data-equip="gold"><div class="dc-title">Starting Gold</div><div class="dc-sub dc-plain">' + pe.gold + ' GP to spend on your own gear</div></div>';
     h += "</div>";
     return h;
   }
@@ -449,7 +473,7 @@
       h += '<div class="dr-line">Spells: <b>' + esc(spells.join(", ") || "none chosen") + '</b></div>';
     }
     const c2 = clsData(); const eq = c2 && c2.startingEquipment ? c2.startingEquipment : [];
-    h += '<div class="dr-line">Starting gear: <b>' + esc(st.equipChoice === "gold" ? ((String(eq[1] || "").match(/(\d+)\s*GP/i) || [])[1] || "0") + " GP" : "Equipment package") + '</b></div>';
+    h += '<div class="dr-line">Starting gear: <b>' + esc(st.equipChoice === "gold" ? (parseEquip(c).gold + " GP") : "Equipment package") + '</b></div>';
     h += "</div>";
     return h;
   }
@@ -474,8 +498,10 @@
     body.querySelectorAll(".dndb-array").forEach((el) => el.addEventListener("change", () => { const a = el.dataset.abil, v = el.value; ABIL.forEach((x) => { if (x !== a && String(st.arrayPick[x]) === String(v)) delete st.arrayPick[x]; }); if (v === "") delete st.arrayPick[a]; else st.arrayPick[a] = parseInt(v,10); render(); }));
     body.querySelectorAll(".dndb-manual").forEach((el) => el.addEventListener("input", () => { st.base[el.dataset.abil] = Math.max(1, Math.min(20, parseInt(el.value,10) || 8)); updTotals(); }));
     body.querySelectorAll(".dndb-pm").forEach((el) => el.addEventListener("click", () => { pbAdjust(el.dataset.pb, parseInt(el.dataset.d,10)); }));
-    const bg2 = $("dndb-bg2"); if (bg2) bg2.addEventListener("change", () => { st.bg2 = bg2.value; updTotals(); });
-    const bg1 = $("dndb-bg1"); if (bg1) bg1.addEventListener("change", () => { st.bg1 = bg1.value; updTotals(); });
+    // The +2 and +1 must go to two DIFFERENT abilities (2024). If they collide, bump the other.
+    const bgAbils = () => (bgData() || {}).abilityScores || [];
+    const bg2 = $("dndb-bg2"); if (bg2) bg2.addEventListener("change", () => { st.bg2 = bg2.value; if (st.bg1 === st.bg2) st.bg1 = bgAbils().find((a) => a !== st.bg2) || ""; render(); });
+    const bg1 = $("dndb-bg1"); if (bg1) bg1.addEventListener("change", () => { st.bg1 = bg1.value; if (st.bg2 === st.bg1) st.bg2 = bgAbils().find((a) => a !== st.bg1) || ""; render(); });
     body.querySelectorAll("[data-sk]").forEach((el) => el.addEventListener("click", () => {
       if (el.classList.contains("disabled")) return;
       const s = el.dataset.sk, max = parseInt(el.dataset.max,10);
@@ -516,7 +542,7 @@
       render();
     }));
     // equipment
-    body.querySelectorAll("[data-equip]").forEach((el) => el.addEventListener("click", () => { st.equipChoice = el.dataset.equip; render(); }));
+    body.querySelectorAll("[data-equip]").forEach((el) => el.addEventListener("click", () => { st.equipChoice = el.dataset.equip; if (el.dataset.pkg != null) st.equipPkg = parseInt(el.dataset.pkg, 10) || 0; render(); }));
     updTotals(); updSkillCount();
   }
   function pbAdjust(a, d) {
@@ -548,6 +574,12 @@
       case "Subclass": return !hasSubclass() || !!st.subclass;
       case "Species": { const sp = spData(); if (!st.species) return false; if (sp && sp.lineages && sp.lineages.length && !st.lineage) return false; return true; }
       case "Background": return !!st.background;
+      case "Abilities": {
+        if (st.method === "array") return ABIL.every((a) => st.arrayPick[a] != null);
+        if (st.method === "pointbuy") { const costs = (D.tables() && D.tables().pointBuyCosts) || {8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9}; const budget = (D.tables() && D.tables().pointBuyBudget) || 27; return ABIL.reduce((s,a) => s + (costs[st.base[a]] || 0), 0) <= budget; }
+        return true;
+      }
+      case "Skills": { const c = clsData(); if (!c) return true; const n = (c.proficiencies && c.proficiencies.skillsChoose) ? c.proficiencies.skillsChoose : 2; return st.classSkills.length >= n; }
       case "Choices": {
         for (const ch of classChoices()) {
           if (ch.kind === "style" && !st.fightingStyle) return false;
@@ -613,17 +645,20 @@
     });
     // starting equipment vs gold
     let inv = [], gp = 0;
-    if (st.equipChoice === "gold" && c && c.startingEquipment) {
-      const g = (String(c.startingEquipment[1] || "").match(/(\d+)\s*GP/i) || [])[1];
-      gp = g ? parseInt(g, 10) : 0;
-    } else if (c && c.startingEquipment && c.startingEquipment[0]) {
-      c.startingEquipment[0].split(/,\s*/).forEach((x) => {
-        const t = x.trim();
+    const pe = parseEquip(c);
+    if (st.equipChoice === "gold") {
+      gp = pe.gold;
+    } else {
+      const pkg = pe.packages[st.equipPkg || 0] || pe.packages[0] || [];
+      pkg.forEach((t) => {
         const gold = t.match(/^(\d+)\s*GP$/i); if(gold){ gp += parseInt(gold[1], 10); return; }   // gold → coins, not an item
         const m = t.match(/^(\d+)\s+(.*)/);
         const item = resolveItem(m ? m[2] : t);
         inv.push({ name: item.name, ref: item.ref, qty: m ? parseInt(m[1], 10) : 1 });
       });
+      // Equip the package's armor/shield so the sheet computes AC from it.
+      const armorNames = new Set((D.armor() || []).map((a) => String(a.name).toLowerCase()));
+      inv.forEach((it) => { if (it.ref && armorNames.has(String(it.ref).toLowerCase())) it.equipped = true; });
     }
     // spells
     const spellsKnown = st.pickedCantrips.map((n) => ({ name:n, prepared:true }))

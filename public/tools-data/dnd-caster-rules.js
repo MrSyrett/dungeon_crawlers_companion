@@ -107,8 +107,12 @@
   // full-caster table when more than one caster class is present — the C2 fix).
   function maxSpellLevelMulti(classLevels) {
     const T = TABLES(); if (!T) return 1;
-    const casters = (classLevels || []).map((cl) => ({ cl, c: classByName(cl.cls) })).filter((x) => x.c && isCasterClass(x.c) && x.c.spellcasting !== "pact");
-    if (casters.length <= 1) return casters.length ? maxSpellLevelSingle(casters[0].c, num(casters[0].cl.level)) : 0;
+    const all = (classLevels || []).map((cl) => ({ cl, c: classByName(cl.cls) })).filter((x) => x.c && isCasterClass(x.c));
+    const nonPact = all.filter((x) => x.c.spellcasting !== "pact");
+    // All casters are Pact Magic (e.g. a pure Warlock): use the highest single Pact level,
+    // not the combined full-caster table (which would return 0 and hide every leveled spell).
+    if (nonPact.length === 0) { let m = 0; all.forEach((x) => { m = Math.max(m, maxSpellLevelSingle(x.c, num(x.cl.level))); }); return m; }
+    if (nonPact.length === 1) return maxSpellLevelSingle(nonPact[0].c, num(nonPact[0].cl.level));
     const mcl = combinedCasterLevel(classLevels); const arr = (T.fullCasterSlots || [])[mcl-1] || []; let m = 0; arr.forEach((n, i) => { if (n > 0) m = i+1; });
     return m;
   }

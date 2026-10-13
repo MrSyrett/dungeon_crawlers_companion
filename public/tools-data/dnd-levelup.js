@@ -59,13 +59,13 @@
     const sub = existing ? existing.subclass : "";
     const needSub = !!(c && !sub && newLevel >= (c.subclassLevel || 3) && (c.subclasses||[]).length);
     const newCantrips = isCasterClass(c) ? Math.max(0, cantripsAt(c,newLevel) - cantripsAt(c,newLevel-1)) : 0;
-    const newSpells = isCasterClass(c) ? Math.max(0, preparedAt(c,newLevel) - preparedAt(c,newLevel-1)) : 0;
-    // Max spell level uses the COMBINED multiclass caster level after this level (C2),
-    // so a multiclass caster is offered spells up to the level their slots allow.
-    const projected = cur.map((x) => ({ cls:x.cls, level:x.level }));
-    const pe = projected.find((x) => norm(x.cls) === norm(lu.targetCls));
-    if(pe) pe.level += 1; else projected.push({ cls: lu.targetCls, level: 1 });
-    const maxSL = isCasterClass(c) ? RULES().maxSpellLevelMulti(projected) : 0;
+    // Wizards add 2 spells to their spellbook every level; other casters pick the delta
+    // in their prepared/known count.
+    const newSpells = !isCasterClass(c) ? 0
+      : (norm(lu.targetCls) === "wizard" ? 2 : Math.max(0, preparedAt(c,newLevel) - preparedAt(c,newLevel-1)));
+    // Spell LEVEL you can learn is capped by THIS class's own level (not the combined
+    // multiclass caster level, which only governs how many slots you get).
+    const maxSL = isCasterClass(c) ? RULES().maxSpellLevelSingle(c, newLevel) : 0;
     return { c, isNew, newLevel, hitDie, needSub, asi: grantsASI(lu.targetCls, newLevel), newCantrips, newSpells, maxSL };
   }
   function computeSteps(){
@@ -230,7 +230,7 @@
   function curScore(a){ const el = $("sc-" + a); return el ? (num(el.value) || 10) : 10; }
   function conMod(){ return Math.floor((curScore("CON") - 10) / 2); }
   function curMaxHP(){ return num($("f-hp-max").value); }
-  function hpGain(){ if(lu.hpMethod === "roll") return lu.hp != null ? lu.hp : (Math.floor(ctx.hitDie/2)+1 + conMod()); return Math.floor(ctx.hitDie/2) + 1 + conMod(); }
+  function hpGain(){ const g = lu.hpMethod === "roll" ? (lu.hp != null ? lu.hp : (Math.floor(ctx.hitDie/2)+1 + conMod())) : (Math.floor(ctx.hitDie/2) + 1 + conMod()); return Math.max(1, g); }  // always at least 1 HP per level
 
   function wire(){
     const body = $("dndlu-body");
@@ -238,7 +238,7 @@
     body.querySelectorAll("[data-newcls]").forEach((el) => el.addEventListener("click", () => { lu.targetCls = el.dataset.newcls; lu._new = true; lu.subclass=""; lu.asi={}; lu.feat=""; lu.pickedCantrips=[]; lu.pickedSpells=[]; ctx = buildCtx(); computeSteps(); render(); }));
     body.querySelectorAll("[data-sub]").forEach((el) => el.addEventListener("click", () => { lu.subclass = el.dataset.sub; render(); }));
     body.querySelectorAll("[data-hpm]").forEach((el) => el.addEventListener("click", () => { lu.hpMethod = el.dataset.hpm; if(lu.hpMethod==="avg") lu.hp=null; render(); }));
-    body.querySelectorAll("[data-roll]").forEach((el) => el.addEventListener("click", () => { lu.hp = (1 + Math.floor(Math.random()*ctx.hitDie)) + conMod(); render(); }));
+    body.querySelectorAll("[data-roll]").forEach((el) => el.addEventListener("click", () => { lu.hp = Math.max(1, (1 + Math.floor(Math.random()*ctx.hitDie)) + conMod()); render(); }));
     body.querySelectorAll("[data-asimode]").forEach((el) => el.addEventListener("click", () => { lu.asiMode = el.dataset.asimode; render(); }));
     body.querySelectorAll("[data-asi]").forEach((el) => el.addEventListener("click", () => {
       const a = el.dataset.asi, d = num(el.dataset.d), cur = lu.asi[a]||0, total = ABIL.reduce((s,x)=>s+(lu.asi[x]||0),0);
@@ -276,7 +276,13 @@
     else { const e = cur.find((c) => norm(c.cls) === norm(lu.targetCls)); e.level += 1; if(lu.subclass) e.subclass = lu.subclass; }
     if(window.setClassLevels) window.setClassLevels(cur);
     // HP + a gained Hit Die
-    const gain = hpGain();
+    let gain = hpGain();
+    // Tough grants +2 HP per character level. If it was taken on an EARLIER level, keep
+    // adding its +2 each level-up (if it's being taken THIS level, featEffects below covers
+    // every level at once, so don't double-add here).
+    const toughOwned = !!(window.hasFeature && window.hasFeature("Tough"));
+    const choosingTough = ctx.asi && lu.asiMode === "feat" && norm(lu.feat || "") === "tough";
+    if(toughOwned && !choosingTough) gain += 2;
     const hpMax = $("f-hp-max"), hpCur = $("f-hp-cur");
     hpMax.value = num(hpMax.value) + gain; hpCur.value = num(hpCur.value) + gain;
     const hd = $("f-hd-left"); if(hd) hd.value = num(hd.value) + 1;
@@ -284,6 +290,7 @@
     const hdField = $("f-hitdice"); if(hdField) hdField.value = hitDiceStr(cur);
     // ASI / feat
     if(ctx.asi){
+      const oldCon = conMod();
       if(lu.asiMode === "asi"){ ABIL.forEach((a) => { if(lu.asi[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + lu.asi[a]); } }); }
       else if(lu.feat && window.addFeatByName){
         window.addFeatByName(lu.feat);
@@ -292,6 +299,9 @@
         if(fe.hpBonus){ hpMax.value = num(hpMax.value) + fe.hpBonus; hpCur.value = num(hpCur.value) + fe.hpBonus; }
         ABIL.forEach((a) => { if(fe.abil[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + fe.abil[a]); } });
       }
+      // A CON increase (from the ASI or a feat) raises HP for EVERY level, retroactively.
+      const dCon = conMod() - oldCon;
+      if(dCon > 0){ const add = dCon * totalOf(cur); hpMax.value = num(hpMax.value) + add; hpCur.value = num(hpCur.value) + add; }
     }
     // spells
     lu.pickedCantrips.concat(lu.pickedSpells).forEach((n) => { if(window.addSpellByName) window.addSpellByName(n); });
