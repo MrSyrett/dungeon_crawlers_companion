@@ -1193,9 +1193,11 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
-/* Dead Kansas headings: bone, with the grunge texture clipped THROUGH the
-   letterforms so the display face reads distressed. Falls back to solid bone
-   where background-clip:text is unsupported. */
+/* Dead Kansas headings: bone, with a DARK grime overlay clipped THROUGH the
+   letterforms so the display face reads distressed. The worn marks are dark
+   because the heading itself is light (bone); a colored/dark display heading
+   uses the LIGHT grime overlay (.twd-grime-light) so its marks stay visible.
+   Falls back to solid bone where background-clip:text is unsupported. */
 :root[data-system="TWD"]:not([data-chrome]) body h1,
 :root[data-system="TWD"]:not([data-chrome]) body h2,
 :root[data-system="TWD"]:not([data-chrome]) body h3 {
@@ -1203,9 +1205,21 @@ body {
   letter-spacing: 0.03em;
   color: var(--twd-bone);
   background-color: var(--twd-bone);
-  background-image: url("/themes/twd-grunge.webp");
-  background-size: 620px auto;
+  background-image: url("/themes/twd-grime-dark.webp");
+  background-size: 680px auto;
   background-position: center;
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* Colored or dark TWD display text: same grime pattern, tinted light so the
+   worn marks read as pale wear against the darker paint. */
+:root[data-system="TWD"]:not([data-chrome]) body .twd-grime-light {
+  background-image: url("/themes/twd-grime-light.webp");
+  background-size: 680px auto;
+  background-position: center;
+  background-repeat: repeat;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
