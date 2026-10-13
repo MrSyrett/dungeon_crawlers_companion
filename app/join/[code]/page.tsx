@@ -3,9 +3,10 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TOOLS, CHARACTER_TOOL_IDS, type ToolId } from "@/lib/tools";
-import { isSystemKey, systemName } from "@/components/systemStore";
+import { isSystemKey, systemName, SYSTEMS, type SystemKey } from "@/components/systemStore";
 import { createDocument } from "@/app/actions/documents";
 import PageHeader from "@/components/PageHeader";
+import JoinSystemSync from "@/components/JoinSystemSync";
 import { blocked, strike, CODE_MISSES_PER_USER } from "@/lib/rate-limit";
 
 // THE INVITE LINK. A GM copies /join/<code> from the campaign row and sends it
@@ -24,6 +25,28 @@ export const dynamic = "force-dynamic";
 
 const ACTION =
   "inline-flex min-h-11 items-center justify-center rounded border px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]";
+
+// Pre-paint theme switch + the client store sync for a known system. The inline
+// script mirrors the root layout's themeScript: set data-system / --sys on
+// <html> and write the store's localStorage + cookie, all before first paint, so
+// the join page opens in the campaign's system with no flash of the old theme.
+function buildThemeSync(system: SystemKey) {
+  const accent = SYSTEMS.find((s) => s.key === system)?.accent ?? null;
+  const k = JSON.stringify(system);
+  const bootScript =
+    `(function(){try{var k=${k};var r=document.documentElement;` +
+    `r.dataset.system=k;delete r.dataset.chrome;` +
+    (accent ? `r.style.setProperty("--sys",${JSON.stringify(accent)});` : "") +
+    `try{localStorage.setItem("dcw_system",k)}catch(e){}` +
+    `try{document.cookie="dcw_system="+k+"; path=/; max-age=31536000; SameSite=Lax"}catch(e){}` +
+    `}catch(e){}})();`;
+  return (
+    <>
+      <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+      <JoinSystemSync system={system} />
+    </>
+  );
+}
 
 export default async function JoinPage({ params }: { params: Promise<{ code: string }> }) {
   const raw = (await params).code;
@@ -58,9 +81,21 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
   const system = isSystemKey(campaign.system) ? campaign.system : null;
   const sysLabel = system ? systemName(system) : "any system";
 
+  // THEME THE JOIN PAGE AS THE CAMPAIGN'S SYSTEM, not the player's stored one.
+  // The inline script runs before first paint (same technique as the root
+  // layout's themeScript) so the page opens already dressed in the campaign's
+  // system — data-system drives the :root[data-system] var blocks, and it also
+  // writes the store's localStorage + cookie so SiteNav hydrates to the same
+  // system with no flash. JoinSystemSync then persists the switch through the
+  // store (and covers client-side navigation, where the inline script does not
+  // re-run). Skipped for a system-agnostic campaign (system === null).
+  const themeSync =
+    system !== null ? buildThemeSync(system) : null;
+
   if (campaign.ownerId === user.id) {
     return (
       <div className="mx-auto w-full max-w-xl px-5 py-10">
+        {themeSync}
         <PageHeader title={campaign.name} subtitle="This is your own campaign" />
         <p className="mb-5 text-[14px] text-[var(--muted)]">
           Send this link to your players; they'll pick or create a {sysLabel} character and it links to {campaign.name} on its own.
@@ -85,6 +120,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
 
   return (
     <div className="mx-auto w-full max-w-xl px-5 py-10">
+      {themeSync}
       <PageHeader title={`Join ${campaign.name}`} subtitle={system ? `a ${sysLabel} campaign` : "a campaign"} />
       <p className="mb-6 max-w-[62ch] text-[14px] leading-relaxed text-[var(--muted)]">
         Pick the character you're playing, or make a new one. Once it's linked, your rolls show up in everyone's roll log and the GM can send you loot.

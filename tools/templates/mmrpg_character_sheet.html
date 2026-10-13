@@ -472,6 +472,10 @@ body.dark .a-tile .atv{color:#f0888e;}
 .pset .card-list{padding-top:4px;}
 /* Conditions: only the applied ones show; add more from the + popup. */
 .conds-empty{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:2px 2px 4px;}
+
+/* dd-no-spin-global — hide number-input spinner arrows everywhere */
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
 </style>
 </head>
 <body>

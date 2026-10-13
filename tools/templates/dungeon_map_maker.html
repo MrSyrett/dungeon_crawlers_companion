@@ -280,6 +280,10 @@
   .tool.snapon,.tool.opaqueon{background:var(--active);border-color:var(--gold);color:var(--gold)}
   #snapTool:not(.snapon),#opaqueTool:not(.opaqueon){opacity:.5}
   .tsep{flex:0 0 auto;width:1px;align-self:stretch;margin:6px 3px;background:var(--gold-dim);opacity:.5}
+
+/* dd-no-spin-global — hide number-input spinner arrows everywhere */
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
 </style>
 </head>
 <body>

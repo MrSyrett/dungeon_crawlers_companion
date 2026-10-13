@@ -1746,6 +1746,10 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   .dice-die, .pane.narrow .dice-die { font-size: 13px !important; padding: 15px 0 !important; }
 }
 
+
+/* dd-no-spin-global — hide number-input spinner arrows everywhere */
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#5490c4)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#0b0c0e}</style>
 <style>
