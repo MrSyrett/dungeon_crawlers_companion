@@ -170,6 +170,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .vbox{width:20px;height:20px;border:2px solid var(--rule);border-radius:4px;cursor:pointer;background:#fff;padding:0;}
 .vbox.on{background:var(--red);border-color:var(--red);}
 .vbox.resolve.on{background:var(--blue);border-color:var(--blue);}
+.vbox.rad.on{background:#5aa832;border-color:#3f7e22;}
 .v-auto{background:none;border:1px solid var(--rule);border-radius:5px;color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 5px;flex:0 0 auto;}
 .v-auto:hover{border-color:var(--yz);color:var(--yz-dk);}
 .broken-tag{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--red);border-radius:3px;padding:1px 6px;flex:0 0 auto;}
@@ -616,11 +617,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — each applies its penalty to every roll until you remove it. Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
       </div>
 
-      <div class="card" style="flex:2 1 0;min-width:0;">
+      <div class="card" style="flex:1 1 0;min-width:0;">
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
         <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
+        <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
         <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Sum of equipped armor">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div></div>
@@ -763,7 +765,7 @@ var _lastRoll=null;   // for the push option on the newest roll
 function blankState(){
   var st={ name:'',archetype:'',pronouns:'',key:'',variant:'alien',career:'',
     attrs:{STR:2,AGI:2,WITS:2,EMP:2}, skills:{},
-    health:{max:0,dmg:0}, resolve:{max:0,dmg:0}, stress:0,
+    health:{max:0,dmg:0}, resolve:{max:0,dmg:0}, stress:0, radiation:0,
     conditions:{}, xp:0, armor:0, weapons:[], gear:[], crits:[], talents:[], agenda:'', signature:'',
     traits:{}, relationships:[], appearance:'', notes:'' };
   // seed every skill name from BOTH variants so switching modes never loses data
@@ -824,8 +826,14 @@ function renderVitals(){
   $('broken-tag').classList.toggle('hide',!broken);
   var ba=$('broken-tag-a'); if(ba) ba.classList.toggle('hide',!broken);
   var rr=$('resolve-rating'); if(rr) rr.textContent=resolveRating();
-  renderStress();
+  renderStress(); renderRadiation();
 }
+function renderRadiation(){
+  var host=$('rad-boxes'); if(!host)return; var r=clamp(num(S.radiation),0,10), b='';
+  for(var i=1;i<=10;i++){ b+='<button class="vbox rad'+(i<=r?' on':'')+'" onclick="setRad('+i+')" title="radiation '+i+'"></button>'; }
+  host.innerHTML=b;
+}
+function setRad(n){ S.radiation=(num(S.radiation)===n)?n-1:n; if(S.radiation<0)S.radiation=0; renderRadiation(); scheduleAutosave(); }
 function renderStress(){
   var host=$('stress-pips'); if(!host)return; var s=clamp(num(S.stress),0,10), pips='';
   for(var i=1;i<=10;i++){ pips+='<button class="spip'+(i<=s?' on':'')+'" onclick="setStress('+i+')" title="stress '+i+'">'+i+'</button>'; }
@@ -1340,7 +1348,7 @@ function applySheet(d){
   S.variant='alien';
   syncVariant();
   ['name','archetype','pronouns','key','appearance','notes','career','agenda','signature'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
-  if(d.xp!=null)S.xp=num(d.xp); if(d.stress!=null)S.stress=clamp(num(d.stress),0,10);
+  if(d.xp!=null)S.xp=num(d.xp); if(d.stress!=null)S.stress=clamp(num(d.stress),0,10); if(d.radiation!=null)S.radiation=clamp(num(d.radiation),0,10);
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   // apply skills across BOTH variant skill sets so switching modes never loses data
   if(d.skills) BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });

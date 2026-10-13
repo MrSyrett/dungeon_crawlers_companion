@@ -41,7 +41,7 @@
     startGear = []; gearTab = 'weap';
   }
   function attrTotal() { var n = 0; ATTRS.forEach(function (a) { n += attrs[a.key]; }); return n; }
-  function skillSpent() { var n = 0; SK.forEach(function (s) { n += skills[s.name]; }); return n; }
+  function skillSpent() { var n = 0; SK.forEach(function (s) { n += (skills[s.name] || 0); }); if (specialist) n += (skills[specialist] || 0); return n; }
   function attrMax(k) { return key === k ? 5 : 4; }
 
   var ov;
@@ -194,7 +194,7 @@
     setRole: function (nm) {
       role = (role === nm) ? '' : nm; talentPick = '';
       var r = roleObj(role);
-      if (r) { key = r.key; specialist = r.specialist; if (attrs[key] > 5) attrs[key] = 5; ATTRS.forEach(function (a) { if (a.key !== key && attrs[a.key] > 4) attrs[a.key] = 4; }); }
+      if (r) { key = r.key; specialist = r.specialist; if (skills[specialist] == null) skills[specialist] = 0; if (attrs[key] > 5) attrs[key] = 5; ATTRS.forEach(function (a) { if (a.key !== key && attrs[a.key] > 4) attrs[a.key] = 4; }); }
       else { key = ''; specialist = ''; }
       render();
     },
@@ -211,11 +211,12 @@
     },
     removeGear: function (i) { startGear.splice(i, 1); render(); },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
-    skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap()) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
+    skill: function (nm, d) { var v = (skills[nm] || 0) + d; if (v < 0 || v > skillCap()) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {
       var d = { name: name, pronouns: pronouns, role: role, key: key, specialist: specialist, attrs: {}, skills: {}, trauma: { STR: 0, AGI: 0, WIT: 0, EMP: 0 } };
       ATTRS.forEach(function (a) { d.attrs[a.key] = attrs[a.key]; });
       SK.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
+      if (specialist) d.skills[specialist] = skills[specialist] || 0;
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
       if (mutPick) { var mo = mutObj(mutPick); d.mutations = [{ name: mutPick, note: mo ? mo.desc : '', spend: 1 }]; d.mp = 1; }
       if (startGear.length) d.gear = startGear.map(function (g) { return g; });

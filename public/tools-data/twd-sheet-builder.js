@@ -21,7 +21,7 @@
   var AR = arr(W.ALIEN_ARMOR);
   var GR = arr(W.YZE_GEAR);
   var ATTR_BUDGET = 13, SKILL_BUDGET = 12;
-  var STEPS = ['Name & Archetype', 'Attributes & Skills', 'Talent, Issue & Drive', 'Starting Gear'];
+  var STEPS = ['Archetype', 'Attributes', 'Skills', 'Talent & Issue', 'Starting Gear'];
 
   var step = 0;
   var name = '', pronouns = '', key = '', career = '', talentPick = '', issue = '', drive = '';
@@ -78,15 +78,18 @@
     return h;
   }
 
-  function stepAttrSkills() {
-    var aLeft = ATTR_BUDGET - attrTotal(), sLeft = SKILL_BUDGET - skillSpent();
-    var h = '<p class="m-hint">Everyone has <b style="color:#d8cfbf;">3</b> Health. Spend <b style="color:#d8cfbf;">13</b> attribute points (each starts at 2; key to 5, others to 4) and <b style="color:#d8cfbf;">12</b> skill points — key skills ★ to 3, the rest to 1.</p>';
-    h += '<div class="m-lbl">Attributes — <span style="color:' + (aLeft < 0 ? '#df6a6a' : '#d8cfbf') + ';">' + aLeft + ' left</span></div><div class="a-skills">';
-    h += ATTRS.map(function (a) {
+  function stepAttrs() {
+    var aLeft = ATTR_BUDGET - attrTotal();
+    var h = '<p class="m-hint">Everyone has <b style="color:#d8cfbf;">3</b> Health. Distribute <b style="color:#d8cfbf;">13</b> attribute points — each starts at 2; your key attribute ★ may reach 5, the rest 4. <b>Remaining: ' + aLeft + '</b></p>';
+    h += '<div class="a-skills" style="grid-template-columns:1fr;">' + ATTRS.map(function (a) {
       var v = attrs[a.key];
       return stepper(a.name + (key === a.key ? ' ★' : ''), v, "window.YZEB.attr('" + a.key + "',-1)", "window.YZEB.attr('" + a.key + "',1)", v <= 2, v >= attrMax(a.key) || aLeft <= 0);
     }).join('') + '</div>';
-    h += '<div class="m-lbl" style="margin-top:12px;">Skills — <span style="color:' + (sLeft < 0 ? '#df6a6a' : '#d8cfbf') + ';">' + sLeft + ' left</span></div>';
+    return h;
+  }
+  function stepSkills() {
+    var sLeft = SKILL_BUDGET - skillSpent();
+    var h = '<p class="m-hint">Distribute <b style="color:#d8cfbf;">12</b> skill points — key skills ★ to 3, the rest to 1. <b>Remaining: ' + sLeft + '</b></p>';
     ATTRS.forEach(function (a) {
       h += '<div class="a-attr">' + esc(a.name) + '</div><div class="a-skills">';
       h += ASK.filter(function (s) { return s.attr === a.key; }).map(function (s) {
@@ -159,7 +162,8 @@
     var aLeft = ATTR_BUDGET - attrTotal(), sLeft = SKILL_BUDGET - skillSpent();
     var ready = aLeft === 0 && sLeft >= 0 && !!career;
     var msg = '';
-    if (step === 1) msg = (aLeft === 0 ? 'Attributes set' : aLeft + ' attribute points left') + ' · ' + sLeft + ' skill points left';
+    if (step === 1) msg = (aLeft === 0 ? 'Attributes set' : aLeft + ' attribute points left');
+    else if (step === 2) msg = (sLeft === 0 ? 'Skills set' : sLeft + ' skill points left');
     else if (step === 0 && !career) msg = 'Pick an archetype';
     var left = step > 0 ? '<button class="m-btn ghost" onclick="window.YZEB.back()">‹ Back</button>' : '<button class="m-btn ghost" onclick="window.YZEB.close()">Cancel</button>';
     var right = step < STEPS.length - 1
@@ -169,7 +173,7 @@
   }
   function render() {
     ensure();
-    var body = step === 0 ? stepIdentity() : step === 1 ? stepAttrSkills() : step === 2 ? stepStory() : stepGear();
+    var body = step === 0 ? stepIdentity() : step === 1 ? stepAttrs() : step === 2 ? stepSkills() : step === 3 ? stepStory() : stepGear();
     $('yzeb-body').innerHTML = body;
     var t = $('yzeb-ttl'); if (t) t.textContent = '✦ ' + STEPS[step];
     renderSteps(); renderNav();

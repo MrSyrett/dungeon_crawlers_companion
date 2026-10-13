@@ -609,11 +609,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="body-row">
     <div class="stats-col">
       <div class="card">
-        <div class="section-bar accent cbar"><span>Attributes &amp; Skills</span><span class="sb-note">base dice = current attribute · click to roll</span></div>
+        <div class="section-bar accent cbar"><span>Attributes &amp; Skills</span></div>
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="section-bar accent"><span>Experience</span><span class="sb-note">5 XP → raise a skill or learn a talent</span></div>
+        <div class="section-bar accent"><span>Experience</span></div>
         <div class="xp-row"><span class="v-lbl">XP</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button><button class="hdr-btn" style="margin-left:auto;" onclick="openAdvance()">Spend</button></div>
       </div>
     </div>
@@ -622,26 +622,27 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vit-row">
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit()">＋ Roll D66</button></span></div>
-          <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. You roll one on the D66 table when Broken by Damage (Strength 0). Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
+          <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
         </div>
         <div class="card" style="flex:1.1 1 0;min-width:0;">
-          <div class="section-bar accent cbar"><span>Trauma &amp; Armor</span><span class="sb-note">attributes are your health</span></div>
+          <div class="section-bar accent cbar"><span>Trauma &amp; Armor</span></div>
           <div class="vitals" id="trauma-tracks"></div>
           <div class="vrow" style="padding:6px 10px 8px;"><span class="v-lbl">Armor</span><span class="stress-val" id="armor-val" title="Sum of equipped armor ratings">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button><span class="broken-tag hide" id="broken-tag" style="margin-left:auto;">Broken</span></div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="section-bar accent cbar"><span>Mutation Points &amp; Rot</span><span class="sb-note">start each session with MP = your mutations · max 10</span></div>
-        <div class="vitals">
-          <div class="vrow"><span class="v-lbl">Mut. Pts</span><div class="stress-pips" id="mp-pips"></div></div>
-          <div class="vrow"><span class="v-lbl">Rot Pts</span><div class="vboxes" id="rot-boxes"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollRot()" title="Roll Base Dice = total Rot Points; each 6 is 1 Damage">Roll</button></div>
+      <div class="vit-row">
+        <div class="card" style="flex:1.2 1 0;min-width:0;">
+          <div class="section-bar accent cbar"><span>Mutation Points &amp; Rot</span></div>
+          <div class="vitals">
+            <div class="vrow"><span class="v-lbl">Mut. Pts</span><div class="stress-pips" id="mp-pips"></div></div>
+            <div class="vrow"><span class="v-lbl">Rot Pts</span><div class="vboxes" id="rot-boxes"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollRot()">Roll</button></div>
+          </div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="section-bar accent"><span>Conditions</span></div>
-        <div class="conds"><div class="cond-row" id="cond-list"></div></div>
+        <div class="card" style="flex:1 1 0;min-width:0;">
+          <div class="section-bar accent"><span>Conditions</span></div>
+          <div class="conds" style="padding-top:4px;"><div class="cond-row" id="cond-list"></div></div>
+        </div>
       </div>
 
       <div class="card tabs-card">
@@ -654,38 +655,38 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-combat">
-          <div class="section-bar"><span>Attacks</span><span class="sb-note">equip a weapon on the Gear tab</span></div>
+          <div class="section-bar"><span>Attacks</span></div>
           <table class="tbl" id="atk-tbl"><thead><tr><th style="width:34%;">Weapon</th><th style="width:12%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:22%;">Range</th><th style="width:23%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-          <div id="atk-empty" class="tbl-empty">No weapons equipped. Add one on the Gear tab and tap Equip.</div>
+          <div id="atk-empty" class="tbl-empty">No weapons equipped.</div>
         </div>
 
         <div class="tab-panel" id="tab-mut">
           <div class="section-bar cbar"><span>Mutations</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('mutation')">＋ Add</button></span></div>
           <div class="tln-list" id="mut-list"></div>
-          <div id="mut-empty" style="padding:2px 10px 8px;font-size:12px;color:var(--muted);">Begin play with one random mutation (you may draw a second by lowering one attribute a step). Max four ever. Tap <b>Use</b> to spend Mutation Points — it never fails, but risks a misfire.</div>
+          <div id="mut-empty" style="padding:2px 10px 8px;font-size:12px;color:var(--muted);">No mutations yet.</div>
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span><span class="e-lbl" style="margin-left:auto;">rations: 4 = 1 item</span></div>
+          <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span></div>
           <div class="section-bar cbar"><span>Supplies</span></div>
           <div class="res-row" id="res-row"></div>
           <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:28%;">Item</th><th>Details</th><th style="width:9%;">Slots</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
-          <div id="inv-empty" class="tbl-empty">No gear yet. Tap ＋ Add Gear for weapons, armor, scrap, or Old-Age artifacts.</div>
+          <div id="inv-empty" class="tbl-empty">No gear yet.</div>
         </div>
 
         <div class="tab-panel" id="tab-story">
           <div class="section-bar cbar"><span>Talents</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('talent')">＋ Add</button></span></div>
           <div class="tln-list" id="tln-list"></div>
-          <div id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Pick one of your role's three at creation; buy more with XP.</div>
+          <div id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet.</div>
           <div class="section-bar"><span>Dream &amp; Den</span></div>
           <div class="blk" style="padding-top:2px;">
-            <div class="fld"><label>Big Dream<span class="hint">the hope that keeps you going</span></label><input type="text" id="f-dream" placeholder="What you dream the future could hold"></div>
-            <div class="fld"><label>Your Den<span class="hint">your corner of the Ark</span></label><input type="text" id="f-den" placeholder="Where and how you live in the Ark"></div>
+            <div class="fld"><label>Big Dream</label><input type="text" id="f-dream" placeholder="What you dream the future could hold"></div>
+            <div class="fld"><label>Your Den</label><input type="text" id="f-den" placeholder="Where and how you live in the Ark"></div>
           </div>
           <div class="section-bar"><span>Relationships</span><span class="hdr-right"><button class="hdr-btn" onclick="addRelRow()">＋ Add</button></span></div>
           <div class="blk" style="padding-top:2px;"><div id="relationships"></div><div class="fld" style="margin-top:6px;"><label>Appearance</label><textarea id="f-appearance" rows="2"></textarea></div></div>
-          <div class="section-bar cbar"><span>The Ark — Development Levels</span><span class="sb-note">distribute 12 at creation</span></div>
+          <div class="section-bar cbar"><span>The Ark — Development Levels</span></div>
           <div class="dev-row" id="dev-row"></div>
         </div>
 
@@ -816,7 +817,10 @@ function renderAttrSkills(){
       +'<span class="pips edit-only">'+basePips+'</span>'
       +'<button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="base dice = current '+esc(a.name)+'">'+pool+'d</button></div>';
     var rows='';
-    skillsByAttr(a.key).forEach(function(s){
+    var skRows=skillsByAttr(a.key).map(function(s){ return {name:s.name,desc:s.desc}; });
+    // The role's specialist skill is a 13th skill tied to the role's key attribute.
+    if(S.specialist && a.key===S.key && !skillObj(S.specialist)) skRows.push({name:S.specialist,desc:'Your role’s specialist skill'});
+    skRows.forEach(function(s){
       var lvl=num(S.skills[s.name]), spool=Math.max(0,cur+lvl-cp), esn=s.name.replace(/'/g,"\\'");
       var spips='';
       for(var j=1;j<=3;j++){ spips+='<button class="pip sk'+(j<=lvl?' on':'')+'" title="level '+j+'" onclick="setSkill(\''+esn+'\','+j+')"></button>'; }
@@ -1128,7 +1132,7 @@ function doMyzRoll(label, baseN, skillN, gearN, attrKey, ctx){
   _lastRoll={label:label, base:base, skill:skill, gear:gear, pen:pen, attr:attrKey, ctx:ctx||null};
   showPushOption();
 }
-function rollSkill(name){ var s=skillObj(name); if(!s)return; doMyzRoll(name+' ('+s.attr+')', attrCur(s.attr)-critPenalty(), num(S.skills[name]), 0, s.attr, null); }
+function rollSkill(name){ var s=skillObj(name); var attr=s?s.attr:(name===S.specialist?S.key:null); if(!attr)return; doMyzRoll(name+' ('+attr+')', attrCur(attr)-critPenalty(), num(S.skills[name]), 0, attr, null); }
 function rollAttr(k){ doMyzRoll(attrName(k)+' ('+k+')', attrCur(k)-critPenalty(), 0, 0, k, null); }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
@@ -1208,14 +1212,16 @@ function refreshWizardButtons(){ var built=hasCharacter(), c=$('build-btn'), l=$
 
 // ── Advancement: 5 XP → raise a basic skill (not another role's specialist) OR learn a talent ──
 var SKILL_XP=5, TALENT_XP=5, _advSnap=null;
-function openAdvance(){ _advSnap={skills:{},talentNames:{}}; SKILLS.forEach(function(s){ _advSnap.skills[s.name]=num(S.skills[s.name]); }); (S.talents||[]).forEach(function(t){ if(t&&t.name)_advSnap.talentNames[t.name]=1; }); renderAdvance(); $('advance-overlay').classList.add('open'); }
+function openAdvance(){ _advSnap={skills:{},talentNames:{}}; SKILLS.forEach(function(s){ _advSnap.skills[s.name]=num(S.skills[s.name]); }); if(S.specialist)_advSnap.skills[S.specialist]=num(S.skills[S.specialist]); (S.talents||[]).forEach(function(t){ if(t&&t.name)_advSnap.talentNames[t.name]=1; }); renderAdvance(); $('advance-overlay').classList.add('open'); }
 function closeAdvance(){ $('advance-overlay').classList.remove('open'); _advSnap=null; }
 function renderAdvance(){
   var xp=num(S.xp);
   var h='<p class="m-hint">When you reach <b style="color:#d8cfbf;">5 XP</b> you may raise one skill a level (<b>'+SKILL_XP+' XP</b>) or learn one talent (<b>'+TALENT_XP+' XP</b>). Undo with − / ✕ before <b>Done</b>.</p>';
   h+='<div class="adv-xp-bar"><span class="m-lbl" style="margin:0;">Experience</span><span id="adv-xp" class="adv-xp-val">'+xp+'</span><span class="m-hint" style="margin:0;">XP available</span></div>';
   h+='<div class="m-lbl">Skills</div>';
-  ATTRS.forEach(function(a){ var list=skillsByAttr(a.key); if(!list.length)return;
+  ATTRS.forEach(function(a){ var list=skillsByAttr(a.key).slice();
+    if(S.specialist && a.key===S.key && !skillObj(S.specialist)) list.push({name:S.specialist});
+    if(!list.length)return;
     h+='<div class="a-attr">'+esc(a.name)+'</div><div class="a-skills">';
     h+=list.map(function(s){ var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'");
       var base=(_advSnap&&_advSnap.skills[s.name]!=null)?_advSnap.skills[s.name]:v;
@@ -1305,7 +1311,7 @@ function applySheet(d){
   if(d.xp!=null)S.xp=num(d.xp); if(d.mp!=null)S.mp=clamp(num(d.mp),0,MP_MAX); if(d.rot!=null)S.rot=clamp(num(d.rot),0,ROT_MAX);
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   if(d.trauma) ATTR_KEYS.forEach(function(k){ if(d.trauma[k]!=null)S.trauma[k]=num(d.trauma[k]); });
-  if(d.skills) SKILLS.forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });
+  if(d.skills){ SKILLS.forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); }); if(S.specialist && d.skills[S.specialist]!=null) S.skills[S.specialist]=num(d.skills[S.specialist]); }
   if(d.conditions) CONDS.forEach(function(c){ S.conditions[c.name]=!!d.conditions[c.name]; });
   if(d.supplies) S.supplies=Object.assign({grub:0,water:0,bullets:0}, d.supplies);
   if(d.dev) S.dev=Object.assign({Food:0,Culture:0,Technology:0,Warfare:0}, d.dev);

@@ -594,11 +594,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="body-row">
     <div class="stats-col">
       <div class="card">
-        <div class="section-bar accent cbar"><span>Attributes &amp; Skills</span><span class="sb-note">pool = attribute + skill − conditions</span></div>
+        <div class="section-bar accent cbar"><span>Attributes &amp; Skills</span></div>
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="section-bar accent"><span>Experience</span><span class="sb-note">5 XP → an Advance</span></div>
+        <div class="section-bar accent"><span>Experience</span></div>
         <div class="xp-row"><span class="v-lbl">XP</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button><button class="hdr-btn" style="margin-left:auto;" onclick="openAdvance()">Spend</button></div>
       </div>
     </div>
@@ -607,10 +607,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vit-row">
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">Mental</button></span></div>
-          <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. You roll one (physical or mental D66) when Broken. Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
+          <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
         </div>
         <div class="card" style="flex:1.1 1 0;min-width:0;">
-          <div class="section-bar accent cbar"><span>Conditions</span><span class="sb-note">each −1 die · 4th = Broken</span></div>
+          <div class="section-bar accent cbar"><span>Conditions</span></div>
           <div class="conds">
             <div class="cond-grp"><div class="cg-lbl">Physical <span id="brk-phys" class="broken-tag hide" style="padding:0 5px;font-size:8px;">BROKEN</span></div><div class="cond-row" id="cond-phys"></div></div>
             <div class="cond-grp"><div class="cg-lbl">Mental <span id="brk-ment" class="broken-tag hide" style="padding:0 5px;font-size:8px;">BROKEN</span></div><div class="cond-row" id="cond-ment"></div></div>
@@ -620,12 +620,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
 
       <div class="card">
-        <div class="section-bar accent cbar"><span>Fear, Resources &amp; Memento</span></div>
+        <div class="section-bar accent cbar"><span>Resources &amp; Memento</span></div>
         <div class="vitals">
-          <div class="vrow"><span class="v-lbl">Fear test</span><span class="inv-mini">value</span><input type="number" id="fear-val" class="no-spin armor-in" data-nolock value="1" min="0" max="4" title="The vaesen's Fear value"><button class="dice-btn mini" style="flex:0 0 auto;" onclick="rollFear('LOG')">Logic</button><button class="dice-btn mini" style="flex:0 0 auto;" onclick="rollFear('EMP')">Empathy</button></div>
           <div class="vrow"><span class="v-lbl">Resources</span><button class="xp-step" onclick="bumpRes(-1)">−</button><span class="stress-val" id="res-val">3</span><button class="xp-step" onclick="bumpRes(1)">＋</button><span class="inv-mini" id="res-name" style="margin-left:6px;"></span></div>
         </div>
-        <div class="blk" style="padding-top:2px;"><div class="fld"><label>Memento<span class="hint">once per session, heals 2 Conditions while resting</span> <button class="hdr-btn" style="padding:2px 8px;" onclick="useMemento()">Use</button></label><input type="text" id="f-memento" placeholder="A keepsake that steadies you"></div></div>
+        <div class="blk" style="padding-top:2px;"><div class="fld"><label>Memento <button class="hdr-btn" style="padding:2px 8px;" onclick="useMemento()">Use</button></label><input type="text" id="f-memento" placeholder="A keepsake that steadies you"></div></div>
       </div>
 
       <div class="card tabs-card">
@@ -637,25 +636,25 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-combat">
-          <div class="section-bar"><span>Attacks</span><span class="sb-note">damage = physical Conditions inflicted</span></div>
+          <div class="section-bar"><span>Attacks</span></div>
           <table class="tbl" id="atk-tbl"><thead><tr><th style="width:34%;">Weapon</th><th style="width:12%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:22%;">Range</th><th style="width:23%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-          <div id="atk-empty" class="tbl-empty">No weapons equipped. Add one on the Gear tab and tap Equip.</div>
+          <div id="atk-empty" class="tbl-empty">No weapons equipped.</div>
         </div>
 
         <div class="tab-panel" id="tab-gear">
           <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:30%;">Item</th><th>Details</th><th style="width:9%;">Cost</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
-          <div id="inv-empty" class="tbl-empty">No gear yet. Tap ＋ Add Gear for weapons, armor, or tools.</div>
+          <div id="inv-empty" class="tbl-empty">No gear yet.</div>
         </div>
 
         <div class="tab-panel" id="tab-story">
           <div class="section-bar cbar"><span>Talents</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('talent')">＋ Add</button></span></div>
           <div class="tln-list" id="tln-list"></div>
-          <div id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Pick one of your archetype's three at creation; buy more with XP.</div>
+          <div id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet.</div>
           <div class="section-bar"><span>Who You Are</span></div>
           <div class="blk" style="padding-top:2px;">
-            <div class="fld"><label>Motivation<span class="hint">why you hunt the vaesen</span></label><input type="text" id="f-motivation"></div>
-            <div class="fld"><label>Trauma<span class="hint">the event that gave you the Sight</span></label><input type="text" id="f-trauma"></div>
+            <div class="fld"><label>Motivation</label><input type="text" id="f-motivation"></div>
+            <div class="fld"><label>Trauma</label><input type="text" id="f-trauma"></div>
             <div class="fld"><label>Dark Secret</label><input type="text" id="f-secret"></div>
           </div>
           <div class="section-bar"><span>Relationships</span><span class="hdr-right"><button class="hdr-btn" onclick="addRelRow()">＋ Add</button></span></div>
@@ -983,21 +982,6 @@ function rollAttack(i){
 function rollQuick(){ var n=clamp(num($('tray-mod').value),1,12); $('tray-mod').value='0'; var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
 function rollArmor(){ var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab.','fumble'); return; } var a=rollSet(Math.min(12,r)), blk=count6(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 cancels 1 damage', blk?'crit':'fumble'); }
 
-// ── Fear test (Logic or Empathy vs the vaesen's Fear value) ──
-function rollFear(attrKey){
-  var fv=clamp(num($('fear-val').value),0,6);
-  var mod=clamp(num($('tray-mod').value),-6,6); $('tray-mod').value='0';
-  var pen=condPenaltyFor(attrKey)+critPenalty();
-  var n=Math.max(1, attrBase(attrKey)-pen+mod);
-  var base=rollSet(n), succ=count6(base);
-  animDice(base,[],[],succ>=fv?'crit':'fumble');
-  if(succ>=fv){ addLog('Fear test ('+attrKey+')', 'COMPOSED · '+succ+'/'+fv, poolStr(base)+' · kept your nerve', 'crit'); _lastRoll={label:'Fear test ('+attrKey+')',base:base,skill:[],gear:[],attr:attrKey,ctx:{ctype:'Mental',fear:true}}; showPushOption(); }
-  else { var gained=Math.max(0,fv-succ), marks=[]; for(var i=0;i<gained;i++){ var m=addCondition('Mental'); if(m)marks.push(m); }
-    renderConds(); renderAttrSkills();
-    addLog('Fear test ('+attrKey+')', 'TERRIFIED · '+succ+'/'+fv, poolStr(base)+' · '+gained+' mental Condition'+(gained!==1?'s':'')+(marks.length?' ('+marks.join(', ')+')':'')+' — flee, freeze, faint or frenzy', 'fumble');
-    _lastRoll=null; scheduleAutosave(); }
-}
-
 // ── Push (Vaesen): keep 6s, reroll blanks; cost = one Condition of the roll's type ──
 function clearPushButtons(){ var es=$('log-entries'); if(!es)return; [].forEach.call(es.querySelectorAll('.push-inline'),function(b){ b.remove(); }); }
 function showPushOption(){
@@ -1018,7 +1002,6 @@ function doPush(){
   var marked=addCondition(ctype), brokeNote='';
   if(!marked){ brokeNote=' · '+ctype+' BROKEN — roll a critical injury'; }
   var th; if(pr.ctx&&pr.ctx.kind==='attack'){ var hit=succ>=1, dmg=hit?(num(pr.ctx.wdmg)+(succ-1)):0; th=hit?{t:'HIT · '+dmg+' Conditions',type:'crit'}:{t:'MISS',type:'fumble'}; }
-  else if(pr.ctx&&pr.ctx.fear){ var fv=clamp(num($('fear-val').value),0,6); th=succ>=fv?{t:'COMPOSED',type:'crit'}:{t:'TERRIFIED',type:'fumble'}; }
   else th=tierOf(succ);
   var detail=poolStr(base)+(skill.length?' + '+skill.length+'sk('+skill.join(',')+')':'')+(gear.length?' + '+gear.length+'gr('+gear.join(',')+')':'')+' · '+succ+' succ · PUSHED — '+(marked?('+1 '+ctype.toLowerCase()+' Condition ('+marked+')'):('already full'))+brokeNote;
   animDice(base,skill,gear,glowFor(succ));
