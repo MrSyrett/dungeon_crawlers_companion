@@ -24,7 +24,7 @@ export default async function YzeHomebrewHubPage() {
       <PageHeader title="Homebrew" subtitle={<>{total ? `${total} creation${total === 1 ? "" : "s"} across ${KINDS.length} types` : "create and manage all your homebrew"}</>} />
 
       <p className="mb-6 max-w-[62ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Everything you make here flows into the Year Zero Engine reference pages and the character
+        Everything you make here flows into the ALIEN RPG reference pages and the character
         sheet&rsquo;s pickers. Share a creation to a campaign to let your table use it too.
       </p>
 

@@ -211,7 +211,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   "yze-character": {
     id: "yze-character",
     system: "YZE",
-    systemName: "Year Zero Engine",
+    systemName: "Alien RPG",
     kind: "character",
     label: "Character Sheet",
     file: "yze_character_sheet.html",
@@ -220,7 +220,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   "yze-session": {
     id: "yze-session",
     system: "YZE",
-    systemName: "Year Zero Engine",
+    systemName: "Alien RPG",
     kind: "session",
     label: "Adventure",
     file: "yze_session_prep_builder.html",

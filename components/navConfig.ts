@@ -92,10 +92,11 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
   ],
   YZE: [
     { href: "/yze/skills", label: "Skills" },
+    { href: "/yze/careers", label: "Careers" },
+    { href: "/yze/talents", label: "Talents" },
     { href: "/yze/weapons", label: "Weapons" },
     { href: "/yze/gear", label: "Gear" },
     { href: "/yze/combat", label: "Combat" },
-    { href: "/yze/alien", label: "Alien" },
   ],
   MMRPG: [
     { href: "/mmrpg/origins", label: "Origins" },
@@ -215,11 +216,11 @@ const CONCEPT: Record<string, string[]> = {
   // creatures and NPC rosters
   Bestiary: ["creatures"],
   "Ghosts & Extras": ["creatures"],
-  Alien: ["creatures"],
   Characters: ["creatures"],
   // what you are
   Classes: ["archetype"],
   Roles: ["archetype"],
+  Careers: ["archetype"],
   Templates: ["archetype"],
   Tropes: ["archetype"],
   Heroes: ["archetype"],
@@ -256,6 +257,7 @@ const CONCEPT: Record<string, string[]> = {
   "Strengths & Flaws": ["traits"],
   Tags: ["traits"],
   "Traits & Talents": ["traits"],
+  Talents: ["traits"],
   Focuses: ["traits"],
   // one-offs, which have no equivalent anywhere and fall back by design
   Worlds: ["setting"],

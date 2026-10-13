@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { YZE_COVER } from "@/lib/data/yze-data";
+import { ALIEN_ARMOR } from "@/lib/data/yze-alien-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { YzeHeader, SearchForm, CountLine, EmptyState, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/YzeRef";
@@ -41,7 +41,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <YzeHeader title="Gear & Encumbrance" subtitle={`Year Zero Engine · SRD v1.0${hbRows.length ? ` · ${hbRows.length} homebrew` : ""}`} />
+      <YzeHeader title="Gear & Encumbrance" subtitle={`ALIEN RPG · suits, armor & encumbrance${hbRows.length ? ` · ${hbRows.length} homebrew` : ""}`} />
 
       <section className="mb-8">
         <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Encumbrance</h2>
@@ -54,25 +54,28 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Armor & cover</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Suits &amp; armor</h2>
         <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          Body armor has a numeric rating; when hit, roll that many D6 and each 6 stops one point of
-          damage. Cover works like armor but only against ranged attacks. Armor does nothing against
-          damage from pushing a roll.
+          Armor has a numeric rating; when hit, roll that many D6 and each 6 stops one point of
+          damage. Many suits also carry an Air Supply rating for vacuum and hostile atmospheres.
+          Armor does nothing against damage from pushing a roll.
         </p>
         <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr className="bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]">
-                <th className="p-2">Barrier</th><th className="p-2">Armor rating (dice pool)</th><th className="p-2">Step die</th>
+                <th className="p-2">Suit</th><th className="p-2">Armor</th><th className="p-2">Air</th><th className="p-2">Wt</th><th className="p-2">Cost</th><th className="p-2">Notes</th>
               </tr>
             </thead>
             <tbody>
-              {YZE_COVER.map((c) => (
-                <tr key={c.barrier} className="border-t border-[var(--border)]">
-                  <td className="p-2 font-semibold text-[var(--sys-link)]">{c.barrier}</td>
-                  <td className="p-2 font-mono">{c.rating}</td>
-                  <td className="p-2 font-mono text-[var(--muted)]">{c.die}</td>
+              {ALIEN_ARMOR.map((a) => (
+                <tr key={a.name} className="border-t border-[var(--border)]">
+                  <td className="p-2 font-semibold text-[var(--sys-link)]">{a.name}</td>
+                  <td className="p-2 font-mono">{a.rating}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{a.air}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{a.weight}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{a.cost}</td>
+                  <td className="p-2 text-[var(--muted)]">{a.comment}</td>
                 </tr>
               ))}
             </tbody>
@@ -83,8 +86,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       <section>
         <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Your homebrew gear</h2>
         <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          The SRD ships no fixed gear list — gear is setting-specific. Add your own below; it shows in
-          the character sheet&rsquo;s gear picker.
+          Add your own equipment below; it shows in the character sheet&rsquo;s gear picker.
         </p>
         <div className="mb-6"><HomebrewEditor kind="yze-gear" campaigns={campaigns} initial={hbOwn} /></div>
 

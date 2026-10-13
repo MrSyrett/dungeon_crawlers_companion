@@ -18,7 +18,7 @@
      the viewport's — see the note beside this file's zoom controls.
      scripts/check-standalone-viewport.mjs holds the line. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Year Zero Engine Character Sheet</title>
+<title>Alien RPG Character Sheet</title>
 <script src="/tools-data/yze-data.js"></script>
 <script src="/tools-data/yze-alien-data.js"></script>
 <style>
@@ -540,7 +540,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
   <div class="hdr-row">
     <div class="hdr-top">
-      <div class="hdr-logo"><div class="lg-word">Year Zero Engine</div><div class="lg-sub">Character Dossier</div></div>
+      <div class="hdr-logo"><div class="lg-word">Alien RPG</div><div class="lg-sub">Character Dossier</div></div>
       <div class="hdr-field name-primary"><label>Name</label><input type="text" id="f-name" placeholder="Character name"></div>
     </div>
     <div class="hdr-metarow">
@@ -658,7 +658,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
 </div>
 
-<div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Year Zero Engine — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Alien RPG — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
 
@@ -699,7 +699,7 @@ function itemWeight(w){ w=String(w||'1'); if(w==='—'||w==='-'||w==='')return 0
 var S=null;
 var _lastRoll=null;   // for the push option on the newest roll
 function blankState(){
-  var st={ name:'',archetype:'',pronouns:'',key:'',variant:'yze',career:'',
+  var st={ name:'',archetype:'',pronouns:'',key:'',variant:'alien',career:'',
     attrs:{STR:2,AGI:2,WITS:2,EMP:2}, skills:{},
     health:{max:0,dmg:0}, resolve:{max:0,dmg:0}, stress:0,
     conditions:{}, xp:0, armor:0, weapons:[], gear:[], talents:[],
@@ -1058,7 +1058,7 @@ function setDefaultTab(){ var t='combat'; try{ t=localStorage.getItem('yze_tab')
 // ── Rules ──
 function openRules(){
   var R=G(window.YZE_RULES);
-  var h='<p class="m-hint">The Year Zero Engine runs on D6 dice pools — each 6 is a success, each 1 a bane. This SRD core uses the dice-pool variant.</p>';
+  var h='<p class="m-hint">ALIEN runs on the Year Zero Engine — D6 dice pools where each 6 is a success. Your Stress Level adds Stress Dice to every roll; a 1 on a Stress Die forces a Panic Roll and blocks pushing.</p>';
   h+=R.map(function(q){ return '<p><b>'+esc(q.title)+'.</b> '+esc(q.text)+'</p>'; }).join('');
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
 }
@@ -1151,12 +1151,15 @@ function collectSheet(){
   S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.armor=num($('f-armor').value);
   // Key attribute and career are set at creation (read-only on the sheet) — keep S.key / S.career.
   var cls = isAlien() ? (S.career||'Alien crew') : S.archetype;
-  return Object.assign({}, S, { system:'YZE', variant:S.variant||'yze', class:cls, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
+  return Object.assign({}, S, { system:'YZE', variant:'alien', class:cls, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
 }
 function applySheet(d){
   d=d||{};
   if(!S) S=blankState();
-  if(d.variant) S.variant=(d.variant==='alien')?'alien':'yze';
+  // ALIEN-only system: the sheet is always the Alien variant, even for a
+  // character saved before the conversion (its skill data is preserved — both
+  // skill sets are seeded — so coercing to Alien never loses points).
+  S.variant='alien';
   syncVariant();
   ['name','archetype','pronouns','key','appearance','notes','career'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
   if(d.xp!=null)S.xp=num(d.xp); if(d.armor!=null)S.armor=num(d.armor); if(d.stress!=null)S.stress=clamp(num(d.stress),0,10);
