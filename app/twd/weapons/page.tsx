@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { TWD_CLOSE_WEAPONS, TWD_RANGED_WEAPONS } from "@/lib/data/twd-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
-import { TwdHeader, one, type RawQuery } from "@/components/TwdRef";
+import { TwdHeader, type RawQuery } from "@/components/TwdRef";
 
 export const dynamic = "force-dynamic";
 
