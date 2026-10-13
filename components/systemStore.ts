@@ -34,11 +34,6 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // D6 System: Second Edition (Gallant Knight Games, 2024) — a genre-agnostic
   // evolution of the West End Games D6 System.
   { key: "D62E", name: "D6 System 2e", short: "D62e", accent: "var(--d62e)" },
-  // ALIEN RPG (Free League) — the Year Zero Engine's sci-fi-horror game: four
-  // attributes, twelve skills, D6 dice pools where each 6 is a success, Stress &
-  // Panic, push at a cost. Internal key stays "YZE" so saved characters and
-  // campaigns keep working; only the label is Alien.
-  { key: "YZE", name: "Alien RPG", short: "Alien", accent: "var(--yze)" },
   { key: "MMRPG", name: "Marvel Multiverse RPG", short: "Marvel", accent: "var(--mmrpg)" },
   // Justice League Unlimited RPG (Quickstart) — DC's d20 super-hero system:
   // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
@@ -48,6 +43,11 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // four Traits (Brains/Muscles/Moves/Cool), Talents, the Ghost Die, and
   // Brownie Points. Roll a pool of d6 vs a Difficulty; one die is the Ghost Die.
   { key: "GB", name: "Ghostbusters", short: "GB", accent: "var(--gb)" },
+  // ALIEN RPG (Free League) — the Year Zero Engine's sci-fi-horror game: four
+  // attributes, twelve skills, D6 dice pools where each 6 is a success, Stress &
+  // Panic, push at a cost. Internal key stays "YZE" so saved characters and
+  // campaigns keep working; only the label is Alien.
+  { key: "YZE", name: "Alien RPG", short: "Alien", accent: "var(--yze)" },
   // The Walking Dead Universe RPG (Free League) — the Year Zero Engine's
   // survival-horror game: four attributes, D6 dice pools, stress dice & the
   // walker Threat Level, a fixed 3-point Health track, Archetypes, and Anchors.
