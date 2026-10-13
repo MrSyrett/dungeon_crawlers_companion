@@ -221,6 +221,9 @@ details.feats summary::-webkit-details-marker{display:none;}
 /* Skill Points inline next to the skill buttons */
 .sp-hdr{display:inline-flex;align-items:center;gap:5px;margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
 .sp-hdr input{width:52px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.map-hdr{margin-left:0;}
+.map-reset{height:24px;border:1px solid var(--input-border);background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:0 7px;cursor:pointer;border-radius:4px;}
+.map-reset:hover{background:var(--input-bg);color:var(--ink);}
 /* Credits row atop the Equipment tab */
 .credits-row{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
 .credits-row input{width:120px;height:26px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;text-align:left;color:var(--ink);outline:none;padding:0 6px;}
@@ -649,7 +652,7 @@ body.dark .tabs-bar{background:#1a1d24;}
         <div class="section-bar gold"><span>Attributes</span></div>
         <div class="stats-grid" id="stats-grid"></div>
         <table class="skills-table"><tbody id="skills-body"></tbody></table>
-        <div class="add-row"><span class="sp-hdr">Skill Points <input type="number" id="f-sp" value="0" min="0"></span></div>
+        <div class="add-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;"><span class="sp-hdr map-hdr" title="Multi-Action Penalty — dice subtracted from every dice-pool roll until you reset it">MAP −<input type="number" id="f-map" value="0" min="0" step="1" data-nolock style="width:42px;" oninput="onMapChange()">D <button type="button" class="map-reset" onclick="resetMAP()" title="Reset the Multi-Action Penalty to 0">Reset</button></span><span class="sp-hdr">Skill Points <input type="number" id="f-sp" value="0" min="0"></span></div>
       </div>
     </div>
 
@@ -752,7 +755,7 @@ body.dark .tabs-bar{background:#1a1d24;}
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="SWB.launch()" title="Character Builder">Create</button>
@@ -1024,13 +1027,16 @@ function onTemplateChange() {
 function speciesFor(t) { const n = t.name; if(/Wookiee/i.test(n)) return 'Wookiee'; if(/Ewok/i.test(n)) return 'Ewok'; if(/Mon Calamari/i.test(n)) return 'Mon Calamari'; if(/Alien/i.test(n)) return 'Alien'; return 'Human'; }
 
 // ═══ MODIFIERS + ROLLING ══════════════════════════════════════════════════
+function swMAP() { const el = $('f-map'); return Math.max(0, num(el ? el.value : 0)); }
+function resetMAP() { const el = $('f-map'); if(el) el.value = 0; onMapChange(); }
+function onMapChange() { updateModNote(); scheduleAutosave(); }
 function currentMods() {
-  const w = WOUND_PEN[wound] || 0;
-  return { actions: 0, wound: w, mod: 0, total: -w };
+  const w = WOUND_PEN[wound] || 0, map = swMAP() * 3;   // Multi-Action Penalty: each die = 3 pips
+  return { actions: swMAP(), wound: w, mod: 0, total: -(w + map) };
 }
 function updateModNote() {
   const m = currentMods(); const parts = [];
-  if(m.wound) parts.push('−' + toCode(m.wound) + ' ' + wound); if(forcePointArmed) parts.push('Force Point: dice doubled');
+  if(m.actions) parts.push('−' + m.actions + 'D Multi-Action'); if(m.wound) parts.push('−' + toCode(m.wound) + ' ' + wound); if(forcePointArmed) parts.push('Force Point: dice doubled');
   const note = $('mod-note'); if(note) note.textContent = parts.length ? parts.join(' · ') : 'No modifiers.';
   const fb = $('fp-btn'); if(fb) fb.textContent = forcePointArmed ? 'Force Point armed ✓' : 'Use Force Point';
 }
@@ -1097,7 +1103,7 @@ function rollCode(label, basePips, opts) {
 }
 function rollAttr(a) { rollCode(a, attr(a)); }
 function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; rollCode(name, rowTotal(tr)); }
-function rollLoose(n) { const r = rollDice(n * 3); addLog(n + 'D', r.total, swDiceStr(n * 3, r), 'normal'); }
+function rollLoose(n) { const map = swMAP(), pips = Math.max(1, n * 3 - map * 3), r = rollDice(pips); addLog(n + 'D', r.total, [swDiceStr(pips, r), map ? '−' + map + 'D Multi-Action' : ''].filter(Boolean).join(' · '), 'normal'); }
 // ── Dice pool tray: 1D/2D/3D build a pool, Roll rolls it with the Wild Die ──────
 var swPool = 0;
 function renderPool() { const el = $('sw-pool-display'); if(el) el.textContent = swPool > 0 ? (swPool + 'D  ·  last die is Wild') : 'Empty — tap 1D / 2D / 3D to build a pool'; }
@@ -1105,9 +1111,10 @@ function addPoolDice(n) { swPool = Math.min(30, swPool + n); renderPool(); }
 function clearPool() { swPool = 0; renderPool(); }
 function rollPool() {
   if(swPool <= 0) { addLog('Dice Pool', '—', 'Add dice with 1D / 2D / 3D first', 'normal'); return; }
-  const r = rollDice(swPool * 3, true);
+  const map = swMAP(), pips = Math.max(1, swPool * 3 - map * 3);
+  const r = rollDice(pips, true);
   const ws = wildStyle(r);
-  addLog(swPool + 'D Pool', r.total + ws.mark, [swDiceStr(swPool * 3, r), ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
+  addLog(swPool + 'D Pool', r.total + ws.mark, [swDiceStr(pips, r), map ? '−' + map + 'D Multi-Action' : '', ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
   clearPool();
 }
 function callDarkSide() {
@@ -1434,7 +1441,7 @@ function collectSheet() {
     name: v('f-name'), template: v('f-template'), species: v('f-species'), sex: v('f-sex'), age: v('f-age'), height: v('f-height'), weight: v('f-weight'), physical: v('f-physical'),
     attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attr: tr.dataset.attr, adds: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
-    wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), credits: v('f-credits'),
+    wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), map: num(v('f-map')), credits: v('f-credits'),
     armor: { name: v('f-armor'), pips: fromCode(v('f-armor-pips')) || 0 }, move: num(v('f-move')) || 10,
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || undefined, fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
     force: [...document.querySelectorAll('#force-body tr')].map(tr => ({ name: tr.dataset.name })).filter(f => f.name),
@@ -1450,7 +1457,7 @@ function applySheet(d) {
   ATTRS.forEach(a => set('at-' + a, toCode(d.attrs && d.attrs[a] != null ? d.attrs[a] : 6)));
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; forcePointArmed = false; renderWoundTrack();
-  set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-credits', d.credits);
+  set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-map', d.map || 0); set('f-credits', d.credits);
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-pips', ar.pips ? toCode(ar.pips, true) : ''); set('f-move', d.move || 10);
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(w => addWeaponRow(w));
   ensureUnarmed();
@@ -1689,5 +1696,54 @@ if (window.SWHB) SWHB.load(function () { try { fillPickers(); } catch (e) {} });
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<style id="dd-lock-style">
+.log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
+.log-lock:hover{background:rgba(255,255,255,.35);}
+.log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
+.log-lock .lk-ico{font-size:15px;line-height:1;}
+</style>
+<script>
+(function(){
+  /* Shared Lock/Unlock. Locked = play mode: character fields are read-only, but
+     rolling and live trackers (checkboxes, pips, buttons) still work. Unlocked =
+     edit mode. Default locked, mirroring the D&D sheet. */
+  var SKIP={checkbox:1,radio:1,range:1,file:1,button:1,submit:1,reset:1,image:1,color:1};
+  window._sheetLocked=true;
+  function els(){
+    var root=document.querySelector('.sheet'); if(!root) return [];
+    return [].slice.call(root.querySelectorAll('input,textarea,select,[contenteditable]')).filter(function(el){
+      if(el.hasAttribute('data-nolock')) return false;
+      if(el.id==='lock-toggle'||el.id==='campaign-code-input') return false;
+      if(el.closest && el.closest('.roll-log,.ov,[class*="overlay"],[class*="modal"],[id*="overlay"],[id*="modal"]')) return false;
+      return true;
+    });
+  }
+  window.applySheetLock=function(){
+    var locked=window._sheetLocked;
+    document.body.classList.toggle('sheet-locked',locked);
+    document.body.classList.toggle('sheet-unlocked',!locked);
+    els().forEach(function(el){
+      var tag=el.tagName;
+      if(locked){
+        if(el.hasAttribute('contenteditable')){ if(el.getAttribute('contenteditable')!=='false'){ el.setAttribute('data-lk-ce','1'); el.setAttribute('contenteditable','false'); } }
+        else if(tag==='SELECT'){ if(!el.disabled){ el.setAttribute('data-lk-dis','1'); el.disabled=true; } }
+        else if(tag==='TEXTAREA'){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+        else if(tag==='INPUT' && !SKIP[(el.type||'').toLowerCase()]){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+      } else {
+        if(el.getAttribute('data-lk-ce')){ el.setAttribute('contenteditable','true'); el.removeAttribute('data-lk-ce'); }
+        if(el.getAttribute('data-lk-dis')){ el.disabled=false; el.removeAttribute('data-lk-dis'); }
+        if(el.getAttribute('data-lk-ro')){ el.readOnly=false; el.removeAttribute('data-lk-ro'); }
+      }
+    });
+    var b=document.getElementById('lock-toggle');
+    if(b){ b.classList.toggle('on',!locked); b.setAttribute('aria-pressed',String(!locked)); b.title=locked?'Sheet locked (fields read-only; rolling works). Click to edit.':'Sheet unlocked (editing). Click to lock.'; var ic=b.querySelector('.lk-ico'); if(ic) ic.textContent=locked?'🔒':'🔓'; }
+  };
+  window.toggleSheetLock=function(){ window._sheetLocked=!window._sheetLocked; window.applySheetLock(); };
+  function init(){ try{ window.applySheetLock(); }catch(e){} }
+  if(document.readyState==='complete') setTimeout(init,350);
+  else window.addEventListener('load',function(){ setTimeout(init,350); });
+})();
+</script>
+
 </body>
 </html>

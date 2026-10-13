@@ -287,6 +287,9 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 .combat-grid.four{grid-template-columns:repeat(4,1fr);}
 .cp-hdr{display:inline-flex;align-items:center;gap:5px;margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
 .cp-hdr input{width:56px;height:24px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.map-hdr{margin-left:0;}
+.map-reset{height:24px;border:1px solid var(--input-border);background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:0 7px;cursor:pointer;border-radius:4px;}
+.map-reset:hover{background:var(--input-bg);color:var(--ink);}
 .combat-grid .vital{display:flex;flex-direction:column;min-height:0;padding:6px 8px;gap:1px;}
 .combat-grid .vbig{font-size:28px;line-height:1;margin-top:1px;}
 .combat-grid .vbig .calc{font-size:44px;line-height:1;}
@@ -618,7 +621,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="section-bar accent"><span>Attributes</span></div>
         <div class="stats-grid" id="stats-grid"></div>
         <table class="skills-table"><tbody id="skills-body"></tbody></table>
-        <div class="add-row"><span class="cp-hdr">Character Points <input type="number" id="f-cp" value="0" min="0" oninput="scheduleAutosave()"></span></div>
+        <div class="add-row" style="justify-content:space-between;"><span class="cp-hdr map-hdr" title="Multi-Action Penalty — dice subtracted from every dice-pool roll until you reset it">MAP −<input type="number" id="f-map" value="0" min="0" step="1" data-nolock style="width:42px;" oninput="onMapChange()">D <button type="button" class="map-reset" onclick="resetMAP()" title="Reset the Multi-Action Penalty to 0">Reset</button></span><span class="cp-hdr">Character Points <input type="number" id="f-cp" value="0" min="0" oninput="scheduleAutosave()"></span></div>
       </div>
       <div id="magic-panel" class="card" hidden></div>
       <div id="advancement-panel" class="card" hidden></div>
@@ -715,7 +718,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2c22;background:transparent;color:#9a8676;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="D62EB.launch()" title="Character Builder">Create</button>
@@ -1050,12 +1053,16 @@ function recalc() {
 }
 
 // ═══ MODIFIERS + ROLLING ══════════════════════════════════════════════════
+function d6MAP() { const el = $('f-map'); return Math.max(0, num(el ? el.value : 0)); }
+function resetMAP() { const el = $('f-map'); if(el) el.value = 0; onMapChange(); }
+function onMapChange() { updateModNote(); scheduleAutosave(); }
 function currentMods() {
-  const w = WOUND_PEN[wound] || 0;
-  return { wound: w, total: -w };
+  const w = WOUND_PEN[wound] || 0, map = d6MAP() * 3;   // Multi-Action Penalty: each die = 3 pips
+  return { actions: d6MAP(), wound: w, total: -(w + map) };
 }
 function updateModNote() {
   const m = currentMods(); const parts = [];
+  if(m.actions) parts.push('−' + m.actions + 'D Multi-Action');
   if(m.wound) parts.push('−' + code(m.wound) + ' ' + wound);
   if(heroArmed) parts.push('Hero Point: ' + heroArmDesc());
   if(assetBonusPips) parts.push('Asset: +' + code(assetBonusPips) + ' next roll');
@@ -1167,12 +1174,13 @@ function addPoolDice(n) { d62ePool = Math.min(30, d62ePool + n); renderPool(); }
 function clearPool() { d62ePool = 0; renderPool(); }
 function rollPool() {
   if(d62ePool <= 0) { addLog('Dice Pool', '—', 'Add dice with 1D / 2D / 3D first', 'normal'); return; }
-  const r = rollDice(d62ePool * 3, true); const ws = wildStyle(r);
+  const map = d6MAP(), pips = Math.max(1, d62ePool * 3 - map * 3), mapNote = map ? '−' + map + 'D Multi-Action' : '';
+  const r = rollDice(pips, true); const ws = wildStyle(r);
   if(r.succMode) {
     var st = 'target ' + r.target + '+ · ' + r.successes + ' success' + (r.successes === 1 ? '' : 'es');
-    addLog(d62ePool + 'D Pool', r.successes + ws.mark, [diceStr(d62ePool * 3, r), st, ws.note].filter(Boolean).join(' · '), ws.type || (r.successes > 0 ? 'crit' : 'fumble'));
+    addLog(d62ePool + 'D Pool', r.successes + ws.mark, [diceStr(pips, r), st, mapNote, ws.note].filter(Boolean).join(' · '), ws.type || (r.successes > 0 ? 'crit' : 'fumble'));
   } else {
-    addLog(d62ePool + 'D Pool', r.total + ws.mark, [diceStr(d62ePool * 3, r), ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
+    addLog(d62ePool + 'D Pool', r.total + ws.mark, [diceStr(pips, r), mapNote, ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
   }
   clearPool();
 }
@@ -1662,7 +1670,7 @@ function collectSheet() {
     system: 'D62E', name: v('f-name'), genre: v('f-genre'), template: v('f-template'), archetype: v('f-archetype'),
     attrs: attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attribute: tr.dataset.attr, pips: codeOrZero(tr.querySelector('.sk-adds').value), adv: tr.dataset.adv === '1', spec: !!(tr.querySelector('.sk-spec') && tr.querySelector('.sk-spec').checked), specName: (tr.querySelector('.sk-specname') && tr.querySelector('.sk-specname').value.trim()) || '' })).filter(s => s.name),
-    heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')),
+    heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')), map: num(v('f-map')),
     move: v('f-move'),
     wound: wound,
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, skill: tr.querySelector('.wp-skill').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
@@ -1695,7 +1703,7 @@ function applySheet(d) {
   buildStats(d.attrs && typeof d.attrs === 'object' ? d.attrs : { Agility:9, Brawn:9, Knowledge:9, Perception:9 });
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = false; assetBonusPips = 0; renderWoundTrack();
-  set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0);
+  set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0); set('f-map', d.map || 0);
   set('f-move', d.move != null ? d.move : '10');
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow); ensureUnarmed();
@@ -1928,5 +1936,54 @@ if (window.D62eHomebrew) {
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->
 <script src="/tools-data/dice-anim.js"></script>
+<style id="dd-lock-style">
+.log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
+.log-lock:hover{background:rgba(255,255,255,.35);}
+.log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
+.log-lock .lk-ico{font-size:15px;line-height:1;}
+</style>
+<script>
+(function(){
+  /* Shared Lock/Unlock. Locked = play mode: character fields are read-only, but
+     rolling and live trackers (checkboxes, pips, buttons) still work. Unlocked =
+     edit mode. Default locked, mirroring the D&D sheet. */
+  var SKIP={checkbox:1,radio:1,range:1,file:1,button:1,submit:1,reset:1,image:1,color:1};
+  window._sheetLocked=true;
+  function els(){
+    var root=document.querySelector('.sheet'); if(!root) return [];
+    return [].slice.call(root.querySelectorAll('input,textarea,select,[contenteditable]')).filter(function(el){
+      if(el.hasAttribute('data-nolock')) return false;
+      if(el.id==='lock-toggle'||el.id==='campaign-code-input') return false;
+      if(el.closest && el.closest('.roll-log,.ov,[class*="overlay"],[class*="modal"],[id*="overlay"],[id*="modal"]')) return false;
+      return true;
+    });
+  }
+  window.applySheetLock=function(){
+    var locked=window._sheetLocked;
+    document.body.classList.toggle('sheet-locked',locked);
+    document.body.classList.toggle('sheet-unlocked',!locked);
+    els().forEach(function(el){
+      var tag=el.tagName;
+      if(locked){
+        if(el.hasAttribute('contenteditable')){ if(el.getAttribute('contenteditable')!=='false'){ el.setAttribute('data-lk-ce','1'); el.setAttribute('contenteditable','false'); } }
+        else if(tag==='SELECT'){ if(!el.disabled){ el.setAttribute('data-lk-dis','1'); el.disabled=true; } }
+        else if(tag==='TEXTAREA'){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+        else if(tag==='INPUT' && !SKIP[(el.type||'').toLowerCase()]){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+      } else {
+        if(el.getAttribute('data-lk-ce')){ el.setAttribute('contenteditable','true'); el.removeAttribute('data-lk-ce'); }
+        if(el.getAttribute('data-lk-dis')){ el.disabled=false; el.removeAttribute('data-lk-dis'); }
+        if(el.getAttribute('data-lk-ro')){ el.readOnly=false; el.removeAttribute('data-lk-ro'); }
+      }
+    });
+    var b=document.getElementById('lock-toggle');
+    if(b){ b.classList.toggle('on',!locked); b.setAttribute('aria-pressed',String(!locked)); b.title=locked?'Sheet locked (fields read-only; rolling works). Click to edit.':'Sheet unlocked (editing). Click to lock.'; var ic=b.querySelector('.lk-ico'); if(ic) ic.textContent=locked?'🔒':'🔓'; }
+  };
+  window.toggleSheetLock=function(){ window._sheetLocked=!window._sheetLocked; window.applySheetLock(); };
+  function init(){ try{ window.applySheetLock(); }catch(e){} }
+  if(document.readyState==='complete') setTimeout(init,350);
+  else window.addEventListener('load',function(){ setTimeout(init,350); });
+})();
+</script>
+
 </body>
 </html>
