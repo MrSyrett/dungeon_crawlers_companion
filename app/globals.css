@@ -245,8 +245,9 @@
      the headings. Vaesen — antique brass candlelight on black paper. */
   --myz: #cf6a2a;
   --myz-steel: #d9d3c6;
-  --vae: #b8924e;
+  --vae: #d4a53a;
   --vae-bone: #e7dec9;
+  --vae-blue: #35508a;
   /* Dungeon Crawler Carl accent — the covers' hot magenta. (Its pages used to
      borrow --red, which is the app's muted brick and nowhere near the books.) */
   --dcc: #e8275f;
@@ -1275,6 +1276,8 @@ body {
   --sys-head: var(--vae-bone);
   --sys-sub: var(--vae-bone);
   --sys-link: var(--vae);
+  --sys-hilite: var(--vae-blue);
+  --sys-action: var(--vae-blue);
   --panel: #17140f;
   --panel-2: #211c15;
   --border: #3a3326;
@@ -1287,7 +1290,8 @@ body {
   background-color: #0c0a07;
   background-image:
     radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.74) 100%),
-    radial-gradient(70% 46% at 50% 2%, rgba(184, 146, 78, 0.12) 0%, rgba(184, 146, 78, 0) 70%),
+    radial-gradient(70% 46% at 50% 2%, rgba(212, 165, 58, 0.13) 0%, rgba(212, 165, 58, 0) 70%),
+    radial-gradient(90% 60% at 50% 112%, rgba(53, 80, 138, 0.22) 0%, rgba(53, 80, 138, 0) 68%),
     url("/themes/vae-paper.webp");
   background-attachment: fixed;
   background-position: center;

@@ -88,7 +88,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.gb { color: #8bc53f; }
   .group-head.twd { color: #d8cfbf; }
   .group-head.myz { color: #cf6a2a; }
-  .group-head.vae { color: #b8924e; }
+  .group-head.vae { color: #d4a53a; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
