@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -52,6 +52,15 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // survival-horror game: four attributes, D6 dice pools, stress dice & the
   // walker Threat Level, a fixed 3-point Health track, Archetypes, and Anchors.
   { key: "TWD", name: "The Walking Dead", short: "TWD", accent: "var(--twd)" },
+  // Mutant: Year Zero (Free League) — the original Year Zero Engine: four
+  // attributes that ARE the health pool (Damage/Fatigue/Confusion/Doubt, Broken at
+  // 0), no stress/panic — pushing deals attribute trauma and earns Mutation Points
+  // — plus Mutations, the Rot track, and the Ark's Development Levels.
+  { key: "MYZ", name: "Mutant: Year Zero", short: "MYZ", accent: "var(--myz)" },
+  // Vaesen — Nordic Horror (Free League) — the Year Zero Engine at its gentlest:
+  // D6 dice pools, NO stress dice, health modeled by Conditions (three physical +
+  // three mental), the Fear test, and a Gothic investigate-and-banish campaign loop.
+  { key: "VAE", name: "Vaesen", short: "Vaesen", accent: "var(--vae)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

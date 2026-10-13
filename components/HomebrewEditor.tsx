@@ -640,6 +640,59 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ slots: "1" }), toForm: (d) => ({ ...d }),
     summary: (d) => `${sv(d, "slots") || "1"} slots${sv(d, "bonus") ? " · " + sv(d, "bonus") : ""}`,
   },
+
+  // ── Mutant: Year Zero (Free League) ──
+  "myz-weapon": {
+    title: "Homebrew Weapons", noun: "Weapon",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "skill", label: "Skill", type: "select", options: [["Fight", "Fight (melee)"], ["Shoot", "Shoot (ranged)"]] },
+      { key: "bonus", label: "Gear bonus", type: "number", placeholder: "1" },
+      { key: "damage", label: "Damage", type: "number", placeholder: "1" },
+      { key: "range", label: "Range", type: "select", options: [["Arm's Length", "Arm's Length"], ["Near", "Near"], ["Short", "Short"], ["Long", "Long"], ["Distant", "Distant"]] },
+      { key: "weight", label: "Slots", type: "text", placeholder: "1, ½" },
+      { key: "desc", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ skill: "Fight", range: "Arm's Length", weight: "1", damage: 1, bonus: 0 }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "damage") || "1"} dmg · ${sv(d, "skill") || "Fight"}`,
+  },
+  "myz-gear": {
+    title: "Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "weight", label: "Slots", type: "text", placeholder: "1, ½" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ weight: "1" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "weight") || "1"} slots`,
+  },
+
+  // ── Vaesen (Free League) ──
+  "vae-weapon": {
+    title: "Homebrew Weapons", noun: "Weapon",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "skill", label: "Skill", type: "select", options: [["Close Combat", "Close Combat"], ["Ranged Combat", "Ranged Combat"], ["Force", "Force"]] },
+      { key: "bonus", label: "Bonus", type: "text", placeholder: "+1" },
+      { key: "damage", label: "Damage", type: "number", placeholder: "2" },
+      { key: "range", label: "Range", type: "text", placeholder: "0, 0-2" },
+      { key: "cost", label: "Cost", type: "text", placeholder: "2" },
+      { key: "desc", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ skill: "Close Combat", range: "0", damage: 1, bonus: "0" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "damage") || "1"} dmg · ${sv(d, "skill") || "Close Combat"}`,
+  },
+  "vae-gear": {
+    title: "Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "bonus", label: "Skill bonus", type: "text", placeholder: "+1" },
+      { key: "cost", label: "Cost", type: "text", placeholder: "2" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "bonus") ? sv(d, "bonus") + " · " : ""}cost ${sv(d, "cost") || "—"}`,
+  },
   "mmrpg-power": {
     title: "Homebrew Powers", noun: "Power",
     fields: [

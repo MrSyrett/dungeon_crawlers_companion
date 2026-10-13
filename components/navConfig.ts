@@ -125,6 +125,24 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/twd/combat", label: "Combat" },
     { href: "/twd/dead", label: "The Dead" },
   ],
+  MYZ: [
+    { href: "/myz/skills", label: "Skills" },
+    { href: "/myz/roles", label: "Roles" },
+    { href: "/myz/talents", label: "Talents" },
+    { href: "/myz/mutations", label: "Mutations" },
+    { href: "/myz/gear", label: "Gear" },
+    { href: "/myz/combat", label: "Combat" },
+    { href: "/myz/zone", label: "The Zone" },
+  ],
+  VAE: [
+    { href: "/vae/skills", label: "Skills" },
+    { href: "/vae/archetypes", label: "Archetypes" },
+    { href: "/vae/talents", label: "Talents" },
+    { href: "/vae/gear", label: "Gear" },
+    { href: "/vae/injuries", label: "Conditions & Injuries" },
+    { href: "/vae/bestiary", label: "The Vaesen" },
+    { href: "/vae/society", label: "The Society" },
+  ],
 };
 
 export const RULEBOOKS_LINK: NavLink = { href: "/rules", label: "Rulebooks" };
@@ -156,6 +174,8 @@ export const HOMEBREW: Partial<Record<SystemKey, string>> = {
   YZE: "/yze/homebrew",
   MMRPG: "/mmrpg/homebrew",
   TWD: "/twd/homebrew",
+  MYZ: "/myz/homebrew",
+  VAE: "/vae/homebrew",
 };
 
 export function homebrewFor(system: SystemKey): string | null {
@@ -225,6 +245,7 @@ const CONCEPT: Record<string, string[]> = {
   Bestiary: ["creatures"],
   "Ghosts & Extras": ["creatures"],
   "The Dead": ["creatures"],
+  "The Vaesen": ["creatures"],
   Characters: ["creatures"],
   // what you are
   Classes: ["archetype"],
@@ -253,6 +274,7 @@ const CONCEPT: Record<string, string[]> = {
   // what you cast
   Spells: ["magic"],
   Magic: ["magic"],
+  Mutations: ["magic"],
   Powers: ["magic"],
   "Capes & Powers": ["magic"],
   "Skills & Spells": ["magic", "skills"],
@@ -271,8 +293,11 @@ const CONCEPT: Record<string, string[]> = {
   Focuses: ["traits"],
   // one-offs, which have no equivalent anywhere and fall back by design
   Worlds: ["setting"],
+  "The Zone": ["setting"],
+  "The Society": ["setting"],
   Starships: ["vehicles"],
   Combat: ["rules"],
+  "Conditions & Injuries": ["rules"],
 };
 
 // When the user switches system while on a compendium page, keep them in the
@@ -335,6 +360,8 @@ const PREFIX_SYSTEM: { prefix: string; key: SystemKey }[] = [
   { prefix: "/jlu/", key: "JLU" },
   { prefix: "/gb/", key: "GB" },
   { prefix: "/twd/", key: "TWD" },
+  { prefix: "/myz/", key: "MYZ" },
+  { prefix: "/vae/", key: "VAE" },
 ];
 
 // Shadowdark's reference pages live at top-level routes (historical), so match

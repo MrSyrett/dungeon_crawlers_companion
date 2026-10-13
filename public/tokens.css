@@ -50,6 +50,11 @@
   /* The Walking Dead — blood red + bone (mirrors app/globals.css). */
   --twd: #9e1b1b;
   --twd-bone: #d8cfbf;
+  /* Mutant: Year Zero (rust on metal) + Vaesen (brass on black paper). */
+  --myz: #cf6a2a;
+  --myz-steel: #d9d3c6;
+  --vae: #b8924e;
+  --vae-bone: #e7dec9;
   --dcc: #e8275f;
   --dcc-gold: #f2c230;
   /* ---- The systems' SECOND colours, mirrored from app/globals.css ----------
@@ -1193,6 +1198,64 @@ html {
     radial-gradient(130% 96% at 50% 42%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.7) 100%),
     radial-gradient(70% 48% at 50% 0%, rgba(158, 27, 27, 0.16) 0%, rgba(158, 27, 27, 0) 72%),
     url("/themes/twd-grunge.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Mutant: Year Zero (rust on scrap metal) ------------------------------ */
+:root[data-themed][data-system="MYZ"] {
+  --sub-color: var(--myz-steel);
+  --section-hdr-dark: var(--myz-steel);
+  --sys-display: "Anton", ui-sans-serif, system-ui, sans-serif;
+  --sys-text: "Asap", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #1c1714;
+  --ui-panel: #262019;
+  --ui-border: #3d332a;
+  --ui-text: #e6ddcf;
+  --ui-muted: #9c9184;
+  --ui-accent: var(--myz);
+  --ui-highlight: var(--myz);
+  --font-display: "Anton", ui-sans-serif, system-ui, sans-serif;
+}
+:root[data-themed][data-system="MYZ"] body,
+:root[data-themed][data-system="MYZ"] .preview-area {
+  background-color: #100c0a;
+  background-image:
+    radial-gradient(132% 98% at 50% 40%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.72) 100%),
+    radial-gradient(74% 50% at 50% 0%, rgba(207, 106, 42, 0.14) 0%, rgba(207, 106, 42, 0) 70%),
+    url("/themes/myz-metal.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Vaesen (candlelight on black paper) ---------------------------------- */
+:root[data-themed][data-system="VAE"] {
+  --sub-color: var(--vae-bone);
+  --section-hdr-dark: var(--vae-bone);
+  --sys-display: "Fraunces", ui-serif, Georgia, serif;
+  --sys-text: "EB Garamond", ui-serif, Georgia, serif;
+  --sys-label: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --ui-bg: #17140f;
+  --ui-panel: #211c15;
+  --ui-border: #3a3326;
+  --ui-text: #e8e0cf;
+  --ui-muted: #9c9179;
+  --ui-accent: var(--vae);
+  --ui-highlight: var(--vae);
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+}
+:root[data-themed][data-system="VAE"] body,
+:root[data-themed][data-system="VAE"] .preview-area {
+  background-color: #0c0a07;
+  background-image:
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.74) 100%),
+    radial-gradient(70% 46% at 50% 2%, rgba(184, 146, 78, 0.12) 0%, rgba(184, 146, 78, 0) 70%),
+    url("/themes/vae-paper.webp");
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;

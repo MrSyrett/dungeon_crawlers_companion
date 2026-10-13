@@ -31,6 +31,8 @@ type HbType =
   | "co-ability" | "co-gear"
   | "yze-weapon" | "yze-gear"
   | "twd-weapon" | "twd-gear"
+  | "myz-weapon" | "myz-gear"
+  | "vae-weapon" | "vae-gear"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {

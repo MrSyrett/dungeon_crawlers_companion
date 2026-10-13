@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session" | "icrpg-character" | "icrpg-session" | "co-character" | "co-session" | "yze-character" | "yze-session" | "mmrpg-character" | "mmrpg-session" | "jlu-character" | "jlu-session" | "gb-character" | "gb-session" | "twd-character" | "twd-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session" | "icrpg-character" | "icrpg-session" | "co-character" | "co-session" | "yze-character" | "yze-session" | "mmrpg-character" | "mmrpg-session" | "jlu-character" | "jlu-session" | "gb-character" | "gb-session" | "twd-character" | "twd-session" | "myz-character" | "myz-session" | "vae-character" | "vae-session";
 
 export type ToolKind = "character" | "session";
 
@@ -298,9 +298,45 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "twd_session_prep_builder.html",
     keys: ["twd_session"],
   },
+  "myz-character": {
+    id: "myz-character",
+    system: "MYZ",
+    systemName: "Mutant: Year Zero",
+    kind: "character",
+    label: "Character Sheet",
+    file: "myz_character_sheet.html",
+    keys: ["myz_sheet"],
+  },
+  "myz-session": {
+    id: "myz-session",
+    system: "MYZ",
+    systemName: "Mutant: Year Zero",
+    kind: "session",
+    label: "Adventure",
+    file: "myz_session_prep_builder.html",
+    keys: ["myz_session"],
+  },
+  "vae-character": {
+    id: "vae-character",
+    system: "VAE",
+    systemName: "Vaesen",
+    kind: "character",
+    label: "Character Sheet",
+    file: "vae_character_sheet.html",
+    keys: ["vae_sheet"],
+  },
+  "vae-session": {
+    id: "vae-session",
+    system: "VAE",
+    systemName: "Vaesen",
+    kind: "session",
+    label: "Mystery",
+    file: "vae_session_prep_builder.html",
+    keys: ["vae_session"],
+  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "yze-character", "yze-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "twd-character", "twd-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "yze-character", "yze-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "twd-character", "twd-session", "myz-character", "myz-session", "vae-character", "vae-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

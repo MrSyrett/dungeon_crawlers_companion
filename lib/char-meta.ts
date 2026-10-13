@@ -65,6 +65,28 @@ export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | n
         level: null,
       };
     }
+    // Mutant: Year Zero: no levels — the roster shows the role as the class.
+    const myz = blob?.myz_sheet;
+    if (typeof myz === "string") {
+      const s = JSON.parse(myz) as { name?: unknown; role?: unknown; class?: unknown };
+      const cls = (typeof s.role === "string" && s.role.trim()) ? s.role : (typeof s.class === "string" ? s.class : "");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
+    // Vaesen: no levels — the roster shows the archetype as the class.
+    const vae = blob?.vae_sheet;
+    if (typeof vae === "string") {
+      const s = JSON.parse(vae) as { name?: unknown; archetype?: unknown; class?: unknown };
+      const cls = (typeof s.archetype === "string" && s.archetype.trim()) ? s.archetype : (typeof s.class === "string" ? s.class : "");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
     // Marvel Multiverse RPG: "level" is Rank; the class column shows the origin.
     const mmrpg = blob?.mmrpg_sheet;
     if (typeof mmrpg === "string") {

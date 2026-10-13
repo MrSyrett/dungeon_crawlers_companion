@@ -100,6 +100,20 @@ const SYSTEMS = [
     chapter: "Scene", chapterPh: "Scene 1", session: "Adventure", mobs: "Ghosts/Extras", mobsHeading: "Ghosts &amp; Extras",
     mob: "Ghost", boss: "Big Bad", npc: "Extra", typePh: "SLIMER // Class 5 Free-Roaming Vapor", titlePh: "e.g. The Kane House Haunting", subtitlePh: "e.g. A Ghostbusters one-shot",
   },
+  {
+    file: "myz_session_prep_builder.html", key: "myz_session", ls: "myz_builder_v1", cfg: "myz", random: "Random Zone Threat",
+    name: "Mutant: Year Zero", title: "Session Prep Builder — Mutant: Year Zero",
+    accent: "#cf6a2a", accentDark: "#8f4517", red: "#b23c2f", redDark: "#7a1510", highlight: "#e8923f", boxBg: "#efe0d2",
+    chapter: "Sector", chapterPh: "Sector A3", session: "Session", mobs: "Zone Threats/NPCs", mobsHeading: "Zone Threats &amp; NPCs",
+    mob: "Beast", boss: "Threat", npc: "NPC", typePh: "ZONE GHOUL // STR 3 · FIGHT 1", titlePh: "e.g. The Dawn Vault", subtitlePh: "e.g. A Mutant: Year Zero expedition",
+  },
+  {
+    file: "vae_session_prep_builder.html", key: "vae_session", ls: "vae_builder_v1", cfg: "vae", random: "Random Vaesen",
+    name: "Vaesen", title: "Session Prep Builder — Vaesen",
+    accent: "#b8924e", accentDark: "#7a5a24", red: "#9e5a2a", redDark: "#6f3a16", highlight: "#d8b96a", boxBg: "#ece2cc",
+    chapter: "Scene", chapterPh: "Scene 1", session: "Mystery", mobs: "Vaesen/NPCs", mobsHeading: "Vaesen &amp; NPCs",
+    mob: "Vaesen", boss: "Vaesen", npc: "NPC", typePh: "GHOST // MAGIC 10 · FEAR 2", titlePh: "e.g. The Dance of Dreams", subtitlePh: "e.g. A Vaesen mystery",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -234,6 +248,26 @@ const SB_CONFIG = {
   abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: pool, damage · Note: …',
   mobs: null,
 };`,
+  myz: `const SB_CONFIG = {
+  typePlaceholder: 'BEAST // STR 5 · FIGHT 2',
+  hp: null,
+  rows: [
+    [{ key:'str', label:'STR' }, { key:'agi', label:'AGI' }, { key:'wit', label:'WIT' }, { key:'emp', label:'EMP' }],
+    [{ key:'armor', label:'ARMOR' }, { key:'skills', label:'SKILLS', ph:'Fight 2 · Move 3' }],
+  ],
+  abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: dmg, range · Note: …',
+  mobs: null,
+};`,
+  vae: `const SB_CONFIG = {
+  typePlaceholder: 'VAESEN // FEAR 2',
+  hp: null,
+  rows: [
+    [{ key:'might', label:'MIGHT' }, { key:'bodyControl', label:'BODY' }, { key:'magic', label:'MAGIC' }, { key:'manipulation', label:'MANIP' }],
+    [{ key:'fear', label:'FEAR' }, { key:'protection', label:'PROT' }, { key:'conditions', label:'CONDITIONS', ph:'Angry +1 · Wounded -2' }],
+  ],
+  abilitiesLabel: 'Powers, Combat & Ritual', abilitiesPlaceholder: 'One per line — Power / Attack / Ritual / Secret',
+  mobs: null,
+};`,
   mmrpg: `const _mvSgn = v => v == null ? '' : ((v >= 0 ? '+' : '') + v);
 const SB_CONFIG = {
   typePlaceholder: 'THUG // Rank 1 · Melee +2',
@@ -347,6 +381,8 @@ const MOB_DATA = {
   mmrpg: '<script src="/tools-data/mmrpg-characters.js"></script>',
   jlu: '<script src="/tools-data/jlu-bestiary.js"></script>',
   gb: '<script src="/tools-data/gb-bestiary.js"></script>',
+  myz: '',
+  vae: '',
 };
 
 function rep(s, a, b, all = true) {
@@ -371,6 +407,8 @@ const BANNERS = {
   mmrpg:  ["#b3141a", "#ec1d24", "#ffffff", 700, "#7fc0f5"],
   jlu:    ["#1c49a8", "#2f6fed", "#ffffff", 900, "#e2b23a"],
   gb:     ["#5f8f24", "#8bc53f", "#12180a", 900, "#5e2b90"],
+  myz:    ["#8f4517", "#cf6a2a", "#f4ece0", 800, "#d9d3c6"],
+  vae:    ["#2a2016", "#b8924e", "#efe6d4", 700, "#e7dec9"],
 };
 
 for (const S of SYSTEMS) {

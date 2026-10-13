@@ -31,6 +31,8 @@ export type HbType =
   | "co-ability" | "co-gear"
   | "yze-weapon" | "yze-gear"
   | "twd-weapon" | "twd-gear"
+  | "myz-weapon" | "myz-gear"
+  | "vae-weapon" | "vae-gear"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 
 const HB_TYPES = [
@@ -46,6 +48,8 @@ const HB_TYPES = [
   "co-ability", "co-gear",
   "yze-weapon", "yze-gear",
   "twd-weapon", "twd-gear",
+  "myz-weapon", "myz-gear",
+  "vae-weapon", "vae-gear",
   "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq", "mmrpg-starship",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
@@ -1797,6 +1801,67 @@ function normalizeTwdGear(input: unknown): { name: string; data: Record<string, 
   return { name, data };
 }
 
+// ── Mutant: Year Zero (MYZ) ─────────────────────────────────────────────────
+function normalizeMyzWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew weapon needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    skill: oneOf(str(o.skill) || "Fight", ["Fight", "Shoot"] as const, "Fight"),
+    bonus: Math.max(0, Math.min(10, Math.round(Number(o.bonus) || 0))),
+    damage: Math.max(0, Math.min(10, Math.round(Number(o.damage) || 1))),
+    range: str(o.range).slice(0, 20) || "Arm's Length",
+    weight: str(o.weight).slice(0, 8) || "1",
+    desc: str(o.desc).slice(0, 1000),
+    hb: true,
+  };
+  return { name, data };
+}
+function normalizeMyzGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    weight: str(o.weight).slice(0, 8) || "1",
+    desc: str(o.desc).slice(0, 2000),
+    hb: true,
+  };
+  return { name, data };
+}
+
+// ── Vaesen (VAE) ────────────────────────────────────────────────────────────
+function normalizeVaeWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew weapon needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    skill: oneOf(str(o.skill) || "Close Combat", ["Close Combat", "Ranged Combat", "Force"] as const, "Close Combat"),
+    bonus: str(o.bonus).slice(0, 8) || "0",
+    damage: Math.max(0, Math.min(10, Math.round(Number(o.damage) || 1))),
+    range: str(o.range).slice(0, 20) || "0",
+    cost: str(o.cost).slice(0, 8),
+    desc: str(o.desc).slice(0, 1000),
+    hb: true,
+  };
+  return { name, data };
+}
+function normalizeVaeGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    bonus: str(o.bonus).slice(0, 8),
+    cost: str(o.cost).slice(0, 8),
+    desc: str(o.desc).slice(0, 2000),
+    hb: true,
+  };
+  return { name, data };
+}
+
 // ── Marvel Multiverse RPG (MMRPG, d616) ─────────────────────────────────────
 function normalizeMmrpgPower(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -2032,6 +2097,10 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "yze-gear": return normalizeYzeGear(data);
     case "twd-weapon": return normalizeTwdWeapon(data);
     case "twd-gear": return normalizeTwdGear(data);
+    case "myz-weapon": return normalizeMyzWeapon(data);
+    case "myz-gear": return normalizeMyzGear(data);
+    case "vae-weapon": return normalizeVaeWeapon(data);
+    case "vae-gear": return normalizeVaeGear(data);
     case "mmrpg-power": return normalizeMmrpgPower(data);
     case "mmrpg-trait": return normalizeMmrpgLabel(data, "trait");
     case "mmrpg-tag": return normalizeMmrpgLabel(data, "tag");

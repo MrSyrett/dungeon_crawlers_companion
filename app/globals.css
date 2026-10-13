@@ -241,6 +241,12 @@
      colour (links, borders, fills, rules). */
   --twd: #9e1b1b;
   --twd-bone: #d8cfbf;
+  /* Mutant: Year Zero — corroded-metal rust on near-black; a pale steel reads
+     the headings. Vaesen — antique brass candlelight on black paper. */
+  --myz: #cf6a2a;
+  --myz-steel: #d9d3c6;
+  --vae: #b8924e;
+  --vae-bone: #e7dec9;
   /* Dungeon Crawler Carl accent — the covers' hot magenta. (Its pages used to
      borrow --red, which is the app's muted brick and nowhere near the books.) */
   --dcc: #e8275f;
@@ -1228,6 +1234,73 @@ body {
   text-transform: uppercase;
 }
 
+/* --- Mutant: Year Zero: rust on scrap metal ------------------------------
+   Anton, a brutalist condensed slab, letters the headings in pale steel; a
+   corroded rust-orange takes the links and rules over a dark metal ground. */
+:root[data-system="MYZ"]:not([data-chrome]) body {
+  --sys-head: var(--myz-steel);
+  --sys-sub: var(--myz-steel);
+  --sys-link: var(--myz);
+  --panel: #1c1714;
+  --panel-2: #262019;
+  --border: #3d332a;
+  --text: #e6ddcf;
+  --muted: #9c9184;
+  --gold: var(--myz);
+  --sys-display: var(--font-anton);
+  --sys-text: var(--font-asap);
+  --sys-label: var(--font-barlow);
+  background-color: #100c0a;
+  background-image:
+    radial-gradient(132% 98% at 50% 40%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.72) 100%),
+    radial-gradient(74% 50% at 50% 0%, rgba(207, 106, 42, 0.14) 0%, rgba(207, 106, 42, 0) 70%),
+    url("/themes/myz-metal.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="MYZ"]:not([data-chrome]) body h1,
+:root[data-system="MYZ"]:not([data-chrome]) body h2,
+:root[data-system="MYZ"]:not([data-chrome]) body h3 {
+  font-family: var(--font-anton), "Anton", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* --- Vaesen: candlelight on black paper -----------------------------------
+   Fraunces, a high-contrast old-style serif, letters the headings in bone; an
+   antique brass takes the links over a near-black paper ground (gaslamp gothic). */
+:root[data-system="VAE"]:not([data-chrome]) body {
+  --sys-head: var(--vae-bone);
+  --sys-sub: var(--vae-bone);
+  --sys-link: var(--vae);
+  --panel: #17140f;
+  --panel-2: #211c15;
+  --border: #3a3326;
+  --text: #e8e0cf;
+  --muted: #9c9179;
+  --gold: var(--vae);
+  --sys-display: var(--font-fraunces);
+  --sys-text: var(--font-garamond);
+  --sys-label: var(--font-cormorant);
+  background-color: #0c0a07;
+  background-image:
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.74) 100%),
+    radial-gradient(70% 46% at 50% 2%, rgba(184, 146, 78, 0.12) 0%, rgba(184, 146, 78, 0) 70%),
+    url("/themes/vae-paper.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-system="VAE"]:not([data-chrome]) body h1,
+:root[data-system="VAE"]:not([data-chrome]) body h2,
+:root[data-system="VAE"]:not([data-chrome]) body h3 {
+  font-family: var(--font-fraunces), "Fraunces", ui-serif, Georgia, serif;
+  letter-spacing: 0.01em;
+}
+
 /* --- Justice League Unlimited: an art-deco skyline -------------------------
    Russo One over Rubik. Bruce Timm's design language is flat, geometric and
    squared off, with no texture and no gradient in the drawing itself.
@@ -1553,6 +1626,8 @@ body {
 [data-sys="JLU"],   .home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-sub: var(--jlu-gold);    --tile-namefont: var(--font-rubik);      --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
 [data-sys="GB"],    .home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-sub: var(--gb-ecto);     --tile-namefont: var(--font-asap);       --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
 [data-sys="TWD"],   .home-tile[data-sys="TWD"]   { --tile-accent: var(--twd);         --tile-sub: var(--twd-bone);    --tile-namefont: var(--font-oswald);     --tile-face: "Dead Kansas", var(--font-oswald); --tile-bg: #0b0909; --tile-tex: url("/themes/twd-grunge.webp"); --tile-scrim: 0.14; }
+[data-sys="MYZ"],   .home-tile[data-sys="MYZ"]   { --tile-accent: var(--myz);         --tile-sub: var(--myz-steel);   --tile-namefont: var(--font-anton);      --tile-face: var(--font-anton); --tile-bg: #100c0a; --tile-tex: url("/themes/myz-metal.webp"); --tile-scrim: 0.18; }
+[data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.
