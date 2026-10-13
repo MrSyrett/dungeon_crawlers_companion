@@ -642,13 +642,13 @@ body.dark .section-bar,body.dark .section-bar.blue,body.dark .tab-btn.on,body.da
           <div class="derived-lbl"><span>Defence</span></div>
           <div class="def-row">
             <div class="derived-big" id="def-val">8</div>
-            <div class="derived-formula" style="margin-left:auto;">gear <input type="number" id="def-bonus" value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
+            <div class="derived-formula" style="margin-left:auto;">gear <input type="number" id="def-bonus" data-nolock value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
           </div>
         </div>
         <div class="derived-cell">
           <div class="derived-lbl"><span>Health</span></div>
           <div class="health-pips" id="hp-pips"></div>
-          <div class="derived-formula">bonus <input type="number" id="hp-bonus" value="0" oninput="recalc()"> <span id="ko-flag"></span></div>
+          <div class="derived-formula">bonus <input type="number" id="hp-bonus" data-nolock value="0" oninput="recalc()"> <span id="ko-flag"></span></div>
           <span id="hp-cur" hidden></span><span id="hp-max" hidden></span>
         </div>
       </div>
@@ -1089,7 +1089,7 @@ function addAttackRow(a) {
   // Linked rows (added from the Gear Store) have no ✕ here — they are removed by
   // deleting the gear weapon. Legacy/unlinked rows keep their own ✕.
   if(a.link) tr.dataset.link = a.link;
-  const removeBtn = a.link ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button>`;
+  const removeBtn = (a.link || a.unarmed) ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button>`;
   tr.innerHTML =
     `<td><input type="text" class="atk-name" placeholder="Pistol, katana, hook hand…" value="${esc(a.name)}" oninput="onWeaponPick(this)"></td>` +
     `<td><select class="atk-kind" onchange="recalcAttacks()"><option value="melee"${a.kind==='melee'?' selected':''}>Melee</option><option value="ranged"${a.kind==='ranged'?' selected':''}>Ranged</option><option value="power"${a.kind==='power'?' selected':''}>Power</option></select></td>` +
@@ -1441,7 +1441,7 @@ function applySheet(d) {
   karma = (typeof d.karma === 'number') ? d.karma : CREATION.karma;
   $('f-ability').value = d.ability || ''; $('f-trait-notes').value = d.traitNotes || ''; $('f-notes').value = d.notes || '';
   $('attacks-body').innerHTML = '';
-  (d.attacks && d.attacks.length ? d.attacks : [{ name:'Unarmed', kind:'melee', damage:'' }]).forEach(a => addAttackRow(a));
+  (d.attacks && d.attacks.length ? d.attacks : [{ name:'Unarmed', kind:'melee', damage:'', unarmed:true }]).forEach(a => addAttackRow(a));
   $('gear-body').innerHTML = '';
   (d.gear || []).forEach(g => addGearRow(g));
   if(!(d.gear || []).length) addGearRow();
@@ -1773,6 +1773,9 @@ if (window.ACEHB) ACEHB.load(function () { try { fillDatalists(); } catch (e) {}
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
+input.no-spin{-moz-appearance:textfield;}
+input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 </style>
 <script>
 (function(){
@@ -1783,7 +1786,7 @@ if (window.ACEHB) ACEHB.load(function () { try { fillDatalists(); } catch (e) {}
   window._sheetLocked=true;
   function els(){
     var root=document.querySelector('.sheet'); if(!root) return [];
-    return [].slice.call(root.querySelectorAll('input,textarea,select,[contenteditable]')).filter(function(el){
+    return [].slice.call(root.querySelectorAll('input,select,[contenteditable]')).filter(function(el){
       if(el.hasAttribute('data-nolock')) return false;
       if(el.id==='lock-toggle'||el.id==='campaign-code-input') return false;
       if(el.closest && el.closest('.roll-log,.ov,[class*="overlay"],[class*="modal"],[id*="overlay"],[id*="modal"]')) return false;
@@ -1798,12 +1801,11 @@ if (window.ACEHB) ACEHB.load(function () { try { fillDatalists(); } catch (e) {}
       var tag=el.tagName;
       if(locked){
         if(el.hasAttribute('contenteditable')){ if(el.getAttribute('contenteditable')!=='false'){ el.setAttribute('data-lk-ce','1'); el.setAttribute('contenteditable','false'); } }
-        else if(tag==='SELECT'){ if(!el.disabled){ el.setAttribute('data-lk-dis','1'); el.disabled=true; } }
-        else if(tag==='TEXTAREA'){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+        else if(tag==='SELECT'){ if(!el.hasAttribute('data-lk-sel')){ el.setAttribute('data-lk-sel','1'); el.classList.add('lk-ro-sel'); } }
         else if(tag==='INPUT' && !SKIP[(el.type||'').toLowerCase()]){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
       } else {
         if(el.getAttribute('data-lk-ce')){ el.setAttribute('contenteditable','true'); el.removeAttribute('data-lk-ce'); }
-        if(el.getAttribute('data-lk-dis')){ el.disabled=false; el.removeAttribute('data-lk-dis'); }
+        if(el.getAttribute('data-lk-sel')){ el.classList.remove('lk-ro-sel'); el.removeAttribute('data-lk-sel'); }
         if(el.getAttribute('data-lk-ro')){ el.readOnly=false; el.removeAttribute('data-lk-ro'); }
       }
     });

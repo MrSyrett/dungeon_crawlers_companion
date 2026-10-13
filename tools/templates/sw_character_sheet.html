@@ -652,7 +652,7 @@ body.dark .tabs-bar{background:#1a1d24;}
         <div class="section-bar gold"><span>Attributes</span></div>
         <div class="stats-grid" id="stats-grid"></div>
         <table class="skills-table"><tbody id="skills-body"></tbody></table>
-        <div class="add-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;"><span class="sp-hdr map-hdr" title="Multi-Action Penalty — dice subtracted from every dice-pool roll until you reset it">MAP −<input type="number" id="f-map" value="0" min="0" step="1" data-nolock style="width:42px;" oninput="onMapChange()">D <button type="button" class="map-reset" onclick="resetMAP()" title="Reset the Multi-Action Penalty to 0">Reset</button></span><span class="sp-hdr">Skill Points <input type="number" id="f-sp" value="0" min="0"></span></div>
+        <div class="add-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;"><span class="sp-hdr map-hdr" title="Multi-Action Penalty — dice subtracted from every dice-pool roll until you reset it">−<input type="number" id="f-map" class="no-spin" value="0" min="0" step="1" data-nolock style="width:42px;" oninput="onMapChange()">D <button type="button" class="map-reset" onclick="resetMAP()" title="Reset the Multi-Action Penalty to 0">Reset</button></span><span class="sp-hdr">Skill Points <input type="number" id="f-sp" data-nolock class="no-spin" value="0" min="0"></span></div>
       </div>
     </div>
 
@@ -666,7 +666,7 @@ body.dark .tabs-bar{background:#1a1d24;}
         </div>
         <div class="vital">
           <div class="vlbl"><span>Force Points</span></div>
-          <div class="vbig"><input type="number" id="f-fp" value="1" min="0" oninput="recalc()"></div>
+          <div class="vbig"><input type="number" id="f-fp" data-nolock class="no-spin" value="1" min="0" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn gold" id="fp-btn" onclick="toggleForcePoint()">Use Force Point</button></div>
         </div>
         <div class="vital">
@@ -1701,6 +1701,9 @@ if (window.SWHB) SWHB.load(function () { try { fillPickers(); } catch (e) {} });
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
+input.no-spin{-moz-appearance:textfield;}
+input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 </style>
 <script>
 (function(){
@@ -1711,7 +1714,7 @@ if (window.SWHB) SWHB.load(function () { try { fillPickers(); } catch (e) {} });
   window._sheetLocked=true;
   function els(){
     var root=document.querySelector('.sheet'); if(!root) return [];
-    return [].slice.call(root.querySelectorAll('input,textarea,select,[contenteditable]')).filter(function(el){
+    return [].slice.call(root.querySelectorAll('input,select,[contenteditable]')).filter(function(el){
       if(el.hasAttribute('data-nolock')) return false;
       if(el.id==='lock-toggle'||el.id==='campaign-code-input') return false;
       if(el.closest && el.closest('.roll-log,.ov,[class*="overlay"],[class*="modal"],[id*="overlay"],[id*="modal"]')) return false;
@@ -1726,12 +1729,11 @@ if (window.SWHB) SWHB.load(function () { try { fillPickers(); } catch (e) {} });
       var tag=el.tagName;
       if(locked){
         if(el.hasAttribute('contenteditable')){ if(el.getAttribute('contenteditable')!=='false'){ el.setAttribute('data-lk-ce','1'); el.setAttribute('contenteditable','false'); } }
-        else if(tag==='SELECT'){ if(!el.disabled){ el.setAttribute('data-lk-dis','1'); el.disabled=true; } }
-        else if(tag==='TEXTAREA'){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+        else if(tag==='SELECT'){ if(!el.hasAttribute('data-lk-sel')){ el.setAttribute('data-lk-sel','1'); el.classList.add('lk-ro-sel'); } }
         else if(tag==='INPUT' && !SKIP[(el.type||'').toLowerCase()]){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
       } else {
         if(el.getAttribute('data-lk-ce')){ el.setAttribute('contenteditable','true'); el.removeAttribute('data-lk-ce'); }
-        if(el.getAttribute('data-lk-dis')){ el.disabled=false; el.removeAttribute('data-lk-dis'); }
+        if(el.getAttribute('data-lk-sel')){ el.classList.remove('lk-ro-sel'); el.removeAttribute('data-lk-sel'); }
         if(el.getAttribute('data-lk-ro')){ el.readOnly=false; el.removeAttribute('data-lk-ro'); }
       }
     });

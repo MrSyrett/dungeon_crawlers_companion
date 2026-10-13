@@ -649,23 +649,23 @@ body.dark .tabs-bar{background:#1a201c;}
       <div class="vitals">
         <div class="vital vc">
           <div class="vlbl"><span>Hit Dice</span><small id="hd-lbl"></small></div>
-          <div class="vbig"><input type="number" id="hd-cur" value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" value="1" oninput="recalc()"></div>
+          <div class="vbig"><input type="number" id="hd-cur" data-nolock value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" data-nolock value="1" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn" onclick="catchBreath()" title="Spend 1 Hit Die: roll it + STR">Catch Breath</button><button class="small-btn" onclick="makeCamp()" title="Spend 1 Hit Die at max value + STR">Make Camp</button><button class="small-btn green" onclick="safeRest()" title="Recover all HP, Hit Dice, mana; heal 1 Wound">Safe Rest</button></div>
         </div>
         <div class="vital vc">
           <div class="vlbl"><span>Wounds</span></div>
           <div class="pips" id="wound-pips"></div>
-          <div class="vline">max <input type="number" id="wounds-max" value="6" oninput="recalc()"></div>
+          <div class="vline">max <input type="number" id="wounds-max" data-nolock value="6" oninput="recalc()"></div>
         </div>
         <div class="vital vc">
           <div class="vlbl"><span>Hit Points</span></div>
-          <div class="vbig"><input type="number" id="hp-cur" value="10" oninput="recalc()"><span class="sep">/</span><input type="number" id="hp-max" value="10" oninput="recalc()"></div>
-          <div class="vline">temp <input type="number" id="hp-temp" value="0" oninput="recalc()"><span id="ko-flag"></span></div>
+          <div class="vbig"><input type="number" id="hp-cur" data-nolock value="10" oninput="recalc()"><span class="sep">/</span><input type="number" id="hp-max" data-nolock value="10" oninput="recalc()"></div>
+          <div class="vline">temp <input type="number" id="hp-temp" data-nolock value="0" oninput="recalc()"><span id="ko-flag"></span></div>
         </div>
         <div class="vital vc">
           <div class="vlbl"><span>Initiative · Speed</span></div>
           <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn" style="margin-left:8px;align-self:center;" onclick="rollInitiative()" title="Roll initiative">🎲</button></div>
-          <div class="vline">init +<input type="number" id="init-bonus" value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
+          <div class="vline">init +<input type="number" id="init-bonus" data-nolock value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" data-nolock value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
         </div>
         <div class="vital vc">
           <div class="vlbl"><span>Actions</span></div>
@@ -675,7 +675,7 @@ body.dark .tabs-bar{background:#1a201c;}
         <div class="vital vc">
           <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><span id="armor-val">0</span></div>
-          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;" oninput="recalc()"> +<input type="number" id="armor-bonus" value="0" oninput="recalc()"></div>
+          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;" oninput="recalc()"> +<input type="number" id="armor-bonus" data-nolock value="0" oninput="recalc()"></div>
         </div>
       </div>
 
@@ -698,7 +698,7 @@ body.dark .tabs-bar{background:#1a201c;}
       </div>
 
       <div class="tab-panel" id="tab-spells">
-        <div class="section-bar"><span>Spells</span><span class="hdr-right"><span class="mana-hdr" title="Spell points — spent when casting tiered spells, restored on a Safe Rest">Mana <input type="number" id="mana-cur" value="0" oninput="recalc()"><span class="msep">/</span><input type="number" id="mana-max" value="0" oninput="recalc()"><small id="mana-lbl"></small></span><button class="hdr-btn" onclick="openSpellbook()">Spellbook</button></span></div>
+        <div class="section-bar"><span>Spells</span><span class="hdr-right"><span class="mana-hdr" title="Spell points — spent when casting tiered spells, restored on a Safe Rest">Mana <input type="number" id="mana-cur" data-nolock value="0" oninput="recalc()"><span class="msep">/</span><input type="number" id="mana-max" data-nolock value="0" oninput="recalc()"><small id="mana-lbl"></small></span><button class="hdr-btn" onclick="openSpellbook()">Spellbook</button></span></div>
         <table class="tbl">
           <thead><tr><th style="width:30%;">Spell</th><th style="width:60px;">Tier</th><th>Effect</th><th style="width:96px;"></th></tr></thead>
           <tbody id="spells-body"></tbody>
@@ -720,7 +720,7 @@ body.dark .tabs-bar{background:#1a201c;}
           <thead><tr><th>Item</th><th style="width:54px;">Slots</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="inv-body"></tbody>
         </table>
-        <div class="add-row"><span class="hint" style="margin:0 0 0 auto;">Coins <input type="number" id="f-gold" value="50" style="width:64px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp <input type="number" id="f-silver" value="0" style="width:54px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> sp</span></div>
+        <div class="add-row"><span class="hint" style="margin:0 0 0 auto;">Coins <input type="number" id="f-gold" data-nolock value="50" style="width:64px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp <input type="number" id="f-silver" data-nolock value="0" style="width:54px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> sp</span></div>
       </div>
 
       <div class="tab-panel" id="tab-notes">
@@ -830,7 +830,7 @@ function buildStats() {
     `<div class="stat-cell"><div class="sn" onclick="rollSave('${s}')" title="Roll a ${s} save">${s}</div><input type="number" id="st-${s}" value="0" min="-5" max="10" oninput="recalc()">` +
     `<div class="save-toggle"><button id="adv-${s}" onclick="toggleSave('${s}','adv')" title="Advantaged save">▲</button><button id="dis-${s}" onclick="toggleSave('${s}','dis')" title="Disadvantaged save">▼</button></div></div>`).join('');
   $('skills-body').innerHTML = SKILLS.map(([n, s]) =>
-    `<tr><td class="sk-name" onclick="rollSkill('${n}')">${n}<small>${s}</small></td><td style="width:44px;"><input type="number" id="skp-${n}" value="0" min="0" oninput="recalc()" title="Extra skill points"></td><td class="sk-total" id="skt-${n}">+0</td></tr>`).join('');
+    `<tr><td class="sk-name" onclick="rollSkill('${n}')">${n}<small>${s}</small></td><td style="width:44px;"><input type="number" id="skp-${n}" data-nolock class="no-spin" value="0" min="0" oninput="recalc()" title="Extra skill points"></td><td class="sk-total" id="skt-${n}">+0</td></tr>`).join('');
 }
 function toggleSave(s, kind) {
   if(kind === 'adv') { saveAdv = saveAdv === s ? '' : s; if(saveDis === s) saveDis = ''; }
@@ -1607,6 +1607,9 @@ autoLoad();
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
+input.no-spin{-moz-appearance:textfield;}
+input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 </style>
 <script>
 (function(){
@@ -1617,7 +1620,7 @@ autoLoad();
   window._sheetLocked=true;
   function els(){
     var root=document.querySelector('.sheet'); if(!root) return [];
-    return [].slice.call(root.querySelectorAll('input,textarea,select,[contenteditable]')).filter(function(el){
+    return [].slice.call(root.querySelectorAll('input,select,[contenteditable]')).filter(function(el){
       if(el.hasAttribute('data-nolock')) return false;
       if(el.id==='lock-toggle'||el.id==='campaign-code-input') return false;
       if(el.closest && el.closest('.roll-log,.ov,[class*="overlay"],[class*="modal"],[id*="overlay"],[id*="modal"]')) return false;
@@ -1632,12 +1635,11 @@ autoLoad();
       var tag=el.tagName;
       if(locked){
         if(el.hasAttribute('contenteditable')){ if(el.getAttribute('contenteditable')!=='false'){ el.setAttribute('data-lk-ce','1'); el.setAttribute('contenteditable','false'); } }
-        else if(tag==='SELECT'){ if(!el.disabled){ el.setAttribute('data-lk-dis','1'); el.disabled=true; } }
-        else if(tag==='TEXTAREA'){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+        else if(tag==='SELECT'){ if(!el.hasAttribute('data-lk-sel')){ el.setAttribute('data-lk-sel','1'); el.classList.add('lk-ro-sel'); } }
         else if(tag==='INPUT' && !SKIP[(el.type||'').toLowerCase()]){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
       } else {
         if(el.getAttribute('data-lk-ce')){ el.setAttribute('contenteditable','true'); el.removeAttribute('data-lk-ce'); }
-        if(el.getAttribute('data-lk-dis')){ el.disabled=false; el.removeAttribute('data-lk-dis'); }
+        if(el.getAttribute('data-lk-sel')){ el.classList.remove('lk-ro-sel'); el.removeAttribute('data-lk-sel'); }
         if(el.getAttribute('data-lk-ro')){ el.readOnly=false; el.removeAttribute('data-lk-ro'); }
       }
     });

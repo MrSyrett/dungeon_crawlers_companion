@@ -679,7 +679,7 @@ body.dark .sl::after{background:#3a3320;}
         <div class="lg-word">Shadowdark</div>
         <div class="lg-sub">Character Sheet</div>
       </div>
-      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Also locks the Talents box (the wizards write it). Turn off to handle AC, talents and these items by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
+      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Turn off to handle AC and these items by hand. Field editing is controlled by the Lock button, not Auto."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
       <div class="hdr-field name-primary"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
     </div>
     <div class="hdr-metarow">
@@ -722,7 +722,7 @@ body.dark .sl::after{background:#3a3320;}
       <div class="sd-vitals">
         <div class="sd-vital">
           <span class="sv-lbl">HP</span>
-          <div class="sv-row"><input type="text" class="sv-big" id="hp-current" placeholder="0" oninput="onHPChange()"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" placeholder="0"></div>
+          <div class="sv-row"><input type="text" class="sv-big" id="hp-current" data-nolock placeholder="0" oninput="onHPChange()"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" data-nolock placeholder="0"></div>
         </div>
         <div class="sd-vital sd-vital-ac">
           <span class="sv-lbl">AC</span>
@@ -743,7 +743,7 @@ body.dark .sl::after{background:#3a3320;}
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">XP</span>
-          <div class="sv-row"><input type="text" class="sv-big" id="xp-current" placeholder="0"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="xp-next" placeholder="0" readonly title="Auto: 10 × current level"></div>
+          <div class="sv-row"><input type="text" class="sv-big" id="xp-current" data-nolock placeholder="0"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="xp-next" placeholder="0" readonly title="Auto: 10 × current level"></div>
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">Luck</span>
@@ -2346,7 +2346,7 @@ function addAttackRow() {
     <td><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll Attack"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3 3.4 8 4l8.6 8.6-1.9 1.9L6.1 6 3 3.4Zm0 15.9 4-4 1.9 1.9-4 4a1.3 1.3 0 0 1-1.9-1.9Z"/><path d="M21 3.4 16 4l-3.2 3.2 1.9 1.9L21 3.4Zm0 15.9-4-4-1.9 1.9 4 4a1.3 1.3 0 0 0 1.9-1.9ZM12.8 12.7l-1.5 1.5 3.4 3.4 1.5-1.5z"/></svg></button></td>
   `;
   tbody.appendChild(tr);
-  lockGeneratedFields(_autoConsume, tr);   // new rows honour the Auto lock
+  if(window._sheetLocked && window.applySheetLock){ try{ window.applySheetLock(); }catch(e){} }   // new rows honour the Lock state
 }
 
 // ── SPELLS ──
@@ -2375,7 +2375,7 @@ function addSpellRow(num) {
   const bar = list.querySelector('div[style*="display:flex"]');
   if(bar) list.insertBefore(row, bar);
   else list.appendChild(row);
-  lockGeneratedFields(_autoConsume, row);   // new rows honour the Auto lock
+  if(window._sheetLocked && window.applySheetLock){ try{ window.applySheetLock(); }catch(e){} }   // new rows honour the Lock state
   return row;
 }
 
@@ -2415,13 +2415,13 @@ function openSpellDesc(btn) {
   const fullEl = document.getElementById('spelldesc-full');
   fullEl.value = custom ? notes : (full || notes || '');
 
-  const locked = !!_autoConsume;
+  const locked = !!window._sheetLocked;
   fullEl.readOnly = locked;
   fullEl.style.opacity = locked ? '0.75' : '1';
   document.getElementById('spelldesc-restore').style.display =
     (!locked && custom && (full || stock)) ? 'inline-block' : 'none';
   document.getElementById('spelldesc-hint').textContent =
-    locked ? 'Turn off Auto to edit this description.'
+    locked ? 'Unlock the sheet to edit this description.'
            : (custom ? 'Your own text — the book entry is unchanged.' : '');
 
   document.getElementById('spelldesc-overlay').style.display = 'flex';
@@ -2946,36 +2946,11 @@ function lockGeneratedFields(lock, root) {
   });
 }
 
-// When Auto is ON these fields are derived/locked (read-only); when OFF they can
-// be edited by hand. Covers the ability scores, Max HP, and AC. (Stat modifiers
-// are computed spans, and HP-current stays editable for play.)
-function applyAutoLock(on) {
-  const lock = !!on;
-  STATS.forEach(s => {
-    const el = document.getElementById(s.id + '-val');
-    if(el) { el.readOnly = lock; el.style.opacity = lock ? '0.95' : '1'; }
-  });
-  const hpMax = document.getElementById('hp-max');
-  if(hpMax) { hpMax.readOnly = lock; hpMax.style.opacity = lock ? '0.95' : '1'; }
-  const ac = document.getElementById('armor-val');
-  if(ac) { ac.readOnly = lock; ac.style.opacity = lock ? '0.95' : '1'; ac.style.cursor = lock ? 'default' : 'text'; }
-  // Talents are written by the character-creation and level-up wizards while
-  // Auto is on, so lock the box to stop hand-edits being overwritten. Turning
-  // Auto off hands it back to the player.
-  const tArea = document.getElementById('talents-area');
-  const tText = document.getElementById('talents-text');
-  const tView = document.getElementById('talents-view');
-  if(tArea) tArea.classList.toggle('locked', lock);
-  if(tText) tText.readOnly = lock;
-  if(lock && tArea && tArea.classList.contains('editing')) talentsDone();   // drop out of edit mode
-  if(tView) {
-    tView.style.cursor = lock ? 'default' : 'text';
-    tView.style.opacity = lock ? '0.95' : '1';
-    tView.title = lock ? 'Managed automatically — turn off Auto to edit talents by hand'
-                       : 'Click to edit';
-  }
-  lockGeneratedFields(lock);   // every field in the Attacks and Spells rows
-}
+// Field editability (ability scores, Max HP, AC, Talents, Attacks and Spells)
+// is now owned entirely by the Lock/Unlock control (applySheetLock). Auto only
+// governs auto-consumption of inventory and auto-AC, so this is a no-op kept so
+// existing call sites stay valid.
+function applyAutoLock(on) { /* editability moved to Lock/Unlock */ }
 // Which ammo (if any) does this attack spend? A homebrew weapon that names its
 // ammo is authoritative — that includes choosing "none", so a custom bow can be
 // made not to need arrows. Weapons saved before the picker existed have no ammo
@@ -6801,6 +6776,9 @@ function campaignRestore(saved) {
 .log-lock:hover{background:rgba(255,255,255,.35);}
 .log-lock.on{background:rgba(110,220,140,.3);border-color:rgba(150,240,170,.85);}
 .log-lock .lk-ico{font-size:15px;line-height:1;}
+.lk-ro-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:none!important;pointer-events:none;}
+input.no-spin{-moz-appearance:textfield;}
+input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 </style>
 <script>
 (function(){
@@ -6811,7 +6789,7 @@ function campaignRestore(saved) {
   window._sheetLocked=true;
   function els(){
     var root=document.querySelector('.sheet'); if(!root) return [];
-    return [].slice.call(root.querySelectorAll('input,textarea,select,[contenteditable]')).filter(function(el){
+    return [].slice.call(root.querySelectorAll('input,select,[contenteditable]')).filter(function(el){
       if(el.hasAttribute('data-nolock')) return false;
       if(el.id==='lock-toggle'||el.id==='campaign-code-input') return false;
       if(el.closest && el.closest('.roll-log,.ov,[class*="overlay"],[class*="modal"],[id*="overlay"],[id*="modal"]')) return false;
@@ -6826,15 +6804,25 @@ function campaignRestore(saved) {
       var tag=el.tagName;
       if(locked){
         if(el.hasAttribute('contenteditable')){ if(el.getAttribute('contenteditable')!=='false'){ el.setAttribute('data-lk-ce','1'); el.setAttribute('contenteditable','false'); } }
-        else if(tag==='SELECT'){ if(!el.disabled){ el.setAttribute('data-lk-dis','1'); el.disabled=true; } }
-        else if(tag==='TEXTAREA'){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
+        else if(tag==='SELECT'){ if(!el.hasAttribute('data-lk-sel')){ el.setAttribute('data-lk-sel','1'); el.classList.add('lk-ro-sel'); } }
         else if(tag==='INPUT' && !SKIP[(el.type||'').toLowerCase()]){ if(!el.readOnly){ el.setAttribute('data-lk-ro','1'); el.readOnly=true; } }
       } else {
         if(el.getAttribute('data-lk-ce')){ el.setAttribute('contenteditable','true'); el.removeAttribute('data-lk-ce'); }
-        if(el.getAttribute('data-lk-dis')){ el.disabled=false; el.removeAttribute('data-lk-dis'); }
+        if(el.getAttribute('data-lk-sel')){ el.classList.remove('lk-ro-sel'); el.removeAttribute('data-lk-sel'); }
         if(el.getAttribute('data-lk-ro')){ el.readOnly=false; el.removeAttribute('data-lk-ro'); }
       }
     });
+    // The Talents box is a <textarea>+view pair (wizard-written character data),
+    // so the generic input/select sweep misses it — lock it here.
+    try{
+      var tArea=document.getElementById('talents-area');
+      var tText=document.getElementById('talents-text');
+      var tView=document.getElementById('talents-view');
+      if(tArea) tArea.classList.toggle('locked',locked);
+      if(tText) tText.readOnly=locked;
+      if(locked && tArea && tArea.classList.contains('editing') && typeof talentsDone==='function') talentsDone();
+      if(tView){ tView.style.cursor=locked?'default':'text'; tView.style.opacity=locked?'0.95':'1'; tView.title=locked?'Locked — unlock the sheet to edit talents by hand':'Click to edit'; }
+    }catch(e){}
     var b=document.getElementById('lock-toggle');
     if(b){ b.classList.toggle('on',!locked); b.setAttribute('aria-pressed',String(!locked)); b.title=locked?'Sheet locked (fields read-only; rolling works). Click to edit.':'Sheet unlocked (editing). Click to lock.'; var ic=b.querySelector('.lk-ico'); if(ic) ic.textContent=locked?'🔒':'🔓'; }
   };
