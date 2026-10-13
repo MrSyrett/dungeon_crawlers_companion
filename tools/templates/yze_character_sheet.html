@@ -96,7 +96,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 /* Sheet card */
 .sheet{background:#e9ebf0;border:3px solid var(--border);border-radius:14px;overflow:hidden;max-width:1040px;margin:0 auto;position:relative;box-shadow:0 12px 36px rgba(0,0,0,.22);}
 .card{background:#fff;border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(10,20,26,.07);}
-.section-bar{position:relative;background:transparent;color:var(--yz-dk);font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:.13em;text-transform:uppercase;padding:10px 13px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-bar{position:relative;background:transparent;color:var(--yz-dk);font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:.13em;text-transform:uppercase;padding:10px 13px 9px;display:flex;align-items:center;justify-content:flex-start;gap:10px;}
 .section-bar::after{content:'';position:absolute;left:13px;right:13px;bottom:0;height:1px;background:var(--yz-lt);}
 .section-bar.accent{background:transparent;color:var(--yz-dk);}
 .section-bar .sb-note{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.04em;text-transform:none;color:var(--muted);}
@@ -239,7 +239,7 @@ body.sheet-locked .edit-only{display:none!important;}
 .inv-details input.inv-rng{width:74px;}
 .inv-details input.inv-note{flex:1 1 90px;min-width:70px;}
 .section-bar.cbar{flex-wrap:wrap;row-gap:2px;}
-.section-bar.cbar .hdr-right{margin-left:auto;}
+.section-bar.cbar .hdr-right{margin-left:0;}
 .section-bar.cbar .hdr-btn{padding:3px 7px;font-size:9px;}
 .inv-mini{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6d8489;}
 .inv-type{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--yz-dk);background:var(--yz-lt);border-radius:4px;padding:1px 5px;margin-right:4px;}
@@ -611,6 +611,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
     <div class="center-col">
       <div class="vit-row">
+      <div class="card" style="flex:1 1 0;min-width:0;">
+      <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Ment</button></span></div>
+      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — each applies its penalty to every roll until you remove it. Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
+      </div>
+
       <div class="card" style="flex:2 1 0;min-width:0;">
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
@@ -623,11 +628,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
         <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
       </div>
-      </div>
-
-      <div class="card" style="flex:1 1 0;min-width:0;">
-      <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Ment</button></span></div>
-      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — each applies its penalty to every roll until you remove it. Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
       </div>
       </div>
 
@@ -1031,7 +1031,7 @@ function countPool(rolls){ var s=0,b=0; rolls.forEach(function(v){ if(v===6)s++;
 function tierOf(succ){ if(succ>=2) return {t:'SUCCESS ×'+succ,type:'crit'}; if(succ===1) return {t:'SUCCESS',type:'crit'}; return {t:'FAILURE',type:'fumble'}; }
 // Stress dice roll in their own colour so the extra risk dice read at a glance.
 // (Alien's Stress Dice are the yellow ones.)
-var STRESS_DIE_COLOR='#e8c020';
+var STRESS_DIE_COLOR='#cc2b2b';
 // Hand the exact dice to the 3D animation: base dice in the player's colour,
 // stress dice in STRESS_DIE_COLOR, and glow RED only on the bad state (a 1 on a
 // stress die). Ordinary success/failure no longer glows — that is every roll.
