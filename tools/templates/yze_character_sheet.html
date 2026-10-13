@@ -578,6 +578,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Sum of equipped armor">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><span class="stress-val" id="stress-val">0</span></div>
+        <div class="vrow alien-only"><span class="v-lbl">Resolve</span><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
         <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
       </div>
@@ -697,7 +698,7 @@ function die6(){ return 1+Math.floor(Math.random()*6); }
 function G(x){ return (typeof x!=='undefined'&&Array.isArray(x))?x:[]; }
 
 var ATTRS=G(window.YZE_ATTRIBUTES), WEAPONS=G(window.YZE_WEAPONS),
-    CONDS=G(window.YZE_CONDITIONS), CRITP=G(window.YZE_CRITS_PHYSICAL), CRITM=G(window.YZE_CRITS_MENTAL), PANIC=G(window.YZE_PANIC);
+    CONDS=G(window.YZE_CONDITIONS), CRITP=G(window.YZE_CRITS_PHYSICAL), CRITM=G(window.YZE_CRITS_MENTAL), PANIC=G(window.YZE_PANIC), SR=G(window.YZE_STRESS_RESPONSE);
 // Variant-swappable data: SKILLS and TRAITS change between YZE SRD and Alien.
 var BASE_SKILLS=G(window.YZE_SKILLS), ALIEN_SK=G(window.ALIEN_SKILLS);
 var BASE_TRAITS=G(window.YZE_TRAITS), ALIEN_TR=G(window.ALIEN_TRAITS);
@@ -738,10 +739,13 @@ function condPenaltyFor(attrKey){
   var n=0; CONDS.forEach(function(c){ if(c.type===type && S.conditions[c.name]) n++; }); return n;
 }
 function derivedMax(which){
-  // Alien: Health = Strength score (talents can raise it). YZE: (Str+Agi)/2 +1.
-  if(which==='health') return isAlien()? attrVal('STR') : Math.ceil((attrVal('STR')+attrVal('AGI'))/2)+1;
+  // Alien (Evolved Edition): Health = ⌈(Str+Agi)/2⌉ (Hardened talent can raise it).
+  // Generic YZE: (Str+Agi)/2 +1. Resolve damage track (yze-only) = (Wits+Emp)/2 +1.
+  if(which==='health') return isAlien()? Math.ceil((attrVal('STR')+attrVal('AGI'))/2) : Math.ceil((attrVal('STR')+attrVal('AGI'))/2)+1;
   return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2)+1;
 }
+// Alien Evolved Resolve RATING — a static derived score, subtracted on Stress & Panic rolls.
+function resolveRating(){ return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2); }
 
 // ── Render: attributes with their skills nested underneath ──
 function renderAttrSkills(){
@@ -763,7 +767,7 @@ function renderAttrSkills(){
 }
 function renderAttrs(){ renderAttrSkills(); }
 function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n;
-  if(isAlien() && k==='STR'){ S.health.max=attrVal('STR'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; renderVitals(); }
+  if(isAlien()){ if(k==='STR'||k==='AGI'){ S.health.max=derivedMax('health'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; } renderVitals(); }
   renderAttrSkills(); renderEnc(); scheduleAutosave(); }
 
 // ── Render: vitals (Health / Resolve damage tracks) ──
@@ -780,6 +784,7 @@ function renderVitals(){
     : ((S.health.max>0&&S.health.dmg>=S.health.max)||(S.resolve.max>0&&S.resolve.dmg>=S.resolve.max));
   $('broken-tag').classList.toggle('hide',!broken);
   var ba=$('broken-tag-a'); if(ba) ba.classList.toggle('hide',!broken);
+  var rr=$('resolve-rating'); if(rr) rr.textContent=resolveRating();
   renderStress();
 }
 function renderStress(){
@@ -975,10 +980,11 @@ function animDice(base, stress, glow){
 // Dice glow: RED on the bad state (a 1 on a stress die), GOLD on multiple
 // successes (the win state), nothing on a bare pass or a miss.
 function glowFor(succ, bad){ return bad ? 'fumble' : (succ>=2 ? 'crit' : 'normal'); }
-// Tag appended to a roll's detail when a stress die comes up 1 (a Panic trigger).
-function badTag(ones){ return ones>0 ? ' · ⚠ Panic ('+ones+' on a Stress Die)' : ''; }
-// The bad state fired: in Alien a 1 on a Stress Die forces a Panic Roll.
-function onBad(label){ rollPanic(); }
+// Tag appended to a roll's detail when a stress die comes up 1 (a Stress Response trigger).
+function badTag(ones){ return ones>0 ? ' · ⚠ Stress Response ('+ones+' on a Stress Die)' : ''; }
+// The bad state fired: in Alien Evolved a 1 on a Stress Die triggers a Stress Response roll
+// (you also can't push the roll). A Panic Roll is separate — made when you face fear.
+function onBad(label){ rollStressResponse(label); }
 
 // Roll base dice, plus (Alien) a number of Stress Dice equal to stress level.
 // Each 6 is a success; a 1 on a Stress Die is the Panic trigger (the bad state).
@@ -1031,20 +1037,30 @@ function rollAttack(i){
   if(bad){ _lastRoll=null; onBad(label); return; }
   _lastRoll={label:label,base:r.base,stress:r.stress,kind:'attack',wdmg:num(w.damage)}; showPushOption();
 }
-// ── Panic (Alien) ──
-function panicLookup(total){
-  for(var i=0;i<PANIC.length;i++){ var r=PANIC[i].roll;
-    if(r.indexOf('+')>=0){ if(total>=parseInt(r,10))return PANIC[i]; continue; }
-    var m=r.split(/[–-]/); if(m.length===2){ if(total>=parseInt(m[0],10)&&total<=parseInt(m[1],10))return PANIC[i]; continue; }
-    if(parseInt(r,10)===total)return PANIC[i];
+// ── Stress Response & Panic (Alien Evolved Edition) ──
+// Both roll D6 + current Stress Level − Resolve, then read a signed table whose
+// rows may be "≤0", an exact number, a range, or "N+".
+function yzeRowLookup(table,total){
+  for(var i=0;i<table.length;i++){ var r=String(table[i].roll);
+    if(/^[≤<]/.test(r)){ if(total<=0)return table[i]; continue; }
+    if(r.indexOf('+')>=0){ if(total>=parseInt(r,10))return table[i]; continue; }
+    var m=r.split(/[–-]/); if(m.length===2){ if(total>=parseInt(m[0],10)&&total<=parseInt(m[1],10))return table[i]; continue; }
+    if(parseInt(r,10)===total)return table[i];
   }
-  return PANIC[PANIC.length-1];
+  return table[table.length-1];
 }
+// Triggered automatically when a Stress Die shows a 1 on a skill roll.
+function rollStressResponse(label){
+  if(!SR.length){ return; }
+  var stress=clamp(num(S.stress),0,10), res=resolveRating(), roll=die6(), total=roll+stress-res, row=yzeRowLookup(SR,total);
+  addLog('Stress Response'+(label?' · '+label:'')+' · d6 '+roll+' + stress '+stress+' − Resolve '+res+' = '+total,
+    row?row.effect:'—', row?row.detail:'', total<=0?'normal':'fumble');
+}
+// Made when you face something horrifying (the "Roll Panic" button / GM call).
 function rollPanic(){
-  var stress=clamp(num(S.stress),0,10), roll=die6(), total=roll+stress, row=panicLookup(total);
-  addLog('Panic · d6 '+roll+' + stress '+stress+' = '+total, row?row.effect:'—', row?row.detail:'', total>=10?'fumble':'normal');
+  var stress=clamp(num(S.stress),0,10), res=resolveRating(), roll=die6(), total=roll+stress-res, row=yzeRowLookup(PANIC,total);
+  addLog('Panic · d6 '+roll+' + stress '+stress+' − Resolve '+res+' = '+total, row?row.effect:'—', row?row.detail:'', total<=0?'normal':'fumble');
 }
-function forcePanic(label){ addLog((label||'')+' · PANIC','⚠ 1 on a Stress Die','You can\'t push this roll — Panic Roll forced.','fumble'); rollPanic(); }
 function rollQuick(){
   var n=clamp(num($('tray-qn').value),1,12);
   doPool(n+'d6 pool', n, false);
@@ -1101,7 +1117,7 @@ function showPushOption(){
   if(!_lastRoll)return;
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var old=$('push-choice'); if(old)old.remove();
-  var costTxt=isAlien()?'Cost: +1 Stress (adds a Stress Die — a 1 on a Stress Die triggers Panic).':'Cost: a condition (or damage/stress per bane).';
+  var costTxt=isAlien()?'Cost: +1 Stress (adds a Stress Die — a 1 on a Stress Die triggers a Stress Response).':'Cost: a condition (or damage/stress per bane).';
   var rerollTxt=isAlien()?'Re-roll every die that isn\'t a 6 — you keep your successes. ':'Re-roll every die that isn\'t a 6 or a 1. ';
   var div=document.createElement('div'); div.className='log-entry push-choice'; div.id='push-choice';
   div.innerHTML='<div class="roll-label">'+esc(_lastRoll.label)+' — push?</div>'
@@ -1158,22 +1174,24 @@ function refreshWizardButtons(){ var built=hasCharacter(), c=$('build-btn'), l=$
 // ── Experience modal (spend XP; skills/attrs raised directly on the sheet) ──
 function openAdvance(){ renderAdvance(); $('advance-overlay').classList.add('open'); }
 function closeAdvance(){ $('advance-overlay').classList.remove('open'); }
-// ── Advancement: spend XP on skill points (5 XP each, max 5) or new talents
-//    (5 XP each). Attributes are fixed at creation. ──
-var SKILL_XP=5, TALENT_XP=5;
+// ── Advancement: spend XP on skill points or new talents. Attributes are fixed
+//    at creation. Evolved Edition: raising a skill to level L costs 5 × L XP
+//    (a new skill at level 1 = 5 XP); each new talent costs a flat 5 XP. ──
+var TALENT_XP=5;
+function skillStepCost(v){ return 5*(v+1); }   // XP to go from level v → v+1
 function renderAdvance(){
   var xp=num(S.xp);
-  var h='<p class="m-hint">Spend <b style="color:#5fd6ea;">XP</b> to buy skill points (<b>'+SKILL_XP+' XP</b> per step, to a max of 5) or new talents (<b>'+TALENT_XP+' XP</b> each). Attributes are set at creation. Add session XP with ＋ below.</p>';
+  var h='<p class="m-hint">Spend <b style="color:#5fd6ea;">XP</b> to buy skill points (<b>5 × the new level</b> XP per step, to a max of 5) or new talents (<b>'+TALENT_XP+' XP</b> each). Attributes are set at creation. Add session XP with ＋ below.</p>';
   h+='<div style="display:flex;align-items:center;gap:10px;margin:4px 0 12px;"><span class="m-lbl" style="margin:0;">Experience</span>'
     +'<span id="adv-xp" style="font-family:\'Share Tech Mono\',monospace;font-size:22px;color:#5fd6ea;min-width:30px;text-align:center;">'+xp+'</span><span class="m-hint" style="margin:0;">XP available</span>'
     +'<span style="margin-left:auto;display:flex;gap:4px;"><button class="m-btn ghost" onclick="advXP(-1)">−1</button><button class="m-btn ghost" onclick="advXP(1)">＋1</button><button class="m-btn ghost" onclick="advXP(5)">＋5</button></span></div>';
-  h+='<div class="m-lbl">Skills <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(buy +1 for '+SKILL_XP+' XP)</span></div>';
+  h+='<div class="m-lbl">Skills <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(buy +1 for 5 × new level XP)</span></div>';
   ATTRS.forEach(function(a){
     var list=skillsByAttr(a.key); if(!list.length)return;
     h+='<div class="a-attr">'+esc(a.name)+'</div><div class="a-skills">';
-    h+=list.map(function(s){ var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'"), can=v<5 && xp>=SKILL_XP;
+    h+=list.map(function(s){ var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'"), cost=skillStepCost(v), can=v<5 && xp>=cost;
       return '<div class="a-row"><span class="a-name2">'+esc(s.name)+'</span><span class="a-code">'+v+'</span>'
-        +'<button onclick="buySkill(\''+esn+'\')"'+(can?'':' disabled')+' title="'+(v>=5?'At maximum':'Buy +1 for '+SKILL_XP+' XP')+'">＋'+SKILL_XP+'</button></div>'; }).join('');
+        +'<button onclick="buySkill(\''+esn+'\')"'+(can?'':' disabled')+' title="'+(v>=5?'At maximum':'Buy +1 (to level '+(v+1)+') for '+cost+' XP')+'">＋'+cost+'</button></div>'; }).join('');
     h+='</div>';
   });
   var owned={}; (S.talents||[]).forEach(function(t){ if(t&&t.name)owned[t.name]=1; });
@@ -1185,7 +1203,7 @@ function renderAdvance(){
   h+='<div style="margin-top:16px;text-align:right;"><button class="m-btn" onclick="closeAdvance()">Done</button></div>';
   $('advance-body').innerHTML=h;
 }
-function buySkill(name){ var v=num(S.skills[name]); if(v>=5||num(S.xp)<SKILL_XP)return; S.skills[name]=v+1; S.xp=num(S.xp)-SKILL_XP; $('f-xp').value=S.xp; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','+1 '+name,'Spent '+SKILL_XP+' XP · now '+(v+1),'crit'); }catch(e){} }
+function buySkill(name){ var v=num(S.skills[name]), cost=skillStepCost(v); if(v>=5||num(S.xp)<cost)return; S.skills[name]=v+1; S.xp=num(S.xp)-cost; $('f-xp').value=S.xp; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','+1 '+name,'Spent '+cost+' XP · now level '+(v+1),'crit'); }catch(e){} }
 function buyTalent(name){ if(num(S.xp)<TALENT_XP)return; var desc=''; for(var i=0;i<ALIEN_TL.length;i++){ if(ALIEN_TL[i].name===name){ desc=ALIEN_TL[i].desc||''; break; } } S.talents=S.talents||[]; S.talents.push({name:name,note:desc}); S.xp=num(S.xp)-TALENT_XP; $('f-xp').value=S.xp; renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','New talent: '+name,'Spent '+TALENT_XP+' XP','crit'); }catch(e){} }
 function advXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; var e=$('adv-xp'); if(e)e.textContent=S.xp; renderAdvance(); scheduleAutosave(); }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent=num(S.xp)?('XP '+S.xp):''; }
