@@ -236,12 +236,10 @@
   --jlu: #2f6fed;
   /* Ghostbusters accent — ectoplasm slime green. */
   --gb: #8bc53f;
-  /* The Walking Dead accents — desaturated blood red (the brand), with bone as
-     the second colour over black/charcoal. --twd is the fill/border/h1 red;
-     --twd-ink is a lifted blood red that clears 4.5:1 on the dark panels for
-     links and headings; --twd-bone is the bone second accent. */
+  /* The Walking Dead — one blood red accent + bone, over black/charcoal. Bone is
+     the main font colour (text and headings); blood red is the accent and link
+     colour (links, borders, fills, rules). */
   --twd: #9e1b1b;
-  --twd-ink: #e2564e;
   --twd-bone: #d8cfbf;
   /* Dungeon Crawler Carl accent — the covers' hot magenta. (Its pages used to
      borrow --red, which is the app's muted brick and nowhere near the books.) */
@@ -1173,32 +1171,44 @@ body {
    lifted blood red over near-black, with a faint red bloom at the top. The
    character sheet carries a bone/charcoal light mode too (its own dark toggle). */
 :root[data-system="TWD"]:not([data-chrome]) body {
-  --sys-head: var(--twd-ink);
+  --sys-head: var(--twd-bone);
   --sys-sub: var(--twd-bone);
-  --sys-link: var(--twd-ink);
+  --sys-link: var(--twd);
   --panel: #1a1313;
   --panel-2: #241919;
   --border: #3a2a2a;
   --text: #e8e1d6;
   --muted: #a89f93;
-  --gold: var(--twd-ink);
+  --gold: var(--twd);
   --sys-display: "Dead Kansas", ui-serif, Georgia, serif;
   --sys-text: var(--font-mulish);
   --sys-label: var(--font-oswald);
   background-color: #0b0909;
   background-image:
     radial-gradient(130% 96% at 50% 42%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.7) 100%),
-    radial-gradient(70% 48% at 50% 0%, rgba(158, 27, 27, 0.16) 0%, rgba(158, 27, 27, 0) 72%);
+    radial-gradient(70% 48% at 50% 0%, rgba(158, 27, 27, 0.16) 0%, rgba(158, 27, 27, 0) 72%),
+    url("/themes/twd-grunge.webp");
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
 }
+/* Dead Kansas headings: bone, with the grunge texture clipped THROUGH the
+   letterforms so the display face reads distressed. Falls back to solid bone
+   where background-clip:text is unsupported. */
 :root[data-system="TWD"]:not([data-chrome]) body h1,
 :root[data-system="TWD"]:not([data-chrome]) body h2,
 :root[data-system="TWD"]:not([data-chrome]) body h3 {
   font-family: "Dead Kansas", ui-serif, Georgia, serif;
   letter-spacing: 0.03em;
+  color: var(--twd-bone);
+  background-color: var(--twd-bone);
+  background-image: url("/themes/twd-grunge.webp");
+  background-size: 620px auto;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 :root[data-system="TWD"]:not([data-chrome]) body h1 {
   text-transform: uppercase;
@@ -1528,7 +1538,7 @@ body {
 [data-sys="MMRPG"], .home-tile[data-sys="MMRPG"] { --tile-accent: var(--text);            --tile-sub: var(--mmrpg-blue); --tile-namefont: var(--font-sourcesans); --tile-face: "Marvel", var(--font-oswald); --tile-bg: #0b0809; --tile-tex: url("/themes/mmrpg-burst.webp"); }
 [data-sys="JLU"],   .home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-sub: var(--jlu-gold);    --tile-namefont: var(--font-rubik);      --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
 [data-sys="GB"],    .home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-sub: var(--gb-ecto);     --tile-namefont: var(--font-asap);       --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
-[data-sys="TWD"],   .home-tile[data-sys="TWD"]   { --tile-accent: var(--twd-ink);     --tile-sub: var(--twd-bone);    --tile-namefont: var(--font-oswald);     --tile-face: "Dead Kansas", var(--font-oswald); --tile-bg: #0b0909; --tile-scrim: 0.12; }
+[data-sys="TWD"],   .home-tile[data-sys="TWD"]   { --tile-accent: var(--twd);         --tile-sub: var(--twd-bone);    --tile-namefont: var(--font-oswald);     --tile-face: "Dead Kansas", var(--font-oswald); --tile-bg: #0b0909; --tile-tex: url("/themes/twd-grunge.webp"); --tile-scrim: 0.14; }
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.

@@ -58,7 +58,7 @@
     var SK = curSkills();
 
     var h = '';
-    h += '<p class="m-hint">THE WALKING DEAD: everyone has 3 Health. Pick an archetype (it sets your key attribute), spend <b style="color:#e2564e;">14</b> attribute points and <b style="color:#e2564e;">10</b> skill points (key skill to 3, others to 1), and choose one starting talent.</p>';
+    h += '<p class="m-hint">THE WALKING DEAD: everyone has 3 Health. Pick an archetype (it sets your key attribute), spend <b style="color:#d8cfbf;">14</b> attribute points and <b style="color:#d8cfbf;">10</b> skill points (key skill to 3, others to 1), and choose one starting talent.</p>';
 
     h += '<div class="m-lbl" style="margin-top:10px;">Name</div><input class="m-input" id="yzeb-name" value="' + esc(name) + '" placeholder="Character name" oninput="window.YZEB.setName(this.value)">';
 
@@ -66,16 +66,16 @@
     h += CAREERS.map(function (c) { return chip(c.name, career === c.name, "window.YZEB.setCareer('" + c.name.replace(/'/g, "\\'") + "')", 'Key ' + c.key + ' · ' + c.skills.join(', ')); }).join('');
     h += '</div>';
     var cc = careerObj(career);
-    if (cc) h += '<p class="m-hint" style="margin:6px 0 0;">Key <b style="color:#e2564e;">' + esc(cc.key) + '</b> · key skills: ' + esc(cc.skills.join(', ')) + '</p>';
+    if (cc) h += '<p class="m-hint" style="margin:6px 0 0;">Key <b style="color:#d8cfbf;">' + esc(cc.key) + '</b> · key skills: ' + esc(cc.skills.join(', ')) + '</p>';
 
-    h += '<div class="m-lbl" style="margin-top:12px;">Attributes — <span style="color:' + (aLeft < 0 ? '#df6a6a' : '#e2564e') + ';">' + aLeft + ' left</span></div><div class="a-skills">';
+    h += '<div class="m-lbl" style="margin-top:12px;">Attributes — <span style="color:' + (aLeft < 0 ? '#df6a6a' : '#d8cfbf') + ';">' + aLeft + ' left</span></div><div class="a-skills">';
     h += ATTRS.map(function (a) {
       var v = attrs[a.key];
       return stepper(a.name + (key === a.key ? ' ★' : ''), v, "window.YZEB.attr('" + a.key + "',-1)", "window.YZEB.attr('" + a.key + "',1)", v <= 2, v >= attrMax(a.key) || aLeft <= 0);
     }).join('');
     h += '</div>';
 
-    h += '<div class="m-lbl" style="margin-top:12px;">Skills — <span style="color:' + (sLeft < 0 ? '#df6a6a' : '#e2564e') + ';">' + sLeft + ' left</span></div>';
+    h += '<div class="m-lbl" style="margin-top:12px;">Skills — <span style="color:' + (sLeft < 0 ? '#df6a6a' : '#d8cfbf') + ';">' + sLeft + ' left</span></div>';
     ATTRS.forEach(function (a) {
       h += '<div class="a-attr">' + esc(a.name) + '</div><div class="a-skills">';
       h += SK.filter(function (s) { return s.attr === a.key; }).map(function (s) {

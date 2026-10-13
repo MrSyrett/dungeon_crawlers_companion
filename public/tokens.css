@@ -49,7 +49,6 @@
   --gb: #8bc53f;
   /* The Walking Dead — blood red + bone (mirrors app/globals.css). */
   --twd: #9e1b1b;
-  --twd-ink: #e2564e;
   --twd-bone: #d8cfbf;
   --dcc: #e8275f;
   --dcc-gold: #f2c230;
@@ -1173,8 +1172,8 @@ html {
 
 /* --- The Walking Dead ------------------------------------------------------ */
 :root[data-themed][data-system="TWD"] {
-  --sub-color: #ffffff;
-  --section-hdr-dark: var(--twd-ink);
+  --sub-color: var(--twd-bone);
+  --section-hdr-dark: var(--twd-bone);
   --sys-display: "Dead Kansas", ui-serif, Georgia, serif;
   --sys-text: "Mulish", ui-sans-serif, system-ui, sans-serif;
   --sys-label: "Oswald", ui-sans-serif, system-ui, sans-serif;
@@ -1184,7 +1183,7 @@ html {
   --ui-text: #e8e1d6;
   --ui-muted: #a89f93;
   --ui-accent: var(--twd);
-  --ui-highlight: var(--twd-ink);
+  --ui-highlight: var(--twd);
   --font-display: "Dead Kansas", ui-serif, Georgia, serif;
 }
 :root[data-themed][data-system="TWD"] body,
@@ -1192,7 +1191,8 @@ html {
   background-color: #0b0909;
   background-image:
     radial-gradient(130% 96% at 50% 42%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.7) 100%),
-    radial-gradient(70% 48% at 50% 0%, rgba(158, 27, 27, 0.16) 0%, rgba(158, 27, 27, 0) 72%);
+    radial-gradient(70% 48% at 50% 0%, rgba(158, 27, 27, 0.16) 0%, rgba(158, 27, 27, 0) 72%),
+    url("/themes/twd-grunge.webp");
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;

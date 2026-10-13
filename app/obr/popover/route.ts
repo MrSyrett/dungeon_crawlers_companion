@@ -86,7 +86,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.mmrpg { color: #EC1D24; }
   .group-head.jlu { color: #2f6fed; }
   .group-head.gb { color: #8bc53f; }
-  .group-head.twd { color: #e2564e; }
+  .group-head.twd { color: #d8cfbf; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
