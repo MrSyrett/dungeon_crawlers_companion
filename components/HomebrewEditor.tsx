@@ -613,6 +613,33 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ weight: "1" }), toForm: (d) => ({ ...d }),
     summary: (d) => `${sv(d, "weight") || "1"} wt`,
   },
+
+  // ── The Walking Dead (Free League) ──
+  "twd-weapon": {
+    title: "Homebrew Weapons", noun: "Weapon",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "kind", label: "Type", type: "select", options: [["Close", "Close combat"], ["Ranged", "Ranged"]] },
+      { key: "bonus", label: "Bonus", type: "text", placeholder: "+2" },
+      { key: "damage", label: "Damage", type: "number", placeholder: "2" },
+      { key: "range", label: "Range", type: "select", options: [["Short", "Short"], ["Long", "Long"], ["Extreme", "Extreme"]] },
+      { key: "slots", label: "Slots", type: "text", placeholder: "1, ½" },
+      { key: "desc", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ kind: "Close", range: "Short", slots: "1", damage: 1, bonus: "0" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "damage") || "1"} dmg · ${sv(d, "kind") || "Close"}`,
+  },
+  "twd-gear": {
+    title: "Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "slots", label: "Slots", type: "text", placeholder: "1, ½" },
+      { key: "bonus", label: "Skill bonus", type: "text", placeholder: "Scout +2" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ slots: "1" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "slots") || "1"} slots${sv(d, "bonus") ? " · " + sv(d, "bonus") : ""}`,
+  },
   "mmrpg-power": {
     title: "Homebrew Powers", noun: "Power",
     fields: [

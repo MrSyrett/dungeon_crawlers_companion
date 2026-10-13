@@ -54,6 +54,17 @@ export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | n
         level: null,
       };
     }
+    // The Walking Dead: no levels — the roster shows the archetype as the class.
+    const twd = blob?.twd_sheet;
+    if (typeof twd === "string") {
+      const s = JSON.parse(twd) as { name?: unknown; archetype?: unknown; class?: unknown };
+      const cls = (typeof s.archetype === "string" && s.archetype.trim()) ? s.archetype : (typeof s.class === "string" ? s.class : "");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
     // Marvel Multiverse RPG: "level" is Rank; the class column shows the origin.
     const mmrpg = blob?.mmrpg_sheet;
     if (typeof mmrpg === "string") {

@@ -118,6 +118,15 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/gb/gear", label: "Gear & Goals" },
     { href: "/gb/bestiary", label: "Ghosts & Extras" },
   ],
+  TWD: [
+    { href: "/twd/skills", label: "Skills" },
+    { href: "/twd/archetypes", label: "Archetypes" },
+    { href: "/twd/talents", label: "Talents" },
+    { href: "/twd/weapons", label: "Weapons" },
+    { href: "/twd/gear", label: "Gear" },
+    { href: "/twd/combat", label: "Combat" },
+    { href: "/twd/dead", label: "The Dead" },
+  ],
 };
 
 export const RULEBOOKS_LINK: NavLink = { href: "/rules", label: "Rulebooks" };
@@ -148,6 +157,7 @@ export const HOMEBREW: Partial<Record<SystemKey, string>> = {
   CO: "/candela/homebrew",
   YZE: "/yze/homebrew",
   MMRPG: "/mmrpg/homebrew",
+  TWD: "/twd/homebrew",
 };
 
 export function homebrewFor(system: SystemKey): string | null {
@@ -216,11 +226,13 @@ const CONCEPT: Record<string, string[]> = {
   // creatures and NPC rosters
   Bestiary: ["creatures"],
   "Ghosts & Extras": ["creatures"],
+  "The Dead": ["creatures"],
   Characters: ["creatures"],
   // what you are
   Classes: ["archetype"],
   Roles: ["archetype"],
   Careers: ["archetype"],
+  Archetypes: ["archetype"],
   Templates: ["archetype"],
   Tropes: ["archetype"],
   Heroes: ["archetype"],
@@ -324,6 +336,7 @@ const PREFIX_SYSTEM: { prefix: string; key: SystemKey }[] = [
   { prefix: "/mmrpg/", key: "MMRPG" },
   { prefix: "/jlu/", key: "JLU" },
   { prefix: "/gb/", key: "GB" },
+  { prefix: "/twd/", key: "TWD" },
 ];
 
 // Shadowdark's reference pages live at top-level routes (historical), so match

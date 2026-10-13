@@ -86,6 +86,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.mmrpg { color: #EC1D24; }
   .group-head.jlu { color: #2f6fed; }
   .group-head.gb { color: #8bc53f; }
+  .group-head.twd { color: #e2564e; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -277,7 +278,8 @@ const PAGE = String.raw`<!doctype html>
             { key: "YZE", name: "Alien RPG", cls: "yze" },
             { key: "MMRPG", name: "Marvel Multiverse RPG", cls: "mmrpg" },
             { key: "JLU", name: "Justice League Unlimited", cls: "jlu" },
-            { key: "GB", name: "Ghostbusters", cls: "gb" }
+            { key: "GB", name: "Ghostbusters", cls: "gb" },
+            { key: "TWD", name: "The Walking Dead", cls: "twd" }
           ];
           var seen = {};
           var html = "";

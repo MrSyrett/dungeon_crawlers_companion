@@ -47,6 +47,10 @@
   --mmrpg: #c8102e;
   --jlu: #2f6fed;
   --gb: #8bc53f;
+  /* The Walking Dead — blood red + bone (mirrors app/globals.css). */
+  --twd: #9e1b1b;
+  --twd-ink: #e2564e;
+  --twd-bone: #d8cfbf;
   --dcc: #e8275f;
   --dcc-gold: #f2c230;
   /* ---- The systems' SECOND colours, mirrored from app/globals.css ----------
@@ -872,6 +876,14 @@ html {
   font-display: swap;
   src: url("/fonts/dreadful.woff2") format("woff2");
 }
+/* The Walking Dead heading face (Dead Kansas) — same file as app/globals.css. */
+@font-face {
+  font-family: "Dead Kansas";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dead-kansas.woff2") format("woff2");
+}
 :root[data-themed][data-system="KOB"] {
   /* Prep subtitle. Was #f0d27a — a gold, in a purple-and-teal palette; white is 5.75:1 on the purple band. */
   --sub-color: #ffffff;
@@ -1153,6 +1165,34 @@ html {
   background-image:
     url("/themes/yze-raster.webp"),
     radial-gradient(128% 94% at 50% 46%, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.56) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- The Walking Dead ------------------------------------------------------ */
+:root[data-themed][data-system="TWD"] {
+  --sub-color: #ffffff;
+  --section-hdr-dark: var(--twd-ink);
+  --sys-display: "Dead Kansas", ui-serif, Georgia, serif;
+  --sys-text: "Mulish", ui-sans-serif, system-ui, sans-serif;
+  --sys-label: "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --ui-bg: #1a1313;
+  --ui-panel: #241919;
+  --ui-border: #3a2a2a;
+  --ui-text: #e8e1d6;
+  --ui-muted: #a89f93;
+  --ui-accent: var(--twd);
+  --ui-highlight: var(--twd-ink);
+  --font-display: "Dead Kansas", ui-serif, Georgia, serif;
+}
+:root[data-themed][data-system="TWD"] body,
+:root[data-themed][data-system="TWD"] .preview-area {
+  background-color: #0b0909;
+  background-image:
+    radial-gradient(130% 96% at 50% 42%, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.7) 100%),
+    radial-gradient(70% 48% at 50% 0%, rgba(158, 27, 27, 0.16) 0%, rgba(158, 27, 27, 0) 72%);
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;

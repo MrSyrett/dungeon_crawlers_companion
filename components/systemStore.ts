@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -48,6 +48,10 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // four Traits (Brains/Muscles/Moves/Cool), Talents, the Ghost Die, and
   // Brownie Points. Roll a pool of d6 vs a Difficulty; one die is the Ghost Die.
   { key: "GB", name: "Ghostbusters", short: "GB", accent: "var(--gb)" },
+  // The Walking Dead Universe RPG (Free League) — the Year Zero Engine's
+  // survival-horror game: four attributes, D6 dice pools, stress dice & the
+  // walker Threat Level, a fixed 3-point Health track, Archetypes, and Anchors.
+  { key: "TWD", name: "The Walking Dead", short: "TWD", accent: "var(--twd)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";
