@@ -1,84 +1,8 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { ALIEN_WEAPONS } from "@/lib/data/yze-alien-data";
-import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
-import HomebrewEditor from "@/components/HomebrewEditor";
-import { YzeHeader, SearchForm, CountLine, EmptyState, one, type RawQuery } from "@/components/YzeRef";
-import InstantFilter from "@/components/InstantFilter";
-import { facetMatch, facetAttr } from "@/lib/facets";
 
+// Weapons are now part of the unified Gear page (General / Weapons / Armor).
 export const dynamic = "force-dynamic";
-const BASE = "/yze/weapons";
 
-type Row = { name: string; cls: string; bonus: string; damage: string; range: string; weight: string; cost: string; special: string; homebrew?: boolean };
-
-export default async function Page({ searchParams }: { searchParams: Promise<RawQuery> }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
-
-  const [hbVisible, hbOwn, campaigns] = await Promise.all([
-    visibleHomebrew(user.id, { type: "yze-weapon" }),
-    ownHomebrew(user.id, "yze-weapon"),
-    userCampaigns(user.id),
-  ]);
-
-  const book: Row[] = ALIEN_WEAPONS.map((w) => ({
-    name: w.name, cls: w.class, bonus: w.bonus, damage: String(w.damage), range: w.range, weight: w.weight, cost: w.cost, special: w.special || "—",
-  }));
-  const hbRows: Row[] = hbVisible.map((h) => {
-    const d = h.data as Record<string, unknown>;
-    const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
-    return { name: h.name, cls: s("class") || s("skill") || "—", bonus: s("bonus") || "—", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "Engaged", weight: s("weight") || "1", cost: s("cost") || "—", special: s("special") || "—", homebrew: true };
-  });
-  const ALL = [...hbRows, ...book];
-
-  const raw = await searchParams;
-  const q = one(raw.q).trim();
-  const needle = q.toLowerCase();
-  // Every weapon is rendered; the search box filters on the client
-  // (InstantFilter). `show` applies the URL's `q` for the initial paint. There
-  // are no chips here, so no row has any facet to test.
-  const results = ALL;
-  const current = { q };
-  const facets = () => ({});
-  const show = (w: Row) => facetMatch(facets(), current) && (!needle || [w.name, w.range, w.cls, w.special].join(" ").toLowerCase().includes(needle));
-  const shown = results.filter(show).length;
-
-  return (
-    <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <YzeHeader title="Weapons" subtitle={`ALIEN RPG · Core Rulebook${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-
-      <div className="mb-6"><HomebrewEditor kind="yze-weapon" campaigns={campaigns} initial={hbOwn} /></div>
-
-      <InstantFilter>
-      <SearchForm base={BASE} q={q} placeholder="Search weapons…" hidden={{}} />
-      <CountLine count={shown} noun="weapon" base={BASE} filtered={Boolean(needle)} />
-
-      <EmptyState noun="weapon" base={BASE} hidden={shown > 0} />
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
-          <table className="w-full border-collapse text-[13px]">
-            <thead>
-              <tr className="bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]">
-                <th className="p-2">Weapon</th><th className="p-2">Class</th><th className="p-2">Bonus</th><th className="p-2">Dmg</th><th className="p-2">Range</th><th className="p-2">Wt</th><th className="p-2">Cost</th><th className="p-2">Special</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((w, i) => (
-                <tr key={`${w.homebrew ? "hb" : "bk"}-${w.name}-${i}`} className="border-t border-[var(--border)]" hidden={!show(w)} data-f={facetAttr(facets())}>
-                  <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}{w.homebrew ? <span className="ml-2 rounded border border-[var(--yze)] px-1 py-0.5 text-[8px] uppercase tracking-[0.1em] text-[var(--sys-link)]">HB</span> : null}</td>
-                  <td className="p-2 text-[var(--muted)]">{w.cls}</td>
-                  <td className="p-2 font-mono">{w.bonus}</td>
-                  <td className="p-2 font-mono">{w.damage}</td>
-                  <td className="p-2">{w.range}</td>
-                  <td className="p-2 font-mono text-[var(--muted)]">{w.weight}</td>
-                  <td className="p-2 font-mono text-[var(--muted)]">{w.cost}</td>
-                  <td className="p-2 text-[var(--muted)]">{w.special}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </InstantFilter>
-    </div>
-  );
+export default function Page() {
+  redirect("/yze/gear");
 }
