@@ -133,7 +133,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 
 /* Body */
 .body-row{display:flex;gap:14px;padding:16px;align-items:flex-start;}
-.stats-col{width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
+.stats-col{width:430px;flex-shrink:0;display:flex;flex-direction:column;gap:14px;}
 .center-col{flex:1;display:flex;flex-direction:column;min-width:0;gap:14px;}
 .vit-row{display:flex;gap:14px;align-items:stretch;}
 .vit-row>.card{display:flex;flex-direction:column;}
@@ -156,7 +156,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .attr-row .a-die{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--yz-dk);width:34px;text-align:right;flex:0 0 auto;background:none;border:none;cursor:pointer;padding:0;}
 .attr-row .a-die:hover{color:var(--yz);text-decoration:underline;}
 /* Attributes with their skills nested underneath */
-.attr-skills{padding:8px 10px;display:flex;flex-direction:column;gap:11px;}
+.attr-skills{padding:8px 10px;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;align-items:start;}
+.attr-skills .as-attr{min-width:0;}
 .as-attr .attr-row{padding-bottom:3px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
 .as-attr .attr-row .a-name{font-size:15px;color:var(--yz-dk);}
 .as-skills{display:flex;flex-direction:column;gap:2px;padding-left:8px;}
@@ -618,16 +619,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="card">
         <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button></div>
       </div>
-    </div>
-
-    <div class="center-col">
-      <div class="vit-row">
-      <div class="card" style="flex:1 1 0;min-width:0;">
+      <div class="card">
       <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Ment</button></span></div>
       <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — tap an injury for its effect and to remove it.</div></div>
       </div>
+    </div>
 
-      <div class="card hstress" style="flex:1.8 1 0;min-width:0;">
+    <div class="center-col">
+      <div class="card hstress">
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
@@ -640,7 +639,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="vrow alien-only"><span class="v-lbl">Story Pts</span><div class="story-pips" id="story-pips" title="Spend one for an automatic success — hold at most 3"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="spendStoryPoint()">Spend</button></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
         <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
-      </div>
       </div>
       </div>
 
