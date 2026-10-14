@@ -12,7 +12,7 @@ export default function YzeSkillsPage() {
         Each skill is tied to one of the four attributes. To act, roll a pool of D6 equal to the
         attribute score plus the skill level (plus any gear dice) — every 6 is a success. With no
         skill, you roll the attribute alone. Your Stress Dice are added on top: a 1 on a Stress Die
-        forces a Panic Roll.
+        triggers a Stress Response (a Panic Roll is separate — made when you face something horrifying).
       </p>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {YZE_ATTRIBUTES.map((a) => (

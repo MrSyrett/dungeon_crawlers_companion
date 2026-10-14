@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { ALIEN_ARMOR, ALIEN_WEAPONS } from "@/lib/data/yze-alien-data";
+import { ALIEN_ARMOR, ALIEN_WEAPONS, ALIEN_GEAR } from "@/lib/data/yze-alien-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { YzeHeader, SectionH, cardCls, nameCls, hbBadge, type RawQuery } from "@/components/YzeRef";
@@ -8,7 +8,7 @@ import { YzeHeader, SectionH, cardCls, nameCls, hbBadge, type RawQuery } from "@
 export const dynamic = "force-dynamic";
 
 type GearRow = { name: string; weight: string; desc: string };
-type WpRow = { name: string; cls: string; bonus: string; damage: string; range: string; weight: string; cost: string; special: string };
+type WpRow = { name: string; cls: string; bonus: string; damage: string; range: string; ammo: string; weight: string; cost: string; special: string };
 
 const panelCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 const tableWrap = "overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]";
@@ -35,12 +35,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   const wHb: WpRow[] = wVis.map((h) => {
     const d = h.data as Record<string, unknown>;
     const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
-    return { name: h.name, cls: s("class") || s("skill") || "—", bonus: s("bonus") || "—", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "Engaged", weight: s("weight") || "1", cost: s("cost") || "—", special: s("special") || "—" };
+    return { name: h.name, cls: s("class") || s("skill") || "—", bonus: s("bonus") || "—", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "Adjacent", ammo: s("ammo") || "—", weight: s("weight") || "1", cost: s("cost") || "—", special: s("special") || "—" };
   });
 
   const book: WpRow[] = ALIEN_WEAPONS.map((w) => ({
-    name: w.name, cls: w.class, bonus: w.bonus, damage: String(w.damage), range: w.range, weight: w.weight, cost: w.cost, special: w.special || "—",
+    name: w.name, cls: w.class, bonus: w.bonus, damage: String(w.damage), range: w.range, ammo: w.ammo, weight: w.weight, cost: w.cost, special: w.special || "—",
   }));
+
+  const gearCategories = [...new Set(ALIEN_GEAR.map((g) => g.category))];
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -54,11 +56,37 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* General gear */}
       <section className="mb-8">
         <SectionH>General Gear</SectionH>
-        <div className={panelCls}>
+        <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+          The Evolved Edition equipment appendix. Many items grant a skill-roll bonus (shown in Effect);
+          some carry a Power supply rating. Costs are in W-Y dollars.
+        </p>
+        {gearCategories.map((cat) => (
+          <div key={cat} className="mb-4">
+            <h3 className={hbHead}>{cat}</h3>
+            <div className={tableWrap}>
+              <table className="w-full border-collapse text-[13px]">
+                <thead>
+                  <tr className={thRow}><th className="p-2">Item</th><th className="p-2">Wt</th><th className="p-2">Cost</th><th className="p-2">Power</th><th className="p-2">Effect</th></tr>
+                </thead>
+                <tbody>
+                  {ALIEN_GEAR.filter((g) => g.category === cat).map((g) => (
+                    <tr key={g.name} className="border-t border-[var(--border)]">
+                      <td className="p-2 font-semibold text-[var(--sys-link)]">{g.name}</td>
+                      <td className="p-2 font-mono text-[var(--muted)]">{g.weight}</td>
+                      <td className="p-2 font-mono text-[var(--muted)]">{g.cost}</td>
+                      <td className="p-2 font-mono text-[var(--muted)]">{g.supply || "—"}</td>
+                      <td className="p-2 text-[var(--muted)]">{g.effect}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+        <div className={`${panelCls} mt-4`}>
           <h3 className={hbHead}>Your homebrew gear</h3>
           <p className="mb-3 text-[12px] leading-relaxed text-[var(--muted)]">
-            ALIEN has no fixed general-gear list — add your own equipment here; it shows in the character
-            sheet&rsquo;s gear picker.
+            Add your own equipment here; it shows in the character sheet&rsquo;s gear picker alongside the list above.
           </p>
           <HomebrewEditor kind="yze-gear" campaigns={campaigns} initial={gOwn} />
           {gHb.length > 0 && (
@@ -81,8 +109,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       <section className="mb-8">
         <SectionH>Weapons</SectionH>
         <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          DAMAGE is the base damage on a hit; each extra success adds one more. BONUS is the gear dice the
-          weapon adds to your attack pool.
+          DAMAGE is the base damage on a hit; each extra success adds one more. MODIFIER is the gear dice the
+          weapon adds to your attack pool. RANGE is the min–max band — firing closer than the minimum takes
+          −2 dice per band below it. AMMO is the weapon&rsquo;s supply rating (Power for energy weapons).
         </p>
         <div className={`${panelCls} mb-4`}>
           <h3 className={hbHead}>Your homebrew weapons</h3>
@@ -91,7 +120,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             <div className={`${tableWrap} mt-3`}>
               <table className="w-full border-collapse text-[13px]">
                 <thead>
-                  <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Class</th><th className="p-2">Dmg</th><th className="p-2">Bonus</th><th className="p-2">Range</th><th className="p-2">Wt</th><th className="p-2">Special</th></tr>
+                  <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Class</th><th className="p-2">Dmg</th><th className="p-2">Mod</th><th className="p-2">Range</th><th className="p-2">Ammo</th><th className="p-2">Wt</th><th className="p-2">Special</th></tr>
                 </thead>
                 <tbody>
                   {wHb.map((w, i) => (
@@ -101,6 +130,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                       <td className="p-2 font-mono">{w.damage}</td>
                       <td className="p-2 font-mono">{w.bonus}</td>
                       <td className="p-2">{w.range}</td>
+                      <td className="p-2 font-mono text-[var(--muted)]">{w.ammo}</td>
                       <td className="p-2 font-mono text-[var(--muted)]">{w.weight}</td>
                       <td className="p-2 text-[var(--muted)]">{w.special}</td>
                     </tr>
@@ -113,7 +143,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
         <div className={tableWrap}>
           <table className="w-full border-collapse text-[13px]">
             <thead>
-              <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Class</th><th className="p-2">Dmg</th><th className="p-2">Bonus</th><th className="p-2">Range</th><th className="p-2">Wt</th><th className="p-2">Cost</th><th className="p-2">Special</th></tr>
+              <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Class</th><th className="p-2">Dmg</th><th className="p-2">Mod</th><th className="p-2">Range</th><th className="p-2">Ammo</th><th className="p-2">Wt</th><th className="p-2">Cost</th><th className="p-2">Special</th></tr>
             </thead>
             <tbody>
               {book.map((w) => (
@@ -123,6 +153,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                   <td className="p-2 font-mono">{w.damage}</td>
                   <td className="p-2 font-mono">{w.bonus}</td>
                   <td className="p-2">{w.range}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{w.ammo}</td>
                   <td className="p-2 font-mono text-[var(--muted)]">{w.weight}</td>
                   <td className="p-2 font-mono text-[var(--muted)]">{w.cost}</td>
                   <td className="p-2 text-[var(--muted)]">{w.special}</td>

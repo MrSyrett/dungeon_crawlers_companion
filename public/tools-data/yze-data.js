@@ -150,7 +150,7 @@ var YZE_STRESS_RESPONSE = [
 ];
 
 var YZE_RANGES = [
-  { range: "Engaged", desc: "Right next to you." },
+  { range: "Adjacent", desc: "Right next to you." },
   { range: "Short", desc: "A few meters away, in the same zone as you." },
   { range: "Medium", desc: "Up to 25 meters away, in an adjacent zone." },
   { range: "Long", desc: "Up to about one hundred meters (four zones) away." },

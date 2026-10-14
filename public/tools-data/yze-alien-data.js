@@ -15,7 +15,7 @@
 
 var ALIEN_SKILLS = [
   { name: "Heavy Machinery", attr: "STR", desc: "Operate and repair heavy machines, force open doors, use industrial equipment and power loaders." },
-  { name: "Close Combat", attr: "STR", desc: "Fight hand-to-hand or with a melee weapon at Engaged range." },
+  { name: "Close Combat", attr: "STR", desc: "Fight hand-to-hand or with a melee weapon at Adjacent range." },
   { name: "Stamina", attr: "STR", desc: "Endure hardship — resist poison and disease, hold your breath, survive a lethal critical injury." },
   { name: "Mobility", attr: "AGI", desc: "Move under pressure — climb, jump, dodge, sneak, and keep your footing." },
   { name: "Ranged Combat", attr: "AGI", desc: "Fire guns and throw weapons at range." },
@@ -74,7 +74,7 @@ var ALIEN_CAREERS = [
   { name: "Roughneck", key: "STR", skills: ["Heavy Machinery", "Stamina", "Close Combat"],
     talents: ["Resilient", "Steady Hands", "True Grit"],
     signature: ["Tool belt", "Photo of partner", "Crucifix or other religious symbol"],
-    gear: "Cutting torch or Watsumi DV-303 bolt gun; D6 doses Hydr8tion or Maintenance jack; Stash of hard liquor or IRC MK.50 compression suit; Hi-beam flashlight or Seegson C-Series magnetic tape recorder. $D6×100 cash.",
+    gear: "Cutting torch or Watatsumi DV-303 bolt gun; D6 doses Hydr8tion or Maintenance jack; Stash of hard liquor or IRC MK.50 compression suit; Hi-beam flashlight or Seegson C-Series magnetic tape recorder. $D6×100 cash.",
     agendas: ["You are a compulsive thrill-seeker. If there is a risk to take, you'll step up and try it.", "You once sacrificed your family for the job. Now you won't let your friends down — ever.", "Downtime matters. If you can grab a beer and some time alone, you're happy."],
     names: ["Mac Masterton", "Kip Tranter", "Charlie Stead", "Sassy Diaz", "Kat Longridge", "Jayden Pace"] },
   { name: "Scientist", key: "WITS", skills: ["Observation", "Survival", "Comtech"],
@@ -147,39 +147,40 @@ var ALIEN_TALENTS = [
 
 // Alien weapons (Evolved Edition appendix) — bonus = gear dice; damage = base
 // rating; range = max band; class groups the picker. Explosive/stun noted in special.
+// bonus = Modifier (gear dice). range = Evolved min/max band. ammo = Ammo/Power supply rating.
 var ALIEN_WEAPONS = [
   // Pistols
-  { name: "M4A3 Service Pistol", bonus: "+2", damage: 2, range: "Medium", weight: "½", cost: "$200", special: "", skill: "Ranged Combat", class: "Pistol" },
-  { name: "VP-70MA6 Service Pistol", bonus: "+2", damage: 2, range: "Medium", weight: "¼", cost: "$250", special: "", skill: "Ranged Combat", class: "Pistol" },
-  { name: ".357 Magnum Revolver", bonus: "+1", damage: 3, range: "Medium", weight: "1", cost: "$300", special: "", skill: "Ranged Combat", class: "Pistol" },
-  { name: "Rexim RXF-M5 EVA Pistol", bonus: "+1", damage: 1, range: "Medium", weight: "½", cost: "$400", special: "Armor piercing", skill: "Ranged Combat", class: "Pistol" },
-  { name: "Weyland ES-4 Electrostatic Pistol", bonus: "+1", damage: 1, range: "Medium", weight: "½", cost: "$1,000", special: "Stun, armor piercing", skill: "Ranged Combat", class: "Pistol" },
-  { name: "Watatsumi DV-303 Bolt Gun", bonus: "−1", damage: 3, range: "Short", weight: "1", cost: "$400", special: "Armor piercing, single-shot", skill: "Ranged Combat", class: "Pistol" },
+  { name: "M4A3 Service Pistol", bonus: "+2", damage: 2, range: "Adjacent–Medium", ammo: "2", weight: "½", cost: "$200", special: "", skill: "Ranged Combat", class: "Pistol" },
+  { name: "VP-70MA6 Service Pistol", bonus: "+2", damage: 2, range: "Adjacent–Medium", ammo: "2", weight: "¼", cost: "$250", special: "", skill: "Ranged Combat", class: "Pistol" },
+  { name: ".357 Magnum Revolver", bonus: "+1", damage: 3, range: "Short–Medium", ammo: "1", weight: "1", cost: "$300", special: "", skill: "Ranged Combat", class: "Pistol" },
+  { name: "Rexim RXF-M5 EVA Pistol", bonus: "+1", damage: 1, range: "Short–Medium", ammo: "4", weight: "½", cost: "$400", special: "Armor piercing", skill: "Ranged Combat", class: "Pistol" },
+  { name: "Weyland ES-4 Electrostatic Pistol", bonus: "+1", damage: 1, range: "Short–Medium", ammo: "1", weight: "½", cost: "$1,000", special: "Stun, armor piercing", skill: "Ranged Combat", class: "Pistol" },
+  { name: "Watatsumi DV-303 Bolt Gun", bonus: "−1", damage: 3, range: "Adjacent–Short", ammo: "Single-shot", weight: "1", cost: "$400", special: "Armor piercing", skill: "Ranged Combat", class: "Pistol" },
   // Rifles
-  { name: "Armat M41A Pulse Rifle", bonus: "+2", damage: 2, range: "Long", weight: "1", cost: "$1,200", special: "Armor piercing, full auto, grenade launcher", skill: "Ranged Combat", class: "Rifle" },
-  { name: "F44AA Pulse Rifle", bonus: "+3", damage: 2, range: "Long", weight: "1", cost: "$1,500", special: "Armor piercing, full auto, unreliable", skill: "Ranged Combat", class: "Rifle" },
-  { name: "AK-4047 Pulse Assault Rifle", bonus: "+1", damage: 2, range: "Long", weight: "1", cost: "$600", special: "Armor piercing, full auto", skill: "Ranged Combat", class: "Rifle" },
-  { name: "M42A Scope Rifle", bonus: "+3", damage: 2, range: "Extreme", weight: "1", cost: "$1,000", special: "Armor piercing", skill: "Ranged Combat", class: "Rifle" },
-  { name: "Armat M41AE2 Heavy Pulse Rifle", bonus: "+2", damage: 2, range: "Extreme", weight: "2", cost: "$1,500", special: "Armor piercing, full auto", skill: "Ranged Combat", class: "Rifle" },
-  { name: "M56A2 Smartgun", bonus: "+3", damage: 3, range: "Long", weight: "3", cost: "$6,000", special: "Armor piercing, full auto, smart sight", skill: "Ranged Combat", class: "Rifle" },
-  { name: "Armat Model 37A2 12 Gauge Pump Action Shotgun", bonus: "+2", damage: 3, range: "Short", weight: "1", cost: "$500", special: "", skill: "Ranged Combat", class: "Rifle" },
-  { name: "SpaceSub ASSO-400 Harpoon Gun", bonus: "—", damage: 1, range: "Medium", weight: "1", cost: "$300", special: "Harpoon effect, single-shot", skill: "Ranged Combat", class: "Rifle" },
+  { name: "Armat M41A Pulse Rifle", bonus: "+2", damage: 2, range: "Short–Long", ammo: "3", weight: "1", cost: "$1,200", special: "Armor piercing, full auto, grenade launcher", skill: "Ranged Combat", class: "Rifle" },
+  { name: "F44AA Pulse Rifle", bonus: "+3", damage: 2, range: "Short–Long", ammo: "3", weight: "1", cost: "$1,500", special: "Armor piercing, full auto, unreliable", skill: "Ranged Combat", class: "Rifle" },
+  { name: "AK-4047 Pulse Assault Rifle", bonus: "+1", damage: 2, range: "Short–Long", ammo: "2", weight: "1", cost: "$600", special: "Armor piercing, full auto", skill: "Ranged Combat", class: "Rifle" },
+  { name: "M42A Scope Rifle", bonus: "+3", damage: 2, range: "Medium–Extreme", ammo: "2", weight: "1", cost: "$1,000", special: "Armor piercing", skill: "Ranged Combat", class: "Rifle" },
+  { name: "Armat M41AE2 Heavy Pulse Rifle", bonus: "+2", damage: 2, range: "Medium–Extreme", ammo: "4", weight: "2", cost: "$1,500", special: "Armor piercing, full auto", skill: "Ranged Combat", class: "Rifle" },
+  { name: "M56A2 Smartgun", bonus: "+3", damage: 3, range: "Short–Long", ammo: "3", weight: "3", cost: "$6,000", special: "Armor piercing, full auto, smart sight", skill: "Ranged Combat", class: "Rifle" },
+  { name: "Armat Model 37A2 12 Gauge Pump Action Shotgun", bonus: "+2", damage: 3, range: "Adjacent–Short", ammo: "1", weight: "1", cost: "$500", special: "", skill: "Ranged Combat", class: "Rifle" },
+  { name: "SpaceSub ASSO-400 Harpoon Gun", bonus: "—", damage: 1, range: "Short–Medium", ammo: "Single-shot", weight: "1", cost: "$300", special: "Harpoon effect", skill: "Ranged Combat", class: "Rifle" },
   // Heavy weapons
-  { name: "M240 Incinerator Unit", bonus: "+1", damage: 2, range: "Short", weight: "1", cost: "$500", special: "Fire effect", skill: "Ranged Combat", class: "Heavy" },
-  { name: "Armat XM99A Phased Plasma Pulse Rifle", bonus: "—", damage: 4, range: "Extreme", weight: "2", cost: "$20,000", special: "Armor piercing, aim needed", skill: "Ranged Combat", class: "Heavy" },
-  { name: "M5A3 RPG Launcher", bonus: "−1", damage: 7, range: "Extreme", weight: "2", cost: "$1,800", special: "Armor piercing, aim needed, single-shot", skill: "Ranged Combat", class: "Heavy" },
-  { name: "Armat U1 Grenade Launcher", bonus: "+1", damage: 2, range: "Long", weight: "½", cost: "$600", special: "Explosive; can fire smoke and Electroshock grenades", skill: "Ranged Combat", class: "Heavy" },
-  { name: "M40 HEDP Hand Grenade", bonus: "—", damage: 2, range: "Medium", weight: "¼", cost: "$60", special: "Explosive, single-use", skill: "Ranged Combat", class: "Heavy" },
-  { name: "G2 Electroshock Grenade", bonus: "—", damage: 2, range: "Medium", weight: "¼", cost: "$400", special: "Explosive, stun, single-use", skill: "Ranged Combat", class: "Heavy" },
-  { name: "Seismic Survey Charge", bonus: "—", damage: 3, range: "Medium", weight: "1", cost: "$200", special: "Explosive, single-use", skill: "Ranged Combat", class: "Heavy" },
-  { name: "UA 571-C Sentry Gun", bonus: "—", damage: 4, range: "Long", weight: "—", cost: "$12,000", special: "Armor piercing, full auto, automation", skill: "Ranged Combat", class: "Heavy" },
+  { name: "M240 Incinerator Unit", bonus: "+1", damage: 2, range: "Short", ammo: "2", weight: "1", cost: "$500", special: "Fire effect", skill: "Ranged Combat", class: "Heavy" },
+  { name: "Armat XM99A Phased Plasma Pulse Rifle", bonus: "—", damage: 4, range: "Medium–Extreme", ammo: "1", weight: "2", cost: "$20,000", special: "Armor piercing, aim needed", skill: "Ranged Combat", class: "Heavy" },
+  { name: "M5A3 RPG Launcher", bonus: "−1", damage: 7, range: "Medium–Extreme", ammo: "Single-shot", weight: "2", cost: "$1,800", special: "Armor piercing, aim needed", skill: "Ranged Combat", class: "Heavy" },
+  { name: "Armat U1 Grenade Launcher", bonus: "+1", damage: 2, range: "Medium–Long", ammo: "1", weight: "½", cost: "$600", special: "Explosive; can fire smoke and Electroshock grenades", skill: "Ranged Combat", class: "Heavy" },
+  { name: "M40 HEDP Hand Grenade", bonus: "—", damage: 2, range: "Short–Medium", ammo: "Single use", weight: "¼", cost: "$60", special: "Explosive", skill: "Ranged Combat", class: "Heavy" },
+  { name: "G2 Electroshock Grenade", bonus: "—", damage: 2, range: "Short–Medium", ammo: "Single use", weight: "¼", cost: "$400", special: "Explosive, stun", skill: "Ranged Combat", class: "Heavy" },
+  { name: "Seismic Survey Charge", bonus: "—", damage: 3, range: "Short–Medium", ammo: "Single use", weight: "1", cost: "$200", special: "Explosive", skill: "Ranged Combat", class: "Heavy" },
+  { name: "UA 571-C Sentry Gun", bonus: "—", damage: 4, range: "Short–Long", ammo: "5", weight: "—", cost: "$12,000", special: "Armor piercing, full auto, automation", skill: "Ranged Combat", class: "Heavy" },
   // Close combat
-  { name: "Unarmed Attack", bonus: "—", damage: 1, range: "Engaged", weight: "—", cost: "—", special: "", skill: "Close Combat", class: "Close Combat" },
-  { name: "Blunt Instrument", bonus: "+1", damage: 1, range: "Engaged", weight: "1", cost: "—", special: "", skill: "Close Combat", class: "Close Combat" },
-  { name: "Combat Knife", bonus: "+1", damage: 2, range: "Engaged", weight: "½", cost: "$50", special: "", skill: "Close Combat", class: "Close Combat" },
-  { name: "Fire Axe", bonus: "—", damage: 2, range: "Engaged", weight: "1", cost: "$60", special: "", skill: "Close Combat", class: "Close Combat" },
-  { name: "Stun Baton", bonus: "+1", damage: 1, range: "Engaged", weight: "1", cost: "$80", special: "Stun effect", skill: "Close Combat", class: "Close Combat" },
-  { name: "Cutting Torch", bonus: "−1", damage: 3, range: "Engaged", weight: "1", cost: "$300", special: "Armor piercing", skill: "Close Combat", class: "Close Combat" }
+  { name: "Unarmed Attack", bonus: "—", damage: 1, range: "Adjacent", ammo: "—", weight: "—", cost: "—", special: "", skill: "Close Combat", class: "Close Combat" },
+  { name: "Blunt Instrument", bonus: "+1", damage: 1, range: "Adjacent", ammo: "—", weight: "1", cost: "—", special: "", skill: "Close Combat", class: "Close Combat" },
+  { name: "Combat Knife", bonus: "+1", damage: 2, range: "Adjacent", ammo: "—", weight: "½", cost: "$50", special: "", skill: "Close Combat", class: "Close Combat" },
+  { name: "Fire Axe", bonus: "—", damage: 2, range: "Adjacent", ammo: "—", weight: "1", cost: "$60", special: "Armor piercing", skill: "Close Combat", class: "Close Combat" },
+  { name: "Stun Baton", bonus: "+1", damage: 1, range: "Adjacent", ammo: "Power 2", weight: "1", cost: "$80", special: "Stun effect", skill: "Close Combat", class: "Close Combat" },
+  { name: "Cutting Torch", bonus: "−1", damage: 3, range: "Adjacent", ammo: "Power 3", weight: "1", cost: "$300", special: "Armor piercing", skill: "Close Combat", class: "Close Combat" }
 ];
 
 // Suits & armor (Evolved Edition). rating = Armor Rating; air = Air Supply.
@@ -187,7 +188,7 @@ var ALIEN_ARMOR = [
   { name: "M3 Personnel Armor", rating: 2, air: "—", weight: "1", cost: "$1,200", comment: "Comm unit, PDT" },
   { name: "Kevlar Riot Vest", rating: 1, air: "—", weight: "½", cost: "$600", comment: "" },
   { name: "IRC Mk.50 Compression Suit", rating: 0, air: "5", weight: "1", cost: "$4,000", comment: "Vacuum protection, comm unit, head light, −1 to Mobility" },
-  { name: "IRC Mk.35 Pressure Suit", rating: 1, air: "4", weight: "2", cost: "$2,000", comment: "−2 to Mobility" },
+  { name: "IRC Mk.35 Pressure Suit", rating: 1, air: "4", weight: "2", cost: "$2,000", comment: "Vacuum protection, −2 to Mobility" },
   { name: "Eco All-World Survival Suit", rating: 2, air: "6", weight: "2", cost: "$30,000", comment: "Vacuum protection, comm unit, head light, +2 to Mobility in zero-G" },
   { name: "Weyland-Yutani APEsuit", rating: 1, air: "4", weight: "1", cost: "$5,000", comment: "Armor 3 vs. acid, facehug protection, Survival +2" },
   { name: "P-5000 Power Loader", rating: 1, air: "—", weight: "—", cost: "$50,000", comment: "+3 dice to Heavy Machinery & Close Combat; close combat base damage 3" }
@@ -195,10 +196,68 @@ var ALIEN_ARMOR = [
 
 // Signature-item, agenda, buddy and rival prompts used by the Alien story tab.
 var ALIEN_TRAITS = [
-  { key: "agenda", label: "Personal Agenda", prompt: "Your private angle — pick one from your career or invent your own. Advance it despite risk or cost to earn a bonus XP." },
+  { key: "agenda", label: "Personal Agenda", prompt: "Your private angle — pick one from your career or invent your own. Advancing it earns a Story Point in cinematic play (spend one for an automatic success; you can hold at most 3), or a bonus XP in campaign play." },
   { key: "signature", label: "Signature Item", prompt: "A personal object that grounds you. Once per session you can interact with it to reduce your Stress Level by one (slow action). Androids don't have one." },
   { key: "buddy", label: "Buddy", prompt: "The one crew member you trust. Making a sacrifice or taking a big risk for your Buddy is its own reward." },
   { key: "rival", label: "Rival", prompt: "The crew member you don't get along with. Your Rival is a source of drama the GM can lean on." }
+];
+
+// General gear (Evolved Edition equipment appendix). supply = Power rating where present.
+var ALIEN_GEAR = [
+  // Computer Mainframes
+  { name: "MU/TH/UR 6000", category: "Computer Mainframes", weight: "—", cost: "$2,500,000", effect: "Ship mainframe. Comtech 5, Piloting 5, Observation 5." },
+  { name: "MU/TH/UR 6500", category: "Computer Mainframes", weight: "—", cost: "$3,500,000", effect: "Ship mainframe. Comtech 6, Piloting 5, Observation 6." },
+  { name: "MU/TH/UR 7000", category: "Computer Mainframes", weight: "—", cost: "$5,000,000", effect: "Ship mainframe. Comtech 7, Piloting 6, Observation 7." },
+  { name: "MU/TH/UR 9000", category: "Computer Mainframes", weight: "—", cost: "$50,000,000", effect: "Ship mainframe. Comtech 10, Piloting 8, Observation 10, Ranged Combat 9." },
+  { name: "A.P.O.L.L.O.", category: "Computer Mainframes", weight: "—", cost: "$2,000,000", effect: "Ship mainframe. Comtech 5, Piloting 4, Observation 5." },
+  // Data Storage
+  { name: "Long-Data Discs", category: "Data Storage", weight: "—", cost: "$30", effect: "Stores up to 10 zettabytes." },
+  { name: "Magnetic Tape", category: "Data Storage", weight: "—", cost: "$5", effect: "Stores up to 120 terabytes." },
+  // Comms & Diagnostics
+  { name: "Computer Terminal", category: "Comms & Diagnostics", weight: "—", cost: "Varies", effect: "Access and process data (Comtech roll)." },
+  { name: "PR-PUT Uplink Terminal", category: "Comms & Diagnostics", weight: "1", cost: "$9,000", effect: "Remotely control a spacecraft (Comtech roll)." },
+  { name: "Seegson C-Series Recorder", category: "Comms & Diagnostics", weight: "1", cost: "$80", effect: "Record and play music (Manipulation +1)." },
+  { name: "Samani E-Series Watch", category: "Comms & Diagnostics", weight: "—", cost: "$50", effect: "Tracks time, oxygen and pressure (Survival +1)." },
+  { name: "Comm Unit", category: "Comms & Diagnostics", weight: "—", cost: "$50", effect: "Enables remote team communication." },
+  { name: "Personal Data Transmitter (PDT)", category: "Comms & Diagnostics", weight: "—", cost: "$100", effect: "Monitors location and vitals (Medical Aid +1)." },
+  { name: "IFF Transponder", category: "Comms & Diagnostics", weight: "—", cost: "$250", effect: "Prevents Sentry Gun friendly fire." },
+  { name: "Data Transmitter Cards", category: "Comms & Diagnostics", weight: "—", cost: "$50", effect: "Transfer audiovisual data (Comtech +1)." },
+  { name: "Seegson P-DAT", category: "Comms & Diagnostics", weight: "½", cost: "$500", effect: "Coordinate info for field teams (Command +1)." },
+  { name: "Seegson System Diagnostic Device", category: "Comms & Diagnostics", weight: "1", cost: "$300", effect: "Troubleshoot computer systems (Comtech +2)." },
+  { name: "HoloTab", category: "Comms & Diagnostics", weight: "—", cost: "$100,000", effect: "Strategic analysis platform (Observation and Command +2)." },
+  { name: "Modular Computing Device", category: "Comms & Diagnostics", weight: "—", cost: "$8,000", effect: "Full audiovisual holographic projector (Manipulation +2)." },
+  // Vision Devices
+  { name: "Flashlight", category: "Vision Devices", weight: "½", cost: "$40", effect: "Removes the effects of darkness in a zone. Short range." },
+  { name: "Optical Scope", category: "Vision Devices", weight: "—", cost: "$60", effect: "+1 range category for aimed shots with a pistol or rifle." },
+  { name: "Binoculars", category: "Vision Devices", weight: "½", cost: "$100", effect: "+2 dice to Observation at Long range or more. Extreme range." },
+  { name: "M314 Motion Tracker", category: "Vision Devices", weight: "1", cost: "$1,200", supply: "Power 5", effect: "Detects motion in stealth mode. Long range." },
+  { name: "M316 Motion Tracker", category: "Vision Devices", weight: "—", cost: "$3,000", supply: "Power 3", effect: "Detects motion in stealth mode. Medium range." },
+  { name: "Neuro Visor", category: "Vision Devices", weight: "1", cost: "$10,000", supply: "Power 5", effect: "Monitor or interact with a hypersleep patient (Comtech roll). Long range." },
+  { name: "\"Pups\" Parameter Uplink Spectrograph Mapping Device", category: "Vision Devices", weight: "1", cost: "$50,000", supply: "Power 5", effect: "Scans one zone per stretch in stealth mode, auto-detecting enemies unless hidden. Extreme range." },
+  { name: "Seegson Microview-2000SE", category: "Vision Devices", weight: "½", cost: "$250", effect: "Tracks current location. Extreme range." },
+  // Tools
+  { name: "Mechanical Cutting Torch", category: "Tools", weight: "1", cost: "$300", supply: "Power 3", effect: "Construction and repairs (Heavy Machinery +2)." },
+  { name: "Maintenance Jack", category: "Tools", weight: "1", cost: "$150", effect: "Heavy Machinery +1 die in relevant situations." },
+  { name: "Electronic Tools", category: "Tools", weight: "½", cost: "$250", effect: "Comtech +1." },
+  { name: "Power Cell", category: "Tools", weight: "¼", cost: "$30", effect: "Restores full power supply to one item." },
+  // Medical Supplies
+  { name: "Personal Medkit", category: "Medical Supplies", weight: "¼", cost: "$50", effect: "Medical Aid +2 for giving first aid (single use)." },
+  { name: "Surgical Kit", category: "Medical Supplies", weight: "1", cost: "$200", effect: "Medical Aid +2 for first aid and surgery on critical injuries. Base damage 2 if used as a weapon." },
+  { name: "Pauling MedPod", category: "Medical Supplies", weight: "—", cost: "$2,000,000", effect: "First aid and surgery with Medical Aid skill level 12." },
+  { name: "AutoDoc", category: "Medical Supplies", weight: "—", cost: "$500,000", effect: "First aid with Medical Aid skill level 8." },
+  // Pharmaceuticals
+  { name: "Neversleep Pills", category: "Pharmaceuticals", weight: "—", cost: "$2", effect: "Stress Level +1 but removes the need for sleep for a day; stress can't be relieved during that time." },
+  { name: "Hydr8tion", category: "Pharmaceuticals", weight: "—", cost: "$5", effect: "Eliminates fatigue from hypersleep." },
+  { name: "Naproleve", category: "Pharmaceuticals", weight: "—", cost: "$20", effect: "Reduces Stress Level to zero. Each dose beyond the first in the same shift gives −1 die to all skill rolls until the end of the shift." },
+  { name: "Recreational Drugs", category: "Pharmaceuticals", weight: "—", cost: "Varies", effect: "Stress Level +1 or −1. Each dose beyond the first in the same shift gives −1 die to all skill rolls until the end of the shift." },
+  // Food & Drink
+  { name: "Prefab Meal", category: "Food & Drink", weight: "¼", cost: "$10", effect: "Satisfies food needs for one day." },
+  { name: "Water Bottle", category: "Food & Drink", weight: "¼", cost: "$2–$100", effect: "Satisfies water needs for one day." },
+  { name: "\"Bug Juice\" Protein Drink", category: "Food & Drink", weight: "¼", cost: "$5", effect: "Satisfies food and water needs for one day." },
+  { name: "Candy Bar", category: "Food & Drink", weight: "¼", cost: "$15", effect: "Satisfies food needs for one day." },
+  { name: "Coffee", category: "Food & Drink", weight: "—", cost: "$0–$1.50", effect: "Stress Level +1 and postpones fatigue from lack of sleep for one shift." },
+  { name: "Colony Specialty Meals", category: "Food & Drink", weight: "¼", cost: "$20–$300", effect: "Satisfies food needs for one day; Stress Level −1." },
+  { name: "Beer and Booze", category: "Food & Drink", weight: "¼", cost: "$5–$500", effect: "Stress Level −1. Each dose beyond the first in the same shift gives −1 die to all skill rolls until the end of the shift." }
 ];
 
 if (typeof window !== "undefined") {
@@ -208,4 +267,5 @@ if (typeof window !== "undefined") {
   window.ALIEN_WEAPONS = ALIEN_WEAPONS;
   window.ALIEN_ARMOR = ALIEN_ARMOR;
   window.ALIEN_TRAITS = ALIEN_TRAITS;
+  window.ALIEN_GEAR = ALIEN_GEAR;
 }
