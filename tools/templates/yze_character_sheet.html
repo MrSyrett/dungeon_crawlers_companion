@@ -141,8 +141,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .xp-sp-row{display:flex;gap:14px;}
 .stat-bubbles{display:flex;flex-direction:column;gap:14px;flex:0 0 132px;}
 .stat-bubbles>.card{flex:1 1 0;display:flex;flex-direction:column;}
-.bubble-val{display:flex;align-items:center;justify-content:center;padding:14px 10px;flex:1;}
-.bubble-val .stress-val{font-size:28px;}
+.stat-bubbles .section-bar{padding:5px 10px 4px;font-size:10px;}
+.stat-bubbles .section-bar::after{left:10px;right:10px;}
+.bubble-val{display:flex;align-items:center;justify-content:center;padding:6px 10px 10px;flex:1;}
+.bubble-val .stress-val{font-size:26px;line-height:1;}
 @media(max-width:860px){.vit-row{flex-direction:column;}.vit-row>.card{flex:0 0 auto!important;}.stat-bubbles{flex-direction:row;flex:0 0 auto;}}
 .push-inline{margin-top:7px;background:var(--yz);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
 .push-inline:hover{filter:brightness(1.1);}
@@ -250,7 +252,7 @@ body.sheet-locked .edit-only{display:none!important;}
 .inv-details input.inv-note{flex:1 1 70px;min-width:50px;}
 .inv-details .inv-mini,.inv-details .inv-type{flex:0 0 auto;}
 .section-bar.cbar{flex-wrap:wrap;row-gap:2px;}
-.section-bar.cbar .hdr-right{margin-left:0;}
+.section-bar.cbar .hdr-right{margin-left:auto;}
 .section-bar.cbar .hdr-btn{padding:3px 7px;font-size:9px;}
 .inv-mini{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6d8489;}
 .inv-type{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--yz-dk);background:var(--yz-lt);border-radius:4px;padding:1px 5px;margin-right:4px;}
@@ -448,8 +450,8 @@ body.synthetic .synth-hide{display:none !important;}
 .stress-row{display:flex;align-items:center;gap:8px;}
 .stress-pips{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 auto;}
 .hstress .stress-pips,.hstress .vboxes{flex-wrap:nowrap;}
-.hstress .spip,.hstress .vbox{width:16px;height:16px;}
-.hstress .spip{font-size:9px;}
+.hstress .spip,.hstress .vbox{width:20px;height:20px;}
+.hstress .spip{font-size:10px;}
 .spip{width:20px;height:20px;border:2px solid var(--rule);border-radius:4px;cursor:pointer;background:#fff;padding:0;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--yz-dk);line-height:1;}
 .spip.on{background:var(--yz);border-color:var(--yz-dk);color:#04232a;}
 .stress-val{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--yz-dk);font-weight:700;min-width:20px;text-align:center;}
@@ -626,10 +628,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
       <div class="xp-sp-row">
         <div class="card" style="flex:1 1 0;min-width:0;">
-          <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button></div>
+          <div class="xp-row"><span class="v-lbl">Experience</span><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"></div>
         </div>
         <div class="card alien-only" style="flex:1 1 0;min-width:0;">
-          <div class="xp-row"><span class="v-lbl">Story Pts</span><div class="story-pips" id="story-pips" title="Spend one for an automatic success — hold at most 3"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="spendStoryPoint()">Spend</button></div>
+          <div class="xp-row"><span class="v-lbl">Story Pts</span><div class="story-pips" id="story-pips" title="Story Points (max 3) — tick up or down"></div></div>
         </div>
       </div>
       <div class="card">
@@ -654,12 +656,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
-        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
+        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes" style="flex:0 1 auto;"></div><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="margin-left:auto;flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
         <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="Full-auto fire or facing fear raises Stress one step (Machinegunner ignores full-auto)">+1</button></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
-        <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
       </div>
       </div>
       </div>
@@ -1244,6 +1245,7 @@ function rollStressResponse(label){
 // Made when you face something horrifying (the "Roll Panic" button / GM call).
 function rollPanic(){
   var stress=clamp(num(S.stress),0,10), res=resolveRating(), roll=die6(), total=roll+stress-res, row=yzeRowLookup(PANIC,total);
+  animDice([roll], [], total<=0?'normal':'fumble');   // show the D6 roll with the 3D dice
   addLog('Panic · d6 '+roll+' + stress '+stress+' − Resolve '+res+' = '+total, row?row.effect:'—', row?row.detail:'', total<=0?'normal':'fumble');
 }
 function rollQuick(){
