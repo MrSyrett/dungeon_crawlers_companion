@@ -9,10 +9,6 @@ export default function YzeTalentsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <YzeHeader title="Talents" subtitle="ALIEN RPG · career & general talents" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        You start with one talent from your career and can earn more with experience. Career talents
-        belong to a specific career; general talents are open to anyone.
-      </p>
 
       <section className="mb-8">
         <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Career talents</h2>

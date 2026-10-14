@@ -7,11 +7,6 @@ export default function YzeCareersPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <YzeHeader title="Careers" subtitle="ALIEN RPG · nine careers · pick one at character creation" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Your career sets your key attribute, three key skills, your choice of a starting talent, a
-        signature item, and your starting gear. It also suggests a personal agenda — a private goal
-        that pulls against the crew when the pressure mounts.
-      </p>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {ALIEN_CAREERS.map((c) => (
           <div key={c.name} className={cardCls}>
