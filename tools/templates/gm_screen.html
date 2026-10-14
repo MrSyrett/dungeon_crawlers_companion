@@ -2207,7 +2207,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
     ICRPG:['npc','icrpgmonster','icrpgtreasure'],
     MMRPG:['npc','mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
     CO:  ['npc'],
-    YZE: ['npc','yzetables'],
+    YZE: ['npc','yzemonster','yzetables'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -3249,6 +3249,7 @@ GMScenes.renderPins();
         <option value="mmrpgtables">Marvel Encounters &amp; Danger Room</option>
         <option value="mmrpgtreasure">Marvel Gear &amp; Loot</option>
         <option value="mmrpghenchmen">Marvel Henchmen</option>
+        <option value="yzemonster">Alien Creature</option>
         <option value="yzetables">YZE Crit &amp; Panic</option>
         <option value="map">Map</option>
       </select>
@@ -3678,6 +3679,20 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-dndmon-group-results"></div>
+      </div>
+      <div class="gen-panel" data-panel="yzemonster">
+        <div class="gen-controls">
+          <label class="gen-label">Type
+            <select class="gen-select" id="gen-yzemon-group"><option value="">Any Type</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-yzemon-group-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-yzemon-group-results"></div>
       </div>
 
       <!-- D6 SYSTEM 2e CREATURE PANEL (bestiary draw; cards send to the tracker) -->
@@ -7472,7 +7487,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze'];
   // Map a system to its bestiary source. Unknown systems keep their own key (so
   // pickerMatches returns nothing and the picker says "No Combatants Found")
   // rather than silently falling back to the DCC bestiary.
@@ -10122,6 +10137,7 @@ function xsBestiary(src) {
   if(src === 'icrpg') return ok(typeof ICRPG_MONSTERS !== 'undefined' ? ICRPG_MONSTERS : undefined);
   if(src === 'mmrpg') return ok(typeof MMRPG_CHARACTERS !== 'undefined' ? MMRPG_CHARACTERS.filter(function(c){ return String(c.rank).toUpperCase() !== 'X'; }) : undefined);
   if(src === 'gb') return ok(typeof GB_BESTIARY !== 'undefined' ? GB_BESTIARY : undefined);
+  if(src === 'yze') return ok(typeof ALIEN_BESTIARY !== 'undefined' ? ALIEN_BESTIARY : undefined);
   return [];
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
@@ -10257,6 +10273,16 @@ function xsMonSummary(src, m) {
     if(m.goal) out.meta.push(['Goal', m.goal]);
     if(m.tags) out.notes.push(String(m.tags));
     if(m.description) out.notes.push(m.description);
+  } else if(src === 'yze') {
+    // Alien RPG creatures: numeric Health is the HP track; Armor is a static soak,
+    // Speed/Acid are stats, key Skills a line, Stage on the meta line.
+    out.stats.push({ label: 'Health', val: String(m.health ?? '') }, { label: 'Armor', val: String(m.armor ?? '') });
+    if(m.speed) out.stats.push({ label: 'Speed', val: String(m.speed) });
+    if(m.acid && m.acid !== '—') out.stats.push({ label: 'Acid', val: String(m.acid) });
+    if(m.skills && m.skills !== '—') out.lines.push({ label: 'Skills', text: m.skills });
+    if(m.stage) out.meta.push(['Stage', m.stage]);
+    if(m.notes) out.notes.push(m.notes);
+    out.hp = parseInt(m.health, 10) || 1;
   }
   return out;
 }
@@ -11814,7 +11840,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg' || src === 'yze') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -11874,7 +11900,7 @@ window.init_gen = function(root) {
     }
   })();
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind']].forEach(([src, id]) => {
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -12110,9 +12136,9 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster' || activeTab==='yzemonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : '#gen-mmrpgmon-kind';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : src === 'yze' ? '#gen-yzemon-group' : '#gen-mmrpgmon-kind';
       const type=root.querySelector(idBase).value;
       const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
@@ -14159,6 +14185,7 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <script src="/tools-data/mmrpg-traits.js"></script>
 <script src="/tools-data/mmrpg-tags.js"></script>
 <script src="/tools-data/gb-bestiary.js"></script>
+<script src="/tools-data/yze-alien-data.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <!-- PDF.js + the shared reader are loaded on demand by init_rules (first Rulebooks open) — not on every GM Screen load. -->
 <script>
