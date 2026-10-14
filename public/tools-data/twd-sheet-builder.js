@@ -108,15 +108,13 @@
       return prow(t, '', talentDesc(t), talentPick === t, "window.YZEB.pickTalent('" + t.replace(/'/g, "\\'") + "')", talentPick === t ? '✓ Chosen' : 'Choose');
     }).join('') + '</div>';
     h += '<div class="m-lbl" style="margin-top:14px;">Issue <span class="yzeb-sub">(something that complicates you)</span></div>';
-    if (c.issues && c.issues.length) h += '<div class="yzeb-list">' + c.issues.map(function (x, i) {
-      return prow('Issue ' + (i + 1), '', x, issue === x, "window.YZEB.pickIssue(" + i + ")", issue === x ? '✓ Chosen' : 'Choose');
+    h += '<div class="yzeb-list">' + ((c.issues) || []).map(function (x, i) {
+      return prow(x, '', '', issue === x, "window.YZEB.pickIssue(" + i + ")", issue === x ? '✓ Chosen' : 'Choose');
     }).join('') + '</div>';
-    h += '<input class="m-input" style="margin-top:6px;" value="' + esc(issue) + '" placeholder="Choose a suggestion or write your own" oninput="window.YZEB.setIssueText(this.value)">';
     h += '<div class="m-lbl" style="margin-top:14px;">Drive <span class="yzeb-sub">(what keeps you going — once/session, +2)</span></div>';
-    if (c.drives && c.drives.length) h += '<div class="yzeb-list">' + c.drives.map(function (x, i) {
-      return prow('Drive ' + (i + 1), '', x, drive === x, "window.YZEB.pickDrive(" + i + ")", drive === x ? '✓ Chosen' : 'Choose');
+    h += '<div class="yzeb-list">' + ((c.drives) || []).map(function (x, i) {
+      return prow(x, '', '', drive === x, "window.YZEB.pickDrive(" + i + ")", drive === x ? '✓ Chosen' : 'Choose');
     }).join('') + '</div>';
-    h += '<input class="m-input" style="margin-top:6px;" value="' + esc(drive) + '" placeholder="Choose a suggestion or write your own" oninput="window.YZEB.setDriveText(this.value)">';
     return h;
   }
 

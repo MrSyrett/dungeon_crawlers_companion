@@ -208,24 +208,6 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "co_session_prep_builder.html",
     keys: ["co_session"],
   },
-  "yze-character": {
-    id: "yze-character",
-    system: "YZE",
-    systemName: "Alien RPG",
-    kind: "character",
-    label: "Character Sheet",
-    file: "yze_character_sheet.html",
-    keys: ["yze_sheet"],
-  },
-  "yze-session": {
-    id: "yze-session",
-    system: "YZE",
-    systemName: "Alien RPG",
-    kind: "session",
-    label: "Adventure",
-    file: "yze_session_prep_builder.html",
-    keys: ["yze_session"],
-  },
   "mmrpg-character": {
     id: "mmrpg-character",
     system: "MMRPG",
@@ -279,6 +261,24 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     label: "Adventure",
     file: "gb_session_prep_builder.html",
     keys: ["gb_session"],
+  },
+  "yze-character": {
+    id: "yze-character",
+    system: "YZE",
+    systemName: "Alien RPG",
+    kind: "character",
+    label: "Character Sheet",
+    file: "yze_character_sheet.html",
+    keys: ["yze_sheet"],
+  },
+  "yze-session": {
+    id: "yze-session",
+    system: "YZE",
+    systemName: "Alien RPG",
+    kind: "session",
+    label: "Adventure",
+    file: "yze_session_prep_builder.html",
+    keys: ["yze_session"],
   },
   "twd-character": {
     id: "twd-character",
@@ -336,7 +336,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "yze-character", "yze-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "twd-character", "twd-session", "myz-character", "myz-session", "vae-character", "vae-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "yze-character", "yze-session", "twd-character", "twd-session", "myz-character", "myz-session", "vae-character", "vae-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

@@ -277,10 +277,10 @@ const PAGE = String.raw`<!doctype html>
             { key: "D62E", name: "D6 System 2e", cls: "d62e" },
             { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" },
             { key: "CO", name: "Candela Obscura", cls: "co" },
-            { key: "YZE", name: "Alien RPG", cls: "yze" },
             { key: "MMRPG", name: "Marvel Multiverse RPG", cls: "mmrpg" },
             { key: "JLU", name: "Justice League Unlimited", cls: "jlu" },
             { key: "GB", name: "Ghostbusters", cls: "gb" },
+            { key: "YZE", name: "Alien RPG", cls: "yze" },
             { key: "TWD", name: "The Walking Dead", cls: "twd" },
             { key: "MYZ", name: "Mutant: Year Zero", cls: "myz" },
             { key: "VAE", name: "Vaesen", cls: "vae" }
