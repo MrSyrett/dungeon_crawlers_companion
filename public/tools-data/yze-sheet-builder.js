@@ -139,39 +139,47 @@
     h += '<div><div class="m-lbl">Buddy</div><input class="m-input" value="' + esc(buddy) + '" placeholder="A crewmate you trust" oninput="window.YZEB.setBuddy(this.value)"></div>';
     h += '<div><div class="m-lbl">Rival</div><input class="m-input" value="' + esc(rival) + '" placeholder="A crewmate you clash with" oninput="window.YZEB.setRival(this.value)"></div>';
     h += '</div>';
-    h += '<div class="m-lbl" style="margin-top:14px;">Starting cash <span class="yzeb-sub">(W-Y dollars — roll D6×100 for your career)</span></div>';
-    h += '<input class="m-input" value="' + esc(cash) + '" placeholder="e.g. 300" oninput="window.YZEB.setCash(this.value)">';
+    h += '<div class="m-lbl" style="margin-top:14px;">Starting cash <span class="yzeb-sub">(' + esc(cashFormula()) + ' — roll it or take the average)</span></div>';
+    h += '<div class="yzeb-gtabs" style="align-items:center;flex-wrap:wrap;">'
+      + '<button class="builder-chip" onclick="window.YZEB.rollCash()">🎲 Roll</button>'
+      + '<button class="builder-chip" onclick="window.YZEB.avgCash()">Average</button>'
+      + '<input class="m-input" style="max-width:130px;" value="' + esc(cash) + '" placeholder="$" oninput="window.YZEB.setCash(this.value)"></div>';
     return h;
   }
 
-  function gearSources() {
-    return { weap: arr(W.ALIEN_WEAPONS), armor: arr(W.ALIEN_ARMOR), gear: arr(W.ALIEN_GEAR) };
+  // Career starting-cash formula → parsed {n dice, mult}.
+  function cashFormula() { var c = careerObj(career); return (c && c.cashRoll) || 'D6x100'; }
+  function cashParse(f) { var m = String(f || 'D6x100').match(/^(\d*)D6(x100)?$/i); return { n: (m && m[1]) ? parseInt(m[1], 10) : 1, mult: (m && m[2]) ? 100 : 1 }; }
+
+  // Resolve a career starting-gear option name to its compendium entry.
+  function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function resolveItem(name) {
+    var n = normName(name).replace(/^\d+\s+/, '').replace(/^d6\s+(doses|flares)\s*/, '').replace(/^d6\s+/, '');
+    function find(list) {
+      var i, ln, partial = null;
+      for (i = 0; i < list.length; i++) { if (normName(list[i].name) === n) return list[i]; }
+      for (i = 0; i < list.length; i++) { ln = normName(list[i].name); if (ln.indexOf(n) >= 0 || n.indexOf(ln) >= 0) { if (!partial) partial = list[i]; } }
+      return partial;
+    }
+    var w = find(arr(W.ALIEN_WEAPONS)); if (w) return { kind: 'weapon', it: w };
+    var a = find(arr(W.ALIEN_ARMOR)); if (a) return { kind: 'armor', it: a };
+    var g = find(arr(W.ALIEN_GEAR)); if (g) return { kind: 'gear', it: g };
+    return null;
   }
   function stepGear() {
-    var c = careerObj(career), src = gearSources();
-    var h = '';
-    if (c && c.gear) h += '<p class="m-hint"><b style="color:#5fd6ea;">Suggested loadout:</b> ' + esc(c.gear) + '</p>';
-    else h += '<p class="m-hint">Add your starting weapons, armor, and gear. You can tweak everything on the sheet afterward.</p>';
-    if (startGear.length) {
-      h += '<div class="m-lbl">Chosen (' + startGear.length + ')</div><div class="yzeb-list">';
-      h += startGear.map(function (g, i) {
-        var meta = g.kind === 'weapon' ? ('Weapon · ' + (g.damage != null ? g.damage + ' dmg' : '') + (g.range ? ' · ' + g.range : '')) : g.kind === 'armor' ? ('Armor ' + (g.rating != null ? g.rating : '')) : 'Gear';
-        return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + '<span class="brow-cost">' + esc(meta) + '</span></div></div>'
-          + '<button class="brow-add" style="background:#3a1a1a;color:#df8a8a;" onclick="window.YZEB.removeGear(' + i + ')">✕</button></div>';
-      }).join('') + '</div>';
-    }
-    h += '<div class="yzeb-gtabs">'
-      + '<button class="builder-chip' + (gearTab === 'weap' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'weap\')">Weapons</button>'
-      + '<button class="builder-chip' + (gearTab === 'armor' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'armor\')">Armor</button>'
-      + '<button class="builder-chip' + (gearTab === 'gear' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'gear\')">Gear</button></div>';
-    var list = src[gearTab] || [];
-    if (!list.length) { h += '<p class="m-hint" style="margin-top:8px;">Nothing to add here.</p>'; return h; }
-    h += '<div class="yzeb-list" style="margin-top:6px;">' + list.map(function (it, idx) {
-      var meta, desc;
-      if (gearTab === 'weap') { meta = (it.damage != null ? it.damage + ' dmg' : '') + (it.range ? ' · ' + it.range : ''); desc = (it.class ? it.class + ' · ' : '') + 'bonus ' + (it.bonus || '0') + ' · wt ' + (it.weight || '1') + (it.special ? ' · ' + it.special : ''); }
-      else if (gearTab === 'armor') { meta = 'Armor ' + (it.rating != null ? it.rating : ''); desc = ((it.air && it.air !== '—') ? 'Air ' + it.air + ' · ' : '') + 'wt ' + (it.weight || '1') + (it.comment ? ' · ' + it.comment : ''); }
-      else { meta = (it.weight != null && it.weight !== '' ? it.weight + ' wt' : '') + (it.cost ? ' · ' + it.cost : ''); desc = it.effect || it.note || it.desc || ''; }
-      return prow(it.name, meta, desc, false, "window.YZEB.addGear('" + gearTab + "'," + idx + ")", '＋ Add');
+    var c = careerObj(career);
+    if (!c) return '<p class="m-hint">Go back and pick a career first — starting gear comes from it.</p>';
+    var opts = arr(c.startGear);
+    var h = '<p class="m-hint">Choose <b style="color:#5fd6ea;">two</b> items from your career’s starting gear. You can buy more from the Item Store on the sheet afterward. <b>Chosen: ' + startGear.length + '/2</b></p>';
+    if (!opts.length) { h += '<p class="m-hint">This career has no listed starting gear — add items from the Item Store once you finish.</p>'; return h; }
+    h += '<div class="yzeb-list">' + opts.map(function (name, idx) {
+      var chosen = startGear.some(function (g) { return g.optName === name; });
+      var r = resolveItem(name), meta = 'Gear', desc = '';
+      if (r && r.kind === 'weapon') { meta = 'Weapon · ' + (r.it.damage != null ? r.it.damage + ' dmg' : '') + (r.it.range ? ' · ' + r.it.range : ''); desc = (r.it.class ? r.it.class + ' · ' : '') + 'bonus ' + (r.it.bonus || '0') + (r.it.special ? ' · ' + r.it.special : ''); }
+      else if (r && r.kind === 'armor') { meta = 'Armor ' + (r.it.rating != null ? r.it.rating : ''); desc = ((r.it.air && r.it.air !== '—') ? 'Air ' + r.it.air + ' · ' : '') + (r.it.comment || ''); }
+      else if (r && r.kind === 'gear') { meta = (r.it.weight != null && r.it.weight !== '' ? r.it.weight + ' wt' : '') + (r.it.cost ? ' · ' + r.it.cost : ''); desc = r.it.effect || r.it.note || ''; }
+      var full = (!chosen && startGear.length >= 2);
+      return prow(name, meta, desc, chosen, "window.YZEB.toggleStartGear(" + idx + ")", chosen ? '✓ Chosen' : (full ? 'Full' : '＋ Add'));
     }).join('') + '</div>';
     return h;
   }
@@ -185,12 +193,13 @@
   function renderNav() {
     var el = $('yzeb-nav'); if (!el) return;
     var aLeft = ATTR_BUDGET - attrTotal(), sLeft = SKILL_BUDGET - skillSpent();
-    var ready = aLeft === 0 && sLeft >= 0 && !!career && !!talentPick && (!android || androidBonus.length === 2);
+    var ready = aLeft === 0 && sLeft >= 0 && !!career && !!talentPick && (!android || androidBonus.length === 2) && (android || !!signature);
     var msg = '';
     if (step === 1) msg = (aLeft !== 0 ? aLeft + ' attribute points left' : (android && androidBonus.length < 2 ? 'Choose ' + (2 - androidBonus.length) + ' synthetic bonus attribute' + (2 - androidBonus.length === 1 ? '' : 's') : 'Attributes set'));
     else if (step === 2) msg = (sLeft === 0 ? 'Skills set' : sLeft + ' skill points left');
     else if (step === 0 && !career) msg = 'Pick a career';
-    else if (step === 3 && !talentPick) msg = 'Pick a starting talent';
+    else if (step === 3) msg = (!talentPick ? 'Pick a starting talent' : (!android && !signature ? 'Pick a signature item' : ''));
+    else if (step === 4) msg = startGear.length + ' of 2 gear chosen';
     var left = step > 0 ? '<button class="m-btn ghost" onclick="window.YZEB.back()">‹ Back</button>' : '<button class="m-btn ghost" onclick="window.YZEB.close()">Cancel</button>';
     var right = step < STEPS.length - 1
       ? '<button class="m-btn" onclick="window.YZEB.next()">Next ›</button>'
@@ -236,6 +245,8 @@
     setBuddy: function (v) { buddy = v; },
     setRival: function (v) { rival = v; },
     setCash: function (v) { cash = v; },
+    rollCash: function () { var p = cashParse(cashFormula()), n = p.n, sum = 0; for (var i = 0; i < n; i++) sum += 1 + Math.floor(Math.random() * 6); cash = String(sum * p.mult); render(); },
+    avgCash: function () { var p = cashParse(cashFormula()); cash = String(Math.round(p.n * 3.5 * p.mult)); render(); },
     setCareer: function (nm) {
       career = (career === nm) ? '' : nm; talentPick = ''; agenda = ''; signature = '';
       var c = careerObj(career);
@@ -245,15 +256,20 @@
     pickTalent: function (t) { talentPick = (talentPick === t) ? '' : t; render(); },
     pickAgenda: function (idx) { var c = careerObj(career); if (c && c.agendas && c.agendas[idx] != null) { agenda = (agenda === c.agendas[idx]) ? '' : c.agendas[idx]; render(); } },
     pickSig: function (idx) { var c = careerObj(career); if (c && c.signature && c.signature[idx] != null) { signature = (signature === c.signature[idx]) ? '' : c.signature[idx]; render(); } },
-    setGearTab: function (t) { gearTab = t; render(); },
-    addGear: function (kind, idx) {
-      var src = gearSources(); var it = (src[kind] || [])[idx]; if (!it) return;
-      if (kind === 'weap') startGear.push({ kind: 'weapon', name: it.name, bonus: it.bonus || '', damage: it.damage != null ? num(it.damage) : 1, range: it.range || '', ammo: it.ammo || '—', weight: it.weight || '1', skill: it.skill || 'Ranged Combat', equipped: false });
-      else if (kind === 'armor') startGear.push({ kind: 'armor', name: it.name, rating: num(it.rating), air: it.air || '', weight: it.weight || '1', note: it.comment || it.note || '', equipped: false });
-      else startGear.push({ kind: 'gear', name: it.name, weight: it.weight || '1', note: it.effect || it.note || it.desc || '' });
-      render();
+    // Toggle a career starting-gear option (max 2), resolving it to its compendium stats.
+    toggleStartGear: function (idx) {
+      var c = careerObj(career); if (!c) return;
+      var name = arr(c.startGear)[idx]; if (name == null) return;
+      var at = -1; for (var i = 0; i < startGear.length; i++) { if (startGear[i].optName === name) { at = i; break; } }
+      if (at >= 0) { startGear.splice(at, 1); render(); return; }
+      if (startGear.length >= 2) return;
+      var r = resolveItem(name), obj;
+      if (r && r.kind === 'weapon') { var w = r.it; obj = { kind: 'weapon', optName: name, name: w.name, bonus: w.bonus || '', damage: w.damage != null ? num(w.damage) : 1, range: w.range || '', ammo: w.ammo || '—', weight: w.weight || '1', skill: w.skill || 'Ranged Combat', equipped: false }; }
+      else if (r && r.kind === 'armor') { var a = r.it; obj = { kind: 'armor', optName: name, name: a.name, rating: num(a.rating), air: a.air || '', weight: a.weight || '1', note: a.comment || a.note || '', equipped: false }; }
+      else if (r && r.kind === 'gear') { var g = r.it; obj = { kind: 'gear', optName: name, name: g.name, weight: g.weight || '1', note: g.effect || g.note || '' }; }
+      else { obj = { kind: 'gear', optName: name, name: name, weight: '1', note: '' }; }
+      startGear.push(obj); render();
     },
-    removeGear: function (i) { startGear.splice(i, 1); render(); },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
     skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap(nm)) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {
