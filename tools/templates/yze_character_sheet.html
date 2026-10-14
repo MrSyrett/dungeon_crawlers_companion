@@ -661,7 +661,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="tab-panel" id="tab-combat">
         <div class="section-bar"><span>Attacks</span></div>
         <table class="tbl" id="atk-tbl"><thead><tr><th style="width:28%;">Weapon</th><th style="width:11%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:16%;">Range</th><th style="width:16%;">Ammo</th><th style="width:20%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-        <div id="atk-empty" class="tbl-empty">No weapons equipped. Add a weapon on the Gear tab and tap Equip.</div>
+        <div id="atk-empty" class="tbl-empty">No weapons equipped — your Unarmed attack is always available above. Add weapons on the Gear tab and tap Equip.</div>
       </div>
 
       <div class="tab-panel" id="tab-gear">
@@ -997,6 +997,10 @@ function renderAttacks(){
     var ammoCell=esc(am)+(hasAmmo?' <button class="w-roll" style="padding:2px 6px;font-size:9px;margin-left:4px;" title="Roll Supply: each 1 lowers ammo by one" onclick="rollSupply('+i+')">⟳</button>':'');
     tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td>'+ammoCell+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
     body.appendChild(tr); });
+  // Unarmed Attack is always available (Close Combat, base damage 1, Adjacent).
+  var ur=document.createElement('tr');
+  ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Adjacent</td><td>—</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
+  body.appendChild(ur);
   $('atk-empty').style.display=eq.length?'none':'block';
   renderArmorVal();
 }
@@ -1019,7 +1023,8 @@ function updateStoreCash(){ var el=$('store-cash'); if(el) el.textContent='Cash:
 function flashStoreBtn(btn,txt){ if(!btn)return; var o=btn.textContent; btn.textContent=txt; btn.disabled=true; setTimeout(function(){ btn.textContent=o; btn.disabled=false; },800); }
 function pickerPool(kind){
   if(kind==='weap'){
-    var src=isAlien()?ALIEN_WP:WEAPONS;
+    // Unarmed Attack is always available in the Combat tab, so it isn't sold in the store.
+    var src=(isAlien()?ALIEN_WP:WEAPONS).filter(function(w){ return !/^unarmed\b/i.test(w.name||''); });
     var out=src.map(function(w){ return {name:w.name,cost:w.damage+' dmg · '+w.range,note:(isAlien()?(w.class+' · '):('Grip '+w.grip+' · '))+'bonus '+w.bonus+' · wt '+w.weight+(w.special?' · '+w.special:''),price:dollars(w.cost),priceStr:w.cost||'',data:w}; });
     G(window.YZE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:'Homebrew'+(d.bonus?' · bonus '+d.bonus:''),price:dollars(d.cost),priceStr:d.cost||'',data:d}); });
     return out;
@@ -1159,6 +1164,13 @@ function rollAttr(k){
 }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
+  doWeaponAttack(w);
+}
+// The always-available Unarmed Attack: Close Combat, base damage 1, Adjacent.
+function rollUnarmed(){
+  doWeaponAttack({name:'Unarmed',skill:'Close Combat',bonus:'',damage:1,range:'Adjacent'});
+}
+function doWeaponAttack(w){
   var skName=w.skill||'Melee', s=skillObj(skName)||{attr:'STR'};
   var pool=attrVal(s.attr)+num(S.skills[skName])+weaponBonus(w.bonus)-condPenaltyFor(s.attr)-critPenalty();
   var label=(w.name||'Attack')+' · '+skName;
