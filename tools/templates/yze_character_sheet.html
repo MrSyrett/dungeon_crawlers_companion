@@ -234,18 +234,19 @@ body.sheet-locked .edit-only{display:none!important;}
 
 .tbl-empty{padding:12px;font-size:12px;color:var(--muted);}
 .tbl td.inv-details{padding-top:3px;padding-bottom:3px;}
-.inv-details{display:flex;align-items:center;flex-wrap:wrap;gap:2px 4px;}
+.inv-details{display:flex;align-items:center;flex-wrap:nowrap;gap:2px 4px;min-width:0;}
 .inv-details input{width:auto;}
-.inv-details input.cx{width:40px;}
-.inv-details input.inv-rng{width:74px;}
-.inv-details input.inv-note{flex:1 1 90px;min-width:70px;}
+.inv-details input.cx{width:38px;flex:0 0 auto;}
+.inv-details input.inv-rng{flex:1 1 54px;min-width:40px;width:auto;}
+.inv-details input.inv-note{flex:1 1 70px;min-width:50px;}
+.inv-details .inv-mini,.inv-details .inv-type{flex:0 0 auto;}
 .section-bar.cbar{flex-wrap:wrap;row-gap:2px;}
 .section-bar.cbar .hdr-right{margin-left:0;}
 .section-bar.cbar .hdr-btn{padding:3px 7px;font-size:9px;}
 .inv-mini{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6d8489;}
 .inv-type{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--yz-dk);background:var(--yz-lt);border-radius:4px;padding:1px 5px;margin-right:4px;}
-.tbl input.inv-note{min-width:70px;flex:1 1 90px;}
-.tbl input.inv-rng{width:72px;}
+.tbl input.inv-note{min-width:50px;flex:1 1 70px;}
+.tbl input.inv-rng{flex:1 1 54px;min-width:40px;width:auto;}
 .tbl td.eq-cell{text-align:left;padding-left:8px;}
 #atk-body td{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);}
 #atk-body td.atk-name{text-align:left;}
@@ -632,7 +633,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vitals" id="vitals">
         <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
-        <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Sum of equipped armor">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div>
+        <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Evolved Edition: a static soak — subtract this from each hit's damage (no roll)">0</span><span class="inv-mini" style="flex:0 0 auto;">soak · reduces each hit</span></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="Full-auto fire or facing fear raises Stress one step (Machinegunner ignores full-auto)">+1</button></div>
         <div class="vrow alien-only synth-hide"><span class="v-lbl">Resolve</span><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
@@ -951,7 +952,7 @@ function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRat
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating')?num(v):v; scheduleAutosave(); if(f==='weight')renderEnc(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
 function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); scheduleAutosave(); }
-function invIn(i,f,val,cls,ph){ return '<input'+(cls?' class="'+cls+'"':'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
+function invIn(i,f,val,cls,ph,extra){ return '<input'+(cls?' class="'+cls+'"':'')+(extra?' '+extra:'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
 function eqBox(i,on){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="Equip">'; }
 // One combined inventory list — general gear, weapons and armor together, in
 // S.gear order. Weapons & armor carry an equip checkbox; details adapt to kind.
@@ -968,7 +969,7 @@ function renderInventory(){
           +'<span class="inv-mini">bonus</span>'+invIn(i,'bonus',g.bonus,'cx')
           +'<span class="inv-mini">dmg</span>'+invIn(i,'damage',g.damage,'cx')
           +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng')
-          +'<span class="inv-mini">ammo</span>'+invIn(i,'ammo',g.ammo,'cx');
+          +'<span class="inv-mini">ammo</span>'+invIn(i,'ammo',g.ammo,'cx','','data-nolock title="Editable even when the sheet is locked — restock here"');
       } else if(kind==='armor'){
         details='<span class="inv-type">Armor</span>'
           +'<span class="inv-mini">rating</span>'+invIn(i,'rating',g.rating,'cx')
@@ -1205,13 +1206,6 @@ function rollQuick(){
   var n=clamp(num($('tray-mod').value),1,12); $('tray-mod').value='0';
   doPool(n+'d6 free pool', n, false);
 }
-function rollArmor(){
-  var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab','fumble'); return; }
-  var rolls=[]; for(var i=0;i<Math.min(12,r);i++)rolls.push(die6());
-  var c=countPool(rolls);
-  animDice(rolls, [], false);
-  addLog('Armor ('+r+')', c.succ+' blocked', poolStr(rolls)+' · each 6 stops one damage', c.succ?'crit':'fumble');
-}
 // Supply roll (Alien ammo / consumables): roll dice equal to the current rating;
 // each 1 lowers the rating by one. At 0 you're out.
 function rollSupply(i){
@@ -1320,7 +1314,7 @@ var ALIEN_RULES=[
   { title:'Stress Response', text:'When a Stress Die comes up 1, roll D6 + Stress Level − Resolve and read the Stress Response table. This is the small, automatic reaction — not a full Panic.' },
   { title:'Panic', text:'When you face something truly horrifying, the GM calls for a Panic Roll: D6 + Stress Level − Resolve on the Panic table. The higher the total, the worse you break.' },
   { title:'Health & Resolve', text:'Health = ⌈(Strength + Agility) ÷ 2⌉. Resolve = ⌈(Wits + Empathy) ÷ 2⌉ — your Resolve rating is subtracted on Stress Response and Panic rolls. At 0 Health you\'re Broken and roll a Critical Injury.' },
-  { title:'Armor & damage', text:'A hit deals the weapon\'s damage +1 per extra success. When hit, roll base dice equal to your Armor Rating; each 6 stops one point. Air-tight suits also track an Air Supply.' },
+  { title:'Armor & damage', text:'A hit deals the weapon\'s damage +1 per extra success. Armor is a static soak — subtract your Armor Rating from each hit\'s damage (no roll). Armor-piercing attacks count your rating 1 step lower; a called shot at a weak spot takes −2 but knocks the rating down 1 step. Air-tight suits also track an Air Supply.' },
   { title:'Ammo & supply', text:'Ammo and consumables carry a supply rating. When you fire full-auto or the GM calls for it, roll Supply Dice equal to the rating — each 1 lowers the rating by one. Full-auto fire also raises your Stress by one (unless you\'re a Machinegunner).' },
   { title:'Ranges', text:'Adjacent · Short · Medium · Long · Extreme. Each weapon lists the band(s) it can reach; close combat happens at Adjacent.' },
   { title:'Radiation', text:'Each new dose of Radiation calls for a Stamina roll — one success or take a point of damage; heavy doses also force a Critical Injury. Radiation never heals on its own.' },
