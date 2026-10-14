@@ -137,7 +137,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .center-col{flex:1;display:flex;flex-direction:column;min-width:0;gap:14px;}
 .vit-row{display:flex;gap:14px;align-items:stretch;}
 .vit-row>.card{display:flex;flex-direction:column;}
-@media(max-width:860px){.vit-row{flex-direction:column;}.vit-row>.card{flex:0 0 auto!important;}}
+/* Experience + Story Points side by side; Armor/Resolve bubbles beside Health & Stress */
+.xp-sp-row{display:flex;gap:14px;}
+.stat-bubbles{display:flex;flex-direction:column;gap:14px;flex:0 0 132px;}
+.stat-bubbles>.card{flex:1 1 0;display:flex;flex-direction:column;}
+.bubble-val{display:flex;align-items:center;justify-content:center;padding:14px 10px;flex:1;}
+.bubble-val .stress-val{font-size:28px;}
+@media(max-width:860px){.vit-row{flex-direction:column;}.vit-row>.card{flex:0 0 auto!important;}.stat-bubbles{flex-direction:row;flex:0 0 auto;}}
 .push-inline{margin-top:7px;background:var(--yz);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
 .push-inline:hover{filter:brightness(1.1);}
 .blk{padding:10px;}
@@ -236,8 +242,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 body.sheet-locked .edit-only{display:none!important;}
 
 .tbl-empty{padding:12px;font-size:12px;color:var(--muted);}
-.tbl td.inv-details{padding-top:3px;padding-bottom:3px;}
-.inv-details{display:flex;align-items:center;flex-wrap:nowrap;gap:2px 4px;min-width:0;}
+.tbl td.inv-cell{padding-top:3px;padding-bottom:3px;vertical-align:middle;}
+.inv-details{display:flex;align-items:center;flex-wrap:nowrap;gap:2px 4px;min-width:0;width:100%;}
 .inv-details input{width:auto;}
 .inv-details input.cx{width:38px;flex:0 0 auto;}
 .inv-details input.inv-rng{flex:1 1 54px;min-width:40px;width:auto;}
@@ -618,29 +624,43 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="section-bar accent"><span>Attributes &amp; Skills</span></div>
         <div class="attr-skills" id="attr-skills"></div>
       </div>
-      <div class="card">
-        <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button></div>
+      <div class="xp-sp-row">
+        <div class="card" style="flex:1 1 0;min-width:0;">
+          <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button></div>
+        </div>
+        <div class="card alien-only" style="flex:1 1 0;min-width:0;">
+          <div class="xp-row"><span class="v-lbl">Story Pts</span><div class="story-pips" id="story-pips" title="Spend one for an automatic success — hold at most 3"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="spendStoryPoint()">Spend</button></div>
+        </div>
       </div>
       <div class="card">
       <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Ment</button></span></div>
-      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — tap an injury for its effect and to remove it.</div></div>
+      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div></div>
       </div>
     </div>
 
     <div class="center-col">
-      <div class="card hstress">
+      <div class="vit-row">
+      <div class="stat-bubbles">
+        <div class="card">
+          <div class="section-bar accent"><span>Armor</span></div>
+          <div class="blk bubble-val"><span class="stress-val" id="armor-val" title="Evolved Edition: a static soak — subtract this from each hit's damage (no roll)">0</span></div>
+        </div>
+        <div class="card alien-only synth-hide">
+          <div class="section-bar accent"><span>Resolve</span></div>
+          <div class="blk bubble-val"><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
+        </div>
+      </div>
+      <div class="card hstress" style="flex:1 1 0;min-width:0;">
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
         <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
-        <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Evolved Edition: a static soak — subtract this from each hit's damage (no roll)">0</span></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="Full-auto fire or facing fear raises Stress one step (Machinegunner ignores full-auto)">+1</button></div>
-        <div class="vrow alien-only synth-hide"><span class="v-lbl">Resolve</span><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
-        <div class="vrow alien-only"><span class="v-lbl">Story Pts</span><div class="story-pips" id="story-pips" title="Spend one for an automatic success — hold at most 3"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="spendStoryPoint()">Spend</button></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
         <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
+      </div>
       </div>
       </div>
 
@@ -663,7 +683,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="tab-panel" id="tab-combat">
         <div class="section-bar"><span>Attacks</span></div>
         <table class="tbl" id="atk-tbl"><thead><tr><th style="width:28%;">Weapon</th><th style="width:11%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:16%;">Range</th><th style="width:16%;">Ammo</th><th style="width:20%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-        <div id="atk-empty" class="tbl-empty">No weapons equipped — your Unarmed attack is always available above. Add weapons on the Gear tab and tap Equip.</div>
       </div>
 
       <div class="tab-panel" id="tab-gear">
@@ -997,7 +1016,7 @@ function renderInventory(){
       var tr=document.createElement('tr');
       tr.innerHTML='<td class="eq-cell">'+eq+'</td>'
         +'<td>'+invIn(i,'name',g.name,'',ph)+'</td>'
-        +'<td class="inv-details">'+details+'</td>'
+        +'<td class="inv-cell"><div class="inv-details">'+details+'</div></td>'
         +'<td>'+invIn(i,'weight',g.weight,'cx')+'</td>'
         +'<td style="text-align:right;"><button class="row-x" onclick="gDel('+i+')">✕</button></td>';
       body.appendChild(tr);
@@ -1018,7 +1037,7 @@ function renderAttacks(){
   var ur=document.createElement('tr');
   ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Adjacent</td><td>—</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
   body.appendChild(ur);
-  $('atk-empty').style.display=eq.length?'none':'block';
+  { var ae=$('atk-empty'); if(ae) ae.style.display=eq.length?'none':'block'; }
   renderArmorVal();
 }
 function renderWeapons(){ renderInventory(); renderAttacks(); }
