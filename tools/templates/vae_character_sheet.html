@@ -16,8 +16,8 @@
 :root{
   --bg:#e7ddcd;--paper:#f4efe4;--ink:#1a1512;--muted:#6d6156;--rule:#cdc0ae;
   --yz:#cf9b2e;--yz-dk:#7e5c14;--yz-lt:#f3ead6;--gild:#7e5c14;--red:#b23c2f;--green:#2f8f5b;--blue:#35508a;
-  --border:#2a1e1e;--section-hdr:#1a1210;--box:#ece2d3;--input-bg:#fff;--input-border:#b7a992;
-  --log-bg:#120b0a;--log-text:#efe7d9;
+  --border:#2e3645;--section-hdr:#141b26;--box:#ece2d3;--input-bg:#fff;--input-border:#b7a992;
+  --log-bg:#0e1219;--log-text:#efe7d9;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'EB Garamond',sans-serif;background-color:var(--bg);background-image:url("/themes/vae-paper.webp");background-size:cover;background-position:center;background-attachment:fixed;color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
@@ -34,7 +34,7 @@ body{font-family:'EB Garamond',sans-serif;background-color:var(--bg);background-
 .log-title{font-family:'Fraunces',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.14em;color:#f4ece0;}
 .log-clear{background:rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.3);color:#f4ece0;font-family:'Cormorant Garamond',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:6px;}
 .log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
-.log-entry{background:#1a1210;border:1px solid #3a2a2a;border-radius:8px;padding:8px 10px;}
+.log-entry{background:#141b26;border:1px solid #2a3344;border-radius:8px;padding:8px 10px;}
 .log-entry .roll-label{font-family:'Cormorant Garamond',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a89f93;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
 .log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#a89f93;margin-top:3px;line-height:1.4;word-break:break-word;}
@@ -57,29 +57,29 @@ body{font-family:'EB Garamond',sans-serif;background-color:var(--bg);background-
 .lb-actions{margin-top:6px;}
 .log-entry.crit .roll-result{color:#5fd38a;}.log-entry.fumble .roll-result{color:#e0a06f;}
 .log-entry.crit{border-color:#3f9e63;}.log-entry.fumble{border-color:#a06a44;}
-.log-entry.remote{border-left:3px solid #c88a5a;background:#241919;}
+.log-entry.remote{border-left:3px solid #c88a5a;background:#1a2130;}
 .log-hint{color:#3a5257;font-size:11px;font-family:'Cormorant Garamond',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
 .log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #14262a;}
 .log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Cormorant Garamond',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:6px;}
-.log-action-btn.wizard{background:#2a1414;color:#d8cfbf;border:1px solid #5a2424;}
-.log-action-btn.wizard:hover{background:#5a2424;color:#fff;}
-.log-action-btn.rules{background:#182a2e;color:#c3dde3;border:1px solid #3a2a2a;}
+.log-action-btn.wizard{background:#2a2213;color:#e6d9b8;border:1px solid #7e5c14;}
+.log-action-btn.wizard:hover{background:#7e5c14;color:#fff;}
+.log-action-btn.rules{background:#182a2e;color:#c3dde3;border:1px solid #30424a;}
 .log-action-btn.export{background:#1a2733;color:#6aabdf;border:1px solid #1a4a8a;}
-.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
+.log-action-btn.import{background:#20222c;color:#b8bfcc;border:1px solid #39506f;}
 .dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
 .dm-label{font-family:'Cormorant Garamond',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(4,35,42,.75);}
-.dm-toggle-btn{width:36px;height:18px;background:#1f3d43;border:1px solid #3a2a2a;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
-.dm-toggle-btn.on{background:#d8cfbf;border-color:#7a1414;}
+.dm-toggle-btn{width:36px;height:18px;background:#1f3d43;border:1px solid #2e3645;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.dm-toggle-btn.on{background:#d8cfbf;border-color:#7e5c14;}
 .dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:left .2s;}
 .dm-toggle-btn.on::after{left:20px;background:#f4ece0;}
 .dice-tray{border-top:1px solid #14262a;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0b0909;}
 .tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .tray-label{font-family:'Cormorant Garamond',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a89f93;flex-shrink:0;}
-.tray-input{background:#1a1210;border:1px solid #3a2a2a;color:#eee;font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;border-radius:6px;outline:none;width:52px;text-align:center;}
+.tray-input{background:#141b26;border:1px solid #2e3645;color:#eee;font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;border-radius:6px;outline:none;width:52px;text-align:center;}
 .dice-btn{flex:1;padding:8px 0;background:var(--yz);border:1px solid var(--yz-dk);color:#f4ece0;font-family:'Cormorant Garamond',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border-radius:6px;}
 .dice-btn:hover{background:var(--yz-dk);color:#fff;}
-.dice-btn.mini{flex:0 0 auto;padding:8px 10px;background:#182a2e;color:#c3dde3;border-color:#3a2a2a;}
-.dice-btn.mini:hover{background:#3a2a2a;color:#fff;}
+.dice-btn.mini{flex:0 0 auto;padding:8px 10px;background:#182a2e;color:#c3dde3;border-color:#2e3645;}
+.dice-btn.mini:hover{background:#2e3645;color:#fff;}
 
 /* Sheet card */
 .sheet{background:#e9ebf0;border:3px solid var(--border);border-radius:14px;overflow:hidden;max-width:1040px;margin:0 auto;position:relative;box-shadow:0 12px 36px rgba(0,0,0,.22);}
@@ -273,7 +273,7 @@ body.sheet-locked .edit-only{display:none!important;}
 .brow-desc{font-size:11.5px;color:#a9bfc3;line-height:1.4;margin-top:3px;}
 .brow-add{flex-shrink:0;background:var(--yz);color:#f4ece0;border:none;border-radius:6px;padding:6px 11px;font-family:'Cormorant Garamond',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .brow-add:hover{background:#d8cfbf;}
-.brow-add.have{background:transparent;color:#a89f93;border:1px solid #3a2a2a;cursor:default;}
+.brow-add.have{background:transparent;color:#a89f93;border:1px solid #2e3645;cursor:default;}
 .brow-empty{padding:14px 4px;font-size:12px;color:#889;}
 
 /* Toast + modals */
@@ -293,7 +293,7 @@ body.sheet-locked .edit-only{display:none!important;}
 .modal-bd{padding:14px 16px;overflow-y:auto;}
 .m-btn{padding:9px 14px;border:none;border-radius:6px;cursor:pointer;font-family:'Cormorant Garamond',sans-serif;font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--yz);color:#f4ece0;}
 .m-btn:hover{background:var(--yz-dk);color:#fff;}
-.m-btn.ghost{background:#182a2e;color:#cdc;border:1px solid #3a2a2a;}
+.m-btn.ghost{background:#182a2e;color:#cdc;border:1px solid #2e3645;}
 .m-btn.warn{background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;}
 .m-btn:disabled{opacity:.4;cursor:default;}
 .m-hint{font-size:12px;color:#a9bfc3;margin:0 0 12px;line-height:1.5;}
@@ -302,46 +302,48 @@ body.sheet-locked .edit-only{display:none!important;}
 .rules-list h4{font-family:'Cormorant Garamond',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#d8cfbf;margin:12px 0 3px;}
 .rules-list p{font-size:12px;line-height:1.5;color:#ddd;}
 .push-btns{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
-.push-btns button{flex:1;min-width:90px;background:#14262a;border:1px solid #3a2a2a;color:#d8cfbf;border-radius:6px;padding:6px 8px;font-family:'Cormorant Garamond',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;cursor:pointer;}
+.push-btns button{flex:1;min-width:90px;background:#14262a;border:1px solid #2e3645;color:#d8cfbf;border-radius:6px;padding:6px 8px;font-family:'Cormorant Garamond',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;cursor:pointer;}
 .push-btns button:hover{background:var(--yz);color:#f4ece0;}
 .log-entry.push-choice{border-color:var(--yz);}
 
 /* Builder chips */
-.builder-chip{background:#1a1210;border:1px solid #3a2a2a;color:#dde;border-radius:12px;padding:4px 11px;font-family:'Cormorant Garamond',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
+.builder-chip{background:#141b26;border:1px solid #2e3645;color:#dde;border-radius:12px;padding:4px 11px;font-family:'Cormorant Garamond',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
 .builder-chip:hover{border-color:var(--yz);}
-.builder-chip.sel{background:#2a1414;border-color:var(--yz);color:#d8cfbf;}
-.yzeb-steps{display:flex;gap:2px;padding:8px 12px 0;flex-wrap:wrap;border-bottom:1px solid #2a1a18;}
+.builder-chip.sel{background:#1c2740;border-color:var(--yz);color:#d8cfbf;}
+.yzeb-steps{display:flex;gap:2px;padding:8px 12px 0;flex-wrap:wrap;border-bottom:1px solid #1e2636;}
 .yzeb-step{flex:1 1 auto;display:flex;align-items:center;gap:6px;justify-content:center;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;font-family:'Cormorant Garamond',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:7px 6px;white-space:nowrap;}
 .yzeb-step.on{color:var(--yz-dk);border-bottom-color:var(--yz);}
 .yzeb-step.done{color:var(--ink);}
-.yzeb-step-n{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#2a1a18;color:#8b7f72;font-size:10px;}
+.yzeb-step-n{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:#1e2636;color:#8b7f72;font-size:10px;}
 .yzeb-step.on .yzeb-step-n{background:var(--yz);color:#f4ece0;}
 .yzeb-step.done .yzeb-step-n{background:var(--yz-dk);color:#fff;}
-.yzeb-nav{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #2a1a18;}
+.yzeb-nav{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #1e2636;}
 .yzeb-list{display:flex;flex-direction:column;max-height:300px;overflow:auto;}
 .yzeb-chips{display:flex;flex-wrap:wrap;gap:6px;}
 .yzeb-gtabs{display:flex;gap:6px;margin-top:12px;}
 .yzeb-2col{display:flex;gap:12px;flex-wrap:wrap;}
 .yzeb-2col>div{flex:1 1 150px;min-width:0;}
 .yzeb-sub{color:#8b7f72;font-weight:600;text-transform:none;letter-spacing:0;}
-.a-attr{font-family:'Cormorant Garamond',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#d8cfbf;margin-top:8px;border-bottom:1px solid #3a2a2a;padding-bottom:2px;}
+.a-attr{font-family:'Cormorant Garamond',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#d8cfbf;margin-top:8px;border-bottom:1px solid #2e3645;padding-bottom:2px;}
 .a-skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;margin-top:4px;}
 .a-row{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding:1px 0;}
 .a-row .a-name2{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Cormorant Garamond',sans-serif;}
 .a-row .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;text-align:right;min-width:34px;}
-.a-row button{width:24px;height:22px;background:#182a2e;border:1px solid #3a2a2a;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
+.a-row button{width:24px;height:22px;background:#182a2e;border:1px solid #2e3645;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
 .a-row button:disabled{opacity:.3;cursor:default;}
 .adv-xp-bar{display:flex;align-items:center;gap:10px;margin:4px 0 12px;}
 .adv-xp-val{font-family:'Share Tech Mono',monospace;font-size:22px;color:#d8cfbf;min-width:30px;text-align:center;}
 .adv-tln-list{max-height:260px;overflow:auto;padding:2px;}
 
 /* Dark mode */
-body.dark{--bg:#0b0909;--paper:#1a1313;--ink:#e8e1d6;--muted:#a89f93;--rule:#3a2a2a;--border:#3a2a2a;--box:#20201a;--input-bg:#120b0a;--input-border:#3a2a2a;--section-hdr:#120b0a;--yz-lt:#241d12;}
-body.dark .sheet{border-color:#3a2a2a;background:#0e0a0a;}
-body.dark .card{background:#241919;border-color:#3a2a2a;box-shadow:0 2px 8px rgba(0,0,0,.3);}
-body.dark .tabs-bar{background:#1a1313;}
+/* Dark mode uses a cool midnight slate (not the warm red-brown of the horror
+   sheets) to match Vaesen's gold + midnight-blue Nordic identity. */
+body.dark{--bg:#090b10;--paper:#141821;--ink:#e8e1d6;--muted:#9aa2b0;--rule:#2e3645;--border:#2e3645;--box:#1a1f29;--input-bg:#0f131b;--input-border:#2e3645;--section-hdr:#0f131b;--yz-lt:#202a3a;}
+body.dark .sheet{border-color:#2e3645;background:#0b0e14;}
+body.dark .card{background:#1a1f29;border-color:#2e3645;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+body.dark .tabs-bar{background:#151a23;}
 body.dark .section-bar,body.dark .section-bar.accent,body.dark .subhead,body.dark .tab-btn.on,body.dark .hdr-btn,body.dark .attr-row .a-name .key-star{color:#d8cfbf;}
-body.dark .hdr-btn{border-color:#5a2424;}
+body.dark .hdr-btn{border-color:#39506f;}
 body.dark .pip,body.dark .vbox,body.dark .cond{background:var(--input-bg);}
 
 @media(max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
@@ -613,7 +615,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vit-row">
         <div class="card" style="flex:1.25 1 0;min-width:0;">
           <div class="section-bar accent cbar crit-bar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">Mental</button></span></div>
-          <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
+          <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries.</div></div>
         </div>
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent cbar"><span>Conditions</span></div>
@@ -654,7 +656,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-story">
-          <div class="section-bar cbar"><span>Talents</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('talent')">＋ Add</button></span></div>
+          <div class="section-bar cbar"><span>Talents</span></div>
           <div class="tln-list" id="tln-list"></div>
           <div id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet.</div>
           <div class="section-bar"><span>Who You Are</span></div>
@@ -685,7 +687,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button type="button" class="log-clear" id="vtt-open-btn" hidden>VTT</button><button id="lock-toggle" class="log-lock" onclick="toggleSheetLock()" aria-pressed="false" aria-label="Lock or unlock the sheet" title="Sheet locked (fields read-only; rolling works). Click to edit."><span class="lk-ico">🔒</span></button><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2a2a;background:transparent;color:#a89f93;" title="Campaign">Link</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2e3645;background:transparent;color:#a89f93;" title="Campaign">Link</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.YZEB)YZEB.launch();" title="Character Builder">Create</button>
     <button id="level-btn" class="log-action-btn wizard" onclick="openAdvance()" title="Advancement &amp; experience" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
@@ -716,6 +718,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Vaesen — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
+<div id="crit-overlay" class="ov" onclick="if(event.target===this)closeCritInfo()"><div class="modal"><div class="modal-hd"><div class="ttl">Critical Injury</div><button class="x" onclick="closeCritInfo()">✕</button></div><div class="modal-bd" id="crit-info-body"></div></div></div>
 <script>
 // ═══ Vaesen Character Sheet ═════════════════════════════════════════════════
 // Year Zero Engine. Pool of D6 = attribute + skill (+ gear/weapon bonus); each 6
@@ -1077,11 +1080,17 @@ function critDel(i){ S.crits.splice(i,1); renderCrits(); renderAttrSkills(); sch
 function renderCrits(){
   var host=$('crit-list'); if(!host)return; host.innerHTML='';
   (S.crits||[]).forEach(function(c,i){ var el=document.createElement('span'); el.className='cond crit-badge'; el.title=(c.effect||'')+(num(c.mod)?' · pool −'+Math.abs(num(c.mod)):'');
-    el.innerHTML='<span class="cb-i" onclick="event.stopPropagation();critInfo('+i+')" title="details" style="cursor:help;color:var(--yz-dk);font-weight:800;">ⓘ</span><span>'+esc(c.name||'Injury')+'</span>'+(num(c.mod)?'<span style="color:var(--yz-dk);font-weight:800;">−'+Math.abs(num(c.mod))+'</span>':'');
-    el.onclick=function(){ critDel(i); }; host.appendChild(el); });
+    el.innerHTML='<span class="cb-i" style="color:var(--yz-dk);font-weight:800;">ⓘ</span><span>'+esc(c.name||'Injury')+'</span>'+(num(c.mod)?'<span style="color:var(--yz-dk);font-weight:800;">−'+Math.abs(num(c.mod))+'</span>':'');
+    el.onclick=function(){ critInfo(i); }; host.appendChild(el); });
   var e=$('crit-empty'); if(e) e.style.display=(S.crits&&S.crits.length)?'none':'block';
 }
-function critInfo(i){ var c=(S.crits||[])[i]; var d=$('crit-detail'); if(!c||!d)return; var modTxt=num(c.mod)?(' Removes '+Math.abs(num(c.mod))+' dice from matching pools.'):''; d.innerHTML='<b style="color:var(--ink);">'+esc(c.name||'Injury')+'.</b> '+esc(c.effect||'—')+modTxt; }
+function critInfo(i){ var c=(S.crits||[])[i]; if(!c)return; var b=$('crit-info-body'); if(!b)return;
+  var modTxt=num(c.mod)?('<div style="margin-top:10px;font-size:12px;color:#9fb4b8;">Removes '+Math.abs(num(c.mod))+' dice from your pools while this injury is active.</div>'):'';
+  b.innerHTML='<div style="font-weight:800;font-size:17px;color:var(--yz);margin-bottom:8px;">'+esc(c.name||'Injury')+'</div>'
+    +'<div style="font-size:13px;line-height:1.55;">'+(esc(c.effect||'')||'No additional effect recorded.')+'</div>'+modTxt
+    +'<div style="display:flex;gap:8px;margin-top:18px;"><button class="m-btn warn" onclick="critDel('+i+');closeCritInfo();">Remove injury</button><button class="m-btn ghost" onclick="closeCritInfo()">Close</button></div>';
+  var o=$('crit-overlay'); if(o)o.classList.add('open'); }
+function closeCritInfo(){ var o=$('crit-overlay'); if(o)o.classList.remove('open'); }
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
 var _toastTimer=null;
@@ -1154,12 +1163,12 @@ var _campaign=null; var _campaignClientKey='ck-'+Math.random().toString(36).slic
 var CAMPAIGN_SKIP_LABELS=new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Health','Resolve']);
 function campaignPlayerName(){ return ($('f-name').value||'').trim()||'Player'; }
 function campaignUpdateBtn(){
-  if (window.__ddVtt) window.__ddVtt(_campaign);   /* roll-log VTT button follows the campaign link */ var btn=$('campaign-btn'); if(!btn)return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#2a1414'; btn.style.color='#d8cfbf'; btn.style.borderColor='#5a2424'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#a89f93'; btn.style.borderColor='#3a2a2a'; } }
+  if (window.__ddVtt) window.__ddVtt(_campaign);   /* roll-log VTT button follows the campaign link */ var btn=$('campaign-btn'); if(!btn)return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#1c2740'; btn.style.color='#d8cfbf'; btn.style.borderColor='#39506f'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#a89f93'; btn.style.borderColor='#2e3645'; } }
 function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
 function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
 function campaignRenderModal(){
   var body=$('campaign-body');
-  if(_campaign) body.innerHTML='<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0a181c;border:1px solid #5a2424;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#d8cfbf;">'+esc(_campaign.name)+'</div><div style="font-size:11px;color:#a89f93;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">'+esc(_campaign.code)+'</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
+  if(_campaign) body.innerHTML='<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0a181c;border:1px solid #39506f;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#d8cfbf;">'+esc(_campaign.name)+'</div><div style="font-size:11px;color:#a89f93;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">'+esc(_campaign.code)+'</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
   else body.innerHTML='<p class="m-hint">Enter a join code from your GM to connect this sheet. Campaigns are created on the Campaigns page.</p><div class="m-lbl">Join a Campaign</div><div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" class="m-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:.15em;"><button class="m-btn" onclick="campaignJoin()">Join</button></div><div id="campaign-error" style="font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
 }
 function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }

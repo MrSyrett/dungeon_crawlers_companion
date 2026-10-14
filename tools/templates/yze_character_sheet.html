@@ -617,7 +617,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vit-row">
       <div class="card" style="flex:1 1 0;min-width:0;">
       <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Ment</button></span></div>
-      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — each applies its penalty to every roll until you remove it. Tap a badge to remove it, or ⓘ for details.</div><div id="crit-detail" style="padding:4px 10px 2px;font-size:12px;line-height:1.45;color:var(--muted);"></div></div>
+      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — tap an injury for its effect and to remove it.</div></div>
       </div>
 
       <div class="card hstress" style="flex:1.8 1 0;min-width:0;">
@@ -728,6 +728,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Alien RPG — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 <div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
+<div id="crit-overlay" class="ov" onclick="if(event.target===this)closeCritInfo()"><div class="modal"><div class="modal-hd"><div class="ttl">Critical Injury</div><button class="x" onclick="closeCritInfo()">✕</button></div><div class="modal-bd" id="crit-info-body"></div></div></div>
 
 <script>
 // ═══ Year Zero Engine Character Sheet ═══════════════════════════════════════
@@ -1180,16 +1181,20 @@ function renderCrits(){
   (S.crits||[]).forEach(function(c,i){
     var modTxt=num(c.mod)?(' · pool −'+Math.abs(num(c.mod))):'';
     var el=document.createElement('span'); el.className='cond crit-badge'; el.title=(c.effect||'')+modTxt;
-    el.innerHTML='<span class="cb-i" onclick="event.stopPropagation();critInfo('+i+')" title="details" style="cursor:help;color:var(--yz-dk);font-weight:800;">ⓘ</span>'
+    el.innerHTML='<span class="cb-i" style="color:var(--yz-dk);font-weight:800;">ⓘ</span>'
       +'<span>'+esc(c.name||'Injury')+'</span>'+(num(c.mod)?'<span style="color:var(--yz-dk);font-weight:800;">−'+Math.abs(num(c.mod))+'</span>':'');
-    el.onclick=function(){ critDel(i); };
+    el.onclick=function(){ critInfo(i); };
     host.appendChild(el);
   });
   var e=$('crit-empty'); if(e) e.style.display=(S.crits&&S.crits.length)?'none':'block';
 }
-function critInfo(i){ var c=(S.crits||[])[i]; var d=$('crit-detail'); if(!c||!d)return;
-  var modTxt=num(c.mod)?(' Removes '+Math.abs(num(c.mod))+' dice from every pool.'):'';
-  d.innerHTML='<b style="color:var(--ink);">'+esc(c.name||'Injury')+'.</b> '+esc(c.effect||'—')+modTxt; }
+function critInfo(i){ var c=(S.crits||[])[i]; if(!c)return; var b=$('crit-info-body'); if(!b)return;
+  var modTxt=num(c.mod)?('<div style="margin-top:10px;font-size:12px;color:#9fb4b8;">Removes '+Math.abs(num(c.mod))+' dice from your pools while this injury is active.</div>'):'';
+  b.innerHTML='<div style="font-weight:800;font-size:17px;color:var(--yz);margin-bottom:8px;">'+esc(c.name||'Injury')+'</div>'
+    +'<div style="font-size:13px;line-height:1.55;">'+(esc(c.effect||'')||'No additional effect recorded.')+'</div>'+modTxt
+    +'<div style="display:flex;gap:8px;margin-top:18px;"><button class="m-btn warn" onclick="critDel('+i+');closeCritInfo();">Remove injury</button><button class="m-btn ghost" onclick="closeCritInfo()">Close</button></div>';
+  var o=$('crit-overlay'); if(o)o.classList.add('open'); }
+function closeCritInfo(){ var o=$('crit-overlay'); if(o)o.classList.remove('open'); }
 // ── Push option ──
 function clearPushButtons(){ var es=$('log-entries'); if(!es)return; [].forEach.call(es.querySelectorAll('.push-inline'),function(b){ b.remove(); }); }
 // Attach a single "Push" button to the roll's own log bubble (the newest entry).
