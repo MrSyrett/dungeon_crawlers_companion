@@ -96,6 +96,7 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/yze/talents", label: "Talents" },
     { href: "/yze/gear", label: "Gear" },
     { href: "/yze/combat", label: "Combat" },
+    { href: "/yze/alien", label: "Bestiary" },
   ],
   MMRPG: [
     { href: "/mmrpg/origins", label: "Origins" },

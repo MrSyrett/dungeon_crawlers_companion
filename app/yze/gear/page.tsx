@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { ALIEN_ARMOR, ALIEN_WEAPONS, ALIEN_GEAR } from "@/lib/data/yze-alien-data";
+import { ALIEN_ARMOR, ALIEN_WEAPONS, ALIEN_GEAR, ALIEN_VEHICLES, ALIEN_VEHICLE_WEAPONS } from "@/lib/data/yze-alien-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { YzeHeader, SectionH, cardCls, nameCls, hbBadge, type RawQuery } from "@/components/YzeRef";
@@ -186,6 +186,57 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                   <td className="p-2 font-mono text-[var(--muted)]">{a.weight}</td>
                   <td className="p-2 font-mono text-[var(--muted)]">{a.cost}</td>
                   <td className="p-2 text-[var(--muted)]">{a.comment}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Vehicles */}
+      <section className="mt-8">
+        <SectionH>Vehicles</SectionH>
+        <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+          Maneuverability is a modifier to Piloting rolls. Hull is the vehicle&rsquo;s damage track; Armor
+          reduces incoming damage like body armor.
+        </p>
+        <div className={`${tableWrap} mb-6`}>
+          <table className="w-full border-collapse text-[13px]">
+            <thead>
+              <tr className={thRow}><th className="p-2">Vehicle</th><th className="p-2">Pass.</th><th className="p-2">Man.</th><th className="p-2">Spd</th><th className="p-2">Hull</th><th className="p-2">Armor</th><th className="p-2">Cost</th><th className="p-2">Weapons</th></tr>
+            </thead>
+            <tbody>
+              {ALIEN_VEHICLES.map((v) => (
+                <tr key={v.name} className="border-t border-[var(--border)]">
+                  <td className="p-2 font-semibold text-[var(--sys-link)]">{v.name}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{v.passengers}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{v.maneuver}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{v.speed}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{v.hull}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{v.armor}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{v.cost}</td>
+                  <td className="p-2 text-[var(--muted)]">{v.weapons || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <h3 className={hbHead}>Vehicle Weapons</h3>
+        <div className={tableWrap}>
+          <table className="w-full border-collapse text-[13px]">
+            <thead>
+              <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Mod</th><th className="p-2">Dmg</th><th className="p-2">Range</th><th className="p-2">Ammo</th><th className="p-2">Cost</th><th className="p-2">Special</th></tr>
+            </thead>
+            <tbody>
+              {ALIEN_VEHICLE_WEAPONS.map((w) => (
+                <tr key={w.name} className="border-t border-[var(--border)]">
+                  <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}</td>
+                  <td className="p-2 font-mono">{w.bonus}</td>
+                  <td className="p-2 font-mono">{w.damage}</td>
+                  <td className="p-2">{w.range}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{w.ammo}</td>
+                  <td className="p-2 font-mono text-[var(--muted)]">{w.cost}</td>
+                  <td className="p-2 text-[var(--muted)]">{w.special}</td>
                 </tr>
               ))}
             </tbody>

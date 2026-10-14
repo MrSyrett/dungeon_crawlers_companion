@@ -260,6 +260,61 @@ var ALIEN_GEAR = [
   { name: "Beer and Booze", category: "Food & Drink", weight: "¼", cost: "$5–$500", effect: "Stress Level −1. Each dose beyond the first in the same shift gives −1 die to all skill rolls until the end of the shift." }
 ];
 
+// Bestiary (Evolved Edition ch.10). acid = Acid Splash rating (Xenomorph XX121 only).
+var ALIEN_BESTIARY = [
+  // Xenomorph XX121
+  { name: "Ovomorph (Egg)", group: "Xenomorph XX121", stage: "Stage I", speed: "0", health: "2", skills: "—", armor: "0", acid: "4", notes: "Releases its Facehugger when a non-android host comes within Short range (roll a stress die each round) or disturbs it at Adjacent (Mobility to avoid). Essentially a vat of acid; fire sterilizes it, extreme cold makes it dormant." },
+  { name: "The Queen's Egg", group: "Xenomorph XX121", stage: "Stage I", speed: "0", health: "3", skills: "—", armor: "1 (0 vs fire)", acid: "5", notes: "A hardier egg laid directly by a Queen; carries a Royal Facehugger." },
+  { name: "Facehugger", group: "Xenomorph XX121", stage: "Stage II", speed: "2", health: "2", skills: "Mobility 8 · Observation 7", armor: "1 (0 vs fire)", acid: "4", notes: "Leaps for the face to implant an embryo. D6 attacks: Skittering Menace, Tail Grapple, Face Grapple, then The Final Embrace (implants; armor/helmet no help except the APEsuit). Destroyed at 0 Health (no crit)." },
+  { name: "Praeto-Facehugger", group: "Xenomorph XX121", stage: "Stage II", speed: "2", health: "2", skills: "Mobility 6 · Observation 7", armor: "1 (0 vs fire)", acid: "4", notes: "A slightly larger, less dexterous Facehugger; otherwise identical. Produces a P. praepotens." },
+  { name: "Royal Facehugger", group: "Xenomorph XX121", stage: "Stage II", speed: "2", health: "3", skills: "Mobility 8 · Observation 8", armor: "2 (1 vs fire)", acid: "5", notes: "Armored royal variety with serrated fingertips and a bladed tail; produces Queens." },
+  { name: "Chestburster", group: "Xenomorph XX121", stage: "Stage III", speed: "2", health: "2", skills: "Mobility 8 · Observation 4", armor: "0", acid: "4", notes: "Bursts from (and kills) the host, then flees to hide and feed on metals before molting to Stage IV within a shift. D6 attacks: Escape, Terrorizing Hiss, Leg Slash, Throat Bite. Destroyed at 0 Health." },
+  { name: "Bambi Burster", group: "Xenomorph XX121", stage: "Stage III", speed: "2", health: "2", skills: "Mobility 10 · Observation 4", armor: "0", acid: "4", notes: "A faster Chestburster variant." },
+  { name: "Imp", group: "Xenomorph XX121", stage: "Stage III", speed: "2", health: "2", skills: "Mobility 8 · Observation 6", armor: "0", acid: "4", notes: "Immature Praetomorph; on emergence it may mimic the actions of a nearby creature. Matures much faster than a normal Chestburster." },
+  { name: "Queenburster", group: "Xenomorph XX121", stage: "Stage III", speed: "2", health: "3", skills: "Mobility 8 · Observation 8", armor: "1 (0 vs fire)", acid: "5", notes: "An embryonic Queen; gestates over days and is born with a partial crest, both sets of arms and legs." },
+  { name: "Drone", group: "Xenomorph XX121", stage: "Stage IV", speed: "2", health: "7", skills: "Mobility 8 · Observation 8", armor: "2 (1 vs fire)", acid: "8", notes: "Stealthy ambush hunter (\"Lurker\"). Silent Assassin: −2 dice to Observation rolls to spot it in stealth mode. Shared Stage IV D6 attacks include Hypnotizing Gaze and Headbite (kills on a hit)." },
+  { name: "Scout", group: "Xenomorph XX121", stage: "Stage IV", speed: "2", health: "5", skills: "Mobility 10 · Observation 10", armor: "2 (1 vs fire)", acid: "8", notes: "Fast \"Runner\" that seeks hosts and secures a hive; has no dorsal tubes. Can be tricked into running into hazards." },
+  { name: "Stalker", group: "Xenomorph XX121", stage: "Stage IV", speed: "2", health: "9", skills: "Mobility 9 · Observation 6", armor: "2", acid: "8", notes: "Praetomorph (P. linesteres); no Queen stage. Feral Hunger: on a damaging attack it immediately makes a second (free) attack on the same target." },
+  { name: "Soldier (Warrior)", group: "Xenomorph XX121", stage: "Stage V", speed: "2", health: "8", skills: "Mobility 8 · Observation 8", armor: "2 (1 vs fire)", acid: "10", notes: "Adult form of the Drone; works in groups and carries prey back to the hive. Its tail barb can inject a toxin." },
+  { name: "Worker (Weaver)", group: "Xenomorph XX121", stage: "Stage V", speed: "1", health: "4", skills: "Mobility 4 · Observation 4", armor: "1 (0 vs fire)", acid: "6", notes: "Builds and maintains the hive; non-aggressive and easy to take down, offering little resistance." },
+  { name: "Sentry", group: "Xenomorph XX121", stage: "Stage V", speed: "2", health: "8", skills: "Mobility 12 · Observation 10", armor: "2 (1 vs fire)", acid: "10", notes: "Adult form of the Scout; a fast wall-and-ceiling climber that will sacrifice itself to protect the Queen." },
+  { name: "Praetorian", group: "Xenomorph XX121", stage: "Stage VI", speed: "2", health: "12", skills: "Mobility 5 · Observation 8", armor: "3 (1 vs fire)", acid: "10", notes: "Royal Guard and army commander that coordinates Soldiers; can molt into a new Queen if the hive loses one. Killing it briefly disorients the Soldiers it leads." },
+  { name: "Crusher (Charger)", group: "Xenomorph XX121", stage: "Stage VI", speed: "1", health: "20", skills: "Mobility 4 · Observation 5", armor: "5 (3 vs fire) front · 3 (1 vs fire) elsewhere", acid: "10", notes: "Bloated quadrupedal battering ram that plows through light vehicles; poor at climbing or jumping. Charge: 8 base dice, damage 4, armor piercing — can be dodged but not defended against." },
+  { name: "Queen", group: "Xenomorph XX121", stage: "Stage VI", speed: "2", health: "18", skills: "Mobility 6* · Observation 12", armor: "4 (2 vs fire)", acid: "10", notes: "Mother of the hive (6 m or more). Lays eggs via ovipositor and commands the hive through pheromones and subsonics. *Mobility 0 while attached to the egg cocoon. Charge: 8 base dice, damage 2, armor piercing." },
+  // Neomorph
+  { name: "Neomorphic Egg Sac", group: "Neomorph", stage: "Stage I", speed: "0", health: "—", skills: "—", armor: "—", acid: "—", notes: "A bulbous fungal pod; when disturbed it releases a cloud of Neomorphic Motes. Destroyed by severe cold." },
+  { name: "Neomorphic Motes", group: "Neomorph", stage: "Stage II", speed: "—", health: "—", skills: "—", armor: "—", acid: "—", notes: "A synchronized swarm of microscopic parasites that enter a host through an orifice or wound. Infection is a disease (virulence −2); on a failed Stamina roll the host reaches Stage III within one shift. Avoid smoke; killed by fire." },
+  { name: "Neomorphic Bloodburster", group: "Neomorph", stage: "Stage III", speed: "3", health: "2", skills: "Mobility 9 · Observation 5", armor: "0", acid: "—", notes: "Bursts from (and kills) the host, then flies into a rage. D6 attacks: Escape, Terrifying Hiss, Leg Bite, Throat Bite. Grows into a Juvenile within a few stretches." },
+  { name: "Neophyte (Juvenile Neomorph)", group: "Neomorph", stage: "Stage IV", speed: "3", health: "4", skills: "Mobility 10 · Observation 6", armor: "1 (0 vs fire)", acid: "—", notes: "An aggressive pack hunter on all fours. So focused when attacking that it ignores damage to itself until critical; becomes an Adult after one shift." },
+  { name: "Adult Neomorph", group: "Neomorph", stage: "Stage V", speed: "2", health: "6", skills: "Mobility 9 · Observation 8", armor: "1 (0 vs fire)", acid: "—", notes: "A gaunt, eyeless stealth hunter with a protruding inner jaw. D6 attacks: Terrifying Hiss, Tail Slash, Deadly Grab, Leaping Attack, Tail Spike, Throat Bite. Short-lived — burns out within about 24 hours." },
+  // Other extra-solar species
+  { name: "Harvester", group: "Other Species", stage: "", speed: "1", health: "15", skills: "Mobility 4", armor: "5 (2 on the underbelly)", acid: "—", notes: "A behemoth subterranean omnivore (6 m or more). Hidden Behemoth: rests just under the surface and ambushes anyone who walks over it. D6 attacks include Sonar Pulse (stun), Charge, Stampede and Pulverize (instant death). Hit the soft underbelly." },
+  { name: "Harvester Juvenile", group: "Other Species", stage: "", speed: "1", health: "4", skills: "Mobility 8", armor: "1", acid: "—", notes: "A mother carries up to 2D6 young under her armor; they leap to her defense, rolling four base dice, base damage 1." },
+  { name: "Lion Worm", group: "Other Species", stage: "", speed: "2", health: "8", skills: "Mobility 10 · Observation 8", armor: "1", acid: "—", notes: "Golden-cilia apex ambush predator of Zagreus that burrows through soft earth. Ambush Predator: prey gets −2 dice to Observation to spot it in stealth. D6 attacks include Acrid Pheromones (stun) and Death Roll." },
+  { name: "Scorpionid", group: "Other Species", stage: "", speed: "1 land · 3 water", health: "5", skills: "land: Mobility 6 · Observation 6 — water: Mobility 10 · Observation 10", armor: "1 (0 vs firearms)", acid: "—", notes: "A desert/cavern arthropod carnivore of Tanaka 5 and an adept swimmer. Tail Strike poisons (disease, virulence −2); Immobilize inflicts an Impaled Thigh crit. Shells stop melee but not bullets." },
+  { name: "The Swarm", group: "Other Species", stage: "", speed: "1 per zone", health: "5 per zone", skills: "—", armor: "Impervious except fire, explosions and electricity", acid: "—", notes: "\"Space locusts\" — a Swarm's Speed equals the number of zones it covers and its Health is 5× that; it cannot be killed, only driven off. D6 attacks include Suffocating Swarm (stun), Feeding Frenzy and Stripped To The Bone (12 base dice, armor piercing)." }
+];
+
+// Vehicles (Evolved Edition, Gear & Tech)
+var ALIEN_VEHICLES = [
+  { name: "Daihotai Series 8×8 Tractor", passengers: "4", maneuver: "—", speed: "2", hull: "6", armor: "3", cost: "$17,000", weapons: "" },
+  { name: "Weyland NR-9 Series ATV", passengers: "1", maneuver: "+2", speed: "2", hull: "2", armor: "1", cost: "$3,000", weapons: "" },
+  { name: "M577 Armored Personnel Carrier", passengers: "13", maneuver: "+1", speed: "3", hull: "8", armor: "5", cost: "$500,000", weapons: "Phased Plasma Pulse Cannon Turret; 20 mm Gatling Gun Turret" },
+  { name: "Aerodyne Automotive Gyrocar", passengers: "5", maneuver: "+3", speed: "3", hull: "4", armor: "1", cost: "$40,000", weapons: "" },
+  { name: "UD-4L Cheyenne VTOL Dropship", passengers: "15", maneuver: "+2", speed: "4", hull: "10", armor: "4", cost: "$3,100,000", weapons: "25 mm Gatling Gun; Mk.16 Banshee 70 Rocket Launcher; 7× Hellhound II Missiles; 3× Headlock Air-to-Air Missiles" },
+  { name: "WY-37B Cargo Lifter Transport Sled", passengers: "3", maneuver: "−1", speed: "3", hull: "12", armor: "2", cost: "$800,000", weapons: "" }
+];
+
+var ALIEN_VEHICLE_WEAPONS = [
+  { name: "20 mm Gatling Gun", bonus: "+1", damage: "4", range: "Medium–Long", ammo: "6", cost: "$7,500", special: "Armor piercing, full auto" },
+  { name: "25 mm Gatling Gun", bonus: "+1", damage: "4", range: "Medium–Extreme", ammo: "6", cost: "$9,000", special: "Armor piercing, full auto" },
+  { name: "Phased Plasma Pulse Cannon Turret", bonus: "−1", damage: "6", range: "Medium–Extreme", ammo: "5", cost: "$54,000", special: "Armor piercing" },
+  { name: "Multi-Directional Flame Unit", bonus: "—", damage: "3", range: "Short–Medium", ammo: "4", cost: "$4,200", special: "Fire effect" },
+  { name: "Mk.16 Banshee 70 Rocket Launcher", bonus: "—", damage: "3", range: "Medium–Long", ammo: "3", cost: "$48,000", special: "Explosive, full auto" },
+  { name: "AGM-220C Hellhound II Tactical Missile", bonus: "+1", damage: "8", range: "Long–Extreme", ammo: "Single-shot", cost: "$76,000", special: "Armor piercing; missile $12,000 each" },
+  { name: "AIM-90E Headlock Air-to-Air Missile", bonus: "+2", damage: "6", range: "Long–Extreme", ammo: "Single-shot", cost: "$64,000", special: "Armor piercing; missile $9,000 each" }
+];
+
 if (typeof window !== "undefined") {
   window.ALIEN_SKILLS = ALIEN_SKILLS;
   window.ALIEN_CAREERS = ALIEN_CAREERS;
@@ -268,4 +323,7 @@ if (typeof window !== "undefined") {
   window.ALIEN_ARMOR = ALIEN_ARMOR;
   window.ALIEN_TRAITS = ALIEN_TRAITS;
   window.ALIEN_GEAR = ALIEN_GEAR;
+  window.ALIEN_BESTIARY = ALIEN_BESTIARY;
+  window.ALIEN_VEHICLES = ALIEN_VEHICLES;
+  window.ALIEN_VEHICLE_WEAPONS = ALIEN_VEHICLE_WEAPONS;
 }
