@@ -21,7 +21,8 @@
 
   var step = 0;
   var name = '', pronouns = '', key = '', career = '', talentPick = '';
-  var agenda = '', signature = '';
+  var agenda = '', signature = '', buddy = '', rival = '', cash = '';
+  var android = false, androidBonus = [];   // Synthetic: up to 2 attribute keys that gain +3
   var attrs = {}, skills = {}, startGear = [], gearTab = 'weap';
 
   function careerObj(nm) { for (var i = 0; i < CAREERS.length; i++) if (CAREERS[i].name === nm) return CAREERS[i]; return null; }
@@ -32,13 +33,15 @@
 
   function reset() {
     step = 0; name = ''; pronouns = ''; key = ''; career = ''; talentPick = '';
-    agenda = ''; signature = ''; startGear = []; gearTab = 'weap';
+    agenda = ''; signature = ''; buddy = ''; rival = ''; cash = ''; android = false; androidBonus = [];
+    startGear = []; gearTab = 'weap';
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
     skills = {}; ASK.forEach(function (s) { skills[s.name] = 0; });
   }
   function attrTotal() { var n = 0; ATTRS.forEach(function (a) { n += attrs[a.key]; }); return n; }
   function skillSpent() { var n = 0; ASK.forEach(function (s) { n += skills[s.name]; }); return n; }
   function attrMax(k) { return key === k ? 5 : 4; }
+  function attrEff(k) { return attrs[k] + (androidBonus.indexOf(k) >= 0 ? 3 : 0); }
 
   var ov;
   function ensure() {
@@ -71,6 +74,11 @@
     h += '<div><div class="m-lbl">Name</div><input class="m-input" value="' + esc(name) + '" placeholder="Character name" oninput="window.YZEB.setName(this.value)"></div>';
     h += '<div><div class="m-lbl">Pronouns</div><input class="m-input" value="' + esc(pronouns) + '" placeholder="they / she / he …" oninput="window.YZEB.setPronouns(this.value)"></div>';
     h += '</div>';
+    h += '<div class="m-lbl" style="margin-top:14px;">Character type</div>';
+    h += '<div class="yzeb-gtabs">'
+      + '<button class="builder-chip' + (!android ? ' sel' : '') + '" onclick="window.YZEB.setAndroid(false)">Human</button>'
+      + '<button class="builder-chip' + (android ? ' sel' : '') + '" onclick="window.YZEB.setAndroid(true)">Synthetic</button></div>';
+    if (android) h += '<p class="m-hint" style="margin-top:4px;">Synthetics add +3 to two attributes (next step), can’t push, have no Stress or Panic, and carry no signature item.</p>';
     h += '<div class="m-lbl" style="margin-top:14px;">Career <span class="yzeb-sub">(sets your key attribute)</span></div>';
     h += '<div class="yzeb-list">' + CAREERS.map(function (c) {
       return prow(c.name, 'Key ' + c.key, c.skills.join(' · '), career === c.name, "window.YZEB.setCareer('" + c.name.replace(/'/g, "\\'") + "')", career === c.name ? '✓ Chosen' : 'Choose');
@@ -82,9 +90,17 @@
     var aLeft = ATTR_BUDGET - attrTotal();
     var h = '<p class="m-hint">Distribute <b style="color:#5fd6ea;">14</b> attribute points — each starts at 2; your key attribute ★ may reach 5, the rest 4. <b>Remaining: ' + aLeft + '</b></p>';
     h += '<div class="a-skills" style="grid-template-columns:1fr;">' + ATTRS.map(function (a) {
-      var v = attrs[a.key];
-      return stepper(a.name + (key === a.key ? ' ★' : ''), v, "window.YZEB.attr('" + a.key + "',-1)", "window.YZEB.attr('" + a.key + "',1)", v <= 2, v >= attrMax(a.key) || aLeft <= 0);
+      var v = attrs[a.key], bonus = androidBonus.indexOf(a.key) >= 0;
+      var label = a.name + (key === a.key ? ' ★' : '') + (bonus ? ' +3 → ' + attrEff(a.key) : '');
+      return stepper(label, v, "window.YZEB.attr('" + a.key + "',-1)", "window.YZEB.attr('" + a.key + "',1)", v <= 2, v >= attrMax(a.key) || aLeft <= 0);
     }).join('') + '</div>';
+    if (android) {
+      h += '<p class="m-hint" style="margin-top:10px;">Synthetic bonus: choose <b style="color:#5fd6ea;">two</b> attributes to gain <b>+3</b> (beyond the normal caps). <b>Chosen: ' + androidBonus.length + '/2</b></p>';
+      h += '<div class="yzeb-gtabs">' + ATTRS.map(function (a) {
+        var on = androidBonus.indexOf(a.key) >= 0;
+        return '<button class="builder-chip' + (on ? ' sel' : '') + '" onclick="window.YZEB.androidPlus(\'' + a.key + '\')">' + esc(a.name) + (on ? ' +3' : '') + '</button>';
+      }).join('') + '</div>';
+    }
     return h;
   }
   function stepSkills() {
@@ -111,15 +127,25 @@
     h += '<div class="yzeb-list">' + (c.agendas || []).map(function (a, idx) {
       return prow(a, '', '', agenda === a, "window.YZEB.pickAgenda(" + idx + ")", agenda === a ? '✓ Chosen' : 'Choose');
     }).join('') + '</div>';
-    h += '<div class="m-lbl" style="margin-top:14px;">Signature item</div>';
-    h += '<div class="yzeb-list">' + (c.signature || []).map(function (s, idx) {
-      return prow(s, '', '', signature === s, "window.YZEB.pickSig(" + idx + ")", signature === s ? '✓ Chosen' : 'Choose');
-    }).join('') + '</div>';
+    if (!android) {
+      h += '<div class="m-lbl" style="margin-top:14px;">Signature item</div>';
+      h += '<div class="yzeb-list">' + (c.signature || []).map(function (s, idx) {
+        return prow(s, '', '', signature === s, "window.YZEB.pickSig(" + idx + ")", signature === s ? '✓ Chosen' : 'Choose');
+      }).join('') + '</div>';
+    } else {
+      h += '<p class="m-hint" style="margin-top:14px;">Synthetics have no signature item.</p>';
+    }
+    h += '<div class="yzeb-2col" style="margin-top:14px;">';
+    h += '<div><div class="m-lbl">Buddy</div><input class="m-input" value="' + esc(buddy) + '" placeholder="A crewmate you trust" oninput="window.YZEB.setBuddy(this.value)"></div>';
+    h += '<div><div class="m-lbl">Rival</div><input class="m-input" value="' + esc(rival) + '" placeholder="A crewmate you clash with" oninput="window.YZEB.setRival(this.value)"></div>';
+    h += '</div>';
+    h += '<div class="m-lbl" style="margin-top:14px;">Starting cash <span class="yzeb-sub">(W-Y dollars — roll D6×100 for your career)</span></div>';
+    h += '<input class="m-input" value="' + esc(cash) + '" placeholder="e.g. 300" oninput="window.YZEB.setCash(this.value)">';
     return h;
   }
 
   function gearSources() {
-    return { weap: arr(W.ALIEN_WEAPONS), armor: arr(W.ALIEN_ARMOR), gear: arr(W.YZE_GEAR) };
+    return { weap: arr(W.ALIEN_WEAPONS), armor: arr(W.ALIEN_ARMOR), gear: arr(W.ALIEN_GEAR) };
   }
   function stepGear() {
     var c = careerObj(career), src = gearSources();
@@ -144,7 +170,7 @@
       var meta, desc;
       if (gearTab === 'weap') { meta = (it.damage != null ? it.damage + ' dmg' : '') + (it.range ? ' · ' + it.range : ''); desc = (it.class ? it.class + ' · ' : '') + 'bonus ' + (it.bonus || '0') + ' · wt ' + (it.weight || '1') + (it.special ? ' · ' + it.special : ''); }
       else if (gearTab === 'armor') { meta = 'Armor ' + (it.rating != null ? it.rating : ''); desc = ((it.air && it.air !== '—') ? 'Air ' + it.air + ' · ' : '') + 'wt ' + (it.weight || '1') + (it.comment ? ' · ' + it.comment : ''); }
-      else { meta = (it.weight != null && it.weight !== '' ? it.weight + ' wt' : ''); desc = it.note || it.desc || ''; }
+      else { meta = (it.weight != null && it.weight !== '' ? it.weight + ' wt' : '') + (it.cost ? ' · ' + it.cost : ''); desc = it.effect || it.note || it.desc || ''; }
       return prow(it.name, meta, desc, false, "window.YZEB.addGear('" + gearTab + "'," + idx + ")", '＋ Add');
     }).join('') + '</div>';
     return h;
@@ -159,9 +185,9 @@
   function renderNav() {
     var el = $('yzeb-nav'); if (!el) return;
     var aLeft = ATTR_BUDGET - attrTotal(), sLeft = SKILL_BUDGET - skillSpent();
-    var ready = aLeft === 0 && sLeft >= 0 && !!career && !!talentPick;
+    var ready = aLeft === 0 && sLeft >= 0 && !!career && !!talentPick && (!android || androidBonus.length === 2);
     var msg = '';
-    if (step === 1) msg = (aLeft === 0 ? 'Attributes set' : aLeft + ' attribute points left');
+    if (step === 1) msg = (aLeft !== 0 ? aLeft + ' attribute points left' : (android && androidBonus.length < 2 ? 'Choose ' + (2 - androidBonus.length) + ' synthetic bonus attribute' + (2 - androidBonus.length === 1 ? '' : 's') : 'Attributes set'));
     else if (step === 2) msg = (sLeft === 0 ? 'Skills set' : sLeft + ' skill points left');
     else if (step === 0 && !career) msg = 'Pick a career';
     else if (step === 3 && !talentPick) msg = 'Pick a starting talent';
@@ -190,7 +216,10 @@
           if (S.career) career = S.career;
           if (S.agenda) agenda = S.agenda;
           if (S.signature) signature = S.signature;
-          ATTRS.forEach(function (a) { if (S.attrs && S.attrs[a.key] != null) attrs[a.key] = Math.max(2, num(S.attrs[a.key])); });
+          if (S.android) android = !!S.android;
+          if (S.buddy) buddy = S.buddy; if (S.rival) rival = S.rival; if (S.cash != null) cash = S.cash;
+          // Clamp to the base cap so an edited Synthetic drops its baked-in +3 (re-picked below).
+          ATTRS.forEach(function (a) { if (S.attrs && S.attrs[a.key] != null) attrs[a.key] = Math.min(attrMax(a.key), Math.max(2, num(S.attrs[a.key]))); });
           ASK.forEach(function (s) { if (S.skills && S.skills[s.name] != null) skills[s.name] = num(S.skills[s.name]); });
         }
       } catch (e) { reset(); }
@@ -202,6 +231,11 @@
     back: function () { if (step > 0) { step--; render(); } },
     setName: function (v) { name = v; },
     setPronouns: function (v) { pronouns = v; },
+    setAndroid: function (v) { android = !!v; if (!android) { androidBonus = []; } else { signature = ''; } render(); },
+    androidPlus: function (k) { if (!android) return; var i = androidBonus.indexOf(k); if (i >= 0) androidBonus.splice(i, 1); else { if (androidBonus.length >= 2) return; androidBonus.push(k); } render(); },
+    setBuddy: function (v) { buddy = v; },
+    setRival: function (v) { rival = v; },
+    setCash: function (v) { cash = v; },
     setCareer: function (nm) {
       career = (career === nm) ? '' : nm; talentPick = ''; agenda = ''; signature = '';
       var c = careerObj(career);
@@ -214,9 +248,9 @@
     setGearTab: function (t) { gearTab = t; render(); },
     addGear: function (kind, idx) {
       var src = gearSources(); var it = (src[kind] || [])[idx]; if (!it) return;
-      if (kind === 'weap') startGear.push({ kind: 'weapon', name: it.name, bonus: it.bonus || '', damage: it.damage != null ? num(it.damage) : 1, range: it.range || '', weight: it.weight || '1', skill: it.skill || 'Ranged Combat', equipped: false });
-      else if (kind === 'armor') startGear.push({ kind: 'armor', name: it.name, rating: num(it.rating), weight: it.weight || '1', note: it.comment || it.note || '', equipped: false });
-      else startGear.push({ kind: 'gear', name: it.name, weight: it.weight || '1', note: it.note || it.desc || '' });
+      if (kind === 'weap') startGear.push({ kind: 'weapon', name: it.name, bonus: it.bonus || '', damage: it.damage != null ? num(it.damage) : 1, range: it.range || '', ammo: it.ammo || '—', weight: it.weight || '1', skill: it.skill || 'Ranged Combat', equipped: false });
+      else if (kind === 'armor') startGear.push({ kind: 'armor', name: it.name, rating: num(it.rating), air: it.air || '', weight: it.weight || '1', note: it.comment || it.note || '', equipped: false });
+      else startGear.push({ kind: 'gear', name: it.name, weight: it.weight || '1', note: it.effect || it.note || it.desc || '' });
       render();
     },
     removeGear: function (i) { startGear.splice(i, 1); render(); },
@@ -224,9 +258,10 @@
     skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap(nm)) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {
       var d = { name: name, pronouns: pronouns, key: key, variant: 'alien', career: career, attrs: {}, skills: {} };
-      ATTRS.forEach(function (a) { d.attrs[a.key] = attrs[a.key]; });
+      ATTRS.forEach(function (a) { d.attrs[a.key] = attrs[a.key] + (androidBonus.indexOf(a.key) >= 0 ? 3 : 0); });
       ASK.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
-      d.agenda = agenda; d.signature = signature;
+      d.android = android; d.buddy = buddy; d.rival = rival; d.cash = cash;
+      d.agenda = agenda; d.signature = android ? '' : signature;
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
       if (startGear.length) d.gear = startGear.map(function (g) { return g; });
       try { applySheet(d); } catch (e) {}

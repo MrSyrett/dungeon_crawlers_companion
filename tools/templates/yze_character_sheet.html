@@ -428,6 +428,12 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 /* ── Variant: YZE SRD vs ALIEN ── */
 body[data-variant="alien"] .yze-only{display:none !important;}
 body:not([data-variant="alien"]) .alien-only{display:none !important;}
+/* Synthetic (Android) reconfiguration: no Stress, no Panic, no signature item */
+body.synthetic .synth-hide{display:none !important;}
+/* Story Points (round pips, max 3) */
+.story-pips{display:flex;gap:5px;flex:0 0 auto;}
+.sp-pip{width:20px;height:20px;border:2px solid var(--rule);border-radius:50%;cursor:pointer;background:#fff;padding:0;}
+.sp-pip.on{background:var(--yz);border-color:var(--yz-dk);}
 /* Stress track (Alien mode) */
 .stress-row{display:flex;align-items:center;gap:8px;}
 .stress-pips{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 auto;}
@@ -628,10 +634,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
         <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Sum of equipped armor">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
-        <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div></div>
-        <div class="vrow alien-only"><span class="v-lbl">Resolve</span><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
+        <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="Full-auto fire or facing fear raises Stress one step (Machinegunner ignores full-auto)">+1</button></div>
+        <div class="vrow alien-only synth-hide"><span class="v-lbl">Resolve</span><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
+        <div class="vrow alien-only"><span class="v-lbl">Story Pts</span><div class="story-pips" id="story-pips" title="Spend one for an automatic success — hold at most 3"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="spendStoryPoint()">Spend</button></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
-        <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
+        <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
       </div>
       </div>
       </div>
@@ -654,7 +661,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="tab-panel" id="tab-combat">
         <div class="section-bar"><span>Attacks</span></div>
-        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:36%;">Weapon</th><th style="width:12%;">Bonus</th><th style="width:10%;">Dmg</th><th style="width:20%;">Range</th><th style="width:22%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
+        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:28%;">Weapon</th><th style="width:11%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:16%;">Range</th><th style="width:16%;">Ammo</th><th style="width:20%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
         <div id="atk-empty" class="tbl-empty">No weapons equipped. Add a weapon on the Gear tab and tap Equip.</div>
       </div>
 
@@ -669,13 +676,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="section-bar alien-only"><span>Talents</span></div>
         <div class="tln-list alien-only" id="tln-list"></div>
         <div class="alien-only" id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Your career offers three — pick one at creation.</div>
-        <div class="section-bar alien-only"><span>Agenda &amp; Signature</span></div>
+        <div class="section-bar alien-only"><span>Agenda, Ties &amp; Fortune</span></div>
         <div class="blk alien-only" style="padding-top:2px;">
-          <div class="fld"><label>Personal agenda</label><input type="text" id="f-agenda" placeholder="Your secret goal — only you know it"></div>
-          <div class="fld"><label>Signature item</label><input type="text" id="f-signature" placeholder="The one thing you'd never leave behind"></div>
+          <div class="fld"><label>Personal agenda<span class="hint">Advance it for a Story Point (cinematic) or bonus XP</span></label><input type="text" id="f-agenda" placeholder="Your secret goal — only you know it" oninput="S.agenda=this.value;scheduleAutosave()"></div>
+          <div class="fld synth-hide"><label>Signature item<span class="hint">Once per session, interact to reduce Stress by 1</span></label><input type="text" id="f-signature" placeholder="The one thing you'd never leave behind" oninput="S.signature=this.value;scheduleAutosave()"></div>
+          <div class="fld"><label>Buddy<span class="hint">The crewmate you trust</span></label><input type="text" id="f-buddy" placeholder="Someone you'd take a risk for" oninput="S.buddy=this.value;scheduleAutosave()"></div>
+          <div class="fld"><label>Rival<span class="hint">The crewmate you clash with</span></label><input type="text" id="f-rival" placeholder="A source of drama aboard" oninput="S.rival=this.value;scheduleAutosave()"></div>
+          <div class="fld"><label>Cash<span class="hint">W-Y dollars</span></label><input type="text" id="f-cash" placeholder="e.g. 300" oninput="S.cash=this.value;scheduleAutosave()"></div>
         </div>
-        <div class="section-bar"><span>Story</span></div>
-        <div class="blk" id="traits-blk"></div>
+        <div class="section-bar yze-only"><span>Story</span></div>
+        <div class="blk yze-only" id="traits-blk"></div>
         <div class="section-bar"><span>Relationships</span><span class="hdr-right"><button class="hdr-btn" onclick="addRelRow()">＋ Add</button></span></div>
         <div class="blk" style="padding-top:2px;"><div id="relationships"></div></div>
         <div class="blk" style="padding-top:0;"><div class="fld"><label>Appearance</label><textarea id="f-appearance" rows="2"></textarea></div></div>
@@ -756,7 +766,11 @@ function syncVariant(){
   SKILLS = isAlien()?ALIEN_SK:BASE_SKILLS;
   TRAITS = isAlien()?ALIEN_TR:BASE_TRAITS;
   try{ document.body.dataset.variant = isAlien()?'alien':'yze'; }catch(e){}
+  // Synthetic (Android) mode reconfigures the sheet: no Stress/Panic, no signature,
+  // and pushing is disabled. A body class drives the CSS (.synth-hide).
+  try{ document.body.classList.toggle('synthetic', !!(S && S.android)); }catch(e){}
 }
+function isAndroid(){ return !!(S && S.android); }
 var ATTR_KEYS=ATTRS.map(function(a){return a.key;});
 function skillsByAttr(k){ return SKILLS.filter(function(s){return s.attr===k;}); }
 function skillObj(name){ return SKILLS.find(function(s){return s.name===name;}); }
@@ -767,10 +781,10 @@ function itemWeight(w){ w=String(w||'1'); if(w==='—'||w==='-'||w==='')return 0
 var S=null;
 var _lastRoll=null;   // for the push option on the newest roll
 function blankState(){
-  var st={ name:'',archetype:'',pronouns:'',key:'',variant:'alien',career:'',
+  var st={ name:'',archetype:'',pronouns:'',key:'',variant:'alien',career:'', android:false,
     attrs:{STR:2,AGI:2,WITS:2,EMP:2}, skills:{},
-    health:{max:0,dmg:0}, resolve:{max:0,dmg:0}, stress:0, radiation:0,
-    conditions:{}, xp:0, armor:0, weapons:[], gear:[], crits:[], talents:[], agenda:'', signature:'',
+    health:{max:0,dmg:0}, resolve:{max:0,dmg:0}, stress:0, radiation:0, storyPoints:0, cash:'',
+    conditions:{}, xp:0, armor:0, weapons:[], gear:[], crits:[], talents:[], agenda:'', signature:'', buddy:'', rival:'',
     traits:{}, relationships:[], appearance:'', notes:'' };
   // seed every skill name from BOTH variants so switching modes never loses data
   BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ if(st.skills[s.name]==null) st.skills[s.name]=0; });
@@ -783,14 +797,20 @@ function condPenaltyFor(attrKey){
   var type=(attrKey==='STR'||attrKey==='AGI')?'Physical':'Mental';
   var n=0; CONDS.forEach(function(c){ if(c.type===type && S.conditions[c.name]) n++; }); return n;
 }
+// Count how many times a (stackable) talent is held, capped at its max of 3.
+function talentCount(name){ var n=0; (S&&S.talents||[]).forEach(function(t){ if(t&&t.name===name)n++; }); return Math.min(3,n); }
 function derivedMax(which){
-  // Alien (Evolved Edition): Health = ⌈(Str+Agi)/2⌉ (Hardened talent can raise it).
-  // Generic YZE: (Str+Agi)/2 +1. Resolve damage track (yze-only) = (Wits+Emp)/2 +1.
-  if(which==='health') return isAlien()? Math.ceil((attrVal('STR')+attrVal('AGI'))/2) : Math.ceil((attrVal('STR')+attrVal('AGI'))/2)+1;
+  // Alien (Evolved Edition): Health = ⌈(Str+Agi)/2⌉, raised +1 per rank of the
+  // Hardened talent (up to +3). Generic YZE: (Str+Agi)/2 +1. Resolve damage
+  // track (yze-only) = (Wits+Emp)/2 +1.
+  if(which==='health') return isAlien()? Math.ceil((attrVal('STR')+attrVal('AGI'))/2)+talentCount('Hardened') : Math.ceil((attrVal('STR')+attrVal('AGI'))/2)+1;
   return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2)+1;
 }
-// Alien Evolved Resolve RATING — a static derived score, subtracted on Stress & Panic rolls.
-function resolveRating(){ return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2); }
+// Alien Evolved Resolve RATING — a static derived score, subtracted on Stress &
+// Panic rolls. Raised +1 per rank of the Seen It All talent (up to +3).
+function resolveRating(){ return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2)+talentCount('Seen It All'); }
+// Recompute the Health track's max from attributes + Hardened, keeping damage in range.
+function syncHealthMax(){ var m=derivedMax('health'); S.health.max=m; if(S.health.dmg>m)S.health.dmg=m; renderVitals(); }
 
 // ── Render: attributes with their skills nested underneath ──
 function renderAttrSkills(){
@@ -830,14 +850,30 @@ function renderVitals(){
   $('broken-tag').classList.toggle('hide',!broken);
   var ba=$('broken-tag-a'); if(ba) ba.classList.toggle('hide',!broken);
   var rr=$('resolve-rating'); if(rr) rr.textContent=resolveRating();
-  renderStress(); renderRadiation();
+  renderStress(); renderRadiation(); renderStoryPoints();
+}
+// Story Points: a cinematic-play meta currency (max 3). Spend one for an
+// automatic success. Available to synthetics too — it is not tied to Stress.
+function renderStoryPoints(){
+  var host=$('story-pips'); if(!host)return; var sp=clamp(num(S.storyPoints),0,3), pips='';
+  for(var i=1;i<=3;i++){ pips+='<button class="sp-pip'+(i<=sp?' on':'')+'" onclick="setStoryPoints('+i+')" title="story point '+i+'"></button>'; }
+  host.innerHTML=pips;
+}
+function setStoryPoints(n){ S.storyPoints=(num(S.storyPoints)===n)?n-1:n; if(S.storyPoints<0)S.storyPoints=0; renderStoryPoints(); scheduleAutosave(); }
+function spendStoryPoint(){
+  if(num(S.storyPoints)<1){ addLog('Story Point','—','None to spend — advance your agenda to earn one (max 3)','normal'); return; }
+  S.storyPoints=num(S.storyPoints)-1; renderStoryPoints(); scheduleAutosave();
+  addLog('Story Point spent','Automatic success','Count a roll as succeeding, add +1 success, or activate a talent — '+S.storyPoints+' left','crit');
 }
 function renderRadiation(){
   var host=$('rad-boxes'); if(!host)return; var r=clamp(num(S.radiation),0,10), b='';
   for(var i=1;i<=10;i++){ b+='<button class="vbox rad'+(i<=r?' on':'')+'" onclick="setRad('+i+')" title="radiation '+i+'"></button>'; }
   host.innerHTML=b;
 }
-function setRad(n){ S.radiation=(num(S.radiation)===n)?n-1:n; if(S.radiation<0)S.radiation=0; renderRadiation(); scheduleAutosave(); }
+function setRad(n){ var prev=num(S.radiation); S.radiation=(prev===n)?n-1:n; if(S.radiation<0)S.radiation=0; renderRadiation(); scheduleAutosave();
+  if(S.radiation>prev){ addLog('Radiation','Level '+S.radiation,'Each new dose: roll Stamina — one 6 or you take a point of damage; at higher Radiation Levels, also roll a Critical Injury.','fumble'); } }
+// Full-auto fire and facing fear both raise Stress one step (Machinegunner ignores full-auto).
+function stressUp(){ bumpStress(1); addLog('Stress','Level '+clamp(num(S.stress),0,10),'+1 step — full-auto fire or facing fear','fumble'); }
 function renderStress(){
   var host=$('stress-pips'); if(!host)return; var s=clamp(num(S.stress),0,10), pips='';
   for(var i=1;i<=10;i++){ pips+='<button class="spip'+(i<=s?' on':'')+'" onclick="setStress('+i+')" title="stress '+i+'">'+i+'</button>'; }
@@ -884,7 +920,7 @@ function tlnDel(i){ S.talents.splice(i,1); renderTalents(); scheduleAutosave(); 
 // ── Career (Alien) ──
 function keyName(k){ for(var i=0;i<ATTRS.length;i++){ if(ATTRS[i].key===k)return ATTRS[i].name; } return ''; }
 function renderKeyDisp(){ var el=$('f-key-disp'); if(el) el.textContent=keyName(S.key)||'—'; }
-function renderCareerDisp(){ var el=$('f-career-disp'); if(el) el.textContent=S.career||'—'; }
+function renderCareerDisp(){ var el=$('f-career-disp'); if(el) el.textContent=(S.career||'—')+(S.android?' · Synthetic':''); }
 function renderCareer(){
   var note=$('career-note'); if(!note)return;
   var c=careerObj(S.career);
@@ -932,10 +968,12 @@ function renderInventory(){
         details='<span class="inv-type">Weapon</span>'
           +'<span class="inv-mini">bonus</span>'+invIn(i,'bonus',g.bonus,'cx')
           +'<span class="inv-mini">dmg</span>'+invIn(i,'damage',g.damage,'cx')
-          +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng');
+          +'<span class="inv-mini">rng</span>'+invIn(i,'range',g.range,'inv-rng')
+          +'<span class="inv-mini">ammo</span>'+invIn(i,'ammo',g.ammo,'cx');
       } else if(kind==='armor'){
         details='<span class="inv-type">Armor</span>'
           +'<span class="inv-mini">rating</span>'+invIn(i,'rating',g.rating,'cx')
+          +'<span class="inv-mini">air</span>'+invIn(i,'air',g.air,'cx')
           +invIn(i,'note',g.note,'inv-note','note');
       } else {
         details=invIn(i,'note',g.note,'inv-note','note');
@@ -957,7 +995,9 @@ function renderAttacks(){
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
   eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
-    tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
+    var am=(w.ammo!=null&&w.ammo!=='')?w.ammo:'—', hasAmmo=!isNaN(parseInt(am,10));
+    var ammoCell=esc(am)+(hasAmmo?' <button class="w-roll" style="padding:2px 6px;font-size:9px;margin-left:4px;" title="Roll Supply: each 1 lowers ammo by one" onclick="rollSupply('+i+')">⟳</button>':'');
+    tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td>'+ammoCell+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
     body.appendChild(tr); });
   $('atk-empty').style.display=eq.length?'none':'block';
   renderArmorVal();
@@ -985,12 +1025,12 @@ function pickerPool(kind){
   }
   if(kind==='armor'){
     var ar=[], srcA=G(window.YZE_ARMOR).length?G(window.YZE_ARMOR):ALIEN_AR;
-    srcA.forEach(function(a){ ar.push({name:a.name,cost:'Armor '+(a.rating!=null?a.rating:''),note:a.note||(((a.air&&a.air!=='—')?'Air '+a.air+' · ':'')+'wt '+(a.weight||'1')+(a.comment?' · '+a.comment:'')),data:{name:a.name,rating:a.rating,weight:a.weight||'1',note:a.note||a.comment||''}}); });
+    srcA.forEach(function(a){ ar.push({name:a.name,cost:'Armor '+(a.rating!=null?a.rating:''),note:a.note||(((a.air&&a.air!=='—')?'Air '+a.air+' · ':'')+'wt '+(a.weight||'1')+(a.comment?' · '+a.comment:'')),data:{name:a.name,rating:a.rating,air:a.air||'',weight:a.weight||'1',note:a.note||a.comment||''}}); });
     G(window.YZE_HB_ARMOR).forEach(function(d){ ar.push({name:d.name,cost:'Armor '+(d.rating!=null?d.rating:''),note:'Homebrew'+(d.note?' · '+d.note:''),data:{name:d.name,rating:d.rating,weight:d.weight||'1',note:d.note||''}}); });
     return ar;
   }
   var g=[];
-  G(window.YZE_GEAR).forEach(function(d){ g.push({name:d.name,cost:(d.weight!=null&&d.weight!==''?d.weight+' wt':''),note:d.note||'',data:{name:d.name,weight:d.weight,note:d.note}}); });
+  G(isAlien()?window.ALIEN_GEAR:window.YZE_GEAR).forEach(function(d){ var nt=d.effect||d.note||''; g.push({name:d.name,cost:(d.weight!=null&&d.weight!==''?d.weight+' wt':'')+(d.cost?' · '+d.cost:''),note:nt+(d.supply?' · '+d.supply:''),data:{name:d.name,weight:d.weight,note:nt}}); });
   G(window.YZE_HB_GEAR).forEach(function(d){ g.push({name:d.name,cost:d.weight?d.weight+' wt':'',note:'Homebrew'+(d.desc?' · '+d.desc:''),data:d}); });
   return g;
 }
@@ -1023,14 +1063,14 @@ function renderPicker(){
 var _pkRows=[];
 function pickAdd(idx){
   var x=_pkRows[idx]; if(!x)return;
-  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.weight||'1',skill:w.skill||(isAlien()?'Ranged Combat':'Melee')}); renderWeapons(); setTab('gear'); }
-  else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'1',note:a.note||''}); renderInventory(); setTab('gear'); }
+  if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',ammo:w.ammo||'—',weight:w.weight||'1',skill:w.skill||(isAlien()?'Ranged Combat':'Melee')}); renderWeapons(); setTab('gear'); }
+  else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),air:a.air||'',weight:a.weight||'1',note:a.note||''}); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else { var d=x.data||{}; S.gear.push({kind:'gear',name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}); renderGear(); setTab('gear'); }
   scheduleAutosave(); renderPicker();
 }
 function addCustomFromPicker(){
-  if(_pk==='weap'){ S.gear.push({kind:'weapon',equipped:false,name:'',grip:isAlien()?'':'1H',bonus:'',damage:1,range:'Engaged',weight:'1',skill:isAlien()?'Ranged Combat':'Melee'}); renderWeapons(); setTab('gear'); }
+  if(_pk==='weap'){ S.gear.push({kind:'weapon',equipped:false,name:'',grip:isAlien()?'':'1H',bonus:'',damage:1,range:isAlien()?'Adjacent':'Engaged',ammo:'—',weight:'1',skill:isAlien()?'Ranged Combat':'Melee'}); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ S.gear.push({kind:'armor',equipped:false,name:'',rating:0,weight:'1',note:''}); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ S.talents.push({name:'',note:''}); renderTalents(); setTab('story'); }
   else { S.gear.push({kind:'gear',name:'',weight:'1',note:''}); renderGear(); setTab('gear'); }
@@ -1043,7 +1083,7 @@ function countPool(rolls){ var s=0,b=0; rolls.forEach(function(v){ if(v===6)s++;
 function tierOf(succ){ if(succ>=2) return {t:'SUCCESS ×'+succ,type:'crit'}; if(succ===1) return {t:'SUCCESS',type:'crit'}; return {t:'FAILURE',type:'fumble'}; }
 // Stress dice roll in their own colour so the extra risk dice read at a glance.
 // (Alien's Stress Dice are the yellow ones.)
-var STRESS_DIE_COLOR='#cc2b2b';
+var STRESS_DIE_COLOR='#e8c23a';
 // Hand the exact dice to the 3D animation: base dice in the player's colour,
 // stress dice in STRESS_DIE_COLOR, and glow RED only on the bad state (a 1 on a
 // stress die). Ordinary success/failure no longer glows — that is every roll.
@@ -1068,7 +1108,7 @@ function onBad(label){ rollStressResponse(label); }
 function rollDicePool(baseSize){
   var base=[]; for(var i=0;i<baseSize;i++)base.push(die6());
   var stress=[], ones=0;
-  if(isAlien()){ var lvl=clamp(num(S.stress),0,10); for(var k=0;k<lvl;k++){ var d=die6(); stress.push(d); if(d===1)ones++; } }
+  if(isAlien() && !isAndroid()){ var lvl=clamp(num(S.stress),0,10); for(var k=0;k<lvl;k++){ var d=die6(); stress.push(d); if(d===1)ones++; } }
   return { base:base, stress:stress, all:base.concat(stress), stressOnes:ones };
 }
 function poolDetail(r, floored){
@@ -1151,6 +1191,18 @@ function rollArmor(){
   animDice(rolls, [], false);
   addLog('Armor ('+r+')', c.succ+' blocked', poolStr(rolls)+' · each 6 stops one damage', c.succ?'crit':'fumble');
 }
+// Supply roll (Alien ammo / consumables): roll dice equal to the current rating;
+// each 1 lowers the rating by one. At 0 you're out.
+function rollSupply(i){
+  var w=S.gear[i]; if(!w)return;
+  var rating=parseInt(w.ammo,10);
+  if(isNaN(rating)||rating<=0){ addLog('Supply · '+(w.name||'Weapon'),'—','No ammo supply rating to roll','normal'); return; }
+  var rolls=[],ones=0; for(var k=0;k<Math.min(12,rating);k++){ var d=die6(); rolls.push(d); if(d===1)ones++; }
+  var nr=Math.max(0,rating-ones); w.ammo=String(nr);
+  animDice(rolls,[],ones>0?'fumble':'normal');
+  addLog('Supply · '+(w.name||'Weapon'), nr+(ones?'  (−'+ones+')':'  (no loss)'), poolStr(rolls)+' · each 1 lowers supply by one'+(nr===0?' · OUT OF AMMO':''), ones?'fumble':'normal');
+  renderInventory(); renderAttacks(); scheduleAutosave();
+}
 function rollCrit(kind){
   var table=(kind==='phys')?CRITP:CRITM;
   if(!table || !table.length){ addLog((kind==='phys'?'Physical':'Mental')+' Crit','—','No critical-injury table for this system','normal'); return; }
@@ -1200,6 +1252,7 @@ function clearPushButtons(){ var es=$('log-entries'); if(!es)return; [].forEach.
 // Attach a single "Push" button to the roll's own log bubble (the newest entry).
 function showPushOption(){
   if(!_lastRoll)return;
+  if(isAndroid())return;   // Synthetics can't push.
   clearPushButtons();
   var entries=$('log-entries'); var top=entries.querySelector('.log-entry'); if(!top)return;
   var b=document.createElement('button'); b.className='push-inline'; b.textContent='Push';
@@ -1236,9 +1289,27 @@ function setTab(name){
 function setDefaultTab(){ var t='combat'; try{ t=localStorage.getItem('yze_tab')||'combat'; }catch(e){} if(!$('tab-'+t))t='combat'; setTab(t); }
 
 // ── Rules ──
+// Alien Evolved Edition quick rules. Kept inline (not in shared YZE_RULES, which
+// the SRD/TWD sheets use) so Alien's Stress-Dice / Stress-Response / Push wording
+// is correct here without changing the other variants.
+var ALIEN_RULES=[
+  { title:'Dice pool', text:'Roll a number of D6 equal to the attribute plus the skill (plus any gear bonus). Each 6 is a success — one success means you make it, and each extra success adds a bonus (in combat, +1 damage).' },
+  { title:'Stress Dice', text:'Your Stress Level adds that many yellow Stress Dice to every roll. They can score successes too — but a 1 on any Stress Die triggers a Stress Response, and you can\'t push a roll that shows one.' },
+  { title:'Pushing', text:'Failed and no Stress Die showed a 1? Push: re-roll every die that isn\'t already a 6, keeping your successes. Pushing raises your Stress Level by one (adding another Stress Die to the re-roll). You can push once. Synthetics can never push.' },
+  { title:'Stress Response', text:'When a Stress Die comes up 1, roll D6 + Stress Level − Resolve and read the Stress Response table. This is the small, automatic reaction — not a full Panic.' },
+  { title:'Panic', text:'When you face something truly horrifying, the GM calls for a Panic Roll: D6 + Stress Level − Resolve on the Panic table. The higher the total, the worse you break.' },
+  { title:'Health & Resolve', text:'Health = ⌈(Strength + Agility) ÷ 2⌉. Resolve = ⌈(Wits + Empathy) ÷ 2⌉ — your Resolve rating is subtracted on Stress Response and Panic rolls. At 0 Health you\'re Broken and roll a Critical Injury.' },
+  { title:'Armor & damage', text:'A hit deals the weapon\'s damage +1 per extra success. When hit, roll base dice equal to your Armor Rating; each 6 stops one point. Air-tight suits also track an Air Supply.' },
+  { title:'Ammo & supply', text:'Ammo and consumables carry a supply rating. When you fire full-auto or the GM calls for it, roll Supply Dice equal to the rating — each 1 lowers the rating by one. Full-auto fire also raises your Stress by one (unless you\'re a Machinegunner).' },
+  { title:'Ranges', text:'Adjacent · Short · Medium · Long · Extreme. Each weapon lists the band(s) it can reach; close combat happens at Adjacent.' },
+  { title:'Radiation', text:'Each new dose of Radiation calls for a Stamina roll — one success or take a point of damage; heavy doses also force a Critical Injury. Radiation never heals on its own.' },
+  { title:'Critical injuries', text:'Broken by damage → roll D66 on the physical Critical Injuries table. A lethal crit forces a Stamina death save each time its time limit passes until it\'s treated.' },
+  { title:'Story Points', text:'Advance your personal Agenda to earn a Story Point (hold at most 3). Spend one to count a roll as an automatic success, add +1 success, or trigger a talent. Cinematic play runs on Story Points; campaign play earns XP.' },
+  { title:'Experience', text:'In campaign play, gain XP at the end of a session for taking part, exploring somewhere new, surviving real danger, and acting on your Agenda, Buddy or Rival. Spend 5 × the new level to raise a skill, or 5 XP to learn a talent from your career or the General list.' }
+];
 function openRules(){
-  var R=G(window.YZE_RULES);
-  var h='<p class="m-hint">ALIEN runs on the Year Zero Engine — D6 dice pools where each 6 is a success. Your Stress Level adds Stress Dice to every roll; a 1 on a Stress Die forces a Panic Roll and blocks pushing.</p>';
+  var R=ALIEN_RULES;
+  var h='<p class="m-hint">ALIEN runs on the Year Zero Engine — D6 dice pools where each 6 is a success. Your Stress Level adds yellow Stress Dice to every roll; a 1 on a Stress Die triggers a Stress Response (not a Panic) and blocks pushing.</p>';
   h+=R.map(function(q){ return '<p><b>'+esc(q.title)+'.</b> '+esc(q.text)+'</p>'; }).join('');
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
 }
@@ -1257,9 +1328,9 @@ function refreshWizardButtons(){ var built=hasCharacter(), c=$('build-btn'), l=$
 // purchase made this session can be undone (with − / ✕) before you hit Done.
 var _advSnap=null;
 function openAdvance(){
-  _advSnap={ skills:{}, talentNames:{} };
+  _advSnap={ skills:{}, talentCounts:{} };
   BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ _advSnap.skills[s.name]=num(S.skills[s.name]); });
-  (S.talents||[]).forEach(function(t){ if(t&&t.name)_advSnap.talentNames[t.name]=1; });
+  (S.talents||[]).forEach(function(t){ if(t&&t.name)_advSnap.talentCounts[t.name]=(_advSnap.talentCounts[t.name]||0)+1; });
   renderAdvance(); $('advance-overlay').classList.add('open');
 }
 function closeAdvance(){ $('advance-overlay').classList.remove('open'); _advSnap=null; }
@@ -1289,27 +1360,39 @@ function renderAdvance(){
     }).join('');
     h+='</div>';
   });
-  h+='<div class="m-lbl" style="margin-top:14px;">Talents</div>';
-  var owned={}, added=[]; (S.talents||[]).forEach(function(t){ if(t&&t.name){ owned[t.name]=1; if(!(_advSnap&&_advSnap.talentNames[t.name])) added.push(t.name); } });
+  h+='<div class="m-lbl" style="margin-top:14px;">Talents <span class="yzeb-sub" style="text-transform:none;letter-spacing:0;">— '+esc(S.career||'your career')+' &amp; General</span></div>';
+  // Count-based: Hardened / Seen It All stack up to 3; everything else is once.
+  var STACK={ 'Hardened':3, 'Seen It All':3 };
+  var cur={}; (S.talents||[]).forEach(function(t){ if(t&&t.name)cur[t.name]=(cur[t.name]||0)+1; });
+  var base=(_advSnap&&_advSnap.talentCounts)||{};
+  var added=[]; Object.keys(cur).forEach(function(n){ var extra=cur[n]-(base[n]||0); for(var k=0;k<extra;k++)added.push(n); });
   if(added.length){
     h+='<div class="m-hint" style="margin:0 0 4px;color:#5fd6ea;">Learned this session — ✕ to undo:</div>';
-    h+='<div class="adv-tln-list">'+added.map(function(n){ var t=talentOf(n)||{};
-      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(n)+'<span class="brow-cost">'+esc(t.career||'')+'</span></div>'
+    h+='<div class="adv-tln-list">'+added.map(function(n){ var t=talentOf(n)||{}; var rk=STACK[n]?' (rank '+cur[n]+')':'';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(n)+esc(rk)+'<span class="brow-cost">'+esc(t.career||'')+'</span></div>'
         +(t.desc?'<div class="brow-desc">'+esc(t.desc)+'</div>':'')+'</div><button class="brow-add" style="background:#3a1a1a;color:#df8a8a;" onclick="undoTalent(\''+n.replace(/'/g,"\\'")+'\')">✕ Undo</button></div>'; }).join('')+'</div>';
   }
-  var avail=ALIEN_TL.filter(function(t){ return t&&t.name&&!owned[t.name]; });
+  // Pool: only talents from the character's own career or the General list.
+  // Stackable talents stay available until maxed; others drop once owned.
+  var avail=ALIEN_TL.filter(function(t){
+    if(!t||!t.name) return false;
+    if(t.career!=='General' && t.career!==S.career) return false;
+    var cap=STACK[t.name];
+    if(cap) return (cur[t.name]||0)<cap;
+    return !cur[t.name];
+  });
   h+='<div class="m-hint" style="margin:8px 0 4px;">Available:</div>';
-  if(!avail.length){ h+='<p class="m-hint" style="margin:0;">You have every talent.</p>'; }
-  else { h+='<div class="adv-tln-list">'+avail.map(function(t){ var can=xp>=TALENT_XP;
-      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(t.name)+'<span class="brow-cost">'+esc(t.career||'')+' · '+TALENT_XP+' XP</span></div>'
+  if(!avail.length){ h+='<p class="m-hint" style="margin:0;">No more talents available for this career.</p>'; }
+  else { h+='<div class="adv-tln-list">'+avail.map(function(t){ var can=xp>=TALENT_XP; var cap=STACK[t.name], rk=cap?(' · rank '+((cur[t.name]||0)+1)+'/'+cap):'';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(t.name)+'<span class="brow-cost">'+esc(t.career||'')+' · '+TALENT_XP+' XP'+esc(rk)+'</span></div>'
         +(t.desc?'<div class="brow-desc">'+esc(t.desc)+'</div>':'')+'</div><button class="brow-add'+(can?'':' have')+'"'+(can?' onclick="buyTalent(\''+t.name.replace(/'/g,"\\'")+'\')"':' disabled')+'>＋ Learn</button></div>'; }).join('')+'</div>'; }
   h+='<div style="margin-top:16px;text-align:right;"><button class="m-btn" onclick="closeAdvance()">Done</button></div>';
   $('advance-body').innerHTML=h;
 }
 function buySkill(name){ var v=num(S.skills[name]), cost=skillStepCost(v); if(v>=5||num(S.xp)<cost)return; S.skills[name]=v+1; S.xp=num(S.xp)-cost; $('f-xp').value=S.xp; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','+1 '+name,'Spent '+cost+' XP · now level '+(v+1),'crit'); }catch(e){} }
 function undoSkill(name){ var v=num(S.skills[name]); var base=(_advSnap&&_advSnap.skills[name]!=null)?_advSnap.skills[name]:0; if(v<=base)return; var refund=5*v; S.skills[name]=v-1; S.xp=num(S.xp)+refund; $('f-xp').value=S.xp; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','−1 '+name,'Refunded '+refund+' XP · now level '+(v-1),'normal'); }catch(e){} }
-function buyTalent(name){ if(num(S.xp)<TALENT_XP)return; var t=talentOf(name); S.talents=S.talents||[]; S.talents.push({name:name,note:(t&&t.desc)||''}); S.xp=num(S.xp)-TALENT_XP; $('f-xp').value=S.xp; renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','New talent: '+name,'Spent '+TALENT_XP+' XP','crit'); }catch(e){} }
-function undoTalent(name){ var idx=-1; for(var i=(S.talents||[]).length-1;i>=0;i--){ if(S.talents[i]&&S.talents[i].name===name){ idx=i; break; } } if(idx<0)return; S.talents.splice(idx,1); S.xp=num(S.xp)+TALENT_XP; $('f-xp').value=S.xp; renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','Removed talent: '+name,'Refunded '+TALENT_XP+' XP','normal'); }catch(e){} }
+function buyTalent(name){ if(num(S.xp)<TALENT_XP)return; var t=talentOf(name); S.talents=S.talents||[]; S.talents.push({name:name,note:(t&&t.desc)||''}); S.xp=num(S.xp)-TALENT_XP; $('f-xp').value=S.xp; syncHealthMax(); renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','New talent: '+name,'Spent '+TALENT_XP+' XP','crit'); }catch(e){} }
+function undoTalent(name){ var idx=-1; for(var i=(S.talents||[]).length-1;i>=0;i--){ if(S.talents[i]&&S.talents[i].name===name){ idx=i; break; } } if(idx<0)return; S.talents.splice(idx,1); S.xp=num(S.xp)+TALENT_XP; $('f-xp').value=S.xp; syncHealthMax(); renderTalents(); renderAdvance(); scheduleAutosave(); try{ addLog('Advancement','Removed talent: '+name,'Refunded '+TALENT_XP+' XP','normal'); }catch(e){} }
 function advXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; var e=$('adv-xp'); if(e)e.textContent=S.xp; renderAdvance(); scheduleAutosave(); }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent=num(S.xp)?('XP '+S.xp):''; }
 
@@ -1343,6 +1426,7 @@ function collectSheet(){
   S.name=$('f-name').value.trim(); S.archetype=$('f-archetype').value; S.pronouns=$('f-pronouns').value;
   S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.armor=armorRating();
   { var fa=$('f-agenda'); if(fa)S.agenda=fa.value; var fs=$('f-signature'); if(fs)S.signature=fs.value; }
+  { var fc=$('f-cash'); if(fc)S.cash=fc.value; var fb=$('f-buddy'); if(fb)S.buddy=fb.value; var fr=$('f-rival'); if(fr)S.rival=fr.value; }
   // Key attribute and career are set at creation (read-only on the sheet) — keep S.key / S.career.
   var cls = isAlien() ? (S.career||'Alien crew') : S.archetype;
   return Object.assign({}, S, { system:'YZE', variant:'alien', class:cls, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
@@ -1355,8 +1439,9 @@ function applySheet(d){
   // skill sets are seeded — so coercing to Alien never loses points).
   S.variant='alien';
   syncVariant();
-  ['name','archetype','pronouns','key','appearance','notes','career','agenda','signature'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
+  ['name','archetype','pronouns','key','appearance','notes','career','agenda','signature','buddy','rival'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
   if(d.xp!=null)S.xp=num(d.xp); if(d.stress!=null)S.stress=clamp(num(d.stress),0,10); if(d.radiation!=null)S.radiation=clamp(num(d.radiation),0,10);
+  if(d.android!=null)S.android=!!d.android; if(d.storyPoints!=null)S.storyPoints=clamp(num(d.storyPoints),0,3); if(d.cash!=null)S.cash=d.cash;
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   // apply skills across BOTH variant skill sets so switching modes never loses data
   if(d.skills) BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });
@@ -1369,11 +1454,11 @@ function applySheet(d){
   var inv=[];
   if(Array.isArray(d.gear)) d.gear.forEach(function(g){
     var kind=g.kind || (g.rating!=null?'armor':(g.damage!=null?'weapon':'gear'));
-    if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',grip:g.grip||'',bonus:g.bonus||'',damage:g.damage!=null?num(g.damage):1,range:g.range||'',weight:g.weight||'1',skill:g.skill||'Melee'});
-    else if(kind==='armor') inv.push({kind:'armor',equipped:g.equipped!==false,name:g.name||'',rating:num(g.rating),weight:g.weight||'1',note:g.note||''});
+    if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',grip:g.grip||'',bonus:g.bonus||'',damage:g.damage!=null?num(g.damage):1,range:g.range||'',ammo:g.ammo!=null&&g.ammo!==''?g.ammo:'—',weight:g.weight||'1',skill:g.skill||'Melee'});
+    else if(kind==='armor') inv.push({kind:'armor',equipped:g.equipped!==false,name:g.name||'',rating:num(g.rating),air:g.air!=null?g.air:'',weight:g.weight||'1',note:g.note||''});
     else inv.push({kind:'gear',name:g.name||'',weight:g.weight||'1',note:g.note||''});
   });
-  if(Array.isArray(d.weapons)) d.weapons.forEach(function(w){ inv.push({kind:'weapon',equipped:true,name:w.name||'',grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?num(w.damage):1,range:w.range||'',weight:w.weight||'1',skill:w.skill||'Melee'}); });
+  if(Array.isArray(d.weapons)) d.weapons.forEach(function(w){ inv.push({kind:'weapon',equipped:true,name:w.name||'',grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?num(w.damage):1,range:w.range||'',ammo:w.ammo!=null&&w.ammo!==''?w.ammo:'—',weight:w.weight||'1',skill:w.skill||'Melee'}); });
   if(d.armor!=null && num(d.armor)>0 && !inv.some(function(x){return x.kind==='armor';})) inv.push({kind:'armor',equipped:true,name:'Armor',rating:num(d.armor),weight:'1',note:''});
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
@@ -1389,6 +1474,7 @@ function renderAll(){
   $('f-name').value=S.name||''; $('f-archetype').value=S.archetype||''; $('f-pronouns').value=S.pronouns||'';
   $('f-appearance').value=S.appearance||''; $('f-notes').value=S.notes||''; $('f-xp').value=num(S.xp);
   { var fa=$('f-agenda'); if(fa)fa.value=S.agenda||''; var fs=$('f-signature'); if(fs)fs.value=S.signature||''; }
+  { var fb=$('f-buddy'); if(fb)fb.value=S.buddy||''; var fr=$('f-rival'); if(fr)fr.value=S.rival||''; var fcash=$('f-cash'); if(fcash)fcash.value=S.cash||''; }
   renderKeyDisp(); renderCareerDisp();
   renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); renderTalents(); renderCareer(); updateFoot(); refreshWizardButtons();
 }
