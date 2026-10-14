@@ -170,6 +170,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .vboxes{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 auto;}
 .vbox{width:20px;height:20px;border:2px solid var(--rule);border-radius:4px;cursor:pointer;background:#fff;padding:0;}
 .vbox.on{background:var(--red);border-color:var(--red);}
+/* Health is a depleting bar: filled = remaining health, shown in the health green. */
+.vbox.hp.on{background:var(--green);border-color:#246b43;}
 .vbox.resolve.on{background:var(--blue);border-color:var(--blue);}
 .vbox.rad.on{background:#5aa832;border-color:#3f7e22;}
 .v-auto{background:none;border:1px solid var(--rule);border-radius:5px;color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 5px;flex:0 0 auto;}
@@ -632,7 +634,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vitals" id="vitals">
         <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
-        <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Evolved Edition: a static soak — subtract this from each hit's damage (no roll)">0</span><span class="inv-mini" style="flex:0 0 auto;">soak · reduces each hit</span></div>
+        <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Evolved Edition: a static soak — subtract this from each hit's damage (no roll)">0</span></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="Full-auto fire or facing fear raises Stress one step (Machinegunner ignores full-auto)">+1</button></div>
         <div class="vrow alien-only synth-hide"><span class="v-lbl">Resolve</span><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
@@ -835,13 +837,19 @@ function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.
 
 // ── Render: vitals (Health / Resolve damage tracks) ──
 function renderVitals(){
-  ['health','resolve'].forEach(function(w){
-    var host=$(w+'-boxes'), st=S[w], boxes='';
-    var max=st.max||0;
-    // Health is fixed (set at creation) — just the damage track, no +/- box adjusters.
-    for(var i=1;i<=max;i++){ boxes+='<button class="vbox'+(w==='resolve'?' resolve':'')+(i<=st.dmg?' on':'')+'" title="damage" onclick="setDamage(\''+w+'\','+i+')"></button>'; }
+  // Health bar: boxes START FULL and empty right-to-left as you take damage.
+  // Filled = remaining health (max − dmg); when all are empty you're Broken.
+  (function(){
+    var host=$('health-boxes'); if(!host)return; var st=S.health, max=st.max||0, rem=Math.max(0,max-num(st.dmg)), boxes='';
+    for(var i=1;i<=max;i++){ boxes+='<button class="vbox hp'+(i<=rem?' on':'')+'" title="'+(i<=rem?'health remaining — click to take damage':'click to heal to here')+'" onclick="setHealth('+i+')"></button>'; }
     host.innerHTML=boxes;
-  });
+  })();
+  // Resolve (yze-only) stays a damage track — fills left-to-right as damage is taken.
+  (function(){
+    var host=$('resolve-boxes'); if(!host)return; var st=S.resolve, max=st.max||0, boxes='';
+    for(var i=1;i<=max;i++){ boxes+='<button class="vbox resolve'+(i<=num(st.dmg)?' on':'')+'" title="damage" onclick="setDamage(\'resolve\','+i+')"></button>'; }
+    host.innerHTML=boxes;
+  })();
   var broken = isAlien()
     ? (S.health.max>0 && S.health.dmg>=S.health.max)
     : ((S.health.max>0&&S.health.dmg>=S.health.max)||(S.resolve.max>0&&S.resolve.dmg>=S.resolve.max));
@@ -880,6 +888,14 @@ function renderStress(){
 function setStress(n){ S.stress=(num(S.stress)===n)?n-1:n; if(S.stress<0)S.stress=0; renderStress(); scheduleAutosave(); }
 function bumpStress(d){ S.stress=clamp(num(S.stress)+d,0,10); renderStress(); scheduleAutosave(); }
 function setDamage(w,n){ var st=S[w]; st.dmg=(st.dmg===n)?n-1:n; renderVitals(); scheduleAutosave(); }
+// Health is a depleting bar. Box i = the i-th point of health from the left.
+// Click the current top-filled box to take one damage; click any box to set
+// remaining health to that level (heal or damage to it).
+function setHealth(i){
+  var st=S.health, max=st.max||0, rem=max-num(st.dmg);
+  var newRem=(i===rem)?i-1:i; newRem=clamp(newRem,0,max);
+  st.dmg=max-newRem; renderVitals(); scheduleAutosave();
+}
 function bumpMax(w,d){ var st=S[w]; st.max=clamp(st.max+d,0,20); if(st.dmg>st.max)st.dmg=st.max; renderVitals(); scheduleAutosave(); }
 function autoDerive(w){ S[w].max=derivedMax(w); if(S[w].dmg>S[w].max)S[w].dmg=S[w].max; renderVitals(); scheduleAutosave(); addLog(w==='health'?'Health':'Resolve','max '+S[w].max, 'derived from attributes','normal'); }
 
