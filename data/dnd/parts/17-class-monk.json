@@ -565,6 +565,9 @@
         },
         {
           "name": "Warrior of the Mystic Arts",
+          "spellList": "Sorcerer",
+          "spellcastingAbility": "WIS",
+          "spellcasting": "third",
           "className": "Monk",
           "flavor": "A monk who weaves Sorcerer magic through martial focus, balancing spell slots and Focus Points to blend cantrips and spells into flurries of blows.",
           "source": "arcana-unleashed",

@@ -75,6 +75,8 @@ export interface DndSubclass {
   spellList?: string;
   /** Always-prepared subclass spells (domain / oath / patron / circle lists), keyed by class level. */
   alwaysPrepared?: Record<string, string[]>;
+  /** A spell list picked from options (Circle of the Land's land type, Vestige Patron's domain); `choice` is the key in choices["class:<Class>"]. */
+  alwaysPreparedByChoice?: { choice: string; label: string; options: Record<string, Record<string, string[]>> };
   flavor: string;
   features: DndClassFeature[];
   source: DndSource;
@@ -185,6 +187,11 @@ export interface DndSpell {
   damageType?: string;  // e.g. "fire"
   heal?: string;        // dice, e.g. "2d8"
   upcast?: string;      // extra dice per slot level above base, e.g. "1d6"
+  /** Several projectiles, each with its own attack roll (Eldritch Blast beams by character
+   *  level; Scorching Ray rays = base + perSlot per slot level above the spell's). */
+  multiAttack?: { dice: string; type?: string; beamsByLevel?: boolean; base?: number; perSlot?: number };
+  /** Healing adds the spellcasting modifier (when the description doesn't say so). */
+  healAddMod?: boolean;
 }
 
 // ── Equipment ─────────────────────────────────────────────────────────────

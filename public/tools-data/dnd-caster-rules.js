@@ -19,6 +19,10 @@
   const SPELL_LIST_ALIAS = { artificer: "wizard" };
   const spellListName = (className) => SPELL_LIST_ALIAS[norm(className)] || norm(className);
   const spellInList = (spell, className) => (spell && spell.classes || []).some((n) => norm(n) === spellListName(className));
+  // The spell lists a class prepares from at a given class level. 2024 Magical Secrets (Bard 10+)
+  // opens the Cleric, Druid and Wizard lists to the Bard's own prepared spells.
+  const listsFor = (className, level) => (norm(className) === "bard" && Number(level) >= 10) ? ["Bard","Cleric","Druid","Wizard"] : [className];
+  const spellInLists = (spell, lists) => [].concat(lists || []).some((l) => spellInList(spell, l));
 
   // ── ASI / feat levels ──────────────────────────────────────────────────
   const ASI_LEVELS = { Fighter: [4,6,8,12,14,16,19], Rogue: [4,8,10,12,16,19] };
@@ -177,7 +181,7 @@
   }
 
   window.DNDCALC = {
-    num, norm, esc, classByName, isCasterClass, spellListName, spellInList,
+    num, norm, esc, classByName, isCasterClass, spellListName, spellInList, listsFor, spellInLists,
     ASI_LEVELS, ASI_DEFAULT, grantsASI, asiLevelsUpTo,
     shortCastTime, spellDmgStr, spellTags, spellLevelLabel, spellRow, spellPickerHTML,
     tableRow, colAt, cantripsAt, preparedAt, spellbookAt,

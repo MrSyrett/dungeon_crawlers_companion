@@ -2808,7 +2808,7 @@ function renderBook(){
   const list = D.spells().filter(s => {
     if(mine){
       if(!casters.length){ if(s.level > sheetMaxSpellLevel()) return false; const c = classData(); if(!c || !spellOnCasterList(s, c)) return false; }
-      else if(!casters.some(({cl, c}) => spellOnCasterList(s, c) && s.level <= casterMaxSpellLevel(cl, c))) return false;
+      else if(!casters.some(({cl, c}) => spellOnCasterList(s, c, cl) && s.level <= casterMaxSpellLevel(cl, c))) return false;
     }
     else if(fc && !(s.classes || []).includes(fc)) return false;
     if(fl !== '' && String(s.level) !== String(fl)) return false;
@@ -3022,7 +3022,8 @@ function autoFeatures(){
 function renderFeatures(){
   const box = $('features-list'); box.innerHTML = '';
   const auto = autoFeatures();
-  const featObjs = addedFeats.map(n => { const f = featData(n); return f ? { name: n, meta: f.category + ' feat', desc: withChoices((f.benefits||[]).join(' '), featChoiceSummary(n)) } : { name: n, meta: 'Feat', desc: '' }; });
+  const featObjs = featInstances().map(({ name: n, key, idx }) => { const f = featData(n); const shown = idx > 1 ? n + ' (' + idx + ')' : n;
+    return f ? { name: shown, inst: key, meta: f.category + ' feat', desc: withChoices((f.benefits||[]).join(' '), featChoiceSummary(key.slice(5))) } : { name: shown, inst: key, meta: 'Feat', desc: '' }; });
   const allRaw = auto.concat(featObjs).concat(customFeatures.map(cf => ({ name: cf.name, meta: cf.meta || 'Custom', desc: cf.desc || '', custom: true })));
   // Dedupe by name so a feature granted two ways (e.g. a background feat that is
   // both auto-listed and in addedFeats) shows once — the first (auto) entry wins.
@@ -3035,7 +3036,7 @@ function renderFeatures(){
     const trackers = resourcesForFeature(f.name).map(resourcePipsHTML).join('');
     const rollLabel = [f.damage ? esc(f.damage) + (f.damageType ? ' ' + esc(f.damageType) : '') : '', f.heal ? 'heal ' + esc(f.heal) : ''].filter(Boolean).join(' · ');
     const rollBtn = rollLabel ? '<button class="fi-roll" onclick="rollFeatureEffect(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" title="Roll this feature\'s effect">🎲 ' + rollLabel + '</button>' : '';
-    d.innerHTML = '<div class="fi-name">' + esc(f.name) + (f.custom ? ' <button class="row-x" onclick="removeCustomFeature(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : (featObjs.indexOf(f) >= 0 ? ' <button class="row-x" onclick="removeFeat(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : '')) + '</div>' +
+    d.innerHTML = '<div class="fi-name">' + esc(f.name) + (f.custom ? ' <button class="row-x" onclick="removeCustomFeature(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : (featObjs.indexOf(f) >= 0 ? ' <button class="row-x" onclick="removeFeat(\'' + esc(f.inst.slice(5)).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : '')) + '</div>' +
       '<div class="fi-meta">' + esc(f.meta || '') + '</div>' +
       rollBtn +
       (f.desc ? '<div class="fi-desc' + (long ? ' collapsed' : '') + '" onclick="this.classList.toggle(\'collapsed\')">' + esc(f.desc) + '</div>' + (long ? '<span class="tap-more" onclick="openDesc(\'' + esc(f.name).replace(/'/g,"\\'") + '\',\'' + esc(f.meta||'').replace(/'/g,"\\'") + '\',this)">Read full</span>' : '') : '') +
@@ -3056,8 +3057,24 @@ function rollFeatureEffect(name){
 }
 function addCustomFeature(){ const n = ($('feat-name').value || '').trim(); if(!n) return; customFeatures.push({ name:n, desc:'', meta:'Custom' }); $('feat-name').value=''; renderFeatures(); scheduleAutosave(); }
 function removeCustomFeature(n){ customFeatures = customFeatures.filter(f => f.name !== n); renderFeatures(); scheduleAutosave(); }
-function addFeatByName(n){ if(addedFeats.indexOf(n) < 0) addedFeats.push(n); renderFeatures(); scheduleAutosave(); }
-function removeFeat(n){ addedFeats = addedFeats.filter(f => f !== n); renderFeatures(); scheduleAutosave(); }
+// Feat instances in order: a repeatable feat taken twice is two entries; the 2nd one's
+// choices live under "feat:<Name>#2". Returns [{ name, key, idx }].
+function featInstances(){ const n = {}; return addedFeats.map(name => { n[name] = (n[name] || 0) + 1; return { name, idx: n[name], key: 'feat:' + name + (n[name] > 1 ? '#' + n[name] : '') }; }); }
+// Adds a feat (again, if it's repeatable) and returns its choices key.
+function addFeatByName(n){
+  const f = featData(n), has = addedFeats.indexOf(n) >= 0;
+  if(!has || (f && f.repeatable)) addedFeats.push(n);
+  renderFeatures(); scheduleAutosave();
+  const inst = featInstances().filter(x => x.name === n); return inst.length ? inst[inst.length - 1].key : 'feat:' + n;
+}
+// Remove one feat instance ("Skilled" or "Skilled#2"); later instances' choices shift down.
+function removeFeat(n){
+  const m = String(n).match(/^(.*?)(?:#(\d+))?$/), name = m[1], idx = num(m[2]) || 1;
+  const keys = featInstances().filter(x => x.name === name).map(x => x.key);
+  let seen = 0; addedFeats = addedFeats.filter(f => !(f === name && ++seen === idx));
+  for(let i = idx - 1; i < keys.length; i++){ const nx = keys[i + 1]; if(nx && choices[nx]) choices[keys[i]] = choices[nx]; else delete choices[keys[i]]; }
+  renderFeatures(); scheduleAutosave();
+}
 
 // ═══ AUTO-APPLIED FEATURE / TRAIT BONUSES (#5) ════════════════════════════
 // Every class + subclass feature and species trait active at the current level,
@@ -3123,6 +3140,9 @@ function computeGrantedSpells(){
     if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => grantsFromText(f.description).forEach(nm => put(nm, 'class', '')));
     // Domain / Oath / Patron / Circle spell lists, unlocked by class level (always prepared, still use slots).
     if(sub && sub.alwaysPrepared) Object.keys(sub.alwaysPrepared).forEach(lv => { if(num(cl.level) >= num(lv)) (sub.alwaysPrepared[lv] || []).forEach(nm => put(nm, 'class', '')); });
+    // …or a list picked from options: Circle of the Land's land type, Vestige Patron's domain
+    if(sub && sub.alwaysPreparedByChoice){ const bc = sub.alwaysPreparedByChoice, pick = ((choices || {})['class:' + c.name] || {})[bc.choice], lists = pick && bc.options && bc.options[pick];
+      if(lists) Object.keys(lists).forEach(lv => { if(num(cl.level) >= num(lv)) (lists[lv] || []).forEach(nm => put(nm, 'class', '')); }); }
   });
   if(sp){
     const sa = speciesCastAbility();
@@ -3381,7 +3401,9 @@ function spellcastingClasses(){
 }
 // The spell list a caster entry reads (Artificer → Wizard alias handled by DNDCALC.spellInList).
 function casterListName(c){ return (c && (c.listName || c.name)) || ''; }
-function spellOnCasterList(sp, c){ const ln = casterListName(c); return (window.DNDCALC && DNDCALC.spellInList) ? DNDCALC.spellInList(sp, ln) : (sp.classes || []).some(n => norm(n) === norm(ln)); }
+// A caster's lists at its class level — Bard 10+ (Magical Secrets) adds Cleric, Druid and Wizard.
+function casterLists(c, cl){ const ln = casterListName(c); const lvl = cl ? num(cl.level) : num((classList().find(x => norm(x.cls) === norm(c.name)) || {}).level); return (window.DNDCALC && DNDCALC.listsFor) ? DNDCALC.listsFor(ln, lvl) : [ln]; }
+function spellOnCasterList(sp, c, cl){ return casterLists(c, cl).some(ln => (window.DNDCALC && DNDCALC.spellInList) ? DNDCALC.spellInList(sp, ln) : (sp.classes || []).some(n => norm(n) === norm(ln))); }
 // Highest spell level a caster entry can learn/prepare — by ITS OWN class level (RAW multiclass rule).
 function casterMaxSpellLevel(cl, c){
   const t = D.tables(); if(!t) return 1; const L = num(cl.level);
@@ -3395,12 +3417,36 @@ function nonPactCasters(){ return spellcastingClasses().filter(x => x.c.spellcas
 function multiCasterLevel(){ let lvl = 0; nonPactCasters().forEach(({cl,c}) => { if(c.spellcasting==='full') lvl+=num(cl.level); else if(c.spellcasting==='artificer') lvl+=Math.ceil(num(cl.level)/2); else if(c.spellcasting==='half') lvl+=Math.floor(num(cl.level)/2); else if(c.spellcasting==='third') lvl+=Math.floor(num(cl.level)/3); }); return lvl; }
 function casterType(){ const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); return cs.length ? cs[0].c.spellcasting : (_forceSpells ? 'third' : 'none'); }
 function spellAbilityId(){ if(_spellAbility && !spellcastingClasses().length) return _spellAbility; const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); if(cs.length && cs[0].c.spellcastingAbility) return cs[0].c.spellcastingAbility; const c = classData(); return (c && c.spellcastingAbility) ? c.spellcastingAbility : 'INT'; }
-function abilityForSpell(sp){ const sk = sp && spellsKnown.find(s => norm(s.name) === norm(sp.name)); if(sk && sk.ability) return String(sk.ability).toUpperCase(); if(_spellAbility && !spellcastingClasses().length) return _spellAbility; const owner = spellcastingClasses().find(x => spellOnCasterList(sp, x.c)); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
+function abilityForSpell(sp){ const sk = sp && spellsKnown.find(s => norm(s.name) === norm(sp.name)); if(sk && sk.ability) return String(sk.ability).toUpperCase(); if(_spellAbility && !spellcastingClasses().length) return _spellAbility; const owner = (sk && spellOwner(sk)) || spellcastingClasses().find(x => spellOnCasterList(sp, x.c)); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
 function spellDC(ab){ if(_ov.spDC != null && String(_ov.spDC) !== '') return ovNum('spDC', 8); return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC') + exhPenalty(); }   // 2024: Exhaustion lowers spell save DCs too
 function spellAtkBonus(ab){ if(_ov.spAtk != null && String(_ov.spAtk) !== '') return ovNum('spAtk', 0); return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
 // A racial/feature-granted spell (e.g. High Elf's cantrip on a Fighter) also opens the Spells tab.
 function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted); }
 // Prepared-spell budget (A5): sum each non-pact caster class's Prepared Spells (or Spells Known) at its level.
+// Which caster class a known spell belongs to: its stored `cls` if that class still casts,
+// else the first caster class whose list has it at a level it can cast.
+function spellOwner(sk){
+  const cs = spellcastingClasses(); if(!cs.length) return null;
+  if(sk && sk.cls){ const hit = cs.find(x => norm(x.c.name) === norm(sk.cls)); if(hit) return hit; }
+  const sp = sk && spellByName(sk.name); if(!sp) return cs[0];
+  return cs.find(({cl, c}) => spellOnCasterList(sp, c, cl) && sp.level <= casterMaxSpellLevel(cl, c)) || cs.find(({cl, c}) => spellOnCasterList(sp, c, cl)) || cs[0];
+}
+function tableCount(cl, c, col){ const row = (c.table||[]).find(r => Number(r.level) === num(cl.level)); if(!row) return 0;
+  if(col === 'Cantrips'){ const a = row.columns ? parseInt(row.columns['Cantrips'], 10) : NaN, b = row.cantripsKnown != null ? Number(row.cantripsKnown) : NaN; return Math.max(isNaN(a)?0:a, isNaN(b)?0:b); }
+  const n = row.columns ? parseInt(row.columns['Prepared Spells'] != null ? row.columns['Prepared Spells'] : row.columns['Spells Known'], 10) : NaN; return isNaN(n) ? 0 : n; }
+function preparedMaxFor(entry){ return entry ? tableCount(entry.cl, entry.c, 'Prepared') : 0; }
+function cantripMaxFor(entry){ if(!entry) return 0; let n = tableCount(entry.cl, entry.c, 'Cantrips'); const cn = norm(entry.c.name); if(cn === 'cleric' || cn === 'druid'){ const st = (choices || {})['class:' + entry.c.name] || {}; if(norm(st.order) === (cn === 'cleric' ? 'thaumaturge' : 'magician') || customFeatures.some(f => norm(f.name).indexOf(cn === 'cleric' ? 'thaumaturge' : 'magician') >= 0)) n++; } return n; }
+function preparedNowFor(entry, cantrips){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); if(!sp || sk.granted || !sk.prepared) return false; if(cantrips ? sp.level !== 0 : sp.level === 0) return false; const o = spellOwner(sk); return o && entry && norm(o.c.name) === norm(entry.c.name); }).length; }
+// Room to prepare this spell under its own class's limit (single casters: the one shared limit).
+function prepRoomFor(sk){
+  const sp = spellByName(sk.name); if(!sp) return true;
+  const cs = spellcastingClasses();
+  if(cs.length <= 1) return sp.level === 0 ? preparedCantripNow() < cantripMax() : preparedNow() < preparedMax();
+  if(sp.level === 0 && _ov.cantripMax != null && String(_ov.cantripMax) !== '') return preparedCantripNow() < cantripMax();
+  if(sp.level > 0 && _ov.prepMax != null && String(_ov.prepMax) !== '') return preparedNow() < preparedMax();
+  const o = spellOwner(sk); if(!o) return true;
+  return sp.level === 0 ? preparedNowFor(o, true) < cantripMaxFor(o) : preparedNowFor(o, false) < preparedMaxFor(o);
+}
 function preparedMax(){
   if(_ov.prepMax != null && String(_ov.prepMax) !== '') return ovNum('prepMax', 0);
   let total = 0;
@@ -3449,12 +3495,17 @@ function renderSpellHeader(){
     if(document.activeElement !== $('sp-atk')) $('sp-atk').textContent = sgn(spellAtkBonus());
     const pmax = preparedMax(), pbox = $('sp-prep-box');
     if(pbox){
-      if(pmax > 0){ pbox.style.display = ''; const now = preparedNow(), el = $('sp-prep-val'); if(document.activeElement !== el){ el.textContent = now + '/' + pmax; el.style.color = now > pmax ? 'var(--red)' : ''; } }
+      if(pmax > 0){ pbox.style.display = ''; const now = preparedNow(), el = $('sp-prep-val'); const cs = spellcastingClasses();
+        const over = cs.length > 1 ? cs.some(o => preparedNowFor(o, false) > preparedMaxFor(o)) : now > pmax;
+        if(document.activeElement !== el){ el.textContent = now + '/' + pmax; el.style.color = (now > pmax || over) ? 'var(--red)' : ''; }
+        pbox.title = cs.length > 1 ? 'Prepared per class — ' + cs.map(o => o.c.name + ' ' + preparedNowFor(o, false) + '/' + preparedMaxFor(o)).join(' · ') : ''; }
       else pbox.style.display = 'none';
     }
     const cmax = cantripMax(), cbox = $('sp-prep-cantrip-box');
     if(cbox){
-      if(cmax > 0){ cbox.style.display = ''; const now = preparedCantripNow(), el = $('sp-prep-cantrip-val'); if(document.activeElement !== el){ el.textContent = now + '/' + cmax; el.style.color = now > cmax ? 'var(--red)' : ''; } }
+      if(cmax > 0){ cbox.style.display = ''; const now = preparedCantripNow(), el = $('sp-prep-cantrip-val'); const cs = spellcastingClasses();
+        if(document.activeElement !== el){ el.textContent = now + '/' + cmax; el.style.color = now > cmax ? 'var(--red)' : ''; }
+        cbox.title = cs.length > 1 ? 'Cantrips per class — ' + cs.map(o => o.c.name + ' ' + preparedNowFor(o, true) + '/' + cantripMaxFor(o)).join(' · ') : ''; }
       else cbox.style.display = 'none';
     }
   } else { $('sp-ability').textContent = ''; }
@@ -3543,14 +3594,21 @@ function renderSpells(){
   document.querySelectorAll('#spells-by-level .sp-name-input').forEach(el => { el.readOnly = _locked; });
   if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn();
 }
-function addSpellByName(n){
+function addSpellByName(n, cls){
   if(!spellsKnown.some(s => norm(s.name) === norm(n))){
-    // Add to the known list; prepare it only if there's room under the class limit
+    // Add to the known list; prepare it only if there's room under its class's limit
     // (cantrips and leveled spells each have their own cap). Otherwise it's added
     // known-but-unprepared — the player un-prepares another to make room.
-    const sp = spellByName(n), isCantrip = sp && sp.level === 0;
-    const room = isCantrip ? (preparedCantripNow() < cantripMax()) : (sp && sp.level > 0 ? (preparedNow() < preparedMax()) : true);
-    spellsKnown.push({ name:n, prepared: room });
+    const sk = { name:n, prepared:false };
+    if(cls) sk.cls = cls;
+    else if(spellcastingClasses().length > 1){
+      // multiclass: the class whose list has it and still has room, else any class that can cast it
+      const sp = spellByName(n), cs = spellcastingClasses().filter(({cl, c}) => sp && spellOnCasterList(sp, c, cl) && sp.level <= casterMaxSpellLevel(cl, c));
+      const roomy = cs.find(o => sp.level === 0 ? preparedNowFor(o, true) < cantripMaxFor(o) : preparedNowFor(o, false) < preparedMaxFor(o));
+      const pick = roomy || cs[0]; if(pick) sk.cls = pick.c.name;
+    }
+    sk.prepared = prepRoomFor(sk);
+    spellsKnown.push(sk);
   }
   renderSpells(); renderSpellHeader(); scheduleAutosave();
 }
@@ -3571,10 +3629,10 @@ function togglePrep(n){
   const s = spellsKnown.find(x => x.name === n); if(!s) return;
   // Preparing (not un-preparing): block if already at the class limit. Cantrips and
   // leveled spells have separate limits; granted always-prepared spells don't count.
-  if(!s.prepared && !s.granted){
-    const sp = spellByName(n), isCantrip = sp && sp.level === 0;
-    if(isCantrip){ if(preparedCantripNow() >= cantripMax()){ addLog('Cantrips', '✗', 'At your cantrip limit (' + cantripMax() + ') — un-prepare one first', 'fumble'); return; } }
-    else { if(preparedNow() >= preparedMax()){ addLog('Prepared Spells', '✗', 'At your prepared limit (' + preparedMax() + ') — un-prepare one first', 'fumble'); return; } }
+  if(!s.prepared && !s.granted && !prepRoomFor(s)){
+    const sp = spellByName(n), isCantrip = sp && sp.level === 0, o = spellOwner(s), multi = spellcastingClasses().length > 1;
+    const lim = multi && o ? (isCantrip ? cantripMaxFor(o) : preparedMaxFor(o)) : (isCantrip ? cantripMax() : preparedMax());
+    addLog(isCantrip ? 'Cantrips' : 'Prepared Spells', '✗', 'At your ' + (multi && o ? o.c.name + ' ' : '') + (isCantrip ? 'cantrip' : 'prepared') + ' limit (' + lim + ') — un-prepare one first', 'fumble'); return;
   }
   s.prepared = !s.prepared; renderSpells(); renderSpellHeader(); scheduleAutosave();
 }
@@ -3747,6 +3805,7 @@ function castSpellFull(name, castLevel, opts){
   const dmgInfo = spellDamage(sp);
   let diceExpr = dmgInfo.dice;
   if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
+  if(lvl === 0 && diceExpr && invocationOn('Agonizing Blast', 'agonizingBlast', sp.name) && modOf('CHA') > 0) diceExpr += '+' + modOf('CHA');   // Agonizing Blast
   else if(diceExpr && useLevel > lvl) diceExpr = combineDice(diceExpr, upcastBonusDice(sp, useLevel));
   let healExpr = spellHealing(sp);
   if(healExpr){ if(lvl === 0) healExpr = scaleCantrip(healExpr, levelNow()); else if(useLevel > lvl) healExpr = combineDice(healExpr, upcastBonusDice(sp, useLevel)); }
@@ -3780,14 +3839,15 @@ function castSpellFull(name, castLevel, opts){
     const count = ma.beamsByLevel
       ? (levelNow() >= 17 ? 4 : levelNow() >= 11 ? 3 : levelNow() >= 5 ? 2 : 1)
       : ((ma.base || 1) + Math.max(0, useLevel - lvl) * (ma.perSlot || 0));
-    const per = ma.dice, mt = ma.type ? ' ' + ma.type : '';
+    const agon = invocationOn('Agonizing Blast', 'agonizingBlast', sp.name) ? Math.max(0, modOf('CHA')) : 0;   // + CHA to each beam
+    const per = ma.dice + (agon ? '+' + agon : ''), mt = ma.type ? ' ' + ma.type : '';
     let maxDmg = 0; const segs = [];
     for(let i = 0; i < count; i++){
       const ctx = rollCtx('attack'); const r = rawD20(ctx.mode); const atkMod = spellAtkBonus(ab) + ctx.pen; const hit = r.nat + atkMod; const crit = r.nat === 20;
       const dd = rollDiceExpr(per, crit); maxDmg += dd.total;
       segs.push('#' + (i+1) + ' hit ' + sgn(hit) + ' → ' + dd.total + (crit ? ' CRIT' : '') + ' · ' + d20Detail(r) + ' / ' + dd.detail);
     }
-    addLog(label + upLabel, count + '× · up to ' + maxDmg + mt + ' (compare each to AC)', segs.join('  |  '), 'normal');
+    addLog(label + upLabel, count + '× · up to ' + maxDmg + mt + ' (compare each to AC)', segs.join('  |  ') + (agon ? '  · Agonizing Blast +' + agon + ' each' : '') + (invocationOn('Repelling Blast', 'repellingBlast', sp.name) ? '  · Repelling Blast: push 10 ft on a hit' : ''), 'normal');
     if(sp.concentration) startConcentration(label);
     return true;
   }
@@ -3810,6 +3870,8 @@ function castSpellFull(name, castLevel, opts){
   if(sp.concentration) startConcentration(label);
   return true;
 }
+// Eldritch Invocations that modify a chosen cantrip (stored in choices["class:Warlock"]).
+function invocationOn(inv, key, spName){ const st = (choices || {})['class:Warlock'] || {}; const has = [].concat(st.invocations || []).some(x => norm(x) === norm(inv)); return has && norm(st[key] || '') === norm(spName); }
 function castRitual(name){ return castSpellFull(name, null, { ritual:true }); }
 // The spell currently concentrated on (resolved from the stored label).
 function concentratedSpell(){

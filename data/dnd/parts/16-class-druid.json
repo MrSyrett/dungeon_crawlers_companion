@@ -378,6 +378,7 @@
       "subclasses": [
         {
           "name": "Circle of the Land",
+          "alwaysPreparedByChoice": {"choice": "land", "label": "Land type", "options": {"Arid": {"3": ["Blur", "Burning Hands", "Fire Bolt"], "5": ["Fireball"], "7": ["Blight"], "9": ["Wall of Stone"]}, "Polar": {"3": ["Fog Cloud", "Hold Person", "Ray of Frost"], "5": ["Sleet Storm"], "7": ["Ice Storm"], "9": ["Cone of Cold"]}, "Temperate": {"3": ["Misty Step", "Shocking Grasp", "Sleep"], "5": ["Lightning Bolt"], "7": ["Freedom of Movement"], "9": ["Tree Stride"]}, "Tropical": {"3": ["Acid Splash", "Ray of Sickness", "Web"], "5": ["Stinking Cloud"], "7": ["Polymorph"], "9": ["Insect Plague"]}}},
           "className": "Druid",
           "flavor": "A druid bound to a particular land — desert, mountains, forest, or coast — drawing extra spells and protection from it.",
           "source": "srd",

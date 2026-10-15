@@ -70,7 +70,7 @@
     const stored = storedClassState(lu.targetCls);
     let specs = [];
     if(CH() && c){
-      const all = CH().classChoiceSpecs(c.name, sub, newLevel, { allowSrc: () => true, weaponTokens: profTokens("weapons"), level: totalOf(cur) + 1 }, lu.choices);
+      const all = CH().classChoiceSpecs(c.name, sub, newLevel, { allowSrc: () => true, weaponTokens: profTokens("weapons"), level: totalOf(cur) + 1, stored }, lu.choices);
       specs = all.filter((s) => (s.count || 1) > (s.prev || 0)).map((s) => Object.assign({}, s, { locked: CH().vals(stored, s.key) }));
     }
     // an Order chosen this level (Thaumaturge / Magician) adds a cantrip
@@ -219,7 +219,7 @@
   }
   function rSpells(){
     const cf = ctx.cf, known = knownSpellSet();
-    const avail = lu.spellsAvail !== false, inList = (s) => _spellInList(s, cf.list);
+    const avail = lu.spellsAvail !== false, lists = RULES().listsFor ? RULES().listsFor(cf.list, ctx.newLevel) : [cf.list], inList = (s) => lists.some((l) => _spellInList(s, l));   // Bard 10+: Magical Secrets
     // Spells the character already knows are left out entirely — you only choose
     // from what's new — so spells added freely from the sheet's Spellbook don't
     // count toward this level's "choose N".
@@ -366,7 +366,20 @@
       const fxNew = CH().classChoiceEffects(ctx.specs, lu.choices);
       const fxOld = CH().classChoiceEffects(ctx.specs, before);
       const fresh = (list, key) => list.filter((x) => !fxOld[key].some((y) => (y.name || y) === (x.name || x)));
-      fresh(fxNew.feats, "feats").forEach((f) => { if(window.addFeatByName) window.addFeatByName(f); });
+      fresh(fxNew.feats, "feats").forEach((f) => {
+        const key = window.addFeatByName ? window.addFeatByName(f) : null;
+        // a feat granted by a class choice (Lessons of the First Ones) applies its own picks too
+        const fst = (fxNew.featStates || {})[f];
+        if(fst && CH()){
+          const fx2 = CH().featEffects(f, fst);
+          ABIL.forEach((a) => { if(fx2.abil[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + fx2.abil[a]); } });
+          fx2.skills.forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 1); });
+          fx2.expertise.forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 2); });
+          if(fx2.profs.length && window.appendProficiencies) window.appendProficiencies(fx2.profs.join(", "));
+          fx2.spells.forEach((g) => { if(window.addGrantedSpell) window.addGrantedSpell(g.name, g.ability, g.source); });
+          if(window.setChoice) window.setChoice(typeof key === "string" ? key : "feat:" + f, fst);
+        }
+      });
       fresh(fxNew.skills, "skills").forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 1); });
       fresh(fxNew.expertise, "expertise").forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 2); });
       const langs = fresh(fxNew.languages, "languages"); if(langs.length){ if(typeof window.addLanguages === "function") window.addLanguages(langs); else if(window.appendProficiencies) window.appendProficiencies("Languages: " + langs.join(", ")); }
@@ -381,7 +394,7 @@
       const oldCon = conMod();
       if(lu.asiMode === "asi"){ ABIL.forEach((a) => { if(lu.asi[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + lu.asi[a]); } }); }
       else if(lu.feat && window.addFeatByName){
-        window.addFeatByName(lu.feat);
+        const featKey = window.addFeatByName(lu.feat);   // "feat:<Name>" or "feat:<Name>#2" for a repeated feat
         // C4: apply the feat's structured effects (Tough HP) to the live sheet.
         const fe = RULES().featEffects(lu.feat, totalOf(cur));
         if(fe.hpBonus) bumpHP(fe.hpBonus);
@@ -395,7 +408,7 @@
           fx.saves.forEach((a) => { if(window.grantSaveProf) window.grantSaveProf(a); });
           if(fx.profs.length && window.appendProficiencies) window.appendProficiencies(fx.profs.join(", "));
           fx.spells.forEach((g) => { if(window.addGrantedSpell) window.addGrantedSpell(g.name, g.ability, g.source); else if(window.addSpellByName) window.addSpellByName(g.name); });
-          if(window.setChoice) window.setChoice("feat:" + lu.feat, lu.featChoices);
+          if(window.setChoice) window.setChoice(typeof featKey === "string" ? featKey : "feat:" + lu.feat, lu.featChoices);
         }
       }
       // A CON increase (from the ASI or a feat) raises HP for EVERY level, retroactively.
@@ -403,7 +416,7 @@
       if(dCon > 0) bumpHP(dCon * totalOf(cur));
     }
     // spells (a subclass caster's spells carry its ability so the sheet uses INT for an Eldritch Knight)
-    lu.pickedCantrips.concat(lu.pickedSpells).forEach((n) => { if(window.addSpellByName) window.addSpellByName(n); });
+    lu.pickedCantrips.concat(lu.pickedSpells).forEach((n) => { if(window.addSpellByName) window.addSpellByName(n, lu.targetCls); });
     if(ctx.cf && ctx.cf.source === "subclass"){
       try { (window.getSpellsKnown ? window.getSpellsKnown() : []).forEach((sk) => { if(lu.pickedCantrips.concat(lu.pickedSpells).some((n) => norm(n) === norm(sk.name))){ sk.ability = ctx.cf.ability; sk.src = "class"; } }); } catch(e){}
       if(typeof window.setSubclassCasting === "function") window.setSubclassCasting(lu.targetCls, ctx.sub, { type: ctx.cf.type, ability: ctx.cf.ability, list: ctx.cf.list });

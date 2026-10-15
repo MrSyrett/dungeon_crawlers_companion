@@ -498,6 +498,7 @@
         },
         {
           "name": "Vestige Patron",
+          "alwaysPreparedByChoice": {"choice": "vestigeDomain", "label": "Vestige domain", "options": {"Life": {"3": ["Aid", "Bless", "Cure Wounds", "Lesser Restoration"], "5": ["Mass Healing Word", "Revivify"], "7": ["Aura of Life", "Death Ward"], "9": ["Greater Restoration", "Mass Cure Wounds"]}, "Light": {"3": ["Burning Hands", "Faerie Fire", "Scorching Ray", "See Invisibility"], "5": ["Daylight", "Fireball"], "7": ["Arcane Eye", "Wall of Fire"], "9": ["Flame Strike", "Scrying"]}, "Trickery": {"3": ["Charm Person", "Disguise Self", "Invisibility", "Pass without Trace"], "5": ["Hypnotic Pattern", "Nondetection"], "7": ["Confusion", "Dimension Door"], "9": ["Dominate Person", "Modify Memory"]}, "War": {"3": ["Guiding Bolt", "Magic Weapon", "Shield of Faith", "Spiritual Weapon"], "5": ["Crusader's Mantle", "Spirit Guardians"], "7": ["Fire Shield", "Freedom of Movement"], "9": ["Hold Monster", "Steel Wind Strike"]}}},
           "className": "Warlock",
           "flavor": "Your pact draws on a vestige — a dying, forgotten god that shares its remaining strength through a manifested companion as it seeks to reclaim its power.",
           "source": "arcana-unleashed",

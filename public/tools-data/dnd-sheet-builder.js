@@ -128,7 +128,7 @@
   function spellMaxFor(cl) { if (isWizardEntry(cl)) return CALC().spellbookAt(classDataByName(cl.cls), cl.level); return preparedFor(cl); }
   function spellMinFor(cl) { if (isWizardEntry(cl)) return cl.level <= 1 ? spellMaxFor(cl) : Math.min(preparedFor(cl), spellMaxFor(cl)); return preparedFor(cl); }
   function maxSpellLevelFor(cl) { const cf = castingFor(cl); if (!cf) return 0; const m = cf.maxLevel(cl.level); return (m < 1 && cf.prepared(cl.level) > 0) ? 1 : m; }
-  function spellInList(s, nm) { return CALC().spellInList(s, nm); }
+  function spellInList(s, nm) { return [].concat(nm).some((n) => CALC().spellInList(s, n)); }   // one list or several (Magical Secrets)
   // The picker's spell list. "available to me" on → only this list's spells;
   // off → every class's spells in range (to browse), non-eligible ones shown but their +Add disabled.
   function spellsFor(minL, maxL, avail, list) {
@@ -170,7 +170,9 @@
     if (st.species) out.push({ root:"species", state: st.spChoices, fx: () => ch.speciesEffects(st.species, st.lineage, { level: num(st.level) }, st.spChoices) });
     if (b && b.feat) out.push({ root:"bg", state: st.bgChoices, fx: () => ch.featEffects(b.feat, st.bgChoices) });
     (st.advances || []).forEach((av, i) => { if (av.mode === "feat" && av.feat) out.push({ root:"adv:" + i, state: av.choices || (av.choices = {}), fx: () => ch.featEffects(av.feat, av.choices || {}) }); });
-    classBreakdown().forEach((cl) => { if (!cl.cls) return; out.push({ root:"class:" + cl.cls, state: classState(cl.cls), fx: () => { const x = classFxFor(cl.cls) || { skills:[], expertise:[], profs:[] }; return { abil:{}, skills:x.skills, expertise:x.expertise, saves:[], spells:[], profs:x.profs, picks:[] }; } }); });
+    classBreakdown().forEach((cl) => { if (!cl.cls) return; out.push({ root:"class:" + cl.cls, state: classState(cl.cls), fx: () => { const x = classFxFor(cl.cls) || { skills:[], expertise:[], profs:[] }; return { abil:{}, skills:x.skills, expertise:x.expertise, saves:[], spells:[], profs:x.profs, picks:[] }; } });
+      // a feat granted by a class choice (Lessons of the First Ones → an Origin feat) applies its own picks
+      const cfx = classFxFor(cl.cls); if (cfx && cfx.featStates) Object.keys(cfx.featStates).forEach((fn) => out.push({ root:"classfeat:" + cl.cls + ":" + fn, state: cfx.featStates[fn], fx: () => ch.featEffects(fn, cfx.featStates[fn]) })); });
     out.push({ root:"tools", state: st.tools, fx: () => ({ abil:{}, skills:[], expertise:[], saves:[], spells:[], profs: toolPickNames(), picks:[] }) });
     out.push({ root:"equip", state: st.equipPicks, fx: () => ({ abil:{}, skills:[], expertise:[], saves:[], spells:[], profs:[], picks:[] }) });
     return out;
@@ -536,9 +538,9 @@
       h += '<div class="dndb-spsec"><span class="m-lbl" style="display:block;margin-top:10px;color:#8ad4ff;">' + esc(who) + ' ' + cl.level + ' — ' + esc(cf.list) + ' spell list · ' + esc(ABIL_NAME[cf.ability] || cf.ability) + '</span>';
       if (cCount > 0) {
         h += '<span class="m-lbl">Cantrips — choose ' + cCount + ' <span style="color:#8ad4ff;">(' + p.cantrips.length + '/' + cCount + ')</span></span>';
-        h += CALC().spellPickerHTML(spellsFor(0, 0, avail, cf.list), {
+        h += CALC().spellPickerHTML(spellsFor(0, 0, avail, CALC().listsFor(cf.list, cl.level)), {
           selected: (n) => p.cantrips.includes(n),
-          disabledAdd: (s) => !spellInList(s, cf.list) || p.cantrips.length >= cCount,
+          disabledAdd: (s) => !spellInList(s, CALC().listsFor(cf.list, cl.level)) || p.cantrips.length >= cCount,
           pickAttr: 'data-spcls="' + esc(cl.cls) + '" data-sp-pick',
           emptyHTML: '<p class="spl-empty">No cantrips available.</p>',
         });
@@ -547,9 +549,9 @@
         const lbl = isWizardEntry(cl) ? 'Spellbook — choose ' + (sMin === sMax ? sMax : sMin + '–' + sMax) + ' (you prepare ' + preparedFor(cl) + ')' : 'Spells — choose ' + sMax;
         h += '<span class="m-lbl">' + lbl + ' (up to level ' + maxL + ') <span style="color:#8ad4ff;">(' + p.spells.length + '/' + sMax + ')</span></span>';
         if (isWizardEntry(cl)) h += '<p class="m-hint" style="margin:2px 0 6px;">Your first ' + preparedFor(cl) + ' picks start prepared; the rest wait in your spellbook.</p>';
-        h += CALC().spellPickerHTML(spellsFor(1, maxL, avail, cf.list), {
+        h += CALC().spellPickerHTML(spellsFor(1, maxL, avail, CALC().listsFor(cf.list, cl.level)), {
           selected: (n) => p.spells.includes(n),
-          disabledAdd: (s) => !spellInList(s, cf.list) || p.spells.length >= sMax,
+          disabledAdd: (s) => !spellInList(s, CALC().listsFor(cf.list, cl.level)) || p.spells.length >= sMax,
           pickAttr: 'data-spcls="' + esc(cl.cls) + '" data-sp-pick',
           emptyHTML: '<p class="spl-empty">No spells available.</p>',
         });
@@ -832,17 +834,25 @@
     Object.keys(classFx).forEach((k) => classFx[k].skills.forEach((s) => { const real = matchSkill(s); if (real && !skillProf[real]) skillProf[real] = 1; }));
     allExpertise().forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 2; });
     // ── feats: background origin feat + fighting styles + advancement (B1) ──
-    const addedFeats = [];
-    if (b && b.feat) addedFeats.push(b.feat);
-    Object.keys(classFx).forEach((k) => classFx[k].feats.forEach((f) => { if (addedFeats.indexOf(f) < 0) addedFeats.push(f); }));
-    (st.advances || []).forEach((av) => { if (av.mode === "feat" && av.feat) addedFeats.push(av.feat); });
+    // Every feat instance with its own pick state. A repeatable feat taken twice (Skilled, Magic
+    // Initiate…) keeps both instances; the sheet keys the 2nd one's choices "feat:<Name>#2".
+    const featInst = [];
+    const addFeat = (fn, state) => {
+      const f = D.feats().find((x) => norm(x.name) === norm(String(fn).replace(/\s*\(.*\)$/, "")));
+      if (featInst.some((x) => x.name === fn) && !(f && f.repeatable)) return;   // non-repeatable: once
+      featInst.push({ name: fn, state: state || {} });
+    };
+    if (b && b.feat) addFeat(b.feat, st.bgChoices);
+    Object.keys(classFx).forEach((k) => classFx[k].feats.forEach((f) => addFeat(f, (classFx[k].featStates || {})[f])));
+    (st.advances || []).forEach((av) => { if (av.mode === "feat" && av.feat) addFeat(av.feat, av.choices || {}); });
+    // a Human's Versatile feat is a real feat on the sheet too
+    if (ch && st.species) speciesSpecs().forEach((s) => { if (s.kind === "feat" && st.spChoices[s.key]) addFeat(st.spChoices[s.key], ch.subState(st.spChoices, s.key)); });
+    const addedFeats = featInst.map((x) => x.name);
     // the choices store the sheet keeps (so feature entries can show the picks and re-derive granted spells)
     const choices = {};
     if (st.species) choices.species = st.spChoices;
-    if (b && b.feat) choices["feat:" + b.feat] = st.bgChoices;
-    (st.advances || []).forEach((av) => { if (av.mode === "feat" && av.feat) choices["feat:" + av.feat] = av.choices || {}; });
-    // a Human's Versatile feat is a real feat on the sheet too
-    if (ch && st.species) speciesSpecs().forEach((s) => { if (s.kind === "feat" && st.spChoices[s.key]) { const fn = st.spChoices[s.key]; if (addedFeats.indexOf(fn) < 0) addedFeats.push(fn); choices["feat:" + fn] = ch.subState(st.spChoices, s.key); } });
+    const seenFeat = {};
+    featInst.forEach((x) => { seenFeat[x.name] = (seenFeat[x.name] || 0) + 1; if (Object.keys(x.state).length) choices["feat:" + x.name + (seenFeat[x.name] > 1 ? "#" + seenFeat[x.name] : "")] = x.state; });
     // B12/B14: class choice state under "class:<Class>" (orders, invocations, metamagic…); Weapon Mastery under choices.mastery
     const mastery = [];
     classBreakdown().forEach((cl) => { if (!cl.cls) return; const state = classState(cl.cls); if (Object.keys(state).length) choices["class:" + cl.cls] = JSON.parse(JSON.stringify(state)); classFx[cl.cls].mastery.forEach((w) => { if (mastery.indexOf(w) < 0) mastery.push(w); }); });

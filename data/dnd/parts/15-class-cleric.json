@@ -455,7 +455,7 @@
         },
         {
           "name": "War Domain",
-          "alwaysPrepared": {"3": ["Guiding Bolt", "Magic Weapon", "Shield of Faith", "Spiritual Weapon"], "5": ["Crusader's Mantle", "Spirit Guardians"], "7": ["Freedom of Movement", "Staggering Smite"], "9": ["Banishing Smite", "Steel Wind Strike"]},
+          "alwaysPrepared": {"3": ["Guiding Bolt", "Magic Weapon", "Shield of Faith", "Spiritual Weapon"], "5": ["Crusader's Mantle", "Spirit Guardians"], "7": ["Fire Shield", "Freedom of Movement"], "9": ["Hold Monster", "Steel Wind Strike"]},
           "className": "Cleric",
           "flavor": "A martial priest who leads the charge, guiding weapons with divine will and fighting like a seasoned soldier.",
           "source": "phb",
@@ -485,6 +485,7 @@
         },
         {
           "name": "Arcana Domain",
+          "alwaysPrepared": {"3": ["Detect Magic", "Magic Missile", "Magic Weapon", "Nystul's Magic Aura"], "5": ["Counterspell", "Dispel Magic"], "7": ["Arcane Eye", "Leomund's Secret Chest"], "9": ["Bigby's Hand", "Teleportation Circle"]},
           "className": "Cleric",
           "flavor": "A cleric of gods tied to knowledge, secrecy, and power, who treats magical lore not as personal power but as a gift to be shared and protected.",
           "source": "arcana-unleashed",

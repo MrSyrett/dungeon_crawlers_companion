@@ -2096,6 +2096,24 @@ export const DND_SPELLS: DndSpell[] = [
     "source": "srd"
   },
   {
+    "name": "Dragon's Breath",
+    "level": 2,
+    "school": "Transmutation",
+    "castingTime": "Bonus Action",
+    "range": "Touch",
+    "components": "V, S, M (a hot pepper)",
+    "duration": "Concentration, up to 1 minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Sorcerer",
+      "Wizard"
+    ],
+    "description": "You touch a willing creature and choose Acid, Cold, Fire, Lightning, or Poison. Until the spell ends, the creature can take a Magic action to exhale a 15-foot Cone of that energy; each creature in the Cone makes a Dexterity saving throw, taking 3d6 damage of the chosen type on a failed save or half as much on a success.",
+    "higherLevels": "The damage increases by 1d6 for each spell slot level above 2.",
+    "source": "phb"
+  },
+  {
     "name": "Enhance Ability",
     "level": 2,
     "school": "Transmutation",

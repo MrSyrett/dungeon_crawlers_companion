@@ -56,7 +56,7 @@
       "subclasses": [
         {
           "name": "Draconic Sorcery",
-          "alwaysPrepared": {"3": ["Alter Self", "Chromatic Orb", "Command"], "5": ["Fear", "Fly"], "7": ["Arcane Eye", "Charm Monster"], "9": ["Legend Lore", "Summon Dragon"]},
+          "alwaysPrepared": {"3": ["Alter Self", "Chromatic Orb", "Command", "Dragon's Breath"], "5": ["Fear", "Fly"], "7": ["Arcane Eye", "Charm Monster"], "9": ["Legend Lore", "Summon Dragon"]},
           "className": "Sorcerer",
           "flavor": "A sorcerer with dragon blood, warded by scaled resilience and commanding an elemental heritage — eventually sprouting wings.",
           "source": "srd",

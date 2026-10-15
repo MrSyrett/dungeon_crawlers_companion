@@ -3388,11 +3388,11 @@ export const DND_CLASSES: DndClass[] = [
             "Spirit Guardians"
           ],
           "7": [
-            "Freedom of Movement",
-            "Staggering Smite"
+            "Fire Shield",
+            "Freedom of Movement"
           ],
           "9": [
-            "Banishing Smite",
+            "Hold Monster",
             "Steel Wind Strike"
           ]
         },
@@ -3425,6 +3425,26 @@ export const DND_CLASSES: DndClass[] = [
       },
       {
         "name": "Arcana Domain",
+        "alwaysPrepared": {
+          "3": [
+            "Detect Magic",
+            "Magic Missile",
+            "Magic Weapon",
+            "Nystul's Magic Aura"
+          ],
+          "5": [
+            "Counterspell",
+            "Dispel Magic"
+          ],
+          "7": [
+            "Arcane Eye",
+            "Leomund's Secret Chest"
+          ],
+          "9": [
+            "Bigby's Hand",
+            "Teleportation Circle"
+          ]
+        },
         "className": "Cleric",
         "flavor": "A cleric of gods tied to knowledge, secrecy, and power, who treats magical lore not as personal power but as a gift to be shared and protected.",
         "source": "arcana-unleashed",
@@ -3845,6 +3865,76 @@ export const DND_CLASSES: DndClass[] = [
     "subclasses": [
       {
         "name": "Circle of the Land",
+        "alwaysPreparedByChoice": {
+          "choice": "land",
+          "label": "Land type",
+          "options": {
+            "Arid": {
+              "3": [
+                "Blur",
+                "Burning Hands",
+                "Fire Bolt"
+              ],
+              "5": [
+                "Fireball"
+              ],
+              "7": [
+                "Blight"
+              ],
+              "9": [
+                "Wall of Stone"
+              ]
+            },
+            "Polar": {
+              "3": [
+                "Fog Cloud",
+                "Hold Person",
+                "Ray of Frost"
+              ],
+              "5": [
+                "Sleet Storm"
+              ],
+              "7": [
+                "Ice Storm"
+              ],
+              "9": [
+                "Cone of Cold"
+              ]
+            },
+            "Temperate": {
+              "3": [
+                "Misty Step",
+                "Shocking Grasp",
+                "Sleep"
+              ],
+              "5": [
+                "Lightning Bolt"
+              ],
+              "7": [
+                "Freedom of Movement"
+              ],
+              "9": [
+                "Tree Stride"
+              ]
+            },
+            "Tropical": {
+              "3": [
+                "Acid Splash",
+                "Ray of Sickness",
+                "Web"
+              ],
+              "5": [
+                "Stinking Cloud"
+              ],
+              "7": [
+                "Polymorph"
+              ],
+              "9": [
+                "Insect Plague"
+              ]
+            }
+          }
+        },
         "className": "Druid",
         "flavor": "A druid bound to a particular land — desert, mountains, forest, or coast — drawing extra spells and protection from it.",
         "source": "srd",
@@ -4596,6 +4686,9 @@ export const DND_CLASSES: DndClass[] = [
       },
       {
         "name": "Warrior of the Mystic Arts",
+        "spellList": "Sorcerer",
+        "spellcastingAbility": "WIS",
+        "spellcasting": "third",
         "className": "Monk",
         "flavor": "A monk who weaves Sorcerer magic through martial focus, balancing spell slots and Focus Points to blend cantrips and spells into flurries of blows.",
         "source": "arcana-unleashed",
@@ -6121,7 +6214,8 @@ export const DND_CLASSES: DndClass[] = [
           "3": [
             "Alter Self",
             "Chromatic Orb",
-            "Command"
+            "Command",
+            "Dragon's Breath"
           ],
           "5": [
             "Fear",
@@ -6897,6 +6991,92 @@ export const DND_CLASSES: DndClass[] = [
       },
       {
         "name": "Vestige Patron",
+        "alwaysPreparedByChoice": {
+          "choice": "vestigeDomain",
+          "label": "Vestige domain",
+          "options": {
+            "Life": {
+              "3": [
+                "Aid",
+                "Bless",
+                "Cure Wounds",
+                "Lesser Restoration"
+              ],
+              "5": [
+                "Mass Healing Word",
+                "Revivify"
+              ],
+              "7": [
+                "Aura of Life",
+                "Death Ward"
+              ],
+              "9": [
+                "Greater Restoration",
+                "Mass Cure Wounds"
+              ]
+            },
+            "Light": {
+              "3": [
+                "Burning Hands",
+                "Faerie Fire",
+                "Scorching Ray",
+                "See Invisibility"
+              ],
+              "5": [
+                "Daylight",
+                "Fireball"
+              ],
+              "7": [
+                "Arcane Eye",
+                "Wall of Fire"
+              ],
+              "9": [
+                "Flame Strike",
+                "Scrying"
+              ]
+            },
+            "Trickery": {
+              "3": [
+                "Charm Person",
+                "Disguise Self",
+                "Invisibility",
+                "Pass without Trace"
+              ],
+              "5": [
+                "Hypnotic Pattern",
+                "Nondetection"
+              ],
+              "7": [
+                "Confusion",
+                "Dimension Door"
+              ],
+              "9": [
+                "Dominate Person",
+                "Modify Memory"
+              ]
+            },
+            "War": {
+              "3": [
+                "Guiding Bolt",
+                "Magic Weapon",
+                "Shield of Faith",
+                "Spiritual Weapon"
+              ],
+              "5": [
+                "Crusader's Mantle",
+                "Spirit Guardians"
+              ],
+              "7": [
+                "Fire Shield",
+                "Freedom of Movement"
+              ],
+              "9": [
+                "Hold Monster",
+                "Steel Wind Strike"
+              ]
+            }
+          }
+        },
         "className": "Warlock",
         "flavor": "Your pact draws on a vestige — a dying, forgotten god that shares its remaining strength through a manifested companion as it seeks to reclaim its power.",
         "source": "arcana-unleashed",
@@ -7488,7 +7668,7 @@ export const DND_CLASSES: DndClass[] = [
             "Shield"
           ],
           "5": [
-            "Branding Smite",
+            "Shining Smite",
             "Warding Bond"
           ],
           "9": [

@@ -99,7 +99,7 @@
         },
         {
           "name": "Battle Smith",
-          "alwaysPrepared": {"3": ["Heroism", "Shield"], "5": ["Branding Smite", "Warding Bond"], "9": ["Aura of Vitality", "Conjure Barrage"], "13": ["Aura of Purity", "Fire Shield"], "17": ["Banishing Smite", "Mass Cure Wounds"]},
+          "alwaysPrepared": {"3": ["Heroism", "Shield"], "5": ["Shining Smite", "Warding Bond"], "9": ["Aura of Vitality", "Conjure Barrage"], "13": ["Aura of Purity", "Fire Shield"], "17": ["Banishing Smite", "Mass Cure Wounds"]},
           "className": "Artificer",
           "flavor": "A protector-artificer who fights beside a loyal mechanical Steel Defender and wields arcane weapons with Intelligence.",
           "source": "eberron",

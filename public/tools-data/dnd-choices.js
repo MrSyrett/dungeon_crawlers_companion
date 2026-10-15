@@ -40,7 +40,7 @@
 
   // "Magic Initiate (Cleric)" → { feat: <Magic Initiate data>, name:"Magic Initiate", preset:"Cleric" }
   function featBase(name) {
-    const raw = String(name || "").trim();
+    const raw = String(name || "").trim().replace(/#\d+$/, "");   // a repeated feat's 2nd/3rd instance ("Skilled#2")
     let f = D.feats().find((x) => norm(x.name) === norm(raw));
     let preset = "";
     if (!f) { const m = raw.match(/^(.+?)\s*\((.+)\)$/); if (m) { f = D.feats().find((x) => norm(x.name) === norm(m[1])); preset = m[2].trim(); } }
@@ -273,11 +273,36 @@
         return { v: o.name, label: o.name, desc: o.desc + (o.req ? " (Requires " + o.req + ".)" : ""), disabled: !!why, reason: why, meta: [o.level ? "L" + o.level : "", o.pact || "", o.prereq || ""].filter(Boolean).join(" · ") };
       });
       add(Object.assign(S.pick("invocations", coLabel("invocations", "Eldritch Invocation") + "s", options, 1, "Pact of the Blade / Chain / Tome are invocations too (take one as your Pact Boon)."), { effect: "feature", featMeta: "Eldritch Invocation" }), steps);
+      // Follow-up picks some invocations ask for. `prev` comes from the stored (earlier-level) state
+      // so a level-up only asks again for a pick made this level.
+      const stored = ctx.stored || {};
+      const dep = (spec) => { const n = spec.count || 1; spec.count = n; spec.level = L; spec.prev = vals(stored, spec.key).length >= n ? n : 0; out.push(spec); };   // nested feat picks keep their own count (Skilled: 3)
+      const dmgCantrips = D.spells().filter((s) => s.level === 0 && (s.classes || []).some((x) => norm(x) === "warlock") && /\d+d\d+[^.]*damage/i.test(s.description || "")).map((s) => opt(s.name, ""));
+      [["Agonizing Blast","agonizingBlast","add your Charisma modifier to its damage"],["Eldritch Spear","eldritchSpear","its range becomes 30 feet × your Warlock level"],["Repelling Blast","repellingBlast","a hit can push a Large or smaller creature up to 10 feet"]].forEach(([inv, key, what]) => {
+        if (picked.includes(inv)) dep(Object.assign(S.pick(key, inv + " — which cantrip?", dmgCantrips, 1, "Choose a Warlock cantrip you know that deals damage: " + what + "."), { effect: "pick" }));
+      });
+      if (picked.includes("Lessons of the First Ones")) {
+        dep(Object.assign(S.feat("lessonsFeat", "Lessons of the First Ones — Origin feat", "Origin"), { effect: "originFeat" }));
+        if (state.lessonsFeat) featSpecs(state.lessonsFeat, subState(state, "lessonsFeat")).forEach((fs) => dep(Object.assign({}, fs, { key: "lessonsFeat." + fs.key, parentFeat: state.lessonsFeat, effect: "featSub" })));
+      }
       [[11,6],[13,7],[15,8],[17,9]].forEach(([lv, sl]) => add(Object.assign(S.spell("arcanum" + sl, "Mystic Arcanum — a level " + sl + " Warlock spell", 1, { levels:[sl], lists:["Warlock"] }), { effect: "spell", featMeta: "Mystic Arcanum" }), { [lv]: 1 }));
     }
     if (cn === "sorcerer") add(Object.assign(S.pick("metamagic", coLabel("metamagic", "Metamagic") + " options", simpleOpts("metamagic"), 1), { effect: "feature", featMeta: "Metamagic" }), { 2:2, 10:3, 17:4 });
     if (cn === "fighter" && sub === "battle master") add(Object.assign(S.pick("maneuvers", coLabel("maneuvers", "Maneuver") + "s", simpleOpts("maneuvers"), 1), { effect: "feature", featMeta: "Maneuver" }), { 3:3, 7:5, 10:7, 15:9 });
-    if (cn === "bard") { const ml = (window.DNDCALC && window.DNDCALC.maxSpellLevelSingle) ? window.DNDCALC.maxSpellLevelSingle(c, L) : 5; add(Object.assign(S.spell("magicalSecrets", "Magical Secrets — spells from the Cleric, Druid, or Wizard list", 1, { levels: Array.from({ length: ml }, (_, i) => i + 1), lists: ["Cleric","Druid","Wizard"] }), { effect: "spell", featMeta: "Magical Secrets" }), { 10:2, 14:4, 18:6 }); }
+    // 2024 Magical Secrets (Bard 10) grants no extra spells — it opens the Cleric, Druid and Wizard
+    // lists for the Bard's own prepared spells (handled by the spell pickers / Spellbook).
+    if (cn === "bard" && sub === "college of lore") {
+      add(Object.assign(S.skill("loreProficiencies", "Bonus Proficiencies — skills", 1), { effect: "skill" }), { 3: 3 });
+      const ml = (window.DNDCALC && window.DNDCALC.maxSpellLevelSingle) ? window.DNDCALC.maxSpellLevelSingle(c, L) : 3;
+      add(Object.assign(S.spell("magicalDiscoveries", "Magical Discoveries — spells from the Cleric, Druid, or Wizard list (always prepared)", 1, { levels: Array.from({ length: ml + 1 }, (_, i) => i), lists: ["Cleric","Druid","Wizard"] }), { effect: "spell", featMeta: "Magical Discoveries" }), { 6: 2 });
+    }
+    // A subclass spell list picked from options (Circle of the Land's land type, Vestige Patron's domain)
+    const subObj = (c.subclasses || []).find((x) => norm(x.name) === sub);
+    if (subObj && subObj.alwaysPreparedByChoice) {
+      const bc = subObj.alwaysPreparedByChoice;
+      const opts = Object.keys(bc.options || {}).map((k) => { const lv = bc.options[k]; return opt(k, Object.keys(lv).map((x) => "L" + x + ": " + lv[x].join(", ")).join(" · ")); });
+      add(Object.assign(S.pick(bc.choice, subObj.name + " — " + (bc.label || "choice"), opts, 1, "Sets your always-prepared " + subObj.name + " spells."), { effect: "feature", featMeta: subObj.name }), { [c.subclassLevel || 3]: 1 });
+    }
     // Weapon Mastery: pick weapons you're proficient with that have a mastery property
     let mSteps = stepsFromColumn(c, "Weapon Mastery"); if (!Object.keys(mSteps).length) mSteps = MASTERY_FALLBACK[cn] || {};
     if (Object.keys(mSteps).length) {
@@ -291,11 +316,13 @@
   // feats (Fighting Styles), features [{name,desc,meta}], mastery [], spells [], extraCantrips, orders {} }
   function classChoiceEffects(specs, state) {
     state = state || {};
-    const out = { skills:[], expertise:[], languages:[], profs:[], feats:[], features:[], mastery:[], spells:[], extraCantrips:0, orders:{}, picks:[] };
+    const out = { skills:[], expertise:[], languages:[], profs:[], feats:[], features:[], mastery:[], spells:[], extraCantrips:0, orders:{}, picks:[], featStates:{} };
     specs.forEach((spec) => {
       const v = vals(state, spec.key); if (!v.length) return;
       const optOf = (x) => (spec.options || []).find((o) => o.v === x) || { v: x, label: x, desc: "" };
       if (spec.effect === "style") out.feats = out.feats.concat(v);
+      else if (spec.effect === "originFeat") { out.feats = out.feats.concat(v); out.featStates[v[0]] = subState(state, spec.key); }
+      else if (spec.effect === "featSub") return;   // folded into featStates above
       else if (spec.effect === "expertise") out.expertise = out.expertise.concat(v);
       else if (spec.effect === "skill") out.skills = out.skills.concat(v);
       else if (spec.effect === "language") out.languages = out.languages.concat(v);
