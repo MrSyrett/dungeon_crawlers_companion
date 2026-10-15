@@ -2208,7 +2208,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
     MMRPG:['npc','mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
     CO:  ['npc'],
     YZE: ['yzemonster','yzetreasure','yzestar','yzeworld','yzejobs','yzeencounters','yzetwist','yzeshore','yzeoracle','yzesalvage'],
-    TWD: ['twdmonster','twdtreasure'],
+    TWD: ['twdmonster','twdtreasure','twdscavenge','twdlocation','twdnpc','twdfaction','twdwalker','twdevents','twdrumors'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -3262,6 +3262,13 @@ GMScenes.renderPins();
         <option value="yzesalvage">Salvage</option>
         <option value="twdmonster">Creature</option>
         <option value="twdtreasure">Gear Drop</option>
+        <option value="twdscavenge">Scavenging</option>
+        <option value="twdlocation">Locations</option>
+        <option value="twdnpc">NPC</option>
+        <option value="twdfaction">Faction</option>
+        <option value="twdwalker">Walker</option>
+        <option value="twdevents">Events</option>
+        <option value="twdrumors">Rumors</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -4291,6 +4298,61 @@ GMScenes.renderPins();
             <div class="ai-status xs-tr-status"></div>
           </div>
         </div>
+      </div>
+
+      <!-- TWD: SCAVENGING (D666) -->
+      <div class="gen-panel" data-panel="twdscavenge">
+        <div class="gen-results twd-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to scavenge (D666).</div></div>
+      </div>
+
+      <!-- TWD: LOCATIONS -->
+      <div class="gen-panel" data-panel="twdlocation">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Kind
+            <select class="gen-select twd-sub">
+              <option value="building">Building</option>
+              <option value="rooms">Room</option>
+              <option value="ruins">Ruins</option>
+              <option value="wilderness">Wilderness</option>
+              <option value="weather">Weather</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results twd-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- TWD: NPC BUILDER -->
+      <div class="gen-panel" data-panel="twdnpc">
+        <div class="gen-results twd-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to build a random NPC.</div></div>
+      </div>
+
+      <!-- TWD: FACTION -->
+      <div class="gen-panel" data-panel="twdfaction">
+        <div class="gen-results twd-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to generate a faction.</div></div>
+      </div>
+
+      <!-- TWD: WALKER -->
+      <div class="gen-panel" data-panel="twdwalker">
+        <div class="gen-results twd-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for a walker (past + wounds).</div></div>
+      </div>
+
+      <!-- TWD: RANDOM EVENTS -->
+      <div class="gen-panel" data-panel="twdevents">
+        <div class="gen-results twd-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for a random event (D66).</div></div>
+      </div>
+
+      <!-- TWD: RUMORS / FACTION ENCOUNTERS / FACTION CHANGE -->
+      <div class="gen-panel" data-panel="twdrumors">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Table
+            <select class="gen-select twd-sub">
+              <option value="rumors">Rumor</option>
+              <option value="encounters">Faction Encounter</option>
+              <option value="change">Faction Change</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results twd-out" style="margin-top:10px;"></div>
       </div>
 
       <!-- MAP GENERATOR PANEL (system-neutral — same engine as the Dungeon/Adventure map) -->
@@ -12075,6 +12137,7 @@ window.init_gen = function(root) {
   const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'twdtreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
   // Alien table generators are driven straight from the window Roll button (no inline button).
   const YZE_TABLE_GENS = ['yzestar', 'yzeworld', 'yzejobs', 'yzeencounters', 'yzetwist', 'yzeshore', 'yzeoracle', 'yzesalvage'];
+  const TWD_TABLE_GENS = ['twdscavenge', 'twdlocation', 'twdnpc', 'twdfaction', 'twdwalker', 'twdevents', 'twdrumors'];
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -12129,6 +12192,11 @@ window.init_gen = function(root) {
     if(YZE_TABLE_GENS.indexOf(activeTab) >= 0) {
       const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
       if(panel && typeof window.alienGenPanel === 'function') window.alienGenPanel(panel);
+      return;
+    }
+    if(TWD_TABLE_GENS.indexOf(activeTab) >= 0) {
+      const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
+      if(panel && typeof window.twdGenPanel === 'function') window.twdGenPanel(panel);
       return;
     }
     if(activeTab==='npc') {
@@ -14379,6 +14447,7 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <script src="/tools-data/yze-alien-attacks.js"></script>
 <script src="/tools-data/twd-data.js"></script>
 <script src="/tools-data/twd-bestiary.js"></script>
+<script src="/tools-data/twd-gm-tables.js"></script>
 <script src="/tools-data/yze-alien-gm-tables.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <!-- PDF.js + the shared reader are loaded on demand by init_rules (first Rulebooks open) — not on every GM Screen load. -->
@@ -17390,6 +17459,78 @@ window.init_vtt = init_vtt;
       var sm=o.sub||'salvage';
       if(sm==='anomalousEnvironment'){ var ae=d66idx(d.salvage.anomalousEnvironment); html=card('Anomalous Environment · '+ae.code,'',esc(ae.val)); }
       else { var sv=rollTable(d.salvage.salvage); html=card('Salvage · '+sv.code,'', line('Common',sv.code,sv.row.common)+line('Rare',sv.code,sv.row.rare)); }
+    }
+    o.el.innerHTML=html;
+  };
+})();
+
+// ── The Walking Dead GM tables (core rulebook). Data in /tools-data/twd-gm-tables.js
+//    as TWD_GM_TABLES. Each panel is driven by the window Roll button → twdGenPanel.
+(function(){
+  'use strict';
+  function T(){ return (typeof TWD_GM_TABLES!=='undefined')?TWD_GM_TABLES:(window.TWD_GM_TABLES||null); }
+  function d6(){ return 1+Math.floor(Math.random()*6); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function bounds(tok){
+    tok=String(tok).trim(); var m;
+    if(/or less/i.test(tok)){ return [-Infinity, parseInt(tok,10)]; }
+    if((m=tok.match(/^<=?\s*(\d+)/))){ return [-Infinity, parseInt(m[1],10)]; }
+    if((m=tok.match(/^(\d+)\s*\+$/))){ return [parseInt(m[1],10), Infinity]; }
+    if((m=tok.match(/^(\d+)\s*[–-]\s*(\d+)$/))){ return [parseInt(m[1],10), parseInt(m[2],10)]; }
+    if((m=tok.match(/^(\d+)$/))){ var v=parseInt(m[1],10); return [v,v]; }
+    return [0,0];
+  }
+  function maxEnd(tbl){ var mx=-Infinity; tbl.forEach(function(r){ var b=bounds(r.roll); [b[0],b[1]].forEach(function(x){ if(isFinite(x)&&x>mx)mx=x; }); }); return mx; }
+  function rollTable(tbl){
+    if(!tbl||!tbl.length) return { code:'—', row:{ result:'(no table)' } };
+    var mx=maxEnd(tbl), n;
+    if(mx<=6){ n=d6(); }
+    else if(mx<=12){ n=d6()+d6(); }
+    else { var codes=[]; tbl.forEach(function(r){ var b=bounds(r.roll); var lo=isFinite(b[0])?b[0]:b[1], hi=isFinite(b[1])?b[1]:b[0]; for(var v=lo;v<=hi;v++) codes.push(v); }); n= codes.length? codes[Math.floor(Math.random()*codes.length)] : (mx>66? d6()*100+d6()*10+d6() : d6()*10+d6()); }
+    var row=null; for(var i=0;i<tbl.length;i++){ var b=bounds(tbl[i].roll); if(n>=b[0]&&n<=b[1]){ row=tbl[i]; break; } } if(!row)row=tbl[tbl.length-1];
+    return { code: row.roll, row: row };
+  }
+  function card(kick,title,body){
+    return '<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;">'
+      +'<div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">'+esc(kick)+'</div>'
+      +(title?'<div style="font-size:16px;font-weight:800;color:#3fd0e6;">'+esc(title)+'</div>':'')
+      +(body?'<div style="font-size:13px;margin-top:3px;">'+body+'</div>':'')+'</div>';
+  }
+  function line(lbl,code,txt){ return '<div style="margin-top:3px;"><b style="color:#3fd0e6;">'+esc(lbl)+'</b> <span style="color:#999;font-size:11px;">('+esc(code)+')</span> '+esc(txt)+'</div>'; }
+  function ctx(panel){ var s=panel&&panel.querySelector('.twd-sub'); return { panel:panel, el:panel&&panel.querySelector('.twd-out'), sub:s?s.value:'' }; }
+
+  window.twdGen=function(btn){ var p=btn&&btn.closest('[data-panel]'); if(p) window.twdGenPanel(p); };
+  window.twdGenPanel=function(panel){
+    var d=T(); var o=ctx(panel); if(!d||!o.el){ if(o.el) o.el.innerHTML=card('TWD tables did not load','','Open the GM Screen from the app.'); return; }
+    var kind=panel.dataset.panel, html='';
+    if(kind==='twdscavenge'){
+      var r=rollTable(d.scavenging); html=card('Scavenging · D666 '+r.code,'',esc(r.row.result));
+    } else if(kind==='twdlocation'){
+      var sub=o.sub||'building', tbl=d.locations?d.locations[sub]:null, r=rollTable(tbl);
+      var nm={building:'Building',rooms:'Room',ruins:'Ruins',wilderness:'Wilderness',weather:'Weather'}[sub];
+      var body=line(nm,r.code,r.row.result);
+      if(sub==='building' && d.locations && d.locations.buildingContents && d.locations.buildingContents.length){ var c=rollTable(d.locations.buildingContents); body+=line('Contents',c.code,c.row.result); }
+      html=card('Location · '+nm,'',body);
+    } else if(kind==='twdnpc'){
+      var n=d.npc||{};
+      var rF=rollTable(n.features); var body=line('Feature',rF.code,rF.row.result);
+      var rI=rollTable(n.issues); body+=line('Issue',rI.code,rI.row.result);
+      var rS=rollTable(n.secretIssues); body+=line('Secret',rS.code,rS.row.result);
+      var rK=rollTable(n.skills); body+=line('Skills',rK.code,rK.row.result);
+      var rG=rollTable(n.gear); body+=line('Gear',rG.code,rG.row.result);
+      html=card('Random NPC','',body);
+    } else if(kind==='twdfaction'){
+      var f=d.faction||{}, rows=[['Size','size'],['Leadership','leadership'],['Type','type'],['Needs','needs'],['Assets','assets'],['Issue','issues'],['Haven','havens']];
+      var body=rows.map(function(p){ var t=f[p[1]]; if(!t||!t.length)return ''; var r=rollTable(t); return line(p[0],r.code,r.row.result); }).filter(Boolean).join('');
+      html=card('Faction','',body);
+    } else if(kind==='twdwalker'){
+      var w=d.walker||{}, rp=rollTable(w.past), rw=rollTable(w.wounds);
+      html=card('Walker','', line('In life',rp.code,rp.row.result)+line('Wounds',rw.code,rw.row.result));
+    } else if(kind==='twdevents'){
+      var r=rollTable(d.events); html=card('Random Event · '+r.code,'',esc(r.row.result));
+    } else if(kind==='twdrumors'){
+      var sub=o.sub||'rumors', fp=d.factionPlay||{}, r=rollTable(fp[sub]);
+      html=card(({rumors:'Rumor',encounters:'Faction Encounter',change:'Faction Change'}[sub])+' · '+r.code,'',esc(r.row.result));
     }
     o.el.innerHTML=html;
   };
