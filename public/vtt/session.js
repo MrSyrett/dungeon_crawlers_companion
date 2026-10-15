@@ -301,8 +301,35 @@
   // ---- live sync ------------------------------------------------------------
   function startNet() {
     var transport = window.VTTNet.httpTransport({ base: V.signalBase, campaignId: V.campaignId, me: V.userId });
-    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers }); renderPlayers([]); startPopoutBeacon(); }
-    else { net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: (chars[0] && chars[0].title) || V.userName, iceServers: V.iceServers, onStatus: setConn }); setConn("waiting"); }
+    if (isGM) { net = window.VTTNet.host({ transport: transport, board: board, me: V.userId, iceServers: V.iceServers, onPeers: renderPlayers }); renderPlayers([]); startPopoutBeacon(); startAudioRelay(); }
+    else {
+      // Table sound: the GM Screen's music/scenes/soundboard mirrored here, under
+      // a local master volume (public/vtt/audio-sync.js). Positions are placed on
+      // the host's clock, which net.guest estimates over the data channel.
+      if (window.VTTAudio) audio = window.VTTAudio.create({ mount: mount.querySelector(".vtt-top.right"), hostNow: function () { return net && net.hostNow ? net.hostNow() : Date.now(); }, storageKey: "vtt-audio-master:" + V.campaignId });
+      net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: (chars[0] && chars[0].title) || V.userName, iceServers: V.iceServers, onStatus: setConn, onAudio: function (s) { if (audio) audio.apply(s); } });
+      setConn("waiting");
+    }
+  }
+  // GM side: the GM Screen publishes "what I'm playing" snapshots on a same-origin
+  // BroadcastChannel (lib/gm-screen.ts → audioBroadcast); whether this host is the
+  // Maps-pane embed, the pop-out, or its own tab, it hears them and relays each one
+  // to every connected player. We say hello so a screen that's already playing
+  // re-sends its current state at once. Snapshots stamped with another campaign's
+  // id (two GM Screens open) are ignored.
+  var audio = null;
+  function startAudioRelay() {
+    if (typeof BroadcastChannel === "undefined") return;
+    try {
+      var bc = new BroadcastChannel("dcc-gm-audio");
+      bc.onmessage = function (ev) {
+        var m = ev && ev.data;
+        if (!m || m.t !== "audio") return;
+        if (m.camp && V.campaignId && m.camp !== V.campaignId) return;
+        if (net && net.audio) net.audio(m);
+      };
+      try { bc.postMessage({ t: "hello" }); } catch (e) {}
+    } catch (e) {}
   }
   // When we're the GM's popped-out tabletop, tell the GM Screen we're alive (and
   // say goodbye on close) over a same-origin BroadcastChannel. The GM Screen only

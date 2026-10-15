@@ -363,7 +363,12 @@ body.dark .section-bar,body.dark .section-bar.accent,body.dark .subhead,body.dar
 body.dark .hdr-btn{border-color:#2b565e;}
 body.dark .pip,body.dark .vbox,body.dark .cond{background:var(--input-bg);}
 
-@media(max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}}
+@media(max-width:1024px){.body-row{flex-direction:column;align-items:stretch;}.stats-col,.center-col{width:100%;}.hdr-top{grid-template-columns:1fr;gap:9px;}
+  /* Mobile section order: flatten the two columns + the vit-row so every section is a
+     direct flex item of .body-row, then order them. Desktop is untouched. */
+  .stats-col,.center-col,.vit-row{display:contents;}
+  .m-attrs{order:1;}.m-health{order:2;}.m-armor{order:3;}.m-crit{order:4;}.m-xp{order:5;}.m-cond{order:6;}.m-tabs{order:7;}
+}
 .roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
 /* Hybrid: single-column body keyed off the sheet area's own width (shrinks when log is open); log stays docked right until the phone-width @media below. */
 @container (max-width:900px){
@@ -371,9 +376,24 @@ body.dark .pip,body.dark .vbox,body.dark .cond{background:var(--input-bg);}
   .stats-col,.center-col{width:100%;}
   .hdr-top{grid-template-columns:1fr;gap:9px;}
   .hdr-metarow>*{flex:1 1 31%!important;}
+  .stats-col,.center-col,.vit-row{display:contents;}
+  .m-attrs{order:1;}.m-health{order:2;}.m-armor{order:3;}.m-crit{order:4;}.m-xp{order:5;}.m-cond{order:6;}.m-tabs{order:7;}
 }
 @container (max-width:520px){
   .hdr-metarow>*{flex:1 1 47%!important;}
+}
+/* Mobile Gear tab: break each inventory row's Details onto its own line so the
+   name and details each get the full width. */
+@media(max-width:560px){
+  #inv-tbl,#inv-tbl tbody{display:block;}
+  #inv-tbl thead{display:none;}
+  #inv-tbl tr{display:grid;grid-template-columns:auto 1fr auto auto;grid-template-areas:"eq name wt x" "det det det det";column-gap:6px;row-gap:3px;align-items:center;padding:5px 2px;border-bottom:1px solid var(--rule);}
+  #inv-tbl td{padding:2px 3px;border:none;}
+  #inv-tbl td:nth-child(1){grid-area:eq;}
+  #inv-tbl td:nth-child(2){grid-area:name;}
+  #inv-tbl td:nth-child(3){grid-area:det;}
+  #inv-tbl td:nth-child(4){grid-area:wt;text-align:right;}
+  #inv-tbl td:nth-child(5){grid-area:x;text-align:right;}
 }
 @media(max-width:820px){
   .sheet-wrap{padding:12px 12px 16px;}
@@ -622,11 +642,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="card">
+      <div class="card m-attrs">
         <div class="section-bar accent"><span>Attributes &amp; Skills</span></div>
         <div class="attr-skills" id="attr-skills"></div>
       </div>
-      <div class="xp-sp-row">
+      <div class="xp-sp-row m-xp">
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="xp-row"><span class="v-lbl">Experience</span><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="margin-left:auto;" oninput="S.xp=num(this.value);scheduleAutosave()"></div>
         </div>
@@ -634,7 +654,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="xp-row"><span class="v-lbl">Story Pts</span><div class="story-pips" id="story-pips" style="margin-left:auto;" title="Story Points (max 3) — tick up or down"></div></div>
         </div>
       </div>
-      <div class="card">
+      <div class="card m-crit">
       <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">＋ Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">＋ Ment</button></span></div>
       <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div></div>
       </div>
@@ -642,7 +662,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
     <div class="center-col">
       <div class="vit-row">
-      <div class="stat-bubbles">
+      <div class="stat-bubbles m-armor">
         <div class="card">
           <div class="section-bar accent"><span>Armor</span></div>
           <div class="blk bubble-val"><span class="stress-val" id="armor-val" title="Evolved Edition: a static soak — subtract this from each hit's damage (no roll)">0</span></div>
@@ -652,7 +672,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="blk bubble-val"><span class="stress-val" id="resolve-rating" title="⌈(Wits + Empathy) ÷ 2⌉ — subtracted on Stress &amp; Panic rolls">0</span></div>
         </div>
       </div>
-      <div class="card hstress" style="flex:1 1 0;min-width:0;">
+      <div class="card hstress m-health" style="flex:1 1 0;min-width:0;">
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
@@ -665,7 +685,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
       </div>
 
-      <div class="card yze-only">
+      <div class="card yze-only m-cond">
       <div class="section-bar accent yze-only"><span>Conditions</span></div>
       <div class="conds yze-only">
         <div class="cond-grp"><div class="cg-lbl">Physical conditions</div><div class="cond-row" id="cond-phys"></div></div>
@@ -673,7 +693,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
       </div>
 
-      <div class="card tabs-card">
+      <div class="card tabs-card m-tabs">
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Combat</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>

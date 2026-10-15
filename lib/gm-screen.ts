@@ -423,6 +423,107 @@ function audioVolumeFix(vttToken: string): string {
 </script>`;
 }
 
+// GM Screen → tabletop audio relay ("share what I hear with the players").
+//
+// Every sound the GM Screen makes — Music tool, Scenes mixes, Soundboard — plays
+// through `new Audio(...)` and is mixed by writing `.volume` on independent
+// elements. So instead of capturing/streaming the GM's mix (re-encoded, Chrome-only,
+// banner — tried and reverted), we OBSERVE those elements and publish a tiny
+// state snapshot: which URLs are playing, at what position, at what volume, looping
+// or not. The live tabletop host (/play, same origin — embedded in the Maps pane,
+// popped out, or its own tab) picks the snapshot up over a BroadcastChannel and
+// relays it to every connected player over the existing WebRTC data channel; each
+// player's browser then streams the SAME files from the same URLs itself, at the
+// GM's per-track levels, under its own local master volume. Full source quality,
+// zero server bytes, nothing to install.
+//
+// Only http(s) URLs can be mirrored; a local file (blob:) or data: URL is reported
+// as `local: true` so the tabletop can say "1 track is GM-only". Snapshots are
+// throttled (a 1.8 s crossfade writes .volume at 25 Hz — players get ~8/s) and a
+// heartbeat re-sends the current positions every few seconds for drift correction.
+// Installed in <head> AFTER audioVolumeFix, so it wraps whatever window.Audio is
+// by then (the iOS gain shim's `src` getter returns the ORIGINAL url, which is
+// exactly what we want to publish).
+function audioBroadcast(campaignId: string | null): string {
+  return `<script>
+(function () {
+  if (typeof BroadcastChannel === "undefined") return;
+  var Native = window.Audio;
+  if (!Native) return;
+  var CAMP = ${JSON.stringify(campaignId || "")};
+  var bc; try { bc = new BroadcastChannel("dcc-gm-audio"); } catch (e) { return; }
+
+  var els = [], nextId = 1, seq = 0, timer = null, lastSent = 0, lastEmpty = true;
+  var MIN_GAP = 120, HEARTBEAT = 4000, IDLE_DROP = 15000;
+  var EVENTS = ["play", "playing", "pause", "ended", "emptied", "loadstart", "loadedmetadata", "durationchange", "volumechange", "seeked", "ratechange"];
+
+  function enlist(a) { if (els.indexOf(a) < 0) els.push(a); }
+  function track(a) {
+    if (!a.__dccAid) {
+      a.__dccAid = nextId++;
+      EVENTS.forEach(function (ev) { a.addEventListener(ev, function () { enlist(a); schedule(); }); });
+    }
+    enlist(a);
+  }
+  // Drop elements that have stayed paused for a while so one-shot soundboard
+  // hits don't pile up in memory; their listeners re-enlist them on play.
+  function prune() {
+    var now = Date.now();
+    els = els.filter(function (a) {
+      if (!a.paused && !a.ended) { a.__dccIdle = 0; return true; }
+      if (!a.__dccIdle) { a.__dccIdle = now; return true; }
+      return now - a.__dccIdle < IDLE_DROP;
+    });
+  }
+  function srcOf(a) {
+    var s = ""; try { s = a.src; } catch (e) {}
+    if (!s) { try { s = a.currentSrc; } catch (e2) {} }
+    return s || "";
+  }
+  function layer(a) {
+    if (a.paused || a.ended) return null;
+    var src = srcOf(a); if (!src) return null;
+    var http = /^https?:\\/\\//i.test(src);
+    var vol = 1; try { vol = a.muted ? 0 : +a.volume; } catch (e) {}
+    if (vol !== vol) vol = 1;
+    var dur = null; try { dur = isFinite(a.duration) && a.duration > 0 ? a.duration : null; } catch (e) {}
+    return { id: a.__dccAid, url: http ? src : null, local: !http, pos: +a.currentTime || 0, vol: Math.max(0, Math.min(1, vol)), loop: !!a.loop, rate: +a.playbackRate || 1, dur: dur };
+  }
+  function snapshot() {
+    prune();
+    var layers = [];
+    els.forEach(function (a) { var l = layer(a); if (l) layers.push(l); });
+    return { t: "audio", v: 1, camp: CAMP, seq: ++seq, at: Date.now(), layers: layers };
+  }
+  function send(force) {
+    var snap = snapshot();
+    var empty = !snap.layers.length;
+    if (empty && lastEmpty && !force) return;   // nothing playing, nothing changed — stay quiet
+    lastEmpty = empty; lastSent = Date.now();
+    try { bc.postMessage(snap); } catch (e) {}
+  }
+  function schedule() {
+    if (timer) return;
+    var wait = Math.max(0, MIN_GAP - (Date.now() - lastSent));
+    timer = setTimeout(function () { timer = null; send(false); }, wait);
+  }
+  setInterval(function () { send(false); }, HEARTBEAT);
+  // A tabletop host that (re)opens asks for the current state.
+  bc.onmessage = function (ev) { var m = ev && ev.data; if (m && m.t === "hello") send(true); };
+  window.addEventListener("pagehide", function () { try { bc.postMessage({ t: "audio", v: 1, camp: CAMP, seq: ++seq, at: Date.now(), layers: [] }); } catch (e) {} });
+
+  function Wrapped(src) {
+    var a = src === undefined ? new Native() : new Native(src);
+    track(a);
+    return a;
+  }
+  Wrapped.prototype = Native.prototype;
+  window.Audio = Wrapped;
+  window.__dccAudioSnapshot = snapshot;
+})();
+</script>`;
+}
+
 /**
  * Build the GM Screen page. Pass `vttToken` to render the framed, token-auth
  * variant (fetch-patch + embed chrome); omit it for the cookie full-page variant.
@@ -544,9 +645,12 @@ export async function buildGmScreenHtml(opts: {
   // the template's music code runs. (The Sound Library is now a docked column
   // inside the Music tool itself — see init_music in the template — so there is
   // no separate injected picker overlay any more.)
+  // The audio relay wraps window.Audio AFTER the iOS fix so it sees every element
+  // the template creates (and the original URLs, not the proxied ones).
+  const audioRelay = audioBroadcast(camp?.id ?? null);
   html = html.replace(
     /<\/head>/i,
-    `${audioScript}\n${tokenScript}${hiddenScript}${stateScript}${SHIM}\n</head>`,
+    `${audioScript}\n${audioRelay}\n${tokenScript}${hiddenScript}${stateScript}${SHIM}\n</head>`,
   );
 
   // Chrome after <body>: the shared mini-bar (cookie mode) or the status-only

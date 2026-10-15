@@ -242,6 +242,19 @@
       var src = embeddedSrc();
       sendObj(peer, scenePayload(!!src, peer));
       if (src) shipMap(peer, src);
+      // ...and whatever the GM Screen is playing right now, so they join mid-track
+      // at the right position (the snapshot carries pos + host time).
+      if (lastAudio) sendObj(peer, lastAudio, "audio");
+    }
+
+    // GM Screen audio state (see audioBroadcast in lib/gm-screen.ts): the host just
+    // relays the latest snapshot to every player. Keyed "audio" so a burst of
+    // throttled volume updates behind a congested channel collapses to the newest.
+    var lastAudio = null;
+    function audio(snap) {
+      if (!snap || snap.t !== "audio") return;
+      lastAudio = snap;
+      broadcast(snap, "audio");
     }
     // Ship the embedded map as mapBegin/mapChunk/mapEnd (chunked for a live progress
     // bar and the atomic swap on the guest). Backpressure + ordering are handled by
@@ -357,6 +370,10 @@
         var o = msg.o || { kind: null };
         board.setOverlay(peerId, o);
         Object.keys(peers).forEach(function (k) { if (k !== peerId) sendObj(peers[k], { t: "overlay", from: peerId, o: o }); });
+      } else if (msg.t === "clk") {
+        // Clock probe: echo the player's stamp with ours so they can place audio
+        // positions on the host's timeline (the GM Screen and this host share a clock).
+        sendObj(peer, { t: "clk", c: msg.c, s: Date.now() });
       }
     }
     function syncDoor(i) { var d = board.state.map.doors[i]; if (d) broadcast({ t: "door", index: i, closed: d.closed, locked: d.locked }); }
@@ -374,6 +391,7 @@
       pushScene: pushScene, pushTokens: pushTokens, peerCount: peerCount, peers: peersList,
       settings: pushSettings,
       overlay: hostOverlay,
+      audio: audio,
       ping: function (x, y) { broadcast({ t: "ping", x: x, y: y }); },
       doorSync: function (i) { syncDoor(i); },
       stop: function () { transport.stop(); Object.keys(peers).forEach(function (k) { try { peers[k].pc.close(); } catch (e) {} }); },
@@ -388,6 +406,34 @@
     var joinTries = 0, joinTimer = null, connState = "waiting";
     var mapBuf = null, pendingMap = null, mapLen = 0;
     var reasm = makeReasm(); // reassembles fragmented host->guest messages
+    var onAudio = opts.onAudio || function () {};
+
+    // Host clock estimate, for audio sync. Audio snapshots say "position P at host
+    // time T"; to play the same spot we need host-now, i.e. our clock + offset.
+    // Probe with a few round trips on connect (then one every 30 s) and keep the
+    // offset from the LOWEST-RTT sample — that's the one with the least skew.
+    var clk = { offset: 0, rtt: Infinity, timer: null, burst: 0 };
+    function hostNow() { return Date.now() + clk.offset; }
+    function probeClock() { sendHost({ t: "clk", c: Date.now() }); }
+    function startClock() {
+      stopClock();
+      clk.rtt = Infinity; clk.burst = 0;
+      var tick = function () {
+        if (!conn || !conn.open) return;
+        probeClock();
+        clk.burst++;
+        clk.timer = setTimeout(tick, clk.burst < 4 ? 400 : 30000);
+      };
+      tick();
+    }
+    function stopClock() { if (clk.timer) { clearTimeout(clk.timer); clk.timer = null; } }
+    function onClock(msg) {
+      var now = Date.now(), rtt = now - msg.c;
+      if (rtt < 0 || rtt > 5000) return;
+      // Accept a sample that is at least as good as the best so far, with a little
+      // slack so the estimate can follow a slowly drifting clock.
+      if (rtt <= clk.rtt + 20) { clk.rtt = Math.min(clk.rtt, rtt); clk.offset = msg.s + rtt / 2 - now; }
+    }
 
     // Report a coarse connection state to the UI:
     //   "waiting"    — sent a join, no GM host has answered yet (GM tab not open?)
@@ -447,8 +493,11 @@
     function wireDc(dc) {
       conn.dc = dc;
       conn.out = makeOutbox({ dc: function () { return conn && conn.dc; }, open: function () { return !!(conn && conn.open); } });
-      dc.onopen = function () { conn.open = true; joinTries = 0; if (joinTimer) { clearTimeout(joinTimer); joinTimer = null; } setState("connected"); };
-      dc.onclose = function () { if (conn) conn.open = false; setState("waiting"); clearLoad(); resumeJoining(); };
+      dc.onopen = function () { conn.open = true; joinTries = 0; if (joinTimer) { clearTimeout(joinTimer); joinTimer = null; } setState("connected"); startClock(); };
+      // Losing the GM also silences the table: the host is the only source of
+      // "what's playing", so an empty snapshot fades everything out rather than
+      // leaving a loop running for a player whose GM has gone.
+      dc.onclose = function () { if (conn) conn.open = false; setState("waiting"); clearLoad(); stopClock(); try { onAudio({ t: "audio", layers: [], at: hostNow() }); } catch (e) {} resumeJoining(); };
       dc.onmessage = function (ev) { onHostMsg(ev.data); };
     }
 
@@ -497,6 +546,8 @@
       } else if (msg.t === "ping") { board.ping(msg.x, msg.y, "#4ea3ff"); }
       else if (msg.t === "overlay") { board.setOverlay(msg.from || "gm", msg.o || { kind: null }); }
       else if (msg.t === "door") { board.setDoor(msg.index, { closed: msg.closed, locked: msg.locked }); }
+      else if (msg.t === "clk") { onClock(msg); }
+      else if (msg.t === "audio") { try { onAudio(msg); } catch (e) {} }
       else if (msg.t === "mapBegin") { mapBuf = ""; mapLen = msg.len || 0; if (board.setLoading) board.setLoading(1); }
       else if (msg.t === "mapChunk") { if (mapBuf !== null) { mapBuf += msg.s; if (board.setLoading && mapLen) board.setLoading(Math.min(99, mapBuf.length / mapLen * 100)); } }
       else if (msg.t === "mapEnd") {
@@ -549,6 +600,7 @@
     return {
       connected: function () { return !!(conn && conn.open); },
       state: function () { return connState; },
+      hostNow: hostNow,
       overlay: guestOverlay,
       // Manual "Reconnect" — tear down any half-open peer and start fresh.
       reconnect: function () {
