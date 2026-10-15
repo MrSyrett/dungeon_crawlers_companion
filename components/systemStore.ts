@@ -28,12 +28,6 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Candela Obscura (Darrington Press) — gaslamp horror on the Illuminated
   // Worlds engine: d6 dice pools, roles & specialties, drives & actions.
   { key: "CO", name: "Candela Obscura", short: "CO", accent: "var(--candela)" },
-  { key: "ACE", name: "ACE!", short: "ACE", accent: "var(--ace)" },
-  // Star Wars: The Roleplaying Game (WEG 1e, 1987) with the Rules Companion.
-  { key: "SW", name: "Star Wars", short: "SW", accent: "var(--sw)" },
-  // D6 System: Second Edition (Gallant Knight Games, 2024) — a genre-agnostic
-  // evolution of the West End Games D6 System.
-  { key: "D62E", name: "D6 System 2e", short: "D62e", accent: "var(--d62e)" },
   { key: "MMRPG", name: "Marvel Multiverse RPG", short: "Marvel", accent: "var(--mmrpg)" },
   // Justice League Unlimited RPG (Quickstart) — DC's d20 super-hero system:
   // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
@@ -43,6 +37,12 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // four Traits (Brains/Muscles/Moves/Cool), Talents, the Ghost Die, and
   // Brownie Points. Roll a pool of d6 vs a Difficulty; one die is the Ghost Die.
   { key: "GB", name: "Ghostbusters", short: "GB", accent: "var(--gb)" },
+  // Star Wars: The Roleplaying Game (WEG 1e, 1987) with the Rules Companion.
+  { key: "SW", name: "Star Wars", short: "SW", accent: "var(--sw)" },
+  { key: "ACE", name: "ACE!", short: "ACE", accent: "var(--ace)" },
+  // D6 System: Second Edition (Gallant Knight Games, 2024) — a genre-agnostic
+  // evolution of the West End Games D6 System.
+  { key: "D62E", name: "D6 System 2e", short: "D62e", accent: "var(--d62e)" },
   // ALIEN RPG (Free League) — the Year Zero Engine's sci-fi-horror game: four
   // attributes, twelve skills, D6 dice pools where each 6 is a success, Stress &
   // Panic, push at a cost. Internal key stays "YZE" so saved characters and
