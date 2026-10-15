@@ -28,6 +28,24 @@ export function TwdHeader({ title, subtitle }: { title: string; subtitle: string
   return <PageHeader title={title} subtitle={subtitle} />;
 }
 
+// A borderless tab row that switches a page's `mode` query param (mirrors YzeRef's).
+export function ModeRow({ base, current, param, options, active }: { base: string; current: Query; param: string; options: { key: string; label: string }[]; active: string }) {
+  return (
+    <div className="mb-6 flex flex-wrap gap-2">
+      {options.map((o) => (
+        <Link
+          key={o.key}
+          href={withParams(base, { ...current, [param]: o.key === options[0].key ? "" : o.key }, {})}
+          aria-pressed={(active || options[0].key) === o.key}
+          className={`${chipBase} ${(active || options[0].key) === o.key ? chipOn : chipOff}`}
+        >
+          {o.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {
   return (
     <form method="get" action={base} className="mb-4 flex gap-2" data-search>

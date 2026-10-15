@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { TWD_ARMOR, TWD_GEAR, TWD_CLOSE_WEAPONS, TWD_RANGED_WEAPONS } from "@/lib/data/twd-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
-import { TwdHeader, SectionH, cardCls, nameCls, hbBadge, type RawQuery } from "@/components/TwdRef";
+import { TwdHeader, ModeRow, SectionH, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/TwdRef";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +14,14 @@ const panelCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4
 const tableWrap = "overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]";
 const thRow = "bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]";
 const hbHead = "mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]";
+const BASE = "/twd/gear";
 
 export default async function Page({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const raw = await searchParams;
+  const mode = ["weapons", "armor"].includes(one(raw.mode)) ? one(raw.mode) : "general";
 
   const [gVis, gOwn, wVis, wOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "twd-gear" }),
@@ -26,7 +30,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
     ownHomebrew(user.id, "twd-weapon"),
     userCampaigns(user.id),
   ]);
-  void (await searchParams);
 
   const gHb: GearRow[] = gVis.map((h) => {
     const d = h.data as Record<string, unknown>;
@@ -41,16 +44,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <TwdHeader title="Gear" subtitle="The Walking Dead · general gear, weapons & armor" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Your carry limit equals double your Strength. Items cost slots (heavy ones more, light ones ½
-        or ¼; tiny items are free). Most gear grants a bonus to one skill — you may use the bonus from
-        only one item on a given roll.
-      </p>
+      <TwdHeader title="Gear" subtitle="The Walking Dead · general gear · weapons · armor" />
+      <ModeRow base={BASE} current={{}} param="mode" options={[{ key: "general", label: "General" }, { key: "weapons", label: "Weapons" }, { key: "armor", label: "Armor" }]} active={mode} />
 
       {/* General gear */}
+      {mode === "general" && (
       <section className="mb-8">
-        <SectionH>General Gear</SectionH>
+        <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+          Your carry limit equals double your Strength. Items cost slots (heavy ones more, light ones ½
+          or ¼; tiny items are free). Most gear grants a bonus to one skill — you may use the bonus from
+          only one item on a given roll.
+        </p>
         <div className={`${panelCls} mb-4`}>
           <h3 className={hbHead}>Your homebrew gear</h3>
           <HomebrewEditor kind="twd-gear" campaigns={campaigns} initial={gOwn} />
@@ -86,8 +90,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
           </table>
         </div>
       </section>
+      )}
 
       {/* Weapons */}
+      {mode === "weapons" && (
       <section className="mb-8">
         <SectionH>Weapons</SectionH>
         <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
@@ -157,8 +163,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
           </table>
         </div>
       </section>
+      )}
 
       {/* Armor */}
+      {mode === "armor" && (
       <section>
         <SectionH>Armor</SectionH>
         <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
@@ -183,6 +191,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
           </table>
         </div>
       </section>
+      )}
     </div>
   );
 }

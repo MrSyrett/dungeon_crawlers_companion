@@ -1,4 +1,5 @@
 import { TWD_THREAT, TWD_SWARM } from "@/lib/data/twd-data";
+import { TWD_WALKER_ATTACK } from "@/lib/data/twd-bestiary";
 import { TwdHeader } from "@/components/TwdRef";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +55,31 @@ export default function TwdDeadPage() {
                 <tr key={s.size} className="border-t border-[var(--border)]">
                   <td className="p-2 font-mono text-[15px] font-bold text-[var(--sys-link)]">{s.size}</td>
                   <td className="p-2 font-mono">{s.walkers}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Walker Attack</h2>
+        <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+          When the dead reach a survivor — a single attack from a mess-up, or when fighting out of a
+          swarm — roll <b className="text-[var(--sys-link)]">D66</b> here for what happens.
+        </p>
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+          <table className="w-full border-collapse text-[13px]">
+            <thead>
+              <tr className="bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]">
+                <th className="p-2">D66</th><th className="p-2">Effect</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TWD_WALKER_ATTACK.map((a) => (
+                <tr key={a.roll} className="border-t border-[var(--border)]">
+                  <td className="p-2 font-mono text-[15px] font-bold text-[var(--sys-link)]">{a.roll}</td>
+                  <td className="p-2 text-[var(--text)]">{a.effect}</td>
                 </tr>
               ))}
             </tbody>

@@ -125,6 +125,7 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/twd/gear", label: "Gear" },
     { href: "/twd/combat", label: "Combat" },
     { href: "/twd/dead", label: "The Dead" },
+    { href: "/twd/npcs", label: "NPCs" },
   ],
   MYZ: [
     { href: "/myz/skills", label: "Skills" },
