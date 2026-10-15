@@ -4,7 +4,7 @@ import { YzeHeader, SectionH, cardCls, nameCls, badge } from "@/components/YzeRe
 
 export const dynamic = "force-dynamic";
 
-const GROUPS = ["Xenomorph XX121", "Neomorph", "Other Species"] as const;
+const GROUPS = ["Xenomorph XX121", "Neomorph", "Other Species", "NPC"] as const;
 
 export default function YzeBestiaryPage() {
   return (
@@ -22,13 +22,25 @@ export default function YzeBestiaryPage() {
                   {c.stage ? <span className={badge}>{c.stage}</span> : null}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--muted)]">
-                  <span><b className="text-[var(--text)]">Speed</b> {c.speed}</span>
-                  <span><b className="text-[var(--text)]">Health</b> {c.health}</span>
-                  {c.skills !== "—" ? <span><b className="text-[var(--text)]">Skills</b> {c.skills}</span> : null}
-                  <span><b className="text-[var(--text)]">Armor</b> {c.armor}</span>
-                  {c.acid !== "—" ? <span><b className="text-[var(--text)]">Acid Splash</b> {c.acid}</span> : null}
+                  {c.group === "NPC" || c.str != null ? (
+                    <>
+                      <span><b className="text-[var(--text)]">STR</b> {c.str} <b className="text-[var(--text)]">AGI</b> {c.agi} <b className="text-[var(--text)]">WITS</b> {c.wits} <b className="text-[var(--text)]">EMP</b> {c.emp}</span>
+                      <span><b className="text-[var(--text)]">Health</b> {c.health}</span>
+                      {c.skills && c.skills !== "—" ? <span><b className="text-[var(--text)]">Skills</b> {c.skills}</span> : null}
+                      {c.talent ? <span><b className="text-[var(--text)]">Talent</b> {c.talent}</span> : null}
+                    </>
+                  ) : (
+                    <>
+                      <span><b className="text-[var(--text)]">Speed</b> {c.speed}</span>
+                      <span><b className="text-[var(--text)]">Health</b> {c.health}</span>
+                      {c.skills !== "—" ? <span><b className="text-[var(--text)]">Skills</b> {c.skills}</span> : null}
+                      <span><b className="text-[var(--text)]">Armor</b> {c.armor}</span>
+                      {c.acid !== "—" ? <span><b className="text-[var(--text)]">Acid Splash</b> {c.acid}</span> : null}
+                    </>
+                  )}
                 </div>
-                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{c.notes}</p>
+                {c.gear ? <p className="mt-1 text-[12px] text-[var(--muted)]"><b className="text-[var(--text)]">Gear</b> {c.gear}</p> : null}
+                {c.notes ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{c.notes}</p> : null}
                 {ALIEN_ATTACKS[c.name] ? (
                   <div className="mt-3">
                     <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">Signature Attacks <span className="font-normal">(D6)</span></div>

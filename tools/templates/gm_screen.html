@@ -2207,7 +2207,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
     ICRPG:['npc','icrpgmonster','icrpgtreasure'],
     MMRPG:['npc','mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
     CO:  ['npc'],
-    YZE: ['npc','yzemonster','yzetreasure','yzestar','yzeworld','yzejobs','yzeencounters','yzetwist','yzeshore','yzeoracle','yzesalvage'],
+    YZE: ['yzemonster','yzetreasure','yzestar','yzeworld','yzejobs','yzeencounters','yzetwist','yzeshore','yzeoracle','yzesalvage'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -4136,20 +4136,14 @@ GMScenes.renderPins();
       </div>
 
       <!-- YEAR ZERO ENGINE — crit (D66) + panic (D6) rollers and quick reference -->
-      <!-- ALIEN: STAR SYSTEM -->
+      <!-- ALIEN: STAR SYSTEM (driven by the window's Roll button) -->
       <div class="gen-panel" data-panel="yzestar">
-        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
-          <button class="btn small primary" onclick="alienGen(this)">Generate Star System</button>
-        </div>
-        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+        <div class="gen-results alien-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to generate a star system.</div></div>
       </div>
 
       <!-- ALIEN: WORLD -->
       <div class="gen-panel" data-panel="yzeworld">
-        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
-          <button class="btn small primary" onclick="alienGen(this)">Generate World</button>
-        </div>
-        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+        <div class="gen-results alien-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to generate a world.</div></div>
       </div>
 
       <!-- ALIEN: JOBS -->
@@ -4162,7 +4156,6 @@ GMScenes.renderPins();
               <option value="expedition">Expedition</option>
             </select>
           </label>
-          <button class="btn small primary" onclick="alienGen(this)">Generate Job</button>
         </div>
         <div class="gen-results alien-out" style="margin-top:10px;"></div>
       </div>
@@ -4178,17 +4171,13 @@ GMScenes.renderPins();
               <option value="colony">Colony</option>
             </select>
           </label>
-          <button class="btn small primary" onclick="alienGen(this)">Roll Encounter</button>
         </div>
         <div class="gen-results alien-out" style="margin-top:10px;"></div>
       </div>
 
       <!-- ALIEN: PLOT TWIST -->
       <div class="gen-panel" data-panel="yzetwist">
-        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
-          <button class="btn small primary" onclick="alienGen(this)">Roll Plot Twist</button>
-        </div>
-        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+        <div class="gen-results alien-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for a plot twist.</div></div>
       </div>
 
       <!-- ALIEN: SHORE LEAVE -->
@@ -4200,7 +4189,6 @@ GMScenes.renderPins();
               <option value="others">Everyone Else</option>
             </select>
           </label>
-          <button class="btn small primary" onclick="alienGen(this)">Roll Shore Leave</button>
         </div>
         <div class="gen-results alien-out" style="margin-top:10px;"></div>
       </div>
@@ -4215,7 +4203,6 @@ GMScenes.renderPins();
               <option value="danger">Danger Event</option>
             </select>
           </label>
-          <button class="btn small primary" onclick="alienGen(this)">Consult Oracle</button>
         </div>
         <div class="gen-results alien-out" style="margin-top:10px;"></div>
       </div>
@@ -4229,7 +4216,6 @@ GMScenes.renderPins();
               <option value="anomalousEnvironment">Anomalous Environment</option>
             </select>
           </label>
-          <button class="btn small primary" onclick="alienGen(this)">Roll Salvage</button>
         </div>
         <div class="gen-results alien-out" style="margin-top:10px;"></div>
       </div>
@@ -10373,12 +10359,20 @@ function xsMonSummary(src, m) {
     if(m.tags) out.notes.push(String(m.tags));
     if(m.description) out.notes.push(m.description);
   } else if(src === 'yze') {
-    // Alien RPG creatures: numeric Health is the HP track; Armor is a static soak,
-    // Speed/Acid are stats, key Skills a line, Stage on the meta line.
-    out.stats.push({ label: 'Health', val: String(m.health ?? '') }, { label: 'Armor', val: String(m.armor ?? '') });
-    if(m.speed) out.stats.push({ label: 'Speed', val: String(m.speed) });
-    if(m.acid && m.acid !== '—') out.stats.push({ label: 'Acid', val: String(m.acid) });
+    // Alien RPG. Human NPCs (group "NPC") lead with STR/AGI/WITS/EMP attributes +
+    // Talent/Gear; creatures lead with Health/Armor soak + Speed/Acid.
+    const isNpc = m.group === 'NPC' || m.str != null;
+    if(isNpc) {
+      [['STR','str'],['AGI','agi'],['WITS','wits'],['EMP','emp']].forEach(([l, k]) => { if(m[k] != null) out.stats.push({ label: l, val: String(m[k]), roll: m[k] > 0 ? m[k] + 'd6' : '' }); });
+      out.stats.push({ label: 'Health', val: String(m.health ?? '') });
+    } else {
+      out.stats.push({ label: 'Health', val: String(m.health ?? '') }, { label: 'Armor', val: String(m.armor ?? '') });
+      if(m.speed) out.stats.push({ label: 'Speed', val: String(m.speed) });
+      if(m.acid && m.acid !== '—') out.stats.push({ label: 'Acid', val: String(m.acid) });
+    }
     if(m.skills && m.skills !== '—') out.lines.push({ label: 'Skills', text: m.skills });
+    if(m.talent) out.lines.push({ label: 'Talent', text: m.talent });
+    if(m.gear) out.lines.push({ label: 'Gear', text: m.gear });
     if(m.stage) out.meta.push(['Stage', m.stage]);
     if(typeof ALIEN_ATTACKS !== 'undefined' && ALIEN_ATTACKS[m.name]) {
       ALIEN_ATTACKS[m.name].forEach(a => out.lines.push({ label: 'D6 ' + a.roll + ' · ' + a.name, text: a.effect }));
@@ -11991,7 +11985,9 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'yzestar', 'yzeworld', 'yzejobs', 'yzeencounters', 'yzetwist', 'yzeshore', 'yzeoracle', 'yzesalvage', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
+  // Alien table generators are driven straight from the window Roll button (no inline button).
+  const YZE_TABLE_GENS = ['yzestar', 'yzeworld', 'yzejobs', 'yzeencounters', 'yzetwist', 'yzeshore', 'yzeoracle', 'yzesalvage'];
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -12041,6 +12037,11 @@ window.init_gen = function(root) {
       const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
       const primary = panel && (panel.querySelector('.ai-roll-tier, .ai-fl-roll, .xs-tr-roll') || panel.querySelector('.btn.primary:not(.gen-roll):not(.gen-inline-roll)') || panel.querySelector('button.btn:not(.gen-roll)'));
       if(primary) primary.click();
+      return;
+    }
+    if(YZE_TABLE_GENS.indexOf(activeTab) >= 0) {
+      const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
+      if(panel && typeof window.alienGenPanel === 'function') window.alienGenPanel(panel);
       return;
     }
     if(activeTab==='npc') {
@@ -17244,10 +17245,13 @@ window.init_vtt = init_vtt;
       +(body?'<div style="font-size:13px;margin-top:3px;">'+body+'</div>':'')+'</div>';
   }
   function line(lbl,code,txt){ return '<div style="margin-top:3px;"><b style="color:#3fd0e6;">'+esc(lbl)+'</b> <span style="color:#999;font-size:11px;">('+esc(code)+')</span> '+esc(txt)+'</div>'; }
-  function ctx(btn){ var p=btn.closest('[data-panel]'); var s=p&&p.querySelector('.alien-sub'); return { panel:p, el:p&&p.querySelector('.alien-out'), sub:s?s.value:'' }; }
+  function ctx(panel){ var s=panel&&panel.querySelector('.alien-sub'); return { panel:panel, el:panel&&panel.querySelector('.alien-out'), sub:s?s.value:'' }; }
 
-  window.alienGen=function(btn){
-    var d=T(); var o=ctx(btn); if(!d||!o.el){ if(o.el) o.el.innerHTML=card('Alien tables did not load','','Open the GM Screen from the app.')+o.el.innerHTML; return; }
+  // Driven by the generator window's main Roll button (see the rollBtn dispatch);
+  // alienGen(btn) is kept as a thin shim for any inline caller.
+  window.alienGen=function(btn){ var p=btn&&btn.closest('[data-panel]'); if(p) window.alienGenPanel(p); };
+  window.alienGenPanel=function(panel){
+    var d=T(); var o=ctx(panel); if(!d||!o.el){ if(o.el) o.el.innerHTML=card('Alien tables did not load','','Open the GM Screen from the app.')+o.el.innerHTML; return; }
     var kind=o.panel.dataset.panel, html='';
     if(kind==='yzestar'){
       var body='';
@@ -17288,7 +17292,7 @@ window.init_vtt = init_vtt;
       if(sm==='anomalousEnvironment'){ var ae=d66idx(d.salvage.anomalousEnvironment); html=card('Anomalous Environment · '+ae.code,'',esc(ae.val)); }
       else { var sv=rollTable(d.salvage.salvage); html=card('Salvage · '+sv.code,'', line('Common',sv.code,sv.row.common)+line('Rare',sv.code,sv.row.rare)); }
     }
-    o.el.innerHTML=html+o.el.innerHTML;
+    o.el.innerHTML=html;
   };
 })();
 
