@@ -1,4 +1,5 @@
 import { ALIEN_BESTIARY } from "@/lib/data/yze-alien-data";
+import { ALIEN_ATTACKS } from "@/lib/data/yze-alien-attacks";
 import { YzeHeader, SectionH, cardCls, nameCls, badge } from "@/components/YzeRef";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,19 @@ export default function YzeBestiaryPage() {
                   {c.acid !== "—" ? <span><b className="text-[var(--text)]">Acid Splash</b> {c.acid}</span> : null}
                 </div>
                 <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{c.notes}</p>
+                {ALIEN_ATTACKS[c.name] ? (
+                  <div className="mt-3">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">Signature Attacks <span className="font-normal">(D6)</span></div>
+                    <ul className="mt-1 space-y-1">
+                      {ALIEN_ATTACKS[c.name].map((a, i) => (
+                        <li key={i} className="text-[12px] leading-relaxed text-[var(--text)]">
+                          <span className="inline-block min-w-[2.2em] font-mono text-[var(--muted)]">{a.roll}</span>
+                          <b>{a.name}.</b> {a.effect}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

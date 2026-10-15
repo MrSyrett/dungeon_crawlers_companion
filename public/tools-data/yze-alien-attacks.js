@@ -1,0 +1,123 @@
+// Alien RPG signature attack tables (Evolved Edition core rulebook, bestiary chapter).
+// Keyed by exact ALIEN_BESTIARY creature name. Shared tables duplicated per creature.
+
+const FACEHUGGER_ATTACKS = [
+  { roll: "1–2", name: "Skittering Menace", effect: "It picks its host and skitters forward spider-like. Victim gains stress level +1 and makes an immediate panic roll; its next attack is vs the same target at +1 to the D6 roll." },
+  { roll: "3–4", name: "Tail Grapple", effect: "Leaps and catches the victim, tail whipping. Roll another D6 — legs caught (falls, panics, immobilized), arm tangled (drops an item, panics), or neck choked (panic + STAMINA roll or 1 damage, armor no effect). Next attack vs same target at +2." },
+  { roll: "5", name: "Face Grapple", effect: "Leaps at the victim's face; attack with six base dice (can be defended against). On a hit the target makes an immediate panic roll, and the Facehugger performs The Final Embrace on it next turn." },
+  { roll: "6+", name: "The Final Embrace", effect: "Acid eats through any helmet/respirator (armor has no effect except the APEsuit); attack with eight base dice (defendable). On a hit the victim is facehugged and immediately broken." },
+];
+
+const CHESTBURSTER_ATTACKS = [
+  { roll: "1–3", name: "Escape", effect: "Snarls and flees two zones away into the nearest vent, sewer or duct. Once the PCs lose line of sight it has escaped and stealth mode ensues." },
+  { roll: "4", name: "Terrorizing Hiss", effect: "Jumps toward a target flashing its teeth; the target must make an immediate panic roll. (An Imp instead unsettlingly mimics the target's actions, same effect.)" },
+  { roll: "5", name: "Leg Slash", effect: "Attack with six base dice, base damage 2, armor piercing. If it damages a human, the victim immediately suffers an Impaled Thigh critical injury (even if not broken)." },
+  { roll: "6", name: "Throat Bite", effect: "Shrieks and goes for the throat; attack with eight base dice, base damage 1, armor piercing. If it causes damage it triggers an immediate panic roll." },
+];
+
+const DRONE_SCOUT_STALKER_ATTACKS = [
+  { roll: "1", name: "Hypnotizing Gaze", effect: "Stares into a victim at Short range; mesmerized, the victim gains stress level +1 and must make an immediate panic roll." },
+  { roll: "2", name: "Playing With Its Prey", effect: "Attacks without killing: the victim is knocked down and drops an item but takes no damage. The victim must make an immediate panic roll." },
+  { roll: "3", name: "Deadly Grab", effect: "Attack with eight base dice, base damage 1. On a hit it drags the victim into an adjacent zone (free move) and dumps it; the victim drops an item and makes an immediate panic roll." },
+  { roll: "4", name: "Ready To Kill", effect: "Attack with ten base dice. On a hit the victim takes 1 damage and is grappled (opposed CLOSE COMBAT vs the Xeno's MOBILITY to break free); all friendlies in the zone panic. Unless it breaks free, Headbite follows next turn." },
+  { roll: "5", name: "Tail Spike", effect: "Impales the victim with its razor-sharp tail; attack with ten base dice, base damage 2, armor piercing." },
+  { roll: "6", name: "Headbite", effect: "Inner jaws snap out; attack with nine base dice, base damage 2, armor piercing. Any damage to a human kills instantly (or the GM may leave them barely alive for ovomorphing)." },
+];
+
+const SOLDIER_SENTRY_ATTACKS = [
+  { roll: "1", name: "Call For Reinforcements", effect: "Another Xenomorph appears in an adjacent zone, ready to act next round. All PCs in sight gain stress level +1." },
+  { roll: "2", name: "Frenzy", effect: "Sweeps arms, legs and tail through the zone: all targets are knocked prone, take 1 damage and make an immediate panic roll. Automatic, but a successful MOBILITY dodge avoids all effects." },
+  { roll: "3", name: "Talon Attack", effect: "Wild clawed attack; roll with twelve base dice, base damage 1, armor piercing." },
+  { roll: "4", name: "Capture For The Hive", effect: "Venom-spiked tail, twelve base dice, base damage 1, armor piercing. Any damage inflicts 1 point plus paralyzing venom — STAMINA roll sets rounds before falling unconscious for a shift; a MEDICAL AID roll wakes them, else captured for the hive." },
+  { roll: "5", name: "Tail Spike", effect: "Impales the victim; attack with eleven base dice, base damage 2, armor piercing." },
+  { roll: "6", name: "Headbite", effect: "Inner jaws snap forward; attack with ten base dice, base damage 2, armor piercing. Any damage to a human kills instantly in one blow." },
+];
+
+const PRAETORIAN_CHARGER_QUEEN_ATTACKS = [
+  { roll: "1", name: "Call The Guard", effect: "Shrill cry summons D3 Sentries (Queen) or Soldiers (Praetorian/Charger) to its defense; they arrive the following round and can act." },
+  { roll: "2", name: "Frenzy", effect: "Sweeps through the zone: all targets are knocked prone, take 1 damage and make immediate panic rolls. Automatic, but a successful MOBILITY dodge avoids all effects." },
+  { roll: "3", name: "Beastly Bite", effect: "Huge bite; attack with ten base dice, base damage 1, armor piercing. Any damage to a human automatically breaks the victim." },
+  { roll: "4", name: "Charge", effect: "Charger/Queen only (re-roll for Praetorian). Attack with eight base dice, base damage 4 (2 for a Queen), armor piercing. Can be dodged but not defended against." },
+  { roll: "5", name: "Tail Spike", effect: "Impales the victim; attack with twelve base dice, base damage 2, armor piercing." },
+  { roll: "6", name: "Headbite", effect: "Inner jaws snap forward; attack with eleven base dice, base damage 2, armor piercing. Any damage to a human kills instantly in one blow." },
+];
+
+const NEOMORPHIC_BLOODBURSTER_ATTACKS = [
+  { roll: "1–3", name: "Escape", effect: "Snarls and flees two zones away into the nearest air duct. Once line of sight is lost combat ends and stealth mode ensues; after D6 stretches it grows into a Juvenile Neomorph and stalks the PCs." },
+  { roll: "4", name: "Terrifying Hiss", effect: "Jumps onto the victim showing its teeth; the victim must make an immediate panic roll." },
+  { roll: "5", name: "Leg Bite", effect: "Attack with six base dice, base damage 2. If it causes damage the victim immediately suffers an Impaled Thigh critical injury (even if not broken)." },
+  { roll: "6", name: "Throat Bite", effect: "Bites the throat; attack with eight base dice, base damage 1, armor piercing. Damage to a human triggers an immediate panic roll." },
+];
+
+const NEOMORPH_ATTACKS = [
+  { roll: "1", name: "Terrifying Hiss", effect: "Leans in at Adjacent range showing its teeth; the victim must make an immediate panic roll." },
+  { roll: "2", name: "Tail Slash", effect: "Pivots and slashes with its sharp tail; attack with ten base dice, base damage 2." },
+  { roll: "3", name: "Deadly Grab", effect: "Attack with eight base dice, base damage 1. On a hit it drags the victim into an adjacent zone (free move) and dumps it; the victim drops an item and makes an immediate panic roll." },
+  { roll: "4", name: "Leaping Attack", effect: "Attack with eight base dice, base damage 1. On a hit the victim is thrown down and makes an immediate panic roll, and the Neomorph makes a free extra attack with ten base dice, base damage 2." },
+  { roll: "5", name: "Tail Spike", effect: "Impales the victim; attack with ten base dice, base damage 2, armor piercing." },
+  { roll: "6", name: "Throat Bite", effect: "Bites the throat; attack with eight base dice, base damage 1, armor piercing. Any damage to a human kills the victim outright." },
+];
+
+const LION_WORM_ATTACKS = [
+  { roll: "1", name: "Intimidating Display", effect: "Rears up in a bluff to cover a retreat; all PCs within Short range make a panic roll. Next turn it tries to leave combat and re-enter stealth; its next attack rolls at +1 (max 6)." },
+  { roll: "2", name: "Playing With Its Prey", effect: "Attack with eight base dice. On a hit the target drops an item but is otherwise unharmed, then must make an immediate panic roll." },
+  { roll: "3", name: "Acrid Pheromones", effect: "Releases pungent pheromones; all PCs within Short range must make a STAMINA roll (no action) or lose their next turn." },
+  { roll: "4", name: "Feral Rage", effect: "Attack with ten base dice, base damage 2. If it causes any damage it immediately makes a second attack with the same effect." },
+  { roll: "5", name: "Crippling Attack", effect: "Goes for a crippling blow; attack with eight base dice, base damage 1, armor piercing. Any damage automatically breaks the victim." },
+  { roll: "6", name: "Death Roll", effect: "Attack with ten base dice, base damage 1, armor piercing. On a hit the victim is grappled (opposed CLOSE COMBAT vs MOBILITY to break free); each turn it squeezes for ten base dice, base damage 1 until the victim is killed or breaks free." },
+];
+
+const TANAKAN_SCORPIONID_ATTACKS = [
+  { roll: "1", name: "Retreat", effect: "Decides there is no good reason to fight and flees the combat as quickly as possible." },
+  { roll: "2", name: "Pinned Down", effect: "Pins the target with its pincers; attack with ten base dice, base damage 1. On a hit the target drops an item and must make an immediate panic roll." },
+  { roll: "3", name: "Pincer Grab", effect: "Attack with eight base dice, base damage 1. On a hit the victim is grappled (opposed CLOSE COMBAT vs MOBILITY); if held, an auto Tail Strike follows next turn. Underwater it also drags the victim a zone away and deeper (drowning)." },
+  { roll: "4", name: "Flailing Strike", effect: "Pincer swipe; attack with eight base dice, base damage 1. On a hit the victim is flung into the next zone, taking another point of damage." },
+  { roll: "5", name: "Tail Strike", effect: "Swings its tail; attack with ten base dice, base damage 1, armor piercing. Any damage also poisons the victim — a disease with virulence –2." },
+  { roll: "6", name: "Immobilize", effect: "Lunges for the legs; attack with eight base dice, base damage 2. Any damage causes an Impaled Thigh critical injury (even if not broken)." },
+];
+
+const SWARM_ATTACKS = [
+  { roll: "1", name: "Consume", effect: "Devours everything in its path; the Swarm's Health is restored by 2 points, making it harder to drive off." },
+  { roll: "2", name: "Pheromones", effect: "Grows agitated and releases pheromones; the Swarm's next roll on this table gets +1." },
+  { roll: "3", name: "Suffocating Swarm", effect: "Fills eyes, ears and mouths; everyone inside the Swarm area must make a STAMINA roll or lose their next turn, and the Swarm performs Stripped To The Bone on one victim next turn." },
+  { roll: "4", name: "Desperate Hunger", effect: "Eats armor polymers: everyone wearing armor is attacked with eight base dice, base damage 1, with any damage subtracted from armor level. The unarmored just have clothes shredded, no damage." },
+  { roll: "5", name: "Feeding Frenzy", effect: "Tries to envelop and eat everyone inside the Swarm; attack with six base dice, base damage 1, armor piercing." },
+  { roll: "6", name: "Stripped To The Bone", effect: "Focuses one target with twelve base dice, base damage 1, armor piercing. If it causes damage it auto-attacks the same target again each turn until it fails, the victim is stripped to the bone or rescued, or the Swarm is driven off." },
+];
+
+const HARVESTER_ATTACKS = [
+  { roll: "1", name: "Sonar Sweep", effect: "Sings out a sonar pulse; add +1 to the next roll on this table (max 6). All PCs within Long range gain stress level +1." },
+  { roll: "2", name: "Sonar Pulse", effect: "Weaponizes its sonar; everyone within Short range must make a STAMINA roll (no action) or be stunned and lose their next turn." },
+  { roll: "3", name: "Charge", effect: "Rushes the biggest threat and continues into the next zone; attack with six base dice, base damage 3, armor piercing. Can be dodged but not defended against." },
+  { roll: "4", name: "Stampede", effect: "Flails in a maddened frenzy; all targets in the zone suffer a crushing attack of eight base dice, base damage 2." },
+  { roll: "5", name: "Burrowing Claws", effect: "Leaps on a victim with its claws; attack with ten base dice, base damage 2, armor piercing." },
+  { roll: "6", name: "Pulverize", effect: "Drags the victim into its meat-grinder mouth; attack with eight base dice, base damage 2, armor piercing. If damage is inflicted the victim dies, minced." },
+];
+
+const ALIEN_ATTACKS = {
+  "Facehugger": FACEHUGGER_ATTACKS,
+  "Praeto-Facehugger": FACEHUGGER_ATTACKS,
+  "Royal Facehugger": FACEHUGGER_ATTACKS,
+  "Chestburster": CHESTBURSTER_ATTACKS,
+  "Bambi Burster": CHESTBURSTER_ATTACKS,
+  "Imp": CHESTBURSTER_ATTACKS,
+  "Queenburster": CHESTBURSTER_ATTACKS,
+  "Drone": DRONE_SCOUT_STALKER_ATTACKS,
+  "Scout": DRONE_SCOUT_STALKER_ATTACKS,
+  "Stalker": DRONE_SCOUT_STALKER_ATTACKS,
+  "Soldier (Warrior)": SOLDIER_SENTRY_ATTACKS,
+  "Sentry": SOLDIER_SENTRY_ATTACKS,
+  "Praetorian": PRAETORIAN_CHARGER_QUEEN_ATTACKS,
+  "Crusher (Charger)": PRAETORIAN_CHARGER_QUEEN_ATTACKS,
+  "Queen": PRAETORIAN_CHARGER_QUEEN_ATTACKS,
+  "Neomorphic Bloodburster": NEOMORPHIC_BLOODBURSTER_ATTACKS,
+  "Neophyte (Juvenile Neomorph)": NEOMORPH_ATTACKS,
+  "Adult Neomorph": NEOMORPH_ATTACKS,
+  "Lion Worm": LION_WORM_ATTACKS,
+  "Scorpionid": TANAKAN_SCORPIONID_ATTACKS,
+  "The Swarm": SWARM_ATTACKS,
+  "Harvester": HARVESTER_ATTACKS,
+};
+
+if (typeof window !== 'undefined') window.ALIEN_ATTACKS = ALIEN_ATTACKS;
+if (typeof module !== 'undefined') module.exports = { ALIEN_ATTACKS };

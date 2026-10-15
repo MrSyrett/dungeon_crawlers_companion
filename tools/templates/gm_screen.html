@@ -10380,6 +10380,9 @@ function xsMonSummary(src, m) {
     if(m.acid && m.acid !== '—') out.stats.push({ label: 'Acid', val: String(m.acid) });
     if(m.skills && m.skills !== '—') out.lines.push({ label: 'Skills', text: m.skills });
     if(m.stage) out.meta.push(['Stage', m.stage]);
+    if(typeof ALIEN_ATTACKS !== 'undefined' && ALIEN_ATTACKS[m.name]) {
+      ALIEN_ATTACKS[m.name].forEach(a => out.lines.push({ label: 'D6 ' + a.roll + ' · ' + a.name, text: a.effect }));
+    }
     if(m.notes) out.notes.push(m.notes);
     out.hp = parseInt(m.health, 10) || 1;
   }
@@ -14285,6 +14288,7 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <script src="/tools-data/mmrpg-tags.js"></script>
 <script src="/tools-data/gb-bestiary.js"></script>
 <script src="/tools-data/yze-alien-data.js"></script>
+<script src="/tools-data/yze-alien-attacks.js"></script>
 <script src="/tools-data/yze-alien-gm-tables.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <!-- PDF.js + the shared reader are loaded on demand by init_rules (first Rulebooks open) — not on every GM Screen load. -->

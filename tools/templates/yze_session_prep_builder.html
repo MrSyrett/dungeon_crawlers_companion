@@ -859,6 +859,7 @@ body.flow-mode .page + .page {
 <script src="/dungeon-engine.js"></script>
 <!-- Alien RPG bestiary for the Adversaries & NPCs picker. -->
 <script src="/tools-data/yze-alien-data.js"></script>
+<script src="/tools-data/yze-alien-attacks.js"></script>
 
 
 <script>
@@ -1882,7 +1883,10 @@ const SB_CONFIG = {
     flavor: [m.speed ? 'Speed ' + m.speed : '', m.acid && m.acid !== '—' ? 'Acid ' + m.acid : ''].filter(Boolean).join(' · '),
     str:'', agi:'', wits:'', emp:'',
     health: String(m.health ?? ''), armor: String(m.armor ?? ''), skills: (m.skills && m.skills !== '—') ? m.skills : '',
-    abilities: [m.acid && m.acid !== '—' ? 'Acid Splash: ' + m.acid : '', m.notes || ''].filter(Boolean).join('\n'),
+    abilities: [
+      ...((typeof ALIEN_ATTACKS !== 'undefined' && ALIEN_ATTACKS[m.name]) ? ALIEN_ATTACKS[m.name].map(a => 'D6 ' + a.roll + ' ' + a.name + ': ' + a.effect) : []),
+      m.acid && m.acid !== '—' ? 'Acid Splash: ' + m.acid : '', m.notes || ''
+    ].filter(Boolean).join('\n'),
   }), sub: m => [m.group, m.stage].filter(Boolean).join(' · ') },
 };
 const _DCC_SIZE_NAMES = {1:'Tiny',2:'Small',3:'Petite',4:'Medium',5:'Large',6:'Huge',7:'Colossal',8:'Gargantuan'};
