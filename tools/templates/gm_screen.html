@@ -2197,7 +2197,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
 (function () {
   const SYS_GENS = {
     SD:  ['adventure','npc','rival','monster','dungeon','encounter','shop','sdfoundloot'],
-    DCC: ['npc','dccneighborhood','dccmonster','dccencounter','dccloot','dccitem'],
+    DCC: ['dccnpc','dccneighborhood','dccmonster','dccencounter','dccloot','dccitem'],
     ACE: ['npc','acemonster','acetreasure'],
     KOB: ['npc'],
     NIM: ['npc','nimmonster','nimtreasure'],
@@ -2207,7 +2207,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
     ICRPG:['npc','icrpgmonster','icrpgtreasure'],
     MMRPG:['npc','mmrpgmonster','mmrpgtables','mmrpgtreasure','mmrpghenchmen'],
     CO:  ['npc'],
-    YZE: ['npc','yzemonster','yzetables'],
+    YZE: ['npc','yzemonster','yzetreasure','yzestar','yzeworld','yzejobs','yzeencounters','yzetwist','yzeshore','yzeoracle','yzesalvage'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -3227,30 +3227,38 @@ GMScenes.renderPins();
         <option value="encounter">Encounter</option>
         <option value="shop">Shop/Tavern</option>
         <option value="sdfoundloot">Treasure</option>
-        <option value="dccnpc">DCC NPC</option>
-        <option value="dccneighborhood">DCC Neighborhood/Quest</option>
-        <option value="dccmonster">DCC Monster</option>
-        <option value="dccencounter">DCC Encounter</option>
-        <option value="dccloot">DCC Loot Box</option>
-        <option value="dccitem">DCC Item</option>
-        <option value="acemonster">ACE! Monsters</option>
-        <option value="acetreasure">ACE! Gear Drop</option>
-        <option value="nimmonster">Nimble Monster</option>
-        <option value="nimtreasure">Nimble Treasure</option>
-        <option value="swmonster">Star Wars NPC</option>
-        <option value="swtreasure">Star Wars Gear Drop</option>
-        <option value="dndmonster">D&amp;D Monster</option>
-        <option value="dndtreasure">D&amp;D Treasure</option>
-        <option value="d62emonster">D6 2e Creature</option>
-        <option value="d62etreasure">D6 2e Gear Drop</option>
-        <option value="icrpgmonster">ICRPG Monster</option>
-        <option value="icrpgtreasure">ICRPG Loot</option>
-        <option value="mmrpgmonster">Marvel Character</option>
-        <option value="mmrpgtables">Marvel Encounters &amp; Danger Room</option>
-        <option value="mmrpgtreasure">Marvel Gear &amp; Loot</option>
-        <option value="mmrpghenchmen">Marvel Henchmen</option>
-        <option value="yzemonster">Alien Creature</option>
-        <option value="yzetables">YZE Crit &amp; Panic</option>
+        <option value="dccnpc">NPC</option>
+        <option value="dccneighborhood">Neighborhood/Quest</option>
+        <option value="dccmonster">Monster</option>
+        <option value="dccencounter">Encounter</option>
+        <option value="dccloot">Loot Box</option>
+        <option value="dccitem">Item</option>
+        <option value="acemonster">Monsters</option>
+        <option value="acetreasure">Gear Drop</option>
+        <option value="nimmonster">Monster</option>
+        <option value="nimtreasure">Treasure</option>
+        <option value="swmonster">Adversary</option>
+        <option value="swtreasure">Gear Drop</option>
+        <option value="dndmonster">Monster</option>
+        <option value="dndtreasure">Treasure</option>
+        <option value="d62emonster">Creature</option>
+        <option value="d62etreasure">Gear Drop</option>
+        <option value="icrpgmonster">Monster</option>
+        <option value="icrpgtreasure">Loot</option>
+        <option value="mmrpgmonster">Character</option>
+        <option value="mmrpgtables">Encounters &amp; Danger Room</option>
+        <option value="mmrpgtreasure">Gear &amp; Loot</option>
+        <option value="mmrpghenchmen">Henchmen</option>
+        <option value="yzemonster">Creature</option>
+        <option value="yzetreasure">Gear Drop</option>
+        <option value="yzestar">Star System</option>
+        <option value="yzeworld">World</option>
+        <option value="yzejobs">Jobs</option>
+        <option value="yzeencounters">Encounters</option>
+        <option value="yzetwist">Plot Twist</option>
+        <option value="yzeshore">Shore Leave</option>
+        <option value="yzeoracle">Oracle / Danger</option>
+        <option value="yzesalvage">Salvage</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -4128,41 +4136,129 @@ GMScenes.renderPins();
       </div>
 
       <!-- YEAR ZERO ENGINE — crit (D66) + panic (D6) rollers and quick reference -->
-      <div class="gen-panel" data-panel="yzetables">
+      <!-- ALIEN: STAR SYSTEM -->
+      <div class="gen-panel" data-panel="yzestar">
         <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
-          <button class="btn small primary" onclick="yzeCrit(this,'phys')">Roll Physical Crit (D66)</button>
-          <button class="btn small primary" onclick="yzeCrit(this,'ment')">Roll Mental Crit (D66)</button>
-          <label class="gen-label" style="max-width:120px;">Stress
-            <input type="number" class="gen-select yze-stress" value="0" min="0" max="12">
-          </label>
-          <button class="btn small primary" onclick="yzePanic(this)">Roll Panic (D6 + stress)</button>
+          <button class="btn small primary" onclick="alienGen(this)">Generate Star System</button>
         </div>
-        <div class="yze-out" style="margin-top:10px;"></div>
-        <div style="margin-top:16px;font-size:11px;color:var(--dim,#888);text-transform:uppercase;letter-spacing:.1em;">Weapons</div>
-        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;">
-          <thead><tr style="text-align:left;color:var(--dim,#888);"><th style="padding:3px 6px;">Weapon</th><th style="padding:3px 6px;">Grip</th><th style="padding:3px 6px;">Bonus</th><th style="padding:3px 6px;">Dmg</th><th style="padding:3px 6px;">Range</th></tr></thead>
-          <tbody>
-            <tr><td style="padding:3px 6px;">Unarmed</td><td style="padding:3px 6px;">—</td><td style="padding:3px 6px;">—</td><td style="padding:3px 6px;">1</td><td style="padding:3px 6px;">Engaged</td></tr>
-            <tr><td style="padding:3px 6px;">Knife</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+1</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Engaged</td></tr>
-            <tr><td style="padding:3px 6px;">Sword</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Engaged</td></tr>
-            <tr><td style="padding:3px 6px;">Battleaxe</td><td style="padding:3px 6px;">2H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">3</td><td style="padding:3px 6px;">Engaged</td></tr>
-            <tr><td style="padding:3px 6px;">Spear</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+1</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Short</td></tr>
-            <tr><td style="padding:3px 6px;">Bow</td><td style="padding:3px 6px;">2H</td><td style="padding:3px 6px;">+1</td><td style="padding:3px 6px;">1</td><td style="padding:3px 6px;">Long</td></tr>
-            <tr><td style="padding:3px 6px;">Pistol</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Medium</td></tr>
-            <tr><td style="padding:3px 6px;">Rifle</td><td style="padding:3px 6px;">2H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Long</td></tr>
-          </tbody>
-        </table>
-        <div style="margin-top:14px;font-size:11px;color:var(--dim,#888);text-transform:uppercase;letter-spacing:.1em;">Armor &amp; cover — roll rating in D6, each 6 stops one damage</div>
-        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;">
-          <thead><tr style="text-align:left;color:var(--dim,#888);"><th style="padding:3px 6px;">Barrier</th><th style="padding:3px 6px;">Rating</th></tr></thead>
-          <tbody>
-            <tr><td style="padding:3px 6px;">Furniture</td><td style="padding:3px 6px;">3</td></tr>
-            <tr><td style="padding:3px 6px;">Wooden door</td><td style="padding:3px 6px;">4</td></tr>
-            <tr><td style="padding:3px 6px;">Tree trunk</td><td style="padding:3px 6px;">5</td></tr>
-            <tr><td style="padding:3px 6px;">Wooden wall</td><td style="padding:3px 6px;">6</td></tr>
-            <tr><td style="padding:3px 6px;">Stone wall</td><td style="padding:3px 6px;">8</td></tr>
-          </tbody>
-        </table>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: WORLD -->
+      <div class="gen-panel" data-panel="yzeworld">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <button class="btn small primary" onclick="alienGen(this)">Generate World</button>
+        </div>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: JOBS -->
+      <div class="gen-panel" data-panel="yzejobs">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Type
+            <select class="gen-select alien-sub">
+              <option value="cargo">Cargo Run</option>
+              <option value="military">Military Op</option>
+              <option value="expedition">Expedition</option>
+            </select>
+          </label>
+          <button class="btn small primary" onclick="alienGen(this)">Generate Job</button>
+        </div>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: ENCOUNTERS -->
+      <div class="gen-panel" data-panel="yzeencounters">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Where
+            <select class="gen-select alien-sub">
+              <option value="starSystem">Star System</option>
+              <option value="shipReactions">Ship Reaction</option>
+              <option value="surface">Surface</option>
+              <option value="colony">Colony</option>
+            </select>
+          </label>
+          <button class="btn small primary" onclick="alienGen(this)">Roll Encounter</button>
+        </div>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: PLOT TWIST -->
+      <div class="gen-panel" data-panel="yzetwist">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <button class="btn small primary" onclick="alienGen(this)">Roll Plot Twist</button>
+        </div>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: SHORE LEAVE -->
+      <div class="gen-panel" data-panel="yzeshore">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Group
+            <select class="gen-select alien-sub">
+              <option value="colonialMarines">Colonial Marines</option>
+              <option value="others">Everyone Else</option>
+            </select>
+          </label>
+          <button class="btn small primary" onclick="alienGen(this)">Roll Shore Leave</button>
+        </div>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: ORACLE / DANGER -->
+      <div class="gen-panel" data-panel="yzeoracle">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Mode
+            <select class="gen-select alien-sub">
+              <option value="answer">Yes / No Answer</option>
+              <option value="complex">Complex Question</option>
+              <option value="danger">Danger Event</option>
+            </select>
+          </label>
+          <button class="btn small primary" onclick="alienGen(this)">Consult Oracle</button>
+        </div>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: SALVAGE / ANOMALOUS ENVIRONMENT -->
+      <div class="gen-panel" data-panel="yzesalvage">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Table
+            <select class="gen-select alien-sub">
+              <option value="salvage">Salvage (Common / Rare)</option>
+              <option value="anomalousEnvironment">Anomalous Environment</option>
+            </select>
+          </label>
+          <button class="btn small primary" onclick="alienGen(this)">Roll Salvage</button>
+        </div>
+        <div class="gen-results alien-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ALIEN: GEAR DROP (weapons / armor / gear → send to players) -->
+      <div class="gen-panel xs-treasure" data-panel="yzetreasure" data-sys="yze">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Gear Drop</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it turns up (e.g. the derelict's cargo hold)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option><option value="credits">Dollars</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a drop from the Alien weapon, armor &amp; gear lists">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search weapons, armor &amp; gear to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
       </div>
 
       <!-- MAP GENERATOR PANEL (system-neutral — same engine as the Dungeon/Adventure map) -->
@@ -5585,6 +5681,9 @@ function syncToolbar(slot, toolNode) {
       liveSel.dispatchEvent(new Event('change'));
     });
   });
+  // Scope the cloned (mobile/toolbar) Generators dropdown to the current system,
+  // same as the live tool — otherwise the clone shows every system's generators.
+  try { if(typeof window.applyGmSystemToGenerators === 'function') window.applyGmSystemToGenerators(slot); } catch(e){}
 
   const cloneImportLabel = slot.querySelector('label:has(.nts-import-input)');
   const liveImportInput = toolNode.querySelector('.nts-import-input');
@@ -7547,7 +7646,7 @@ function init_trackers(root) {
         <span class="mon-pick-item-meta">${meta}</span>
       </button>`;
     }).join('');
-    return (rows || (!srcHasBestiary() ? '<div class="mon-pick-empty">No Combatants Found</div>' : '<div class="mon-pick-empty">No monster matches that search.</div>')) +
+    return (rows || (!srcHasBestiary() ? '<div class="mon-pick-empty">None Available</div>' : '<div class="mon-pick-empty">No monster matches that search.</div>')) +
       (found.length > 60 ? `<div class="mon-pick-empty">Showing 60 of ${found.length} &mdash; keep typing to narrow it down.</div>` : '');
   }
 
@@ -11889,7 +11988,7 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'yzestar', 'yzeworld', 'yzejobs', 'yzeencounters', 'yzetwist', 'yzeshore', 'yzeoracle', 'yzesalvage', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -14186,6 +14285,7 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <script src="/tools-data/mmrpg-tags.js"></script>
 <script src="/tools-data/gb-bestiary.js"></script>
 <script src="/tools-data/yze-alien-data.js"></script>
+<script src="/tools-data/yze-alien-gm-tables.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <!-- PDF.js + the shared reader are loaded on demand by init_rules (first Rulebooks open) — not on every GM Screen load. -->
 <script>
@@ -16738,6 +16838,14 @@ function wireAiConsole(root) {
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'loot',label:'Loot',cats:['loot'] }],
       randomCats: ['weapon','armor','gear','loot'], money: null, label: 'LOOT DROP', empty: 'ICRPG loot & gear lists',
     },
+    yze: {
+      list: () => []
+        .concat(((typeof ALIEN_WEAPONS !== 'undefined' && Array.isArray(ALIEN_WEAPONS)) ? ALIEN_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: [w.bonus ? 'Bonus ' + w.bonus : '', w.damage != null ? 'Dmg ' + w.damage : '', w.range, w.class, w.cost].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(((typeof ALIEN_ARMOR !== 'undefined' && Array.isArray(ALIEN_ARMOR)) ? ALIEN_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + a.rating, (a.air && a.air !== '—') ? 'Air ' + a.air : '', a.cost, a.comment].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(((typeof ALIEN_GEAR !== 'undefined' && Array.isArray(ALIEN_GEAR)) ? ALIEN_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.category, g.cost, g.effect].filter(Boolean).join(' · ').slice(0, 160) }))),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
+      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Dollars', unit: '$', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 }, label: 'GEAR DROP', empty: 'Alien gear list',
+    },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {
     const cfg = XS_TREASURE[panel.dataset.sys]; if(!cfg) return;
@@ -17094,67 +17202,89 @@ window.init_vtt = init_vtt;
 })();
 </script>
 
-<!-- Year Zero Engine GM tables — self-contained crit (D66) + panic (D6) rollers for the YZE generator panel. -->
 <script>
+// ── Alien RPG GM tables (Evolved Edition core, ch.11 + Last Survivor oracle).
+//    Data in /tools-data/yze-alien-gm-tables.js as ALIEN_GM_TABLES. Each panel
+//    carries its own primary button → window.alienGen(this).
 (function(){
   'use strict';
-  var CRITP=[
-    ['11','Winded','No','—','None.','—'],['12','Stunned','No','—','None.','—'],['13','Crippling pain','No','—','None.','—'],
-    ['14','Sprained ankle','No','—','Mobility −2 and movement is a slow action until a Healing roll.','—'],
-    ['15','Blood in eyes','No','—','Observation and Marksmanship −2 until a Healing roll.','—'],
-    ['16','Concussion','No','—','Mobility −2.','D6'],['21','Severed ear','No','—','Observation −2.','D6'],
-    ['22','Broken toes','No','—','Movement becomes a slow action.','D6'],['23','Broken hand','No','—','Hand cannot be used.','D6'],
-    ['24','Knocked out teeth','No','—','Persuasion −2.','D6'],['25','Impaled thigh','No','—','Movement becomes a slow action.','2D6'],
-    ['26','Slashed shoulder','No','—','Arm cannot be used.','D6'],['31','Broken nose','No','—','Persuasion and Observation −1.','D6'],
-    ['32','Crotch hit','No','—','One damage per Mobility or Melee roll made.','D6'],['33','Broken ribs','No','—','Mobility and Observation −2.','2D6'],
-    ['34','Gouged eye','No','—','Marksmanship and Observation −2.','2D6'],['35','Busted kneecap','No','—','Movement becomes a slow action.','2D6'],
-    ['36','Broken arm','No','—','Arm cannot be used.','2D6'],['41','Broken leg','No','—','Movement becomes a slow action.','2D6'],
-    ['42','Crushed foot','No','—','Movement becomes a slow action.','3D6'],['43','Crushed elbow','No','—','Arm cannot be used.','3D6'],
-    ['44','Punctured lung','Yes','Shift','Stamina and Mobility −2.','D6'],['45','Bleeding gut','Yes','Shift','One damage per Mobility or Melee roll.','D6'],
-    ['46','Ruptured intestines','Yes','Shift','Disease with virulence 6.','2D6'],['51','Busted kidney','Yes','Day','Mobility −2 and movement is a slow action.','2D6'],
-    ['52','Severed arm artery','Yes −1','Stretch','Arm cannot be used.','D6'],['53','Severed leg artery','Yes −1','Stretch','Movement becomes a slow action.','D6'],
-    ['54','Severed arm','Yes −1','Shift','Arm cannot be used.','Permanent'],['55','Severed leg','Yes −1','Shift','Movement becomes a slow action.','Permanent'],
-    ['56','Cracked spine','No','—','Paralyzed from the neck down; permanent if no Healing roll in time.','3D6'],
-    ['61','Ruptured jugular','Yes −1','Round','Stamina −1.','2D6'],['62','Ruptured aorta','Yes −2','Round','Stamina −2.','3D6'],
-    ['63','Disemboweled','Yes','—','Instant death.','—'],['64','Crushed skull','Yes','—','Your story ends here.','—'],
-    ['65','Pierced head','Yes','—','You die immediately.','—'],['66','Impaled heart','Yes','—','Your heart beats for the last time.','—']
-  ];
-  var CRITM=[
-    ['11-16','Trembling','Modifier −1 on all Agility-based rolls.','D6'],['21','White hair','None.','Permanent'],
-    ['22-24','Anxious','Modifier −1 on all Wits-based rolls.','D6'],['25-31','Sullen','Modifier −1 on all Empathy-based rolls.','D6'],
-    ['32-35','Nightmares','Insight roll every shift spent sleeping; failure means the sleep does not count.','D6'],
-    ['36-41','Nocturnal','You can only sleep during the light part of the day.','2D6'],
-    ['42-43','Phobic','Terrified of what broke you; one stress/damage to Wits each round within Short range of it.','2D6'],
-    ['44-45','Alcoholic','Drink alcohol every day or suffer one stress/damage to Agility.','3D6'],
-    ['46-51','Claustrophobic','Every stretch in a confined space, one stress/damage to Wits.','2D6'],
-    ['52','Mythomaniac','You cannot stop lying about everything.','2D6'],['53-54','Paranoia','You are certain someone is out to get you.','2D6'],
-    ['55','Delusion','Convinced of something totally untrue.','3D6'],['56','Hallucinations','Insight roll every shift or suffer a powerful hallucination.','3D6'],
-    ['61-62','Altered personality','Your personality is altered in a fundamental way.','Permanent'],['63','Amnesia','You lose all memory.','D6'],
-    ['64-65','Catatonic','You stare blankly and do not respond to stimuli.','D6'],['66','Heart attack','Your heart stops; you die of pure fright.','—']
-  ];
-  var PANIC=[[6,'Keeping it Together','You keep your nerves in check. Barely.'],[7,'Nervous Twitch','You and all PCs in Short range gain a stress point.'],
-    [8,'Tremble','All Agility skill rolls suffer −2.'],[9,'Drop Item','You drop a weapon or important item.'],
-    [10,'Freeze','Frozen for one round; lose your next turn.'],[11,'Seek Cover','Move to safety; lose one stress, all PCs in Short range gain one.'],
-    [12,'Scream','Lose your next turn; every PC who hears you must panic roll.'],[13,'Flee','Flee to safety and refuse to leave; hearers must panic roll.'],
-    [14,'Berserk','Attack the nearest creature, friend or foe; witnesses must panic roll.'],[999,'Catatonic','You collapse, unable to talk or move.']];
+  function T(){ return (typeof ALIEN_GM_TABLES!=='undefined')?ALIEN_GM_TABLES:(window.ALIEN_GM_TABLES||null); }
   function d6(){ return 1+Math.floor(Math.random()*6); }
-  function look(tbl,code,ci){ var n=parseInt(code,10); for(var i=0;i<tbl.length;i++){ var r=tbl[i][0]; if(r===code)return tbl[i]; var m=r.split(/[–-]/); if(m.length===2){ if(n>=parseInt(m[0],10)&&n<=parseInt(m[1],10))return tbl[i]; } } return null; }
-  function out(btn){ var p=btn.closest('[data-panel]'); return p?p.querySelector('.yze-out'):null; }
   function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
-  window.yzeCrit=function(btn,kind){
-    var o=out(btn); if(!o)return; var a=d6(),b=d6(),code=''+a+b;
-    if(kind==='phys'){ var r=look(CRITP,code); if(!r){o.innerHTML='';return;}
-      var lethal=r[2]!=='No';
-      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;'+(lethal?'border-color:#b23c2f;':'')+'"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Physical Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#3fd0e6;">'+esc(r[1])+(lethal?' <span style="color:#e0776f;font-size:12px;">LETHAL '+esc(r[2])+' · '+esc(r[3])+'</span>':'')+'</div><div style="font-size:13px;margin-top:3px;">'+esc(r[4])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(r[5])+'</div></div>'+o.innerHTML;
-    } else { var m=look(CRITM,code); if(!m){o.innerHTML='';return;}
-      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Mental Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#3fd0e6;">'+esc(m[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(m[2])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(m[3])+'</div></div>'+o.innerHTML;
+  function bounds(tok){
+    tok=String(tok).trim(); var m;
+    if(/or less/i.test(tok)){ return [-Infinity, parseInt(tok,10)]; }
+    if((m=tok.match(/^<=?\s*(\d+)/))){ return [-Infinity, parseInt(m[1],10)]; }
+    if((m=tok.match(/^(\d+)\s*\+$/))){ return [parseInt(m[1],10), Infinity]; }
+    if((m=tok.match(/^>=?\s*(\d+)/))){ return [parseInt(m[1],10), Infinity]; }
+    if((m=tok.match(/^(\d+)\s*[–-]\s*(\d+)$/))){ return [parseInt(m[1],10), parseInt(m[2],10)]; }
+    if((m=tok.match(/^(\d+)$/))){ var v=parseInt(m[1],10); return [v,v]; }
+    return [0,0];
+  }
+  function maxEnd(tbl){ var mx=-Infinity; tbl.forEach(function(r){ var b=bounds(r.roll); [b[0],b[1]].forEach(function(x){ if(isFinite(x)&&x>mx)mx=x; }); }); return mx; }
+  function rollTable(tbl){
+    var mx=maxEnd(tbl), n;
+    if(mx<=6){ n=d6(); }
+    else if(mx<=12){ n=d6()+d6(); }
+    else { var codes=[]; tbl.forEach(function(r){ var b=bounds(r.roll); var lo=isFinite(b[0])?b[0]:b[1], hi=isFinite(b[1])?b[1]:b[0]; for(var v=lo;v<=hi;v++) codes.push(v); }); n= codes.length? codes[Math.floor(Math.random()*codes.length)] : (d6()*10+d6()); }
+    var row=null; for(var i=0;i<tbl.length;i++){ var b=bounds(tbl[i].roll); if(n>=b[0]&&n<=b[1]){ row=tbl[i]; break; } } if(!row)row=tbl[tbl.length-1];
+    return { code: row.roll, row: row };
+  }
+  function d66idx(arr){ var t=d6(), o=d6(); return { code: ''+t+o, val: arr[(t-1)*6+(o-1)] }; }
+  function d6arr(arr){ var r=d6(); return { code: String(r), val: arr[r-1] }; }
+  function rollFormula(f){ var m=String(f).match(/D6\s*([+-]\s*\d+)?/i); var v=d6(); if(m&&m[1]) v+=parseInt(m[1].replace(/\s/g,''),10); return Math.max(0,v); }
+  function card(kick,title,body){
+    return '<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;">'
+      +'<div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">'+esc(kick)+'</div>'
+      +(title?'<div style="font-size:16px;font-weight:800;color:#3fd0e6;">'+esc(title)+'</div>':'')
+      +(body?'<div style="font-size:13px;margin-top:3px;">'+body+'</div>':'')+'</div>';
+  }
+  function line(lbl,code,txt){ return '<div style="margin-top:3px;"><b style="color:#3fd0e6;">'+esc(lbl)+'</b> <span style="color:#999;font-size:11px;">('+esc(code)+')</span> '+esc(txt)+'</div>'; }
+  function ctx(btn){ var p=btn.closest('[data-panel]'); var s=p&&p.querySelector('.alien-sub'); return { panel:p, el:p&&p.querySelector('.alien-out'), sub:s?s.value:'' }; }
+
+  window.alienGen=function(btn){
+    var d=T(); var o=ctx(btn); if(!d||!o.el){ if(o.el) o.el.innerHTML=card('Alien tables did not load','','Open the GM Screen from the app.')+o.el.innerHTML; return; }
+    var kind=o.panel.dataset.panel, html='';
+    if(kind==='yzestar'){
+      var body='';
+      d.starSystem.objects.forEach(function(ob){ body+=line(ob.object, ob.number, String(rollFormula(ob.number))); });
+      var gg=d6arr(d.starSystem.gasGiants), ab=d6arr(d.starSystem.asteroidBelts);
+      body+=line('Notable Gas Giant', gg.code, gg.val)+line('Notable Asteroid Belt', ab.code, ab.val);
+      html=card('Star System','',body);
+    } else if(kind==='yzeworld'){
+      var sz=rollTable(d.world.size), at=rollTable(d.world.atmosphere), tp=rollTable(d.world.temperature), ge=rollTable(d.world.geosphere), tr=d66idx(d.world.terrestrialTerrain);
+      html=card('World Profile','', line('Size',sz.code,sz.row.result)+line('Atmosphere',at.code,at.row.result)+line('Temperature',tp.code,tp.row.result)+line('Geosphere',ge.code,ge.row.result)+line('Terrain',tr.code,tr.val));
+    } else if(kind==='yzejobs'){
+      var sub=o.sub||'cargo', j=d.jobs[sub], body='';
+      if(j.employer){ var e=rollTable(j.employer); body+=line('Employer',e.code,e.row.result); }
+      if(j.sponsors){ var sp=rollTable(j.sponsors); body+=line('Sponsor',sp.code,sp.row.result); }
+      if(j.mission){ var mi=rollTable(j.mission); body+=line('Mission',mi.code,mi.row.result); }
+      if(j.cargo){ var cg=rollTable(j.cargo); body+=line('Cargo',cg.code,cg.row.result); }
+      var de=rollTable(j.destination); body+=line('Destination',de.code,de.row.result);
+      var br=rollTable(j.bonusRewards); body+=line('Bonus Reward',br.code,br.row.result);
+      var cp=rollTable(j.complications); body+=line('Complication',cp.code,cp.row.result);
+      html=card('Job · '+({cargo:'Cargo Run',military:'Military Op',expedition:'Expedition'}[sub]),'',body);
+    } else if(kind==='yzeencounters'){
+      var es=o.sub||'starSystem', r=rollTable(d.encounters[es]), txt;
+      if(es==='surface') txt='<b style="color:#3fd0e6;">Uninhabited</b> '+esc(r.row.uninhabited)+'<br><b style="color:#3fd0e6;">Colonized</b> '+esc(r.row.colonized);
+      else txt=esc(r.row.result);
+      html=card('Encounter · '+({starSystem:'Star System',shipReactions:'Ship Reaction',surface:'Surface',colony:'Colony'}[es])+' · '+r.code,'',txt);
+    } else if(kind==='yzetwist'){
+      var pt=rollTable(d.plotTwists); html=card('Plot Twist · '+pt.code,'',esc(pt.row.result));
+    } else if(kind==='yzeshore'){
+      var sl=o.sub||'colonialMarines', r2=rollTable(d.shoreLeave[sl]);
+      html=card('Shore Leave · '+({colonialMarines:'Colonial Marines',others:'Everyone Else'}[sl])+' · '+r2.code,'',esc(r2.row.result));
+    } else if(kind==='yzeoracle'){
+      var om=o.sub||'answer';
+      if(om==='answer'){ var an=rollTable(d.oracle.answers); html=card('Oracle Answer · d6 '+an.code, an.row.result, ''); }
+      else if(om==='complex'){ var di=d66idx(d.oracle.complexDirective), su=d66idx(d.oracle.complexSubject); html=card('Complex Question','', line('Directive',di.code,di.val)+line('Subject',su.code,su.val)); }
+      else { var dg=rollTable(d.oracle.danger); html=card('Danger Event · '+dg.code, dg.row.focus, '<b style="color:#3fd0e6;">Low</b> '+esc(dg.row.low)+'<br><b style="color:#3fd0e6;">Mid</b> '+esc(dg.row.mid)+'<br><b style="color:#3fd0e6;">High</b> '+esc(dg.row.high)); }
+    } else if(kind==='yzesalvage'){
+      var sm=o.sub||'salvage';
+      if(sm==='anomalousEnvironment'){ var ae=d66idx(d.salvage.anomalousEnvironment); html=card('Anomalous Environment · '+ae.code,'',esc(ae.val)); }
+      else { var sv=rollTable(d.salvage.salvage); html=card('Salvage · '+sv.code,'', line('Common',sv.code,sv.row.common)+line('Rare',sv.code,sv.row.rare)); }
     }
-  };
-  window.yzePanic=function(btn){
-    var o=out(btn); if(!o)return; var p=btn.closest('[data-panel]'); var si=p?p.querySelector('.yze-stress'):null;
-    var stress=si?(parseInt(si.value,10)||0):0; var roll=d6(), total=roll+stress, row=null;
-    for(var i=0;i<PANIC.length;i++){ if(total<=PANIC[i][0]){ row=PANIC[i]; break; } } if(!row)row=PANIC[PANIC.length-1];
-    o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Panic · D6 '+roll+' + stress '+stress+' = '+total+'</div><div style="font-size:17px;font-weight:800;color:#3fd0e6;">'+esc(row[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(row[2])+'</div></div>'+o.innerHTML;
+    o.el.innerHTML=html+o.el.innerHTML;
   };
 })();
 
