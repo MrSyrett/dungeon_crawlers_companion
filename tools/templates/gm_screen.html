@@ -12179,6 +12179,33 @@ window.init_gen = function(root) {
   // inline Generate button; route it through the same toolbar generate handler.
   root.querySelectorAll('.gen-inline-roll').forEach(b => b.addEventListener('click', () => { if(rollBtn) rollBtn.click(); }));
 
+  // Give the Alien / TWD table generators a "How many" selector so the GM can roll
+  // several results at once. Injected once per panel (guarded by the .gen-qty check),
+  // read back by alienGenPanel / twdGenPanel which loop that many times.
+  (function(){
+    const QTY = [1, 2, 3, 5, 10];
+    const TGENS = YZE_TABLE_GENS.concat(TWD_TABLE_GENS);
+    TGENS.forEach(name => {
+      const panel = root.querySelector('.gen-panel[data-panel="' + name + '"]');
+      if(!panel || panel.querySelector('.gen-qty')) return;
+      let ctrls = panel.querySelector('.gen-controls');
+      if(!ctrls){
+        ctrls = document.createElement('div');
+        ctrls.className = 'gen-controls';
+        ctrls.style.cssText = 'flex-wrap:wrap;gap:8px;align-items:flex-end;';
+        panel.insertBefore(ctrls, panel.firstChild);
+      }
+      const lbl = document.createElement('label');
+      lbl.className = 'gen-label';
+      lbl.textContent = 'How many';
+      const sel = document.createElement('select');
+      sel.className = 'gen-select gen-qty';
+      QTY.forEach(n => { const op = document.createElement('option'); op.value = String(n); op.textContent = String(n); sel.appendChild(op); });
+      lbl.appendChild(sel);
+      ctrls.appendChild(lbl);
+    });
+  })();
+
   rollBtn.addEventListener('click', () => {
     // Builder panels (loot box, treasure spreads, tables, henchmen) keep their own
     // inline controls, but the toolbar Roll now drives their primary action too —
@@ -17413,14 +17440,15 @@ window.init_vtt = init_vtt;
       +(body?'<div style="font-size:13px;margin-top:3px;">'+body+'</div>':'')+'</div>';
   }
   function line(lbl,code,txt){ return '<div style="margin-top:3px;"><b style="color:#3fd0e6;">'+esc(lbl)+'</b> <span style="color:#999;font-size:11px;">('+esc(code)+')</span> '+esc(txt)+'</div>'; }
-  function ctx(panel){ var s=panel&&panel.querySelector('.alien-sub'); return { panel:panel, el:panel&&panel.querySelector('.alien-out'), sub:s?s.value:'' }; }
+  function ctx(panel){ var s=panel&&panel.querySelector('.alien-sub'); var q=panel&&panel.querySelector('.gen-qty'); return { panel:panel, el:panel&&panel.querySelector('.alien-out'), sub:s?s.value:'', qty:(q?Math.max(1,parseInt(q.value,10)||1):1) }; }
 
   // Driven by the generator window's main Roll button (see the rollBtn dispatch);
   // alienGen(btn) is kept as a thin shim for any inline caller.
   window.alienGen=function(btn){ var p=btn&&btn.closest('[data-panel]'); if(p) window.alienGenPanel(p); };
   window.alienGenPanel=function(panel){
     var d=T(); var o=ctx(panel); if(!d||!o.el){ if(o.el) o.el.innerHTML=card('Alien tables did not load','','Open the GM Screen from the app.')+o.el.innerHTML; return; }
-    var kind=o.panel.dataset.panel, html='';
+    var kind=o.panel.dataset.panel;
+    function one(){ var html='';
     if(kind==='yzestar'){
       var body='';
       d.starSystem.objects.forEach(function(ob){ body+=line(ob.object, ob.number, String(rollFormula(ob.number))); });
@@ -17460,7 +17488,10 @@ window.init_vtt = init_vtt;
       if(sm==='anomalousEnvironment'){ var ae=d66idx(d.salvage.anomalousEnvironment); html=card('Anomalous Environment · '+ae.code,'',esc(ae.val)); }
       else { var sv=rollTable(d.salvage.salvage); html=card('Salvage · '+sv.code,'', line('Common',sv.code,sv.row.common)+line('Rare',sv.code,sv.row.rare)); }
     }
-    o.el.innerHTML=html;
+    return html;
+    }
+    var out=''; for(var qi=0; qi<Math.max(1,o.qty); qi++){ out+=one(); }
+    o.el.innerHTML=out;
   };
 })();
 
@@ -17497,12 +17528,13 @@ window.init_vtt = init_vtt;
       +(body?'<div style="font-size:13px;margin-top:3px;">'+body+'</div>':'')+'</div>';
   }
   function line(lbl,code,txt){ return '<div style="margin-top:3px;"><b style="color:#3fd0e6;">'+esc(lbl)+'</b> <span style="color:#999;font-size:11px;">('+esc(code)+')</span> '+esc(txt)+'</div>'; }
-  function ctx(panel){ var s=panel&&panel.querySelector('.twd-sub'); return { panel:panel, el:panel&&panel.querySelector('.twd-out'), sub:s?s.value:'' }; }
+  function ctx(panel){ var s=panel&&panel.querySelector('.twd-sub'); var q=panel&&panel.querySelector('.gen-qty'); return { panel:panel, el:panel&&panel.querySelector('.twd-out'), sub:s?s.value:'', qty:(q?Math.max(1,parseInt(q.value,10)||1):1) }; }
 
   window.twdGen=function(btn){ var p=btn&&btn.closest('[data-panel]'); if(p) window.twdGenPanel(p); };
   window.twdGenPanel=function(panel){
     var d=T(); var o=ctx(panel); if(!d||!o.el){ if(o.el) o.el.innerHTML=card('TWD tables did not load','','Open the GM Screen from the app.'); return; }
-    var kind=panel.dataset.panel, html='';
+    var kind=panel.dataset.panel;
+    function one(){ var html='';
     if(kind==='twdscavenge'){
       var r=rollTable(d.scavenging); html=card('Scavenging · D666 '+r.code,'',esc(r.row.result));
     } else if(kind==='twdlocation'){
@@ -17532,7 +17564,10 @@ window.init_vtt = init_vtt;
       var sub=o.sub||'rumors', fp=d.factionPlay||{}, r=rollTable(fp[sub]);
       html=card(({rumors:'Rumor',encounters:'Faction Encounter',change:'Faction Change'}[sub])+' · '+r.code,'',esc(r.row.result));
     }
-    o.el.innerHTML=html;
+    return html;
+    }
+    var out=''; for(var qi=0; qi<Math.max(1,o.qty); qi++){ out+=one(); }
+    o.el.innerHTML=out;
   };
 })();
 
