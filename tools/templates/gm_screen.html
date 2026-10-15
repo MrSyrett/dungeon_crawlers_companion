@@ -5667,9 +5667,19 @@ function syncToolbar(slot, toolNode) {
       liveSel.dispatchEvent(new Event('change'));
     });
   });
-  // Scope the cloned (mobile/toolbar) Generators dropdown to the current system,
-  // same as the live tool — otherwise the clone shows every system's generators.
-  try { if(typeof window.applyGmSystemToGenerators === 'function') window.applyGmSystemToGenerators(slot); } catch(e){}
+  // Scope the cloned (mobile/toolbar) Generators dropdown to the current system.
+  // The live tool just hides out-of-system options, but a mobile native <select>
+  // ignores option[hidden]/[disabled] and still lists them (greyed out), so here we
+  // REMOVE them from the clone outright, keeping the current selection valid.
+  try {
+    if(typeof window.applyGmSystemToGenerators === 'function') window.applyGmSystemToGenerators(slot);
+    slot.querySelectorAll('.gen-tab-select').forEach(sel => {
+      const live = toolNode.querySelector('.gen-tab-select');
+      const keep = live ? live.value : sel.value;
+      [].slice.call(sel.options).forEach(o => { if((o.hidden || o.disabled) && o.value !== keep) o.remove(); });
+      if(live && sel.querySelector('option[value="' + CSS.escape(live.value) + '"]')) sel.value = live.value;
+    });
+  } catch(e){}
 
   const cloneImportLabel = slot.querySelector('label:has(.nts-import-input)');
   const liveImportInput = toolNode.querySelector('.nts-import-input');
