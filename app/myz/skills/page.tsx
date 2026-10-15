@@ -7,13 +7,6 @@ export default function MyzSkillsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MyzHeader title="Skills" subtitle="Mutant: Year Zero · the twelve skills (plus each role's specialist skill)" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        To act, build a dice pool of D6: <b>Base Dice</b> equal to the current value of the attribute,
-        <b> Skill Dice</b> equal to your level in the skill, and <b>Gear Dice</b> equal to a weapon or
-        tool&rsquo;s Gear Bonus. Every <b>6</b> is a success; one success means you make it, each extra
-        success buys a stunt. A basic skill can be rolled at level 0 (base dice only); a role&rsquo;s
-        specialist skill needs level 1+.
-      </p>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {MYZ_ATTRIBUTES.map((a) => (
           <section key={a.key}>

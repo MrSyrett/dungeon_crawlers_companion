@@ -163,7 +163,7 @@ body{font-family:'Asap',sans-serif;background-color:var(--bg);background-image:u
 .vboxes{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 auto;}
 .vbox{width:20px;height:20px;border:2px solid var(--rule);border-radius:4px;cursor:pointer;background:#fff;padding:0;}
 .vbox.on{background:var(--red);border-color:var(--red);}
-.vbox.perm{background:#2a1512;border-color:#2a1512;cursor:default;box-shadow:inset 0 0 0 2px rgba(244,236,214,.25);}
+.vbox.perm{background:var(--red);border-color:var(--red);cursor:default;}
 .vbox.hp.on{background:var(--green);border-color:var(--green);}
 .vbox.resolve.on{background:var(--blue);border-color:var(--blue);}
 .v-auto{background:none;border:1px solid var(--rule);border-radius:5px;color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 5px;flex:0 0 auto;}
@@ -440,7 +440,7 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
 .tln-head{display:flex;align-items:center;gap:8px;}
 .tln-head .tln-name{flex:1 1 auto;font-family:'Anton',sans-serif;font-weight:600;font-size:14px;color:var(--yz-dk);}
 .tln-head .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
-.tln-card .tln-desc{width:100%;margin-top:5px;font-family:'Asap',sans-serif;font-size:12px;line-height:1.4;color:var(--ink);border:1px solid var(--rule);border-radius:6px;background:var(--input-bg);padding:5px 7px;resize:vertical;outline:none;}
+.tln-card .tln-desc{margin-top:4px;font-family:'Asap',sans-serif;font-size:12px;line-height:1.5;color:var(--ink);white-space:pre-wrap;}
 
 /* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
 @media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
@@ -465,6 +465,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .dev-item .dev-in{width:52px;border:1px solid var(--rule);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:14px;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .mp-spend{display:inline-flex;align-items:center;gap:3px;margin-left:auto;margin-right:4px;}
 .mp-spend .mp-in{width:38px;border:1px solid var(--rule);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
+.mp-spend .mp-val{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:var(--yz-dk);}
 .tln-card.locked-mut{opacity:.6;}
 .tln-card .tln-head{gap:6px;}
 
@@ -624,14 +625,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:60px;text-align:right;font-size:19px;font-weight:800;color:var(--yz-dk);background:var(--yz-lt);border:1px solid var(--yz);border-radius:6px;padding:3px 8px;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
+        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right" style="margin-left:auto;"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:60px;text-align:right;font-size:19px;font-weight:800;color:var(--yz-dk);background:var(--yz-lt);border:1px solid var(--yz);border-radius:6px;padding:3px 8px;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
       </div>
       <div class="card">
         <div class="section-bar accent"><span>Mutation Points</span></div>
         <div class="vitals"><div class="vrow"><span class="v-lbl">Mut. Pts</span><div class="stress-pips" id="mp-pips"></div></div></div>
       </div>
       <div class="card">
-        <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit()">Roll</button></span></div>
+        <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right" style="margin-left:auto;"><button class="hdr-btn" onclick="rollCrit()">Roll</button></span></div>
         <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries.</div></div>
       </div>
     </div>
@@ -677,8 +678,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span></div>
-          <div class="section-bar cbar"><span>Supplies</span><span class="hdr-right" id="sup-row" style="gap:12px;align-items:center;"></span></div>
+          <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span><span id="sup-row" style="margin-left:auto;display:flex;gap:12px;align-items:center;"></span></div>
           <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:28%;">Item</th><th>Details</th><th style="width:9%;">Slots</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div id="inv-empty" class="tbl-empty">No gear yet.</div>
@@ -945,7 +945,7 @@ function renderMutations(){
   (S.mutations||[]).forEach(function(m,i){
     var card=document.createElement('div'); card.className='tln-card'+(m.locked?' locked-mut':'');
     card.innerHTML='<div class="tln-head"><input class="tln-name" style="border:none;background:transparent;outline:none;" value="'+esc(m.name||'')+'" oninput="mutEdit('+i+',\'name\',this.value)" placeholder="Mutation">'
-      +'<span class="mp-spend"><span class="inv-mini">MP</span><input type="number" class="no-spin mp-in" data-nolock min="1" max="10" value="'+(m.spend||1)+'" onchange="mutEdit('+i+',\'spend\',num(this.value))"></span>'
+      +'<span class="mp-spend"><span class="inv-mini">MP</span><span class="mp-val">'+num(m.spend||1)+'</span></span>'
       +'<button class="atk-roll" data-nolock onclick="useMutation('+i+')"'+(m.locked?' disabled title="Locked for the session"':'')+'>Use</button>'
       +'<button class="row-x" onclick="mutDel('+i+')">✕</button></div>'
       +(m.note?('<div class="tln-desc" style="font-size:12px;line-height:1.5;color:var(--ink);white-space:pre-wrap;">'+esc(m.note)+'</div>'):'');

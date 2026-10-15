@@ -7,11 +7,6 @@ export default function MyzRolesPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MyzHeader title="Roles" subtitle="Mutant: Year Zero · the eight roles · pick one at character creation" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Your role sets your key attribute (which may start at 5) and gives you a <b>specialist skill</b>
-        {" "}no one else can use, plus three signature talents — pick one to start. In play your role is
-        your place in the People of the Ark.
-      </p>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {MYZ_ROLES.map((r) => (
           <div key={r.name} className={cardCls}>

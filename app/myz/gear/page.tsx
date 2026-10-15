@@ -71,12 +71,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       <MyzHeader title="Gear" subtitle="Mutant: Year Zero · scrap weapons, armor, supplies & artifacts" />
       <ModeRow base={BASE} current={{}} param="mode" options={modeOpts} active={mode} />
 
-      <p className="mb-5 max-w-[72ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        There is no money in the Ark — trade is barter and <b>bullets</b> are the de-facto currency. The
-        <b> Value</b> column prices each item in bullets for the character sheet&rsquo;s Item Shop (not a core
-        rule — artifacts start at 15, +2 per gear-bonus, damage or armor point, +3 per special effect; scrap
-        gear is cheap). A weapon&rsquo;s <b>Gear Bonus</b> is the black Gear Dice it adds.
-      </p>
 
       {/* Melee */}
       {mode === "melee" && (

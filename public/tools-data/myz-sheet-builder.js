@@ -21,11 +21,12 @@
   var RANGED = arr(W.MYZ_RANGED_WEAPONS);
   var ARMORS = arr(W.MYZ_ARMOR);
   var GEARS = arr(W.MYZ_GEAR);
+  var ARTIFACTS = arr(W.MYZ_ARTIFACTS);
   var ATTR_BUDGET = 14, SKILL_BUDGET = 10;
-  var STEPS = ['Role', 'Attributes', 'Skills', 'Talent & Mutation', 'Starting Gear'];
+  var STEPS = ['Role', 'Attributes', 'Skills', 'Talent & Mutation', 'Gear & Dream'];
 
   var step = 0;
-  var name = '', pronouns = '', role = '', key = '', specialist = '', talentPick = '', mutPick = '', weaponPick = '';
+  var name = '', pronouns = '', role = '', key = '', specialist = '', talentPick = '', mutPick = '', weaponPick = '', artifactPick = '', dream = '', den = '';
   var attrs = {}, skills = {}, startGear = [], gearTab = 'weap', supplies = { grub: 0, water: 0, bullets: 0 };
 
   function roleObj(nm) { for (var i = 0; i < ROLES.length; i++) if (ROLES[i].name === nm) return ROLES[i]; return null; }
@@ -43,10 +44,11 @@
   function talentObj(nm) { for (var i = 0; i < TALENTS.length; i++) if (TALENTS[i].name === nm) return TALENTS[i]; return null; }
   function talentDesc(nm) { var t = talentObj(nm); return t ? t.desc : ''; }
   function mutObj(nm) { for (var i = 0; i < MUT.length; i++) if (MUT[i].name === nm) return MUT[i]; return null; }
+  function artObj(nm) { for (var i = 0; i < ARTIFACTS.length; i++) if (ARTIFACTS[i].name === nm) return ARTIFACTS[i]; return null; }
   function skillCap() { return 3; }
 
   function reset() {
-    step = 0; name = ''; pronouns = ''; role = ''; key = ''; specialist = ''; talentPick = ''; mutPick = ''; weaponPick = '';
+    step = 0; name = ''; pronouns = ''; role = ''; key = ''; specialist = ''; talentPick = ''; mutPick = ''; weaponPick = ''; artifactPick = ''; dream = ''; den = '';
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
     skills = {}; SK.forEach(function (s) { skills[s.name] = 0; });
     startGear = []; gearTab = 'weap'; supplies = { grub: 0, water: 0, bullets: 0 };
@@ -157,6 +159,13 @@
       + '<span class="brow-cost">Bullets <b style="color:#d8cfbf;">' + supplies.bullets + '</b></span></div>';
     if (g) h += '<p class="m-hint" style="margin-top:8px;">Role grants Grub ' + esc(g.grub) + ' · Water ' + esc(g.water) + ' · Bullets ' + esc(g.bullets) + '. Trade bullets to buy extra gear — add it on the sheet with ＋ Add Gear.</p>';
     if (g && g.other && g.other.length) { var extra = g.other.filter(function (o) { return !/no free weapon/i.test(o); }); if (extra.length) h += '<p class="m-hint">Also start with: ' + extra.map(esc).join(' · ') + '.</p>'; }
+    // Item 1: roll one random Artifact of the Old Age.
+    h += '<div class="m-lbl" style="margin-top:16px;">Artifact <span class="yzeb-sub">(start with one relic of the Old Age)</span> <button class="builder-chip" style="margin-left:6px;" onclick="window.YZEB.rollArtifact()">⚄ Roll Artifact</button>' + (artifactPick ? ' <button class="builder-chip" onclick="window.YZEB.clearArtifact()">Clear</button>' : '') + '</div>';
+    if (artifactPick) { var ao = artObj(artifactPick); h += '<div class="yzeb-list">' + prow(artifactPick, ao ? ('D666 ' + ao.roll) : '', ao ? ao.desc : '', true, "window.YZEB.rollArtifact()", '🎲 Reroll') + '</div>'; }
+    else { h += '<p class="m-hint">No artifact yet — roll to receive a random one from the D666 table.</p>'; }
+    // Item 3: Big Dream & Den.
+    h += '<div class="m-lbl" style="margin-top:16px;">Big Dream</div><input class="m-input" value="' + esc(dream) + '" placeholder="What you dream the future could hold" oninput="window.YZEB.setDream(this.value)">';
+    h += '<div class="m-lbl" style="margin-top:12px;">Your Den</div><input class="m-input" value="' + esc(den) + '" placeholder="Where and how you live in the Ark" oninput="window.YZEB.setDen(this.value)">';
     return h;
   }
 
@@ -194,6 +203,7 @@
           SK.forEach(function (s) { if (S.skills && S.skills[s.name] != null) skills[s.name] = num(S.skills[s.name]); });
           if (S.supplies) supplies = { grub: num(S.supplies.grub), water: num(S.supplies.water), bullets: num(S.supplies.bullets) };
           else if (role) doRollSupplies();
+          if (S.dream) dream = S.dream; if (S.den) den = S.den;
         }
       } catch (e) { reset(); }
       ensure(); render(); ov.classList.add('open');
@@ -216,6 +226,10 @@
     rollMut: function () { if (MUT.length) { mutPick = MUT[Math.floor(Math.random() * MUT.length)].name; render(); } },
     pickWeapon: function (nm) { weaponPick = (weaponPick === nm) ? '' : nm; render(); },
     rollSupplies: function () { doRollSupplies(); render(); },
+    rollArtifact: function () { if (ARTIFACTS.length) { artifactPick = ARTIFACTS[Math.floor(Math.random() * ARTIFACTS.length)].name; render(); } },
+    clearArtifact: function () { artifactPick = ''; render(); },
+    setDream: function (v) { dream = v; },
+    setDen: function (v) { den = v; },
     setGearTab: function (t) { gearTab = t; render(); },
     removeGear: function (i) { startGear.splice(i, 1); render(); },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
@@ -228,9 +242,11 @@
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
       if (mutPick) { var mo = mutObj(mutPick); d.mutations = [{ name: mutPick, note: mo ? mo.desc : '', spend: 1 }]; d.mp = 1; }
       d.supplies = { grub: num(supplies.grub), water: num(supplies.water), bullets: num(supplies.bullets) };
+      if (dream) d.dream = dream; if (den) d.den = den;
       var gearList = [], g = roleGear();
       if (weaponPick) { var w = findWeapon(weaponPick); gearList.push(w ? wpItem(w) : { kind: 'weapon', equipped: true, name: weaponPick, bonus: 0, damage: 1, range: '', weight: '1', skill: 'Fight' }); }
       if (g && g.other) g.other.forEach(function (o) { if (!/no free weapon/i.test(o)) gearList.push({ kind: 'gear', name: o, weight: '1', note: 'Starting gear (' + role + ')' }); });
+      if (artifactPick) { var ao = artObj(artifactPick); gearList.push({ kind: 'gear', name: artifactPick, weight: '1', note: ao ? ao.desc : '', artifact: true }); }
       if (gearList.length) d.gear = gearList;
       try { applySheet(d); } catch (e) {}
       this.close();

@@ -8,11 +8,6 @@ export default function MyzTalentsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MyzHeader title="Talents" subtitle="Mutant: Year Zero · role talents and general talents" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Talents are learned tricks that bend the rules in your favor. You start with one from your
-        role&rsquo;s three; afterward, spend 5 XP to learn a new one — your role&rsquo;s, a general
-        talent, or even another role&rsquo;s talent.
-      </p>
       <div className="flex flex-col gap-7">
         {groups.map((g) => {
           const list = MYZ_TALENTS.filter((t) => t.role === g);

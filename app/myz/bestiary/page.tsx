@@ -13,12 +13,6 @@ export default function MyzBestiaryPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MyzHeader title="Bestiary" subtitle="Mutant: Year Zero · the monsters, people and hazards of the Zone" />
-      <p className="mb-6 max-w-[72ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Monsters lack Wits and Empathy (you can&rsquo;t Manipulate or frighten them) and most lack Agility too; a
-        swarm can only be hurt by fire or explosions. Humanoids use the full attribute set. The number by each
-        name is the Know-the-Zone modifier to identify it. NPCs have Toughness-style survivability via their
-        attributes — a typical NPC also has one random mutation and 3 Mutation Points.
-      </p>
 
       <SectionH>Monsters</SectionH>
       <div className="mb-10 grid grid-cols-1 gap-3 md:grid-cols-2">
