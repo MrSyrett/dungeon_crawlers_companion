@@ -1,4 +1,4 @@
-import { MYZ_ROT, MYZ_DEVELOPMENT, MYZ_BESTIARY } from "@/lib/data/myz-data";
+import { MYZ_ROT, MYZ_DEVELOPMENT } from "@/lib/data/myz-data";
 import { MyzHeader, cardCls, nameCls } from "@/components/MyzRef";
 
 export const dynamic = "force-dynamic";
@@ -51,24 +51,10 @@ export default function MyzZonePage() {
 
       <section>
         <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Threats in the Zone</h2>
-        <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          Zone beasts lack Wits and Empathy (you can&rsquo;t Manipulate or frighten them) and most lack
-          Agility too. The number is the Know-the-Zone modifier to identify them. A swarm can only be
-          hurt by fire or explosions.
+        <p className="max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+          The Zone teems with monsters, humanoid factions and phenomena. See the{" "}
+          <a href="/myz/bestiary" className="text-[var(--sys-link)] underline">Bestiary</a> for full stat blocks.
         </p>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {MYZ_BESTIARY.map((m) => (
-            <div key={m.name} className={cardCls}>
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h3 className={nameCls}>{m.name}</h3>
-                <span className="font-mono text-[11px] text-[var(--muted)]">{m.mod}</span>
-              </div>
-              <p className="mt-1 font-mono text-[11px] leading-relaxed text-[var(--muted)]">{m.stats}</p>
-              <p className="mt-1 text-[12px] leading-relaxed text-[var(--text)]"><b className="text-[var(--muted)]">Attack:</b> {m.attack}</p>
-              <p className="mt-1 text-[12px] leading-relaxed text-[var(--text)]">{m.desc}</p>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   );

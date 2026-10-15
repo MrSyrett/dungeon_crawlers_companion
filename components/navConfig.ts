@@ -132,6 +132,7 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/myz/mutations", label: "Mutations" },
     { href: "/myz/gear", label: "Gear" },
     { href: "/myz/combat", label: "Combat" },
+    { href: "/myz/bestiary", label: "Bestiary" },
     { href: "/myz/zone", label: "The Zone" },
   ],
   VAE: [

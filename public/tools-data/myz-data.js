@@ -338,10 +338,64 @@ var MYZ_ARCHETYPE_GEAR = {
   "Grunt":       { weapons: ["Bat with Spikes", "Bicycle Chain", "Slingshot"], grub: "D6", water: "D6", bullets: "0", other: [] }
 };
 
+// Humanoid factions, NPC role-templates and Zone phenomena (core rulebook Ch.9 & 13).
+var MYZ_FACTIONS = [
+  {"name":"Amnesiac","mod":"−2","str":2,"agi":2,"wit":4,"emp":2,"skills":"Comprehend 2, Heal 1","mutations":"none","mp":null,"weapons":"None","special":"STR and AGI currently reduced to 1. A dazed human woman who dies within hours unless Healed; may hold a clue to Eden. A cryo-frozen Project Eden lab assistant.","desc":"A human woman staggering through the Zone, glazed-eyed and mumbling alien words, with no memory of who she is."},
+  {"name":"Beast Mutants","mod":"−1","str":null,"agi":null,"wit":null,"emp":null,"skills":"Varies by type","mutations":"none","mp":null,"weapons":"Scrap spear, slingshot, fangs (weapon damage 2, no Gear Bonus)","special":"Four types: Dog (STR4/AGI5/WIT3/EMP2, Fight1, Move1); Bear (STR5/AGI4/WIT2/EMP3, Fight2); Rodent (STR2/AGI5/WIT5/EMP2, Sneak2); Monkey (STR3/AGI5/WIT4/EMP2, Move2). No mutations or MP.","desc":"A small tribe of upright, tool-using animal-mutants (dog, rodent, monkey types) new to the Zone, wary of strangers."},
+  {"name":"Cannibals","mod":"±0","str":5,"agi":4,"wit":3,"emp":2,"skills":"Fight 2, Move 1","mutations":"1 random","mp":null,"weapons":"Scrap spear or slingshot","special":"−3 to any Manipulation attempt; a success only buys time until they get hungry again. Only a clear show of force deters them.","desc":"Wiry mutants in rags and white face paint from an Ark whose scientists died early; sly, bloodthirsty, and hungry for mutant meat."},
+  {"name":"Doom Cultists","mod":"±0","str":3,"agi":2,"wit":3,"emp":4,"skills":"Fight 1, Manipulate 2","mutations":"1 random","mp":null,"weapons":"Scrap weapons","special":"May recruit or capture PCs/NPCs to sacrifice to their deity; may hold a clue to Eden.","desc":"Mutants exiled from their Ark who worship a Zone ruin or artifact they believe will bring the Ancients back."},
+  {"name":"Exiled Mutants","mod":"±0","str":2,"agi":2,"wit":2,"emp":2,"skills":"Move 1, Fight 1","mutations":"1 random","mp":null,"weapons":"Blunt instrument or slingshot","special":"Physical contact counts as a Rot attack. Beg for help but will attack and steal grub at the first chance; may know Eden's location.","desc":"A dozen starving, Rot-contaminated mutants in tatters, exiled from another Ark."},
+  {"name":"Expedition from Another Ark","mod":"+1","str":null,"agi":null,"wit":null,"emp":null,"skills":"Depends on role","mutations":"1 random","mp":null,"weapons":"Spiked bat or scrap rifle","special":"Attributes depend on role (use the Typical NPC Stats). At least one is a Stalker. May carry an artifact with a clue to Eden.","desc":"An expedition much like the PCs' own but from another Ark, roughly equal in number."},
+  {"name":"Helldrivers","mod":"±0","str":4,"agi":5,"wit":2,"emp":3,"skills":"Shoot 3, Fight 2, Jury-Rig 1","mutations":"1 random","mp":null,"weapons":"Bicycle chain, scrap rifle, scrap armor (Armor 3)","special":"Ride vehicles, often fitted with flamethrowers or scrap cannons.","desc":"A horde of mutants riding bizarre spiked, skull-adorned Old Age vehicles from an operational garage."},
+  {"name":"Morlocks","mod":"±0","str":2,"agi":3,"wit":5,"emp":2,"skills":"Move 2, Fight 1","mutations":"1 random","mp":null,"weapons":"Scrap spear","special":"Wary but not hostile; trade help/info for something in return; defend with animal ferocity. May hold an artifact with a clue to Eden.","desc":"Degenerate wild mutants from lost Arks who took refuge underground and regressed to savagery."},
+  {"name":"Nova Cultists","mod":"−1","str":2,"agi":3,"wit":5,"emp":4,"skills":"Move 2, Heal 1","mutations":"1 mental (Mind Terror, Puppeteer, Pathokinesis, Pyrokinesis, or Telepathy)","mp":6,"weapons":"—","special":"Powerful mentalists; start with 6 MP. Leave mutant babies as bundles; can be tracked to their lair.","desc":"A procession of shaven-headed, robed men and women of the mythical Nova Cult who treat PCs like air unless provoked."},
+  {"name":"Patrol from the Ark","mod":"—","str":null,"agi":null,"wit":null,"emp":null,"skills":"Depends on role","mutations":"1 random each","mp":null,"weapons":"Spiked bat, scrap knife, scrap rifle","special":"Attributes depend on role. At least one is a Stalker. One may be an NPC a PC has a relationship to.","desc":"A patrol from the PCs' own Ark that has found a valuable artifact and wants help retrieving it."},
+  {"name":"Scrap Oracle","mod":"−1","str":2,"agi":3,"wit":4,"emp":3,"skills":"Manipulate 2","mutations":"Telepathy, Pathokinesis, Rot-Eater","mp":6,"weapons":"—","special":"A telepath who sees visions of the PCs' future; can help interpret a clue to Eden.","desc":"A short, stocky mutant dressed in a bizarre outfit of scrap, an oddball with powerful mental mutations."},
+  {"name":"Wanderers","mod":"−1","str":4,"agi":3,"wit":4,"emp":3,"skills":"Shoot 3, Fight 2, Comprehend 1","mutations":"none","mp":null,"weapons":"Scrap knives, scrap axes, artifacts","special":"On guard but not hostile; may turn hostile if refused answers. May hold a clue to Eden.","desc":"A scrawny, grim-faced band of humans in tattered clothes who say they have walked for years from a far-off mountain range."},
+  {"name":"Water Trader","mod":"±0","str":2,"agi":3,"wit":4,"emp":5,"skills":"Manipulate 2, Shoot 1, Jury-Rig 1","mutations":"1 random","mp":null,"weapons":"Scrap pistol (5 bullets)","special":"Sells Rot-free water (may contain Gutfish spawn); price scales with desperation. May trade a clue to Eden.","desc":"A lone, friendly tall mutant pulling a cart of water bottles and a Jury-Rigged purification set, followed by two mutts."},
+  {"name":"Wreckers","mod":"±0","str":3,"agi":4,"wit":3,"emp":2,"skills":"Fight 3, Shoot 2, Sneak 1","mutations":"1 random (none if Zone-Ghouls)","mp":null,"weapons":"Spiked bats, slingshots","special":"Use an intact vehicle wreck as bait, ambushing travelers to steal everything and take survivors as slaves. An artifact is locked inside.","desc":"A band of savage mutants or Zone-Ghouls who use a surprisingly intact vehicle wreck as a trap."}
+];
+var MYZ_NPCS = [
+  {"role":"Enforcer","str":5,"agi":3,"wit":2,"emp":2,"skills":"Intimidate 3, Fight 2, Force 1"},
+  {"role":"Gearhead","str":2,"agi":2,"wit":5,"emp":3,"skills":"Jury-Rig 3, Comprehend 2, Scout 1"},
+  {"role":"Stalker","str":2,"agi":5,"wit":3,"emp":2,"skills":"Find the Path 3, Shoot 2, Sneak 1"},
+  {"role":"Fixer","str":2,"agi":2,"wit":3,"emp":5,"skills":"Make a Deal 3, Manipulate 2, Move 1"},
+  {"role":"Dog Handler","str":3,"agi":4,"wit":3,"emp":2,"skills":"Sic a Dog 3, Shoot 2, Sneak 1"},
+  {"role":"Chronicler","str":2,"agi":2,"wit":4,"emp":4,"skills":"Inspire 3, Comprehend 2, Heal 1"},
+  {"role":"Boss","str":3,"agi":3,"wit":2,"emp":4,"skills":"Command 3, Shoot 2, Fight 1"},
+  {"role":"Grunt","str":4,"agi":4,"wit":2,"emp":2,"skills":"Shake it Off 3, Endure 2, Fight 1"},
+  {"role":"No Role","str":3,"agi":3,"wit":3,"emp":3,"skills":"Level 2 in one skill"}
+];
+var MYZ_PHENOMENA = [
+  {"name":"Acid Rain","mod":"+1","effect":"An attack of 6 Base Dice (4–10 by intensity) each turn; every success is 1 damage (armor works). Repeats until sheltered (Move). Lasts D6 hours."},
+  {"name":"Ash Storm","mod":"+1","effect":"Visibility cut to a few feet; pushing on needs an Endure roll or you must shelter. Lasts D6 hours."},
+  {"name":"Dust Tornado","mod":"−1","effect":"Funnels move toward the PCs; a Move roll to escape, else a 12 Base Dice attack (damage 1; cover/armor normal)."},
+  {"name":"Ghost Lights","mod":"±0","effect":"A pale green light drifts among ruins, moving away if approached, then vanishing. No effect; can't be affected."},
+  {"name":"Electric Storm","mod":"±0","effect":"Lightning for a few minutes: 4 Base Dice (damage 1), or 8 on high ground/metal. Cover helps, armor doesn't; roll each turn until sheltered."},
+  {"name":"Heat Wave","mod":"±0","effect":"After any physical action, Endure or take 1 fatigue; drink 1 water/hour or become Dehydrated. Lasts D6 hours (summer)."},
+  {"name":"Inertia Field","mod":"−1","effect":"A field that slows time, stronger toward the center; moving in risks being trapped forever. Know the Zone to spot the danger."},
+  {"name":"Magnetic Field","mod":"−1","effect":"Pulls metal to a point. Drop metal gear or make a Force roll to leave with it (growing penalty each retry). Dissipates at the GM's call."},
+  {"name":"Mirage","mod":"−1","effect":"An ancient hologram makes terrain look pristine; act as if in total darkness within ~50 feet, risking collisions."},
+  {"name":"Mud Puddles","mod":"±0","effect":"Warm mud hides scalding geysers. Scout to spot; wading needs Know the Zone, failure triggers 6 Base Dice (1 damage + 1 Rot to anyone hit). The steam wards off severe cold."},
+  {"name":"Night Lights","mod":"−1","effect":"Billowing sky-lights make electric artifacts work erratically or not at all. Last until morning."},
+  {"name":"Obelisk","mod":"−1","effect":"A black metal obelisk emits psychedelic energies; within Short range, Know the Zone or take 1 confusion."},
+  {"name":"Pillars of Light","mod":"±0","effect":"Two great pillars of light beam skyward at the horizon. No effect, but a potent omen in NPC tales (Eden, another Ark, or doom)."},
+  {"name":"Rot Hotspot","mod":"±0","effect":"Rot is very strong with no visible threat. A chance to notice warning signs; proceeding costs 1 Rot Point per minute."},
+  {"name":"Rot Wind","mod":"±0","effect":"Foul Rot fumes inflict 1 Rot Point on everyone and contaminate carried water/grub (1 Rot per ration). Lasts D6 hours."},
+  {"name":"Sinkhole","mod":"±0","effect":"The ground collapses; those close make a Move roll or fall (1 damage), exposed to underground threats. Climbing out needs Move."},
+  {"name":"Temperature Drop","mod":"±0","effect":"A sudden cold snap with snow; Endure severe cold now and every 15 min until it passes (D6 hours) or you leave. A fire wards it off. Winter only."},
+  {"name":"Unexploded Ordnance","mod":"+1","effect":"Hidden mines and bombs; walking through needs a Move roll, failure triggers a Blast Power 6 explosion at Arm's Length."},
+  {"name":"Vacuum","mod":"−1","effect":"An airless zone: can't speak or breathe. Move roll or panic another turn; 1 damage per turn inside, one escape roll per turn."},
+  {"name":"Zone Smog","mod":"+1","effect":"Thick yellow fog: everyone takes 1 Rot Point; vision and shooting limited to Near. Some monsters hunt in it. Escape to high ground; dissipates after D6 hours."}
+];
+
 var MYZ_HB_WEAPONS = [];
 var MYZ_HB_GEAR = [];
 
 if (typeof window !== 'undefined') {
+  window.MYZ_FACTIONS = MYZ_FACTIONS;
+  window.MYZ_NPCS = MYZ_NPCS;
+  window.MYZ_PHENOMENA = MYZ_PHENOMENA;
   window.MYZ_ARCHETYPE_GEAR = MYZ_ARCHETYPE_GEAR;
   window.MYZ_ATTRIBUTES = MYZ_ATTRIBUTES;
   window.MYZ_SKILLS = MYZ_SKILLS;
