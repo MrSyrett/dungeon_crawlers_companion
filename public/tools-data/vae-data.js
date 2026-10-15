@@ -606,10 +606,51 @@ var VAE_ARCHETYPE_GEAR = {
   "Writer": ["Writing utensils and paper", "Camera", "Opera glasses", "Pet dog", "Book collection"]
 };
 
+// Supporting cast (core rulebook pp.166–168). NPCs use Toughness (physical &
+// mental), not Conditions: each point of damage is −1 to the matching skill, and
+// exceeding Toughness = Broken (out or dead). Minor 1/1 · Named 2/2 · Unique 3/3.
+// Any NPC can be made a witch/wizard by granting a MAGIC value + chosen powers.
+var VAE_NPCS = [
+  { name: "Soldier",        physique: 4, precision: 4, logic: 2, empathy: 2, toughPhys: 2, toughMental: 2, skills: "Ranged Combat 3, Agility 2, Close Combat 2, Vigilance 1" },
+  { name: "Police Officer", physique: 3, precision: 3, logic: 3, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Investigation 3, Close Combat 2, Observation 2, Ranged Combat 1" },
+  { name: "Doctor",         physique: 2, precision: 4, logic: 4, empathy: 2, toughPhys: 1, toughMental: 2, skills: "Medicine 3, Learning 3, Agility 2" },
+  { name: "Professor",      physique: 2, precision: 3, logic: 4, empathy: 2, toughPhys: 1, toughMental: 2, skills: "Learning 4, Investigation 3, Inspiration 3" },
+  { name: "Student",        physique: 2, precision: 3, logic: 3, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Stealth 2, Learning 2, Manipulation 2" },
+  { name: "Farmer",         physique: 4, precision: 2, logic: 2, empathy: 2, toughPhys: 2, toughMental: 1, skills: "Force 3, Agility 2, Learning 1" },
+  { name: "Blacksmith",     physique: 4, precision: 2, logic: 3, empathy: 2, toughPhys: 2, toughMental: 1, skills: "Agility 2, Force 2, Manipulation 1" },
+  { name: "Maid",           physique: 2, precision: 2, logic: 3, empathy: 3, toughPhys: 1, toughMental: 1, skills: "Force 2, Stealth 2, Vigilance 1" },
+  { name: "Priest",         physique: 2, precision: 2, logic: 3, empathy: 4, toughPhys: 1, toughMental: 3, skills: "Inspiration 4, Observation 3, Manipulation 2, Medicine 1" },
+  { name: "Coachman",       physique: 3, precision: 2, logic: 2, empathy: 3, toughPhys: 2, toughMental: 1, skills: "Agility 3, Close Combat 2, Observation 2" },
+  { name: "Valet",          physique: 2, precision: 2, logic: 3, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Stealth 2, Learning 2, Vigilance 2, Observation 1" },
+  { name: "Hunter",         physique: 2, precision: 4, logic: 3, empathy: 2, toughPhys: 2, toughMental: 2, skills: "Stealth 4, Ranged Combat 3, Investigation 2, Vigilance 1" },
+  { name: "Urchin",         physique: 3, precision: 2, logic: 2, empathy: 3, toughPhys: 1, toughMental: 1, skills: "Agility 3, Stealth 3, Close Combat 1, Manipulation 1" },
+  { name: "Dockworker",     physique: 4, precision: 2, logic: 2, empathy: 2, toughPhys: 3, toughMental: 1, skills: "Force 4, Close Combat 3" },
+  { name: "Merchant",       physique: 2, precision: 2, logic: 3, empathy: 3, toughPhys: 1, toughMental: 1, skills: "Manipulation 3, Learning 2, Observation 2" },
+  { name: "Seer",           physique: 2, precision: 2, logic: 4, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Learning 3, Investigation 2" },
+  { name: "Journalist",     physique: 2, precision: 2, logic: 3, empathy: 4, toughPhys: 1, toughMental: 2, skills: "Learning 2, Observation 3, Manipulation 2" }
+];
+
+// Animals (core rulebook p.168). Attack with MIGHT; use BODY CONTROL to sneak/evade.
+// One slow + one fast action per round. Toughness instead of Conditions.
+var VAE_ANIMALS = [
+  { name: "Badger",    might: 5, bodyControl: 4, toughness: 1, damage: 1 },
+  { name: "Bear",      might: 8, bodyControl: 6, toughness: 3, damage: 2 },
+  { name: "Dog",       might: 5, bodyControl: 6, toughness: 1, damage: 1 },
+  { name: "Eagle",     might: 5, bodyControl: 7, toughness: 1, damage: 1 },
+  { name: "Fox",       might: 4, bodyControl: 8, toughness: 1, damage: 1 },
+  { name: "Moose",     might: 7, bodyControl: 4, toughness: 3, damage: 2 },
+  { name: "Reindeer",  might: 4, bodyControl: 5, toughness: 1, damage: 1 },
+  { name: "Wild Boar", might: 5, bodyControl: 6, toughness: 2, damage: 1 },
+  { name: "Wolf",      might: 6, bodyControl: 7, toughness: 2, damage: 1 },
+  { name: "Wolverine", might: 5, bodyControl: 6, toughness: 1, damage: 1 }
+];
+
 var VAE_HB_WEAPONS = [];
 var VAE_HB_GEAR = [];
 
 if (typeof window !== 'undefined') {
+  window.VAE_NPCS = VAE_NPCS;
+  window.VAE_ANIMALS = VAE_ANIMALS;
   window.VAE_ARCHETYPE_GEAR = VAE_ARCHETYPE_GEAR;
   window.VAE_ATTRIBUTES = VAE_ATTRIBUTES;
   window.VAE_SKILLS = VAE_SKILLS;

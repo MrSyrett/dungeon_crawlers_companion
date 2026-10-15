@@ -2209,6 +2209,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
     CO:  ['npc'],
     YZE: ['yzemonster','yzetreasure','yzestar','yzeworld','yzejobs','yzeencounters','yzetwist','yzeshore','yzeoracle','yzesalvage'],
     TWD: ['twdmonster','twdtreasure','twdscavenge','twdlocation','twdnpc','twdfaction','twdwalker','twdevents','twdrumors'],
+    VAE: ['vaemonster','vaetreasure','vaemystery','vaenpc'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -2216,7 +2217,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
   // Display names for the top-bar system indicator (the GM Screen no longer has
   // a system dropdown — the linked campaign drives it).
-  const SYS_LABEL = { SD:'Shadowdark', DCC:'DCC', ACE:'ACE!', KOB:'Kids on Bikes', NIM:'Nimble', SW:'Star Wars', DND:'D&D', D62E:'D6 System 2e', ICRPG:'Index Card RPG', MMRPG:'Marvel Multiverse', CO:'Candela Obscura', YZE:'Year Zero Engine', TWD:'The Walking Dead', JLU:'Justice League', GB:'Ghostbusters' };
+  const SYS_LABEL = { SD:'Shadowdark', DCC:'DCC', ACE:'ACE!', KOB:'Kids on Bikes', NIM:'Nimble', SW:'Star Wars', DND:'D&D', D62E:'D6 System 2e', ICRPG:'Index Card RPG', MMRPG:'Marvel Multiverse', CO:'Candela Obscura', YZE:'Year Zero Engine', TWD:'The Walking Dead', VAE:'Vaesen', JLU:'Justice League', GB:'Ghostbusters' };
   // Systems an admin hid (Admin → Systems) — injected by the server before the
   // page runs. Never let the visible set go empty (mirrors the server guard).
   const HIDDEN_SYS = (function () { try { return Array.isArray(window.__gmHiddenSystems__) ? window.__gmHiddenSystems__ : []; } catch (e) { return []; } })();
@@ -3269,6 +3270,10 @@ GMScenes.renderPins();
         <option value="twdwalker">Walker</option>
         <option value="twdevents">Events</option>
         <option value="twdrumors">Rumors</option>
+        <option value="vaemonster">Creature</option>
+        <option value="vaetreasure">Gear Drop</option>
+        <option value="vaemystery">Mystery</option>
+        <option value="vaenpc">NPC</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -4353,6 +4358,84 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results twd-out" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- VAESEN CREATURE PANEL (vaesen / NPCs / animals; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="vaemonster">
+        <div class="gen-controls">
+          <label class="gen-label">Type
+            <select class="gen-select" id="gen-vaemon-group"><option value="">Any Type</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-vaemon-group-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-vaemon-group-results"></div>
+      </div>
+
+      <!-- VAESEN GEAR DROP (weapons / armor / gear → send to players) -->
+      <div class="gen-panel xs-treasure" data-panel="vaetreasure" data-sys="vae">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Gear Drop</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it turns up (e.g. the manor's locked study)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a drop from the Vaesen weapon, armor &amp; gear lists">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search weapons, armor &amp; gear to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VAESEN: MYSTERY (the adventure-seed suite) -->
+      <div class="gen-panel" data-panel="vaemystery">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Table
+            <select class="gen-select vae-sub">
+              <option value="full">Full Mystery</option>
+              <option value="invitation">Invitation</option>
+              <option value="questGiver">Quest Giver</option>
+              <option value="misdeed">Misdeed</option>
+              <option value="whichVaesen">Which Vaesen</option>
+              <option value="primaryConflict">Primary Conflict</option>
+              <option value="vaesenAttitude">Vaesen's Attitude</option>
+              <option value="secondaryConflict">Secondary Conflict</option>
+              <option value="meetings">A Meeting</option>
+              <option value="location">Location</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results vae-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to build a mystery.</div></div>
+      </div>
+
+      <!-- VAESEN: NPC (name + trait + occupation) -->
+      <div class="gen-panel" data-panel="vaenpc">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Name
+            <select class="gen-select vae-sub">
+              <option value="any">Any</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results vae-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for a random NPC.</div></div>
       </div>
 
       <!-- MAP GENERATOR PANEL (system-neutral — same engine as the Dungeon/Adventure map) -->
@@ -7690,7 +7773,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd', 'vae'];
   // Map a system to its bestiary source. Unknown systems keep their own key (so
   // pickerMatches returns nothing and the picker says "No Combatants Found")
   // rather than silently falling back to the DCC bestiary.
@@ -10339,6 +10422,15 @@ function twdBestiary() {
   (typeof TWD_ANIMALS !== 'undefined' && Array.isArray(TWD_ANIMALS) ? TWD_ANIMALS : []).forEach(a => out.push(Object.assign({ _twdkind: 'animal', _twdtype: 'Animal' }, a)));
   return out;
 }
+// Vaesen combat roster: the 21 vaesen, the NPC archetypes, and the animals.
+// Each entry carries _vaekind + _vaetype for the summary/facet.
+function vaeBestiary() {
+  const out = [];
+  (typeof VAE_BESTIARY !== 'undefined' && Array.isArray(VAE_BESTIARY) ? VAE_BESTIARY : []).forEach(v => out.push(Object.assign({ _vaekind: 'vaesen', _vaetype: 'Vaesen' }, v)));
+  (typeof VAE_NPCS !== 'undefined' && Array.isArray(VAE_NPCS) ? VAE_NPCS : []).forEach(n => out.push(Object.assign({ _vaekind: 'npc', _vaetype: 'NPC' }, n)));
+  (typeof VAE_ANIMALS !== 'undefined' && Array.isArray(VAE_ANIMALS) ? VAE_ANIMALS : []).forEach(a => out.push(Object.assign({ _vaekind: 'animal', _vaetype: 'Animal' }, a)));
+  return out;
+}
 function xsBestiary(src) {
   const ok = v => (typeof v !== 'undefined' && Array.isArray(v)) ? v : [];
   if(src === 'ace') return ok(typeof ACE_EXTRAS !== 'undefined' ? ACE_EXTRAS : undefined);
@@ -10351,11 +10443,12 @@ function xsBestiary(src) {
   if(src === 'gb') return ok(typeof GB_BESTIARY !== 'undefined' ? GB_BESTIARY : undefined);
   if(src === 'yze') return ok(typeof ALIEN_BESTIARY !== 'undefined' ? ALIEN_BESTIARY : undefined);
   if(src === 'twd') return (typeof TWD_NPCS !== 'undefined' || typeof TWD_ANIMALS !== 'undefined') ? twdBestiary() : [];
+  if(src === 'vae') return (typeof VAE_BESTIARY !== 'undefined' || typeof VAE_NPCS !== 'undefined') ? vaeBestiary() : [];
   return [];
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
 // group, D6 2e kind, ICRPG tier).
-function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : src === 'mmrpg' ? ('Rank ' + m.rank) : src === 'gb' ? (m.kind === 'ghost' ? 'Ghost' : 'NPC') : src === 'twd' ? (m._twdtype || '') : (m.group || ''); }
+function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : src === 'mmrpg' ? ('Rank ' + m.rank) : src === 'gb' ? (m.kind === 'ghost' ? 'Ghost' : 'NPC') : src === 'twd' ? (m._twdtype || '') : src === 'vae' ? (m._vaetype || '') : (m.group || ''); }
 function xsMonTypes(src) { return [...new Set(xsBestiary(src).map(m => xsMonType(src, m)).filter(Boolean))]; }
 // Star Wars die codes are stored as pips (3D+2 = 11).
 function swPipsCode(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p / 3), r = p % 3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); }
@@ -10527,6 +10620,34 @@ function xsMonSummary(src, m) {
       if(m.secretIssue) out.notes.push('Secret: ' + m.secretIssue);
       if(m.gear) out.notes.push('Gear: ' + m.gear);
       out.hp = 3;
+    }
+  } else if(src === 'vae') {
+    // Vaesen use a 5-stat dice-pool block + an ordered Conditions track; NPCs and
+    // animals instead use Toughness (physical/mental) and take no Conditions.
+    if(m._vaekind === 'npc') {
+      out.stats.push({ label: 'Tough', val: m.toughPhys + '/' + m.toughMental });
+      out.lines.push({ label: 'Attributes', text: 'PHY ' + m.physique + ' · PRE ' + m.precision + ' · LOG ' + m.logic + ' · EMP ' + m.empathy });
+      if(m.skills) out.lines.push({ label: 'Skills', text: m.skills });
+      out.notes.push('NPC — uses Toughness, not Conditions. Each point of damage is −1 to the skill; exceed Toughness = Broken.');
+      out.hp = parseInt(m.toughPhys, 10) || 1;
+    } else if(m._vaekind === 'animal') {
+      out.stats.push({ label: 'Might', val: String(m.might), roll: m.might ? m.might + 'd6' : '' }, { label: 'Body', val: String(m.bodyControl) }, { label: 'Tough', val: String(m.toughness) }, { label: 'Dmg', val: String(m.damage) });
+      out.notes.push('Attacks with Might; uses Body Control to sneak or evade. One slow + one fast action.');
+      out.hp = parseInt(m.toughness, 10) || 1;
+    } else {
+      const s = m.stats || {};
+      out.stats.push(
+        { label: 'Might', val: String(s.might != null ? s.might : ''), roll: s.might ? s.might + 'd6' : '' },
+        { label: 'Body', val: String(s.bodyControl != null ? s.bodyControl : ''), roll: s.bodyControl ? s.bodyControl + 'd6' : '' },
+        { label: 'Magic', val: String(s.magic != null ? s.magic : ''), roll: s.magic ? s.magic + 'd6' : '' },
+        { label: 'Manip', val: String(s.manipulation != null ? s.manipulation : ''), roll: s.manipulation ? s.manipulation + 'd6' : '' },
+        { label: 'Fear', val: String(s.fear != null ? s.fear : '') }
+      );
+      if(m.powers && m.powers.length) out.lines.push({ label: 'Powers', text: m.powers.join(' · ') });
+      if(m.combat) out.lines.push({ label: 'Combat', text: m.combat });
+      if(m.conditions) out.notes.push('Conditions: ' + m.conditions);
+      if(m.weakness) out.notes.push(m.weakness);
+      out.hp = m.conditions ? Math.max(1, String(m.conditions).split(';').length) : 4;
     }
   }
   return out;
@@ -12085,7 +12206,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg' || src === 'yze' || src === 'twd') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg' || src === 'yze' || src === 'twd' || src === 'vae') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -12134,10 +12255,11 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'twdtreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'twdtreasure', 'vaetreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
   // Alien table generators are driven straight from the window Roll button (no inline button).
   const YZE_TABLE_GENS = ['yzestar', 'yzeworld', 'yzejobs', 'yzeencounters', 'yzetwist', 'yzeshore', 'yzeoracle', 'yzesalvage'];
   const TWD_TABLE_GENS = ['twdscavenge', 'twdlocation', 'twdnpc', 'twdfaction', 'twdwalker', 'twdevents', 'twdrumors'];
+  const VAE_TABLE_GENS = ['vaemystery', 'vaenpc'];
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -12148,7 +12270,7 @@ window.init_gen = function(root) {
     }
   })();
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group'],['twd','#gen-twdmon-group']].forEach(([src, id]) => {
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group'],['twd','#gen-twdmon-group'],['vae','#gen-vaemon-group']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -12184,7 +12306,7 @@ window.init_gen = function(root) {
   // read back by alienGenPanel / twdGenPanel which loop that many times.
   (function(){
     const QTY = [1, 2, 3, 5, 10];
-    const TGENS = YZE_TABLE_GENS.concat(TWD_TABLE_GENS);
+    const TGENS = YZE_TABLE_GENS.concat(TWD_TABLE_GENS).concat(VAE_TABLE_GENS);
     TGENS.forEach(name => {
       const panel = root.querySelector('.gen-panel[data-panel="' + name + '"]');
       if(!panel || panel.querySelector('.gen-qty')) return;
@@ -12224,6 +12346,11 @@ window.init_gen = function(root) {
     if(TWD_TABLE_GENS.indexOf(activeTab) >= 0) {
       const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
       if(panel && typeof window.twdGenPanel === 'function') window.twdGenPanel(panel);
+      return;
+    }
+    if(VAE_TABLE_GENS.indexOf(activeTab) >= 0) {
+      const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
+      if(panel && typeof window.vaeGenPanel === 'function') window.vaeGenPanel(panel);
       return;
     }
     if(activeTab==='npc') {
@@ -12421,9 +12548,9 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster' || activeTab==='yzemonster' || activeTab==='twdmonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster' || activeTab==='yzemonster' || activeTab==='twdmonster' || activeTab==='vaemonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : src === 'yze' ? '#gen-yzemon-group' : src === 'twd' ? '#gen-twdmon-group' : '#gen-mmrpgmon-kind';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : src === 'yze' ? '#gen-yzemon-group' : src === 'twd' ? '#gen-twdmon-group' : src === 'vae' ? '#gen-vaemon-group' : '#gen-mmrpgmon-kind';
       const type=root.querySelector(idBase).value;
       const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
@@ -14475,6 +14602,8 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <script src="/tools-data/twd-data.js"></script>
 <script src="/tools-data/twd-bestiary.js"></script>
 <script src="/tools-data/twd-gm-tables.js"></script>
+<script src="/tools-data/vae-data.js"></script>
+<script src="/tools-data/vae-gm-tables.js"></script>
 <script src="/tools-data/yze-alien-gm-tables.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <!-- PDF.js + the shared reader are loaded on demand by init_rules (first Rulebooks open) — not on every GM Screen load. -->
@@ -14568,7 +14697,7 @@ function init_dice(root) {
     ICRPG:[4, 6, 8, 10, 12, 20],
     KOB:  [4, 6, 8, 10, 12, 20],
     JLU:  [6, 8, 12],
-    SW:   [6], D62E: [6], CO: [6], YZE: [6], TWD: [6], GB: [6], ACE: [6], MMRPG: [6],
+    SW:   [6], D62E: [6], CO: [6], YZE: [6], TWD: [6], VAE: [6], GB: [6], ACE: [6], MMRPG: [6],
   };
   function diceForSystem(sys) { return DICE_BY_SYS[String(sys || '').toUpperCase()] || DICE_STD; }
   let DICE = diceForSystem(window.GM_SYSTEM);
@@ -14824,6 +14953,7 @@ function init_dice(root) {
   const GM_TRAYS = {
     YZE: renderYZETray,
     TWD: renderYZETray,
+    VAE: renderYZETray,
     SW: renderWildTray, ACE: renderWildTray, D62E: renderWildTray,
     GB: renderGhostTray,
     CO: renderCandelaTray,
@@ -17046,6 +17176,15 @@ function wireAiConsole(root) {
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
       randomCats: ['weapon','armor','gear','gear'], money: null, label: 'GEAR DROP', empty: 'TWD gear list',
     },
+    vae: {
+      list: () => []
+        .concat(((typeof VAE_MELEE_WEAPONS !== 'undefined' && Array.isArray(VAE_MELEE_WEAPONS)) ? VAE_MELEE_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus ? 'Bonus ' + w.bonus : '', 'Melee', w.skill || ''].filter(Boolean).join(' · ') })))
+        .concat(((typeof VAE_RANGED_WEAPONS !== 'undefined' && Array.isArray(VAE_RANGED_WEAPONS)) ? VAE_RANGED_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus ? 'Bonus ' + w.bonus : '', w.range != null ? 'Range ' + w.range : '', w.skill || ''].filter(Boolean).join(' · ') })))
+        .concat(((typeof VAE_ARMOR !== 'undefined' && Array.isArray(VAE_ARMOR)) ? VAE_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Protection ' + a.protection, a.comment].filter(Boolean).join(' · ') })))
+        .concat(((typeof VAE_GEAR !== 'undefined' && Array.isArray(VAE_GEAR)) ? VAE_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.comment || g.effect || '', g.cost != null && g.cost !== '' ? 'cost ' + g.cost : ''].filter(Boolean).join(' · ') }))),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
+      randomCats: ['weapon','armor','gear','gear'], money: null, label: 'GEAR DROP', empty: 'Vaesen gear list',
+    },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {
     const cfg = XS_TREASURE[panel.dataset.sys]; if(!cfg) return;
@@ -17565,6 +17704,78 @@ window.init_vtt = init_vtt;
       html=card(({rumors:'Rumor',encounters:'Faction Encounter',change:'Faction Change'}[sub])+' · '+r.code,'',esc(r.row.result));
     }
     return html;
+    }
+    var out=''; for(var qi=0; qi<Math.max(1,o.qty); qi++){ out+=one(); }
+    o.el.innerHTML=out;
+  };
+})();
+
+// ── Vaesen GM tables (core rulebook Mystery suite + NPC). Data in
+//    /tools-data/vae-gm-tables.js as VAE_GM_TABLES. Driven by the window Roll button.
+(function(){
+  'use strict';
+  function T(){ return (typeof VAE_GM_TABLES!=='undefined')?VAE_GM_TABLES:(window.VAE_GM_TABLES||null); }
+  function d6(){ return 1+Math.floor(Math.random()*6); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function bounds(tok){
+    tok=String(tok).trim(); var m;
+    if((m=tok.match(/^(\d+)\s*[–-]\s*(\d+)$/))){ return [parseInt(m[1],10), parseInt(m[2],10)]; }
+    if((m=tok.match(/^(\d+)$/))){ var v=parseInt(m[1],10); return [v,v]; }
+    return [0,0];
+  }
+  function maxEnd(tbl){ var mx=-Infinity; tbl.forEach(function(r){ var b=bounds(r.roll); [b[0],b[1]].forEach(function(x){ if(isFinite(x)&&x>mx)mx=x; }); }); return mx; }
+  function rollTable(tbl){
+    if(!tbl||!tbl.length) return { code:'—', row:{ result:'(no table)' } };
+    var mx=maxEnd(tbl), n;
+    if(mx<=6){ n=d6(); }
+    else { var codes=[]; tbl.forEach(function(r){ var b=bounds(r.roll); for(var v=b[0];v<=b[1];v++) codes.push(v); }); n= codes.length? codes[Math.floor(Math.random()*codes.length)] : (d6()*10+d6()); }
+    var row=null; for(var i=0;i<tbl.length;i++){ var b=bounds(tbl[i].roll); if(n>=b[0]&&n<=b[1]){ row=tbl[i]; break; } } if(!row)row=tbl[tbl.length-1];
+    return { code: row.roll, row: row };
+  }
+  function card(kick,title,body){
+    return '<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;">'
+      +'<div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">'+esc(kick)+'</div>'
+      +(title?'<div style="font-size:16px;font-weight:800;color:#3fd0e6;">'+esc(title)+'</div>':'')
+      +(body?'<div style="font-size:13px;margin-top:3px;">'+body+'</div>':'')+'</div>';
+  }
+  function line(lbl,code,txt){ return '<div style="margin-top:3px;"><b style="color:#3fd0e6;">'+esc(lbl)+'</b> <span style="color:#999;font-size:11px;">('+esc(code)+')</span> '+esc(txt)+'</div>'; }
+  function ctx(panel){ var s=panel&&panel.querySelector('.vae-sub'); var q=panel&&panel.querySelector('.gen-qty'); return { panel:panel, el:panel&&panel.querySelector('.vae-out'), sub:s?s.value:'', qty:(q?Math.max(1,parseInt(q.value,10)||1):1) }; }
+
+  window.vaeGen=function(btn){ var p=btn&&btn.closest('[data-panel]'); if(p) window.vaeGenPanel(p); };
+  window.vaeGenPanel=function(panel){
+    var d=T(); var o=ctx(panel); if(!d||!o.el){ if(o.el) o.el.innerHTML=card('Vaesen tables did not load','','Open the GM Screen from the app.'); return; }
+    var kind=panel.dataset.panel;
+    function one(){ var html='';
+      if(kind==='vaemystery'){
+        var sub=o.sub||'full';
+        if(sub==='full'){
+          var inv=rollTable(d.invitation), qg=rollTable(d.questGiver), md=rollTable(d.misdeed), wv=rollTable(d.whichVaesen),
+              pc=rollTable(d.primaryConflict), at=rollTable(d.vaesenAttitude), sc=rollTable(d.secondaryConflict),
+              mt=rollTable(d.meetings), loc=rollTable(Math.random()<0.5?d.locationsCountryside:d.locationsCity);
+          var body=line('Invitation',inv.code,inv.row.result)+line('Quest Giver',qg.code,qg.row.result)
+            +line('Misdeed',md.code,md.row.result)+line('Vaesen',wv.code,wv.row.result)
+            +line('Grievance',pc.code,pc.row.result)+line('Attitude',at.code,at.row.result)
+            +line('Secondary Conflict',sc.code,sc.row.result)+line('A Meeting',mt.code,mt.row.result)
+            +line('Location',loc.code,loc.row.result);
+          html=card('Mystery Seed','',body);
+        } else if(sub==='location'){
+          var cs=rollTable(d.locationsCountryside), ci=rollTable(d.locationsCity);
+          html=card('Locations','', line('Countryside',cs.code,cs.row.result)+line('City',ci.code,ci.row.result));
+        } else {
+          var r=rollTable(d[sub]);
+          var nm={invitation:'Invitation',questGiver:'Quest Giver',misdeed:'Misdeed',whichVaesen:'Which Vaesen',primaryConflict:'Primary Conflict',vaesenAttitude:"Vaesen's Attitude",secondaryConflict:'Secondary Conflict',meetings:'A Meeting'}[sub]||sub;
+          html=card(nm+' · '+r.code,'',esc(r.row.result));
+        }
+      } else if(kind==='vaenpc'){
+        var g=o.sub||'any', useM=(g==='male')||(g==='any'&&Math.random()<0.5);
+        var first=rollTable(useM?d.npcNamesMale:d.npcNamesFemale), last=rollTable(d.npcNamesLast),
+            trait=rollTable(d.npcTraits), occ=rollTable(d.meetings);
+        var body=line('Name',first.code+'·'+last.code, first.row.result+' '+last.row.result)
+          +line('Trait',trait.code,trait.row.result)
+          +line('Occupation',occ.code,occ.row.result);
+        html=card('Random NPC · '+(useM?'♂':'♀'),'',body);
+      }
+      return html;
     }
     var out=''; for(var qi=0; qi<Math.max(1,o.qty); qi++){ out+=one(); }
     o.el.innerHTML=out;

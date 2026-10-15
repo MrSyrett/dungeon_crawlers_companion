@@ -617,3 +617,134 @@ export const VAE_ARCHETYPE_GEAR: Record<string, string[]> = {
   "Vagabond": ["Walking stick", "Knife", "Crowbar", "Liquor", "Pet dog"],
   "Writer": ["Writing utensils and paper", "Camera", "Opera glasses", "Pet dog", "Book collection"]
 };
+
+
+export type VaeNpc = { name: string; physique: number; precision: number; logic: number; empathy: number; toughPhys: number; toughMental: number; skills: string };
+// Supporting cast (core rulebook pp.166-168). NPCs use Toughness (physical & mental),
+// not Conditions: each point of damage is -1 to the matching skill; exceeding Toughness
+// = Broken. Minor 1/1 / Named 2/2 / Unique 3/3. Any NPC can be a witch/wizard (give MAGIC + powers).
+export const VAE_NPCS: VaeNpc[] = [
+  { name: "Soldier", physique: 4, precision: 4, logic: 2, empathy: 2, toughPhys: 2, toughMental: 2, skills: "Ranged Combat 3, Agility 2, Close Combat 2, Vigilance 1" },
+  { name: "Police Officer", physique: 3, precision: 3, logic: 3, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Investigation 3, Close Combat 2, Observation 2, Ranged Combat 1" },
+  { name: "Doctor", physique: 2, precision: 4, logic: 4, empathy: 2, toughPhys: 1, toughMental: 2, skills: "Medicine 3, Learning 3, Agility 2" },
+  { name: "Professor", physique: 2, precision: 3, logic: 4, empathy: 2, toughPhys: 1, toughMental: 2, skills: "Learning 4, Investigation 3, Inspiration 3" },
+  { name: "Student", physique: 2, precision: 3, logic: 3, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Stealth 2, Learning 2, Manipulation 2" },
+  { name: "Farmer", physique: 4, precision: 2, logic: 2, empathy: 2, toughPhys: 2, toughMental: 1, skills: "Force 3, Agility 2, Learning 1" },
+  { name: "Blacksmith", physique: 4, precision: 2, logic: 3, empathy: 2, toughPhys: 2, toughMental: 1, skills: "Agility 2, Force 2, Manipulation 1" },
+  { name: "Maid", physique: 2, precision: 2, logic: 3, empathy: 3, toughPhys: 1, toughMental: 1, skills: "Force 2, Stealth 2, Vigilance 1" },
+  { name: "Priest", physique: 2, precision: 2, logic: 3, empathy: 4, toughPhys: 1, toughMental: 3, skills: "Inspiration 4, Observation 3, Manipulation 2, Medicine 1" },
+  { name: "Coachman", physique: 3, precision: 2, logic: 2, empathy: 3, toughPhys: 2, toughMental: 1, skills: "Agility 3, Close Combat 2, Observation 2" },
+  { name: "Valet", physique: 2, precision: 2, logic: 3, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Stealth 2, Learning 2, Vigilance 2, Observation 1" },
+  { name: "Hunter", physique: 2, precision: 4, logic: 3, empathy: 2, toughPhys: 2, toughMental: 2, skills: "Stealth 4, Ranged Combat 3, Investigation 2, Vigilance 1" },
+  { name: "Urchin", physique: 3, precision: 2, logic: 2, empathy: 3, toughPhys: 1, toughMental: 1, skills: "Agility 3, Stealth 3, Close Combat 1, Manipulation 1" },
+  { name: "Dockworker", physique: 4, precision: 2, logic: 2, empathy: 2, toughPhys: 3, toughMental: 1, skills: "Force 4, Close Combat 3" },
+  { name: "Merchant", physique: 2, precision: 2, logic: 3, empathy: 3, toughPhys: 1, toughMental: 1, skills: "Manipulation 3, Learning 2, Observation 2" },
+  { name: "Seer", physique: 2, precision: 2, logic: 4, empathy: 3, toughPhys: 1, toughMental: 2, skills: "Learning 3, Investigation 2" },
+  { name: "Journalist", physique: 2, precision: 2, logic: 3, empathy: 4, toughPhys: 1, toughMental: 2, skills: "Learning 2, Observation 3, Manipulation 2" }
+];
+
+export type VaeAnimal = { name: string; might: number; bodyControl: number; toughness: number; damage: number };
+// Animals (core rulebook p.168). Attack with MIGHT; use BODY CONTROL to sneak/evade.
+export const VAE_ANIMALS: VaeAnimal[] = [
+  { name: "Badger", might: 5, bodyControl: 4, toughness: 1, damage: 1 },
+  { name: "Bear", might: 8, bodyControl: 6, toughness: 3, damage: 2 },
+  { name: "Dog", might: 5, bodyControl: 6, toughness: 1, damage: 1 },
+  { name: "Eagle", might: 5, bodyControl: 7, toughness: 1, damage: 1 },
+  { name: "Fox", might: 4, bodyControl: 8, toughness: 1, damage: 1 },
+  { name: "Moose", might: 7, bodyControl: 4, toughness: 3, damage: 2 },
+  { name: "Reindeer", might: 4, bodyControl: 5, toughness: 1, damage: 1 },
+  { name: "Wild Boar", might: 5, bodyControl: 6, toughness: 2, damage: 1 },
+  { name: "Wolf", might: 6, bodyControl: 7, toughness: 2, damage: 1 },
+  { name: "Wolverine", might: 5, bodyControl: 6, toughness: 1, damage: 1 }
+];
+
+export type VaeSpell = { name: string; resist?: string; effect: string };
+export type VaeMagicItem = { name: string; effect: string; risk: string };
+export const VAE_MAGIC = {
+  theSight: "The Sight is the ability to see vaesen even when they try to remain invisible to the human eye. A character gains it through some physical or psychological trauma, usually a supernatural event. Player characters all have the Sight and are therefore known as Thursday's Children.",
+  pcMagic: "In exceptional circumstances a PC can gain the MAGIC skill — from a spertus or a wand — granting a value plus one or more spells. MAGIC adds no attribute dice, cannot be raised with XP, is a slow action, can be pushed with mental Conditions, and usually needs a ritual or rhyme.",
+  families: { enchantments: "Magic that affects a location and the people living there to create atmosphere — fog, rotting food, blood in the well. The creature succeeds automatically with no roll; any affected player character must pass a Fear test (usually Fear 1). Enchantments usually last one scene.", curses: "Magic vaesen use to attack player characters, at a distance or as a weapon in combat. Resolved as an opposed roll of the creature's MAGIC against the PC's listed skill (Observation, Vigilance, or Force); the creature must roll more successes, and extra successes usually inflict Conditions. A slow action; lasts one scene unless stated.", trollcraft: "Magic of trolls and fairies that bends time and space. Used for mood it works like an Enchantment (auto-success, PC makes a Fear test); used to attack a specific PC it works like a Curse (opposed MAGIC vs a resisting skill)." },
+  enchantments: [
+    { name: "Animal invasion", effect: "The location is overrun by animals." },
+    { name: "Animals are born with defects", effect: "Newborn animals in the area are born deformed." },
+    { name: "Animals bolt", effect: "Animals panic and flee." },
+    { name: "Blindness", effect: "NPCs lose their eyesight." },
+    { name: "Christian symbols shatter", effect: "Crosses and other Christian symbols break apart." },
+    { name: "Command animal", effect: "The creature commands an animal." },
+    { name: "Contact with the great beyond", effect: "Spirits and undead communicate through speech, screams, scents, writing or visions." },
+    { name: "Darkness", effect: "Unnatural darkness falls over the location." },
+    { name: "Distort vision", effect: "NPCs see something other than what is really there." },
+    { name: "Disturbance", effect: "NPCs are haunted by horrifying visions." },
+    { name: "Earthquake", effect: "The ground shakes." },
+    { name: "Enchanted sleep", effect: "Afflicts NPCs in the location with magical sleep." },
+    { name: "Enthrall", effect: "NPCs become mind-controlled and may attack the player characters." },
+    { name: "Fog", effect: "Thick fog enshrouds the area." },
+    { name: "Food or beverage is transformed or rots", effect: "Food and drink is transformed or spoils." },
+    { name: "Mareel", effect: "Phosphorescence appears on water." },
+    { name: "Muteness", effect: "NPCs lose their ability to speak." },
+    { name: "Nightmares", effect: "One or several player characters are plagued by nightmares." },
+    { name: "Plant invasion", effect: "The location is overrun by plants." },
+    { name: "Plants die", effect: "Plant life withers and dies." },
+    { name: "Raise the dead", effect: "The dead are brought back." },
+    { name: "Shape stone or wood", effect: "Stone or wood is reshaped." },
+    { name: "Spread disease", effect: "Disease spreads through the location." },
+    { name: "Storm", effect: "A storm is conjured." },
+    { name: "Terrible signs", effect: "Dreadful omens and portents appear." },
+    { name: "The drinking water is filled with tadpoles", effect: "The water teems with tadpoles and NPCs belch up frogs." },
+    { name: "The ground turns marshy", effect: "The ground becomes soft and boggy." }
+  ] as VaeSpell[],
+  curses: [
+    { name: "Deadly Cold", resist: "Force", effect: "Struck by extreme cold, suffering one physical Condition. Extra successes deal more." },
+    { name: "Enthrall", resist: "Observation", effect: "The creature controls the PC's actions (but can't make them hurt themself) for the scene. Extra successes cause mental Conditions." },
+    { name: "Fear", resist: "Fear test", effect: "Tormented by dreadful visions; the creature's successes set the Fear value." },
+    { name: "Feast", resist: "Vigilance", effect: "Seized by an urge to party and indulge. Affects all PCs; extra successes cause mental Conditions." },
+    { name: "Fire", resist: "Force", effect: "The PC catches fire. Extra successes increase the fire's intensity by one step." },
+    { name: "Infect", resist: "Force", effect: "Contracts a terrible disease (one physical Condition; more on extra successes). Cured with Medicine; may require hair/skin or banishing." },
+    { name: "Lame", resist: "Force", effect: "Unable to walk. Extra successes cause physical Conditions." },
+    { name: "Lure", resist: "Vigilance", effect: "Compelled to reach the creature, breaking through obstacles. Extra successes cause mental Conditions." },
+    { name: "Mute", resist: "Force", effect: "Unable to speak. Extra successes cause physical Conditions." },
+    { name: "Night Terror", resist: "Observation", effect: "Severe nightmares; can't be woken this scene; one mental Condition (more on extra successes). Sleeping PCs only." },
+    { name: "Seduce", resist: "Observation", effect: "Attracted to the creature. Extra successes cause mental Conditions." },
+    { name: "Self-Loathing", resist: "Observation", effect: "Hates or is disgusted by themself. Extra successes cause mental Conditions." },
+    { name: "Sleep", resist: "Force", effect: "Falls asleep and can't be woken. Needs a planted item in the bedroom; removing it wakes the PC." },
+    { name: "Stranger", resist: "Observation", effect: "Others dislike the PC and want to drive them away. Requires an item belonging to the PC; retrieving it lifts it." },
+    { name: "Twist Vision", resist: "Vigilance", effect: "Reality warps — villagers seem monsters, friends seem replaced. Extra successes cause mental Conditions." },
+    { name: "Wound", resist: "Force", effect: "A wound opens, causing a physical Condition. Extra successes cause more." }
+  ] as VaeSpell[],
+  trollcraft: [
+    { name: "Alter Age", resist: "Force", effect: "People grow older or younger. Extra successes cause mental Conditions; may be permanent." },
+    { name: "Animal Parts", resist: "Force", effect: "A body part becomes an animal's (donkey ears, pig tail). Extra successes escalate it." },
+    { name: "Animate the Inanimate", resist: "Fear test", effect: "Something not alive comes to life and is controlled by the creature; fights using an animal's stats by shape/size." },
+    { name: "Dance", resist: "Observation", effect: "Forced to dance until the music stops. Extra successes cause mental Conditions." },
+    { name: "Enlarge", resist: "Force", effect: "The victim grows to the size of a cottage or giant. Each extra success adds a scene." },
+    { name: "Mix Thoughts", resist: "Vigilance", effect: "Thoughts jumbled; each PC passes a Fear 1 test. Extra successes cause mental Conditions." },
+    { name: "Obstruct", resist: "Force", effect: "Cannot pass a point or move a direction. Each extra success adds a scene." },
+    { name: "Passion", resist: "Observation", effect: "Falls fiercely in love with another. Each extra success adds a scene." },
+    { name: "Shrink", resist: "Force", effect: "Shrinks to insect size. Each extra success adds a scene." },
+    { name: "Stop Time", resist: "Observation", effect: "Time stands still or loops; the creature must be killed/banished or made to undo it. Against a PC, frozen but immune to harm." },
+    { name: "Teleport", resist: "Force", effect: "Someone is sent elsewhere. Extra successes cause mental Conditions." },
+    { name: "Thought Virus", resist: "Observation", effect: "A false belief spreads as if true. Lasts the mystery or until the creature dies. Affects all PCs." },
+    { name: "Transform Into Animals", resist: "Force", effect: "Victims turn into animals but keep their minds." }
+  ] as VaeSpell[],
+  itemsOfPower: [
+    { name: "Fairy cross", effect: "+2 defense against Trollcraft. An amulet of nine kinds of silver, forged on three consecutive Thursday nights." },
+    { name: "Silver bullets", effect: "Can kill certain vaesen. Ammunition made of silver." },
+    { name: "Bible", effect: "Add Inspiration to your attribute when making a Fear test." },
+    { name: "Holy water", effect: "Use Inspiration against MAGIC to temporarily drive off undead." },
+    { name: "Troll cross", effect: "+2 to resist Curses from trolls. An arc-shaped pendant." },
+    { name: "Scythe", effect: "+2 to resist Curses from mares. Hung above the bedroom door." },
+    { name: "Elf mill", effect: "+2 to resist Trollcraft from fairies when near the elf mill (cup marks in rock, smeared with grease)." }
+  ] as VaeSpell[],
+  magicItems: [
+    { name: "Seaweed bladder", effect: "Breathe underwater.", risk: "Water seeps in: one physical Condition per ten minutes underwater." },
+    { name: "The fiddle of the Neck", effect: "Inspiration +5 when luring a crowd.", risk: "Cannot stop playing; one mental Condition per hour until Broken or disarmed." },
+    { name: "Powdered stag's horn", effect: "Use Observation to resist the temptations of vaesen.", risk: "Feels unloved; one mental Condition per hour until someone succeeds with Inspiration." },
+    { name: "Snake skin from a wood wife", effect: "Turn into a snake.", risk: "The transformation lasts one day." },
+    { name: "Spindle", effect: "Discover magical gateways.", risk: "Transports the PC to a magical place." },
+    { name: "Track sand", effect: "Vigilance +3 when tracking vaesen.", risk: "A strange vaesen notices and starts following the PC." },
+    { name: "Nisse's porridge", effect: "Force +3 to a skill test.", risk: "The PC angers the nisse." },
+    { name: "Troll's eye", effect: "Use Observation through dreams to get a clue.", risk: "A vaesen visits the PC's dreams." },
+    { name: "Wand", effect: "Cast Enchantments, Curses or Trollcraft; grants MAGIC 8.", risk: "The wand breaks and the magic affects the PC." },
+    { name: "Fairy square", effect: "Pass through locked doors.", risk: "The PC ends up somewhere else." }
+  ] as VaeMagicItem[]
+};

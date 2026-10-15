@@ -140,7 +140,9 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/vae/talents", label: "Talents" },
     { href: "/vae/gear", label: "Gear" },
     { href: "/vae/injuries", label: "Conditions & Injuries" },
+    { href: "/vae/magic", label: "Magic" },
     { href: "/vae/bestiary", label: "The Vaesen" },
+    { href: "/vae/npcs", label: "NPCs & Animals" },
     { href: "/vae/society", label: "The Society" },
   ],
 };
