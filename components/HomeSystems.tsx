@@ -70,7 +70,11 @@ function fitTileNames(root: HTMLElement) {
     if (!(roomW > 0 && roomH > 0)) continue;
 
     let lo = MIN_PX;
-    let hi = MAX_PX;
+    // A tile may cap its own fitted size via --tile-fit-max (e.g. TWD's Dead Kansas
+    // display face renders visually larger than the others at the same box, so it
+    // is reined in). Clamp to MAX_PX; ignore junk values.
+    const capRaw = parseFloat(cs.getPropertyValue("--tile-fit-max"));
+    let hi = capRaw > 0 ? Math.min(MAX_PX, capRaw) : MAX_PX;
     let best = MIN_PX;
     // Eight halvings of a 22px range settles to under a tenth of a pixel, which is
     // finer than anything that can be seen; more passes would only cost layouts.
