@@ -122,29 +122,34 @@
   function wpItem(w) { return { kind: 'weapon', name: w.name, bonus: w.bonus || '', damage: w.damage != null ? num(w.damage) : 1, range: w.range || 'Short', weight: w.weight || '1', skill: w.skill || 'Close Combat', equipped: false }; }
   function arItem(a) { return { kind: 'armor', name: a.name, rating: num(a.rating != null ? a.rating : a.level), weight: a.weight || '1', note: a.note || a.comment || '', equipped: false }; }
   function grItem(g) { return { kind: 'gear', name: g.name, weight: g.weight || '1', note: g.note || g.bonus || '' }; }
-  function stepGear() {
-    var src = gearSources();
-    var h = '<p class="m-hint">Add your starting weapons, gear, and armor. You can tweak everything on the sheet afterward. <button class="builder-chip" style="margin-left:6px;" onclick="window.YZEB.rollKit()">⚄ Roll a kit</button></p>';
-    if (startGear.length) {
-      h += '<div class="m-lbl">Chosen (' + startGear.length + ')</div><div class="yzeb-list">';
-      h += startGear.map(function (g, i) {
-        var meta = g.kind === 'weapon' ? ('Weapon · ' + (g.damage != null ? g.damage + ' dmg' : '')) : g.kind === 'armor' ? ('Armor ' + (g.rating != null ? g.rating : '')) : 'Gear';
-        return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + '<span class="brow-cost">' + esc(meta) + '</span></div></div>'
-          + '<button class="brow-add" style="background:#3a1a1a;color:#df8a8a;" onclick="window.YZEB.removeGear(' + i + ')">✕</button></div>';
-      }).join('') + '</div>';
+  function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function resolveItem(nm) {
+    var n = normName(nm).replace(/^\d+\s+/, '').replace(/^d6\s+/, '');
+    function find(list) {
+      var i, ln, partial = null;
+      for (i = 0; i < list.length; i++) { if (normName(list[i].name) === n) return list[i]; }
+      for (i = 0; i < list.length; i++) { ln = normName(list[i].name); if (ln.indexOf(n) >= 0 || n.indexOf(ln) >= 0) { if (!partial) partial = list[i]; } }
+      return partial;
     }
-    h += '<div class="yzeb-gtabs">'
-      + '<button class="builder-chip' + (gearTab === 'weap' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'weap\')">Weapons</button>'
-      + '<button class="builder-chip' + (gearTab === 'gear' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'gear\')">Gear</button>'
-      + '<button class="builder-chip' + (gearTab === 'armor' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'armor\')">Armor</button></div>';
-    var list = src[gearTab] || [];
-    if (!list.length) { h += '<p class="m-hint" style="margin-top:8px;">Nothing to add here.</p>'; return h; }
-    h += '<div class="yzeb-list" style="margin-top:6px;">' + list.map(function (it, idx) {
-      var meta, desc;
-      if (gearTab === 'weap') { meta = (it.damage != null ? it.damage + ' dmg' : '') + (it.range ? ' · ' + it.range : ''); desc = 'bonus ' + (it.bonus || '0') + ' · wt ' + (it.weight || '1') + (it.special ? ' · ' + it.special : ''); }
-      else if (gearTab === 'armor') { meta = 'Armor ' + (it.rating != null ? it.rating : it.level); desc = 'wt ' + (it.weight || '1') + (it.comment ? ' · ' + it.comment : ''); }
-      else { meta = (it.weight != null && it.weight !== '' ? it.weight + ' wt' : ''); desc = it.note || it.bonus || ''; }
-      return prow(it.name, meta, desc, false, "window.YZEB.addGear('" + gearTab + "'," + idx + ")", '＋ Add');
+    var w = find(WP); if (w) return { kind: 'weapon', it: w };
+    var a = find(AR); if (a) return { kind: 'armor', it: a };
+    var g = find(GR); if (g) return { kind: 'gear', it: g };
+    return null;
+  }
+  function stepGear() {
+    var c = careerObj(career);
+    if (!c) return '<p class="m-hint">Go back and pick an archetype first — starting gear comes from it.</p>';
+    var opts = arr(c.startGear);
+    var h = '<p class="m-hint">Choose up to <b style="color:#df8a8a;">three</b> items from your archetype’s starting gear (roll D6 three times on the table, or just pick). You can add more on the sheet afterward. <b>Chosen: ' + startGear.length + '/3</b></p>';
+    if (!opts.length) { h += '<p class="m-hint">This archetype has no listed starting gear.</p>'; return h; }
+    h += '<div class="yzeb-list">' + opts.map(function (name, idx) {
+      var chosen = startGear.some(function (g) { return g.optName === name; });
+      var r = resolveItem(name), meta = 'Gear', desc = '';
+      if (r && r.kind === 'weapon') { meta = 'Weapon · ' + (r.it.damage != null ? r.it.damage + ' dmg' : '') + (r.it.range ? ' · ' + r.it.range : ''); desc = 'bonus ' + (r.it.bonus || '0') + (r.it.weight ? ' · wt ' + r.it.weight : ''); }
+      else if (r && r.kind === 'armor') { meta = 'Armor ' + (r.it.rating != null ? r.it.rating : ''); desc = r.it.comment || ''; }
+      else if (r && r.kind === 'gear') { meta = (r.it.weight != null && r.it.weight !== '' ? r.it.weight + ' wt' : ''); desc = r.it.note || r.it.effect || ''; }
+      var full = (!chosen && startGear.length >= 3);
+      return prow(name, meta, desc, chosen, "window.YZEB.toggleStartGear(" + idx + ")", chosen ? '✓ Chosen' : (full ? 'Full' : '＋ Add'));
     }).join('') + '</div>';
     return h;
   }
@@ -211,22 +216,19 @@
     pickDrive: function (i) { var c = careerObj(career); if (c && c.drives && c.drives[i] != null) { drive = (drive === c.drives[i]) ? '' : c.drives[i]; render(); } },
     setIssueText: function (v) { issue = v; },
     setDriveText: function (v) { drive = v; },
-    setGearTab: function (t) { gearTab = t; render(); },
-    addGear: function (kind, idx) {
-      var src = gearSources(); var it = (src[kind] || [])[idx]; if (!it) return;
-      if (kind === 'weap') startGear.push(wpItem(it));
-      else if (kind === 'armor') startGear.push(arItem(it));
-      else startGear.push(grItem(it));
-      render();
-    },
-    removeGear: function (i) { startGear.splice(i, 1); render(); },
-    rollKit: function () {
-      startGear = [];
-      if (WP.length) startGear.push(wpItem(WP[Math.floor(Math.random() * WP.length)]));
-      var picks = GR.slice();
-      for (var n2 = 0; n2 < 2 && picks.length; n2++) { var idx = Math.floor(Math.random() * picks.length); startGear.push(grItem(picks.splice(idx, 1)[0])); }
-      if (step !== 3) step = 3;
-      render();
+    // Toggle an archetype starting-gear option (max 3), resolving it to its stats.
+    toggleStartGear: function (idx) {
+      var c = careerObj(career); if (!c) return;
+      var name = arr(c.startGear)[idx]; if (name == null) return;
+      var at = -1; for (var i = 0; i < startGear.length; i++) { if (startGear[i].optName === name) { at = i; break; } }
+      if (at >= 0) { startGear.splice(at, 1); render(); return; }
+      if (startGear.length >= 3) return;
+      var r = resolveItem(name), obj;
+      if (r && r.kind === 'weapon') { var w = r.it; obj = { kind: 'weapon', optName: name, name: w.name, bonus: w.bonus || '', damage: w.damage != null ? num(w.damage) : 1, range: w.range || '', weight: w.weight || '1', skill: w.skill || 'Close Combat', equipped: false }; }
+      else if (r && r.kind === 'armor') { var a = r.it; obj = { kind: 'armor', optName: name, name: a.name, rating: num(a.rating), weight: a.weight || '1', note: a.comment || a.note || '', equipped: false }; }
+      else if (r && r.kind === 'gear') { var g = r.it; obj = { kind: 'gear', optName: name, name: g.name, weight: g.weight || '1', note: g.note || g.effect || '' }; }
+      else { obj = { kind: 'gear', optName: name, name: name, weight: '1', note: '' }; }
+      startGear.push(obj); render();
     },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
     skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap(nm)) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },

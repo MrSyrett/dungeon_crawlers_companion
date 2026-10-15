@@ -248,4 +248,19 @@ const TWD_CRITS = [
   { roll: "66", injury: "Impaled heart", lethal: "Yes", timeLimit: "—", penalty: "You die", recovery: "—" },
 ];
 
-;(function(){try{Object.assign(window, { TWD_ATTRIBUTES, TWD_SKILLS, TWD_ARCHETYPES, TWD_TALENTS, TWD_CLOSE_WEAPONS, TWD_RANGED_WEAPONS, TWD_ARMOR, TWD_GEAR, TWD_HEALTH_STATES, TWD_THREAT, TWD_SWARM, TWD_CRITS });}catch(e){}})();
+var TWD_ARCHETYPE_GEAR = {
+  "The Criminal": ["Big revolver","Axe","Lockpick","Motorbike","Shotgun","Stash of drugs and medicine"],
+  "The Doctor": ["Basic medical gear","Medications and drugs","Spear (Scalpel taped to a stick)","Car","Diary","Pistol"],
+  "The Farmer": ["Shotgun","Axe","Jeep","Toolbox","Tent","Survival equipment"],
+  "The Homemaker": ["Shovel","Bow and arrows","Bag with medical herbs","Painkillers","Tent","Car"],
+  "The Kid": ["Pistol with homemade silencer","Spear","American football gear (Armor Value 4)","Scooter","D6 Molotov cocktails","Dog"],
+  "The Law Enforcer": ["Riot gear (Armor Level 6)","Revolver","Shotgun","Axe","Assault rifle","Badge of office"],
+  "The Nobody": ["Pizza delivery car","Machete","Frying pan","Binoculars","Sleeping bag","Fishing rod"],
+  "The Outcast": ["D6 Molotov cocktails","Pistol","Spear","Handcuffs","Armor of cloth and old newspapers (level 4)","D6 bottles of moonshine"],
+  "The Politician": ["Assault rifle","Bottle of champagne","Bulletproof limousine (+2 Armor)","Hand crank radio","Notes for a book about this new era","Two knives"],
+  "The Preacher": ["Bible","Homemade spear","Guitar","Scooter","Iron cross","Wine and altar bread"],
+  "The Scientist": ["Sledgehammer","Pistol","Flashlight","Tent","Portable stove with gas and lighter","Basic medical gear"],
+  "The Soldier": ["Assault rifle","Bayonet","D6 hand grenades","Binoculars","Basic medical gear","Pistol"]
+};
+
+;(function(){try{Object.assign(window, { TWD_ATTRIBUTES, TWD_SKILLS, TWD_ARCHETYPES, TWD_TALENTS, TWD_CLOSE_WEAPONS, TWD_RANGED_WEAPONS, TWD_ARMOR, TWD_GEAR, TWD_HEALTH_STATES, TWD_THREAT, TWD_SWARM, TWD_CRITS, TWD_ARCHETYPE_GEAR });}catch(e){}})();

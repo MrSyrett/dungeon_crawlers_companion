@@ -26,7 +26,7 @@
 (function(){var T=window;
   T.YZE_ATTRIBUTES=T.TWD_ATTRIBUTES;
   T.YZE_SKILLS=T.TWD_SKILLS; T.ALIEN_SKILLS=T.TWD_SKILLS;
-  T.ALIEN_CAREERS=(T.TWD_ARCHETYPES||[]).map(function(a){return {name:a.name,key:a.key,skills:[a.keySkill],talents:a.talents,signature:[],gear:"",issues:a.issues||[],drives:a.drives||[]};});
+  T.ALIEN_CAREERS=(T.TWD_ARCHETYPES||[]).map(function(a){return {name:a.name,key:a.key,skills:[a.keySkill],talents:a.talents,signature:[],gear:"",issues:a.issues||[],drives:a.drives||[],startGear:(T.TWD_ARCHETYPE_GEAR||{})[a.name]||[]};});
   T.ALIEN_TALENTS=(T.TWD_TALENTS||[]).map(function(t){return {name:t.name,career:t.archetype,desc:t.desc};});
   var wp=[];
   (T.TWD_CLOSE_WEAPONS||[]).forEach(function(w){wp.push({name:w.name,bonus:w.bonus,damage:w.damage,range:"Short",weight:w.slots,cost:"",special:"",skill:"Close Combat",class:"Close Combat"});});
@@ -479,7 +479,7 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
 .tln-head{display:flex;align-items:center;gap:8px;}
 .tln-head .tln-name{flex:1 1 auto;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;color:var(--yz-dk);}
 .tln-head .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
-.tln-card .tln-desc{width:100%;margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;line-height:1.4;color:var(--ink);border:1px solid var(--rule);border-radius:6px;background:var(--input-bg);padding:5px 7px;resize:vertical;outline:none;}
+.tln-card .tln-desc{margin-top:4px;font-family:'Barlow',sans-serif;font-size:12px;line-height:1.45;color:var(--ink);}
 
 /* Header meta fields wrap into 2-3 columns on small screens (gold-standard) */
 @media(max-width:768px){.hdr-metarow>*{flex:1 1 31%!important;}}
@@ -910,8 +910,8 @@ function renderTalents(){
   var host=$('tln-list'); if(!host)return; host.innerHTML='';
   (S.talents||[]).forEach(function(t,i){
     var card=document.createElement('div'); card.className='tln-card';
-    card.innerHTML='<div class="tln-head"><input class="tln-name" style="border:none;background:transparent;outline:none;" value="'+esc(t.name||'')+'" oninput="tlnEdit('+i+',\'name\',this.value)" placeholder="Talent"><button class="row-x" onclick="tlnDel('+i+')">✕</button></div>'
-      +'<textarea class="tln-desc" rows="2" oninput="tlnEdit('+i+',\'note\',this.value)" placeholder="Effect">'+esc(t.note||'')+'</textarea>';
+    card.innerHTML='<div class="tln-head"><span class="tln-name">'+esc(t.name||'Talent')+'</span></div>'
+      +(t.note?'<div class="tln-desc">'+esc(t.note)+'</div>':'');
     host.appendChild(card);
   });
   var emp=$('tln-empty'); if(emp) emp.style.display=(S.talents&&S.talents.length)?'none':'block';
