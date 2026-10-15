@@ -95,7 +95,6 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/yze/careers", label: "Careers" },
     { href: "/yze/talents", label: "Talents" },
     { href: "/yze/gear", label: "Gear" },
-    { href: "/yze/combat", label: "Combat" },
     { href: "/yze/alien", label: "Bestiary" },
   ],
   MMRPG: [
@@ -123,7 +122,6 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/twd/archetypes", label: "Archetypes" },
     { href: "/twd/talents", label: "Talents" },
     { href: "/twd/gear", label: "Gear" },
-    { href: "/twd/combat", label: "Combat" },
     { href: "/twd/dead", label: "The Dead" },
     { href: "/twd/npcs", label: "NPCs" },
   ],

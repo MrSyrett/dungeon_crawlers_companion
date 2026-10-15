@@ -22,7 +22,7 @@ export default function TwdDeadPage() {
           blunder into a placed group, or make noise. At Level 3 the walkers notice you and every PC
           takes a point of stress.
         </p>
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]">
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr className="bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]">
@@ -43,7 +43,7 @@ export default function TwdDeadPage() {
 
       <section>
         <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Swarm Size</h2>
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)] sm:max-w-sm">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)] sm:max-w-sm">
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr className="bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]">
@@ -68,7 +68,7 @@ export default function TwdDeadPage() {
           When the dead reach a survivor — a single attack from a mess-up, or when fighting out of a
           swarm — roll <b className="text-[var(--sys-link)]">D66</b> here for what happens.
         </p>
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]">
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr className="bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]">
