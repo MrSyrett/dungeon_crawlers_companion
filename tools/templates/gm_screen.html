@@ -17344,9 +17344,11 @@ function wireAiConsole(root) {
         .concat(((typeof VAE_MELEE_WEAPONS !== 'undefined' && Array.isArray(VAE_MELEE_WEAPONS)) ? VAE_MELEE_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus ? 'Bonus ' + w.bonus : '', 'Melee', w.skill || ''].filter(Boolean).join(' · ') })))
         .concat(((typeof VAE_RANGED_WEAPONS !== 'undefined' && Array.isArray(VAE_RANGED_WEAPONS)) ? VAE_RANGED_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus ? 'Bonus ' + w.bonus : '', w.range != null ? 'Range ' + w.range : '', w.skill || ''].filter(Boolean).join(' · ') })))
         .concat(((typeof VAE_ARMOR !== 'undefined' && Array.isArray(VAE_ARMOR)) ? VAE_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Protection ' + a.protection, a.comment].filter(Boolean).join(' · ') })))
-        .concat(((typeof VAE_GEAR !== 'undefined' && Array.isArray(VAE_GEAR)) ? VAE_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.comment || g.effect || '', g.cost != null && g.cost !== '' ? 'cost ' + g.cost : ''].filter(Boolean).join(' · ') }))),
-      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
-      randomCats: ['weapon','armor','gear','gear'], money: null, label: 'GEAR DROP', empty: 'Vaesen gear list',
+        .concat(((typeof VAE_GEAR !== 'undefined' && Array.isArray(VAE_GEAR)) ? VAE_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.comment || g.effect || '', g.cost != null && g.cost !== '' ? 'cost ' + g.cost : ''].filter(Boolean).join(' · ') })))
+        .concat(((typeof VAE_ITEMS_OF_POWER !== 'undefined' && Array.isArray(VAE_ITEMS_OF_POWER)) ? VAE_ITEMS_OF_POWER : []).map(p => ({ name: p.name, category: 'power', desc: ['Item of Power', p.effect || ''].filter(Boolean).join(' · ') })))
+        .concat(((typeof VAE_MAGIC_ITEMS !== 'undefined' && Array.isArray(VAE_MAGIC_ITEMS)) ? VAE_MAGIC_ITEMS : []).map(p => ({ name: p.name, category: 'magic', desc: ['Magic Item', p.effect || '', p.risk ? 'Risk: ' + p.risk : ''].filter(Boolean).join(' · ') }))),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'power',label:'Items of Power',cats:['power'] },{ key:'magic',label:'Magic Items',cats:['magic'] }],
+      randomCats: ['weapon','armor','gear','gear','power','magic'], money: null, label: 'GEAR DROP', empty: 'Vaesen gear list',
     },
     myz: {
       list: () => []

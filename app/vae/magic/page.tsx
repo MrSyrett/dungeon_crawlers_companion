@@ -69,27 +69,12 @@ export default function VaesenMagicPage() {
         ))}
       </div>
 
-      <SectionH>Items of Power</SectionH>
-      <p className="mb-3 text-[12px] text-[var(--muted)]">Protective relics. Each use risks the item breaking (roll a d6 — on a 1 it is spent or shatters).</p>
-      <div className="mb-10 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {M.itemsOfPower.map((i) => (
-          <div key={i.name} className={cardCls}>
-            <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">{i.name}</h3>
-            <p className="mt-1 text-[12px] leading-relaxed text-[var(--text)]">{i.effect}</p>
-          </div>
-        ))}
-      </div>
-
-      <SectionH>Magic Items</SectionH>
-      <p className="mb-3 text-[12px] text-[var(--muted)]">Vaesen gear — potent but perilous. Using one rolls a hidden d6; on a 1 the magic backfires.</p>
-      <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-2">
-        {M.magicItems.map((i) => (
-          <div key={i.name} className={cardCls}>
-            <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--sys-link)]">{i.name}</h3>
-            <p className="mt-1 text-[12px] leading-relaxed text-[var(--text)]">{i.effect}</p>
-            <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]"><b className="text-[var(--text)]">Risk:</b> {i.risk}</p>
-          </div>
-        ))}
+      <div className={`${cardCls} mb-8`}>
+        <h3 className={nameCls}>Items of Power &amp; Magic Items</h3>
+        <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">
+          Protective relics and vaesen gear now live on the <a href="/vae/gear?mode=power" className="text-[var(--sys-link)] underline">Weapons &amp; Gear</a> page,
+          where they can be added to a character from the Item Shop and dropped from the GM Screen gear generator.
+        </p>
       </div>
 
       <div className={cardCls}>

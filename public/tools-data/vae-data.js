@@ -645,11 +645,48 @@ var VAE_ANIMALS = [
   { name: "Wolverine", might: 5, bodyControl: 6, toughness: 1, damage: 1 }
 ];
 
+// Items of Power (protective relics) & Magic Items (vaesen gear) for the Item Shop
+// and GM gear generator. Living Standards maps Resources (1-8) to Bonus + Capital.
+var VAE_ITEMS_OF_POWER = [
+  {"name":"Fairy cross","effect":"+2 defense against Trollcraft. An amulet of nine kinds of silver, forged on three consecutive Thursday nights."},
+  {"name":"Silver bullets","effect":"Can kill certain vaesen. Ammunition made of silver."},
+  {"name":"Bible","effect":"Add Inspiration to your attribute when making a Fear test."},
+  {"name":"Holy water","effect":"Use Inspiration against MAGIC to temporarily drive off undead."},
+  {"name":"Troll cross","effect":"+2 to resist Curses from trolls. An arc-shaped pendant."},
+  {"name":"Scythe","effect":"+2 to resist Curses from mares. Hung above the bedroom door."},
+  {"name":"Elf mill","effect":"+2 to resist Trollcraft from fairies when near the elf mill (cup marks in rock, smeared with grease)."}
+];
+var VAE_MAGIC_ITEMS = [
+  {"name":"Seaweed bladder","effect":"Breathe underwater.","risk":"Water seeps in: one physical Condition per ten minutes underwater."},
+  {"name":"The fiddle of the Neck","effect":"Inspiration +5 when luring a crowd.","risk":"Cannot stop playing; one mental Condition per hour until Broken or disarmed."},
+  {"name":"Powdered stag's horn","effect":"Use Observation to resist the temptations of vaesen.","risk":"Feels unloved; one mental Condition per hour until someone succeeds with Inspiration."},
+  {"name":"Snake skin from a wood wife","effect":"Turn into a snake.","risk":"The transformation lasts one day."},
+  {"name":"Spindle","effect":"Discover magical gateways.","risk":"Transports the PC to a magical place."},
+  {"name":"Track sand","effect":"Vigilance +3 when tracking vaesen.","risk":"A strange vaesen notices and starts following the PC."},
+  {"name":"Nisse's porridge","effect":"Force +3 to a skill test.","risk":"The PC angers the nisse."},
+  {"name":"Troll's eye","effect":"Use Observation through dreams to get a clue.","risk":"A vaesen visits the PC's dreams."},
+  {"name":"Wand","effect":"Cast Enchantments, Curses or Trollcraft; grants MAGIC 8.","risk":"The wand breaks and the magic affects the PC."},
+  {"name":"Fairy square","effect":"Pass through locked doors.","risk":"The PC ends up somewhere else."}
+];
+var VAE_RESOURCES = [
+  {"level":1,"name":"Destitute","bonus":-1,"capital":0},
+  {"level":2,"name":"Poor","bonus":0,"capital":0},
+  {"level":3,"name":"Struggling","bonus":0,"capital":1},
+  {"level":4,"name":"Financially Stable","bonus":1,"capital":2},
+  {"level":5,"name":"Middle-Class","bonus":1,"capital":3},
+  {"level":6,"name":"Well-Off","bonus":2,"capital":5},
+  {"level":7,"name":"Wealthy","bonus":3,"capital":8},
+  {"level":8,"name":"Filthy Rich","bonus":5,"capital":12}
+];
+
 var VAE_HB_WEAPONS = [];
 var VAE_HB_GEAR = [];
 
 if (typeof window !== 'undefined') {
   window.VAE_NPCS = VAE_NPCS;
+  window.VAE_ITEMS_OF_POWER = VAE_ITEMS_OF_POWER;
+  window.VAE_MAGIC_ITEMS = VAE_MAGIC_ITEMS;
+  window.VAE_RESOURCES = VAE_RESOURCES;
   window.VAE_ANIMALS = VAE_ANIMALS;
   window.VAE_ARCHETYPE_GEAR = VAE_ARCHETYPE_GEAR;
   window.VAE_ATTRIBUTES = VAE_ATTRIBUTES;

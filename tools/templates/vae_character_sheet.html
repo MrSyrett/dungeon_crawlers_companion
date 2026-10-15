@@ -456,7 +456,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 </style>
 </head>
-<body>
+<body class="sheet-locked">
 <script>
 /* ── SAVED-STATE READER ────────────────────────────────────────────────────
    Every sheet reads its saved state through __ddPick(). It parses the payload,
@@ -610,7 +610,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:52px;text-align:right;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
+        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:60px;text-align:right;font-size:19px;font-weight:800;color:var(--yz-dk);background:var(--yz-lt);border:1px solid var(--yz);border-radius:6px;padding:3px 8px;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
       </div>
       <div class="card">
         <div class="section-bar accent cbar crit-bar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">Mental</button></span></div>
@@ -622,7 +622,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vit-row">
         <div class="card" style="flex:0 0 118px;">
           <div class="section-bar accent"><span>Armor</span></div>
-          <div class="blk" style="padding:8px 10px 10px;"><div class="vrow" style="padding:0;"><span class="stress-val" id="armor-val" title="Sum of equipped armor protection — click Roll; each 6 cancels one point of damage">0</span><button class="dice-btn mini" style="flex:0 0 auto;margin-left:auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div></div>
+          <div class="blk" style="padding:6px 10px 12px;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="rollArmor()" title="Sum of equipped armor protection — click to roll; each 6 cancels one point of damage"><span class="stress-val" id="armor-val" style="font-size:38px;font-weight:800;line-height:1;">0</span></div>
         </div>
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent cbar"><span>Conditions</span></div>
@@ -631,11 +631,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="cond-grp"><div class="cg-lbl">Mental</div><div class="cond-row" id="cond-ment"></div></div>
           </div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="section-bar accent cbar"><span>Memento</span></div>
-        <div class="blk" style="padding-top:2px;"><div class="fld"><label>Memento <button class="hdr-btn" style="padding:2px 8px;" onclick="useMemento()">Use</button></label><input type="text" id="f-memento" placeholder="A keepsake that steadies you"></div></div>
       </div>
 
       <div class="card tabs-card">
@@ -653,12 +648,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right" style="align-items:center;gap:8px;"><span class="inv-mini" id="res-disp" title="Resources — your standard of living, set at character creation"></span><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
+          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right" style="align-items:center;gap:10px;"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button><span class="inv-mini" id="res-disp" data-nolock style="cursor:pointer;" title="Resources — click to roll for Capital (your standard of living, set at creation)" onclick="rollResources()"></span><span class="inv-mini" id="cap-disp" data-nolock title="Capital — spending money for the Item Shop" style="font-weight:800;color:var(--yz-dk);"></span></span></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:30%;">Item</th><th>Details</th><th style="width:9%;">Cost</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div id="inv-empty" class="tbl-empty">No gear yet.</div>
         </div>
 
         <div class="tab-panel" id="tab-story">
+          <div class="section-bar cbar"><span>Memento</span><span class="hdr-right"><button class="hdr-btn" data-nolock style="padding:2px 8px;" onclick="useMemento()">Use</button></span></div>
+          <div class="blk" style="padding-top:2px;"><div class="fld"><input type="text" id="f-memento" placeholder="A keepsake that steadies you — once per session while resting, heal two Conditions"></div></div>
           <div class="section-bar cbar"><span>Talents</span></div>
           <div class="tln-list" id="tln-list"></div>
           <div id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet.</div>
@@ -712,7 +709,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <button class="tab-btn" data-pk="gear" onclick="pickerTab('gear')">General Gear</button>
       <button class="tab-btn" data-pk="weap" onclick="pickerTab('weap')">Weapons</button>
       <button class="tab-btn" data-pk="armor" onclick="pickerTab('armor')">Armor</button>
+      <button class="tab-btn" data-pk="power" onclick="pickerTab('power')">Items of Power</button>
+      <button class="tab-btn" data-pk="magic" onclick="pickerTab('magic')">Magic Items</button>
     </div>
+    <div id="picker-cap" class="brow-controls" style="padding-top:0;font-size:12px;color:var(--muted);display:none;"></div>
     <div class="brow-controls"><input id="picker-search" class="m-input" placeholder="Search…" oninput="renderPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addCustomFromPicker()">＋ Add custom</button></div>
     <div class="modal-bd brow-list" id="picker-body"></div>
   </div>
@@ -760,7 +760,7 @@ var S=null, _lastRoll=null;
 function blankState(){
   var st={ name:'', archetype:'', key:'', age:'', pronouns:'',
     attrs:{PHY:2,PRE:2,LOG:2,EMP:2}, skills:{},
-    conditions:{}, brokenPhys:false, brokenMent:false, resources:3, memento:'',
+    conditions:{}, brokenPhys:false, brokenMent:false, resources:3, capital:0, memento:'',
     xp:0, gear:[], talents:[], crits:[],
     motivation:'', trauma:'', secret:'', relationships:[], appearance:'', notes:'' };
   SKILLS.forEach(function(s){ st.skills[s.name]=0; });
@@ -835,8 +835,18 @@ function addCondition(type){
 }
 
 // ── Resources / memento ──
-function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-disp'); if(e)e.innerHTML='<b style="color:var(--yz-dk);">Resources '+v+'</b> · '+esc(RES_NAMES[v]||''); }
+var RES_TABLE=G(window.VAE_RESOURCES);
+function resTier(v){ v=clamp(num(v),1,8); for(var i=0;i<RES_TABLE.length;i++){ if(RES_TABLE[i].level===v) return RES_TABLE[i]; } return {level:v,name:RES_NAMES[v]||'',bonus:0,capital:0}; }
+function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-disp'); if(e)e.innerHTML='🎲 <b style="color:var(--yz-dk);">Resources '+v+'</b> · '+esc(RES_NAMES[v]||''); var c=$('cap-disp'); if(c)c.innerHTML='Capital '+num(S.capital); }
 function bumpRes(d){ S.resources=clamp(num(S.resources)+d,1,8); renderRes(); scheduleAutosave(); }
+// Roll your Resources to generate Capital (each 6 + the Living-Standards bonus → money).
+function rollResources(){
+  var v=clamp(num(S.resources),1,8), tier=resTier(v);
+  var a=rollSet(Math.max(1,v)), succ=count6(a), gained=Math.max(0,succ+num(tier.bonus));
+  S.capital=num(S.capital)+gained; renderRes(); scheduleAutosave();
+  animDice(a,[],[],gained?'crit':'normal');
+  addLog('Resources ('+v+' · '+esc(tier.name)+')', '+'+gained+' Capital', poolStr(a)+' · '+succ+' succ'+(tier.bonus?(' '+(tier.bonus>0?'+':'')+tier.bonus+' bonus'):'')+' → '+num(S.capital)+' total', gained?'crit':'fumble');
+}
 function useMemento(){
   var healed=0;
   CONDS.forEach(function(c){ if(healed<2 && S.conditions[c.name]){ S.conditions[c.name]=false; healed++; } });
@@ -850,7 +860,7 @@ function renderTalents(){
   (S.talents||[]).forEach(function(t,i){
     var card=document.createElement('div'); card.className='tln-card';
     card.innerHTML='<div class="tln-head"><input class="tln-name" style="border:none;background:transparent;outline:none;" value="'+esc(t.name||'')+'" oninput="tlnEdit('+i+',\'name\',this.value)" placeholder="Talent"><button class="row-x" onclick="tlnDel('+i+')">✕</button></div>'
-      +'<textarea class="tln-desc" rows="2" oninput="tlnEdit('+i+',\'note\',this.value)" placeholder="Effect">'+esc(t.note||'')+'</textarea>';
+      +(t.note?('<div class="tln-desc" style="font-size:12px;line-height:1.5;color:var(--text);white-space:pre-wrap;">'+esc(t.note)+'</div>'):'');
     host.appendChild(card);
   });
   var emp=$('tln-empty'); if(emp) emp.style.display=(S.talents&&S.talents.length)?'none':'block';
@@ -924,47 +934,61 @@ function renderWeapons(){ renderInventory(); renderAttacks(); }
 // ── Picker ──
 var _pk=null, _pkRows=[];
 function wSkillAttr(skillStr){ var first=String(skillStr||'').split('/')[0].trim(); var s=skillObj(first); return s?s.attr:'PHY'; }
+function armorCost(a){ var m=String(a.comment||'').match(/cost\s*(\d+)/i); if(m)return parseInt(m[1],10); var p=num(a.protection); return p>=6?4:(p>=4?3:2); }
+function GEAR_FAM(k){ return k==='gear'||k==='weap'||k==='armor'||k==='power'||k==='magic'; }
 function pickerPool(kind){
   if(kind==='weap'){
     var out=[];
     // Kick or Punch is the always-available attack in the Combat tab, so it isn't sold in the store.
-    MELEE.filter(function(w){ return !/^kick or punch/i.test(w.name||''); }).forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg',note:'Melee · bonus '+w.bonus+' · '+(w.skill||'Close Combat'),data:w}); });
-    RANGED.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Ranged · bonus '+w.bonus+' · '+(w.skill||'Ranged Combat'),data:w}); });
-    G(window.VAE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':''),note:'Homebrew'+(d.bonus!=null?' · bonus '+d.bonus:''),data:d}); });
+    MELEE.filter(function(w){ return !/^kick or punch/i.test(w.name||''); }).forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg',note:'Melee · bonus '+w.bonus+' · '+(w.skill||'Close Combat'),price:num(w.cost),data:w}); });
+    RANGED.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Ranged · bonus '+w.bonus+' · '+(w.skill||'Ranged Combat'),price:num(w.cost),data:w}); });
+    G(window.VAE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':''),note:'Homebrew'+(d.bonus!=null?' · bonus '+d.bonus:''),price:num(d.cost),data:d}); });
     return out;
   }
   if(kind==='armor'){
-    var ar=ARMORS.map(function(a){ return {name:a.name,cost:'Protection '+a.protection,note:a.comment||'',data:{name:a.name,rating:a.protection,weight:'',note:a.comment||''}}; });
-    G(window.VAE_HB_GEAR).filter(function(d){return d.rating!=null;}).forEach(function(d){ ar.push({name:d.name,cost:'Protection '+d.rating,note:'Homebrew',data:{name:d.name,rating:num(d.rating),weight:'',note:d.note||''}}); });
+    var ar=ARMORS.map(function(a){ return {name:a.name,cost:'Protection '+a.protection,note:a.comment||'',price:armorCost(a),data:{name:a.name,rating:a.protection,weight:'',note:a.comment||''}}; });
+    G(window.VAE_HB_GEAR).filter(function(d){return d.rating!=null;}).forEach(function(d){ ar.push({name:d.name,cost:'Protection '+d.rating,note:'Homebrew',price:num(d.cost),data:{name:d.name,rating:num(d.rating),weight:'',note:d.note||''}}); });
     return ar;
   }
   if(kind==='talent'){ return TALENTS.map(function(t){ return {name:t.name,cost:t.archetype,note:t.desc,data:t}; }); }
-  var g=GEARS.map(function(d){ return {name:d.name,cost:(d.bonus&&d.bonus!=='—'?d.bonus+' · ':'')+'cost '+d.cost,note:d.comment||'',data:{name:d.name,weight:d.cost,note:(d.comment||'')+(d.bonus&&d.bonus!=='—'?' ('+d.bonus+')':'')}}; });
-  G(window.VAE_HB_GEAR).filter(function(d){return d.rating==null;}).forEach(function(d){ g.push({name:d.name,cost:'',note:'Homebrew'+(d.desc?' · '+d.desc:''),data:d}); });
+  if(kind==='power'){ return G(window.VAE_ITEMS_OF_POWER).map(function(p){ return {name:p.name,cost:'Item of Power',note:p.effect||'',price:0,data:{name:p.name,weight:'',note:p.effect||''}}; }); }
+  if(kind==='magic'){ return G(window.VAE_MAGIC_ITEMS).map(function(p){ return {name:p.name,cost:'Magic Item',note:(p.effect||'')+(p.risk?(' · Risk: '+p.risk):''),price:0,data:{name:p.name,weight:'',note:(p.effect||'')+(p.risk?(' — Risk: '+p.risk):'')}}; }); }
+  var g=GEARS.map(function(d){ return {name:d.name,cost:(d.bonus&&d.bonus!=='—'?d.bonus+' · ':'')+'cost '+d.cost,note:d.comment||'',price:num(d.cost),data:{name:d.name,weight:d.cost,note:(d.comment||'')+(d.bonus&&d.bonus!=='—'?' ('+d.bonus+')':'')}}; });
+  G(window.VAE_HB_GEAR).filter(function(d){return d.rating==null;}).forEach(function(d){ g.push({name:d.name,cost:'',note:'Homebrew'+(d.desc?' · '+d.desc:''),price:num(d.cost),data:d}); });
   return g;
 }
-function openPicker(kind){ _pk=kind; var gearFam=(kind==='gear'||kind==='weap'||kind==='armor'); var tabs=$('picker-tabs'); if(tabs) tabs.style.display=gearFam?'flex':'none';
-  $('picker-title').textContent=gearFam?'✦ Add Gear':(kind==='talent'?'✦ Talents':'✦ Add');
+function updatePickerCap(){ var c=$('picker-cap'); if(!c)return; var fam=GEAR_FAM(_pk); c.style.display=fam?'block':'none'; if(fam) c.innerHTML='Capital available: <b style="color:var(--yz-dk);">'+num(S.capital)+'</b> · buy gear with Capital (⛁); items with no price are found, not bought.'; }
+function openPicker(kind){ _pk=kind; var gearFam=GEAR_FAM(kind); var tabs=$('picker-tabs'); if(tabs) tabs.style.display=gearFam?'flex':'none';
+  $('picker-title').textContent=gearFam?'✦ Item Shop':(kind==='talent'?'✦ Talents':'✦ Add');
   if(tabs&&gearFam){ [].forEach.call(tabs.children,function(b){ b.classList.toggle('on', b.dataset.pk===kind); }); }
-  $('picker-search').value=''; renderPicker(); $('picker-overlay').classList.add('open'); }
-function pickerTab(kind){ _pk=kind; var tabs=$('picker-tabs'); if(tabs)[].forEach.call(tabs.children,function(b){ b.classList.toggle('on', b.dataset.pk===kind); }); $('picker-search').value=''; renderPicker(); }
+  $('picker-search').value=''; updatePickerCap(); renderPicker(); $('picker-overlay').classList.add('open'); }
+function pickerTab(kind){ _pk=kind; var tabs=$('picker-tabs'); if(tabs)[].forEach.call(tabs.children,function(b){ b.classList.toggle('on', b.dataset.pk===kind); }); $('picker-search').value=''; updatePickerCap(); renderPicker(); }
 function closePicker(){ $('picker-overlay').classList.remove('open'); }
 function renderPicker(){
   if(!_pk)return;
-  var q=($('picker-search').value||'').toLowerCase().trim();
+  var q=($('picker-search').value||'').toLowerCase().trim(), fam=GEAR_FAM(_pk);
   var rows=pickerPool(_pk).filter(function(x){ if(!q)return true; return (x.name+' '+x.cost+' '+x.note).toLowerCase().indexOf(q)>=0; }).slice(0,400);
   var el=$('picker-body');
   if(!rows.length){ el.innerHTML='<div class="brow-empty">'+(_pk==='gear'?'No matches — use “Add custom”.':'No matches.')+'</div>'; _pkRows=rows; return; }
-  el.innerHTML=rows.map(function(x,idx){ return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+'<span class="brow-cost">'+esc(x.cost)+'</span></div>'+(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div><button class="brow-add" onclick="pickAdd('+idx+')">＋ Add</button></div>'; }).join('');
+  el.innerHTML=rows.map(function(x,idx){
+    var p=num(x.price), afford=(p<=0)||(num(S.capital)>=p);
+    var priceTag=(fam&&p>0)?'<span class="brow-cost" title="Costs '+p+' Capital">'+p+' ⛁</span>':'';
+    var btn=(fam&&p>0)?('<button class="brow-add'+(afford?'':' have')+'"'+(afford?'':' disabled title="Need '+p+' Capital"')+' onclick="pickAdd('+idx+')">'+(afford?('Buy '+p):('Need '+p))+'</button>')
+      :('<button class="brow-add" onclick="pickAdd('+idx+')">＋ Add</button>');
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+'<span class="brow-cost">'+esc(x.cost)+'</span>'+priceTag+'</div>'+(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div>'+btn+'</div>';
+  }).join('');
   _pkRows=rows;
 }
 function pickAdd(idx){
   var x=_pkRows[idx]; if(!x)return;
+  var fam=GEAR_FAM(_pk), p=fam?num(x.price):0;
+  if(p>0){ if(num(S.capital)<p){ addLog('Item Shop','Not enough Capital','“'+(x.name||'Item')+'” costs '+p+' · you have '+num(S.capital)+' Capital','fumble'); return; } S.capital=num(S.capital)-p; renderRes(); }
   if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,bonus:weaponBonus(w.bonus),damage:w.damage!=null?w.damage:1,range:(w.range!=null&&w.range!==0?String(w.range):'0'),weight:w.cost!=null?w.cost:'',skill:w.skill||'Close Combat'}); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'',note:a.note||''}); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else { var d=x.data||{}; S.gear.push({kind:'gear',name:d.name||x.name,weight:d.weight||'',note:d.note||d.desc||''}); renderGear(); setTab('gear'); }
-  scheduleAutosave(); renderPicker();
+  if(p>0) addLog('Item Shop','Bought '+x.name,'−'+p+' Capital → '+num(S.capital)+' Capital left','crit');
+  scheduleAutosave(); updatePickerCap(); renderPicker();
 }
 function addCustomFromPicker(){
   if(_pk==='weap'){ S.gear.push({kind:'weapon',equipped:false,name:'',bonus:0,damage:1,range:'0',weight:'',skill:'Close Combat'}); renderWeapons(); setTab('gear'); }
@@ -1135,6 +1159,7 @@ function applySheet(d){
   d=d||{}; if(!S) S=blankState();
   ['name','archetype','key','keySkill','age','pronouns','appearance','notes','memento','motivation','trauma','secret'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
   if(d.xp!=null)S.xp=num(d.xp); if(d.resources!=null)S.resources=clamp(num(d.resources),1,8);
+  S.capital = (d.capital!=null) ? num(d.capital) : resTier(S.resources).capital;
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   if(d.skills) SKILLS.forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });
   if(d.conditions) CONDS.forEach(function(c){ S.conditions[c.name]=!!d.conditions[c.name]; });

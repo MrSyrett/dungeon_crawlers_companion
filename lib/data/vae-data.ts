@@ -748,3 +748,16 @@ export const VAE_MAGIC = {
     { name: "Fairy square", effect: "Pass through locked doors.", risk: "The PC ends up somewhere else." }
   ] as VaeMagicItem[]
 };
+
+// Items of Power / Magic Items / Living Standards (exported for the Gear page).
+export type VaeResourceTier = { level: number; name: string; bonus: number; capital: number };
+export const VAE_RESOURCES: VaeResourceTier[] = [
+  {"level":1,"name":"Destitute","bonus":-1,"capital":0},
+  {"level":2,"name":"Poor","bonus":0,"capital":0},
+  {"level":3,"name":"Struggling","bonus":0,"capital":1},
+  {"level":4,"name":"Financially Stable","bonus":1,"capital":2},
+  {"level":5,"name":"Middle-Class","bonus":1,"capital":3},
+  {"level":6,"name":"Well-Off","bonus":2,"capital":5},
+  {"level":7,"name":"Wealthy","bonus":3,"capital":8},
+  {"level":8,"name":"Filthy Rich","bonus":5,"capital":12}
+];

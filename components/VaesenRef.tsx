@@ -38,6 +38,23 @@ export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: 
   );
 }
 
+export function ModeRow({ base, current, param, options, active }: { base: string; current: Query; param: string; options: { key: string; label: string }[]; active: string }) {
+  return (
+    <div className="mb-6 flex flex-wrap gap-2">
+      {options.map((o) => (
+        <Link
+          key={o.key}
+          href={withParams(base, { ...current, [param]: o.key === options[0].key ? "" : o.key }, {})}
+          aria-pressed={(active || options[0].key) === o.key}
+          className={`${chipBase} ${(active || options[0].key) === o.key ? chipOn : chipOff}`}
+        >
+          {o.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export function ChipRow({ label, base, current, param, options, active }: { label: string; base: string; current: Query; param: string; options: { key: string; label: string }[]; active: string }) {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-1.5" data-chiprow data-base={chipBase} data-on={chipOn} data-off={chipOff}>

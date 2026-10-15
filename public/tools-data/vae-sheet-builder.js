@@ -194,7 +194,10 @@
     apply: function () {
       var a = archObj(archetype);
       var resLow = a && a.resources ? num(String(a.resources).split(/[–-]/)[0]) : 3;
-      var d = { name: name, pronouns: pronouns, age: age, archetype: archetype, key: key, keySkill: keySkill, resources: (resourcesPick != null ? resourcesPick : (resLow || 3)), attrs: {}, skills: {} };
+      var resVal = (resourcesPick != null ? resourcesPick : (resLow || 3));
+      var capMap = { 1: 0, 2: 0, 3: 1, 4: 2, 5: 3, 6: 5, 7: 8, 8: 12 }, capital = capMap[resVal] != null ? capMap[resVal] : 0;
+      try { var RT = window.VAE_RESOURCES; if (RT && RT.length) { for (var ri = 0; ri < RT.length; ri++) { if (num(RT[ri].level) === resVal) { capital = num(RT[ri].capital); break; } } } } catch (e) {}
+      var d = { name: name, pronouns: pronouns, age: age, archetype: archetype, key: key, keySkill: keySkill, resources: resVal, capital: capital, attrs: {}, skills: {} };
       ATTRS.forEach(function (x) { d.attrs[x.key] = attrs[x.key]; });
       SK.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
