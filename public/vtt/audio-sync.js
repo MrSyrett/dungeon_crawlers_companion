@@ -67,14 +67,14 @@
   function injectStyles() {
     if (styled) return; styled = true;
     var css = [
-      ".vtt-aud{position:relative;display:flex;align-items:center}",
+      ".vtt-aud{position:relative;display:flex;align-items:center;justify-content:flex-end}",
       ".vtt-aud-btn{position:relative}",
       ".vtt-aud-btn.live{color:#c8a24a;border-color:#c8a24a}",
       ".vtt-aud-btn.locked{color:#14181e;background:#c8a24a;border-color:#c8a24a;animation:vttAudPulse 1.4s ease-in-out infinite}",
       ".vtt-aud-btn.muted{color:#c8503a}",
       "@keyframes vttAudPulse{0%,100%{box-shadow:0 0 0 0 rgba(200,162,74,.55)}50%{box-shadow:0 0 0 7px rgba(200,162,74,0)}}",
       ".vtt-aud-badge{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#5ac26a;color:#0b0d10;font:800 10px/16px system-ui;text-align:center}",
-      ".vtt-aud-pop{position:absolute;top:46px;right:0;width:232px;background:rgba(15,18,23,.97);border:1px solid #2a323d;border-radius:10px;padding:12px;z-index:40;box-shadow:0 10px 30px rgba(0,0,0,.45);backdrop-filter:blur(6px)}",
+      ".vtt-aud-pop{position:absolute;bottom:0;right:48px;width:232px;background:rgba(15,18,23,.97);border:1px solid #2a323d;border-radius:10px;padding:12px;z-index:40;box-shadow:0 10px 30px rgba(0,0,0,.45);backdrop-filter:blur(6px)}",
       ".vtt-aud-pop[hidden]{display:none}",
       ".vtt-aud-h{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#c8a24a;font-size:13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}",
       ".vtt-aud-row{display:flex;align-items:center;gap:8px}",

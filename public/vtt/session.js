@@ -306,7 +306,7 @@
       // Table sound: the GM Screen's music/scenes/soundboard mirrored here, under
       // a local master volume (public/vtt/audio-sync.js). Positions are placed on
       // the host's clock, which net.guest estimates over the data channel.
-      if (window.VTTAudio) audio = window.VTTAudio.create({ mount: mount.querySelector(".vtt-top.right"), hostNow: function () { return net && net.hostNow ? net.hostNow() : Date.now(); }, storageKey: "vtt-audio-master:" + V.campaignId });
+      if (window.VTTAudio) audio = window.VTTAudio.create({ mount: mount.querySelector(".vtt-zoom"), hostNow: function () { return net && net.hostNow ? net.hostNow() : Date.now(); }, storageKey: "vtt-audio-master:" + V.campaignId });
       net = window.VTTNet.guest({ transport: transport, board: board, me: V.userId, name: (chars[0] && chars[0].title) || V.userName, iceServers: V.iceServers, onStatus: setConn, onAudio: function (s) { if (audio) audio.apply(s); } });
       setConn("waiting");
     }
