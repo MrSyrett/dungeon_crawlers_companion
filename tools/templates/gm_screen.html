@@ -17355,9 +17355,10 @@ function wireAiConsole(root) {
         .concat(((typeof MYZ_MELEE_WEAPONS !== 'undefined' && Array.isArray(MYZ_MELEE_WEAPONS)) ? MYZ_MELEE_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus != null ? 'Bonus ' + w.bonus : '', 'Melee', w.comment].filter(Boolean).join(' · ') })))
         .concat(((typeof MYZ_RANGED_WEAPONS !== 'undefined' && Array.isArray(MYZ_RANGED_WEAPONS)) ? MYZ_RANGED_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: ['Dmg ' + w.damage, w.bonus != null ? 'Bonus ' + w.bonus : '', w.range, w.comment].filter(Boolean).join(' · ') })))
         .concat(((typeof MYZ_ARMOR !== 'undefined' && Array.isArray(MYZ_ARMOR)) ? MYZ_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + (a.rating != null ? a.rating : ''), a.comment].filter(Boolean).join(' · ') })))
-        .concat(((typeof MYZ_GEAR !== 'undefined' && Array.isArray(MYZ_GEAR)) ? MYZ_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.comment || g.effect || '', g.bonus ? 'Bonus ' + g.bonus : ''].filter(Boolean).join(' · ') }))),
-      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
-      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Bullets', unit: '', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 6)) }, label: 'GEAR DROP', empty: 'MYZ gear list',
+        .concat(((typeof MYZ_GEAR !== 'undefined' && Array.isArray(MYZ_GEAR)) ? MYZ_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.comment || g.effect || '', g.bonus ? 'Bonus ' + g.bonus : ''].filter(Boolean).join(' · ') })))
+        .concat(((typeof MYZ_ARTIFACTS !== 'undefined' && Array.isArray(MYZ_ARTIFACTS)) ? MYZ_ARTIFACTS : []).map(a => ({ name: a.name, category: 'artifact', desc: ['Artifact', a.roll ? 'D666 ' + a.roll : '', (typeof MYZ_VALUES !== 'undefined' && MYZ_VALUES[a.name] != null) ? MYZ_VALUES[a.name] + ' bullets' : '', a.desc].filter(Boolean).join(' · ') }))),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'artifact',label:'Artifacts',cats:['artifact'] }],
+      randomCats: ['weapon','armor','gear','gear','artifact'], money: { name: 'Bullets', unit: '', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 6)) }, label: 'GEAR DROP', empty: 'MYZ gear list',
     },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {

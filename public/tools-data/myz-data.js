@@ -389,6 +389,89 @@ var MYZ_PHENOMENA = [
   {"name":"Zone Smog","mod":"+1","effect":"Thick yellow fog: everyone takes 1 Rot Point; vision and shooting limited to Near. Some monsters hunt in it. Escape to high ground; dissipates after D6 hours."}
 ];
 
+// Bullet values for the Item Shop (not in the core rules — priced via the
+// community formula: artifacts base 15, +2/gear-bonus, +2/damage or armor,
+// +3/special effect; scrap weapons & gear 2 + 2/bonus + 2/damage).
+var MYZ_VALUES = {
+  "Blunt Instrument": 6,
+  "Bicycle Chain": 6,
+  "Brass Knuckles": 6,
+  "Scrap Knife": 8,
+  "Baseball Bat": 8,
+  "Bat with Spikes": 10,
+  "Machete": 10,
+  "Scrap Spear": 8,
+  "Scrap Axe": 10,
+  "Thrown Rock": 4,
+  "Slingshot": 6,
+  "Bow": 6,
+  "Scrap Pistol": 8,
+  "Scrap Derringer": 6,
+  "Scrap Rifle": 8,
+  "Flamethrower": 8,
+  "Scrap Cannon": 12,
+  "Scrap Armor": 2,
+  "Old-Age Body Armor": 2,
+  "Shield (road sign etc.)": 8,
+  "Rot Suit": 8,
+  "Grub (food ration)": 2,
+  "Water (ration)": 2,
+  "Bullets": 2,
+  "Booze": 2,
+  "Rot Suit / Gas Mask / Protective Suit / Umbrella": 2,
+  "Grub/Water from the Zone": 2,
+  "Air Mattress": 18,
+  "Antidepressants": 18,
+  "Assault Rifle": 25,
+  "Automobile": 24,
+  "Battery": 18,
+  "Bicycle": 22,
+  "Binoculars": 21,
+  "Bow & Arrow": 21,
+  "Canoe": 18,
+  "Cassette Player (Metaplot)": 18,
+  "Chainsaw": 25,
+  "Comic Book": 15,
+  "Compass": 19,
+  "Crossbow": 23,
+  "Diary": 15,
+  "Diving Gear": 24,
+  "Dress": 19,
+  "Energy Pills": 18,
+  "Flashlight": 18,
+  "Flare Gun": 23,
+  "Gas Mask": 18,
+  "Generator": 18,
+  "Guitar": 21,
+  "Hand Grenade": 22,
+  "Hockey Helmet": 18,
+  "Hunting Rifle": 23,
+  "ID Card (Metaplot)": 15,
+  "Jerrycan": 18,
+  "Katana": 25,
+  "Kevlar Vest": 27,
+  "Lifestyle Magazine": 15,
+  "Map of the Zone": 21,
+  "Motor Boat": 24,
+  "Painkillers": 18,
+  "Painting": 15,
+  "Perfume Bottle": 19,
+  "Protective Suit": 18,
+  "REGEN": 18,
+  "Revolver": 25,
+  "Scooter": 22,
+  "Semi-Automatic Pistol": 23,
+  "Shotgun": 27,
+  "Smoke Grenade": 18,
+  "Soda Can": 18,
+  "Stimulants": 18,
+  "Sunglasses": 19,
+  "Tuxedo": 19,
+  "Umbrella": 18,
+  "Video Camera (Metaplot)": 18,
+  "Wrench": 23
+};
+
 var MYZ_HB_WEAPONS = [];
 var MYZ_HB_GEAR = [];
 
@@ -413,6 +496,7 @@ if (typeof window !== 'undefined') {
   window.MYZ_ROT = MYZ_ROT;
   window.MYZ_DEVELOPMENT = MYZ_DEVELOPMENT;
   window.MYZ_BESTIARY = MYZ_BESTIARY;
+  window.MYZ_VALUES = MYZ_VALUES;
   window.MYZ_HB_WEAPONS = MYZ_HB_WEAPONS;
   window.MYZ_HB_GEAR = MYZ_HB_GEAR;
 }

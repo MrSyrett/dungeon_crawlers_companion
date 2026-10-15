@@ -1,104 +1,251 @@
-import { MYZ_MELEE_WEAPONS, MYZ_RANGED_WEAPONS, MYZ_ARMOR, MYZ_GEAR, MYZ_ARTIFACTS } from "@/lib/data/myz-data";
-import { MyzHeader } from "@/components/MyzRef";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import { MYZ_MELEE_WEAPONS, MYZ_RANGED_WEAPONS, MYZ_ARMOR, MYZ_GEAR, MYZ_ARTIFACTS, MYZ_VALUES } from "@/lib/data/myz-data";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import HomebrewEditor from "@/components/HomebrewEditor";
+import { MyzHeader, ModeRow, cardCls, nameCls, hbBadge, one, type RawQuery } from "@/components/MyzRef";
 
 export const dynamic = "force-dynamic";
 
-const th = "bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]";
-const slot = (n: number) => (n === 0 ? "—" : n === 0.5 ? "½" : n >= 99 ? "fixed" : String(n));
+type GearRow = { name: string; weight: string; desc: string };
+type WpRow = { name: string; skill: string; bonus: string; damage: string; range: string; weight: string; desc: string };
 
-export default function MyzGearPage() {
+const panelCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
+const tableWrap = "overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]";
+const thRow = "bg-[var(--panel-2)] text-left uppercase tracking-[0.1em] text-[var(--muted)]";
+const hbHead = "mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]";
+const BASE = "/myz/gear";
+
+const slot = (n: number | string) => {
+  const v = typeof n === "number" ? n : parseFloat(String(n));
+  if (Number.isNaN(v)) return String(n);
+  return v === 0 ? "—" : v === 0.5 ? "½" : v >= 99 ? "fixed" : String(v);
+};
+const val = (name: string): string => {
+  const v = (MYZ_VALUES as Record<string, number>)[name];
+  return v != null ? `${v} ⦾` : "—";
+};
+
+export default async function Page({ searchParams }: { searchParams: Promise<RawQuery> }) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const raw = await searchParams;
+  const mode = ["ranged", "armor", "supplies", "artifacts"].includes(one(raw.mode)) ? one(raw.mode) : "melee";
+
+  const [gVis, gOwn, wVis, wOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "myz-gear" }),
+    ownHomebrew(user.id, "myz-gear"),
+    visibleHomebrew(user.id, { type: "myz-weapon" }),
+    ownHomebrew(user.id, "myz-weapon"),
+    userCampaigns(user.id),
+  ]);
+
+  const gHb: GearRow[] = gVis.map((h) => {
+    const d = h.data as Record<string, unknown>;
+    const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
+    return { name: h.name, weight: s("weight") || "1", desc: s("desc") };
+  });
+  const wHb: WpRow[] = wVis.map((h) => {
+    const d = h.data as Record<string, unknown>;
+    const s = (k: string) => (typeof d[k] === "string" ? (d[k] as string) : "");
+    return { name: h.name, skill: s("skill") || "Fight", bonus: d.bonus != null ? String(d.bonus) : "0", damage: d.damage != null ? String(d.damage) : "1", range: s("range") || "Arm's Length", weight: s("weight") || "1", desc: s("desc") };
+  });
+  const wHbMelee = wHb.filter((w) => w.skill !== "Shoot");
+  const wHbRanged = wHb.filter((w) => w.skill === "Shoot");
+
+  const modeOpts = [
+    { key: "melee", label: "Melee" },
+    { key: "ranged", label: "Ranged" },
+    { key: "armor", label: "Armor" },
+    { key: "supplies", label: "Supplies" },
+    { key: "artifacts", label: "Artifacts" },
+  ];
+
+  const wpHead = (
+    <tr className={thRow}><th className="p-2">Weapon</th><th className="p-2">Bonus</th><th className="p-2">Dmg</th><th className="p-2">Range</th><th className="p-2">Slots</th><th className="p-2">Value</th><th className="p-2">Notes</th></tr>
+  );
+
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <MyzHeader title="Gear" subtitle="Mutant: Year Zero · scrap weapons, armor, supplies & artifacts" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        There is no money in the Ark — trade is barter and <b>bullets</b> are the de-facto currency.
-        A weapon&rsquo;s <b>Gear Bonus</b> is how many black Gear Dice it adds; its <b>Damage</b> is the
-        points dealt on a hit. You carry regular items up to twice your Strength (a Heavy item takes two
-        slots, a Light item half a slot, a Tiny item none).
+      <ModeRow base={BASE} current={{}} param="mode" options={modeOpts} active={mode} />
+
+      <p className="mb-5 max-w-[72ch] text-[13px] leading-relaxed text-[var(--muted)]">
+        There is no money in the Ark — trade is barter and <b>bullets</b> are the de-facto currency. The
+        <b> Value</b> column prices each item in bullets for the character sheet&rsquo;s Item Shop (not a core
+        rule — artifacts start at 15, +2 per gear-bonus, damage or armor point, +3 per special effect; scrap
+        gear is cheap). A weapon&rsquo;s <b>Gear Bonus</b> is the black Gear Dice it adds.
       </p>
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Close-combat weapons</h2>
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
-          <table className="w-full border-collapse text-[12px]">
-            <thead><tr className={th}><th className="p-2">Weapon</th><th className="p-2">Bonus</th><th className="p-2">Damage</th><th className="p-2">Range</th><th className="p-2">Slots</th><th className="p-2">Notes</th></tr></thead>
-            <tbody>
-              {MYZ_MELEE_WEAPONS.map((w) => (
-                <tr key={w.name} className="border-t border-[var(--border)]">
-                  <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}</td>
-                  <td className="p-2 font-mono">{w.bonus >= 0 ? `+${w.bonus}` : w.bonus}</td>
-                  <td className="p-2 font-mono">{w.damage}</td>
-                  <td className="p-2 text-[var(--muted)]">{w.range}</td>
-                  <td className="p-2 font-mono text-[var(--muted)]">{slot(w.slots)}</td>
-                  <td className="p-2 text-[var(--muted)]">{w.comment}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Ranged weapons</h2>
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
-          <table className="w-full border-collapse text-[12px]">
-            <thead><tr className={th}><th className="p-2">Weapon</th><th className="p-2">Bonus</th><th className="p-2">Damage</th><th className="p-2">Range</th><th className="p-2">Slots</th><th className="p-2">Notes</th></tr></thead>
-            <tbody>
-              {MYZ_RANGED_WEAPONS.map((w) => (
-                <tr key={w.name} className="border-t border-[var(--border)]">
-                  <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}</td>
-                  <td className="p-2 font-mono">{w.bonus >= 0 ? `+${w.bonus}` : w.bonus}</td>
-                  <td className="p-2 font-mono">{w.damage}</td>
-                  <td className="p-2 text-[var(--muted)]">{w.range}</td>
-                  <td className="p-2 font-mono text-[var(--muted)]">{slot(w.slots)}</td>
-                  <td className="p-2 text-[var(--muted)]">{w.comment}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      {/* Melee */}
+      {mode === "melee" && (
         <section>
-          <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Armor &amp; cover</h2>
-          <div className="flex flex-col gap-2">
-            {MYZ_ARMOR.map((a) => (
-              <div key={a.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3">
-                <div className="flex items-baseline gap-2"><span className="font-mono text-[15px] font-bold text-[var(--sys-link)]">{a.rating}</span><span className="text-[14px] font-bold">{a.name}</span></div>
-                <p className="mt-0.5 text-[12px] text-[var(--muted)]">{a.comment}</p>
+          <div className={`${panelCls} mb-4`}>
+            <h3 className={hbHead}>Your homebrew weapons</h3>
+            <HomebrewEditor kind="myz-weapon" campaigns={campaigns} initial={wOwn} />
+            {wHbMelee.length > 0 && (
+              <div className={`${tableWrap} mt-3`}>
+                <table className="w-full border-collapse text-[12px]"><thead>{wpHead}</thead>
+                  <tbody>
+                    {wHbMelee.map((w, i) => (
+                      <tr key={`${w.name}-${i}`} className="border-t border-[var(--border)]">
+                        <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}</td>
+                        <td className="p-2 font-mono">{w.bonus}</td><td className="p-2 font-mono">{w.damage}</td>
+                        <td className="p-2 text-[var(--muted)]">{w.range}</td><td className="p-2 font-mono text-[var(--muted)]">{slot(w.weight)}</td>
+                        <td className="p-2 font-mono text-[var(--muted)]">{val(w.name)}</td><td className="p-2 text-[var(--muted)]">{w.desc}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
+            )}
+          </div>
+          <div className={tableWrap}>
+            <table className="w-full border-collapse text-[12px]"><thead>{wpHead}</thead>
+              <tbody>
+                {MYZ_MELEE_WEAPONS.map((w) => (
+                  <tr key={w.name} className="border-t border-[var(--border)]">
+                    <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}</td>
+                    <td className="p-2 font-mono">{w.bonus >= 0 ? `+${w.bonus}` : w.bonus}</td><td className="p-2 font-mono">{w.damage}</td>
+                    <td className="p-2 text-[var(--muted)]">{w.range}</td><td className="p-2 font-mono text-[var(--muted)]">{slot(w.slots)}</td>
+                    <td className="p-2 font-mono text-[var(--muted)]">{val(w.name)}</td><td className="p-2 text-[var(--muted)]">{w.comment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
+      )}
+
+      {/* Ranged */}
+      {mode === "ranged" && (
         <section>
-          <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Supplies</h2>
-          <div className="flex flex-col gap-2">
-            {MYZ_GEAR.map((g) => (
-              <div key={g.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3">
-                <div className="flex flex-wrap items-baseline gap-2"><span className="text-[14px] font-bold text-[var(--sys-link)]">{g.name}</span><span className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">{g.slots}</span></div>
-                <p className="mt-0.5 text-[12px] text-[var(--muted)]">{g.comment}</p>
+          <div className={`${panelCls} mb-4`}>
+            <h3 className={hbHead}>Your homebrew weapons</h3>
+            <HomebrewEditor kind="myz-weapon" campaigns={campaigns} initial={wOwn} />
+            {wHbRanged.length > 0 && (
+              <div className={`${tableWrap} mt-3`}>
+                <table className="w-full border-collapse text-[12px]"><thead>{wpHead}</thead>
+                  <tbody>
+                    {wHbRanged.map((w, i) => (
+                      <tr key={`${w.name}-${i}`} className="border-t border-[var(--border)]">
+                        <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}</td>
+                        <td className="p-2 font-mono">{w.bonus}</td><td className="p-2 font-mono">{w.damage}</td>
+                        <td className="p-2 text-[var(--muted)]">{w.range}</td><td className="p-2 font-mono text-[var(--muted)]">{slot(w.weight)}</td>
+                        <td className="p-2 font-mono text-[var(--muted)]">{val(w.name)}</td><td className="p-2 text-[var(--muted)]">{w.desc}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
+            )}
+          </div>
+          <div className={tableWrap}>
+            <table className="w-full border-collapse text-[12px]"><thead>{wpHead}</thead>
+              <tbody>
+                {MYZ_RANGED_WEAPONS.map((w) => (
+                  <tr key={w.name} className="border-t border-[var(--border)]">
+                    <td className="p-2 font-semibold text-[var(--sys-link)]">{w.name}</td>
+                    <td className="p-2 font-mono">{w.bonus >= 0 ? `+${w.bonus}` : w.bonus}</td><td className="p-2 font-mono">{w.damage}</td>
+                    <td className="p-2 text-[var(--muted)]">{w.range}</td><td className="p-2 font-mono text-[var(--muted)]">{slot(w.slots)}</td>
+                    <td className="p-2 font-mono text-[var(--muted)]">{val(w.name)}</td><td className="p-2 text-[var(--muted)]">{w.comment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
-      </div>
+      )}
 
-      <section className="mt-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Artifacts of the Old Age</h2>
-        <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          Relics of the world before. Find them in the Zone, or turn one in to the <b>Dawn Vault</b> to
-          raise one of the Ark&rsquo;s Development Levels.
-        </p>
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-          {MYZ_ARTIFACTS.map((a) => (
-            <div key={a.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3">
-              <div className="flex flex-wrap items-baseline gap-2"><span className="text-[13px] font-bold text-[var(--sys-link)]">{a.name}</span><span className="font-mono text-[10px] text-[var(--muted)]">D666 {a.roll}</span></div>
-              <p className="mt-1 text-[12px] leading-relaxed text-[var(--text)]">{a.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Armor */}
+      {mode === "armor" && (
+        <section>
+          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
+            When you take damage, roll dice equal to the Armor Rating; each 6 stops one point. (Homebrew armor
+            shares the gear editor on the Supplies tab.)
+          </p>
+          <div className={tableWrap}>
+            <table className="w-full border-collapse text-[13px]">
+              <thead><tr className={thRow}><th className="p-2">Armor</th><th className="p-2">Rating</th><th className="p-2">Value</th><th className="p-2">Notes</th></tr></thead>
+              <tbody>
+                {MYZ_ARMOR.map((a) => (
+                  <tr key={a.name} className="border-t border-[var(--border)]">
+                    <td className="p-2 font-semibold text-[var(--sys-link)]">{a.name}</td>
+                    <td className="p-2 font-mono">{a.rating}</td>
+                    <td className="p-2 font-mono text-[var(--muted)]">{val(a.name)}</td>
+                    <td className="p-2 text-[var(--muted)]">{a.comment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Supplies */}
+      {mode === "supplies" && (
+        <section>
+          <div className={`${panelCls} mb-4`}>
+            <h3 className={hbHead}>Your homebrew gear</h3>
+            <HomebrewEditor kind="myz-gear" campaigns={campaigns} initial={gOwn} />
+            {gHb.length > 0 && (
+              <ul className="mt-3 grid grid-cols-1 items-start gap-3 md:grid-cols-2">
+                {gHb.map((g, i) => (
+                  <li key={`${g.name}-${i}`} className={cardCls}>
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <h4 className={nameCls}>{g.name}</h4>
+                      <span className={hbBadge}>{slot(g.weight)} slots</span>
+                    </div>
+                    {g.desc ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{g.desc}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className={tableWrap}>
+            <table className="w-full border-collapse text-[13px]">
+              <thead><tr className={thRow}><th className="p-2">Item</th><th className="p-2">Slots</th><th className="p-2">Value</th><th className="p-2">Notes</th></tr></thead>
+              <tbody>
+                {MYZ_GEAR.map((g) => (
+                  <tr key={g.name} className="border-t border-[var(--border)]">
+                    <td className="p-2 font-semibold text-[var(--sys-link)]">{g.name}</td>
+                    <td className="p-2 text-[11px] uppercase tracking-[0.08em] text-[var(--muted)]">{g.slots}</td>
+                    <td className="p-2 font-mono text-[var(--muted)]">{val(g.name)}</td>
+                    <td className="p-2 text-[var(--muted)]">{g.comment}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Artifacts */}
+      {mode === "artifacts" && (
+        <section>
+          <p className="mb-4 max-w-[72ch] text-[13px] leading-relaxed text-[var(--muted)]">
+            Relics of the world before. Find them in the Zone, or turn one in to the <b>Dawn Vault</b> to raise
+            one of the Ark&rsquo;s Development Levels. They&rsquo;re also stocked in the character sheet&rsquo;s
+            Item Shop and the GM Screen&rsquo;s gear generator.
+          </p>
+          <div className={tableWrap}>
+            <table className="w-full border-collapse text-[13px]">
+              <thead><tr className={thRow}><th className="p-2">Artifact</th><th className="p-2">D666</th><th className="p-2">Value</th><th className="p-2">Effect</th></tr></thead>
+              <tbody>
+                {MYZ_ARTIFACTS.map((a) => (
+                  <tr key={a.name} className="border-t border-[var(--border)]">
+                    <td className="p-2 font-semibold text-[var(--sys-link)]">{a.name}</td>
+                    <td className="p-2 font-mono text-[var(--muted)]">{a.roll}</td>
+                    <td className="p-2 font-mono text-[var(--muted)]">{val(a.name)}</td>
+                    <td className="p-2 text-[var(--text)]">{a.desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

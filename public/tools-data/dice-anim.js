@@ -106,25 +106,25 @@
   DICE[100]=DICE[10];
   function cY(pts){ var s=0; pts.forEach(function(p){s+=p[1];}); return s/pts.length; }
   function pstr(pts){ return pts.map(function(p){return p.join(',');}).join(' '); }
-  function numSVG(disp, cx, cy, fs){ var y=cy+fs*0.355;
-    var t='<text x="'+cx+'" y="'+y+'" text-anchor="middle" font-family="Montserrat,Barlow Condensed,Arial,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+S.num+'">'+disp+'</text>';
-    if(disp==='6'||disp==='9'){ var uw=fs*0.36; t+='<rect x="'+(cx-uw/2).toFixed(1)+'" y="'+(y+fs*0.12).toFixed(1)+'" width="'+uw.toFixed(1)+'" height="'+(fs*0.11).toFixed(1)+'" rx="'+(fs*0.055).toFixed(1)+'" fill="'+S.num+'"/>'; }
+  function numSVG(disp, cx, cy, fs, numColor){ var y=cy+fs*0.355, nc=numColor||S.num;
+    var t='<text x="'+cx+'" y="'+y+'" text-anchor="middle" font-family="Montserrat,Barlow Condensed,Arial,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+nc+'">'+disp+'</text>';
+    if(disp==='6'||disp==='9'){ var uw=fs*0.36; t+='<rect x="'+(cx-uw/2).toFixed(1)+'" y="'+(y+fs*0.12).toFixed(1)+'" width="'+uw.toFixed(1)+'" height="'+(fs*0.11).toFixed(1)+'" rx="'+(fs*0.055).toFixed(1)+'" fill="'+nc+'"/>'; }
     return t; }
-  function dieSVG(sides,val,color){
+  function dieSVG(sides,val,color,numColor){
     if(sides===2){ var CR=ramp(color);
       return '<svg viewBox="0 0 100 100">'
         +'<circle cx="50" cy="51.5" r="41" fill="'+CR.side[4]+'"/>'
         +'<circle cx="50" cy="49" r="40" fill="'+color+'"/>'
         +'<circle cx="50" cy="49" r="40" fill="none" stroke="'+CR.side[1]+'" stroke-width="1.4"/>'
         +'<circle cx="50" cy="49" r="33" fill="none" stroke="'+CR.side[3]+'" stroke-width="1" opacity="0.55"/>'
-        + numSVG(val, 50, 49, 34) + '</svg>'; }
+        + numSVG(val, 50, 49, 34, numColor) + '</svg>'; }
     var D=DICE[sides]||DICE[20]; var R=ramp(color), N=R.side.length;
     var s='<svg viewBox="0 0 100 100" shape-rendering="geometricPrecision">';
     D.facets.forEach(function(f){ var fill; if(f.face)fill=color; else if(f.mid)fill=color; else { var t=Math.max(0,Math.min(1,(cY(f.pts)-10)/80)); fill=R.side[Math.round(t*(N-1))]; }
       s+='<polygon points="'+pstr(f.pts)+'" fill="'+fill+'" stroke="'+fill+'" stroke-width="0.6" stroke-linejoin="round"/>'; });
     s+='<polygon points="'+pstr(D.outline)+'" fill="none" stroke="'+R.side[N-1]+'" stroke-width="1.1" stroke-linejoin="round"/>';
     var n=D.num, fs=D.fs||28;
-    s+=numSVG(val, n[0], n[1], fs)+'</svg>';
+    s+=numSVG(val, n[0], n[1], fs, numColor)+'</svg>';
     return s; }
   var clear2dTimer=null;
   var WAVE_GAP=430; // ms between an exploding die and the next
@@ -134,7 +134,7 @@
   function play2Dinline(mount, dice, crit){ mount.innerHTML='';
     var maxWave=0; dice.forEach(function(r){ if((r.wave||0)>maxWave)maxWave=r.wave||0; });
     dice.forEach(function(r,i){ var die=document.createElement('div'); die.className='da-die'+(crit==='crit'?' crit':crit==='fumble'?' fumble':'');
-      die.innerHTML=dieSVG(r.sides,r.display,r.color); mount.appendChild(die);
+      die.innerHTML=dieSVG(r.sides,r.display,r.color,r.numColor); mount.appendChild(die);
       var wd=(r.wave||0)*WAVE_GAP;
       die.animate([{transform:'scale(.3) translateY(-16px)',opacity:0,offset:0},{opacity:0,offset:0.001},{transform:'scale(1.12)',opacity:1,offset:.62},{transform:'scale(1)',opacity:1,offset:1}],
         {duration:360,delay:wd+i*60,easing:'cubic-bezier(.2,.8,.25,1)',fill:'both'}); });
@@ -145,7 +145,7 @@
     var maxWave=0; dice.forEach(function(r){ if((r.wave||0)>maxWave)maxWave=r.wave||0; });
     var holdStart=640+maxWave*WAVE_GAP+(S.linger||1000);
     dice.forEach(function(r,i){ var die=document.createElement('div'); die.className='da-die'+(crit==='crit'?' crit':crit==='fumble'?' fumble':'');
-      die.innerHTML=dieSVG(r.sides,r.display,r.color); layer2d.appendChild(die);
+      die.innerHTML=dieSVG(r.sides,r.display,r.color,r.numColor); layer2d.appendChild(die);
       var wd=(r.wave||0)*WAVE_GAP, spin=(Math.random()>.5?1:-1)*(500+Math.random()*360), dx=(Math.random()*2-1)*44;
       if(reduce){ die.animate([{opacity:0},{opacity:1}],{duration:120,delay:wd,fill:'both'}); }
       else { die.animate([
@@ -426,8 +426,8 @@
   // face at any viewing/lighting angle (the bump below adds light-driven depth):
   // a dark band inside the top edge (shaded upper groove wall) + a light band
   // inside the bottom edge (the lit lower lip).
-  function faceTex(text){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d'); g.textAlign='center'; g.textBaseline='middle';
-    g.fillStyle=S.num; drawDigit(g,s,text);                       // crisp inked digit
+  function faceTex(text,numColor){ var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d'); g.textAlign='center'; g.textBaseline='middle';
+    g.fillStyle=numColor||S.num; drawDigit(g,s,text);             // crisp inked digit
     innerShadow(g,s,text,'rgba(0,0,0,0.7)',3,2.6);                // shaded upper wall
     innerShadow(g,s,text,'rgba(255,255,255,0.55)',2.6,-2.6);      // lit lower lip
     var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
@@ -437,7 +437,7 @@
     g.fillStyle='#808080'; g.fillRect(0,0,s,s); g.textAlign='center'; g.textBaseline='middle';
     g.shadowColor='#000'; g.shadowOffsetX=0; g.shadowOffsetY=0; g.shadowBlur=2.4; g.fillStyle='#000'; drawDigit(g,s,text); drawDigit(g,s,text);
     var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
-  function labelMat(text,extra){ var o={map:faceTex(text),bumpMap:bumpTex(text),bumpScale:0.05,roughness:0.82,metalness:0,envMapIntensity:0.08,transparent:true,depthWrite:false};
+  function labelMat(text,extra,numColor){ var o={map:faceTex(text,numColor),bumpMap:bumpTex(text),bumpScale:0.05,roughness:0.82,metalness:0,envMapIntensity:0.08,transparent:true,depthWrite:false};
     if(extra) for(var k in extra) o[k]=extra[k]; return new THREE.MeshStandardMaterial(o); }
   // ─── the worn surface ───
   // The chosen colour, richest in the flat CENTRE of each face, worn away to a
@@ -534,7 +534,7 @@
     var t=i-(i%3); if(!_fn) _fn={a:new THREE.Vector3(),b:new THREE.Vector3(),c:new THREE.Vector3(),n:new THREE.Vector3()};
     _fn.a.set(pos[t*3],pos[t*3+1],pos[t*3+2]); _fn.b.set(pos[t*3+3],pos[t*3+4],pos[t*3+5]); _fn.c.set(pos[t*3+6],pos[t*3+7],pos[t*3+8]);
     _fn.n.subVectors(_fn.b,_fn.a).cross(_fn.c.sub(_fn.a)).normalize(); var best=0,bd=-2; for(var k=0;k<groups.length;k++){ var dd=groups[k].n.dot(_fn.n); if(dd>bd){bd=dd;best=k;} } return best; }
-  function buildDie(geo,groups,labels,sides,resultStr,color,d4){
+  function buildDie(geo,groups,labels,sides,resultStr,color,d4,numColor){
     // FINISH (optical) × TEXTURE (pattern) — two independent axes. The finish
     // sets how the surface catches light; the texture supplies the colour map.
     // Plastic = cast resin under a clear coat; Metal = the colour as polished
@@ -563,12 +563,12 @@
         // Opaque alpha-tested decal (writes depth, front-side only, depth-biased toward
         // the camera) so the 3 co-located copies of each vertex number don't z-fight /
         // flicker and the back-face copies are culled instead of bleeding through.
-        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), labelMat(d4.vlabels[vi],{alphaTest:0.5,depthWrite:true,transparent:false,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));
+        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), labelMat(d4.vlabels[vi],{alphaTest:0.5,depthWrite:true,transparent:false,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4},numColor));
         pl.position.copy(pos); pl.quaternion.setFromRotationMatrix(m4); group.add(pl); }); });
       return group; }
     var size=sides===2?1.15:sides===6?1.0:sides===4?0.8:sides===10?0.52:sides===8?0.7:0.64;
     groups.forEach(function(g,idx){ var isR=labels[idx]===resultStr;
-      var pl=new THREE.Mesh(new THREE.PlaneGeometry(size,size), labelMat(labels[idx]));
+      var pl=new THREE.Mesh(new THREE.PlaneGeometry(size,size), labelMat(labels[idx],null,numColor));
       var pp=g.labelPos ? g.labelPos.clone().addScaledVector(g.n,0.03) : g.n.clone().multiplyScalar(g.c.dot(g.n)*1.02); pl.position.copy(pp);
       pl.up.copy(numberUp(g,sides)); pl.lookAt(pp.clone().add(g.n)); group.add(pl); });
     return group; }
@@ -712,7 +712,7 @@
   function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
     _camTilt = true; applyCam();   // always tip the camera 30° (the d4 angle) — reads better and separates overlapping dice in depth
     if(floor3d) floor3d.material.opacity=SHADOW_OP;
-    var metas=[],inits=[],maxSpawn=0, fromBottom=Math.random()<0.5; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i,dice.length,gg.hull,fromBottom); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
+    var metas=[],inits=[],maxSpawn=0, fromBottom=Math.random()<0.5; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i,dice.length,gg.hull,fromBottom); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,numColor:r.numColor,wave:r.wave||0,tetra:gg.tetra}); });
     var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS+maxSpawn){ stepWorld(probe,FDT,steps); steps++; if(allRest(probe))break; }
     var live=inits.map(cloneState),meshes=[],shadows=[];
     metas.forEach(function(m,i){ var rs=m.display, d4=null;
@@ -723,7 +723,7 @@
         d4={verts:m.tetra.verts, faces:m.tetra.faces, vlabels:vlabels}; }
       var up=upFace(m.groups,probe[i].q), labels=labelSet(m.faceSet,m.groups.length);
       var had=labels.indexOf(rs),prev=labels[up]; labels[up]=rs; if(had>=0&&had!==up)labels[had]=prev;
-      var g=buildDie(m.geo,m.groups,labels,m.sides,rs,m.color,d4); g.position.copy(live[i].p); g.quaternion.copy(live[i].q);
+      var g=buildDie(m.geo,m.groups,labels,m.sides,rs,m.color,d4,m.numColor); g.position.copy(live[i].p); g.quaternion.copy(live[i].q);
       var sh=makeShadow(); if(inits[i].spawnStep>0){ g.visible=false; sh.visible=false; } scene.add(sh); scene.add(g); meshes.push(g); shadows.push(sh); });
     world3d={ live:live, meshes:meshes, shadows:shadows, crit:(crit||'normal'), emph:false, acc:0, rested:false, stepCount:0, maxSteps:steps, phase:'roll', tStart:performance.now() };
     lastRoll={ dice:dice.length, steps:steps, ms:Math.round(steps*FDT*1000), capped:steps>=MAXSTEPS+maxSpawn, fromBottom:fromBottom };
@@ -754,7 +754,7 @@
   // it right after when this roll IS inline).
   function clearInline(){ try{ var els=document.querySelectorAll('[data-da-inline]'); for(var i=0;i<els.length;i++) els[i].innerHTML=''; }catch(e){} }
   function play(dice, crit){ if(!S.on || !dice || !dice.length) return; ensureOverlay();
-    var rd=dice.map(function(d){ return { sides:d.sides, display:(d.display!=null?d.display:d.val), faceSet:d.faceSet||null, wave:d.wave||0, color:(d.color!=null?d.color:resolveColor()) }; });
+    var rd=dice.map(function(d){ return { sides:d.sides, display:(d.display!=null?d.display:d.val), faceSet:d.faceSet||null, wave:d.wave||0, color:(d.color!=null?d.color:resolveColor()), numColor:(d.numColor!=null?d.numColor:null) }; });
     if(S.sound!==false) playAudio(rd.length);
     clearInline();
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
@@ -806,7 +806,8 @@
   function parseGM(detail){ return parseDice(detail); }
 
   // ─── hook addLog ───
-  // A sheet can set window.__daNext = { dice:[{sides,display,color?}...], glow:'normal'|'crit'|'fumble' }
+  // A sheet can set window.__daNext = { dice:[{sides,display,color?,numColor?}...], glow:'normal'|'crit'|'fumble' }
+  // (numColor overrides the global numeral colour per die — e.g. light pips on a black die.)
   // right before calling addLog to drive the animation EXPLICITLY — used by the
   // Year Zero sheets so stress dice carry their own colour and the dice glow is
   // decoupled from the log's success/failure styling (it glows only on the bad
