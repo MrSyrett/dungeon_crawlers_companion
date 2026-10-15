@@ -24,7 +24,7 @@
   var STEPS = ['Archetype', 'Attributes', 'Skills', 'Talent & Issue', 'Starting Gear'];
 
   var step = 0;
-  var name = '', pronouns = '', key = '', career = '', talentPick = '', issue = '', drive = '';
+  var name = '', pronouns = '', key = '', career = '', talentPick = '', issue = '', drive = '', anchorPc = '', anchorNpc = '';
   var attrs = {}, skills = {}, startGear = [], gearTab = 'weap';
 
   function careerObj(nm) { for (var i = 0; i < CAREERS.length; i++) if (CAREERS[i].name === nm) return CAREERS[i]; return null; }
@@ -34,7 +34,7 @@
   function skillCap(nm) { return isCareerSkill(nm) ? 3 : 1; }
 
   function reset() {
-    step = 0; name = ''; pronouns = ''; key = ''; career = ''; talentPick = ''; issue = ''; drive = '';
+    step = 0; name = ''; pronouns = ''; key = ''; career = ''; talentPick = ''; issue = ''; drive = ''; anchorPc = ''; anchorNpc = '';
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
     skills = {}; ASK.forEach(function (s) { skills[s.name] = 0; });
     startGear = []; gearTab = 'weap';
@@ -115,6 +115,9 @@
     h += '<div class="yzeb-list">' + ((c.drives) || []).map(function (x, i) {
       return prow(x, '', '', drive === x, "window.YZEB.pickDrive(" + i + ")", drive === x ? '✓ Chosen' : 'Choose');
     }).join('') + '</div>';
+    h += '<div class="m-lbl" style="margin-top:14px;">Anchors <span class="yzeb-sub">(one fellow survivor + one NPC — meet one to shed all stress; +2 Fear while they live)</span></div>';
+    h += '<div class="m-lbl" style="font-weight:600;opacity:.8;">PC Anchor</div><input type="text" class="m-input" value="' + esc(anchorPc) + '" placeholder="Another player’s character" oninput="window.YZEB.setAnchorPc(this.value)">';
+    h += '<div class="m-lbl" style="font-weight:600;opacity:.8;margin-top:8px;">NPC Anchor</div><input type="text" class="m-input" value="' + esc(anchorNpc) + '" placeholder="An NPC who matters to you" oninput="window.YZEB.setAnchorNpc(this.value)">';
     return h;
   }
 
@@ -216,6 +219,8 @@
     pickDrive: function (i) { var c = careerObj(career); if (c && c.drives && c.drives[i] != null) { drive = (drive === c.drives[i]) ? '' : c.drives[i]; render(); } },
     setIssueText: function (v) { issue = v; },
     setDriveText: function (v) { drive = v; },
+    setAnchorPc: function (v) { anchorPc = v; },
+    setAnchorNpc: function (v) { anchorNpc = v; },
     // Toggle an archetype starting-gear option (max 3), resolving it to its stats.
     toggleStartGear: function (idx) {
       var c = careerObj(career); if (!c) return;
@@ -238,6 +243,7 @@
       ASK.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
       d.career = career; if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
       if (issue) d.issue = issue; if (drive) d.drive = drive;
+      if (anchorPc) d.anchorPc = anchorPc; if (anchorNpc) d.anchorNpc = anchorNpc;
       if (startGear.length) d.gear = startGear.map(function (g) { return g; });
       try { applySheet(d); } catch (e) {}
       try { autoDerive('health'); } catch (e) {}

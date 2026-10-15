@@ -42,7 +42,10 @@
     {title:"Pushing",text:"Fail a roll and you may push it (roll again), taking one point of stress."},
     {title:"Health",text:"Everyone has 3 Health. At 0 you are Broken: you go down, take a critical injury and one stress, and all rolls fail. Hurt again while Broken, you die."},
     {title:"Armor",text:"When hit, roll a number of dice equal to the Armor Level; each success stops one damage. The armor penalty applies to Mobility."},
-    {title:"The dead",text:"Walkers have no stat blocks \u2014 they are measured by Threat Level (0\u20136) and Swarm Size. At Threat 3 they notice you and every PC takes a stress."}
+    {title:"The dead",text:"Walkers have no stat blocks \u2014 they are measured by Threat Level (0\u20136) and Swarm Size. At Threat 3 they notice you and every PC takes a stress."},
+    {title:"Anchors",text:"You have two Anchors \u2014 one fellow PC and one NPC. Spend an hour with one to relieve ALL your stress (once per session). Each living Anchor also grants +2 to your end-of-session Handle Your Fear roll. Anchors can be lost or gained in play."},
+    {title:"Breaking Points & Fear",text:"At session end, if you hit a Breaking Point \u2014 an Anchor dies or turns on you, you kill a defenseless person, you\u2019re Broken by damage, you reach 5 stress, or something you built is destroyed \u2014 make a Handle Your Fear roll: Wits OR Empathy, +2 per living Anchor, no stress dice, no push."},
+    {title:"Overwhelmed & Shattered",text:"Fail Handle Your Fear and roll D6 to see how the horror marks you: 1\u20132 you lose your Drive; 3\u20135 you become Shattered (a lasting trauma \u2014 e.g. sees the dead as alive, shuts down, flies into rage, turns paranoid); 6 your Issue changes or you gain another. Lost Drives and Shattered states can be worked through in roleplay."}
   ];
 })();
 </script>
@@ -710,6 +713,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="fld"><label>Issue</label><input type="text" id="f-issue" placeholder="Something that complicates your character"></div>
           <div class="fld"><label>Drive</label><input type="text" id="f-drive" placeholder="What keeps you going — once per session, +2 (roll two extra base dice)"></div>
         </div>
+        <div class="section-bar"><span>Anchors</span></div>
+        <div class="blk" style="padding-top:2px;">
+          <div class="fld"><label>PC Anchor<span class="hint">A fellow survivor — meet them for an hour to relieve all stress (once/session); +2 to Handle Your Fear while they live</span></label><input type="text" id="f-anchor-pc" placeholder="Another player’s character"></div>
+          <div class="fld"><label>NPC Anchor<span class="hint">Someone outside the group who steadies you — same benefits</span></label><input type="text" id="f-anchor-npc" placeholder="An NPC who matters to you"></div>
+        </div>
         <div class="section-bar"><span>Story</span></div>
         <div class="blk" id="traits-blk"></div>
         <div class="section-bar"><span>Relationships</span><span class="hdr-right"><button class="hdr-btn" onclick="addRelRow()">＋ Add</button></span></div>
@@ -807,7 +815,7 @@ function blankState(){
     attrs:{STR:2,AGI:2,WITS:2,EMP:2}, skills:{},
     health:{max:3,dmg:0}, resolve:{max:0,dmg:0}, stress:0,
     conditions:{}, xp:0, armor:0, weapons:[], gear:[], crits:[], talents:[],
-    issue:'', drive:'', traits:{}, relationships:[], appearance:'', notes:'' };
+    issue:'', drive:'', anchorPc:'', anchorNpc:'', traits:{}, relationships:[], appearance:'', notes:'' };
   // seed every skill name from BOTH variants so switching modes never loses data
   BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ if(st.skills[s.name]==null) st.skills[s.name]=0; });
   CONDS.forEach(function(c){ st.conditions[c.name]=false; });
@@ -1392,7 +1400,7 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 function collectSheet(){
   S.name=$('f-name').value.trim(); S.archetype=$('f-archetype').value; S.pronouns=$('f-pronouns').value;
   S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.armor=armorRating();
-  { var fi=$('f-issue'); if(fi)S.issue=fi.value; var fd=$('f-drive'); if(fd)S.drive=fd.value; }
+  { var fi=$('f-issue'); if(fi)S.issue=fi.value; var fd=$('f-drive'); if(fd)S.drive=fd.value; var fap=$('f-anchor-pc'); if(fap)S.anchorPc=fap.value; var fan=$('f-anchor-npc'); if(fan)S.anchorNpc=fan.value; }
   // Key attribute and career are set at creation (read-only on the sheet) — keep S.key / S.career.
   var cls = isAlien() ? (S.career||'Survivor') : S.archetype;
   return Object.assign({}, S, { system:'TWD', variant:'alien', class:cls, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
@@ -1405,7 +1413,7 @@ function applySheet(d){
   // skill sets are seeded — so coercing to Alien never loses points).
   S.variant='alien';
   syncVariant();
-  ['name','archetype','pronouns','key','appearance','notes','career','issue','drive'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
+  ['name','archetype','pronouns','key','appearance','notes','career','issue','drive','anchorPc','anchorNpc'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
   if(d.xp!=null)S.xp=num(d.xp); if(d.stress!=null)S.stress=clamp(num(d.stress),0,10);
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   // apply skills across BOTH variant skill sets so switching modes never loses data
@@ -1439,7 +1447,7 @@ function renderAll(){
   syncVariant();
   $('f-name').value=S.name||''; $('f-archetype').value=S.archetype||''; $('f-pronouns').value=S.pronouns||'';
   $('f-appearance').value=S.appearance||''; $('f-notes').value=S.notes||''; $('f-xp').value=num(S.xp);
-  { var fi=$('f-issue'); if(fi)fi.value=S.issue||''; var fd=$('f-drive'); if(fd)fd.value=S.drive||''; }
+  { var fi=$('f-issue'); if(fi)fi.value=S.issue||''; var fd=$('f-drive'); if(fd)fd.value=S.drive||''; var fap=$('f-anchor-pc'); if(fap)fap.value=S.anchorPc||''; var fan=$('f-anchor-npc'); if(fan)fan.value=S.anchorNpc||''; }
   renderKeyDisp(); renderCareerDisp();
   renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderInventory(); renderAttacks(); renderCrits(); renderTalents(); renderCareer(); updateFoot(); refreshWizardButtons();
 }
