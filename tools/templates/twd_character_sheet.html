@@ -181,7 +181,8 @@ body{font-family:'Barlow',sans-serif;background-color:var(--bg);background-image
 .attr-row .a-die{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--yz-dk);width:34px;text-align:right;flex:0 0 auto;background:none;border:none;cursor:pointer;padding:0;}
 .attr-row .a-die:hover{color:var(--yz);text-decoration:underline;}
 /* Attributes with their skills nested underneath */
-.attr-skills{padding:8px 10px;display:flex;flex-direction:column;gap:11px;}
+.attr-skills{padding:8px 10px;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;align-items:start;}
+.attr-skills .as-attr{min-width:0;}
 .as-attr .attr-row{padding-bottom:3px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
 .as-attr .attr-row .a-name{font-size:15px;color:var(--yz-dk);}
 .as-skills{display:flex;flex-direction:column;gap:2px;padding-left:8px;}
@@ -195,6 +196,15 @@ body{font-family:'Barlow',sans-serif;background-color:var(--bg);background-image
 .vbox{width:20px;height:20px;border:2px solid var(--rule);border-radius:4px;cursor:pointer;background:#fff;padding:0;}
 .vbox.on{background:var(--red);border-color:var(--red);}
 .vbox.resolve.on{background:var(--blue);border-color:var(--blue);}
+.vbox.hp.on{background:var(--green);border-color:#246b43;}
+.xp-sp-row{display:flex;gap:14px;}
+.stat-bubbles{display:flex;flex-direction:column;gap:14px;flex:0 0 132px;}
+.stat-bubbles>.card{flex:1 1 0;display:flex;flex-direction:column;}
+.stat-bubbles .section-bar{padding:5px 10px 4px;font-size:10px;}
+.stat-bubbles .section-bar::after{left:10px;right:10px;}
+.bubble-val{display:flex;align-items:center;justify-content:center;padding:6px 10px 10px;flex:1;cursor:pointer;}
+.bubble-val .stress-val{font-size:26px;line-height:1;}
+@media(max-width:860px){.vit-row{flex-direction:column;}.vit-row>.card{flex:0 0 auto!important;}.stat-bubbles{flex-direction:row;flex:0 0 auto;}}
 .v-auto{background:none;border:1px solid var(--rule);border-radius:5px;color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 5px;flex:0 0 auto;}
 .v-auto:hover{border-color:var(--yz);color:var(--yz-dk);}
 .broken-tag{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--red);border-radius:3px;padding:1px 6px;flex:0 0 auto;}
@@ -634,27 +644,30 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button></div>
+        <div class="xp-row"><span class="v-lbl">Experience</span><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="margin-left:auto;" oninput="S.xp=num(this.value);scheduleAutosave()"></div>
+      </div>
+      <div class="card">
+      <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">Roll</button></span></div>
+      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — tap an injury for its effect and to remove it.</div></div>
       </div>
     </div>
 
     <div class="center-col">
       <div class="vit-row">
-      <div class="card" style="flex:1 1 0;min-width:0;">
-      <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">Roll</button></span></div>
-      <div class="blk" style="padding-top:6px;"><div id="crit-list" class="cond-row"></div><div id="crit-empty" style="padding:2px 10px 4px;font-size:12px;color:var(--muted);">No critical injuries. Roll one above — tap an injury for its effect and to remove it.</div></div>
+      <div class="stat-bubbles">
+        <div class="card">
+          <div class="section-bar accent"><span>Armor</span></div>
+          <div class="blk bubble-val" onclick="rollArmor()" title="Armor Level of the gear you have equipped — click to roll it; each 6 stops one point of damage"><span class="stress-val" id="armor-val">0</span></div>
+        </div>
       </div>
-
-      <div class="card hstress" style="flex:1.6 1 0;min-width:0;">
+      <div class="card hstress" style="flex:1 1 0;min-width:0;">
       <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
       <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
-        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
-        <div class="vrow"><span class="v-lbl">Armor rating</span><span class="stress-val" id="armor-val" title="Sum of equipped armor">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div>
+        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes" style="flex:0 1 auto;"></div><span class="broken-tag hide" id="broken-tag-a">Broken</span></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
-        <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span></div>
       </div>
       </div>
       </div>
@@ -691,7 +704,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="tab-panel" id="tab-story">
         <div class="section-bar alien-only"><span>Talents</span></div>
         <div class="tln-list alien-only" id="tln-list"></div>
-        <div class="alien-only" id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Your career offers three — pick one at creation.</div>
+        <div class="alien-only" id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Your archetype offers three — pick one at creation.</div>
         <div class="section-bar"><span>Issue &amp; Drive</span></div>
         <div class="blk" style="padding-top:2px;">
           <div class="fld"><label>Issue</label><input type="text" id="f-issue" placeholder="Something that complicates your character"></div>
@@ -836,14 +849,19 @@ function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.
 
 // ── Render: vitals (Health / Resolve damage tracks) ──
 function renderVitals(){
-  ['health','resolve'].forEach(function(w){
-    var host=$(w+'-boxes'), st=S[w], boxes='';
-    var max=st.max||0;
-    // Health is fixed (TWD: 3 / Alien: Strength), set at creation — just the
-    // damage track, no manual +/- box adjusters.
-    for(var i=1;i<=max;i++){ boxes+='<button class="vbox'+(w==='resolve'?' resolve':'')+(i<=st.dmg?' on':'')+'" title="damage" onclick="setDamage(\''+w+'\','+i+')"></button>'; }
+  // Health is a depleting bar: boxes start full (green) and empty right-to-left as
+  // you take damage; empty = Broken. TWD everyone has 3.
+  (function(){
+    var st=S.health, max=st.max||0, rem=max-num(st.dmg), host=$('health-boxes'), boxes='';
+    for(var i=1;i<=max;i++){ boxes+='<button class="vbox hp'+(i<=rem?' on':'')+'" title="'+(i<=rem?'health remaining — click to take damage':'click to heal to here')+'" onclick="setHealth('+i+')"></button>'; }
+    if(host) host.innerHTML=boxes;
+  })();
+  // Resolve stays a fill-on-damage track (hidden in the TWD variant).
+  (function(){
+    var host=$('resolve-boxes'); if(!host)return; var st=S.resolve, boxes='';
+    for(var i=1;i<=(st.max||0);i++){ boxes+='<button class="vbox resolve'+(i<=num(st.dmg)?' on':'')+'" title="damage" onclick="setDamage(\'resolve\','+i+')"></button>'; }
     host.innerHTML=boxes;
-  });
+  })();
   var broken = isAlien()
     ? (S.health.max>0 && S.health.dmg>=S.health.max)
     : ((S.health.max>0&&S.health.dmg>=S.health.max)||(S.resolve.max>0&&S.resolve.dmg>=S.resolve.max));
@@ -859,6 +877,13 @@ function renderStress(){
 function setStress(n){ S.stress=(num(S.stress)===n)?n-1:n; if(S.stress<0)S.stress=0; renderStress(); scheduleAutosave(); }
 function bumpStress(d){ S.stress=clamp(num(S.stress)+d,0,10); renderStress(); scheduleAutosave(); }
 function setDamage(w,n){ var st=S[w]; st.dmg=(st.dmg===n)?n-1:n; renderVitals(); scheduleAutosave(); }
+// Health is a depleting bar. Box i = the i-th point of health from the left; click
+// the current top-filled box to take one damage, or any box to set remaining health.
+function setHealth(i){
+  var st=S.health, max=st.max||0, rem=max-num(st.dmg);
+  var newRem=(i===rem)?i-1:i; newRem=clamp(newRem,0,max);
+  st.dmg=max-newRem; renderVitals(); scheduleAutosave();
+}
 function bumpMax(w,d){ var st=S[w]; st.max=clamp(st.max+d,0,20); if(st.dmg>st.max)st.dmg=st.max; renderVitals(); scheduleAutosave(); }
 function autoDerive(w){ S[w].max=derivedMax(w); if(S[w].dmg>S[w].max)S[w].dmg=S[w].max; renderVitals(); scheduleAutosave(); addLog(w==='health'?'Health':'Resolve','max '+S[w].max, 'derived from attributes','normal'); }
 
@@ -975,8 +1000,29 @@ function renderAttacks(){
   eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
     tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
     body.appendChild(tr); });
-  $('atk-empty').style.display=eq.length?'none':'block';
+  // Unarmed Attack is always available (Close Combat, base damage 1, Short range).
+  var ur=document.createElement('tr');
+  ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Short</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
+  body.appendChild(ur);
+  { var ae=$('atk-empty'); if(ae) ae.style.display=eq.length?'none':'block'; }
   renderArmorVal();
+}
+// The always-available Unarmed Attack: Close Combat, base damage 1, Short range.
+function rollUnarmed(){
+  var skName='Close Combat', s=skillObj(skName)||{attr:'STR'};
+  var pool=attrVal(s.attr)+num(S.skills[skName])-condPenaltyFor(s.attr)-critPenalty();
+  var label='Unarmed · '+skName;
+  var mod=clamp(num($('tray-mod').value),-6,6); $('tray-mod').value='0';
+  var poolSize=pool+mod, floored=false; if(poolSize<1){ poolSize=1; floored=true; } poolSize=Math.min(20,poolSize);
+  var r=rollDicePool(poolSize), c=countPool(r.all), hit=c.succ>=1;
+  var bad=r.stressOnes>0;
+  var dmg=hit?(1+(c.succ-1)):0;
+  var t=hit?{t:'HIT · '+dmg+' dmg',type:'crit'}:{t:'MISS',type:'fumble'};
+  var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+badTag(r.stressOnes);
+  animDice(r.base, r.stress, glowFor(c.succ, bad));
+  addLog(label, c.succ+'  '+t.t, detail, t.type);
+  if(bad){ _lastRoll=null; onBad(label); return; }
+  _lastRoll={label:label,base:r.base,stress:r.stress,kind:'attack',wdmg:1}; showPushOption();
 }
 // Back-compat aliases (other code calls these names).
 function renderWeapons(){ renderInventory(); renderAttacks(); }
