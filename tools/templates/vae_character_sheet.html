@@ -893,21 +893,21 @@ function renderInventory(){
 function renderAttacks(){
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
+  // Kick or Punch Attack is always available (Close Combat, base damage 1, Arm's length).
+  var ur=document.createElement('tr');
+  ur.innerHTML='<td class="atk-name">Kick or Punch</td><td>0</td><td>1</td><td>Arm’s length</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
+  body.appendChild(ur);
   eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
     tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
     body.appendChild(tr); });
-  // Unarmed Attack is always available (Close Combat, base damage 1, Arm's length).
-  var ur=document.createElement('tr');
-  ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Arm’s length</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
-  body.appendChild(ur);
   { var ae=$('atk-empty'); if(ae) ae.style.display=eq.length?'none':'block'; }
   renderArmorVal();
 }
-// The always-available Unarmed Attack: Close Combat, base damage 1, Arm's length.
+// The always-available Kick or Punch Attack: Close Combat, base damage 1, Arm's length.
 function rollUnarmed(){
   var s=skillObj('Close Combat')||{attr:'PHY'};
   var pen=condPenaltyFor('PHY')+critPenalty();
-  doRoll('Unarmed · Close Combat', attrBase('PHY')-pen, num(S.skills['Close Combat']), 0, 'PHY', {kind:'attack',wdmg:1,ctype:attrType('PHY')});
+  doRoll('Kick or Punch · Close Combat', attrBase('PHY')-pen, num(S.skills['Close Combat']), 0, 'PHY', {kind:'attack',wdmg:1,ctype:attrType('PHY')});
 }
 function renderGear(){ renderInventory(); }
 function renderWeapons(){ renderInventory(); renderAttacks(); }
@@ -918,7 +918,8 @@ function wSkillAttr(skillStr){ var first=String(skillStr||'').split('/')[0].trim
 function pickerPool(kind){
   if(kind==='weap'){
     var out=[];
-    MELEE.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg',note:'Melee · bonus '+w.bonus+' · '+(w.skill||'Close Combat'),data:w}); });
+    // Kick or Punch is the always-available attack in the Combat tab, so it isn't sold in the store.
+    MELEE.filter(function(w){ return !/^kick or punch/i.test(w.name||''); }).forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg',note:'Melee · bonus '+w.bonus+' · '+(w.skill||'Close Combat'),data:w}); });
     RANGED.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Ranged · bonus '+w.bonus+' · '+(w.skill||'Ranged Combat'),data:w}); });
     G(window.VAE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':''),note:'Homebrew'+(d.bonus!=null?' · bonus '+d.bonus:''),data:d}); });
     return out;

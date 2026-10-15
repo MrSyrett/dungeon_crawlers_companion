@@ -1017,13 +1017,13 @@ function renderInventory(){
 function renderAttacks(){
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
-  eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
-    tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
-    body.appendChild(tr); });
   // Unarmed Attack is always available (Fight, base damage 1, Arm's length).
   var ur=document.createElement('tr');
   ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Arm’s length</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
   body.appendChild(ur);
+  eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
+    tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
+    body.appendChild(tr); });
   { var ae=$('atk-empty'); if(ae) ae.style.display=eq.length?'none':'block'; }
   renderArmorVal();
 }
@@ -1046,7 +1046,8 @@ var _pk=null, _pkRows=[];
 function pickerPool(kind){
   if(kind==='weap'){
     var out=[];
-    MELEE.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Melee (Fight) · bonus '+w.bonus+(w.comment?' · '+w.comment:''),data:w,skill:'Fight'}); });
+    // Unarmed is the always-available attack in the Combat tab, so it isn't sold in the store.
+    MELEE.filter(function(w){ return !/^unarmed\b/i.test(w.name||''); }).forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Melee (Fight) · bonus '+w.bonus+(w.comment?' · '+w.comment:''),data:w,skill:'Fight'}); });
     RANGED.forEach(function(w){ out.push({name:w.name,cost:w.damage+' dmg · '+w.range,note:'Ranged (Shoot) · bonus '+w.bonus+(w.comment?' · '+w.comment:''),data:w,skill:'Shoot'}); });
     G(window.MYZ_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:'Homebrew'+(d.bonus!=null?' · bonus '+d.bonus:''),data:d,skill:(d.skill==='Shoot'?'Shoot':'Fight')}); });
     return out;

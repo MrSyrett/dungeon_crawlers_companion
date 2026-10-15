@@ -1005,21 +1005,21 @@ function renderInventory(){
 function renderAttacks(){
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
+  // Foot or Fist Attack is always available (Close Combat, base damage 1, Short range).
+  var ur=document.createElement('tr');
+  ur.innerHTML='<td class="atk-name">Foot or Fist</td><td>0</td><td>1</td><td>Short</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
+  body.appendChild(ur);
   eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
     tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
     body.appendChild(tr); });
-  // Unarmed Attack is always available (Close Combat, base damage 1, Short range).
-  var ur=document.createElement('tr');
-  ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Short</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
-  body.appendChild(ur);
   { var ae=$('atk-empty'); if(ae) ae.style.display=eq.length?'none':'block'; }
   renderArmorVal();
 }
-// The always-available Unarmed Attack: Close Combat, base damage 1, Short range.
+// The always-available Foot or Fist Attack: Close Combat, base damage 1, Short range.
 function rollUnarmed(){
   var skName='Close Combat', s=skillObj(skName)||{attr:'STR'};
   var pool=attrVal(s.attr)+num(S.skills[skName])-condPenaltyFor(s.attr)-critPenalty();
-  var label='Unarmed · '+skName;
+  var label='Foot or Fist · '+skName;
   var mod=clamp(num($('tray-mod').value),-6,6); $('tray-mod').value='0';
   var poolSize=pool+mod, floored=false; if(poolSize<1){ poolSize=1; floored=true; } poolSize=Math.min(20,poolSize);
   var r=rollDicePool(poolSize), c=countPool(r.all), hit=c.succ>=1;
@@ -1046,7 +1046,8 @@ function renderEnc(){
 var _pk=null;
 function pickerPool(kind){
   if(kind==='weap'){
-    var src=isAlien()?ALIEN_WP:WEAPONS;
+    // Foot or Fist is the always-available attack in the Combat tab, so it isn't sold in the store.
+    var src=(isAlien()?ALIEN_WP:WEAPONS).filter(function(w){ return !/^foot or fist/i.test(w.name||''); });
     var out=src.map(function(w){ return {name:w.name,cost:w.damage+' dmg · '+w.range,note:(isAlien()?(w.class+' · '):('Grip '+w.grip+' · '))+'bonus '+w.bonus+' · wt '+w.weight+(w.special?' · '+w.special:''),data:w}; });
     G(window.YZE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:'Homebrew'+(d.bonus?' · bonus '+d.bonus:''),data:d}); });
     return out;

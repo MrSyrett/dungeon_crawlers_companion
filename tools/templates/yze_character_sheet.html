@@ -1029,15 +1029,15 @@ function renderInventory(){
 function renderAttacks(){
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
+  // Unarmed Attack is always available (Close Combat, base damage 1, Adjacent).
+  var ur=document.createElement('tr');
+  ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Adjacent</td><td>—</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
+  body.appendChild(ur);
   eq.forEach(function(o){ var i=o.i,w=o.g; var tr=document.createElement('tr');
     var am=(w.ammo!=null&&w.ammo!=='')?w.ammo:'—', hasAmmo=!isNaN(parseInt(am,10));
     var ammoCell=esc(am)+(hasAmmo?' <button class="w-roll" style="padding:2px 6px;font-size:9px;margin-left:4px;" title="Roll Supply: each 1 lowers ammo by one" onclick="rollSupply('+i+')">⟳</button>':'');
     tr.innerHTML='<td class="atk-name">'+esc(w.name||'Weapon')+'</td><td>'+esc(w.bonus!=null&&w.bonus!==''?w.bonus:'0')+'</td><td>'+esc(w.damage!=null?w.damage:'')+'</td><td>'+esc(w.range||'')+'</td><td>'+ammoCell+'</td><td style="text-align:right;"><button class="atk-roll" onclick="rollAttack('+i+')">Attack</button></td>';
     body.appendChild(tr); });
-  // Unarmed Attack is always available (Close Combat, base damage 1, Adjacent).
-  var ur=document.createElement('tr');
-  ur.innerHTML='<td class="atk-name">Unarmed</td><td>0</td><td>1</td><td>Adjacent</td><td>—</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
-  body.appendChild(ur);
   { var ae=$('atk-empty'); if(ae) ae.style.display=eq.length?'none':'block'; }
   renderArmorVal();
 }
