@@ -324,10 +324,25 @@ var MYZ_BESTIARY = [
   { name: "Zone Leeches",  mod: "±0", stats: "Swarm, STR 6; Armor —; only fire/explosions", attack: "Bite (dmg 1); once attached, +1 damage/turn until removed (Fight roll to pull off, -2 on yourself)", desc: "Fist-sized eyeless blood-suckers that sense heat and latch on." },
 ];
 
+// Character-creation starting gear per role (core rulebook). You pick ONE weapon
+// from your role's list; grub/water/bullets are dice amounts rolled at creation.
+// You may trade starting bullets to buy extra gear from the Gear & Services list.
+var MYZ_ARCHETYPE_GEAR = {
+  "Enforcer":    { weapons: ["Bat with Spikes", "Brass Knuckles", "Scrap Axe"], grub: "2D6", water: "D6", bullets: "D6", other: [] },
+  "Gearhead":    { weapons: ["Brass Knuckles", "Bicycle Chain", "Scrap Pistol"], grub: "D6", water: "D6", bullets: "2D6", other: ["One random Artifact"] },
+  "Stalker":     { weapons: ["Scrap Rifle", "Scrap Pistol", "Bow"], grub: "D6", water: "2D6", bullets: "D6", other: [] },
+  "Fixer":       { weapons: ["Scrap Knife", "Brass Knuckles", "Scrap Derringer"], grub: "2D6", water: "D6", bullets: "2D6", other: [] },
+  "Dog Handler": { weapons: ["Bicycle Chain", "Scrap Knife", "Slingshot", "Scrap Rifle"], grub: "D6", water: "D6", bullets: "D6", other: ["A dog"] },
+  "Chronicler":  { weapons: [], grub: "D6", water: "D6", bullets: "D6", other: ["No free weapon — buy gear with bullets"] },
+  "Boss":        { weapons: ["Bat with Spikes", "Scrap Knife", "Scrap Pistol"], grub: "2D6", water: "D6", bullets: "2D6", other: [] },
+  "Grunt":       { weapons: ["Bat with Spikes", "Bicycle Chain", "Slingshot"], grub: "D6", water: "D6", bullets: "0", other: [] }
+};
+
 var MYZ_HB_WEAPONS = [];
 var MYZ_HB_GEAR = [];
 
 if (typeof window !== 'undefined') {
+  window.MYZ_ARCHETYPE_GEAR = MYZ_ARCHETYPE_GEAR;
   window.MYZ_ATTRIBUTES = MYZ_ATTRIBUTES;
   window.MYZ_SKILLS = MYZ_SKILLS;
   window.MYZ_ROLES = MYZ_ROLES;

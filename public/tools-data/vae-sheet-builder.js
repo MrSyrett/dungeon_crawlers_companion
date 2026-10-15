@@ -19,15 +19,29 @@
   var ARMORS = arr(W.VAE_ARMOR);
   var GEARS = arr(W.VAE_GEAR);
   var AGES = { 'Young': { a: 15, s: 10 }, 'Middle-aged': { a: 14, s: 12 }, 'Old': { a: 13, s: 14 } };
-  var STEPS = ['Archetype & Age', 'Attributes', 'Skills', 'Talent', 'Equipment'];
+  var STEPS = ['Archetype & Age', 'Attributes', 'Skills', 'Talent', 'Gear & Resources'];
   // archetype.key is a full attribute NAME ("Logic"); map to key code.
   function keyCodeFor(nameOrKey) { for (var i = 0; i < ATTRS.length; i++) { if (ATTRS[i].key === nameOrKey || ATTRS[i].name === nameOrKey) return ATTRS[i].key; } return ''; }
 
   var step = 0;
   var name = '', pronouns = '', age = 'Middle-aged', archetype = '', key = '', keySkill = '', talentPick = '';
-  var attrs = {}, skills = {}, startGear = [], gearTab = 'weap';
+  var attrs = {}, skills = {}, startGear = [], gearTab = 'weap', resourcesPick = null;
 
   function archObj(nm) { for (var i = 0; i < ARCH.length; i++) if (ARCH[i].name === nm) return ARCH[i]; return null; }
+  // Resources range from the archetype (data uses an en-dash, e.g. "2–4").
+  function resRange(a) { if (!a || !a.resources) return [3, 3]; var p = String(a.resources).split(/[–-]/); var lo = num(p[0]), hi = num(p[1] != null ? p[1] : p[0]); if (!hi) hi = lo; return [lo, hi]; }
+  function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function resolveItem(nm) {
+    var n = normName(nm);
+    function find(list) { var i, ln, partial = null; for (i = 0; i < list.length; i++) { if (normName(list[i].name) === n) return list[i]; } for (i = 0; i < list.length; i++) { ln = normName(list[i].name); if (ln.indexOf(n) >= 0 || n.indexOf(ln) >= 0) { if (!partial) partial = list[i]; } } return partial; }
+    var mw = find(MELEE); if (mw) return { kind: 'weapon', it: Object.assign({}, mw, { _ranged: false }) };
+    var rw = find(RANGED); if (rw) return { kind: 'weapon', it: Object.assign({}, rw, { _ranged: true }) };
+    var ar = find(ARMORS); if (ar) return { kind: 'armor', it: ar };
+    var gr = find(GEARS); if (gr) return { kind: 'gear', it: gr };
+    return null;
+  }
+  function startItemFor(nm) { var r = resolveItem(nm), o; if (r && r.kind === 'weapon') o = wpItem(r.it); else if (r && r.kind === 'armor') o = arItem(r.it); else if (r && r.kind === 'gear') o = grItem(r.it); else o = { kind: 'gear', name: nm, weight: '', note: '' }; o.optName = nm; return o; }
+  function gearIndexOf(nm) { for (var i = 0; i < startGear.length; i++) { if (startGear[i].optName === nm) return i; } return -1; }
   function talentDesc(nm) { for (var i = 0; i < TALENTS.length; i++) if (TALENTS[i].name === nm) return TALENTS[i].desc; return ''; }
   function skillCap(nm) { return keySkill === nm ? 3 : 2; }
   function attrBudget() { return (AGES[age] || AGES['Middle-aged']).a; }
@@ -38,7 +52,7 @@
     step = 0; name = ''; pronouns = ''; age = 'Middle-aged'; archetype = ''; key = ''; keySkill = ''; talentPick = '';
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
     skills = {}; SK.forEach(function (s) { skills[s.name] = 0; });
-    startGear = []; gearTab = 'weap';
+    startGear = []; gearTab = 'weap'; resourcesPick = null;
   }
   function attrTotal() { var n = 0; ATTRS.forEach(function (a) { n += attrs[a.key]; }); return n; }
   function skillSpent() { var n = 0; SK.forEach(function (s) { n += skills[s.name]; }); return n; }
@@ -106,19 +120,23 @@
   function arItem(it) { return { kind: 'armor', equipped: true, name: it.name, rating: it.protection != null ? it.protection : 0, weight: '', note: it.comment || '' }; }
   function grItem(it) { return { kind: 'gear', name: it.name, weight: it.cost != null ? it.cost : '', note: (it.comment || '') + (it.bonus && it.bonus !== '—' ? ' (' + it.bonus + ')' : '') }; }
   function stepGear() {
-    var h = '<p class="m-hint">Add starting weapons, armor and gear. You can tweak everything on the sheet afterward.</p>';
-    if (startGear.length) {
-      h += '<div class="m-lbl">Chosen (' + startGear.length + ')</div><div class="yzeb-list">';
-      h += startGear.map(function (g, i) { var meta = g.kind === 'weapon' ? (g.damage + ' dmg · bonus ' + g.bonus) : g.kind === 'armor' ? ('Protection ' + g.rating) : '';
-        return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + (meta ? '<span class="brow-cost">' + esc(meta) + '</span>' : '') + '</div></div><button class="brow-add" style="background:#3a1a1a;color:#df8a8a;" onclick="window.YZEB.removeGear(' + i + ')">✕</button></div>'; }).join('') + '</div>';
-    }
-    h += '<div class="yzeb-gtabs"><button class="builder-chip' + (gearTab === 'weap' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'weap\')">Weapons</button>'
-      + '<button class="builder-chip' + (gearTab === 'gear' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'gear\')">Gear</button>'
-      + '<button class="builder-chip' + (gearTab === 'armor' ? ' sel' : '') + '" onclick="window.YZEB.setGearTab(\'armor\')">Armor</button></div>';
-    var list = gearSources()[gearTab] || [];
-    h += '<div class="yzeb-list" style="margin-top:6px;">' + list.map(function (it, idx) {
-      var meta = gearTab === 'weap' ? ((it._ranged ? 'Ranged' : 'Melee') + ' · ' + it.damage + ' dmg · bonus ' + it.bonus) : gearTab === 'armor' ? ('Protection ' + it.protection) : (it.bonus && it.bonus !== '—' ? it.bonus + ' · cost ' + it.cost : 'cost ' + it.cost);
-      return prow(it.name, meta, it.comment || '', false, "window.YZEB.addGear('" + gearTab + "'," + idx + ")", '＋ Add');
+    var a = archObj(archetype);
+    if (!a) return '<p class="m-hint">Go back and pick an archetype first — your starting equipment and resources come from it.</p>';
+    var rr = resRange(a);
+    var h = '<div class="m-lbl">Resources <span class="yzeb-sub">(your standard of living — roll, or choose within your archetype\'s range ' + rr[0] + '–' + rr[1] + ')</span></div>';
+    h += '<div class="yzeb-chips" style="align-items:center;">';
+    for (var v = rr[0]; v <= rr[1]; v++) { h += '<button class="builder-chip' + (resourcesPick === v ? ' sel' : '') + '" onclick="window.YZEB.setRes(' + v + ')">' + v + '</button>'; }
+    h += '<button class="m-btn ghost" style="margin-left:8px;" onclick="window.YZEB.rollRes()">🎲 Roll</button></div>';
+    var opts = arr((W.VAE_ARCHETYPE_GEAR || {})[archetype]);
+    h += '<div class="m-lbl" style="margin-top:16px;">Starting equipment <span class="yzeb-sub">(from your archetype\'s kit — add what you carry; tweak on the sheet after)</span></div>';
+    if (!opts.length) { h += '<p class="m-hint">This archetype has no listed starting equipment.</p>'; return h; }
+    h += '<div class="yzeb-list">' + opts.map(function (nm) {
+      var chosen = gearIndexOf(nm) >= 0;
+      var r = resolveItem(nm), meta = 'Gear', desc = '';
+      if (r && r.kind === 'weapon') { meta = (r.it._ranged ? 'Ranged' : 'Melee') + (r.it.damage != null ? ' · ' + r.it.damage + ' dmg' : '') + (r.it.range != null && r.it.range !== 0 && r.it.range !== '0' ? ' · ' + r.it.range : ''); desc = 'bonus ' + (r.it.bonus || '0'); }
+      else if (r && r.kind === 'armor') { meta = 'Protection ' + (r.it.protection != null ? r.it.protection : ''); desc = r.it.comment || ''; }
+      else if (r && r.kind === 'gear') { meta = (r.it.cost != null && r.it.cost !== '' ? 'cost ' + r.it.cost : ''); desc = r.it.comment || ''; }
+      return prow(nm, meta, desc, chosen, "window.YZEB.toggleStartGear('" + nm.replace(/'/g, "\\'") + "')", chosen ? '✓ Chosen' : '＋ Add');
     }).join('') + '</div>';
     return h;
   }
@@ -161,20 +179,22 @@
     setArch: function (nm) {
       archetype = (archetype === nm) ? '' : nm; talentPick = '';
       var a = archObj(archetype);
-      if (a) { key = keyCodeFor(a.key); keySkill = a.keySkill; if (attrs[key] > 5) attrs[key] = 5; ATTRS.forEach(function (x) { if (x.key !== key && attrs[x.key] > 4) attrs[x.key] = 4; }); }
-      else { key = ''; keySkill = ''; }
+      if (a) { key = keyCodeFor(a.key); keySkill = a.keySkill; if (attrs[key] > 5) attrs[key] = 5; ATTRS.forEach(function (x) { if (x.key !== key && attrs[x.key] > 4) attrs[x.key] = 4; }); resourcesPick = resRange(a)[0]; }
+      else { key = ''; keySkill = ''; resourcesPick = null; }
+      startGear = [];
       render();
     },
     pickTalent: function (t) { talentPick = (talentPick === t) ? '' : t; render(); },
-    setGearTab: function (t) { gearTab = t; render(); },
-    addGear: function (kind, idx) { var it = (gearSources()[kind] || [])[idx]; if (!it) return; if (kind === 'weap') startGear.push(wpItem(it)); else if (kind === 'armor') startGear.push(arItem(it)); else startGear.push(grItem(it)); render(); },
+    setRes: function (v) { resourcesPick = num(v); render(); },
+    rollRes: function () { var rr = resRange(archObj(archetype)); resourcesPick = rr[0] + Math.floor(Math.random() * (rr[1] - rr[0] + 1)); render(); },
+    toggleStartGear: function (nm) { var i = gearIndexOf(nm); if (i >= 0) startGear.splice(i, 1); else startGear.push(startItemFor(nm)); render(); },
     removeGear: function (i) { startGear.splice(i, 1); render(); },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (attrBudget() - attrTotal()) <= 0) return; attrs[k] = v; render(); },
     skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap(nm)) return; if (d > 0 && (skillBudget() - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {
       var a = archObj(archetype);
       var resLow = a && a.resources ? num(String(a.resources).split(/[–-]/)[0]) : 3;
-      var d = { name: name, pronouns: pronouns, age: age, archetype: archetype, key: key, keySkill: keySkill, resources: resLow || 3, attrs: {}, skills: {} };
+      var d = { name: name, pronouns: pronouns, age: age, archetype: archetype, key: key, keySkill: keySkill, resources: (resourcesPick != null ? resourcesPick : (resLow || 3)), attrs: {}, skills: {} };
       ATTRS.forEach(function (x) { d.attrs[x.key] = attrs[x.key]; });
       SK.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];

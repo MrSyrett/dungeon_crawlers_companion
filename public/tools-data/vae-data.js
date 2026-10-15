@@ -590,10 +590,27 @@ var VAE_BESTIARY = [
     weakness: "RITUAL: Sometimes appeased with a gift (food or a valuable coin), then grants hunters permission to kill certain animals; those affected by her magic can break the spell by turning their coat inside out (+2 to resist her magic once); she can be lured with beautiful songs, artworks, or people; killed/banished by burning or cutting down the trees at the heart of the forest (in the correct order, center tree first). SECRET: Turning one's coat inside out only protects against her magic if there is a cross/crucifix in the pocket. The tree in the center must be destroyed first; if the wood wife is killed, the forest dies or turns into barren marshland."
   },];
 
+// Starting equipment options per archetype (parsed from each archetype's
+// equipment line — "or" groups split into individual choices). The character
+// creation gear step restricts selection to the character's archetype list.
+var VAE_ARCHETYPE_GEAR = {
+  "Academic": ["Book collection", "Map book", "Writing utensils", "Liquor", "Slide rule"],
+  "Doctor": ["Doctor's bag with medical equipment", "Liquor", "Fine wine", "Weak horse", "Strong poison"],
+  "Hunter": ["Rifle", "Hunting knife", "Hunting dog", "Hunting trap", "Hunting equipment"],
+  "Occultist": ["Crystal ball", "Powdered stag's horn", "Tinder box", "Dagger", "Cooking pot"],
+  "Officer": ["Rifle", "Pistol", "Compass", "Bayonet", "Map book", "Saber"],
+  "Priest": ["Musical instrument", "Fine wines", "Writing utensils", "Holy water", "Old bible"],
+  "Private Detective": ["Magnifying glass", "Lockpicks", "Revolver", "Knuckle duster", "Binoculars"],
+  "Servant": ["Revolver", "Hurricane lamp", "Make-up", "Field kitchen", "Simple bandages"],
+  "Vagabond": ["Walking stick", "Knife", "Crowbar", "Liquor", "Pet dog"],
+  "Writer": ["Writing utensils and paper", "Camera", "Opera glasses", "Pet dog", "Book collection"]
+};
+
 var VAE_HB_WEAPONS = [];
 var VAE_HB_GEAR = [];
 
 if (typeof window !== 'undefined') {
+  window.VAE_ARCHETYPE_GEAR = VAE_ARCHETYPE_GEAR;
   window.VAE_ATTRIBUTES = VAE_ATTRIBUTES;
   window.VAE_SKILLS = VAE_SKILLS;
   window.VAE_ARCHETYPES = VAE_ARCHETYPES;

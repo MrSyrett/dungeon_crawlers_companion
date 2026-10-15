@@ -178,6 +178,9 @@ body{font-family:'EB Garamond',sans-serif;background-color:var(--bg);background-
 .cond.on .cbox{background:var(--red);border-color:var(--red);}
 .cond.mental.on{border-color:var(--blue);color:var(--blue);}
 .cond.mental.on .cbox{background:var(--blue);border-color:var(--blue);}
+.cond.cond-broken{font-weight:900;letter-spacing:.05em;text-transform:uppercase;}
+.cond.cond-broken.on,.cond.mental.cond-broken.on{background:var(--red);border-color:var(--red);color:#fff;}
+.cond.cond-broken.on .cbox{background:#fff;border-color:#fff;}
 
 /* XP */
 .xp-row{padding:8px 12px;display:flex;align-items:center;gap:8px;}
@@ -607,8 +610,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="section-bar accent"><span>Experience</span></div>
-        <div class="xp-row"><span class="v-lbl">XP</span><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="margin-left:auto;" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="hdr-btn" style="margin-left:8px;" onclick="openAdvance()">Spend</button></div>
+        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:52px;text-align:right;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
       </div>
       <div class="card">
         <div class="section-bar accent cbar crit-bar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">Mental</button></span></div>
@@ -618,21 +620,21 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
     <div class="center-col">
       <div class="vit-row">
+        <div class="card" style="flex:0 0 118px;">
+          <div class="section-bar accent"><span>Armor</span></div>
+          <div class="blk" style="padding:8px 10px 10px;"><div class="vrow" style="padding:0;"><span class="stress-val" id="armor-val" title="Sum of equipped armor protection — click Roll; each 6 cancels one point of damage">0</span><button class="dice-btn mini" style="flex:0 0 auto;margin-left:auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div></div>
+        </div>
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent cbar"><span>Conditions</span></div>
           <div class="conds">
-            <div class="cond-grp"><div class="cg-lbl">Physical <span id="brk-phys" class="broken-tag hide" style="padding:0 5px;font-size:8px;">BROKEN</span></div><div class="cond-row" id="cond-phys"></div></div>
-            <div class="cond-grp"><div class="cg-lbl">Mental <span id="brk-ment" class="broken-tag hide" style="padding:0 5px;font-size:8px;">BROKEN</span></div><div class="cond-row" id="cond-ment"></div></div>
+            <div class="cond-grp"><div class="cg-lbl">Physical</div><div class="cond-row" id="cond-phys"></div></div>
+            <div class="cond-grp"><div class="cg-lbl">Mental</div><div class="cond-row" id="cond-ment"></div></div>
           </div>
-          <div class="vrow" style="padding:4px 10px 8px;"><span class="v-lbl">Armor</span><span class="stress-val" id="armor-val" title="Sum of equipped armor protection">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="section-bar accent cbar"><span>Resources &amp; Memento</span></div>
-        <div class="vitals">
-          <div class="vrow"><span class="v-lbl">Resources</span><button class="xp-step" onclick="bumpRes(-1)">−</button><span class="stress-val" id="res-val">3</span><button class="xp-step" onclick="bumpRes(1)">＋</button><span class="inv-mini" id="res-name" style="margin-left:6px;"></span></div>
-        </div>
+        <div class="section-bar accent cbar"><span>Memento</span></div>
         <div class="blk" style="padding-top:2px;"><div class="fld"><label>Memento <button class="hdr-btn" style="padding:2px 8px;" onclick="useMemento()">Use</button></label><input type="text" id="f-memento" placeholder="A keepsake that steadies you"></div></div>
       </div>
 
@@ -651,7 +653,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
+          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right" style="align-items:center;gap:8px;"><span class="inv-mini" id="res-disp" title="Resources — your standard of living, set at character creation"></span><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button></span></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:30%;">Item</th><th>Details</th><th style="width:9%;">Cost</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div id="inv-empty" class="tbl-empty">No gear yet.</div>
         </div>
@@ -758,7 +760,7 @@ var S=null, _lastRoll=null;
 function blankState(){
   var st={ name:'', archetype:'', key:'', age:'', pronouns:'',
     attrs:{PHY:2,PRE:2,LOG:2,EMP:2}, skills:{},
-    conditions:{}, resources:3, memento:'',
+    conditions:{}, brokenPhys:false, brokenMent:false, resources:3, memento:'',
     xp:0, gear:[], talents:[], crits:[],
     motivation:'', trauma:'', secret:'', relationships:[], appearance:'', notes:'' };
   SKILLS.forEach(function(s){ st.skills[s.name]=0; });
@@ -814,19 +816,26 @@ function renderConds(){
       el.onclick=function(){ S.conditions[c.name]=!S.conditions[c.name]; renderConds(); renderAttrSkills(); scheduleAutosave(); };
       host.appendChild(el);
     });
+    // Broken — the fourth, terminal Condition of each type.
+    var broken=(g[0]==='phys')?!!S.brokenPhys:!!S.brokenMent;
+    var be=document.createElement('button'); be.className='cond cond-broken'+(g[1]==='Mental'?' mental':'')+(broken?' on':'');
+    be.title='Broken — the fourth '+g[1].toLowerCase()+' Condition. You are out of the fight until healed, and roll a critical injury.';
+    be.innerHTML='<span class="cbox"></span>Broken';
+    be.onclick=function(){ if(g[0]==='phys')S.brokenPhys=!S.brokenPhys; else S.brokenMent=!S.brokenMent; renderConds(); renderAttrSkills(); scheduleAutosave(); };
+    host.appendChild(be);
   });
-  var bp=$('brk-phys'); if(bp) bp.classList.toggle('hide',!typeFull('Physical'));
-  var bm=$('brk-ment'); if(bm) bm.classList.toggle('hide',!typeFull('Mental'));
 }
-// Mark the next free condition of a type; returns true if one was marked, false if already full.
+// Mark the next free condition of a type; returns the name marked, or null if the
+// three were already full — in which case the fourth (Broken) is set instead.
 function addCondition(type){
   var names=(type==='Physical')?PHYS_CONDS:MENT_CONDS;
   for(var i=0;i<names.length;i++){ if(!S.conditions[names[i]]){ S.conditions[names[i]]=true; return names[i]; } }
-  return null; // already full → Broken
+  if(type==='Physical')S.brokenPhys=true; else S.brokenMent=true;
+  return null; // three full → Broken
 }
 
 // ── Resources / memento ──
-function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-val'); if(e)e.textContent=v; var n=$('res-name'); if(n)n.textContent=RES_NAMES[v]||''; }
+function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-disp'); if(e)e.innerHTML='<b style="color:var(--yz-dk);">Resources '+v+'</b> · '+esc(RES_NAMES[v]||''); }
 function bumpRes(d){ S.resources=clamp(num(S.resources)+d,1,8); renderRes(); scheduleAutosave(); }
 function useMemento(){
   var healed=0;
@@ -1129,6 +1138,7 @@ function applySheet(d){
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   if(d.skills) SKILLS.forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });
   if(d.conditions) CONDS.forEach(function(c){ S.conditions[c.name]=!!d.conditions[c.name]; });
+  S.brokenPhys=!!d.brokenPhys; S.brokenMent=!!d.brokenMent;
   if(Array.isArray(d.talents)) S.talents=d.talents.map(function(t){ return {name:t.name||'',note:t.note||''}; });
   var inv=[];
   if(Array.isArray(d.gear)) d.gear.forEach(function(g){

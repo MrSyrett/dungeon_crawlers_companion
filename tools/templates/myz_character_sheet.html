@@ -163,6 +163,7 @@ body{font-family:'Asap',sans-serif;background-color:var(--bg);background-image:u
 .vboxes{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 auto;}
 .vbox{width:20px;height:20px;border:2px solid var(--rule);border-radius:4px;cursor:pointer;background:#fff;padding:0;}
 .vbox.on{background:var(--red);border-color:var(--red);}
+.vbox.hp.on{background:var(--green);border-color:var(--green);}
 .vbox.resolve.on{background:var(--blue);border-color:var(--blue);}
 .v-auto{background:none;border:1px solid var(--rule);border-radius:5px;color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 5px;flex:0 0 auto;}
 .v-auto:hover{border-color:var(--yz);color:var(--yz-dk);}
@@ -618,8 +619,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="section-bar accent"><span>Experience</span></div>
-        <div class="xp-row"><span class="v-lbl">XP</span><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="margin-left:auto;" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="hdr-btn" style="margin-left:8px;" onclick="openAdvance()">Spend</button></div>
+        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:52px;text-align:right;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
+      </div>
+      <div class="card">
+        <div class="section-bar accent"><span>Mutation Points</span></div>
+        <div class="vitals"><div class="vrow"><span class="v-lbl">Mut. Pts</span><div class="stress-pips" id="mp-pips"></div></div></div>
       </div>
       <div class="card">
         <div class="section-bar accent cbar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit()">Roll</button></span></div>
@@ -629,25 +633,20 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
     <div class="center-col">
       <div class="vit-row">
-        <div class="card" style="flex:1 1 0;min-width:0;">
-          <div class="section-bar accent cbar"><span>Trauma &amp; Armor</span></div>
-          <div class="vitals" id="trauma-tracks"></div>
-          <div class="vrow" style="padding:6px 10px 8px;"><span class="v-lbl">Armor</span><span class="stress-val" id="armor-val" title="Sum of equipped armor ratings">0</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button><span class="broken-tag hide" id="broken-tag" style="margin-left:auto;">Broken</span></div>
-        </div>
-      </div>
-
-      <div class="vit-row">
-        <div class="card mprot" style="flex:1.9 1 0;min-width:0;">
-          <div class="section-bar accent cbar"><span>Mutation Points &amp; Rot</span><span class="hdr-right"><button class="hdr-btn" onclick="rollRot()">Roll</button></span></div>
-          <div class="vitals">
-            <div class="vrow"><span class="v-lbl">Mut. Pts</span><div class="stress-pips" id="mp-pips"></div></div>
-            <div class="vrow"><span class="v-lbl">Rot Pts</span><div class="vboxes" id="rot-boxes"></div></div>
-          </div>
+        <div class="card" style="flex:0 0 118px;">
+          <div class="section-bar accent"><span>Armor</span></div>
+          <div class="blk" style="padding:8px 10px 10px;"><div class="vrow" style="padding:0;"><span class="stress-val" id="armor-val" title="Sum of equipped armor ratings — click Roll; each 6 stops one point of damage">0</span><button class="dice-btn mini" style="flex:0 0 auto;margin-left:auto;padding:5px 9px;font-size:10px;" onclick="rollArmor()">Roll</button></div></div>
         </div>
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent"><span>Conditions</span></div>
           <div class="conds" style="padding-top:4px;"><div class="cond-row cond-2col" id="cond-list"></div></div>
         </div>
+      </div>
+
+      <div class="card mprot">
+        <div class="section-bar accent cbar"><span>Trauma</span><span class="broken-tag hide" id="broken-tag" style="margin-left:auto;">Broken</span></div>
+        <div class="vitals" id="trauma-tracks"></div>
+        <div class="vrow" style="padding:4px 10px 8px;"><span class="v-lbl">Rot Pts</span><div class="vboxes" id="rot-boxes"></div><button class="dice-btn mini" style="flex:0 0 auto;margin-left:auto;padding:5px 9px;font-size:10px;" onclick="rollRot()">Roll</button></div>
       </div>
 
       <div class="card tabs-card">
@@ -850,18 +849,22 @@ function setSkill(name,n){ n=clamp(n,0,5); S.skills[name]=(S.skills[name]===n)?n
 function renderTrauma(){
   var host=$('trauma-tracks'); if(!host)return; host.innerHTML='';
   ATTRS.forEach(function(a){
-    var base=attrBase(a.key), tr=attrTrauma(a.key), boxes='';
-    for(var i=1;i<=Math.max(base,1);i++){ var dis=i>base; boxes+='<button class="vbox'+(i<=tr?' on':'')+'"'+(dis?' style="opacity:.25;" disabled':'')+' title="'+esc(TRAUMA_NAME[a.key])+' '+i+'" onclick="setTrauma(\''+a.key+'\','+i+')"></button>'; }
+    // Pips start FULL (= attribute value) and are clicked off as trauma is taken.
+    var base=attrBase(a.key), cur=attrCur(a.key), boxes='';
+    for(var i=1;i<=Math.max(base,1);i++){ var dis=i>base; boxes+='<button class="vbox hp'+(i<=cur?' on':'')+'"'+(dis?' style="opacity:.2;" disabled':'')+' title="'+esc(a.name)+' '+i+' — click to take '+esc(TRAUMA_NAME[a.key])+'" onclick="setTraumaRemain(\''+a.key+'\','+i+')"></button>'; }
     var brk=isBroken(a.key)?'<span class="broken-tag" style="padding:0 5px;font-size:8px;">BROKEN</span>':'';
     var row=document.createElement('div'); row.className='vrow';
-    row.innerHTML='<span class="v-lbl" title="'+esc(TRAUMA_NAME[a.key])+' lowers '+esc(a.name)+'">'+TRAUMA_NAME[a.key]+'</span>'
-      +'<div class="vboxes">'+boxes+'</div><span class="a-val" title="current '+esc(a.name)+'">'+attrCur(a.key)+'</span>'+brk;
+    row.innerHTML='<span class="v-lbl" title="'+esc(a.name)+' — '+esc(TRAUMA_NAME[a.key])+' lowers it">'+esc(a.name)+'</span>'
+      +'<div class="vboxes">'+boxes+'</div><span class="a-val" title="current '+esc(a.name)+'">'+cur+'</span>'+brk;
     host.appendChild(row);
   });
   var bt=$('broken-tag'); if(bt) bt.classList.toggle('hide',!anyBroken());
 }
-function setTrauma(k,n){ var max=attrBase(k); n=clamp(n,0,max); S.trauma[k]=(S.trauma[k]===n)?n-1:n; renderTrauma(); renderAttrSkills(); scheduleAutosave();
-  if(k==='STR'&&isBroken('STR')) addLog('Broken by Damage','Strength 0','Roll a critical injury (D66) — tap ＋ Roll on Critical Injuries.','fumble'); }
+// Click a remaining pip to set current value to it (toggling the top pip off);
+// trauma = base − remaining.
+function setTraumaRemain(k,i){ var base=attrBase(k), cur=base-attrTrauma(k); var ncur=(cur===i)?i-1:i; ncur=clamp(ncur,0,base); S.trauma[k]=base-ncur; renderTrauma(); renderAttrSkills(); scheduleAutosave();
+  if(isBroken(k)) addLog('Broken by Damage', attrName(k)+' 0', 'Roll a critical injury (D66) — tap Roll on Critical Injuries.','fumble'); }
+function setTrauma(k,n){ var max=attrBase(k); n=clamp(n,0,max); S.trauma[k]=(S.trauma[k]===n)?n-1:n; renderTrauma(); renderAttrSkills(); scheduleAutosave(); }
 
 // ── Render: Mutation Points + Rot ──
 function renderMP(){ var host=$('mp-pips'); if(!host)return; var m=clamp(num(S.mp),0,MP_MAX), p='';

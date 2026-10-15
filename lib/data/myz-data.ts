@@ -338,3 +338,17 @@ export const MYZ_BESTIARY: MyzMonster[] = [
   { name: "Zone Wasps",    mod: "±0", stats: "Swarm, STR 5; Armor 2; only fire/explosions", attack: "Bite (dmg 1); any damage also inflicts 1 confusion; pheromones raise swarm Strength 1/turn", desc: "Fist-sized black-and-yellow wasps with hallucinogenic venom." },
   { name: "Zone Leeches",  mod: "±0", stats: "Swarm, STR 6; Armor —; only fire/explosions", attack: "Bite (dmg 1); once attached, +1 damage/turn until removed (Fight roll to pull off, -2 on yourself)", desc: "Fist-sized eyeless blood-suckers that sense heat and latch on." },
 ];
+
+// Character-creation starting gear per role (core rulebook). Pick ONE weapon from
+// the list; grub/water/bullets are dice amounts rolled at creation.
+export type MyzArchetypeGear = { weapons: string[]; grub: string; water: string; bullets: string; other: string[] };
+export const MYZ_ARCHETYPE_GEAR: Record<string, MyzArchetypeGear> = {
+  "Enforcer":    { weapons: ["Bat with Spikes", "Brass Knuckles", "Scrap Axe"], grub: "2D6", water: "D6", bullets: "D6", other: [] },
+  "Gearhead":    { weapons: ["Brass Knuckles", "Bicycle Chain", "Scrap Pistol"], grub: "D6", water: "D6", bullets: "2D6", other: ["One random Artifact"] },
+  "Stalker":     { weapons: ["Scrap Rifle", "Scrap Pistol", "Bow"], grub: "D6", water: "2D6", bullets: "D6", other: [] },
+  "Fixer":       { weapons: ["Scrap Knife", "Brass Knuckles", "Scrap Derringer"], grub: "2D6", water: "D6", bullets: "2D6", other: [] },
+  "Dog Handler": { weapons: ["Bicycle Chain", "Scrap Knife", "Slingshot", "Scrap Rifle"], grub: "D6", water: "D6", bullets: "D6", other: ["A dog"] },
+  "Chronicler":  { weapons: [], grub: "D6", water: "D6", bullets: "D6", other: ["No free weapon — buy gear with bullets"] },
+  "Boss":        { weapons: ["Bat with Spikes", "Scrap Knife", "Scrap Pistol"], grub: "2D6", water: "D6", bullets: "2D6", other: [] },
+  "Grunt":       { weapons: ["Bat with Spikes", "Bicycle Chain", "Slingshot"], grub: "D6", water: "D6", bullets: "0", other: [] }
+};
