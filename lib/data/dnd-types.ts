@@ -68,6 +68,13 @@ export interface DndClassFeature {
 export interface DndSubclass {
   name: string;
   className: string;
+  /** Subclass spellcasting (Eldritch Knight / Arcane Trickster): "third" caster from the subclass level. */
+  spellcasting?: DndCasterType;
+  spellcastingAbility?: DndAbility;
+  /** Which class's spell list the subclass draws from (e.g. "Wizard"). */
+  spellList?: string;
+  /** Always-prepared subclass spells (domain / oath / patron / circle lists), keyed by class level. */
+  alwaysPrepared?: Record<string, string[]>;
   flavor: string;
   features: DndClassFeature[];
   source: DndSource;

@@ -423,6 +423,7 @@
         },
         {
           "name": "Fey Wanderer",
+          "alwaysPrepared": {"3": ["Charm Person"], "5": ["Misty Step"], "9": ["Summon Fey"], "13": ["Dimension Door"], "17": ["Mislead"]},
           "className": "Ranger",
           "flavor": "A ranger touched by the Feywild — uncanny charm, dread magical strikes, and fey allies that appear at need.",
           "source": "phb",
@@ -459,6 +460,7 @@
         },
         {
           "name": "Gloom Stalker",
+          "alwaysPrepared": {"3": ["Disguise Self"], "5": ["Rope Trick"], "9": ["Fear"], "13": ["Greater Invisibility"], "17": ["Seeming"]},
           "className": "Ranger",
           "flavor": "An ambusher of the dark places of the world, striking first and hardest and vanishing into shadow.",
           "source": "phb",

@@ -93,6 +93,11 @@ const DND_SPELLS = [
   },
   {
     "name": "Eldritch Blast",
+    "multiAttack": {
+      "dice": "1d10",
+      "type": "force",
+      "beamsByLevel": true
+    },
     "level": 0,
     "school": "Evocation",
     "castingTime": "Action",
@@ -106,7 +111,6 @@ const DND_SPELLS = [
     ],
     "description": "You launch a crackling beam of eldritch force at a creature, making a ranged spell attack. On a hit the target takes 1d10 force damage.",
     "higherLevels": "You create additional beams at higher levels: two at level 5, three at level 11, and four at level 17. Each beam can strike the same or different targets, and you make a separate attack roll for each.",
-    "multiAttack": { "dice": "1d10", "type": "force", "beamsByLevel": true },
     "source": "srd"
   },
   {
@@ -2624,6 +2628,12 @@ const DND_SPELLS = [
   },
   {
     "name": "Scorching Ray",
+    "multiAttack": {
+      "dice": "2d6",
+      "type": "fire",
+      "base": 3,
+      "perSlot": 1
+    },
     "level": 2,
     "school": "Evocation",
     "castingTime": "Action",
@@ -2638,7 +2648,6 @@ const DND_SPELLS = [
     ],
     "description": "Fling three fiery rays at targets within range, dividing them among one or more creatures. Make a separate ranged spell attack for each ray; each hit deals 2d6 fire damage.",
     "higherLevels": "Each slot level above 2nd creates one additional ray.",
-    "multiAttack": { "dice": "2d6", "type": "fire", "base": 3, "perSlot": 1 },
     "source": "srd"
   },
   {
@@ -2734,6 +2743,9 @@ const DND_SPELLS = [
   },
   {
     "name": "Spiritual Weapon",
+    "roll": "attack",
+    "damage": "1d8",
+    "damageType": "force",
     "level": 2,
     "school": "Evocation",
     "castingTime": "Bonus Action",
@@ -2747,9 +2759,6 @@ const DND_SPELLS = [
     ],
     "description": "Conjure a floating spectral weapon that you can direct against foes. When you cast the spell, and again as a Bonus Action on later turns, you can move it up to 20 feet and make a melee spell attack with it, dealing 1d8 plus your spellcasting ability modifier in force damage on a hit.",
     "higherLevels": "The damage increases by 1d8 for every two slot levels above 2nd.",
-    "roll": "attack",
-    "damage": "1d8",
-    "damageType": "force",
     "source": "srd"
   },
   {

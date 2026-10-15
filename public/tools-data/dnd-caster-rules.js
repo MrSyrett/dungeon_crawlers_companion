@@ -87,6 +87,37 @@
   function colAt(c, level, col) { const r = tableRow(c, level); if (!r || !r.columns) return 0; const n = parseInt(r.columns[col], 10); return isNaN(n) ? 0 : n; }
   function cantripsAt(c, level) { if (level < 1) return 0; const r = tableRow(c, level); return Math.max(colAt(c, level, "Cantrips"), r && r.cantripsKnown != null ? Number(r.cantripsKnown) : 0); }
   function preparedAt(c, level) { if (level < 1) return 0; return colAt(c, level, "Prepared Spells") || colAt(c, level, "Spells Known"); }
+  // A Wizard's spellbook: 6 level-1 spells at level 1, +2 every Wizard level after.
+  const WIZARD_BOOK_START = 6, WIZARD_BOOK_PER_LEVEL = 2;
+  function spellbookAt(c, level) { if (!c || norm(c.name) !== "wizard" || level < 1) return 0; return WIZARD_BOOK_START + WIZARD_BOOK_PER_LEVEL * (level - 1); }
+
+  // ── subclass spellcasting (Eldritch Knight / Arcane Trickster) ─────────
+  // A subclass object may carry spellcasting:"third" (+ spellcastingAbility, spellList);
+  // the character then casts as a third-caster from the subclass level, using the 2024
+  // third-caster table below (cantrips 2 at 3 / 3 at 10; prepared 3 at 3 then +1 at
+  // 4,7,8,10,11,13,14,16,19,20).
+  const THIRD_PREPARED = [0,0,3,4,4,4,5,6,6,7,8,8,9,10,10,11,11,11,12,13];
+  const THIRD_CANTRIPS = [0,0,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3];
+  function subclassOf(c, subName) { return (c && subName) ? ((c.subclasses || []).find((s) => norm(s.name) === norm(subName)) || null) : null; }
+  // { type, ability, list, level } when the subclass casts on its own, else null.
+  function subclassCasting(c, subName) {
+    const sub = subclassOf(c, subName);
+    if (!sub || !sub.spellcasting || sub.spellcasting === "none") return null;
+    return { type: sub.spellcasting, ability: sub.spellcastingAbility || "INT", list: sub.spellList || "Wizard", level: c.subclassLevel || 3 };
+  }
+  // Casting profile for a class entry {cls, subclass, level}: the class's own casting,
+  // else its subclass's. { type, ability, list, cantrips(L), prepared(L), maxLevel(L) } or null.
+  function castingFor(c, subName) {
+    if (isCasterClass(c)) return { type: c.spellcasting, ability: c.spellcastingAbility || "INT", list: c.name, source: "class",
+      cantrips: (L) => cantripsAt(c, L), prepared: (L) => preparedAt(c, L), maxLevel: (L) => maxSpellLevelSingle(c, L) };
+    const sc = subclassCasting(c, subName); if (!sc) return null;
+    const T = TABLES();
+    return { type: sc.type, ability: sc.ability, list: sc.list, source: "subclass",
+      cantrips: (L) => L >= sc.level ? (THIRD_CANTRIPS[L-1] || 0) : 0,
+      prepared: (L) => L >= sc.level ? (THIRD_PREPARED[L-1] || 0) : 0,
+      maxLevel: (L) => { if (L < sc.level || !T) return 0; const arr = (T.thirdCasterSlots || [])[L-1] || []; let m = 0; arr.forEach((n, i) => { if (n > 0) m = i+1; }); return m; } };
+  }
+  const isCasterEntry = (c, subName) => !!castingFor(c, subName);
 
   // Highest spell level a single class of the given level can cast.
   function maxSpellLevelSingle(c, level) {
@@ -96,6 +127,17 @@
     const arr = (T[map[c.spellcasting]] || [])[level-1] || []; let m = 0; arr.forEach((n, i) => { if (n > 0) m = i+1; });
     if (m < 1 && preparedAt(c, level) > 0) m = 1;
     return m;
+  }
+  // ── multiclass prerequisites (2024: 13+ in the listed abilities) ─────────
+  // "any" = at least one of them; "all" = every one.
+  const MC_PREREQ = { barbarian:{all:["STR"]}, bard:{all:["CHA"]}, cleric:{all:["WIS"]}, druid:{all:["WIS"]}, fighter:{any:["STR","DEX"]}, monk:{all:["DEX","WIS"]}, paladin:{all:["STR","CHA"]}, ranger:{all:["DEX","WIS"]}, rogue:{all:["DEX"]}, sorcerer:{all:["CHA"]}, warlock:{all:["CHA"]}, wizard:{all:["INT"]}, artificer:{all:["INT"]} };
+  // { text:"Strength 13 or Dexterity 13", met:true|false } for the class against the scores.
+  function multiclassPrereq(className, scores) {
+    const p = MC_PREREQ[norm(className)]; if (!p) return { text: "", met: true };
+    const names = { STR:"Strength", DEX:"Dexterity", CON:"Constitution", INT:"Intelligence", WIS:"Wisdom", CHA:"Charisma" };
+    const list = p.any || p.all, ok = (a) => num((scores || {})[a]) >= 13;
+    const met = p.any ? list.some(ok) : list.every(ok);
+    return { text: list.map((a) => names[a] + " 13").join(p.any ? " or " : " and "), met };
   }
   // Combined caster level for a multiclass set [{cls, level}] (RAW: full=lvl,
   // half=⌊/2⌋, third=⌊/3⌋, artificer=⌈/2⌉; Pact Magic excluded).
@@ -138,7 +180,8 @@
     num, norm, esc, classByName, isCasterClass, spellListName, spellInList,
     ASI_LEVELS, ASI_DEFAULT, grantsASI, asiLevelsUpTo,
     shortCastTime, spellDmgStr, spellTags, spellLevelLabel, spellRow, spellPickerHTML,
-    tableRow, colAt, cantripsAt, preparedAt,
+    tableRow, colAt, cantripsAt, preparedAt, spellbookAt,
+    subclassOf, subclassCasting, castingFor, isCasterEntry, multiclassPrereq,
     maxSpellLevelSingle, combinedCasterLevel, maxSpellLevelMulti, profBonus, featEffects,
   };
 })();

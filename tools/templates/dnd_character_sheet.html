@@ -394,6 +394,16 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .dtype-sel option{color:var(--ink);background:var(--input-bg);font-weight:600;letter-spacing:0;text-transform:none;}
 body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23e07a5f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");}
 .hp-sub{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:9px;}
+.hp-dtype{display:flex;align-items:center;justify-content:center;gap:8px;}
+.hp-crit{display:inline-flex;align-items:center;gap:3px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;}
+.hp-crit input{width:13px;height:13px;accent-color:var(--red);margin:0;}
+.hd-pool{display:inline-flex;gap:6px;align-items:center;}
+.sr-pool{display:flex;flex-direction:column;gap:6px;margin:6px 0 10px;}
+.res-pool{width:56px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;text-align:center;color:var(--ink);padding:2px 0;}
+.sp-empty-hint{font-family:Barlow,sans-serif;font-size:12px;color:var(--muted);padding:8px 4px;}
+.sp-empty-hint button{background:none;border:none;color:var(--dnd);font-weight:700;cursor:pointer;text-decoration:underline;padding:0;font:inherit;}
+.ritual-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:4px;padding:3px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-right:4px;}
+.cast-btn:disabled{opacity:.4;cursor:default;}
 .hp-sub label{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:3px;}
 .hp-sub input{width:40px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
 .death-row{display:flex;align-items:center;gap:4px;justify-content:center;flex-wrap:wrap;}
@@ -543,6 +553,23 @@ body.dark .conc-badge .cb-name{color:#8fc3ec;}
 .atk-tbl th:nth-child(2),.atk-tbl td:nth-child(2),.atk-tbl th:nth-child(3),.atk-tbl td:nth-child(3){width:1%;white-space:nowrap;text-align:center;}
 .atk-tbl .atk-bonus{width:34px;text-align:center;}
 .atk-tbl .atk-dmg{width:44px;text-align:center;}
+/* Computed totals: the final to-hit badge + damage expression. Locked: shown instead of the raw
+   Bonus / Damage inputs; unlocked: shown above them (the inputs hold the misc bonus + dice). */
+.atk-hit{display:inline-block;min-width:36px;text-align:center;font-weight:700;font-size:13px;color:#fff;background:var(--dnd);border-radius:4px;padding:3px 6px;line-height:1.1;}
+.atk-dmg-calc{display:inline-block;white-space:nowrap;font-size:12px;font-weight:700;color:var(--ink);}
+body:not(.unlocked) .atk-tbl .atk-bonus,body:not(.unlocked) .atk-tbl .atk-dmg{display:none;}
+body.unlocked .atk-tbl .atk-hit,body.unlocked .atk-tbl .atk-dmg-calc{display:block;margin:0 auto 3px;font-size:11px;padding:2px 5px;}
+.atk-detail .atk-2h{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--muted);background:transparent;border:1px solid var(--rule);border-radius:3px;padding:0 4px;cursor:pointer;line-height:1.3;}
+.atk-detail .atk-2h.on{color:#fff;background:var(--dnd);border-color:var(--dnd);}
+.atk-warn{color:var(--red);font-weight:800;}
+.mastery-btn{margin-left:auto;padding:2px 8px;font-size:10px;}
+.mastery-btn b{color:inherit;font-weight:900;}
+.inv-charges{display:none;align-items:center;gap:3px;margin-top:3px;flex-wrap:wrap;}
+.inv-charges .res-pip{width:12px;height:12px;border-width:2px;border-radius:2px;}
+.inv-charges-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin-right:3px;}
+.inv-charges-lbl b{color:var(--ink);}
+.use-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-right:5px;}
+.use-btn:hover{background:var(--dnd);color:#fff;}
 .atk-field{display:flex;flex-direction:column;gap:1px;}
 .atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
 .atk-mastery{background:transparent;border:1px dashed var(--rule);border-radius:3px;color:var(--dnd);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:2px 6px;letter-spacing:.02em;}
@@ -664,12 +691,12 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
   .sheet{max-width:100%;}
-  /* One column, reordered: Abilities, Combat/Vitals, Skills, Attacks, Conditions,
+  /* One column, reordered: Combat/Vitals, Abilities, Skills, Attacks, Conditions,
      Defenses, Tabs. Wrappers flattened so their sections order freely. */
   .body-row{flex-direction:column;flex-wrap:nowrap;align-items:stretch;}
   .left-region,.left-top,.lt-left,.skills-col,.main-col{display:contents;}
   .ability-col{order:1;width:100%;border-right:none;border-bottom:1px solid var(--rule);}
-  .mc-combat{order:2;}
+  .mc-combat{order:0;}   /* vitals (AC / HP / damage & heal) first — what a player reaches for mid-fight */
   .sc-skills{order:3;border-bottom:1px solid var(--rule);display:block;flex:0 1 auto;}
   .sc-skills .skills-wrap{display:block;}
   .sc-skills .skill-row{flex:none;}
@@ -685,7 +712,7 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
   .tab-panel.on{height:auto;max-height:70vh;}
 }
 @container (max-width:520px){
-  .ability-col .abil-list{grid-template-columns:repeat(2,1fr);}
+  .ability-col .abil-list{grid-template-columns:repeat(3,1fr);}   /* 3×2 keeps all six scores on one screen */
   .hdr-fields{grid-template-columns:1fr;}
 }
 @media (max-width:768px){
@@ -758,14 +785,14 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
-  /* One column, reordered for a phone: Abilities, Combat/Vitals, Skills, Attacks,
+  /* One column, reordered for a phone: Combat/Vitals, Abilities, Skills, Attacks,
      Conditions, Proficiencies, Tabs. The region/column wrappers are flattened
      with display:contents so their inner sections become siblings that order
      freely. */
   .body-row{flex-direction:column;flex-wrap:nowrap;align-items:stretch;}
   .left-region,.left-top,.lt-left,.skills-col,.main-col{display:contents;}
   .ability-col{order:1;width:100%;border-right:none;border-bottom:1px solid var(--rule);}
-  .mc-combat{order:2;}
+  .mc-combat{order:0;}   /* vitals (AC / HP / damage & heal) first — what a player reaches for mid-fight */
   .sc-skills{order:3;border-bottom:1px solid var(--rule);display:block;flex:0 1 auto;}
   .sc-skills .skills-wrap{display:block;}
   .sc-skills .skill-row{flex:none;}
@@ -867,7 +894,7 @@ body.dark .hdr-row{background:linear-gradient(120deg,#7a1119,#9b1b22);}
 body.dark .sheet{border-color:#44444d;background:#121215;}
 body.dark .card,body.dark .ability-col,body.dark .sc-skills,body.dark .sc-conditions,body.dark .sc-defenses,body.dark .sc-prof,body.dark .mc-combat,body.dark .mc-tabs{background:#22222a;border-color:#3a3a41;box-shadow:0 2px 8px rgba(0,0,0,.3);}
 body.dark .tabs-bar{background:#1a1a1f;}
-.small-btn,.hdr-btn,.rest-btn,.hp-adj-btn,.mini-roll,.equip-btn,.attune-btn,.cast-btn,.sneak-btn,.upcast-btn,.atk-mastery,.mana-mini,.slot-col-lbl,.slot-reset,.res-reset-btn,.brow-add,.m-btn,.lb-btn,.fl-btn,.dice-clear-btn,.dice-roll-btn,.dice-btn{border-radius:6px;}
+.small-btn,.hdr-btn,.rest-btn,.hp-adj-btn,.mini-roll,.equip-btn,.attune-btn,.use-btn,.cast-btn,.sneak-btn,.upcast-btn,.atk-mastery,.mana-mini,.slot-col-lbl,.slot-reset,.res-reset-btn,.brow-add,.m-btn,.lb-btn,.fl-btn,.dice-clear-btn,.dice-roll-btn,.dice-btn{border-radius:6px;}
 .hp-hd input,.hp-sub input,.pick-sel,.fld textarea,.notes-box textarea,.tray-input,.tray-select{border-radius:6px;}
 .log-clear,.log-action-btn{border-radius:6px;}
 .log-entry{border-radius:8px;}
@@ -1100,7 +1127,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
         <div class="cbt hp-box">
           <div class="c-lbl">Hit Points <span class="hp-boost" id="hp-boost" title="Bonus to your HP maximum from an equipped magic item (included above)" style="display:none;"></span></div>
-          <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><span class="c-val hp-max-val" id="f-hp-max" title="Maximum HP — set at creation and level-up">10</span></div>
+          <div class="hp-row"><input id="f-hp-cur" type="number" value="10" onfocus="this._prev=this.value" oninput="scheduleAutosave()" onchange="onHPTyped(this)"><span class="slash">/</span><span class="c-val hp-max-val" id="f-hp-max" title="Maximum HP — set at creation and level-up">10</span></div>
           <div class="hp-adjust">
             <button class="hp-adj-btn dmg" onclick="adjustHP(-1)" title="Take damage by the amount entered (resistances applied, then temp HP absorbs)">Damage</button>
             <input id="f-hp-adjust" type="number" min="0" placeholder="0" title="Amount to heal or take as damage" onkeydown="if(event.key==='Enter')adjustHP(-1)">
@@ -1108,10 +1135,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           </div>
           <div class="hp-dtype">
             <select id="f-dmg-type" class="dtype-sel" title="Damage type — applies your defenses below (resistance halves, immunity negates, vulnerability doubles)"></select>
+            <label class="hp-crit" title="The damage is from a Critical Hit — at 0 HP that's two death-save failures"><input type="checkbox" id="f-dmg-crit"> Crit</label>
           </div>
           <div class="hp-sub">
             <label>Temp <input id="f-hp-temp" type="number" value="0" oninput="scheduleAutosave()"></label>
-            <span class="hd-inline">Hit Dice <input id="f-hd-left" type="number" value="1" readonly title="Hit Dice remaining — spend them on a Short Rest">/<span id="hd-total">1</span> <span class="hd-die" id="hd-die">d8</span></span>
+            <span class="hd-inline">Hit Dice <input id="f-hd-left" type="number" value="1" readonly onchange="onHDTyped(this)" title="Hit Dice remaining — spend them on a Short Rest (unlock the sheet to correct the count)">/<span id="hd-total">1</span> <span class="hd-die" id="hd-die">d8</span></span>
             <input id="f-hitdice" type="hidden">
           </div>
         </div>
@@ -1152,8 +1180,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
         <div class="tab-scroll" id="turn-scroll">
           <section class="turn-sec" id="turn-attacks-sec">
-            <div class="turn-sec-hd" onclick="toggleTurnSec('attacks')"><span class="tsh-caret">▾</span><span class="tsh-title">Attacks</span><span class="tsh-note" id="turn-atk-note"></span></div>
-            <div class="turn-sec-body"><div class="tbl-scroll"><table class="tbl atk-tbl"><thead><tr><th>Name</th><th>Bonus</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div></div>
+            <div class="turn-sec-hd" onclick="toggleTurnSec('attacks')"><span class="tsh-caret">▾</span><span class="tsh-title">Attacks</span><span class="tsh-note" id="turn-atk-note"></span><button class="hdr-btn mastery-btn" id="mastery-btn" style="display:none;" onclick="event.stopPropagation();openMasteryPicker()" title="Weapon Mastery — choose which weapon kinds you've mastered">Mastery 0/0</button></div>
+            <div class="turn-sec-body"><div class="tbl-scroll"><table class="tbl atk-tbl"><thead><tr><th>Name</th><th>To Hit</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div></div>
           </section>
           <div id="turn-body"></div>
         </div>
@@ -1392,7 +1420,7 @@ function defaultOptions(){ return {}; }
 let options = defaultOptions();
 
 function levelNow(){ return totalLevel(); }
-function profBonus(){ const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
+function profBonus(){ if(_ov && _ov.prof != null && String(_ov.prof) !== '' && !isNaN(parseInt(_ov.prof,10))) return parseInt(_ov.prof,10); const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
 function score(id){ return num($('sc-' + id) ? $('sc-' + id).value : 10); }
 function modOf(id){ return abilMod(score(id)); }
 // ── Multiclass model ──────────────────────────────────────────────────────
@@ -1491,7 +1519,7 @@ function recalc(){
   let perceptionVal = 0, investigationVal = 0, insightVal = 0;
   document.querySelectorAll('.skill-row').forEach(row => {
     const nm = row.dataset.skill, ab = row.dataset.abil, lvl = skillProf[nm] || 0;
-    const v = modOf(ab) + lvl * PB;
+    const v = modOf(ab) + lvl * PB + (lvl === 0 ? jackBonus() : 0);
     setAuto('skv-' + cssId(nm), 'skv-' + cssId(nm), sgn(v));
     const dot = $('skp-' + cssId(nm)); dot.className = 'prof-dot' + (_locked ? ' locked' : '') + (lvl === 1 ? ' on' : lvl === 2 ? ' exp' : '');
     dot.title = (lvl === 0 ? 'Not proficient' : lvl === 1 ? 'Proficient' : 'Expertise') + (_locked ? ' — unlock the sheet to edit' : '');
@@ -1501,7 +1529,7 @@ function recalc(){
   });
   // derived — honor a manual override (and never clobber the focused field)
   setAuto('c-prof', 'prof', sgn(PB));
-  const init = modOf('DEX') + magicSum('init'); setAuto('c-init', 'init', sgn(init));
+  const init = initBonus(); setAuto('c-init', 'init', sgn(init));
   renderMagicBadges();
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
   const pinv = $('d-pinv'); if(pinv) pinv.textContent = 10 + investigationVal;
@@ -1533,6 +1561,7 @@ function applyLock(){
   ['f-species','f-background','f-alignment'].forEach(id => { const el = $(id); if(el) el.readOnly = locked; });
   // Computed number displays — editable overrides via contenteditable
   ['f-ac','f-speed','f-hp-max','c-init','c-prof','sp-dc','sp-atk','sp-prep-val','sp-prep-cantrip-val'].forEach(id => { const el = $(id); if(el) el.contentEditable = locked ? 'false' : 'true'; });
+  const hdl = $('f-hd-left'); if(hdl) hdl.readOnly = locked;
   document.querySelectorAll('.skill-row .sk-val').forEach(el => { el.contentEditable = locked ? 'false' : 'true'; });
   // Attack rows (name / bonus / damage / type inputs, ability <select>)
   document.querySelectorAll('.atk-name, .atk-bonus, .atk-dmg, .atk-dtype').forEach(el => { el.readOnly = locked; });
@@ -1585,21 +1614,32 @@ function condMode(kind){
   return { adv, dis };
 }
 // Combine manual Adv/Dis with condition effects (adv + dis cancel to normal) and exhaustion.
-function rollCtx(kind){
+// extra: { abil, skill, dis } — the ability/skill behind the test (armor you're not proficient
+// with gives Disadvantage on STR/DEX tests; Stealth-Disadvantage armor on Stealth) and any
+// roll-specific Disadvantage reason (Heavy weapon without the stat).
+function rollCtx(kind, extra){
+  extra = extra || {};
   const cm = condMode(kind);
-  const advOn = _adv === 'adv' || !!cm.adv, disOn = _adv === 'dis' || !!cm.dis;
+  let xdis = extra.dis || '';
+  if(!xdis && /^(STR|DEX)$/.test(extra.abil || '')){ const ap = armorPenalties(); if(ap.nonProf) xdis = 'not proficient with ' + ap.nonProf; }
+  if(!xdis && extra.skill === 'Stealth'){ const ap = armorPenalties(); if(ap.stealth) xdis = ap.stealth + ' (Stealth Disadv.)'; }
+  const disSrc = cm.dis || xdis, advSrc = cm.adv || extra.adv || '';
+  const advOn = _adv === 'adv' || !!advSrc, disOn = _adv === 'dis' || !!disSrc;
   const mode = (advOn && disOn) ? 'norm' : advOn ? 'adv' : disOn ? 'dis' : 'norm';
   const pen = exhPenalty(), why = [];
-  if(mode === 'adv' && cm.adv) why.push('adv from ' + cm.adv);
-  if(mode === 'dis' && cm.dis) why.push('dis from ' + cm.dis);
+  if(mode === 'adv' && advSrc) why.push('adv from ' + advSrc);
+  if(mode === 'dis' && disSrc) why.push('dis from ' + disSrc);
+  if(mode === 'norm' && advOn && disOn && disSrc) why.push('adv/dis cancel (' + disSrc + ')');
   if(pen) why.push(Math.abs(pen) + ' exhaustion');
   return { mode, pen, note: why.join(' · ') };
 }
 // A d20 test: 1d20 (adv/dis) + mod. opts.kind = 'check' | 'save' | 'saveDex' | 'attack'.
 function d20Check(label, mod, opts){
   opts = opts || {};
-  const ctx = rollCtx(opts.kind || 'check');
+  const ctx = rollCtx(opts.kind || 'check', { abil: opts.abil, skill: opts.skill, dis: opts.dis, adv: opts.adv });
   const r = rawD20(ctx.mode);
+  // Reliable Talent: a proficient ability check treats a d20 roll of 9 or lower as a 10.
+  if(opts.reliable && r.nat < 10){ opts.note = [opts.note, 'Reliable Talent (' + r.nat + '→10)'].filter(Boolean).join(' · '); r.nat = 10; }
   const totalMod = mod + ctx.pen;
   const total = r.nat + totalMod;
   let detail = 'd20' + (r.mode !== 'norm' ? ' [' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']' : ': ' + r.nat) + (totalMod ? ' ' + sgn(totalMod) : '');
@@ -1613,18 +1653,27 @@ function d20Check(label, mod, opts){
 }
 // Rolling is disabled while the sheet is unlocked (you're editing, not playing).
 function rollsOff(){ if(_locked) return false; addLog('Rolling off', '🔓', 'Lock the sheet to roll', 'fumble'); return true; }
-function rollAbility(id){ if(rollsOff()) return; d20Check(id + ' check', modOf(id), { kind:'check' }); }
-function rollSave(id){ if(rollsOff()) return; const PB = profBonus(), ms = magicSaveBonus(); d20Check(id + ' save', modOf(id) + (saveProf[id] ? PB : 0) + ms, { kind: id === 'DEX' ? 'saveDex' : 'save', note: ms ? ('+' + ms + ' magic') : '' }); }
+function jackBonus(){ return hasFeature('Jack of All Trades') ? Math.floor(profBonus() / 2) : 0; }
+function rollAbility(id){ if(rollsOff()) return; const jb = jackBonus(); d20Check(id + ' check', modOf(id) + jb, { kind:'check', abil:id, note: jb ? 'Jack of All Trades +' + jb : '' }); }
+const AUTOFAIL_STRDEX = ['Paralyzed','Petrified','Stunned','Unconscious'];
+function rollSave(id){ if(rollsOff()) return;
+  if(id === 'STR' || id === 'DEX'){ const c = AUTOFAIL_STRDEX.find(x => activeCond(x)); if(c){ addLog(id + ' save', 'Fail', 'Automatically fails — ' + c, 'fumble'); return; } }
+  const PB = profBonus(), ms = magicSaveBonus(); d20Check(id + ' save', modOf(id) + (saveProf[id] ? PB : 0) + ms, { kind: id === 'DEX' ? 'saveDex' : 'save', abil:id, note: ms ? ('+' + ms + ' magic') : '' }); }
 function rollSkill(name){
   if(rollsOff()) return;
   const row = [...document.querySelectorAll('.skill-row')].find(r => r.dataset.skill === name); if(!row) return;
   const ab = row.dataset.abil, PB = profBonus(), lvl = skillProf[name] || 0;
   const key = 'skv-' + cssId(name);
-  const base = (_ov[key] != null && String(_ov[key]) !== '' && !isNaN(parseInt(_ov[key],10))) ? parseInt(_ov[key],10) : (modOf(ab) + lvl * PB);
-  d20Check(name + ' (' + ab + ')', base, { kind:'check' });
+  const base = (_ov[key] != null && String(_ov[key]) !== '' && !isNaN(parseInt(_ov[key],10))) ? parseInt(_ov[key],10) : (modOf(ab) + lvl * PB + (lvl === 0 ? jackBonus() : 0));
+  d20Check(name + ' (' + ab + ')', base, { kind:'check', abil:ab, skill:name,
+    reliable: lvl > 0 && hasFeature('Reliable Talent'),
+    adv: (name === 'Athletics' && hasFeature('Remarkable Athlete')) ? 'Remarkable Athlete' : '',
+    note: (lvl === 0 && jackBonus()) ? 'Jack of All Trades +' + jackBonus() : '' });
 }
-function rollInitiative(){ if(rollsOff()) return; d20Check('Initiative', modOf('DEX') + magicSum('init'), { kind:'check' }); }
-function rollSpellAttack(){ if(rollsOff()) return; d20Check('Spell Attack', spellAtkBonus(), { kind:'attack' }); }
+// Initiative = DEX mod + magic + Alert (Proficiency Bonus); a manual override wins. Remarkable Athlete → Advantage.
+function initBonus(){ return modOf('DEX') + magicSum('init') + (hasFeature('Alert') ? profBonus() : 0); }
+function rollInitiative(){ if(rollsOff()) return; const ov = ovNum('init', NaN); d20Check('Initiative', isNaN(ov) ? initBonus() : ov, { kind:'check', abil:'DEX', adv: hasFeature('Remarkable Athlete') ? 'Remarkable Athlete' : '', note: hasFeature('Alert') ? 'Alert +PB' : '' }); }
+function rollSpellAttack(){ if(rollsOff()) return; if(spellsBlockedByArmor('Spell Attack')) return; d20Check('Spell Attack', spellAtkBonus(), { kind:'attack' }); }
 function rollDeathSave(){
   if(rollsOff()) return;
   const ctx = rollCtx('save');
@@ -1641,12 +1690,40 @@ function rollDeathSave(){
   // Prefix a parseable d20 detail so the dice-animation module rolls the die too.
   addLog('Death Save', String(r.nat), d20Detail(r) + (msg ? ' · ' + msg : ''), type); scheduleAutosave();
 }
-function hitDieSides(){ const m = ($('f-hitdice').value || '').match(/d(\d+)/i); if(m) return num(m[1]); const c = classData(); return (c && c.hitDie) ? c.hitDie : 8; }
-function hitDiceTotal(){ return Math.max(1, num($('f-level').value) || 1); }
-function updateHitDiceUI(){
-  const t = hitDiceTotal(); $('hd-total').textContent = t; $('hd-die').textContent = 'd' + hitDieSides();
-  const le = $('f-hd-left'); if(le){ le.max = t; if(le.value === '' ) le.value = t; else if(num(le.value) > t) le.value = t; }
+// Hit Dice are pooled per die size: each class contributes its own die (Fighter 5 / Cleric 3 →
+// 5d10 + 3d8). `hdUsed` tracks spent dice per size; remaining = pool − used.
+let hdUsed = {};   // { '10': 2, '8': 0 }
+function hdPool(){
+  const pool = {};
+  classList().forEach(cl => { const c = classDataByName(cl.cls); const d = (c && c.hitDie) ? c.hitDie : 8; pool[d] = (pool[d] || 0) + Math.max(0, num(cl.level)); });
+  if(!Object.keys(pool).length){ const c = classData(); pool[(c && c.hitDie) ? c.hitDie : 8] = Math.max(1, num($('f-level').value) || 1); }
+  return pool;
 }
+const hdSizes = () => Object.keys(hdPool()).map(Number).sort((a,b) => b - a);   // largest first
+function hdLeftOf(d){ return Math.max(0, (hdPool()[d] || 0) - (hdUsed[d] || 0)); }
+function hdRemaining(){ return hdSizes().reduce((n, d) => n + hdLeftOf(d), 0); }
+function hitDieSides(){ return hdSizes()[0] || 8; }
+function hitDiceTotal(){ const p = hdPool(); return Math.max(1, Object.values(p).reduce((a,b) => a + b, 0)); }
+function hdPoolString(){ const p = hdPool(); return hdSizes().map(d => p[d] + 'd' + d).join(' + '); }
+// Spend (n>0) or regain (n<0) dice; regaining refills the largest dice first.
+function hdSpend(d, n){ hdUsed[d] = Math.max(0, Math.min(hdPool()[d] || 0, (hdUsed[d] || 0) + n)); }
+function hdSetRemaining(target){   // a hand-edited remaining count: spend smallest first / regain largest first
+  let diff = hdRemaining() - Math.max(0, Math.min(hitDiceTotal(), target));
+  const asc = hdSizes().slice().reverse();
+  if(diff > 0) asc.forEach(d => { const take = Math.min(diff, hdLeftOf(d)); hdSpend(d, take); diff -= take; });
+  else if(diff < 0) hdSizes().forEach(d => { const give = Math.min(-diff, hdUsed[d] || 0); hdSpend(d, -give); diff += give; });
+}
+function updateHitDiceUI(){
+  // drop spent dice for sizes no longer in the pool (class removed / level lowered)
+  const pool = hdPool(); Object.keys(hdUsed).forEach(d => { if(!pool[d]) delete hdUsed[d]; else if(hdUsed[d] > pool[d]) hdUsed[d] = pool[d]; });
+  const t = hitDiceTotal(); $('hd-total').textContent = t;
+  const sizes = hdSizes(), dieEl = $('hd-die');
+  dieEl.textContent = sizes.length > 1 ? sizes.map(d => hdLeftOf(d) + 'd' + d).join('+') : 'd' + sizes[0];
+  dieEl.title = 'Pool: ' + hdPoolString() + (sizes.length > 1 ? ' · remaining ' + sizes.map(d => hdLeftOf(d) + 'd' + d).join(' + ') : '');
+  const le = $('f-hd-left'); if(le && document.activeElement !== le){ le.max = t; le.value = hdRemaining(); }
+  const hf = $('f-hitdice'); if(hf) hf.value = hdPoolString();
+}
+function onHDTyped(el){ hdSetRemaining(num(el.value)); updateHitDiceUI(); scheduleAutosave(); }
 // Heal (sign +1) or Damage (sign -1) current HP by the amount in the adjust field.
 // Automates the downed state: dropping to 0 HP → Unconscious + fresh death saves;
 // taking damage at 0 → a death-save failure (instant death on massive damage);
@@ -1656,6 +1733,7 @@ function adjustHP(sign){
   const curEl = $('f-hp-cur'), maxEl = $('f-hp-max'), tempEl = $('f-hp-temp');
   const max = num(maxEl.textContent); let cur = num(curEl.value), temp = num(tempEl.value);
   if(sign > 0){
+    if(isDead()){ addLog('Heal', '✗', 'The character is dead — healing has no effect. After a revival spell, clear the death-save failures first.', 'fumble'); amtEl.value = ''; return; }
     const wasDown = cur === 0;
     cur = Math.min(max || cur + amt, cur + amt); curEl.value = cur;
     addLog('Heal', '+' + amt, 'HP ' + cur + (max ? '/' + max : ''), 'normal');
@@ -1669,27 +1747,36 @@ function adjustHP(sign){
     if(temp > 0 && dmg > 0){ soaked = Math.min(temp, dmg); temp -= soaked; dmg -= soaked; tempEl.value = temp; }
     cur = Math.max(0, before - dmg); curEl.value = cur;
     addLog('Damage', '-' + amt + (dtype ? ' ' + dtype : ''), adj.note + (soaked ? soaked + ' soaked by temp · ' : '') + 'HP ' + cur + (max ? '/' + max : '') + (cur === 0 ? ' — down!' : ''), cur === 0 ? 'fumble' : 'normal');
-    if(_concentration && taken > 0) concentrationCheck(taken);
-    if(before > 0 && cur === 0){                 // just dropped to 0
+    if(before > 0 && cur === 0){                 // just dropped to 0 — concentration ends outright (Incapacitated), no save
+      if(_concentration) dropConcentration();
       const overkill = dmg - before;             // damage beyond what brought you to 0
       setUnconscious(true); deathSucc = 0; deathFail = 0;
       if(max > 0 && overkill >= max){ deathFail = 3; renderDeath(); addLog('Massive Damage', 'Down', 'Overflow ' + overkill + ' ≥ max HP — instant death', 'fumble'); }
       else { renderDeath(); addLog('Downed', 'Down', 'At 0 HP — Unconscious, roll Death Saves', 'fumble'); }
     } else if(before === 0 && dmg > 0){           // taking damage while already down
-      tickDeathDamage(dmg, max);
-    }
+      tickDeathDamage(dmg, max, !!($('f-dmg-crit') && $('f-dmg-crit').checked));
+    } else if(_concentration && taken > 0) concentrationCheck(taken);
   }
-  amtEl.value = ''; scheduleAutosave();
+  amtEl.value = ''; const cb = $('f-dmg-crit'); if(cb) cb.checked = false; scheduleAutosave();
 }
+// Three death-save failures = dead. Healing and rests can't help; clear the death saves
+// (click the pips) after a Revivify/Raise Dead to bring the character back.
+function isDead(){ return deathFail >= 3; }
 // Taking damage at 0 HP costs a death-save failure (three = dead; massive damage = instant death).
-function tickDeathDamage(dmg, max){
-  const inc = (max > 0 && dmg >= max) ? 3 : 1;
+function tickDeathDamage(dmg, max, crit){
+  const inc = (max > 0 && dmg >= max) ? 3 : (crit ? 2 : 1);   // a Critical Hit at 0 HP = two failures
   deathFail = Math.min(3, deathFail + inc); renderDeath();
-  addLog('Death Save', 'Down', 'Damage at 0 HP — ' + (inc >= 2 ? 'instant death' : 'a failure') + ' (' + deathFail + '/3)' + (deathFail >= 3 ? ' — the character dies.' : ''), 'fumble');
+  addLog('Death Save', 'Down', 'Damage at 0 HP — ' + (inc >= 3 ? 'instant death' : inc === 2 ? 'Critical Hit: two failures' : 'a failure') + ' (' + deathFail + '/3)' + (deathFail >= 3 ? ' — the character dies.' : ''), 'fumble');
+}
+// Hand-typed Current HP: dropping to 0 or coming back up runs the same automation as Damage/Heal.
+function onHPTyped(el){
+  const before = num(el._prev), now = Math.max(0, num(el.value)); el.value = now; el._prev = now;
+  if(before > 0 && now === 0){ if(_concentration) dropConcentration(); setUnconscious(true); deathSucc = 0; deathFail = 0; renderDeath(); addLog('Downed', 'Down', 'At 0 HP — Unconscious, roll Death Saves', 'fumble'); }
+  else if(before === 0 && now > 0 && !isDead()) reviveFromDown();
 }
 function setUnconscious(on){
   const has = activeCond('Unconscious');
-  if(on && !has){ activeConditions.push('Unconscious'); renderConditions(); }
+  if(on && !has){ activeConditions.push('Unconscious'); if(_concentration) dropConcentration(); renderConditions(); }
   else if(!on && has){ activeConditions = activeConditions.filter(c => norm(c) !== norm('Unconscious')); renderConditions(); }
 }
 // Back above 0 HP: clear death saves and the Unconscious condition.
@@ -1709,10 +1796,10 @@ function dropConcentration(silent){
 }
 // On taking damage: CON save DC = max(10, ⌊damage/2⌋) or concentration breaks.
 function concentrationCheck(dmg){
-  const dc = Math.max(10, Math.floor(dmg / 2));
+  const dc = Math.min(30, Math.max(10, Math.floor(dmg / 2)));   // 2024: DC 10 or half the damage, max 30
   const ctx = rollCtx('save'); const r = rawD20(ctx.mode);
   const mod = modOf('CON') + (saveProf['CON'] ? profBonus() : 0) + magicSaveBonus() + ctx.pen;
-  const total = r.nat + mod, ok = r.nat === 20 || total >= dc;   // saves don't auto-fail on a nat 1; a nat 20 always holds
+  const total = r.nat + mod, ok = total >= dc;   // 2024: saving throws have no automatic success/failure on a 20 or 1
   addLog('Concentration', (ok ? 'Held ' : 'Broken ') + sgn(total), 'DC ' + dc + ' CON save · ' + d20Detail(r) + ' ' + sgn(mod) + (ctx.note ? ' · ' + ctx.note : ''), ok ? 'normal' : 'fumble');
   if(!ok) dropConcentration(true);
 }
@@ -1756,32 +1843,40 @@ function renderDeath(){
 function toggleDeath(kind, i){ if(kind === 'succ') deathSucc = (deathSucc === i ? i-1 : i); else deathFail = (deathFail === i ? i-1 : i); renderDeath(); scheduleAutosave(); }
 
 // ═══ ATTACKS ══════════════════════════════════════════════════════════════
+// Weapon rows are keyed by `rid` — the id of the inventory row that produced them —
+// so two items with the same base weapon (a +1 Longsword and a plain Longsword) each
+// get their own row and unequipping one removes only its row. `data-weapon` always
+// holds the BASE weapon name (also for named magic weapons) so property lookups work.
+function newRid(){ return 'rid_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 function addAttackRow(a){
   a = a || { name:'', abil:'STR', prof:true, bonus:0, damage:'', type:'' };
   const tr = document.createElement('tr');
   if(a.spell) tr.dataset.spell = a.spell;
   if(a.weapon) tr.dataset.weapon = a.weapon;
+  if(a.rid) tr.dataset.rid = a.rid;
   if(a.unarmed) tr.dataset.unarmed = '1';
-  if(a.mastery) tr.dataset.mastery = a.mastery;
-  tr.dataset.prof = (a.prof === false ? '0' : '1');       // proficiency is auto-set on equip (no checkbox)
-  const bonus = num(a.bonus) + num(a.magic || 0);         // magic +N folds into the visible Bonus (applies to hit + damage)
+  if(a.mastery) tr.dataset.mastery = a.mastery;               // the weapon's mastery property (shown only when chosen)
+  if(a.twoHanded) tr.dataset.twoHanded = '1';                // Versatile weapon wielded in two hands
+  if(num(a.magic)) tr.dataset.magic = num(a.magic);          // +N of a magic weapon (fallback when the inventory row is gone)
+  tr.dataset.prof = (a.prof === false ? '0' : '1');          // proficiency is auto-set on equip (no checkbox)
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
     '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()">' +
       '<div class="atk-detail">' +
-        '<select class="atk-abil" onchange="scheduleAutosave()" title="Ability used for this attack">' + abilOpts + '</select>' +
-        '<span class="atk-dot">·</span><input type="text" class="atk-dtype" value="' + esc(a.type) + '" placeholder="type" title="Damage type" oninput="scheduleAutosave()">' +
-        (a.mastery ? '<span class="atk-dot">·</span><button class="atk-mastery" onclick="openMastery(\'' + esc(a.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(a.mastery) + '</button>' : '') +
+        '<select class="atk-abil" onchange="onAtkEdit(this)" title="Ability used for this attack (Finesse picks the better of STR/DEX automatically)">' + abilOpts + '</select>' +
+        '<span class="atk-dot">·</span><input type="text" class="atk-dtype" value="' + esc(a.type) + '" placeholder="type" title="Damage type" oninput="onAtkEdit(this)">' +
+        '<span class="atk-extra"></span>' +
       '</div>' +
     '</td>' +
-    '<td><input type="number" class="atk-bonus mono" value="' + bonus + '" title="To-hit and damage bonus (magic weapons fill this automatically)" oninput="scheduleAutosave()"></td>' +
-    '<td><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" oninput="scheduleAutosave()"></td>' +
+    '<td><span class="atk-hit mono" title="Final to-hit bonus">+0</span><input type="number" class="atk-bonus mono" value="' + num(a.bonus) + '" title="Misc bonus to hit and damage (a magic weapon\'s +N and Fighting Styles are added automatically)" oninput="onAtkEdit(this)"></td>' +
+    '<td><span class="atk-dmg-calc mono" title="Final damage expression">—</span><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" title="Damage dice only — the ability modifier is added automatically" oninput="onAtkEdit(this)"></td>' +
     '<td class="roll-cell atk-actions" style="white-space:nowrap;text-align:right;"></td>';
   $('attacks-body').appendChild(tr);
   renderAtkActions(tr);
   if(_locked){ tr.querySelectorAll('.atk-name, .atk-bonus, .atk-dmg, .atk-dtype').forEach(e => e.readOnly = true); const ab = tr.querySelector('.atk-abil'); if(ab){ ab.style.pointerEvents = 'none'; ab.tabIndex = -1; } }
   return tr;
 }
+function onAtkEdit(el){ const tr = el.closest('tr'); if(tr) renderAtkActions(tr); scheduleAutosave(); }
 // Rogues get a Sneak Attack button to the left of Attack; refreshed when class/level changes.
 function isRogue(){ return classList().some(cl => norm(cl.cls) === 'rogue'); }
 function rogueLevel(){ const cl = classList().find(c => norm(c.cls) === 'rogue'); return cl ? num(cl.level) : 0; }
@@ -1790,19 +1885,118 @@ function sneakDice(){ return Math.max(1, Math.ceil(rogueLevel() / 2)); }
 // since its properties are unknown; unarmed and spell-attack rows never qualify.
 function isSneakEligible(tr){
   if(tr.dataset.unarmed || tr.dataset.spell) return false;
-  if(tr.dataset.weapon){ const w = (typeof D !== 'undefined' && D.weapons ? D.weapons() : []).find(x => norm(x.name) === norm(tr.dataset.weapon)); if(w) return (w.properties||[]).some(p => /finesse/i.test(p)) || norm(w.kind) === 'ranged'; }
+  const info = rowWeaponInfo(tr);
+  if(info.w) return info.finesse || info.ranged;
   return true;
+}
+// ── Row → weapon properties (base weapon + any magic-item overrides) ──────────
+function rowInv(tr){ const rid = tr.dataset.rid; return rid ? (invRows().find(r => r.dataset.rid === rid) || null) : null; }
+function rowWeaponInfo(tr){
+  const w = tr.dataset.weapon ? (D.weapons().find(x => norm(x.name) === norm(tr.dataset.weapon)) || null) : null;
+  const out = { w, props:[], ranged:false, finesse:false, light:false, heavy:false, twoHandedProp:false, versatile:0, thrown:false, loading:false, mastery:'', dtype:'' };
+  if(!w) return out;
+  const props = (w.properties || []).slice();
+  const inv = rowInv(tr);
+  if(inv && itemKind(invRowRef(inv)) === 'magic'){ const spec = magicWeaponSpec(magicData(invRowRef(inv))); if(spec){ if(spec.finesse) props.push('Finesse'); out.dtype = spec.dtype || ''; } }
+  out.props = props.map(norm);
+  out.ranged = norm(w.kind) === 'ranged';
+  out.finesse = out.props.some(p => /finesse/.test(p));
+  out.light = out.props.some(p => /^light/.test(p));
+  out.heavy = out.props.some(p => /^heavy/.test(p));
+  out.twoHandedProp = out.props.some(p => /^two-?handed(?! \(unless)/.test(p));
+  const v = out.props.map(p => p.match(/^versatile \(1d(\d+)\)/)).find(Boolean); if(v) out.versatile = +v[1];
+  out.thrown = out.props.some(p => /^thrown/.test(p));
+  out.loading = out.props.some(p => /^loading/.test(p));
+  out.mastery = w.mastery || '';
+  return out;
+}
+// The +N of a magic weapon, read live from its inventory row and gated on attunement.
+function atkMagicPlus(tr){
+  const inv = rowInv(tr); if(!inv) return num(tr.dataset.magic || 0);
+  const ref = invRowRef(inv), plus = num(inv.dataset.plus || 0);
+  if(itemKind(ref) === 'magic' && magicNeedsAttune(ref) && !isAttunedRow(inv)) return 0;
+  return plus;
+}
+// Fighting Styles are stored as feat names (the builder pushes e.g. "Archery" into addedFeats).
+function hasFightingStyle(name){
+  const n = norm(name);
+  return (addedFeats || []).some(f => { const k = norm(f); return k === n || k === 'fighting style: ' + n || k === 'fighting style (' + n + ')'; })
+    || Object.keys(choices || {}).some(k => /fightingstyle/i.test(k) && norm(choices[k] && (choices[k].style || choices[k].name || choices[k])) === n);
+}
+function meleeWeaponRowCount(){ return [...document.querySelectorAll('#attacks-body tr')].filter(tr => !tr.dataset.unarmed && !tr.dataset.spell && isMeleeAttackRow(tr)).length; }
+function weaponRowCount(){ return [...document.querySelectorAll('#attacks-body tr')].filter(tr => !tr.dataset.unarmed && !tr.dataset.spell).length; }
+function parseDmg(s){ s = String(s || '').trim(); const m = s.match(/(\d*)d(\d+)\s*([+-]\s*\d+)?/i); if(m) return { n: num(m[1]) || 1, sides: num(m[2]), flat: m[3] ? num(m[3].replace(/\s+/g,'')) : 0, flatOnly:false }; if(/^[+-]?\d+$/.test(s)) return { n:0, sides:0, flat:num(s), flatOnly:true }; return null; }
+// Everything that goes into one attack row's final numbers: ability (Finesse re-evaluated
+// now, not frozen at equip), proficiency, magic +N, misc bonus, Fighting Styles, Versatile
+// two-handed die, Unarmed Fighting, Heavy/Loading notes. opts.offhand = the Light-weapon
+// bonus-action attack (no ability mod to damage unless Two-Weapon Fighting).
+function atkCalc(tr, opts){
+  opts = opts || {};
+  const info = rowWeaponInfo(tr), sel = tr.querySelector('.atk-abil');
+  let abil = sel ? sel.value : 'STR';
+  if(info.w){ if(info.finesse) abil = modOf('DEX') > modOf('STR') ? 'DEX' : 'STR'; else if(info.ranged) abil = 'DEX'; }
+  const am = modOf(abil), prof = tr.dataset.prof !== '0', PB = profBonus();
+  const bonus = num((tr.querySelector('.atk-bonus') || {}).value), magic = atkMagicPlus(tr);
+  const twoH = tr.dataset.twoHanded === '1' && !!info.versatile && !hasShield();
+  const unarmed = tr.dataset.unarmed === '1', melee = !info.ranged;
+  const notes = [], dis = [], styles = [];
+  let hitStyle = 0, dmgStyle = 0;
+  if(info.w){
+    if(info.ranged && hasFightingStyle('Archery')){ hitStyle += 2; styles.push('Archery +2 to hit'); }
+    if(melee && !info.twoHandedProp && !twoH && meleeWeaponRowCount() <= 1 && hasFightingStyle('Dueling')){ dmgStyle += 2; styles.push('Dueling +2 dmg'); }
+    if(info.thrown && hasFightingStyle('Thrown Weapon Fighting')){ dmgStyle += 2; styles.push('Thrown Weapon Fighting +2 dmg'); }
+    if(info.heavy && score(info.ranged ? 'DEX' : 'STR') < 13) dis.push('Heavy weapon with ' + (info.ranged ? 'DEX' : 'STR') + ' below 13');
+    if(info.loading) notes.push('Loading: one attack per action');
+  }
+  const gwf = !!info.w && melee && (info.twoHandedProp || twoH) && hasFightingStyle('Great Weapon Fighting');
+  if(gwf) styles.push('Great Weapon Fighting: 1s and 2s on damage dice count as 3');
+  let dice = parseDmg((tr.querySelector('.atk-dmg') || {}).value);
+  if(twoH && dice && dice.sides < info.versatile) dice = { n: dice.n || 1, sides: info.versatile, flat: dice.flat, flatOnly:false };
+  if(unarmed && hasFightingStyle('Unarmed Fighting')){ const s = (weaponRowCount() === 0 && !hasShield()) ? 8 : 6; if(!dice || dice.sides < s) dice = { n:1, sides:s, flat:0, flatOnly:false }; styles.push('Unarmed Fighting 1d' + s); }
+  const offhand = !!opts.offhand;
+  const twf = offhand && hasFightingStyle('Two-Weapon Fighting');
+  if(offhand) styles.push(twf ? 'Two-Weapon Fighting: ability mod added to off-hand damage' : 'off-hand: no ability mod to damage');
+  const dmgAbil = offhand ? (twf ? am : 0) : am;
+  const dmgFlat = (dice ? dice.flat : 0) + dmgAbil + bonus + magic + dmgStyle;
+  const hit = am + (prof ? PB : 0) + bonus + magic + hitStyle;
+  const dmgExpr = dice ? (dice.n ? dice.n + 'd' + dice.sides + (dmgFlat ? ' ' + sgn(dmgFlat) : '') : String(dmgFlat)) : '';
+  const hitBreakdown = abil + ' ' + sgn(am) + (prof ? ' · PB +' + PB : ' · not proficient') + (magic ? ' · +' + magic + ' magic' : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (hitStyle ? ' · ' + sgn(hitStyle) + ' style' : '');
+  const dmgBreakdown = (dice && dice.n ? dice.n + 'd' + dice.sides + ' ' : (dice ? dice.flat + ' ' : '')) + (dmgAbil ? sgn(dmgAbil) + ' ' + abil : (offhand ? 'no ability mod' : '')) + (magic ? ' +' + magic + ' magic' : '') + (bonus ? ' ' + sgn(bonus) + ' bonus' : '') + (dmgStyle ? ' +' + dmgStyle + ' style' : '');
+  const dtype = info.dtype || ((tr.querySelector('.atk-dtype') || {}).value || '').trim();
+  return { abil, am, prof, PB, bonus, magic, hitStyle, dmgStyle, hit, dice, dmgFlat, dmgExpr, hitBreakdown, dmgBreakdown, notes, dis, styles, gwf, info, twoH, offhand, dtype, mastery: rowMasteryName(tr) };
 }
 function renderAtkActions(tr){
   const cell = tr.querySelector('.atk-actions'); if(!cell) return;
-  const spent = turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction());
+  const c = atkCalc(tr), inc = isIncapacitated();
+  const spent = inc || turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction());
   const d = spent ? ' dis' : '';
   // Sneak Attack: once per turn, Finesse/Ranged weapons only.
   const sneakDis = (spent || _turn.sneakUsed) ? ' dis' : '';
   const sneak = (isRogue() && isSneakEligible(tr)) ? '<button class="sneak-btn' + sneakDis + '" onclick="rollSneak(this)" title="Roll Sneak Attack damage (' + sneakDice() + 'd6, once per turn — Finesse or Ranged weapon)">Sneak</button>' : '';
-  cell.innerHTML = sneak + '<button class="mini-roll' + d + '" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button>';
+  cell.innerHTML = sneak + '<button class="mini-roll' + d + '" onclick="rollAttackFull(this)" title="' + (inc ? 'Incapacitated — you can\'t take actions' : 'Roll to hit and damage together') + '">Attack</button>';
+  // Computed totals (the final to-hit badge + damage expression) next to the raw fields.
+  const hb = tr.querySelector('.atk-hit'); if(hb){ hb.textContent = sgn(c.hit); hb.title = 'To hit: ' + c.hitBreakdown; }
+  const db = tr.querySelector('.atk-dmg-calc'); if(db){ db.textContent = c.dmgExpr || '—'; db.title = c.dmgExpr ? 'Damage: ' + c.dmgBreakdown : 'No damage dice'; }
+  // While locked the automation decides the ability (Finesse/Ranged) — keep the select in step.
+  const sel = tr.querySelector('.atk-abil'); if(sel && _locked && sel.value !== c.abil) sel.value = c.abil;
+  // Detail extras: mastery (only when the weapon is one of your chosen masteries) · 2H toggle · warnings.
+  const ex = tr.querySelector('.atk-extra');
+  if(ex){
+    const dot = '<span class="atk-dot">·</span>'; let h = '';
+    if(c.mastery) h += dot + '<button class="atk-mastery" onclick="openMastery(\'' + esc(c.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(c.mastery) + '</button>';
+    if(c.info.versatile && !hasShield()) h += dot + '<button class="atk-2h' + (c.twoH ? ' on' : '') + '" onclick="toggleTwoHanded(this)" title="Versatile — wield in two hands for 1d' + c.info.versatile + '">2H</button>';   // no two-handed grip while holding a shield
+    if(c.dis.length) h += dot + '<span class="atk-warn" title="' + esc(c.dis.join(' · ')) + '">Disadv.</span>';
+    if(c.info.loading) h += dot + '<span title="Loading: one attack per action">Loading</span>';
+    ex.innerHTML = h;
+  }
 }
-function refreshAtkActions(){ [...document.querySelectorAll('#attacks-body tr')].forEach(renderAtkActions); }
+function refreshAtkActions(){ [...document.querySelectorAll('#attacks-body tr')].forEach(renderAtkActions); renderMasteryBtn(); }
+// Versatile: toggle two-handed use on a row (off automatically while a shield is held).
+function toggleTwoHanded(btn){
+  const tr = _atkRow(btn), on = tr.dataset.twoHanded !== '1';
+  if(on && hasShield()){ addLog('Two-handed', '✗', "Can't wield a weapon in two hands while holding a shield", 'fumble'); return; }
+  tr.dataset.twoHanded = on ? '1' : ''; renderAtkActions(tr); scheduleAutosave();
+}
 // Sneak Attack: a full attack (to-hit + weapon damage) with an extra sneakDice()d6.
 function rollSneak(btn){ doAttack(_atkRow(btn), sneakDice()); }
 // ── Weapon Mastery (2024) — the eight mastery properties and what they do ──
@@ -1821,6 +2015,66 @@ function openMastery(name){
   $('desc-title').textContent = name + ' (Weapon Mastery)';
   $('desc-body').innerHTML = '<p>' + esc(desc) + '</p>';
   $('desc-overlay').classList.add('open');
+}
+// How many weapon kinds the character can master: only classes with the Weapon Mastery
+// feature (Barbarian 2/3@4/4@10, Fighter 3/4@4/5@10/6@16, Paladin/Ranger/Rogue 2). 0 = none.
+function masteryCount(){
+  let n = 0;
+  classList().forEach(cl => {
+    const c = classDataByName(cl.cls); if(!c) return; const L = num(cl.level);
+    if(!(c.features || []).some(f => !f.subclass && /^weapon mastery$/i.test(f.name) && f.level <= L)) return;
+    const k = norm(cl.cls); let m = 2;
+    if(k === 'barbarian') m = L >= 10 ? 4 : L >= 4 ? 3 : 2;
+    else if(k === 'fighter') m = L >= 16 ? 6 : L >= 10 ? 5 : L >= 4 ? 4 : 3;
+    n = Math.max(n, m);
+  });
+  return n;
+}
+function masteryChoices(){ return Array.isArray(choices.mastery) ? choices.mastery : []; }
+function masteryChosen(name){ return masteryCount() > 0 && masteryChoices().some(x => norm(x) === norm(name)); }
+// The mastery shown on a row: the weapon's property, only if that weapon kind is chosen.
+function rowMasteryName(tr){ const w = tr.dataset.weapon; if(!w) return ''; const info = D.weapons().find(x => norm(x.name) === norm(w)); return (info && info.mastery && masteryChosen(info.name)) ? info.mastery : ''; }
+// The base weapon behind an inventory row (a catalog weapon, or a magic weapon's resolved base).
+function invBaseWeapon(r){
+  const ref = invRowRef(r), k = itemKind(ref);
+  if(k === 'weapon') return D.weapons().find(x => norm(x.name) === norm(ref)) || null;
+  if(k === 'magic'){ const spec = magicWeaponSpec(magicData(ref)); if(spec){ if(spec.base) return spec.base; if(r.dataset.base) return D.weapons().find(x => norm(x.name) === norm(r.dataset.base)) || null; } }
+  return null;
+}
+// Weapons in the inventory (equipped or not) with a mastery property the character is proficient with.
+function masteryCandidates(){
+  const seen = {}, out = [];
+  invRows().forEach(r => { const w = invBaseWeapon(r); if(!w || !w.mastery || seen[norm(w.name)] || !isProficientWithWeapon(w)) return; seen[norm(w.name)] = 1; out.push(w); });
+  return out;
+}
+function renderMasteryBtn(){
+  const el = $('mastery-btn'); if(!el) return; const n = masteryCount();
+  el.style.display = n ? '' : 'none';
+  if(n) el.innerHTML = 'Mastery <b>' + masteryChoices().length + '</b>/' + n;
+}
+function openMasteryPicker(){
+  let ov = $('mastery-overlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'mastery-overlay'; ov.className = 'ov'; ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); }); document.body.appendChild(ov); }
+  renderMasteryPicker(); ov.classList.add('open');
+}
+function renderMasteryPicker(){
+  const ov = $('mastery-overlay'); if(!ov) return;
+  const n = masteryCount(), chosen = masteryChoices(), cands = masteryCandidates();
+  const chips = cands.map(w => { const on = masteryChosen(w.name);
+    return '<span class="cond-chip' + (on ? ' on' : '') + '" title="' + esc(MASTERIES[w.mastery] || '') + '" onclick="toggleMasteryPick(\'' + esc(w.name).replace(/\x27/g,"\\\x27") + '\')">' + esc(w.name) + ' <small>· ' + esc(w.mastery) + '</small></span>'; }).join('');
+  const stale = chosen.filter(c => !cands.some(w => norm(w.name) === norm(c)));
+  ov.innerHTML = '<div class="modal" style="max-width:440px;"><div class="modal-hd"><div class="ttl">Weapon Mastery — ' + chosen.length + '/' + n + '</div><button class="x" onclick="document.getElementById(\'mastery-overlay\').classList.remove(\'open\')">✕</button></div><div class="modal-bd">' +
+    '<p class="m-hint" style="margin:0 0 8px;">Choose up to ' + n + ' weapon kinds from your inventory (proficient weapons with a mastery property). You can change them after a Long Rest.</p>' +
+    (chips || '<p class="m-hint">No weapons with a mastery property in your inventory yet.</p>') +
+    (stale.length ? '<p class="m-hint" style="margin-top:8px;">Chosen but not in your inventory: ' + stale.map(s => '<span class="cond-chip on" onclick="toggleMasteryPick(\'' + esc(s).replace(/\x27/g,"\\\x27") + '\')">' + esc(s) + '</span>').join(' ') + '</p>' : '') +
+    '</div></div>';
+}
+function toggleMasteryPick(name){
+  const list = masteryChoices().slice(); const i = list.findIndex(x => norm(x) === norm(name));
+  if(i >= 0) list.splice(i, 1);
+  else { if(list.length >= masteryCount()){ addLog('Weapon Mastery', '✗', 'Already mastering ' + masteryCount() + ' weapon kinds — remove one first', 'fumble'); return; } list.push(name); }
+  window.setChoice('mastery', list);
+  renderMasteryPicker(); refreshAtkActions(); refreshTurnHub();
 }
 // 2024 multiclassing grants only a SUBSET of a class's proficiencies when it isn't your
 // first class. Your first (primary) class gives its full list; each class multiclassed into
@@ -1848,7 +2102,15 @@ function profTokens(){
     if(idx === 0){                                   // primary class — full proficiencies
       const pr = c.proficiencies || {};
       (pr.armor||[]).forEach(a => { const s = norm(a); if(/heavy/.test(s)) armor.add('heavy'); else if(/medium/.test(s)) armor.add('medium'); else if(/light/.test(s)) armor.add('light'); else if(/shield/.test(s)) shields = true; });
-      (pr.weapons||[]).forEach(w => { const s = norm(w); if(/martial/.test(s)) weapons.add('martial'); else if(/simple/.test(s)) weapons.add('simple'); else weapons.add(s); });
+      (pr.weapons||[]).forEach(w => { const s = norm(w);
+        if(/martial/.test(s)){
+          // "Martial weapons with Finesse or Light" (Rogue) / "with the Light property" (Monk) are subsets, not full Martial.
+          if(/finesse/.test(s) && /light/.test(s)) weapons.add('martial-finesse-light');
+          else if(/light/.test(s)) weapons.add('martial-light');
+          else if(/finesse/.test(s)) weapons.add('martial-finesse');
+          else weapons.add('martial');
+        }
+        else if(/simple/.test(s)) weapons.add('simple'); else weapons.add(s); });
     } else {                                          // multiclassed class — 2024 subset
       const mc = MC_PROF[norm(entry.cls)]; if(mc){ (mc.armor||[]).forEach(a => armor.add(a)); if(mc.shields) shields = true; (mc.weapons||[]).forEach(w => weapons.add(w)); }
     }
@@ -1859,7 +2121,11 @@ function _weaponProf(t, w){
   if(!w) return true;
   if(t.weapons.has('martial')) return true;
   if(t.weapons.has('simple') && /simple/i.test(w.category || '')) return true;
-  if(t.weapons.has('martial-light') && /martial/i.test(w.category || '') && (w.properties||[]).some(p => /light/i.test(p))) return true;
+  const martial = /martial/i.test(w.category || ''), props = w.properties || [];
+  const light = props.some(p => /light/i.test(p)), finesse = props.some(p => /finesse/i.test(p));
+  if(martial && t.weapons.has('martial-light') && light) return true;
+  if(martial && t.weapons.has('martial-finesse') && finesse) return true;
+  if(martial && t.weapons.has('martial-finesse-light') && (light || finesse)) return true;
   return t.weapons.has(norm(w.name));
 }
 // Proficiency with a weapon from the character's class weapon proficiencies (multiclass-aware).
@@ -1875,7 +2141,7 @@ function addAttackFromWeapon(name){
   const w = D.weapons().find(x => x.name === name); if(!w) return;
   const finesse = (w.properties||[]).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  addAttackRow({ name: w.name, abil, prof: true, bonus: 0, damage: w.damage, type: w.damageType });
+  addAttackRow({ name: w.name, abil, prof: true, bonus: 0, damage: w.damage, type: w.damageType, weapon: w.name, mastery: w.mastery || '' });
   scheduleAutosave();
 }
 function _atkRow(btn){ return btn.closest('tr'); }
@@ -1885,39 +2151,45 @@ function _atkRow(btn){ return btn.closest('tr'); }
 // One button: roll to-hit (adv/dis) and damage together. Crit (nat 20) doubles the damage dice.
 function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
 // Core attack roll. sneakD6 > 0 adds that many d6 of Sneak Attack damage (doubled on a crit).
-function doAttack(tr, sneakD6, asReaction){
+// asReaction = Opportunity Attack (spends the Reaction); opts.offhand = Light-weapon extra attack (spends the Bonus Action).
+function doAttack(tr, sneakD6, asReaction, opts){
+  opts = opts || {};
   if(rollsOff()) return;
+  if(isIncapacitated()){ addLog('Attack', '✗', "Incapacitated — you can't take actions, bonus actions or reactions", 'fumble'); return; }
+  const offhand = !!opts.offhand;
   // Turn economy: a normal attack spends your Attack action (Extra Attack lets you
-  // keep attacking until all attacks are made); an Opportunity Attack spends your Reaction.
+  // keep attacking until all attacks are made); an Opportunity Attack spends your Reaction;
+  // the off-hand Light-weapon attack spends your Bonus Action.
   if(asReaction){
     if(_turn.reaction){ addLog('Opportunity Attack', '—', 'Reaction already used this turn — End Turn to refresh', 'normal'); return; }
+  } else if(offhand){
+    if(_turn.bonus){ addLog('Off-hand attack', '—', 'Bonus Action already used this turn — End Turn to refresh', 'normal'); return; }
   } else if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){
     addLog('Attack', '—', 'No attack left this turn — End Turn to refresh', 'normal'); return;
   }
   sneakD6 = sneakD6 || 0;
   if(sneakD6 > 0){ if(_turn.sneakUsed){ addLog('Sneak Attack', '—', 'Already used this turn — End Turn to refresh', 'normal'); return; } _turn.sneakUsed = true; }
-  const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
-  const bonus = num(tr.querySelector('.atk-bonus').value), name = (asReaction ? 'Opportunity Attack: ' : '') + (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
-  const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
-  // to-hit (Bonus adds to hit)
-  const ctx = rollCtx('attack');
-  const r = rawD20(ctx.mode); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + bonus + ctx.pen;
+  const c = atkCalc(tr, { offhand });
+  const name = (asReaction ? 'Opportunity Attack: ' : offhand ? 'Off-hand: ' : '') + (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
+  // to-hit
+  const ctx = rollCtx('attack', { abil: c.abil, dis: c.dis[0] || '' });
+  const r = rawD20(ctx.mode); const hitMod = c.hit + ctx.pen;
   const hitTotal = r.nat + hitMod;
   const crit = r.nat === 20, fumble = r.nat === 1;
-  // damage (dice + ability mod + Bonus)
-  const m = dmg.match(/(\d*)d(\d+)\s*([+-]\s*\d+)?/i);
-  let dmgLine = '', dmgTotal = null;
-  if(m){
-    let nDice = num(m[1]) || 1; const sides = num(m[2]);
-    const flat = (m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil)) + bonus;
+  // damage (dice + ability mod + magic + bonus + style)
+  let dmgLine = '', dmgTotal = null, gwfNote = '';
+  if(c.dice && c.dice.n){
+    let nDice = c.dice.n; const sides = c.dice.sides;
     if(crit) nDice *= 2;
-    const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
-    dmgTotal = sum + flat;
-    dmgLine = nDice + 'd' + sides + '(' + faces.join('+') + ') ' + sgn(flat) + (dtype ? ' ' + dtype : '') + (crit ? ' — CRIT!' : '');
-  } else if(/^\d+$/.test(dmg)){
+    const faces = []; let sum = 0, rerolled = 0;
+    for(let i=0;i<nDice;i++){ let f = dN(sides); if(c.gwf && f < 3){ rerolled++; f = 3; } faces.push(f); sum += f; }
+    if(rerolled) gwfNote = 'GWF: ' + rerolled + (rerolled === 1 ? ' die' : ' dice') + ' bumped to 3';
+    dmgTotal = sum + c.dmgFlat;
+    dmgLine = nDice + 'd' + sides + '(' + faces.join('+') + ') ' + sgn(c.dmgFlat) + (c.dtype ? ' ' + c.dtype : '') + (crit ? ' — CRIT!' : '');
+  } else if(c.dice){
     // flat damage (e.g. Unarmed Strike = 1 + ability modifier)
-    dmgTotal = num(dmg) + modOf(abil) + bonus;
-    dmgLine = num(dmg) + ' ' + sgn(modOf(abil) + bonus) + (dtype ? ' ' + dtype : '');
+    dmgTotal = c.dmgFlat;
+    dmgLine = c.dice.flat + ' ' + sgn(c.dmgFlat - c.dice.flat) + (c.dtype ? ' ' + c.dtype : '');
   }
   // Sneak Attack dice
   if(sneakD6 > 0){
@@ -1927,28 +2199,35 @@ function doAttack(tr, sneakD6, asReaction){
     dmgLine += (dmgLine ? ' + ' : '') + 'sneak ' + sn + 'd6(' + sf.join('+') + ')';
   }
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
-  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (ctx.note ? ' · ' + ctx.note : '');
+  const extras = [].concat(c.styles, gwfNote ? [gwfNote] : [], c.mastery ? ['Mastery: ' + c.mastery] : [], c.notes, ctx.note ? [ctx.note] : []);
+  const detail = 'to hit ' + d20Detail(r) + ' ' + sgn(hitMod) + ' (' + c.hitBreakdown + ')' + (dmgLine ? ' · damage ' + dmgLine : '') + (extras.length ? ' · ' + extras.join(' · ') : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
   if(asReaction){ _turn.reaction = true; }                                 // spend the Reaction
+  else if(offhand){ _turn.bonus = true; }                                  // spend the Bonus Action
   else { _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; }   // spend the Attack action
   if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn();
 }
 
 // ═══ INVENTORY ════════════════════════════════════════════════════════════
-// Each row carries a canonical `data-ref` (the catalog name behind it). The
-// visible name can be renamed freely; mechanics (equip, stats, info) resolve
-// through the ref, so a renamed item still works. The ref auto-links the first
-// time a typed name matches the catalog (DCC-style).
+// Each row carries a canonical `data-ref` (the catalog name behind it) and a stable
+// `data-rid` (per-row id — attack rows and attunement are keyed by it). The visible
+// name can be renamed freely; mechanics (equip, stats, info) resolve through the ref,
+// so a renamed item still works. The ref auto-links the first time a typed name
+// matches the catalog (DCC-style).
 function addInvRow(it){
   it = it || { name:'', qty:1, equipped:false };
   const tr = document.createElement('tr');
+  tr.dataset.rid = it.rid || newRid();
   if(it.equipped) tr.dataset.equipped = '1';
   const ref = it.ref || resolveItemRef(it.name);
   if(ref) tr.dataset.ref = ref;
-  if(num(it.plus)) tr.dataset.plus = num(it.plus);   // a +N base weapon/armor (magic enhancement)
+  if(num(it.plus)) tr.dataset.plus = num(it.plus);   // a +N base weapon/armor (magic enhancement), or a named magic weapon's parsed +N
+  if(it.base) tr.dataset.base = it.base;             // the base weapon chosen for a "Weapon (any sword)"-style magic weapon
   if(it.scroll) tr.dataset.scroll = it.scroll;       // the spell a Spell Scroll contains
+  const cmax = magicChargesMax(ref);
+  if(cmax) tr.dataset.charges = (it.charges != null && it.charges !== '') ? Math.max(0, Math.min(cmax, num(it.charges))) : cmax;
   tr.innerHTML =
-    '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"><div class="inv-detail inv-subline"></div></td>' +
+    '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"><div class="inv-detail inv-subline"></div><div class="inv-charges"></div></td>' +
     '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" oninput="scheduleAutosave();updateCarry()"></td>' +
     '<td class="inv-val-cell"><span class="inv-cost-val"></span></td>' +
     '<td class="inv-actions"></td>';
@@ -1963,7 +2242,7 @@ function addInvRow(it){
 // Value shows in its own column next to Qty; notes go on a second line under the name.
 function invRowParts(tr){
   // A Spell Scroll shows the contained spell's info instead of the generic scroll blurb.
-  if(tr.dataset.scroll){ const sp = spellByName(tr.dataset.scroll); if(sp) return { cost:'', notes: (sp.level === 0 ? 'Cantrip' : 'Lvl ' + sp.level) + ' · ' + sp.school + ' · ' + shortCastTime(sp.castingTime) + ' · ' + sp.range }; }
+  if(tr.dataset.scroll){ const sp = spellByName(tr.dataset.scroll); if(sp){ const st = scrollStats(sp.level); return { cost:'', notes: (sp.level === 0 ? 'Cantrip' : 'Lvl ' + sp.level) + ' · ' + sp.school + ' · ' + shortCastTime(sp.castingTime) + ' · ' + sp.range + ' · scroll +' + st.atk + ' / DC ' + st.dc }; } }
   const it = itemData(invRowRef(tr));
   if(!it) return { cost:'', notes:'' };
   const notes = [];
@@ -1975,9 +2254,14 @@ function invRowParts(tr){
   } else if(it.baseAC){                             // armor / shield
     notes.push('AC ' + String(it.baseAC).replace(/\s*modifier/i, ''));
     if(it.category && !/shield/i.test(it.category)) notes.push(it.category);
+    if(it.strength && /\d/.test(it.strength)) notes.push(it.strength);
     if(it.stealthDisadvantage) notes.push('Stealth Disadv.');
   } else if(it.rarity){                             // magic item
     if(it.type) notes.push(it.type);
+    const spec = magicWeaponSpec(it);
+    if(spec && !spec.base){ notes.push(tr.dataset.base ? 'Base: ' + tr.dataset.base : 'Base weapon: choose on equip'); }
+    if(spec && spec.dtype) notes.push(spec.dtype + ' damage');
+    if(spec && spec.finesse) notes.push('Finesse');
     notes.push(it.rarity + (it.attunement ? ' · Attunement' : ''));
   } else if(it.category){                           // gear
     notes.push(it.category);
@@ -1988,6 +2272,31 @@ function renderInvDetail(tr){
   const parts = invRowParts(tr);
   const sub = tr.querySelector('.inv-subline'); if(sub) sub.textContent = parts.notes;
   const val = tr.querySelector('.inv-cost-val'); if(val) val.textContent = parts.cost;
+  renderInvCharges(tr);
+}
+// ── Charges ("has/holds N charges") — per-row tracker, restored on a Long Rest ──
+function magicChargesMax(ref){
+  const m = magicData(ref); if(!m) return 0;
+  const d = String(m.description || '');
+  const mm = d.match(/(?:has|holds|holding|with)\s+(\d+)\s+charges/i) || d.match(/\b(\d+)\s+charges\b/i);
+  return mm ? Math.min(99, +mm[1]) : 0;
+}
+function renderInvCharges(tr){
+  const box = tr.querySelector('.inv-charges'); if(!box) return;
+  const max = magicChargesMax(invRowRef(tr));
+  if(!max){ box.innerHTML = ''; box.style.display = 'none'; return; }
+  const cur = Math.max(0, Math.min(max, num(tr.dataset.charges != null && tr.dataset.charges !== '' ? tr.dataset.charges : max)));
+  tr.dataset.charges = cur;
+  let pips = ''; for(let i=1;i<=max;i++) pips += '<span class="res-pip' + (i > cur ? ' used' : '') + '" onclick="setCharges(this.closest(\'tr\'),' + i + ')" title="Charge ' + i + '"></span>';
+  box.style.display = '';
+  box.innerHTML = '<span class="inv-charges-lbl"><b>' + cur + '</b>/' + max + ' charges</span>' + pips;
+}
+// Click pip i: spend down to i−1 if it's charged, else recharge up to i.
+function setCharges(tr, i){ const cur = num(tr.dataset.charges || 0); tr.dataset.charges = (i <= cur ? i - 1 : i); renderInvCharges(tr); scheduleAutosave(); }
+function restoreCharges(){
+  let n = 0;
+  invRows().forEach(tr => { const max = magicChargesMax(invRowRef(tr)); if(!max) return; if(num(tr.dataset.charges) < max) n++; tr.dataset.charges = max; renderInvCharges(tr); });
+  return n;
 }
 function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
 function onInvNameChange(input){
@@ -1996,14 +2305,24 @@ function onInvNameChange(input){
   renderInvActions(tr); renderInvDetail(tr); syncEquippedWeaponName(tr); scheduleAutosave();
 }
 function removeInvRow(btn){
-  const tr = btn.closest('tr'); const ref = invRowRef(tr);
-  if(tr.dataset.equipped === '1' && (invRowKind(tr) === 'weapon' || invRowKind(tr) === 'magic')) unequipWeaponRow(ref);
-  if(isAttuned(ref)){ attunedRefs = attunedRefs.filter(r => norm(r) !== norm(ref)); renderAttuneCount(); }
+  const tr = btn.closest('tr');
+  if(tr.dataset.equipped === '1' && invRowSlot(tr) === 'weapon') unequipWeaponRid(tr.dataset.rid, invRowRef(tr));
+  if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== tr.dataset.rid); renderAttuneCount(); }
   tr.remove(); reconcileAC(); recalc(); scheduleAutosave();
 }
-// Equip toggle + info (ⓘ) + remove. Equip only if the item resolves to a weapon/armor/shield.
-// Consumable magic items (potions, scrolls) aren't equippable.
-function magicEquippable(ref){ const m = magicData(ref); return !!(m && !/^(Potion|Scroll)$/i.test(m.type || '')); }
+// Equip is offered only when equipping does something: weapons, armor, shields, and
+// magic items whose parsed effect the sheet applies (AC/saves/abilities/spell bonuses…).
+// Consumable magic items (potions, scrolls) get Drink / Cast / Use instead.
+function magicDoesSomething(m){
+  if(!m) return false;
+  const b = magicBonuses(m);
+  if(MAGIC_BONUS_KEYS.some(k => b[k]) || b.dmg) return true;
+  if(b.set && Object.keys(b.set).length) return true;
+  return /Bracers of Defense/i.test(m.name);
+}
+function magicEquippable(ref){ const m = magicData(ref); if(!m || /^(Potion|Scroll)$/i.test(m.type || '')) return false; return !!(magicWeaponSpec(m) || magicArmorBase(ref) || isMagicShield(ref) || magicDoesSomething(m)); }
+function isConsumableRef(ref){ const m = magicData(ref); return !!(m && /^(Potion|Scroll)$/i.test(m.type || '')); }
+function potionHealExpr(name){ const n = norm(name); if(!/potion of .*healing/.test(n)) return ''; return /supreme/.test(n) ? '10d4+20' : /superior/.test(n) ? '8d4+8' : /greater/.test(n) ? '4d4+4' : '2d4+2'; }
 function renderInvActions(tr){
   const kind = invRowKind(tr), ref = invRowRef(tr);
   const eq = tr.dataset.equipped === '1';
@@ -2011,10 +2330,67 @@ function renderInvActions(tr){
   const equipBtn = canEquip
     ? '<button class="equip-btn' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="Equip / Unequip">' + (eq?'Equipped':'Equip') + '</button>' : '';
   const attuneBtn = (kind === 'magic' && magicNeedsAttune(ref))
-    ? '<button class="attune-btn' + (isAttuned(ref)?' on':'') + '" onclick="toggleAttune(this)" title="Attunement — bonuses apply only while attuned (max 3)">' + (isAttuned(ref)?'Attuned':'Attune') + '</button>' : '';
+    ? '<button class="attune-btn' + (isAttunedRow(tr)?' on':'') + '" onclick="toggleAttune(this)" title="Attunement — bonuses apply only while attuned (max 3)">' + (isAttunedRow(tr)?'Attuned':'Attune') + '</button>' : '';
+  let useBtn = '';
+  if(tr.dataset.scroll) useBtn = '<button class="use-btn" onclick="castScroll(this.closest(\'tr\'))" title="Cast the spell from this scroll (consumes it)">Cast</button>';
+  else if(potionHealExpr(ref)) useBtn = '<button class="use-btn" onclick="drinkPotion(this.closest(\'tr\'))" title="Drink — heals ' + potionHealExpr(ref) + ' (consumes one)">Drink</button>';
+  else if(isConsumableRef(ref)) useBtn = '<button class="use-btn" onclick="useConsumable(this.closest(\'tr\'))" title="Use one (reduces quantity)">Use</button>';
   const infoBtn = itemData(ref) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
-  // Order: Info · Attune · Equip · Remove
-  tr.querySelector('.inv-actions').innerHTML = infoBtn + attuneBtn + equipBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+  // Order: Info · Attune · Equip/Use · Remove
+  tr.querySelector('.inv-actions').innerHTML = infoBtn + attuneBtn + equipBtn + useBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+}
+// ── Consumables: Spell Scroll (Cast), Potion of Healing (Drink), other potions/scrolls (Use) ──
+// 2024 Spell Scroll table: the scroll's own attack bonus / save DC by spell level.
+const SCROLL_TABLE = [[1,5,13],[3,7,15],[5,9,17],[7,10,18],[8,11,19],[9,12,20]];
+function scrollStats(lvl){ for(const row of SCROLL_TABLE){ if(lvl <= row[0]) return { atk: row[1], dc: row[2] }; } return { atk:12, dc:20 }; }
+function consumeRow(tr){
+  const q = tr.querySelector('.inv-qty'); const left = num(q.value) - 1;
+  if(left <= 0){ if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== tr.dataset.rid); renderAttuneCount(); } tr.remove(); }
+  else q.value = left;
+  updateCarry(); scheduleAutosave();
+  return left;
+}
+function castScroll(tr){
+  if(rollsOff()) return;
+  if(spellsBlockedByArmor('Scroll')) return;
+  const sp = spellByName(tr.dataset.scroll); if(!sp){ addLog('Spell Scroll', '✗', 'Unknown spell on this scroll', 'fumble'); return; }
+  const st = scrollStats(sp.level), label = 'Scroll: ' + sp.name;
+  const dmgInfo = spellDamage(sp); let dice = dmgInfo.dice; if(sp.level === 0 && dice) dice = scaleCantrip(dice, 1);
+  const dtype = dmgInfo.type ? ' ' + dmgInfo.type : '', save = spellSaveAbility(sp), heal = spellHealing(sp);
+  const left = consumeRow(tr);
+  const tail = ' · scroll consumed' + (left > 0 ? ' (' + left + ' left)' : '');
+  if(dice && spellIsAttack(sp)){
+    const ctx = rollCtx('attack'); const r = rawD20(ctx.mode), atkMod = st.atk + ctx.pen, hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
+    const dd = rollDiceExpr(dice, crit);
+    addLog(label, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' +' + st.atk + ' (scroll) · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : '') + tail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
+  } else if(dice && save){
+    const dd = rollDiceExpr(dice, false);
+    addLog(label, dd.total + dtype, 'DC ' + st.dc + ' ' + save + ' save (scroll) · dmg ' + dd.detail + tail, 'normal');
+  } else if(dice){
+    const dd = rollDiceExpr(dice, false);
+    addLog(label, dd.total + dtype, 'damage ' + dd.detail + tail, 'normal');
+  } else if(heal){
+    const hd = rollDiceExpr(heal, false); const hb = $('f-hp-adjust'); if(hb) hb.value = hd.total;
+    addLog(label, '+' + hd.total + ' HP', 'heal ' + hd.detail + ' · in Heal box — click Heal to apply to yourself' + tail, 'normal');
+  } else {
+    addLog(label, save ? ('DC ' + st.dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp) + tail, 'normal');
+  }
+  if(sp.concentration) startConcentration(sp.name);
+}
+function drinkPotion(tr){
+  if(rollsOff()) return;
+  const ref = invRowRef(tr), expr = potionHealExpr(ref); if(!expr) return;
+  const hd = rollDiceExpr(expr, false);
+  const curEl = $('f-hp-cur'), max = num($('f-hp-max').textContent); const before = num(curEl.value);
+  const cur = max ? Math.min(max, before + hd.total) : before + hd.total; curEl.value = cur;
+  const left = consumeRow(tr);
+  addLog('Drink ' + (tr.querySelector('.inv-name') ? ref : ref), '+' + hd.total + ' HP', 'heal ' + hd.detail + ' · HP ' + cur + (max ? '/' + max : '') + ' · potion consumed' + (left > 0 ? ' (' + left + ' left)' : ''), 'normal');
+  if(before === 0 && cur > 0) reviveFromDown();
+}
+function useConsumable(tr){
+  const name = tr.querySelector('.inv-name').value || invRowRef(tr);
+  const left = consumeRow(tr);
+  addLog('Use ' + name, '✦', 'one used' + (left > 0 ? ' · ' + left + ' left' : ' · none left'), 'normal');
 }
 
 // ── EQUIPMENT: item kinds, equip toggles, AC, weapon attack rows ──────────
@@ -2041,75 +2417,169 @@ function invRows(){ return [...document.querySelectorAll('#inv-body tr')]; }
 function parseWeightLb(w){ const m = String(w || '').match(/([\d.]+)/); return m ? parseFloat(m[1]) : 0; }
 function carriedWeight(){ let t = 0; invRows().forEach(tr => { const it = itemData(invRowRef(tr)); if(it && it.weight){ const q = num(tr.querySelector('.inv-qty').value) || 1; t += parseWeightLb(it.weight) * q; } }); return Math.round(t * 10) / 10; }
 function updateCarry(){ const el = $('carry-weight'); if(!el) return;
-  const strEl = $('sc-STR'), w = carriedWeight(), cap = (num(strEl && strEl.value) || 10) * 15;
+  const strEl = $('sc-STR'), w = carriedWeight(), sizeMul = /tiny/i.test(_size) ? 0.5 : /large|huge|garg/i.test(_size) ? 2 : 1, cap = Math.floor((num(strEl && strEl.value) || 10) * 15 * sizeMul);
   el.textContent = w + ' / ' + cap + ' lb';
   el.style.color = w > cap ? 'var(--red)' : (w > cap * 0.667 ? 'var(--dnd)' : 'var(--muted)');
   el.title = w > cap ? 'Over your carrying capacity (STR × 15 lb)' : 'Carried weight vs capacity (STR × 15 lb)'; }
 function invRowRef(tr){ return tr.dataset.ref || tr.querySelector('.inv-name').value; }
 function invRowKind(tr){ return itemKind(invRowRef(tr)); }
+function invRowDisplay(tr){ const nm = tr.querySelector('.inv-name'); return (nm && nm.value) || invRowRef(tr); }
+// The body slot an inventory row occupies when equipped: 'armor' | 'shield' | 'weapon' | ''.
+// Named magic armor / magic shields / magic weapons share the slot of their mundane kind.
+function invRowSlot(tr){
+  const ref = invRowRef(tr), k = itemKind(ref);
+  if(k === 'armor' || k === 'shield' || k === 'weapon') return k;
+  if(k === 'magic'){ if(isMagicShield(ref)) return 'shield'; if(magicArmorBase(ref)) return 'armor'; if(magicWeaponSpec(magicData(ref))) return 'weapon'; }
+  return '';
+}
 function equippedItemName(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? invRowRef(tr) : null; }
+// Shields: a mundane Shield, or a magic item typed "Shield" / "Armor (shield)" (Repulsion Shield,
+// Sentinel Shield, Shield +N). One shield at a time; the base +2 always applies, the magic +N only while attuned (if required).
+function isMagicShield(ref){ const m = magicData(ref); return !!(m && /^(Shield|Armor \(shield\))$/i.test(String(m.type || '').trim())); }
+function isShieldRef(ref){ return itemKind(ref) === 'shield' || isMagicShield(ref); }
+function equippedShieldRow(){ return invRows().find(r => r.dataset.equipped === '1' && isShieldRef(invRowRef(r))) || null; }
+function hasShield(){ return !!equippedShieldRow(); }
+function shieldAC(){
+  const r = equippedShieldRow(); if(!r) return 0; const ref = invRowRef(r);
+  if(isMagicShield(ref)){ const ok = !magicNeedsAttune(ref) || isAttunedRow(r); return ok ? Math.max(2, magicBonuses(magicData(ref)).ac) : 2; }
+  return 2 + num(r.dataset.plus || 0);
+}
 function openItemInfo(tr){
   if(tr.dataset.scroll){ openSpell(tr.dataset.scroll); return; }   // Spell Scroll → show the contained spell
   const it = itemData(invRowRef(tr)), display = tr.querySelector('.inv-name').value;
   let meta = 'Custom item', body = '';
   if(it){
     if(it.damage){ meta = it.category + ' ' + it.kind + ' · ' + it.damage + ' ' + it.damageType + (it.mastery ? ' · Mastery: ' + it.mastery : ''); body = (it.properties || []).join(', ') + (it.weight ? (((it.properties||[]).length?' · ':'') + it.weight) : ''); }
-    else if(it.baseAC){ meta = it.category + ' Armor · AC ' + it.baseAC + (it.stealthDisadvantage ? ' · Stealth Disadvantage' : ''); body = it.weight || ''; }
+    else if(it.baseAC){ meta = it.category + ' Armor · AC ' + it.baseAC + (it.strength && /\d/.test(it.strength) ? ' · ' + it.strength : '') + (it.stealthDisadvantage ? ' · Stealth Disadvantage' : ''); body = it.weight || ''; }
     else if(it.rarity){ meta = it.type + ' · ' + it.rarity + (it.attunement ? ' · Requires Attunement' : ''); body = it.description || ''; }
     else { meta = (it.category || 'Gear') + (it.weight ? ' · ' + it.weight : ''); body = it.description || ''; }
   }
   openDesc(display, meta, { _desc: body });
 }
 function toggleEquip(btn){
-  const tr = btn.closest('tr'); const ref = invRowRef(tr); const kind = itemKind(ref);
+  const tr = btn.closest('tr'); const ref = invRowRef(tr); const kind = itemKind(ref), slot = invRowSlot(tr);
+  const display = invRowDisplay(tr);
   const turningOn = tr.dataset.equipped !== '1';
   if(turningOn){
-    // one body armor / one shield at a time
-    if(kind === 'armor' || kind === 'shield'){
-      invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && invRowKind(r) === kind){ r.dataset.equipped = ''; renderInvActions(r); } });
+    // A named magic weapon with an open base ("Weapon (any sword)") — pick the base first; the pick re-enters here.
+    if(kind === 'magic' && slot === 'weapon' && !magicWeaponBase(tr)){
+      const spec = magicWeaponSpec(magicData(ref));
+      openBasePicker('weapon', spec.plus, { rid: tr.dataset.rid, filter: spec.filter, title: 'Choose the base weapon for ' + display }); return;
     }
-    // equipping any armor (real or named magic) unequips other worn armor
-    if(kind === 'armor' || magicArmorBase(ref)){
-      invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && (invRowKind(r) === 'armor' || magicArmorBase(invRowRef(r)))){ r.dataset.equipped = ''; renderInvActions(r); } });
-    }
+    // one body armor / one shield at a time (mundane or magic)
+    if(slot === 'armor' || slot === 'shield') invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && invRowSlot(r) === slot){ r.dataset.equipped = ''; renderInvActions(r); } });
     tr.dataset.equipped = '1';
-    if(kind === 'weapon') equipWeaponRow(tr);
-    if(kind === 'magic') equipMagicRow(tr);
+    if(slot === 'weapon'){ if(kind === 'weapon') equipWeaponRow(tr); else equipMagicRow(tr); weaponVsShield(tr, display); }
+    if(slot === 'armor' || slot === 'shield') warnArmorEquip(tr, slot);
+    if(slot === 'shield') shieldVsTwoHanded(display);
   } else {
     tr.dataset.equipped = '';
-    if(kind === 'weapon') unequipWeaponRow(ref);
-    if(kind === 'magic') unequipWeaponRow(ref);
+    if(slot === 'weapon') unequipWeaponRid(tr.dataset.rid, ref);
   }
-  renderInvActions(tr); reconcileAC(); if(kind === 'magic') recalc(); scheduleAutosave();
+  renderInvActions(tr); reconcileAC(); recalc(); scheduleAutosave();
 }
-// A magic weapon (its type names a base weapon) equips as an attack row with its +N to hit.
+// A6: warn on donning armor you're not proficient with / too weak for (penalties are applied live).
+function warnArmorEquip(tr, slot){
+  const ref = invRowRef(tr), display = invRowDisplay(tr);
+  const a = slot === 'shield' ? (D.armor().find(x => /shield/i.test(x.category || '')) || { category:'Shield', name:'Shield' }) : (magicArmorBase(ref) || D.armor().find(x => norm(x.name) === norm(ref)));
+  if(!a) return;
+  if(!armorProficient(a)) addLog('Armor', '⚠', 'Not proficient with ' + display + " — Disadvantage on STR/DEX d20 tests and you can't cast spells while wearing it", 'fumble');
+  const m = String(a.strength || '').match(/(\d+)/); if(m && score('STR') < +m[1]) addLog('Armor', '⚠', display + ' needs Str ' + m[1] + ' — Speed −10 ft while worn', 'fumble');
+  if(a.stealthDisadvantage) addLog('Armor', '⚠', display + ' — Disadvantage on Stealth checks', 'normal');
+}
+// A5: a shield ends two-handed use of Versatile weapons, and a Two-Handed weapon drops the shield.
+function shieldVsTwoHanded(display){
+  [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
+    const info = rowWeaponInfo(tr); const nm = tr.querySelector('.atk-name').value || tr.dataset.weapon;
+    if(tr.dataset.twoHanded === '1'){ tr.dataset.twoHanded = ''; addLog('Shield', '⚠', nm + ': two-handed use ended — you\'re holding ' + display, 'normal'); }
+    else if(info.twoHandedProp) addLog('Shield', '⚠', nm + ' is Two-Handed — you can\'t attack with it while holding ' + display, 'fumble');
+  });
+}
+function weaponVsShield(tr, display){
+  const w = invBaseWeapon(tr); if(!w || !(w.properties || []).some(p => /^two-handed$/i.test(p))) return;
+  const sh = equippedShieldRow(); if(!sh) return;
+  sh.dataset.equipped = ''; renderInvActions(sh);
+  addLog('Shield', '⚠', invRowDisplay(sh) + ' unequipped — ' + display + ' needs both hands', 'normal');
+}
+// ── Named magic weapons: "Weapon (longsword)" has a fixed base; "Weapon (any sword)" etc. let the
+// player pick one on equip. The +N, Finesse and an overriding damage type are parsed from the text.
+function magicWeaponSpec(m){
+  if(!m) return null;
+  const mt = String(m.type || '').match(/^Weapon \((.+)\)\s*$/i); if(!mt) return null;
+  const t = norm(mt[1]), W = D.weapons();
+  const base = W.find(w => norm(w.name) === t) || null; let filter = null;
+  if(!base){
+    const names = t.split(/,\s*(?:or\s+)?|\s+or\s+/).map(s => s.trim()).filter(Boolean);
+    const hasProp = re => w => (w.properties || []).some(p => re.test(p));
+    if(names.length > 1 && names.every(n => W.some(w => norm(w.name) === n))) filter = w => names.includes(norm(w.name));
+    else if(/thrown property/.test(t)) filter = hasProp(/^thrown/i);
+    else if(/ammunition/.test(t)) filter = hasProp(/^ammunition/i);
+    else if(/sword/.test(t)) filter = w => /sword|rapier|scimitar/i.test(w.name) && (!/slashing/.test(t) || norm(w.damageType) === 'slashing');
+    else if(/axe/.test(t)) filter = w => /axe/i.test(w.name);
+    else if(/bow/.test(t)) filter = w => /bow/i.test(w.name);
+    else if(/simple/.test(t) && !/martial/.test(t)) filter = w => /simple/i.test(w.category || '');
+    else filter = () => true;   // "any", "any simple or martial"
+  }
+  const d = String(m.description || ''); let plus = 0;
+  const mm = m.name.match(/\+(\d)\b/) || d.match(/\+(\d)\s+(?:bonus\s+)?to attack and damage/i) || d.match(/(?:\ba|this|granting|gains?)\s+\+(\d)\b/i) || d.match(/\+(\d)\s+bonus\b/i);
+  if(mm) plus = +mm[1];
+  const finesse = /\bfinesse\b/i.test(d);
+  let dtype = ''; const dm = d.match(/deal(?:s|ing)?\s+([a-z]+)\s+damage/i); if(dm && DMG_TYPES.includes(dm[1].toLowerCase())) dtype = dm[1].toLowerCase();
+  return { base, filter, plus, finesse, dtype };
+}
+// The base weapon of a magic-weapon inventory row (fixed by its type, or chosen by the player).
+function magicWeaponBase(tr){ const spec = magicWeaponSpec(magicData(invRowRef(tr))); if(!spec) return null; if(spec.base) return spec.base; return tr.dataset.base ? (D.weapons().find(w => norm(w.name) === norm(tr.dataset.base)) || null) : null; }
+// A magic weapon equips as an attack row keyed by the inventory row; its +N is read live (and gated on attunement).
 function equipMagicRow(tr){
-  const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
-  const mb = magicBonuses(magicData(ref)); if(!mb.baseWeapon) return;
-  if(invAttackHasWeapon(ref)) return;
-  const w = mb.baseWeapon, finesse = (w.properties || []).some(p => /finesse/i.test(p));
+  const ref = invRowRef(tr), display = invRowDisplay(tr);
+  const spec = magicWeaponSpec(magicData(ref)); if(!spec) return;
+  const w = magicWeaponBase(tr); if(!w) return;
+  tr.dataset.base = w.name; if(spec.plus && !num(tr.dataset.plus)) tr.dataset.plus = spec.plus;
+  renderInvDetail(tr);
+  if(invAttackHasRid(tr.dataset.rid)) return;
+  const finesse = spec.finesse || (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  // The +N folds into the Bonus (applies to hit + damage); proficiency is auto-set.
-  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, magic: mb.atk || 0, damage: w.damage, type: w.damageType, mastery: w.mastery || '', weapon: ref });
+  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, magic: num(tr.dataset.plus || 0), damage: w.damage, type: spec.dtype || w.damageType, mastery: w.mastery || '', weapon: w.name, rid: tr.dataset.rid });
 }
 function equipWeaponRow(tr){
-  const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
+  const ref = invRowRef(tr), display = invRowDisplay(tr);
   const w = D.weapons().find(x => norm(x.name) === norm(ref)); if(!w) return;
-  if(invAttackHasWeapon(ref)) return;
+  if(invAttackHasRid(tr.dataset.rid)) return;
   const finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: num(tr.dataset.plus || 0), damage: w.damage, type: w.damageType, mastery: w.mastery || '', weapon: ref });
+  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, magic: num(tr.dataset.plus || 0), damage: w.damage, type: w.damageType, mastery: w.mastery || '', weapon: w.name, rid: tr.dataset.rid });
 }
-// The +N on an equipped base weapon/armor row (from a "+1 Weapon" / "+2 Armor" purchase).
+// The +N on an equipped base armor row (from a "+2 Armor" purchase).
 function equippedRowPlus(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? num(tr.dataset.plus || 0) : 0; }
-function unequipWeaponRow(ref){ [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.weapon || '') === norm(ref)) tr.remove(); }); }
+// Remove the attack row(s) of one inventory row — by rid; legacy rows without a rid match by weapon name.
+function unequipWeaponRid(rid, ref){ [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if((rid && tr.dataset.rid === rid) || (!tr.dataset.rid && ref && norm(tr.dataset.weapon || '') === norm(ref))) tr.remove(); }); }
 // Keep an equipped weapon's attack-row name in sync when its inventory item is renamed.
 function syncEquippedWeaponName(tr){
-  if(tr.dataset.equipped !== '1' || invRowKind(tr) !== 'weapon') return;
-  const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
-  [...document.querySelectorAll('#attacks-body tr')].forEach(row => { if(norm(row.dataset.weapon || '') === norm(ref)){ const nm = row.querySelector('.atk-name'); if(nm) nm.value = display; } });
+  if(tr.dataset.equipped !== '1' || invRowSlot(tr) !== 'weapon') return;
+  const display = invRowDisplay(tr);
+  [...document.querySelectorAll('#attacks-body tr')].forEach(row => { if(row.dataset.rid === tr.dataset.rid){ const nm = row.querySelector('.atk-name'); if(nm) nm.value = display; } });
 }
-function invAttackHasWeapon(name){ return [...document.querySelectorAll('#attacks-body tr')].some(tr => norm(tr.dataset.weapon || '') === norm(name)); }
+function invAttackHasRid(rid){ return !!rid && [...document.querySelectorAll('#attacks-body tr')].some(tr => tr.dataset.rid === rid); }
+// Legacy saves keyed attack rows by weapon name (and folded a magic +N into Bonus). Give each
+// such row the rid of its inventory item, point `data-weapon` at the base weapon, and move the
+// +N out of the Bonus field. Attunement refs saved as catalog names become rids too.
+function reconcileAttackRids(){
+  const rows = [...document.querySelectorAll('#attacks-body tr')], inv = invRows();
+  attunedRefs = attunedRefs.map(x => { if(/^rid_/.test(String(x))) return x; const r = inv.find(r => norm(invRowRef(r)) === norm(x)); return r ? r.dataset.rid : null; }).filter(Boolean);
+  rows.forEach(tr => {
+    if(tr.dataset.rid || !tr.dataset.weapon) return;
+    const wn = norm(tr.dataset.weapon);
+    const r = inv.find(r => r.dataset.equipped === '1' && !rows.some(o => o.dataset.rid === r.dataset.rid) && (norm(invRowRef(r)) === wn || norm(r.dataset.base || '') === wn));
+    if(!r) return;
+    tr.dataset.rid = r.dataset.rid;
+    let plus = num(r.dataset.plus || 0);
+    if(itemKind(invRowRef(r)) === 'magic'){ const spec = magicWeaponSpec(magicData(invRowRef(r))); const base = magicWeaponBase(r);
+      if(spec && !plus && spec.plus){ plus = spec.plus; r.dataset.plus = plus; }
+      if(base){ tr.dataset.weapon = base.name; if(!tr.dataset.mastery && base.mastery) tr.dataset.mastery = base.mastery; } }
+    const b = tr.querySelector('.atk-bonus'); if(plus && num(b.value) >= plus) b.value = num(b.value) - plus;
+    tr.dataset.magic = plus;
+  });
+}
 // Armor Class from equipped armor + shield (Light = full Dex, Medium = +Dex max 2, Heavy = flat).
 function armorACValue(a, dex){
   const base = String(a.baseAC || '');
@@ -2122,29 +2592,46 @@ function armorACValue(a, dex){
 function magicArmorBase(ref){
   const m = magicData(ref); if(!m) return null;
   const mt = String(m.type || '').match(/^Armor \(([^)]+)\)/i); if(!mt) return null;
-  return D.armor().find(x => norm(x.name) === norm(mt[1].trim())) || null;   // only a specific base counts
+  return D.armor().find(x => norm(x.name) === norm(mt[1].trim()) && !/shield/i.test(x.category || '')) || null;   // only a specific base counts
 }
 function equippedMagicArmorRow(){ return invRows().find(r => r.dataset.equipped === '1' && itemKind(invRowRef(r)) === 'magic' && magicArmorBase(invRowRef(r))); }
 // The armor the character is actually wearing (real base armor, or a named magic armor), with its AC bonus.
 function equippedArmorInfo(){
-  const dex = modOf('DEX');
   const realName = equippedItemName('armor');
   if(realName){ const a = D.armor().find(x => norm(x.name) === norm(realName)); return { armor:a, plus: equippedRowPlus('armor') }; }
   const mr = equippedMagicArmorRow();
-  if(mr){ const ref = invRowRef(mr), a = magicArmorBase(ref); const attunedOk = !magicNeedsAttune(ref) || isAttuned(ref);
+  if(mr){ const ref = invRowRef(mr), a = magicArmorBase(ref); const attunedOk = !magicNeedsAttune(ref) || isAttunedRow(mr);
     return { armor:a, plus: (attunedOk ? (magicBonuses(magicData(ref)).ac || 0) : 0) + num(mr.dataset.plus || 0) }; }
   return { armor:null, plus:0 };
+}
+// A6: penalties from worn armor/shield — not proficient (Disadv. on STR/DEX d20 tests, no
+// spellcasting), Str requirement unmet (Speed −10), Stealth Disadvantage.
+function armorPenalties(){
+  const out = { nonProf:'', stealth:'', strUnmet:'' };
+  const { armor } = equippedArmorInfo();
+  if(armor){
+    if(!armorProficient(armor)) out.nonProf = armor.name;
+    if(armor.stealthDisadvantage) out.stealth = armor.name;
+    const m = String(armor.strength || '').match(/(\d+)/); if(m && score('STR') < +m[1]) out.strUnmet = armor.name;
+  }
+  const sh = equippedShieldRow();
+  if(sh && !profTokens().shields) out.nonProf = out.nonProf ? out.nonProf + ' & ' + invRowDisplay(sh) : invRowDisplay(sh);
+  return out;
+}
+function spellsBlockedByArmor(label){
+  const ap = armorPenalties(); if(!ap.nonProf) return false;
+  addLog(label ? 'Cast (' + label + ')' : 'Cast', '✗', "Can't cast spells — not proficient with " + ap.nonProf, 'fumble'); return true;
 }
 // Unarmored AC when no armor is worn: the best of plain 10+DEX and any class
 // feature that sets an unarmored formula (2024). Shield is added by computeAC,
 // but Monk's Unarmored Defense doesn't work with a shield, so it drops out then.
 function hasUnarmoredDefense(){ return hasFeature('Unarmored Defense') || hasFeature('Draconic Resilience'); }
 function unarmoredACBase(dex){
-  const hasShield = !!equippedItemName('shield');
+  const shield = hasShield();
   const cl = classList(), has = c => cl.some(x => norm(x.cls) === c);
   let best = 10 + dex;
   if(has('barbarian') && hasFeature('Unarmored Defense')) best = Math.max(best, 10 + dex + modOf('CON'));   // shield allowed
-  if(has('monk') && hasFeature('Unarmored Defense') && !hasShield) best = Math.max(best, 10 + dex + modOf('WIS'));
+  if(has('monk') && hasFeature('Unarmored Defense') && !shield) best = Math.max(best, 10 + dex + modOf('WIS'));
   if(hasFeature('Draconic Resilience')) best = Math.max(best, 10 + dex + modOf('CHA'));                      // 2024: 10 + Dex + Cha (shield allowed)
   return best;
 }
@@ -2153,13 +2640,14 @@ function unarmoredACBase(dex){
 // The situational field is only live when there's an auto-calculated base to add to;
 // in pure-manual mode the user types their whole AC, so it stays disabled (contributes 0).
 function acTempBonus(){ const el = $('f-ac-temp'); return (el && !el.disabled) ? num(el.value) : 0; }
-function acHasAutoBase(){ return !!(equippedItemName('armor') || equippedItemName('shield') || equippedMagicArmorRow() || magicACBonus() > 0 || hasUnarmoredDefense()); }
+function acHasAutoBase(){ return !!(equippedItemName('armor') || hasShield() || equippedMagicArmorRow() || magicACBonus() > 0 || hasUnarmoredDefense()); }
 function computeAC(){
   const dex = modOf('DEX');
   const { armor, plus } = equippedArmorInfo();
   let base = armor ? armorACValue(armor, dex) + plus : unarmoredACBase(dex);
   let ac = base;
-  if(equippedItemName('shield')) ac += 2 + equippedRowPlus('shield');
+  ac += shieldAC();
+  if(armor && hasFightingStyle('Defense')) ac += 1;   // Defense fighting style: +1 AC while wearing armor
   ac += magicACBonus();
   ac += acTempBonus();
   return ac;
@@ -2174,52 +2662,80 @@ function reconcileAC(){
   acEl.title = (_ov.ac != null && String(_ov.ac) !== '') ? 'AC — manual override (unlock to change)' : 'Auto-calculated from armor / shield / class features / magic items, plus any AC bonus';
 }
 function onTempAC(){ reconcileAC(); scheduleAutosave(); }
-// ── Magic items: parse worn bonuses, apply to AC / saves / attacks ────────
+// ── Magic items: parse worn bonuses, apply to AC / saves / attacks / abilities / spells ────────
 function magicData(ref){ const n = norm(ref); return D.magicItems().find(x => norm(x.name) === n) || null; }
 // Targets a homebrew magic item can boost, each with a real sheet consumer.
 const MAGIC_BONUS_KEYS = ['ac','save','hp','speed','init','spellAtk','spellDC','atk','str','dex','con','int','wis','cha'];
+const ABIL_WORDS = '(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)';
 function magicBonuses(m){
-  const b = { ac:0, save:0, atk:0, dmg:0, hp:0, speed:0, init:0, spellAtk:0, spellDC:0, str:0, dex:0, con:0, int:0, wis:0, cha:0, baseWeapon:null };
+  const b = { ac:0, save:0, atk:0, dmg:0, hp:0, speed:0, init:0, spellAtk:0, spellDC:0, str:0, dex:0, con:0, int:0, wis:0, cha:0, baseWeapon:null, set:null, caps:null };
   if(!m) return b;
   const d = (m.description || '') + ' ' + m.name;
-  let mm = d.match(/\+(\d)\s+bonus to (?:the wearer's |your )?Armor Class/i); if(mm) b.ac = +mm[1];
-  if(/Bracers of Defense/i.test(m.name) && !equippedItemName('armor') && !equippedItemName('shield')) b.ac = Math.max(b.ac, 2);   // RAW: only while wearing no armor and no shield
+  let mm = d.match(/\+(\d)\s+bonus to (?:the wearer's |your )?(?:Armor Class|AC)\b/i) || d.match(/\+(\d)\s+(?:to\s+)?(?:AC|Armor Class)\b/i); if(mm) b.ac = +mm[1];
+  if(/Bracers of Defense/i.test(m.name) && !equippedItemName('armor') && !hasShield()) b.ac = Math.max(b.ac, 2);   // RAW: only while wearing no armor and no shield
   mm = m.name.match(/(?:Shield|Armor),?\s*\+(\d)/i); if(mm) b.ac = Math.max(b.ac, +mm[1]);
-  if(/^Shield$/i.test(m.type)) b.ac += 2;                                   // a magic shield still gives the base +2
+  if(/^(Shield|Armor \(shield\))$/i.test(String(m.type || '').trim())) b.ac += 2;   // a magic shield still gives the base +2
   if(/saving throws/i.test(d) && b.ac) b.save = b.ac;                       // Ring/Cloak of Protection: same +N to saves
   mm = d.match(/\+(\d)\s+bonus to (?:attack and damage|attack rolls? and damage)/i) || m.name.match(/^Weapon,?\s*\+(\d)/i);
   if(mm){ b.atk = +mm[1]; b.dmg = +mm[1]; }
   const wt = (m.type || '').match(/^Weapon \(([a-z ]+)\)/i);
   if(wt){ const base = D.weapons().find(w => norm(w.name) === norm(wt[1].trim())); if(base) b.baseWeapon = base; }
+  // Ability scores: "sets your Strength score to 19", "your Intelligence is 19 while",
+  // "increases/raises your Wisdom score by 2 (maximum 20)", "+2 bonus to Constitution".
+  mm = d.match(new RegExp("sets? (?:the wearer's |your )?" + ABIL_WORDS + ' score to (\\d+)', 'i')) || d.match(new RegExp('your ' + ABIL_WORDS + ' (?:score )?is (\\d+) while', 'i'));
+  if(mm){ b.set = b.set || {}; const k = mm[1].slice(0,3).toLowerCase(); b.set[k] = Math.max(b.set[k] || 0, +mm[2]); }
+  mm = d.match(new RegExp("(?:raises|increases) (?:the wearer's |your )?" + ABIL_WORDS + ' score by (\\d+)', 'i'));
+  if(mm){ const k = mm[1].slice(0,3).toLowerCase(); b[k] += +mm[2]; const cm = d.match(/(?:up to a |to a )?maximum (?:of )?(\d+)/i); if(cm){ b.caps = b.caps || {}; b.caps[k] = +cm[1]; } }
+  mm = d.match(new RegExp('\\+(\\d+) bonus to (?:your )?' + ABIL_WORDS + '( score)?([^.]{0,14})', 'i'));
+  if(mm && !/^\s*(\(|checks?|sav)/i.test(mm[4] || '')) b[mm[2].slice(0,3).toLowerCase()] += +mm[1];
+  // Spellcasting: "+N bonus to spell attack rolls", "+N bonus to spell save DC" (Wand of the War Mage,
+  // Rod of the Pact Keeper), plus the classic named items whose text gives no number.
+  mm = d.match(/\+(\d)\s+bonus to (?:your )?spell attack rolls/i); if(mm) b.spellAtk = +mm[1];
+  mm = d.match(/\+(\d)\s+bonus to (?:your )?(?:spell attack rolls and )?(?:your )?spell save DCs?/i) || d.match(/\+(\d)\s+(?:bonus )?to (?:your )?spell save DCs?/i); if(mm) b.spellDC = +mm[1];
+  if(/^Robe of the Archmagi/i.test(m.name)){ b.spellAtk = Math.max(b.spellAtk, 2); b.spellDC = Math.max(b.spellDC, 2); }
+  if(/^Staff of the Magi/i.test(m.name)) b.spellAtk = Math.max(b.spellAtk, 2);
   // Structured homebrew bonuses ({target, amount}) stack on top of any parsed text.
   if(Array.isArray(m.bonuses)) m.bonuses.forEach(x => { const t = x && x.target, amt = num(x && x.amount); if(t && amt && MAGIC_BONUS_KEYS.indexOf(t) >= 0) b[t] = (b[t] || 0) + amt; });
   return b;
 }
 // ── Attunement (A3): a magic item's bonuses count only while equipped AND
-// (it doesn't require attunement, or it's one of your ≤3 attuned items). ──────
+// (it doesn't require attunement, or it's one of your ≤3 attuned items).
+// Attunement is per inventory row (rid), so two copies of an item are tracked apart. ──
 function magicNeedsAttune(ref){ const m = magicData(ref); return !!(m && m.attunement); }
-function isAttuned(ref){ return attunedRefs.some(r => norm(r) === norm(ref)); }
+function isAttunedRow(tr){ return !!(tr && tr.dataset && attunedRefs.indexOf(tr.dataset.rid) >= 0); }
+function isAttuned(x){ if(x && x.dataset) return isAttunedRow(x); return attunedRefs.indexOf(String(x)) >= 0; }
 function attunedCount(){ return attunedRefs.length; }
 function renderAttuneCount(){ const el = $('attune-count'); if(el) el.textContent = attunedCount() + '/3'; }
 function toggleAttune(btn){
-  const tr = btn.closest('tr'), ref = invRowRef(tr), nm = tr.querySelector('.inv-name').value || ref;
-  if(isAttuned(ref)){ attunedRefs = attunedRefs.filter(r => norm(r) !== norm(ref)); addLog('Attunement', '—', 'Unattuned ' + nm, 'normal'); }
+  const tr = btn.closest('tr'), rid = tr.dataset.rid, nm = invRowDisplay(tr);
+  if(isAttunedRow(tr)){ attunedRefs = attunedRefs.filter(r => r !== rid); addLog('Attunement', '—', 'Unattuned ' + nm, 'normal'); }
   else {
     if(attunedCount() >= 3){ addLog('Attunement', '✗', 'Already attuned to 3 items', 'fumble'); return; }
-    attunedRefs.push(ref); addLog('Attunement', '✦', 'Attuned to ' + nm, 'normal');
+    attunedRefs.push(rid); addLog('Attunement', '✦', 'Attuned to ' + nm, 'normal');
   }
   renderInvActions(tr); renderAttuneCount(); recalc(); scheduleAutosave();
 }
 function magicActive(tr){
   if(tr.dataset.equipped !== '1' || itemKind(invRowRef(tr)) !== 'magic') return false;
-  if(magicArmorBase(invRowRef(tr))) return false;   // worn as armor (AC handled in computeAC), not a flat bonus
-  return magicNeedsAttune(invRowRef(tr)) ? isAttuned(invRowRef(tr)) : true;
+  const ref = invRowRef(tr);
+  if(magicArmorBase(ref) || isMagicShield(ref)) return false;   // worn as armor / shield (AC handled in computeAC), not a flat bonus
+  return magicNeedsAttune(ref) ? isAttunedRow(tr) : true;
 }
 function equippedMagic(){ return invRows().filter(magicActive).map(r => magicBonuses(magicData(invRowRef(r)))); }
 // Total of one bonus key across every equipped-and-active magic item.
 function magicSum(key){ return equippedMagic().reduce((s, b) => s + (b[key] || 0), 0); }
 function magicACBonus(){ return magicSum('ac'); }
 function magicSaveBonus(){ return magicSum('save'); }
+// How much an ability score moves from magic items, given its BASE (un-boosted) score:
+// flat "+N" items (capped where the text says "maximum 20"), then "sets to N" items
+// (only if N is higher than what you'd otherwise have).
+function abilityMagicDelta(key, base){
+  let flat = 0, cap = 0, setTo = 0;
+  equippedMagic().forEach(b => { flat += b[key] || 0; if(b.caps && b.caps[key]) cap = Math.max(cap, b.caps[key]); if(b.set && b.set[key]) setTo = Math.max(setTo, b.set[key]); });
+  let v = base + flat; if(cap && flat > 0) v = Math.max(base, Math.min(v, cap));
+  if(setTo > v) v = setTo;
+  return v - base;
+}
 // Ability-score + HP-max bonuses live in editable inputs, so they're applied as
 // a reversible delta (like the Shadowdark sheet): we track how much we've baked
 // in and only ever move the input by the change, so the player's base value is
@@ -2230,10 +2746,10 @@ let _applyingMagicInputs = false;
 function applyMagicInputBonuses(){
   if(_applyingMagicInputs) return; _applyingMagicInputs = true;
   ABILITIES.forEach(a => {
-    const key = a.id.toLowerCase();
-    const desired = magicSum(key);
-    const delta = desired - (_magicApplied[key] || 0);
-    if(delta){ const el = $('sc-' + a.id); if(el) el.value = String((num(el.value) || 0) + delta); }
+    const key = a.id.toLowerCase(), el = $('sc-' + a.id); if(!el) return;
+    const base = (num(el.value) || 0) - (_magicApplied[key] || 0);
+    const desired = abilityMagicDelta(key, base);
+    if(desired !== (_magicApplied[key] || 0)) el.value = String(base + desired);
     _magicApplied[key] = desired;
   });
   const hpDesired = magicSum('hp'), hpDelta = hpDesired - (_magicApplied.hp || 0);
@@ -2245,7 +2761,7 @@ function applyMagicInputBonuses(){
 function renderMagicBadges(){
   ABILITIES.forEach(a => {
     const el = $('ab-boost-' + a.id); if(!el) return;
-    const n = magicSum(a.id.toLowerCase());
+    const n = _magicApplied[a.id.toLowerCase()] || 0;
     el.textContent = n ? (n > 0 ? '+' + n : String(n)) : '';
     el.style.display = n ? '' : 'none';
   });
@@ -2279,6 +2795,7 @@ function openBook(){
 function closeBook(){ $('book-overlay').classList.remove('open'); }
 // Highest spell level this character can currently cast (0 = cantrips only / none).
 function sheetMaxSpellLevel(){
+  const cs = spellcastingClasses(); if(cs.length) return Math.max.apply(null, cs.map(({cl, c}) => casterMaxSpellLevel(cl, c)));
   const t = D.tables(), L = levelNow();
   if(casterType() === 'pact'){ const pm = t && t.pactMagic ? t.pactMagic[L-1] : null; return pm ? pm.level : (isCaster()?1:0); }
   const arr = slotArray(); let m = 0; if(arr) arr.forEach((n,i) => { if(n > 0) m = i + 1; });
@@ -2287,10 +2804,12 @@ function sheetMaxSpellLevel(){
 }
 function renderBook(){
   const q = norm($('book-search').value), fc = $('book-class').value, fl = $('book-level').value;
-  const mine = $('book-mine').checked, myClass = (classData() || {}).name, maxL = sheetMaxSpellLevel();
-  const inList = (window.DNDCALC && DNDCALC.spellInList) ? DNDCALC.spellInList : (s, c) => (s.classes || []).includes(c);
+  const mine = $('book-mine').checked, casters = spellcastingClasses();
   const list = D.spells().filter(s => {
-    if(mine){ if(!myClass || !inList(s, myClass)) return false; if(s.level > maxL) return false; }
+    if(mine){
+      if(!casters.length){ if(s.level > sheetMaxSpellLevel()) return false; const c = classData(); if(!c || !spellOnCasterList(s, c)) return false; }
+      else if(!casters.some(({cl, c}) => spellOnCasterList(s, c) && s.level <= casterMaxSpellLevel(cl, c))) return false;
+    }
     else if(fc && !(s.classes || []).includes(fc)) return false;
     if(fl !== '' && String(s.level) !== String(fl)) return false;
     if(q && !(norm(s.name).includes(q) || norm(s.school).includes(q))) return false;
@@ -2335,19 +2854,33 @@ function genericPlusItem(name){
   return null;
 }
 // Pick the base weapon/armor a "+N" enhancement applies to, then add + equip it.
-function openBasePicker(kind, plus){
+// opts.rid: instead pick the base for an existing named magic weapon row ("Weapon (any sword)"),
+// opts.filter narrows the candidates, opts.title overrides the heading.
+function openBasePicker(kind, plus, opts){
+  opts = opts || {};
   let ov = $('base-overlay');
   if(!ov){ ov = document.createElement('div'); ov.id = 'base-overlay'; ov.className = 'ov'; ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); }); document.body.appendChild(ov); }
-  const items = kind === 'weapon' ? D.weapons() : D.armor().filter(a => !/shield/i.test(a.category || ''));
+  let items = kind === 'weapon' ? D.weapons() : D.armor().filter(a => !/shield/i.test(a.category || ''));
+  if(typeof opts.filter === 'function') items = items.filter(opts.filter);
+  const ridArg = opts.rid ? ',\'' + esc(opts.rid) + '\'' : '';
   const rows = items.map(x => {
-    const meta = kind === 'weapon' ? (x.category + ' · ' + x.damage + ' ' + x.damageType) : (x.category + ' · AC ' + x.baseAC);
-    return '<button class="m-btn ghost base-pick-btn" onclick="pickBase(\'' + kind + '\',' + plus + ',\'' + esc(x.name).replace(/'/g,"\\'") + '\')"><b>' + esc(x.name) + '</b> <span class="base-pick-meta">' + esc(meta) + '</span></button>';
-  }).join('');
-  ov.innerHTML = '<div class="modal" style="max-width:440px;max-height:82vh;display:flex;flex-direction:column;"><div class="modal-hd"><div class="ttl">Choose a base ' + kind + ' for your +' + plus + ' ' + (kind === 'weapon' ? 'Weapon' : 'Armor') + '</div><button class="x" onclick="document.getElementById(\'base-overlay\').classList.remove(\'open\')">✕</button></div><div class="modal-bd" style="overflow:auto;">' + rows + '</div></div>';
+    const meta = kind === 'weapon' ? (x.category + ' · ' + x.damage + ' ' + x.damageType + (!isProficientWithWeapon(x) ? ' · not proficient' : '')) : (x.category + ' · AC ' + x.baseAC);
+    return '<button class="m-btn ghost base-pick-btn" onclick="pickBase(\'' + kind + '\',' + plus + ',\'' + esc(x.name).replace(/'/g,"\\'") + '\'' + ridArg + ')"><b>' + esc(x.name) + '</b> <span class="base-pick-meta">' + esc(meta) + '</span></button>';
+  }).join('') || '<p class="m-hint">No matching weapons.</p>';
+  const title = opts.title || ('Choose a base ' + kind + ' for your +' + plus + ' ' + (kind === 'weapon' ? 'Weapon' : 'Armor'));
+  ov.innerHTML = '<div class="modal" style="max-width:440px;max-height:82vh;display:flex;flex-direction:column;"><div class="modal-hd"><div class="ttl">' + esc(title) + '</div><button class="x" onclick="document.getElementById(\'base-overlay\').classList.remove(\'open\')">✕</button></div><div class="modal-bd" style="overflow:auto;">' + rows + '</div></div>';
   ov.classList.add('open');
 }
-function pickBase(kind, plus, base){
+function pickBase(kind, plus, base, rid){
   const ov = $('base-overlay'); if(ov) ov.classList.remove('open');
+  if(rid){   // base chosen for an existing magic-weapon row → record it and finish equipping
+    const row = invRows().find(r => r.dataset.rid === rid); if(!row) return;
+    row.dataset.base = base; if(plus && !num(row.dataset.plus)) row.dataset.plus = plus;
+    renderInvDetail(row);
+    const eq = row.querySelector('.equip-btn'); if(eq && row.dataset.equipped !== '1') toggleEquip(eq);
+    addLog('Item', '✦', invRowDisplay(row) + ' — base weapon: ' + base, 'normal');
+    scheduleAutosave(); return;
+  }
   const tr = addInvRow({ name: base + ' +' + plus, ref: base, plus: plus, qty:1 });
   const eq = tr.querySelector('.equip-btn'); if(eq) toggleEquip(eq);   // add + equip with its bonuses
   scheduleAutosave();
@@ -2396,7 +2929,7 @@ function storeItems(){
     default:        return D.gear().map(g => ({ name:g.name, cost:g.cost, meta:(g.category + (g.weight?' · ' + g.weight:'')), desc:g.description, prof:true }));
   }
 }
-function costToCp(cost){ const m = String(cost || '').match(/(\d+)\s*(GP|SP|CP)/i); if(!m) return 0; const n = +m[1], u = m[2].toUpperCase(); return u==='GP'?n*100:u==='SP'?n*10:n; }
+function costToCp(cost){ const m = String(cost || '').replace(/,/g, '').match(/(\d+)\s*(GP|SP|CP)/i); if(!m) return 0; const n = +m[1], u = m[2].toUpperCase(); return u==='GP'?n*100:u==='SP'?n*10:n; }
 function coinsCp(){ return (num($('f-gp').value))*100 + (num($('f-sp').value))*10 + num($('f-cp').value); }
 function setCoinsCp(total){ total = Math.max(0, total); $('f-gp').value = Math.floor(total/100); $('f-sp').value = Math.floor((total%100)/10); $('f-cp').value = total%10; }
 function storeBuy(name, cost){
@@ -2441,6 +2974,22 @@ const withChoices = (desc, sum) => sum ? (desc ? desc + ' ' : '') + '▸ Your ch
 // Feat data for a stored name — tolerates a background's parenthetical ("Magic Initiate (Cleric)").
 function featData(name){ if(CH()) return CH().featBase(name).feat; return D.feats().find(f => norm(f.name) === norm(name)) || null; }
 window.getChoices = () => choices;
+// ── wizard hooks: languages, size, custom feature entries, subclass casting ──
+let languages = [];          // ["Common", "Elvish", …]
+let _size = '';              // "Medium" | "Small" (from species)
+function syncLanguagesText(){
+  // Keep one "Languages: …" line in the proficiency text in step with the list.
+  const el = $('f-proficiencies'); if(!el) return;
+  const parts = String(el.value || '').split(/\s*·\s*/).filter(p => p && !/^languages:/i.test(p));
+  if(languages.length) parts.push('Languages: ' + languages.join(', '));
+  el.value = parts.join(' · ');
+}
+window.setLanguages = (arr) => { languages = []; (arr || []).forEach(l => { if(l && languages.indexOf(l) < 0) languages.push(l); }); syncLanguagesText(); scheduleAutosave(); };
+window.addLanguages = (arr) => { (arr || []).forEach(l => { if(l && languages.indexOf(l) < 0) languages.push(l); }); syncLanguagesText(); scheduleAutosave(); };
+window.setSize = (sz) => { _size = sz || ''; recalc(); scheduleAutosave(); };
+window.addCustomFeatureEntry = (name, desc, meta) => { if(!name) return; if(!customFeatures.some(f => norm(f.name) === norm(name))) customFeatures.push({ name, desc: desc || '', meta: meta || 'Feature' }); renderFeatures(); scheduleAutosave(); };
+// Subclass casting is read from the class data (subclass `spellcasting` flag) — nothing to store.
+window.setSubclassCasting = () => { recalc(); };
 window.setChoice = (key, state) => { choices[key] = state || {}; renderFeatures(); scheduleAutosave(); };
 window.getSkillProf = () => Object.assign({}, skillProf);
 window.grantSkillProf = (name, lvl) => { const sk = D.skills().find(x => norm(x.name) === norm(name)); if(!sk) return; if((skillProf[sk.name] || 0) < (lvl || 1)) skillProf[sk.name] = lvl || 1; recalc(); scheduleAutosave(); };
@@ -2527,7 +3076,13 @@ function activeFeatureList(){
     (sp.lineages || []).filter(l => !ln || norm(l.name) === ln).forEach(l => (l.traits||[]).forEach(t => out.push({ name:t.name, desc:t.description }))); }
   return out;
 }
-function hasFeature(name){ return activeFeatureList().some(f => norm(f.name) === norm(name)); }
+function hasFeature(name){
+  if(activeFeatureList().some(f => norm(f.name) === norm(name))) return true;
+  // feats count too: ones added on the sheet / by the wizards, and the background's Origin feat
+  const n = norm(name), bg = backgroundData();
+  const featNames = (addedFeats || []).concat(bg && bg.feat ? [bg.feat] : []);
+  return featNames.some(fn => { const fd = featData(fn); return norm(fd ? fd.name : fn) === n || norm(fn) === n; });
+}
 
 // ── Spells granted by a feature/trait, validated against the real spell list ──
 // Reads "You know the X cantrip", "you always have X [and Y] prepared", "at
@@ -2552,27 +3107,56 @@ function grantsFromText(desc){
   while((m = rePar.exec(t))){ m[1].split(/,\s*(?:and\s+)?/).forEach(x => add(x.trim())); }
   return Object.values(found);
 }
+// Granted spells carry their source: 'class' (always prepared, still needs a slot — Divine
+// Smite, domain spells…), 'species' or 'feat' (always prepared AND castable once per Long Rest
+// without a slot, using the ability the trait/feat names). Returns [{name, src, ability}].
+function speciesCastAbility(){ const st = (choices && choices.species) || {}; return st.castAbil || ''; }
 function computeGrantedSpells(){
-  const names = {};
-  activeFeatureList().forEach(f => grantsFromText(f.desc).forEach(nm => names[norm(nm)] = nm));
+  const out = {};
+  const put = (nm, src, ability) => { const real = spellByName(nm); if(!real) return; const k = norm(real.name);
+    if(!out[k] || (out[k].src === 'class' && src !== 'class')) out[k] = { name: real.name, src, ability: ability || '' }; };
+  const sp = speciesData();
+  classList().forEach(cl => {
+    const c = classDataByName(cl.cls); if(!c) return;
+    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => grantsFromText(f.description).forEach(nm => put(nm, 'class', '')));
+    const sub = (c.subclasses || []).find(x => norm(x.name) === norm(cl.subclass));
+    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => grantsFromText(f.description).forEach(nm => put(nm, 'class', '')));
+    // Domain / Oath / Patron / Circle spell lists, unlocked by class level (always prepared, still use slots).
+    if(sub && sub.alwaysPrepared) Object.keys(sub.alwaysPrepared).forEach(lv => { if(num(cl.level) >= num(lv)) (sub.alwaysPrepared[lv] || []).forEach(nm => put(nm, 'class', '')); });
+  });
+  if(sp){
+    const sa = speciesCastAbility();
+    (sp.traits || []).forEach(t => grantsFromText(t.description).forEach(nm => put(nm, 'species', sa)));
+    const ln = norm(_lineage);
+    // with no lineage chosen, grant nothing lineage-specific (not every lineage's spells)
+    (sp.lineages || []).filter(l => ln && norm(l.name) === ln).forEach(l => (l.traits||[]).forEach(t => grantsFromText(t.description).forEach(nm => put(nm, 'species', sa))));
+  }
   // spells chosen through feats / traits (Magic Initiate, Fey Touched, a Human's Origin feat…)
-  if(CH()){ const sp = speciesData(); CH().grantedSpells(choices, sp ? sp.name : '', _lineage, chCtx()).forEach(g => { const real = spellByName(g.name); if(real) names[norm(real.name)] = real.name; }); }
-  return Object.values(names);
+  if(CH()) CH().grantedSpells(choices, sp ? sp.name : '', _lineage, chCtx()).forEach(g => put(g.name, 'feat', g.ability || ''));
+  return Object.values(out);
 }
 // Add spells granted by current features/traits; drop previously-granted ones
 // that are no longer granted (species swapped, level dropped). Returns whether
 // spellsKnown changed.
 function applyGrantedSpells(){
   const want = computeGrantedSpells();
-  const wantSet = {}; want.forEach(nm => wantSet[norm(nm)] = 1);
+  const wantMap = {}; want.forEach(g => wantMap[norm(g.name)] = g);
   let changed = false;
   const before = spellsKnown.length;
-  spellsKnown = spellsKnown.filter(sk => !(sk.granted && !wantSet[norm(sk.name)]));
+  spellsKnown = spellsKnown.filter(sk => !(sk.granted && !wantMap[norm(sk.name)]));
   if(spellsKnown.length !== before) changed = true;
-  want.forEach(nm => { if(!spellsKnown.some(sk => norm(sk.name) === norm(nm))){ spellsKnown.push({ name:nm, prepared:true, granted:true }); changed = true; }
-    else { const sk = spellsKnown.find(s => norm(s.name) === norm(nm)); if(sk && !sk.granted){ sk.granted = true; changed = true; } } });
+  want.forEach(g => {
+    let sk = spellsKnown.find(s => norm(s.name) === norm(g.name));
+    if(!sk){ sk = { name:g.name, prepared:true, granted:true }; spellsKnown.push(sk); changed = true; }
+    if(!sk.granted){ sk.granted = true; sk.prepared = true; changed = true; }
+    if(sk.src !== g.src){ sk.src = g.src; changed = true; }
+    if(g.ability && sk.ability !== g.ability){ sk.ability = g.ability; changed = true; }
+  });
   return changed;
 }
+// Free casts of species/feat-granted spells: once per Long Rest each (then a slot of the spell's level).
+let freeCastUsed = {};   // { norm(spell name): true }
+function isFreeCastSpell(sk){ return !!(sk && sk.granted && sk.src && sk.src !== 'class'); }
 
 // ── Walking speed: species base + trait/feature bonuses (#5) ───────────────
 let _speedManual = false;
@@ -2584,11 +3168,14 @@ function autoSpeed(){
   const heavy = worn && /heavy/i.test(worn.category || '');
   if(hasFeature('Fast Movement') && !heavy) sp += 10;              // Barbarian (L5+), not in Heavy armor
   const monk = classList().find(c => norm(c.cls) === 'monk');
-  if(monk && hasFeature('Unarmored Movement') && !worn && !equippedItemName('shield')){
+  if(monk && hasFeature('Unarmored Movement') && !worn && !hasShield()){
     const ml = num(monk.level);
     sp += ml >= 18 ? 30 : ml >= 14 ? 25 : ml >= 10 ? 20 : ml >= 6 ? 15 : 10;
   }
   sp += magicSum('speed');                 // homebrew magic-item Speed bonus
+  if(armorPenalties().strUnmet) sp -= 10;  // armor's Strength requirement unmet: −10 ft
+  if(activeCond('Grappled') || activeCond('Restrained')) return 0;   // Speed 0 while Grappled/Restrained
+  sp = Math.max(0, sp - 5 * (exhaustion || 0));   // 2024 Exhaustion: −5 ft Speed per level
   return sp;
 }
 function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
@@ -2602,12 +3189,14 @@ function reconcileSpeed(){
 // ── Monk Martial Arts die on Unarmed + Monk weapons (#5) ───────────────────
 function monkLevel(){ const c = classList().find(x => norm(x.cls) === 'monk'); return c ? num(c.level) : 0; }
 function martialArtsDie(){ const ml = monkLevel(); if(!ml || !hasFeature('Martial Arts')) return ''; return '1d' + (ml >= 17 ? 12 : ml >= 11 ? 10 : ml >= 5 ? 8 : 6); }
-// A weapon qualifies for Martial Arts: a Simple melee weapon without Heavy/Two-Handed.
+// A weapon qualifies for Martial Arts (2024): a Simple melee weapon, or a Martial melee
+// weapon with the Light property — in both cases without Heavy or Two-Handed.
 function isMonkWeapon(w){
   if(!w || w.kind === 'Ranged') return false;
   const props = (w.properties || []).map(p => norm(p));
-  if(props.some(p => /heavy|two-?handed/.test(p))) return false;
-  return /simple/i.test(w.category || '');
+  if(props.some(p => /^heavy|^two-?handed$/.test(p))) return false;
+  if(/simple/i.test(w.category || '')) return true;
+  return /martial/i.test(w.category || '') && props.some(p => /^light/.test(p));
 }
 function weaponDieSides(dmg){ const m = String(dmg || '').match(/(\d*)d(\d+)/i); return m ? +m[2] : 0; }
 // Bump Unarmed + Monk-weapon rows to the martial arts die (only upward, so a
@@ -2632,10 +3221,11 @@ function applyMartialArts(){
 // ═══ CLASS RESOURCES (per-day / feature trackers) ═════════════════════════
 // Auto-detected from the class table's per-day columns; users can add their own.
 const RESOURCE_DEFS = {
-  'Rages':            { label:'Rages',            reset:'long',  feature:'Rage' },
-  'Second Wind':      { label:'Second Wind',      reset:'short', feature:'Second Wind' },
-  'Channel Divinity': { label:'Channel Divinity', reset:'short', feature:'Channel Divinity' },
-  'Wild Shape':       { label:'Wild Shape',       reset:'short', feature:'Wild Shape' },
+  // 2024: these regain ONE use on a Short Rest and all on a Long Rest (shortRegain:1).
+  'Rages':            { label:'Rages',            reset:'long', shortRegain:1, feature:'Rage' },
+  'Second Wind':      { label:'Second Wind',      reset:'long', shortRegain:1, feature:'Second Wind' },
+  'Channel Divinity': { label:'Channel Divinity', reset:'long', shortRegain:1, feature:'Channel Divinity' },
+  'Wild Shape':       { label:'Wild Shape',       reset:'long', shortRegain:1, feature:'Wild Shape' },
   'Focus':            { label:'Focus Points',     reset:'short', feature:"Monk's Focus" },
   'Sorcery Points':   { label:'Sorcery Points',   reset:'long',  feature:'Font of Magic' },
 };
@@ -2648,7 +3238,7 @@ function autoResources(){
     const row = c.table.find(r => Number(r.level) === Number(cl.level)); if(!row || !row.columns) return;
     Object.keys(RESOURCE_DEFS).forEach(col => {
       const raw = String(row.columns[col] == null ? '' : row.columns[col]).trim();
-      if(/^\d+$/.test(raw) && +raw > 0){ const d = RESOURCE_DEFS[col]; out.push({ name:d.label, key:d.label, max:+raw, reset:d.reset, feature:d.feature || d.label }); }
+      if(/^\d+$/.test(raw) && +raw > 0){ const d = RESOURCE_DEFS[col]; out.push({ name:d.label, key:d.label, max:+raw, reset:d.reset, shortRegain:d.shortRegain || 0, feature:d.feature || d.label }); }
     });
   });
   return out;
@@ -2659,7 +3249,7 @@ function parseFeatureUses(text){
   if(!text) return null;
   const t = String(text); let max = null; let m;
   if(/\bonce per day\b/i.test(t)) max = 1;
-  else if(/once per (?:short|long) rest/i.test(t)) max = 1;
+  else if(/once per (?:short|long) rest/i.test(t) || /once per short or long rest/i.test(t)) max = 1;
   else if(/\bonce\b[^.]*?(?:can't|cannot|until you finish)[^.]*?(?:short|long) rest/i.test(t) || /(?:can't|cannot) (?:use|do so)[^.]*?again until you finish a (?:short|long) rest/i.test(t)) max = 1;
   else if((m = t.match(/number of (?:uses|times)[^.]*?equal to your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) modifier/i))) max = Math.max(1, modOf(m[1].slice(0,3).toUpperCase()));
   else if(/number of times[^.]*?equal to your Proficiency Bonus/i.test(t) || /equal to your Proficiency Bonus[^.]*?(?:times|per (?:short|long) rest)/i.test(t)) max = profBonus();
@@ -2672,18 +3262,27 @@ function parseFeatureUses(text){
 }
 // Trackers for class/subclass/species features that state a limited per-rest use
 // but aren't already a per-day table column (Arcane Recovery, Bardic Inspiration…).
+// Features whose uses scale with class level or whose text the generic parser can't read.
+const FEATURE_USE_RULES = {
+  'action surge':        (lvl) => ({ max: lvl >= 17 ? 2 : 1, reset:'short' }),
+  'indomitable':         (lvl) => ({ max: lvl >= 17 ? 3 : lvl >= 13 ? 2 : 1, reset:'long' }),
+  'bardic inspiration':  (lvl) => ({ max: Math.max(1, modOf('CHA')), reset: lvl >= 5 ? 'short' : 'long' }),   // Font of Inspiration at 5
+  'relentless rage':     () => null,
+  'lay on hands':        (lvl) => ({ max: 5 * Math.max(1, lvl), reset:'long', pool:true }),
+};
 function featureResources(){
   const out = [], seen = {};
-  const add = (name, desc) => {
-    const u = parseFeatureUses(desc); if(!u) return;
+  const add = (name, desc, lvl) => {
+    const rule = FEATURE_USE_RULES[norm(name)];
+    const u = rule ? rule(lvl || 0) : parseFeatureUses(desc); if(!u) return;
     if(seen[norm(name)]) return; seen[norm(name)] = 1;
-    out.push({ name, key: name, max: u.max, reset: u.reset, feature: name });
+    out.push({ name, key: name, max: u.max, reset: u.reset, feature: name, pool: !!u.pool });
   };
   classList().forEach(cl => {
     const c = classDataByName(cl.cls); if(!c) return;
-    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => add(f.name, f.description));
+    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => add(f.name, f.description, num(cl.level)));
     const sub = (c.subclasses || []).find(s => norm(s.name) === norm(cl.subclass));
-    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => add(f.name, f.description));
+    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => add(f.name, f.description, num(cl.level)));
   });
   const sp = speciesData();
   if(sp){ (sp.traits || []).forEach(t => add(t.name, t.description));
@@ -2712,8 +3311,14 @@ function shownFeatureNames(){
   return set;
 }
 // Render the pip row + label + reset for one resource, for inline use.
+function setPoolLeft(key, max, val){ resourceUsed[key] = Math.max(0, Math.min(max, max - num(val))); renderResources(); renderFeatures(); refreshTurnHub(); scheduleAutosave(); }
 function resourcePipsHTML(r){
   const used = Math.min(resourceUsed[r.key] || 0, r.max);
+  if(r.pool || r.max > 12){   // big pools (Lay on Hands HP) are a number, not a row of pips
+    const k = esc(r.key).replace(/'/g,"\\'");
+    return '<div class="fi-track"><span class="fi-track-lbl">Pool</span><input class="res-pool" type="number" min="0" max="' + r.max + '" value="' + (r.max - used) + '" onchange="setPoolLeft(\'' + k + '\',' + r.max + ',this.value)"><span class="fi-track-lbl">/' + r.max + ' · ' + r.reset + ' rest</span>' +
+      '<button class="res-reset-btn" onclick="resetResource(\'' + k + '\')">Reset</button></div>';
+  }
   let pips = ''; for(let i=1;i<=r.max;i++) pips += '<span class="res-pip' + (i<=used?' used':'') + '" onclick="toggleResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\',' + i + ',' + r.max + ')"></span>';
   return '<div class="fi-track"><span class="fi-track-lbl"><b>' + (r.max - used) + '</b>/' + r.max + ' · ' + r.reset + ' rest</span>' + pips +
     '<button class="res-reset-btn" onclick="resetResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\')">Reset</button></div>';
@@ -2739,7 +3344,13 @@ function toggleResource(key, i, max){ const u = resourceUsed[key] || 0; resource
 function resetResource(key){ resourceUsed[key] = 0; renderResources(); renderFeatures(); refreshTurnHub(); scheduleAutosave(); }
 function addCustomResource(){ const n = ($('res-name').value || '').trim(), m = num($('res-max').value); if(!n || m < 1) return; customResources.push({ name:n, max:m, reset:$('res-reset').value || 'long' }); $('res-name').value=''; $('res-max').value=''; renderResources(); scheduleAutosave(); }
 function removeCustomResource(n){ customResources = customResources.filter(r => r.name !== n); delete resourceUsed[n]; renderResources(); scheduleAutosave(); }
-function resetResources(kind){ allResources().forEach(r => { if(kind === 'long' || r.reset === 'short') resourceUsed[r.key] = 0; }); renderResources(); renderFeatures(); refreshTurnHub(); }
+function resetResources(kind){
+  allResources().forEach(r => {
+    if(kind === 'long' || r.reset === 'short') resourceUsed[r.key] = 0;
+    else if(r.shortRegain) resourceUsed[r.key] = Math.max(0, (resourceUsed[r.key] || 0) - r.shortRegain);   // regain one use on a Short Rest
+  });
+  renderResources(); renderFeatures(); refreshTurnHub();
+}
 function refreshTurnHub(){ if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn(); }
 
 // ═══ SPELLCASTING ═════════════════════════════════════════════════════════
@@ -2748,14 +3359,44 @@ window.getSpellsKnown = () => spellsKnown;
 // Spellcasting is multiclass-aware: each caster class contributes to a combined
 // caster level (full=level, half=⌊/2⌋, artificer=⌈/2⌉, third=⌊/3⌋); Warlock's Pact
 // Magic is tracked separately.
-function spellcastingClasses(){ return classList().map(cl => ({ cl, c: classDataByName(cl.cls) })).filter(x => x.c && x.c.spellcasting && x.c.spellcasting !== 'none'); }
+// 2024 third-caster subclass progression (Eldritch Knight / Arcane Trickster): cantrips and prepared spells by class level.
+const THIRD_SUB_CANTRIPS = (L) => L >= 10 ? 3 : L >= 3 ? 2 : 0;
+const THIRD_SUB_PREPARED = [0,0,3,4,4,4,5,6,6,7,8,8,9,10,10,11,11,11,12,13];
+const SUBCLASS_CASTERS = { 'eldritch knight': { ability:'INT', list:'Wizard' }, 'arcane trickster': { ability:'INT', list:'Wizard' } };
+// A subclass that casts (data flag `spellcasting` on the subclass, or a known third-caster
+// subclass) becomes a synthetic caster entry with its own table so slots/caps/lists all work.
+function subclassCaster(cl, c){
+  const sub = (c.subclasses || []).find(x => norm(x.name) === norm(cl.subclass)); if(!sub) return null;
+  const known = SUBCLASS_CASTERS[norm(sub.name)];
+  if(!(sub.spellcasting && sub.spellcasting !== 'none') && !known) return null;
+  if(num(cl.level) < 3) return null;
+  const table = []; for(let L = 1; L <= 20; L++) table.push({ level:L, columns:{ 'Cantrips': String(THIRD_SUB_CANTRIPS(L)), 'Prepared Spells': String(THIRD_SUB_PREPARED[L-1]) } });
+  return { name: c.name, listName: sub.spellList || (known && known.list) || 'Wizard', spellcasting: sub.spellcasting || 'third', spellcastingAbility: sub.spellcastingAbility || (known && known.ability) || 'INT', table, subclass: sub.name };
+}
+function spellcastingClasses(){
+  return classList().map(cl => { const c = classDataByName(cl.cls); if(!c) return null;
+    if(c.spellcasting && c.spellcasting !== 'none') return { cl, c };
+    const sc = subclassCaster(cl, c); return sc ? { cl, c: sc } : null;
+  }).filter(Boolean);
+}
+// The spell list a caster entry reads (Artificer → Wizard alias handled by DNDCALC.spellInList).
+function casterListName(c){ return (c && (c.listName || c.name)) || ''; }
+function spellOnCasterList(sp, c){ const ln = casterListName(c); return (window.DNDCALC && DNDCALC.spellInList) ? DNDCALC.spellInList(sp, ln) : (sp.classes || []).some(n => norm(n) === norm(ln)); }
+// Highest spell level a caster entry can learn/prepare — by ITS OWN class level (RAW multiclass rule).
+function casterMaxSpellLevel(cl, c){
+  const t = D.tables(); if(!t) return 1; const L = num(cl.level);
+  if(c.spellcasting === 'pact'){ const pm = t.pactMagic && t.pactMagic[L-1]; return pm ? pm.level : 1; }
+  const map = { full:'fullCasterSlots', half:'halfCasterSlots', third:'thirdCasterSlots', artificer:'artificerSlots' };
+  const arr = (t[map[c.spellcasting]] || [])[L-1] || []; let m = 0; arr.forEach((n, i) => { if(n > 0) m = i + 1; });
+  return Math.max(m, 1);
+}
 function warlockEntry(){ return spellcastingClasses().find(x => x.c.spellcasting === 'pact') || null; }
 function nonPactCasters(){ return spellcastingClasses().filter(x => x.c.spellcasting !== 'pact'); }
 function multiCasterLevel(){ let lvl = 0; nonPactCasters().forEach(({cl,c}) => { if(c.spellcasting==='full') lvl+=num(cl.level); else if(c.spellcasting==='artificer') lvl+=Math.ceil(num(cl.level)/2); else if(c.spellcasting==='half') lvl+=Math.floor(num(cl.level)/2); else if(c.spellcasting==='third') lvl+=Math.floor(num(cl.level)/3); }); return lvl; }
 function casterType(){ const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); return cs.length ? cs[0].c.spellcasting : (_forceSpells ? 'third' : 'none'); }
-function spellAbilityId(){ if(_spellAbility) return _spellAbility; const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); if(cs.length && cs[0].c.spellcastingAbility) return cs[0].c.spellcastingAbility; const c = classData(); return (c && c.spellcastingAbility) ? c.spellcastingAbility : 'INT'; }
-function abilityForSpell(sp){ if(_spellAbility) return _spellAbility; const owner = spellcastingClasses().find(x => (sp.classes||[]).some(n => norm(n)===norm(x.c.name))); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
-function spellDC(ab){ if(_ov.spDC != null && String(_ov.spDC) !== '') return ovNum('spDC', 8); return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC'); }
+function spellAbilityId(){ if(_spellAbility && !spellcastingClasses().length) return _spellAbility; const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); if(cs.length && cs[0].c.spellcastingAbility) return cs[0].c.spellcastingAbility; const c = classData(); return (c && c.spellcastingAbility) ? c.spellcastingAbility : 'INT'; }
+function abilityForSpell(sp){ const sk = sp && spellsKnown.find(s => norm(s.name) === norm(sp.name)); if(sk && sk.ability) return String(sk.ability).toUpperCase(); if(_spellAbility && !spellcastingClasses().length) return _spellAbility; const owner = spellcastingClasses().find(x => spellOnCasterList(sp, x.c)); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
+function spellDC(ab){ if(_ov.spDC != null && String(_ov.spDC) !== '') return ovNum('spDC', 8); return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC') + exhPenalty(); }   // 2024: Exhaustion lowers spell save DCs too
 function spellAtkBonus(ab){ if(_ov.spAtk != null && String(_ov.spAtk) !== '') return ovNum('spAtk', 0); return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
 // A racial/feature-granted spell (e.g. High Elf's cantrip on a Fighter) also opens the Spells tab.
 function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted); }
@@ -2774,9 +3415,17 @@ function preparedMax(){
 function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level > 0 && sk.prepared && !sk.granted; }).length; }
 // Cantrips known/prepared: max from each caster class's "Cantrips" table column
 // (Warlock/pact casters know cantrips too, so unlike preparedMax we don't skip pact).
+// Divine Order: Thaumaturge (Cleric) / Primal Order: Magician (Druid) know one extra cantrip.
+function orderCantripBonus(){
+  let n = 0; const ch = choices || {};
+  const has = (cls, opt) => classList().some(c => norm(c.cls) === cls) && (norm((ch['class:' + cls[0].toUpperCase() + cls.slice(1)] || {}).order) === opt || customFeatures.some(f => /order/i.test(f.name) && norm(f.name).indexOf(opt) >= 0));
+  if(has('cleric', 'thaumaturge')) n++;
+  if(has('druid', 'magician')) n++;
+  return n;
+}
 function cantripMax(){
   if(_ov.cantripMax != null && String(_ov.cantripMax) !== '') return ovNum('cantripMax', 0);
-  let total = 0;
+  let total = orderCantripBonus();
   spellcastingClasses().forEach(({cl,c}) => {
     const row = (c.table||[]).find(r => Number(r.level) === num(cl.level));
     if(row){ const col = row.columns ? parseInt(row.columns['Cantrips'], 10) : NaN; const kn = row.cantripsKnown != null ? Number(row.cantripsKnown) : NaN; const n = Math.max(isNaN(col)?0:col, isNaN(kn)?0:kn); total += n; }
@@ -2791,7 +3440,9 @@ function renderSpellHeader(){
   const stb = document.querySelector('.tab-btn[data-tab="spells"]');
   if(stb){ stb.classList.toggle('no-cast', !on); stb.title = on ? '' : 'This class has no spellcasting'; }
   if(on){
-    $('sp-ability').textContent = spellAbilityId();
+    const abs = []; spellcastingClasses().forEach(({c}) => { if(c.spellcastingAbility && abs.indexOf(c.spellcastingAbility) < 0) abs.push(c.spellcastingAbility); });
+    $('sp-ability').textContent = abs.length > 1 ? abs.join(' / ') : spellAbilityId();
+    $('sp-ability').title = abs.length > 1 ? 'Each class casts its own spells with its own ability; DC / attack shown for ' + spellAbilityId() : '';
     // Save DC / Spell Attack honor a manual override (spellDC/spellAtkBonus) and are
     // left alone while being edited.
     if(document.activeElement !== $('sp-dc')) $('sp-dc').textContent = spellDC();
@@ -2859,17 +3510,25 @@ function spellRowHTML(sk, sp, opts){
       '<div class="sp-name-line">' +
         (opts.nameInput ? '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">'
                         : '<span class="sp-name-txt">' + esc(sk.display || sk.name) + '</span>') +
-        (sk.granted ? '<span class="sp-granted" title="Granted by a feature or trait — always prepared">granted</span>' : '') +
+        (sk.granted ? (isFreeCastSpell(sk)
+            ? '<span class="sp-granted' + (freeCastUsed[norm(sk.name)] ? ' used' : '') + '" title="Granted by ' + esc(sk.source || 'a feature or trait') + ' — always prepared; one free cast per Long Rest' + (freeCastUsed[norm(sk.name)] ? ' (used — needs a slot now)' : '') + (sk.ability ? ' · uses ' + esc(sk.ability) : '') + '">' + (freeCastUsed[norm(sk.name)] ? 'free used' : 'free 1/LR') + '</span>'
+            : '<span class="sp-granted" title="Always prepared from a class feature — still uses a spell slot">granted</span>') : '') +
       '</div>' +
       '<div class="sp-info">' + esc(spellInfoLine(sp)) + '</div>' +
     '</div>' +
     '<div class="sp-ctrls">' +
       '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
-      ((!opts.noUpcast && sp && (sp.higherLevels || sp.upcast) && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
-      '<button class="cast-btn" onclick="' + castCall + '" title="Cast this spell">Cast</button>' +
+      (canRitual(sk, sp) ? '<button class="ritual-btn" onclick="castRitual(\'' + q + '\')" title="Cast as a Ritual — no spell slot, takes 10 minutes longer">Ritual</button>' : '') +
+      ((!opts.noUpcast && sp && (sp.higherLevels || sp.upcast) && lvl > 0 && castReady(sk, sp)) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
+      (castReady(sk, sp) ? '<button class="cast-btn" onclick="' + castCall + '" title="Cast this spell">Cast</button>'
+                         : '<button class="cast-btn" disabled title="Not prepared — tick its Prepared box to cast it">Cast</button>') +
     '</div>' +
   '</div>';
 }
+// Leveled spells must be prepared (or granted) to cast; cantrips always can.
+function castReady(sk, sp){ return !sp || sp.level === 0 || !!sk.prepared || !!sk.granted; }
+// Rituals: castable as a Ritual when prepared — a Wizard can ritual-cast straight from the spellbook.
+function canRitual(sk, sp){ return !!(sp && sp.ritual && sp.level > 0 && (castReady(sk, sp) || classList().some(c => norm(c.cls) === 'wizard'))); }
 function renderSpells(){
   const box = $('spells-by-level'); box.innerHTML = '';
   const byLvl = {};
@@ -2879,6 +3538,7 @@ function renderSpells(){
     h += '<div class="slot-hd" style="background:transparent;"><span class="sl-name">' + (lvl === 0 ? 'Cantrips' : 'Level ' + lvl + ' Spells') + '</span></div>';
     byLvl[lvl].sort((a,b)=>a.sk.name.localeCompare(b.sk.name)).forEach(({ sk, sp }) => { h += spellRowHTML(sk, sp, { prep:true, nameInput:true }); });
   });
+  if(!spellsKnown.length && isCaster()) h = '<div class="sp-empty-hint">No spells yet — <button onclick="openBook()">open the Spellbook</button> to add spells from your class list.</div>';
   box.innerHTML = h;
   document.querySelectorAll('#spells-by-level .sp-name-input').forEach(el => { el.readOnly = _locked; });
   if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn();
@@ -2955,18 +3615,43 @@ function addSpellAttackRow(n){
 function syncSpellAttacks(){ spellsKnown.forEach(sk => addSpellAttackRow(sk.name)); }
 window.syncSpellAttacks = syncSpellAttacks;
 // Spend the lowest available slot of at least `lvl` — regular slots first, then a Pact slot.
-function spendSpellSlot(lvl, name){
+function spendSpellSlot(lvl, name, strict){
   const arr = slotArray();
-  if(arr){ for(let i = lvl; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(used < max){ slotUsed[String(i)] = used + 1; renderSlots(); scheduleAutosave(); return true; } } }
+  // Returns the slot level spent (Pact slots are always their own level), or false.
+  if(arr){ for(let i = lvl; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(used < max){ slotUsed[String(i)] = used + 1; renderSlots(); scheduleAutosave(); return i; } } }
   const pm = pactInfo();
-  if(pm && pm.level >= lvl){ const used = slotUsed['pact'] || 0; if(used < pm.slots){ slotUsed['pact'] = used + 1; renderSlots(); scheduleAutosave(); return true; } }
-  if(!arr && !pm) return true;   // no slot tracking → allow
-  addLog('Cast ' + name, '✗', 'No slots of level ' + lvl + '+ left', 'fumble'); return false;
+  if(pm && pm.level >= lvl){ const used = slotUsed['pact'] || 0; if(used < pm.slots){ slotUsed['pact'] = used + 1; renderSlots(); scheduleAutosave(); return pm.level; } }
+  if(!arr && !pm && !strict) return lvl;   // no slot tracking → allow
+  addLog('Cast ' + name, '✗', (!arr && !pm) ? 'Free cast already used this Long Rest — and you have no spell slots' : 'No slots of level ' + lvl + '+ left', 'fumble'); return false;
 }
-function spellSaveAbility(sp){ if(sp && sp.roll) return sp.roll === 'save' ? (sp.saveAbility || '') : ''; const m = ((sp && sp.description) || '').match(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\s+saving throw/i); return m ? m[1].slice(0,3).toUpperCase() : ''; }
+function spellSaveAbility(sp){
+  if(sp && sp.roll) return sp.roll === 'save' ? (sp.saveAbility || '') : '';
+  const d = (sp && sp.description) || '', re = /\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\s+sav(?:ing throws?|e)\b/gi; let m;
+  while((m = re.exec(d))){
+    const before = d.slice(Math.max(0, m.index - 24), m.index), after = d.slice(re.lastIndex, re.lastIndex + 30);
+    if(/(dis)?advantage on\s*$/i.test(before) || /bonus to\s*$/i.test(before) || /proficiency in\s*$/i.test(before)) continue;   // a buff, not the spell's save
+    if(/^\s*to (keep|maintain) concentration/i.test(after)) continue;
+    return m[1].slice(0,3).toUpperCase();
+  }
+  return '';
+}
+// A rider spell (Hex, Hunter's Mark…) adds damage to later hits; casting it doesn't deal damage itself.
+function isRiderSpell(sp){ const d = (sp && sp.description) || ''; return /\bextra\s+\d+d\d+/i.test(d) && !/instant/i.test((sp && sp.duration) || ''); }
 // Cantrip damage scales with character level (×1 / ×2 / ×3 / ×4 at 1 / 5 / 11 / 17).
 function scaleCantrip(expr, charLevel){ const mult = charLevel >= 17 ? 4 : charLevel >= 11 ? 3 : charLevel >= 5 ? 2 : 1; const m = expr.match(/^(\d+)d(\d+)(.*)$/i); return m ? (num(m[1]) * mult) + 'd' + m[2] + (m[3] || '') : expr; }
-function rollDiceExpr(expr, crit){ const m = expr.match(/(\d+)d(\d+)\s*([+-]\s*\d+)?/i); if(!m) return { total:0, detail:expr }; let n = num(m[1]) || 1; const sides = num(m[2]); const flat = m[3] ? num(m[3].replace(/\s+/g,'')) : 0; if(crit) n *= 2; const faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(sides); faces.push(f); sum += f; } return { total: sum + flat, detail: n + 'd' + sides + '(' + faces.join('+') + ')' + (flat ? ' ' + sgn(flat) : '') }; }
+function rollDiceExpr(expr, crit){
+  // Several dice groups (an upcast with a different die, "1d10 + 1d6"): roll each, sum them.
+  const groups = String(expr).match(/\d*d\d+/gi) || [];
+  if(groups.length > 1){
+    let total = 0; const parts = [];
+    String(expr).replace(/([+-]?)\s*(\d*)d(\d+)|([+-])\s*(\d+)(?!\s*d)/gi, (all, sg, n, sides, fsg, flat) => {
+      if(sides){ let k = num(n) || 1; if(crit) k *= 2; const faces = []; let sum = 0; for(let i = 0; i < k; i++){ const f = dN(num(sides)); faces.push(f); sum += f; } total += (sg === '-' ? -sum : sum); parts.push(k + 'd' + sides + '(' + faces.join('+') + ')'); }
+      else if(flat){ const v = num(flat) * (fsg === '-' ? -1 : 1); total += v; parts.push(sgn(v)); }
+      return all;
+    });
+    return { total, detail: parts.join(' + ').replace(/\+ ([+-])/g, '$1') };
+  }
+  const m = expr.match(/(\d+)d(\d+)\s*([+-]\s*\d+)?/i); if(!m) return { total:0, detail:expr }; let n = num(m[1]) || 1; const sides = num(m[2]); const flat = m[3] ? num(m[3].replace(/\s+/g,'')) : 0; if(crit) n *= 2; const faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(sides); faces.push(f); sum += f; } return { total: sum + flat, detail: n + 'd' + sides + '(' + faces.join('+') + ')' + (flat ? ' ' + sgn(flat) : '') }; }
 function d20Detail(r){ return r.mode !== 'norm' ? 'd20[' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']' : 'd20:' + r.nat; }
 function spellEffectSummary(sp){ const d = (sp && sp.description) || ''; const first = d.split(/(?<=[.!?])\s/)[0] || d; return first.length > 170 ? first.slice(0,167) + '…' : first; }
 // Slot levels (≥ minLevel) that currently have a free slot — the upcast options.
@@ -3024,23 +3709,40 @@ function upcastSpell(name){
   openCastPicker(name, (sk && sk.display) || name, opts);
 }
 // Cast a spell: pick/spend a slot (with upcasting), then roll/report by type — attack roll, saving throw, plain damage, or effect text.
-function castSpellFull(name, castLevel){
-  if(rollsOff()) return;
+// Returns true when the spell was cast (so the Turn hub only spends the action on success).
+// opts.ritual: cast as a Ritual — no slot, +10 minutes, no action economy.
+function castSpellFull(name, castLevel, opts){
+  opts = opts || {};
+  if(rollsOff()) return false;
   const sk = spellsKnown.find(s => norm(s.name) === norm(name));
   const label = (sk && sk.display) || name;
+  if(spellsBlockedByArmor(label)) return false;
   const sp = spellByName(name);
-  if(!sp){ addLog('Cast ' + label, '✦', 'Cast', 'normal'); return; }
+  if(!sp){ addLog('Cast ' + label, '✦', 'Cast', 'normal'); return true; }
   const lvl = sp.level;
+  const ritual = !!opts.ritual && !!sp.ritual;
   // Default Cast is one click at base level; the ⇧ button (upcastSpell) opens the picker.
-  const useLevel = Math.max(lvl, castLevel || lvl);
-  // Spells granted by a feature/trait are always-prepared and cast without a spell
-  // slot (they're free, or gated by their own tracker). Only a deliberate upcast to
-  // a higher level spends a real slot to boost them.
-  const isGranted = !!(sk && sk.granted);
-  if(lvl > 0){
-    if(isGranted){ if(useLevel > lvl){ if(!spendSlotAt(useLevel, label)) return; } }
-    else if(castLevel != null){ if(!spendSlotAt(useLevel, label)) return; }
-    else { if(!spendSpellSlot(lvl, label)) return; }
+  // A Pact slot (or a higher slot when the lower ones are gone) casts at the slot's level.
+  let useLevel = Math.max(lvl, castLevel || lvl);
+  // Class-granted always-prepared spells (Divine Smite, domain spells…) spend a slot like
+  // any other. Species/feat-granted spells get ONE free cast per Long Rest; after that they
+  // need a slot of the spell's level. A deliberate upcast always spends the chosen slot.
+  const freeCast = isFreeCastSpell(sk);
+  let usedFree = false;
+  if(lvl > 0 && !ritual){
+    if(castLevel != null && useLevel > lvl){ if(!spendSlotAt(useLevel, label)) return false; }
+    else if(freeCast && !freeCastUsed[norm(name)]){ freeCastUsed[norm(name)] = true; usedFree = true; }
+    else if(castLevel != null){ if(!spendSlotAt(useLevel, label)) return false; }
+    else { const got = spendSpellSlot(lvl, label, freeCast); if(!got) return false; if(typeof got === 'number' && got > useLevel) useLevel = got; }
+  }
+  if(usedFree) addLog('Free cast', '✦', label + ' — once per Long Rest without a slot (used)', 'normal');
+  if(ritual) addLog('Ritual', '✦', label + ' — cast as a Ritual: no slot, takes 10 minutes longer', 'normal');
+  // Rider spells (Hex, Hunter's Mark…): no damage now — it's added to later hits.
+  if(isRiderSpell(sp)){
+    const rd = ((sp.description || '').match(/extra\s+(\d+d\d+)\s+([A-Za-z]+)?/i) || []);
+    addLog(label + (useLevel > lvl ? ' (Lvl ' + useLevel + ')' : ''), '✦ Active', 'Adds ' + (rd[1] || 'extra') + (rd[2] ? ' ' + rd[2].toLowerCase() : '') + ' damage to your hits while it lasts · ' + spellEffectSummary(sp), 'normal');
+    if(sp.concentration) startConcentration(label);
+    return true;
   }
   const dmgInfo = spellDamage(sp);
   let diceExpr = dmgInfo.dice;
@@ -3068,7 +3770,7 @@ function castSpellFull(name, castLevel){
     for(let i=0;i<darts;i++){ const f = dN(4); faces.push(f); sum += f; }
     const total = sum + darts;   // +1 force per dart
     addLog(label + upLabel, total + ' force', darts + ' darts, 1d4+1 each · ' + darts + 'd4(' + faces.join('+') + ') +' + darts, 'normal');
-    return;
+    return true;
   }
   // Multi-projectile attack spells (Eldritch Blast beams, Scorching Ray rays): each
   // projectile gets its OWN attack roll + damage. Beams scale by character level (cantrip);
@@ -3087,7 +3789,7 @@ function castSpellFull(name, castLevel){
     }
     addLog(label + upLabel, count + '× · up to ' + maxDmg + mt + ' (compare each to AC)', segs.join('  |  '), 'normal');
     if(sp.concentration) startConcentration(label);
-    return;
+    return true;
   }
   if(diceExpr && spellIsAttack(sp)){
     const ctx = rollCtx('attack');
@@ -3106,7 +3808,9 @@ function castSpellFull(name, castLevel){
     addLog(label + upLabel, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
   }
   if(sp.concentration) startConcentration(label);
+  return true;
 }
+function castRitual(name){ return castSpellFull(name, null, { ritual:true }); }
 // The spell currently concentrated on (resolved from the stored label).
 function concentratedSpell(){
   if(!_concentration) return null;
@@ -3307,7 +4011,7 @@ function castableSpells(sub){
     .filter(x => turnCastType(x.sp.castingTime) === sub)
     .sort((a, b) => (a.sp.level - b.sp.level) || a.sk.name.localeCompare(b.sk.name));
 }
-function turnCastSpell(name, sub){ castSpellFull(name); _turn[sub] = true; afterTurnAction(); }
+function turnCastSpell(name, sub){ if(isIncapacitated && isIncapacitated()){ addLog('Cast', '✗', 'Incapacitated — you can\'t take actions', 'fumble'); return; } if(castSpellFull(name)){ _turn[sub] = true; afterTurnAction(); } }
 function toggleTurnSec(id){ _turnCollapsed[id] = !_turnCollapsed[id]; renderTurn(); scheduleAutosave(); }
 // ── Opportunity Attack: mirrors the Attacks section, melee options only ──
 // Unarmed Strikes and melee weapons qualify; ranged weapons and spell-attack rows don't.
@@ -3318,29 +4022,40 @@ function isMeleeAttackRow(tr){
   if(tr.dataset.weapon){ const w = (typeof D !== 'undefined' && D.weapons ? D.weapons() : []).find(x => norm(x.name) === norm(tr.dataset.weapon)); if(w) return norm(w.kind) !== 'ranged'; }
   return true;
 }
-function oppAttack(i){ if(_turn.reaction) return; const tr = document.querySelectorAll('#attacks-body tr')[i]; if(tr) doAttack(tr, 0, true); }
+function oppAttack(i){ if(_turn.reaction || isIncapacitated()) return; const tr = document.querySelectorAll('#attacks-body tr')[i]; if(tr) doAttack(tr, 0, true); }
+// Light-weapon extra attack (Bonus Action): offered for each equipped Light weapon when another
+// Light weapon is equipped (or a mastered Nick weapon, which can fold it into the Attack action).
+function offhandOpts(){
+  const rows = [...document.querySelectorAll('#attacks-body tr')].filter(tr => { const i = rowWeaponInfo(tr); return i.w && i.light; });
+  const nick = rows.some(tr => rowMasteryName(tr) === 'Nick');
+  if(rows.length < 2 && !nick) return [];
+  return rows.map(tr => {
+    const c = atkCalc(tr, { offhand:true }), nm = (tr.querySelector('.atk-name').value || '').trim() || 'Attack';
+    const isNick = rowMasteryName(tr) === 'Nick';
+    return { name: 'Off-hand: ' + nm, meta: 'Light weapon · ' + sgn(c.hit) + ' to hit · ' + (c.dmgExpr || '—') + (c.dtype ? ' ' + c.dtype : '') + ' · ' + (hasFightingStyle('Two-Weapon Fighting') ? 'Two-Weapon Fighting adds ' + c.abil : 'no ability mod to damage') + (isNick ? ' · Nick: can be part of the Attack action' : ''),
+      usesHTML:'', disabled: _turn.bonus || isIncapacitated(), run(){ doAttack(tr, 0, false, { offhand:true }); } };
+  });
+}
 // Mirrors the Attacks section (same table + row layout), melee rows only, read-only,
 // with an Attack button that spends the Reaction — the attack analogue of how the
 // Turn-tab spell rows mirror the Spells tab.
 function turnOppAttacksHTML(){
   const rows = [...document.querySelectorAll('#attacks-body tr')].map((tr, i) => ({ tr, i })).filter(x => isMeleeAttackRow(x.tr));
   if(!rows.length) return '<p class="turn-empty">No melee attacks — add a melee weapon in the Attacks section to make Opportunity Attacks.</p>';
-  const dis = _turn.reaction;
-  let h = '<div class="tbl-scroll"><table class="tbl atk-tbl"><thead><tr><th>Name</th><th>Bonus</th><th>Damage</th><th></th></tr></thead><tbody>';
+  const inc = isIncapacitated(), dis = _turn.reaction || inc;
+  let h = '<div class="tbl-scroll"><table class="tbl atk-tbl"><thead><tr><th>Name</th><th>To Hit</th><th>Damage</th><th></th></tr></thead><tbody>';
   rows.forEach(({ tr, i }) => {
     const name = (tr.querySelector('.atk-name').value || '').trim() || 'Attack';
-    const abil = tr.querySelector('.atk-abil').value;
-    const type = (tr.querySelector('.atk-dtype').value || '').trim();
-    const mastery = tr.dataset.mastery || '';
-    const bonus = tr.querySelector('.atk-bonus').value, dmg = tr.querySelector('.atk-dmg').value;
-    let det = '<span>' + esc(abil) + '</span>';
-    if(type) det += '<span class="atk-dot">·</span><span>' + esc(type) + '</span>';
-    if(mastery) det += '<span class="atk-dot">·</span><button class="atk-mastery" onclick="openMastery(\'' + esc(mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(mastery) + '</button>';
+    const c = atkCalc(tr);
+    let det = '<span>' + esc(c.abil) + '</span>';
+    if(c.dtype) det += '<span class="atk-dot">·</span><span>' + esc(c.dtype) + '</span>';
+    if(c.mastery) det += '<span class="atk-dot">·</span><button class="atk-mastery" onclick="openMastery(\'' + esc(c.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(c.mastery) + '</button>';
+    if(c.dis.length) det += '<span class="atk-dot">·</span><span class="atk-warn" title="' + esc(c.dis.join(' · ')) + '">Disadv.</span>';
     h += '<tr>' +
       '<td><div class="atk-name-txt">' + esc(name) + '</div><div class="atk-detail">' + det + '</div></td>' +
-      '<td class="mono">' + esc(bonus) + '</td>' +
-      '<td class="mono">' + esc(dmg) + '</td>' +
-      '<td class="roll-cell" style="white-space:nowrap;text-align:right;"><button class="mini-roll' + (dis ? ' dis' : '') + '" onclick="oppAttack(' + i + ')" title="Make this as an Opportunity Attack (uses your Reaction)">Attack</button></td>' +
+      '<td><span class="atk-hit mono" title="' + esc('To hit: ' + c.hitBreakdown) + '">' + sgn(c.hit) + '</span></td>' +
+      '<td><span class="atk-dmg-calc mono" title="' + esc('Damage: ' + c.dmgBreakdown) + '">' + esc(c.dmgExpr || '—') + '</span></td>' +
+      '<td class="roll-cell" style="white-space:nowrap;text-align:right;"><button class="mini-roll' + (dis ? ' dis' : '') + '" onclick="oppAttack(' + i + ')" title="' + (inc ? 'Incapacitated — no reactions' : 'Make this as an Opportunity Attack (uses your Reaction)') + '">Attack</button></td>' +
     '</tr>';
   });
   return h + '</tbody></table></div>';
@@ -3355,7 +4070,9 @@ function turnSecHTML(id, title, bodyHTML, note){
     '<div class="turn-sec-body">' + bodyHTML + '</div></section>';
 }
 function turnCardsHTML(opts){
+  const inc = isIncapacitated();
   return opts.map(o => {
+    if(inc){ o.disabled = true; o.meta = 'Incapacitated — no actions' + (o.meta ? ' · ' + o.meta : ''); }
     const i = _turnOpts.length; _turnOpts.push(o);
     return '<div class="turn-card' + (o.disabled ? ' disabled' : '') + '">' +
       '<div class="tc-main" onclick="useTurnOpt(' + i + ')"><div class="tc-name">' + esc(o.name) + '</div>' + (o.meta ? '<div class="tc-sub">' + esc(o.meta) + '</div>' : '') + '</div>' +
@@ -3400,7 +4117,7 @@ function renderTurn(){
   if(atkSec){
     atkSec.style.display = _turnSub === 'action' ? '' : 'none';
     atkSec.classList.toggle('collapsed', !!_turnCollapsed['attacks']);
-    const per = attacksPerAction(), note = $('turn-atk-note'); if(note) note.textContent = per > 1 ? ('Extra Attack · ' + per + ' attacks') : '';
+    const per = attacksPerAction(), note = $('turn-atk-note'); if(note) note.textContent = isIncapacitated() ? 'Incapacitated — no actions' : per > 1 ? ('Extra Attack · ' + per + ' attacks') : '';
     refreshAtkActions();
   }
   _turnOpts = [];
@@ -3416,6 +4133,7 @@ function renderTurn(){
       const opt = { name: _concentration + ' (sustain)', meta: 'Bonus Action · ' + _sus.dice + ' ' + _sus.type + ' · hits automatically', disabled: _turn.bonus, run(){ sustainSpell(); } };
       h += turnSecHTML('b-sustain', 'Sustained Spell', turnCardsHTML([opt]));
     }
+    h += turnSecHTML('b-offhand', 'Off-hand Attack', turnCardsHTML(offhandOpts()), 'Light weapons');
     h += turnSecHTML('b-spells', 'Spells', turnSpellsHTML('bonus'));
     h += turnSecHTML('b-feats', 'Features', turnCardsHTML(activatedFeatures().filter(f => f.type === 'bonus').map(featureOpt)));
     if(!h) h = '<p class="turn-empty">No bonus actions yet — bonus-action spells and features show up here.</p>';
@@ -3514,11 +4232,15 @@ function renderConditions(){
   box.innerHTML = chips + '<span class="cond-chip cond-add" title="Add a condition" onclick="openCondPicker()">+ Add</span>';
   renderExhaustion();
 }
+// Conditions that include Incapacitated — they end concentration and block actions/reactions.
+const INCAPACITATING = ['Incapacitated','Paralyzed','Petrified','Stunned','Unconscious'];
+function isIncapacitated(){ return INCAPACITATING.some(c => activeCond(c)); }
 function toggleCondition(name){
   const i = activeConditions.findIndex(x => norm(x) === norm(name));
   if(i >= 0){ activeConditions.splice(i,1); addLog('Condition removed', '—', name, 'normal'); }
-  else { activeConditions.push(name); addLog('Condition', '⚠', name + ' applied', 'fumble'); }
-  renderConditions(); scheduleAutosave();
+  else { activeConditions.push(name); addLog('Condition', '⚠', name + ' applied', 'fumble');
+    if(_concentration && INCAPACITATING.some(c => norm(c) === norm(name))) dropConcentration(); }
+  renderConditions(); recalc(); scheduleAutosave();
 }
 function condInfo(name){ const c = D.conditions().find(x => norm(x.name) === norm(name)); if(c){ $('desc-title').textContent = c.name; $('desc-body').innerHTML = '<p>' + esc(c.description) + '</p>'; $('desc-overlay').classList.add('open'); } }
 
@@ -3569,7 +4291,12 @@ function renderExhaustion(){
   box.innerHTML = h;
   const ev = $('exh-val'); if(ev) ev.textContent = exhaustion * 2;
 }
-function setExhaustion(n){ exhaustion = (exhaustion === n ? n-1 : n); renderExhaustion(); scheduleAutosave(); }
+function setExhaustion(n){
+  exhaustion = (exhaustion === n ? n-1 : n); renderExhaustion();
+  if(exhaustion >= 6) addLog('Exhaustion', '☠', 'Exhaustion level 6 — the character dies.', 'fumble');
+  recalc();   // speed and spell DC depend on it
+  scheduleAutosave();
+}
 
 // ═══ RESTS ════════════════════════════════════════════════════════════════
 function shortRest(){ openShortRestModal(); }
@@ -3582,46 +4309,58 @@ function restListHTML(items){
 function resNames(kind){ return allResources().filter(r => kind === 'long' || r.reset === 'short').map(r => r.name); }
 // Short Rest: pick how many Hit Dice to roll, then heal + run short-rest automations.
 let _srPick = 0;
-function openShortRestModal(){ _srPick = 0; renderShortRestModal(); $('desc-overlay').classList.add('open'); }
-function srAdjust(d){ const avail = num($('f-hd-left').value); _srPick = Math.max(0, Math.min(avail, _srPick + d)); const el = $('sr-n'); if(el) el.textContent = _srPick; }
+function openShortRestModal(){ _srPick = {}; renderShortRestModal(); $('desc-overlay').classList.add('open'); }
+// _srPick: { dieSize: count } — how many of each die to spend this rest.
+function srAdjust(d, size){ size = size || hitDieSides(); if(typeof _srPick !== 'object' || !_srPick) _srPick = {}; _srPick[size] = Math.max(0, Math.min(hdLeftOf(size), (_srPick[size] || 0) + d)); const el = $('sr-n-' + size); if(el) el.textContent = _srPick[size]; }
 function shortRestRestoreItems(){
   const items = [];
-  if(num($('f-hd-left').value) > 0) items.push('Hit Points — roll any Hit Dice you spend above');
-  if(casterType() === 'pact') items.push('Pact Magic spell slots');
+  if(hdRemaining() > 0) items.push('Hit Points — roll any Hit Dice you spend above');
+  if(warlockEntry()) items.push('Pact Magic spell slots');
   const sres = allResources().filter(r => r.reset === 'short').map(r => r.name);
   if(sres.length) items.push('Short-rest resources: ' + sres.join(', '));
   return items;
 }
 function renderShortRestModal(){
-  const avail = num($('f-hd-left').value), sides = hitDieSides(), con = modOf('CON');
-  _srPick = Math.max(0, Math.min(avail, _srPick));
+  const avail = hdRemaining(), con = modOf('CON');
+  if(typeof _srPick !== 'object' || !_srPick) _srPick = {};
   $('desc-title').textContent = 'Short Rest';
   let h = '';
   if(avail <= 0){
     h += '<p>You have no Hit Dice remaining — no Hit Points to roll. The rest still restores everything below.</p>';
   } else {
-    h += '<p class="dm-meta">' + avail + ' Hit Dice available (d' + sides + ') · each heals its roll ' + sgn(con) + ' CON</p>';
-    h += '<div class="sr-pick"><span class="sr-lbl">Spend</span><button class="sr-step" onclick="srAdjust(-1)">&minus;</button><span class="sr-n" id="sr-n">' + _srPick + '</span><button class="sr-step" onclick="srAdjust(1)">+</button><span class="sr-of">of ' + avail + '</span></div>';
+    h += '<p class="dm-meta">' + avail + ' Hit Dice available (' + hdSizes().filter(d => hdLeftOf(d) > 0).map(d => hdLeftOf(d) + 'd' + d).join(' + ') + ') · each heals its roll ' + sgn(con) + ' CON (minimum 0)</p><div class="sr-pool">';
+    hdSizes().filter(d => hdLeftOf(d) > 0).forEach(d => {
+      _srPick[d] = Math.max(0, Math.min(hdLeftOf(d), _srPick[d] || 0));
+      h += '<div class="sr-pick"><span class="sr-lbl">Spend d' + d + '</span><button class="sr-step" onclick="srAdjust(-1,' + d + ')">&minus;</button><span class="sr-n" id="sr-n-' + d + '">' + _srPick[d] + '</span><button class="sr-step" onclick="srAdjust(1,' + d + ')">+</button><span class="sr-of">of ' + hdLeftOf(d) + '</span></div>';
+    });
+    h += '</div>';
   }
   h += restListHTML(shortRestRestoreItems());
   h += '<div class="sr-ft"><button class="rest-btn sr-rest" onclick="completeShortRest()">Rest</button></div>';
   $('desc-body').innerHTML = h;
 }
 function completeShortRest(){
-  const le = $('f-hd-left'), avail = num(le.value), n = Math.max(0, Math.min(avail, _srPick)), sides = hitDieSides();
-  let healed = 0; const rolls = [];
+  if(typeof _srPick !== 'object' || !_srPick) _srPick = {};
+  let healed = 0, n = 0; const rolls = [], spentBits = [];
+  const con = modOf('CON');
+  hdSizes().forEach(d => {
+    const k = Math.max(0, Math.min(hdLeftOf(d), _srPick[d] || 0)); if(!k) return;
+    const faces = []; for(let i = 0; i < k; i++){ const r = dN(d); healed += r; faces.push(r); }
+    healed += con * k; n += k; hdSpend(d, k); rolls.push(faces.join(', ')); spentBits.push(k + '×d' + d);
+  });
+  healed = Math.max(0, healed);   // 2024: the total is minimum 0
   if(n > 0){
-    const con = modOf('CON');
-    for(let i = 0; i < n; i++){ const r = dN(sides); healed += Math.max(1, r + con); rolls.push(r); }
-    le.value = avail - n;
-    const cur = $('f-hp-cur'), max = num($('f-hp-max').textContent);
-    cur.value = max ? Math.min(max, num(cur.value) + healed) : num(cur.value) + healed;
+    const cur = $('f-hp-cur'), max = num($('f-hp-max').textContent), was = num(cur.value);
+    cur.value = max ? Math.min(max, was + healed) : was + healed;
+    if(was === 0 && num(cur.value) > 0 && !isDead()) reviveFromDown();
   }
+  updateHitDiceUI();
+  const sides = spentBits.join(' + ');
   // Other short-rest automations: Pact Magic slots + short-rest resources.
-  if(casterType() === 'pact' && slotUsed['pact']){ slotUsed['pact'] = 0; renderSlots(); }
+  if(warlockEntry() && slotUsed['pact']){ slotUsed['pact'] = 0; renderSlots(); }
   resetResources('short');
   const detail = n > 0
-    ? ('spent ' + n + '×d' + sides + ' (' + rolls.join(', ') + ') + CON · ' + (avail - n) + ' HD left; Pact slots + short-rest resources restored')
+    ? ('spent ' + sides + ' (' + rolls.join(' | ') + ') ' + sgn(con) + ' CON each · ' + hdRemaining() + ' HD left; Pact slots + short-rest resources restored')
     : 'no Hit Dice spent; Pact slots + short-rest resources restored';
   addLog('Short Rest', n > 0 ? ('+' + healed + ' HP') : '☾', detail, 'normal');
   closeDesc();
@@ -3630,16 +4369,17 @@ function completeShortRest(){
 // Long Rest: no Hit Dice are spent, so the modal just lists what it restores.
 function longRest(){ openLongRestModal(); }
 function openLongRestModal(){ renderLongRestModal(); $('desc-overlay').classList.add('open'); }
-function longRestRegain(){ const t = hitDiceTotal(); return Math.min(t - num($('f-hd-left').value), Math.max(1, Math.floor(t/2))); }
+function longRestRegain(){ const t = hitDiceTotal(); return Math.min(t - hdRemaining(), Math.max(1, Math.floor(t/2))); }
 function longRestRestoreItems(){
   const items = ['Hit Points restored to full'];
   if(num($('f-hp-temp').value) > 0) items.push('Temporary HP cleared');
-  if(isCaster()) items.push('All spell slots' + (casterType() === 'pact' ? ' (including Pact Magic)' : ''));
+  if(isCaster()) items.push('All spell slots' + (warlockEntry() ? ' (including Pact Magic)' : '') + ', free casts of granted spells');
   const regained = longRestRegain(); if(regained > 0) items.push('Hit Dice regained (+' + regained + ')');
   if(exhaustion > 0) items.push('Exhaustion reduced by 1');
   if(deathSucc || deathFail) items.push('Death saves cleared');
   if(activeCond('Unconscious')) items.push('Unconscious condition removed');
   if(_concentration) items.push('Concentration on ' + _concentration + ' ended');
+  if(invRows().some(tr => { const m = magicChargesMax(invRowRef(tr)); return m && num(tr.dataset.charges) < m; })) items.push('Magic item charges restored');
   const res = resNames('long');
   if(res.length) items.push(res.length <= 4 ? ('Resources reset: ' + res.join(', ')) : (res.length + ' resource trackers reset'));
   return items;
@@ -3652,14 +4392,18 @@ function renderLongRestModal(){
   $('desc-body').innerHTML = h;
 }
 function completeLongRest(){
+  if(isDead()){ addLog('Long Rest', '✗', 'The character is dead — a rest has no effect.', 'fumble'); closeDesc(); return; }
+  if(num($('f-hp-cur').value) <= 0){ addLog('Long Rest', '✗', 'You need at least 1 Hit Point at the start of a Long Rest to gain its benefits.', 'fumble'); closeDesc(); return; }
   $('f-hp-cur').value = $('f-hp-max').textContent; $('f-hp-temp').value = 0;
-  slotUsed = {}; deathSucc = 0; deathFail = 0; dropConcentration(true); setUnconscious(false);
+  slotUsed = {}; freeCastUsed = {}; deathSucc = 0; deathFail = 0; dropConcentration(true); setUnconscious(false);
+  const hadExh = exhaustion > 0;
   if(exhaustion > 0) exhaustion -= 1;   // 2024: a Long Rest removes one Exhaustion level
   // Regain half your Hit Dice (rounded down, minimum 1).
-  const t = hitDiceTotal(); const le = $('f-hd-left'); const regained = Math.min(t - num(le.value), Math.max(1, Math.floor(t/2))); le.value = Math.min(t, num(le.value) + regained);
+  const regained = longRestRegain(); hdSetRemaining(hdRemaining() + regained); updateHitDiceUI();
   resetResources('long');
+  const recharged = restoreCharges();
   renderDeath(); renderSlots(); renderExhaustion();
-  addLog('Long Rest', '☀', 'Full HP, all spell slots, death saves cleared' + (exhaustion >= 0 ? ', −1 Exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice', 'crit');
+  addLog('Long Rest', '☀', 'Full HP, all spell slots, death saves cleared' + (hadExh ? ', −1 Exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice' + (recharged ? ', ' + recharged + ' item' + (recharged > 1 ? 's' : '') + ' recharged' : ''), 'crit');
   closeDesc();
   scheduleAutosave();
 }
@@ -3709,9 +4453,10 @@ function collectSheet(){
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
     prof: tr.dataset.prof !== '0', bonus: num(tr.querySelector('.atk-bonus').value),
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
-    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1', mastery: tr.dataset.mastery || '', weapon: tr.dataset.weapon || ''
+    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1', mastery: tr.dataset.mastery || '', weapon: tr.dataset.weapon || '',
+    rid: tr.dataset.rid || '', twoHanded: tr.dataset.twoHanded === '1', magic: num(tr.dataset.magic || 0)
   })).filter(a => a.name || a.damage);
-  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', plus: num(tr.dataset.plus || 0), scroll: tr.dataset.scroll || '' })).filter(i => i.name);
+  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', plus: num(tr.dataset.plus || 0), scroll: tr.dataset.scroll || '', rid: tr.dataset.rid || '', base: tr.dataset.base || '', charges: (tr.dataset.charges != null && tr.dataset.charges !== '') ? num(tr.dataset.charges) : null })).filter(i => i.name);
   return {
     system:'DND', v:1,
     name: v('f-name'),
@@ -3722,13 +4467,13 @@ function collectSheet(){
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
     shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
-    speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
+    speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), acTemp: v('f-ac-temp'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: hdRemaining(), hdUsed,
     locked: _locked, ov: _ov,
     turn: _turn, turnSub: _turnSub, turnCollapsed: _turnCollapsed,
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
-    customFeatures, addedFeats, choices, resourceUsed, customResources, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
+    customFeatures, addedFeats, choices, languages, size: _size, resourceUsed, customResources, spellsKnown, slotUsed, freeCastUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
     concentration: _concentration, attunedRefs,
     options,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id:_campaign.id, code:_campaign.code, name:_campaign.name } : null,
@@ -3751,20 +4496,24 @@ function applySheet(d){
   set('f-speed', d.speed || '30'); _speedManual = !!d.speedManual; set('f-ac', d.ac || '10');
   set('f-ac-temp', d.acTemp || '');
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
-  set('f-hd-left', d.hdLeft != null ? d.hdLeft : hitDiceTotal());
+  hdUsed = (d.hdUsed && typeof d.hdUsed === 'object') ? Object.assign({}, d.hdUsed) : {};
+  if(!d.hdUsed && d.hdLeft != null) hdSetRemaining(num(d.hdLeft));   // older saves: one remaining count → spend smallest dice first
+  set('f-hd-left', hdRemaining());
   $('insp-btn').classList.toggle('on', !!d.inspiration);
   deathSucc = d.deathSucc || 0; deathFail = d.deathFail || 0;
   activeConditions = d.activeConditions || []; defenses = d.defenses || {}; companions = Array.isArray(d.companions) ? d.companions : []; exhaustion = d.exhaustion || 0; _tab = d.tab || _tab;
   set('f-proficiencies', d.proficiencies); set('f-notes', d.notes);
   set('f-gp', d.gp || 0); set('f-sp', d.sp || 0); set('f-cp', d.cp || 0);
   customFeatures = d.customFeatures || []; addedFeats = d.addedFeats || []; choices = (d.choices && typeof d.choices === 'object') ? d.choices : {};
+  languages = Array.isArray(d.languages) ? d.languages.slice() : []; _size = d.size || '';
   resourceUsed = d.resourceUsed || {}; customResources = d.customResources || [];
-  spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
+  spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; freeCastUsed = (d.freeCastUsed && typeof d.freeCastUsed === 'object') ? d.freeCastUsed : {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
   _concentration = d.concentration || null; attunedRefs = Array.isArray(d.attunedRefs) ? d.attunedRefs.slice() : [];
   options = Object.assign(defaultOptions(), d.options || {});
   $('attacks-body').innerHTML = ''; (d.attacks || []).filter(a => !a.spell).forEach(addAttackRow);   // spells now live only in the Spells tab
   ensureUnarmed();
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
+  reconcileAttackRids();   // legacy saves: key weapon rows + attunement by inventory rid
   refreshSubclassList(); refreshSpellPicker();
   renderDeath(); renderFeatures(); renderResources(); renderConditions(); fillDamageTypes(); renderDefenses(); fillCompanionDatalist(); renderCompanions(); renderConcentration(); renderAttuneCount(); recalc(); setDefaultTab();
   applyLock();   // apply lock/unlock editability across all fields (after rows are built)

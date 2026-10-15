@@ -441,6 +441,11 @@ const DND_CLASSES = [
       },
       {
         "name": "Path of the Wild Heart",
+        "alwaysPrepared": {
+          "3": [
+            "Speak with Animals"
+          ]
+        },
         "className": "Barbarian",
         "flavor": "Your Rage draws on a spiritual bond with animals, letting you borrow their strengths and speak with the natural world.",
         "source": "phb",
@@ -1001,6 +1006,9 @@ const DND_CLASSES = [
       },
       {
         "name": "Eldritch Knight",
+        "spellcasting": "third",
+        "spellcastingAbility": "INT",
+        "spellList": "Wizard",
         "className": "Fighter",
         "flavor": "A warrior who weaves Wizard magic into swordplay — warding themselves, binding a weapon, and striking with spell and steel at once.",
         "source": "phb",
@@ -1596,6 +1604,9 @@ const DND_CLASSES = [
       },
       {
         "name": "Arcane Trickster",
+        "spellcasting": "third",
+        "spellcastingAbility": "INT",
+        "spellList": "Wizard",
         "className": "Rogue",
         "flavor": "A spell-thief who laces stealth and larceny with enchantment and illusion — a phantom hand, a nudge to the mind, a stolen spell.",
         "source": "phb",
@@ -2788,6 +2799,12 @@ const DND_CLASSES = [
       },
       {
         "name": "College of Glamour",
+        "alwaysPrepared": {
+          "3": [
+            "Charm Person",
+            "Mirror Image"
+          ]
+        },
         "className": "Bard",
         "flavor": "A bard touched by the Feywild whose beauty commands and beguiles, rallying allies and awing enemies into submission.",
         "source": "phb",
@@ -3203,6 +3220,26 @@ const DND_CLASSES = [
     "subclasses": [
       {
         "name": "Life Domain",
+        "alwaysPrepared": {
+          "3": [
+            "Aid",
+            "Bless",
+            "Cure Wounds",
+            "Lesser Restoration"
+          ],
+          "5": [
+            "Mass Healing Word",
+            "Revivify"
+          ],
+          "7": [
+            "Aura of Life",
+            "Death Ward"
+          ],
+          "9": [
+            "Greater Restoration",
+            "Mass Cure Wounds"
+          ]
+        },
         "className": "Cleric",
         "flavor": "A healer channeling the positive energy of life itself, mending wounds better than any other.",
         "source": "srd",
@@ -3239,6 +3276,26 @@ const DND_CLASSES = [
       },
       {
         "name": "Light Domain",
+        "alwaysPrepared": {
+          "3": [
+            "Burning Hands",
+            "Faerie Fire",
+            "Scorching Ray",
+            "See Invisibility"
+          ],
+          "5": [
+            "Daylight",
+            "Fireball"
+          ],
+          "7": [
+            "Arcane Eye",
+            "Wall of Fire"
+          ],
+          "9": [
+            "Flame Strike",
+            "Scrying"
+          ]
+        },
         "className": "Cleric",
         "flavor": "A cleric of a sun or fire god who scorches foes with radiance and blinds the wicked.",
         "source": "phb",
@@ -3268,6 +3325,26 @@ const DND_CLASSES = [
       },
       {
         "name": "Trickery Domain",
+        "alwaysPrepared": {
+          "3": [
+            "Charm Person",
+            "Disguise Self",
+            "Invisibility",
+            "Pass without Trace"
+          ],
+          "5": [
+            "Hypnotic Pattern",
+            "Nondetection"
+          ],
+          "7": [
+            "Confusion",
+            "Dimension Door"
+          ],
+          "9": [
+            "Dominate Person",
+            "Modify Memory"
+          ]
+        },
         "className": "Cleric",
         "flavor": "A cleric of mischief and misdirection who conjures duplicates and blesses allies with stealthy cunning.",
         "source": "phb",
@@ -3297,6 +3374,26 @@ const DND_CLASSES = [
       },
       {
         "name": "War Domain",
+        "alwaysPrepared": {
+          "3": [
+            "Guiding Bolt",
+            "Magic Weapon",
+            "Shield of Faith",
+            "Spiritual Weapon"
+          ],
+          "5": [
+            "Crusader's Mantle",
+            "Spirit Guardians"
+          ],
+          "7": [
+            "Freedom of Movement",
+            "Staggering Smite"
+          ],
+          "9": [
+            "Banishing Smite",
+            "Steel Wind Strike"
+          ]
+        },
         "className": "Cleric",
         "flavor": "A martial priest who leads the charge, guiding weapons with divine will and fighting like a seasoned soldier.",
         "source": "phb",
@@ -3782,6 +3879,22 @@ const DND_CLASSES = [
       },
       {
         "name": "Circle of the Moon",
+        "alwaysPrepared": {
+          "3": [
+            "Cure Wounds",
+            "Moonbeam",
+            "Starry Wisp"
+          ],
+          "5": [
+            "Conjure Animals"
+          ],
+          "7": [
+            "Fount of Moonlight"
+          ],
+          "9": [
+            "Mass Cure Wounds"
+          ]
+        },
         "className": "Druid",
         "flavor": "A fierce shapeshifter who wades into battle as a dire beast, mending wounds mid-transformation.",
         "source": "phb",
@@ -3818,6 +3931,27 @@ const DND_CLASSES = [
       },
       {
         "name": "Circle of the Sea",
+        "alwaysPrepared": {
+          "3": [
+            "Fog Cloud",
+            "Gust of Wind",
+            "Ray of Frost",
+            "Shatter",
+            "Thunderwave"
+          ],
+          "5": [
+            "Lightning Bolt",
+            "Water Breathing"
+          ],
+          "7": [
+            "Control Water",
+            "Ice Storm"
+          ],
+          "9": [
+            "Conjure Elemental",
+            "Hold Monster"
+          ]
+        },
         "className": "Druid",
         "flavor": "A druid of tides and storms who wraps themselves in a lashing sea and rides the wind.",
         "source": "phb",
@@ -3854,6 +3988,12 @@ const DND_CLASSES = [
       },
       {
         "name": "Circle of the Stars",
+        "alwaysPrepared": {
+          "3": [
+            "Guidance",
+            "Guiding Bolt"
+          ]
+        },
         "className": "Druid",
         "flavor": "A stargazer who charts the constellations and takes on their radiant, guiding forms.",
         "source": "phb",
@@ -4864,6 +5004,28 @@ const DND_CLASSES = [
     "subclasses": [
       {
         "name": "Oath of Devotion",
+        "alwaysPrepared": {
+          "3": [
+            "Protection from Evil and Good",
+            "Shield of Faith"
+          ],
+          "5": [
+            "Aid",
+            "Zone of Truth"
+          ],
+          "9": [
+            "Beacon of Hope",
+            "Dispel Magic"
+          ],
+          "13": [
+            "Freedom of Movement",
+            "Guardian of Faith"
+          ],
+          "17": [
+            "Commune",
+            "Flame Strike"
+          ]
+        },
         "className": "Paladin",
         "flavor": "The paragon of the paladin ideal — honesty, courage, compassion, and honor — smiting evil with a blessed weapon.",
         "source": "srd",
@@ -4900,6 +5062,28 @@ const DND_CLASSES = [
       },
       {
         "name": "Oath of Glory",
+        "alwaysPrepared": {
+          "3": [
+            "Guiding Bolt",
+            "Heroism"
+          ],
+          "5": [
+            "Enhance Ability",
+            "Magic Weapon"
+          ],
+          "9": [
+            "Haste",
+            "Protection from Energy"
+          ],
+          "13": [
+            "Compulsion",
+            "Freedom of Movement"
+          ],
+          "17": [
+            "Legend Lore",
+            "Yolande's Regal Presence"
+          ]
+        },
         "className": "Paladin",
         "flavor": "A paladin who pursues heroic legend, empowering allies to feats of greatness and racing to their side.",
         "source": "phb",
@@ -4936,6 +5120,28 @@ const DND_CLASSES = [
       },
       {
         "name": "Oath of the Ancients",
+        "alwaysPrepared": {
+          "3": [
+            "Ensnaring Strike",
+            "Speak with Animals"
+          ],
+          "5": [
+            "Misty Step",
+            "Moonbeam"
+          ],
+          "9": [
+            "Plant Growth",
+            "Protection from Energy"
+          ],
+          "13": [
+            "Ice Storm",
+            "Stoneskin"
+          ],
+          "17": [
+            "Commune with Nature",
+            "Tree Stride"
+          ]
+        },
         "className": "Paladin",
         "flavor": "A paladin sworn to the light and life of the world, warding against darkness and enduring beyond mortal limits.",
         "source": "phb",
@@ -4972,6 +5178,28 @@ const DND_CLASSES = [
       },
       {
         "name": "Oath of Vengeance",
+        "alwaysPrepared": {
+          "3": [
+            "Bane",
+            "Hunter's Mark"
+          ],
+          "5": [
+            "Hold Person",
+            "Misty Step"
+          ],
+          "9": [
+            "Haste",
+            "Protection from Energy"
+          ],
+          "13": [
+            "Banishment",
+            "Dimension Door"
+          ],
+          "17": [
+            "Hold Monster",
+            "Scrying"
+          ]
+        },
         "className": "Paladin",
         "flavor": "A grim avenger who hunts a foe without mercy, marking a single enemy for a relentless, focused end.",
         "source": "phb",
@@ -5430,6 +5658,23 @@ const DND_CLASSES = [
       },
       {
         "name": "Fey Wanderer",
+        "alwaysPrepared": {
+          "3": [
+            "Charm Person"
+          ],
+          "5": [
+            "Misty Step"
+          ],
+          "9": [
+            "Summon Fey"
+          ],
+          "13": [
+            "Dimension Door"
+          ],
+          "17": [
+            "Mislead"
+          ]
+        },
         "className": "Ranger",
         "flavor": "A ranger touched by the Feywild — uncanny charm, dread magical strikes, and fey allies that appear at need.",
         "source": "phb",
@@ -5466,6 +5711,23 @@ const DND_CLASSES = [
       },
       {
         "name": "Gloom Stalker",
+        "alwaysPrepared": {
+          "3": [
+            "Disguise Self"
+          ],
+          "5": [
+            "Rope Trick"
+          ],
+          "9": [
+            "Fear"
+          ],
+          "13": [
+            "Greater Invisibility"
+          ],
+          "17": [
+            "Seeming"
+          ]
+        },
         "className": "Ranger",
         "flavor": "An ambusher of the dark places of the world, striking first and hardest and vanishing into shadow.",
         "source": "phb",
@@ -5853,6 +6115,25 @@ const DND_CLASSES = [
     "subclasses": [
       {
         "name": "Draconic Sorcery",
+        "alwaysPrepared": {
+          "3": [
+            "Alter Self",
+            "Chromatic Orb",
+            "Command"
+          ],
+          "5": [
+            "Fear",
+            "Fly"
+          ],
+          "7": [
+            "Arcane Eye",
+            "Charm Monster"
+          ],
+          "9": [
+            "Legend Lore",
+            "Summon Dragon"
+          ]
+        },
         "className": "Sorcerer",
         "flavor": "A sorcerer with dragon blood, warded by scaled resilience and commanding an elemental heritage — eventually sprouting wings.",
         "source": "srd",
@@ -5889,6 +6170,27 @@ const DND_CLASSES = [
       },
       {
         "name": "Aberrant Sorcery",
+        "alwaysPrepared": {
+          "3": [
+            "Arms of Hadar",
+            "Calm Emotions",
+            "Detect Thoughts",
+            "Dissonant Whispers",
+            "Mind Sliver"
+          ],
+          "5": [
+            "Hunger of Hadar",
+            "Sending"
+          ],
+          "7": [
+            "Evard's Black Tentacles",
+            "Summon Aberration"
+          ],
+          "9": [
+            "Rary's Telepathic Bond",
+            "Telekinesis"
+          ]
+        },
         "className": "Sorcerer",
         "flavor": "A sorcerer whose power seeps from the Far Realm — psionic whispers, telepathy, and flesh that warps to alien will.",
         "source": "phb",
@@ -5925,6 +6227,26 @@ const DND_CLASSES = [
       },
       {
         "name": "Clockwork Sorcery",
+        "alwaysPrepared": {
+          "3": [
+            "Aid",
+            "Alarm",
+            "Lesser Restoration",
+            "Protection from Evil and Good"
+          ],
+          "5": [
+            "Dispel Magic",
+            "Protection from Energy"
+          ],
+          "7": [
+            "Freedom of Movement",
+            "Summon Construct"
+          ],
+          "9": [
+            "Greater Restoration",
+            "Wall of Force"
+          ]
+        },
         "className": "Sorcerer",
         "flavor": "A sorcerer aligned with the cosmic force of Order, smoothing away chaos and cloaking allies in inevitable law.",
         "source": "phb",
@@ -6346,6 +6668,26 @@ const DND_CLASSES = [
     "subclasses": [
       {
         "name": "Fiend Patron",
+        "alwaysPrepared": {
+          "3": [
+            "Burning Hands",
+            "Command",
+            "Scorching Ray",
+            "Suggestion"
+          ],
+          "5": [
+            "Fireball",
+            "Stinking Cloud"
+          ],
+          "7": [
+            "Fire Shield",
+            "Wall of Fire"
+          ],
+          "9": [
+            "Geas",
+            "Insect Plague"
+          ]
+        },
         "className": "Warlock",
         "flavor": "A pact with a devil or demon of the Lower Planes, rewarding slaughter with vitality and infernal luck.",
         "source": "srd",
@@ -6382,6 +6724,27 @@ const DND_CLASSES = [
       },
       {
         "name": "Archfey Patron",
+        "alwaysPrepared": {
+          "3": [
+            "Calm Emotions",
+            "Faerie Fire",
+            "Misty Step",
+            "Phantasmal Force",
+            "Sleep"
+          ],
+          "5": [
+            "Blink",
+            "Plant Growth"
+          ],
+          "7": [
+            "Dominate Beast",
+            "Greater Invisibility"
+          ],
+          "9": [
+            "Dominate Person",
+            "Seeming"
+          ]
+        },
         "className": "Warlock",
         "flavor": "A bargain with a lord or lady of the Feywild — misty steps, beguiling wards, and fey-touched trickery.",
         "source": "phb",
@@ -6418,6 +6781,28 @@ const DND_CLASSES = [
       },
       {
         "name": "Celestial Patron",
+        "alwaysPrepared": {
+          "3": [
+            "Aid",
+            "Cure Wounds",
+            "Guiding Bolt",
+            "Lesser Restoration",
+            "Light",
+            "Sacred Flame"
+          ],
+          "5": [
+            "Daylight",
+            "Revivify"
+          ],
+          "7": [
+            "Guardian of Faith",
+            "Wall of Fire"
+          ],
+          "9": [
+            "Greater Restoration",
+            "Summon Celestial"
+          ]
+        },
         "className": "Warlock",
         "flavor": "A pact with a being of the Upper Planes, channeling radiant power to heal allies and scour the wicked.",
         "source": "phb",
@@ -6454,6 +6839,26 @@ const DND_CLASSES = [
       },
       {
         "name": "Great Old One Patron",
+        "alwaysPrepared": {
+          "3": [
+            "Detect Thoughts",
+            "Dissonant Whispers",
+            "Phantasmal Force",
+            "Tasha's Hideous Laughter"
+          ],
+          "5": [
+            "Clairvoyance",
+            "Hunger of Hadar"
+          ],
+          "7": [
+            "Confusion",
+            "Summon Aberration"
+          ],
+          "9": [
+            "Modify Memory",
+            "Telekinesis"
+          ]
+        },
         "className": "Warlock",
         "flavor": "A pact with an incomprehensible entity of the Far Realm — telepathy, mind-rending magic, and psychic dominion.",
         "source": "phb",
@@ -6901,6 +7306,28 @@ const DND_CLASSES = [
     "subclasses": [
       {
         "name": "Alchemist",
+        "alwaysPrepared": {
+          "3": [
+            "Healing Word",
+            "Ray of Sickness"
+          ],
+          "5": [
+            "Flaming Sphere",
+            "Acid Arrow"
+          ],
+          "9": [
+            "Gaseous Form",
+            "Mass Healing Word"
+          ],
+          "13": [
+            "Death Ward",
+            "Vitriolic Sphere"
+          ],
+          "17": [
+            "Cloudkill",
+            "Raise Dead"
+          ]
+        },
         "className": "Artificer",
         "flavor": "A master of potions and reagents who brews restorative and destructive concoctions on the fly.",
         "source": "eberron",
@@ -6937,6 +7364,28 @@ const DND_CLASSES = [
       },
       {
         "name": "Armorer",
+        "alwaysPrepared": {
+          "3": [
+            "Magic Missile",
+            "Thunderwave"
+          ],
+          "5": [
+            "Mirror Image",
+            "Shatter"
+          ],
+          "9": [
+            "Hypnotic Pattern",
+            "Lightning Bolt"
+          ],
+          "13": [
+            "Fire Shield",
+            "Greater Invisibility"
+          ],
+          "17": [
+            "Passwall",
+            "Wall of Force"
+          ]
+        },
         "className": "Artificer",
         "flavor": "An artificer who lives inside a suit of arcane power armor, reshaping it for defense or infiltration.",
         "source": "eberron",
@@ -6973,6 +7422,28 @@ const DND_CLASSES = [
       },
       {
         "name": "Artillerist",
+        "alwaysPrepared": {
+          "3": [
+            "Shield",
+            "Thunderwave"
+          ],
+          "5": [
+            "Scorching Ray",
+            "Shatter"
+          ],
+          "9": [
+            "Fireball",
+            "Wind Wall"
+          ],
+          "13": [
+            "Ice Storm",
+            "Wall of Fire"
+          ],
+          "17": [
+            "Cone of Cold",
+            "Wall of Force"
+          ]
+        },
         "className": "Artificer",
         "flavor": "A battlefield engineer who conjures an Eldritch Cannon to blast, protect, and control the field.",
         "source": "eberron",
@@ -7009,6 +7480,28 @@ const DND_CLASSES = [
       },
       {
         "name": "Battle Smith",
+        "alwaysPrepared": {
+          "3": [
+            "Heroism",
+            "Shield"
+          ],
+          "5": [
+            "Branding Smite",
+            "Warding Bond"
+          ],
+          "9": [
+            "Aura of Vitality",
+            "Conjure Barrage"
+          ],
+          "13": [
+            "Aura of Purity",
+            "Fire Shield"
+          ],
+          "17": [
+            "Banishing Smite",
+            "Mass Cure Wounds"
+          ]
+        },
         "className": "Artificer",
         "flavor": "A protector-artificer who fights beside a loyal mechanical Steel Defender and wields arcane weapons with Intelligence.",
         "source": "eberron",

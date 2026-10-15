@@ -95,6 +95,11 @@ export const DND_SPELLS: DndSpell[] = [
   },
   {
     "name": "Eldritch Blast",
+    "multiAttack": {
+      "dice": "1d10",
+      "type": "force",
+      "beamsByLevel": true
+    },
     "level": 0,
     "school": "Evocation",
     "castingTime": "Action",
@@ -2625,6 +2630,12 @@ export const DND_SPELLS: DndSpell[] = [
   },
   {
     "name": "Scorching Ray",
+    "multiAttack": {
+      "dice": "2d6",
+      "type": "fire",
+      "base": 3,
+      "perSlot": 1
+    },
     "level": 2,
     "school": "Evocation",
     "castingTime": "Action",
@@ -2734,6 +2745,9 @@ export const DND_SPELLS: DndSpell[] = [
   },
   {
     "name": "Spiritual Weapon",
+    "roll": "attack",
+    "damage": "1d8",
+    "damageType": "force",
     "level": 2,
     "school": "Evocation",
     "castingTime": "Bonus Action",

@@ -1,7 +1,9 @@
 /* D&D 2024 Level-Up Wizard — window.DNDLU.
    Adds one level to an existing character (continue a class or multiclass into a
-   new one), walking through HP, subclass, ASI/feat, and new spells. Reads/writes
-   the live sheet via window.getClassLevels/setClassLevels and the sheet helpers. */
+   new one), walking through HP, subclass, the level's class choices (Fighting
+   Style, Expertise, Divine Order, Invocations, Metamagic, Maneuvers, Weapon
+   Mastery…), ASI/feat, and new spells. Reads/writes the live sheet via
+   window.getClassLevels/setClassLevels and the sheet helpers. */
 (function () {
   "use strict";
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -14,10 +16,10 @@
   const ABIL_NAME = { STR:"Strength", DEX:"Dexterity", CON:"Constitution", INT:"Intelligence", WIS:"Wisdom", CHA:"Charisma" };
   // Shared caster/spell/ASI math (window.DNDCALC, loaded before this script).
   const RULES = () => window.DNDCALC || {};
-  // Match a spell to the class's spell list, honoring aliases (Artificer→Wizard).
-  const _spellInList = (s, className) => RULES().spellInList
-    ? RULES().spellInList(s, className)
-    : (s.classes || []).some((n) => norm(n) === norm(className));
+  // Match a spell to a spell list, honoring aliases (Artificer→Wizard).
+  const _spellInList = (s, listName) => RULES().spellInList
+    ? RULES().spellInList(s, listName)
+    : (s.classes || []).some((n) => norm(n) === norm(listName));
 
   const D = {
     classes: () => window.DND_CLASSES || [], feats: () => window.DND_FEATS || [],
@@ -42,11 +44,14 @@
   }
 
   // ── class-table helpers (delegated to the shared module) ────────────────
-  const cantripsAt = (c, level) => RULES().cantripsAt(c, level);
-  const preparedAt = (c, level) => RULES().preparedAt(c, level);
   const grantsASI = (cls, newLevel) => RULES().grantsASI(cls, newLevel);
-  const isCasterClass = (c) => RULES().isCasterClass(c);
   function knownSpellSet(){ try { return new Set((window.getSpellsKnown ? window.getSpellsKnown() : []).map((s) => norm(s.name))); } catch(e){ return new Set(); } }
+  const CH = () => window.DNDCH || null;
+  // The sheet's stored choice state for a class ("class:<Class>"), copied.
+  function storedClassState(cls){ try { const all = window.getChoices ? window.getChoices() : {}; return JSON.parse(JSON.stringify(all["class:" + cls] || {})); } catch(e){ return {}; } }
+  function storedMastery(){ try { const all = window.getChoices ? window.getChoices() : {}; return Array.isArray(all.mastery) ? all.mastery.slice() : []; } catch(e){ return []; } }
+  // Weapon / armor proficiency tokens from every class the character has (plus the new one).
+  function profTokens(kind){ const out = []; const all = curClasses().map((c) => c.cls); if(all.indexOf(lu.targetCls) < 0) all.push(lu.targetCls); all.forEach((n) => { const c = classByName(n); ((c && c.proficiencies && c.proficiencies[kind]) || []).forEach((t) => out.push(t)); }); try { const txt = ($("f-proficiencies") || {}).value || ""; txt.split(/\s*[·,]\s*/).forEach((t) => { if(t) out.push(t.trim()); }); } catch(e){} return out; }
 
   // Build the context for the chosen class: what this level grants.
   function buildCtx(){
@@ -56,26 +61,41 @@
     const isNew = !existing;
     const newLevel = isNew ? 1 : existing.level + 1;
     const hitDie = c ? c.hitDie : 8;
-    const sub = existing ? existing.subclass : "";
-    const needSub = !!(c && !sub && newLevel >= (c.subclassLevel || 3) && (c.subclasses||[]).length);
-    const newCantrips = isCasterClass(c) ? Math.max(0, cantripsAt(c,newLevel) - cantripsAt(c,newLevel-1)) : 0;
-    // Wizards add 2 spells to their spellbook every level; other casters pick the delta
-    // in their prepared/known count.
-    const newSpells = !isCasterClass(c) ? 0
-      : (norm(lu.targetCls) === "wizard" ? 2 : Math.max(0, preparedAt(c,newLevel) - preparedAt(c,newLevel-1)));
+    const sub = lu.subclass || (existing ? existing.subclass : "");
+    const needSub = !!(c && !(existing && existing.subclass) && newLevel >= (c.subclassLevel || 3) && (c.subclasses||[]).length);
+    // Casting profile: the class's own, or its subclass's (Eldritch Knight / Arcane Trickster — B13).
+    const cf = c && RULES().castingFor ? RULES().castingFor(c, sub) : null;
+    // This level's class choices (B12): specs whose count grew at the new level. Earlier
+    // picks come from the sheet's stored state and are locked in the picker.
+    const stored = storedClassState(lu.targetCls);
+    let specs = [];
+    if(CH() && c){
+      const all = CH().classChoiceSpecs(c.name, sub, newLevel, { allowSrc: () => true, weaponTokens: profTokens("weapons"), level: totalOf(cur) + 1 }, lu.choices);
+      specs = all.filter((s) => (s.count || 1) > (s.prev || 0)).map((s) => Object.assign({}, s, { locked: CH().vals(stored, s.key) }));
+    }
+    // an Order chosen this level (Thaumaturge / Magician) adds a cantrip
+    let extraCantrip = 0;
+    if(CH() && c){ const fx = CH().classChoiceEffects(specs, lu.choices); extraCantrip = fx.extraCantrips; }
+    const newCantrips = cf ? Math.max(0, cf.cantrips(newLevel) - cf.cantrips(newLevel-1)) + extraCantrip : 0;
+    // Wizards fill their spellbook (6 at level 1, +2 every level after); other casters pick
+    // the delta in their prepared/known count.
+    const newSpells = !cf ? 0
+      : (norm(lu.targetCls) === "wizard" ? (RULES().spellbookAt(c, newLevel) - RULES().spellbookAt(c, newLevel-1)) : Math.max(0, cf.prepared(newLevel) - cf.prepared(newLevel-1)));
     // Spell LEVEL you can learn is capped by THIS class's own level (not the combined
     // multiclass caster level, which only governs how many slots you get).
-    const maxSL = isCasterClass(c) ? RULES().maxSpellLevelSingle(c, newLevel) : 0;
-    return { c, isNew, newLevel, hitDie, needSub, asi: grantsASI(lu.targetCls, newLevel), newCantrips, newSpells, maxSL };
+    const maxSL = cf ? cf.maxLevel(newLevel) : 0;
+    return { c, isNew, newLevel, hitDie, sub, needSub, cf, specs, asi: grantsASI(lu.targetCls, newLevel), newCantrips, newSpells, maxSL };
   }
   function computeSteps(){
     STEPS = ["Class"];
     if(ctx.needSub) STEPS.push("Subclass");
     STEPS.push("HP");
+    if(ctx.specs.length) STEPS.push("Choices");
     if(ctx.asi) STEPS.push("ASI");
     if(ctx.newCantrips > 0 || ctx.newSpells > 0) STEPS.push("Spells");
     STEPS.push("Review");
   }
+  function refresh(){ ctx = buildCtx(); computeSteps(); render(); }
 
   // ── modal shell ────────────────────────────────────────────────────────
   function ensureModal(){
@@ -89,7 +109,7 @@
         '<div class="modal-ft"><div><button class="m-btn ghost" id="dndlu-back" onclick="DNDLU.back()">← Back</button></div>' +
         '<div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="DNDLU.close()">Cancel</button><button class="m-btn" id="dndlu-next" onclick="DNDLU.next()">Next →</button></div></div>' +
       '</div>';
-    ov.addEventListener("click", (e) => { if(e.target === ov) DNDLU.close(); });
+    // Backdrop click does NOT close the wizard (B15) — losing a half-built level is worse than an extra click on ✕.
     document.body.appendChild(ov);
   }
   function launch(){
@@ -99,7 +119,8 @@
     if(totalOf(cur) >= 20){ if(window.addLog) window.addLog("Level Up","✗","Already at level 20","fumble"); return; }
     // ensure the character is in managed mode so classLevels drives the engine
     if(window.setClassLevels) window.setClassLevels(cur);
-    lu = { targetCls: cur[0].cls, subclass:"", hp:null, hpMethod:"avg", asiMode:"asi", asi:{}, feat:"", featChoices:{}, pickedCantrips:[], pickedSpells:[], spellsAvail:true };
+    lu = { targetCls: cur[0].cls, subclass:"", hp:null, hpMethod:"avg", asiMode:"asi", asi:{}, feat:"", featChoices:{}, choices:{}, pickedCantrips:[], pickedSpells:[], spellsAvail:true };
+    lu.choices = storedClassState(lu.targetCls);
     ctx = buildCtx(); computeSteps(); step = 0;
     $("dndlu-overlay").classList.add("open"); render();
   }
@@ -112,7 +133,7 @@
     $("dndlu-step").textContent = step === 0 ? "" : "Step " + step + " of " + (STEPS.length-1) + " — " + STEPS[step];
     $("dndlu-back").style.visibility = step === 0 ? "hidden" : "visible";
     $("dndlu-next").textContent = STEPS[step] === "Review" ? "Apply level ✓" : "Next →";
-    const fn = { Class:rClass, Subclass:rSubclass, HP:rHP, ASI:rASI, Spells:rSpells, Review:rReview }[STEPS[step]];
+    const fn = { Class:rClass, Subclass:rSubclass, HP:rHP, Choices:rChoices, ASI:rASI, Spells:rSpells, Review:rReview }[STEPS[step]];
     const body = $("dndlu-body");
     // Keep scroll on in-step re-renders (picking a spell/ASI); reset only on step change.
     const sameStep = render._step === step, prevScroll = body.scrollTop;
@@ -129,40 +150,46 @@
     h += '<span class="m-lbl">Continue a class</span><div class="dndb-grid">';
     cur.forEach((cl) => { const c = classByName(cl.cls); h += card('data-cls="' + esc(cl.cls) + '"', norm(lu.targetCls)===norm(cl.cls) && !lu._new, cl.cls, 'Level ' + cl.level + ' → ' + (cl.level+1) + (c?' · d'+c.hitDie:'')); });
     h += "</div>";
-    // multiclass options: classes not yet taken
+    // multiclass options: classes not yet taken (13+ prerequisites shown, flagged when unmet, never blocked)
     const taken = new Set(cur.map((c) => norm(c.cls)));
     const others = D.classes().filter((c) => !taken.has(norm(c.name)));
     if(others.length){
       h += '<span class="m-lbl">Multiclass (new class, level 1)</span><div class="dndb-grid">';
-      others.forEach((c) => { const on = lu._new && norm(lu.targetCls)===norm(c.name); h += card('data-newcls="' + esc(c.name) + '"', on, c.name, 'd' + c.hitDie + ' · ' + (c.primaryAbility||[]).join("/")); });
+      others.forEach((c) => { const on = lu._new && norm(lu.targetCls)===norm(c.name); const p = RULES().multiclassPrereq ? RULES().multiclassPrereq(c.name, curScores()) : { text:"", met:true }; h += card('data-newcls="' + esc(c.name) + '"', on, c.name, 'd' + c.hitDie + ' · ' + (p.text ? p.text + (p.met ? "" : " ⚠") : (c.primaryAbility||[]).join("/"))); });
       h += "</div>";
-      h += '<p class="m-hint" style="margin-top:6px;">Multiclassing normally requires 13+ in the relevant abilities — the wizard won\'t block you, so mind the prerequisites.</p>';
+      h += '<p class="m-hint" style="margin-top:6px;">Multiclassing requires 13+ in the abilities shown (⚠ = not met with your current scores) — the wizard won\'t block you, so mind the prerequisites.</p>';
     }
     return h;
   }
   function rSubclass(){
     const c = ctx.c;
     let h = '<p class="m-hint">Your ' + esc(lu.targetCls) + ' chooses a ' + esc(c.subclassLabel || "subclass") + ' at level ' + ctx.newLevel + '.</p><div class="dndb-grid">';
-    (c.subclasses||[]).forEach((s) => h += card('data-sub="' + esc(s.name) + '"', norm(lu.subclass)===norm(s.name), s.name, (s.source||"").toUpperCase()));
+    (c.subclasses||[]).forEach((s) => h += card('data-sub="' + esc(s.name) + '"', norm(lu.subclass)===norm(s.name), s.name, (s.source||"").toUpperCase() + (s.spellcasting ? " · " + s.spellcasting + " caster (" + (s.spellcastingAbility || "INT") + ")" : "")));
     h += "</div>";
     const sub = (c.subclasses||[]).find((s) => norm(s.name)===norm(lu.subclass));
     if(sub) h += CH() ? CH().subclassDetail(c, sub, ctx.newLevel) : '<div class="dndb-note">' + esc(sub.flavor || "") + '</div>';
     return h;
   }
   function rHP(){
-    const con = conMod(), avg = Math.floor(ctx.hitDie/2) + 1;
-    let h = '<p class="m-hint">Gain Hit Points for your new ' + esc(lu.targetCls) + ' level (d' + ctx.hitDie + ' + Constitution).</p>';
+    const con = conMod(), avg = Math.floor(ctx.hitDie/2) + 1, extra = hpExtras();
+    let h = '<p class="m-hint">Gain Hit Points for your new ' + esc(lu.targetCls) + ' level (d' + ctx.hitDie + ' + Constitution' + (extra.label ? ' + ' + esc(extra.label) : '') + ').</p>';
     h += '<div class="dndb-seg">' +
-      '<button class="dndb-seg-btn' + (lu.hpMethod==="avg"?" on":"") + '" data-hpm="avg">Average (' + (avg + con) + ')</button>' +
+      '<button class="dndb-seg-btn' + (lu.hpMethod==="avg"?" on":"") + '" data-hpm="avg">Average (' + (avg + con + extra.n) + ')</button>' +
       '<button class="dndb-seg-btn' + (lu.hpMethod==="roll"?" on":"") + '" data-hpm="roll">Roll d' + ctx.hitDie + '</button></div>';
     if(lu.hpMethod === "roll"){
       h += '<div style="text-align:center;margin:10px 0;">';
       if(lu.hp == null) h += '<button class="m-btn" data-roll="1">🎲 Roll d' + ctx.hitDie + '</button>';
-      else h += '<div class="dndb-pb-head" style="font-size:15px;">Rolled <b>' + (lu.hp - con) + '</b> ' + sgn(con) + ' CON = <b>' + lu.hp + ' HP</b></div><button class="m-btn ghost" data-roll="1" style="margin-top:6px;">Roll again</button>';
+      else h += '<div class="dndb-pb-head" style="font-size:15px;">Rolled <b>' + (lu.hp - con) + '</b> ' + sgn(con) + ' CON' + (extra.n ? ' + ' + extra.n : '') + ' = <b>' + (lu.hp + extra.n) + ' HP</b></div><button class="m-btn ghost" data-roll="1" style="margin-top:6px;">Roll again</button>';
       h += '</div>';
     }
     const gain = hpGain();
     h += '<div class="dndb-note">New max HP: <b>' + curMaxHP() + '</b> + <b>' + gain + '</b> = <b>' + (curMaxHP() + gain) + '</b></div>';
+    return h;
+  }
+  // B12: the class choices this level grants.
+  function rChoices(){
+    let h = '<p class="m-hint">Level ' + ctx.newLevel + ' ' + esc(lu.targetCls) + (ctx.sub ? ' (' + esc(ctx.sub) + ')' : '') + ' choices. Picks from earlier levels are shown locked.</p>';
+    h += CH().renderChoices(ctx.specs.map((s) => Object.assign({}, s, { label: s.label + ((s.prev || 0) > 0 ? ' — choose ' + ((s.count || 1) - (s.prev || 0)) + ' more' : '') })), lu.choices, chCtx(), "class");
     return h;
   }
   function rASI(){
@@ -178,10 +205,9 @@
       });
       h += "</div>";
     } else {
-      // Fighting Style feats come only from a class feature; Epic Boons need level 19+.
-      const newTotal = totalOf(curClasses()) + 1;
-      h += '<span class="m-lbl">Choose a feat</span><select id="dndlu-feat" class="m-input"><option value="">Select a feat…</option>' +
-        D.feats().filter((f) => (f.category || "") !== "Fighting Style" && ((f.category || "") !== "Epic Boon" || newTotal >= 19)).slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (lu.feat===f.name?" selected":"") + '>' + esc(f.name) + ' — ' + esc(f.category) + '</option>').join("") + '</select>';
+      // B6: General (level 4+) / Origin / Epic Boon (19+) feats; never Fighting Styles; owned
+      // non-repeatable feats drop out; unmet prerequisites are greyed with the reason.
+      h += '<span class="m-lbl">Choose a feat</span>' + (CH() ? CH().featSelectHTML('id="dndlu-feat" class="m-input"', lu.feat, featCtx(), {}) : '');
       const f = D.feats().find((x) => x.name === lu.feat);
       if(f){
         h += CH() ? CH().featDetail(f.name) : '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || f.description || "") + '</div>';
@@ -192,12 +218,12 @@
     return h;
   }
   function rSpells(){
-    const c = ctx.c, known = knownSpellSet();
-    const avail = lu.spellsAvail !== false, inList = (s) => _spellInList(s, c.name);
+    const cf = ctx.cf, known = knownSpellSet();
+    const avail = lu.spellsAvail !== false, inList = (s) => _spellInList(s, cf.list);
     // Spells the character already knows are left out entirely — you only choose
     // from what's new — so spells added freely from the sheet's Spellbook don't
     // count toward this level's "choose N".
-    let h = '<p class="m-hint">Your ' + esc(lu.targetCls) + ' learns new magic at this level.</p>';
+    let h = '<p class="m-hint">Your ' + esc(lu.targetCls) + (cf.source === "subclass" ? ' (' + esc(ctx.sub) + ')' : '') + ' learns new magic at this level — ' + esc(cf.list) + ' spell list, ' + esc(ABIL_NAME[cf.ability] || cf.ability) + '.</p>';
     h += '<label class="brow-check spl-avail"><input type="checkbox" data-spavail' + (avail ? " checked" : "") + '> Spells available to me</label>';
     if(ctx.newCantrips > 0){
       h += '<span class="m-lbl">New cantrips — choose ' + ctx.newCantrips + ' <span style="color:#8ad4ff;">(' + lu.pickedCantrips.length + '/' + ctx.newCantrips + ')</span></span>';
@@ -209,7 +235,8 @@
       });
     }
     if(ctx.newSpells > 0 && ctx.maxSL >= 1){
-      h += '<span class="m-lbl">New spells — choose ' + ctx.newSpells + ' (up to level ' + ctx.maxSL + ') <span style="color:#8ad4ff;">(' + lu.pickedSpells.length + '/' + ctx.newSpells + ')</span></span>';
+      const wiz = norm(lu.targetCls) === "wizard";
+      h += '<span class="m-lbl">' + (wiz ? 'Spellbook — add ' + ctx.newSpells : 'New spells — choose ' + ctx.newSpells) + ' (up to level ' + ctx.maxSL + ') <span style="color:#8ad4ff;">(' + lu.pickedSpells.length + '/' + ctx.newSpells + ')</span></span>';
       const ss = D.spells().filter((s) => s.level>=1 && s.level<=ctx.maxSL && !known.has(norm(s.name)) && (avail ? inList(s) : true)).sort((a,b)=>(a.level-b.level)||a.name.localeCompare(b.name));
       h += RULES().spellPickerHTML(ss, {
         selected: (n) => lu.pickedSpells.includes(n),
@@ -225,6 +252,7 @@
     h += '<div class="dr-line">' + (ctx.isNew ? 'Multiclass into <b>' + esc(lu.targetCls) + '</b> (level 1)' : '<b>' + esc(lu.targetCls) + '</b> ' + (ctx.newLevel-1) + ' → <b>' + ctx.newLevel + '</b>') + ' · new total level <b>' + (totalOf(cur)+1) + '</b></div>';
     if(lu.subclass) h += '<div class="dr-line">Subclass: <b>' + esc(lu.subclass) + '</b></div>';
     h += '<div class="dr-line">Hit Points: +<b>' + hpGain() + '</b> (→ ' + (curMaxHP()+hpGain()) + ')</div>';
+    if(ctx.specs.length && CH()){ const s = CH().summary(ctx.specs, lu.choices); if(s) h += '<div class="dr-line">Class choices: <b>' + esc(s) + '</b></div>'; }
     if(ctx.asi){ h += '<div class="dr-line">' + (lu.asiMode==="feat" ? 'Feat: <b>' + esc(lu.feat || "—") + '</b>' + (CH() && lu.feat && CH().summary(featSpecs(), lu.featChoices) ? ' — ' + esc(CH().summary(featSpecs(), lu.featChoices)) : '') : 'Ability Scores: <b>' + (ABIL.filter((a)=>lu.asi[a]).map((a)=>a+" +"+lu.asi[a]).join(", ") || "—") + '</b>') + '</div>'; }
     const spells = lu.pickedCantrips.concat(lu.pickedSpells);
     if(spells.length) h += '<div class="dr-line">New spells: <b>' + esc(spells.join(", ")) + '</b></div>';
@@ -234,25 +262,47 @@
 
   // ── helpers reading the live sheet ──────────────────────────────────────
   function curScore(a){ const el = $("sc-" + a); return el ? (num(el.value) || 10) : 10; }
+  function curScores(){ const o = {}; ABIL.forEach((a) => o[a] = curScore(a)); return o; }
   function conMod(){ return Math.floor((curScore("CON") - 10) / 2); }
   // Max HP on the sheet is a contenteditable <span> (not an input): read/write textContent.
   const fieldGet = (el) => el ? ("value" in el ? el.value : el.textContent) : "";
   const fieldSet = (el, v) => { if(!el) return; if("value" in el) el.value = String(v); else el.textContent = String(v); };
   function curMaxHP(){ return num(fieldGet($("f-hp-max"))); }
   // ── sub-choices for the chosen feat (window.DNDCH) ───────────────────────
-  const CH = () => window.DNDCH || null;
   function featSpecs(){ return (CH() && lu.asiMode === "feat" && lu.feat) ? CH().featSpecs(lu.feat, lu.featChoices) : []; }
   function chCtx(){
-    const prof = []; try { const sk = window.getSkillProf ? window.getSkillProf() : {}; Object.keys(sk).forEach((k) => { if(sk[k] > 0) prof.push(k); }); } catch(e){}
-    return { prof, level: totalOf(curClasses()) + 1 };
+    const prof = [], expert = []; try { const sk = window.getSkillProf ? window.getSkillProf() : {}; Object.keys(sk).forEach((k) => { if(sk[k] > 0) prof.push(k); if(sk[k] > 1) expert.push(k); }); } catch(e){}
+    // skills granted by this level's own picks (Primal Knowledge) count for Expertise too
+    if(CH() && ctx && ctx.specs.length) CH().classChoiceEffects(ctx.specs, lu.choices).skills.forEach((s) => { if(prof.indexOf(s) < 0) prof.push(s); });
+    return { prof, expert, level: totalOf(curClasses()) + 1 };
   }
-  function hpGain(){ const g = lu.hpMethod === "roll" ? (lu.hp != null ? lu.hp : (Math.floor(ctx.hitDie/2)+1 + conMod())) : (Math.floor(ctx.hitDie/2) + 1 + conMod()); return Math.max(1, g); }  // always at least 1 HP per level
+  // Feat-prerequisite context from the live sheet (B6).
+  function featCtx(){
+    const owned = D.feats().filter((f) => { try { return window.hasFeature && window.hasFeature(f.name); } catch(e){ return false; } }).map((f) => f.name);
+    const all = curClasses().map((c) => c.cls); if(all.indexOf(lu.targetCls) < 0) all.push(lu.targetCls);
+    const caster = all.some((n) => { const c = classByName(n); return c && RULES().isCasterClass(c); }) || !!ctx.cf;
+    const pact = all.some((n) => { const c = classByName(n); return c && c.spellcasting === "pact"; });
+    return { level: totalOf(curClasses()) + 1, scores: curScores(), armor: profTokens("armor"), weapons: profTokens("weapons"), caster, pact, owned };
+  }
+  // Per-level HP riders the character already has: Tough (+2/level) and Dwarven Toughness (+1/level).
+  // (Tough taken THIS level is covered by featEffects in apply, which adds every level at once.)
+  function hpExtras(){
+    let n = 0; const bits = [];
+    const toughOwned = !!(window.hasFeature && window.hasFeature("Tough"));
+    const choosingTough = ctx && ctx.asi && lu.asiMode === "feat" && norm(lu.feat || "") === "tough";
+    if(toughOwned && !choosingTough){ n += 2; bits.push("Tough"); }
+    if(window.hasFeature && window.hasFeature("Dwarven Toughness")){ n += 1; bits.push("Dwarven Toughness"); }
+    return { n, label: bits.join(" + ") };
+  }
+  function hpGain(){ const base = lu.hpMethod === "roll" ? (lu.hp != null ? lu.hp : (Math.floor(ctx.hitDie/2)+1 + conMod())) : (Math.floor(ctx.hitDie/2) + 1 + conMod()); return Math.max(1, base) + hpExtras().n; }  // always at least 1 HP per level
 
   function wire(){
     const body = $("dndlu-body");
-    body.querySelectorAll("[data-cls]").forEach((el) => el.addEventListener("click", () => { lu.targetCls = el.dataset.cls; lu._new = false; lu.subclass=""; lu.asi={}; lu.feat=""; lu.pickedCantrips=[]; lu.pickedSpells=[]; ctx = buildCtx(); computeSteps(); render(); }));
-    body.querySelectorAll("[data-newcls]").forEach((el) => el.addEventListener("click", () => { lu.targetCls = el.dataset.newcls; lu._new = true; lu.subclass=""; lu.asi={}; lu.feat=""; lu.pickedCantrips=[]; lu.pickedSpells=[]; ctx = buildCtx(); computeSteps(); render(); }));
-    body.querySelectorAll("[data-sub]").forEach((el) => el.addEventListener("click", () => { lu.subclass = el.dataset.sub; render(); }));
+    const pickTarget = (cls, isNew) => { lu.targetCls = cls; lu._new = isNew; lu.subclass=""; lu.asi={}; lu.feat=""; lu.featChoices={}; lu.pickedCantrips=[]; lu.pickedSpells=[]; lu.choices = storedClassState(cls); refresh(); };
+    body.querySelectorAll("[data-cls]").forEach((el) => el.addEventListener("click", () => pickTarget(el.dataset.cls, false)));
+    body.querySelectorAll("[data-newcls]").forEach((el) => el.addEventListener("click", () => pickTarget(el.dataset.newcls, true)));
+    // a subclass can change this level's choices (Battle Master maneuvers) and casting (Eldritch Knight)
+    body.querySelectorAll("[data-sub]").forEach((el) => el.addEventListener("click", () => { lu.subclass = el.dataset.sub; lu.pickedCantrips=[]; lu.pickedSpells=[]; refresh(); }));
     body.querySelectorAll("[data-hpm]").forEach((el) => el.addEventListener("click", () => { lu.hpMethod = el.dataset.hpm; if(lu.hpMethod==="avg") lu.hp=null; render(); }));
     body.querySelectorAll("[data-roll]").forEach((el) => el.addEventListener("click", () => { lu.hp = Math.max(1, (1 + Math.floor(Math.random()*ctx.hitDie)) + conMod()); render(); }));
     body.querySelectorAll("[data-asimode]").forEach((el) => el.addEventListener("click", () => { lu.asiMode = el.dataset.asimode; render(); }));
@@ -265,7 +315,8 @@
       lu.asi[a] = nv; if(!nv) delete lu.asi[a]; render();
     }));
     const fs = $("dndlu-feat"); if(fs) fs.addEventListener("change", () => { if(lu.feat !== fs.value) lu.featChoices = {}; lu.feat = fs.value; render(); });
-    if(CH()) CH().wireChoices(body, (root) => root === "feat" ? lu.featChoices : null, render);
+    // "feat" root → the feat's picks; "class" root → this level's class choices (changing an Order can add a cantrip → rebuild ctx)
+    if(CH()) CH().wireChoices(body, (root) => root === "feat" ? lu.featChoices : (root === "class" ? lu.choices : null), () => { if(STEPS[step] === "Choices") refresh(); else render(); });
     body.querySelectorAll("[data-spavail]").forEach((el) => el.addEventListener("change", () => { lu.spellsAvail = el.checked; render(); }));
     body.querySelectorAll("[data-sp-exp]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const row = el.closest("[data-sp]"); if(row){ row.classList.toggle("open"); const d = row.querySelector(".spl-desc"); if(d) d.hidden = !row.classList.contains("open"); } }));
     body.querySelectorAll("[data-sp-pick]").forEach((el) => el.addEventListener("click", () => {
@@ -280,10 +331,19 @@
     switch(STEPS[step]){
       case "Subclass": return !!lu.subclass;
       case "HP": return lu.hpMethod === "avg" || lu.hp != null;
+      case "Choices": { if(!CH()) return true; const c = chCtx(); return ctx.specs.every((s) => { const n = Math.min(s.count || 1, (s.kind === "expertise" || s.kind === "skill") ? CH().specOptions(s, c).filter((o) => !o.taken).length : Infinity); return CH().vals(lu.choices, s.key).length >= n; }); }
       case "ASI": return lu.asiMode === "feat" ? (!!lu.feat && (!CH() || CH().complete(featSpecs(), lu.featChoices))) : ABIL.reduce((s,a)=>s+(lu.asi[a]||0),0) === 2;
       case "Spells": return lu.pickedCantrips.length >= ctx.newCantrips && lu.pickedSpells.length >= (ctx.maxSL>=1 ? ctx.newSpells : 0);
       default: return true;
     }
+  }
+
+  // Add a feature entry to the sheet's Features tab. The sheet's own addCustomFeature()
+  // reads its input box, so a parameterised hook is needed: window.addCustomFeatureEntry(name, desc, meta).
+  function addFeature(name, desc, meta){
+    if(typeof window.addCustomFeatureEntry === "function") return window.addCustomFeatureEntry(name, desc, meta);
+    if(typeof window.addCustomFeature === "function" && window.addCustomFeature.length >= 2) return window.addCustomFeature(name, desc, meta);
+    if(window.addLog) window.addLog("Level Up", "", "Record on your sheet: " + name + (meta ? " (" + meta + ")" : ""), "normal");
   }
 
   // ── apply ──────────────────────────────────────────────────────────────
@@ -292,21 +352,30 @@
     if(ctx.isNew){ cur.push({ cls: lu.targetCls, subclass: lu.subclass || "", level: 1 }); }
     else { const e = cur.find((c) => norm(c.cls) === norm(lu.targetCls)); e.level += 1; if(lu.subclass) e.subclass = lu.subclass; }
     if(window.setClassLevels) window.setClassLevels(cur);
-    // HP + a gained Hit Die
-    let gain = hpGain();
-    // Tough grants +2 HP per character level. If it was taken on an EARLIER level, keep
-    // adding its +2 each level-up (if it's being taken THIS level, featEffects below covers
-    // every level at once, so don't double-add here).
-    const toughOwned = !!(window.hasFeature && window.hasFeature("Tough"));
-    const choosingTough = ctx.asi && lu.asiMode === "feat" && norm(lu.feat || "") === "tough";
-    if(toughOwned && !choosingTough) gain += 2;
-    if(window.hasFeature && window.hasFeature("Dwarven Toughness")) gain += 1;   // Dwarf: +1 HP each level
+    // HP + a gained Hit Die (hpGain already includes Tough / Dwarven Toughness riders — B15)
+    const gain = hpGain();
     const hpMax = $("f-hp-max"), hpCur = $("f-hp-cur");
     const bumpHP = (n) => { fieldSet(hpMax, num(fieldGet(hpMax)) + n); fieldSet(hpCur, num(fieldGet(hpCur)) + n); };
     bumpHP(gain);
     const hd = $("f-hd-left"); if(hd) hd.value = num(hd.value) + 1;
     // C1: rebuild the hit-dice pool string from the class breakdown (e.g. 3d10 + 2d6).
     const hdField = $("f-hitdice"); if(hdField) hdField.value = hitDiceStr(cur);
+    // B12: this level's class choices → stored state + their effects
+    if(ctx.specs.length && CH()){
+      const before = storedClassState(lu.targetCls);
+      const fxNew = CH().classChoiceEffects(ctx.specs, lu.choices);
+      const fxOld = CH().classChoiceEffects(ctx.specs, before);
+      const fresh = (list, key) => list.filter((x) => !fxOld[key].some((y) => (y.name || y) === (x.name || x)));
+      fresh(fxNew.feats, "feats").forEach((f) => { if(window.addFeatByName) window.addFeatByName(f); });
+      fresh(fxNew.skills, "skills").forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 1); });
+      fresh(fxNew.expertise, "expertise").forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 2); });
+      const langs = fresh(fxNew.languages, "languages"); if(langs.length){ if(typeof window.addLanguages === "function") window.addLanguages(langs); else if(window.appendProficiencies) window.appendProficiencies("Languages: " + langs.join(", ")); }
+      const profs = fresh(fxNew.profs, "profs"); if(profs.length && window.appendProficiencies) window.appendProficiencies(profs.join(", "));
+      fresh(fxNew.features, "features").forEach((f) => addFeature(f.name, f.desc, f.meta));
+      fresh(fxNew.spells, "spells").forEach((g) => { if(window.addGrantedSpell && ctx.cf) window.addGrantedSpell(g.name, ctx.cf.ability, "class"); else if(window.addSpellByName) window.addSpellByName(g.name); });
+      if(fxNew.mastery.length && window.setChoice){ const m = storedMastery(); fxNew.mastery.forEach((w) => { if(m.indexOf(w) < 0) m.push(w); }); window.setChoice("mastery", m); }
+      if(window.setChoice) window.setChoice("class:" + lu.targetCls, Object.assign({}, before, lu.choices));
+    }
     // ASI / feat
     if(ctx.asi){
       const oldCon = conMod();
@@ -319,7 +388,8 @@
         // The feat's chosen/fixed +1, skills, expertise, saves, proficiencies and granted spells.
         if(CH()){
           const fx = CH().featEffects(lu.feat, lu.featChoices);
-          ABIL.forEach((a) => { if(fx.abil[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + fx.abil[a]); } });
+          const f = D.feats().find((x) => x.name === lu.feat); const cap = (f && f.category === "Epic Boon") ? 30 : 20;   // B10: boons may raise a score to 30
+          ABIL.forEach((a) => { if(fx.abil[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(cap, (num(el.value)||10) + fx.abil[a]); } });
           fx.skills.forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 1); });
           fx.expertise.forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 2); });
           fx.saves.forEach((a) => { if(window.grantSaveProf) window.grantSaveProf(a); });
@@ -332,14 +402,18 @@
       const dCon = conMod() - oldCon;
       if(dCon > 0) bumpHP(dCon * totalOf(cur));
     }
-    // spells
+    // spells (a subclass caster's spells carry its ability so the sheet uses INT for an Eldritch Knight)
     lu.pickedCantrips.concat(lu.pickedSpells).forEach((n) => { if(window.addSpellByName) window.addSpellByName(n); });
+    if(ctx.cf && ctx.cf.source === "subclass"){
+      try { (window.getSpellsKnown ? window.getSpellsKnown() : []).forEach((sk) => { if(lu.pickedCantrips.concat(lu.pickedSpells).some((n) => norm(n) === norm(sk.name))){ sk.ability = ctx.cf.ability; sk.src = "class"; } }); } catch(e){}
+      if(typeof window.setSubclassCasting === "function") window.setSubclassCasting(lu.targetCls, ctx.sub, { type: ctx.cf.type, ability: ctx.cf.ability, list: ctx.cf.list });
+    }
     // refresh everything
-    ["renderFeatures","renderResources","renderSlots","recalc","updateHitDiceUI"].forEach((fn) => { if(typeof window[fn] === "function") window[fn](); });
+    ["renderFeatures","renderResources","renderSlots","renderSpells","recalc","updateHitDiceUI"].forEach((fn) => { if(typeof window[fn] === "function") window[fn](); });
     if(window.saveSheet) window.saveSheet(true);
     if(window.addLog) window.addLog("Level Up", "⬆ " + (totalOf(cur)), summaryOf(cur) + (lu.subclass ? " · " + lu.subclass : ""), "crit");
     close();
   }
 
-  window.DNDLU = { launch, close, next, back };
+  window.DNDLU = { launch, close, next, back, _state: () => ({ lu, ctx, STEPS }) };
 })();

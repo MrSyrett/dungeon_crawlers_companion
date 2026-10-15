@@ -862,6 +862,7 @@
     },
     {
       "name": "Scorching Ray",
+      "multiAttack": {"dice": "2d6", "type": "fire", "base": 3, "perSlot": 1},
       "level": 2,
       "school": "Evocation",
       "castingTime": "Action",
@@ -971,6 +972,9 @@
     },
     {
       "name": "Spiritual Weapon",
+      "roll": "attack",
+      "damage": "1d8",
+      "damageType": "force",
       "level": 2,
       "school": "Evocation",
       "castingTime": "Bonus Action",

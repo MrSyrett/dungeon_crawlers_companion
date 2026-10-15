@@ -60,6 +60,7 @@
       "subclasses": [
         {
           "name": "Alchemist",
+          "alwaysPrepared": {"3": ["Healing Word", "Ray of Sickness"], "5": ["Flaming Sphere", "Acid Arrow"], "9": ["Gaseous Form", "Mass Healing Word"], "13": ["Death Ward", "Vitriolic Sphere"], "17": ["Cloudkill", "Raise Dead"]},
           "className": "Artificer",
           "flavor": "A master of potions and reagents who brews restorative and destructive concoctions on the fly.",
           "source": "eberron",
@@ -72,6 +73,7 @@
         },
         {
           "name": "Armorer",
+          "alwaysPrepared": {"3": ["Magic Missile", "Thunderwave"], "5": ["Mirror Image", "Shatter"], "9": ["Hypnotic Pattern", "Lightning Bolt"], "13": ["Fire Shield", "Greater Invisibility"], "17": ["Passwall", "Wall of Force"]},
           "className": "Artificer",
           "flavor": "An artificer who lives inside a suit of arcane power armor, reshaping it for defense or infiltration.",
           "source": "eberron",
@@ -84,6 +86,7 @@
         },
         {
           "name": "Artillerist",
+          "alwaysPrepared": {"3": ["Shield", "Thunderwave"], "5": ["Scorching Ray", "Shatter"], "9": ["Fireball", "Wind Wall"], "13": ["Ice Storm", "Wall of Fire"], "17": ["Cone of Cold", "Wall of Force"]},
           "className": "Artificer",
           "flavor": "A battlefield engineer who conjures an Eldritch Cannon to blast, protect, and control the field.",
           "source": "eberron",
@@ -96,6 +99,7 @@
         },
         {
           "name": "Battle Smith",
+          "alwaysPrepared": {"3": ["Heroism", "Shield"], "5": ["Branding Smite", "Warding Bond"], "9": ["Aura of Vitality", "Conjure Barrage"], "13": ["Aura of Purity", "Fire Shield"], "17": ["Banishing Smite", "Mass Cure Wounds"]},
           "className": "Artificer",
           "flavor": "A protector-artificer who fights beside a loyal mechanical Steel Defender and wields arcane weapons with Intelligence.",
           "source": "eberron",

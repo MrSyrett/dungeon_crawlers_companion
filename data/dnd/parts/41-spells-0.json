@@ -75,6 +75,7 @@
     },
     {
       "name": "Eldritch Blast",
+      "multiAttack": {"dice": "1d10", "type": "force", "beamsByLevel": true},
       "level": 0,
       "school": "Evocation",
       "castingTime": "Action",

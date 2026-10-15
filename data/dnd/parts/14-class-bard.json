@@ -428,6 +428,7 @@
         },
         {
           "name": "College of Glamour",
+          "alwaysPrepared": {"3": ["Charm Person", "Mirror Image"]},
           "className": "Bard",
           "flavor": "A bard touched by the Feywild whose beauty commands and beguiles, rallying allies and awing enemies into submission.",
           "source": "phb",

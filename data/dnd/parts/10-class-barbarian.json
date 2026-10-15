@@ -76,6 +76,7 @@
         },
         {
           "name": "Path of the Wild Heart",
+          "alwaysPrepared": {"3": ["Speak with Animals"]},
           "className": "Barbarian",
           "flavor": "Your Rage draws on a spiritual bond with animals, letting you borrow their strengths and speak with the natural world.",
           "source": "phb",

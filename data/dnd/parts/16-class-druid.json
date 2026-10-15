@@ -414,6 +414,7 @@
         },
         {
           "name": "Circle of the Moon",
+          "alwaysPrepared": {"3": ["Cure Wounds", "Moonbeam", "Starry Wisp"], "5": ["Conjure Animals"], "7": ["Fount of Moonlight"], "9": ["Mass Cure Wounds"]},
           "className": "Druid",
           "flavor": "A fierce shapeshifter who wades into battle as a dire beast, mending wounds mid-transformation.",
           "source": "phb",
@@ -450,6 +451,7 @@
         },
         {
           "name": "Circle of the Sea",
+          "alwaysPrepared": {"3": ["Fog Cloud", "Gust of Wind", "Ray of Frost", "Shatter", "Thunderwave"], "5": ["Lightning Bolt", "Water Breathing"], "7": ["Control Water", "Ice Storm"], "9": ["Conjure Elemental", "Hold Monster"]},
           "className": "Druid",
           "flavor": "A druid of tides and storms who wraps themselves in a lashing sea and rides the wind.",
           "source": "phb",
@@ -486,6 +488,7 @@
         },
         {
           "name": "Circle of the Stars",
+          "alwaysPrepared": {"3": ["Guidance", "Guiding Bolt"]},
           "className": "Druid",
           "flavor": "A stargazer who charts the constellations and takes on their radiant, guiding forms.",
           "source": "phb",

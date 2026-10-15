@@ -89,6 +89,9 @@
         },
         {
           "name": "Arcane Trickster",
+          "spellcasting": "third",
+          "spellcastingAbility": "INT",
+          "spellList": "Wizard",
           "className": "Rogue",
           "flavor": "A spell-thief who laces stealth and larceny with enchantment and illusion — a phantom hand, a nudge to the mind, a stolen spell.",
           "source": "phb",

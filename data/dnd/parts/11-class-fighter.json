@@ -453,6 +453,9 @@
         },
         {
           "name": "Eldritch Knight",
+          "spellcasting": "third",
+          "spellcastingAbility": "INT",
+          "spellList": "Wizard",
           "className": "Fighter",
           "flavor": "A warrior who weaves Wizard magic into swordplay — warding themselves, binding a weapon, and striking with spell and steel at once.",
           "source": "phb",

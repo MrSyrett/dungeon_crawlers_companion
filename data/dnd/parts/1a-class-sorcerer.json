@@ -56,6 +56,7 @@
       "subclasses": [
         {
           "name": "Draconic Sorcery",
+          "alwaysPrepared": {"3": ["Alter Self", "Chromatic Orb", "Command"], "5": ["Fear", "Fly"], "7": ["Arcane Eye", "Charm Monster"], "9": ["Legend Lore", "Summon Dragon"]},
           "className": "Sorcerer",
           "flavor": "A sorcerer with dragon blood, warded by scaled resilience and commanding an elemental heritage — eventually sprouting wings.",
           "source": "srd",
@@ -68,6 +69,7 @@
         },
         {
           "name": "Aberrant Sorcery",
+          "alwaysPrepared": {"3": ["Arms of Hadar", "Calm Emotions", "Detect Thoughts", "Dissonant Whispers", "Mind Sliver"], "5": ["Hunger of Hadar", "Sending"], "7": ["Evard's Black Tentacles", "Summon Aberration"], "9": ["Rary's Telepathic Bond", "Telekinesis"]},
           "className": "Sorcerer",
           "flavor": "A sorcerer whose power seeps from the Far Realm — psionic whispers, telepathy, and flesh that warps to alien will.",
           "source": "phb",
@@ -80,6 +82,7 @@
         },
         {
           "name": "Clockwork Sorcery",
+          "alwaysPrepared": {"3": ["Aid", "Alarm", "Lesser Restoration", "Protection from Evil and Good"], "5": ["Dispel Magic", "Protection from Energy"], "7": ["Freedom of Movement", "Summon Construct"], "9": ["Greater Restoration", "Wall of Force"]},
           "className": "Sorcerer",
           "flavor": "A sorcerer aligned with the cosmic force of Order, smoothing away chaos and cloaking allies in inevitable law.",
           "source": "phb",

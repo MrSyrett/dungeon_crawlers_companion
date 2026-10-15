@@ -358,6 +358,7 @@
       "subclasses": [
         {
           "name": "Life Domain",
+          "alwaysPrepared": {"3": ["Aid", "Bless", "Cure Wounds", "Lesser Restoration"], "5": ["Mass Healing Word", "Revivify"], "7": ["Aura of Life", "Death Ward"], "9": ["Greater Restoration", "Mass Cure Wounds"]},
           "className": "Cleric",
           "flavor": "A healer channeling the positive energy of life itself, mending wounds better than any other.",
           "source": "srd",
@@ -394,6 +395,7 @@
         },
         {
           "name": "Light Domain",
+          "alwaysPrepared": {"3": ["Burning Hands", "Faerie Fire", "Scorching Ray", "See Invisibility"], "5": ["Daylight", "Fireball"], "7": ["Arcane Eye", "Wall of Fire"], "9": ["Flame Strike", "Scrying"]},
           "className": "Cleric",
           "flavor": "A cleric of a sun or fire god who scorches foes with radiance and blinds the wicked.",
           "source": "phb",
@@ -423,6 +425,7 @@
         },
         {
           "name": "Trickery Domain",
+          "alwaysPrepared": {"3": ["Charm Person", "Disguise Self", "Invisibility", "Pass without Trace"], "5": ["Hypnotic Pattern", "Nondetection"], "7": ["Confusion", "Dimension Door"], "9": ["Dominate Person", "Modify Memory"]},
           "className": "Cleric",
           "flavor": "A cleric of mischief and misdirection who conjures duplicates and blesses allies with stealthy cunning.",
           "source": "phb",
@@ -452,6 +455,7 @@
         },
         {
           "name": "War Domain",
+          "alwaysPrepared": {"3": ["Guiding Bolt", "Magic Weapon", "Shield of Faith", "Spiritual Weapon"], "5": ["Crusader's Mantle", "Spirit Guardians"], "7": ["Freedom of Movement", "Staggering Smite"], "9": ["Banishing Smite", "Steel Wind Strike"]},
           "className": "Cleric",
           "flavor": "A martial priest who leads the charge, guiding weapons with divine will and fighting like a seasoned soldier.",
           "source": "phb",
