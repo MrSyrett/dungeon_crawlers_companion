@@ -52,24 +52,26 @@
     const blocked = !sel && opts.disabledAdd(s);
     const label = sel ? (opts.removeLabel || "− Remove") : (opts.addLabel || "+ Add");
     const cls = "spl-pick" + (sel ? " on" : "") + (blocked ? " disabled" : "");
+    const pickAttr = opts.pickAttr || "data-sp-pick", expAttr = opts.expAttr || "data-sp-exp";
     return '<div class="spl-row" data-sp="' + esc(name) + '">' +
-      '<button class="spl-head" data-sp-exp type="button">' +
+      '<button class="spl-head" ' + expAttr + ' type="button">' +
         '<span class="spl-caret">▸</span>' +
         '<span class="spl-hd-txt"><span class="spl-name">' + esc(name) + '</span>' +
         '<span class="spl-tags">' + esc(spellTags(s).join(" · ")) + '</span></span>' +
       '</button>' +
-      '<button class="' + cls + '" type="button" data-sp-pick="' + esc(name) + '"' + (blocked ? " disabled" : "") + '>' + label + '</button>' +
+      '<button class="' + cls + '" type="button" ' + pickAttr + '="' + esc(name) + '"' + (blocked ? " disabled" : "") + '>' + label + '</button>' +
       '<div class="spl-desc" hidden>' + esc(s.description || "") + (s.higherLevels ? '<br><b>At Higher Levels.</b> ' + esc(s.higherLevels) : "") + '</div>' +
     '</div>';
   }
   // `spells` is already filtered + sorted by the caller. opts: { selected(name),
-  // disabledAdd(spell), addLabel, removeLabel, emptyHTML }.
+  // disabledAdd(spell), addLabel, removeLabel, emptyHTML, pickAttr, expAttr }.
   function spellPickerHTML(spells, opts) {
     opts = opts || {};
     const o = {
       selected: opts.selected || (() => false),
       disabledAdd: opts.disabledAdd || (() => false),
       addLabel: opts.addLabel, removeLabel: opts.removeLabel,
+      pickAttr: opts.pickAttr, expAttr: opts.expAttr,   // alternate data hooks (the choices module uses its own)
     };
     if (!spells || !spells.length) return opts.emptyHTML || '<p class="spl-empty">No spells match.</p>';
     const byLevel = {};

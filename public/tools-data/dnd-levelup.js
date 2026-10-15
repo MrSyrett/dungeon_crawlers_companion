@@ -99,7 +99,7 @@
     if(totalOf(cur) >= 20){ if(window.addLog) window.addLog("Level Up","✗","Already at level 20","fumble"); return; }
     // ensure the character is in managed mode so classLevels drives the engine
     if(window.setClassLevels) window.setClassLevels(cur);
-    lu = { targetCls: cur[0].cls, subclass:"", hp:null, hpMethod:"avg", asiMode:"asi", asi:{}, feat:"", pickedCantrips:[], pickedSpells:[], spellsAvail:true };
+    lu = { targetCls: cur[0].cls, subclass:"", hp:null, hpMethod:"avg", asiMode:"asi", asi:{}, feat:"", featChoices:{}, pickedCantrips:[], pickedSpells:[], spellsAvail:true };
     ctx = buildCtx(); computeSteps(); step = 0;
     $("dndlu-overlay").classList.add("open"); render();
   }
@@ -146,7 +146,7 @@
     (c.subclasses||[]).forEach((s) => h += card('data-sub="' + esc(s.name) + '"', norm(lu.subclass)===norm(s.name), s.name, (s.source||"").toUpperCase()));
     h += "</div>";
     const sub = (c.subclasses||[]).find((s) => norm(s.name)===norm(lu.subclass));
-    if(sub) h += '<div class="dndb-note">' + esc(sub.flavor || "") + '</div>';
+    if(sub) h += CH() ? CH().subclassDetail(c, sub, ctx.newLevel) : '<div class="dndb-note">' + esc(sub.flavor || "") + '</div>';
     return h;
   }
   function rHP(){
@@ -178,10 +178,16 @@
       });
       h += "</div>";
     } else {
+      // Fighting Style feats come only from a class feature; Epic Boons need level 19+.
+      const newTotal = totalOf(curClasses()) + 1;
       h += '<span class="m-lbl">Choose a feat</span><select id="dndlu-feat" class="m-input"><option value="">Select a feat…</option>' +
-        D.feats().slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (lu.feat===f.name?" selected":"") + '>' + esc(f.name) + ' — ' + esc(f.category) + '</option>').join("") + '</select>';
+        D.feats().filter((f) => (f.category || "") !== "Fighting Style" && ((f.category || "") !== "Epic Boon" || newTotal >= 19)).slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (lu.feat===f.name?" selected":"") + '>' + esc(f.name) + ' — ' + esc(f.category) + '</option>').join("") + '</select>';
       const f = D.feats().find((x) => x.name === lu.feat);
-      if(f) h += '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || f.description || "") + '</div>';
+      if(f){
+        h += CH() ? CH().featDetail(f.name) : '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || f.description || "") + '</div>';
+        // the feat's own picks (ability +1, spells, skills, …) happen right here
+        const specs = featSpecs(); if(specs.length) h += CH().renderChoices(specs, lu.featChoices, chCtx(), "feat");
+      }
     }
     return h;
   }
@@ -219,7 +225,7 @@
     h += '<div class="dr-line">' + (ctx.isNew ? 'Multiclass into <b>' + esc(lu.targetCls) + '</b> (level 1)' : '<b>' + esc(lu.targetCls) + '</b> ' + (ctx.newLevel-1) + ' → <b>' + ctx.newLevel + '</b>') + ' · new total level <b>' + (totalOf(cur)+1) + '</b></div>';
     if(lu.subclass) h += '<div class="dr-line">Subclass: <b>' + esc(lu.subclass) + '</b></div>';
     h += '<div class="dr-line">Hit Points: +<b>' + hpGain() + '</b> (→ ' + (curMaxHP()+hpGain()) + ')</div>';
-    if(ctx.asi){ h += '<div class="dr-line">' + (lu.asiMode==="feat" ? 'Feat: <b>' + esc(lu.feat || "—") + '</b>' : 'Ability Scores: <b>' + (ABIL.filter((a)=>lu.asi[a]).map((a)=>a+" +"+lu.asi[a]).join(", ") || "—") + '</b>') + '</div>'; }
+    if(ctx.asi){ h += '<div class="dr-line">' + (lu.asiMode==="feat" ? 'Feat: <b>' + esc(lu.feat || "—") + '</b>' + (CH() && lu.feat && CH().summary(featSpecs(), lu.featChoices) ? ' — ' + esc(CH().summary(featSpecs(), lu.featChoices)) : '') : 'Ability Scores: <b>' + (ABIL.filter((a)=>lu.asi[a]).map((a)=>a+" +"+lu.asi[a]).join(", ") || "—") + '</b>') + '</div>'; }
     const spells = lu.pickedCantrips.concat(lu.pickedSpells);
     if(spells.length) h += '<div class="dr-line">New spells: <b>' + esc(spells.join(", ")) + '</b></div>';
     h += "</div>";
@@ -229,7 +235,17 @@
   // ── helpers reading the live sheet ──────────────────────────────────────
   function curScore(a){ const el = $("sc-" + a); return el ? (num(el.value) || 10) : 10; }
   function conMod(){ return Math.floor((curScore("CON") - 10) / 2); }
-  function curMaxHP(){ return num($("f-hp-max").value); }
+  // Max HP on the sheet is a contenteditable <span> (not an input): read/write textContent.
+  const fieldGet = (el) => el ? ("value" in el ? el.value : el.textContent) : "";
+  const fieldSet = (el, v) => { if(!el) return; if("value" in el) el.value = String(v); else el.textContent = String(v); };
+  function curMaxHP(){ return num(fieldGet($("f-hp-max"))); }
+  // ── sub-choices for the chosen feat (window.DNDCH) ───────────────────────
+  const CH = () => window.DNDCH || null;
+  function featSpecs(){ return (CH() && lu.asiMode === "feat" && lu.feat) ? CH().featSpecs(lu.feat, lu.featChoices) : []; }
+  function chCtx(){
+    const prof = []; try { const sk = window.getSkillProf ? window.getSkillProf() : {}; Object.keys(sk).forEach((k) => { if(sk[k] > 0) prof.push(k); }); } catch(e){}
+    return { prof, level: totalOf(curClasses()) + 1 };
+  }
   function hpGain(){ const g = lu.hpMethod === "roll" ? (lu.hp != null ? lu.hp : (Math.floor(ctx.hitDie/2)+1 + conMod())) : (Math.floor(ctx.hitDie/2) + 1 + conMod()); return Math.max(1, g); }  // always at least 1 HP per level
 
   function wire(){
@@ -248,7 +264,8 @@
       if(d > 0 && curScore(a) + nv > 20) return;
       lu.asi[a] = nv; if(!nv) delete lu.asi[a]; render();
     }));
-    const fs = $("dndlu-feat"); if(fs) fs.addEventListener("change", () => { lu.feat = fs.value; render(); });
+    const fs = $("dndlu-feat"); if(fs) fs.addEventListener("change", () => { if(lu.feat !== fs.value) lu.featChoices = {}; lu.feat = fs.value; render(); });
+    if(CH()) CH().wireChoices(body, (root) => root === "feat" ? lu.featChoices : null, render);
     body.querySelectorAll("[data-spavail]").forEach((el) => el.addEventListener("change", () => { lu.spellsAvail = el.checked; render(); }));
     body.querySelectorAll("[data-sp-exp]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const row = el.closest("[data-sp]"); if(row){ row.classList.toggle("open"); const d = row.querySelector(".spl-desc"); if(d) d.hidden = !row.classList.contains("open"); } }));
     body.querySelectorAll("[data-sp-pick]").forEach((el) => el.addEventListener("click", () => {
@@ -263,7 +280,7 @@
     switch(STEPS[step]){
       case "Subclass": return !!lu.subclass;
       case "HP": return lu.hpMethod === "avg" || lu.hp != null;
-      case "ASI": return lu.asiMode === "feat" ? !!lu.feat : ABIL.reduce((s,a)=>s+(lu.asi[a]||0),0) === 2;
+      case "ASI": return lu.asiMode === "feat" ? (!!lu.feat && (!CH() || CH().complete(featSpecs(), lu.featChoices))) : ABIL.reduce((s,a)=>s+(lu.asi[a]||0),0) === 2;
       case "Spells": return lu.pickedCantrips.length >= ctx.newCantrips && lu.pickedSpells.length >= (ctx.maxSL>=1 ? ctx.newSpells : 0);
       default: return true;
     }
@@ -283,8 +300,10 @@
     const toughOwned = !!(window.hasFeature && window.hasFeature("Tough"));
     const choosingTough = ctx.asi && lu.asiMode === "feat" && norm(lu.feat || "") === "tough";
     if(toughOwned && !choosingTough) gain += 2;
+    if(window.hasFeature && window.hasFeature("Dwarven Toughness")) gain += 1;   // Dwarf: +1 HP each level
     const hpMax = $("f-hp-max"), hpCur = $("f-hp-cur");
-    hpMax.value = num(hpMax.value) + gain; hpCur.value = num(hpCur.value) + gain;
+    const bumpHP = (n) => { fieldSet(hpMax, num(fieldGet(hpMax)) + n); fieldSet(hpCur, num(fieldGet(hpCur)) + n); };
+    bumpHP(gain);
     const hd = $("f-hd-left"); if(hd) hd.value = num(hd.value) + 1;
     // C1: rebuild the hit-dice pool string from the class breakdown (e.g. 3d10 + 2d6).
     const hdField = $("f-hitdice"); if(hdField) hdField.value = hitDiceStr(cur);
@@ -294,14 +313,24 @@
       if(lu.asiMode === "asi"){ ABIL.forEach((a) => { if(lu.asi[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + lu.asi[a]); } }); }
       else if(lu.feat && window.addFeatByName){
         window.addFeatByName(lu.feat);
-        // C4: apply the feat's structured effects (Tough HP, a single named +1) to the live sheet.
+        // C4: apply the feat's structured effects (Tough HP) to the live sheet.
         const fe = RULES().featEffects(lu.feat, totalOf(cur));
-        if(fe.hpBonus){ hpMax.value = num(hpMax.value) + fe.hpBonus; hpCur.value = num(hpCur.value) + fe.hpBonus; }
-        ABIL.forEach((a) => { if(fe.abil[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + fe.abil[a]); } });
+        if(fe.hpBonus) bumpHP(fe.hpBonus);
+        // The feat's chosen/fixed +1, skills, expertise, saves, proficiencies and granted spells.
+        if(CH()){
+          const fx = CH().featEffects(lu.feat, lu.featChoices);
+          ABIL.forEach((a) => { if(fx.abil[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + fx.abil[a]); } });
+          fx.skills.forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 1); });
+          fx.expertise.forEach((n) => { if(window.grantSkillProf) window.grantSkillProf(n, 2); });
+          fx.saves.forEach((a) => { if(window.grantSaveProf) window.grantSaveProf(a); });
+          if(fx.profs.length && window.appendProficiencies) window.appendProficiencies(fx.profs.join(", "));
+          fx.spells.forEach((g) => { if(window.addGrantedSpell) window.addGrantedSpell(g.name, g.ability, g.source); else if(window.addSpellByName) window.addSpellByName(g.name); });
+          if(window.setChoice) window.setChoice("feat:" + lu.feat, lu.featChoices);
+        }
       }
       // A CON increase (from the ASI or a feat) raises HP for EVERY level, retroactively.
       const dCon = conMod() - oldCon;
-      if(dCon > 0){ const add = dCon * totalOf(cur); hpMax.value = num(hpMax.value) + add; hpCur.value = num(hpCur.value) + add; }
+      if(dCon > 0) bumpHP(dCon * totalOf(cur));
     }
     // spells
     lu.pickedCantrips.concat(lu.pickedSpells).forEach((n) => { if(window.addSpellByName) window.addSpellByName(n); });

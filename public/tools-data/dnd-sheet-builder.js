@@ -62,6 +62,7 @@
              bg2:"", bg1:"", classSkills:[], multiclass:[],
              name:"", alignment:"", eberron:true, au:true,
              fightingStyle:"", expertise:[], orders:{}, advances:[],
+             spChoices:{}, bgChoices:{},   // sub-choices: species traits / background Origin feat (window.DNDCH)
              pickedCantrips:[], pickedSpells:[], spellsAvail:true, equipChoice:"gear", equipPkg:0 };
   }
   function clsData() { return D.classes().find((c) => c.name === st.cls) || null; }
@@ -126,7 +127,40 @@
   }
   function fightingStyles() { return D.feats().filter((f) => (f.category || "") === "Fighting Style" && allowSrc(f)); }
   function classChoices() { return (CLASS_CHOICES[st.cls] || []).filter((ch) => primaryLevel() >= (ch.level || 1)); }
-  function proficientSkills() { const b = bgData(); const bg = b ? (b.skillProficiencies || []) : []; const out = []; bg.concat(st.classSkills).forEach((s) => { const r = matchSkill(s); if (r && out.indexOf(r) < 0) out.push(r); }); return out; }
+  function proficientSkills() { const b = bgData(); const bg = b ? (b.skillProficiencies || []) : []; const out = []; bg.concat(st.classSkills).concat(choiceEffects().skills).forEach((s) => { const r = matchSkill(s); if (r && out.indexOf(r) < 0) out.push(r); }); return out; }
+
+  // ── sub-choices (window.DNDCH): species traits, the background's Origin feat,
+  //    and every Advancement feat can each ask for further picks ─────────
+  const CH = () => window.DNDCH || null;
+  // Context for option lists: skills already proficient (so a feat can't re-pick
+  // one, and Expertise offers only those), the build level, and expansion gating.
+  function chCtx(excludeRoot) {
+    const b = bgData(); const prof = [];
+    const add = (n) => { const r = matchSkill(n); if (r && prof.indexOf(r) < 0) prof.push(r); };
+    (b ? (b.skillProficiencies || []) : []).forEach(add); st.classSkills.forEach(add);
+    // skills from OTHER choice roots count as taken; a root never blocks its own picks
+    choiceRoots().forEach((r) => { if (r.root !== excludeRoot) r.fx().skills.forEach(add); });
+    return { prof, level: num(st.level), allowSrc };
+  }
+  function speciesSpecs() { return (CH() && st.species) ? CH().speciesSpecs(st.species, st.lineage, { level: num(st.level) }, st.spChoices) : []; }
+  function bgFeatSpecs() { const b = bgData(); return (CH() && b && b.feat) ? CH().featSpecs(b.feat, st.bgChoices) : []; }
+  function advFeatSpecs(av) { return (CH() && av && av.mode === "feat" && av.feat) ? CH().featSpecs(av.feat, av.choices || (av.choices = {})) : []; }
+  // Every choice root: { root, state, fx() } — fx() = its concrete effects.
+  function choiceRoots() {
+    const out = []; const ch = CH(); if (!ch) return out;
+    const b = bgData();
+    if (st.species) out.push({ root:"species", state: st.spChoices, fx: () => ch.speciesEffects(st.species, st.lineage, { level: num(st.level) }, st.spChoices) });
+    if (b && b.feat) out.push({ root:"bg", state: st.bgChoices, fx: () => ch.featEffects(b.feat, st.bgChoices) });
+    (st.advances || []).forEach((av, i) => { if (av.mode === "feat" && av.feat) out.push({ root:"adv:" + i, state: av.choices || (av.choices = {}), fx: () => ch.featEffects(av.feat, av.choices || {}) }); });
+    return out;
+  }
+  function choiceEffects() {
+    const out = { abil:{}, skills:[], expertise:[], saves:[], spells:[], profs:[], picks:[] };
+    choiceRoots().forEach((r) => { const fx = r.fx(); Object.keys(fx.abil).forEach((k) => out.abil[k] = (out.abil[k] || 0) + fx.abil[k]); ["skills","expertise","saves","spells","profs","picks"].forEach((k) => out[k] = out[k].concat(fx[k])); });
+    return out;
+  }
+  function choiceState(root) { const r = choiceRoots().find((x) => x.root === root); return r ? r.state : null; }
+  function choicesHTML(specs, state, root) { return CH() ? CH().renderChoices(specs, state, chCtx(root), root) : ""; }
 
   // ── modal shell ────────────────────────────────────────────────────────
   function ensureModal() {
@@ -191,7 +225,7 @@
     let h = '<p class="m-hint">Name your hero and set a starting level, then choose which content is available as you build.</p>';
     h += '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">' +
          '<label style="flex:1 1 220px;"><span class="m-lbl">Character name</span><input type="text" id="dndb-name" class="m-input" placeholder="Aelric Thornwood" value="' + esc(st.name) + '"></label>' +
-         '<label><span class="m-lbl">Starting level</span> <input type="number" id="dndb-level" class="m-input" style="width:80px;" min="1" max="20" value="' + st.level + '"></label>' +
+         '<label><span class="m-lbl">Starting level</span> <select id="dndb-level" class="m-input" style="width:90px;">' + Array.from({ length: 20 }, (_, i) => '<option value="' + (i+1) + '"' + (num(st.level) === i+1 ? " selected" : "") + '>' + (i+1) + '</option>').join("") + '</select></label>' +
          '</div>';
     h += '<span class="m-lbl">Expansion content</span><p class="m-hint" style="margin:2px 0 8px;">Leave an expansion unchecked to hide its options \u2014 classes, subclasses, species, backgrounds, feats, and spells \u2014 throughout character creation.</p>';
     h += '<div class="dndb-opt' + (st.eberron ? " on" : "") + '" id="dndb-opt-eberron"><div class="dnb-main"><span class="dnb-check">' + (st.eberron ? "\u2713" : "") + '</span><div><div class="dnb-ttl">Eberron: Forge of the Artificer</div><div class="dnb-sub">The Artificer class; Changeling, Kalashtar, Khoravar, Shifter &amp; Warforged species; dragonmark backgrounds &amp; feats; and Eberron magic items.</div></div></div></div>';
@@ -207,7 +241,7 @@
     });
     h += "</div>";
     const c = clsData();
-    if (c) h += '<div class="dndb-note">' + esc(c.flavor || "") + '</div>';
+    if (c) h += CH() ? CH().classDetail(c, primaryLevel()) : '<div class="dndb-note">' + esc(c.flavor || "") + '</div>';
     // Multiclass allocator (only meaningful above level 1)
     if (st.cls && num(st.level) > 1) h += rMulticlass();
     return h;
@@ -235,20 +269,24 @@
     (c.subclasses || []).filter(allowSrc).forEach((s) => h += card('data-sub="' + esc(s.name) + '"', st.subclass === s.name, s.name, s.source === "srd" ? "SRD" : (s.source||"").toUpperCase()));
     h += "</div>";
     const sub = (c.subclasses||[]).find((s) => s.name === st.subclass);
-    if (sub) h += '<div class="dndb-note">' + esc(sub.flavor || "") + '</div>';
+    if (sub) h += CH() ? CH().subclassDetail(c, sub, primaryLevel()) : '<div class="dndb-note">' + esc(sub.flavor || "") + '</div>';
     return h;
   }
   function rSpecies() {
     let h = '<p class="m-hint">Choose a species. Some have a lineage to pick as well.</p><div class="dndb-grid">';
-    D.species().filter(allowSrc).forEach((s) => h += card('data-sp="' + esc(s.name) + '"', st.species === s.name, s.name, "Speed " + s.speed + (s.darkvision ? " · Darkvision " + s.darkvision : "")));
+    D.species().filter(allowSrc).forEach((s) => h += card('data-species="' + esc(s.name) + '"', st.species === s.name, s.name, "Speed " + s.speed + (s.darkvision ? " · Darkvision " + s.darkvision : "")));
     h += "</div>";
     const sp = spData();
+    if (sp) h += CH() ? CH().speciesDetail(sp, "") : '<div class="dndb-note">' + esc(sp.flavor || "") + '</div>';
     if (sp && sp.lineages && sp.lineages.length) {
       h += '<span class="m-lbl">Lineage</span><div class="dndb-grid">';
-      sp.lineages.forEach((l) => h += card('data-lin="' + esc(l.name) + '"', st.lineage === l.name, l.name, ""));
+      sp.lineages.forEach((l) => h += card('data-lin="' + esc(l.name) + '"', st.lineage === l.name, l.name, (l.traits || []).map((t) => t.name).join(" · ")));
       h += "</div>";
+      const ln = sp.lineages.find((l) => l.name === st.lineage);
+      if (ln && CH()) h += CH().lineageDetail(sp, ln);
     }
-    if (sp) h += '<div class="dndb-note">' + esc(sp.flavor || "") + '</div>';
+    // Trait choices (Human's skill + Origin feat, Keen Senses, Draconic Ancestry, a lineage's spellcasting ability…)
+    if (sp) { const specs = speciesSpecs(); if (specs.length) h += '<span class="m-lbl" style="display:block;margin-top:12px;">Species choices</span>' + choicesHTML(specs, st.spChoices, "species"); }
     return h;
   }
   function rBackground() {
@@ -256,7 +294,9 @@
     D.backgrounds().filter(allowSrc).forEach((b) => h += card('data-bg="' + esc(b.name) + '"', st.background === b.name, b.name, (b.abilityScores||[]).join("/") + " · " + b.feat));
     h += "</div>";
     const b = bgData();
-    if (b) h += '<div class="dndb-note"><b>' + esc(b.name) + '.</b> ' + esc(b.description || "") + '<br>Skills: <b>' + esc((b.skillProficiencies||[]).join(", ")) + '</b> · Feat: <b>' + esc(b.feat) + '</b></div>';
+    if (b) h += CH() ? CH().backgroundDetail(b) : '<div class="dndb-note"><b>' + esc(b.name) + '.</b> ' + esc(b.description || "") + '<br>Skills: <b>' + esc((b.skillProficiencies||[]).join(", ")) + '</b> · Feat: <b>' + esc(b.feat) + '</b></div>';
+    // The Origin feat's own picks (Magic Initiate's list + spells, Skilled's three skills, …)
+    if (b) { const specs = bgFeatSpecs(); if (specs.length) h += '<span class="m-lbl" style="display:block;margin-top:12px;">' + esc(b.feat) + ' — your choices</span>' + choicesHTML(specs, st.bgChoices, "bg"); }
     return h;
   }
   function rAbilities() {
@@ -319,9 +359,9 @@
   }
   function rSkills() {
     const c = clsData(), b = bgData();
-    const bgSkills = b ? (b.skillProficiencies || []) : [];
-    let h = '<p class="m-hint">You are automatically proficient in your background skills. Choose your class skills.</p>';
-    if (bgSkills.length) h += '<div class="dndb-note">From ' + esc(b.name) + ': <b>' + esc(bgSkills.join(", ")) + '</b></div>';
+    const bgSkills = (b ? (b.skillProficiencies || []) : []).concat(choiceEffects().skills);
+    let h = '<p class="m-hint">You are automatically proficient in your background skills' + (choiceEffects().skills.length ? ' and the skills your species/feat choices granted' : '') + '. Choose your class skills.</p>';
+    if (bgSkills.length) h += '<div class="dndb-note">Already proficient: <b>' + esc(bgSkills.join(", ")) + '</b></div>';
     if (c) {
       let from = c.proficiencies && c.proficiencies.skillsFrom && c.proficiencies.skillsFrom.length ? c.proficiencies.skillsFrom : D.skills().map((s) => s.name);
       // "Any" means the class chooses from the full skill list (e.g. Bard). Expand it.
@@ -380,7 +420,7 @@
         h += '<select class="m-input dndb-adv-feat" data-i="' + i + '"><option value="">Select a feat…</option>' +
           D.feats().filter((f) => { if (!allowSrc(f)) return false; const cat = f.category || ""; if (cat === "General") return true; if (cat === "Epic Boon") return (st.level || 1) >= 19; return false; }).slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (av.feat===f.name?" selected":"") + '>' + esc(f.name) + " — " + esc(f.category) + '</option>').join("") + '</select>';
         const f = D.feats().find((x) => x.name === av.feat);
-        if (f) h += '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || "") + '</div>';
+        if (f) { h += CH() ? CH().featDetail(f.name) : '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || "") + '</div>'; const specs = advFeatSpecs(av); if (specs.length) h += choicesHTML(specs, av.choices, "adv:" + i); }
       } else {
         const total = ABIL.reduce((s,a) => s + (av.asi[a]||0), 0);
         h += '<p class="m-hint" style="margin:0 0 6px;">+2 to one score, or +1 to two (max 20). <b style="color:#8ad4ff;">' + total + '/2</b></p><div class="dndb-abil-rows">';
@@ -460,12 +500,13 @@
     h += '<div class="dr-line"><b>' + esc(st.name || "Unnamed") + '</b> — ' + esc(st.species || "—") + (st.lineage ? " (" + esc(st.lineage) + ")" : "") + ' ' + clsLabel + ' · ' + esc(st.background || "—") + (st.alignment ? " · " + esc(st.alignment) : "") + '</div>';
     h += '<div class="dr-scores">' + ABIL.map((a) => '<div class="drs"><span class="drs-a">' + a + '</span><span class="drs-v">' + sc[a] + '</span><span class="drs-m">' + sgn(mod(sc[a])) + '</span></div>').join("") + '</div>';
     if (c) h += '<div class="dr-line">Saves: <b>' + esc((c.savingThrows||[]).join(", ")) + '</b> · Hit Die d' + c.hitDie + '</div>';
-    h += '<div class="dr-line">Skills: <b>' + esc(bgSkills.concat(st.classSkills).join(", ") || "—") + '</b>' + (st.expertise.length ? ' · Expertise: <b>' + esc(st.expertise.join(", ")) + '</b>' : "") + '</div>';
+    h += '<div class="dr-line">Skills: <b>' + esc(bgSkills.concat(st.classSkills).concat(choiceEffects().skills.filter((x) => !bgSkills.concat(st.classSkills).some((y) => norm(y) === norm(x)))).join(", ") || "—") + '</b>' + (st.expertise.length ? ' · Expertise: <b>' + esc(st.expertise.join(", ")) + '</b>' : "") + '</div>';
     if (st.fightingStyle) h += '<div class="dr-line">Fighting Style: <b>' + esc(st.fightingStyle) + '</b></div>';
     Object.keys(st.orders || {}).forEach((k) => { if (st.orders[k]) h += '<div class="dr-line">' + esc(k) + ': <b>' + esc(st.orders[k]) + '</b></div>'; });
-    if (b) h += '<div class="dr-line">Origin feat: <b>' + esc(b.feat) + '</b></div>';
+    if (b) h += '<div class="dr-line">Origin feat: <b>' + esc(b.feat) + '</b>' + (CH() && CH().summary(bgFeatSpecs(), st.bgChoices) ? ' — ' + esc(CH().summary(bgFeatSpecs(), st.bgChoices)) : '') + '</div>';
+    if (CH() && st.species) { const ss = CH().storedSummary({ species: st.spChoices }, "species", st.species, st.lineage, { level: num(st.level) }); if (ss) h += '<div class="dr-line">Species choices: <b>' + esc(ss) + '</b></div>'; }
     if (st.advances && st.advances.length) {
-      const advTxt = st.advances.map((av) => av.mode === "feat" ? (av.feat || "—") : ("ASI " + ABIL.filter((a)=>av.asi[a]).map((a)=>a+" +"+av.asi[a]).join(" ")) ).filter(Boolean).join(" · ");
+      const advTxt = st.advances.map((av) => av.mode === "feat" ? ((av.feat || "—") + (CH() && av.feat && CH().summary(advFeatSpecs(av), av.choices) ? " (" + CH().summary(advFeatSpecs(av), av.choices) + ")" : "")) : ("ASI " + ABIL.filter((a)=>av.asi[a]).map((a)=>a+" +"+av.asi[a]).join(" ")) ).filter(Boolean).join(" · ");
       if (advTxt) h += '<div class="dr-line">Advancement: <b>' + esc(advTxt) + '</b></div>';
     }
     if (isCaster()) {
@@ -481,7 +522,7 @@
   // ── wiring ─────────────────────────────────────────────────────────────
   function wire() {
     const body = $("dndb-body");
-    const lvl = $("dndb-level"); if (lvl) lvl.addEventListener("input", () => { st.level = Math.max(1, Math.min(20, parseInt(lvl.value,10) || 1)); while (secondaryTotal() > st.level - 1 && st.multiclass.length) st.multiclass.pop(); render(); });
+    const lvl = $("dndb-level"); if (lvl) lvl.addEventListener("change", () => { st.level = Math.max(1, Math.min(20, parseInt(lvl.value,10) || 1)); while (secondaryTotal() > st.level - 1 && st.multiclass.length) st.multiclass.pop(); render(); });
     const nm = $("dndb-name"); if (nm) nm.addEventListener("input", () => { st.name = nm.value; });
     const al = $("dndb-align"); if (al) al.addEventListener("change", () => { st.alignment = al.value; });
     const ebx = $("dndb-opt-eberron"); if (ebx) ebx.addEventListener("click", () => { st.eberron = !st.eberron; pruneDisallowed(); render(); });
@@ -491,9 +532,10 @@
     body.querySelectorAll("[data-mcx]").forEach((el) => el.addEventListener("click", () => { st.multiclass.splice(num(el.dataset.mcx),1); render(); }));
     const mca = $("dndb-mc-add"); if (mca) mca.addEventListener("change", () => { if(mca.value){ st.multiclass.push({ cls: mca.value, level: 1 }); render(); } });
     body.querySelectorAll("[data-sub]").forEach((el) => el.addEventListener("click", () => { st.subclass = el.dataset.sub; render(); }));
-    body.querySelectorAll("[data-sp]").forEach((el) => el.addEventListener("click", () => { st.species = el.dataset.sp; st.lineage = ""; render(); }));
+    // (species cards use data-species — the spell picker's rows carry data-sp, which must not select a species)
+    body.querySelectorAll("[data-species]").forEach((el) => el.addEventListener("click", () => { if (st.species !== el.dataset.species) st.spChoices = {}; st.species = el.dataset.species; st.lineage = ""; render(); }));
     body.querySelectorAll("[data-lin]").forEach((el) => el.addEventListener("click", () => { st.lineage = el.dataset.lin; render(); }));
-    body.querySelectorAll("[data-bg]").forEach((el) => el.addEventListener("click", () => { const b = D.backgrounds().find((x)=>x.name===el.dataset.bg); st.background = el.dataset.bg; if (b) { st.bg2 = (b.abilityScores||[])[0] || ""; st.bg1 = (b.abilityScores||[])[1] || ""; } render(); }));
+    body.querySelectorAll("[data-bg]").forEach((el) => el.addEventListener("click", () => { const b = D.backgrounds().find((x)=>x.name===el.dataset.bg); if (st.background !== el.dataset.bg) st.bgChoices = {}; st.background = el.dataset.bg; if (b) { st.bg2 = (b.abilityScores||[])[0] || ""; st.bg1 = (b.abilityScores||[])[1] || ""; } render(); }));
     body.querySelectorAll("[data-method]").forEach((el) => el.addEventListener("click", () => { st.method = el.dataset.method; render(); }));
     body.querySelectorAll(".dndb-array").forEach((el) => el.addEventListener("change", () => { const a = el.dataset.abil, v = el.value; ABIL.forEach((x) => { if (x !== a && String(st.arrayPick[x]) === String(v)) delete st.arrayPick[x]; }); if (v === "") delete st.arrayPick[a]; else st.arrayPick[a] = parseInt(v,10); render(); }));
     body.querySelectorAll(".dndb-manual").forEach((el) => el.addEventListener("input", () => { st.base[el.dataset.abil] = Math.max(1, Math.min(20, parseInt(el.value,10) || 8)); updTotals(); }));
@@ -528,7 +570,8 @@
       if (d > 0 && base + nv > 20) return;
       av.asi[a] = nv; if (!nv) delete av.asi[a]; render();
     }));
-    body.querySelectorAll(".dndb-adv-feat").forEach((el) => el.addEventListener("change", () => { st.advances[num(el.dataset.i)].feat = el.value; render(); }));
+    body.querySelectorAll(".dndb-adv-feat").forEach((el) => el.addEventListener("change", () => { const av = st.advances[num(el.dataset.i)]; if (av.feat !== el.value) av.choices = {}; av.feat = el.value; render(); }));
+    if (CH()) CH().wireChoices(body, choiceState, render);
     // spells: "available to me" toggle, expand-on-click, +Add / −Remove (cap
     // enforced by the Add button being disabled when the pool is full).
     body.querySelectorAll("[data-spavail]").forEach((el) => el.addEventListener("change", () => { st.spellsAvail = el.checked; render(); }));
@@ -572,8 +615,8 @@
       case "Options": return true;
       case "Class": return !!st.cls;
       case "Subclass": return !hasSubclass() || !!st.subclass;
-      case "Species": { const sp = spData(); if (!st.species) return false; if (sp && sp.lineages && sp.lineages.length && !st.lineage) return false; return true; }
-      case "Background": return !!st.background;
+      case "Species": { const sp = spData(); if (!st.species) return false; if (sp && sp.lineages && sp.lineages.length && !st.lineage) return false; return !CH() || CH().complete(speciesSpecs(), st.spChoices); }
+      case "Background": return !!st.background && (!CH() || CH().complete(bgFeatSpecs(), st.bgChoices));
       case "Abilities": {
         if (st.method === "array") return ABIL.every((a) => st.arrayPick[a] != null);
         if (st.method === "pointbuy") { const costs = (D.tables() && D.tables().pointBuyCosts) || {8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9}; const budget = (D.tables() && D.tables().pointBuyBudget) || 27; return ABIL.reduce((s,a) => s + (costs[st.base[a]] || 0), 0) <= budget; }
@@ -590,7 +633,7 @@
       }
       case "Advancement": {
         const n = asiSlots();
-        for (let i = 0; i < n; i++) { const av = st.advances[i] || {}; if (av.mode === "feat") { if (!av.feat) return false; } else { if (ABIL.reduce((s,a)=>s+((av.asi||{})[a]||0),0) !== 2) return false; } }
+        for (let i = 0; i < n; i++) { const av = st.advances[i] || {}; if (av.mode === "feat") { if (!av.feat) return false; if (CH() && !CH().complete(advFeatSpecs(av), av.choices || {})) return false; } else { if (ABIL.reduce((s,a)=>s+((av.asi||{})[a]||0),0) !== 2) return false; } }
         return true;
       }
       case "Spells": {
@@ -611,19 +654,33 @@
     if (b) (b.skillProficiencies || []).forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 1; });
     st.classSkills.forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 1; });
     st.expertise.forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 2; });
+    // ── sub-choices (DNDCH): skills / expertise / saves / +1s / granted spells / proficiency text ──
+    const fx = choiceEffects();
+    fx.skills.forEach((s) => { const real = matchSkill(s); if (real && !skillProf[real]) skillProf[real] = 1; });
+    fx.expertise.forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 2; });
+    fx.saves.forEach((a) => { saveProf[a] = true; });
     // ── feats: background origin feat + fighting style + advancement (B1) ──
     const addedFeats = [];
     if (b && b.feat) addedFeats.push(b.feat);
     if (st.fightingStyle) addedFeats.push(st.fightingStyle);
     (st.advances || []).forEach((av) => { if (av.mode === "feat" && av.feat) addedFeats.push(av.feat); });
+    // the choices store the sheet keeps (so feature entries can show the picks and re-derive granted spells)
+    const choices = {};
+    if (st.species) choices.species = st.spChoices;
+    if (b && b.feat) choices["feat:" + b.feat] = st.bgChoices;
+    (st.advances || []).forEach((av) => { if (av.mode === "feat" && av.feat) choices["feat:" + av.feat] = av.choices || {}; });
+    // a Human's Versatile feat is a real feat on the sheet too
+    if (CH() && st.species) speciesSpecs().forEach((sp) => { if (sp.kind === "feat" && st.spChoices[sp.key]) { const fn = st.spChoices[sp.key]; if (addedFeats.indexOf(fn) < 0) addedFeats.push(fn); choices["feat:" + fn] = CH().subState(st.spChoices, sp.key); } });
     // Advancement ASIs (B1) then feat ability increases (B4) — applied to scores
     // BEFORE HP/AC so their Con/Dex changes count.
     (st.advances || []).forEach((av) => { if (av.mode !== "feat" && av.asi) ABIL.forEach((a) => { if (av.asi[a]) sc[a] = Math.min(20, (sc[a] || 10) + av.asi[a]); }); });
     let featHP = 0;
-    addedFeats.forEach((fn) => { const fe = window.DNDCALC.featEffects(fn, num(st.level)); featHP += fe.hpBonus; ABIL.forEach((a) => { if (fe.abil[a]) sc[a] = Math.min(20, (sc[a] || 10) + fe.abil[a]); }); });
+    addedFeats.forEach((fn) => { const fe = window.DNDCALC.featEffects(fn, num(st.level)); featHP += fe.hpBonus; });
+    ABIL.forEach((a) => { if (fx.abil[a]) sc[a] = Math.min(20, (sc[a] || 10) + fx.abil[a]); });   // feat/trait +1s (chosen or fixed)
     // HP: very first level = max die; every level after = its own class's average. (+ feat HP, e.g. Tough)
     let hp = 0; const conMod = mod(sc.CON); let firstLvl = true;
     classBreakdown().forEach((cl) => { const cc = D.classes().find((x) => x.name === cl.cls); const hd = cc ? cc.hitDie : 8; for (let L=1; L<=cl.level; L++){ hp += (firstLvl ? hd : Math.floor(hd/2)+1) + conMod; firstLvl = false; } });
+    if (sp && (sp.traits || []).some((t) => /dwarven toughness/i.test(t.name))) hp += num(st.level);   // +1 HP per level
     hp = Math.max(1, hp + featHP);
     const speed = sp ? sp.speed : 30;
     const ac = 10 + mod(sc.DEX);
@@ -631,6 +688,7 @@
     const profBits = [];
     if (c && c.proficiencies) { ["armor","weapons","tools"].forEach((k) => { if (c.proficiencies[k] && c.proficiencies[k].length) profBits.push(c.proficiencies[k].join(", ")); }); }
     if (b && b.toolProficiencies && b.toolProficiencies.length) profBits.push(b.toolProficiencies.join(", "));
+    if (fx.profs.length) profBits.push(fx.profs.join(", "));   // tools / instruments / weapons chosen through feats and traits
     // B3: multiclass secondary classes contribute their armor/weapon proficiencies.
     (st.multiclass || []).forEach((m) => { const mc = D.classes().find((x) => x.name === m.cls); if (mc && mc.proficiencies) ["armor","weapons"].forEach((k) => { if (mc.proficiencies[k] && mc.proficiencies[k].length) profBits.push(m.cls + ": " + mc.proficiencies[k].join(", ")); }); });
     // Species + lineage traits (B2) are populated by the sheet's autoFeatures()
@@ -663,6 +721,8 @@
     // spells
     const spellsKnown = st.pickedCantrips.map((n) => ({ name:n, prepared:true }))
       .concat(st.pickedSpells.map((n) => ({ name:n, prepared:true })));
+    // spells granted by feat/trait choices (Magic Initiate, Fey Touched…): always prepared, flagged granted
+    fx.spells.forEach((g) => { if (!spellsKnown.some((x) => norm(x.name) === norm(g.name))) spellsKnown.push({ name: g.name, prepared:true, granted:true, ability: g.ability || "", source: g.source || "" }); });
     const spellcasts = isCaster();
     const data = {
       system:"DND", v:1, name: st.name, cls: st.cls, level: st.level, subclass: st.subclass,
@@ -673,7 +733,7 @@
       hitdice: hitDiceString(),
       attacks: [], inventory: inv, gp: gp, sp:0, cp:0,
       proficiencies: profBits.join(" · "), notes:"",
-      customFeatures, addedFeats, spellsKnown, slotUsed:{},
+      customFeatures, addedFeats, choices, spellsKnown, slotUsed:{},
       forceSpells: false, spellAbility: (spellcasts && c.spellcastingAbility) ? c.spellcastingAbility : "",
       lineage: st.lineage,
       options: { eberron: !!st.eberron, au: !!st.au }, manaUsed: 0, actionsUsed: 0,

@@ -620,6 +620,11 @@ body.dark .abil-mod{color:#fff;} /* solid red roll button keeps white text in da
    Collapsed rows grouped into sticky-headed sections by spell level; click a row to expand its text. */
 .spl-sec{margin:2px 0 8px;}
 .spl-sec-hd{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#ec4456;padding:6px 2px 4px;border-bottom:1px solid #332c2c;position:sticky;top:0;background:#151519;z-index:1;}
+/* A sticky header is pinned to the scroller's CONTENT box, so the scroller's top padding
+   would show rows scrolling past above it. Pull it up by that padding (wizards: 14px;
+   the Spellbook's .brow-list: 6px) so it sits flush with the top edge. */
+.modal-bd .spl-sec-hd{top:-14px;}
+.modal-bd.brow-list .spl-sec-hd{top:-6px;}
 .spl-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #2a2422;}
 .spl-head{display:flex;align-items:center;gap:7px;background:transparent;border:none;text-align:left;cursor:pointer;padding:0;min-width:0;}
 .spl-caret{color:#8a7f72;font-size:10px;transition:transform .12s;flex-shrink:0;}
@@ -2425,6 +2430,30 @@ function renderStore(){
 // ═══ FEATURES & TRAITS ════════════════════════════════════════════════════
 let customFeatures = [];   // [{name, desc, meta}]
 let addedFeats = [];       // [feat name]
+// Sub-choices made inside feats / species traits (window.DNDCH): { "feat:<name>": state, species: state }.
+// Set by the builder / level-up wizard; shown under the matching feature and used to re-derive granted spells.
+let choices = {};
+const CH = () => window.DNDCH || null;
+function chCtx(){ return { level: totalLevel() }; }
+function featChoiceSummary(featName){ return CH() ? CH().storedSummary(choices, 'feat:' + featName, '', '', chCtx()) : ''; }
+function traitChoiceSummary(traitName){ const sp = speciesData(); return (CH() && sp) ? CH().storedSummary(choices, 'species', sp.name, _lineage, chCtx(), traitName) : ''; }
+const withChoices = (desc, sum) => sum ? (desc ? desc + ' ' : '') + '▸ Your choices: ' + sum + '.' : desc;
+// Feat data for a stored name — tolerates a background's parenthetical ("Magic Initiate (Cleric)").
+function featData(name){ if(CH()) return CH().featBase(name).feat; return D.feats().find(f => norm(f.name) === norm(name)) || null; }
+window.getChoices = () => choices;
+window.setChoice = (key, state) => { choices[key] = state || {}; renderFeatures(); scheduleAutosave(); };
+window.getSkillProf = () => Object.assign({}, skillProf);
+window.grantSkillProf = (name, lvl) => { const sk = D.skills().find(x => norm(x.name) === norm(name)); if(!sk) return; if((skillProf[sk.name] || 0) < (lvl || 1)) skillProf[sk.name] = lvl || 1; recalc(); scheduleAutosave(); };
+window.grantSaveProf = (abil) => { const a = String(abil || '').toUpperCase(); if(!a) return; saveProf[a] = true; recalc(); scheduleAutosave(); };
+window.appendProficiencies = (txt) => { const el = $('f-proficiencies'); if(!el || !txt) return; el.value = (el.value ? el.value + ' · ' : '') + txt; scheduleAutosave(); };
+// A spell granted by a feat/trait choice: always prepared, castable once per Long Rest without a slot.
+window.addGrantedSpell = (name, ability, source) => {
+  const sp = spellByName(name); if(!sp) return;
+  let sk = spellsKnown.find(x => norm(x.name) === norm(sp.name));
+  if(!sk){ sk = { name: sp.name, prepared:true, granted:true }; spellsKnown.push(sk); }
+  sk.granted = true; sk.prepared = true; if(ability) sk.ability = ability; if(source) sk.source = source;
+  renderSpells(); renderSpellHeader(); scheduleAutosave();
+};
 function autoFeatures(){
   const out = [];
   classList().forEach(cl => {
@@ -2434,17 +2463,17 @@ function autoFeatures(){
     if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => out.push({ name: f.name, meta: sub.name + ' ' + f.level, desc: f.description, damage: f.damage, damageType: f.damageType, heal: f.heal }));
   });
   const sp = speciesData();
-  if(sp){ (sp.traits || []).forEach(t => out.push({ name: t.name, meta: sp.name, desc: t.description }));
+  if(sp){ (sp.traits || []).forEach(t => out.push({ name: t.name, meta: sp.name, desc: withChoices(t.description, traitChoiceSummary(t.name)) }));
     const ln = norm(_lineage);
-    (sp.lineages || []).filter(l => !ln || norm(l.name) === ln).forEach(l => (l.traits||[]).forEach(t => out.push({ name: t.name, meta: sp.name + ' · ' + l.name, desc: t.description }))); }
+    (sp.lineages || []).filter(l => !ln || norm(l.name) === ln).forEach(l => (l.traits||[]).forEach(t => out.push({ name: t.name, meta: sp.name + ' · ' + l.name, desc: withChoices(t.description, traitChoiceSummary(t.name)) }))); }
   const bg = backgroundData();
-  if(bg){ out.push({ name: bg.feat, meta: bg.name + ' feat', desc: (D.feats().find(f=>norm(f.name)===norm(bg.feat))||{}).benefits ? (D.feats().find(f=>norm(f.name)===norm(bg.feat)).benefits.join(' ')) : 'Origin feat from your background.' }); }
+  if(bg){ const fd = featData(bg.feat); out.push({ name: bg.feat, meta: bg.name + ' feat', desc: withChoices(fd && fd.benefits ? fd.benefits.join(' ') : 'Origin feat from your background.', featChoiceSummary(bg.feat)) }); }
   return out;
 }
 function renderFeatures(){
   const box = $('features-list'); box.innerHTML = '';
   const auto = autoFeatures();
-  const featObjs = addedFeats.map(n => { const f = D.feats().find(x => norm(x.name) === norm(n)); return f ? { name: f.name, meta: f.category + ' feat', desc: (f.benefits||[]).join(' ') } : { name: n, meta: 'Feat', desc: '' }; });
+  const featObjs = addedFeats.map(n => { const f = featData(n); return f ? { name: n, meta: f.category + ' feat', desc: withChoices((f.benefits||[]).join(' '), featChoiceSummary(n)) } : { name: n, meta: 'Feat', desc: '' }; });
   const allRaw = auto.concat(featObjs).concat(customFeatures.map(cf => ({ name: cf.name, meta: cf.meta || 'Custom', desc: cf.desc || '', custom: true })));
   // Dedupe by name so a feature granted two ways (e.g. a background feat that is
   // both auto-listed and in addedFeats) shows once — the first (auto) entry wins.
@@ -2526,6 +2555,8 @@ function grantsFromText(desc){
 function computeGrantedSpells(){
   const names = {};
   activeFeatureList().forEach(f => grantsFromText(f.desc).forEach(nm => names[norm(nm)] = nm));
+  // spells chosen through feats / traits (Magic Initiate, Fey Touched, a Human's Origin feat…)
+  if(CH()){ const sp = speciesData(); CH().grantedSpells(choices, sp ? sp.name : '', _lineage, chCtx()).forEach(g => { const real = spellByName(g.name); if(real) names[norm(real.name)] = real.name; }); }
   return Object.values(names);
 }
 // Add spells granted by current features/traits; drop previously-granted ones
@@ -3236,7 +3267,7 @@ function activatedFeatures(){
   const sp = speciesData();
   if(sp){ (sp.traits||[]).forEach(t => add(t.name, t.description));
     const ln = norm(_lineage); (sp.lineages||[]).filter(l => !ln || norm(l.name)===ln).forEach(l => (l.traits||[]).forEach(t => add(t.name, t.description))); }
-  (addedFeats||[]).forEach(fn => { const fe = (window.DND_FEATS||[]).find(x => norm(x.name)===norm(fn)); if(fe) add(fe.name, (fe.benefits||[]).join(' ') + ' ' + (fe.description||'')); });
+  (addedFeats||[]).forEach(fn => { const fe = featData(fn); if(fe) add(fe.name, (fe.benefits||[]).join(' ') + ' ' + (fe.description||'')); });
   return out;
 }
 function turnCastType(ct){ const s = shortCastTime(ct); return /bonus/i.test(s) ? 'bonus' : /reaction/i.test(s) ? 'reaction' : /^action$/i.test(s) ? 'action' : null; }
@@ -3697,7 +3728,7 @@ function collectSheet(){
     inspiration: $('insp-btn').classList.contains('on'), deathSucc, deathFail, activeConditions, defenses, companions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
-    customFeatures, addedFeats, resourceUsed, customResources, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
+    customFeatures, addedFeats, choices, resourceUsed, customResources, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
     concentration: _concentration, attunedRefs,
     options,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id:_campaign.id, code:_campaign.code, name:_campaign.name } : null,
@@ -3726,7 +3757,7 @@ function applySheet(d){
   activeConditions = d.activeConditions || []; defenses = d.defenses || {}; companions = Array.isArray(d.companions) ? d.companions : []; exhaustion = d.exhaustion || 0; _tab = d.tab || _tab;
   set('f-proficiencies', d.proficiencies); set('f-notes', d.notes);
   set('f-gp', d.gp || 0); set('f-sp', d.sp || 0); set('f-cp', d.cp || 0);
-  customFeatures = d.customFeatures || []; addedFeats = d.addedFeats || [];
+  customFeatures = d.customFeatures || []; addedFeats = d.addedFeats || []; choices = (d.choices && typeof d.choices === 'object') ? d.choices : {};
   resourceUsed = d.resourceUsed || {}; customResources = d.customResources || [];
   spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
   _concentration = d.concentration || null; attunedRefs = Array.isArray(d.attunedRefs) ? d.attunedRefs.slice() : [];
@@ -3973,6 +4004,7 @@ campaignUpdateBtn();
 <script src="/tools-data/dnd-conditions.js"></script>
 <script src="/tools-data/dnd-tables.js"></script>
 <script src="/tools-data/dnd-caster-rules.js"></script>
+<script src="/tools-data/dnd-choices.js"></script>
 <!-- Companions: the full 442KB bestiary isn't loaded on the sheet, but seeding an
      empty DND_MONSTERS pool lets the homebrew loader inject the player's own
      homebrew creatures so they autofill the companion tracker. -->
