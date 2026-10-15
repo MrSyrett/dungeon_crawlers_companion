@@ -679,6 +679,17 @@ var VAE_RESOURCES = [
   {"level":8,"name":"Filthy Rich","bonus":5,"capital":12}
 ];
 
+// Memento table (Core Rulebook p.23, D66) — a keepsake that steadies you; once
+// per session while resting it heals two Conditions.
+var VAE_MEMENTOS = [
+  "Dried red rose","Photo of someone close to you","Seal ring with a secret chamber","Your father's cane","Hat with a secret compartment","Book in a foreign language",
+  "Hip flask with inscription","Old love letter","A scruffy cat","A monkey's skull","Bloodstained promissory note","Gold jewelry worn by your mother",
+  "Silver cross on a chain","Beautiful fiddle passed down in the family","Journal (yours or someone else's)","Newspaper from a date that means something to you","Ragged doll","Tame pigeon",
+  "Well-thumbed novel with dedication","Plans for a family tomb","Map with notes in the margin","Strange animal preserved in a glass jar","Music box from your childhood","Sunstone (cut mineral)",
+  "Small bottle of perfume that reminds you of someone","Hymnbook passed down in the family","Pocket watch with a photo inside","An unsigned will","Golden box from a foreign land","Sheet music from a forgotten master",
+  "Powder compact with sleeping pills","Beautifully ornamented pipe","Rabbit's foot or some other lucky charm","Syringe with needle in a box","Worn dice made of bone","A manuscript passed down in the family"
+];
+
 var VAE_HB_WEAPONS = [];
 var VAE_HB_GEAR = [];
 
@@ -687,6 +698,7 @@ if (typeof window !== 'undefined') {
   window.VAE_ITEMS_OF_POWER = VAE_ITEMS_OF_POWER;
   window.VAE_MAGIC_ITEMS = VAE_MAGIC_ITEMS;
   window.VAE_RESOURCES = VAE_RESOURCES;
+  window.VAE_MEMENTOS = VAE_MEMENTOS;
   window.VAE_ANIMALS = VAE_ANIMALS;
   window.VAE_ARCHETYPE_GEAR = VAE_ARCHETYPE_GEAR;
   window.VAE_ATTRIBUTES = VAE_ATTRIBUTES;

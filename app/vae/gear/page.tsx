@@ -62,11 +62,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Gear & Tools */}
       {mode === "gear" && (
         <section>
-          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            Gear adds bonus dice to the matching skill test — you may use the bonus from only one item on a
-            given roll. Cost is the Resources level (or Capital) needed to procure the item; temporary gear
-            is lost at the end of a mystery.
-          </p>
           <div className={`${panelCls} mb-4`}>
             <h3 className={hbHead}>Your homebrew gear</h3>
             <HomebrewEditor kind="vae-gear" campaigns={campaigns} initial={gOwn} />
@@ -131,10 +126,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Melee weapons */}
       {mode === "melee" && (
         <section>
-          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            Damage is the number of physical Conditions a hit inflicts; Bonus adds dice to the attack. Melee
-            weapons roll Close Combat (or Force for the heaviest).
-          </p>
           <div className={`${panelCls} mb-4`}>
             <h3 className={hbHead}>Your homebrew weapons</h3>
             <HomebrewEditor kind="vae-weapon" campaigns={campaigns} initial={wOwn} />
@@ -183,9 +174,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Ranged weapons */}
       {mode === "ranged" && (
         <section>
-          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            Ranged weapons roll Ranged Combat. Range is the maximum distance band the weapon can reach.
-          </p>
           <div className={`${panelCls} mb-4`}>
             <h3 className={hbHead}>Your homebrew weapons</h3>
             <HomebrewEditor kind="vae-weapon" campaigns={campaigns} initial={wOwn} />
@@ -234,10 +222,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Armor */}
       {mode === "armor" && (
         <section>
-          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            When you&rsquo;re hit, roll a number of dice equal to the armor&rsquo;s Protection; each success
-            stops one point of damage. (Homebrew armor shares the gear editor on the Gear tab.)
-          </p>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">
               <thead>
@@ -260,10 +244,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Items of Power */}
       {mode === "power" && (
         <section>
-          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            Protective relics against the vaesen. Each use risks the item breaking (roll a d6 — on a 1 it is
-            spent or shatters). These are found or granted in play rather than bought.
-          </p>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {VAE_MAGIC.itemsOfPower.map((i) => (
               <div key={i.name} className={cardCls}>
@@ -278,10 +258,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {/* Magic Items */}
       {mode === "magic" && (
         <section>
-          <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            Vaesen gear — potent but perilous. Using one rolls a hidden d6; on a 1 the magic backfires. These
-            are found or granted in play rather than bought.
-          </p>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {VAE_MAGIC.magicItems.map((i) => (
               <div key={i.name} className={cardCls}>

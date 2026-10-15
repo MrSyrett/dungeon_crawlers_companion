@@ -7,11 +7,6 @@ export default function VaesenArchetypesPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <VaesenHeader title="Archetypes" subtitle="Vaesen · the ten walks of life that gained the Sight" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--text)]">
-        Your archetype sets your <b className="text-[var(--sys-link)]">key attribute</b> and key skill (both
-        may start one step higher), the three talents you choose your first from, and your Resources range.
-        Each also suggests a trauma — the event that gave you the Sight — a dark secret, and starting equipment.
-      </p>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {VAE_ARCHETYPES.map((a) => (
           <div key={a.name} className={cardCls}>

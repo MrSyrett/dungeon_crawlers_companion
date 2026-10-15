@@ -7,12 +7,6 @@ export default function VaesenBestiaryPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <VaesenHeader title="The Vaesen" subtitle="Vaesen · the creatures of Nordic folklore and how to banish them" />
-      <p className="mb-6 max-w-[70ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Vaesen have no attributes or skills — only Might, Body Control, Magic, Manipulation, and a Fear value
-        (the successes a character needs on their Fear test; a pair like 2/1 means first sighting / after).
-        They are rarely beaten in a fight: each is banished by a specific <b className="text-[var(--sys-link)]">ritual</b>,
-        and each hides a <b>secret</b> that complicates it.
-      </p>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {VAE_BESTIARY.map((v) => (
           <div key={v.name} className={cardCls}>

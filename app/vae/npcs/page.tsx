@@ -13,12 +13,6 @@ export default function VaesenNpcsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <VaesenHeader title="NPCs & Animals" subtitle="Vaesen · the supporting cast — townsfolk, officials, and beasts" />
-      <p className="mb-6 max-w-[72ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        NPCs and animals use <b className="text-[var(--sys-link)]">Toughness</b> (physical and mental) instead of Conditions:
-        each point of damage is −1 to the matching skill, and when damage exceeds Toughness the NPC is Broken (knocked out
-        or dead). Minor NPCs are 1/1, Named NPCs 2/2, Unique NPCs 3/3. Any human NPC can be made a witch or wizard — give
-        them a MAGIC value and a few chosen Enchantments, Curses, or Trollcraft.
-      </p>
 
       <SectionH>NPC Archetypes</SectionH>
       <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

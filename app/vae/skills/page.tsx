@@ -7,12 +7,6 @@ export default function VaesenSkillsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <VaesenHeader title="Attributes & Skills" subtitle="Vaesen · the four attributes and their twelve skills" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--text)]">
-        Roll a pool of D6 equal to your <b className="text-[var(--sys-link)]">attribute + skill</b> (plus any
-        gear or weapon bonus). Each 6 is a success; one is enough to pass, and extra successes buy stunts.
-        Attributes run 2–5 (your archetype&rsquo;s key attribute may reach 5); skills run 0–5. There are no
-        stress dice — the only way to push your luck is to <b>push</b> a roll, which always costs a Condition.
-      </p>
       <div className="flex flex-col gap-7">
         {VAE_ATTRIBUTES.map((a) => (
           <section key={a.key}>

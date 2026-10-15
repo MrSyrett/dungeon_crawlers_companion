@@ -8,11 +8,6 @@ export default function VaesenTalentsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <VaesenHeader title="Talents" subtitle="Vaesen · archetype talents and general talents" />
-      <p className="mb-6 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        You start with one talent from your archetype&rsquo;s three. Each Advance (5 XP) buys another — any
-        talent, including a general one or another archetype&rsquo;s. Many grant +2 dice to a skill or Fear
-        test, or let you ignore Condition penalties for a particular skill.
-      </p>
       <div className="flex flex-col gap-7">
         {groups.map((g) => {
           const list = VAE_TALENTS.filter((t) => t.archetype === g);

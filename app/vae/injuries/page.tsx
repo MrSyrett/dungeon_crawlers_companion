@@ -38,13 +38,6 @@ export default function VaesenInjuriesPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <VaesenHeader title="Conditions & Injuries" subtitle="Vaesen · the health model — three physical, three mental" />
-      <p className="mb-6 max-w-[70ch] text-[13px] leading-relaxed text-[var(--text)]">
-        Vaesen has no hit points. Harm marks <b className="text-[var(--sys-link)]">Conditions</b> — three physical
-        (affecting Physique/Precision rolls) and three mental (affecting Logic/Empathy). Each is −1 die and they
-        stack. Take a fourth of a type and you are <b>Broken</b>: you fail every roll and immediately roll a
-        critical injury. Fatal/chronic injuries must be treated before their time limit or you die or go mad;
-        the mildest leave a lasting Affliction, and the rarest grant an Insight.
-      </p>
 
       <section className="mb-8">
         <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em]">Conditions</h2>

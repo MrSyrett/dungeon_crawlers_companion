@@ -18,14 +18,18 @@
   var RANGED = arr(W.VAE_RANGED_WEAPONS);
   var ARMORS = arr(W.VAE_ARMOR);
   var GEARS = arr(W.VAE_GEAR);
+  var MEMENTOS = arr(W.VAE_MEMENTOS);
+  var RESTIERS = arr(W.VAE_RESOURCES);
+  var MAX_START_GEAR = 3;
   var AGES = { 'Young': { a: 15, s: 10 }, 'Middle-aged': { a: 14, s: 12 }, 'Old': { a: 13, s: 14 } };
-  var STEPS = ['Archetype & Age', 'Attributes', 'Skills', 'Talent', 'Gear & Resources'];
+  var STEPS = ['Archetype & Age', 'Attributes', 'Skills', 'Talent & Memento', 'Backstory', 'Gear & Resources'];
   // archetype.key is a full attribute NAME ("Logic"); map to key code.
   function keyCodeFor(nameOrKey) { for (var i = 0; i < ATTRS.length; i++) { if (ATTRS[i].key === nameOrKey || ATTRS[i].name === nameOrKey) return ATTRS[i].key; } return ''; }
 
   var step = 0;
   var name = '', pronouns = '', age = 'Middle-aged', archetype = '', key = '', keySkill = '', talentPick = '';
   var attrs = {}, skills = {}, startGear = [], gearTab = 'weap', resourcesPick = null;
+  var mementoPick = '', motivation = '', traumaPick = '', secretPick = '';
 
   function archObj(nm) { for (var i = 0; i < ARCH.length; i++) if (ARCH[i].name === nm) return ARCH[i]; return null; }
   // Resources range from the archetype (data uses an en-dash, e.g. "2–4").
@@ -53,7 +57,9 @@
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
     skills = {}; SK.forEach(function (s) { skills[s.name] = 0; });
     startGear = []; gearTab = 'weap'; resourcesPick = null;
+    mementoPick = ''; motivation = ''; traumaPick = ''; secretPick = '';
   }
+  function resTierObj(v) { for (var i = 0; i < RESTIERS.length; i++) { if (num(RESTIERS[i].level) === num(v)) return RESTIERS[i]; } return null; }
   function attrTotal() { var n = 0; ATTRS.forEach(function (a) { n += attrs[a.key]; }); return n; }
   function skillSpent() { var n = 0; SK.forEach(function (s) { n += skills[s.name]; }); return n; }
 
@@ -110,7 +116,28 @@
     var a = archObj(archetype);
     var h = '<div class="m-lbl">Starting talent <span class="yzeb-sub">(one of your archetype\'s three)</span></div>';
     h += '<div class="yzeb-list">' + ((a && a.talents) || []).map(function (t) { return prow(t, '', talentDesc(t), talentPick === t, "window.YZEB.pickTalent('" + t.replace(/'/g, "\\'") + "')", talentPick === t ? '✓ Chosen' : 'Choose'); }).join('') + '</div>';
-    if (a) h += '<p class="m-hint" style="margin-top:12px;"><b>Suggested equipment:</b> ' + esc(a.equipment) + '</p>';
+    h += '<div class="m-lbl" style="margin-top:16px;">Memento <span class="yzeb-sub">(a keepsake that steadies you — roll from the table or write your own)</span></div>';
+    h += '<div style="display:flex;gap:8px;align-items:center;">'
+      + '<input class="m-input" style="flex:1 1 auto;" value="' + esc(mementoPick) + '" placeholder="e.g. a pocket watch with a photo inside" oninput="window.YZEB.setMemento(this.value)">'
+      + '<button class="m-btn ghost" style="flex:0 0 auto;" onclick="window.YZEB.rollMemento()">🎲 Roll</button></div>';
+    return h;
+  }
+  function optionRows(list, current, method) {
+    return '<div class="yzeb-list">' + arr(list).map(function (o) {
+      return prow(o, '', '', current === o, "window.YZEB." + method + "('" + String(o).replace(/'/g, "\\'").replace(/"/g, '&quot;') + "')", current === o ? '✓ Chosen' : 'Choose');
+    }).join('') + '</div>';
+  }
+  function stepBackstory() {
+    var a = archObj(archetype);
+    if (!a) return '<p class="m-hint">Go back and pick an archetype first — your Trauma and Dark Secret options come from it.</p>';
+    var h = '<div class="m-lbl">Motivation <span class="yzeb-sub">(why you face the unknown — write your own)</span></div>';
+    h += '<input class="m-input" value="' + esc(motivation) + '" placeholder="What drives you to investigate the supernatural?" oninput="window.YZEB.setMotivation(this.value)">';
+    h += '<div class="m-lbl" style="margin-top:16px;">Trauma <span class="yzeb-sub">(the event that gave you the Sight — choose one or write your own)</span></div>';
+    h += optionRows(a.trauma, traumaPick, 'pickTrauma');
+    h += '<input class="m-input" style="margin-top:8px;" value="' + esc(traumaPick) + '" placeholder="Or write your own Trauma…" oninput="window.YZEB.setTrauma(this.value)">';
+    h += '<div class="m-lbl" style="margin-top:16px;">Dark Secret <span class="yzeb-sub">(what you hide — choose one or write your own)</span></div>';
+    h += optionRows(a.darkSecret, secretPick, 'pickSecret');
+    h += '<input class="m-input" style="margin-top:8px;" value="' + esc(secretPick) + '" placeholder="Or write your own Dark Secret…" oninput="window.YZEB.setSecret(this.value)">';
     return h;
   }
   function gearSources() {
@@ -126,9 +153,15 @@
     var h = '<div class="m-lbl">Resources <span class="yzeb-sub">(your standard of living — roll, or choose within your archetype\'s range ' + rr[0] + '–' + rr[1] + ')</span></div>';
     h += '<div class="yzeb-chips" style="align-items:center;">';
     for (var v = rr[0]; v <= rr[1]; v++) { h += '<button class="builder-chip' + (resourcesPick === v ? ' sel' : '') + '" onclick="window.YZEB.setRes(' + v + ')">' + v + '</button>'; }
-    h += '<button class="m-btn ghost" style="margin-left:8px;" onclick="window.YZEB.rollRes()">🎲 Roll</button></div>';
+    h += '<button class="m-btn ghost" style="margin-left:8px;" onclick="window.YZEB.rollRes()">🎲 Roll</button>';
+    // Item 1: show the currently selected Living Standard + starting Capital beside the Roll button.
+    if (resourcesPick != null) { var t = resTierObj(resourcesPick);
+      h += '<span class="yzeb-sub" style="margin-left:10px;">' + (t ? '<b style="color:#d8cfbf;">' + esc(t.name) + '</b> · Capital <b style="color:#d8cfbf;">' + num(t.capital) + '</b>' + (num(t.bonus) ? ' · Resources bonus ' + (num(t.bonus) > 0 ? '+' : '') + num(t.bonus) : '') : 'Resources ' + resourcesPick) + '</span>'; }
+    h += '</div>';
+    h += '<p class="m-hint" style="margin-top:12px;"><b>Suggested equipment:</b> ' + esc(a.equipment) + '</p>';
     var opts = arr((W.VAE_ARCHETYPE_GEAR || {})[archetype]);
-    h += '<div class="m-lbl" style="margin-top:16px;">Starting equipment <span class="yzeb-sub">(from your archetype\'s kit — add what you carry; tweak on the sheet after)</span></div>';
+    var picked = startGear.length, full = picked >= MAX_START_GEAR;
+    h += '<div class="m-lbl" style="margin-top:12px;">Starting equipment <span class="yzeb-sub">(choose up to ' + MAX_START_GEAR + ' — <b>' + picked + '/' + MAX_START_GEAR + ' chosen</b>; tweak on the sheet after)</span></div>';
     if (!opts.length) { h += '<p class="m-hint">This archetype has no listed starting equipment.</p>'; return h; }
     h += '<div class="yzeb-list">' + opts.map(function (nm) {
       var chosen = gearIndexOf(nm) >= 0;
@@ -136,7 +169,9 @@
       if (r && r.kind === 'weapon') { meta = (r.it._ranged ? 'Ranged' : 'Melee') + (r.it.damage != null ? ' · ' + r.it.damage + ' dmg' : '') + (r.it.range != null && r.it.range !== 0 && r.it.range !== '0' ? ' · ' + r.it.range : ''); desc = 'bonus ' + (r.it.bonus || '0'); }
       else if (r && r.kind === 'armor') { meta = 'Protection ' + (r.it.protection != null ? r.it.protection : ''); desc = r.it.comment || ''; }
       else if (r && r.kind === 'gear') { meta = (r.it.cost != null && r.it.cost !== '' ? 'cost ' + r.it.cost : ''); desc = r.it.comment || ''; }
-      return prow(nm, meta, desc, chosen, "window.YZEB.toggleStartGear('" + nm.replace(/'/g, "\\'") + "')", chosen ? '✓ Chosen' : '＋ Add');
+      // Disable Add on unchosen items once 3 are picked (chosen items keep their ✓ toggle).
+      var act = chosen ? '✓ Chosen' : (full ? 'Max ' + MAX_START_GEAR : '＋ Add');
+      return prow(nm, meta, desc, chosen || (full && !chosen), "window.YZEB.toggleStartGear('" + nm.replace(/'/g, "\\'") + "')", act);
     }).join('') + '</div>';
     return h;
   }
@@ -150,7 +185,7 @@
     el.innerHTML = left + '<div style="flex:1;"></div>' + right;
   }
   function render() {
-    var body = step === 0 ? stepArch() : step === 1 ? stepAttrs() : step === 2 ? stepSkills() : step === 3 ? stepTalent() : stepGear();
+    var body = step === 0 ? stepArch() : step === 1 ? stepAttrs() : step === 2 ? stepSkills() : step === 3 ? stepTalent() : step === 4 ? stepBackstory() : stepGear();
     $('yzeb-body').innerHTML = body;
     var t = $('yzeb-ttl'); if (t) t.textContent = '✦ ' + STEPS[step];
     renderSteps(); renderNav();
@@ -165,6 +200,7 @@
           if (S.archetype) { archetype = S.archetype; var a0 = archObj(archetype); if (a0) { key = keyCodeFor(a0.key); keySkill = a0.keySkill; } }
           ATTRS.forEach(function (a) { if (S.attrs && S.attrs[a.key] != null) attrs[a.key] = Math.max(2, num(S.attrs[a.key])); });
           SK.forEach(function (s) { if (S.skills && S.skills[s.name] != null) skills[s.name] = num(S.skills[s.name]); });
+          if (S.memento) mementoPick = S.memento; if (S.motivation) motivation = S.motivation; if (S.trauma) traumaPick = S.trauma; if (S.secret) secretPick = S.secret;
         }
       } catch (e) { reset(); }
       ensure(); render(); ov.classList.add('open');
@@ -187,7 +223,14 @@
     pickTalent: function (t) { talentPick = (talentPick === t) ? '' : t; render(); },
     setRes: function (v) { resourcesPick = num(v); render(); },
     rollRes: function () { var rr = resRange(archObj(archetype)); resourcesPick = rr[0] + Math.floor(Math.random() * (rr[1] - rr[0] + 1)); render(); },
-    toggleStartGear: function (nm) { var i = gearIndexOf(nm); if (i >= 0) startGear.splice(i, 1); else startGear.push(startItemFor(nm)); render(); },
+    toggleStartGear: function (nm) { var i = gearIndexOf(nm); if (i >= 0) { startGear.splice(i, 1); } else { if (startGear.length >= MAX_START_GEAR) return; startGear.push(startItemFor(nm)); } render(); },
+    setMemento: function (v) { mementoPick = v; },
+    rollMemento: function () { if (MEMENTOS.length) { mementoPick = MEMENTOS[Math.floor(Math.random() * MEMENTOS.length)]; render(); } },
+    setMotivation: function (v) { motivation = v; },
+    pickTrauma: function (v) { traumaPick = (traumaPick === v) ? '' : v; render(); },
+    setTrauma: function (v) { traumaPick = v; },
+    pickSecret: function (v) { secretPick = (secretPick === v) ? '' : v; render(); },
+    setSecret: function (v) { secretPick = v; },
     removeGear: function (i) { startGear.splice(i, 1); render(); },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (attrBudget() - attrTotal()) <= 0) return; attrs[k] = v; render(); },
     skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap(nm)) return; if (d > 0 && (skillBudget() - skillSpent()) <= 0) return; skills[nm] = v; render(); },
@@ -201,6 +244,10 @@
       ATTRS.forEach(function (x) { d.attrs[x.key] = attrs[x.key]; });
       SK.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
+      if (mementoPick) d.memento = mementoPick;
+      if (motivation) d.motivation = motivation;
+      if (traumaPick) d.trauma = traumaPick;
+      if (secretPick) d.secret = secretPick;
       if (startGear.length) d.gear = startGear.map(function (g) { return g; });
       try { applySheet(d); } catch (e) {}
       this.close();

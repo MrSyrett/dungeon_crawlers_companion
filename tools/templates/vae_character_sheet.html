@@ -233,6 +233,8 @@ body.sheet-locked .edit-only{display:none!important;}
 .inv-details input.inv-rng{width:74px;}
 .inv-details input.inv-note{flex:1 1 90px;min-width:70px;}
 .inv-mini{font-family:'Cormorant Garamond',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8b7f72;}
+.eco-chip{font-family:'Cormorant Garamond',sans-serif;font-size:12px;font-weight:700;color:var(--yz-dk);background:var(--yz-lt);border:1px solid var(--yz);border-radius:6px;padding:3px 9px;white-space:nowrap;text-align:right;line-height:1.2;}
+.eco-chip.cap{font-weight:800;}
 .inv-type{font-family:'Cormorant Garamond',sans-serif;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--yz-dk);background:var(--yz-lt);border-radius:4px;padding:1px 5px;margin-right:4px;}
 .tbl td.eq-cell{text-align:left;padding-left:8px;}
 #atk-body td{font-family:'Cormorant Garamond',sans-serif;font-size:14px;font-weight:600;color:var(--ink);}
@@ -278,6 +280,9 @@ body.sheet-locked .edit-only{display:none!important;}
 .brow-add{flex-shrink:0;background:var(--yz);color:#f4ece0;border:none;border-radius:6px;padding:6px 11px;font-family:'Cormorant Garamond',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .brow-add:hover{background:#d8cfbf;}
 .brow-add.have{background:transparent;color:#a89f93;border:1px solid #2e3645;cursor:default;}
+.brow-btns{display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:stretch;}
+.brow-add.alt{background:transparent;color:var(--yz-dk);border:1px solid var(--yz);}
+.brow-add.alt:hover{background:var(--yz-lt);}
 .brow-empty{padding:14px 4px;font-size:12px;color:#889;}
 
 /* Toast + modals */
@@ -610,7 +615,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="attr-skills" id="attr-skills"></div>
       </div>
       <div class="card">
-        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:60px;text-align:right;font-size:19px;font-weight:800;color:var(--yz-dk);background:var(--yz-lt);border:1px solid var(--yz);border-radius:6px;padding:3px 8px;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
+        <div class="section-bar accent cbar"><span>Experience</span><span class="hdr-right" style="margin-left:auto;"><input type="number" id="f-xp" data-nolock class="no-spin" value="0" min="0" style="width:60px;text-align:right;font-size:19px;font-weight:800;color:var(--yz-dk);background:var(--yz-lt);border:1px solid var(--yz);border-radius:6px;padding:3px 8px;" title="Experience points" oninput="S.xp=num(this.value);scheduleAutosave()"></span></div>
       </div>
       <div class="card">
         <div class="section-bar accent cbar crit-bar"><span>Critical Injuries</span><span class="hdr-right"><button class="hdr-btn" onclick="rollCrit('phys')">Phys</button><button class="hdr-btn" onclick="rollCrit('ment')">Mental</button></span></div>
@@ -622,7 +627,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="vit-row">
         <div class="card" style="flex:0 0 118px;">
           <div class="section-bar accent"><span>Armor</span></div>
-          <div class="blk" style="padding:6px 10px 12px;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="rollArmor()" title="Sum of equipped armor protection — click to roll; each 6 cancels one point of damage"><span class="stress-val" id="armor-val" style="font-size:38px;font-weight:800;line-height:1;">0</span></div>
+          <div class="blk" style="padding:12px 10px 16px;display:flex;align-items:center;justify-content:center;min-height:72px;cursor:pointer;" onclick="rollArmor()" title="Sum of equipped armor protection — click to roll; each 6 cancels one point of damage"><span class="stress-val" id="armor-val" style="font-size:56px;font-weight:800;line-height:1;">0</span></div>
         </div>
         <div class="card" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent cbar"><span>Conditions</span></div>
@@ -648,7 +653,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right" style="align-items:center;gap:10px;"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button><span class="inv-mini" id="res-disp" data-nolock style="cursor:pointer;" title="Resources — click to roll for Capital (your standard of living, set at creation)" onclick="rollResources()"></span><span class="inv-mini" id="cap-disp" data-nolock title="Capital — spending money for the Item Shop" style="font-weight:800;color:var(--yz-dk);"></span></span></div>
+          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right" style="flex:1 1 auto;align-items:center;gap:8px;"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button><span style="margin-left:auto;display:flex;align-items:center;gap:8px;"><span class="eco-chip" id="res-disp" data-nolock style="cursor:pointer;" title="Resources — click to roll for Capital (your standard of living, set at creation)" onclick="rollResources()"></span><span class="eco-chip cap" id="cap-disp" data-nolock title="Capital — spending money for the Item Shop"></span></span></span></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:30%;">Item</th><th>Details</th><th style="width:9%;">Cost</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div id="inv-empty" class="tbl-empty">No gear yet.</div>
         </div>
@@ -837,7 +842,7 @@ function addCondition(type){
 // ── Resources / memento ──
 var RES_TABLE=G(window.VAE_RESOURCES);
 function resTier(v){ v=clamp(num(v),1,8); for(var i=0;i<RES_TABLE.length;i++){ if(RES_TABLE[i].level===v) return RES_TABLE[i]; } return {level:v,name:RES_NAMES[v]||'',bonus:0,capital:0}; }
-function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-disp'); if(e)e.innerHTML='🎲 <b style="color:var(--yz-dk);">Resources '+v+'</b> · '+esc(RES_NAMES[v]||''); var c=$('cap-disp'); if(c)c.innerHTML='Capital '+num(S.capital); }
+function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-disp'); if(e)e.innerHTML='🎲 Resources '+v+' · '+esc(RES_NAMES[v]||''); var c=$('cap-disp'); if(c)c.innerHTML='⛁ Capital '+num(S.capital); }
 function bumpRes(d){ S.resources=clamp(num(S.resources)+d,1,8); renderRes(); scheduleAutosave(); }
 // Roll your Resources to generate Capital (each 6 + the Living-Standards bonus → money).
 function rollResources(){
@@ -971,23 +976,31 @@ function renderPicker(){
   var el=$('picker-body');
   if(!rows.length){ el.innerHTML='<div class="brow-empty">'+(_pk==='gear'?'No matches — use “Add custom”.':'No matches.')+'</div>'; _pkRows=rows; return; }
   el.innerHTML=rows.map(function(x,idx){
-    var p=num(x.price), afford=(p<=0)||(num(S.capital)>=p);
+    var p=num(x.price), afford=num(S.capital)>=p;
     var priceTag=(fam&&p>0)?'<span class="brow-cost" title="Costs '+p+' Capital">'+p+' ⛁</span>':'';
-    var btn=(fam&&p>0)?('<button class="brow-add'+(afford?'':' have')+'"'+(afford?'':' disabled title="Need '+p+' Capital"')+' onclick="pickAdd('+idx+')">'+(afford?('Buy '+p):('Need '+p))+'</button>')
-      :('<button class="brow-add" onclick="pickAdd('+idx+')">＋ Add</button>');
-    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+'<span class="brow-cost">'+esc(x.cost)+'</span>'+priceTag+'</div>'+(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div>'+btn+'</div>';
+    var btns;
+    if(fam&&p>0){
+      // Priced item: buy with Capital, or just add it (found, no cost).
+      var buy='<button class="brow-add'+(afford?'':' have')+'"'+(afford?'':' disabled title="Need '+p+' Capital"')+' onclick="pickAdd('+idx+',\'buy\')">'+(afford?('Buy '+p):('Need '+p))+'</button>';
+      var add='<button class="brow-add alt" title="Add without spending Capital (found or granted)" onclick="pickAdd('+idx+',\'add\')">＋ Add</button>';
+      btns='<div class="brow-btns">'+buy+add+'</div>';
+    } else {
+      btns='<button class="brow-add" onclick="pickAdd('+idx+',\'add\')">＋ Add</button>';
+    }
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+'<span class="brow-cost">'+esc(x.cost)+'</span>'+priceTag+'</div>'+(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div>'+btns+'</div>';
   }).join('');
   _pkRows=rows;
 }
-function pickAdd(idx){
+function pickAdd(idx,mode){
   var x=_pkRows[idx]; if(!x)return;
-  var fam=GEAR_FAM(_pk), p=fam?num(x.price):0;
-  if(p>0){ if(num(S.capital)<p){ addLog('Item Shop','Not enough Capital','“'+(x.name||'Item')+'” costs '+p+' · you have '+num(S.capital)+' Capital','fumble'); return; } S.capital=num(S.capital)-p; renderRes(); }
+  var fam=GEAR_FAM(_pk), p=fam?num(x.price):0, buying=(mode==='buy'&&p>0);
+  if(buying){ if(num(S.capital)<p){ addLog('Item Shop','Not enough Capital','“'+(x.name||'Item')+'” costs '+p+' · you have '+num(S.capital)+' Capital','fumble'); return; } S.capital=num(S.capital)-p; renderRes(); }
   if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,bonus:weaponBonus(w.bonus),damage:w.damage!=null?w.damage:1,range:(w.range!=null&&w.range!==0?String(w.range):'0'),weight:w.cost!=null?w.cost:'',skill:w.skill||'Close Combat'}); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'',note:a.note||''}); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else { var d=x.data||{}; S.gear.push({kind:'gear',name:d.name||x.name,weight:d.weight||'',note:d.note||d.desc||''}); renderGear(); setTab('gear'); }
-  if(p>0) addLog('Item Shop','Bought '+x.name,'−'+p+' Capital → '+num(S.capital)+' Capital left','crit');
+  if(buying) addLog('Item Shop','Bought '+x.name,'−'+p+' Capital → '+num(S.capital)+' Capital left','crit');
+  else if(fam&&p>0) addLog('Item Shop','Added '+x.name,'Found/granted — no Capital spent','normal');
   scheduleAutosave(); updatePickerCap(); renderPicker();
 }
 function addCustomFromPicker(){

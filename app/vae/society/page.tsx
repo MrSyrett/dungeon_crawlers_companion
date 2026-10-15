@@ -9,13 +9,6 @@ export default function VaesenSocietyPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <VaesenHeader title="The Society" subtitle="Vaesen · Castle Gyllencreutz and its upgrades" />
-      <p className="mb-6 max-w-[70ch] text-[13px] leading-relaxed text-[var(--text)]">
-        The player characters re-found <b className="text-[var(--sys-link)]">the Society</b> — a secret order
-        that investigates and banishes vaesen — from their headquarters at Castle Gyllencreutz in Upsala.
-        Between mysteries the group earns <b>Development Points</b> (one per &ldquo;yes&rdquo; to eight
-        questions) and spends them on Upgrades. Each purchase risks drawing a Threat. You begin with the
-        Library and the butler, Algot Frisk.
-      </p>
       <div className="flex flex-col gap-7">
         {TYPES.map((t) => {
           const list = VAE_HQ_UPGRADES.filter((u) => u.type === t);
