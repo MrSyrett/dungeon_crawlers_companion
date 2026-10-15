@@ -42,7 +42,9 @@
 @font-face {
   font-family: "Dead Kansas";
   font-style: normal;
-  font-weight: 400;
+  /* One file, declared across the whole weight range so a 700 request (e.g. the
+     home tiles) maps to it instead of falling back off the family. */
+  font-weight: 100 900;
   font-display: swap;
   src: url("/fonts/dead-kansas.woff2") format("woff2");
 }
@@ -1630,8 +1632,12 @@ body {
 [data-sys="JLU"],   .home-tile[data-sys="JLU"]   { --tile-accent: var(--jlu-gold);    --tile-sub: var(--jlu-gold);    --tile-namefont: var(--font-rubik);      --tile-face: var(--font-russo);          --tile-bg: #0f1626; --tile-tex: url("/themes/jlu-skyline.webp"); --tile-zoom: 1; --tile-scrim: 0.22; --tile-tex-pos: bottom; }
 [data-sys="GB"],    .home-tile[data-sys="GB"]    { --tile-accent: #ffffff;            --tile-sub: var(--gb-ecto);     --tile-namefont: var(--font-asap);       --tile-face: "Ghostbusters", var(--font-anton); --tile-bg: #0e120a; --tile-tex: url("/themes/gb-ectoplasm.webp"); --tile-zoom: 1.3; --tile-scrim: 0.06; --tile-tex-pos: top; }
 [data-sys="TWD"],   .home-tile[data-sys="TWD"]   { --tile-accent: var(--twd);         --tile-sub: var(--twd-bone);    --tile-namefont: var(--font-oswald);     --tile-face: "Dead Kansas", var(--font-oswald); --tile-bg: #0b0909; --tile-tex: url("/themes/twd-grunge.webp"); --tile-scrim: 0.14; }
-/* The TWD home tile's "Dead Kansas" wordmark rendered oversized next to the other tiles and in brand red; use the readable Oswald name font and bone ink just on the tile (rosters keep Dead Kansas). */
-.home-tile[data-sys="TWD"] { --tile-face: var(--font-oswald); --tile-ink: var(--twd-bone); }
+/* Keep the Dead Kansas wordmark on the TWD tile, but it renders oversized vs the
+   other tiles and in brand red; recolour it bone and cap its fitted size. The face
+   is forced here (and set to weight 400, the only weight the @font-face ships) so
+   the tile's default 700 request can't fall back off Dead Kansas. */
+.home-tile[data-sys="TWD"] { --tile-ink: var(--twd-bone); --tile-fit-max: 26px; }
+.home-tile[data-sys="TWD"] .home-tile-name { font-family: "Dead Kansas", var(--font-oswald), ui-sans-serif, system-ui, sans-serif; font-weight: 400; }
 [data-sys="MYZ"],   .home-tile[data-sys="MYZ"]   { --tile-accent: var(--myz);         --tile-sub: var(--myz-steel);   --tile-namefont: var(--font-anton);      --tile-face: var(--font-anton); --tile-bg: #100c0a; --tile-tex: url("/themes/myz-metal.webp"); --tile-scrim: 0.18; }
 [data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
 
