@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { visibleRulebooks, prettyName } from "@/lib/rulebooks";
+import { visibleRulebooks, prettyName, LIBRARY_CATEGORIES } from "@/lib/rulebooks";
 import RulebookGrid from "@/components/RulebookGrid";
 import RulebookReader from "@/components/RulebookReader";
 import { readSystemCookie } from "@/lib/system-cookie";
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 export default async function LibraryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ book?: string }>;
+  searchParams: Promise<{ book?: string; type?: string }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -24,7 +24,7 @@ export default async function LibraryPage({
   // Only the books this user is allowed to see (with their system + category —
   // the grid below hides other systems' books behind the system toggle).
   const books = await visibleRulebooks({ id: user.id, email: user.email });
-  const { book } = await searchParams;
+  const { book, type } = await searchParams;
 
   // Only ever serve a file we actually listed — never trust the query string.
   // Deliberately checked against ALL visible books, not the system-filtered
@@ -71,6 +71,7 @@ export default async function LibraryPage({
         <RulebookGrid
           books={books.map((b) => ({ file: b.file, title: prettyName(b.file), system: b.system, category: b.category }))}
           initialSystem={await readSystemCookie()}
+          initialType={LIBRARY_CATEGORIES.find((c) => c === type) ?? null}
         />
       )}
     </div>

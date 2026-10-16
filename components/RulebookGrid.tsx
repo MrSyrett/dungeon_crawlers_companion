@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import {
   SYSTEMS,
   subscribeSystem,
@@ -26,10 +26,31 @@ const SECTIONS: { key: RulebookCategory; blurb: string }[] = [
  * localStorage store) and grouped into Core Rules / Expansions / Adventures.
  * A book tagged BOTH shows on every shelf. This only hides cards — access
  * control happened on the server, so `books` already contains only what this
- * user may read.
+ * user may read. The Book type chips narrow it to one section; the choice
+ * lives in the URL (?type=Expansions) so it survives a reload or a shared link.
  */
-export default function RulebookGrid({ books, initialSystem }: { books: RulebookListItem[]; initialSystem?: SystemKey }) {
+export default function RulebookGrid({
+  books,
+  initialSystem,
+  initialType = null,
+}: {
+  books: RulebookListItem[];
+  initialSystem?: SystemKey;
+  initialType?: RulebookCategory | null;
+}) {
   const active = useSyncExternalStore(subscribeSystem, getSystemSnapshot, serverSystem(initialSystem));
+  const [type, setType] = useState<RulebookCategory | null>(initialType);
+  const pickType = (t: RulebookCategory | null) => {
+    setType(t);
+    try {
+      const url = new URL(window.location.href);
+      if (t) url.searchParams.set("type", t);
+      else url.searchParams.delete("type");
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    } catch {
+      /* URL sync is a convenience only */
+    }
+  };
   const shown = books.filter((b) => b.system === "BOTH" || b.system === active);
   const hidden = books.length - shown.length;
   const activeName = SYSTEMS.find((s) => s.key === active)?.name ?? active;
@@ -54,10 +75,42 @@ export default function RulebookGrid({ books, initialSystem }: { books: Rulebook
     );
   }
 
+  const typeHref = (t: RulebookCategory | null) => (t ? `/library?type=${encodeURIComponent(t)}` : "/library");
+  const chip = (t: RulebookCategory | null, label: string, count: number) => {
+    const on = type === t;
+    return (
+      <a
+        key={label}
+        href={typeHref(t)}
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let new-tab clicks through
+          e.preventDefault();
+          pickType(t);
+        }}
+        aria-pressed={on}
+        className={
+          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors " +
+          (on
+            ? "border-[var(--gold)] bg-[var(--panel-2)] text-[var(--gold)]"
+            : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]")
+        }
+      >
+        {label}
+        <span className={on ? "" : "opacity-70"}>{count}</span>
+      </a>
+    );
+  };
+  const sections = type ? SECTIONS.filter((s) => s.key === type) : SECTIONS;
+
   return (
     <>
+      <div className="mb-8 flex flex-wrap items-center gap-2" role="group" aria-label="Filter by book type">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Book type</span>
+        {chip(null, "All", shown.length)}
+        {SECTIONS.map((sec) => chip(sec.key, sec.key, shown.filter((b) => b.category === sec.key).length))}
+      </div>
       <div className="flex flex-col gap-10">
-        {SECTIONS.map((sec) => {
+        {sections.map((sec) => {
           const list = shown.filter((b) => b.category === sec.key);
           return (
             <section key={sec.key} aria-labelledby={`lib-${sec.key.replace(/\s+/g, "-")}`}>
@@ -73,7 +126,9 @@ export default function RulebookGrid({ books, initialSystem }: { books: Rulebook
                 </span>
               </div>
               {list.length === 0 ? (
-                <p className="text-[13px] italic text-[var(--muted)]">None yet.</p>
+                <p className="text-[13px] italic text-[var(--muted)]">
+                  {type ? `No ${sec.key.toLowerCase()} on the ${activeName} shelf yet.` : "None yet."}
+                </p>
               ) : (
                 <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {list.map((b) => (
