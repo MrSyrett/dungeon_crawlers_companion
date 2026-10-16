@@ -4,7 +4,7 @@ import { visibleRulebooks, prettyName } from "@/lib/rulebooks";
 export const dynamic = "force-dynamic";
 
 // GET — the Library PDFs this user is allowed to see.
-// Returns { books: [{ file, title, system, category, url }] }, used by the GM
+// Returns { books: [{ file, title, system, category, url, cover }] }, used by the GM
 // Screen's Library tool and the /library page. `system` (a SystemKey or "BOTH")
 // says which game system's shelf shows the book and `category` ("Core Rules" |
 // "Expansions" | "Adventures") which section — both come from the folder the
@@ -31,6 +31,7 @@ export async function GET(req: Request) {
     system,
     category,
     url: `/api/rulebooks/${encodeURIComponent(file)}${suffix}`,
+    cover: `/api/rulebooks/${encodeURIComponent(file)}/cover${suffix}`,
   }));
 
   return Response.json({ books });

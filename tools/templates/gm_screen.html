@@ -3017,7 +3017,34 @@ GMScenes.renderPins();
 .pty-slots { font-family:'Geist Mono',monospace; font-size:10px; color:var(--light); background:var(--panel); border:1px solid var(--border); border-radius:3px; padding:0 5px; margin-left:4px; }
 .pty-coins { font-family:'Geist',sans-serif; font-size:9px; font-weight:700; color:var(--dim); letter-spacing:0; text-transform:none; }
 /* ═══ RULEBOOKS ═══ */
-.rul-body { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.rul-body { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+/* Library shelf — the system's books by section; pick one to open the reader. */
+.rul-shelf { flex:1; min-height:0; overflow-y:auto; padding:12px 14px 18px; }
+.rul-reader { flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+.rul-chips { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:14px; }
+.rul-chips-lbl { font-family:'Geist',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--dim); margin-right:2px; }
+.rul-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; border:1px solid var(--border); background:transparent; color:var(--dim); font-family:'Geist',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
+.rul-chip:hover { border-color:var(--gold); color:var(--white); }
+.rul-chip.on { border-color:var(--gold); color:var(--gold); background:var(--panel-2); }
+.rul-chip .n { opacity:.7; font-weight:600; }
+.rul-sec { margin-bottom:16px; }
+.rul-sec-h { display:flex; align-items:baseline; justify-content:space-between; gap:8px; border-bottom:1px solid var(--border); padding-bottom:5px; margin-bottom:8px; }
+.rul-sec-t { font-family:'Geist',sans-serif; font-size:13px; font-weight:900; letter-spacing:.06em; color:var(--gold); }
+.rul-sec-c { font-family:'Geist',sans-serif; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+.rul-sec-none { font-family:'Geist',sans-serif; font-size:12px; font-style:italic; color:var(--dim); }
+.rul-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:14px 12px; }
+.rul-book { display:block; width:100%; min-width:0; padding:0; border:none; background:none; color:var(--white); cursor:pointer; text-align:center; }
+.rul-cover { position:relative; display:block; width:100%; aspect-ratio:3/4; overflow:hidden; border-radius:6px; border:1px solid var(--border); background:var(--panel-2); box-shadow:0 6px 16px rgba(0,0,0,.45); transition:border-color .15s, transform .15s; }
+.rul-cover img { display:block; width:100%; height:100%; object-fit:cover; object-position:top; }
+.rul-cover-plate { position:absolute; inset:0; display:none; align-items:center; justify-content:center; padding:8px; font-family:'Geist',sans-serif; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+.rul-cover.plate img { display:none; }
+.rul-cover.plate .rul-cover-plate { display:flex; }
+.rul-book:hover .rul-cover, .rul-book:focus-visible .rul-cover { border-color:var(--gold); transform:translateY(-2px); }
+.rul-book.last .rul-cover { border-color:color-mix(in srgb, var(--gold) 60%, var(--border)); }
+.rul-book-t { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:6px; font-family:'Geist',sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; line-height:1.3; }
+.rul-book:hover .rul-book-t { color:var(--gold); }
+.rul-book-s { display:block; margin-top:2px; font-family:'Geist',sans-serif; font-size:9.5px; color:var(--dim); }
+.rul-shelf-empty { padding:28px 12px; text-align:center; color:var(--dim); font-family:'Geist',sans-serif; font-size:12.5px; line-height:1.55; }
 .rul-bar { display:flex; gap:6px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--border); background:var(--panel); flex-shrink:0; flex-wrap:wrap; }
 .rul-search { flex:1; min-width:120px; background:var(--panel-2); border:1px solid var(--border); color:var(--white); font-family:'Geist',sans-serif; font-size:12px; padding:5px 8px; outline:none; }
 .rul-booktabs { display:flex; gap:4px; overflow-x:auto; }
@@ -5011,7 +5038,8 @@ GMScenes.renderPins();
       <div class="toolbar-spacer"></div>
       <span class="rul-note"></span>
     </div>
-    <!-- The shared DCCPdfReader (tabs + toolbar + chapters + reader) mounts here. -->
+    <!-- The Library shelf (pick a book) and the shared DCCPdfReader (one book,
+         with "← Library" back to the shelf) both live here. -->
     <div class="rul-body"></div>
   </div>
 </template>
@@ -5877,6 +5905,9 @@ function openTool(k){
   node.classList.add('active');
   body.appendChild(node);
   fillPopToolbar(node);
+  // A tool may want to reset when its quick button is pressed (the Library
+  // opens on the system's shelf, not the last book).
+  if(typeof node._onOpen === 'function') { try { node._onOpen(); } catch(e){} }
 }
 
 // A party bubble opens that character's actual Party-tool card (cloned so it
@@ -17114,25 +17145,43 @@ function init_rules(root) {
   const noteEl     = root.querySelector('.rul-note');
   const body       = root.querySelector('.rul-body');
 
+  // Two views in the pane: the SHELF (this system's books in Core Rules /
+  // Expansions / Adventures, filterable by type) and the READER (one book, with
+  // a "← Library" button back to the shelf). Pressing the Library quick button
+  // always lands on the shelf, so picking a book is one tap from there.
+  body.innerHTML = '<div class="rul-shelf"></div><div class="rul-reader" style="display:none"></div>';
+  const shelfEl  = body.querySelector('.rul-shelf');
+  const readerEl = body.querySelector('.rul-reader');
+
+  const SECTIONS = ['Core Rules', 'Expansions', 'Adventures'];
+  const esc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
   let allBooks = [];     // every book the user may see — from /api/rulebooks
   let books = [];        // filtered to the currently-selected game system
-  let activeFile = '';   // which book is open (remembered across sessions)
+  let activeFile = '';   // the open (or last-opened) book
+  let view = 'shelf';    // 'shelf' | 'reader'
+  let typeFilter = '';   // '' = all sections, else one of SECTIONS
   let loaded = false;
+
+  const sysKey = () => (typeof window.GM_SYSTEM === 'string' ? window.GM_SYSTEM : '');
+  const sysName = () => {
+    const k = sysKey();
+    return (window.SYS_LABEL && window.SYS_LABEL[k]) || k || 'this system';
+  };
 
   // Show only the books tied to the selected system ("BOTH" = every system).
   function applyBookFilter() {
-    const sys = (typeof window.GM_SYSTEM === 'string' ? window.GM_SYSTEM : '');
+    const sys = sysKey();
     books = allBooks.filter(b => !b.system || b.system === 'BOTH' || b.system === sys);
-    if(!books.some(b => b.file === activeFile)) activeFile = books.length ? books[0].file : '';
   }
+  const bookFor = f => books.find(b => b.file === f) || null;
+  const catOf = b => (SECTIONS.indexOf(b.category) >= 0 ? b.category : 'Core Rules');
 
   // ── Unified PDF reader ────────────────────────────────────────────────────
-  // The reader is the shared window.DCCPdfReader (/vendor/dcc-pdf-reader.js) —
-  // the SAME component (and the same tab bar, toolbar, chapters panel, gestures)
-  // the Rulebook Compendium uses, so there's one system to update. We feed it the
-  // book list via setBooks and keep per-book page memory here (positions) through
-  // getStartPage / onPage so each book reopens on its last page; onActiveBook
-  // tracks the current tab for the board save.
+  // The shared window.DCCPdfReader (/vendor/dcc-pdf-reader.js) — the SAME
+  // component the Library page uses. It is handed one book at a time; per-book
+  // page memory lives here (positions) through getStartPage / onPage so each
+  // book reopens on its last page.
   let reader = null;
   const positions = {};          // file → last-viewed page (persisted across sessions)
   const save = () => { if(window.__ddScheduleSave) { try { window.__ddScheduleSave(); } catch(e){} } };
@@ -17140,11 +17189,13 @@ function init_rules(root) {
   function ensureReader() {
     if(reader) return reader;
     if(!window.DCCPdfReader || !window.pdfjsLib) return null;
-    body.innerHTML = '';
-    reader = window.DCCPdfReader.create(body, {
+    readerEl.innerHTML = '';
+    reader = window.DCCPdfReader.create(readerEl, {
       showOpenInNew: true,
       showDownload: true,
-      emptyText: 'No books found. The Library is read from the server — the same books listed on the Library page. Drop a PDF into protected/rulebooks/<System>/<Core Rules | Expansions | Adventures>/ and press Refresh.',
+      onBack: () => showShelf(),
+      backLabel: 'Library',
+      emptyText: 'That book is no longer in the Library.',
       getStartPage: (f) => positions[f] || 1,
       onActiveBook: (f) => { activeFile = f; save(); },
       onPage: (f, pg) => { if(pg > 0) positions[f] = pg; save(); },
@@ -17152,8 +17203,8 @@ function init_rules(root) {
     return reader;
   }
 
-  // PDF.js (320 KB) + the shared reader load on FIRST use of this tool, not on
-  // every GM Screen open (the Compendium reader does the same).
+  // PDF.js (320 KB) + the shared reader load on the FIRST book opened, not on
+  // every GM Screen open.
   let readerLoading = null;
   function loadReaderScripts() {
     if(window.DCCPdfReader && window.pdfjsLib) return Promise.resolve();
@@ -17170,17 +17221,100 @@ function init_rules(root) {
     return readerLoading;
   }
 
-  // Push the current (filtered) book list into the shared reader.
-  function sync() {
-    const r = ensureReader();
-    if(!r) {
-      body.textContent = 'Loading PDF reader…';
-      loadReaderScripts().then(() => { if(ensureReader()) sync(); else body.textContent = 'Couldn\u2019t start the PDF reader.'; },
-                               () => { body.textContent = 'Couldn\u2019t load the PDF reader. Check your connection and press Refresh.'; });
+  // ── Shelf ────────────────────────────────────────────────────────────────
+  function renderShelf() {
+    const n = books.length;
+    noteEl.textContent = loaded ? (n + ' book' + (n === 1 ? '' : 's')) : '';
+    if(!loaded) { shelfEl.innerHTML = '<div class="rul-shelf-empty">Loading the Library…</div>'; return; }
+    if(!n) {
+      shelfEl.innerHTML = '<div class="rul-shelf-empty">Nothing on the ' + esc(sysName()) + ' shelf yet.<br>' +
+        'Drop PDFs into <b>protected/rulebooks/&lt;System&gt;/&lt;Core Rules | Expansions | Adventures&gt;/</b> and press Refresh.</div>';
       return;
     }
-    r.setBooks(books.map(b => ({ file: b.file, title: b.title, url: b.url })), activeFile);
-    noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
+    const count = c => books.filter(b => catOf(b) === c).length;
+    const chip = (val, label, num) =>
+      '<button type="button" class="rul-chip' + (typeFilter === val ? ' on' : '') + '" data-type="' + esc(val) + '" aria-pressed="' + (typeFilter === val) + '">' +
+      esc(label) + ' <span class="n">' + num + '</span></button>';
+    let html = '<div class="rul-chips" role="group" aria-label="Filter by book type"><span class="rul-chips-lbl">Book type</span>' +
+      chip('', 'All', n) + SECTIONS.map(c => chip(c, c, count(c))).join('') + '</div>';
+    (typeFilter ? [typeFilter] : SECTIONS).forEach(c => {
+      const list = books.filter(b => catOf(b) === c);
+      html += '<section class="rul-sec"><div class="rul-sec-h"><span class="rul-sec-t">' + esc(c) + '</span>' +
+        '<span class="rul-sec-c">' + list.length + ' book' + (list.length === 1 ? '' : 's') + '</span></div>';
+      if(!list.length) html += '<div class="rul-sec-none">None yet.</div>';
+      else html += '<div class="rul-grid">' + list.map(b => {
+        const pg = positions[b.file];
+        const sub = pg > 1 ? 'Page ' + pg : (b.system === 'BOTH' ? 'All systems' : '');
+        const cover = b.cover || ('/api/rulebooks/' + encodeURIComponent(b.file) + '/cover');
+        return '<button type="button" class="rul-book' + (b.file === activeFile ? ' last' : '') + '" data-file="' + esc(b.file) + '" title="' + esc(b.title || b.file) + '">' +
+          '<span class="rul-cover"><img alt="" loading="lazy" decoding="async" src="' + esc(cover) + '" data-pdf="' + esc(b.url) + '">' +
+          '<span class="rul-cover-plate">' + esc(b.title || b.file) + '</span></span>' +
+          '<span class="rul-book-t">' + esc(b.title || b.file) + '</span>' +
+          (sub ? '<span class="rul-book-s">' + esc(sub) + '</span>' : '') + '</button>';
+      }).join('') + '</div>';
+      html += '</section>';
+    });
+    shelfEl.innerHTML = html;
+    // No cover image on the server → draw page 1 in the browser; failing that,
+    // a plain title plate.
+    shelfEl.querySelectorAll('.rul-cover img').forEach(img => {
+      img.addEventListener('error', () => {
+        const plate = () => img.parentNode && img.parentNode.classList.add('plate');
+        if(img.dataset.drawing) { plate(); return; }
+        img.dataset.drawing = '1';
+        img.removeAttribute('src');
+        loadCoverScript().then(() => window.DCCPdfCover.draw(img, img.dataset.pdf, plate), plate);
+      }, { once: false });
+    });
+  }
+  let coverLoading = null;
+  function loadCoverScript() {
+    if(window.DCCPdfCover) return Promise.resolve();
+    if(!coverLoading) coverLoading = new Promise((res, rej) => {
+      const el = document.createElement('script'); el.src = '/vendor/dcc-pdf-cover.js'; el.async = true;
+      el.onload = () => res(); el.onerror = () => rej(new Error('cover'));
+      document.head.appendChild(el);
+    });
+    return coverLoading;
+  }
+  shelfEl.addEventListener('click', (e) => {
+    const t = e.target.closest ? e.target.closest('[data-type],[data-file]') : null;
+    if(!t) return;
+    if(t.hasAttribute('data-type')) { typeFilter = t.getAttribute('data-type') || ''; renderShelf(); save(); return; }
+    openBook(t.getAttribute('data-file'));
+  });
+
+  function showShelf() {
+    view = 'shelf';
+    readerEl.style.display = 'none';
+    shelfEl.style.display = '';
+    renderShelf();
+    save();
+  }
+
+  function openBook(file) {
+    const b = bookFor(file);
+    if(!b) { showShelf(); return; }
+    activeFile = b.file;
+    view = 'reader';
+    shelfEl.style.display = 'none';
+    readerEl.style.display = '';
+    noteEl.textContent = '';
+    save();
+    const r = ensureReader();
+    if(!r) {
+      readerEl.innerHTML = '<div class="rul-shelf-empty">Loading PDF reader…</div>';
+      loadReaderScripts().then(() => { if(view === 'reader' && activeFile === b.file) { if(ensureReader()) openBook(b.file); else readerEl.innerHTML = '<div class="rul-shelf-empty">Couldn’t start the PDF reader.</div>'; } },
+                               () => { readerEl.innerHTML = '<div class="rul-shelf-empty">Couldn’t load the PDF reader. Check your connection and press Refresh.</div>'; });
+      return;
+    }
+    r.setBooks([{ file: b.file, title: b.title, url: b.url }], b.file);
+  }
+
+  // Put the pane in whichever view it should be showing.
+  function sync() {
+    if(view === 'reader' && bookFor(activeFile)) openBook(activeFile);
+    else showShelf();
   }
 
   async function load(quiet) {
@@ -17197,34 +17331,42 @@ function init_rules(root) {
       loaded = true;
       sync();
     } catch(err) {
+      loaded = true; allBooks = []; books = [];
+      view = 'shelf'; readerEl.style.display = 'none'; shelfEl.style.display = '';
+      shelfEl.innerHTML = '<div class="rul-shelf-empty">Couldn’t reach the Library. Check your connection and press Refresh.</div>';
       noteEl.textContent = '';
-      const r = ensureReader();
-      if(r) r.setBooks([]);   // shows the reader's empty state
     }
   }
 
   refreshBtn.addEventListener('click', () => load(false));
 
-  // Re-filter when the GM switches game system in the top bar.
+  // The Library quick button always opens on the shelf.
+  root._onOpen = () => { if(view !== 'shelf') showShelf(); };
+
+  // Switching game system: a book from another system closes back to the new
+  // system's shelf (a shared "all systems" book stays open).
   document.addEventListener('gm-system-change', () => {
     if(!loaded) return;
-    if(reader) activeFile = reader.getActiveFile() || activeFile;
     applyBookFilter();
-    sync();
+    if(view === 'reader' && bookFor(activeFile)) return;
+    showShelf();
   });
 
-  // Save the chosen book AND the last-viewed page per book (PDFs live on the
-  // server; only these small pointers are persisted) so the reader reopens right
-  // where the GM left off.
-  root._getState = () => ({ activeFile: reader ? (reader.getActiveFile() || activeFile) : activeFile, positions: Object.assign({}, positions) });
+  // Save which book was last open, the last-viewed page per book (PDFs live on
+  // the server; only these small pointers are persisted) and the shelf's type
+  // filter.
+  root._getState = () => ({ activeFile, view, typeFilter, positions: Object.assign({}, positions) });
   root._setState = (st) => {
     if(st && st.activeFile) activeFile = st.activeFile;
+    if(st && (st.view === 'reader' || st.view === 'shelf')) view = st.view;
+    if(st && SECTIONS.indexOf(st.typeFilter) >= 0) typeFilter = st.typeFilter;
     if(st && st.positions && typeof st.positions === 'object') {
       Object.keys(st.positions).forEach(f => { const n = parseInt(st.positions[f], 10); if(n > 0) positions[f] = n; });
     }
     if(loaded) sync();
   };
 
+  renderShelf();
   load(true);
 }
 

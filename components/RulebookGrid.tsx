@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   SYSTEMS,
   subscribeSystem,
@@ -20,6 +20,74 @@ const SECTIONS: { key: RulebookCategory; blurb: string }[] = [
   { key: "Expansions", blurb: "Sourcebooks, supplements and companions" },
   { key: "Adventures", blurb: "Modules, scenarios and campaigns to run" },
 ];
+
+declare global {
+  interface Window {
+    DCCPdfCover?: { draw: (img: HTMLImageElement, pdfUrl: string, onFail?: () => void) => void };
+  }
+}
+
+let coverScript: Promise<void> | null = null;
+function loadCoverScript(): Promise<void> {
+  if (window.DCCPdfCover) return Promise.resolve();
+  if (!coverScript) {
+    coverScript = new Promise((resolve, reject) => {
+      const el = document.createElement("script");
+      el.src = "/vendor/dcc-pdf-cover.js";
+      el.async = true;
+      el.onload = () => resolve();
+      el.onerror = () => reject(new Error("cover script"));
+      document.head.appendChild(el);
+    });
+  }
+  return coverScript;
+}
+
+/**
+ * A book's cover: the server's cover image (/api/rulebooks/<file>/cover), or —
+ * when there isn't one — page 1 drawn in the browser (public/vendor/dcc-pdf-cover.js),
+ * or failing that a plain title plate.
+ */
+function BookCover({ file, title }: { file: string; title: string }) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [mode, setMode] = useState<"server" | "draw" | "plate">("server");
+  const enc = encodeURIComponent(file);
+  useEffect(() => {
+    if (mode !== "draw") return;
+    let live = true;
+    loadCoverScript().then(
+      () => {
+        const img = imgRef.current;
+        if (!live || !img || !window.DCCPdfCover) return;
+        window.DCCPdfCover.draw(img, `/api/rulebooks/${enc}`, () => live && setMode("plate"));
+      },
+      () => live && setMode("plate"),
+    );
+    return () => {
+      live = false;
+    };
+  }, [mode, enc]);
+  return (
+    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md border border-[var(--border)] bg-[var(--panel-2)] shadow-[0_6px_18px_rgba(0,0,0,.45)] transition-[border-color,transform] duration-150 group-hover:-translate-y-0.5 group-hover:border-[var(--gold)]">
+      {mode === "plate" ? (
+        <div className="flex h-full items-center justify-center p-3 text-center text-sm font-bold uppercase tracking-[0.1em] text-[var(--muted)]">
+          {title}
+        </div>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element -- auth-gated API image, not a static asset
+        <img
+          ref={imgRef}
+          src={mode === "server" ? `/api/rulebooks/${enc}/cover` : undefined}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={mode === "server" ? () => setMode("draw") : undefined}
+          className="h-full w-full object-cover object-top"
+        />
+      )}
+    </div>
+  );
+}
 
 /**
  * The Library shelf (/library), filtered by the selected system (shared
@@ -130,20 +198,21 @@ export default function RulebookGrid({
                   {type ? `No ${sec.key.toLowerCase()} on the ${activeName} shelf yet.` : "None yet."}
                 </p>
               ) : (
-                <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                   {list.map((b) => (
                     <li key={b.file} className="min-w-0">
                       <Link
                         href={`/library?book=${encodeURIComponent(b.file)}`}
-                        className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--panel)] px-5 py-5 transition-colors hover:border-[var(--gold)] hover:bg-[var(--panel-2)]"
+                        className="group block rounded-md outline-offset-4"
+                        title={b.title}
                       >
-                        <div className="min-w-0">
-                          <div className="truncate text-base font-bold uppercase tracking-[0.12em]">{b.title}</div>
-                          <div className="mt-1 text-[11px] text-[var(--muted)]">
-                            PDF{b.system === "BOTH" ? " · all systems" : ""}
-                          </div>
+                        <BookCover file={b.file} title={b.title} />
+                        <div className="mt-2 line-clamp-2 text-center text-[12px] font-bold uppercase leading-snug tracking-[0.08em] text-[var(--text)] group-hover:text-[var(--gold)]">
+                          {b.title}
                         </div>
-                        <span className="ml-6 shrink-0 text-xl text-[var(--muted)]">→</span>
+                        {b.system === "BOTH" ? (
+                          <div className="mt-0.5 text-center text-[10px] text-[var(--muted)]">All systems</div>
+                        ) : null}
                       </Link>
                     </li>
                   ))}

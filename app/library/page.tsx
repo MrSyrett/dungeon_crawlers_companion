@@ -33,9 +33,8 @@ export default async function LibraryPage({
 
   if (selected) {
     // The shared, site-wide reader (the SAME component the GM Screen uses) —
-    // tab bar across all the user's books, chapters panel, snap paging,
-    // pinch/ctrl zoom, drag-to-pan, per-book page memory. Hand it the whole
-    // accessible book list so the tabs match the GM Screen.
+    // one book at a time, with a "← Library" button back to this shelf, chapters
+    // panel, snap paging, pinch/ctrl zoom, drag-to-pan and per-book page memory.
     const list = books.map((b) => ({
       file: b.file,
       title: prettyName(b.file),

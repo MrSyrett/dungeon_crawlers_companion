@@ -21,6 +21,12 @@
        pdfjsLib,              // default window.pdfjsLib
        workerSrc,             // default /vendor/pdfjs/pdf.worker.min.js
        onPage(docKey, page),  // called whenever the current page changes
+       onBack(),              // optional: shows a "← Library" button at the start of
+                              // the toolbar and the open book's title, and HIDES the
+                              // book-tab bar — the host's own Library shelf is how
+                              // you switch books (both the Library page and the GM
+                              // Screen use this)
+       backLabel,             // label for that button (default "Library")
      });
      reader.load({ url, docKey, title, startPage });  // open a book
      reader.setPage(n); reader.getPage();
@@ -57,6 +63,12 @@
       ".dccpdf-inp{width:46px;height:26px;text-align:center;background:var(--panel-2,#22262f);border:1px solid var(--border,#2a2f3a);color:var(--text,var(--white,#e5e7eb));border-radius:5px;font:600 11px/1 'Share Tech Mono',monospace;outline:none}" +
       ".dccpdf-inp:focus{border-color:var(--gold,#d8b45a)}" +
       ".dccpdf-sp{flex:1}" +
+      ".dccpdf-back{gap:4px;padding:0 10px 0 7px}" +
+      ".dccpdf-back svg{width:13px;height:13px;flex-shrink:0}" +
+      ".dccpdf-title{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;color:var(--text,var(--white,#e5e7eb));font:700 12px/1.2 'Barlow Condensed','Montserrat',system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase}" +
+      ".dccpdf.dccpdf-has-back .dccpdf-books{display:none}" +
+      ".dccpdf.dccpdf-has-back .dccpdf-sp{display:none}" +
+      "@media (max-width:520px){.dccpdf.dccpdf-has-back .dccpdf-title{order:-1;flex:1 1 100%;padding:2px 2px 0}}" +
       ".dccpdf-body{flex:1;display:flex;min-height:0;position:relative;overflow:hidden}" +
       ".dccpdf-toc{position:absolute;z-index:6;top:0;bottom:0;left:0;width:0;overflow:hidden;background:var(--panel,#1a1d24);border-right:1px solid var(--border,#2a2f3a);box-shadow:0 0 30px rgba(0,0,0,.55);transition:width .18s ease;display:flex;flex-direction:column}" +
       ".dccpdf.dccpdf-toc-open .dccpdf-toc{width:min(86%,300px)}" +
@@ -114,6 +126,8 @@
     var getStart = typeof opts.getStartPage === "function" ? opts.getStartPage : null;
     var onActive = typeof opts.onActiveBook === "function" ? opts.onActiveBook : null;
     var emptyText = opts.emptyText || "No rulebooks found.";
+    var onBack = typeof opts.onBack === "function" ? opts.onBack : null;
+    var backLabel = opts.backLabel || "Library";
     if (pdfjsLib && pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
       try { pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc; } catch (e) {}
     }
@@ -139,11 +153,16 @@
 
     // ── DOM ──────────────────────────────────────────────────────────────────
     container.classList.add("dccpdf");
+    if (onBack) container.classList.add("dccpdf-has-back");
     container.innerHTML =
       '<div class="dccpdf-books"></div>' +
       '<div class="dccpdf-toolbar">' +
+        (onBack ? '<button class="dccpdf-btn dccpdf-back" type="button" title="Back to the Library" aria-label="Back to the Library">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>' +
+          esc(backLabel) + '</button>' : '') +
         '<button class="dccpdf-btn dccpdf-toc-toggle" type="button" title="Chapters" aria-label="Chapters">☰</button>' +
         '<span class="dccpdf-ind">Page <input class="dccpdf-inp" type="text" inputmode="numeric" value="1" aria-label="Page number"> / <span class="dccpdf-tot">–</span></span>' +
+        (onBack ? '<span class="dccpdf-title"></span>' : '') +
         '<span class="dccpdf-sp"></span>' +
         '<a class="dccpdf-btn dccpdf-open" target="_blank" rel="noreferrer" title="Open in a new tab" aria-label="Open in a new tab" style="display:none;text-decoration:none">New tab</a>' +
         '<a class="dccpdf-btn dccpdf-dl" title="Download the PDF" aria-label="Download the PDF" style="display:none;text-decoration:none">Download</a>' +
@@ -175,6 +194,9 @@
     var wrap = container.querySelector(".dccpdf-wrap");
     var canvas = container.querySelector(".dccpdf-canvas");
     var msg = container.querySelector(".dccpdf-msg");
+    var titleEl = container.querySelector(".dccpdf-title");
+    var backBtn = container.querySelector(".dccpdf-back");
+    if (backBtn) backBtn.addEventListener("click", function () { try { onBack(); } catch (e) {} });
 
     function showMsg(text) { msg.textContent = text || ""; msg.style.display = text ? "flex" : "none"; }
     function effScale() { return userScale > 0 ? userScale : fitScale; }
@@ -867,6 +889,7 @@
       renderSeq++;
       var mySeq = renderSeq;
       docKey = key; userScale = 0; pdfDoc = null;
+      if (titleEl) { titleEl.textContent = book.title || ""; titleEl.title = book.title || ""; }
       // Point the toolbar's New tab / Download links at this book.
       if (openLink) { openLink.href = url || "#"; openLink.style.display = (showOpen && url) ? "" : "none"; }
       if (dlLink) {
@@ -966,7 +989,7 @@
       if (ro) { try { ro.disconnect(); } catch (e) {} }
       dropCache();
       pdfDoc = null;
-      container.classList.remove("dccpdf", "dccpdf-toc-open");
+      container.classList.remove("dccpdf", "dccpdf-toc-open", "dccpdf-has-back");
       container.innerHTML = "";
     }
 

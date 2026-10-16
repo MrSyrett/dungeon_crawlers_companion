@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import {
   subscribeSystem,
   getSystemSnapshot,
@@ -11,11 +12,12 @@ import {
 } from "@/components/systemStore";
 
 // The Rulebook Compendium's PDF viewer. It mounts the shared, site-wide reader
-// (window.DCCPdfReader, /vendor/dcc-pdf-reader.js) — the SAME component, tab bar,
+// (window.DCCPdfReader, /vendor/dcc-pdf-reader.js) — the SAME component,
 // toolbar, chapters panel and gestures the GM Screen uses, so there's one system
-// to maintain. We hand it the book list (it renders the tabs) filtered to the
-// selected game system, and the book to open; page position is remembered per
-// book in localStorage. On desktop the reader is capped to a contained column
+// to maintain. It opens ONE book: there is no tab bar of every book any more —
+// the toolbar's "← Library" button goes back to the system's Library shelf,
+// which is where you pick another. Page position is remembered per book in
+// localStorage. On desktop the reader is capped to a contained column
 // (like the GM Screen pane) rather than spanning the whole window.
 
 type Book = { file: string; title: string; url: string; system: string };
@@ -24,6 +26,8 @@ type ReaderInstance = {
   destroy: () => void;
 };
 type ReaderOpts = {
+  onBack?: () => void;
+  backLabel?: string;
   onPage?: (docKey: string, page: number) => void;
   onActiveBook?: (docKey: string) => void;
   getStartPage?: (docKey: string) => number;
@@ -73,6 +77,7 @@ export default function RulebookReader({
   active: string;
   initialSystem?: SystemKey;
 }) {
+  const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<ReaderInstance | null>(null);
@@ -87,17 +92,11 @@ export default function RulebookReader({
   const sysRef = useRef(activeSystem);
   sysRef.current = activeSystem;
 
-  // Only tabs for the SELECTED system ("BOTH" always shows). On a system swap the
-  // current book is intentionally dropped if it isn't in the new system — setBooks
-  // then opens that system's first book, which (after lib ordering) is its core
-  // rule book.
-  function applyBooks(reader: ReaderInstance) {
-    const sys = sysRef.current;
-    const shown = books.filter((b) => b.system === "BOTH" || b.system === sys);
-    reader.setBooks(shown, activeFileRef.current);
-  }
+  const openBook = books.find((b) => b.file === active);
+  // True when the open book belongs on the selected system's shelf.
+  const fitsSystem = (sys: string) => !openBook || openBook.system === "BOTH" || openBook.system === sys;
 
-  // Create the reader once; /rules re-navigates (remounts) to change books.
+  // Create the reader once; the Library re-navigates (remounts) to change books.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -112,6 +111,8 @@ export default function RulebookReader({
         showOpenInNew: true,
         showDownload: true,
         emptyText: "No rulebooks available.",
+        onBack: () => router.push("/library"),
+        backLabel: "Library",
         getStartPage: (file: string) => {
           try {
             const v = parseInt(localStorage.getItem(posKey(file)) || "", 10);
@@ -137,15 +138,14 @@ export default function RulebookReader({
         },
       });
       readerRef.current = reader;
-      // The book was opened from a system-filtered grid (or a direct link). Make
-      // the global system match it so the tabs filter to the right system and the
-      // nav toggle stays in step.
-      const openedBook = books.find((b) => b.file === active);
-      if (openedBook && isSystemKey(openedBook.system) && openedBook.system !== sysRef.current) {
-        sysRef.current = openedBook.system as SystemKey;
-        setSystem(openedBook.system as SystemKey);
+      // The book was opened from a system's shelf (or a direct link). Make the
+      // global system match it so the nav toggle — and the shelf "← Library"
+      // returns to — stay in step.
+      if (openBook && isSystemKey(openBook.system) && openBook.system !== sysRef.current) {
+        sysRef.current = openBook.system as SystemKey;
+        setSystem(openBook.system as SystemKey);
       }
-      applyBooks(reader);
+      reader.setBooks(openBook ? [openBook] : [], active);
     })();
 
     return () => {
@@ -162,9 +162,10 @@ export default function RulebookReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Re-filter the tabs when the selected system changes.
+  // Switching to a system this book isn't part of goes back to that system's
+  // Library shelf (a shared "all systems" book stays open).
   useEffect(() => {
-    if (readerRef.current) applyBooks(readerRef.current);
+    if (readerRef.current && !fitsSystem(activeSystem)) router.push("/library");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSystem]);
 

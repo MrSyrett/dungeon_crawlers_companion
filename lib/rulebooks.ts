@@ -1,4 +1,4 @@
-import { readdir } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { prisma } from "@/lib/prisma";
 import { isAdminEmail } from "@/lib/admin";
@@ -236,6 +236,38 @@ export async function listRulebookFiles(): Promise<string[]> {
 export async function rulebookPath(file: string): Promise<string | null> {
   const hit = (await scanLibrary()).entries.find((e) => e.file === file);
   return hit ? path.join(RULEBOOK_DIR, ...hit.rel.split("/")) : null;
+}
+
+// ── Covers ───────────────────────────────────────────────────────────────────
+// A book's cover image, shown on the Library shelves (app + GM Screen). Looked
+// up in this order, by the book's filename without ".pdf":
+//   1. an image beside the PDF  — Shadowdark/Core Rules/shadowdark-core-rules.jpg
+//      (drop one in to use your own cover art)
+//   2. protected/rulebooks/.covers/<name>.webp|jpg|png — page 1 of each book,
+//      pre-rendered and trimmed (dotfolders are skipped by the scan above)
+// With neither, the shelf draws page 1 in the browser instead (pdf.js), so a
+// newly dropped PDF still gets a cover with no extra step.
+export const COVER_DIR = path.join(RULEBOOK_DIR, ".covers");
+const COVER_EXTS = [".webp", ".jpg", ".jpeg", ".png"] as const;
+export const COVER_TYPES: Record<string, string> = {
+  ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+};
+
+async function isFile(p: string): Promise<boolean> {
+  try { return (await stat(p)).isFile(); } catch { return false; }
+}
+
+export async function rulebookCoverPath(file: string): Promise<string | null> {
+  const pdf = await rulebookPath(file);
+  if (!pdf) return null;
+  const base = file.replace(/\.pdf$/i, "");
+  for (const dir of [path.dirname(pdf), COVER_DIR]) {
+    for (const ext of COVER_EXTS) {
+      const p = path.join(dir, base + ext);
+      if (await isFile(p)) return p;
+    }
+  }
+  return null;
 }
 
 // The effective system: the folder decides; a loose file falls back to its
