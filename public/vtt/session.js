@@ -29,6 +29,7 @@
 
   var P = {
     select: '<path d="M5 3l6 16 2.2-6.3L19 10z"/>',
+    grid: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',
     ruler: '<path d="M3 9l6-6 12 12-6 6z"/><path d="M8 8l1.5 1.5M11 5l1.5 1.5M6 11l1.5 1.5M14 8l1.5 1.5M9 14l1.5 1.5"/>',
     ping: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/>',
     fog: '<path d="M5 16a3.5 3.5 0 0 1 .6-6.9A5 5 0 0 1 15 7.5 3.75 3.75 0 0 1 17 16z"/>',
@@ -256,8 +257,22 @@
         });
       });
     });
-    $("m-ppg").onchange = function () { pb().setPpg(parseInt(this.value, 10) || 70); };
+    $("m-ppg").onchange = function () { pb().setPpg(parseFloat(this.value) || 70); };
     $("m-fpc").onchange = function () { pb().setFeetPerCell(parseFloat(this.value) || 5); };
+    // Grid colour + opacity preview live on the editor's board and are saved with the scene.
+    $("m-gcolor").oninput = function () { pb().setGridStyle({ color: this.value }); };
+    $("m-galpha").oninput = function () { $("m-galpha-v").textContent = this.value + "%"; pb().setGridStyle({ opacity: this.value / 100 }); };
+    // Align grid: drag a box over an N×N block of the map's printed squares; the
+    // tool hands back a (fractional) cell size + origin (public/vtt/grid-align.js).
+    bind("m-align", function () {
+      var m = pb().state.map;
+      if (!m.widthPx || !window.VTTGridAlign) { say("Load a map image first."); return; }
+      window.VTTGridAlign.open({
+        image: m.image, widthPx: m.widthPx, heightPx: m.heightPx,
+        ppg: m.ppg, gx: m.gx || 0, gy: m.gy || 0, color: m.gridColor, opacity: m.gridOpacity,
+        onApply: function (g) { pb().setGrid2(g); $("m-ppg").value = (Math.round(g.ppg * 100) / 100).toString(); },
+      });
+    });
     // scene editor
     bind("sc-new", function () { openEditor(null); });
     bind("se-close", closeEditor);
@@ -500,8 +515,11 @@
     pb().resize(); // the canvas is measurable now that the popup is shown
     var finish = function (title) {
       $("se-name").value = title || "";
-      $("m-ppg").value = pboard.state.map.ppg || 70;
+      $("m-ppg").value = (Math.round((pboard.state.map.ppg || 70) * 100) / 100).toString();
       $("m-fpc").value = pboard.state.feetPerCell || 5;
+      $("m-gcolor").value = /^#[0-9a-f]{6}$/i.test(pboard.state.map.gridColor || "") ? pboard.state.map.gridColor : "#ffffff";
+      var ga = Math.round((typeof pboard.state.map.gridOpacity === "number" ? pboard.state.map.gridOpacity : 0.1) * 100);
+      $("m-galpha").value = ga; $("m-galpha-v").textContent = ga + "%";
       // Per-scene Fog of War / grid — reflect what loadScene applied (both default on).
       $("se-fog").checked = !!pboard.state.fog.enabled;
       $("se-grid").checked = pboard.state.grid !== false;
@@ -1050,7 +1068,9 @@
       '<div class="vtt-row"><button class="vtt-btn" id="m-load">' + ico("upload", 15) + ' Upload UVTT / image</button><button class="vtt-btn ghost" id="m-url">' + ico("link", 15) + " Link</button></div>" +
       '<div id="se-mapname" class="vtt-hint2"></div>' +
       '<div class="vtt-preview"><canvas id="se-canvas"></canvas><div class="vtt-preview-empty" id="se-empty">No map yet — upload a UVTT/image or paste a link.</div></div>' +
-      '<div class="vtt-row small"><label>Grid px <input type="number" id="m-ppg" min="4" value="70"></label><label>ft / square <input type="number" id="m-fpc" min="1" value="5"></label></div>' +
+      '<div class="vtt-field-l">Grid</div>' +
+      '<div class="vtt-row small"><button class="vtt-btn" id="m-align" title="Drag a box over a 3×3 block of printed squares to set the cell size and origin">' + ico("grid", 15) + ' Align grid…</button><label>Cell px <input type="number" id="m-ppg" min="4" step="0.01" value="70"></label><label>ft / square <input type="number" id="m-fpc" min="1" value="5"></label></div>' +
+      '<div class="vtt-row small"><label>Color <input type="color" id="m-gcolor" value="#ffffff" class="vtt-color"></label><label style="flex:1">Opacity <input type="range" id="m-galpha" min="0" max="100" step="1" value="10" style="flex:1;min-width:80px;accent-color:#c8a24a"><span id="m-galpha-v" style="width:34px;text-align:right;color:#e6ebf2;font-weight:700">10%</span></label></div>' +
       '<div class="vtt-te-checks"><label><input type="checkbox" id="se-fog" checked> Fog of War</label><label><input type="checkbox" id="se-grid" checked> Show grid</label></div>' +
       "</div>" +
       '<div class="vtt-modal-foot"><button class="vtt-btn danger" id="se-del">' + ico("trash", 15) + " Delete</button><span style=\"flex:1\"></span><button class=\"vtt-btn primary\" id=\"se-save\">Save scene</button></div>" +
@@ -1139,7 +1159,7 @@
       ".vtt-panel{padding:14px;overflow:auto;flex:1}",
       ".vtt-sec-h{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8b97a7;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}",
       ".vtt-cur{color:#c8a24a;font-weight:600;letter-spacing:0;text-transform:none;font-size:11px}",
-      ".vtt-row{display:flex;gap:6px;margin-bottom:6px}.vtt-row.small{font-size:11px;color:#8b97a7;align-items:center}.vtt-row.small label{display:flex;align-items:center;gap:5px}",
+      ".vtt-row{display:flex;gap:6px;margin-bottom:6px}.vtt-row.small{font-size:11px;color:#8b97a7;align-items:center}.vtt-row.small label{display:flex;align-items:center;gap:5px}.vtt-color{width:34px;height:26px;padding:0;border:1px solid #2a323d;border-radius:5px;background:#1b212a;cursor:pointer}",
       ".vtt-row input[type=number]{width:52px;background:#1b212a;border:1px solid #2a323d;color:#e6ebf2;border-radius:4px;padding:3px 5px}",
       "input[type=range]{accent-color:#c8a24a;flex:1}",
       ".vtt-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:#1b212a;color:#e6ebf2;border:1px solid #2a323d;border-radius:6px;padding:7px 8px;font-size:12px;font-weight:600;cursor:pointer}.vtt-btn:hover{border-color:#3d4756}.vtt-btn.ghost{background:transparent}",

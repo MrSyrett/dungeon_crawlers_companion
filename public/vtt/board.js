@@ -39,7 +39,7 @@
 
     var state = {
       cam: { scale: 1, offX: 0, offY: 0 },
-      map: { image: null, widthPx: 0, heightPx: 0, ppg: 70, walls: [], windows: [], doors: [], lights: [], src: null, srcType: null },
+      map: { image: null, widthPx: 0, heightPx: 0, ppg: 70, gx: 0, gy: 0, gridColor: "#ffffff", gridOpacity: 0.1, walls: [], windows: [], doors: [], lights: [], src: null, srcType: null },
       tokens: [],
       tool: "select",       // select | lasso | pan | ruler | movement | rings | pointer | laser
       selectedId: null,
@@ -89,11 +89,21 @@
       img.src = conditionBase + "/" + key + ".webp";
       return null;
     }
+    // The grid is `ppg` px per cell, with its origin at (gx, gy) — an image whose
+    // first full square doesn't start at the top-left corner (most scanned/
+    // published battlemaps) is aligned by the GM with the Align Grid tool, which
+    // sets ppg (possibly fractional) and the offsets. Every snap goes through these.
+    function gOx() { return state.map.gx || 0; }
+    function gOy() { return state.map.gy || 0; }
+    function snapLineX(v) { var g = state.map.ppg, o = gOx(); return Math.round((v - o) / g) * g + o; }
+    function snapLineY(v) { var g = state.map.ppg, o = gOy(); return Math.round((v - o) / g) * g + o; }
+    // Snap a token CENTER so a w×h token sits on whole cells.
+    function snapCX(x, w) { return snapLineX(x - w / 2) + w / 2; }
+    function snapCY(y, h) { return snapLineY(y - h / 2) + h / 2; }
     function snapTok(t) {
       if (!state.snap || !state.map.ppg) return;
-      var g = state.map.ppg;
-      t.x = Math.round((t.x - t.w / 2) / g) * g + t.w / 2;
-      t.y = Math.round((t.y - t.h / 2) / g) * g + t.h / 2;
+      t.x = snapCX(t.x, t.w);
+      t.y = snapCY(t.y, t.h);
     }
     function roundRect(x, y, w, h, r) {
       ctx.beginPath();
@@ -104,7 +114,7 @@
     // snap a world point to the nearest grid vertex (for clean wall drawing)
     function snapVertex(x, y) {
       if (!state.snap || !state.map.ppg) return { x: x, y: y };
-      var g = state.map.ppg; return { x: Math.round(x / g) * g, y: Math.round(y / g) * g };
+      return { x: snapLineX(x), y: snapLineY(y) };
     }
     function segDist(px, py, s) {
       var vx = s.x2 - s.x1, vy = s.y2 - s.y1, wx = px - s.x1, wy = py - s.y1;
@@ -492,17 +502,31 @@
       scheduleRender();
     }
 
+    // Grid colour: a hex colour + opacity, per scene (GM sets them in the scene
+    // editor; players receive them with the map). Default is the old faint white.
+    function gridStroke(map) {
+      var c = map.gridColor || "#ffffff", a = typeof map.gridOpacity === "number" ? map.gridOpacity : 0.1;
+      var m = /^#?([0-9a-f]{6})$/i.exec(c);
+      if (!m) return c; // already an rgba()/named colour — use as-is
+      var n = parseInt(m[1], 16);
+      return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + Math.max(0, Math.min(1, a)) + ")";
+    }
     function drawGrid() {
       var map = state.map, ppg = map.ppg, sc = state.cam.scale;
-      if (ppg * sc < 6) return; // too dense to be useful
+      if (!(ppg > 0) || ppg * sc < 6) return; // too dense to be useful
+      // Start one line before the origin so the partial cells at the image's edge
+      // (an offset grid) still get their lines.
+      var ox = ((map.gx || 0) % ppg + ppg) % ppg, oy = ((map.gy || 0) % ppg + ppg) % ppg;
       ctx.save();
-      ctx.strokeStyle = "rgba(255,255,255,0.10)";
+      ctx.strokeStyle = gridStroke(map);
       ctx.lineWidth = 1;
       ctx.beginPath();
-      for (var x = 0; x <= map.widthPx + 0.5; x += ppg) {
+      for (var x = ox - ppg; x <= map.widthPx + 0.5; x += ppg) {
+        if (x < -0.5) continue;
         ctx.moveTo(w2sX(x), w2sY(0)); ctx.lineTo(w2sX(x), w2sY(map.heightPx));
       }
-      for (var y = 0; y <= map.heightPx + 0.5; y += ppg) {
+      for (var y = oy - ppg; y <= map.heightPx + 0.5; y += ppg) {
+        if (y < -0.5) continue;
         ctx.moveTo(w2sX(0), w2sY(y)); ctx.lineTo(w2sX(map.widthPx), w2sY(y));
       }
       ctx.stroke();
@@ -1027,7 +1051,7 @@
             // hold position when the next cell is across a barrier. With snap off,
             // slide smoothly up to the barrier instead.
             var sx = tx, sy = ty;
-            if (state.snap && state.map.ppg) { var g = state.map.ppg; sx = Math.round((tx - mt.w / 2) / g) * g + mt.w / 2; sy = Math.round((ty - mt.h / 2) / g) * g + mt.h / 2; }
+            if (state.snap && state.map.ppg) { sx = snapCX(tx, mt.w); sy = snapCY(ty, mt.h); }
             if (!pathBlocked(mm.lastX, mm.lastY, sx, sy, tokMoveRad(mt))) { mt.x = sx; mt.y = sy; }
             else if (!state.snap) { var c = clampMove(mm.lastX, mm.lastY, tx, ty, tokMoveRad(mt)); mt.x = c.x; mt.y = c.y; }
           } else {
@@ -1156,7 +1180,7 @@
       state.map = Object.assign(state.map, fields);
       // Any map change may swap the wall/window/door arrays wholesale — invalidate
       // the fog cache even if counts happen to match.
-      if (fields && (fields.walls || fields.windows || fields.doors || "ppg" in fields || "widthPx" in fields)) bumpGeom();
+      if (fields && (fields.walls || fields.windows || fields.doors || "ppg" in fields || "gx" in fields || "gy" in fields || "widthPx" in fields)) bumpGeom();
       scheduleRender();
     }
 
@@ -1188,6 +1212,7 @@
             widthPx: r.img.naturalWidth,
             heightPx: r.img.naturalHeight,
             ppg: ppg || state.map.ppg || 70,
+            gx: 0, gy: 0,
             walls: [], windows: [], doors: [], lights: [],
             src: r.src, srcType: srcType || (/^data:/.test(r.src) ? "embedded" : "url"),
           });
@@ -1208,6 +1233,7 @@
             widthPx: r.img ? r.img.naturalWidth : m.widthPx,
             heightPx: r.img ? r.img.naturalHeight : m.heightPx,
             ppg: m.ppg,
+            gx: 0, gy: 0,   // UVTT grids start at the image origin
             walls: m.walls,
             windows: [],
             doors: m.doors,
@@ -1272,6 +1298,8 @@
           srcType: m.srcType,           // "url" | "embedded"
           src: m.src,                   // URL, or data-url (embedded)
           ppg: m.ppg,
+          gx: m.gx || 0, gy: m.gy || 0,                       // grid origin (Align Grid)
+          gridColor: m.gridColor || "#ffffff", gridOpacity: typeof m.gridOpacity === "number" ? m.gridOpacity : 0.1,
           widthPx: m.widthPx, heightPx: m.heightPx,
           walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights,
         },
@@ -1306,7 +1334,7 @@
       state.grid = scene.grid !== false;
       state.fog.enabled = (typeof scene.fog === "boolean") ? scene.fog : true;
       var done = function () {
-        setMap({ ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType });
+        setMap(Object.assign({ ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [], widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType }, gridFields(m)));
         (scene.tokens || []).forEach(function (ts) { addToken(ts); });
         fitToMap();
         emit("scene", scene);
@@ -1351,10 +1379,10 @@
     // Apply a map coming from the host over the wire: {src, srcType, ppg, walls,
     // doors, widthPx, heightPx}. Same shape toScene().map produces.
     function loadMapState(m) {
-      var fields = {
+      var fields = Object.assign({
         ppg: m.ppg || 70, walls: m.walls || [], windows: m.windows || [], doors: m.doors || [], lights: m.lights || [],
         widthPx: m.widthPx || 0, heightPx: m.heightPx || 0, src: m.src, srcType: m.srcType,
-      };
+      }, gridFields(m));
       if (m.src) {
         return loadImage(m.src).then(function (img) {
           fields.image = img;
@@ -1369,9 +1397,21 @@
     // Apply map metadata only (walls/doors/lights/ppg) without touching the
     // image — used when the host syncs a wall/door/light change so the whole map
     // picture isn't re-shipped over the wire.
+    // Grid origin + style from a stored/wire map, with defaults for scenes saved
+    // before these existed (origin 0,0; faint white).
+    function gridFields(m) {
+      return {
+        gx: typeof m.gx === "number" ? m.gx : 0, gy: typeof m.gy === "number" ? m.gy : 0,
+        gridColor: m.gridColor || "#ffffff", gridOpacity: typeof m.gridOpacity === "number" ? m.gridOpacity : 0.1,
+      };
+    }
     function applyMapMeta(m) {
       var f = {};
       if (m.ppg) f.ppg = m.ppg;
+      if (typeof m.gx === "number") f.gx = m.gx;
+      if (typeof m.gy === "number") f.gy = m.gy;
+      if (m.gridColor) f.gridColor = m.gridColor;
+      if (typeof m.gridOpacity === "number") f.gridOpacity = m.gridOpacity;
       if (m.walls) f.walls = m.walls;
       if (m.windows) f.windows = m.windows;
       if (m.doors) f.doors = m.doors;
@@ -1601,14 +1641,31 @@
       doorCount: function () { return state.map.doors ? state.map.doors.length : 0; },
       centerOn: centerOn,
       setCanMove: function (fn) { canMove = fn || function () { return true; }; },
-      setPpg: function (n) { state.map.ppg = Math.max(4, n | 0); scheduleRender(); emit("map", state.map); },
+      // Fractional cell sizes are real (an aligned 3×3 block rarely divides to a
+      // whole pixel), so ppg is kept as a number, not truncated.
+      setPpg: function (n) { n = +n; if (!(n > 0)) return; state.map.ppg = Math.max(4, n); bumpGeom(); scheduleRender(); emit("map", state.map); },
+      // Set cell size + origin together (the Align Grid tool's result).
+      setGrid2: function (g) {
+        if (!g) return;
+        if (typeof g.ppg === "number" && g.ppg > 0) state.map.ppg = Math.max(4, g.ppg);
+        var p = state.map.ppg;
+        if (typeof g.gx === "number") state.map.gx = ((g.gx % p) + p) % p;
+        if (typeof g.gy === "number") state.map.gy = ((g.gy % p) + p) % p;
+        bumpGeom(); scheduleRender(); emit("map", state.map);
+      },
+      setGridStyle: function (st) {
+        if (!st) return;
+        if (st.color) state.map.gridColor = st.color;
+        if (typeof st.opacity === "number") state.map.gridOpacity = Math.max(0, Math.min(1, st.opacity));
+        scheduleRender(); emit("map", state.map);
+      },
       setFeetPerCell: function (n) { state.feetPerCell = Math.max(1, n) || 5; },
       screenToWorld: function (sx, sy) { var r = canvas.getBoundingClientRect(); return { x: s2wX(sx - r.left), y: s2wY(sy - r.top) }; },
       addTokenAtScreen: function (spec, sx, sy) {
         var r = canvas.getBoundingClientRect(); spec = spec || {};
         spec.x = s2wX(sx - r.left); spec.y = s2wY(sy - r.top);
         var g = state.map.ppg, w = spec.w || g || 70, h = spec.h || g || 70;
-        if (state.snap && state.map.ppg) { spec.x = Math.round((spec.x - w / 2) / g) * g + w / 2; spec.y = Math.round((spec.y - h / 2) / g) * g + h / 2; }
+        if (state.snap && state.map.ppg) { spec.x = snapCX(spec.x, w); spec.y = snapCY(spec.y, h); }
         return addToken(spec);
       },
       zoomBy: function (f, sx, sy) {

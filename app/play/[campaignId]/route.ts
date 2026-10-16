@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 // still pick up a genuinely new session.js the moment it's deployed. (The old
 // stamp was Date.now(), which changed every boot and forced a full re-download of
 // ~190 KB of board code after any restart — wasted egress with no benefit.)
-const ASSET_FILES = ["board.css", "uvtt.js", "visibility.js", "board.js", "net.js", "audio-sync.js", "session.js"];
+const ASSET_FILES = ["board.css", "uvtt.js", "visibility.js", "board.js", "net.js", "audio-sync.js", "grid-align.js", "session.js"];
 const ASSET_VER = (() => {
   try {
     const h = createHash("sha1");
@@ -193,6 +193,7 @@ ${bar}
 <script src="${asset("/vtt/board.js")}"></script>
 <script src="${asset("/vtt/net.js")}"></script>
 <script src="${asset("/vtt/audio-sync.js")}"></script>
+<script src="${asset("/vtt/grid-align.js")}"></script>
 <script src="${asset("/vtt/session.js")}"></script>
 </body>
 </html>`;

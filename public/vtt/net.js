@@ -187,7 +187,8 @@
     function mapPayload() {
       var m = board.state.map;
       return {
-        ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights,
+        ppg: m.ppg, gx: m.gx || 0, gy: m.gy || 0, gridColor: m.gridColor, gridOpacity: m.gridOpacity,
+        walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights,
         widthPx: m.widthPx, heightPx: m.heightPx, srcType: m.srcType,
         url: m.srcType === "url" ? m.src : null,
       };
@@ -515,7 +516,7 @@
         if (mp.srcType === "url" && mp.url) {
           if (board.setLoading) board.setLoading(0); // blank + bar while the URL image loads
           board.applyMapMeta(mp);
-          board.loadMapState({ src: mp.url, srcType: "url", ppg: mp.ppg, walls: mp.walls, windows: mp.windows, doors: mp.doors, lights: mp.lights, widthPx: mp.widthPx, heightPx: mp.heightPx })
+          board.loadMapState({ src: mp.url, srcType: "url", ppg: mp.ppg, gx: mp.gx, gy: mp.gy, gridColor: mp.gridColor, gridOpacity: mp.gridOpacity, walls: mp.walls, windows: mp.windows, doors: mp.doors, lights: mp.lights, widthPx: mp.widthPx, heightPx: mp.heightPx })
             .then(function () { board.setRemoteApply(false); if (board.setLoading) board.setLoading(null); });
           board.syncTokens(msg.tokens || []);
         } else if (mp.shipping) {
@@ -553,7 +554,7 @@
       else if (msg.t === "mapEnd") {
         var m = pendingMap || {};
         board.setRemoteApply(true);
-        board.loadMapState({ src: mapBuf, srcType: "embedded", ppg: m.ppg, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, widthPx: m.widthPx, heightPx: m.heightPx })
+        board.loadMapState({ src: mapBuf, srcType: "embedded", ppg: m.ppg, gx: m.gx, gy: m.gy, gridColor: m.gridColor, gridOpacity: m.gridOpacity, walls: m.walls, windows: m.windows, doors: m.doors, lights: m.lights, widthPx: m.widthPx, heightPx: m.heightPx })
           .then(function () { board.setRemoteApply(false); if (board.setLoading) board.setLoading(null); });
         mapBuf = null;
       }
