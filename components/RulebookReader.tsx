@@ -130,7 +130,7 @@ export default function RulebookReader({
         onActiveBook: (file: string) => {
           activeFileRef.current = file;
           try {
-            window.history.replaceState(null, "", `/rules?book=${encodeURIComponent(file)}`);
+            window.history.replaceState(null, "", `/library?book=${encodeURIComponent(file)}`);
           } catch {
             /* history unavailable — non-fatal */
           }

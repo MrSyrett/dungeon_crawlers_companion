@@ -21,10 +21,10 @@ export default function NotFound() {
           Back to your party
         </Link>
         <Link
-          href="/rules"
+          href="/library"
           className="rounded border border-[var(--border)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--muted)] transition-colors hover:border-[var(--muted)] hover:text-[var(--text)]"
         >
-          Rulebooks
+          Library
         </Link>
       </div>
     </main>

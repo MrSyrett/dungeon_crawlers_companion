@@ -19,27 +19,32 @@ async function isRealFile(file: string): Promise<boolean> {
   return (await listRulebookFiles()).includes(file);
 }
 
-// Save a file's settings: open to all signed-in users (or private again), and
-// which system's Rulebooks list shows it (Shadowdark / DCC / both). The system
-// tag only hides the book behind the dashboard toggle — it never grants access.
+// Save a file's settings: open to all signed-in users (or private again), and —
+// for a PDF that isn't in a system folder — which system's Library shelf shows
+// it. A book filed under protected/rulebooks/<System>/ gets its system from the
+// folder, so its form sends no "system" field and the stored tag is left as is.
+// The system tag only hides the book behind the system toggle — it never grants
+// access.
 export async function saveRulebookSettings(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (!admin) return;
 
   const file = String(formData.get("file") ?? "");
   const everyone = String(formData.get("everyone") ?? "") === "on";
-  // Anything unexpected (or missing) becomes BOTH — the never-hide default.
-  const system = normalizeSystem(String(formData.get("system") ?? ""));
+  // No "system" field = the folder decides it; keep whatever is stored. Anything
+  // unexpected becomes BOTH — the never-hide default.
+  const rawSystem = formData.get("system");
+  const system = rawSystem == null ? null : normalizeSystem(String(rawSystem));
   if (!file || !(await isRealFile(file))) return;
 
   await prisma.rulebook.upsert({
     where: { file },
-    update: { everyone, system },
-    create: { file, everyone, system },
+    update: system ? { everyone, system } : { everyone },
+    create: { file, everyone, system: system ?? "BOTH" },
   });
 
   revalidatePath("/admin/rulebooks");
-  revalidatePath("/rules");
+  revalidatePath("/library");
 }
 
 // Grant a specific account access to a file, looked up by email.

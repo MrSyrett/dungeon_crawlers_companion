@@ -2,12 +2,12 @@ import Link from "next/link";
 
 // Shared top nav for the admin pages. Renders the admin sections as toggle
 // buttons (the current one highlighted), so you can move between
-// Members / Campaigns / Sounds / Rulebooks / Systems from any admin page.
+// Members / Campaigns / Sounds / Library / Systems from any admin page.
 const SECTIONS = [
   { key: "users", href: "/admin/users", label: "Members" },
   { key: "campaigns", href: "/admin/campaigns", label: "Campaigns" },
   { key: "sounds", href: "/admin/sounds", label: "Sounds" },
-  { key: "rulebooks", href: "/admin/rulebooks", label: "Rulebooks" },
+  { key: "rulebooks", href: "/admin/rulebooks", label: "Library" },
   { key: "systems", href: "/admin/systems", label: "Systems" },
 ] as const;
 

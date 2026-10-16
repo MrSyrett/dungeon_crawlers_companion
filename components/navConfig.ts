@@ -3,9 +3,9 @@
 // Kept free of any server-only imports (no node:fs, no prisma) so it can be
 // pulled into client components. The per-system Compendium links are the old
 // per-system reference pages, with each system's standalone "Rules" page
-// removed (2026-10 homepage cleanup). "Rulebooks" (the PDF shelf at /rules) is
-// appended for every system that has one — all of them except D&D, which ships
-// no rulebook PDFs.
+// removed (2026-10 homepage cleanup). "Library" (the PDF shelf at /library — core
+// rules, expansions and adventures, sorted by the folder each PDF sits in) is
+// appended for every system.
 
 import type { SystemKey } from "./systemStore";
 
@@ -157,16 +157,18 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
   ],
 };
 
-export const RULEBOOKS_LINK: NavLink = { href: "/rules", label: "Rulebooks" };
+// The Library (formerly "Rulebooks", at /rules — which now redirects here).
+export const LIBRARY_LINK: NavLink = { href: "/library", label: "Library" };
 
-// D&D ships no rulebook PDFs, so it gets no Rulebooks entry.
-export const SYSTEMS_WITHOUT_RULEBOOKS: SystemKey[] = ["DND"];
+// Systems that get no Library entry. Empty now: every system has a shelf (a
+// system with no PDFs yet shows an empty shelf explaining where to drop them),
+// so a newly added PDF is reachable from the nav with no code change.
+export const SYSTEMS_WITHOUT_LIBRARY: SystemKey[] = [];
 
-// The Compendium dropdown for a system: its reference pages, plus Rulebooks
-// when that system has any.
+// The Compendium dropdown for a system: its reference pages, plus the Library.
 export function compendiumFor(system: SystemKey): NavLink[] {
   const base = COMPENDIUM[system] ?? [];
-  return SYSTEMS_WITHOUT_RULEBOOKS.includes(system) ? base : [...base, RULEBOOKS_LINK];
+  return SYSTEMS_WITHOUT_LIBRARY.includes(system) ? base : [...base, LIBRARY_LINK];
 }
 
 // Per-system Homebrew hub. Shadowdark's lives at the top-level /homebrew;
@@ -349,10 +351,11 @@ export function compendiumCounterpart(pathname: string, to: SystemKey): string |
 }
 
 // Paths that filter themselves by the selected system: switching system there
-// should NOT bounce the user to the dashboard (the Rulebooks shelf even says
+// should NOT bounce the user to the dashboard (the Library shelf even says
 // "switch systems above" and then filters itself; Campaigns shows that system's
 // campaigns and would be a strange place to be thrown out of).
 export const STAY_ON_SWITCH = new Set<string>([
+  "/library",
   "/rules",
   "/campaigns",
   // Not tied to a system at all, so switching one should change the label and

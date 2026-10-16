@@ -1,10 +1,10 @@
 import { createReadStream } from "node:fs";
-import { readdir, stat } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
 import type { NextRequest } from "next/server";
 import { getPlayUser } from "@/lib/vtt";
-import { canAccessRulebook, RULEBOOK_DIR } from "@/lib/rulebooks";
+import { canAccessRulebook, rulebookPath } from "@/lib/rulebooks";
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +33,10 @@ async function resolveFile(
     return new Response("Not found", { status: 404 });
   }
 
-  let listed = false;
-  try {
-    listed = (await readdir(RULEBOOK_DIR)).includes(file);
-  } catch {
-    listed = false;
-  }
-  if (!listed) return new Response("Not found", { status: 404 });
+  // Books live in <System>/<Category>/ folders; the URL names only the file (its
+  // ID), and the library scan finds where it sits. Anything not found 404s.
+  const full = await rulebookPath(file);
+  if (!full) return new Response("Not found", { status: 404 });
 
   // Access control: admins see everything; everyone else needs the file opened to
   // all or granted to their account. A denied file 404s so the URL doesn't confirm
@@ -47,7 +44,6 @@ async function resolveFile(
   const allowed = await canAccessRulebook({ id: user.id, email: user.email }, file);
   if (!allowed) return new Response("Not found", { status: 404 });
 
-  const full = path.join(RULEBOOK_DIR, file);
   const info = await stat(full).catch(() => null);
   if (!info || !info.isFile()) return new Response("Not found", { status: 404 });
 

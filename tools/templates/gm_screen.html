@@ -2907,7 +2907,7 @@ GMScenes.renderPins();
         <button class="qbtn" type="button" onclick="openTool('music')"><span class="qi">♪</span>Music</button>
         <button class="qbtn" type="button" onclick="openTool('notes')"><span class="qi">✎</span>Notes</button>
         <button class="qbtn" type="button" onclick="openTool('message')"><span class="qi">💬</span>Message</button>
-        <button class="qbtn" type="button" onclick="openTool('rules')"><span class="qi">📖</span>Rulebooks</button>
+        <button class="qbtn" type="button" onclick="openTool('rules')"><span class="qi">📖</span>Library</button>
       </div>
       <div class="scene-strip" id="gmc-scenes"></div>
     </footer>
@@ -5140,7 +5140,7 @@ function normalizeTool(t) { return t === 'combat' ? 'trackers' : t; }
 
 // Tool catalog (order = the tool-picker menu order)
 const TOOL_ORDER = ['adventure','maps','trackers','social','timers','notes','music','gen','party','message','rules','dice'];
-const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Combat', social:'Social', timers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', message:'Message', rules:'Rulebooks', dice:'Roll Log', vtt:'Map · VTT' };
+const TOOL_LABELS = { adventure:'Adventure', maps:'Maps', trackers:'Combat', social:'Social', timers:'Trackers', notes:'Notes', music:'Music', gen:'Generators', party:'Party', message:'Message', rules:'Library', dice:'Roll Log', vtt:'Map · VTT' };
 
 // ── Dynamic windows ───────────────────────────────────────────────────────
 // The GM screen is a row of independent "windows" (columns). Each window shows
@@ -17144,7 +17144,7 @@ function init_rules(root) {
     reader = window.DCCPdfReader.create(body, {
       showOpenInNew: true,
       showDownload: true,
-      emptyText: 'No rulebooks found. Rulebooks are read from the server — the same books listed on the Rulebooks page. Drop a PDF into public/rulebooks/ and press Refresh.',
+      emptyText: 'No books found. The Library is read from the server — the same books listed on the Library page. Drop a PDF into protected/rulebooks/<System>/<Core Rules | Expansions | Adventures>/ and press Refresh.',
       getStartPage: (f) => positions[f] || 1,
       onActiveBook: (f) => { activeFile = f; save(); },
       onPage: (f, pg) => { if(pg > 0) positions[f] = pg; save(); },

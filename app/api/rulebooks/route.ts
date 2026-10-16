@@ -3,10 +3,12 @@ import { visibleRulebooks, prettyName } from "@/lib/rulebooks";
 
 export const dynamic = "force-dynamic";
 
-// GET — the rulebook PDFs this user is allowed to see.
-// Returns { books: [{ file, title, system, url }] }, used by the GM Screen
-// Rulebooks tool and the /rules page. `system` ("SD" | "DCC" | "BOTH") says which
-// game system's list shows the book — informational here; callers may filter.
+// GET — the Library PDFs this user is allowed to see.
+// Returns { books: [{ file, title, system, category, url }] }, used by the GM
+// Screen's Library tool and the /library page. `system` (a SystemKey or "BOTH")
+// says which game system's shelf shows the book and `category` ("Core Rules" |
+// "Expansions" | "Adventures") which section — both come from the folder the
+// PDF sits in (see lib/rulebooks.ts); informational here, callers may filter.
 // Files are streamed (auth-checked) via /api/rulebooks/<file>; they never live
 // under public/, so copyrighted PDFs are never on the open web.
 export async function GET(req: Request) {
@@ -23,10 +25,11 @@ export async function GET(req: Request) {
   const token = tokenFromRequest(req);
   const suffix = token ? `?t=${encodeURIComponent(token)}` : "";
 
-  const books = visible.map(({ file, system }) => ({
+  const books = visible.map(({ file, system, category }) => ({
     file,
     title: prettyName(file),
     system,
+    category,
     url: `/api/rulebooks/${encodeURIComponent(file)}${suffix}`,
   }));
 

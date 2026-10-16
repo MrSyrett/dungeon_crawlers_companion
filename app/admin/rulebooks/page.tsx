@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
-import { listRulebookFiles, prettyName, normalizeSystem } from "@/lib/rulebooks";
+import { scanLibrary, prettyName, normalizeSystem } from "@/lib/rulebooks";
 import type { RulebookSystem } from "@/lib/rulebooks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { AdminNav } from "@/components/AdminNav";
@@ -29,11 +29,14 @@ export default async function AdminRulebooksPage({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!isAdminEmail(user.email)) redirect("/rules"); // not an admin — nothing to see
+  if (!isAdminEmail(user.email)) redirect("/library"); // not an admin — nothing to see
 
   const { nouser } = await searchParams;
 
-  const files = await listRulebookFiles();
+  const { entries, duplicates } = await scanLibrary();
+  const files = entries.map((e) => e.file);
+  const entryFor = new Map(entries.map((e) => [e.file, e]));
+  const unsorted = entries.filter((e) => !e.folderSystem || !e.folderCategory);
   const [rulebooks, grants] = await Promise.all([
     prisma.rulebook.findMany({ select: { file: true, everyone: true, system: true } }),
     prisma.rulebookAccess.findMany({
@@ -56,7 +59,7 @@ export default async function AdminRulebooksPage({
       <header className="mb-8 border-b border-[var(--border)] pb-6">
         <AdminNav active="rulebooks" />
         <div className="mt-5">
-          <h1 className="font-display text-3xl font-black tracking-wide">Rulebook access</h1>
+          <h1 className="font-display text-3xl font-black tracking-wide">Library access</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
             Admin · who can read each PDF
           </p>
@@ -70,10 +73,39 @@ export default async function AdminRulebooksPage({
         <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">
           ADMIN_EMAILS
         </code>{" "}
-        environment variable. &ldquo;Shown on&rdquo; picks which system&apos;s Rulebooks list a book
-        appears in (it follows the Shadowdark / Crawler Carl toggle) — it hides, it doesn&apos;t
-        grant.
+        environment variable.
       </p>
+      <p className="mb-6 text-[13px] leading-relaxed text-[var(--muted)]">
+        <span className="text-[var(--text)]">Shelving is automatic.</span> A PDF&apos;s folder decides
+        where it appears:{" "}
+        <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">
+          protected/rulebooks/&lt;System&gt;/&lt;Core Rules | Expansions | Adventures&gt;/Book.pdf
+        </code>
+        . The system folder can be the system&apos;s name or short label (&ldquo;Shadowdark&rdquo;,
+        &ldquo;SD&rdquo;, &ldquo;The Lord of the Rings&rdquo;, &ldquo;LotR&rdquo;…), or &ldquo;All
+        Systems&rdquo; for every shelf. Only a PDF left loose in{" "}
+        <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">protected/rulebooks/</code>{" "}
+        uses the &ldquo;Shown on&rdquo; picker below. Filenames must be unique across the library —
+        they are each book&apos;s ID, so moving a file keeps its access settings.
+      </p>
+
+      {duplicates.length ? (
+        <div className="mb-6 rounded-lg border border-[var(--red)] bg-[var(--panel)] p-4 text-[13px] text-[var(--text)]">
+          <div className="font-semibold">Duplicate filenames — only the first copy is used:</div>
+          <ul className="mt-1 list-disc pl-5 text-[var(--muted)]">
+            {duplicates.map((d) => <li key={d} className="break-all">{d}</li>)}
+          </ul>
+        </div>
+      ) : null}
+      {unsorted.length ? (
+        <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4 text-[13px] text-[var(--muted)]">
+          <span className="font-semibold text-[var(--text)]">{unsorted.length} not fully sorted</span>{" "}
+          (missing a system or category folder, so their shelf/section is guessed):{" "}
+          {unsorted.map((e) => e.rel).join(" · ")}. Run{" "}
+          <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">npm run library:organize</code>{" "}
+          to file the known books, or move them by hand.
+        </div>
+      ) : null}
 
       {nouser ? (
         <div className="mb-6 rounded-lg border border-[var(--red)] bg-[var(--panel)] p-4 text-[13px] text-[var(--bad)]">
@@ -84,9 +116,9 @@ export default async function AdminRulebooksPage({
 
       {files.length === 0 ? (
         <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6 text-sm text-[var(--muted)]">
-          No rulebooks found. Drop PDFs into{" "}
+          The Library is empty. Drop PDFs into{" "}
           <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">
-            protected/rulebooks/
+            protected/rulebooks/&lt;System&gt;/&lt;Core Rules | Expansions | Adventures&gt;/
           </code>{" "}
           and they will appear here.
         </div>
@@ -94,7 +126,9 @@ export default async function AdminRulebooksPage({
         <ul className="flex flex-col gap-4">
           {files.map((file) => {
             const everyone = everyoneFor.get(file) ?? false;
-            const system = systemFor.get(file) ?? "BOTH";
+            const entry = entryFor.get(file);
+            const folderSystem = entry?.folderSystem ?? null;
+            const system = folderSystem ?? systemFor.get(file) ?? "BOTH";
             const fileGrants = grantsFor.get(file) ?? [];
             return (
               <li
@@ -109,15 +143,16 @@ export default async function AdminRulebooksPage({
                     <span className={everyone ? "text-[var(--good)]" : undefined}>
                       {everyone ? "· everyone signed in" : "· private"}
                     </span>{" "}
-                    · {SYSTEM_LABEL[system]}
+                    · {SYSTEM_LABEL[system]} · {entry?.category ?? "—"}
                   </span>
                 </div>
-                <div className="mt-0.5 break-all text-[11px] text-[var(--muted)]">{file}</div>
+                <div className="mt-0.5 break-all text-[11px] text-[var(--muted)]">protected/rulebooks/{entry?.rel ?? file}</div>
 
                 <RulebookSettingsForm
                   file={file}
                   everyone={everyone}
                   system={system}
+                  folderSystemLabel={folderSystem ? SYSTEM_LABEL[folderSystem] : null}
                   action={saveRulebookSettings}
                 />
 

@@ -17,19 +17,24 @@ function SaveHint() {
 }
 
 /**
- * The per-rulebook visibility settings on the admin Rulebooks page: "visible to
- * everyone" and which system it's shown on. Both save the moment you change
- * them — no Save button.
+ * The per-book settings on the admin Library page: "visible to everyone" and —
+ * for a PDF that isn't in a system folder — which system's shelf shows it. Both
+ * save the moment you change them — no Save button. A book filed in a system
+ * folder shows that system read-only (`folderSystemLabel`); move the file to
+ * change it.
  */
 export function RulebookSettingsForm({
   file,
   everyone,
   system,
+  folderSystemLabel,
   action,
 }: {
   file: string;
   everyone: boolean;
   system: string;
+  /** Set when the book's folder decides its system — the picker is replaced by this label. */
+  folderSystemLabel?: string | null;
   action: (formData: FormData) => Promise<void>;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -51,6 +56,12 @@ export function RulebookSettingsForm({
         />
         Visible to everyone signed in
       </label>
+      {folderSystemLabel ? (
+        <span className="text-[13px] text-[var(--text)]">
+          Shown on <span className="font-semibold">{folderSystemLabel}</span>{" "}
+          <span className="text-[11px] text-[var(--muted)]">(from its folder)</span>
+        </span>
+      ) : (
       <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
         Shown on
         <select
@@ -67,6 +78,7 @@ export function RulebookSettingsForm({
           ))}
         </select>
       </label>
+      )}
       <SaveHint />
     </form>
   );
