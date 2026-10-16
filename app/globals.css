@@ -1811,6 +1811,30 @@ body {
 .nav-sys-title[data-sys="TWD"] { font-family: "Dead Kansas", var(--font-oswald), ui-sans-serif, system-ui, sans-serif; font-weight: 400; color: var(--twd-bone); }
 .nav-sys-title[data-sys="DCC"] .tn-1 { color: var(--dcc-gold); }
 .nav-sys-title[data-sys="DCC"] .tn-2 { color: var(--dcc-ink); }
+/* Marvel: MARVEL on the cover-red plate, "Multiverse RPG" plain beside it — the
+   home tile's lockup laid out on one line (see .home-tile[data-sys="MMRPG"]). */
+.nav-sys-title[data-sys="MMRPG"] .tn-1 {
+  display: inline-block;
+  line-height: 1;
+  padding: 0.12em 0.18em 0.06em;
+  margin-right: 0.08em;
+  background: var(--mmrpg);
+  color: #ffffff;
+  border-radius: 2px;
+}
+.nav-sys-title[data-sys="MMRPG"] .tn-2 { color: var(--text); }
+/* Nimble: the cover logo's white letters inside a heavy black outline, with a
+   small black drop beneath. paint-order puts the stroke behind the fill, so the
+   outline thickens the letter outward instead of eating into it. */
+.nav-sys-title[data-sys="NIM"] {
+  color: #ffffff;
+  -webkit-text-stroke: 0.1em #000000;
+  paint-order: stroke fill;
+  /* The cover's black outline is set against a bright sky; on this dark
+     ground it would vanish, so a soft sky-blue glow sits behind it instead. */
+  text-shadow: 0.05em 0.06em 0 #000000, 0 0 0.22em rgba(142, 201, 236, 0.75);
+  font-weight: 700;
+}
 .nav-sys-title[data-sys="GB"] {
   text-transform: none;
   color: #ffffff;
@@ -2135,5 +2159,19 @@ a.roster-card:hover::before { opacity: 1; }
     -webkit-text-stroke: 0.045em #ffffff;
     paint-order: stroke fill;
   }
+}
+
+/* Nimble: the cover logo — white letters in a heavy black outline over a small
+   black drop. Same recipe as the navbar title (.nav-sys-title[data-sys="NIM"]);
+   paint-order keeps the stroke behind the fill so it grows the letter outward.
+   Also on the home roster's Nimble label, so the two read alike. */
+.home-tile[data-sys="NIM"] .home-tile-name,
+.roster-sys[data-sys="NIM"] .roster-sys-name {
+  color: #ffffff;
+  -webkit-text-stroke: 0.1em #000000;
+  paint-order: stroke fill;
+  /* The cover's black outline is set against a bright sky; on this dark
+     ground it would vanish, so a soft sky-blue glow sits behind it instead. */
+  text-shadow: 0.05em 0.06em 0 #000000, 0 0 0.22em rgba(142, 201, 236, 0.75);
 }
 

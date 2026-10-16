@@ -82,6 +82,8 @@ function isChromePath(pathname: string): boolean {
 // components/HomeSystems.tsx): the parts must spell the system's name exactly.
 const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = {
   DCC: ["Dungeon", "Crawler Carl"],
+  // Marvel: the word MARVEL on its red plate, the rest plain (as the home tile).
+  MMRPG: ["Marvel", "Multiverse RPG"],
 };
 
 // useLayoutEffect warns during server rendering; this runs it only in the browser.

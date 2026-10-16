@@ -112,7 +112,7 @@ function navData(hiddenKeys: SystemKey[] = [], keep: SystemKey | null = null) {
 const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
   SD: { f: '"JSL Blackletter"', c: "var(--text)" },
   ICRPG: { f: '"Permanent Marker"', c: "var(--icrpg)" },
-  NIM: { f: '"Fraunces"', c: "var(--text)" },
+  NIM: { f: '"Fraunces"', c: "#ffffff", x: "-webkit-text-stroke:.1em #000000;paint-order:stroke fill;text-shadow:.05em .06em 0 #000000,0 0 .22em rgba(142,201,236,.75);font-weight:700" },
   DND: { f: '"DnDC","Cinzel"', c: "var(--gold-ink)" },
   LOTR: { f: '"Ringbearer","EB Garamond"', c: "var(--lotr-ink)" },
   DCC: { f: '"Anton"', c: "var(--dcc-gold)" },
@@ -130,14 +130,16 @@ const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
   VAE: { f: '"Fraunces"', c: "var(--vae)" },
 };
 /** Two-colour wordmarks (SiteNav's NAME_PARTS). */
-const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = { DCC: ["Dungeon", "Crawler Carl"] };
+const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = { DCC: ["Dungeon", "Crawler Carl"], MMRPG: ["Marvel", "Multiverse RPG"] };
 
 function titleCss(): string {
   const base = `#dd-nav .nav-sys-title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:17.6px;line-height:1.2;letter-spacing:.02em;padding:.1em .1em .12em;text-transform:none;color:var(--text,#e9edf2)}
 @media (min-width:640px){#dd-nav .nav-sys-title{font-size:19.2px}}
 #dd-nav .nav-sys-title.is-wrap{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow-wrap:anywhere;line-height:1.02}
 #dd-nav .nav-sys-title[data-sys="DCC"] .tn-1{color:var(--dcc-gold)}
-#dd-nav .nav-sys-title[data-sys="DCC"] .tn-2{color:var(--dcc-ink)}`;
+#dd-nav .nav-sys-title[data-sys="DCC"] .tn-2{color:var(--dcc-ink)}
+#dd-nav .nav-sys-title[data-sys="MMRPG"] .tn-1{display:inline-block;line-height:1;padding:.12em .18em .06em;margin-right:.08em;background:var(--mmrpg);color:#ffffff;border-radius:2px}
+#dd-nav .nav-sys-title[data-sys="MMRPG"] .tn-2{color:var(--text,#e9edf2)}`;
   const per = (Object.keys(TITLE) as SystemKey[])
     .map((k) => `#dd-nav .nav-sys-title[data-sys="${k}"]{font-family:${TITLE[k].f},"Geist",ui-sans-serif,system-ui,sans-serif !important;color:${TITLE[k].c}${TITLE[k].x ? ";" + TITLE[k].x : ""}}`)
     .join("\n");
