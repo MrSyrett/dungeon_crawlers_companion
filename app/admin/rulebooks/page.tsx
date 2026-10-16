@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
-import { scanLibrary, prettyName, normalizeSystem } from "@/lib/rulebooks";
-import type { RulebookSystem } from "@/lib/rulebooks";
+import { scanLibrary, prettyName, normalizeSystem, LIBRARY_CATEGORIES } from "@/lib/rulebooks";
+import type { RulebookSystem, RulebookCategory } from "@/lib/rulebooks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { AdminNav } from "@/components/AdminNav";
 import { SYSTEMS } from "@/components/systemStore";
@@ -22,19 +23,49 @@ const SYSTEM_LABEL: Record<RulebookSystem, string> = {
   BOTH: "All systems",
 };
 
+// Filter-chip order: the dashboard's system order, then shared ("All systems") books.
+const SYSTEM_ORDER: RulebookSystem[] = [...SYSTEMS.map((s) => s.key as RulebookSystem), "BOTH"];
+
+// Builds a filter link, keeping the other filter as-is (null = drop that param).
+function filterHref(system: string | null, type: string | null): string {
+  const sp = new URLSearchParams();
+  if (system) sp.set("system", system);
+  if (type) sp.set("type", type);
+  const q = sp.toString();
+  return q ? `/admin/rulebooks?${q}` : "/admin/rulebooks";
+}
+
+function Chip({ href, on, label, count }: { href: string; on: boolean; label: string; count: number }) {
+  return (
+    <Link
+      href={href}
+      scroll={false}
+      aria-current={on ? "true" : undefined}
+      className={
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors " +
+        (on
+          ? "border-[var(--gold)] bg-[var(--panel-2)] text-[var(--gold)]"
+          : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]")
+      }
+    >
+      {label}
+      <span className={on ? "text-[var(--gold)]" : "text-[var(--muted)] opacity-70"}>{count}</span>
+    </Link>
+  );
+}
+
 export default async function AdminRulebooksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nouser?: string }>;
+  searchParams: Promise<{ nouser?: string; system?: string; type?: string }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) redirect("/library"); // not an admin — nothing to see
 
-  const { nouser } = await searchParams;
+  const { nouser, system: systemParam, type: typeParam } = await searchParams;
 
   const { entries, duplicates } = await scanLibrary();
-  const files = entries.map((e) => e.file);
   const entryFor = new Map(entries.map((e) => [e.file, e]));
   const unsorted = entries.filter((e) => !e.folderSystem || !e.folderCategory);
   const [rulebooks, grants] = await Promise.all([
@@ -46,13 +77,34 @@ export default async function AdminRulebooksPage({
   ]);
 
   const everyoneFor = new Map(rulebooks.map((r) => [r.file, r.everyone]));
-  const systemFor = new Map(rulebooks.map((r) => [r.file, normalizeSystem(r.system)]));
+  const systemFor = new Map<string, RulebookSystem>(rulebooks.map((r) => [r.file, normalizeSystem(r.system)]));
   const grantsFor = new Map<string, { userId: string; email: string }[]>();
   for (const g of grants) {
     const list = grantsFor.get(g.file) ?? [];
     list.push({ userId: g.userId, email: g.user.email });
     grantsFor.set(g.file, list);
   }
+
+  // ── Filters (?system=SD&type=Expansions) ─────────────────────────────────
+  // The shelf a book is on: its folder's system, else its stored tag, else all.
+  const shelfOf = (file: string): RulebookSystem =>
+    entryFor.get(file)?.folderSystem ?? systemFor.get(file) ?? "BOTH";
+  const systemsPresent = SYSTEM_ORDER.filter((k) => entries.some((e) => shelfOf(e.file) === k));
+  // Unknown or stale values (a system with no books, a typo) are ignored.
+  const sysFilter = systemsPresent.find((k) => k === systemParam) ?? null;
+  const typeFilter = (LIBRARY_CATEGORIES as string[]).includes(typeParam ?? "")
+    ? (typeParam as RulebookCategory)
+    : null;
+  // Counts on each chip respect the OTHER filter, so they say what you'd get.
+  const bySys = sysFilter ? entries.filter((e) => shelfOf(e.file) === sysFilter) : entries;
+  const byType = typeFilter ? entries.filter((e) => e.category === typeFilter) : entries;
+  // Shown list: grouped by system (dashboard order), then the library order.
+  const files = entries
+    .filter((e) => (!sysFilter || shelfOf(e.file) === sysFilter) && (!typeFilter || e.category === typeFilter))
+    .map((e, i) => ({ e, i }))
+    .sort((a, b) => SYSTEM_ORDER.indexOf(shelfOf(a.e.file)) - SYSTEM_ORDER.indexOf(shelfOf(b.e.file)) || a.i - b.i)
+    .map(({ e }) => e.file);
+  const filtering = Boolean(sysFilter || typeFilter);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-10">
@@ -114,7 +166,54 @@ export default async function AdminRulebooksPage({
         </div>
       ) : null}
 
-      {files.length === 0 ? (
+      {entries.length ? (
+        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-full text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] sm:w-20">System</span>
+            <Chip href={filterHref(null, typeFilter)} on={!sysFilter} label="All" count={byType.length} />
+            {systemsPresent.map((k) => (
+              <Chip
+                key={k}
+                href={filterHref(k, typeFilter)}
+                on={sysFilter === k}
+                label={SYSTEM_LABEL[k]}
+                count={byType.filter((e) => shelfOf(e.file) === k).length}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-full text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] sm:w-20">Book type</span>
+            <Chip href={filterHref(sysFilter, null)} on={!typeFilter} label="All" count={bySys.length} />
+            {LIBRARY_CATEGORIES.map((c) => (
+              <Chip
+                key={c}
+                href={filterHref(sysFilter, c)}
+                on={typeFilter === c}
+                label={c}
+                count={bySys.filter((e) => e.category === c).length}
+              />
+            ))}
+          </div>
+          <div className="flex items-center justify-between border-t border-[var(--border)] pt-2 text-[11px] text-[var(--muted)]">
+            <span>
+              Showing {files.length} of {entries.length} {entries.length === 1 ? "book" : "books"}
+            </span>
+            {filtering ? (
+              <Link href="/admin/rulebooks" scroll={false} className="uppercase tracking-[0.12em] hover:text-[var(--gold)]">
+                Clear filters
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {entries.length > 0 && files.length === 0 ? (
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6 text-sm text-[var(--muted)]">
+          No {typeFilter ? typeFilter.toLowerCase() : "books"} on the{" "}
+          {sysFilter ? SYSTEM_LABEL[sysFilter] : "selected"} shelf.{" "}
+          <Link href="/admin/rulebooks" className="text-[var(--gold)] hover:underline">Clear filters</Link>
+        </div>
+      ) : files.length === 0 ? (
         <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6 text-sm text-[var(--muted)]">
           The Library is empty. Drop PDFs into{" "}
           <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">
@@ -128,7 +227,7 @@ export default async function AdminRulebooksPage({
             const everyone = everyoneFor.get(file) ?? false;
             const entry = entryFor.get(file);
             const folderSystem = entry?.folderSystem ?? null;
-            const system = folderSystem ?? systemFor.get(file) ?? "BOTH";
+            const system = shelfOf(file);
             const fileGrants = grantsFor.get(file) ?? [];
             return (
               <li
@@ -191,6 +290,8 @@ export default async function AdminRulebooksPage({
 
                   <form action={grantRulebookAccess} className="mt-2 flex gap-2">
                     <input type="hidden" name="file" value={file} />
+                    <input type="hidden" name="f_system" value={sysFilter ?? ""} />
+                    <input type="hidden" name="f_type" value={typeFilter ?? ""} />
                     <input
                       type="email"
                       name="email"

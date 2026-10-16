@@ -58,8 +58,14 @@ export async function grantRulebookAccess(formData: FormData): Promise<void> {
 
   const target = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (!target) {
-    // No account with that email — bounce back with a flag the page can show.
-    redirect(`/admin/rulebooks?nouser=${encodeURIComponent(email)}`);
+    // No account with that email — bounce back with a flag the page can show,
+    // keeping whatever system / book-type filters the admin had applied.
+    const back = new URLSearchParams({ nouser: email });
+    const fSystem = String(formData.get("f_system") ?? "");
+    const fType = String(formData.get("f_type") ?? "");
+    if (fSystem) back.set("system", fSystem);
+    if (fType) back.set("type", fType);
+    redirect(`/admin/rulebooks?${back.toString()}`);
   }
 
   await prisma.rulebookAccess.upsert({
