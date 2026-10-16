@@ -107,6 +107,24 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "dnd_character_sheet.html",
     keys: ["dnd_sheet"],
   },
+  "lotr-character": {
+    id: "lotr-character",
+    system: "LOTR",
+    systemName: "The Lord of the Rings",
+    kind: "character",
+    label: "Character Sheet",
+    file: "lotr_character_sheet.html",
+    keys: ["lotr_sheet"],
+  },
+  "lotr-session": {
+    id: "lotr-session",
+    system: "LOTR",
+    systemName: "The Lord of the Rings",
+    kind: "session",
+    label: "Adventure",
+    file: "lotr_session_prep_builder.html",
+    keys: ["lotr_session"],
+  },
   // The session-prep builders below are generated from the DCC one by
   // scripts/make-session-builders.mjs (same tool, re-themed + re-keyed).
   "ace-session": {
@@ -334,27 +352,9 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "vae_session_prep_builder.html",
     keys: ["vae_session"],
   },
-  "lotr-character": {
-    id: "lotr-character",
-    system: "LOTR",
-    systemName: "The Lord of the Rings",
-    kind: "character",
-    label: "Character Sheet",
-    file: "lotr_character_sheet.html",
-    keys: ["lotr_sheet"],
-  },
-  "lotr-session": {
-    id: "lotr-session",
-    system: "LOTR",
-    systemName: "The Lord of the Rings",
-    kind: "session",
-    label: "Adventure",
-    file: "lotr_session_prep_builder.html",
-    keys: ["lotr_session"],
-  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "yze-character", "yze-session", "twd-character", "twd-session", "myz-character", "myz-session", "vae-character", "vae-session", "lotr-character", "lotr-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "lotr-character", "lotr-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "yze-character", "yze-session", "twd-character", "twd-session", "myz-character", "myz-session", "vae-character", "vae-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

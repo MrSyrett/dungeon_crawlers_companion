@@ -20,6 +20,11 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.
   { key: "DND", name: "Dungeons & Dragons", short: "D&D", accent: "var(--dnd)" },
+  // The Lord of the Rings Roleplaying (Free League) — The One Ring converted to
+  // 5E: six heroic cultures and six callings capped at 10th level, no spellcasting,
+  // Shadow points & Shadow Paths, the shared Fellowship pool, Journeys, Councils
+  // and the Fellowship Phase. Mechanics adapted; descriptive text is original.
+  { key: "LOTR", name: "The Lord of the Rings", short: "LotR", accent: "var(--lotr)" },
   // Accent is the covers' hot magenta (--dcc), not the app's brick --red.
   { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--dcc)" },
   // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
@@ -61,11 +66,6 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // D6 dice pools, NO stress dice, health modeled by Conditions (three physical +
   // three mental), the Fear test, and a Gothic investigate-and-banish campaign loop.
   { key: "VAE", name: "Vaesen", short: "Vaesen", accent: "var(--vae)" },
-  // The Lord of the Rings Roleplaying (Free League) — The One Ring converted to
-  // 5E: six heroic cultures and six callings capped at 10th level, no spellcasting,
-  // Shadow points & Shadow Paths, the shared Fellowship pool, Journeys, Councils
-  // and the Fellowship Phase. Mechanics adapted; descriptive text is original.
-  { key: "LOTR", name: "The Lord of the Rings", short: "LotR", accent: "var(--lotr)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

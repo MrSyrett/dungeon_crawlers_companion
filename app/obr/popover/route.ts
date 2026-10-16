@@ -275,6 +275,7 @@ const PAGE = String.raw`<!doctype html>
             { key: "NIM", name: "Nimble", cls: "nim" },
             { key: "SW", name: "Star Wars", cls: "sw" },
             { key: "DND", name: "D&D", cls: "dnd" },
+            { key: "LOTR", name: "The Lord of the Rings", cls: "lotr" },
             { key: "D62E", name: "D6 System 2e", cls: "d62e" },
             { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" },
             { key: "CO", name: "Candela Obscura", cls: "co" },
@@ -284,8 +285,7 @@ const PAGE = String.raw`<!doctype html>
             { key: "YZE", name: "Alien RPG", cls: "yze" },
             { key: "TWD", name: "The Walking Dead", cls: "twd" },
             { key: "MYZ", name: "Mutant: Year Zero", cls: "myz" },
-            { key: "VAE", name: "Vaesen", cls: "vae" },
-            { key: "LOTR", name: "The Lord of the Rings", cls: "lotr" }
+            { key: "VAE", name: "Vaesen", cls: "vae" }
           ];
           var seen = {};
           var html = "";
