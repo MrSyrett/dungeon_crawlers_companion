@@ -155,7 +155,7 @@ export default function RulebookGrid({
           e.preventDefault();
           pickType(t);
         }}
-        aria-pressed={on}
+        aria-current={on ? "true" : undefined}
         className={
           "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors " +
           (on

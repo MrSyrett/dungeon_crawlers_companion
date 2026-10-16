@@ -1771,6 +1771,61 @@ body {
    "Crawler Carl" (split into .tn-1 / .tn-2 by NAME_PARTS in app/page.tsx). */
 .roster-sys[data-sys="DCC"] .tn-1 { color: var(--dcc-gold); }
 .roster-sys[data-sys="DCC"] .tn-2 { color: var(--dcc-ink); }
+/* ===========================================================================
+   NAVBAR SYSTEM TITLE — the selected game's name beside the logo (SiteNav).
+   It carries data-sys, so it reads the same identity tokens as the game tiles
+   and the home rosters (the [data-sys] map above): --tile-face for the face and
+   --tile-accent / --tile-ink for the colour, with the same per-system wordmark
+   fixes. It sits inside .dcc-chrome, which resets the PAGE's theme faces, but
+   these tokens come from the [data-sys] map on the element itself, so the bar
+   keeps its own look while the title wears the game's. =========================================================================== */
+.nav-sys-title {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--tile-ink, var(--tile-accent, var(--text)));
+  /* Room for descenders/swashes some display faces draw outside the line box. */
+  padding: 0.1em 0.1em 0.12em;
+}
+@media (min-width: 640px) { .nav-sys-title { font-size: 1.2rem; } }
+/* Phone width: a long name ("Justice League Unlimited") wraps to two lines
+   rather than being cut off. */
+@media (max-width: 639.98px) {
+  .nav-sys-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 0.95rem;
+    line-height: 1.05;
+  }
+}
+.nav-sys-title[data-sys="SW"] { text-transform: lowercase; }
+.nav-sys-title[data-sys="MMRPG"] { text-transform: uppercase; }
+.nav-sys-title[data-sys="TWD"] { font-family: "Dead Kansas", var(--font-oswald), ui-sans-serif, system-ui, sans-serif; font-weight: 400; color: var(--twd-bone); }
+.nav-sys-title[data-sys="DCC"] .tn-1 { color: var(--dcc-gold); }
+.nav-sys-title[data-sys="DCC"] .tn-2 { color: var(--dcc-ink); }
+.nav-sys-title[data-sys="GB"] {
+  text-transform: none;
+  color: #ffffff;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.9), 0 0 7px rgba(255, 255, 255, 0.45);
+}
+@supports (-webkit-text-stroke: 1px #fff) {
+  .nav-sys-title[data-sys="GB"] {
+    color: var(--panel);
+    -webkit-text-stroke: 0.04em #ffffff;
+    paint-order: stroke fill;
+  }
+}
+
 .roster-cards {
   list-style: none;
   margin: 0;

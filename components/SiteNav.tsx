@@ -30,9 +30,14 @@ import {
 
 // The single site-wide top navbar.
 //
-//   [logo] [System ▾]  Characters · Adventures · Compendium ▾ · Homebrew ·
-//                      OBR · Token Maker · Map Maker · Campaigns · GM Screen
-//                                                            … [Admin] [account]
+//   [logo] System Title  Games ▾ · Characters · Adventures · Campaigns ·
+//                        Compendium ▾ · Homebrew · OBR · Token Maker · Map Maker ·
+//                        GM Screen                           … [Admin] [account]
+//
+// The selected game's name sits beside the logo in that game's own face and
+// colour (.nav-sys-title in app/globals.css, the same identity tokens as the
+// home page's game tiles); "Games" — styled like every other nav item — opens
+// the list of games to switch to.
 //
 // System selection is client state (systemStore, localStorage) shared with the
 // dashboard; the Characters/Adventures tabs drive the dashboard's view store.
@@ -72,6 +77,12 @@ function isChromePath(pathname: string): boolean {
   if (pathname === "/") return true;
   return CHROME_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
+
+// Two-colour wordmarks, as on the home page's game tiles (NAME_PARTS in
+// components/HomeSystems.tsx): the parts must spell the system's name exactly.
+const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = {
+  DCC: ["Dungeon", "Crawler Carl"],
+};
 
 function Caret() {
   return (
@@ -222,24 +233,43 @@ export default function SiteNav({
           <Image src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width={36} height={36} priority className="h-8 w-8" />
         </Link>
 
-        {/* System selector */}
+        {/* The selected game's title, in its own face and colour → its dashboard */}
+        <Link
+          href="/dashboard"
+          onClick={() => { if (pathSystem && pathSystem !== storedSystem) setSystem(effective); }}
+          className="flex min-w-0 shrink items-center"
+          title={`${sys.name} — characters and adventures`}
+        >
+          <span data-sys={sys.key} className="nav-sys-title">
+            {NAME_PARTS[sys.key] ? (
+              <>
+                <span className="tn-1">{NAME_PARTS[sys.key]![0]}</span>{" "}
+                <span className="tn-2">{NAME_PARTS[sys.key]![1]}</span>
+              </>
+            ) : (
+              sys.name
+            )}
+          </span>
+        </Link>
+
+        {/* Games — the system switcher, styled like the other nav items. Kept
+            outside the desktop group so it stays on the bar at phone width too. */}
         <div className="relative shrink-0">
           <button
             onClick={() => setMenu(menu === "system" ? null : "system")}
             aria-haspopup="true"
             aria-expanded={menu === "system"}
-            className="flex items-center gap-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1.5 text-[11px] font-bold uppercase tracking-[0.03em]"
-            style={{ color: sys.accent }}
+            className={`${item} ${menu === "system" ? on : off} flex items-center gap-1`}
           >
-            <span>{sys.name}</span>
-            <Caret />
+            Games <Caret />
           </button>
           {menu === "system" ? (
-            <div className="absolute left-0 top-full mt-1 max-h-[70vh] w-56 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 shadow-xl">
+            <div className="absolute left-0 top-full mt-1 max-h-[70vh] w-56 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 shadow-xl max-[420px]:-left-16">
               {list.map((s) => (
                 <button
                   key={s.key}
                   onClick={() => chooseSystem(s.key)}
+                  aria-current={s.key === effective ? "true" : undefined}
                   className={`block w-full rounded px-3 py-2 text-left text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors hover:bg-[var(--panel-2)] ${s.key === effective ? "bg-[var(--panel-2)]" : "text-[var(--muted)]"}`}
                   style={s.key === effective ? { color: s.accent } : undefined}
                 >
@@ -318,7 +348,7 @@ export default function SiteNav({
             that has nine links to fit. */}
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {isAdmin ? (
-            <Link href="/admin/users" className="rounded border border-[var(--accent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
+            <Link href="/admin/users" className="hidden rounded border border-[var(--accent)] px-2.5 py-1 text-[10px] sm:inline-block font-semibold uppercase tracking-[0.06em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
               Admin
             </Link>
           ) : null}
@@ -344,6 +374,12 @@ export default function SiteNav({
       {/* Mobile panel */}
       {menu === "mobile" ? (
         <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 min-[1152px]:hidden">
+          {/* At phone width the Admin button lives here, so the bar has room for the game's title. */}
+          {isAdmin ? (
+            <Link href="/admin/users" onClick={() => setMenu(null)} className="mb-3 block rounded border border-[var(--accent)] px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] sm:hidden">
+              Admin
+            </Link>
+          ) : null}
           <div className="flex gap-2">
             <button className={`${item} flex-1 ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
             <button className={`${item} flex-1 ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>
