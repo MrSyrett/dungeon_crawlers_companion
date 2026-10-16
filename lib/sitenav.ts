@@ -104,6 +104,48 @@ function navData(hiddenKeys: SystemKey[] = [], keep: SystemKey | null = null) {
   return { systems, comp, brew, tools: TOOLS_NAV.map((t) => ({ h: t.href, l: t.label })) };
 }
 
+/** The game's title beside the logo, in that game's face and colour — the same
+ *  identity the Next navbar draws from app/globals.css (.nav-sys-title over the
+ *  [data-sys] tile tokens). Those tokens use next/font variables, which a
+ *  standalone document doesn't have, so the faces are named here by the literal
+ *  families public/tokens.css self-hosts. Keep the two in step. */
+const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
+  SD: { f: '"JSL Blackletter"', c: "var(--text)" },
+  ICRPG: { f: '"Permanent Marker"', c: "var(--icrpg)" },
+  NIM: { f: '"Fraunces"', c: "var(--text)" },
+  DND: { f: '"DnDC","Cinzel"', c: "var(--gold-ink)" },
+  LOTR: { f: '"Ringbearer","EB Garamond"', c: "var(--lotr-ink)" },
+  DCC: { f: '"Anton"', c: "var(--dcc-gold)" },
+  KOB: { f: '"Dreadful"', c: "var(--kob)" },
+  CO: { f: '"Cormorant Garamond"', c: "var(--candela-gold)" },
+  MMRPG: { f: '"Marvel","Oswald"', c: "var(--text)", x: "text-transform:uppercase" },
+  JLU: { f: '"Russo One"', c: "var(--jlu-gold)" },
+  GB: { f: '"Ghostbusters","Anton"', c: "#ffffff", x: "text-shadow:0 0 2px rgba(255,255,255,.9),0 0 7px rgba(255,255,255,.45)" },
+  SW: { f: '"Star Jedi","Archivo Black"', c: "var(--sw)", x: "text-transform:lowercase" },
+  ACE: { f: '"Lilita One"', c: "var(--ace-yellow)" },
+  D62E: { f: '"Saira Condensed"', c: "var(--d62e)" },
+  YZE: { f: '"Archivo Narrow"', c: "var(--yze)" },
+  TWD: { f: '"Dead Kansas","Oswald"', c: "var(--twd-bone)", x: "font-weight:400" },
+  MYZ: { f: '"Anton"', c: "var(--myz)" },
+  VAE: { f: '"Fraunces"', c: "var(--vae)" },
+};
+/** Two-colour wordmarks (SiteNav's NAME_PARTS). */
+const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = { DCC: ["Dungeon", "Crawler Carl"] };
+
+function titleCss(): string {
+  const base = `#dd-nav .nav-sys-title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:17.6px;line-height:1.2;letter-spacing:.02em;padding:.1em .1em .12em;text-transform:none;color:var(--text,#e9edf2)}
+@media (min-width:640px){#dd-nav .nav-sys-title{font-size:19.2px}}
+#dd-nav .nav-sys-title.is-wrap{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow-wrap:anywhere;line-height:1.02}
+#dd-nav .nav-sys-title[data-sys="DCC"] .tn-1{color:var(--dcc-gold)}
+#dd-nav .nav-sys-title[data-sys="DCC"] .tn-2{color:var(--dcc-ink)}`;
+  const per = (Object.keys(TITLE) as SystemKey[])
+    .map((k) => `#dd-nav .nav-sys-title[data-sys="${k}"]{font-family:${TITLE[k].f},"Geist",ui-sans-serif,system-ui,sans-serif !important;color:${TITLE[k].c}${TITLE[k].x ? ";" + TITLE[k].x : ""}}`)
+    .join("\n");
+  // Last, so it beats GB's plain-white line above where text-stroke exists.
+  const gb = `@supports (-webkit-text-stroke:1px #fff){#dd-nav .nav-sys-title[data-sys="GB"]{color:var(--panel);-webkit-text-stroke:.04em #ffffff;paint-order:stroke fill}}`;
+  return base + "\n" + per + "\n" + gb;
+}
+
 const CSS = `
 :root{--dd-bar-h:0px}
 body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
@@ -135,18 +177,29 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 /* No fixed height: the row is as tall as its tallest control, exactly as the
    Next bar is (py-2 + a 32px logo / 36px burger). The JS measures what that
    came to and republishes it as --dd-bar-h, so nothing has to guess. */
-#dd-nav .nav-row{position:relative;z-index:10;display:flex;align-items:center;gap:6px;width:100%;max-width:80rem;margin:0 auto;padding:8px 12px}
+/* THREE ZONES, as SiteNav: logo + game title left, the buttons centred, status +
+   Admin + account right. Below LINKS_AT it is a plain flex row (burger, logo,
+   title … account); at LINKS_AT it becomes a grid whose equal 1fr side columns
+   keep the centre group exactly centred whatever the title's width. */
+#dd-nav .nav-row{position:relative;z-index:10;display:flex;align-items:center;gap:6px;width:100%;max-width:1600px;margin:0 auto;padding:8px 12px}
+#dd-nav .nav-left{display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0}
+#dd-nav .nav-titlelink{display:flex;align-items:center;flex:1 1 auto;min-width:0}
 @media (min-width:640px){#dd-nav .nav-row{padding:8px 20px}}
 #dd-nav .nav-logo{display:flex;align-items:center;flex:0 0 auto}
 #dd-nav .nav-logo img{width:32px;height:32px;display:block}
 #dd-nav .nav-burger{display:flex;flex:0 0 auto;align-items:center;padding:8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:inherit;cursor:pointer}
-#dd-nav .nav-sysbtn{display:flex;align-items:center;gap:4px;flex:0 0 auto;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);padding:6px 8px;font-size:11px;font-weight:700;line-height:1.5;letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
 #dd-nav .nav-links{display:none;flex:0 0 auto;flex-wrap:nowrap;align-items:center;gap:1px}
 #dd-nav .nav-item{border-radius:4px;padding:6px;font-size:11px;font-weight:600;line-height:1.5;text-transform:uppercase;color:var(--muted,#8d96a3);background:transparent;border:0;cursor:pointer;white-space:nowrap;transition:color .15s,background-color .15s}
 #dd-nav .nav-item:hover{color:var(--text,#e9edf2)}
 #dd-nav .nav-item.on{background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2)}
 #dd-nav .nav-item.has-caret{display:flex;align-items:center;gap:4px}
-#dd-nav .nav-right{margin-left:auto;display:flex;flex:0 0 auto;align-items:center;gap:8px}
+#dd-nav .nav-right{margin-left:auto;display:flex;flex:0 0 auto;align-items:center;justify-content:flex-end;gap:8px}
+#dd-nav .nav-item.is-off{opacity:.4;cursor:default}
+#dd-nav .nav-item.is-off:hover{color:var(--muted,#8d96a3)}
+#dd-nav .nav-panel .nav-games{display:block;margin-bottom:12px;border:1px solid var(--border,#2b3038);text-align:center}
+#dd-nav .nav-panel .nav-admin-m{display:block;margin-bottom:8px;text-align:center;padding:8px 12px;font-size:11px}
+@media (min-width:640px){#dd-nav .nav-panel .nav-admin-m{display:none}}
+@media (max-width:639.98px){#dd-nav .nav-right .nav-admin{display:none}}
 #dd-nav #dd-status{flex:0 0 auto;font-size:10px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);padding:4px 8px;border:1px solid transparent;border-radius:4px;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
 #dd-nav #dd-status:empty{display:none}
 #dd-nav #dd-status.is-saving{color:var(--muted,#8d96a3)}
@@ -165,14 +218,7 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav .nav-pop a:hover,#dd-nav .nav-pop button:hover{background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2)}
 #dd-nav .nav-pop button.on{background:var(--panel-2,#1c1f24)}
 #dd-nav .nav-wrap{position:relative;flex:0 0 auto}
-/* On a phone the system chip is the one control that can be arbitrarily wide
-   ("Justice League Unlimited"), and with every control shrink-0 it pushed the
-   row past the viewport and gave the page a horizontal scrollbar. Only the
-   chip in the top row may shrink, and it truncates rather than wrapping. */
-#dd-nav .nav-row > .nav-wrap{flex:0 1 auto;min-width:0}
-#dd-nav .nav-sysbtn{max-width:100%;min-width:0}
-#dd-nav .nav-sysbtn > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-#dd-nav .nav-sysbtn > svg,#dd-nav .nav-item > svg{flex:0 0 auto}
+#dd-nav .nav-item > svg{flex:0 0 auto}
 #dd-nav .nav-backdrop{position:fixed;inset:0;z-index:0;background:transparent;border:0;cursor:default}
 #dd-nav .nav-panel{position:relative;z-index:10;border-top:1px solid var(--border,#2b3038);background:var(--panel,#14161a);padding:12px}
 #dd-nav .nav-panel[hidden]{display:none}
@@ -187,10 +233,13 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav .nav-grid a,#dd-nav .nav-grid button{border:1px solid var(--border,#2b3038);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);background:transparent;text-align:left;cursor:pointer}
 #dd-nav .nav-grid a:hover,#dd-nav .nav-grid button:hover{color:var(--text,#e9edf2)}
 @media (min-width:${LINKS_AT}px){
+  #dd-nav .nav-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);column-gap:16px}
+  #dd-nav .nav-left{gap:10px}
   #dd-nav .nav-links{display:flex}
   #dd-nav .nav-burger{display:none}
   #dd-nav .nav-panel{display:none!important}
 }
+${titleCss()}
 `;
 
 /** Sized so a sheet's own full-height furniture leaves room for the bar.
@@ -237,13 +286,16 @@ export function siteNav(opts: SiteNavOpts): string {
 
   const markup = `<nav id="dd-nav" class="dcc-chrome" data-sys="${esc(opts.system ?? "")}">
 <div class="nav-row">
-  <button class="nav-burger" type="button" id="dd-nav-burger" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"></path></svg></button>
-  <a class="nav-logo" href="/" title="Dungeon Crawler's Companion"><img src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width="32" height="32"></a>
-  <div class="nav-wrap">
-    <button class="nav-sysbtn" type="button" id="dd-nav-sysbtn" aria-haspopup="true" aria-expanded="false"><span id="dd-nav-sysname">&nbsp;</span>${CARET}</button>
-    <div class="nav-pop" id="dd-nav-syspop" hidden></div>
+  <div class="nav-left">
+    <button class="nav-burger" type="button" id="dd-nav-burger" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"></path></svg></button>
+    <a class="nav-logo" href="/" title="Dungeon Crawler's Companion"><img src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width="32" height="32"></a>
+    <a class="nav-titlelink" id="dd-nav-titlelink" href="/dashboard"><span class="nav-sys-title" id="dd-nav-title">&nbsp;</span></a>
   </div>
   <div class="nav-links">
+    <div class="nav-wrap">
+      <button class="nav-item has-caret" type="button" id="dd-nav-sysbtn" aria-haspopup="true" aria-expanded="false">Games ${CARET}</button>
+      <div class="nav-pop" id="dd-nav-syspop" hidden></div>
+    </div>
     <button class="nav-item" type="button" data-view="characters">Characters</button>
     <button class="nav-item" type="button" data-view="adventures">Adventures</button>
     <!-- Per-system, like the two tabs before it. A real route, so an anchor. -->
@@ -252,7 +304,7 @@ export function siteNav(opts: SiteNavOpts): string {
       <button class="nav-item has-caret" type="button" id="dd-nav-compbtn" aria-haspopup="true" aria-expanded="false">Compendium ${CARET}</button>
       <div class="nav-pop" id="dd-nav-comppop" hidden></div>
     </div>
-    <a class="nav-item" id="dd-nav-brew" href="/homebrew" hidden>Homebrew</a>
+    <a class="nav-item" id="dd-nav-brew" href="/homebrew">Homebrew</a>
     ${tools}
   </div>
   <div class="nav-right">
@@ -262,6 +314,8 @@ export function siteNav(opts: SiteNavOpts): string {
   </div>
 </div>
 <div class="nav-panel" id="dd-nav-panel" hidden>
+  ${opts.isAdmin ? `<a class="nav-admin nav-admin-m" href="/admin/users">Admin</a>` : ""}
+  <a class="nav-item nav-games" href="/#home-systems">Games</a>
   <div class="nav-tabs"><button class="nav-item" type="button" data-view="characters">Characters</button><button class="nav-item" type="button" data-view="adventures">Adventures</button><a class="nav-item" href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a></div>
   <h4>Compendium</h4>
   <div class="nav-grid" id="dd-nav-panelcomp"></div>
@@ -284,7 +338,9 @@ var cur=docSys||stored()||D.systems[0].k;
 function entry(k){for(var i=0;i<D.systems.length;i++)if(D.systems[i].k===k)return D.systems[i];return D.systems[0];}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 
-var sysName=document.getElementById("dd-nav-sysname");
+var title=document.getElementById("dd-nav-title");
+var titleLink=document.getElementById("dd-nav-titlelink");
+var PARTS=${JSON.stringify(NAME_PARTS)};
 var sysBtn=document.getElementById("dd-nav-sysbtn");
 var sysPop=document.getElementById("dd-nav-syspop");
 var compBtn=document.getElementById("dd-nav-compbtn");
@@ -294,7 +350,10 @@ var brew=document.getElementById("dd-nav-brew");
 
 function paint(){
   var e=entry(cur);
-  sysName.textContent=e.n; sysBtn.style.color=e.a;
+  title.setAttribute("data-sys",e.k);
+  var pt=PARTS[e.k];
+  if(pt){title.innerHTML='<span class="tn-1">'+esc(pt[0])+'</span> <span class="tn-2">'+esc(pt[1])+'</span>';}else{title.textContent=e.n;}
+  titleLink.title=e.n+" — characters and adventures";
   sysPop.innerHTML=D.systems.map(function(s){
     return '<button type="button" data-k="'+s.k+'" class="'+(s.k===cur?"on":"")+'"'+(s.k===cur?' style="color:'+s.a+'"':'')+'>'+esc(s.n)+'</button>';
   }).join("");
@@ -302,11 +361,27 @@ function paint(){
   compPop.innerHTML=links.map(function(l){return '<a href="'+esc(l.h)+'">'+esc(l.l)+'</a>';}).join("");
   panelComp.innerHTML=links.map(function(l){return '<a href="'+esc(l.h)+'">'+esc(l.l)+'</a>';}).join("");
   var hb=D.brew[cur];
-  if(hb){brew.href=hb;brew.hidden=false;panelComp.insertAdjacentHTML("beforeend",'<a href="'+esc(hb)+'">Homebrew</a>');}
-  else {brew.hidden=true;}
+  // Homebrew stays in the row so nothing shifts; a game with no hub shows it dimmed.
+  if(hb){brew.href=hb;brew.classList.remove("is-off");brew.removeAttribute("aria-disabled");brew.removeAttribute("title");panelComp.insertAdjacentHTML("beforeend",'<a href="'+esc(hb)+'">Homebrew</a>');}
+  else {brew.removeAttribute("href");brew.classList.add("is-off");brew.setAttribute("aria-disabled","true");brew.title="No homebrew hub for "+e.n+" yet";}
   // The selected system dresses the page, exactly as SiteNav publishes it.
   try{var r=document.documentElement;r.style.setProperty("--sys",e.a);if(!docSys)r.dataset.system=e.k;}catch(e2){}
+  fitTitle();
 }
+// Fit the title to its zone, as SiteNav does: one line, stepping down to a
+// readable floor; then two compact lines that still fit the bar's height.
+function over(size){return title.scrollWidth>title.clientWidth||title.scrollHeight>title.clientHeight+size*0.45;}
+function fitTitle(){
+  title.classList.remove("is-wrap");title.style.fontSize="";
+  var size=parseFloat(getComputedStyle(title).fontSize)||18,g=0;
+  while(over(size)&&size>14&&g++<40){size-=0.5;title.style.fontSize=size+"px";}
+  if(!over(size))return;
+  title.classList.add("is-wrap");size=15;title.style.fontSize=size+"px";g=0;
+  while(over(size)&&size>10&&g++<40){size-=0.5;title.style.fontSize=size+"px";}
+}
+var fitRaf=0;function refit(){cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(fitTitle);}
+window.addEventListener("resize",refit);
+try{document.fonts.ready.then(fitTitle);document.fonts.addEventListener("loadingdone",refit);}catch(e2){}
 paint();
 
 // --dd-bar-h is the single source of truth for the room the bar occupies, and

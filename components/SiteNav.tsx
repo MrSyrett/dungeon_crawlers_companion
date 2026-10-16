@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -30,9 +30,9 @@ import {
 
 // The single site-wide top navbar.
 //
-//   [logo] System Title  Games ▾ · Characters · Adventures · Campaigns ·
-//                        Compendium ▾ · Homebrew · OBR · Token Maker · Map Maker ·
-//                        GM Screen                           … [Admin] [account]
+//   [logo] Game Title   Games ▾ · Characters · Adventures · Campaigns ·   [Admin] [account]
+//                       Compendium ▾ · Homebrew · <tools>
+//   └── left zone ──┘   └────────── centred, fixed ──────────┘   └── right zone ──┘
 //
 // The selected game's name sits beside the logo in that game's own face and
 // colour (.nav-sys-title in app/globals.css, the same identity tokens as the
@@ -83,6 +83,9 @@ function isChromePath(pathname: string): boolean {
 const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = {
   DCC: ["Dungeon", "Crawler Carl"],
 };
+
+// useLayoutEffect warns during server rendering; this runs it only in the browser.
+const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 function Caret() {
   return (
@@ -137,6 +140,47 @@ export default function SiteNav({
   useEffect(() => { setMenu(null); }, [pathname]);
 
   const sys = list.find((s) => s.key === effective) ?? list[0];
+
+  // Fit the game's title to its zone. First on ONE line, stepping down from the
+  // stylesheet's size to a readable floor; a name still too long then wraps to
+  // TWO lines (.is-wrap) starting from a size whose two lines fit the bar's
+  // height, so the bar never grows. Re-run when the game or the window changes.
+  const titleRef = useRef<HTMLSpanElement>(null);
+  useIsoLayoutEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const over = (size: number) =>
+      el.scrollWidth > el.clientWidth ||
+      // Display faces draw outside their line box; only a real third line counts.
+      el.scrollHeight > el.clientHeight + size * 0.45;
+    const fit = () => {
+      el.classList.remove("is-wrap");
+      el.style.fontSize = "";
+      let size = parseFloat(getComputedStyle(el).fontSize) || 18;
+      const floor = 14;
+      let guard = 0;
+      while (over(size) && size > floor && guard++ < 40) { size -= 0.5; el.style.fontSize = size + "px"; }
+      if (!over(size)) return;
+      el.classList.add("is-wrap");
+      size = 15;
+      el.style.fontSize = size + "px";
+      guard = 0;
+      while (over(size) && size > 10 && guard++ < 40) { size -= 0.5; el.style.fontSize = size + "px"; }
+    };
+    fit();
+    let raf = 0;
+    const onResize = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); };
+    window.addEventListener("resize", onResize);
+    // Web fonts arriving late change the width — refit whenever one lands (the
+    // game's display face is often fetched only once this title asks for it).
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    try { fonts?.ready.then(fit); fonts?.addEventListener("loadingdone", onResize); } catch { /* no font loading API */ }
+    return () => {
+      window.removeEventListener("resize", onResize);
+      try { fonts?.removeEventListener("loadingdone", onResize); } catch { /* ignore */ }
+      cancelAnimationFrame(raf);
+    };
+  }, [sys.key]);
 
   // The selected system "dresses" the whole app: publish its accent as --sys on
   // <html> (plus data-system) so any page — dashboard heading, spinner, chips,
@@ -199,12 +243,13 @@ export default function SiteNav({
     if (!onDashboard) router.push("/dashboard");
   }
 
-  // Measured, not guessed: with Geist (not condensed, as Barlow Condensed was)
-  // nine uppercase links plus the logo, the full-name system chip and the
-  // account icon come to 1119px at "Justice League Unlimited" — so the row is
-  // gated at 1152px rather than lg/1024, and any more size, padding or
-  // tracking pushes it past that too. A system name longer than that one is
-  // what would wrap it next.
+  // THREE FIXED ZONES at desktop width (≥1152px): logo + game title on the left,
+  // the nav buttons centred, Admin + account on the right. A CSS grid with two
+  // equal 1fr side columns keeps the middle group exactly centred whatever the
+  // title's width, so the buttons never move when the game changes. Homebrew is
+  // always present for the same reason (dimmed for a game that has no hub).
+  // The title shrinks to fit its zone (fitTitle below) rather than pushing on
+  // the buttons. Below 1152px the buttons live in the ☰ panel.
   const item = "rounded px-1.5 py-1.5 text-[11px] font-semibold uppercase transition-colors";
   const on = "bg-[var(--panel-2)] text-[var(--text)]";
   const off = "text-[var(--muted)] hover:text-[var(--text)]";
@@ -213,75 +258,73 @@ export default function SiteNav({
     <nav className="dcc-chrome sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--panel)]">
       {menu ? <button aria-hidden="true" tabIndex={-1} className="fixed inset-0 z-0 cursor-default" onClick={() => setMenu(null)} /> : null}
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center gap-x-1.5 gap-y-1 px-3 py-2 sm:px-5">
-        {/* Mobile hamburger — left of the logo, reveals the nav links panel */}
-        <button
-          onClick={() => setMenu(menu === "mobile" ? null : "mobile")}
-          aria-label="Menu"
-          aria-expanded={menu === "mobile"}
-          className="flex shrink-0 items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 min-[1152px]:hidden"
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-            <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
-          </svg>
-        </button>
-
-        {/* Logo → home */}
-        {/* The mark alone — no wordmark. The title attribute carries the name
-            for anyone who hovers, and the alt text for screen readers. */}
-        <Link href="/" className="flex shrink-0 items-center" title="Dungeon Crawler's Companion">
-          <Image src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width={36} height={36} priority className="h-8 w-8" />
-        </Link>
-
-        {/* The selected game's title, in its own face and colour → its dashboard */}
-        <Link
-          href="/dashboard"
-          onClick={() => { if (pathSystem && pathSystem !== storedSystem) setSystem(effective); }}
-          className="flex min-w-0 shrink items-center"
-          title={`${sys.name} — characters and adventures`}
-        >
-          <span data-sys={sys.key} className="nav-sys-title">
-            {NAME_PARTS[sys.key] ? (
-              <>
-                <span className="tn-1">{NAME_PARTS[sys.key]![0]}</span>{" "}
-                <span className="tn-2">{NAME_PARTS[sys.key]![1]}</span>
-              </>
-            ) : (
-              sys.name
-            )}
-          </span>
-        </Link>
-
-        {/* Games — the system switcher, styled like the other nav items. Kept
-            outside the desktop group so it stays on the bar at phone width too. */}
-        <div className="relative shrink-0">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1600px] items-center gap-x-1.5 px-3 py-2 sm:px-5 min-[1152px]:grid min-[1152px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] min-[1152px]:gap-x-4">
+        {/* LEFT: hamburger (narrow only), logo, the game's title */}
+        <div className="flex min-w-0 flex-1 items-center gap-x-1.5 min-[1152px]:gap-x-2.5">
           <button
-            onClick={() => setMenu(menu === "system" ? null : "system")}
-            aria-haspopup="true"
-            aria-expanded={menu === "system"}
-            className={`${item} ${menu === "system" ? on : off} flex items-center gap-1`}
+            onClick={() => setMenu(menu === "mobile" ? null : "mobile")}
+            aria-label="Menu"
+            aria-expanded={menu === "mobile"}
+            className="flex shrink-0 items-center rounded border border-[var(--border)] bg-[var(--panel-2)] p-2 min-[1152px]:hidden"
           >
-            Games <Caret />
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
+            </svg>
           </button>
-          {menu === "system" ? (
-            <div className="absolute left-0 top-full mt-1 max-h-[70vh] w-56 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 shadow-xl max-[420px]:-left-16">
-              {list.map((s) => (
-                <button
-                  key={s.key}
-                  onClick={() => chooseSystem(s.key)}
-                  aria-current={s.key === effective ? "true" : undefined}
-                  className={`block w-full rounded px-3 py-2 text-left text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors hover:bg-[var(--panel-2)] ${s.key === effective ? "bg-[var(--panel-2)]" : "text-[var(--muted)]"}`}
-                  style={s.key === effective ? { color: s.accent } : undefined}
-                >
-                  {s.name}
-                </button>
-              ))}
-            </div>
-          ) : null}
+
+          {/* The mark alone — the title beside it names the game. */}
+          <Link href="/" className="flex shrink-0 items-center" title="Dungeon Crawler's Companion">
+            <Image src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width={36} height={36} priority className="h-8 w-8" />
+          </Link>
+
+          {/* The selected game's title, in its own face and colour → its dashboard */}
+          <Link
+            href="/dashboard"
+            onClick={() => { if (pathSystem && pathSystem !== storedSystem) setSystem(effective); }}
+            className="flex min-w-0 flex-1 items-center"
+            title={`${sys.name} — characters and adventures`}
+          >
+            <span ref={titleRef} data-sys={sys.key} className="nav-sys-title">
+              {NAME_PARTS[sys.key] ? (
+                <>
+                  <span className="tn-1">{NAME_PARTS[sys.key]![0]}</span>{" "}
+                  <span className="tn-2">{NAME_PARTS[sys.key]![1]}</span>
+                </>
+              ) : (
+                sys.name
+              )}
+            </span>
+          </Link>
         </div>
 
-        {/* Left nav group (desktop): tabs + Compendium + Homebrew + Tools */}
-        <div className="hidden min-w-0 flex-wrap items-center gap-px min-[1152px]:flex">
+        {/* CENTRE (desktop): Games ▾ + the nav buttons, a fixed set in a fixed order */}
+        <div className="hidden items-center gap-px min-[1152px]:flex">
+          <div className="relative">
+            <button
+              onClick={() => setMenu(menu === "system" ? null : "system")}
+              aria-haspopup="true"
+              aria-expanded={menu === "system"}
+              className={`${item} ${menu === "system" ? on : off} flex items-center gap-1`}
+            >
+              Games <Caret />
+            </button>
+            {menu === "system" ? (
+              <div className="absolute left-0 top-full mt-1 max-h-[70vh] w-56 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 shadow-xl">
+                {list.map((s) => (
+                  <button
+                    key={s.key}
+                    onClick={() => chooseSystem(s.key)}
+                    aria-current={s.key === effective ? "true" : undefined}
+                    className={`block w-full rounded px-3 py-2 text-left text-[13px] font-semibold uppercase tracking-[0.08em] transition-colors hover:bg-[var(--panel-2)] ${s.key === effective ? "bg-[var(--panel-2)]" : "text-[var(--muted)]"}`}
+                    style={s.key === effective ? { color: s.accent } : undefined}
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
           <button className={`${item} ${onDashboard && view === "characters" ? on : off}`} onClick={() => openTab("characters")}>
             Characters
           </button>
@@ -299,7 +342,7 @@ export default function SiteNav({
               onClick={() => setMenu(menu === "compendium" ? null : "compendium")}
               aria-haspopup="true"
               aria-expanded={menu === "compendium"}
-              className={`${item} ${off} flex items-center gap-1`}
+              className={`${item} ${menu === "compendium" ? on : off} flex items-center gap-1`}
             >
               Compendium <Caret />
             </button>
@@ -319,11 +362,16 @@ export default function SiteNav({
             ) : null}
           </div>
 
+          {/* Always in the row so nothing shifts; a game with no hub shows it dimmed. */}
           {homebrewHref ? (
             <Link href={homebrewHref} className={`${item} ${pathname === homebrewHref ? on : off}`}>
               Homebrew
             </Link>
-          ) : null}
+          ) : (
+            <span aria-disabled="true" title={`No homebrew hub for ${sys.name} yet`} className={`${item} cursor-default text-[var(--muted)] opacity-40`}>
+              Homebrew
+            </span>
+          )}
 
           {/* Tools — individual links, always the same. Route-handler tools
               (`hard`) are plain <a>; Next pages get <Link> so they navigate
@@ -341,12 +389,9 @@ export default function SiteNav({
           )}
         </div>
 
-        {/* Account block — an icon the size of the hamburger, linking to
-            /account, which owns the theme preference, the password form and
-            sign-out. The email it used to print is on the page itself and in
-            this control's tooltip; printing it here cost up to 190px of a row
-            that has nine links to fit. */}
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        {/* RIGHT: Admin + account. The account icon links to /account, which owns
+            the theme preference, the password form and sign-out. */}
+        <div className="flex shrink-0 items-center justify-end gap-2">
           {isAdmin ? (
             <Link href="/admin/users" className="hidden rounded border border-[var(--accent)] px-2.5 py-1 text-[10px] sm:inline-block font-semibold uppercase tracking-[0.06em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
               Admin
@@ -368,7 +413,6 @@ export default function SiteNav({
             </svg>
           </Link>
         </div>
-
       </div>
 
       {/* Mobile panel */}
@@ -376,10 +420,19 @@ export default function SiteNav({
         <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 min-[1152px]:hidden">
           {/* At phone width the Admin button lives here, so the bar has room for the game's title. */}
           {isAdmin ? (
-            <Link href="/admin/users" onClick={() => setMenu(null)} className="mb-3 block rounded border border-[var(--accent)] px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] sm:hidden">
+            <Link href="/admin/users" onClick={() => setMenu(null)} className="mb-2 block rounded border border-[var(--accent)] px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] sm:hidden">
               Admin
             </Link>
           ) : null}
+          {/* Games — on a narrow screen the system switcher is the home page's
+              Choose a Game section (the tiles), so this jumps there. */}
+          <Link
+            href="/#home-systems"
+            onClick={() => setMenu(null)}
+            className={`${item} mb-3 block border border-[var(--border)] text-center ${off}`}
+          >
+            Games
+          </Link>
           <div className="flex gap-2">
             <button className={`${item} flex-1 ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
             <button className={`${item} flex-1 ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>

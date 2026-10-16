@@ -1795,18 +1795,16 @@ body {
   padding: 0.1em 0.1em 0.12em;
 }
 @media (min-width: 640px) { .nav-sys-title { font-size: 1.2rem; } }
-/* Phone width: a long name ("Justice League Unlimited") wraps to two lines
-   rather than being cut off. */
-@media (max-width: 639.98px) {
-  .nav-sys-title {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    font-size: 0.95rem;
-    line-height: 1.05;
-  }
+/* A name too long for one line at a readable size ("Justice League Unlimited"
+   on a phone or a narrow desktop) wraps to two compact lines instead — sized by
+   SiteNav's fitter so the pair still fits the bar's height. */
+.nav-sys-title.is-wrap {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.02;
 }
 .nav-sys-title[data-sys="SW"] { text-transform: lowercase; }
 .nav-sys-title[data-sys="MMRPG"] { text-transform: uppercase; }

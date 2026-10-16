@@ -150,7 +150,7 @@ export default async function Home() {
       </section>
 
       <section aria-labelledby="home-systems" className="mt-10">
-        <h2 id="home-systems" className="font-label mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
+        <h2 id="home-systems" className="scroll-mt-20 font-label mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
           Choose a Game
         </h2>
         <HomeSystems hiddenKeys={hiddenKeys} />
