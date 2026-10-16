@@ -34,8 +34,8 @@
   function injectStyles() {
     if (styled) return; styled = true;
     var css = [
-      ".vtt-ga{position:fixed;inset:0;z-index:1000;background:rgba(6,8,11,.92);display:flex;flex-direction:column;color:#e6ebf2;font:14px/1.4 'Montserrat',system-ui,sans-serif;-webkit-user-select:none;user-select:none}",
-      ".vtt-ga-head{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid #2a323d;background:rgba(15,18,23,.97)}",
+      ".vtt-ga{position:fixed;inset:var(--dd-bar-h,0px) 0 0 0;z-index:1000;background:rgba(6,8,11,.92);display:flex;flex-direction:column;color:#e6ebf2;font:14px/1.4 'Montserrat',system-ui,sans-serif;-webkit-user-select:none;user-select:none}",
+      ".vtt-ga-head{display:flex;align-items:center;gap:14px;padding:8px 10px 8px 14px;border-bottom:1px solid #2a323d;background:rgba(15,18,23,.97)}",
       ".vtt-ga-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#c8a24a;font-size:16px}",
       ".vtt-ga-hint{color:#8b97a7;font-size:12px;flex:1;min-width:0}",
       ".vtt-ga-hint b{color:#e6ebf2}",
@@ -53,7 +53,7 @@
       ".vtt-ga-btn{background:#1b212a;color:#e6ebf2;border:1px solid #2a323d;border-radius:6px;padding:7px 12px;font:700 12px/1 system-ui;cursor:pointer}",
       ".vtt-ga-btn:hover{border-color:#8b97a7}.vtt-ga-btn.primary{background:#c8a24a;color:#14181e;border-color:#c8a24a}",
       ".vtt-ga-tb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:rgba(20,24,30,.92);color:#c3ccd8;border:1px solid #2a323d;border-radius:9px;cursor:pointer;font:800 18px/1 system-ui}",
-      "@media(max-width:640px){.vtt-ga-hint{display:none}.vtt-ga-read{min-width:0}}",
+      "@media(max-width:640px){.vtt-ga-hint{display:none}.vtt-ga-read{min-width:0}.vtt-ga-foot{gap:8px 10px;padding:8px 10px}.vtt-ga-foot input[type=number]{width:62px}}",
     ].join("");
     var s = document.createElement("style"); s.textContent = css; document.head.appendChild(s);
   }
@@ -102,8 +102,7 @@
     wrap.innerHTML =
       '<div class="vtt-ga-head"><span class="vtt-ga-title">Align grid</span>' +
         '<span class="vtt-ga-hint">Drag the corners of the gold box onto the corners of any <b class="ga-n">3×3</b> block of squares printed on the map. The whole grid follows. Scroll to zoom, drag the map to pan, arrow keys nudge the box (Shift: ×10).</span>' +
-        '<button class="vtt-ga-btn ga-cancel" type="button">Cancel</button>' +
-        '<button class="vtt-ga-btn primary ga-apply" type="button">Apply grid</button></div>' +
+        '<button class="vtt-ga-tb ga-x" type="button" title="Close" aria-label="Close">✕</button></div>' +
       '<div class="vtt-ga-stage"><canvas></canvas>' +
         '<div class="vtt-ga-zoom"><button class="vtt-ga-tb ga-zin" title="Zoom in">+</button><button class="vtt-ga-tb ga-zfit" title="Fit">⊡</button><button class="vtt-ga-tb ga-zout" title="Zoom out">−</button></div></div>' +
       '<div class="vtt-ga-foot">' +
@@ -112,6 +111,8 @@
         '<label>Offset x <input type="number" class="ga-gx" step="0.1"></label>' +
         '<label>Offset y <input type="number" class="ga-gy" step="0.1"></label>' +
         '<span class="vtt-ga-read"></span><span class="vtt-ga-warn"></span><span class="vtt-ga-sp"></span>' +
+        '<button class="vtt-ga-btn ga-cancel" type="button">Cancel</button>' +
+        '<button class="vtt-ga-btn primary ga-apply" type="button">Apply grid</button>' +
       "</div>";
     document.body.appendChild(wrap);
     var canvas = wrap.querySelector("canvas"), ctx = canvas.getContext("2d");
@@ -279,10 +280,15 @@
     }
     function pos(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
     canvas.addEventListener("pointerdown", function (e) {
-      var p = pos(e); pointers[e.pointerId] = p;
-      canvas.setPointerCapture(e.pointerId);
+      if (e.button != null && e.button > 0) return;   // right/middle button: nothing
+      var p = pos(e);
+      // The primary pointer going down is always the START of a gesture — forget any
+      // finger a missed pointerup left behind, or a lone drag turns into a "pinch".
+      if (e.isPrimary) { pointers = {}; pinch = null; }
+      pointers[e.pointerId] = p;
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
       var ids = Object.keys(pointers);
-      if (ids.length === 2) { // pinch: cancel any drag
+      if (ids.length === 2 && e.pointerType === "touch") { // pinch: cancel any drag
         drag = null; var a = pointers[ids[0]], b = pointers[ids[1]];
         pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: cam.s, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
         return;
@@ -300,7 +306,7 @@
       var p = pos(e);
       if (pointers[e.pointerId]) pointers[e.pointerId] = p;
       if (pinch) {
-        var ids = Object.keys(pointers); if (ids.length < 2) return;
+        var ids = Object.keys(pointers); if (ids.length < 2) { pinch = null; return; }
         var a = pointers[ids[0]], b = pointers[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
         var f = (d / pinch.d) * pinch.s / cam.s;
         zoomAt(f, (a.x + b.x) / 2, (a.y + b.y) / 2);
@@ -331,6 +337,7 @@
       if (drag) { drag = null; canvas.className = ""; draw(); }
     }
     canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
+    canvas.addEventListener("lostpointercapture", up);
     canvas.addEventListener("wheel", function (e) { e.preventDefault(); var p = pos(e); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, p.x, p.y); }, { passive: false });
     canvas.addEventListener("dblclick", function (e) { var p = pos(e); zoomAt(2, p.x, p.y); });
 
@@ -354,6 +361,7 @@
     function close() { document.removeEventListener("keydown", onKey, true); root.removeEventListener("resize", resize); try { wrap.remove(); } catch (e) {} onClose(); }
     function apply() { var g = current(); onApply({ ppg: g.ppg, gx: g.gx, gy: g.gy, cells: cells }); close(); }
     $("ga-cancel").onclick = close;
+    $("ga-x").onclick = close;
     $("ga-apply").onclick = apply;
     $("ga-zin").onclick = function () { zoomAt(1.4, cw / 2, ch / 2); };
     $("ga-zout").onclick = function () { zoomAt(1 / 1.4, cw / 2, ch / 2); };
