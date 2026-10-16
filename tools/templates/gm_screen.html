@@ -2149,6 +2149,39 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .vtt-hint-x{background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px;padding:2px 5px;line-height:1}
 .vtt-hint-x:hover{color:var(--white)}
 </style>
+<style id="lotr-gm-style">
+/* The Lord of the Rings — Loremaster suite (Generators) + party card. Elven
+   gold (#c9a227 / lifted #e2c36b) on deep green; uses the screen's own tokens
+   (--border, --dim, --light) so it sits in every skin. */
+.lotr-gen-card .gen-card-name { font-family: "Ringbearer", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .01em; color: #e2c36b; text-transform: none; }
+.lotr-gen-card .gen-card-row-label { color: #c9a227; }
+.lotr-gen-card { border-left: 3px solid #c9a227; }
+.lotr-dim { color: var(--dim, #8a93a0); }
+.lotr-warn { color: #f0a070; }
+.lotr-chip { display: inline-block; border: 1px solid var(--border); border-radius: 999px; padding: 0 7px; font-size: 11px; margin: 0 3px 3px 0; }
+.lotr-ck { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--light, #ddd); cursor: pointer; white-space: nowrap; }
+.lotr-mods { display: flex; flex-direction: column; gap: 3px; flex: 1 1 260px; min-width: 0; }
+.lotr-mods .lotr-ck { white-space: normal; align-items: flex-start; }
+.lotr-mods .lotr-ck b { color: #e2c36b; }
+.lotr-btnrow { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin: 6px 0 0; }
+.lotr-btnlbl { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim, #8a93a0); min-width: 86px; }
+.lotr-pip { display: inline-block; width: 13px; height: 13px; border-radius: 50%; border: 2px solid #c9a227; margin-right: 3px; vertical-align: -2px; }
+.lotr-pip.on { background: #c9a227; }
+.lotr-jrow { font-size: 12px; margin: 2px 0; }
+.lotr-eye-meter { display: flex; align-items: center; gap: 12px; margin: 4px 0 8px; }
+.lotr-eye-num { font-family: "Ringbearer", "EB Garamond", Georgia, serif; font-size: 30px; color: #e2c36b; line-height: 1; }
+.lotr-eye-num span { font-size: 16px; color: var(--dim, #8a93a0); }
+.lotr-eye-bar { flex: 1; height: 10px; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; border: 1px solid var(--border); }
+.lotr-eye-bar i { display: block; height: 100%; background: linear-gradient(90deg, #c9a227, #d6501e 80%, #b0141a); }
+.lotr-revealed { font-family: "Ringbearer", "EB Garamond", Georgia, serif; font-size: 24px; color: #ff6a3a; text-align: center; letter-spacing: .04em; text-shadow: 0 0 12px rgba(255,90,40,.6); margin: 4px 0; }
+.lotr-flash { animation: lotrFlash 1.4s ease-out 1; }
+@keyframes lotrFlash { 0% { box-shadow: 0 0 0 0 rgba(255,90,40,.9); background: rgba(176,20,26,.35); } 100% { box-shadow: 0 0 0 14px rgba(255,90,40,0); } }
+.lotr-nt-flavour { font-style: italic; font-size: 12.5px; color: var(--light, #ddd); margin: 2px 0 8px; line-height: 1.45; }
+.lotr-hoard-out { margin-top: 8px; }
+.lotr-hoard .ai-row { align-items: center; }
+.pcard.lotr-pc .pty-name { font-family: "Ringbearer", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .01em; }
+.lotr-badge-bad { color: #ff7a5a !important; }
+</style>
 </head>
 <body>
 
@@ -2211,6 +2244,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
     TWD: ['twdmonster','twdtreasure','twdscavenge','twdlocation','twdnpc','twdfaction','twdwalker','twdevents','twdrumors'],
     VAE: ['vaemonster','vaetreasure','vaemystery','vaenpc'],
     MYZ: ['myzmonster','myztreasure','myzsector','myznpc','myzevents','myzfind'],
+    LOTR:['lotrmonster','lotrtreasure','lotrjourney','lotrcouncil','lotreye','lotrnameless','lotrnpc','lotrshadow','lotrpatron'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -2218,7 +2252,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
   // Display names for the top-bar system indicator (the GM Screen no longer has
   // a system dropdown — the linked campaign drives it).
-  const SYS_LABEL = { SD:'Shadowdark', DCC:'DCC', ACE:'ACE!', KOB:'Kids on Bikes', NIM:'Nimble', SW:'Star Wars', DND:'D&D', D62E:'D6 System 2e', ICRPG:'Index Card RPG', MMRPG:'Marvel Multiverse', CO:'Candela Obscura', YZE:'Year Zero Engine', TWD:'The Walking Dead', VAE:'Vaesen', MYZ:'Mutant: Year Zero', JLU:'Justice League', GB:'Ghostbusters' };
+  const SYS_LABEL = { SD:'Shadowdark', DCC:'DCC', ACE:'ACE!', KOB:'Kids on Bikes', NIM:'Nimble', SW:'Star Wars', DND:'D&D', D62E:'D6 System 2e', ICRPG:'Index Card RPG', MMRPG:'Marvel Multiverse', CO:'Candela Obscura', YZE:'Year Zero Engine', TWD:'The Walking Dead', VAE:'Vaesen', MYZ:'Mutant: Year Zero', LOTR:'The Lord of the Rings', JLU:'Justice League', GB:'Ghostbusters' };
   // Systems an admin hid (Admin → Systems) — injected by the server before the
   // page runs. Never let the visible set go empty (mirrors the server guard).
   const HIDDEN_SYS = (function () { try { return Array.isArray(window.__gmHiddenSystems__) ? window.__gmHiddenSystems__ : []; } catch (e) { return []; } })();
@@ -3281,6 +3315,15 @@ GMScenes.renderPins();
         <option value="myznpc">NPC</option>
         <option value="myzevents">Events</option>
         <option value="myzfind">Find (Artifact / Scrap)</option>
+        <option value="lotrmonster">Adversary</option>
+        <option value="lotrtreasure">Hoard &amp; Treasure</option>
+        <option value="lotrjourney">Journey Events</option>
+        <option value="lotrcouncil">Council</option>
+        <option value="lotreye">Eye Awareness</option>
+        <option value="lotrnameless">Nameless Thing</option>
+        <option value="lotrnpc">Folk of Eriador (NPC)</option>
+        <option value="lotrshadow">Shadow Quick-Ref</option>
+        <option value="lotrpatron">Patrons</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -4443,6 +4486,183 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results vae-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for a random NPC.</div></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: ADVERSARY PANEL (LOTR_MONSTERS by group + CR band; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="lotrmonster">
+        <div class="gen-controls">
+          <label class="gen-label">Group
+            <select class="gen-select" id="gen-lotrmon-group"><option value="">Any Group</option></select>
+          </label>
+          <label class="gen-label">Challenge
+            <select class="gen-select" id="gen-lotrmon-cr">
+              <option value="">Any CR</option><option value="low">CR 0–1</option><option value="mid">CR 2–3</option><option value="high">CR 4+</option>
+            </select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-lotrmon-group-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-lotrmon-group-results"></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: HOARD roller (gold, magic d20s, blessings, Greed) + the shared gear-drop list -->
+      <div class="gen-panel xs-treasure" data-panel="lotrtreasure" data-sys="lotr">
+        <div class="ai-scroll">
+          <div class="ai-section lotr-hoard">
+            <div class="ai-sec-title">Hoard</div>
+            <div class="ai-row">
+              <select class="ai-select lh-rating" title="Hoard rating"><option>Lesser</option><option>Greater</option><option>Marvellous</option></select>
+              <label class="lotr-ck" title="Also roll a curse for the hoard"><input type="checkbox" class="lh-cursed"> Curse</label>
+              <button class="btn small primary" type="button" data-lotr="hoard" title="Roll gold, magic d20s and Greed">🎲 Roll Hoard</button>
+            </div>
+            <div class="ai-row">
+              <button class="btn small ghost" type="button" data-lotr="precious">+ Precious object</button>
+              <button class="btn small ghost" type="button" data-lotr="curse">🎲 Curse</button>
+              <button class="btn small ghost" type="button" data-lotr="hoard-drop" title="Copy the rolled hoard into the drop below">→ Drop list</button>
+            </div>
+            <div class="ai-status lotr-hoard-status"></div>
+            <div class="lotr-hoard-out"><div class="gen-empty">Roll a hoard: lesser 2d8 g · greater 3d10 g · marvellous 4d12 g, with 1/2/3 magic d20s.</div></div>
+          </div>
+          <div class="ai-section">
+            <div class="ai-sec-title">Gear Drop</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it is found (e.g. the Troll-hole under Weathertop)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armour</option><option value="gear">Gear</option><option value="magic">Enchanted reward</option><option value="coins">Coins only</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a drop from the LotR weapon, armour &amp; gear lists">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search weapons, armour &amp; gear to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
+              <button class="btn small ghost xs-tr-credits" type="button" title="Add a coin stash">💰 Coins</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: JOURNEY EVENT roller -->
+      <div class="gen-panel" data-panel="lotrjourney">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Region
+            <select class="gen-select lj-region"><option>Border Land</option><option selected>Wild Land</option><option>Dark Land</option></select>
+          </label>
+          <label class="gen-label">Terrain
+            <select class="gen-select lj-terrain"><option>Road</option><option selected>Open terrain</option><option>Hard terrain</option></select>
+          </label>
+          <label class="gen-label">Season
+            <select class="gen-select lj-season"><option>Spring</option><option selected>Summer</option><option>Autumn</option><option>Winter</option></select>
+          </label>
+          <button class="btn small primary" type="button" data-lotr="journey">🎲 Event</button>
+          <button class="btn small ghost" type="button" data-lotr="journey-reset" title="Start a new journey">New journey</button>
+        </div>
+        <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Roll an event each time the Guide's pathfinding count runs out. Fatigue adds up for the end-of-journey save.</div></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: COUNCIL helper -->
+      <div class="gen-panel" data-panel="lotrcouncil">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Audience
+            <select class="gen-select lc-att"><option value="Friendly">Friendly (DC 10)</option><option value="Open" selected>Open (DC 15)</option><option value="Reluctant">Reluctant (DC 20)</option></select>
+          </label>
+          <label class="gen-label">Request
+            <select class="gen-select lc-req"><option value="Reasonable">Reasonable (1)</option><option value="Bold">Bold (2)</option><option value="Outrageous">Outrageous (3)</option></select>
+          </label>
+        </div>
+        <div class="lotr-btnrow"><span class="lotr-btnlbl">Introduction</span>
+          <button class="btn small ghost" type="button" data-lotr="council:fail5">Fail by 5+</button><button class="btn small ghost" type="button" data-lotr="council:fail">Fail</button><button class="btn small ghost" type="button" data-lotr="council:ok">Success</button><button class="btn small ghost" type="button" data-lotr="council:ok5">By 5+</button></div>
+        <div class="lotr-btnrow"><span class="lotr-btnlbl">Interaction</span>
+          <button class="btn small ghost" type="button" data-lotr="council:succ">+1 Success</button><button class="btn small ghost" type="button" data-lotr="council:unsucc">−1</button><button class="btn small ghost" type="button" data-lotr="council:failchk">Failed check</button></div>
+        <div class="lotr-btnrow"><span class="lotr-btnlbl">Outcome</span>
+          <button class="btn small ghost" type="button" data-lotr="council:success">Success</button><button class="btn small ghost" type="button" data-lotr="council:woe">With woe</button><button class="btn small ghost" type="button" data-lotr="council:disaster">Disaster</button><button class="btn small ghost" type="button" data-lotr="council:reset">Reset</button></div>
+        <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Pick the audience and the request, then press Roll for the council summary.</div></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: EYE AWARENESS tracker -->
+      <div class="gen-panel" data-panel="lotreye">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="lotr-ck"><input type="checkbox" class="le-dwarf"> Dwarves</label>
+          <label class="lotr-ck"><input type="checkbox" class="le-elf"> Dúnedain / Elves</label>
+          <label class="lotr-ck"><input type="checkbox" class="le-highelf"> High Elf</label>
+          <label class="gen-label">PB +4 heroes <input type="number" class="gen-select le-pb4" min="0" max="9" value="0" style="width:56px"></label>
+          <label class="gen-label">Famous items <input type="number" class="gen-select le-famous" min="0" max="9" value="0" style="width:56px"></label>
+          <button class="btn small ghost" type="button" data-lotr="eye:start" title="Set the starting score and reset Awareness to it">Set start</button>
+        </div>
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Hunt region
+            <select class="gen-select le-region"><option>Border Land</option><option selected>Wild Land</option><option>Dark Land</option></select>
+          </label>
+          <div class="le-mods lotr-mods"></div>
+        </div>
+        <div class="lotr-btnrow"><span class="lotr-btnlbl">Raise</span>
+          <button class="btn small ghost" type="button" data-lotr="eye:one" title="An ability check's d20 shows 1">+1 rolled 1</button>
+          <input type="number" class="gen-select le-shadow" min="1" max="9" value="1" style="width:52px" title="Shadow points gained">
+          <button class="btn small ghost" type="button" data-lotr="eye:shadow">+ Shadow gained</button>
+          <button class="btn small ghost" type="button" data-lotr="eye:m1" title="Lesser magical effect">+1 magic</button><button class="btn small ghost" type="button" data-lotr="eye:m2" title="Major spell">+2</button><button class="btn small ghost" type="button" data-lotr="eye:m3" title="Powerful spell">+3</button>
+          <button class="btn small ghost" type="button" data-lotr="eye:minus">−1</button>
+          <button class="btn small ghost" type="button" data-lotr="eye:reveal" title="Reveal now and roll a Revelation episode">Reveal</button>
+          <button class="btn small ghost" type="button" data-lotr="eye:reset" title="Back to the starting score">Reset</button></div>
+        <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Set the starting score from the Company's make-up, then raise Awareness as play goes. Roll = a random Revelation episode.</div></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: NAMELESS THING generator -->
+      <div class="gen-panel" data-panel="lotrnameless">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Special traits
+            <select class="gen-select lotr-nt-traits"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+          </label>
+          <label class="gen-label">How many
+            <select class="gen-select lotr-qty"><option>1</option><option>2</option><option>3</option></select>
+          </label>
+        </div>
+        <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for a horror from the deep places — name, form, signs and a full stat block.</div></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: NPC (culture names + occupation + two distinctive features) -->
+      <div class="gen-panel" data-panel="lotrnpc">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Culture
+            <select class="gen-select lotr-npc-culture"><option value="">Any</option></select>
+          </label>
+          <label class="gen-label">Name
+            <select class="gen-select lotr-npc-gender"><option value="">Any</option><option value="female">Female</option><option value="male">Male</option></select>
+          </label>
+          <label class="gen-label">How many
+            <select class="gen-select lotr-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label>
+        </div>
+        <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for a face on the road.</div></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: SHADOW quick reference -->
+      <div class="gen-panel" data-panel="lotrshadow">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Show
+            <select class="gen-select lotr-ref-sub"><option value="">Everything</option><option value="sources">Sources &amp; saves</option><option value="dread">Dread</option><option value="misdeeds">Misdeeds</option><option value="madness">Anguish &amp; Shadow Paths</option></select>
+          </label>
+        </div>
+        <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to show the Shadow tables.</div></div>
+      </div>
+
+      <!-- THE LORD OF THE RINGS: PATRON quick reference -->
+      <div class="gen-panel" data-panel="lotrpatron">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Patron
+            <select class="gen-select lotr-ref-sub patrons"><option value="">All patrons</option></select>
+          </label>
+        </div>
+        <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to show the patrons.</div></div>
       </div>
 
       <!-- MUTANT: YEAR ZERO CREATURE PANEL (monsters / factions / NPCs; cards send to the tracker) -->
@@ -6922,7 +7142,9 @@ function wireSessionPrepLoader(root) {
   function counts(){
     return { overview: prep.overview ? 1 : 0, scenes: scenes().length, notes: (prep.notes && prep.notes.trim()) ? 1 : 0,
              clues: (prep.clues || []).length, loot: (prep.rewards || []).length, tables: tables().length,
-             npcs: (prep.statblocks || []).length, maps: maps().length };
+             npcs: (prep.statblocks || []).length, maps: maps().length,
+             // The Lord of the Rings prep: journeys, councils, landmarks, hoards, schemes, rumours.
+             lotr: ['journeys','councils','landmarks','hoards','schemes','rumours'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0) };
   }
 
   function renderHub(){
@@ -6936,7 +7158,7 @@ function wireSessionPrepLoader(root) {
     // tables simply has no Tables tab. Overview is always there: it is the
     // landing tab, and it now carries the GM notes too (see sectionHtml), so a
     // prep that is only notes still has somewhere to show them.
-    const ALL = [['overview','Overview'],['scenes','Scenes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
+    const ALL = [['overview','Overview'],['lotr','Phase'],['scenes','Scenes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
     const TABS = ALL.filter(([k]) => k === 'overview' || c[k]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'overview';   // the chapter just switched to lacks the open tab
     // Overview shows no count badge, just dims when there is nothing to read.
@@ -7005,6 +7227,38 @@ function wireSessionPrepLoader(root) {
           + (!hasBody ? '<div class="advh-desc dim">No details recorded.</div>' : '')
           + '</div></div>';
       }).join('');
+    }
+    if(sec === 'lotr'){
+      // The Lord of the Rings Adventuring Phase: schemes, rumours, journeys,
+      // councils, landmarks and hoards from the LotR prep builder.
+      const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
+      const ln = (l, v) => (v && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
+      const J = (typeof LOTR_JOURNEY !== 'undefined') ? LOTR_JOURNEY : null, C = (typeof LOTR_COUNCIL !== 'undefined') ? LOTR_COUNCIL : null;
+      let h = '';
+      const P = prep.phase || {};
+      if(P.what || P.where || P.season || P.region) h += card('Adventuring Phase', ln('When', [P.year, P.season].filter(Boolean).join(' · ')) + ln('Where', [P.place, P.region].filter(Boolean).join(' · ')) + ln('What', P.what) + ln('Why', P.why) + ln('Who', P.who));
+      (prep.schemes || []).forEach(x => { h += card('Scheme — ' + (x.name || ''), ln('Schemer', x.villain) + ln('Aim', x.aim) + ln('Moves', x.steps) + ln('If unchecked', x.unchecked)); });
+      (prep.rumours || []).forEach(x => { h += card('Rumour' + (x.truth ? ' (' + x.truth + ')' : ''), '<div class="advh-desc">' + advText(x.text || '') + '</div>' + ln('Source', x.source)); });
+      (prep.journeys || []).forEach(j => {
+        const k = /border/i.test(j.region || '') ? 'border' : /dark/i.test(j.region || '') ? 'dark' : 'wild';
+        const xpr = i => (J && J.xp && J.xp[i]) ? (J.xp[i][k] || 0) : 0;
+        const nn = v => parseInt(v, 10) || 0;
+        const T = { road: 0, open: 1, hard: 2 };
+        const xp = nn(j.road) * xpr(0) + nn(j.open) * xpr(1) + nn(j.hard) * xpr(2) + (j.perils || []).reduce((a, p) => a + nn(p.rating) * xpr(T[p.terrain] != null ? T[p.terrain] : 2), 0);
+        const fat = (j.events || []).reduce((a, e) => { const ev = J && J.events.find(x => x.name === e.name); return a + (ev ? ev.fatigue : 0); }, 0);
+        h += card('Journey — ' + (j.name || [j.from, j.to].filter(Boolean).join(' → ')),
+          ln('Route', [j.from, j.to].filter(Boolean).join(' → ') + (j.region ? ' · ' + j.region : '')) + ln('Hexes', 'road ' + nn(j.road) + ' · open ' + nn(j.open) + ' · hard ' + nn(j.hard))
+          + ln('Perilous Areas', (j.perils || []).map(p => (p.name || 'Area') + ' (Peril ' + (p.rating || '?') + ')').join(', ')) + ln('XP', String(xp)) + ln('Fatigue save', 'DC ' + (10 + fat) + ' CON')
+          + ln('Events', (j.events || []).map(e => (e.roll ? e.roll + ' ' : '') + (e.name || '') + (e.target ? ' — ' + e.target : '') + (e.idea ? ': ' + e.idea : '')).join('\n')) + ln('Notes', j.notes));
+      });
+      (prep.councils || []).forEach(c => {
+        const at = C && C.attitudes.find(a => a.name === c.attitude), rq = C && C.requests.find(r => r.name === c.request);
+        h += card('Council — ' + (c.name || ''), ln('Audience', (c.attitude || '') + (at ? ' (DC ' + at.dc + ')' : '') + (c.audience ? ' · ' + c.audience : '')) + ln('Request', (c.request || '') + (rq ? ' — ' + rq.successes + ' success' + (rq.successes === 1 ? '' : 'es') : '') + (c.ask ? ': ' + c.ask : ''))
+          + ln('Introduction', c.intro) + ln('Sways them', c.sway) + ln('Success', c.success) + ln('With woe', c.woe) + ln('Disaster', c.disaster));
+      });
+      (prep.landmarks || []).forEach(l => { h += card('Landmark — ' + (l.name || ''), ln('Rumour', l.rumour) + ln('Old Lore', l.oldlore) + ln('Background', l.background) + ln('Locations', l.locations) + ln('Trouble', l.trouble)); });
+      (prep.hoards || []).forEach(x => { h += card('Hoard — ' + (x.name || x.rating || ''), ln('Rating', x.rating) + ln('Value', x.value) + ln('Greed DC', x.greed) + ln('Magic', x.magic) + ln('Contents', x.notes) + ln('Curse', x.curse)); });
+      return h || '<div class="advh-empty">No Adventuring Phase notes in this prep.</div>';
     }
     if(sec === 'npcs'){
       const list = prep.statblocks || [];
@@ -7432,7 +7686,7 @@ function init_trackers(root) {
     }
     // D&D: put the creature type + CR in the header type line (a compact stat-block
     // "type line"), so they're not repeated in the Traits block below.
-    if(src === 'dnd') {
+    if(src === 'dnd' || src === 'lotr') {
       tag = [m.type || sum.tag, (m.cr != null && m.cr !== '') ? 'CR ' + m.cr : ''].filter(Boolean).join(' · ');
     }
     return {
@@ -7886,7 +8140,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd', 'vae', 'myz'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd', 'vae', 'myz', 'lotr'];
   // Map a system to its bestiary source. Unknown systems keep their own key (so
   // pickerMatches returns nothing and the picker says "No Combatants Found")
   // rather than silently falling back to the DCC bestiary.
@@ -10567,6 +10821,8 @@ function xsBestiary(src) {
   if(src === 'twd') return (typeof TWD_NPCS !== 'undefined' || typeof TWD_ANIMALS !== 'undefined') ? twdBestiary() : [];
   if(src === 'vae') return (typeof VAE_BESTIARY !== 'undefined' || typeof VAE_NPCS !== 'undefined') ? vaeBestiary() : [];
   if(src === 'myz') return (typeof MYZ_BESTIARY !== 'undefined' || typeof MYZ_FACTIONS !== 'undefined') ? myzBestiary() : [];
+  // LotR adversaries (D&D monster shape + group) plus any Nameless Things rolled this session.
+  if(src === 'lotr') return ok(typeof LOTR_MONSTERS !== 'undefined' ? LOTR_MONSTERS : undefined).concat(Array.isArray(window.__lotrNamelessThings) ? window.__lotrNamelessThings : []);
   return [];
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
@@ -10603,8 +10859,14 @@ function xsMonSummary(src, m) {
     (m.equipment || []).forEach(e => { const dm = /damage\s*(\d+D(?:\+\d)?)/i.exec(e); out.lines.push({ label: 'Gear', text: e, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
     if(m.description) out.notes.push(m.description); if(m.notes) out.notes.push(m.notes);
     out.hp = 0;   // no hit points in D6 — the tracker card carries a wound track instead
-  } else if(src === 'dnd') {
+  } else if(src === 'dnd' || src === 'lotr') {
     const A = m.abilities || {}; const amod = s => Math.floor(((+s || 10) - 10) / 2);
+    // LotR: the Shadow an adversary inflicts (Strike Fear, Wight Song…) leads the lines.
+    if(src === 'lotr') {
+      const sh = (window.LOTR_GM && typeof window.LOTR_GM.shadowSummary === 'function') ? window.LOTR_GM.shadowSummary(m) : '';
+      if(sh) out.lines.push({ label: 'Shadow', text: sh });
+      out.tag = [m.group, m.xp != null ? m.xp + ' XP' : ''].filter(Boolean).join(' · ');
+    }
     // AC → header badge, HP → HP zone. CR rides in the type line (like a printed
     // stat block's "Challenge" line), so only Speed goes on the meta line below the
     // ability strip — the six ability scores stay uncluttered.
@@ -10834,6 +11096,8 @@ const PREP_SB_FIELDS = {
   KOB:  { stats:[['brains','Brains'],['brawn','Brawn'],['fight','Fight'],['flight','Flight'],['charm','Charm'],['grit','Grit']], meta:[['age','Age'],['at','AT'],['fear','Fear']], hp:null },
   CO:   { stats:[], meta:[['stakes','Stakes'],['harm','Harm'],['aspect','Aspect']], hp:null },
   YZE:  { stats:[['str','STR'],['agi','AGI'],['wits','WITS'],['emp','EMP']], def:['armor','Armor'], lines:[['skills','Skills']], hp:'health' },
+  // LOTR: the D&D 5e layout (its prep builder uses the same AC/HP/Speed + six-ability rows).
+  LOTR: { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['speed','Speed']], hp:'hp' },
 };
 function prepStatblockHp(sb, cfg) {
   if(!cfg) return 10;
@@ -10914,8 +11178,13 @@ function xsMonGenCard(src, m, opts) {
     (lines ? '<hr class="gen-card-divider">' + lines : '') + notes + send
   );
 }
+// LotR challenge bands for the Adversary generator: low (CR ≤ 1), mid (2–3), high (4+).
+function lotrCrBand(cr, band) {
+  const s = String(cr == null ? '' : cr); const v = s.indexOf('/') >= 0 ? (parseFloat(s.split('/')[0]) / parseFloat(s.split('/')[1]) || 0) : (parseFloat(s) || 0);
+  return band === 'low' ? v <= 1 : band === 'mid' ? (v >= 2 && v <= 3) : band === 'high' ? v >= 4 : true;
+}
 function genXsMonster(src, type, band) {
-  const pool = xsBestiary(src).filter(m => (!type || xsMonType(src, m) === type) && (!band || dccLevelMatch({ level: String(m.level || '0').includes('/') ? 0 : m.level }, band)));
+  const pool = xsBestiary(src).filter(m => (!type || xsMonType(src, m) === type) && (!band || (src === 'lotr' ? lotrCrBand(m.cr, band) : dccLevelMatch({ level: String(m.level || '0').includes('/') ? 0 : m.level }, band))));
   if(!pool.length) return card('<div class="gen-empty">No entry matches those filters.</div>');
   return xsMonGenCard(src, pool[Math.floor(Math.random() * pool.length)], { send: true });
 }
@@ -12360,7 +12629,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg' || src === 'yze' || src === 'twd' || src === 'vae' || src === 'myz') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg' || src === 'yze' || src === 'twd' || src === 'vae' || src === 'myz' || src === 'lotr') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -12409,12 +12678,16 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'twdtreasure', 'vaetreasure', 'myztreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'twdtreasure', 'vaetreasure', 'myztreasure', 'lotrtreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
   // Alien table generators are driven straight from the window Roll button (no inline button).
   const YZE_TABLE_GENS = ['yzestar', 'yzeworld', 'yzejobs', 'yzeencounters', 'yzetwist', 'yzeshore', 'yzeoracle', 'yzesalvage'];
   const TWD_TABLE_GENS = ['twdscavenge', 'twdlocation', 'twdnpc', 'twdfaction', 'twdwalker', 'twdevents', 'twdrumors'];
   const VAE_TABLE_GENS = ['vaemystery', 'vaenpc'];
   const MYZ_TABLE_GENS = ['myzsector', 'myznpc', 'myzevents', 'myzfind'];
+  // LotR Loremaster suite (public/tools-data/lotr-gm-tables.js → window.lotrGenPanel).
+  // lotrtreasure is also a builder panel; the window Roll rolls its Hoard.
+  const LOTR_TABLE_GENS = ['lotrtreasure', 'lotrjourney', 'lotrcouncil', 'lotreye', 'lotrnameless', 'lotrnpc', 'lotrshadow', 'lotrpatron'];
+  try { if(typeof window.lotrPrimePanels === 'function') window.lotrPrimePanels(root); } catch(e) {}
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -12425,7 +12698,7 @@ window.init_gen = function(root) {
     }
   })();
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group'],['twd','#gen-twdmon-group'],['vae','#gen-vaemon-group'],['myz','#gen-myzmon-group']].forEach(([src, id]) => {
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group'],['twd','#gen-twdmon-group'],['vae','#gen-vaemon-group'],['myz','#gen-myzmon-group'],['lotr','#gen-lotrmon-group']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -12487,6 +12760,11 @@ window.init_gen = function(root) {
     // Builder panels (loot box, treasure spreads, tables, henchmen) keep their own
     // inline controls, but the toolbar Roll now drives their primary action too —
     // so every generator rolls from the same top button.
+    if(LOTR_TABLE_GENS.indexOf(activeTab) >= 0) {
+      const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
+      if(panel && typeof window.lotrGenPanel === 'function') window.lotrGenPanel(panel);
+      return;
+    }
     if(BUILDER_PANELS.indexOf(activeTab) >= 0) {
       const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
       const primary = panel && (panel.querySelector('.ai-roll-tier, .ai-fl-roll, .xs-tr-roll') || panel.querySelector('.btn.primary:not(.gen-roll):not(.gen-inline-roll)') || panel.querySelector('button.btn:not(.gen-roll)'));
@@ -12708,11 +12986,11 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster' || activeTab==='yzemonster' || activeTab==='twdmonster' || activeTab==='vaemonster' || activeTab==='myzmonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster' || activeTab==='yzemonster' || activeTab==='twdmonster' || activeTab==='vaemonster' || activeTab==='myzmonster' || activeTab==='lotrmonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : src === 'yze' ? '#gen-yzemon-group' : src === 'twd' ? '#gen-twdmon-group' : src === 'vae' ? '#gen-vaemon-group' : src === 'myz' ? '#gen-myzmon-group' : '#gen-mmrpgmon-kind';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : src === 'yze' ? '#gen-yzemon-group' : src === 'twd' ? '#gen-twdmon-group' : src === 'vae' ? '#gen-vaemon-group' : src === 'myz' ? '#gen-myzmon-group' : src === 'lotr' ? '#gen-lotrmon-group' : '#gen-mmrpgmon-kind';
       const type=root.querySelector(idBase).value;
-      const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : '';
+      const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : src === 'lotr' ? (root.querySelector('#gen-lotrmon-cr') || {}).value || '' : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
       const res=root.querySelector(idBase+'-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genXsMonster(src, type, band));
@@ -14766,6 +15044,9 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <script src="/tools-data/vae-gm-tables.js"></script>
 <script src="/tools-data/myz-data.js"></script>
 <script src="/tools-data/myz-gm-tables.js"></script>
+<!-- The Lord of the Rings: data layer (adversaries, journeys, councils, treasure, Eye, Shadow …) + the Loremaster suite -->
+<script src="/tools-data/lotr-data.js"></script>
+<script src="/tools-data/lotr-gm-tables.js"></script>
 <script src="/tools-data/yze-alien-gm-tables.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <!-- PDF.js + the shared reader are loaded on demand by init_rules (first Rulebooks open) — not on every GM Screen load. -->
@@ -14855,6 +15136,7 @@ function init_dice(root) {
     SD:   [2, 4, 6, 8, 10, 12, 20, 100],
     DCC:  [2, 4, 6, 8, 10, 12, 20, 100],
     DND:  [4, 6, 8, 10, 12, 20, 100],
+    LOTR: [4, 6, 8, 10, 12, 20, 100],
     NIM:  [4, 6, 8, 10, 12, 20],
     ICRPG:[4, 6, 8, 10, 12, 20],
     KOB:  [4, 6, 8, 10, 12, 20],
@@ -15846,6 +16128,54 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from a The Lord of the Rings (5E) sheet
+  // (tools/templates/lotr_character_sheet.html collectSheet: system 'LOTR',
+  // calling/subclass/culture/level, scores, saveProf, skillProf, hp*, ac,
+  // shadow {points, scars, flaws}, fellowship {points, rating, …}). Every field is
+  // read defensively — a missing value shows as "—".
+  function lotrParty(d) {
+    const n = v => parseInt(v) || 0;
+    const has = v => v !== undefined && v !== null && v !== '';
+    const S = d.scores || {};
+    const mod = k => Math.floor(((has(S[k]) ? n(S[k]) : 10) - 10) / 2);
+    const lvl = Math.max(1, Math.min(10, n(d.level) || 1));
+    const pb = 2 + Math.floor((lvl - 1) / 4);
+    const ABBR = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+    const sp = d.saveProf || {};
+    const SKILLS = [['Acrobatics','DEX'],['Animal Handling','WIS'],['Athletics','STR'],['Deception','CHA'],['Explore','WIS'],['Hunting','WIS'],['Insight','WIS'],['Intimidation','CHA'],['Investigation','INT'],['Medicine','INT'],['Nature','INT'],['Old Lore','INT'],['Perception','WIS'],['Performance','CHA'],['Persuasion','CHA'],['Riddle','INT'],['Sleight of Hand','DEX'],['Stealth','DEX'],['Travel','WIS']];
+    const skp = d.skillProf || {};
+    const sh = (d.shadow && typeof d.shadow === 'object') ? d.shadow : { points: d.shadow };
+    const fw = (d.fellowship && typeof d.fellowship === 'object') ? d.fellowship : {};
+    const wis = has(S.WIS) ? n(S.WIS) : null;
+    const shPts = has(sh.points) ? n(sh.points) : null, shScars = has(sh.scars) ? n(sh.scars) : 0;
+    const shTot = (shPts == null ? 0 : shPts) + shScars;
+    return {
+      system: 'LOTR',
+      name: d.name || 'Unnamed',
+      calling: d.calling || d.cls || '', subclass: d.subclass || '', level: lvl,
+      culture: d.culture || d.species || '', subculture: d.subculture || d.lineage || '', background: d.background || '',
+      features: Array.isArray(d.distinctiveFeatures) ? d.distinctiveFeatures.filter(Boolean) : [],
+      ac: has(d.ac) ? d.ac : '', speed: d.speed || '',
+      hpCur: has(d.hpCur) ? n(d.hpCur) : '', hpMax: has(d.hpMax) ? n(d.hpMax) : '', hpTemp: n(d.hpTemp),
+      hitdice: d.hitdice || '', hdLeft: has(d.hdLeft) ? n(d.hdLeft) : '',
+      pb, passivePerc: 10 + mod('WIS') + (skp['Perception'] ? pb * (n(skp['Perception']) || 1) : 0),
+      inspiration: !!d.inspiration, exhaustion: n(d.exhaustion), xp: has(d.xp) ? n(d.xp) : '',
+      conditions: Array.isArray(d.activeConditions) ? d.activeConditions.filter(Boolean) : [],
+      stats: ABBR.map(k => ({ id: k, mod: mod(k), score: has(S[k]) ? n(S[k]) : '—' })),
+      saves: ABBR.map(k => ({ id: k, val: mod(k) + (sp[k] ? pb : 0), prof: !!sp[k] })),
+      skills: SKILLS.filter(([nm]) => skp[nm]).map(([nm, ab]) => ({ name: nm, val: mod(ab) + pb * (n(skp[nm]) || 1) })),
+      shadow: shPts, scars: shScars, shadowTotal: shTot, wis: wis,
+      miserable: wis != null && shTot > 0 && shTot >= Math.ceil(wis / 2),
+      anguished: wis != null && wis > 0 && shTot >= wis,
+      flaws: Array.isArray(sh.flaws) ? sh.flaws.filter(Boolean) : [],
+      fellowship: has(fw.points) ? n(fw.points) : '', fellowshipRating: has(fw.rating) ? n(fw.rating) : '', patron: fw.patron || '', haven: fw.haven || '',
+      virtues: (Array.isArray(d.virtues) ? d.virtues : []).map(v => typeof v === 'string' ? v : (v && v.name)).filter(Boolean),
+      attacks: (d.attacks || []).filter(a => a && (a.name || a.damage)).map(a => ({ name: a.name || '', damage: [a.damage, a.type].filter(Boolean).join(' ') })),
+      inventory: (d.inventory || []).filter(i => i && i.name).map(i => i.name + (n(i.qty) > 1 ? ' ×' + n(i.qty) : '')),
+      coins: { g: n(d.gp), s: n(d.sp), c: n(d.cp) },
+    };
+  }
+
   // Sheets come from a few exporters (our sheet, Shadowdarklings). Read defensively.
   function normalize(raw) {
     if(!raw || typeof raw !== 'object') return null;
@@ -15864,6 +16194,8 @@ function init_party(root) {
     if(d && d.system === 'YZE') return yzeParty(d);
     if(d && d.system === 'GB') return gbParty(d);
     if(d && d.system === 'JLU') return jluParty(d);
+    // LotR: the sheet tags itself; a campaign roster row also names its system.
+    if(d && (d.system === 'LOTR' || (raw && raw !== d && raw.system === 'LOTR') || (!d.system && d.calling && d.culture))) return lotrParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
@@ -16293,6 +16625,44 @@ function init_party(root) {
     return h;
   }
 
+  // ── The Lord of the Rings ──
+  function cardHTMLLOTR(entry) {
+    const c = entry.sheet;
+    const dash = v => (v === '' || v == null) ? '—' : v;
+    const sgn = v => (v >= 0 ? '+' : '') + v;
+    const cell = (lbl, val, bad) => '<span class="pty-chip' + (bad ? ' lotr-badge-bad' : '') + '">' + esc(lbl) + ' <b>' + esc(dash(val)) + '</b></span>';
+    const sub = [c.culture + (c.subculture && c.subculture !== c.culture ? ' (' + c.subculture + ')' : ''), [c.calling, c.subclass].filter(Boolean).join(' · ') + (c.calling ? ' ' + c.level : 'LV ' + c.level)].filter(s => String(s).trim()).join(' · ');
+    const shTxt = c.shadow == null && !c.scars ? '—' : (c.shadowTotal + (c.scars ? ' (' + c.scars + ' scar' + (c.scars === 1 ? '' : 's') + ')' : '') + (c.wis != null ? ' / ' + c.wis : ''));
+    const state = c.anguished ? 'Anguished' : c.miserable ? 'Miserable' : '';
+    const hpTxt = (c.hpCur !== '' ? c.hpCur + '/' : '') + dash(c.hpMax) + (c.hpTemp ? ' +' + c.hpTemp : '');
+    let body = (c.hpMax !== '' ? pcHpBar('Hit Points', c.hpCur, c.hpMax, c.hpTemp ? '+' + c.hpTemp + ' temp' : '') : '')
+      + pcStats(c.stats.map(s => ({ l: s.id, m: sgn(s.mod), s: s.score })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Shadow</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+      + cell('Shadow', shTxt, !!state) + (state ? '<span class="pty-chip lotr-badge-bad"><b>' + esc(state) + '</b></span>' : '')
+      + (c.flaws.length ? cell('Flaws', c.flaws.join(', '), true) : '') + '</div></div>';
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+      + cell('AC', c.ac) + cell('Speed', c.speed) + cell('Prof', sgn(c.pb)) + cell('Pass. Perc', c.passivePerc)
+      + cell('Fellowship', c.fellowship !== '' ? c.fellowship + (c.fellowshipRating !== '' ? '/' + c.fellowshipRating : '') : '')
+      + (c.hitdice ? cell('Hit Dice', (c.hdLeft !== '' ? c.hdLeft + ' × ' : '') + c.hitdice) : '')
+      + (c.inspiration ? cell('Inspiration', '●') : '')
+      + (c.exhaustion ? cell('Exhaustion', c.exhaustion, true) : '') + '</div></div>';
+    body += '<div class="pty-sec"><div class="pty-sec-h">Saves</div><div class="pty-line dim">' + c.saves.map(s => esc(s.id) + ' ' + sgn(s.val) + (s.prof ? '•' : '')).join(' · ') + '</div></div>';
+    if(c.conditions.length) body += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff8a6a;">' + esc(c.conditions.join(', ')) + '</div></div>';
+    if(c.features.length) body += '<div class="pty-sec"><div class="pty-sec-h">Distinctive Features</div><div class="pty-line dim">' + esc(c.features.join(', ')) + '</div></div>';
+    if(c.skills.length) body += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + sgn(s.val)).join(' · ') + '</div></div>';
+    if(c.virtues.length) body += '<div class="pty-sec"><div class="pty-sec-h">Virtues</div><div class="pty-line dim">' + esc(c.virtues.join(', ')) + '</div></div>';
+    if(c.attacks.length) body += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b>' + (a.damage ? ' <span class="dim">' + esc(a.damage) + '</span>' : '') + '</div>').join('') + '</div>';
+    if(c.patron || c.haven) body += '<div class="pty-sec"><div class="pty-sec-h">Patron &amp; Haven</div><div class="pty-line dim">' + esc([c.patron, c.haven].filter(Boolean).join(' · ')) + '</div></div>';
+    if(c.inventory.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
+    if(c.coins.g || c.coins.s || c.coins.c) body += '<div class="pty-line dim" style="margin-top:4px;">' + c.coins.g + ' g · ' + c.coins.s + ' s · ' + c.coins.c + ' c</div>';
+    const html = pcShell(entry, { name: c.name, sub,
+      // Header stays compact (the full Shadow line lives in the body): AC · HP · Shadow total/WIS.
+      chips: [{ l:'AC', v: c.ac }, { l:'HP', v: (c.hpCur !== '' ? c.hpCur + '/' : '') + dash(c.hpMax), bad: c.hpMax !== '' && c.hpCur !== '' && c.hpCur < c.hpMax }, { l:'Shd', v: (c.shadow == null && !c.scars) ? '—' : c.shadowTotal + (c.wis != null ? '/' + c.wis : ''), bad: !!state }], body,
+      bubble: { hp: (c.hpCur !== '' ? c.hpCur + '/' : '') + dash(c.hpMax),
+        chips: [{ label:'AC', value: dash(c.ac) }, { label:'Shadow', value: shTxt + (state ? ' · ' + state : '') }, { label:'Pass', value: c.passivePerc }] } });
+    return html.replace('class="pty-card pcard', 'class="pty-card pcard lotr-pc');
+  }
+
   // ── Candela Obscura ──
   function cardHTMLCO(entry) {
     const c = entry.sheet;
@@ -16384,6 +16754,7 @@ function init_party(root) {
     if(c.system === 'YZE') return cardHTMLYZE(entry);
     if(c.system === 'GB') return cardHTMLGB(entry);
     if(c.system === 'JLU') return cardHTMLJLU(entry);
+    if(c.system === 'LOTR') return cardHTMLLOTR(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const hpChip = c.hpCur !== '' ? c.hpCur + '/' + c.hpMax : String(c.hpMax);
     const line = [c.ancestry, c.cls].filter(Boolean).join(' ');
@@ -17359,6 +17730,17 @@ function wireAiConsole(root) {
         .concat(((typeof MYZ_ARTIFACTS !== 'undefined' && Array.isArray(MYZ_ARTIFACTS)) ? MYZ_ARTIFACTS : []).map(a => ({ name: a.name, category: 'artifact', desc: ['Artifact', a.roll ? 'D666 ' + a.roll : '', (typeof MYZ_VALUES !== 'undefined' && MYZ_VALUES[a.name] != null) ? MYZ_VALUES[a.name] + ' bullets' : '', a.desc].filter(Boolean).join(' · ') }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'artifact',label:'Artifacts',cats:['artifact'] }],
       randomCats: ['weapon','armor','gear','gear','artifact'], money: { name: 'Bullets', unit: '', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 6)) }, label: 'GEAR DROP', empty: 'MYZ gear list',
+    },
+    lotr: {
+      // Weapons / armour / gear from the LotR data layer, plus the enchanted
+      // rewards a Famous Weapon or Armour can carry. Coins are in silver.
+      list: () => []
+        .concat(((typeof LOTR_WEAPONS !== 'undefined' && Array.isArray(LOTR_WEAPONS)) ? LOTR_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage ? w.damage + (w.damageType ? ' ' + w.damageType : '') : '', (w.properties || []).join ? (w.properties || []).join(', ') : w.properties, w.cost].filter(Boolean).join(' · ') })))
+        .concat(((typeof LOTR_ARMOR !== 'undefined' && Array.isArray(LOTR_ARMOR)) ? LOTR_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: [a.baseAC != null ? 'AC ' + a.baseAC : (a.ac != null ? 'AC ' + a.ac : ''), a.category, a.cost].filter(Boolean).join(' · ') })))
+        .concat(((typeof LOTR_GEAR !== 'undefined' && Array.isArray(LOTR_GEAR)) ? LOTR_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.cost, g.description].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(((typeof LOTR_ENCHANTED_REWARDS !== 'undefined' && Array.isArray(LOTR_ENCHANTED_REWARDS)) ? LOTR_ENCHANTED_REWARDS : []).map(e => ({ name: e.name || String(e), category: 'magic', desc: ['Enchanted reward', e.item || e.appliesTo || '', e.description || e.effect || ''].filter(Boolean).join(' · ').slice(0, 160) }))),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armour',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'magic',label:'Enchanted',cats:['magic'] }],
+      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Silver', unit: 's', cat: 'silver', roll: () => (1 + Math.floor(Math.random() * 6)) * (1 + Math.floor(Math.random() * 6)) }, label: 'TREASURE', empty: 'LotR gear list',
     },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {

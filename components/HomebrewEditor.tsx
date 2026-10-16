@@ -133,6 +133,14 @@ const D62E_GENRE_OPTS: readonly Opt[] = [["core", "Core"], ["fantasy", "Fantasy"
 const D62E_ATTRS = ["Agility", "Brawn", "Knowledge", "Perception"] as const;
 const ICRPG_WORLD_OPTS: readonly Opt[] = [["core", "Core"], ["alfheim", "Alfheim"], ["warpshell", "Warp Shell"], ["ghostmountain", "Ghost Mountain"], ["vigilantecity", "Vigilante City"], ["bloodandsnow", "Blood & Snow"]];
 const ICRPG_STAT_KEYS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
+// The Lord of the Rings Roleplaying (5E) vocabularies — mirror lib/homebrew's
+// LotR normalisers (kept local so this client bundle never pulls in lib/data/lotr-data).
+const LOTR_CULTURES = ["Bardings", "Dwarves of Durin's Folk", "Elves of Lindon", "Hobbits of the Shire", "Men of Bree", "Rangers of the North"] as const;
+const LOTR_ABIL_KEYS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
+const LOTR_SKILL_NAMES = ["Acrobatics", "Animal Handling", "Athletics", "Deception", "Explore", "Hunting", "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Old Lore", "Perception", "Performance", "Persuasion", "Riddle", "Sleight of Hand", "Stealth", "Travel"] as const;
+const LOTR_FEATURE_NAMES = ["Bold", "Cunning", "Eager", "Fair-spoken", "Faithful", "Fierce", "Generous", "Honourable", "Inquisitive", "Lordly", "Merry", "Patient", "Proud", "Rustic", "Secretive", "Stern", "Subtle", "True-hearted", "Wary", "Wilful"] as const;
+const LOTR_MONSTER_GROUP_OPTS: readonly Opt[] = ["Evil Men", "Orcs", "Trolls", "Undead", "Wolves", "Folk of Eriador", "Beasts", "Other"].map((g) => [g, g] as const);
+const LOTR_SIZE_OPTS: readonly Opt[] = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"].map((g) => [g, g] as const);
 
 // ── Mechanical-effect vocabularies (shared with lib/homebrew normalisers) ────
 // Flat bonus targets — mirror BONUS_TARGETS in lib/homebrew.ts (kept local so
@@ -693,6 +701,100 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({}), toForm: (d) => ({ ...d }),
     summary: (d) => `${sv(d, "bonus") ? sv(d, "bonus") + " · " : ""}cost ${sv(d, "cost") || "—"}`,
   },
+  // ── The Lord of the Rings Roleplaying (5E) ──
+  "lotr-virtue": {
+    title: "Homebrew Virtues", noun: "Virtue",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["Common", "Common virtue"], ...LOTR_CULTURES.map((c) => [c, `Cultural — ${c}`] as const)] },
+      { key: "uses", label: "Uses", type: "text", placeholder: "PB/long, 1/short…" },
+      { key: "abilities", label: "+1 to one of", type: "picker", full: true, options: LOTR_ABIL_KEYS, addLabel: "+ Ability", placeholder: "STR, DEX…", help: "Every virtue raises one listed ability score by 1." },
+      { key: "flavor", label: "Flavour", type: "textarea", full: true, maxLength: 1000 },
+      { key: "benefits", label: "Benefits", type: "stringList", full: true, addLabel: "+ Benefit" },
+    ],
+    blank: () => ({ category: "Common", abilities: [], benefits: [""] }),
+    toForm: (d) => { const asi = (d.asi ?? {}) as Record<string, unknown>; return { ...d, abilities: Array.isArray(asi.choose) ? asi.choose : [] }; },
+    summary: (d) => `${sv(d, "category") || "Common"}${sv(d, "uses") ? " · " + sv(d, "uses") : ""}`,
+  },
+  "lotr-background": {
+    title: "Homebrew Backgrounds", noun: "Background",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "culture", label: "Culture", type: "select", options: [["Any", "Any culture"], ...LOTR_CULTURES.map((c) => [c, c] as const)] },
+      { key: "skillProficiencies", label: "Skill proficiencies (2)", type: "picker", full: true, options: LOTR_SKILL_NAMES, addLabel: "+ Skill", placeholder: "Explore, Old Lore…" },
+      { key: "toolProficiencies", label: "Tool proficiency", type: "stringList", full: true, addLabel: "+ Tool", placeholder: "Smith's tools" },
+      { key: "distinctiveFeatures", label: "Distinctive features (2)", type: "picker", full: true, options: LOTR_FEATURE_NAMES, addLabel: "+ Feature", placeholder: "Bold, Wary…" },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ culture: "Any", skillProficiencies: [], toolProficiencies: [""], distinctiveFeatures: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "culture") || "Any culture",
+  },
+  "lotr-weapon": {
+    title: "Homebrew Weapons", noun: "Weapon",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["Simple", "Simple"], ["Martial", "Martial"]] },
+      { key: "kind", label: "Kind", type: "select", options: [["Melee", "Melee"], ["Ranged", "Ranged"]] },
+      { key: "damage", label: "Damage", type: "text", placeholder: "1d8" },
+      { key: "damageType", label: "Damage type", type: "select", options: [["slashing", "Slashing"], ["piercing", "Piercing"], ["bludgeoning", "Bludgeoning"]] },
+      { key: "cost", label: "Cost", type: "text", placeholder: "15 SP" },
+      { key: "weight", label: "Weight", type: "text", placeholder: "3 lb" },
+      { key: "properties", label: "Properties", type: "stringList", full: true, addLabel: "+ Property", placeholder: "Versatile (1d10)" },
+      { key: "description", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "Martial", kind: "Melee", damageType: "slashing", properties: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "damage") || "1d4"} ${sv(d, "damageType")} · ${sv(d, "category")} ${sv(d, "kind")}`,
+  },
+  "lotr-gear": {
+    title: "Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["Adventuring Gear", "Adventuring Gear"], ["Artisan's Tools", "Artisan's Tools"], ["Gaming Set", "Gaming Set"], ["Musical Instrument", "Musical Instrument"], ["Other Tools", "Other Tools"], ["Pipe-weed", "Pipe-weed"]] },
+      { key: "cost", label: "Cost", type: "text", placeholder: "5 SP, 2 CP" },
+      { key: "weight", label: "Weight", type: "text", placeholder: "1 lb" },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "Adventuring Gear" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "category")} · ${sv(d, "cost") || "—"}`,
+  },
+  "lotr-monster": {
+    title: "Homebrew Adversaries", noun: "Adversary",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "group", label: "Group", type: "select", options: LOTR_MONSTER_GROUP_OPTS },
+      { key: "size", label: "Size", type: "select", options: LOTR_SIZE_OPTS },
+      { key: "type", label: "Type", type: "text", placeholder: "Humanoid (Orc)" },
+      { key: "cr", label: "Challenge rating", type: "text", placeholder: "1/2, 3" },
+      { key: "ac", label: "Armour Class", type: "number", placeholder: "13" },
+      { key: "acNote", label: "AC note", type: "text", placeholder: "(leather corslet, shield)" },
+      { key: "hp", label: "Hit points", type: "number", placeholder: "22" },
+      { key: "hpFormula", label: "HP formula", type: "text", placeholder: "22 (4d8 + 4)" },
+      { key: "speed", label: "Speed", type: "text", placeholder: "30 ft." },
+      ...LOTR_ABIL_KEYS.map((a) => ({ key: a, label: a, type: "number" as const, placeholder: "10" })),
+      { key: "savingThrows", label: "Saving throws", type: "text", placeholder: "Con +4" },
+      { key: "skills", label: "Skills", type: "text", placeholder: "Perception +3, Stealth +4" },
+      { key: "damageResistances", label: "Damage resistances", type: "text" },
+      { key: "conditionImmunities", label: "Condition immunities", type: "text" },
+      { key: "senses", label: "Senses", type: "text", placeholder: "Darkvision 60 ft., Passive Perception 11" },
+      { key: "languages", label: "Languages", type: "text", placeholder: "Orkish, Westron" },
+      { key: "traits", label: "Traits", type: "objectList", full: true, addLabel: "+ Trait", fields: [
+        { key: "name", label: "Name", type: "text", placeholder: "Hatred (Dwarves)" },
+        { key: "description", label: "Description", type: "textarea" },
+      ] },
+      { key: "actions", label: "Actions", type: "objectList", full: true, addLabel: "+ Action", fields: [
+        { key: "name", label: "Name", type: "text", placeholder: "Scimitar" },
+        { key: "description", label: "Description", type: "textarea" },
+      ] },
+      { key: "reactions", label: "Reactions", type: "objectList", full: true, addLabel: "+ Reaction", fields: [
+        { key: "name", label: "Name", type: "text" },
+        { key: "description", label: "Description", type: "textarea" },
+      ] },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ group: "Orcs", size: "Medium", type: "Humanoid", cr: "1", speed: "30 ft.", traits: [], actions: [], reactions: [] }),
+    toForm: (d) => { const a = (d.abilities ?? {}) as Record<string, unknown>; const out: Data = { ...d }; for (const k of LOTR_ABIL_KEYS) out[k] = a[k] ?? ""; return out; },
+    summary: (d) => `${sv(d, "group")} · CR ${sv(d, "cr") || "?"}`,
+  },
   "mmrpg-power": {
     title: "Homebrew Powers", noun: "Power",
     fields: [
@@ -807,6 +909,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("co-")) return "--candela";
   if (kind.startsWith("yze-")) return "--yze";
   if (kind.startsWith("mmrpg-")) return "--mmrpg";
+  if (kind.startsWith("lotr-")) return "--lotr";
   return "--dnd";
 }
 

@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE" | "LOTR";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -61,6 +61,11 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // D6 dice pools, NO stress dice, health modeled by Conditions (three physical +
   // three mental), the Fear test, and a Gothic investigate-and-banish campaign loop.
   { key: "VAE", name: "Vaesen", short: "Vaesen", accent: "var(--vae)" },
+  // The Lord of the Rings Roleplaying (Free League) — The One Ring converted to
+  // 5E: six heroic cultures and six callings capped at 10th level, no spellcasting,
+  // Shadow points & Shadow Paths, the shared Fellowship pool, Journeys, Councils
+  // and the Fellowship Phase. Mechanics adapted; descriptive text is original.
+  { key: "LOTR", name: "The Lord of the Rings", short: "LotR", accent: "var(--lotr)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

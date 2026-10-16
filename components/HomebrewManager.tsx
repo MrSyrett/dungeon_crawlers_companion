@@ -33,6 +33,7 @@ type HbType =
   | "twd-weapon" | "twd-gear"
   | "myz-weapon" | "myz-gear"
   | "vae-weapon" | "vae-gear"
+  | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {

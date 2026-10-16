@@ -118,6 +118,9 @@ const THEME_FONTS: Partial<Record<SystemKey, string>> = {
   ICRPG: "family=Permanent+Marker&family=Archivo:ital,wght@0,400;0,600;0,700;1,400",
   YZE: "family=Archivo+Narrow:ital,wght@0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400",
   JLU: "family=Russo+One&family=Rubik:ital,wght@0,400;0,600;0,700;1,400",
+  // The Lord of the Rings: Ringbearer + Aniron are self-hosted (@font-face in
+  // public/tokens.css); only the reading face comes from the Google set.
+  LOTR: "family=EB+Garamond:ital,wght@0,400;0,600;1,400",
 };
 
 // What goes in <head>: the shared tokens (BEFORE the tool's own CSS so the tool

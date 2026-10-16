@@ -136,6 +136,24 @@
   src: url("/fonts/dndc.woff2") format("woff2");
 }
 
+/* The Lord of the Rings: Ringbearer (Pete Klassen's re-creation of the film
+   logo lettering) for display, Aniron (an uncial hand) for accent labels. Both
+   self-hosted; neither carries running text — EB Garamond does that. */
+@font-face {
+  font-family: "Ringbearer";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/ringbearer.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Aniron";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/aniron.woff2") format("woff2");
+}
+
 /* ===========================================================================
    THE SITE'S OWN LOOK
    Everything below the system accents is the app talking, not a game. Four
@@ -250,6 +268,12 @@
   --vae: #d4a53a;
   --vae-bone: #e7dec9;
   --vae-blue: #35508a;
+  /* The Lord of the Rings — Elven gold on deep forest green. --lotr is the
+     brand gold (rules, borders, fills); --lotr-ink is lifted for small text on
+     the green panels; --lotr-green is the ground's mid-tone. */
+  --lotr: #c9a227;
+  --lotr-ink: #e2c36b;
+  --lotr-green: #1f4a30;
   /* Dungeon Crawler Carl accent — the covers' hot magenta. (Its pages used to
      borrow --red, which is the app's muted brick and nowhere near the books.) */
   --dcc: #e8275f;
@@ -1307,6 +1331,47 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* --- The Lord of the Rings: Elven gold on deep forest green ----------------
+   Ringbearer letters the titles in gold; Aniron, an uncial hand, takes the small
+   labels; EB Garamond carries the reading. The ground is a misty watercolour in
+   deep greens (public/themes/lotr-mist.webp) under a soft golden lamp-glow. */
+:root[data-system="LOTR"]:not([data-chrome]) body {
+  --sys-head: var(--lotr-ink);
+  --sys-sub: #b9cfa6;
+  --sys-link: var(--lotr-ink);
+  --sys-hilite: var(--lotr);
+  --sys-action: var(--lotr);
+  --panel: #0f2118;
+  --panel-2: #15291e;
+  --border: #2c4a37;
+  --text: #ece4cc;
+  --muted: #a7b59c;
+  --gold: var(--lotr);
+  --sys-display: "Ringbearer";
+  --sys-text: var(--font-garamond);
+  --sys-label: "Aniron";
+  background-color: #07120c;
+  background-image:
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.62) 100%),
+    radial-gradient(70% 46% at 50% 0%, rgba(201, 162, 39, 0.12) 0%, rgba(201, 162, 39, 0) 70%),
+    url("/themes/lotr-mist.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* Ringbearer has no weight axis and its own spacing; Garamond stands behind it
+   for any glyph it lacks. Headings drop the app's uppercase-and-track styling,
+   which turns the face's lowercase letterforms into its odd decorative capitals. */
+:root[data-system="LOTR"]:not([data-chrome]) body h1,
+:root[data-system="LOTR"]:not([data-chrome]) body h2,
+:root[data-system="LOTR"]:not([data-chrome]) body h3,
+:root[data-system="LOTR"]:not([data-chrome]) body [data-dash-head] {
+  font-family: "Ringbearer", var(--font-garamond), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
 /* --- Justice League Unlimited: an art-deco skyline -------------------------
    Russo One over Rubik. Bruce Timm's design language is flat, geometric and
    squared off, with no texture and no gradient in the drawing itself.
@@ -1640,6 +1705,7 @@ body {
 .home-tile[data-sys="TWD"] .home-tile-name { font-family: "Dead Kansas", var(--font-oswald), ui-sans-serif, system-ui, sans-serif; font-weight: 400; }
 [data-sys="MYZ"],   .home-tile[data-sys="MYZ"]   { --tile-accent: var(--myz);         --tile-sub: var(--myz-steel);   --tile-namefont: var(--font-anton);      --tile-face: var(--font-anton); --tile-bg: #100c0a; --tile-tex: url("/themes/myz-metal.webp"); --tile-scrim: 0.18; }
 [data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
+[data-sys="LOTR"],  .home-tile[data-sys="LOTR"]  { --tile-accent: var(--lotr-ink);    --tile-sub: #b9cfa6;            --tile-namefont: var(--font-garamond);   --tile-face: "Ringbearer", var(--font-garamond); --tile-bg: #07120c; --tile-tex: url("/themes/lotr-mist.webp"); --tile-zoom: 1.4; --tile-scrim: 0.12; }
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.

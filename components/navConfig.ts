@@ -144,6 +144,17 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/vae/npcs", label: "NPCs & Animals" },
     { href: "/vae/society", label: "The Society" },
   ],
+  LOTR: [
+    { href: "/lotr/callings", label: "Callings" },
+    { href: "/lotr/cultures", label: "Cultures" },
+    { href: "/lotr/backgrounds", label: "Backgrounds" },
+    { href: "/lotr/virtues", label: "Virtues" },
+    { href: "/lotr/rewards", label: "Rewards & Crafts" },
+    { href: "/lotr/equipment", label: "Equipment" },
+    { href: "/lotr/bestiary", label: "Bestiary" },
+    { href: "/lotr/patrons", label: "Patrons" },
+    { href: "/lotr/adventuring", label: "Adventuring" },
+  ],
 };
 
 export const RULEBOOKS_LINK: NavLink = { href: "/rules", label: "Rulebooks" };
@@ -177,6 +188,7 @@ export const HOMEBREW: Partial<Record<SystemKey, string>> = {
   TWD: "/twd/homebrew",
   MYZ: "/myz/homebrew",
   VAE: "/vae/homebrew",
+  LOTR: "/lotr/homebrew",
 };
 
 export function homebrewFor(system: SystemKey): string | null {
@@ -298,6 +310,13 @@ const CONCEPT: Record<string, string[]> = {
   "The Society": ["setting"],
   Starships: ["vehicles"],
   Combat: ["rules"],
+  // The Lord of the Rings
+  Callings: ["archetype"],
+  Cultures: ["ancestry"],
+  Virtues: ["traits"],
+  "Rewards & Crafts": ["gear", "traits"],
+  Patrons: ["creatures"],
+  Adventuring: ["rules"],
   "Conditions & Injuries": ["rules"],
 };
 
@@ -363,6 +382,7 @@ const PREFIX_SYSTEM: { prefix: string; key: SystemKey }[] = [
   { prefix: "/twd/", key: "TWD" },
   { prefix: "/myz/", key: "MYZ" },
   { prefix: "/vae/", key: "VAE" },
+  { prefix: "/lotr/", key: "LOTR" },
 ];
 
 // Shadowdark's reference pages live at top-level routes (historical), so match

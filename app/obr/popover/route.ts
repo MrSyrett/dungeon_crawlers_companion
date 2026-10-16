@@ -89,6 +89,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.twd { color: #d8cfbf; }
   .group-head.myz { color: #cf6a2a; }
   .group-head.vae { color: #d4a53a; }
+  .group-head.lotr { color: #e2c36b; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -283,7 +284,8 @@ const PAGE = String.raw`<!doctype html>
             { key: "YZE", name: "Alien RPG", cls: "yze" },
             { key: "TWD", name: "The Walking Dead", cls: "twd" },
             { key: "MYZ", name: "Mutant: Year Zero", cls: "myz" },
-            { key: "VAE", name: "Vaesen", cls: "vae" }
+            { key: "VAE", name: "Vaesen", cls: "vae" },
+            { key: "LOTR", name: "The Lord of the Rings", cls: "lotr" }
           ];
           var seen = {};
           var html = "";

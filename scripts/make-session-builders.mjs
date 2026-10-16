@@ -114,6 +114,20 @@ const SYSTEMS = [
     chapter: "Scene", chapterPh: "Scene 1", session: "Mystery", mobs: "Vaesen/NPCs", mobsHeading: "Vaesen &amp; NPCs",
     mob: "Vaesen", boss: "Vaesen", npc: "NPC", typePh: "GHOST // MAGIC 10 · FEAR 2", titlePh: "e.g. The Dance of Dreams", subtitlePh: "e.g. A Vaesen mystery",
   },
+  // The Lord of the Rings (5E). HAND-BUILT: lotr_session_prep_builder.html was
+  // derived from the D&D builder and carries LotR-only sections (Adventuring
+  // Phase, Schemes, Journeys, Councils, Landmarks, Hoards, Treasure Index,
+  // Fellowship Phase, Eye Awareness), so the loop below skips writing it — a
+  // plain clone would wipe them. The entry records its keys/palette/schema here
+  // so the generator knows the system exists.
+  {
+    file: "lotr_session_prep_builder.html", key: "lotr_session", ls: "lotr_builder_v1", cfg: "lotr", random: "Random Foe", handBuilt: true,
+    name: "The Lord of the Rings", title: "The Lord of the Rings — Adventure",
+    accent: "#a8841c", accentDark: "#7a5f12", red: "#2c4a37", redDark: "#1f3a29", highlight: "#c9a227", boxBg: "#ece0bf",
+    paper: "#f2e6c9", previewBg: "#07120c", displayFont: '"Ringbearer", "EB Garamond", Georgia, serif',
+    chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Adversaries", mobsHeading: "Adversaries &amp; Folk",
+    mob: "Adversary", boss: "Chief", npc: "NPC", typePh: "UNDEAD // CR 3 // 700 XP", titlePh: "e.g. The Star of the Mist", subtitlePh: "e.g. An Adventuring Phase in Eriador",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -256,6 +270,26 @@ const SB_CONFIG = {
     abilities: [m.acid && m.acid !== '—' ? 'Acid Splash: ' + m.acid : '', m.notes || ''].filter(Boolean).join('\\n'),
   }), sub: m => [m.group, m.stage].filter(Boolean).join(' · ') },
 };`,
+  // LotR adversaries share the D&D monster shape (LOTR_MONSTERS, + group); the
+  // hand-built template additionally summarises inflicted Shadow into a
+  // "Shadow:" line (lotrShadowSummary) and filters the picker by group.
+  lotr: `const SB_CONFIG = {
+  typePlaceholder: 'UNDEAD // CR 3 // 700 XP',
+  hp: null,
+  rows: [
+    [{ key:'ac', label:'AC' }, { key:'hp', label:'HP' }, { key:'speed', label:'SPEED' }],
+    [{ key:'str', label:'STR', ph:'10' }, { key:'dex', label:'DEX', ph:'10' }, { key:'con', label:'CON', ph:'10' }, { key:'int', label:'INT', ph:'10' }, { key:'wis', label:'WIS', ph:'10' }, { key:'cha', label:'CHA', ph:'10' }],
+  ],
+  abilitiesLabel: 'Shadow, Traits & Actions', abilitiesPlaceholder: 'One per line — Name: effect',
+  mobs: { placeholder: 'Search the adversaries…', pool: () => (typeof LOTR_MONSTERS !== 'undefined' && Array.isArray(LOTR_MONSTERS)) ? LOTR_MONSTERS : [], toCard: m => { const A = m.abilities || {}; return {
+    sbtype: /chief|king|great orc|hound of sauron/i.test(m.name||'') ? 'boss' : m.group === 'Folk of Eriador' ? 'npc' : 'mob',
+    name: m.name || '',
+    type: [String(m.type||'').toUpperCase(), 'CR ' + m.cr, m.xp != null ? m.xp + ' XP' : ''].filter(Boolean).join(' // '), flavor: m.description || '',
+    ac: String(m.ac ?? ''), hp: m.hpFormula || (m.hp != null ? String(m.hp) : ''), speed: (m.speed||'').replace(/ ?ft\\./g, ''), cr: String(m.cr ?? ''),
+    str: String(A.STR ?? ''), dex: String(A.DEX ?? ''), con: String(A.CON ?? ''), int: String(A.INT ?? ''), wis: String(A.WIS ?? ''), cha: String(A.CHA ?? ''),
+    abilities: [...(m.traits||[]).map(t => t.name + ': ' + t.description), ...(m.actions||[]).map(a => a.name + ': ' + a.description), ...(m.reactions||[]).map(a => 'Reaction — ' + a.name + ': ' + a.description)].join('\\n'),
+  }; }, sub: m => String(m.group||'') + ' · CR ' + m.cr },
+};`,
   myz: `const SB_CONFIG = {
   typePlaceholder: 'BEAST // STR 5 · FIGHT 2',
   hp: null,
@@ -391,6 +425,7 @@ const MOB_DATA = {
   gb: '<script src="/tools-data/gb-bestiary.js"></script>',
   myz: '',
   vae: '',
+  lotr: '<script src="/tools-data/lotr-data.js"></script>',
 };
 
 function rep(s, a, b, all = true) {
@@ -417,9 +452,12 @@ const BANNERS = {
   gb:     ["#5f8f24", "#8bc53f", "#12180a", 900, "#5e2b90"],
   myz:    ["#8f4517", "#cf6a2a", "#f4ece0", 800, "#d9d3c6"],
   vae:    ["#2a2016", "#b8924e", "#efe6d4", 700, "#e7dec9"],
+  lotr:   ["#0f2118", "#1f4a30", "#e2c36b", 400, "#d9e4cc"],
 };
 
 for (const S of SYSTEMS) {
+  // Hand-built builders (e.g. LotR) are listed for reference but never overwritten.
+  if (S.handBuilt) { console.log("skip (hand-built)", S.file); continue; }
   let s = base;
   s = rep(s, "<title>Session Prep Builder — Dungeon Crawler Carl RPG</title>", `<title>${S.title}</title>`);
   s = s.replace(/<!-- BUILD: [^>]*-->/, `<!-- BUILD: ${S.name} Session Prep Builder (generated from the DCC builder) -->`);

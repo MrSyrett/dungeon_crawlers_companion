@@ -56,6 +56,10 @@
   --vae: #d4a53a;
   --vae-bone: #e7dec9;
   --vae-blue: #35508a;
+  /* The Lord of the Rings — Elven gold on deep forest green (mirrors app/globals.css). */
+  --lotr: #c9a227;
+  --lotr-ink: #e2c36b;
+  --lotr-green: #1f4a30;
   --dcc: #e8275f;
   --dcc-gold: #f2c230;
   /* ---- The systems' SECOND colours, mirrored from app/globals.css ----------
@@ -987,6 +991,22 @@ html {
   font-display: swap;
   src: url("/fonts/dndc.woff2") format("woff2");
 }
+/* The Lord of the Rings: Ringbearer (display) and Aniron (accent labels) —
+   the same files app/globals.css declares. */
+@font-face {
+  font-family: "Ringbearer";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/ringbearer.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Aniron";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/aniron.woff2") format("woff2");
+}
 /* Star Wars' logo face. A LOGO font, not a text font: its real uppercase slots
    hold alternate glyphs ("ADVENTURE" comes out "ADRENTKRE"), its digits are
    pieces of the STAR WARS logo lockup, and most symbols are words from the crawl
@@ -1257,6 +1277,35 @@ html {
     radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.74) 100%),
     radial-gradient(70% 46% at 50% 2%, rgba(184, 146, 78, 0.12) 0%, rgba(184, 146, 78, 0) 70%),
     url("/themes/vae-paper.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- The Lord of the Rings (Elven gold on deep forest green) --------------- */
+:root[data-themed][data-system="LOTR"] {
+  --sub-color: #d9e4cc;
+  --section-hdr-dark: var(--lotr-ink);
+  --sys-display: "Ringbearer", "EB Garamond", ui-serif, Georgia, serif;
+  --sys-text: "EB Garamond", ui-serif, Georgia, serif;
+  --sys-label: "Aniron", "EB Garamond", ui-serif, Georgia, serif;
+  --ui-bg: #0f2118;
+  --ui-panel: #15291e;
+  --ui-border: #2c4a37;
+  --ui-text: #ece4cc;
+  --ui-muted: #a7b59c;
+  --ui-accent: var(--lotr-ink);
+  --ui-highlight: var(--lotr);
+  --font-display: "Ringbearer", "EB Garamond", ui-serif, Georgia, serif;
+}
+:root[data-themed][data-system="LOTR"] body,
+:root[data-themed][data-system="LOTR"] .preview-area {
+  background-color: #07120c;
+  background-image:
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.62) 100%),
+    radial-gradient(70% 46% at 50% 0%, rgba(201, 162, 39, 0.12) 0%, rgba(201, 162, 39, 0) 70%),
+    url("/themes/lotr-mist.webp");
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;

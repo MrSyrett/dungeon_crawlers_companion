@@ -33,6 +33,7 @@ export type HbType =
   | "twd-weapon" | "twd-gear"
   | "myz-weapon" | "myz-gear"
   | "vae-weapon" | "vae-gear"
+  | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 
 const HB_TYPES = [
@@ -50,6 +51,7 @@ const HB_TYPES = [
   "twd-weapon", "twd-gear",
   "myz-weapon", "myz-gear",
   "vae-weapon", "vae-gear",
+  "lotr-virtue", "lotr-background", "lotr-weapon", "lotr-gear", "lotr-monster",
   "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq", "mmrpg-starship",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
@@ -1862,6 +1864,100 @@ function normalizeVaeGear(input: unknown): { name: string; data: Record<string, 
   return { name, data };
 }
 
+// ── The Lord of the Rings Roleplaying (LOTR, 5E) ────────────────────────────
+// Each normaliser emits the lib/data/lotr-types shape its book dataset uses
+// (source "Homebrew"), so the /lotr reference pages merge homebrew straight
+// into their LOTR_* lists. Weapons and monsters reuse the D&D shapes.
+const LOTR_CULTURE_NAMES = ["Bardings", "Dwarves of Durin's Folk", "Elves of Lindon", "Hobbits of the Shire", "Men of Bree", "Rangers of the North"] as const;
+const LOTR_VIRTUE_CATEGORIES = ["Common", ...LOTR_CULTURE_NAMES] as const;
+const LOTR_ABILS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
+const LOTR_MONSTER_GROUPS = ["Evil Men", "Orcs", "Trolls", "Undead", "Wolves", "Folk of Eriador", "Beasts", "Other"] as const;
+const LOTR_GEAR_CATEGORIES = ["Adventuring Gear", "Artisan's Tools", "Gaming Set", "Musical Instrument", "Other Tools", "Pipe-weed"] as const;
+
+function normalizeLotrVirtue(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew virtue needs a name.");
+  // The form sends `abilities` (picked list); a stored record carries asi.choose.
+  const asiIn = (o.asi ?? {}) as Record<string, unknown>;
+  const choose = pickList(Array.isArray(o.abilities) ? o.abilities : asiIn.choose, LOTR_ABILS);
+  const data: Record<string, unknown> = {
+    name,
+    category: oneOf(o.category, LOTR_VIRTUE_CATEGORIES, "Common"),
+    asi: choose.length ? { choose, amount: 1 } : null,
+    benefits: strList(o.benefits, 12, 2000),
+    source: "Homebrew",
+  };
+  if (str(o.flavor)) data.flavor = str(o.flavor).slice(0, 1000);
+  if (str(o.uses)) data.uses = str(o.uses).slice(0, 40);
+  return { name, data };
+}
+
+function normalizeLotrBackground(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew background needs a name.");
+  return { name, data: {
+    culture: oneOf(o.culture, ["Any", ...LOTR_CULTURE_NAMES] as const, "Any"),
+    name,
+    skillProficiencies: strList(o.skillProficiencies, 4, 60),
+    toolProficiencies: strList(o.toolProficiencies, 4, 80),
+    distinctiveFeatures: strList(o.distinctiveFeatures, 4, 40),
+    description: str(o.description).slice(0, 3000),
+    source: "Homebrew",
+  } };
+}
+
+function normalizeLotrWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew weapon needs a name.");
+  return { name, data: {
+    name,
+    category: oneOf(o.category, ["Simple", "Martial"] as const, "Simple"),
+    kind: oneOf(o.kind, ["Melee", "Ranged"] as const, "Melee"),
+    cost: str(o.cost).slice(0, 40) || "—",
+    damage: cleanDice(o.damage) || "1d4",
+    damageType: oneOf(o.damageType, ["bludgeoning", "piercing", "slashing"] as const, "slashing"),
+    weight: str(o.weight).slice(0, 40) || "—",
+    properties: strList(o.properties, 12, 60),
+    mastery: "",
+    description: str(o.description).slice(0, 2000),
+    source: "Homebrew",
+  } };
+}
+
+function normalizeLotrGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  return { name, data: {
+    name,
+    category: oneOf(o.category, LOTR_GEAR_CATEGORIES, "Adventuring Gear"),
+    cost: str(o.cost).slice(0, 40) || "—",
+    weight: str(o.weight).slice(0, 40) || "—",
+    description: str(o.description).slice(0, 3000),
+    source: "Homebrew",
+  } };
+}
+
+// A D&D-shaped stat block (normalizeDndMonster) re-grouped into the LotR
+// adversary groups, with a free description. The form sends the six ability
+// scores as flat STR…CHA fields; a stored record nests them under `abilities`.
+function normalizeLotrMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const ab: Record<string, unknown> = { ...((o.abilities ?? {}) as Record<string, unknown>) };
+  for (const k of LOTR_ABILS) if (o[k] != null && str(o[k]) !== "") ab[k] = o[k];
+  const base = normalizeDndMonster({ ...o, abilities: ab });
+  const data: Record<string, unknown> = {
+    ...base.data,
+    alignment: str(o.alignment).slice(0, 60),
+    group: oneOf(o.group, LOTR_MONSTER_GROUPS, "Other"),
+  };
+  if (str(o.description)) data.description = str(o.description).slice(0, 3000);
+  return { name: base.name, data };
+}
+
 // ── Marvel Multiverse RPG (MMRPG, d616) ─────────────────────────────────────
 function normalizeMmrpgPower(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -2101,6 +2197,11 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "myz-gear": return normalizeMyzGear(data);
     case "vae-weapon": return normalizeVaeWeapon(data);
     case "vae-gear": return normalizeVaeGear(data);
+    case "lotr-virtue": return normalizeLotrVirtue(data);
+    case "lotr-background": return normalizeLotrBackground(data);
+    case "lotr-weapon": return normalizeLotrWeapon(data);
+    case "lotr-gear": return normalizeLotrGear(data);
+    case "lotr-monster": return normalizeLotrMonster(data);
     case "mmrpg-power": return normalizeMmrpgPower(data);
     case "mmrpg-trait": return normalizeMmrpgLabel(data, "trait");
     case "mmrpg-tag": return normalizeMmrpgLabel(data, "tag");

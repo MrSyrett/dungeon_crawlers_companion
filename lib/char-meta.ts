@@ -6,7 +6,7 @@
 //
 // Every system saves a flat object under its own `Document.data` key
 // (sd_sheet, dcc_sheet, …). Level is a real number only where the system has
-// levels (SD/DND/Nimble/ICRPG/DCC, and MMRPG's Rank); elsewhere it is null and
+// levels (SD/DND/LOTR/Nimble/ICRPG/DCC, and MMRPG's Rank); elsewhere it is null and
 // the system's "equivalent" (archetype, template, trope, role, tier …) is folded
 // into `cls` instead. When adding a system, add its branch here — see
 // `anthropic-skills:add-game-system`.
@@ -85,6 +85,19 @@ export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | n
         name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
         cls,
         level: null,
+      };
+    }
+    // The Lord of the Rings: calling (+ its specialisation) as the class, level 1–10.
+    const lotr = blob?.lotr_sheet;
+    if (typeof lotr === "string") {
+      const s = JSON.parse(lotr) as { name?: unknown; calling?: unknown; cls?: unknown; subclass?: unknown; level?: unknown };
+      const callingName = typeof s.calling === "string" && s.calling.trim() ? s.calling : (typeof s.cls === "string" ? s.cls : "");
+      const sub = typeof s.subclass === "string" && s.subclass.trim() ? `(${s.subclass.trim()})` : "";
+      const lv = parseInt(String(s.level ?? ""), 10);
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls: [callingName, sub].filter(Boolean).join(" "),
+        level: Number.isNaN(lv) ? null : lv,
       };
     }
     // Marvel Multiverse RPG: "level" is Rank; the class column shows the origin.
