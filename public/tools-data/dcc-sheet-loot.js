@@ -87,7 +87,12 @@
   function add() {
     if (!result) return;
     var added = 0;
-    result.items.forEach(function (it) { if (it.on) { addInvItem(it.name, "1", it.notes); added++; } });
+    result.items.forEach(function (it) {
+      if (!it.on) return;
+      addInvItem(it.name, "1", it.notes); added++;
+      // A weapon brings its weapon skill onto the Skills list (rolls To Hit + Damage).
+      if (it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) { try { window.DCCSkills.ensureWeaponSkill(it.name); } catch (e) {} }
+    });
     if (result.gold) addGold(result.gold);
     try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
     try {

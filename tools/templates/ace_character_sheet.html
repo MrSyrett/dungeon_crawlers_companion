@@ -659,19 +659,20 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       </div>
 
-      <div class="card">
-      <div class="section-bar"><span>Attacks</span></div>
-      <table class="attacks-table">
-        <thead><tr><th style="width:32%;">Weapon</th><th>Kind</th><th style="width:56px;">Dmg</th><th>Dice</th><th style="width:64px;"></th></tr></thead>
-        <tbody id="attacks-body"></tbody>
-      </table>
-      </div>
-
       <div class="card tabs-card">
       <div class="tabs-bar">
+        <button class="tab-btn" data-tab="attacks" onclick="setTab('attacks')">Attacks</button>
         <button class="tab-btn" data-tab="role" onclick="setTab('role')">Role</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
+      </div>
+
+      <div class="tab-panel" id="tab-attacks">
+        <div class="section-bar"><span>Attacks</span></div>
+        <table class="attacks-table">
+          <thead><tr><th style="width:32%;">Weapon</th><th>Kind</th><th style="width:56px;">Dmg</th><th>Dice</th><th style="width:64px;"></th></tr></thead>
+          <tbody id="attacks-body"></tbody>
+        </table>
       </div>
 
       <div class="tab-panel" id="tab-role">
@@ -1188,7 +1189,7 @@ function fillGearPick() {
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
 var _tab = 'role';
-const TABS = ['role','gear','notes'];
+const TABS = ['attacks','role','gear','notes'];
 function setTab(name) {
   if(!TABS.includes(name)) name = 'role';
   _tab = name;

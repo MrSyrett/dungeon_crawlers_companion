@@ -280,7 +280,7 @@
     var stripped = String(name).replace(/\s*\([^)]*\)\s*$/, "").trim();
     if (stripped) cands.push(stripped);
     if (name && name !== stripped) cands.push(name);
-    var isAttack = tr.closest && tr.closest("#attacks-body");
+    var isAttack = /\bDmg:?\s*\d*d\d+/i.test(texts[3] ? texts[3].value : "");
     if (isAttack && texts[3] && texts[3].value) {
       String(texts[3].value).split(/[·,;]/).forEach(function (p) {
         var t = p.replace(/\bskill\b/i, "").trim();
@@ -339,59 +339,16 @@
     var rank = inputs[1]; if (rank) { try { rank.focus(); } catch (_) {} }
   }
 
-  // An attack skill / attack spell also belongs in the Attacks section (Core p.176:
-  // write attack skills in BOTH the Attacks block and the Skills list). Add a matching
-  // attack row so the To Hit / Damage math is available too.
+  // There's no separate Attacks block any more: an attack skill/spell's damage lives
+  // in its Notes as "Dmg NdM" (the sheet's syncLinkedAttacks() writes and updates it
+  // from the Rank), and its roll button rolls To Hit + Damage together.
   function isAttackEntry(e) { return !!e && (e.kind === "attack" || (e.kind === "spell" && e.type === "attack")); }
-  function newAttackRow() {
-    if (typeof addAttackRow !== "function") return null;
-    addAttackRow();
-    var body = document.getElementById("attacks-body");
-    return body ? body.lastElementChild : null;
-  }
-  function fillAttackRow(tr, name, e) {
-    if (!tr) return;
-    var inputs = tr.querySelectorAll('input[type="text"]'); // [name, rank, dice, effects]
-    var sel = tr.querySelector("select");
-    if (inputs[0]) inputs[0].value = name;
-    if (e) {
-      tr.dataset.src = e.name;                                   // keep the original for lookups
-      if (sel && e.stat) sel.value = String(e.stat).toLowerCase();
-      if (inputs[2] && e.damage) inputs[2].value = e.damage;     // attack skills carry base dice
-      if (inputs[3]) inputs[3].value = e.kind === "spell" ? ((e.mana != null ? e.mana + " Mana" : "") + (e.type ? " · " + e.type : "")) : "";
-    }
-    if (typeof recalcAttackRow === "function") { try { recalcAttackRow(tr); } catch (_) {} }
-    fireInput(inputs[0]);
-  }
+  function syncDamage() { if (typeof window.syncLinkedAttacks === "function") { try { window.syncLinkedAttacks(); } catch (_) {} } }
   function addToSheet(name, e) {
-    fillRow(newRow(), name, e);                                  // always goes on the Skills list
-    if (isAttackEntry(e)) fillAttackRow(newAttackRow(), name, e); // …and the Attacks section too
+    fillRow(newRow(), name, e);
     if (typeof floatHealToTop === "function") { try { floatHealToTop(); } catch (_) {} }
-    // Link the new attack to its skill so Rank + damage upgrades track together.
-    if (typeof window.syncLinkedAttacks === "function") { try { window.syncLinkedAttacks(); } catch (_) {} }
+    syncDamage();
   }
-
-  // ── attack rows keyed to a Skills-tab row (used by the Hotlist spell pin) ───
-  function attackRowMatches(tr, keys) {
-    var texts = tr.querySelectorAll('input[type="text"]');
-    var nm = texts[0] ? String(texts[0].value) : "";
-    var nmStripped = nm.replace(/\s*\(spell\)\s*$/i, "").trim().toLowerCase();
-    var src = (tr.dataset && tr.dataset.src ? tr.dataset.src : "").toLowerCase();
-    return keys.some(function (k) { k = String(k || "").toLowerCase(); return !!k && (k === src || k === nmStripped || k === nm.toLowerCase()); });
-  }
-  function findAttackRows(keys) {
-    return [].slice.call(document.querySelectorAll("#attacks-body tr")).filter(function (tr) { return attackRowMatches(tr, keys); });
-  }
-  function rowKeys(tr) {
-    var texts = tr.querySelectorAll('input[type="text"]');
-    var name = texts[0] ? String(texts[0].value).trim() : "";
-    var src = tr.dataset && tr.dataset.src ? tr.dataset.src : "";
-    return [src, name].filter(Boolean);
-  }
-
-  // ── attack-skill radial (○/◉ on the Skills row toggles its Attacks row) ──────
-  // An attack SKILL's radial equips/unequips its attack row instead of pinning to
-  // the Hotlist; the ◉ state mirrors whether that attack row currently exists.
   function isAttackSkillRow(tr) {
     if (!tr) return false;
     var texts = tr.querySelectorAll('input[type="text"]');
@@ -400,40 +357,49 @@
     var e = lookup(src) || lookup(name);
     return !!e && e.kind === "attack";
   }
-  function hasAttackRow(tr) { return findAttackRows(rowKeys(tr)).length > 0; }
-  function skillRadialEl(tr) { return tr ? tr.querySelector(".hot-pin") : null; }
-  function refreshSkillRadial(tr) {
-    var btn = skillRadialEl(tr); if (!btn || !isAttackSkillRow(tr)) return;
-    var on = hasAttackRow(tr);
-    btn.classList.toggle("on", on);
-    btn.textContent = on ? "◉" : "○";
-    btn.title = on ? "Remove this attack from the Attacks list" : "Add this attack to the Attacks list";
-    btn.setAttribute("aria-label", btn.title);
+  // The Skills row for a rulebook skill (by stored source or by name), or null.
+  function findSkillRow(name) {
+    var k = String(name || "").trim().toLowerCase();
+    if (!k) return null;
+    return [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (tr) {
+      var t = tr.querySelector('input[type="text"]');
+      var nm = t ? String(t.value).trim().toLowerCase() : "";
+      var src = (tr.dataset && tr.dataset.src ? tr.dataset.src : "").toLowerCase();
+      return nm === k || src === k;
+    }) || null;
   }
-  function refreshAllSkillRadials() {
-    [].slice.call(document.querySelectorAll("#skills-body tr")).forEach(function (tr) { if (isAttackSkillRow(tr)) refreshSkillRadial(tr); });
-  }
-  function toggleAttack(tr) {
-    if (!tr) return;
-    var rows = findAttackRows(rowKeys(tr));
-    if (rows.length) { rows.forEach(function (r) { r.remove(); }); }
-    else {
-      var texts = tr.querySelectorAll('input[type="text"]');
-      var name = texts[0] ? String(texts[0].value).trim() : "";
-      var src = tr.dataset && tr.dataset.src ? tr.dataset.src : "";
-      var e = lookup(src) || lookup(name);
-      if (isAttackEntry(e)) fillAttackRow(newAttackRow(), name || e.name, e);
-    }
-    refreshSkillRadial(tr);
-    if (typeof window.syncLinkedAttacks === "function") { try { window.syncLinkedAttacks(); } catch (_) {} }
+  // Picking up a weapon puts its weapon skill on the Skills list (Rank 0 until it's
+  // trained) — no-op when the skill is already there or the item has no matching
+  // attack skill. Fills the first blank row so it lands with the other skills.
+  function ensureWeaponSkill(itemName) {
+    var e = lookup(itemName);
+    if (!e || e.kind !== "attack") return null;
+    var have = findSkillRow(e.name);
+    if (have) return have;
+    var tr = [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (r) {
+      var t = r.querySelector('input[type="text"]'); return t && !String(t.value).trim();
+    }) || newRow();
+    if (!tr) return null;
+    var inputs = tr.querySelectorAll('input[type="text"]'); // [name, rank, checkType, notes]
+    var sel = tr.querySelector("select");
+    if (inputs[0]) inputs[0].value = e.name;
+    if (inputs[1] && !String(inputs[1].value).trim()) inputs[1].value = "0";
+    tr.dataset.src = e.name;
+    if (sel && e.stat) sel.value = String(e.stat).toLowerCase();
+    if (inputs[2]) inputs[2].value = checkTypeOf(e);
+    if (inputs[3]) inputs[3].value = e.group || "";
+    fireInput(inputs[0]);
+    syncDamage();
+    return tr;
   }
 
   window.DCCSkills = {
     isAttackSkillRow: isAttackSkillRow,
-    hasAttackRow: hasAttackRow,
-    toggleAttack: toggleAttack,
-    refreshSkillRadial: refreshSkillRadial,
-    refreshAllSkillRadials: refreshAllSkillRadials,
+    isAttackEntry: function (name) { return isAttackEntry(lookup(name)); },
+    ensureWeaponSkill: ensureWeaponSkill,
+    // Kept as no-ops for callers from before the Attacks block was folded into Skills.
+    refreshSkillRadial: function () {},
+    refreshAllSkillRadials: function () {},
     openPicker: openPicker,
     closePicker: closePicker,
     search: function (v) { query = v; renderPicker(); },
@@ -464,25 +430,8 @@
       adding = null;
       renderPicker();
     },
-    // Mirror a Skills-tab spell into the Attacks section (used by the Hotlist pin).
-    // Only attack skills/spells get an attack row; no-op for utility/heal or duplicates.
-    addAttackForRow: function (tr) {
-      if (!tr) return false;
-      var texts = tr.querySelectorAll('input[type="text"]');
-      var name = texts[0] ? String(texts[0].value).trim() : "";
-      var src = tr.dataset && tr.dataset.src ? tr.dataset.src : "";
-      var e = lookup(src) || lookup(name);
-      if (!isAttackEntry(e)) return false;
-      if (findAttackRows(rowKeys(tr)).length) return false;   // already present
-      fillAttackRow(newAttackRow(), name || e.name, e);
-      return true;
-    },
-    removeAttackForRow: function (tr) {
-      if (!tr) return false;
-      var rows = findAttackRows(rowKeys(tr));
-      rows.forEach(function (r) { r.remove(); });
-      return rows.length > 0;
-    },
+    addAttackForRow: function () { return false; },
+    removeAttackForRow: function () { return false; },
   };
 
   // Pull the user's saved homebrew skills & spells so the picker lists them too.

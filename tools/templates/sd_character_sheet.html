@@ -528,7 +528,6 @@ body.dark .sl::after{background:#3a3320;}
   .hdr-metarow > *{flex:1 1 31%!important;}
   .sd-vitals-card{order:1;}
   .sd-abilities{order:2;}
-  .sd-attacks-card{order:3;}
   .sd-trackers{order:4;}
   .sd-tabs-card{order:5;}
 }
@@ -759,9 +758,18 @@ body.dark .sl::after{background:#3a3320;}
       </div>
       </div><!-- end vitals card -->
 
-      <!-- ATTACKS -->
-      <div class="card sd-attacks-card">
-      <div class="attacks-section-wrap">
+
+      <!-- TABS: Attacks / Spells / Talents / Gear -->
+      <div class="card sd-tabs-card">
+      <div class="tabs-bar">
+        <button class="tab-btn" data-tab="attacks" onclick="setTab('attacks')">Attacks</button>
+        <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
+        <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
+        <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Equipment</button>
+      </div>
+
+      <!-- ATTACKS TAB -->
+      <div class="tab-panel" id="tab-attacks">
         <div class="sl">Attacks</div>
         <table class="attacks-table">
           <thead>
@@ -777,15 +785,6 @@ body.dark .sl::after{background:#3a3320;}
           </thead>
           <tbody id="attacks-body"></tbody>
         </table>
-      </div>
-      </div><!-- end attacks card -->
-
-      <!-- TABS: Spells / Talents / Gear -->
-      <div class="card sd-tabs-card">
-      <div class="tabs-bar">
-        <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
-        <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
-        <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Equipment</button>
       </div>
 
       <!-- SPELLS TAB -->
@@ -1433,9 +1432,9 @@ function onStatChange(id) {
   document.getElementById(id+'-mod').textContent = fmtMod(m);
 }
 
-// ═══ TABS (Spells / Talents / Gear) ═════════════════════════════════════════
+// ═══ TABS (Attacks / Spells / Talents / Gear) ═════════════════════════════════════════
 var _tab = 'gear';
-const TABS = ['spells','talents','gear'];
+const TABS = ['attacks','spells','talents','gear'];
 function setTab(name){
   if(TABS.indexOf(name) < 0) name = 'gear';
   _tab = name;
@@ -4465,21 +4464,19 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   /* Flow both columns' children into one stacked list and reorder them */
   .main-body{display:flex;flex-direction:column;align-items:stretch;}
   .left-col,.main-col{display:contents;}
-  /* Card order: Vitals → Ability Scores → Attacks → Trackers → Tabs */
+  /* Card order: Vitals → Ability Scores → Trackers → Tabs (Attacks is a tab) */
   .sd-vitals-card{order:1;}
   .sd-abilities{order:2;}
-  .sd-attacks-card{order:3;}
   .sd-trackers{order:4;}
   .sd-tabs-card{order:5;}
   /* Inner order (mirrors the phone @media) */
   .sd-vitals{order:1;grid-template-columns:1fr 1fr;}
   .main-body > .left-col > .sl:nth-child(1){order:2;}
   #stats-grid{order:2;}
-  .attacks-section-wrap{order:3;border-top:2px solid var(--border);}
   .main-body > .left-col > .sl:nth-child(3){order:4;}
   #trk-list{order:4;}
   .tabs-bar{order:5;}
-  #tab-spells,#tab-talents,#tab-gear{order:6;}
+  #tab-attacks,#tab-spells,#tab-talents,#tab-gear{order:6;}
   /* Ability scores stay stacked (single column) */
   .stats-grid{display:flex;flex-direction:column;}
   /* Header stacking + field grids */
@@ -4567,15 +4564,14 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
     flex-direction:column;
   }
   .left-col,.main-col{display:contents;}
-  /* Mobile order: Vitals → Ability Scores → Attacks → Trackers → tabs */
+  /* Mobile order: Vitals → Ability Scores → Trackers → tabs (Attacks is a tab) */
   .sd-vitals{order:1;grid-template-columns:1fr 1fr;}   /* HP/AC on top, XP/Luck below */
   .main-body > .left-col > .sl:nth-child(1){order:2;}  /* Ability Scores label */
   #stats-grid{order:2;}
-  .attacks-section-wrap{order:3;border-top:2px solid var(--border);}
   .main-body > .left-col > .sl:nth-child(3){order:4;}  /* Trackers label */
   #trk-list{order:4;}
   .tabs-bar{order:5;}
-  #tab-spells,#tab-talents,#tab-gear{order:6;}
+  #tab-attacks,#tab-spells,#tab-talents,#tab-gear{order:6;}
   /* Ability scores stay stacked (single column) on phones */
   .stats-grid{display:flex;flex-direction:column;}
   .hdr-fields,.hdr-fields-2{grid-template-columns:1fr 1fr;}

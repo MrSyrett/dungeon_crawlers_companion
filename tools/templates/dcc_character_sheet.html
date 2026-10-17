@@ -844,39 +844,20 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           </div>
       </div><!-- end Defense card -->
 
-      <!-- ATTACKS -->
+      <!-- HOTLIST (in the old Attacks spot; attack skills roll To Hit + Damage from the Skills tab) -->
       <div class="card">
-        <div class="attacks-section">
-          <div class="section-bar">Attacks</div>
-          <table class="attacks-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th class="center">To Hit<span class="atk-sub">Rank</span></th>
-                <th class="center">Stat Mod<span class="atk-sub">To Hit &amp; Dmg</span></th>
-                <th class="center">Damage<span class="atk-sub">Dice</span></th>
-                <th>Effects</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="attacks-body"></tbody>
-          </table>
-        </div>
-      </div><!-- end Attacks card -->
+        <div class="section-bar red">Hotlist</div>
+        <div id="hotlist-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px 10px;"></div>
+      </div>
 
     </div><!-- end center-col -->
 
   </div><!-- end body-row -->
 
-  <!-- HOTLIST (full width) -->
-  <div class="card">
-    <div class="section-bar red">Hotlist</div>
-    <div id="hotlist-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px 10px;"></div>
-  </div>
-
   <!-- TABS -->
   <div class="card tabs-card">
   <div class="tabs-row">
+    <button class="tab-btn" data-tab="turn" onclick="switchTab('turn')">Turn</button>
     <button class="tab-btn active" data-tab="skills" onclick="switchTab('skills')">Skills</button>
     <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">Inventory</button>
     <button class="tab-btn" data-tab="gear" onclick="switchTab('gear')">Gear</button>
@@ -884,10 +865,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="tab-btn" data-tab="background" onclick="switchTab('background')">Background</button>
   </div>
 
+  <!-- TAB: TURN (combat round hub — rendered by renderTurn()) -->
+  <div class="tab-panel" id="tab-turn"><div id="dcc-turn"></div></div>
+
   <!-- TAB: SKILLS -->
   <div class="tab-panel active" id="tab-skills">
     <div class="skill-topbar">
-      <select class="sort-sel" onchange="sortSkills(this.value);this.selectedIndex=0;" title="Sort skills">
+      <select class="sort-sel" data-nolock onchange="sortSkills(this.value);this.selectedIndex=0;" title="Sort skills">
         <option value="">Sort ▾</option>
         <option value="name">Name</option>
         <option value="rank">Rank</option>
@@ -934,14 +918,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <!-- TAB: INVENTORY -->
   <div class="tab-panel" id="tab-inventory">
     <div class="inv-pinned">
-      <select class="sort-sel" onchange="sortInventory(this.value);this.selectedIndex=0;" title="Sort inventory">
+      <select class="sort-sel" data-nolock onchange="sortInventory(this.value);this.selectedIndex=0;" title="Sort inventory">
         <option value="">Sort ▾</option>
         <option value="item">Item Name</option>
         <option value="qty">Quantity</option>
       </select>
+      <button class="add-btn inv-add-btn" onclick="if(window.DCCItems){DCCItems.openPicker()}else{addInvRow()}">+ Add Item</button>
       <div class="inv-pin-group">
-        <div class="inv-pin gold"><span class="inv-pin-lbl">Gold</span><input type="text" inputmode="numeric" id="f-gold" class="inv-pin-in" placeholder="0" oninput="scheduleAutosave()"></div>
-        <div class="inv-pin junk"><span class="inv-pin-lbl">Misc. Junk</span><input type="text" inputmode="numeric" id="f-junk" class="inv-pin-in" placeholder="0" title="Amount of Misc. Junk (a crafting currency)" oninput="scheduleAutosave()"></div>
+        <div class="inv-pin gold"><span class="inv-pin-lbl">Gold</span><input type="text" inputmode="numeric" id="f-gold" class="inv-pin-in" data-nolock placeholder="0" oninput="scheduleAutosave()"></div>
+        <div class="inv-pin junk"><span class="inv-pin-lbl">Misc. Junk</span><input type="text" inputmode="numeric" id="f-junk" class="inv-pin-in" data-nolock placeholder="0" title="Amount of Misc. Junk (a crafting currency)" oninput="scheduleAutosave()"></div>
       </div>
     </div>
     <table class="inv-table">
@@ -950,9 +935,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </thead>
       <tbody id="inv-body"></tbody>
     </table>
-    <div class="skill-actions-row">
-      <button class="add-btn" onclick="if(window.DCCItems){DCCItems.openPicker()}else{addInvRow()}">+ Add Item</button>
-    </div>
   </div>
 
   <!-- TAB: PETS & ABILITIES -->
@@ -1342,12 +1324,8 @@ function rest(kind) {
   }
 }
 
-// The Skills-row radial: for an ATTACK skill it toggles that skill's Attacks row
-// (equip-style ◉/○); for everything else it pins to the Hotlist as before.
+// The Skills-row radial pins an attack skill or spell to the Hotlist.
 function dccSkillRadial(btn) {
-  const tr = btn && btn.closest ? btn.closest('tr') : null;
-  if(!tr) return;
-  if(window.DCCSkills && DCCSkills.isAttackSkillRow && DCCSkills.isAttackSkillRow(tr)) { DCCSkills.toggleAttack(tr); return; }
   if(window.DCCHotlist) DCCHotlist.toggleRow(btn);
 }
 
@@ -1407,67 +1385,58 @@ function rollDoT() {
   }
 }
 
-// ── ATTACKS ──
-function buildAttacks() {
-  const tbody = document.getElementById('attacks-body');
-  for(let i=0;i<5;i++) addAttackRow(tbody);
+// ── ATTACK SKILLS (Damage lives in the skill's Notes) ──
+// There is no separate Attacks block: an attack skill/spell on the Skills list carries
+// its damage as a "Dmg NdM" token in Notes, and its roll button rolls To Hit
+// (d20 + Rank + Stat Mod) AND Damage (dice + Stat Mod) together. Rulebook-linked
+// skills keep the token current as their Rank unlocks extra damage dice; any custom
+// skill becomes an attack just by having "Dmg 1d6" (etc.) in its Notes.
+const DMG_RX = /\bDmg:?\s*(\d*d\d+)/i;
+function skillDmgOf(tr) {
+  const t = tr ? tr.querySelectorAll('input[type="text"]') : [];
+  const m = String(t[3] ? t[3].value : '').match(DMG_RX);
+  return m ? m[1] : '';
 }
-
-function addAttackRow(tbody) {
-  if(!tbody) tbody = document.getElementById('attacks-body');
-  const statOpts = `<option value="">—</option><option value="str">STR</option><option value="int">INT</option><option value="con">CON</option><option value="dex">DEX</option><option value="cha">CHA</option>`;
-  const tr = document.createElement('tr');
-  const recalc = "recalcAttackRow(this.closest('tr'))";
-  tr.innerHTML = `
-    <td><input type="text" placeholder="Attack name..."></td>
-    <td>
-      <div class="atk-formula">
-        <input type="text" placeholder="Rank" style="width:36px;" oninput="${recalc}">
-      </div>
-      <span class="atk-calc" data-atk="hit" title="To Hit = d20 + Rank + Stat Mod">—</span>
-    </td>
-    <td>
-      <div class="atk-formula">
-        <select class="skill-stat-sel atk-stat-sel" style="width:52px;" title="Stat Mod (applies to both To Hit and Damage)" onchange="${recalc}">${statOpts}</select>
-      </div>
-    </td>
-    <td>
-      <div class="atk-formula">
-        <input type="text" placeholder="Dice" style="width:44px;" oninput="${recalc}">
-      </div>
-      <span class="atk-calc" data-atk="dmg" title="Damage = dice + Stat Mod">—</span>
-    </td>
-    <td><input type="text" placeholder="Effects..."></td>
-    <td style="text-align:right;white-space:nowrap;"><button class="skill-info-btn" onclick="if(window.DCCSkills)DCCSkills.infoRow(this)" title="Look up this attack skill/spell" aria-label="Attack info">i</button><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll attack" aria-label="Roll attack"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button></td>
-  `;
-  tbody.appendChild(tr);
-  recalcAttackRow(tr);
+function noteWithDmg(note, dice) {
+  const v = String(note || '');
+  if(DMG_RX.test(v)) return v.replace(DMG_RX, 'Dmg ' + dice);
+  return 'Dmg ' + dice + (v.trim() ? ' · ' + v.trim() : '');
 }
-
-// ── Auto attack-math: live To Hit / Damage from Rank + linked Stat Mod ──
-// To Hit  = d20 + Rank + Stat Mod (rolled vs the target's Evade = 10 + DEX + Floor).
-// Damage  = the dice + Stat Mod. The stat select feeds both. Recomputed on every
-// row edit, on any stat-score change, and when the ENH/UNENH mod source toggles.
-function recalcAttackRow(tr) {
-  if(!tr) return;
-  const inputs = tr.querySelectorAll('input[type="text"]');
-  const sel = tr.querySelector('select');
-  const rank = parseMod(inputs[1] ? inputs[1].value : '');
-  const statId = sel ? sel.value : '';
-  const sm = statId ? getStatMod(statId) : 0;
-  const sign = (n) => (n >= 0 ? '+' : '−') + Math.abs(n);
-  const hitEl = tr.querySelector('[data-atk="hit"]');
-  if(hitEl) hitEl.textContent = 'd20' + sign(rank + sm);
-  const dmgEl = tr.querySelector('[data-atk="dmg"]');
-  if(dmgEl) {
-    const diceStr = (inputs[2] ? inputs[2].value : '').trim();
-    const m = diceStr.match(/^(\d*)d(\d+)$/i);
-    if(m) dmgEl.textContent = diceStr + (sm ? ' ' + sign(sm) : '');
-    else dmgEl.textContent = sm ? sign(sm) : '—';
-  }
+// Notes text without the Dmg token (for the derived attacks list / exports).
+function noteSansDmg(note) {
+  return String(note || '').replace(DMG_RX, '').replace(/^\s*[·,;|-]\s*/, '').replace(/\s*[·,;|-]\s*$/, '').trim();
 }
-function recalcAllAttacks() {
-  document.querySelectorAll('#attacks-body tr').forEach(recalcAttackRow);
+function recalcAllAttacks() { syncLinkedAttacks(); }
+function migrateAttacksToSkills(attacks) {
+  const tbody = document.getElementById('skills-body'); if(!tbody) return;
+  const norm = v => String(v || '').replace(/\s*\(spell\)\s*$/i, '').trim().toLowerCase();
+  (attacks || []).forEach(a => {
+    if(!a || !String(a.name || '').trim()) return;
+    const keys = [norm(a.src), norm(a.name)].filter(Boolean);
+    let tr = [...tbody.querySelectorAll('tr')].find(r => {
+      const t = r.querySelectorAll('input[type="text"]');
+      const nm = norm(t[0] ? t[0].value : ''), sc = norm(r.dataset.src);
+      return keys.some(k => k === nm || (sc && k === sc));
+    });
+    const dice = String(a.dice || '').trim();
+    const eff = String(a.effects || '').trim();
+    if(!tr) {
+      tr = [...tbody.querySelectorAll('tr')].find(r => { const n = r.querySelector('input[type="text"]'); return n && !n.value.trim(); });
+      if(!tr) { addSkillRow(); tr = tbody.lastElementChild; }
+      const t = tr.querySelectorAll('input[type="text"]');
+      const sel = tr.querySelector('select');
+      t[0].value = a.name; t[1].value = a.rank || '';
+      if(sel) sel.value = atkStatOf(a);
+      t[2].value = /mana/i.test(eff) ? 'Spell' : 'Active';
+      t[3].value = eff;
+      if(a.src) tr.dataset.src = a.src;
+    } else if(eff) {
+      const t = tr.querySelectorAll('input[type="text"]');
+      if(!String(t[3].value).toLowerCase().includes(eff.toLowerCase())) t[3].value = [t[3].value.trim(), eff].filter(Boolean).join(' · ');
+    }
+    const t = tr.querySelectorAll('input[type="text"]');
+    if(/^\d*d\d+$/i.test(dice) && !DMG_RX.test(t[3].value)) t[3].value = noteWithDmg(t[3].value, dice);
+  });
 }
 
 // ── LINK ATTACKS TO THEIR SKILL/SPELL ──
@@ -1528,31 +1497,26 @@ function dccSkillRankFor(entry) {
   return found;
 }
 function syncLinkedAttacks() {
-  document.querySelectorAll('#attacks-body tr').forEach(tr => {
-    const inputs = tr.querySelectorAll('input[type="text"]');   // [name, rank, dice, effects]
-    if(inputs.length < 3) return;
-    const entry = dccCombatEntry(tr.dataset.src || inputs[0].value);
-    // Default: nothing managed — restore editability.
-    inputs[1].readOnly = false; inputs[2].readOnly = false;
-    inputs[1].removeAttribute('title'); inputs[2].removeAttribute('title');
-    if(!entry) { tr.classList.remove('atk-linked'); tr.removeAttribute('title'); return; }
-    tr.classList.add('atk-linked');
-    if(!tr.dataset.src) tr.dataset.src = entry.name;   // remember the link across saves/renames
-    const skillRank = dccSkillRankFor(entry);
-    let rank;
-    if(skillRank !== null) {
-      rank = skillRank;
-      inputs[1].value = String(skillRank);
-      inputs[1].readOnly = true;
-      inputs[1].title = 'Follows the ' + entry.name + ' skill Rank';
-    } else {
-      rank = parseMod(inputs[1].value);              // attack-only: driven by its own Rank
+  document.querySelectorAll('#skills-body tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input[type="text"]');   // [name, rank, checkType, notes]
+    if(inputs.length < 4) return;
+    const entry = dccCombatEntry(tr.dataset.src || inputs[0].value) || (tr.dataset.src ? dccCombatEntry(inputs[0].value) : null);
+    if(!entry) {
+      tr.classList.toggle('skill-attack', !!skillDmgOf(tr));
+      if(tr.dataset.atkTitle) { tr.removeAttribute('title'); delete tr.dataset.atkTitle; }
+      return;
     }
-    inputs[2].value = dccDiceAtRank(entry.base, entry.upgrades, rank);
-    inputs[2].readOnly = true;
-    inputs[2].title = 'Damage scales with the ' + entry.name + ' Rank (' + entry.base + ' base)';
+    tr.classList.add('skill-attack');
+    const rank = parseMod(inputs[1].value);
+    const dice = dccDiceAtRank(entry.base, entry.upgrades, rank);
+    // Don't rewrite Notes under the player's cursor; it resyncs when they leave it.
+    if(dice && document.activeElement !== inputs[3]) {
+      const nv = noteWithDmg(inputs[3].value, dice);
+      if(nv !== inputs[3].value) inputs[3].value = nv;
+    }
     const abil = dccAbilitiesAtRank(entry.upgrades, rank);
-    tr.title = abil.length ? (entry.name + ' — unlocked ' + abil.join(' · ')) : (entry.name + ' — Rank ' + rank);
+    tr.title = entry.name + ' — Damage ' + (dice || entry.base) + ' at Rank ' + rank + (abil.length ? ' · unlocked ' + abil.join(' · ') : '');
+    tr.dataset.atkTitle = '1';
   });
 }
 window.syncLinkedAttacks = syncLinkedAttacks;
@@ -1756,6 +1720,212 @@ function buildInventory() {
   for(let i=0;i<16;i++) addInvRow();
 }
 
+// ── TURN (combat round hub; Core p.63-64 Actions, p.80 the combat round) ──
+// A crawler gets 2 Actions per round; any mix (both may Attack). Every Action also
+// grants a free 10-ft Step. Interrupts (Evade, Intervene, Taunt, Catcher, a healing
+// Spell/item) are spent during the Mobs' declaration and count against the same 2.
+// Spending AI Favor once per round grants one extra NON-Attack Action. Potions: at most
+// one every other round, or Potion Sickness. End Round clears the Actions.
+let _turn = { round: 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, potionRound: 0, done: [] };
+let _turnOpts = [];
+const TURN_ACTIONS = 2;
+const _turnCollapsed = { checks: true };
+function turnEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function turnNum(id, dflt){ const v = parseInt(String(document.getElementById(id)?.value || '').replace(/[^0-9-]/g,''), 10); return isNaN(v) ? dflt : v; }
+function turnLeft(){ return Math.max(0, TURN_ACTIONS - _turn.used) + Math.max(0, _turn.extra - _turn.extraUsed); }
+function turnCan(kind){
+  if(kind === 'free') return true;
+  if(_turn.used < TURN_ACTIONS) return true;
+  return kind !== 'attack' && _turn.extraUsed < _turn.extra;
+}
+// Spend an Action. A non-Attack Action uses the AI Favor bonus Action first, so the
+// two regular Actions stay free for Attacks.
+function turnSpend(kind, label){
+  if(kind === 'free') { _turn.done.push(label); return true; }
+  if(!turnCan(kind)) {
+    addLog('Turn', 'No Actions left', kind === 'attack' ? 'Both Actions are spent (the AI Favor Action can\'t be an Attack). End the round to reset.' : 'Both Actions are spent. End the round to reset.', 'normal');
+    return false;
+  }
+  if(kind !== 'attack' && _turn.extraUsed < _turn.extra) _turn.extraUsed++;
+  else _turn.used++;
+  _turn.done.push(label);
+  return true;
+}
+function turnAfter(){ renderTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+
+// Skill rows by role. [name, rank, checkType, notes]
+function turnSkillRows(){
+  return [...document.querySelectorAll('#skills-body tr')].map(tr => {
+    const t = tr.querySelectorAll('input[type="text"]');
+    const sel = tr.querySelector('select');
+    const name = String(t[0] ? t[0].value : '').trim();
+    if(!name) return null;
+    const check = String(t[2] ? t[2].value : '');
+    const notes = String(t[3] ? t[3].value : '');
+    return { tr, name, rank: parseMod(t[1] ? t[1].value : ''), stat: sel ? sel.value : '', check, notes,
+      dice: skillDmgOf(tr), passive: /passive/i.test(check),
+      spell: /spell/i.test(check) || /\bmana\b/i.test(notes), mana: spellManaOf(tr) };
+  }).filter(Boolean);
+}
+function turnFindSkill(rx){ return turnSkillRows().find(r => rx.test(r.name) || rx.test(r.tr.dataset.src || '')) || null; }
+function turnRollRow(r){ const b = r.tr.querySelector('.skill-roll-btn'); return b ? rollSkill(b) : null; }
+function turnHitStr(r){ const sm = r.stat ? getStatMod(r.stat) : 0; const n = r.rank + sm; return 'd20' + (n >= 0 ? '+' : '−') + Math.abs(n); }
+
+function turnBuildOpts(){
+  const rows = turnSkillRows();
+  const curMana = turnNum('mana-current', 0);
+  const O = { attacks: [], spells: [], checks: [], actions: [], interrupts: [] };
+  const add = (sec, o) => { o.i = _turnOpts.length; _turnOpts.push(o); O[sec].push(o); };
+  _turnOpts = [];
+  // Attacks — every attack skill / attack spell (Dmg in its Notes).
+  rows.filter(r => r.dice).forEach(r => add('attacks', {
+    name: r.name, kind: 'attack',
+    sub: turnHitStr(r) + ' to hit · ' + r.dice + (r.stat ? ' +' + r.stat.toUpperCase() : '') + ' dmg' + (r.mana ? ' · ' + r.mana + ' Mana' : '') + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
+    blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
+    btn: 'Attack', run: () => turnRollRow(r),
+  }));
+  // Spells that aren't attacks (utility / heal). A heal can also be an Interrupt.
+  rows.filter(r => r.spell && !r.dice && !r.passive).forEach(r => add('spells', {
+    name: r.name, kind: 'other',
+    sub: (r.mana ? r.mana + ' Mana' : 'No Mana cost') + (/heal/i.test(r.name + ' ' + r.notes) ? ' · usable as an Interrupt' : ''),
+    blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
+    btn: 'Cast', run: () => turnRollRow(r),
+  }));
+  // Make a Check — the other active skills.
+  rows.filter(r => !r.dice && !r.spell && !r.passive).forEach(r => add('checks', {
+    name: r.name, kind: 'other', sub: turnHitStr(r) + (r.check ? ' · ' + r.check : ''),
+    btn: 'Roll', run: () => turnRollRow(r),
+  }));
+  // Actions (Table 3 / Table 4)
+  const move = turnNum('evade-move', 20);
+  add('actions', { name: 'Move', kind: 'other', sub: 'Move up to ' + move + ' ft (on top of the free Step)', btn: 'Move',
+    run: () => { _turn.moves++; addLog('Move', move + ' ft', 'Move Action — up to ' + move + ' ft', 'normal'); return true; } });
+  const hot = [...document.querySelectorAll('#hotlist-grid textarea')].map(t => String(t.value || '').trim()).filter(Boolean);
+  hot.forEach(h => {
+    const potion = /potion/i.test(h);
+    const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
+    add('actions', { name: 'Use: ' + h.split(/\s—\s/)[0], kind: 'other',
+      sub: (h.split(/\s—\s/)[1] || 'Use a prepared Hotlist item') + (sick ? ' · ⚠ potion last round — Potion Sickness' : (potion ? ' · max one potion every other round' : '')),
+      btn: 'Use', run: () => {
+        addLog('Use Hotlist Item', h.split(/\s—\s/)[0], h, 'normal');
+        if(potion) {
+          if(sick) addLog('Potion Sickness', 'Poisoned', 'Two potions within two rounds — Poison Debuff for 15 seconds (Core p.99)', 'fumble');
+          _turn.potionRound = _turn.round;
+        }
+        return true; } });
+  });
+  add('actions', { name: 'Retrieve', kind: 'other', sub: 'Move an item from Inventory to the Hotlist or your hand', btn: 'Do',
+    run: () => { addLog('Retrieve', '—', 'Inventory → Hotlist / hand', 'normal'); return true; } });
+  add('actions', { name: 'Help', kind: 'other', sub: 'Before an ally\'s non-combat Check: +1d2 (no Ranks in it) or +1d6 (with Ranks)',
+    btns: [['+1d2', () => { const n = d(2); addLog('Help', '+' + n, 'd2(' + n + ') — no Skill Ranks', 'normal'); return true; }],
+           ['+1d6', () => { const n = d(6); addLog('Help', '+' + n, 'd6(' + n + ') — with Skill Ranks', 'normal'); return true; }]] });
+  add('actions', { name: 'Call a Play', kind: 'other', sub: 'Plan an Action — an ally gets a bonus when they perform it', btn: 'Do',
+    run: () => { addLog('Call a Play', '—', 'Ally gains a bonus performing the called Action', 'normal'); return true; } });
+  const clue = turnFindSkill(/^(perception|investigation)$/i);
+  add('actions', { name: 'Look for Clues', kind: 'other', sub: 'Boss fights only — ' + (clue ? 'rolls ' + clue.name : 'Unopposed Perception / Investigation'), btn: clue ? 'Roll' : 'Do',
+    run: () => clue ? turnRollRow(clue) : (addLog('Look for Clues', '—', 'Boss encounter: gain info about the foe or environment', 'normal'), true) });
+  // Interrupts (Crawler Reaction Phase)
+  add('interrupts', { name: 'Evade', kind: 'other', sub: 'Evade Check vs. each Attack aimed at you this round', btn: 'Roll',
+    run: () => { rollEvade(); return true; } });
+  add('interrupts', { name: 'Intervene', kind: 'other', sub: 'Add 1d6 to another crawler\'s d20 Check after it\'s announced (not Stat Checks)', btn: 'Roll',
+    run: () => { const n = d(6); addLog('Intervene', '+' + n, 'd6(' + n + ') added to an ally\'s Check', 'normal'); return true; } });
+  const taunt = turnFindSkill(/^taunt$/i);
+  add('interrupts', { name: 'Taunt', kind: 'other', sub: taunt ? 'INT-Opposed ' + taunt.name + ' Check to pull a Mob\'s Attacks onto you' : 'Needs the Taunt skill', blocked: taunt ? '' : 'No Taunt skill',
+    btn: 'Roll', run: () => taunt ? turnRollRow(taunt) : null });
+  const catcher = turnFindSkill(/^catcher$/i);
+  add('interrupts', { name: 'Catcher', kind: 'other', sub: catcher ? 'Take the hit for an adjacent ally (you can\'t Evade it)' : 'Needs Ranks in Catcher', blocked: catcher ? '' : 'No Catcher skill',
+    btn: 'Do', run: () => { addLog('Catcher', '—', 'Took the hit for an ally (can\'t Evade it)', 'normal'); return true; } });
+  return O;
+}
+
+function turnDo(i, j){
+  const o = _turnOpts[i]; if(!o) return;
+  const run = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run;
+  if(o.blocked) { addLog(o.name, o.blocked, '', 'normal'); return; }
+  if(!turnCan(o.kind)) { turnSpend(o.kind, o.name); return; }
+  const ok = run();
+  if(!ok) { renderTurn(); return; }          // e.g. out of Mana — no Action spent
+  turnSpend(o.kind, o.name);
+  turnAfter();
+}
+function turnSpendAiFavor(){
+  if(_turn.aiSpent) return;
+  const el = document.getElementById('dr-aifavor');
+  const cur = turnNum('dr-aifavor', 0);
+  if(cur < 1) { addLog('AI Favor', 'none to spend', 'You need at least 1 AI Favor', 'normal'); return; }
+  if(el) { el.value = String(cur - 1); try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
+  _turn.aiSpent = true; _turn.extra = 1;
+  addLog('AI Favor spent', '+1 Action', 'One extra non-Attack Action this round · ' + (cur - 1) + ' AI Favor left', 'crit');
+  turnAfter();
+}
+function endTurnRound(){
+  const r = _turn.round;
+  const deb = document.getElementById('debuffs')?.value || '';
+  if(/blood trail|burn|poison|drown|sepsis/i.test(deb) && typeof rollDoT === 'function') rollDoT();
+  addLog('Round ' + r + ' ends', (_turn.used + _turn.extraUsed) + ' Action' + ((_turn.used + _turn.extraUsed) === 1 ? '' : 's'), _turn.done.length ? _turn.done.join(' · ') : 'No Actions taken', 'normal');
+  Object.assign(_turn, { round: r + 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, done: [] });
+  turnAfter();
+}
+function resetTurnCombat(){
+  Object.assign(_turn, { round: 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, potionRound: 0, done: [] });
+  addLog('Combat', 'Round 1', 'Turn tracker reset', 'normal');
+  turnAfter();
+}
+function turnToggleSec(key){ _turnCollapsed[key] = !_turnCollapsed[key]; renderTurn(); }
+
+function renderTurn(){
+  const host = document.getElementById('dcc-turn'); if(!host) return;
+  const O = turnBuildOpts();
+  const step = turnNum('evade-step', 10), move = turnNum('evade-move', 20);
+  const taken = _turn.used + _turn.extraUsed;
+  const moved = taken * step + _turn.moves * move;
+  const pip = (on, lbl, cls) => `<span class="turn-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}">${lbl}</span>`;
+  let pips = '';
+  for(let k = 0; k < TURN_ACTIONS; k++) pips += pip(k < _turn.used, 'Action ' + (k + 1));
+  if(_turn.extra) pips += pip(_turn.extraUsed >= _turn.extra, 'AI Favor Action', 'bonus');
+  const ai = turnNum('dr-aifavor', 0);
+  const card = o => {
+    const can = !o.blocked && turnCan(o.kind);
+    const btns = o.btns ? o.btns.map((b, j) => `<button class="tc-do" onclick="turnDo(${o.i},${j})">${turnEsc(b[0])}</button>`).join('')
+                        : `<button class="tc-do" onclick="turnDo(${o.i})">${turnEsc(o.btn || 'Do')}</button>`;
+    return `<div class="turn-card${can ? '' : ' disabled'}"><div class="tc-main"><div class="tc-name">${turnEsc(o.name)}</div><div class="tc-sub">${turnEsc(o.blocked ? o.blocked + ' · ' + o.sub : o.sub)}</div></div>${btns}</div>`;
+  };
+  const sec = (key, title, note, list, empty) => {
+    const col = !!_turnCollapsed[key];
+    return `<div class="turn-sec${col ? ' collapsed' : ''}"><div class="turn-sec-hd" onclick="turnToggleSec('${key}')"><span class="tsh-caret">▼</span><span class="tsh-title">${title}</span><span class="tsh-note">${note}</span></div>
+      <div class="turn-sec-body">${list.length ? list.map(card).join('') : `<div class="turn-empty">${empty}</div>`}</div></div>`;
+  };
+  host.innerHTML = `
+    <div class="turn-top">
+      <div class="turn-row1">
+        <div class="turn-round">Round <b>${_turn.round}</b></div>
+        <div class="turn-econ">${pips}</div>
+        <button class="turn-end-btn" onclick="endTurnRound()" title="Clear this round's Actions (rolls end-of-round damage-over-time if you have any)">End Round</button>
+      </div>
+      <div class="turn-row2">
+        <span class="turn-stat"><span class="tm-lbl">Actions left</span> <b>${turnLeft()}</b></span>
+        <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft <span class="tm-dim">(${step} ft Step per Action${_turn.moves ? ' + ' + _turn.moves + '× ' + move + ' ft Move' : ''})</span></span>
+        <button class="turn-mini" onclick="turnSpendAiFavor()" ${_turn.aiSpent || ai < 1 ? 'disabled' : ''} title="Once per round: spend 1 AI Favor for an extra non-Attack Action">${_turn.aiSpent ? 'AI Favor spent' : 'Spend AI Favor (' + ai + ') → +1 Action'}</button>
+        <button class="turn-mini ghost" onclick="resetTurnCombat()" title="Start a new combat at Round 1">New Combat</button>
+      </div>
+    </div>
+    ${sec('attacks', 'Attacks', 'To Hit + Damage', O.attacks, 'No attack skills yet. Add a weapon skill or attack spell on the Skills tab — its Notes carry the Dmg dice.')}
+    ${sec('spells', 'Spells', 'Utility & Heal', O.spells, 'No utility or healing spells.')}
+    ${sec('interrupts', 'Interrupts', 'Mob declaration phase · uses an Action', O.interrupts, '')}
+    ${sec('actions', 'Actions', 'Each Action grants a free ' + step + '-ft Step', O.actions, '')}
+    ${sec('checks', 'Make a Check', 'Other active skills', O.checks, 'No other active skills.')}`;
+}
+// Keep the hub current while it's open.
+let _turnRenderT = null;
+function turnMaybeRender(){
+  const p = document.getElementById('tab-turn');
+  if(!p || !p.classList.contains('active')) return;
+  clearTimeout(_turnRenderT); _turnRenderT = setTimeout(renderTurn, 150);
+}
+['input', 'change'].forEach(ev => document.addEventListener(ev, e => {
+  if(e.target && e.target.closest && e.target.closest('#skills-body,#hotlist-grid,#dr-aifavor,#mana-current,#evade-move,#evade-step,#stats-col,.stats-col')) turnMaybeRender();
+}));
+
 // ── TABS ──
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => {
@@ -1766,6 +1936,7 @@ function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('tab-'+name);
   if(panel) panel.classList.add('active');
+  if(name === 'turn' && typeof renderTurn === 'function') renderTurn();
 }
 
 // ── DICE ──
@@ -1939,71 +2110,6 @@ function addAiFavor(n, name) {
   addLog('AI Favor', '+' + n, (name ? name + ' — ' : '') + 'now ' + (cur + n), 'crit');
 }
 
-function rollAttack(btn) {
-  const row = btn.closest('tr');
-  if(!consumeSpellMana(row)) return;
-  const inputs = row.querySelectorAll('input[type="text"]');
-  const sels = row.querySelectorAll('select');
-  const name = inputs[0].value || 'Attack';
-  const rank = parseMod(inputs[1].value);
-  const dm = activeDebuffMods();
-  const statId = sels[0]?.value || '';                 // one stat feeds both
-  const wooz = dm.noDex && statId === 'dex';           // Woozy: no DEX Mod on Attack
-  const statMod = statId && !wooz ? getStatMod(statId) : 0;
-  const statLabel = statId ? `+${statId.toUpperCase()}(${statMod}${wooz?' — Woozy':''})` : '';
-  const diceStr = inputs[2].value || 'd6';
-
-  const {result: hitRoll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), dm.dis ? 'disadvantage' : null));
-  const hitTotal = hitRoll + rank + statMod + dm.penalty;
-  const hitStatLabel = statLabel;
-  let type = hitRoll===20?'crit':hitRoll===1?'fumble':'normal';
-
-  let dmgTotal = null, dmgDetail = '';
-  const diceMatch = diceStr.match(/^(\d*)d(\d+)$/i);
-  if(diceMatch) {
-    const num = parseInt(diceMatch[1]||'1'), sides = parseInt(diceMatch[2]);
-    const rolls = Array.from({length:num}, ()=>d(sides));
-    dmgTotal = rolls.reduce((a,b)=>a+b,0) + statMod;
-    const dmgStatLabel = statLabel;
-    dmgDetail = `${diceStr}(${rolls.join('+')})${dmgStatLabel}=${dmgTotal}`;
-  }
-
-  const resultStr = dmgTotal !== null
-    ? `Hit: ${hitTotal}  |  Dmg: ${dmgTotal}`
-    : `Hit: ${hitTotal}`;
-
-  const hitBase = advDetail ? advDetail : `d20(${hitRoll})`;
-  const detailStr = `${hitBase}+Rank(${rank})${hitStatLabel}${debuffTag(dm)}=${hitTotal}`
-    + (dmgDetail ? `  |  ${dmgDetail}` : '');
-
-  addLog(`${name}` + (hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''), resultStr, detailStr, type);
-  markSkillForAttack(row);   // attack skills also mark their Skills-list entry for advancement
-  addAiFavor(aiFavorAmount(name, inputs[3] ? inputs[3].value : ''), name);
-}
-
-// Find the Skills-list row that matches an attack (by stored source or by name,
-// ignoring a trailing "(Spell)") and tick its advancement box.
-function markSkillForAttack(attackRow) {
-  const at = attackRow.querySelectorAll('input[type="text"]');   // [name, rank, dice, effects]
-  const aName = String(at[0] ? at[0].value : '').replace(/\s*\(spell\)\s*$/i, '').trim().toLowerCase();
-  const aSrc = String(attackRow.dataset.src || '').toLowerCase();
-  const rows = document.querySelectorAll('#skills-body tr');
-  for(const tr of rows) {
-    const s = tr.querySelectorAll('input[type="text"]');        // [name, rank, checkType, notes]
-    const sName = String(s[0] ? s[0].value : '').trim().toLowerCase();
-    const sSrc = String(tr.dataset.src || '').toLowerCase();
-    const hit = (aSrc && (aSrc === sSrc || aSrc === sName)) || (aName && (aName === sName || (sSrc && aName === sSrc)));
-    if(hit) {
-      const chk = tr.querySelector('input[type="checkbox"]');
-      if(chk && chk.style.visibility !== 'hidden' && !chk.checked) {
-        chk.checked = true;
-        try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
-      }
-      return;
-    }
-  }
-}
-
 function rollSkill(btn) {
   const row = btn.closest('tr');
   if(!consumeSpellMana(row)) return;
@@ -2012,20 +2118,34 @@ function rollSkill(btn) {
   const name = inputs[0].value||'Skill';
   const rank = parseMod(inputs[1].value);
   const statId = sel?.value||'';
-  const statMod = statId ? getStatMod(statId) : 0;
   const dm = activeDebuffMods();
+  const diceStr = skillDmgOf(row);
+  const wooz = !!diceStr && dm.noDex && statId === 'dex';    // Woozy: no DEX Mod on an Attack
+  const statMod = statId && !wooz ? getStatMod(statId) : 0;
   const totalMod = rank + statMod + dm.penalty;
   const {result: roll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), dm.dis ? 'disadvantage' : null));
   const total = roll + totalMod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
-  const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod})` : '';
+  const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod}${wooz?' — Woozy':''})` : '';
   const base = advDetail ? advDetail : `d20(${roll})`;
-  addLog(`${name}`+(roll===20?' ★':roll===1?' ✗':''), total,
-    `${base}+Rank(${rank})${statLabel}${debuffTag(dm)}=${total}`, type);
+  if(diceStr) {
+    // Attack skill: To Hit (vs the target's Evade) and Damage in one roll.
+    const m = diceStr.match(/^(\d*)d(\d+)$/i);
+    const num = parseInt(m[1]||'1', 10), sides = parseInt(m[2], 10);
+    const rolls = Array.from({length:num}, ()=>d(sides));
+    const dmg = rolls.reduce((a,b)=>a+b,0) + statMod;
+    const sm = statId ? `+${statId.toUpperCase()}(${statMod})` : '';
+    addLog(`${name}` + (roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), `Hit: ${total}  |  Dmg: ${dmg}`,
+      `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${diceStr}(${rolls.join('+')})${sm}=${dmg}`, type);
+  } else {
+    addLog(`${name}`+(roll===20?' ★':roll===1?' ✗':''), total,
+      `${base}+Rank(${rank})${statLabel}${debuffTag(dm)}=${total}`, type);
+  }
   // Using a skill marks it for advancement (Core p.169).
   const chk = row.querySelector('input[type="checkbox"]');
-  if(chk && !chk.checked) { chk.checked = true; try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
+  if(chk && chk.style.visibility !== 'hidden' && !chk.checked) { chk.checked = true; try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
   addAiFavor(aiFavorAmount(name, inputs[3] ? inputs[3].value : ''), name);
+  return { name, total, roll, attack: !!diceStr };
 }
 
 // ── SKILL ADVANCEMENT ──
@@ -2211,20 +2331,6 @@ function collectSheet() {
   data.hpPips = [...document.querySelectorAll('.hp-pip')].map(p => p.dataset.active);
   data.hpShields = [...document.querySelectorAll('.hp-shield')].map(s => s.dataset.active);
 
-  // Attacks
-  data.attacks = [...document.querySelectorAll('#attacks-body tr')].map(tr => {
-    const inputs = tr.querySelectorAll('input[type="text"]');
-    const sels = tr.querySelectorAll('select');
-    return {
-      name: inputs[0]?.value||'',
-      rank: inputs[1]?.value||'',
-      dice: inputs[2]?.value||'',
-      stat: sels[0]?.value||'',        // one stat drives both To Hit and Damage
-      effects: inputs[3]?.value||'',
-      src: tr.dataset.src||'',         // original rulebook name behind a reskinned attack
-    };
-  });
-
   // Hotlist
   data.hotlist = [...document.querySelectorAll('#hotlist-grid textarea')].map(t => t.value);
 
@@ -2255,6 +2361,24 @@ function collectSheet() {
       src: tr.dataset.src||'',   // original rulebook name behind a reskinned/renamed skill
     };
   });
+
+  // Attacks — derived from the attack skills (Dmg token in Notes). The sheet no longer
+  // has its own Attacks block; this keeps the GM Screen party view, the PDF/print
+  // exports and anything else that reads data.attacks working.
+  data.attacks = [...document.querySelectorAll('#skills-body tr')].filter(tr => skillDmgOf(tr)).map(tr => {
+    const inputs = tr.querySelectorAll('input[type="text"]');
+    const sel = tr.querySelector('select');
+    return {
+      name: inputs[0]?.value||'',
+      rank: inputs[1]?.value||'',
+      dice: skillDmgOf(tr),
+      stat: sel?.value||'',
+      effects: noteSansDmg(inputs[3]?.value||''),
+      src: tr.dataset.src||'',
+    };
+  });
+
+  data.turn = Object.assign({}, _turn, { done: (_turn.done || []).slice(-12) });
 
   // Pinned inventory sections (always at the top of the tab)
   data.gold = document.getElementById('f-gold')?.value || '';
@@ -2369,24 +2493,6 @@ function applySheet(data) {
     s.classList.toggle('on', on);
   });
 
-  // Attacks
-  if(data.attacks) {
-    const tbody = document.getElementById('attacks-body');
-    tbody.innerHTML = '';
-    data.attacks.forEach(a => {
-      addAttackRow(tbody);
-      const tr = tbody.lastElementChild;
-      const inputs = tr.querySelectorAll('input[type="text"]');
-      const sels = tr.querySelectorAll('select');
-      inputs[0].value = a.name; inputs[1].value = a.rank;
-      inputs[2].value = a.dice;
-      sels[0].value = atkStatOf(a);              // one stat; tolerates older saves
-      inputs[3].value = a.effects;
-      if(a.src) tr.dataset.src = a.src; else delete tr.dataset.src;
-      recalcAttackRow(tr);                        // fill the live To Hit / Damage readouts
-    });
-  }
-
   // Hotlist
   if(data.hotlist) {
     document.querySelectorAll('#hotlist-grid textarea').forEach((t,i) => { t.value = data.hotlist[i]||''; });
@@ -2425,8 +2531,13 @@ function applySheet(data) {
       if(sk.src) tr.dataset.src = sk.src; else delete tr.dataset.src;
     });
   }
-  // Now that both Attacks and Skills are populated, link them so each attack's
-  // Rank + Damage reflect its skill/spell (and any Rank 5/10/15 upgrades).
+  // Older saves (and the creation wizard) carry a separate Attacks list. Fold each
+  // one into its Skills row: the damage dice go into the skill's Notes as "Dmg NdM",
+  // and an attack with no matching skill becomes a skill row of its own.
+  if(Array.isArray(data.attacks)) migrateAttacksToSkills(data.attacks);
+  if(data.turn && typeof data.turn === 'object') { Object.assign(_turn, data.turn); if(!Array.isArray(_turn.done)) _turn.done = []; }
+  if(typeof renderTurn === 'function') renderTurn();
+  // Keep each attack skill's Dmg in step with its Rank (Rank 5/10/15 upgrades).
   if(typeof syncLinkedAttacks === 'function') syncLinkedAttacks();
   // Layer the always-on skill buffs (Dodge etc.) onto Evade/DR now that the skill
   // rows exist. Idempotent: the saved fields hold only the hand-entered amount.
@@ -2533,11 +2644,6 @@ function newCharacter() {
   // Reset Pet & Mount health bars to full and clear per-slot HP
   document.querySelectorAll('.comp-hb-pip').forEach(pip => { pip.dataset.active = 'true'; pip.classList.remove('dimmed'); });
   document.querySelectorAll('.comp-hb-val').forEach(el => { el.value = ''; });
-
-  // Clear attacks and rebuild empty rows
-  const atBody = document.getElementById('attacks-body');
-  atBody.innerHTML = '';
-  for(let i=0;i<5;i++) addAttackRow(atBody);
 
   // Clear hotlist
   document.querySelectorAll('#hotlist-grid textarea').forEach(t => t.value = '');
@@ -3069,17 +3175,14 @@ if(localStorage.getItem('dcc_dark') === '1') {
 buildStats();
 buildHpBar();
 buildShields();
-buildAttacks();
 buildHotlist();
 buildAccessories();
 buildCompanions();
 buildSkills();
 buildInventory();
 document.getElementById('skills-body').addEventListener('input', () => { refreshSkillRowRules(); syncLinkedAttacks(); });
-// A linked attack's name can be typed/changed directly too — re-sync on that.
-document.getElementById('attacks-body').addEventListener('input', e => {
-  if(e.target && e.target.matches('input[type="text"]:not([readonly])')) syncLinkedAttacks();
-});
+// Notes aren't rewritten while focused — resync the Dmg token when the player leaves the field.
+document.getElementById('skills-body').addEventListener('focusout', () => setTimeout(syncLinkedAttacks, 0));
 refreshSkillRowRules();
 syncLinkedAttacks();
 
@@ -4023,6 +4126,51 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-inv-picker.js"></script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<style id="dcc-turn-style">
+.inv-pinned{flex-wrap:wrap;}
+.inv-pinned .add-btn{margin-top:0;white-space:nowrap;}
+@media (max-width:600px){ .inv-pin-group{margin-left:0;width:100%;} .inv-pin{flex:1 1 0;min-width:0;} .inv-pin-in{width:100%;min-width:0;} }
+#tab-turn{padding:0;}
+.turn-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.turn-row1{display:flex;align-items:center;gap:8px;padding:8px 10px 6px;flex-wrap:wrap;}
+.turn-round{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.turn-round b{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--dcc-dk);}
+.turn-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+.turn-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--red);color:var(--red);border-radius:12px;padding:3px 11px;background:transparent;}
+.turn-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.turn-pip.bonus{border-color:var(--gold);color:var(--dcc-dk);}
+.turn-end-btn{flex:0 0 auto;background:var(--red);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.turn-end-btn:hover{filter:brightness(1.1);}
+.turn-row2{display:flex;align-items:center;gap:12px;padding:0 10px 8px;flex-wrap:wrap;}
+.turn-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;}
+.turn-stat .tm-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.turn-stat b{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--ink);}
+.turn-stat .tm-dim{font-size:11px;font-weight:600;}
+.turn-mini{background:transparent;border:1px solid var(--gold);color:var(--dcc-dk);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+.turn-mini:hover:not([disabled]){background:var(--dcc-lt);}
+.turn-mini[disabled]{opacity:.45;cursor:default;}
+.turn-mini.ghost{border-color:var(--rule);color:var(--muted);margin-left:auto;}
+.turn-sec{border-bottom:1px solid var(--rule);}
+.turn-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.turn-sec-hd .tsh-caret{color:var(--red);font-size:10px;transition:transform .12s;flex-shrink:0;}
+.turn-sec.collapsed .tsh-caret{transform:rotate(-90deg);}
+.turn-sec-hd .tsh-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dcc-dk);}
+.turn-sec-hd .tsh-note{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:right;}
+.turn-sec.collapsed .turn-sec-body{display:none;}
+.turn-sec-body{padding:2px 12px 6px;}
+.turn-card{display:flex;align-items:center;gap:6px;padding:6px 2px;border-bottom:1px solid var(--rule);}
+.turn-card:last-child{border-bottom:none;}
+.turn-card .tc-main{flex:1;min-width:0;}
+.turn-card .tc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--ink);line-height:1.15;}
+.turn-card .tc-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.turn-card .tc-do{flex:0 0 auto;background:var(--red);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.turn-card .tc-do:hover{filter:brightness(1.12);}
+.turn-card.disabled{opacity:.42;}
+.turn-card.disabled .tc-do{background:var(--muted);cursor:default;pointer-events:none;}
+.turn-card.disabled .tc-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.turn-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
+@media (max-width:600px){ .turn-card .tc-do{padding:9px 12px;font-size:12px;} .turn-mini.ghost{margin-left:0;} }
+</style>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}

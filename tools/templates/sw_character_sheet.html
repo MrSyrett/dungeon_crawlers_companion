@@ -691,21 +691,22 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       </div>
 
-      <div class="card">
-      <div class="section-bar"><span>Weapons</span></div>
-      <table class="tbl" id="weapons-tbl">
-        <thead><tr><th style="width:21%;">Weapon</th><th style="width:19%;">Skill</th><th style="width:66px;">Damage</th><th style="width:13%;">Range</th><th>Notes</th><th style="width:92px;"></th></tr></thead>
-        <tbody id="weapons-body"></tbody>
-      </table>
-      </div>
-
       <div class="card tabs-card">
       <div class="tabs-bar">
+        <button class="tab-btn" data-tab="attacks" onclick="setTab('attacks')">Attacks</button>
         <button class="tab-btn" data-tab="force" onclick="setTab('force')">The Force</button>
         <button class="tab-btn" data-tab="equipment" onclick="setTab('equipment')">Equipment</button>
         <button class="tab-btn" data-tab="ship" onclick="setTab('ship')">Ship</button>
         <button class="tab-btn" data-tab="background" onclick="setTab('background')">Background</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
+      </div>
+
+      <div class="tab-panel" id="tab-attacks">
+        <div class="section-bar"><span>Weapons</span></div>
+        <table class="tbl" id="weapons-tbl">
+          <thead><tr><th style="width:21%;">Weapon</th><th style="width:19%;">Skill</th><th style="width:66px;">Damage</th><th style="width:13%;">Range</th><th>Notes</th><th style="width:92px;"></th></tr></thead>
+          <tbody id="weapons-body"></tbody>
+        </table>
       </div>
 
       <div class="tab-panel" id="tab-force">
@@ -1224,7 +1225,7 @@ function addForcePowerByName(name) {
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
 var _tab = 'equipment';
-const TABS = ['force','equipment','ship','background','notes'];
+const TABS = ['attacks','force','equipment','ship','background','notes'];
 function setTab(name) {
   if(!TABS.includes(name)) name = 'force';
   _tab = name;

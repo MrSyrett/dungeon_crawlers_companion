@@ -685,20 +685,21 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       </div>
 
-      <div class="card">
-      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><span class="sb-note">Add weapons from the Item Store</span></span></div>
-      <table class="tbl">
-        <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
-        <tbody id="attacks-body"></tbody>
-      </table>
-      </div>
-
       <div class="card tabs-card">
       <div class="tabs-bar">
+        <button class="tab-btn" data-tab="attacks" onclick="setTab('attacks')">Attacks</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="features" onclick="setTab('features')">Features</button>
         <button class="tab-btn" data-tab="inventory" onclick="setTab('inventory')">Inventory</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
+      </div>
+
+      <div class="tab-panel" id="tab-attacks">
+        <div class="section-bar"><span>Attacks</span><span class="hdr-right"><span class="sb-note">Add weapons from the Item Store</span></span></div>
+        <table class="tbl">
+          <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
+          <tbody id="attacks-body"></tbody>
+        </table>
       </div>
 
       <div class="tab-panel" id="tab-spells">
@@ -1191,7 +1192,7 @@ function fillDatalists() {
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
 var _tab = 'features';
-const TABS = ['spells','features','inventory','notes'];
+const TABS = ['attacks','spells','features','inventory','notes'];
 function setTab(name) {
   if(!TABS.includes(name)) name = 'features';
   _tab = name;

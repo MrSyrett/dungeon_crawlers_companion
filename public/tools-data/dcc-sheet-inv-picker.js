@@ -205,6 +205,10 @@
       if (pin && tr.dataset.equipped !== "1") { try { window.DCCEquip.click(pin); equipped = true; } catch (e) {} }
     }
     if (!equipped) { try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {} }
+    // A weapon brings its weapon skill onto the Skills list (which rolls To Hit + Damage).
+    if (it && it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) {
+      try { window.DCCSkills.ensureWeaponSkill(it.name) || (name && window.DCCSkills.ensureWeaponSkill(name)); } catch (e) {}
+    }
   }
 
   // ── picker ──────────────────────────────────────────────────────────────────
