@@ -701,6 +701,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="lockfield" style="flex:1.4 1 0;"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
       <div class="lockfield" style="flex:1.2 1 0;"><label>Class</label><input type="text" id="f-class"></div>
       <div class="lockfield" style="flex:1.5 1 0;"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
+      <div class="lockfield" style="flex:.6 1 0;"><label>Size</label><input type="text" id="dr-size" placeholder="—" oninput="dccSizeCoerce(this)" title="Size (number only)" style="text-align:center;"></div>
       <div class="lockfield"><label>Crawler #</label><input type="text" id="f-crawler"></div>
       <div class="lockfield" style="flex:.6 1 0;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="text-align:center;"></div>
       <div class="lockfield" style="flex:.6 1 0;"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
@@ -743,7 +744,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <!-- CENTER -->
     <div class="center-col">
 
-      <!-- DEFENSE: Evade / DR / speeds / Mana + Buffs & Debuffs -->
+      <!-- DEFENSE: Evade / DR -->
       <div class="card">
         <div class="section-bar">Defense</div>
 
@@ -796,53 +797,51 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
               </div>
             </div>
 
-            <!-- Right: stat boxes + External Buffs spanning full height -->
-            <div class="combat-side" style="border-left:2px solid var(--border);padding:5px 6px;display:flex;flex-direction:column;justify-content:center;gap:3px;width:220px;flex-shrink:0;">
-              <div style="display:flex;gap:2px;margin-bottom:3px;">
-                <div class="formula-extra-item" style="flex:1;">
-                  <input type="text" class="formula-total" id="evade-move" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;">
-                  <span class="formula-sublabel" style="font-size:6.5px;">Move</span>
-                </div>
-                <div class="formula-extra-item" style="flex:1;">
-                  <input type="text" class="formula-total" id="evade-step" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;">
-                  <span class="formula-sublabel" style="font-size:6.5px;">Step</span>
-                </div>
-                <div class="formula-extra-item" style="flex:1;">
-                  <input type="text" class="formula-total" id="dr-aifavor" data-nolock placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;">
-                  <span class="formula-sublabel" style="font-size:6.5px;">AI Favor</span>
-                </div>
-                <div class="formula-extra-item" style="flex:1;">
-                  <input type="text" class="formula-total" id="dr-size" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;" oninput="dccSizeCoerce(this)" title="Size (number only)">
-                  <span class="formula-sublabel" style="font-size:6.5px;">Size</span>
-                </div>
-              </div>
-              <div style="height:1px;background:var(--rule);margin:2px 0;"></div>
-              <!-- Mana (moved here from the row below) -->
-              <div class="mana-group" style="justify-content:center;">
-                <span class="mana-label">Mana</span>
-                <input type="text" class="mana-input" id="mana-current" data-nolock placeholder="0">
-                <span class="mana-slash">/</span>
-                <input type="text" class="mana-input" id="mana-max" readonly placeholder="0" title="Equals Enhanced INT" style="background:var(--box);cursor:default;">
-              </div>
-            </div>
-
-          </div>
-
-          <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
-          <div class="cond-row" style="border-top:1px solid var(--rule);">
-            <div class="cond-stack">
-              <div class="buffs-field cond-line">
-                <span class="mana-label cond-label">Buffs</span>
-                <input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…">
-              </div>
-              <div class="cond-line">
-                <span class="mana-label cond-label">Debuffs</span>
-                <input type="text" class="debuff-input" id="debuffs" placeholder="">
-              </div>
-            </div>
-            <button type="button" class="rest-btn cond-roll" onclick="rollDoT()" title="Roll end-of-round damage for every active damage-over-time debuff (Blood Trail, Burned, Poisoned, Drowning, Sepsis).">Roll</button>
           </div>
       </div><!-- end Defense card -->
+
+      <!-- MOVEMENT · MANA · AI FAVOR -->
+      <div class="mini-cards">
+        <div class="card mini-card">
+          <div class="section-bar">Movement</div>
+          <div class="mini-body">
+            <div class="formula-extra-item"><input type="text" class="formula-total" id="evade-move" placeholder="—"><span class="formula-sublabel">Move</span></div>
+            <div class="formula-extra-item"><input type="text" class="formula-total" id="evade-step" placeholder="—"><span class="formula-sublabel">Step</span></div>
+          </div>
+        </div>
+        <div class="card mini-card">
+          <div class="section-bar">Mana</div>
+          <div class="mini-body mana-group">
+            <div class="formula-extra-item"><input type="text" class="mana-input" id="mana-current" data-nolock placeholder="0"><span class="formula-sublabel">Current</span></div>
+            <span class="mana-slash">/</span>
+            <div class="formula-extra-item"><input type="text" class="mana-input" id="mana-max" readonly placeholder="0" title="Equals Enhanced INT" style="background:var(--box);cursor:default;"><span class="formula-sublabel">Max</span></div>
+          </div>
+        </div>
+        <div class="card mini-card">
+          <div class="section-bar">AI Favor</div>
+          <div class="mini-body">
+            <div class="formula-extra-item"><input type="text" class="formula-total" id="dr-aifavor" data-nolock placeholder="—"><span class="formula-sublabel">Favor</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
+      <div class="card">
+        <div class="section-bar">Buffs &amp; Debuffs</div>
+        <div class="cond-row">
+          <div class="cond-stack">
+            <div class="buffs-field cond-line">
+              <span class="mana-label cond-label">Buffs</span>
+              <input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…">
+            </div>
+            <div class="cond-line">
+              <span class="mana-label cond-label">Debuffs</span>
+              <input type="text" class="debuff-input" id="debuffs" placeholder="">
+            </div>
+          </div>
+          <button type="button" class="rest-btn cond-roll" onclick="rollDoT()" title="Roll end-of-round damage for every active damage-over-time debuff (Blood Trail, Burned, Poisoned, Drowning, Sepsis, Potion Sickness).">Roll</button>
+        </div>
+      </div>
 
       <!-- HOTLIST (in the old Attacks spot; attack skills roll To Hit + Damage from the Skills tab) -->
       <div class="card">
@@ -1283,6 +1282,14 @@ function updateHpPips() {
 // ── REST (Core p.76) ──
 // Short Rest (2 hrs): heal 5 Health Bar slots + regain half total Mana (round down).
 // Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.
+// Re-activate the n lowest-% lost Health Bar slots (fill upward). Returns how many.
+function healHpSlots(n) {
+  const lost = [...document.querySelectorAll('.hp-pip')].filter(p => p.dataset.active === 'false')
+    .sort((a, b) => (+a.dataset.pct) - (+b.dataset.pct)).slice(0, n);
+  lost.forEach(p => { p.dataset.active = 'true'; p.classList.remove('dimmed'); });
+  if(lost.length) { if(typeof checkDying === 'function') checkDying(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+  return lost.length;
+}
 function rest(kind) {
   const long = kind === 'long';
   const pips = [...document.querySelectorAll('.hp-pip')];
@@ -1724,15 +1731,16 @@ function buildInventory() {
 // A crawler gets 2 Actions per round; any mix (both may Attack). Every Action also
 // grants a free 10-ft Step. Interrupts (Evade, Intervene, Taunt, Catcher, a healing
 // Spell/item) are spent during the Mobs' declaration and count against the same 2.
-// Spending AI Favor once per round grants one extra NON-Attack Action. Potions: at most
-// one every other round, or Potion Sickness. End Round clears the Actions.
+// Spending AI Favor once per round grants one extra NON-Attack Action (the "+1 Action"
+// button). Potions: at most one every other turn, or the Potion Sickness Debuff. End
+// Turn clears the Actions. No round counter is shown — that's the GM's to track;
+// _turn.round only counts turns internally for the potion rule.
 let _turn = { round: 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, potionRound: 0, done: [] };
 let _turnOpts = [];
 const TURN_ACTIONS = 2;
 const _turnCollapsed = { checks: true };
 function turnEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function turnNum(id, dflt){ const v = parseInt(String(document.getElementById(id)?.value || '').replace(/[^0-9-]/g,''), 10); return isNaN(v) ? dflt : v; }
-function turnLeft(){ return Math.max(0, TURN_ACTIONS - _turn.used) + Math.max(0, _turn.extra - _turn.extraUsed); }
 function turnCan(kind){
   if(kind === 'free') return true;
   if(_turn.used < TURN_ACTIONS) return true;
@@ -1743,7 +1751,7 @@ function turnCan(kind){
 function turnSpend(kind, label){
   if(kind === 'free') { _turn.done.push(label); return true; }
   if(!turnCan(kind)) {
-    addLog('Turn', 'No Actions left', kind === 'attack' ? 'Both Actions are spent (the AI Favor Action can\'t be an Attack). End the round to reset.' : 'Both Actions are spent. End the round to reset.', 'normal');
+    addLog('Turn', 'No Actions left', kind === 'attack' ? 'Both Actions are spent (the +1 Action can\'t be an Attack). End your turn to reset.' : 'Both Actions are spent. End your turn to reset.', 'normal');
     return false;
   }
   if(kind !== 'attack' && _turn.extraUsed < _turn.extra) _turn.extraUsed++;
@@ -1787,7 +1795,7 @@ function turnBuildOpts(){
   // Spells that aren't attacks (utility / heal). A heal can also be an Interrupt.
   rows.filter(r => r.spell && !r.dice && !r.passive).forEach(r => add('spells', {
     name: r.name, kind: 'other',
-    sub: (r.mana ? r.mana + ' Mana' : 'No Mana cost') + (/heal/i.test(r.name + ' ' + r.notes) ? ' · usable as an Interrupt' : ''),
+    sub: (isFixedSkill(r.tr.dataset.src || '') || isFixedSkill(r.name) ? 'Restore 2 Health Bar slots · ' : '') + (r.mana ? r.mana + ' Mana' : 'No Mana cost') + (/heal/i.test(r.name + ' ' + r.notes) ? ' · usable as an Interrupt' : ''),
     blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
     btn: 'Cast', run: () => turnRollRow(r),
   }));
@@ -1805,24 +1813,24 @@ function turnBuildOpts(){
     const potion = /potion/i.test(h);
     const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
     add('actions', { name: 'Use: ' + h.split(/\s—\s/)[0], kind: 'other',
-      sub: (h.split(/\s—\s/)[1] || 'Use a prepared Hotlist item') + (sick ? ' · ⚠ potion last round — Potion Sickness' : (potion ? ' · max one potion every other round' : '')),
+      sub: (h.split(/\s—\s/)[1] || 'Use a prepared Hotlist item') + (sick ? ' · ⚠ potion last turn — Potion Sickness' : ''),
       btn: 'Use', run: () => {
         addLog('Use Hotlist Item', h.split(/\s—\s/)[0], h, 'normal');
         if(potion) {
-          if(sick) addLog('Potion Sickness', 'Poisoned', 'Two potions within two rounds — Poison Debuff for 15 seconds (Core p.99)', 'fumble');
+          if(sick) turnAddDebuff('Potion Sickness', 'Two potions within two rounds — Poisoned for 15 seconds (Core p.99)');
           _turn.potionRound = _turn.round;
         }
         return true; } });
   });
-  add('actions', { name: 'Retrieve', kind: 'other', sub: 'Move an item from Inventory to the Hotlist or your hand', btn: 'Do',
+  add('actions', { name: 'Retrieve', kind: 'other', sub: 'Move an item from Inventory to the Hotlist or your hand', btn: 'Use',
     run: () => { addLog('Retrieve', '—', 'Inventory → Hotlist / hand', 'normal'); return true; } });
   add('actions', { name: 'Help', kind: 'other', sub: 'Before an ally\'s non-combat Check: +1d2 (no Ranks in it) or +1d6 (with Ranks)',
     btns: [['+1d2', () => { const n = d(2); addLog('Help', '+' + n, 'd2(' + n + ') — no Skill Ranks', 'normal'); return true; }],
            ['+1d6', () => { const n = d(6); addLog('Help', '+' + n, 'd6(' + n + ') — with Skill Ranks', 'normal'); return true; }]] });
-  add('actions', { name: 'Call a Play', kind: 'other', sub: 'Plan an Action — an ally gets a bonus when they perform it', btn: 'Do',
+  add('actions', { name: 'Call a Play', kind: 'other', sub: 'Plan an Action — an ally gets a bonus when they perform it', btn: 'Use',
     run: () => { addLog('Call a Play', '—', 'Ally gains a bonus performing the called Action', 'normal'); return true; } });
   const clue = turnFindSkill(/^(perception|investigation)$/i);
-  add('actions', { name: 'Look for Clues', kind: 'other', sub: 'Boss fights only — ' + (clue ? 'rolls ' + clue.name : 'Unopposed Perception / Investigation'), btn: clue ? 'Roll' : 'Do',
+  add('actions', { name: 'Look for Clues', kind: 'other', sub: 'Boss fights only — ' + (clue ? 'rolls ' + clue.name : 'Unopposed Perception / Investigation'), btn: clue ? 'Roll' : 'Use',
     run: () => clue ? turnRollRow(clue) : (addLog('Look for Clues', '—', 'Boss encounter: gain info about the foe or environment', 'normal'), true) });
   // Interrupts (Crawler Reaction Phase)
   add('interrupts', { name: 'Evade', kind: 'other', sub: 'Evade Check vs. each Attack aimed at you this round', btn: 'Roll',
@@ -1834,7 +1842,7 @@ function turnBuildOpts(){
     btn: 'Roll', run: () => taunt ? turnRollRow(taunt) : null });
   const catcher = turnFindSkill(/^catcher$/i);
   add('interrupts', { name: 'Catcher', kind: 'other', sub: catcher ? 'Take the hit for an adjacent ally (you can\'t Evade it)' : 'Needs Ranks in Catcher', blocked: catcher ? '' : 'No Catcher skill',
-    btn: 'Do', run: () => { addLog('Catcher', '—', 'Took the hit for an ally (can\'t Evade it)', 'normal'); return true; } });
+    btn: 'Use', run: () => { addLog('Catcher', '—', 'Took the hit for an ally (can\'t Evade it)', 'normal'); return true; } });
   return O;
 }
 
@@ -1855,21 +1863,25 @@ function turnSpendAiFavor(){
   if(cur < 1) { addLog('AI Favor', 'none to spend', 'You need at least 1 AI Favor', 'normal'); return; }
   if(el) { el.value = String(cur - 1); try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
   _turn.aiSpent = true; _turn.extra = 1;
-  addLog('AI Favor spent', '+1 Action', 'One extra non-Attack Action this round · ' + (cur - 1) + ' AI Favor left', 'crit');
+  addLog('AI Favor spent', '+1 Action', 'One extra non-Attack Action this turn · ' + (cur - 1) + ' AI Favor left', 'crit');
   turnAfter();
 }
-function endTurnRound(){
-  const r = _turn.round;
+function endTurn(){
   const deb = document.getElementById('debuffs')?.value || '';
-  if(/blood trail|burn|poison|drown|sepsis/i.test(deb) && typeof rollDoT === 'function') rollDoT();
-  addLog('Round ' + r + ' ends', (_turn.used + _turn.extraUsed) + ' Action' + ((_turn.used + _turn.extraUsed) === 1 ? '' : 's'), _turn.done.length ? _turn.done.join(' · ') : 'No Actions taken', 'normal');
-  Object.assign(_turn, { round: r + 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, done: [] });
+  if(/blood trail|burn|poison|drown|sepsis|potion sickness/i.test(deb) && typeof rollDoT === 'function') rollDoT();
+  const n = _turn.used + _turn.extraUsed;
+  addLog('Turn ends', n + ' Action' + (n === 1 ? '' : 's'), _turn.done.length ? _turn.done.join(' · ') : 'No Actions taken', 'normal');
+  Object.assign(_turn, { round: (_turn.round || 1) + 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, done: [] });
   turnAfter();
 }
-function resetTurnCombat(){
-  Object.assign(_turn, { round: 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, potionRound: 0, done: [] });
-  addLog('Combat', 'Round 1', 'Turn tracker reset', 'normal');
-  turnAfter();
+// Add a rulebook Debuff through the Debuffs tracker (chips), or to the raw field.
+function turnAddDebuff(name, why){
+  try { if(window.DCCDebuffs && DCCDebuffs.pick) DCCDebuffs.pick(name); else throw 0; }
+  catch(e) {
+    const el = document.getElementById('debuffs');
+    if(el && !new RegExp('(^|,)\\s*' + name + '\\b', 'i').test(el.value)) { el.value = [el.value.trim(), name].filter(Boolean).join(', '); try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(_) {} }
+  }
+  addLog('Debuff: ' + name, 'gained', why || '', 'fumble');
 }
 function turnToggleSec(key){ _turnCollapsed[key] = !_turnCollapsed[key]; renderTurn(); }
 
@@ -1887,33 +1899,28 @@ function renderTurn(){
   const card = o => {
     const can = !o.blocked && turnCan(o.kind);
     const btns = o.btns ? o.btns.map((b, j) => `<button class="tc-do" onclick="turnDo(${o.i},${j})">${turnEsc(b[0])}</button>`).join('')
-                        : `<button class="tc-do" onclick="turnDo(${o.i})">${turnEsc(o.btn || 'Do')}</button>`;
+                        : `<button class="tc-do" onclick="turnDo(${o.i})">${turnEsc(o.btn || 'Use')}</button>`;
     return `<div class="turn-card${can ? '' : ' disabled'}"><div class="tc-main"><div class="tc-name">${turnEsc(o.name)}</div><div class="tc-sub">${turnEsc(o.blocked ? o.blocked + ' · ' + o.sub : o.sub)}</div></div>${btns}</div>`;
   };
-  const sec = (key, title, note, list, empty) => {
+  const sec = (key, title, list, empty) => {
     const col = !!_turnCollapsed[key];
-    return `<div class="turn-sec${col ? ' collapsed' : ''}"><div class="turn-sec-hd" onclick="turnToggleSec('${key}')"><span class="tsh-caret">▼</span><span class="tsh-title">${title}</span><span class="tsh-note">${note}</span></div>
+    return `<div class="turn-sec${col ? ' collapsed' : ''}"><div class="turn-sec-hd" onclick="turnToggleSec('${key}')"><span class="tsh-caret">▼</span><span class="tsh-title">${title}</span></div>
       <div class="turn-sec-body">${list.length ? list.map(card).join('') : `<div class="turn-empty">${empty}</div>`}</div></div>`;
   };
   host.innerHTML = `
     <div class="turn-top">
       <div class="turn-row1">
-        <div class="turn-round">Round <b>${_turn.round}</b></div>
         <div class="turn-econ">${pips}</div>
-        <button class="turn-end-btn" onclick="endTurnRound()" title="Clear this round's Actions (rolls end-of-round damage-over-time if you have any)">End Round</button>
-      </div>
-      <div class="turn-row2">
-        <span class="turn-stat"><span class="tm-lbl">Actions left</span> <b>${turnLeft()}</b></span>
-        <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft <span class="tm-dim">(${step} ft Step per Action${_turn.moves ? ' + ' + _turn.moves + '× ' + move + ' ft Move' : ''})</span></span>
-        <button class="turn-mini" onclick="turnSpendAiFavor()" ${_turn.aiSpent || ai < 1 ? 'disabled' : ''} title="Once per round: spend 1 AI Favor for an extra non-Attack Action">${_turn.aiSpent ? 'AI Favor spent' : 'Spend AI Favor (' + ai + ') → +1 Action'}</button>
-        <button class="turn-mini ghost" onclick="resetTurnCombat()" title="Start a new combat at Round 1">New Combat</button>
+        <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft</span>
+        <button class="turn-mini" onclick="turnSpendAiFavor()" ${_turn.aiSpent || ai < 1 ? 'disabled' : ''} title="Once per turn: spend 1 AI Favor (you have ${ai}) for an extra non-Attack Action">+1 Action</button>
+        <button class="turn-end-btn" onclick="endTurn()" title="Clear this turn's Actions (rolls damage-over-time if you have any)">End Turn</button>
       </div>
     </div>
-    ${sec('attacks', 'Attacks', 'To Hit + Damage', O.attacks, 'No attack skills yet. Add a weapon skill or attack spell on the Skills tab — its Notes carry the Dmg dice.')}
-    ${sec('spells', 'Spells', 'Utility & Heal', O.spells, 'No utility or healing spells.')}
-    ${sec('interrupts', 'Interrupts', 'Mob declaration phase · uses an Action', O.interrupts, '')}
-    ${sec('actions', 'Actions', 'Each Action grants a free ' + step + '-ft Step', O.actions, '')}
-    ${sec('checks', 'Make a Check', 'Other active skills', O.checks, 'No other active skills.')}`;
+    ${sec('attacks', 'Attacks', O.attacks, 'No attack skills yet. Add a weapon skill or attack spell on the Skills tab — its Notes carry the Dmg dice.')}
+    ${sec('spells', 'Spells', O.spells, 'No utility or healing spells.')}
+    ${sec('interrupts', 'Interrupts', O.interrupts, '')}
+    ${sec('actions', 'Actions', O.actions, '')}
+    ${sec('checks', 'Use a Skill', O.checks, 'No other active skills.')}`;
 }
 // Keep the hub current while it's open.
 let _turnRenderT = null;
@@ -2114,6 +2121,12 @@ function rollSkill(btn) {
   const row = btn.closest('tr');
   if(!consumeSpellMana(row)) return;
   const inputs = row.querySelectorAll('input[type="text"]');
+  // The Heal spell just works: restore 2 Health Bar slots (Core p.206, self only).
+  if(isFixedSkill(row.dataset.src || '') || isFixedSkill(inputs[0].value)) {
+    const n = healHpSlots(2);
+    addLog('Heal', n ? '+' + n + ' HB' : 'Full', n ? 'Restored ' + n + ' Health Bar slot' + (n === 1 ? '' : 's') : 'Health Bar already full', 'crit');
+    return { name: 'Heal', total: n, roll: 0, attack: false };
+  }
   const sel = row.querySelector('select');
   const name = inputs[0].value||'Skill';
   const rank = parseMod(inputs[1].value);
@@ -4128,6 +4141,12 @@ autoLoad();
 <script src="/tools-data/dice-anim.js"></script>
 <style id="dcc-turn-style">
 .inv-pinned{flex-wrap:wrap;}
+.mini-cards{display:flex;gap:14px;flex-wrap:wrap;}
+.mini-cards>.mini-card{flex:1 1 150px;min-width:0;}
+.mini-body{display:flex;align-items:flex-start;justify-content:center;gap:8px;padding:8px 10px 10px;}
+.mini-body .formula-total,.mini-body .mana-input{width:56px;height:30px;font-size:15px;}
+.mini-body .mana-slash{align-self:center;margin-top:-12px;}
+@media (max-width:600px){ .mini-body .formula-extra-item{flex:1 1 0;} .mini-body .formula-total,.mini-body .mana-input{width:100%;height:44px;font-size:19px;} }
 .inv-pinned .add-btn{margin-top:0;white-space:nowrap;}
 @media (max-width:600px){ .inv-pin-group{margin-left:0;width:100%;} .inv-pin{flex:1 1 0;min-width:0;} .inv-pin-in{width:100%;min-width:0;} }
 #tab-turn{padding:0;}
@@ -4169,7 +4188,8 @@ autoLoad();
 .turn-card.disabled .tc-do{background:var(--muted);cursor:default;pointer-events:none;}
 .turn-card.disabled .tc-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
 .turn-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
-@media (max-width:600px){ .turn-card .tc-do{padding:9px 12px;font-size:12px;} .turn-mini.ghost{margin-left:0;} }
+@media (max-width:600px){ .turn-card .tc-do{padding:9px 12px;font-size:12px;} .turn-econ{flex-basis:100%;} .turn-row1 .turn-stat{margin-right:auto;} }
+@media (max-width:600px){ .tabs-row{overflow-x:auto!important;scrollbar-width:none;} .tabs-row::-webkit-scrollbar{display:none;} .tab-btn{flex:0 0 auto!important;white-space:nowrap!important;padding:12px 12px!important;font-size:13px!important;} }
 </style>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}

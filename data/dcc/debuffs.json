@@ -13,6 +13,7 @@
   { "name": "Minor Injury", "effect": "-2 to all Checks. A second Minor Injury becomes Long-Term Minor.", "duration": "Until the end of a short rest.", "stackable": false },
   { "name": "Muted", "effect": "Cannot speak or cast Spells.", "duration": "End of combat or 5 minutes.", "stackable": false },
   { "name": "Poisoned", "effect": "1d8+F Poison at end of each round.", "duration": "Until treated with an antidote.", "stackable": true },
+  { "name": "Potion Sickness", "effect": "Drank a second potion within two rounds: Poisoned — 1d8+F Poison at end of each round.", "duration": "15 seconds (about 2 rounds).", "stackable": false },
   { "name": "Paralyzed", "effect": "No Actions.", "duration": "End of next round.", "stackable": false },
   { "name": "Queasy", "effect": "Next rolled Action at Disadvantage.", "duration": "End of the next Action taken.", "stackable": false },
   { "name": "Sepsis", "effect": "Staggered plus 1d10+F Poison at end of each round.", "duration": "As Staggered; damage until healed.", "stackable": false },

@@ -87,6 +87,12 @@ const DCC_DEBUFFS = [
     "stackable": true
   },
   {
+    "name": "Potion Sickness",
+    "effect": "Drank a second potion within two rounds: Poisoned — 1d8+F Poison at end of each round.",
+    "duration": "15 seconds (about 2 rounds).",
+    "stackable": false
+  },
+  {
     "name": "Paralyzed",
     "effect": "No Actions.",
     "duration": "End of next round.",
