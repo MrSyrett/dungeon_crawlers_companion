@@ -9,6 +9,8 @@ import { ConfirmButton } from "@/components/ConfirmButton";
 import { AdminNav } from "@/components/AdminNav";
 import { SYSTEMS } from "@/components/systemStore";
 import { RulebookSettingsForm } from "@/components/RulebookSettingsForm";
+import { LibraryUploader, SeedButton, BookFileActions } from "@/components/LibraryManager";
+import { libraryStorage, isWritable } from "@/lib/library-admin";
 import {
   saveRulebookSettings,
   grantRulebookAccess,
@@ -65,7 +67,9 @@ export default async function AdminRulebooksPage({
 
   const { nouser, system: systemParam, type: typeParam } = await searchParams;
 
-  const { entries, duplicates } = await scanLibrary();
+  const [{ entries, duplicates }, storage] = await Promise.all([scanLibrary(), libraryStorage()]);
+  const systemOpts = SYSTEMS.map((s) => ({ key: s.key, name: s.name }));
+  const gb = (n: number) => `${(n / 1073741824).toFixed(n < 1073741824 ? 2 : 1)} GB`;
   const entryFor = new Map(entries.map((e) => [e.file, e]));
   const unsorted = entries.filter((e) => !e.folderSystem || !e.folderCategory);
   const [rulebooks, grants] = await Promise.all([
@@ -140,6 +144,45 @@ export default async function AdminRulebooksPage({
         uses the &ldquo;Shown on&rdquo; picker below. Filenames must be unique across the library —
         they are each book&apos;s ID, so moving a file keeps its access settings.
       </p>
+
+      {/* WHERE THE FILES LIVE (lib/rulebooks.ts LIBRARY_ROOTS) + adding books. */}
+      <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4 text-[13px] leading-relaxed text-[var(--muted)]">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Storage</h2>
+        {storage.volume ? (
+          <p className="mt-2">
+            <span className="text-[var(--text)]">Volume:</span>{" "}
+            <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">{storage.volume}</code> —{" "}
+            {storage.onVolume} {storage.onVolume === 1 ? "book" : "books"}
+            {storage.volumeFree !== null && storage.volumeTotal !== null ? <>, {gb(storage.volumeFree)} free of {gb(storage.volumeTotal)}</> : null}.
+            New uploads, moves and deletes happen here and survive redeploys.
+          </p>
+        ) : (
+          <p className="mt-2">
+            <span className={storage.production ? "font-semibold text-[var(--bad)]" : "text-[var(--text)]"}>No volume configured.</span>{" "}
+            Books are read from the repo folder, and uploads go there too —{" "}
+            {storage.production
+              ? "on this server they would be lost at the next deploy. Attach a Railway volume and set LIBRARY_DIR (e.g. /data/library) first."
+              : "fine on this computer. Set LIBRARY_DIR to keep the library somewhere else."}
+          </p>
+        )}
+        {storage.volume && storage.bundled > 0 ? (
+          <div className="mt-2">
+            <p>
+              <span className="text-[var(--text)]">{storage.bundled} {storage.bundled === 1 ? "book is" : "books are"} still only in the repo</span>{" "}
+              (protected/rulebooks). Copy them across once — it runs on the server, nothing is uploaded from here — then
+              they can be removed from git so deploys no longer carry them.
+            </p>
+            <SeedButton count={storage.bundled} bytes={storage.bundledOnlyBytes} />
+          </div>
+        ) : null}
+        {storage.volume && storage.bundled === 0 && storage.onVolume > 0 ? (
+          <p className="mt-2 text-[var(--good)]">Every book is on the volume. protected/rulebooks can be removed from git.</p>
+        ) : null}
+      </div>
+
+      <div className="mb-6">
+        <LibraryUploader systems={systemOpts} defaultSystem={sysFilter && sysFilter !== "BOTH" ? sysFilter : systemOpts[0].key} />
+      </div>
 
       {duplicates.length ? (
         <div className="mb-6 rounded-lg border border-[var(--red)] bg-[var(--panel)] p-4 text-[13px] text-[var(--text)]">
@@ -245,7 +288,10 @@ export default async function AdminRulebooksPage({
                     · {SYSTEM_LABEL[system]} · {entry?.category ?? "—"}
                   </span>
                 </div>
-                <div className="mt-0.5 break-all text-[11px] text-[var(--muted)]">protected/rulebooks/{entry?.rel ?? file}</div>
+                <div className="mt-0.5 break-all text-[11px] text-[var(--muted)]">
+                  {entry?.stored === "volume" ? "volume/" : "protected/rulebooks/"}
+                  {entry?.rel ?? file}
+                </div>
 
                 <RulebookSettingsForm
                   file={file}
@@ -254,6 +300,17 @@ export default async function AdminRulebooksPage({
                   folderSystemLabel={folderSystem ? SYSTEM_LABEL[folderSystem] : null}
                   action={saveRulebookSettings}
                 />
+
+                {entry ? (
+                  <BookFileActions
+                    file={file}
+                    system={folderSystem ?? system}
+                    category={entry.category}
+                    systems={systemOpts}
+                    writable={isWritable(entry)}
+                    stored={entry.stored}
+                  />
+                ) : null}
 
                 <div className="mt-3">
                   <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">

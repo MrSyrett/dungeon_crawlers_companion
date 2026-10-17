@@ -37,7 +37,28 @@ import { SYSTEMS, isSystemKey, type SystemKey } from "@/components/systemStore";
 // duplicate is skipped (first one wins) and flagged on the admin page.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// WHERE THE BOOKS LIVE. Two roots, read in this order:
+//
+//   1. LIBRARY_DIR (env) — a persistent disk outside the repo. On Railway this
+//      is a Volume (e.g. LIBRARY_DIR=/data/library), so the PDFs are not part
+//      of every deploy and survive redeploys. Locally it can point at any
+//      folder (or be left unset). Uploads, moves and deletes from the admin
+//      Library page write here.
+//   2. protected/rulebooks/ in the repo ("bundled") — where the books have
+//      always been. Still read, so nothing goes missing while the library is
+//      migrated to the volume; once copied (admin page → "Copy bundled books to
+//      the volume") they can be removed from git.
+//
+// A book in both places is served from the volume. Folder layout and book IDs
+// (bare filenames) are identical in both roots.
 export const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
+export const VOLUME_DIR: string | null = process.env.LIBRARY_DIR?.trim()
+  ? path.resolve(process.env.LIBRARY_DIR.trim())
+  : null;
+export const LIBRARY_ROOTS: string[] = VOLUME_DIR ? [VOLUME_DIR, RULEBOOK_DIR] : [RULEBOOK_DIR];
+/** Where the admin page writes: the volume when there is one, else the repo
+ *  folder (fine locally; on a server without a volume it is lost on redeploy). */
+export const WRITE_ROOT: string = VOLUME_DIR ?? RULEBOOK_DIR;
 
 export type RbUser = { id: string; email: string } | null;
 
@@ -60,7 +81,9 @@ export type RulebookInfo = {
 // One PDF found on disk.
 export type LibraryEntry = {
   file: string; // bare filename (ID)
-  rel: string; // path relative to RULEBOOK_DIR, "/"-separated
+  rel: string; // path relative to its root, "/"-separated
+  root: string; // the library root it was found in (VOLUME_DIR or RULEBOOK_DIR)
+  stored: "volume" | "bundled";
   folderSystem: RulebookSystem | null; // from its system folder, if any
   folderCategory: RulebookCategory | null; // from its category folder, if any
   category: RulebookCategory; // folder category, else guessed from the filename
@@ -169,7 +192,7 @@ async function walk(dir: string, relParts: string[], out: string[][]): Promise<v
   }
 }
 
-function toEntry(parts: string[]): LibraryEntry {
+function toEntry(parts: string[], root: string): LibraryEntry {
   const file = parts[parts.length - 1];
   const folders = parts.slice(0, -1);
   let folderSystem: RulebookSystem | null = null;
@@ -186,14 +209,18 @@ function toEntry(parts: string[]): LibraryEntry {
   return {
     file,
     rel: parts.join("/"),
+    root,
+    stored: root === VOLUME_DIR ? "volume" : "bundled",
     folderSystem,
     folderCategory,
     category: folderCategory ?? rulebookCategory(file),
   };
 }
 
-// The whole library as found on disk, plus any filenames that appear twice
-// (only the first copy is used — IDs are filenames).
+// The whole library as found on disk, plus any filenames that appear twice in
+// the SAME root (only the first copy is used — IDs are filenames). A bundled
+// book that the volume also holds is not a duplicate: the volume copy simply
+// wins, which is the expected state mid-migration.
 //
 // Cached in memory for a few seconds. A Library shelf asks for every book's
 // cover at once, and each cover request (and each PDF range request) resolves
@@ -213,18 +240,28 @@ export function scanLibrary(): Promise<{ entries: LibraryEntry[]; duplicates: st
   return result;
 }
 
+/** Forget the cached scan — after an upload, move or delete. */
+export function invalidateLibraryCache(): void {
+  scanCache = null;
+}
+
 async function scanLibraryUncached(): Promise<{ entries: LibraryEntry[]; duplicates: string[] }> {
-  const found: string[][] = [];
-  await walk(RULEBOOK_DIR, [], found);
-  found.sort((a, b) => a.join("/").localeCompare(b.join("/")));
   const seen = new Set<string>();
   const duplicates: string[] = [];
   const entries: LibraryEntry[] = [];
-  for (const parts of found) {
-    const e = toEntry(parts);
-    if (seen.has(e.file)) { duplicates.push(e.rel); continue; }
-    seen.add(e.file);
-    entries.push(e);
+  for (const root of LIBRARY_ROOTS) {
+    const found: string[][] = [];
+    await walk(root, [], found);
+    found.sort((a, b) => a.join("/").localeCompare(b.join("/")));
+    const inThisRoot = new Set<string>();
+    for (const parts of found) {
+      const e = toEntry(parts, root);
+      if (inThisRoot.has(e.file)) { duplicates.push(e.rel); continue; }
+      inThisRoot.add(e.file);
+      if (seen.has(e.file)) continue; // already served from an earlier root (the volume)
+      seen.add(e.file);
+      entries.push(e);
+    }
   }
   entries.sort(compareEntries);
   return { entries, duplicates };
@@ -253,7 +290,7 @@ export async function listRulebookFiles(): Promise<string[]> {
 // Where a book (by its filename ID) actually sits on disk, or null.
 export async function rulebookPath(file: string): Promise<string | null> {
   const hit = (await scanLibrary()).entries.find((e) => e.file === file);
-  return hit ? path.join(RULEBOOK_DIR, ...hit.rel.split("/")) : null;
+  return hit ? path.join(hit.root, ...hit.rel.split("/")) : null;
 }
 
 // ── Covers ───────────────────────────────────────────────────────────────────
@@ -261,11 +298,13 @@ export async function rulebookPath(file: string): Promise<string | null> {
 // up in this order, by the book's filename without ".pdf":
 //   1. an image beside the PDF  — Shadowdark/Core Rules/shadowdark-core-rules.jpg
 //      (drop one in to use your own cover art)
-//   2. protected/rulebooks/.covers/<name>.webp|jpg|png — page 1 of each book,
-//      pre-rendered and trimmed (dotfolders are skipped by the scan above)
+//   2. <root>/.covers/<name>.webp|jpg|png — page 1 of each book, pre-rendered
+//      (dotfolders are skipped by the scan above). Each library root has its
+//      own; the volume's is checked first, then the repo's.
 // With neither, the shelf draws page 1 in the browser instead (pdf.js), so a
 // newly dropped PDF still gets a cover with no extra step.
 export const COVER_DIR = path.join(RULEBOOK_DIR, ".covers");
+export const coverDirFor = (root: string) => path.join(root, ".covers");
 const COVER_EXTS = [".webp", ".jpg", ".jpeg", ".png"] as const;
 export const COVER_TYPES: Record<string, string> = {
   ".webp": "image/webp", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
@@ -279,7 +318,7 @@ export async function rulebookCoverPath(file: string): Promise<string | null> {
   const pdf = await rulebookPath(file);
   if (!pdf) return null;
   const base = file.replace(/\.pdf$/i, "");
-  for (const dir of [path.dirname(pdf), COVER_DIR]) {
+  for (const dir of [path.dirname(pdf), ...LIBRARY_ROOTS.map(coverDirFor)]) {
     for (const ext of COVER_EXTS) {
       const p = path.join(dir, base + ext);
       if (await isFile(p)) return p;
