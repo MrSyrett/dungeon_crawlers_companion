@@ -127,8 +127,30 @@ export default function HomeSystems({ hiddenKeys }: { hiddenKeys: SystemKey[] })
     // leaves every one of those tiles wrong until something else forces a refit.
     let alive = true;
     const run = () => { if (alive) refit(); };
+    // The names stay hidden (.home-grid:not([data-fitted]) in app/globals.css)
+    // until they have been fitted in their REAL faces, then fade in — instead of
+    // showing at the default size in a fallback face and visibly jumping when the
+    // brand face lands. Capped, so a slow font can never leave the tiles blank.
+    const reveal = () => { if (alive) { refit(); el.setAttribute("data-fitted", ""); } };
     run();
-    if (document.fonts?.ready) document.fonts.ready.then(run).catch(() => {});
+    const cap = window.setTimeout(reveal, 900);
+    // Wait for the very faces the names use. document.fonts.ready alone isn't
+    // enough: a face the browser hasn't started fetching yet doesn't count as
+    // pending, so "ready" could resolve before the brand faces were even asked for.
+    const fonts = document.fonts;
+    if (fonts?.load) {
+      const families = new Set(
+        Array.from(el.querySelectorAll<HTMLElement>(".home-tile-name")).map((n) => getComputedStyle(n).fontFamily),
+      );
+      Promise.all(Array.from(families).map((f) => fonts.load(`700 24px ${f}`).catch(() => [])))
+        .then(() => { window.clearTimeout(cap); reveal(); })
+        .catch(() => { window.clearTimeout(cap); reveal(); });
+    } else {
+      window.clearTimeout(cap);
+      reveal();
+    }
+    // A face that lands after the reveal still gets a refit.
+    fonts?.ready?.then(run).catch(() => {});
     // The tiles reflow at the grid's breakpoints, so the room changes without the
     // text changing. ResizeObserver covers that and the window resize both.
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(run) : null;
@@ -136,6 +158,7 @@ export default function HomeSystems({ hiddenKeys }: { hiddenKeys: SystemKey[] })
     window.addEventListener("resize", run);
     return () => {
       alive = false;
+      window.clearTimeout(cap);
       ro?.disconnect();
       window.removeEventListener("resize", run);
     };

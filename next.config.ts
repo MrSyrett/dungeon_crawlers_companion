@@ -49,6 +49,28 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Theme grounds and the game tiles' cover textures. NOT immutable: a
+        // texture is sometimes replaced under the same name (lotr-mist was), so
+        // a day's cache, then served from cache while it revalidates in the
+        // background for a week — returning visits draw the tiles instantly
+        // instead of waiting on a revalidation round-trip per texture.
+        source: "/themes/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
+        ],
+      },
+      {
+        // The PDF reader (pdf.js + its 1 MB worker, the shared reader, the cover
+        // fallback, the chapter outlines). Only revalidated before, so every book
+        // opened re-checked ~1.4 MB with the server. A day's cache, then served
+        // from cache while revalidating in the background — they change rarely
+        // and keep their names, so not immutable.
+        source: "/vendor/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
+        ],
+      },
+      {
         // Owlbear Rodeo loads the extension icon from its own origin. Static
         // files under public/ don't get the CORS header the manifest route
         // sets for itself, and the hosting guide warns cross-origin headers

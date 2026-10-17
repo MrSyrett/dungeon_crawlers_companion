@@ -48,7 +48,7 @@ function loadCoverScript(): Promise<void> {
  * when there isn't one — page 1 drawn in the browser (public/vendor/dcc-pdf-cover.js),
  * or failing that a plain title plate.
  */
-function BookCover({ file, title }: { file: string; title: string }) {
+function BookCover({ file, title, eager = false }: { file: string; title: string; eager?: boolean }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [mode, setMode] = useState<"server" | "draw" | "plate">("server");
   const enc = encodeURIComponent(file);
@@ -79,7 +79,10 @@ function BookCover({ file, title }: { file: string; title: string }) {
           ref={imgRef}
           src={mode === "server" ? `/api/rulebooks/${enc}/cover` : undefined}
           alt=""
-          loading="lazy"
+          // The first rows load straight away (and first in line); lazy would make
+          // them wait for layout. Covers further down still load as you scroll.
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : "auto"}
           decoding="async"
           onError={mode === "server" ? () => setMode("draw") : undefined}
           className="h-full w-full object-cover object-top"
@@ -169,6 +172,10 @@ export default function RulebookGrid({
     );
   };
   const sections = type ? SECTIONS.filter((s) => s.key === type) : SECTIONS;
+  // The covers likely to be on screen first: the first ten in display order.
+  const eagerFiles = new Set(
+    sections.flatMap((sec) => shown.filter((b) => b.category === sec.key)).slice(0, 10).map((b) => b.file),
+  );
 
   return (
     <>
@@ -206,7 +213,7 @@ export default function RulebookGrid({
                         className="group block rounded-md outline-offset-4"
                         title={b.title}
                       >
-                        <BookCover file={b.file} title={b.title} />
+                        <BookCover file={b.file} title={b.title} eager={eagerFiles.has(b.file)} />
                         <div className="mt-2 line-clamp-2 text-center text-[12px] font-bold uppercase leading-snug tracking-[0.08em] text-[var(--text)] group-hover:text-[var(--gold)]">
                           {b.title}
                         </div>

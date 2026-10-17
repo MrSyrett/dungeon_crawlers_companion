@@ -28,8 +28,7 @@ import { SYSTEMS, isSystemKey, type SystemKey } from "@/components/systemStore";
 // Either folder may be missing: a PDF straight in the system folder has its
 // category guessed from its filename, and a PDF loose in protected/rulebooks/
 // falls back to the system an admin picked for it (the Rulebook DB row) — the
-// pre-Library behaviour, so nothing breaks before the files are sorted
-// (scripts/organize-library.mjs does the one-time sort).
+// pre-Library behaviour, so a PDF dropped loose still shows up until it is filed.
 //
 // A book's ID is still its bare FILENAME — the Rulebook / RulebookAccess rows,
 // the reader's per-book page memory and public/vendor/rulebook-outlines.json are
@@ -195,7 +194,26 @@ function toEntry(parts: string[]): LibraryEntry {
 
 // The whole library as found on disk, plus any filenames that appear twice
 // (only the first copy is used — IDs are filenames).
-export async function scanLibrary(): Promise<{ entries: LibraryEntry[]; duplicates: string[] }> {
+//
+// Cached in memory for a few seconds. A Library shelf asks for every book's
+// cover at once, and each cover request (and each PDF range request) resolves
+// its file through this scan — so without the cache one page view walked the
+// whole folder tree dozens of times in parallel, which is what made covers
+// trickle in. A PDF dropped into a folder still shows up within SCAN_TTL_MS.
+const SCAN_TTL_MS = 10_000;
+let scanCache: { at: number; result: Promise<{ entries: LibraryEntry[]; duplicates: string[] }> } | null = null;
+
+export function scanLibrary(): Promise<{ entries: LibraryEntry[]; duplicates: string[] }> {
+  const now = Date.now();
+  if (scanCache && now - scanCache.at < SCAN_TTL_MS) return scanCache.result;
+  const result = scanLibraryUncached();
+  scanCache = { at: now, result };
+  // A failed scan must not be served from the cache.
+  result.catch(() => { if (scanCache?.result === result) scanCache = null; });
+  return result;
+}
+
+async function scanLibraryUncached(): Promise<{ entries: LibraryEntry[]; duplicates: string[] }> {
   const found: string[][] = [];
   await walk(RULEBOOK_DIR, [], found);
   found.sort((a, b) => a.join("/").localeCompare(b.join("/")));

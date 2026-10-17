@@ -1,3 +1,4 @@
+import { preload } from "react-dom";
 import { redirect } from "next/navigation";
 import HomeSystems from "@/components/HomeSystems";
 import { getCurrentUser } from "@/lib/auth";
@@ -26,7 +27,33 @@ const TOOLS_NAV: { href: string; label: string; tool: "map" | "token" }[] = [
   { href: "/token-maker", label: "Token Maker", tool: "token" },
 ];
 
+// What the game tiles need before they look finished: the brand faces the
+// wordmarks are set in (self-hosted @font-face in app/globals.css — the
+// next/font faces are already preloaded by the layout) and each tile's cover
+// texture (the [data-sys] map's --tile-tex). Both are otherwise discovered only
+// once the stylesheet has been applied and the tiles laid out, so they arrived
+// late and the tiles visibly "caught up". Preloading starts all of them with the
+// HTML itself, in parallel.
+const TILE_FONTS = [
+  "/fonts/jsl-blackletter.woff2",
+  "/fonts/dndc.woff2",
+  "/fonts/ringbearer.woff2",
+  "/fonts/dreadful.woff2",
+  "/fonts/marvel.woff2",
+  "/fonts/ghostbusters.woff2",
+  "/fonts/star-jedi-logo.woff2",
+  "/fonts/dead-kansas.woff2",
+];
+const TILE_ART = [
+  "icrpg-grain", "dnd-cover", "lotr-mist", "dcc-splatter", "kob-halftone", "co-grunge",
+  "mmrpg-burst", "jlu-skyline", "gb-ectoplasm", "sw-starfield", "ace-speedlines",
+  "d62e-blueprint", "yze-raster", "twd-grunge", "myz-metal", "vae-paper", "tool-map", "tool-token",
+];
+
 export default async function Home() {
+  for (const href of TILE_FONTS) preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  for (const name of TILE_ART) preload(`/themes/${name}.webp`, { as: "image", type: "image/webp" });
+
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const hiddenKeys = await getHiddenSystemKeys();
@@ -48,7 +75,7 @@ export default async function Home() {
         </h2>
         {/* .home-tools: the same flex wrap as the games, but two across at every
             width so a pair of tools fills its row. Both classes are in globals.css. */}
-        <ul className="home-grid home-tools">
+        <ul className="home-grid home-tools" data-fitted="">
           {TOOLS_NAV.map((t) => (
             <li key={t.href}>
               {/* The Map Maker is a route handler serving its own HTML document,

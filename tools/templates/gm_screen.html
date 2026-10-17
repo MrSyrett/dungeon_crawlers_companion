@@ -17247,7 +17247,7 @@ function init_rules(root) {
         const sub = pg > 1 ? 'Page ' + pg : (b.system === 'BOTH' ? 'All systems' : '');
         const cover = b.cover || ('/api/rulebooks/' + encodeURIComponent(b.file) + '/cover');
         return '<button type="button" class="rul-book' + (b.file === activeFile ? ' last' : '') + '" data-file="' + esc(b.file) + '" title="' + esc(b.title || b.file) + '">' +
-          '<span class="rul-cover"><img alt="" loading="lazy" decoding="async" src="' + esc(cover) + '" data-pdf="' + esc(b.url) + '">' +
+          '<span class="rul-cover"><img alt="" decoding="async" src="' + esc(cover) + '" data-pdf="' + esc(b.url) + '">' +
           '<span class="rul-cover-plate">' + esc(b.title || b.file) + '</span></span>' +
           '<span class="rul-book-t">' + esc(b.title || b.file) + '</span>' +
           (sub ? '<span class="rul-book-s">' + esc(sub) + '</span>' : '') + '</button>';

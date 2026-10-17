@@ -1464,6 +1464,20 @@ body {
   display: none !important;
 }
 
+/* Long compendium lists (453 Marvel characters, ~400 D&D spells, the bestiaries)
+   render every entry so InstantFilter can filter in place. The browser then laid
+   out and painted all of them on load, most far below the fold. content-
+   visibility lets it skip entries until they near the viewport; the intrinsic
+   size is the placeholder height until an entry has been drawn once ("auto"
+   then remembers its real height), so the scrollbar stays close to right.
+   Entries never contain anything that overflows them — an overlay opened from
+   inside one (MmrpgRefTokens) is portalled to <body>, because containment would
+   otherwise trap a position:fixed child inside the entry. */
+[data-f] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 140px;
+}
+
 /* ===========================================================================
    THE HOME PAGE'S GAME TILES
    ===========================================================================
@@ -1634,6 +1648,10 @@ body {
      colour to wash white instead of black. A black scrim over parchment is mud. */
   background: var(--tile-wash);
 }
+/* Hidden until components/HomeSystems.tsx has fitted the names in their real
+   faces (it sets data-fitted), then faded in — no visible size jump. */
+.home-grid:not([data-fitted]) .home-tile > .home-tile-name { opacity: 0; }
+.home-tile > .home-tile-name { transition: opacity 0.18s ease-out; }
 .home-tile > .home-tile-name {
   position: relative;
   z-index: 2;
