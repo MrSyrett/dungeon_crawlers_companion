@@ -541,6 +541,13 @@ input[type="number"] { -moz-appearance: textfield; }
 .advh-meta { font-family: 'Geist Mono', monospace; font-size: 10.5px; color: var(--dim); margin-top: 5px; }
 .advh-full { flex-shrink: 0; }
 .advh-backbtn { position: absolute; top: 8px; left: 8px; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+/* ── ADVENTURE ← LIBRARY (the system's Adventures shelf + reader, laid over the
+   pane so whatever was loaded underneath comes back when it closes) ── */
+.adv-lib { position: absolute; inset: 0; z-index: 7; display: flex; flex-direction: column; background: var(--panel); color: var(--text); }
+.adv-lib-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.adv-lib-t { font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: .06em; color: var(--gold); }
+.adv-lib-s { font-family: 'Geist', sans-serif; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.adv-lib-head .toolbar-spacer { flex: 1; }
 .advh-prose { font-size: 13px; color: var(--light); line-height: 1.6; overflow-wrap: anywhere; }
 /* Chapter switcher — one tab per chapter of a multi-chapter adventure. */
 /* Chapters — a collapsible outline (table of contents) to switch chapters. */
@@ -3091,7 +3098,7 @@ GMScenes.renderPins();
       <div class="doc-empty">
         <div class="doc-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6.5 4h9.8a2.4 2.4 0 0 1 2.4 2.4v9.2a2.4 2.4 0 0 0 2.4 2.4.8.8 0 0 1 .8.8v.4a1.4 1.4 0 0 1-1.4 1.4H8.3a2.4 2.4 0 0 1-2.4-2.4V9.3H4.6a2.4 2.4 0 0 1 0-4.8.8.8 0 0 1 0-.5Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 8.7h6v1.6h-6zM9.5 12h6v1.6h-6z" opacity=".55"/></svg></div>
         <div class="doc-empty-title">No Adventure Loaded</div>
-        <div class="doc-empty-sub">Load a PDF or image of your adventure or Adventure Prep export</div>
+        <div class="doc-empty-sub">Load an Adventure Prep, a PDF or image of your adventure, or one from the Library</div>
       </div>
       <div class="doc-frame-wrap" style="display:none;"></div>
     </div>
@@ -6125,6 +6132,7 @@ function syncToolbar(slot, toolNode) {
     // doc tools
     ['.doc-file-input', null],            // handled via label click below
     ['.doc-load-prep', '.doc-load-prep'], // adventure: open session-prep picker
+    ['.doc-load-lib',  '.doc-load-lib'],  // adventure: open the system's Adventures shelf
     ['.doc-zoom-out',  '.doc-zoom-out'],
     ['.doc-zoom-in',   '.doc-zoom-in'],
     ['.doc-clear',     '.doc-clear'],
@@ -6515,12 +6523,19 @@ function initDocTool(root) {
 
   // On Maps, the ✕ button closes the CURRENT map's tab (drops just that map);
   // on Adventure it clears the single loaded doc.
-  clearBtn.addEventListener('click', () => { if(isMaps && activeMapId != null) removeMap(activeMapId); else clearDoc(); });
+  clearBtn.addEventListener('click', () => {
+    if(isMaps && activeMapId != null) removeMap(activeMapId);
+    else if(root._advLibIsOpen && root._advLibIsOpen()) root._advLibHide();   // Adventure: close the Library book first
+    else clearDoc();
+  });
 
   // Core loader — works from either a File object or a pre-existing data URL
   // `fileId` is passed when we're RESTORING a file we already stored; otherwise
   // this is a fresh drop and we store it now, so the next save carries just the id.
   function loadFromDataUrl(dataUrl, fileName, fileId) {
+    // Loading a file in the Adventure pane closes the Library shelf/book over it
+    // (but not while restoring a saved board, where the book stays on top).
+    if(!fileId && root._advLibHide) root._advLibHide();
     const ext = fileName.split('.').pop().toLowerCase();
     filenameEl.textContent = fileName;
     emptyEl.style.display = 'none';
@@ -6971,6 +6986,8 @@ function initDocTool(root) {
       // Adventure only: which session-prep the hub had open, so a refresh
       // restores the interactive hub, not just the printable preview.
       advPrep: root._advPrepDoc || null,
+      // Adventure only: the Library shelf/book laid over the pane (book + page).
+      advLib: root._advLibState ? root._advLibState() : null,
     };
   };
   root._setState = (s) => {
@@ -6999,6 +7016,9 @@ function initDocTool(root) {
       }
       return;
     }
+    // Adventure: a Library book open over the pane comes back on top of whatever
+    // is restored beneath it.
+    if(s && s.advLib && root._advLibSetState) root._advLibSetState(s.advLib);
     // Adventure: a saved hub takes precedence over a saved preview file — re-open
     // the prep into the hub (async fetch; the hub shows its own loading state).
     if(s && s.advPrep && s.advPrep.id && typeof root._advLoadPrep === 'function') {
@@ -7039,7 +7059,7 @@ function initDocTool(root) {
 
   // Adventure pane also gets a "Session Prep" loader that pulls in a saved
   // session-prep document (preview-only) from the user's account.
-  if(root.dataset.tool === 'adventure') wireSessionPrepLoader(root);
+  if(root.dataset.tool === 'adventure') { wireSessionPrepLoader(root); wireAdventureLibrary(root); }
 }
 
 // ── SESSION PREP LOADER (Adventure only) ──────────────────────────────────
@@ -7103,6 +7123,7 @@ function wireSessionPrepLoader(root) {
 
   function open() {
     openPrepPicker(function(doc) {
+      if(root._advLibHide) root._advLibHide();   // a chosen prep replaces the Library view
       loadPrep(doc);
     });
   }
@@ -7531,6 +7552,242 @@ function loadPrepList(wrap) {
     .catch(() => {
       list.innerHTML = '<div class="prep-picker-msg">Couldn\u2019t load your Adventure Prep list.</div>';
     });
+}
+
+// PDF.js (320 KB) + the shared reader, and the cover drawer — loaded on first
+// use by the Library tool and the Adventure pane's Library shelf, never on every
+// GM Screen open. One load shared by every pane.
+let _dccReaderLoading = null, _dccCoverLoading = null;
+function dccLoadScript(src) {
+  return new Promise((res, rej) => {
+    const have = document.querySelector('script[data-dcc-src="' + src + '"]');
+    if(have) { if(have.dataset.loaded === '1') return res(); have.addEventListener('load', () => res()); have.addEventListener('error', () => rej(new Error(src))); return; }
+    const el = document.createElement('script'); el.src = src; el.async = true; el.dataset.dccSrc = src;
+    el.addEventListener('load', () => { el.dataset.loaded = '1'; res(); }); el.addEventListener('error', () => rej(new Error(src)));
+    document.head.appendChild(el);
+  });
+}
+function dccLoadPdfReader() {
+  if(window.DCCPdfReader && window.pdfjsLib) return Promise.resolve();
+  if(!_dccReaderLoading) _dccReaderLoading = dccLoadScript('/vendor/pdfjs/pdf.min.js').then(() => dccLoadScript('/vendor/dcc-pdf-reader.js'))
+    .catch(e => { _dccReaderLoading = null; throw e; });
+  return _dccReaderLoading;
+}
+function dccLoadPdfCover() {
+  if(window.DCCPdfCover) return Promise.resolve();
+  if(!_dccCoverLoading) _dccCoverLoading = dccLoadScript('/vendor/dcc-pdf-cover.js').catch(e => { _dccCoverLoading = null; throw e; });
+  return _dccCoverLoading;
+}
+// A cover <img> with no server image → draw page 1 in the browser; failing that,
+// the plain title plate (.rul-cover.plate).
+function dccWireCovers(scope) {
+  scope.querySelectorAll('.rul-cover img').forEach(img => {
+    img.addEventListener('error', () => {
+      const plate = () => img.parentNode && img.parentNode.classList.add('plate');
+      if(img.dataset.drawing) { plate(); return; }
+      img.dataset.drawing = '1';
+      img.removeAttribute('src');
+      dccLoadPdfCover().then(() => window.DCCPdfCover.draw(img, img.dataset.pdf, plate), plate);
+    });
+  });
+}
+
+// ── ADVENTURE ← LIBRARY ──────────────────────────────────────────────────
+// The Adventure pane's Library button: the selected system's Adventures shelf
+// (from /api/rulebooks — the same books, covers and permissions as the Library
+// tool), and the chosen PDF in the shared DCCPdfReader, inside this pane. It is
+// laid OVER the pane, so a prep hub or file loaded underneath is still there
+// when the GM closes it. Loading a file or a prep closes it. Saved as a small
+// pointer (book + page) — the PDF itself stays on the server.
+const LIB_ICO = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3h3A1.5 1.5 0 0 1 10 4.5v15A1.5 1.5 0 0 1 8.5 21h-3A1.5 1.5 0 0 1 4 19.5zM11 6.5A1.5 1.5 0 0 1 12.5 5h2A1.5 1.5 0 0 1 16 6.5v13a1.5 1.5 0 0 1-1.5 1.5h-2a1.5 1.5 0 0 1-1.5-1.5z"/><path d="m16.6 6.9 1.9-.5a1.5 1.5 0 0 1 1.8 1.1l3 11.6a1.5 1.5 0 0 1-1.1 1.8l-1.9.5a1.5 1.5 0 0 1-1.8-1.1l-3-11.6a1.5 1.5 0 0 1 1.1-1.8z" opacity=".75"/></svg>';
+function wireAdventureLibrary(root) {
+  const body = root.querySelector('.doc-body');
+  const emptyEl = root.querySelector('.doc-empty');
+  const toolbarTpl = root.querySelector('.toolbar-tpl');
+  if(!body) return;
+  const esc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const save = () => { if(window.__ddScheduleSave) { try { window.__ddScheduleSave(); } catch(e){} } };
+  const sysKey = () => (typeof window.GM_SYSTEM === 'string' ? window.GM_SYSTEM : '');
+  const sysName = () => { const k = sysKey(); return (window.SYS_LABEL && window.SYS_LABEL[k]) || k || 'this system'; };
+
+  const wrap = document.createElement('div');
+  wrap.className = 'adv-lib';
+  wrap.style.display = 'none';
+  wrap.innerHTML =
+    '<div class="adv-lib-shelfview" style="display:flex;flex-direction:column;flex:1;min-height:0">' +
+      '<div class="adv-lib-head"><span class="adv-lib-t">Adventures</span><span class="adv-lib-s"></span>' +
+        '<span class="toolbar-spacer"></span>' +
+        '<button type="button" class="btn small ghost adv-lib-refresh" title="Refresh the Library" aria-label="Refresh the Library">↻</button>' +
+        '<button type="button" class="btn small ghost adv-lib-close" title="Close the Library" aria-label="Close the Library">✕</button></div>' +
+      '<div class="rul-shelf"></div>' +
+    '</div>' +
+    '<div class="rul-reader" style="display:none"></div>';
+  body.appendChild(wrap);
+  const shelfView = wrap.querySelector('.adv-lib-shelfview');
+  const shelfEl = wrap.querySelector('.rul-shelf');
+  const readerEl = wrap.querySelector('.rul-reader');
+  const subEl = wrap.querySelector('.adv-lib-s');
+
+  let open = false;          // is the Library laid over the pane?
+  let view = 'shelf';        // 'shelf' | 'reader'
+  let activeFile = '';
+  const positions = {};      // file → last page
+  let allBooks = [], loaded = false, loading = null;
+  let reader = null;
+
+  const adventures = () => allBooks.filter(b => b.category === 'Adventures' && (!b.system || b.system === 'BOTH' || b.system === sysKey()));
+  const bookFor = f => adventures().find(b => b.file === f) || null;
+
+  function fetchBooks(force) {
+    if(loading && !force) return loading;
+    loading = fetch('/api/rulebooks', { credentials: 'same-origin' })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(d => { allBooks = (d.books || []).filter(b => b && b.url && b.file); loaded = true; })
+      .catch(() => { loaded = true; allBooks = []; throw new Error('library'); });
+    return loading;
+  }
+
+  function renderShelf(errMsg) {
+    subEl.textContent = sysName();
+    if(errMsg) { shelfEl.innerHTML = '<div class="rul-shelf-empty">' + errMsg + '</div>'; return; }
+    if(!loaded) { shelfEl.innerHTML = '<div class="rul-shelf-empty">Loading the Library…</div>'; return; }
+    const list = adventures();
+    if(!list.length) {
+      shelfEl.innerHTML = '<div class="rul-shelf-empty">No ' + esc(sysName()) + ' adventures in the Library yet.<br>' +
+        'Add them from <b>Admin → Library</b> under <b>Adventures</b>.</div>';
+      return;
+    }
+    shelfEl.innerHTML = '<div class="rul-grid">' + list.map(b => {
+      const pg = positions[b.file];
+      const sub = pg > 1 ? 'Page ' + pg : (b.system === 'BOTH' ? 'All systems' : '');
+      const cover = b.cover || ('/api/rulebooks/' + encodeURIComponent(b.file) + '/cover');
+      return '<button type="button" class="rul-book' + (b.file === activeFile ? ' last' : '') + '" data-file="' + esc(b.file) + '" title="' + esc(b.title || b.file) + '">' +
+        '<span class="rul-cover"><img alt="" decoding="async" src="' + esc(cover) + '" data-pdf="' + esc(b.url) + '">' +
+        '<span class="rul-cover-plate">' + esc(b.title || b.file) + '</span></span>' +
+        '<span class="rul-book-t">' + esc(b.title || b.file) + '</span>' +
+        (sub ? '<span class="rul-book-s">' + esc(sub) + '</span>' : '') + '</button>';
+    }).join('') + '</div>';
+    dccWireCovers(shelfEl);
+  }
+
+  function ensureReader() {
+    if(reader) return reader;
+    if(!window.DCCPdfReader || !window.pdfjsLib) return null;
+    readerEl.innerHTML = '';
+    reader = window.DCCPdfReader.create(readerEl, {
+      showOpenInNew: true,
+      showDownload: true,
+      onBack: () => showShelf(),
+      backLabel: 'Adventures',
+      emptyText: 'That adventure is no longer in the Library.',
+      getStartPage: (f) => positions[f] || 1,
+      onActiveBook: (f) => { activeFile = f; save(); },
+      onPage: (f, pg) => { if(pg > 0) positions[f] = pg; save(); },
+    });
+    return reader;
+  }
+
+  function showShelf() {
+    open = true; view = 'shelf';
+    wrap.style.display = 'flex';
+    readerEl.style.display = 'none';
+    shelfView.style.display = 'flex';
+    renderShelf();
+    if(!loaded) fetchBooks().then(() => { if(open && view === 'shelf') renderShelf(); }, () => { if(open && view === 'shelf') renderShelf('Couldn’t reach the Library. Check your connection and press ↻.'); });
+    save();
+  }
+
+  function openBook(file) {
+    const b = bookFor(file);
+    if(!b) { showShelf(); return; }
+    open = true; view = 'reader'; activeFile = b.file;
+    wrap.style.display = 'flex';
+    shelfView.style.display = 'none';
+    readerEl.style.display = 'flex';
+    save();
+    const r = ensureReader();
+    if(!r) {
+      readerEl.innerHTML = '<div class="rul-shelf-empty">Loading PDF reader…</div>';
+      dccLoadPdfReader().then(() => { if(open && view === 'reader' && activeFile === b.file) { if(ensureReader()) openBook(b.file); else readerEl.innerHTML = '<div class="rul-shelf-empty">Couldn’t start the PDF reader.</div>'; } },
+                             () => { readerEl.innerHTML = '<div class="rul-shelf-empty">Couldn’t load the PDF reader. Check your connection and try again.</div>'; });
+      return;
+    }
+    r.setBooks([{ file: b.file, title: b.title, url: b.url }], b.file);
+  }
+
+  // Close: back to whatever the pane held before (empty, a file, or a prep hub).
+  function close() {
+    if(!open) return;
+    open = false;
+    wrap.style.display = 'none';
+    save();
+  }
+
+  // Library button: straight to the shelf (fresh list each time it opens).
+  function launch() {
+    showShelf();
+    fetchBooks(true).then(() => { if(open && view === 'shelf') renderShelf(); }, () => { if(open && view === 'shelf') renderShelf('Couldn’t reach the Library. Check your connection and press ↻.'); });
+  }
+
+  shelfEl.addEventListener('click', (e) => {
+    const t = e.target.closest ? e.target.closest('[data-file]') : null;
+    if(t) openBook(t.getAttribute('data-file'));
+  });
+  wrap.querySelector('.adv-lib-close').addEventListener('click', close);
+  wrap.querySelector('.adv-lib-refresh').addEventListener('click', () => {
+    loaded = false; renderShelf();
+    if(reader) { try { reader.dropCache(); } catch(e){} }
+    fetchBooks(true).then(() => { if(open && view === 'shelf') renderShelf(); }, () => renderShelf('Couldn’t reach the Library. Check your connection and press ↻.'));
+  });
+
+  // Another game system: an adventure from a different system goes back to the
+  // new system's shelf.
+  document.addEventListener('gm-system-change', () => {
+    if(!open) return;
+    if(view === 'reader' && bookFor(activeFile)) return;
+    if(view === 'shelf' || loaded) showShelf();
+  });
+
+  // Hooks for initDocTool / the prep loader.
+  root._advLibHide = close;                         // a file or prep was loaded
+  root._advLibIsOpen = () => open;
+  root._advLibState = () => ({ open, view, activeFile, positions: Object.assign({}, positions) });
+  root._advLibSetState = (st) => {
+    if(!st || typeof st !== 'object') return;
+    if(st.positions && typeof st.positions === 'object') Object.keys(st.positions).forEach(f => { const n = parseInt(st.positions[f], 10); if(n > 0) positions[f] = n; });
+    if(typeof st.activeFile === 'string') activeFile = st.activeFile;
+    if(!st.open) return;
+    if(st.view === 'reader' && activeFile) {
+      // Show it at once; open the book once the list (and so its URL) is in.
+      open = true; view = 'reader'; wrap.style.display = 'flex'; shelfView.style.display = 'none'; readerEl.style.display = 'flex';
+      // (A placeholder only before the reader exists — never wipe a live reader's DOM.)
+      if(!reader) readerEl.innerHTML = '<div class="rul-shelf-empty">Opening the adventure…</div>';
+      fetchBooks().then(() => { if(open && view === 'reader') openBook(activeFile); }, () => showShelf());
+    } else showShelf();
+  };
+
+  // Buttons: one in the empty state, one in the toolbar (cloned into the pane
+  // header by syncToolbar, which proxies clicks back via the '.doc-load-lib' pair).
+  if(emptyEl && !emptyEl.querySelector('.doc-load-lib')) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn small doc-load-lib';
+    b.innerHTML = LIB_ICO + ' From Library';
+    b.addEventListener('click', launch);
+    emptyEl.appendChild(b);
+  }
+  if(toolbarTpl && !toolbarTpl.querySelector('.doc-load-lib')) {
+    const tb = document.createElement('button');
+    tb.type = 'button';
+    tb.className = 'btn small doc-load-lib';
+    tb.innerHTML = LIB_ICO;
+    tb.title = 'Open an adventure from the Library';
+    tb.setAttribute('aria-label', 'Open an adventure from the Library');
+    tb.addEventListener('click', launch);
+    const prepBtn = toolbarTpl.querySelector('.doc-load-prep');
+    if(prepBtn && prepBtn.nextSibling) toolbarTpl.insertBefore(tb, prepBtn.nextSibling);
+    else toolbarTpl.appendChild(tb);
+  }
 }
 
 function init_adventure(root) { initDocTool(root); }
@@ -17203,23 +17460,8 @@ function init_rules(root) {
     return reader;
   }
 
-  // PDF.js (320 KB) + the shared reader load on the FIRST book opened, not on
-  // every GM Screen open.
-  let readerLoading = null;
-  function loadReaderScripts() {
-    if(window.DCCPdfReader && window.pdfjsLib) return Promise.resolve();
-    if(readerLoading) return readerLoading;
-    const one = (src) => new Promise((res, rej) => {
-      const sel = 'script[data-dcc-src="' + src + '"]';
-      const have = document.querySelector(sel);
-      if(have) { if(have.dataset.loaded === '1') return res(); have.addEventListener('load', () => res()); have.addEventListener('error', () => rej(new Error(src))); return; }
-      const el = document.createElement('script'); el.src = src; el.async = true; el.dataset.dccSrc = src;
-      el.addEventListener('load', () => { el.dataset.loaded = '1'; res(); }); el.addEventListener('error', () => rej(new Error(src)));
-      document.head.appendChild(el);
-    });
-    readerLoading = one('/vendor/pdfjs/pdf.min.js').then(() => one('/vendor/dcc-pdf-reader.js'));
-    return readerLoading;
-  }
+  // PDF.js + the shared reader load on the FIRST book opened (dccLoadPdfReader).
+  const loadReaderScripts = dccLoadPdfReader;
 
   // ── Shelf ────────────────────────────────────────────────────────────────
   function renderShelf() {
@@ -17257,25 +17499,7 @@ function init_rules(root) {
     shelfEl.innerHTML = html;
     // No cover image on the server → draw page 1 in the browser; failing that,
     // a plain title plate.
-    shelfEl.querySelectorAll('.rul-cover img').forEach(img => {
-      img.addEventListener('error', () => {
-        const plate = () => img.parentNode && img.parentNode.classList.add('plate');
-        if(img.dataset.drawing) { plate(); return; }
-        img.dataset.drawing = '1';
-        img.removeAttribute('src');
-        loadCoverScript().then(() => window.DCCPdfCover.draw(img, img.dataset.pdf, plate), plate);
-      }, { once: false });
-    });
-  }
-  let coverLoading = null;
-  function loadCoverScript() {
-    if(window.DCCPdfCover) return Promise.resolve();
-    if(!coverLoading) coverLoading = new Promise((res, rej) => {
-      const el = document.createElement('script'); el.src = '/vendor/dcc-pdf-cover.js'; el.async = true;
-      el.onload = () => res(); el.onerror = () => rej(new Error('cover'));
-      document.head.appendChild(el);
-    });
-    return coverLoading;
+    dccWireCovers(shelfEl);
   }
   shelfEl.addEventListener('click', (e) => {
     const t = e.target.closest ? e.target.closest('[data-type],[data-file]') : null;
