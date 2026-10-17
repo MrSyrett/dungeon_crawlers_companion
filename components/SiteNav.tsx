@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } fr
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { fitNavTitle } from "@/lib/navTitleFit";
 import {
   SYSTEMS,
   setSystem,
@@ -145,32 +146,14 @@ export default function SiteNav({
 
   const sys = list.find((s) => s.key === effective) ?? list[0];
 
-  // Fit the game's title to its zone. First on ONE line, stepping down from the
-  // stylesheet's size to a readable floor; a name still too long then wraps to
-  // TWO lines (.is-wrap) starting from a size whose two lines fit the bar's
-  // height, so the bar never grows. Re-run when the game or the window changes.
+  // Size the game's title so its letters stand as tall as the logo's mark
+  // (lib/navTitleFit.ts), shrinking or wrapping only when it won't fit its
+  // zone. Re-run when the game, the window or a late-loading font changes.
   const titleRef = useRef<HTMLSpanElement>(null);
   useIsoLayoutEffect(() => {
     const el = titleRef.current;
     if (!el) return;
-    const over = (size: number) =>
-      el.scrollWidth > el.clientWidth ||
-      // Display faces draw outside their line box; only a real third line counts.
-      el.scrollHeight > el.clientHeight + size * 0.45;
-    const fit = () => {
-      el.classList.remove("is-wrap");
-      el.style.fontSize = "";
-      let size = parseFloat(getComputedStyle(el).fontSize) || 18;
-      const floor = 14;
-      let guard = 0;
-      while (over(size) && size > floor && guard++ < 40) { size -= 0.5; el.style.fontSize = size + "px"; }
-      if (!over(size)) return;
-      el.classList.add("is-wrap");
-      size = 15;
-      el.style.fontSize = size + "px";
-      guard = 0;
-      while (over(size) && size > 10 && guard++ < 40) { size -= 0.5; el.style.fontSize = size + "px"; }
-    };
+    const fit = () => fitNavTitle(el);
     fit();
     let raf = 0;
     const onResize = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); };

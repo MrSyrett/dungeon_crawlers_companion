@@ -1,4 +1,5 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
+import { fitNavTitle } from "@/lib/navTitleFit";
 import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK, ACCOUNT_LINKS, LIBRARY_LINK } from "@/components/navConfig";
 
 // The site navbar, for the surfaces that are NOT Next pages.
@@ -133,9 +134,8 @@ const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
 const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = { DCC: ["Dungeon", "Crawler Carl"], MMRPG: ["Marvel", "Multiverse RPG"] };
 
 function titleCss(): string {
-  const base = `#dd-nav .nav-sys-title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:17.6px;line-height:1.2;letter-spacing:.02em;padding:.1em .1em .12em;text-transform:none;color:var(--text,#e9edf2)}
-@media (min-width:640px){#dd-nav .nav-sys-title{font-size:19.2px}}
-#dd-nav .nav-sys-title.is-wrap{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow-wrap:anywhere;line-height:1.02}
+  const base = `#dd-nav .nav-sys-title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:30.4px;line-height:1.2;letter-spacing:.02em;padding:.1em .1em .12em;margin-block:calc(16px - .71em);text-transform:none;color:var(--text,#e9edf2)}
+#dd-nav .nav-sys-title.is-wrap{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow-wrap:anywhere;line-height:1.02;margin-block:calc(16px - 1.13em)}
 #dd-nav .nav-sys-title[data-sys="DCC"] .tn-1{color:var(--dcc-gold)}
 #dd-nav .nav-sys-title[data-sys="DCC"] .tn-2{color:var(--dcc-ink)}
 #dd-nav .nav-sys-title[data-sys="MMRPG"] .tn-1{display:inline-block;line-height:1;padding:.12em .18em .06em;margin-right:.08em;background:var(--mmrpg);color:#ffffff;border-radius:2px}
@@ -381,17 +381,10 @@ function paint(){
   try{var r=document.documentElement;r.style.setProperty("--sys",e.a);if(!docSys)r.dataset.system=e.k;}catch(e2){}
   fitTitle();
 }
-// Fit the title to its zone, as SiteNav does: one line, stepping down to a
-// readable floor; then two compact lines that still fit the bar's height.
-function over(size){return title.scrollWidth>title.clientWidth||title.scrollHeight>title.clientHeight+size*0.45;}
-function fitTitle(){
-  title.classList.remove("is-wrap");title.style.fontSize="";
-  var size=parseFloat(getComputedStyle(title).fontSize)||18,g=0;
-  while(over(size)&&size>14&&g++<40){size-=0.5;title.style.fontSize=size+"px";}
-  if(!over(size))return;
-  title.classList.add("is-wrap");size=15;title.style.fontSize=size+"px";g=0;
-  while(over(size)&&size>10&&g++<40){size-=0.5;title.style.fontSize=size+"px";}
-}
+// Size the title as SiteNav does: letters as tall as the logo's mark, shrinking
+// or wrapping only when it won't fit (lib/navTitleFit.ts, inlined here).
+var fitNavTitle=(${fitNavTitle.toString()});
+function fitTitle(){fitNavTitle(title);}
 var fitRaf=0;function refit(){cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(fitTitle);}
 window.addEventListener("resize",refit);
 try{document.fonts.ready.then(fitTitle);document.fonts.addEventListener("loadingdone",refit);}catch(e2){}

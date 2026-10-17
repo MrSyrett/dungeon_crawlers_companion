@@ -1817,14 +1817,18 @@ body {
   white-space: nowrap;
   font-family: var(--tile-face, inherit), "Geist", ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
-  font-size: 1.1rem;
+  /* A starting size only: lib/navTitleFit.ts sets each game's size so its
+     letters stand as tall as the logo's mark. */
+  font-size: 1.9rem;
   line-height: 1.2;
   letter-spacing: 0.02em;
   color: var(--tile-ink, var(--tile-accent, var(--text)));
   /* Room for descenders/swashes some display faces draw outside the line box. */
   padding: 0.1em 0.1em 0.12em;
+  /* The box (1.42em) is taller than the 32px row at these sizes; negative
+     margins keep it from growing the bar — only the letters need the room. */
+  margin-block: calc(16px - 0.71em);
 }
-@media (min-width: 640px) { .nav-sys-title { font-size: 1.2rem; } }
 /* A name too long for one line at a readable size ("Justice League Unlimited"
    on a phone or a narrow desktop) wraps to two compact lines instead — sized by
    SiteNav's fitter so the pair still fits the bar's height. */
@@ -1835,6 +1839,7 @@ body {
   white-space: normal;
   overflow-wrap: anywhere;
   line-height: 1.02;
+  margin-block: calc(16px - 1.13em);
 }
 .nav-sys-title[data-sys="SW"] { text-transform: lowercase; }
 .nav-sys-title[data-sys="MMRPG"] { text-transform: uppercase; }
