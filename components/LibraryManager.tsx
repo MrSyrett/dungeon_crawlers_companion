@@ -17,14 +17,13 @@ const field =
 const btn =
   "rounded border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors disabled:cursor-default disabled:opacity-50";
 
-declare global {
-  interface Window {
-    pdfjsLib?: {
-      GlobalWorkerOptions: { workerSrc: string };
-      getDocument: (src: { data: ArrayBuffer }) => { promise: Promise<PdfDoc> };
-    };
-  }
-}
+// window.pdfjsLib is declared (as unknown) in RulebookReader.tsx, and a global
+// can be declared only one way, so this file reads it through a typed view.
+type PdfLib = {
+  GlobalWorkerOptions: { workerSrc: string };
+  getDocument: (src: { data: ArrayBuffer }) => { promise: Promise<PdfDoc> };
+};
+const pdfjs = () => (window as unknown as { pdfjsLib?: PdfLib }).pdfjsLib;
 type PdfDoc = {
   getPage: (n: number) => Promise<{
     getViewport: (o: { scale: number }) => { width: number; height: number };
@@ -35,7 +34,7 @@ type PdfDoc = {
 
 let pdfjsLoading: Promise<void> | null = null;
 function loadPdfjs(): Promise<void> {
-  if (window.pdfjsLib) return Promise.resolve();
+  if (pdfjs()) return Promise.resolve();
   if (!pdfjsLoading) {
     pdfjsLoading = new Promise((resolve, reject) => {
       const s = document.createElement("script");
@@ -53,7 +52,7 @@ function loadPdfjs(): Promise<void> {
 async function renderCover(file: File): Promise<Blob | null> {
   try {
     await loadPdfjs();
-    const lib = window.pdfjsLib!;
+    const lib = pdfjs()!;
     if (!lib.GlobalWorkerOptions.workerSrc) lib.GlobalWorkerOptions.workerSrc = "/vendor/pdfjs/pdf.worker.min.js";
     const doc = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
     const page = await doc.getPage(1);

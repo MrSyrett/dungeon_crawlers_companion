@@ -69,7 +69,7 @@ export function safePdfName(raw: unknown): string | null {
 }
 
 export function destDir(system: RulebookSystem, category: RulebookCategory): string {
-  return path.join(WRITE_ROOT, folderNameFor(system), category);
+  return path.join(/*turbopackIgnore: true*/ WRITE_ROOT, folderNameFor(system), category);
 }
 
 /** True when this entry's file lives where the admin page may change it. */
@@ -81,7 +81,7 @@ export async function findEntry(file: string): Promise<LibraryEntry | null> {
   return (await scanLibrary()).entries.find((e) => e.file === file) ?? null;
 }
 
-export const entryPath = (e: LibraryEntry) => path.join(e.root, ...e.rel.split("/"));
+export const entryPath = (e: LibraryEntry) => path.join(/*turbopackIgnore: true*/ e.root, ...e.rel.split("/"));
 
 /** Stream a request body to `dest` (via a temp file in the same folder, renamed
  *  into place only when complete), refusing anything over `max` bytes. Returns
@@ -187,7 +187,7 @@ export function seedStatus(): SeedStatus {
 
 async function walkPdfs(root: string, rel: string[] = [], out: string[][] = []): Promise<string[][]> {
   let list: import("node:fs").Dirent[];
-  try { list = await readdir(path.join(root, ...rel), { withFileTypes: true }); } catch { return out; }
+  try { list = await readdir(path.join(/*turbopackIgnore: true*/ root, ...rel), { withFileTypes: true }); } catch { return out; }
   for (const d of list) {
     if (d.name.startsWith(".")) continue;
     if (d.isDirectory() && rel.length < 3) await walkPdfs(root, [...rel, d.name], out);
@@ -210,8 +210,8 @@ export function startSeed(): SeedStatus {
         const file = parts[parts.length - 1];
         seed.current = parts.join("/");
         if (!onVolume.has(file)) {
-          const src = path.join(RULEBOOK_DIR, ...parts);
-          const dst = path.join(volume, ...parts);
+          const src = path.join(/*turbopackIgnore: true*/ RULEBOOK_DIR, ...parts);
+          const dst = path.join(/*turbopackIgnore: true*/ volume, ...parts);
           await mkdir(path.dirname(dst), { recursive: true });
           const tmp = `${dst}.copying`;
           await copyFile(src, tmp);
@@ -221,7 +221,7 @@ export function startSeed(): SeedStatus {
           const base = file.replace(/\.pdf$/i, "");
           for (const ext of [".webp", ".jpg", ".jpeg", ".png"]) {
             const beside = path.join(path.dirname(src), base + ext);
-            const shelf = path.join(RULEBOOK_DIR, ".covers", base + ext);
+            const shelf = path.join(/*turbopackIgnore: true*/ RULEBOOK_DIR, ".covers", base + ext);
             for (const [from, to] of [[beside, path.join(path.dirname(dst), base + ext)], [shelf, path.join(volume, ".covers", base + ext)]] as const) {
               try {
                 if ((await stat(from)).isFile()) { await mkdir(path.dirname(to), { recursive: true }); await copyFile(from, to); }

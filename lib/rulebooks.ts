@@ -53,7 +53,7 @@ import { SYSTEMS, isSystemKey, type SystemKey } from "@/components/systemStore";
 // (bare filenames) are identical in both roots.
 export const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
 export const VOLUME_DIR: string | null = process.env.LIBRARY_DIR?.trim()
-  ? path.resolve(process.env.LIBRARY_DIR.trim())
+  ? path.resolve(/*turbopackIgnore: true*/ process.env.LIBRARY_DIR.trim())
   : null;
 export const LIBRARY_ROOTS: string[] = VOLUME_DIR ? [VOLUME_DIR, RULEBOOK_DIR] : [RULEBOOK_DIR];
 /** Where the admin page writes: the volume when there is one, else the repo
