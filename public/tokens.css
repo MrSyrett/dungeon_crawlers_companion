@@ -124,6 +124,14 @@ html {
   touch-action: manipulation;
 }
 
+/* No swipe-to-go-back: a sideways swipe the page doesn't consume would be
+   browser Back/Forward on Android tablets — in the GM Screen's eReader that is a
+   page turn. Vertical is untouched. Same rule as app/globals.css. */
+html,
+body {
+  overscroll-behavior-x: none;
+}
+
 /* ---- The adventure title, in each system's own display face -----------------
    The prep builders each hard-coded a font here (eleven of fourteen said
    'Barlow Condensed'), so no adventure title wore its system's face. --sys-display

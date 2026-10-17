@@ -27,6 +27,7 @@ import {
   TOOLS_NAV,
   CAMPAIGNS_LINK,
   ACCOUNT_LINKS,
+  LIBRARY_LINK,
 } from "./navConfig";
 
 // The single site-wide top navbar.
@@ -371,6 +372,11 @@ export default function SiteNav({
             </span>
           )}
 
+          {/* The Library: every system's PDFs, shelved by the selected system. */}
+          <Link href={LIBRARY_LINK.href} className={`${item} ${pathname === LIBRARY_LINK.href ? on : off}`}>
+            {LIBRARY_LINK.label}
+          </Link>
+
           {/* Tools — individual links, always the same. Route-handler tools
               (`hard`) are plain <a>; Next pages get <Link> so they navigate
               client-side instead of a full white-flash reload. */}
@@ -474,6 +480,9 @@ export default function SiteNav({
                 Homebrew
               </Link>
             ) : null}
+            <Link href={LIBRARY_LINK.href} onClick={() => setMenu(null)} className="rounded border border-[var(--border)] px-3 py-2 text-[12px] font-semibold text-[var(--muted)] hover:text-[var(--text)]">
+              {LIBRARY_LINK.label}
+            </Link>
           </div>
 
           <p className="mt-3 px-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Tools</p>

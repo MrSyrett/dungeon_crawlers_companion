@@ -84,7 +84,7 @@
       ".dccpdf-toc-empty{padding:12px;color:var(--muted,#8a93a3);font:500 12px/1.4 'Barlow','Montserrat',sans-serif}" +
       ".dccpdf-toc-backdrop{display:none;position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.5)}" +
       ".dccpdf.dccpdf-toc-open .dccpdf-toc-backdrop{display:block}" +
-      ".dccpdf-stage{flex:1;min-width:0;overflow:auto;padding:14px;outline:none;-webkit-overflow-scrolling:touch;touch-action:none;position:relative}" +
+      ".dccpdf-stage{flex:1;min-width:0;overflow:auto;padding:14px;outline:none;-webkit-overflow-scrolling:touch;touch-action:none;overscroll-behavior:none;position:relative}" +
       ".dccpdf-stage.is-pannable{cursor:grab}" +
       ".dccpdf-stage.is-grabbing{cursor:grabbing}" +
       ".dccpdf-wrap{width:max-content;margin:0 auto;will-change:transform,opacity}" +
@@ -821,8 +821,10 @@
           stage.scrollLeft = tc.sl - dx;
           stage.scrollTop = tc.st - dy;
           tc.panned = true;
-        } else if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-          // not overflowing → this is a swipe; keep the page from rubber-banding
+        } else {
+          // Not overflowing → this is a swipe (a page turn). Claim it from the
+          // very first move: waiting for 10px left Chrome on Android tablets time
+          // to read a sideways swipe as browser Back and leave the book.
           e.preventDefault();
         }
       }

@@ -451,6 +451,18 @@ html {
   touch-action: manipulation;
 }
 
+/* No swipe-to-go-back. Chrome on Android tablets (and desktop trackpads) treat a
+   sideways swipe that the page doesn't consume as browser Back/Forward. In the
+   eReader that swipe turns the page, and a stray one would leave the book.
+   overscroll-behavior-x stops the swipe chaining out to the browser; vertical
+   is left alone, so the app's own pull-to-refresh still works. (The swipe in
+   from the very screen edge is Android's own system gesture — no web page can
+   turn that one off.) Mirrored in public/tokens.css for the standalone tools. */
+html,
+body {
+  overscroll-behavior-x: none;
+}
+
 body {
   font-family: var(--sys-text), "Geist", ui-sans-serif, system-ui, sans-serif;
 }

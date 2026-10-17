@@ -157,18 +157,15 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
   ],
 };
 
-// The Library (formerly "Rulebooks", at /rules — which now redirects here).
+// The Library (formerly "Rulebooks", at /rules — which now redirects here). Its
+// own navbar button, after Homebrew, on every bar (SiteNav, lib/sitenav.ts and
+// the mini-bar's menu) — no longer an entry in the Compendium dropdown. Every
+// system has a shelf (one with no PDFs yet explains where to drop them).
 export const LIBRARY_LINK: NavLink = { href: "/library", label: "Library" };
 
-// Systems that get no Library entry. Empty now: every system has a shelf (a
-// system with no PDFs yet shows an empty shelf explaining where to drop them),
-// so a newly added PDF is reachable from the nav with no code change.
-export const SYSTEMS_WITHOUT_LIBRARY: SystemKey[] = [];
-
-// The Compendium dropdown for a system: its reference pages, plus the Library.
+// The Compendium dropdown for a system: its reference pages.
 export function compendiumFor(system: SystemKey): NavLink[] {
-  const base = COMPENDIUM[system] ?? [];
-  return SYSTEMS_WITHOUT_LIBRARY.includes(system) ? base : [...base, LIBRARY_LINK];
+  return COMPENDIUM[system] ?? [];
 }
 
 // Per-system Homebrew hub. Shadowdark's lives at the top-level /homebrew;

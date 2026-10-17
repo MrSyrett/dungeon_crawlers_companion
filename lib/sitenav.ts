@@ -1,5 +1,5 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
-import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK, ACCOUNT_LINKS } from "@/components/navConfig";
+import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK, ACCOUNT_LINKS, LIBRARY_LINK } from "@/components/navConfig";
 
 // The site navbar, for the surfaces that are NOT Next pages.
 //
@@ -311,6 +311,7 @@ export function siteNav(opts: SiteNavOpts): string {
       <div class="nav-pop" id="dd-nav-comppop" hidden></div>
     </div>
     <a class="nav-item" id="dd-nav-brew" href="/homebrew">Homebrew</a>
+    <a class="nav-item" href="${esc(LIBRARY_LINK.href)}">${esc(LIBRARY_LINK.label)}</a>
     ${tools}
   </div>
   <div class="nav-right">
@@ -374,7 +375,8 @@ function paint(){
   var hb=D.brew[cur];
   // Homebrew stays in the row so nothing shifts; a game with no hub shows it dimmed.
   if(hb){brew.href=hb;brew.classList.remove("is-off");brew.removeAttribute("aria-disabled");brew.removeAttribute("title");panelComp.insertAdjacentHTML("beforeend",'<a href="'+esc(hb)+'">Homebrew</a>');}
-  else {brew.removeAttribute("href");brew.classList.add("is-off");brew.setAttribute("aria-disabled","true");brew.title="No homebrew hub for "+e.n+" yet";}
+  panelComp.insertAdjacentHTML("beforeend",'<a href="${esc(LIBRARY_LINK.href)}">${esc(LIBRARY_LINK.label)}</a>');
+  if(!hb){brew.removeAttribute("href");brew.classList.add("is-off");brew.setAttribute("aria-disabled","true");brew.title="No homebrew hub for "+e.n+" yet";}
   // The selected system dresses the page, exactly as SiteNav publishes it.
   try{var r=document.documentElement;r.style.setProperty("--sys",e.a);if(!docSys)r.dataset.system=e.k;}catch(e2){}
   fitTitle();
