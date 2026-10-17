@@ -5228,6 +5228,20 @@ function getWinNode(winId, toolType) {
 // that already shows it. Falls back to a detached singleton (state restore, etc.).
 function getOrCreateInstance(toolType) {
   toolType = normalizeTool(toolType);
+  // Console view (the GM Screen's layout): a tool docked in a station — the Roll
+  // Log rail, the Combat station… — is the live one. Without this, a roll sent
+  // from the Combat Tracker landed in a hidden detached dice tray: players saw it
+  // (it still broadcast) but the GM's own Roll Log never showed it.
+  // (try: CONSOLE_STATIONS / gmcPopNodes are declared further down the script.)
+  try {
+    if(document.body.dataset.cview === 'console') {
+      for(const st of CONSOLE_STATIONS) {
+        const cache = gmNodes['cst-' + st];
+        if(cache && cache.byTool && cache.byTool[toolType]) return cache.byTool[toolType];
+      }
+      if(gmcPopNodes[toolType]) return gmcPopNodes[toolType];
+    }
+  } catch(e) {}
   const w = gmWindows.find(x => x.tool === toolType);
   if(w) return getWinNode(w.id, toolType);
   if(!instances[toolType]) instances[toolType] = buildToolNode(toolType);
