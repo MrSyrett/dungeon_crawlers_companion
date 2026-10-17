@@ -215,6 +215,13 @@ body.dark .tab-panel.on .section-bar{background:#22222a;}
 .econ-chip{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;background:var(--panel-2);border:1.5px solid var(--rule);border-radius:7px;padding:7px 6px;cursor:pointer;transition:.1s;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);line-height:1.1;text-align:center;}
 .econ-chip.avail{border-color:#3a7d4a;background:rgba(74,160,90,.16);color:#2f6a3e;}
 .econ-chip.used{opacity:.5;text-decoration:line-through;text-decoration-thickness:1.5px;}
+/* Readied action: the Action is committed but waiting on its trigger. */
+.econ-chip.ready{border-color:#c9a227;background:rgba(232,190,60,.22);color:#8a6a08;}
+body.dark .econ-chip.ready{background:rgba(232,190,60,.2);color:#f0cf62;}
+.turn-status{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px;}
+.turn-pill{font-size:12px;font-weight:600;border:1px solid var(--rule);border-radius:12px;padding:2px 10px;color:var(--muted);background:var(--panel-2);}
+.turn-pill.ready{border-color:#c9a227;color:#8a6a08;background:rgba(232,190,60,.16);}
+body.dark .turn-pill.ready{color:#f0cf62;}
 body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-end-btn{flex:0 0 auto;background:var(--dnd);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .turn-end-btn:hover{background:#b93b3b;}
@@ -1623,7 +1630,7 @@ function rollCtx(kind, extra){
   let xdis = extra.dis || '';
   if(!xdis && /^(STR|DEX)$/.test(extra.abil || '')){ const ap = armorPenalties(); if(ap.nonProf) xdis = 'not proficient with ' + ap.nonProf; }
   if(!xdis && extra.skill === 'Stealth'){ const ap = armorPenalties(); if(ap.stealth) xdis = ap.stealth + ' (Stealth Disadv.)'; }
-  const disSrc = cm.dis || xdis, advSrc = cm.adv || extra.adv || '';
+  const disSrc = cm.dis || xdis, advSrc = cm.adv || extra.adv || (kind === 'saveDex' && typeof _turn !== 'undefined' && _turn.dodge ? 'Dodge' : '');
   const advOn = _adv === 'adv' || !!advSrc, disOn = _adv === 'dis' || !!disSrc;
   const mode = (advOn && disOn) ? 'norm' : advOn ? 'adv' : disOn ? 'dis' : 'norm';
   const pen = exhPenalty(), why = [];
@@ -2204,7 +2211,7 @@ function doAttack(tr, sneakD6, asReaction, opts){
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
   if(asReaction){ _turn.reaction = true; }                                 // spend the Reaction
   else if(offhand){ _turn.bonus = true; }                                  // spend the Bonus Action
-  else { _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; }   // spend the Attack action
+  else { startOfTurnClear(); _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; }   // spend the Attack action
   if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn();
 }
 
@@ -3975,7 +3982,6 @@ let _turnOpts = [];
 let _turnCollapsed = {};   // { sectionId: true } — collapsed section state
 
 const STANDARD_ACTIONS = [
-  { name:'Attack', desc:'Make one attack — or more with Extra Attack. Roll your weapons from the Attacks section above.' },
   { name:'Dash', desc:'Gain extra movement equal to your Speed for this turn.' },
   { name:'Disengage', desc:"Your movement doesn't provoke Opportunity Attacks this turn." },
   { name:'Dodge', desc:'Until your next turn, attacks against you have Disadvantage and you make Dexterity saves with Advantage.' },
@@ -3993,7 +3999,8 @@ const STANDARD_ACTIONS = [
 ];
 
 function tcClip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n-1) + '…' : s; }
-function turnMoveMax(){ const el = $('f-speed'); const n = parseInt((el ? el.textContent : '') || '', 10); return isNaN(n) ? 30 : n; }
+// Movement this turn: your Speed, doubled once you take the Dash action.
+function turnMoveMax(){ const el = $('f-speed'); const n = parseInt((el ? el.textContent : '') || '', 10); const sp = isNaN(n) ? 30 : n; return _turn.dash ? sp * 2 : sp; }
 function hasSlotTracking(){ return !!(slotArray() || pactInfo()); }
 function freeSlotsAtOrAbove(lvl){
   let n = 0; const arr = slotArray();
@@ -4055,15 +4062,68 @@ function featureOpt(f){
     run(){ if(res){ resourceUsed[res.key] = (resourceUsed[res.key]||0) + 1; renderResources(); } _turn[f.type] = true;
       addLog(f.name, '✦', res ? ('used · ' + Math.max(0, res.max - (resourceUsed[res.key]||0)) + ' left') : 'used', 'normal'); afterTurnAction(); } };
 }
+// Standard actions with an effect on the sheet:
+//   Dash   — doubles this turn's movement
+//   Dodge  — DEX saves with advantage until the start of your next turn
+//   Hide   — rolls Stealth;  Search — choose Perception or Investigation and roll
+//   Ready  — the Action chip turns yellow (waiting) instead of spent; click it when
+//            the trigger happens, which uses your Reaction
+// Dodge and Ready outlast End Turn (they run until your next turn starts): they're
+// kept at 2 = "carried over", and clear when you act again or at the next End Turn.
 function standardOpt(a, sub){
   const isAttack = (sub === 'action' && a.name === 'Attack');
   const disabled = isAttack ? actionFullySpent() : (sub === 'action' ? _turn.action : _turn[sub]);
+  if(sub === 'action' && a.name === 'Search') return { name: a.name, meta: a.desc, usesHTML: '', disabled, run(){ openSearchChoice(); } };
+  if(sub === 'action' && a.name === 'Ready') return { name: a.name, meta: a.desc, usesHTML: '', disabled,
+    run(){ _turn.action = true; _turn.actionType = 'ready'; _turn.ready = 1; addLog('Ready', 'Waiting', 'Readied action — click the yellow Action chip when the trigger happens (uses your Reaction)', 'normal'); afterTurnAction(); } };
   return { name: a.name, meta: a.desc, usesHTML: '', disabled,
     run(){
+      if(sub === 'action'){
+        if(a.name === 'Dash') _turn.dash = true;
+        if(a.name === 'Dodge') _turn.dodge = 1;
+      }
       if(isAttack){ _turn.action = true; _turn.actionType = 'attack'; }   // declare the Attack action; roll weapons from the Attacks section
       else { _turn[sub] = true; if(sub === 'action') _turn.actionType = 'other'; }
       addLog(a.name, sub === 'action' ? 'Action' : sub === 'bonus' ? 'Bonus' : 'Reaction', tcClip(a.desc, 110), 'normal'); afterTurnAction();
+      if(sub === 'action' && a.name === 'Hide') rollSkill('Stealth');
     } };
+}
+// Search: pick the check, then roll it (and spend the Action).
+function openSearchChoice(){
+  let ov = $('search-overlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.id = 'search-overlay'; ov.className = 'ov';
+    ov.onclick = e => { if(e.target === ov) ov.classList.remove('open'); };
+    ov.innerHTML = '<div class="modal" style="max-width:360px;"><div class="modal-hd"><div class="ttl">Search</div><button class="x" onclick="document.getElementById(\'search-overlay\').classList.remove(\'open\')">&#10005;</button></div>' +
+      '<div class="modal-bd" style="display:flex;flex-direction:column;gap:8px;"><p style="margin:0 0 4px;">Which check?</p>' +
+      '<button class="m-btn" onclick="doSearch(\'Perception\')">Perception (WIS) — notice something</button>' +
+      '<button class="m-btn" onclick="doSearch(\'Investigation\')">Investigation (INT) — deduce or find a clue</button></div></div>';
+    document.body.appendChild(ov);
+  }
+  ov.classList.add('open');
+}
+function doSearch(skill){
+  const ov = $('search-overlay'); if(ov) ov.classList.remove('open');
+  if(_turn.action || isIncapacitated()) return;
+  _turn.action = true; _turn.actionType = 'other';
+  addLog('Search', 'Action', skill + ' check', 'normal'); afterTurnAction();
+  rollSkill(skill);
+}
+// Dodge / Ready that outlast End Turn clear once you act on your next turn.
+function startOfTurnClear(){ if(_turn.dodge === 2) _turn.dodge = 0; if(_turn.ready === 2) _turn.ready = 0; }
+// The yellow (readied) Action chip: the trigger happened — spend the Reaction.
+function fireReadied(){
+  _turn.ready = 0; _turn.reaction = true;
+  if(_turn.actionType === 'ready') _turn.actionType = 'other';
+  addLog('Readied action', '⚡', 'Trigger happened — your readied response uses your Reaction', 'normal');
+  renderTurn(); scheduleAutosave();
+}
+function turnStatusHTML(){
+  const bits = [];
+  if(_turn.dash) bits.push('<span class="turn-pill">Dashing — movement doubled</span>');
+  if(_turn.dodge) bits.push('<span class="turn-pill">Dodging — DEX saves with advantage until your next turn</span>');
+  if(_turn.ready) bits.push('<span class="turn-pill ready">Readied — click the yellow Action when it triggers</span>');
+  return bits.join('');
 }
 // Prepared castable spells of a given action type (cantrips + prepared leveled), sorted.
 function castableSpells(sub){
@@ -4171,8 +4231,12 @@ function renderTurn(){
   const mvl = $('turn-move-left'), mvm = $('turn-move-max'); if(mvl) mvl.textContent = Math.max(0, mv - _turn.move); if(mvm) mvm.textContent = mv;
   renderTurnSlots();
   const econ = $('turn-econ');
-  if(econ){ const chip = (type, lbl) => '<button class="econ-chip ' + (econUsed(type) ? 'used' : 'avail') + '" onclick="toggleEcon(\'' + type + '\')" title="' + lbl + ' — click to toggle used / ready">' + lbl + '</button>';
-    econ.innerHTML = chip('action', 'Action') + chip('bonus', 'Bonus Action') + chip('reaction', 'Reaction'); }
+  if(econ){ const chip = (type, lbl) => (type === 'action' && _turn.ready)
+      ? '<button class="econ-chip ready" onclick="toggleEcon(\'action\')" title="Readied — click when the trigger happens (uses your Reaction)">' + lbl + '</button>'
+      : '<button class="econ-chip ' + (econUsed(type) ? 'used' : 'avail') + '" onclick="toggleEcon(\'' + type + '\')" title="' + lbl + ' — click to toggle used / ready">' + lbl + '</button>';
+    econ.innerHTML = chip('action', 'Action') + chip('bonus', 'Bonus Action') + chip('reaction', 'Reaction');
+    let st = $('turn-status'); if(!st){ st = document.createElement('div'); st.id = 'turn-status'; st.className = 'turn-status'; econ.parentNode.insertBefore(st, econ.nextSibling); }
+    st.innerHTML = turnStatusHTML(); st.style.display = st.innerHTML ? '' : 'none'; }
   document.querySelectorAll('.turn-subtab').forEach(b => b.classList.toggle('on', b.dataset.sub === _turnSub));
   // Attacks section (the persistent table) — Actions subtab only
   const atkSec = $('turn-attacks-sec');
@@ -4206,9 +4270,11 @@ function renderTurn(){
   }
   body.innerHTML = h;
 }
-function useTurnOpt(i){ const o = _turnOpts[i]; if(o && !o.disabled && o.run) o.run(); }
+function useTurnOpt(i){ const o = _turnOpts[i]; if(o && !o.disabled && o.run){ startOfTurnClear(); o.run(); } }
 function afterTurnAction(){ renderTurn(); scheduleAutosave(); }
 function toggleEcon(type){
+  if(type === 'action' && _turn.ready){ fireReadied(); return; }
+  startOfTurnClear();
   if(type === 'action'){
     if(actionFullySpent()){ _turn.action = false; _turn.actionType = null; _turn.attacksMade = 0; }
     else { _turn.action = true; _turn.actionType = 'other'; }
@@ -4221,7 +4287,10 @@ function moveFocus(el){ el.textContent = String(Math.max(0, turnMoveMax() - _tur
 function setMoveLeft(el){ const mv = turnMoveMax(); let left = parseInt((el.textContent||'').replace(/[^0-9]/g,''), 10); if(isNaN(left)) left = mv - _turn.move; left = Math.max(0, Math.min(mv, left)); _turn.move = mv - left; renderTurn(); scheduleAutosave(); }
 function setTurnSub(sub){ _turnSub = sub; renderTurn(); }
 function endTurn(){
-  _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false };
+  // Dodge and a readied action last until the start of your next turn, so they
+  // carry past End Turn once (2) and clear when you act again or end that turn.
+  const carryDodge = _turn.dodge === 1 ? 2 : 0, carryReady = _turn.ready === 1 ? 2 : 0;
+  _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:carryDodge, ready:carryReady };
   addLog('End Turn', '⟳', 'Action, Bonus Action, Reaction & Movement reset', 'normal');
   renderTurn(); scheduleAutosave();
 }
