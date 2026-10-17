@@ -1,14 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { DCC_DEITIES } from "@/lib/data/dcc-deities";
 import { DCC_DEBUFFS } from "@/lib/data/dcc-debuffs";
 import { DCC_BUFFS } from "@/lib/data/dcc-buffs";
 import { DCC_EXPERIENCES } from "@/lib/data/dcc-experiences";
 import { DCC_BACKGROUNDS } from "@/lib/data/dcc-backgrounds";
-import { DCC_SKILLS } from "@/lib/data/dcc-skills";
-import { DCC_SPELLS } from "@/lib/data/dcc-spells";
 import type {
   DccDeity,
   DccDebuff,
@@ -111,13 +109,24 @@ function splitName(full: string): { name: string; epithet: string } {
 // so "Warhammer Skill" and "Heal Others Spell" resolve to the real entries.
 const linkNorm = (s: string): string =>
   s.toLowerCase().replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+(skill|spell)s?$/i, "").replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
-const REF_LOOKUP = new Map<string, { page: "skills" | "spells"; name: string }>();
-for (const s of DCC_SPELLS) REF_LOOKUP.set(linkNorm(s.name), { page: "spells", name: s.name });
-for (const s of DCC_SKILLS) REF_LOOKUP.set(linkNorm(s.name), { page: "skills", name: s.name }); // skills win on a name clash
+//
+// Only the NAMES are needed for this, so the page (a server component) passes
+// them in as `refNames`. Importing the full skill and spell data here put ~210 KB
+// of descriptions in this page's browser bundle just to read their names.
+export type DccRefNames = { spells: string[]; skills: string[] };
+type RefLookup = Map<string, { page: "skills" | "spells"; name: string }>;
+const RefLookupContext = createContext<RefLookup>(new Map());
+function buildLookup(refs: DccRefNames): RefLookup {
+  const m: RefLookup = new Map();
+  for (const n of refs.spells) m.set(linkNorm(n), { page: "spells", name: n });
+  for (const n of refs.skills) m.set(linkNorm(n), { page: "skills", name: n }); // skills win on a name clash
+  return m;
+}
 
 // Render a comma list of skill/spell names, linking the ones that resolve to a
 // reference-page entry and leaving freeform "…of choice" perks as plain text.
 function SkillLinks({ names }: { names: string[] }): ReactNode {
+  const REF_LOOKUP = useContext(RefLookupContext);
   return (
     <>
       {names.map((raw, i) => {
@@ -329,12 +338,14 @@ function Count({ n, noun, plural }: { n: number; noun: string; plural: string })
   );
 }
 
-export default function DccOptions(): ReactNode {
+export default function DccOptions({ refNames }: { refNames: DccRefNames }): ReactNode {
+  const lookup = useMemo(() => buildLookup(refNames), [refNames]);
   const [tab, setTab] = useState<TabKey>("deities");
   const [q, setQ] = useState("");
   const needle = q.trim().toLowerCase();
 
   return (
+    <RefLookupContext.Provider value={lookup}>
     <div>
       {/* Section toggle bar */}
       <div className="mb-5 flex flex-wrap gap-2 border-b border-[var(--border)] pb-4">
@@ -381,5 +392,6 @@ export default function DccOptions(): ReactNode {
       {tab === "experiences" ? <ExperiencesSection q={needle} /> : null}
       {tab === "backgrounds" ? <BackgroundsSection q={needle} /> : null}
     </div>
+    </RefLookupContext.Provider>
   );
 }

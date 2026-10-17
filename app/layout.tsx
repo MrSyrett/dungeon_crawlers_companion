@@ -64,15 +64,27 @@ const geistMono = Geist_Mono({
 const cinzel = Cinzel({
   variable: "--font-cinzel",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["700", "900"],
 });
 
 const barlow = Barlow_Condensed({
   variable: "--font-barlow",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
 });
 
+// ---------------------------------------------------------------------------
+// NOT PRELOADED. next/font preloads a face on every route of the layout that
+// declares it — and this is the ROOT layout, so with preload left on, all 28
+// families (~111 weight/style files) were fetched on every page, though a page
+// wears one system's pair. Every face below except the app's own Geist pair is
+// `preload: false`: its @font-face is still declared, and the browser fetches
+// it the moment something on screen uses it (the home page preloads the brand
+// faces its game tiles need on its own — see app/page.tsx).
 // ---------------------------------------------------------------------------
 // Per-system theme faces (app/globals.css picks one pair per data-system).
 // next/font self-hosts and subsets these at build time, so there is no runtime
@@ -87,6 +99,8 @@ const barlow = Barlow_Condensed({
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "800"],
   display: "swap",
 });
@@ -94,6 +108,8 @@ const montserrat = Montserrat({
 const ebGaramond = EB_Garamond({
   variable: "--font-garamond",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600"],
   style: ["normal", "italic"],
   display: "swap",
@@ -102,6 +118,8 @@ const ebGaramond = EB_Garamond({
 const anton = Anton({
   variable: "--font-anton",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400"],
   display: "swap",
 });
@@ -111,6 +129,8 @@ const anton = Anton({
 const shareTech = Share_Tech_Mono({
   variable: "--font-sharetech",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400"],
   display: "swap",
 });
@@ -137,6 +157,8 @@ const shareTech = Share_Tech_Mono({
 const archivoBlack = Archivo_Black({
   variable: "--font-archivo-black",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400"],
   display: "swap",
 });
@@ -144,6 +166,8 @@ const archivoBlack = Archivo_Black({
 const libreFranklin = Libre_Franklin({
   variable: "--font-franklin",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -155,6 +179,8 @@ const libreFranklin = Libre_Franklin({
 const oswald = Oswald({
   variable: "--font-oswald",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["500", "600", "700"],
   display: "swap",
 });
@@ -162,6 +188,8 @@ const oswald = Oswald({
 const sourceSans = Source_Sans_3({
   variable: "--font-sourcesans",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -174,6 +202,8 @@ const sourceSans = Source_Sans_3({
 const lilitaOne = Lilita_One({
   variable: "--font-lilita",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400"],
   display: "swap",
 });
@@ -181,6 +211,8 @@ const lilitaOne = Lilita_One({
 const nunito = Nunito({
   variable: "--font-nunito",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -192,6 +224,8 @@ const nunito = Nunito({
 const mulish = Mulish({
   variable: "--font-mulish",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -203,6 +237,8 @@ const mulish = Mulish({
 const sairaCond = Saira_Condensed({
   variable: "--font-saira-cond",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["500", "600", "700"],
   display: "swap",
 });
@@ -210,6 +246,8 @@ const sairaCond = Saira_Condensed({
 const saira = Saira({
   variable: "--font-saira",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -221,6 +259,8 @@ const saira = Saira({
 const asap = Asap({
   variable: "--font-asap",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -232,6 +272,8 @@ const asap = Asap({
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["500", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -240,6 +282,8 @@ const cormorant = Cormorant_Garamond({
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -250,6 +294,8 @@ const lora = Lora({
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["500", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -258,6 +304,8 @@ const fraunces = Fraunces({
 const figtree = Figtree({
   variable: "--font-figtree",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -269,6 +317,8 @@ const figtree = Figtree({
 const permanentMarker = Permanent_Marker({
   variable: "--font-marker",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400"],
   display: "swap",
 });
@@ -276,6 +326,8 @@ const permanentMarker = Permanent_Marker({
 const archivo = Archivo({
   variable: "--font-archivo",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -287,6 +339,8 @@ const archivo = Archivo({
 const archivoNarrow = Archivo_Narrow({
   variable: "--font-archivo-narrow",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["500", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -295,6 +349,8 @@ const archivoNarrow = Archivo_Narrow({
 const plexSans = IBM_Plex_Sans({
   variable: "--font-plex",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
@@ -305,6 +361,8 @@ const plexSans = IBM_Plex_Sans({
 const russoOne = Russo_One({
   variable: "--font-russo",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400"],
   display: "swap",
 });
@@ -312,6 +370,8 @@ const russoOne = Russo_One({
 const rubik = Rubik({
   variable: "--font-rubik",
   subsets: ["latin"],
+  // Loaded when a page uses it, not preloaded on every route (see the note above).
+  preload: false,
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",

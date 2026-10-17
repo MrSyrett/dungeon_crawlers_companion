@@ -153,9 +153,9 @@ export default async function AdminRulebooksPage({
         <div className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4 text-[13px] text-[var(--muted)]">
           <span className="font-semibold text-[var(--text)]">{unsorted.length} not fully sorted</span>{" "}
           (missing a system or category folder, so their shelf/section is guessed):{" "}
-          {unsorted.map((e) => e.rel).join(" · ")}. Run{" "}
-          <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">npm run library:organize</code>{" "}
-          to file the known books, or move them by hand.
+          {unsorted.map((e) => e.rel).join(" · ")}. Move each into its{" "}
+          <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">&lt;System&gt;/&lt;Core Rules | Expansions | Adventures&gt;/</code>{" "}
+          folder.
         </div>
       ) : null}
 

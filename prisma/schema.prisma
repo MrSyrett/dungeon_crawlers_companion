@@ -117,6 +117,8 @@ model Campaign {
   // Character sheets linked to this campaign (tool = "sd-character"). Deleting
   // the campaign nulls their link (SetNull) rather than removing the sheets.
   linkedDocuments Document[] @relation("DocumentLinkedCampaign")
+
+  @@index([ownerId])
 }
 
 // A user-owned homebrew entry: a spell, gear item, monster, class, ancestry, or

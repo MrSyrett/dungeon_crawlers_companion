@@ -8,6 +8,7 @@
 // directly; power details are larger, so they're dynamic-imported on first click.
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { MMRPG_TAGS } from "@/lib/data/mmrpg-tags";
 import { MMRPG_TRAITS } from "@/lib/data/mmrpg-traits";
 import { MMRPG_ORIGINS } from "@/lib/data/mmrpg-origins";
@@ -119,7 +120,10 @@ export default function MmrpgRefTokens({ text, items, kind, sep = ", " }: { text
           </span>
         );
       })}
-      {active ? (
+      {/* Portalled to <body>: these tokens sit inside list entries, which carry
+          content-visibility (app/globals.css) — and containment would otherwise
+          make this "fixed" overlay position against the entry, not the window. */}
+      {active && typeof document !== "undefined" ? createPortal(
         <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:p-8" onClick={() => setActive(null)}>
           {/* my-auto centers the card vertically when it fits and lets it scroll
               from the top (never clipped) when taller than the viewport. */}
@@ -135,7 +139,7 @@ export default function MmrpgRefTokens({ text, items, kind, sep = ", " }: { text
             </div>
           </div>
         </div>
-      ) : null}
+      , document.body) : null}
     </>
   );
 }

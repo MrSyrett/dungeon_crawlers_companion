@@ -1,8 +1,8 @@
 // Shared client-side store for the selected game system (Shadowdark / Dungeon
 // Crawler Carl / ACE!). Kept in localStorage and surfaced via
 // useSyncExternalStore so the header toggle and the dashboard tab panels stay
-// in step — including across browser tabs via the storage event. SystemToggle,
-// SystemTabs and RulebookGrid all read this one store.
+// in step — including across browser tabs via the storage event. SiteNav,
+// the dashboard and RulebookGrid all read this one store.
 //
 // Adding a system: add its key to SystemKey and a row to SYSTEMS, register its
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the

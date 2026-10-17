@@ -24,6 +24,25 @@
   // Build a sheet equipment entry from an MMRPG_EQUIPMENT record.
   function mkEquip(x, equipped) { x = x || {}; return { name:x.name || '', tier:x.tier || 'Common', type:x.type || x.category || 'Weapon', category:x.type || x.category || 'Weapon', owner:x.owner || '', ability:x.ability || 'melee', range:x.range || '', notes:x.notes || '', special:x.special || '', damageBonus:x.damageBonus || '', multBonus:parseInt(x.multBonus, 10) || 0, multAbilities:Array.isArray(x.multAbilities) ? x.multAbilities.slice() : null, flatMult:parseInt(x.flatMult, 10) || 0, noDamage:!!x.noDamage, grantsMovement:Array.isArray(x.grantsMovement) ? x.grantsMovement : null, equipped:!!equipped }; }
   function CHARS() { return arr(W.MMRPG_CHARACTERS); }
+  // The 453 pre-made characters (1.5 MB) are only needed by step 1 of this
+  // wizard, so the sheet no longer loads them up front: its template carries an
+  // inert <script type="text/x-lazy" id="mmrpg-characters-src"> (the server still
+  // stamps its ?v= content hash), and the first time the wizard opens we load it
+  // for real, then repaint. Files that have the list already (the GM Screen,
+  // prep builder) skip this — MMRPG_CHARACTERS is simply there.
+  var charsLoading = false;
+  function ensureChars() {
+    if (CHARS().length || charsLoading) return;
+    var tag = document.getElementById('mmrpg-characters-src');
+    var src = tag && tag.getAttribute('src');
+    if (!src) return;
+    charsLoading = true;
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = function () { charsLoading = false; if (B) paint(); };
+    s.onerror = function () { charsLoading = false; };
+    document.head.appendChild(s);
+  }
   var ABIL = (typeof ABILITIES !== 'undefined') ? ABILITIES : [
     { key:'melee', name:'Melee' }, { key:'agility', name:'Agility' }, { key:'resilience', name:'Resilience' },
     { key:'vigilance', name:'Vigilance' }, { key:'ego', name:'Ego' }, { key:'logic', name:'Logic' }];
@@ -243,7 +262,9 @@
     var q = (B._q || '').toLowerCase();
     var list = CHARS().filter(function (c) { return !q || (c.name + ' ' + (c.realName || '') + ' ' + (c.teams || '')).toLowerCase().indexOf(q) >= 0; })
       .sort(function (a, b) { return String(a.name).localeCompare(b.name); });
-    var h = '<p class="m-hint">Start from one of the <b>' + CHARS().length + '</b> pre-made heroes &amp; villains — highlight one to see the full profile, then use it (everything is editable after) — or build from scratch.</p>';
+    var h = charsLoading && !CHARS().length
+      ? '<p class="m-hint">Loading the pre-made heroes &amp; villains…</p>'
+      : '<p class="m-hint">Start from one of the <b>' + CHARS().length + '</b> pre-made heroes &amp; villains — highlight one to see the full profile, then use it (everything is editable after) — or build from scratch.</p>';
     var customOn = B.source === 'custom';
     h += '<button onclick="window.MMRPGB.custom()" style="width:100%;text-align:left;border:1px solid ' + (customOn ? 'var(--mv)' : '#2a1416') + ';background:' + (customOn ? '#2a1215' : '#0f1014') + ';border-radius:6px;padding:10px 12px;cursor:pointer;color:#f3e6e7;margin-bottom:10px;">'
       + '<b style="color:#f4a6a8;font-family:\'Oswald\',sans-serif;letter-spacing:.05em;">✎ CUSTOM BUILD</b><div class="m-hint" style="margin:2px 0 0;">A blank slate — set your own name, rank, powers and scores.</div></button>';
@@ -531,6 +552,7 @@
   // ── public API ────────────────────────────────────────────────────────────
   W.MMRPGB = {
     launch: function () {
+      ensureChars();
       B = blank();
       try {
         if (typeof S !== 'undefined' && S && (S.name || spentOf(S))) {
