@@ -1900,6 +1900,36 @@ body {
 .roster-card > * { position: relative; z-index: 2; }
 a.roster-card:hover { border-color: var(--tile-accent); box-shadow: 0 0 0 1px var(--tile-accent); }
 a.roster-card:hover::before { opacity: 1; }
+/* My Campaigns cards are not one link (each has its own buttons), so the hover
+   ring follows the pointer anywhere on the card instead. */
+div.roster-card:hover { border-color: var(--tile-accent); }
+/* The card's buttons (components/CampaignCardActions.tsx): small outlined pills
+   over the card's art, lit in the system's wordmark colour on hover. */
+.roster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+.roster-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.roster-btn:hover { border-color: var(--tile-accent, #fff); color: var(--tile-accent, #fff); }
+.roster-btn:disabled { opacity: 0.6; cursor: default; }
 /* The name — the character's name — in the system's READABLE NAME font
    (--tile-namefont, the same --sys-text its names use on the dashboard: Montserrat
    for Shadowdark, Franklin for Star Wars…) and its HEADER colour (--tile-accent:

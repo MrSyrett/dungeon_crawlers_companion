@@ -1,5 +1,5 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
-import { TOOLS_NAV, compendiumFor, CAMPAIGNS_LINK } from "@/components/navConfig";
+import { TOOLS_NAV, compendiumFor, CAMPAIGNS_LINK, ACCOUNT_LINKS } from "@/components/navConfig";
 
 // The shared "mini-bar": the site's navigation chrome for every surface that
 // is NOT rendered by the Next.js layout — the standalone character sheets, the
@@ -211,6 +211,14 @@ body:has(#dd-bar){--dd-bar-h:36px}
    the left end, account at the right. */
 #dd-bar .dd-acct{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--border,#2b3038);border-radius:4px;color:var(--muted,#8d96a3);transition:color .15s,border-color .15s}
 #dd-bar .dd-acct:hover{color:var(--text,#e9edf2);border-color:var(--muted,#8d96a3)}
+#dd-bar .dd-acct{background:transparent;cursor:pointer;padding:0}
+#dd-bar .dd-acct[aria-expanded="true"]{color:var(--accent,#5490c4);border-color:var(--accent,#5490c4)}
+/* The account menu (My Characters · My Campaigns · Settings), under the icon at
+   the RIGHT end — the same three entries as the main navbar's (ACCOUNT_LINKS). */
+#dd-acct-menu{position:absolute;right:8px;top:40px;width:200px;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:4px;z-index:2147483001;text-transform:none;letter-spacing:.02em;font-weight:600;font-size:13px}
+#dd-acct-menu[hidden]{display:none}
+#dd-acct-menu a{display:block;padding:8px 12px;border-radius:5px;color:var(--muted,#8d96a3)}
+#dd-acct-menu a:hover{color:var(--text,#e9edf2);background:var(--panel-2,#1c1f24)}
 /* Opens under the menu button, which now sits at the LEFT end of the bar. */
 #dd-menu{position:absolute;left:8px;top:40px;width:min(92vw,330px);max-height:calc(100vh - 56px);overflow:auto;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:6px;z-index:2147483001;text-transform:none;letter-spacing:.02em;font-weight:600;font-size:13px}
 #dd-menu[hidden]{display:none}
@@ -267,8 +275,9 @@ ${crumb}
 <span class="dd-spacer"></span>
 ${opts.slot ? `<span class="dd-slot"></span>` : ""}
 ${opts.status ? `<span id="dd-status" role="status" aria-live="polite"></span>` : ""}
-<a class="dd-acct" href="/account" title="Account settings" aria-label="Account settings"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round"></path></svg></a>
+<button type="button" class="dd-acct" aria-haspopup="true" aria-expanded="false" aria-controls="dd-acct-menu" title="Account" aria-label="Account menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round"></path></svg></button>
 ${menu}
+<div id="dd-acct-menu" hidden>${ACCOUNT_LINKS.map((l) => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join("")}</div>
 </div>`;
 
   // key → {name, accent} for the client-side system hook below.
@@ -298,10 +307,14 @@ window.__ddSetPin=function(p){var el=bar.querySelector(".dd-pin");
   if(p.href)el.setAttribute("href",p.href);else el.removeAttribute("href");
   el.classList.toggle("is-empty",!!p.empty);};
 var btn=bar.querySelector(".dd-menu-btn"),menu=document.getElementById("dd-menu"),bd=null;
-function close(){menu.hidden=true;btn.setAttribute("aria-expanded","false");if(bd){bd.remove();bd=null;}document.removeEventListener("keydown",onKey,true);}
-function open(){menu.hidden=false;btn.setAttribute("aria-expanded","true");bd=document.createElement("div");bd.className="dd-backdrop";bd.addEventListener("pointerdown",close);bar.appendChild(bd);document.addEventListener("keydown",onKey,true);}
+var abtn=bar.querySelector(".dd-acct"),amenu=document.getElementById("dd-acct-menu");
+// One popup at a time: the ☰ menu or the account menu.
+function close(){menu.hidden=true;btn.setAttribute("aria-expanded","false");if(amenu){amenu.hidden=true;}if(abtn){abtn.setAttribute("aria-expanded","false");}if(bd){bd.remove();bd=null;}document.removeEventListener("keydown",onKey,true);}
+function openPop(m,b){close();m.hidden=false;b.setAttribute("aria-expanded","true");bd=document.createElement("div");bd.className="dd-backdrop";bd.addEventListener("pointerdown",close);bar.appendChild(bd);document.addEventListener("keydown",onKey,true);}
+function open(){openPop(menu,btn);}
 function onKey(e){if(e.key==="Escape"){e.preventDefault();close();}}
 btn.addEventListener("click",function(){menu.hidden?open():close();});
+if(abtn&&amenu)abtn.addEventListener("click",function(){amenu.hidden?openPop(amenu,abtn):close();});
 // Reload control: tool surfaces (sheets, GM Screen, Map Maker) run as their own
 // standalone documents — in home-screen/standalone mode there's no browser
 // reload button, so a stuck page had no way back but force-quit. This is it.

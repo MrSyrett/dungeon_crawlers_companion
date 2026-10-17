@@ -1,5 +1,5 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
-import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK } from "@/components/navConfig";
+import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK, ACCOUNT_LINKS } from "@/components/navConfig";
 
 // The site navbar, for the surfaces that are NOT Next pages.
 //
@@ -209,7 +209,11 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav #dd-status.is-error{color:#fff;background:var(--red,#b82018);border-color:var(--red,#b82018)}
 #dd-nav .nav-admin{border:1px solid var(--accent,#5490c4);border-radius:4px;padding:4px 10px;font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.06em;text-transform:uppercase;color:var(--accent,#5490c4)}
 #dd-nav .nav-admin:hover{background:var(--panel-2,#1c1f24)}
-#dd-nav .nav-acct{display:flex;flex:0 0 auto;align-items:center;padding:8px;border:1px solid var(--border,#2b3038);border-radius:4px;color:var(--muted,#8d96a3);transition:color .15s,border-color .15s}
+#dd-nav .nav-acct{display:flex;flex:0 0 auto;align-items:center;padding:8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:transparent;color:var(--muted,#8d96a3);cursor:pointer;transition:color .15s,border-color .15s}
+#dd-nav .nav-acct[aria-expanded="true"]{color:var(--accent,#5490c4);border-color:var(--accent,#5490c4)}
+#dd-nav .nav-acctwrap{position:relative;flex:0 0 auto}
+#dd-nav .nav-acctwrap .nav-pop{left:auto;right:0;width:208px}
+#dd-nav .nav-acct-email{padding:8px 12px 4px;font-size:11px;color:var(--muted,#8d96a3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #dd-nav .nav-acct:hover{color:var(--text,#e9edf2);border-color:var(--muted,#8d96a3)}
 #dd-nav .nav-pop{position:absolute;left:0;top:100%;margin-top:4px;width:224px;max-height:70vh;overflow:auto;background:var(--panel,#14161a);border:1px solid var(--border,#2b3038);border-radius:8px;box-shadow:0 20px 25px -5px rgba(0,0,0,.5),0 8px 10px -6px rgba(0,0,0,.5);padding:4px;z-index:2147483001}
 #dd-nav .nav-pop[hidden]{display:none}
@@ -291,7 +295,7 @@ export function siteNav(opts: SiteNavOpts): string {
   <div class="nav-left">
     <button class="nav-burger" type="button" id="dd-nav-burger" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"></path></svg></button>
     <a class="nav-logo" href="/" title="Dungeon Crawler's Companion"><img src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width="32" height="32"></a>
-    <a class="nav-titlelink" id="dd-nav-titlelink" href="/dashboard"><span class="nav-sys-title" id="dd-nav-title">&nbsp;</span></a>
+    <a class="nav-titlelink" id="dd-nav-titlelink" href="/"><span class="nav-sys-title" id="dd-nav-title">&nbsp;</span></a>
   </div>
   <div class="nav-links">
     <div class="nav-wrap">
@@ -312,7 +316,10 @@ export function siteNav(opts: SiteNavOpts): string {
   <div class="nav-right">
     ${opts.status ? `<span id="dd-status" role="status" aria-live="polite"></span>` : ""}
     ${opts.isAdmin ? `<a class="nav-admin" href="/admin/users">Admin</a>` : ""}
-    <a class="nav-acct" href="/account" title="${esc(opts.email)} — account settings" aria-label="Account settings for ${esc(opts.email)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round"></path></svg></a>
+    <div class="nav-acctwrap">
+      <button class="nav-acct" type="button" id="dd-nav-acctbtn" aria-haspopup="true" aria-expanded="false" title="${esc(opts.email)} — account" aria-label="Account menu for ${esc(opts.email)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round"></path></svg></button>
+      <div class="nav-pop" id="dd-nav-acctpop" hidden><div class="nav-acct-email" title="${esc(opts.email)}">${esc(opts.email)}</div>${ACCOUNT_LINKS.map((l) => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join("")}</div>
+    </div>
   </div>
 </div>
 <div class="nav-panel" id="dd-nav-panel" hidden>
@@ -349,13 +356,15 @@ var compBtn=document.getElementById("dd-nav-compbtn");
 var compPop=document.getElementById("dd-nav-comppop");
 var panelComp=document.getElementById("dd-nav-panelcomp");
 var brew=document.getElementById("dd-nav-brew");
+var acctBtn=document.getElementById("dd-nav-acctbtn");
+var acctPop=document.getElementById("dd-nav-acctpop");
 
 function paint(){
   var e=entry(cur);
   title.setAttribute("data-sys",e.k);
   var pt=PARTS[e.k];
   if(pt){title.innerHTML='<span class="tn-1">'+esc(pt[0])+'</span> <span class="tn-2">'+esc(pt[1])+'</span>';}else{title.textContent=e.n;}
-  titleLink.title=e.n+" — characters and adventures";
+  titleLink.title=e.n+" — home";
   sysPop.innerHTML=D.systems.map(function(s){
     return '<button type="button" data-k="'+s.k+'" class="'+(s.k===cur?"on":"")+'"'+(s.k===cur?' style="color:'+s.a+'"':'')+'>'+esc(s.n)+'</button>';
   }).join("");
@@ -410,7 +419,7 @@ if(window.ResizeObserver&&row){try{new ResizeObserver(measure).observe(row);}cat
 var open=null,backdrop=null;
 function shut(){
   if(backdrop){backdrop.remove();backdrop=null;}
-  [[sysPop,sysBtn],[compPop,compBtn]].forEach(function(p){p[0].hidden=true;p[1].setAttribute("aria-expanded","false");});
+  [[sysPop,sysBtn],[compPop,compBtn],[acctPop,acctBtn]].forEach(function(p){p[0].hidden=true;p[1].setAttribute("aria-expanded","false");});
   var pn=document.getElementById("dd-nav-panel");pn.hidden=true;
   document.getElementById("dd-nav-burger").setAttribute("aria-expanded","false");
   open=null;document.removeEventListener("keydown",onKey,true);
@@ -428,6 +437,7 @@ function onKey(e){if(e.key==="Escape"){e.preventDefault();shut();}}
 
 sysBtn.addEventListener("click",function(){show("system",sysPop,sysBtn);});
 compBtn.addEventListener("click",function(){show("compendium",compPop,compBtn);});
+acctBtn.addEventListener("click",function(){show("account",acctPop,acctBtn);});
 document.getElementById("dd-nav-burger").addEventListener("click",function(){
   var pn=document.getElementById("dd-nav-panel");
   if(open==="mobile"){shut();return;}

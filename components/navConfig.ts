@@ -402,7 +402,9 @@ export function systemForPath(pathname: string): SystemKey | null {
 // navbar publishes the system accent there but flags the page so the system's
 // ground and faces stay out of it. "/" is chrome too but is matched exactly by
 // the callers (it is a prefix of every path).
-export const CHROME_PREFIXES = ["/admin", "/token-maker", "/account"];
+// "/my-characters" and "/my-campaigns" span every game (each group styled by its
+// own data-sys), so like the home page they wear no single system's skin.
+export const CHROME_PREFIXES = ["/admin", "/token-maker", "/account", "/my-characters", "/my-campaigns"];
 
 // The same table in a shape the root layout can serialise into its pre-paint
 // theme script (app/layout.tsx), so the script and systemForPath can't drift.
@@ -411,3 +413,11 @@ export function pathSystemTable(): { exact: Record<string, SystemKey>; prefixes:
   for (const p of SD_PATHS) exact[p] = "SD";
   return { exact, prefixes: PREFIX_SYSTEM };
 }
+
+// The account menu behind the navbar's account icon — all three bars (SiteNav,
+// lib/sitenav.ts, lib/minibar.ts) draw it from this list.
+export const ACCOUNT_LINKS: { href: string; label: string }[] = [
+  { href: "/my-characters", label: "My Characters" },
+  { href: "/my-campaigns", label: "My Campaigns" },
+  { href: "/account", label: "Settings" },
+];

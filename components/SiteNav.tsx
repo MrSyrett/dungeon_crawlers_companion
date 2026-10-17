@@ -26,6 +26,7 @@ import {
   STAY_ON_SWITCH,
   TOOLS_NAV,
   CAMPAIGNS_LINK,
+  ACCOUNT_LINKS,
 } from "./navConfig";
 
 // The single site-wide top navbar.
@@ -47,7 +48,7 @@ import {
 // Admin · Sign out beneath). The bar hides itself on the auth screens, and the
 // layout only mounts it for signed-in users.
 
-type Menu = "system" | "compendium" | "mobile" | null;
+type Menu = "system" | "compendium" | "mobile" | "account" | null;
 
 const HIDDEN_ON = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
@@ -279,13 +280,8 @@ export default function SiteNav({
             <Image src="/logo-white.png" alt="Dungeon Crawler's Companion — home" width={36} height={36} priority className="h-8 w-8" />
           </Link>
 
-          {/* The selected game's title, in its own face and colour → its dashboard */}
-          <Link
-            href="/dashboard"
-            onClick={() => { if (pathSystem && pathSystem !== storedSystem) setSystem(effective); }}
-            className="flex min-w-0 flex-1 items-center"
-            title={`${sys.name} — characters and adventures`}
-          >
+          {/* The selected game's title, in its own face and colour → home, like the logo */}
+          <Link href="/" className="flex min-w-0 flex-1 items-center" title={`${sys.name} — home`}>
             <span ref={titleRef} data-sys={sys.key} className="nav-sys-title">
               {NAME_PARTS[sys.key] ? (
                 <>
@@ -399,21 +395,46 @@ export default function SiteNav({
               Admin
             </Link>
           ) : null}
-          <Link
-            href="/account"
-            title={`${email} — account settings`}
-            aria-label={`Account settings for ${email}`}
-            className={`flex shrink-0 items-center rounded border p-2 transition-colors ${
-              pathname === "/account"
-                ? "border-[var(--accent)] text-[var(--accent)]"
-                : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]"
-            }`}
-          >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <circle cx="12" cy="8" r="3.5" />
-              <path d="M4.5 20a7.5 7.5 0 0 1 15 0" strokeLinecap="round" />
-            </svg>
-          </Link>
+          {/* The account menu: My Characters, My Campaigns, Settings (/account,
+              which owns the theme preference, the password form and sign-out). */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMenu(menu === "account" ? null : "account")}
+              aria-haspopup="true"
+              aria-expanded={menu === "account"}
+              title={`${email} — account`}
+              aria-label={`Account menu for ${email}`}
+              className={`flex shrink-0 items-center rounded border p-2 transition-colors ${
+                menu === "account" || ACCOUNT_LINKS.some((l) => pathname === l.href)
+                  ? "border-[var(--accent)] text-[var(--accent)]"
+                  : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]"
+              }`}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M4.5 20a7.5 7.5 0 0 1 15 0" strokeLinecap="round" />
+              </svg>
+            </button>
+            {menu === "account" ? (
+              <div className="absolute right-0 top-full mt-1 w-52 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 shadow-xl">
+                <p className="truncate px-3 pb-1 pt-2 text-[11px] text-[var(--muted)]" title={email}>{email}</p>
+                {ACCOUNT_LINKS.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMenu(null)}
+                    aria-current={pathname === l.href ? "page" : undefined}
+                    className={`block rounded px-3 py-2 text-[13px] font-semibold transition-colors hover:bg-[var(--panel-2)] hover:text-[var(--text)] ${
+                      pathname === l.href ? "bg-[var(--panel-2)] text-[var(--text)]" : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
