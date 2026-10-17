@@ -34,7 +34,7 @@ import {
 // The single site-wide top navbar.
 //
 //   [logo] Game Title   Games ▾ · Characters · Adventures · Campaigns ·   [Admin] [account]
-//                       Compendium ▾ · Homebrew · <tools>
+//                       Library · Compendium ▾ · Homebrew · <tools>
 //   └── left zone ──┘   └────────── centred, fixed ──────────┘   └── right zone ──┘
 //
 // The selected game's name sits beside the logo in that game's own face and
@@ -318,6 +318,11 @@ export default function SiteNav({
           <Link href={CAMPAIGNS_LINK.href} className={`${item} ${pathname === CAMPAIGNS_LINK.href ? on : off}`}>
             {CAMPAIGNS_LINK.label}
           </Link>
+          {/* The Library: every system's PDFs, shelved by the selected system —
+              beside Campaigns, the same grouping as the GM Screen / VTT menu. */}
+          <Link href={LIBRARY_LINK.href} className={`${item} ${pathname === LIBRARY_LINK.href ? on : off}`}>
+            {LIBRARY_LINK.label}
+          </Link>
 
           <div className="relative">
             <button
@@ -355,11 +360,6 @@ export default function SiteNav({
             </span>
           )}
 
-          {/* The Library: every system's PDFs, shelved by the selected system. */}
-          <Link href={LIBRARY_LINK.href} className={`${item} ${pathname === LIBRARY_LINK.href ? on : off}`}>
-            {LIBRARY_LINK.label}
-          </Link>
-
           {/* Tools — individual links, always the same. Route-handler tools
               (`hard`) are plain <a>; Next pages get <Link> so they navigate
               client-side instead of a full white-flash reload. */}
@@ -380,7 +380,7 @@ export default function SiteNav({
             the theme preference, the password form and sign-out. */}
         <div className="flex shrink-0 items-center justify-end gap-2">
           {isAdmin ? (
-            <Link href="/admin/users" className="hidden rounded border border-[var(--accent)] px-2.5 py-1 text-[10px] sm:inline-block font-semibold uppercase tracking-[0.06em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
+            <Link href="/admin/users" className="inline-block rounded border border-[var(--accent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] hover:bg-[var(--panel-2)]">
               Admin
             </Link>
           ) : null}
@@ -430,12 +430,6 @@ export default function SiteNav({
       {/* Mobile panel */}
       {menu === "mobile" ? (
         <div className="relative z-10 border-t border-[var(--border)] bg-[var(--panel)] px-3 py-3 min-[1152px]:hidden">
-          {/* At phone width the Admin button lives here, so the bar has room for the game's title. */}
-          {isAdmin ? (
-            <Link href="/admin/users" onClick={() => setMenu(null)} className="mb-2 block rounded border border-[var(--accent)] px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--accent)] sm:hidden">
-              Admin
-            </Link>
-          ) : null}
           {/* Games — on a narrow screen the system switcher is the home page's
               Choose a Game section (the tiles), so this jumps there. */}
           <Link
@@ -445,10 +439,12 @@ export default function SiteNav({
           >
             Games
           </Link>
-          <div className="flex gap-2">
-            <button className={`${item} flex-1 ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
-            <button className={`${item} flex-1 ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>
-            <Link href={CAMPAIGNS_LINK.href} onClick={() => setMenu(null)} className={`${item} flex-1 ${pathname === CAMPAIGNS_LINK.href ? on : off} border border-[var(--border)] text-center`}>{CAMPAIGNS_LINK.label}</Link>
+          {/* The four per-game pages, two to a row (as the GM Screen / VTT menu groups them). */}
+          <div className="grid grid-cols-2 gap-2">
+            <button className={`${item} ${onDashboard && view === "characters" ? on : off} border border-[var(--border)]`} onClick={() => openTab("characters")}>Characters</button>
+            <button className={`${item} ${onDashboard && view === "adventures" ? on : off} border border-[var(--border)]`} onClick={() => openTab("adventures")}>Adventures</button>
+            <Link href={CAMPAIGNS_LINK.href} onClick={() => setMenu(null)} className={`${item} ${pathname === CAMPAIGNS_LINK.href ? on : off} border border-[var(--border)] text-center`}>{CAMPAIGNS_LINK.label}</Link>
+            <Link href={LIBRARY_LINK.href} onClick={() => setMenu(null)} className={`${item} ${pathname === LIBRARY_LINK.href ? on : off} border border-[var(--border)] text-center`}>{LIBRARY_LINK.label}</Link>
           </div>
 
           <p className="mt-3 px-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Compendium</p>
@@ -463,9 +459,6 @@ export default function SiteNav({
                 Homebrew
               </Link>
             ) : null}
-            <Link href={LIBRARY_LINK.href} onClick={() => setMenu(null)} className="rounded border border-[var(--border)] px-3 py-2 text-[12px] font-semibold text-[var(--muted)] hover:text-[var(--text)]">
-              {LIBRARY_LINK.label}
-            </Link>
           </div>
 
           <p className="mt-3 px-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Tools</p>

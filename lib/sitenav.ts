@@ -199,9 +199,6 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav .nav-item.is-off{opacity:.4;cursor:default}
 #dd-nav .nav-item.is-off:hover{color:var(--muted,#8d96a3)}
 #dd-nav .nav-panel .nav-games{display:block;margin-bottom:12px;border:1px solid var(--border,#2b3038);text-align:center}
-#dd-nav .nav-panel .nav-admin-m{display:block;margin-bottom:8px;text-align:center;padding:8px 12px;font-size:11px}
-@media (min-width:640px){#dd-nav .nav-panel .nav-admin-m{display:none}}
-@media (max-width:639.98px){#dd-nav .nav-right .nav-admin{display:none}}
 #dd-nav #dd-status{flex:0 0 auto;font-size:10px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);padding:4px 8px;border:1px solid transparent;border-radius:4px;white-space:nowrap;text-transform:uppercase;letter-spacing:.06em}
 #dd-nav #dd-status:empty{display:none}
 #dd-nav #dd-status.is-saving{color:var(--muted,#8d96a3)}
@@ -231,11 +228,12 @@ body:has(#dd-nav){--dd-bar-h:${SITE_NAV_H}px}
 #dd-nav .nav-panel h4{margin:12px 4px 4px;font-size:11px;font-weight:700;line-height:1.5;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#8d96a3)}
 #dd-nav .nav-panel h4:first-child{margin-top:0}
 #dd-nav .nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-/* SiteNav's mobile panel opens with the two view tabs as a flex row of equal
-   bordered buttons (flex gap-2), carrying the same 11px uppercase styling as
-   the desktop links — not the 12px grid cells the lists below use. */
-#dd-nav .nav-tabs{display:flex;gap:8px}
-#dd-nav .nav-tabs .nav-item{flex:1 1 0;border:1px solid var(--border,#2b3038);text-align:center}
+/* SiteNav's mobile panel opens with the four per-game pages (Characters,
+   Adventures / Campaigns, Library) two to a row of bordered buttons (grid
+   gap-2), carrying the same 11px uppercase styling as the desktop links — not
+   the 12px grid cells the lists below use. */
+#dd-nav .nav-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#dd-nav .nav-tabs .nav-item{border:1px solid var(--border,#2b3038);text-align:center}
 #dd-nav .nav-grid a,#dd-nav .nav-grid button{border:1px solid var(--border,#2b3038);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:600;line-height:1.5;color:var(--muted,#8d96a3);background:transparent;text-align:left;cursor:pointer}
 #dd-nav .nav-grid a:hover,#dd-nav .nav-grid button:hover{color:var(--text,#e9edf2)}
 @media (min-width:${LINKS_AT}px){
@@ -306,12 +304,12 @@ export function siteNav(opts: SiteNavOpts): string {
     <button class="nav-item" type="button" data-view="adventures">Adventures</button>
     <!-- Per-system, like the two tabs before it. A real route, so an anchor. -->
     <a class="nav-item" href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a>
+    <a class="nav-item" href="${esc(LIBRARY_LINK.href)}">${esc(LIBRARY_LINK.label)}</a>
     <div class="nav-wrap">
       <button class="nav-item has-caret" type="button" id="dd-nav-compbtn" aria-haspopup="true" aria-expanded="false">Compendium ${CARET}</button>
       <div class="nav-pop" id="dd-nav-comppop" hidden></div>
     </div>
     <a class="nav-item" id="dd-nav-brew" href="/homebrew">Homebrew</a>
-    <a class="nav-item" href="${esc(LIBRARY_LINK.href)}">${esc(LIBRARY_LINK.label)}</a>
     ${tools}
   </div>
   <div class="nav-right">
@@ -324,9 +322,8 @@ export function siteNav(opts: SiteNavOpts): string {
   </div>
 </div>
 <div class="nav-panel" id="dd-nav-panel" hidden>
-  ${opts.isAdmin ? `<a class="nav-admin nav-admin-m" href="/admin/users">Admin</a>` : ""}
   <a class="nav-item nav-games" href="/#home-systems">Games</a>
-  <div class="nav-tabs"><button class="nav-item" type="button" data-view="characters">Characters</button><button class="nav-item" type="button" data-view="adventures">Adventures</button><a class="nav-item" href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a></div>
+  <div class="nav-tabs"><button class="nav-item" type="button" data-view="characters">Characters</button><button class="nav-item" type="button" data-view="adventures">Adventures</button><a class="nav-item" href="${esc(CAMPAIGNS_LINK.href)}">${esc(CAMPAIGNS_LINK.label)}</a><a class="nav-item" href="${esc(LIBRARY_LINK.href)}">${esc(LIBRARY_LINK.label)}</a></div>
   <h4>Compendium</h4>
   <div class="nav-grid" id="dd-nav-panelcomp"></div>
   <h4>Tools</h4>
@@ -375,7 +372,6 @@ function paint(){
   var hb=D.brew[cur];
   // Homebrew stays in the row so nothing shifts; a game with no hub shows it dimmed.
   if(hb){brew.href=hb;brew.classList.remove("is-off");brew.removeAttribute("aria-disabled");brew.removeAttribute("title");panelComp.insertAdjacentHTML("beforeend",'<a href="'+esc(hb)+'">Homebrew</a>');}
-  panelComp.insertAdjacentHTML("beforeend",'<a href="${esc(LIBRARY_LINK.href)}">${esc(LIBRARY_LINK.label)}</a>');
   if(!hb){brew.removeAttribute("href");brew.classList.add("is-off");brew.setAttribute("aria-disabled","true");brew.title="No homebrew hub for "+e.n+" yet";}
   // The selected system dresses the page, exactly as SiteNav publishes it.
   try{var r=document.documentElement;r.style.setProperty("--sys",e.a);if(!docSys)r.dataset.system=e.k;}catch(e2){}
