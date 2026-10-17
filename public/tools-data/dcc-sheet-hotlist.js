@@ -1,8 +1,9 @@
 // Dungeon Crawler Carl — Hotlist pins
 // Loaded by tools/templates/dcc_character_sheet.html as <script src>.
 //
-// The Hotlist is 10 quick-access slots (beside the Defense card). This lets
-// you pin a Spell or Attack skill (from the Skills tab) or an Item (from the Inventory tab) into the
+// The Hotlist is 10 quick-access slots, shown as the Hotlist section of the Turn tab
+// (the slots themselves are hidden textareas in #hotlist-grid). This lets
+// you pin a Spell (from the Skills tab) or an Item (from the Inventory tab) into the
 // Hotlist — and unpin it — with the radial-dot control (on / off) just left of the name.
 //
 // A pinned slot carries the entry's Name, its Quantity (items only) and Notes, e.g.
@@ -11,7 +12,7 @@
 // notes change, and a wizard-added entry like "Heal — 2 Mana…" ties back to the Heal
 // skill. Slots stay hand-editable and the data model is unchanged (10 strings).
 //
-// A skill row only shows the pin when it's a Spell or an Attack skill; inventory rows always show it.
+// A skill row only shows the pin when it's a Spell; inventory rows always show it.
 
 (function () {
   "use strict";
@@ -74,12 +75,6 @@
     }
     return false;
   }
-  // An attack skill: its Notes carry a "Dmg NdM" token (the sheet keeps it current).
-  function skillRowIsAttack(tr) {
-    var texts = tr.querySelectorAll('input[type="text"]');
-    if (/\bDmg:?\s*\d*d\d+/i.test(texts[3] ? texts[3].value : "")) return true;
-    return !!(window.DCCSkills && window.DCCSkills.isAttackSkillRow && window.DCCSkills.isAttackSkillRow(tr));
-  }
   function refreshRow(btn) {
     if (!btn || !btn.closest) return;
     var tr = btn.closest("tr");
@@ -89,12 +84,12 @@
     if (inInv && window.DCCEquip && window.DCCEquip.isEquipType(tr)) { window.DCCEquip.refreshRow(btn); return; }
     var name = norm(rowNameOf(btn));
     // Hide the pin on blank rows, and on non-spell / non-attack skill rows.
-    if (!name || (!inInv && !skillRowIsSpell(tr) && !skillRowIsAttack(tr))) { btn.style.visibility = "hidden"; btn.classList.remove("on"); return; }
+    if (!name || (!inInv && !skillRowIsSpell(tr))) { btn.style.visibility = "hidden"; btn.classList.remove("on"); return; }
     btn.style.visibility = "visible";
     var on = isPinned(name);
     btn.classList.toggle("on", on);
     btn.textContent = on ? "◉" : "○";   // ◉ pinned / ○ not
-    btn.title = on ? "Remove from Hotlist" : (inInv ? "Add item to Hotlist" : (skillRowIsSpell(tr) ? "Add spell to Hotlist" : "Add attack to Hotlist"));
+    btn.title = on ? "Remove from Hotlist" : (inInv ? "Add item to Hotlist" : "Add spell to Hotlist");
   }
   function refreshAll() { [].slice.call(document.querySelectorAll(".hot-pin")).forEach(refreshRow); }
 

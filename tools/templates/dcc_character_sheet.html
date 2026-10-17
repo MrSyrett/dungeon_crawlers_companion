@@ -744,8 +744,27 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <!-- CENTER -->
     <div class="center-col">
 
+      <!-- BUFFS & DEBUFFS (left) + DEFENSE (right) -->
+      <div class="def-row">
+      <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
+      <div class="card cond-card">
+        <div class="section-bar">Buffs &amp; Debuffs</div>
+        <div class="cond-row">
+          <div class="cond-stack">
+            <div class="buffs-field cond-line">
+              <span class="mana-label cond-label">Buffs</span>
+              <input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…">
+            </div>
+            <div class="cond-line">
+              <span class="mana-label cond-label">Debuffs</span>
+              <input type="text" class="debuff-input" id="debuffs" placeholder="">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- DEFENSE: Evade / DR -->
-      <div class="card">
+      <div class="card def-card">
         <div class="section-bar">Defense</div>
 
           <!-- EVADE / DR / EXTERNAL BUFFS -->
@@ -799,6 +818,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
           </div>
       </div><!-- end Defense card -->
+      </div><!-- end def-row -->
 
       <!-- MOVEMENT · MANA · AI FAVOR -->
       <div class="mini-cards">
@@ -825,29 +845,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
       </div>
 
-      <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
-      <div class="card">
-        <div class="section-bar">Buffs &amp; Debuffs</div>
-        <div class="cond-row">
-          <div class="cond-stack">
-            <div class="buffs-field cond-line">
-              <span class="mana-label cond-label">Buffs</span>
-              <input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…">
-            </div>
-            <div class="cond-line">
-              <span class="mana-label cond-label">Debuffs</span>
-              <input type="text" class="debuff-input" id="debuffs" placeholder="">
-            </div>
-          </div>
-          <button type="button" class="rest-btn cond-roll" onclick="rollDoT()" title="Roll end-of-round damage for every active damage-over-time debuff (Blood Trail, Burned, Poisoned, Drowning, Sepsis, Potion Sickness).">Roll</button>
-        </div>
-      </div>
 
-      <!-- HOTLIST (in the old Attacks spot; attack skills roll To Hit + Damage from the Skills tab) -->
-      <div class="card">
-        <div class="section-bar red">Hotlist</div>
-        <div id="hotlist-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px 10px;"></div>
-      </div>
 
     </div><!-- end center-col -->
 
@@ -865,7 +863,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
 
   <!-- TAB: TURN (combat round hub — rendered by renderTurn()) -->
-  <div class="tab-panel" id="tab-turn"><div id="dcc-turn"></div></div>
+  <div class="tab-panel" id="tab-turn"><div id="dcc-turn"></div>
+    <!-- The Hotlist's 10 slots: the data store behind the Turn tab's Hotlist section
+         (pinned with the ○ dots on Skills / Inventory). Saved as data.hotlist. -->
+    <div id="hotlist-grid" hidden style="display:none;"></div>
+  </div>
 
   <!-- TAB: SKILLS -->
   <div class="tab-panel active" id="tab-skills">
@@ -1383,13 +1385,49 @@ function rollDoT() {
         sub += r; detail.push(`${dieStr}(${rolls.join('+')})${plusF?`+F(${F})`:''}`);
       }
       grand += sub; summary.push(deb.name + (cnt>1?'×'+cnt:'') + ': ' + sub);
-      if(typeof addLog === 'function') addLog(deb.name + ' — DoT', sub, detail.join(' ; '), 'fumble');
+      const hit = applyDebuffDamage(deb.name, sub);
+      if(typeof addLog === 'function') addLog(deb.name + ' — DoT', sub + (hit.text ? ' · ' + hit.text : ''), detail.join(' ; ') + (hit.detail ? '  |  ' + hit.detail : ''), 'fumble');
     });
   }
-  if(typeof addLog === 'function') {
-    if(!any) addLog('Damage Over Time', '—', 'No active damage-over-time debuffs', 'normal');
-    else addLog('DoT — total this round', grand, summary.join('  |  '), 'fumble');
+  return any ? grand : 0;
+}
+
+// Debuff damage → Health Bar (Core p.93-96). It bypasses DR. Each slot holds CON Mod
+// HP: lose one slot per full slot value, leftover below a slot is lost; slots go
+// right to left (100% → 10%). If it would drop you to 0%, you get the Debuff death
+// save: CON Stat Check vs 10 + Floor — success ends that Debuff and avoids the damage.
+function applyHpDamage(slots) {
+  const live = [...document.querySelectorAll('.hp-pip')].filter(p => p.dataset.active !== 'false')
+    .sort((a, b) => (+b.dataset.pct) - (+a.dataset.pct)).slice(0, slots);
+  live.forEach(p => { p.dataset.active = 'false'; p.classList.add('dimmed'); });
+  if(typeof checkDying === 'function') checkDying();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+  return live.length;
+}
+function applyDebuffDamage(name, dmg) {
+  const slotVal = Math.max(1, getStatMod('con') || 1);
+  const slots = Math.floor((dmg || 0) / slotVal);
+  if(slots < 1) return { text: 'no slot lost', detail: dmg + ' < slot value ' + slotVal };
+  const alive = [...document.querySelectorAll('.hp-pip')].filter(p => p.dataset.active !== 'false').length;
+  if(alive > 0 && slots >= alive) {
+    const roll = d(20), mod = getStatMod('con'), dc = 10 + getFloor(), tot = roll + mod;
+    if(tot >= dc) {
+      dccRemoveDebuff(name);
+      return { text: 'saved — ' + name + ' ends', detail: `CON save d20(${roll})+${mod}=${tot} vs ${dc}` };
+    }
+    const lost = applyHpDamage(slots);
+    return { text: '−' + lost + ' HB', detail: `CON save failed d20(${roll})+${mod}=${tot} vs ${dc} · ${slotVal}/slot` };
   }
+  const lost = applyHpDamage(slots);
+  return { text: '−' + lost + ' HB', detail: slotVal + ' per slot' };
+}
+function dccRemoveDebuff(name) {
+  const el = document.getElementById('debuffs'); if(!el) return;
+  const lc = String(name).toLowerCase();
+  const kept = el.value.split(',').map(t => t.trim()).filter(t => t && t.replace(/\s*[x×]\s*\d+$/i, '').trim().toLowerCase() !== lc);
+  el.value = kept.join(', ');
+  try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+  try { if(window.DCCDebuffs) DCCDebuffs.refresh(); } catch(e) {}
 }
 
 // ── ATTACK SKILLS (Damage lives in the skill's Notes) ──
@@ -1613,7 +1651,7 @@ function addSkillRow() {
   const tbody = document.getElementById('skills-body');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td style="text-align:center;"><button class="hot-pin" onclick="dccSkillRadial(this)" title="Hotlist / attack toggle" aria-label="Hotlist or attack toggle">○</button></td>
+    <td style="text-align:center;"><button class="hot-pin" onclick="dccSkillRadial(this)" title="Pin spell to Hotlist" aria-label="Pin spell to Hotlist">○</button></td>
     <td><input type="text" placeholder="Skill name..."></td>
     <td><input type="text" placeholder="Rank" style="text-align:center;width:100%;"></td>
     <td>
@@ -1782,24 +1820,45 @@ function turnHitStr(r){ const sm = r.stat ? getStatMod(r.stat) : 0; const n = r.
 function turnBuildOpts(){
   const rows = turnSkillRows();
   const curMana = turnNum('mana-current', 0);
-  const O = { attacks: [], spells: [], checks: [], actions: [], interrupts: [] };
+  const O = { hotlist: [], attacks: [], checks: [], actions: [], interrupts: [] };
   const add = (sec, o) => { o.i = _turnOpts.length; _turnOpts.push(o); O[sec].push(o); };
   _turnOpts = [];
-  // Attacks — every attack skill / attack spell (Dmg in its Notes).
-  rows.filter(r => r.dice).forEach(r => add('attacks', {
+  // Hotlist — the 10 pinned slots: Spells (cast from their Skills row; must be on the
+  // Hotlist to cast, Core p.98) and items (potions, scrolls, gear).
+  const norm = v => String(v || '').trim().toLowerCase();
+  const hslots = [...document.querySelectorAll('#hotlist-grid textarea')];
+  hslots.forEach((ta, si) => {
+    const h = String(ta.value || '').trim(); if(!h) return;
+    const nm = h.split(/\s×|\s—\s/)[0].trim(), rest = h.split(/\s—\s/)[1] || '';
+    const r = rows.find(x => norm(x.name) === norm(nm) || norm(x.tr.dataset.src) === norm(nm));
+    if(r && (r.spell || r.dice)) {
+      const heal = isFixedSkill(r.tr.dataset.src || '') || isFixedSkill(r.name);
+      add('hotlist', { name: r.name, kind: r.dice ? 'attack' : 'other', slot: si,
+        sub: r.dice ? turnHitStr(r) + ' to hit · ' + r.dice + (r.stat ? ' +' + r.stat.toUpperCase() : '') + ' dmg' + (r.mana ? ' · ' + r.mana + ' Mana' : '')
+                    : (heal ? 'Restore 2 Health Bar slots · ' : '') + (r.mana ? r.mana + ' Mana' : 'No Mana cost'),
+        blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
+        btn: 'Cast', run: () => turnRollRow(r) });
+      return;
+    }
+    const potion = /potion/i.test(h);
+    const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
+    add('hotlist', { name: h.split(/\s—\s/)[0], kind: 'other', slot: si,
+      sub: (rest || 'Hotlist item') + (sick ? ' · ⚠ potion last turn — Potion Sickness' : ''),
+      btn: 'Use', run: () => {
+        addLog('Use Hotlist Item', nm, h, 'normal');
+        if(potion) {
+          if(sick) turnAddDebuff('Potion Sickness', 'Two potions within two rounds — Poisoned for 15 seconds (Core p.99)');
+          _turn.potionRound = _turn.round;
+        }
+        return true; } });
+  });
+  // Attacks — weapon / attack skills (Dmg in their Notes). Attack spells are cast from the Hotlist.
+  rows.filter(r => r.dice && !r.spell).forEach(r => add('attacks', {
     name: r.name, kind: 'attack',
-    sub: turnHitStr(r) + ' to hit · ' + r.dice + (r.stat ? ' +' + r.stat.toUpperCase() : '') + ' dmg' + (r.mana ? ' · ' + r.mana + ' Mana' : '') + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
-    blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
+    sub: turnHitStr(r) + ' to hit · ' + r.dice + (r.stat ? ' +' + r.stat.toUpperCase() : '') + ' dmg' + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
     btn: 'Attack', run: () => turnRollRow(r),
   }));
-  // Spells that aren't attacks (utility / heal). A heal can also be an Interrupt.
-  rows.filter(r => r.spell && !r.dice && !r.passive).forEach(r => add('spells', {
-    name: r.name, kind: 'other',
-    sub: (isFixedSkill(r.tr.dataset.src || '') || isFixedSkill(r.name) ? 'Restore 2 Health Bar slots · ' : '') + (r.mana ? r.mana + ' Mana' : 'No Mana cost') + (/heal/i.test(r.name + ' ' + r.notes) ? ' · usable as an Interrupt' : ''),
-    blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
-    btn: 'Cast', run: () => turnRollRow(r),
-  }));
-  // Make a Check — the other active skills.
+  // Use a Skill — the other active skills.
   rows.filter(r => !r.dice && !r.spell && !r.passive).forEach(r => add('checks', {
     name: r.name, kind: 'other', sub: turnHitStr(r) + (r.check ? ' · ' + r.check : ''),
     btn: 'Roll', run: () => turnRollRow(r),
@@ -1808,20 +1867,6 @@ function turnBuildOpts(){
   const move = turnNum('evade-move', 20);
   add('actions', { name: 'Move', kind: 'other', sub: 'Move up to ' + move + ' ft (on top of the free Step)', btn: 'Move',
     run: () => { _turn.moves++; addLog('Move', move + ' ft', 'Move Action — up to ' + move + ' ft', 'normal'); return true; } });
-  const hot = [...document.querySelectorAll('#hotlist-grid textarea')].map(t => String(t.value || '').trim()).filter(Boolean);
-  hot.forEach(h => {
-    const potion = /potion/i.test(h);
-    const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
-    add('actions', { name: 'Use: ' + h.split(/\s—\s/)[0], kind: 'other',
-      sub: (h.split(/\s—\s/)[1] || 'Use a prepared Hotlist item') + (sick ? ' · ⚠ potion last turn — Potion Sickness' : ''),
-      btn: 'Use', run: () => {
-        addLog('Use Hotlist Item', h.split(/\s—\s/)[0], h, 'normal');
-        if(potion) {
-          if(sick) turnAddDebuff('Potion Sickness', 'Two potions within two rounds — Poisoned for 15 seconds (Core p.99)');
-          _turn.potionRound = _turn.round;
-        }
-        return true; } });
-  });
   add('actions', { name: 'Retrieve', kind: 'other', sub: 'Move an item from Inventory to the Hotlist or your hand', btn: 'Use',
     run: () => { addLog('Retrieve', '—', 'Inventory → Hotlist / hand', 'normal'); return true; } });
   add('actions', { name: 'Help', kind: 'other', sub: 'Before an ally\'s non-combat Check: +1d2 (no Ranks in it) or +1d6 (with Ranks)',
@@ -1867,10 +1912,9 @@ function turnSpendAiFavor(){
   turnAfter();
 }
 function endTurn(){
-  const deb = document.getElementById('debuffs')?.value || '';
-  if(/blood trail|burn|poison|drown|sepsis|potion sickness/i.test(deb) && typeof rollDoT === 'function') rollDoT();
-  const n = _turn.used + _turn.extraUsed;
-  addLog('Turn ends', n + ' Action' + (n === 1 ? '' : 's'), _turn.done.length ? _turn.done.join(' · ') : 'No Actions taken', 'normal');
+  // End-of-turn damage from Debuffs (auto-applied to the Health Bar). No turn summary
+  // goes to the Roll Log — only the DoT rolls themselves, when there are any.
+  if(typeof rollDoT === 'function') rollDoT();
   Object.assign(_turn, { round: (_turn.round || 1) + 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, done: [] });
   turnAfter();
 }
@@ -1882,6 +1926,13 @@ function turnAddDebuff(name, why){
     if(el && !new RegExp('(^|,)\\s*' + name + '\\b', 'i').test(el.value)) { el.value = [el.value.trim(), name].filter(Boolean).join(', '); try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(_) {} }
   }
   addLog('Debuff: ' + name, 'gained', why || '', 'fumble');
+}
+function turnUnpin(slot){
+  const ta = document.querySelectorAll('#hotlist-grid textarea')[slot]; if(!ta) return;
+  ta.value = '';
+  try { ta.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+  try { if(window.DCCHotlist) DCCHotlist.refresh(); } catch(e) {}
+  turnAfter();
 }
 function turnToggleSec(key){ _turnCollapsed[key] = !_turnCollapsed[key]; renderTurn(); }
 
@@ -1900,7 +1951,8 @@ function renderTurn(){
     const can = !o.blocked && turnCan(o.kind);
     const btns = o.btns ? o.btns.map((b, j) => `<button class="tc-do" onclick="turnDo(${o.i},${j})">${turnEsc(b[0])}</button>`).join('')
                         : `<button class="tc-do" onclick="turnDo(${o.i})">${turnEsc(o.btn || 'Use')}</button>`;
-    return `<div class="turn-card${can ? '' : ' disabled'}"><div class="tc-main"><div class="tc-name">${turnEsc(o.name)}</div><div class="tc-sub">${turnEsc(o.blocked ? o.blocked + ' · ' + o.sub : o.sub)}</div></div>${btns}</div>`;
+    const x = o.slot != null ? `<button class="tc-x" onclick="turnUnpin(${o.slot})" title="Remove from Hotlist" aria-label="Remove from Hotlist">✕</button>` : '';
+    return `<div class="turn-card${can ? '' : ' disabled'}"><div class="tc-main"><div class="tc-name">${turnEsc(o.name)}</div><div class="tc-sub">${turnEsc(o.blocked ? o.blocked + ' · ' + o.sub : o.sub)}</div></div>${btns}${x}</div>`;
   };
   const sec = (key, title, list, empty) => {
     const col = !!_turnCollapsed[key];
@@ -1913,11 +1965,11 @@ function renderTurn(){
         <div class="turn-econ">${pips}</div>
         <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft</span>
         <button class="turn-mini" onclick="turnSpendAiFavor()" ${_turn.aiSpent || ai < 1 ? 'disabled' : ''} title="Once per turn: spend 1 AI Favor (you have ${ai}) for an extra non-Attack Action">+1 Action</button>
-        <button class="turn-end-btn" onclick="endTurn()" title="Clear this turn's Actions (rolls damage-over-time if you have any)">End Turn</button>
+        <button class="turn-end-btn" onclick="endTurn()" title="Clear this turn's Actions and take any damage-over-time from Debuffs">End Turn</button>
       </div>
     </div>
-    ${sec('attacks', 'Attacks', O.attacks, 'No attack skills yet. Add a weapon skill or attack spell on the Skills tab — its Notes carry the Dmg dice.')}
-    ${sec('spells', 'Spells', O.spells, 'No utility or healing spells.')}
+    ${sec('hotlist', 'Hotlist', O.hotlist, 'Nothing on your Hotlist. Pin spells with the ○ dot on the Skills tab, or items with the ○ dot on the Inventory tab (up to 10).')}
+    ${sec('attacks', 'Attacks', O.attacks, 'No attack skills yet. Add a weapon or weapon skill — its Notes carry the Dmg dice.')}
     ${sec('interrupts', 'Interrupts', O.interrupts, '')}
     ${sec('actions', 'Actions', O.actions, '')}
     ${sec('checks', 'Use a Skill', O.checks, 'No other active skills.')}`;
@@ -4142,6 +4194,11 @@ autoLoad();
 <style id="dcc-turn-style">
 .inv-pinned{flex-wrap:wrap;}
 .mini-cards{display:flex;gap:14px;flex-wrap:wrap;}
+.def-row{display:flex;gap:14px;align-items:stretch;}
+.def-row>.cond-card{flex:1 1 0;min-width:0;}
+.def-row>.def-card{flex:1.5 1 0;min-width:0;}
+.cond-card .cond-row{padding:8px 10px 10px;}
+@media (max-width:900px){ .def-row{flex-direction:column;} }
 .mini-cards>.mini-card{flex:1 1 150px;min-width:0;}
 .mini-body{display:flex;align-items:flex-start;justify-content:center;gap:8px;padding:8px 10px 10px;}
 .mini-body .formula-total,.mini-body .mana-input{width:56px;height:30px;font-size:15px;}
@@ -4184,6 +4241,9 @@ autoLoad();
 .turn-card .tc-sub{font-size:11px;color:var(--muted);line-height:1.3;}
 .turn-card .tc-do{flex:0 0 auto;background:var(--red);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .turn-card .tc-do:hover{filter:brightness(1.12);}
+.turn-card .tc-x{flex:0 0 auto;background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:12px;line-height:1;}
+.turn-card .tc-x:hover{border-color:var(--red);color:var(--red);}
+.turn-card.disabled .tc-x{opacity:1;}
 .turn-card.disabled{opacity:.42;}
 .turn-card.disabled .tc-do{background:var(--muted);cursor:default;pointer-events:none;}
 .turn-card.disabled .tc-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
