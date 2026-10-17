@@ -1,4 +1,6 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
+import { fitNavTitle } from "@/lib/navTitleFit";
+import { NAME_PARTS, labelRules, titleHtml, titleRules } from "@/lib/navTitleStyle";
 import { TOOLS_NAV, compendiumFor, CAMPAIGNS_LINK, ACCOUNT_LINKS, LIBRARY_LINK } from "@/components/navConfig";
 
 // The shared "mini-bar": the site's navigation chrome for every surface that
@@ -183,13 +185,23 @@ body:has(#dd-bar){--dd-bar-h:36px}
 #dd-bar a{color:inherit;text-decoration:none}
 #dd-bar .dd-logo{display:flex;align-items:center;flex:0 0 auto}
 #dd-bar .dd-logo img{width:22px;height:22px;display:block}
-#dd-bar .dd-sys{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--sys,var(--accent,#5490c4));white-space:nowrap}
-/* The pin chip. Same box as the system chip so the pair reads as one statement —
-   WHICH GAME, then WHICH TABLE — but in --text, because the accent is the
-   system's and this is not a system. It shrinks before anything else in the bar:
+/* The game's title in its own face and colour, as the other navbars draw it —
+   sized by fitNavTitle so its letters stand as tall as this bar's 22px logo, in
+   the room the script measures for it (max-width) — the campaign chip after it
+   gives way first.
+   The negative margins keep its taller box from growing the 36px bar. */
+#dd-bar .dd-sys{flex:0 0 auto;display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:21px;line-height:1.2;letter-spacing:.02em;text-transform:none;padding:.1em .1em .12em;margin-block:calc(11px - .71em);color:var(--text,#e9edf2)}
+#dd-bar .dd-sys.is-wrap{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow-wrap:anywhere;line-height:1.02;margin-block:calc(11px - 1.13em)}
+${titleRules("#dd-bar .dd-sys")}
+/* The campaign name, right after the game's title behind a thin divider (no box)
+   so the pair reads as one statement — WHICH GAME | WHICH TABLE. It shrinks before anything else in the bar
+   (down to 56px; the title's room is measured with the chip at that size):
    a long campaign name must not push the save status or the account icon off. */
-#dd-bar .dd-pin{flex:0 1 auto;min-width:0;padding:4px 8px;border:1px solid var(--border,#2b3038);border-radius:4px;background:var(--panel-2,#1c1f24);color:var(--text,#e9edf2);text-transform:none;letter-spacing:.02em;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28vw}
-#dd-bar a.dd-pin:hover{border-color:var(--accent,#5490c4)}
+#dd-bar .dd-pin{flex:0 1 auto;box-sizing:border-box;min-width:56px;padding:2px 0 2px 11px;border:0;border-left:1px solid var(--muted,#8d96a3);border-radius:0;background:none;color:var(--text,#e9edf2);text-transform:none;letter-spacing:.02em;font-size:14px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28vw}
+#dd-bar a.dd-pin:hover{color:var(--accent,#5490c4)}
+/* The campaign name in the game's second face (its skin's label font), keyed off
+   the title just before it, so a live game switch restyles it too. */
+${labelRules("#dd-bar .dd-sys", ".dd-pin")}
 #dd-bar .dd-pin.is-empty{color:var(--muted,#8d96a3)}
 /* The page's own controls. The bar owns the box they sit in, not their styling:
    whatever a page moves in here keeps its own look, shrunk to the bar's height. */
@@ -269,7 +281,7 @@ ${comp}${tools}<div class="dd-menu-sec one"><button type="button" id="dd-reload"
   const bar = `<div id="dd-bar" role="navigation" aria-label="Site">
 <button type="button" class="dd-menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="dd-menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg></button>
 <a class="dd-logo" href="/" title="Home"><img src="/logo-white.png" alt="Home" width="22" height="22"></a>
-${s ? `<span class="dd-sys" title="Current system">${esc(s.name)}</span>` : ""}
+${s && opts.system ? `<a class="dd-sys" href="/" data-sys="${esc(opts.system)}" title="${esc(s.name)} — home">${titleHtml(opts.system, s.name, esc)}</a>` : ""}
 ${pin}
 ${crumb}
 <span class="dd-spacer"></span>
@@ -286,13 +298,36 @@ ${menu}
 
   const script = `<script>(function(){
 var bar=document.getElementById("dd-bar");if(!bar)return;
-var SYS=${JSON.stringify(sysMap)};
+var SYS=${JSON.stringify(sysMap)},PARTS=${JSON.stringify(NAME_PARTS)};
+var fitNavTitle=(${fitNavTitle.toString()});
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+// The title's room: the bar's width minus everything else in the row (the
+// campaign chip counted at its 56px minimum, so it gives way first), so the
+// letters are sized against a box that doesn't itself shrink with them.
+function fitSys(){var t=bar.querySelector(".dd-sys");if(!t)return;
+  t.style.maxWidth="none";
+  var bs=getComputedStyle(bar),room=bar.clientWidth-(parseFloat(bs.paddingLeft)||0)-(parseFloat(bs.paddingRight)||0),gap=parseFloat(bs.columnGap)||0,n=0;
+  for(var i=0;i<bar.children.length;i++){var k=bar.children[i],ks=getComputedStyle(k);
+    if(ks.display==="none"||ks.position==="absolute"||ks.position==="fixed")continue;n++;
+    if(k===t||k.classList.contains("dd-spacer"))continue;
+    room-=k.classList.contains("dd-pin")?56:k.getBoundingClientRect().width;}
+  room-=gap*Math.max(0,n-1);
+  t.style.maxWidth=Math.max(40,Math.floor(room))+"px";
+  fitNavTitle(t,20);}
+var fitRaf=0;function refit(){cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(fitSys);}
+window.addEventListener("resize",refit);
+// The page moves its own controls into the slot after load, and the campaign
+// chip can change: refit when the bar's contents do.
+try{new MutationObserver(refit).observe(bar,{childList:true,subtree:true,characterData:true});}catch(x){}
+try{document.fonts.ready.then(fitSys);document.fonts.addEventListener("loadingdone",refit);}catch(x){}
 // window.__ddSetSystem(key): the page tells the bar which system it's in (the
 // GM Screen's own picker calls this), or the bar reads the site-wide choice when
 // the server didn't know (an unlinked GM board). Updates the chip, --sys and —
 // so the dashboard follows — localStorage dcw_system.
 window.__ddSetSystem=function(key,opts){opts=opts||{};var s=SYS[key];if(!s)return;
-  var chip=bar.querySelector(".dd-sys");if(chip){chip.textContent=s.name;}else{chip=document.createElement("span");chip.className="dd-sys";chip.title="Current system";chip.textContent=s.name;var lg=bar.querySelector(".dd-logo");lg&&lg.insertAdjacentElement("afterend",chip);}
+  var chip=bar.querySelector(".dd-sys");if(!chip){chip=document.createElement("a");chip.className="dd-sys";chip.href="/";var lg=bar.querySelector(".dd-logo");lg&&lg.insertAdjacentElement("afterend",chip);}
+  var pt=PARTS[key];chip.innerHTML=pt?'<span class="tn-1">'+esc(pt[0])+'</span> <span class="tn-2">'+esc(pt[1])+'</span>':esc(s.name);
+  chip.setAttribute("data-sys",key);chip.title=s.name+" — home";fitSys();
   try{document.documentElement.style.setProperty("--sys",s.accent);document.documentElement.dataset.system=key;}catch(x){}
   if(!opts.silent){try{localStorage.setItem("dcw_system",key);}catch(x){}}};
 // window.__ddSetPin({label,href,title}) — or null to say "nothing pinned". The GM
@@ -328,6 +363,7 @@ var sysKey=${JSON.stringify(opts.system || "")};
 if(sysKey){try{localStorage.setItem("dcw_system",sysKey);}catch(x){}}
 else{var stored=null;try{stored=localStorage.getItem("dcw_system");}catch(x){}if(stored&&SYS[stored])window.__ddSetSystem(stored,{silent:true});}
 // Save status (sheets + GM Screen call this): kind = saving | saved | error.
+fitSys();
 window.__ddStatus=function(kind,text){var el=document.getElementById("dd-status");if(!el)return;el.className=kind?("is-"+kind):"";el.textContent=text||"";if(kind==="saved"){clearTimeout(el._t);el._t=setTimeout(function(){if(el.className==="is-saved"){el.textContent="";el.className="";}},2500);}};
 })();</script>`;
 

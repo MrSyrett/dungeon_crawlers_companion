@@ -653,6 +653,16 @@ body {
   font-display: swap;
   src: url("/fonts/jsl-blackletter.woff2") format("woff2");
 }
+/* Shadowdark's second face, the old newspaper type (app/globals.css declares the
+   same file for the Next pages as "Old newspaper font"). The GM Screen bar sets
+   a Shadowdark campaign's name in it. */
+@font-face {
+  font-family: "Old Newspaper";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/old-newspaper.woff2") format("woff2");
+}
 
 /* ============================================================================
    THEMES — the standalone surfaces

@@ -1,5 +1,6 @@
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
 import { fitNavTitle } from "@/lib/navTitleFit";
+import { NAME_PARTS, titleRules } from "@/lib/navTitleStyle";
 import { TOOLS_NAV, compendiumFor, homebrewFor, CAMPAIGNS_LINK, ACCOUNT_LINKS, LIBRARY_LINK } from "@/components/navConfig";
 
 // The site navbar, for the surfaces that are NOT Next pages.
@@ -105,47 +106,11 @@ function navData(hiddenKeys: SystemKey[] = [], keep: SystemKey | null = null) {
   return { systems, comp, brew, tools: TOOLS_NAV.map((t) => ({ h: t.href, l: t.label })) };
 }
 
-/** The game's title beside the logo, in that game's face and colour — the same
- *  identity the Next navbar draws from app/globals.css (.nav-sys-title over the
- *  [data-sys] tile tokens). Those tokens use next/font variables, which a
- *  standalone document doesn't have, so the faces are named here by the literal
- *  families public/tokens.css self-hosts. Keep the two in step. */
-const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
-  SD: { f: '"JSL Blackletter"', c: "var(--text)" },
-  ICRPG: { f: '"Permanent Marker"', c: "var(--icrpg)" },
-  NIM: { f: '"Fraunces"', c: "#ffffff", x: "-webkit-text-stroke:.1em #000000;paint-order:stroke fill;text-shadow:.05em .06em 0 #000000,0 0 .22em rgba(142,201,236,.75);font-weight:700" },
-  DND: { f: '"DnDC","Cinzel"', c: "var(--gold-ink)" },
-  LOTR: { f: '"Ringbearer","EB Garamond"', c: "var(--lotr-ink)" },
-  DCC: { f: '"Anton"', c: "var(--dcc-gold)" },
-  KOB: { f: '"Dreadful"', c: "var(--kob)" },
-  CO: { f: '"Cormorant Garamond"', c: "var(--candela-gold)" },
-  MMRPG: { f: '"Marvel","Oswald"', c: "var(--text)", x: "text-transform:uppercase" },
-  JLU: { f: '"Russo One"', c: "var(--jlu-gold)" },
-  GB: { f: '"Ghostbusters","Anton"', c: "#ffffff", x: "text-shadow:0 0 2px rgba(255,255,255,.9),0 0 7px rgba(255,255,255,.45)" },
-  SW: { f: '"Star Jedi","Archivo Black"', c: "var(--sw)", x: "text-transform:lowercase" },
-  ACE: { f: '"Lilita One"', c: "var(--ace-yellow)" },
-  D62E: { f: '"Saira Condensed"', c: "var(--d62e)" },
-  YZE: { f: '"Archivo Narrow"', c: "var(--yze)" },
-  TWD: { f: '"Dead Kansas","Oswald"', c: "var(--twd-bone)", x: "font-weight:400" },
-  MYZ: { f: '"Anton"', c: "var(--myz)" },
-  VAE: { f: '"Fraunces"', c: "var(--vae)" },
-};
-/** Two-colour wordmarks (SiteNav's NAME_PARTS). */
-const NAME_PARTS: Partial<Record<SystemKey, [string, string]>> = { DCC: ["Dungeon", "Crawler Carl"], MMRPG: ["Marvel", "Multiverse RPG"] };
-
 function titleCss(): string {
   const base = `#dd-nav .nav-sys-title{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:30.4px;line-height:1.2;letter-spacing:.02em;padding:.1em .1em .12em;margin-block:calc(16px - .71em);text-transform:none;color:var(--text,#e9edf2)}
 #dd-nav .nav-sys-title.is-wrap{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;overflow-wrap:anywhere;line-height:1.02;margin-block:calc(16px - 1.13em)}
-#dd-nav .nav-sys-title[data-sys="DCC"] .tn-1{color:var(--dcc-gold)}
-#dd-nav .nav-sys-title[data-sys="DCC"] .tn-2{color:var(--dcc-ink)}
-#dd-nav .nav-sys-title[data-sys="MMRPG"] .tn-1{display:inline-block;line-height:1;padding:.12em .18em .06em;margin-right:.08em;background:var(--mmrpg);color:#ffffff;border-radius:2px}
-#dd-nav .nav-sys-title[data-sys="MMRPG"] .tn-2{color:var(--text,#e9edf2)}`;
-  const per = (Object.keys(TITLE) as SystemKey[])
-    .map((k) => `#dd-nav .nav-sys-title[data-sys="${k}"]{font-family:${TITLE[k].f},"Geist",ui-sans-serif,system-ui,sans-serif !important;color:${TITLE[k].c}${TITLE[k].x ? ";" + TITLE[k].x : ""}}`)
-    .join("\n");
-  // Last, so it beats GB's plain-white line above where text-stroke exists.
-  const gb = `@supports (-webkit-text-stroke:1px #fff){#dd-nav .nav-sys-title[data-sys="GB"]{color:var(--panel);-webkit-text-stroke:.04em #ffffff;paint-order:stroke fill}}`;
-  return base + "\n" + per + "\n" + gb;
+`;
+  return base + "\n" + titleRules("#dd-nav .nav-sys-title");
 }
 
 const CSS = `

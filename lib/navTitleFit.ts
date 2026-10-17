@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Size the game's title beside the logo (both navbars: components/SiteNav.tsx
-// and the standalone bar, lib/sitenav.ts, which embeds this function's source).
+// the standalone bar, lib/sitenav.ts, and the GM Screen / VTT bar, lib/minibar.ts,
+// which both embed this function's source).
 //
 // Every game's face has different proportions, so one font-size makes some
 // names look tiny. Instead the LETTERS are sized: the title's tallest glyph is
@@ -16,8 +17,8 @@
 // with Function.prototype.toString().
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function fitNavTitle(el: HTMLElement): void {
-  const INK = 29; // px — the logo's visible mark (459 of its 512px) in its 32px box
+export function fitNavTitle(el: HTMLElement, ink?: number): void {
+  const INK = ink || 29; // px — the logo's visible mark: 29 beside the 32px logo, 20 beside the bar's 22px one
   const FLOOR = 14;
   el.classList.remove("is-wrap");
   el.style.fontSize = "";
@@ -64,7 +65,13 @@ export function fitNavTitle(el: HTMLElement): void {
   };
   let g = 0;
   while (wide() && size > FLOOR && g++ < 80) { size -= 0.5; el.style.fontSize = size + "px"; }
-  if (wide()) {
+  // One word can't wrap without breaking mid-word ("Shadowdar|k"): keep it on
+  // one line and let it go smaller instead.
+  if (wide() && !/\s/.test(text)) {
+    g = 0;
+    while (wide() && size > 10 && g++ < 40) { size -= 0.5; el.style.fontSize = size + "px"; }
+  }
+  if (wide() && /\s/.test(text)) {
     // Still too long: two compact lines that fit the bar's height.
     el.classList.add("is-wrap");
     size = 15;
