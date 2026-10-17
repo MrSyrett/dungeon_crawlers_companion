@@ -1156,7 +1156,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <!-- TABS -->
       <div class="mc-tabs">
       <div class="tabs-bar">
-        <button class="tab-btn" data-tab="turn" onclick="setTab('turn')">Turn</button>
+        <button class="tab-btn" data-tab="turn" onclick="setTab('turn')">Action</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="equipment" onclick="setTab('equipment')">Equipment</button>
         <button class="tab-btn" data-tab="features" onclick="setTab('features')">Features &amp; Traits</button>
@@ -1187,7 +1187,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
         <div class="tab-scroll" id="turn-scroll">
           <section class="turn-sec" id="turn-attacks-sec">
-            <div class="turn-sec-hd" onclick="toggleTurnSec('attacks')"><span class="tsh-caret">▾</span><span class="tsh-title">Attacks</span><span class="tsh-note" id="turn-atk-note"></span><button class="hdr-btn mastery-btn" id="mastery-btn" style="display:none;" onclick="event.stopPropagation();openMasteryPicker()" title="Weapon Mastery — choose which weapon kinds you've mastered">Mastery 0/0</button></div>
+            <div class="turn-sec-hd" onclick="toggleTurnSec('attacks')"><span class="tsh-caret">▾</span><span class="tsh-title">Attacks</span><span class="tsh-note" id="turn-atk-note"></span></div>
             <div class="turn-sec-body"><div class="tbl-scroll"><table class="tbl atk-tbl"><thead><tr><th>Name</th><th>To Hit</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div></div>
           </section>
           <div id="turn-body"></div>
@@ -1212,7 +1212,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <!-- FEATURES TAB -->
       <div class="tab-panel tab-split" id="tab-features">
-        <div class="section-bar red"><span>Class Resources</span></div>
+        <div class="section-bar red"><span>Class Resources</span><button class="hdr-btn mastery-btn" id="mastery-btn" style="display:none;" onclick="event.stopPropagation();openMasteryPicker()" title="Weapon Mastery — choose which weapon kinds you've mastered">Weapon Mastery 0/0</button></div>
         <div id="resources-list" class="res-wrap"></div>
         <div class="tab-scroll">
         <div class="section-bar red"><span>Features &amp; Traits</span><span class="sb-note" id="feat-note"></span></div>
@@ -2057,7 +2057,7 @@ function masteryCandidates(){
 function renderMasteryBtn(){
   const el = $('mastery-btn'); if(!el) return; const n = masteryCount();
   el.style.display = n ? '' : 'none';
-  if(n) el.innerHTML = 'Mastery <b>' + masteryChoices().length + '</b>/' + n;
+  if(n) el.innerHTML = 'Weapon Mastery <b>' + masteryChoices().length + '</b>/' + n;
 }
 function openMasteryPicker(){
   let ov = $('mastery-overlay');

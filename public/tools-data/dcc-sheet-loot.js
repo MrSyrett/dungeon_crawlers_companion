@@ -60,6 +60,7 @@
   // ── inventory writes ─────────────────────────────────────────────────────────
   function fire(el) { if (!el) return; try { var Ev = (el.ownerDocument && el.ownerDocument.defaultView && el.ownerDocument.defaultView.Event) || Event; el.dispatchEvent(new Ev("input", { bubbles: true })); } catch (e) {} }
   function addInvItem(name, qty, notes) {
+    if (window.DCCFx && window.DCCFx.invRowByName(name)) { window.DCCFx.stackAdd(name, qty == null ? 1 : qty); return; }   // stack onto the existing row
     if (typeof addInvRow !== "function") return;
     addInvRow();
     var body = document.getElementById("inv-body");

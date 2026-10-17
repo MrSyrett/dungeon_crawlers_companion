@@ -192,6 +192,13 @@
     return /^(head|torso|arms|legs|feet)$/.test(s) || /hand|holding/.test(s);
   }
   function addToSheet(it, name) {
+    // Already carrying it? Add to that row's Quantity instead of a second row.
+    var nm0 = name || (it ? it.name : "");
+    if (nm0 && window.DCCFx && window.DCCFx.invRowByName(nm0)) {
+      window.DCCFx.stackAdd(nm0, 1);
+      if (it && it.category === "weapon" && window.DCCSkills && window.DCCSkills.ensureWeaponSkill) { try { window.DCCSkills.ensureWeaponSkill(it.name); } catch (e) {} }
+      return;
+    }
     var tr = newInvRow();
     fillRow(tr, name || (it ? it.name : ""), it ? notesOf(it) : "");
     // Stamp category/slot/effect so the row's radial can equip it (works for

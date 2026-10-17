@@ -757,15 +757,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div class="side-stack">
         <div class="card mini-card">
           <div class="section-bar">Movement</div>
-          <div class="mini-body">
-            <div class="formula-extra-item"><input type="text" class="formula-total" id="evade-move" placeholder="—"><span class="formula-sublabel">Move</span></div>
-            <div class="formula-extra-item"><input type="text" class="formula-total" id="evade-step" placeholder="—"><span class="formula-sublabel">Step</span></div>
+          <div class="mini-body mv-stack">
+            <label class="mv-row"><span>Move</span><input type="text" class="formula-total" id="evade-move" placeholder="—"></label>
+            <label class="mv-row"><span>Step</span><input type="text" class="formula-total" id="evade-step" placeholder="—"></label>
           </div>
         </div>
         <div class="card mini-card">
           <div class="section-bar">AI Favor</div>
-          <div class="mini-body">
-            <div class="formula-extra-item"><input type="text" class="formula-total" id="dr-aifavor" data-nolock placeholder="—"><span class="formula-sublabel">Favor</span></div>
+          <div class="mini-body ai-body">
+            <input type="text" class="formula-total" id="dr-aifavor" data-nolock placeholder="—" title="AI Favor" aria-label="AI Favor">
           </div>
         </div>
         </div>
@@ -828,7 +828,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <!-- TABS -->
   <div class="card tabs-card">
   <div class="tabs-row">
-    <button class="tab-btn" data-tab="turn" onclick="switchTab('turn')">Turn</button>
+    <button class="tab-btn" data-tab="turn" onclick="switchTab('turn')">Action</button>
     <button class="tab-btn active" data-tab="skills" onclick="switchTab('skills')">Skills</button>
     <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">Inventory</button>
     <button class="tab-btn" data-tab="gear" onclick="switchTab('gear')">Gear</button>
@@ -1203,11 +1203,18 @@ function syncMana() {
 function calcDR() {
   const armor = parseInt(document.getElementById('dr-armor')?.value)||0;
   const buffs = parseInt(document.getElementById('dr-buffs')?.value)||0;
-  let total = armor + buffs;
+  // Oakhide spell buff: +2 DR, +2 more at Ranks 5, 10 and 15 (Core spells).
+  let oak = 0;
+  if(hasBuff('Oakhide')) {
+    const r = [...document.querySelectorAll('#skills-body tr')].map(tr => tr.querySelectorAll('input[type="text"]')).find(t => t[0] && /^oakhide$/i.test(t[0].value.trim()));
+    const rk = r ? (parseInt(r[1].value, 10) || 1) : 1;
+    oak = 2 + (rk >= 5 ? 2 : 0) + (rk >= 10 ? 2 : 0) + (rk >= 15 ? 2 : 0);
+  }
+  let total = armor + buffs + oak;
   if(hasBuff('Iron Skin')) total *= 2;   // Iron Skin buff doubles DR (Core p.96)
   const el = document.getElementById('dr-total');
   el.value = total;
-  el.title = hasBuff('Iron Skin') ? `Iron Skin: (${armor} + ${buffs}) ×2` : '';
+  el.title = (oak ? `Oakhide +${oak}` : '') + (hasBuff('Iron Skin') ? (oak ? ' · ' : '') + `Iron Skin: (${armor} + ${buffs}${oak ? ' + ' + oak : ''}) ×2` : '');
 }
 document.getElementById('dr-armor').addEventListener('input', calcDR);
 document.getElementById('dr-buffs').addEventListener('input', calcDR);
@@ -1830,7 +1837,8 @@ function turnBuildOpts(){
     add('hotlist', { name: label, kind: 'other', slot: si,
       sub: rest,
       btn: 'Use', run: () => {
-        addLog('Use Hotlist Item', nm, h, 'normal');
+        if(window.DCCFx) { const inv = DCCFx.invRowByName(nm); if(inv) DCCFx.useRow(inv); else DCCFx.useByName(nm, rest); }
+        else addLog('Use Hotlist Item', nm, h, 'normal');
         if(potion) {
           if(sick) turnAddDebuff('Potion Sickness', 'Two potions within two rounds — Poisoned for 15 seconds (Core p.99)');
           _turn.potionRound = _turn.round;
@@ -2183,11 +2191,12 @@ function rollSkill(btn) {
   const row = btn.closest('tr');
   if(!consumeSpellMana(row)) return;
   const inputs = row.querySelectorAll('input[type="text"]');
-  // The Heal spell just works: restore 2 Health Bar slots (Core p.206, self only).
-  if(isFixedSkill(row.dataset.src || '') || isFixedSkill(inputs[0].value)) {
-    const n = healHpSlots(2);
-    addLog('Heal', n ? '+' + n + ' HB' : 'Full', n ? 'Restored ' + n + ' Health Bar slot' + (n === 1 ? '' : 's') : 'Health Bar already full', 'crit');
-    return { name: 'Heal', total: n, roll: 0, attack: false };
+  // Spells with an automated effect (healing, Shield, buff spells, no-Check utility
+  // spells) resolve here instead of rolling a d20 — see dcc-sheet-effects.js.
+  if(window.DCCFx && DCCFx.spellEffect(inputs[0].value, parseMod(inputs[1].value), { src: row.dataset.src })) {
+    const chk0 = row.querySelector('input[type="checkbox"]');
+    if(chk0 && chk0.style.visibility !== 'hidden' && !chk0.checked) { chk0.checked = true; try { chk0.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
+    return { name: inputs[0].value, total: 0, roll: 0, attack: false };
   }
   const sel = row.querySelector('select');
   const name = inputs[0].value||'Skill';
@@ -2208,8 +2217,9 @@ function rollSkill(btn) {
     const m = diceStr.match(/^(\d*)d(\d+)$/i);
     const num = parseInt(m[1]||'1', 10), sides = parseInt(m[2], 10);
     const rolls = Array.from({length:num}, ()=>d(sides));
-    const dmg = rolls.reduce((a,b)=>a+b,0) + statMod;
-    const sm = statId ? `+${statId.toUpperCase()}(${statMod})` : '';
+    const bang = hasBuff('Bang Bro') && !/spell/i.test(inputs[2].value) && !/\bmana\b/i.test(inputs[3].value) ? 2 : 0;   // Bang Bro: +2 Fire/Electric on weapon hits
+    const dmg = rolls.reduce((a,b)=>a+b,0) + statMod + bang;
+    const sm = (statId ? `+${statId.toUpperCase()}(${statMod})` : '') + (bang ? '+Bang Bro(2)' : '');
     addLog(`${name}` + (roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), `Hit: ${total}  |  Dmg: ${dmg}`,
       `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${diceStr}(${rolls.join('+')})${sm}=${dmg}`, type);
   } else {
@@ -2453,6 +2463,7 @@ function collectSheet() {
     };
   });
 
+  data.skillPotions = parseInt(window.__dccSkillPotions || 0, 10) || 0;
   data.turn = Object.assign({}, _turn, { done: (_turn.done || []).slice(-12) });
 
   // Pinned inventory sections (always at the top of the tab)
@@ -2611,6 +2622,7 @@ function applySheet(data) {
   // one into its Skills row: the damage dice go into the skill's Notes as "Dmg NdM",
   // and an attack with no matching skill becomes a skill row of its own.
   if(Array.isArray(data.attacks)) migrateAttacksToSkills(data.attacks);
+  window.__dccSkillPotions = parseInt(data.skillPotions || 0, 10) || 0;
   if(data.turn && typeof data.turn === 'object') { Object.assign(_turn, data.turn); if(!Array.isArray(_turn.done)) _turn.done = []; }
   if(typeof renderTurn === 'function') renderTurn();
   // Keep each attack skill's Dmg in step with its Rank (Rank 5/10/15 upgrades).
@@ -4199,9 +4211,20 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-equip.js"></script>
   <script src="/tools-data/dcc-sheet-skillbuff.js"></script>
   <script src="/tools-data/dcc-sheet-inv-picker.js"></script>
+  <script src="/tools-data/dcc-sheet-effects.js"></script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
 <style id="dcc-turn-style">
+/* Movement: Move / Step stacked; AI Favor one big number */
+.mini-body.mv-stack{flex-direction:column;align-items:stretch;gap:7px;padding:9px 12px 12px;}
+.mv-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.mini-body.mv-stack .formula-total{width:70px;height:36px;font-size:19px;}
+.mini-body.ai-body{align-items:center;justify-content:center;padding:10px 12px 12px;height:calc(100% - 34px);}
+.mini-body.ai-body .formula-total{width:96px;height:66px;font-size:32px;}
+/* Inventory "Use" (consumables only) */
+.dcc-list .dl-use{height:26px;padding:0 10px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;}
+.dcc-list .dl-use:hover{filter:brightness(1.12);}
+@media (max-width:600px){ .dcc-list .dl-use{height:32px;padding:0 10px;font-size:12px;} .mini-body.ai-body .formula-total{width:100%;} }
 /* ── v3 polish: grid rows (name+sub on the left, Rank/Qty column inline with the controls) ── */
 .dcc-list .dl-row{display:grid;align-items:center;column-gap:8px;row-gap:1px;padding:6px 4px;}
 .dl-row .dl-main,.dl-row .dl-line{display:contents;}

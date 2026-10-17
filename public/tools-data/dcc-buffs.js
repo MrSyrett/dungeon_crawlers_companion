@@ -79,5 +79,29 @@ const DCC_BUFFS = [
     "kind": "external",
     "effect": "Negate falling damage.",
     "duration": "Trigger-activated; counts toward the Rule of Three."
+  },
+  {
+    "name": "Oakhide",
+    "kind": "internal",
+    "effect": "Spell: +2 Damage Resistance (+2 more at Ranks 5, 10 and 15).",
+    "duration": "2 minutes (3 at Rank 5, 4 at Rank 15)."
+  },
+  {
+    "name": "Bang Bro",
+    "kind": "internal",
+    "effect": "Spell: your held weapon deals +2 mixed Fire and Electric damage.",
+    "duration": "5 minutes + 1 minute per Rank."
+  },
+  {
+    "name": "Wisp Armor",
+    "kind": "internal",
+    "effect": "Spell: magic damage against you is reduced to its Rank 1 base damage (1 die + Stat Mod).",
+    "duration": "See the spell."
+  },
+  {
+    "name": "Water Breathing",
+    "kind": "internal",
+    "effect": "Spell: you can breathe underwater.",
+    "duration": "INT × 3 seconds."
   }
 ];
