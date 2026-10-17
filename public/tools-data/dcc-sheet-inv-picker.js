@@ -279,8 +279,6 @@
         '<div class="dcci-search"><input id="dcci-search-input" type="search" placeholder="Search items…" value="' + attr(query) + '" oninput="DCCItems.search(this.value)"></div>' +
         '<div class="dcci-filters">' + chips + '</div>' +
         '<div class="dcci-list">' + rows + '</div>' +
-        '<div class="dcci-foot"><input id="dcci-custom-input" type="text" placeholder="…or type a custom item name" onkeydown="if(event.key===\'Enter\')DCCItems.addCustom()">' +
-          '<button class="dcci-btn" onclick="DCCItems.addCustom()">Add</button></div>' +
       '</div>';
     var s = document.getElementById("dcci-search-input");
     if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }

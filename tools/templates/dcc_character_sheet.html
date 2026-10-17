@@ -721,7 +721,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
     <!-- STATS -->
     <div class="stats-col">
-      <div class="card">
+      <div class="card stats-card">
         <div class="section-bar" style="display:flex;justify-content:space-between;align-items:center;">
           <span>Stats</span>
           <button id="global-mod-toggle" onclick="toggleGlobalModSource()" style="background:var(--red);border:none;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;cursor:pointer;border-radius:6px;">ENH</button>
@@ -729,11 +729,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <div id="stats-list"></div>
       </div>
       <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
-      <div class="card cond-card">
+      <div class="card cond-card buffs-card">
         <div class="section-bar">Buffs</div>
         <div class="cond-line cond-solo buffs-field"><input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…"></div>
       </div>
-      <div class="card cond-card">
+      <div class="card cond-card debuffs-card">
         <div class="section-bar">Debuffs</div>
         <div class="cond-line cond-solo"><input type="text" class="debuff-input" id="debuffs" placeholder=""></div>
       </div>
@@ -838,7 +838,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
   <!-- TAB: TURN (combat round hub — rendered by renderTurn()) -->
   <div class="tab-panel" id="tab-turn">
-    <div class="turn-mana">
+    <div class="turn-mana" id="turn-mana">
       <span class="tm-lbl">Mana</span>
       <input type="text" class="mana-input" id="mana-current" data-nolock placeholder="0" title="Current Mana">
       <span class="mana-slash">/</span>
@@ -853,19 +853,19 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <!-- TAB: SKILLS -->
   <div class="tab-panel active" id="tab-skills">
     <div class="tab-head">
-      <span class="tab-title">Skills</span>
+      <select class="sort-sel" data-nolock onchange="sortSkills(this.value);this.selectedIndex=0;" title="Sort skills">
+        <option value="">Sort ▾</option>
+        <option value="name">Name</option>
+        <option value="rank">Rank</option>
+        <option value="stat">Stat</option>
+        <option value="check">Check Type</option>
+      </select>
       <div class="tab-tools">
-        <select class="sort-sel" data-nolock onchange="sortSkills(this.value);this.selectedIndex=0;" title="Sort skills">
-          <option value="">Sort ▾</option>
-          <option value="name">Name</option>
-          <option value="rank">Rank</option>
-          <option value="stat">Stat</option>
-          <option value="check">Check Type</option>
-        </select>
         <button class="tab-tool-btn" onclick="runAdvancement()" title="Roll a Skill Advancement Check (1d20 ≥ Rank → +1, cap 15) for every marked skill, then clear the marks">⬆ Advance</button>
         <button class="tab-tool-btn solid" onclick="if(window.DCCSkills){DCCSkills.openPicker()}else{addSkillRow()}" title="Learn or unlearn skills and spells">+ Skills</button>
       </div>
     </div>
+    <div class="dl-head sk-grid"><span></span><span class="dh-name">Name</span><span class="dh-num">Rank</span><span class="dh-ctrl">Adv · Info · Roll</span></div>
     <table class="dcc-list sk-list">
       <tbody id="skills-body"></tbody>
     </table>
@@ -891,20 +891,20 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <!-- TAB: INVENTORY -->
   <div class="tab-panel" id="tab-inventory">
     <div class="tab-head">
-      <span class="tab-title">Inventory</span>
+      <select class="sort-sel" data-nolock onchange="sortInventory(this.value);this.selectedIndex=0;" title="Sort inventory">
+        <option value="">Sort ▾</option>
+        <option value="item">Item Name</option>
+        <option value="qty">Quantity</option>
+      </select>
       <div class="tab-tools">
-        <select class="sort-sel" data-nolock onchange="sortInventory(this.value);this.selectedIndex=0;" title="Sort inventory">
-          <option value="">Sort ▾</option>
-          <option value="item">Item Name</option>
-          <option value="qty">Quantity</option>
-        </select>
-        <button class="tab-tool-btn solid" onclick="if(window.DCCItems){DCCItems.openPicker()}else{addInvRow()}" title="Add items from the catalog">+ Items</button>
-      </div>
-    </div>
-    <div class="dl-coins">
+<div class="dl-coins">
       <label class="dl-coin"><span>Gold</span><input type="text" inputmode="numeric" id="f-gold" class="inv-pin-in" data-nolock placeholder="0" oninput="scheduleAutosave()"></label>
       <label class="dl-coin"><span>Misc. Junk</span><input type="text" inputmode="numeric" id="f-junk" class="inv-pin-in" data-nolock placeholder="0" title="Amount of Misc. Junk (a crafting currency)" oninput="scheduleAutosave()"></label>
     </div>
+        <button class="tab-tool-btn solid" onclick="if(window.DCCItems){DCCItems.openPicker()}else{addInvRow()}" title="Add items from the catalog">+ Items</button>
+      </div>
+    </div>
+    <div class="dl-head iv-grid"><span></span><span class="dh-name">Name</span><span class="dh-num">Qty</span><span class="dh-ctrl"></span></div>
     <table class="dcc-list iv-list">
       <tbody id="inv-body"></tbody>
     </table>
@@ -1630,17 +1630,17 @@ function addSkillRow() {
   const tbody = document.getElementById('skills-body');
   const tr = document.createElement('tr');
   // DOM order of the text inputs is load-bearing: [name, rank, checkType, notes].
-  tr.innerHTML = `<td class="dl-cell"><div class="dl-row">
+  tr.innerHTML = `<td class="dl-cell"><div class="dl-row sk-grid">
     <button class="hot-pin" onclick="dccSkillRadial(this)" title="Pin spell to Hotlist" aria-label="Pin spell to Hotlist">○</button>
     <div class="dl-main">
       <div class="dl-line">
         <input type="text" class="dl-name" placeholder="Skill name...">
-        <label class="dl-rank" title="Rank"><span>Rank</span><input type="text" placeholder="0" inputmode="numeric"></label>
+        <label class="dl-rank" title="Rank"><input type="text" placeholder="0" inputmode="numeric"></label>
       </div>
       <div class="dl-sub">
-        <select class="skill-stat-sel dl-stat" title="Linked Stat"><option value="">—</option><option value="str">STR</option><option value="int">INT</option><option value="con">CON</option><option value="dex">DEX</option><option value="cha">CHA</option></select>
-        <input type="text" class="dl-check" placeholder="Active / Passive" title="Check type">
-        <input type="text" class="dl-notes" placeholder="Notes &amp; upgrades…" title="Notes &amp; upgrades">
+        <select class="skill-stat-sel dl-stat" title="Linked Stat (unlock the sheet to change)"><option value="">—</option><option value="str">STR</option><option value="int">INT</option><option value="con">CON</option><option value="dex">DEX</option><option value="cha">CHA</option></select>
+        <span class="dl-dot">·</span><input type="text" class="dl-check" placeholder="Active / Passive" title="Check type">
+        <span class="dl-dot">·</span><input type="text" class="dl-notes" placeholder="Notes &amp; upgrades…" title="Notes &amp; upgrades">
       </div>
     </div>
     <div class="dl-ctrls">
@@ -1650,6 +1650,7 @@ function addSkillRow() {
     </div>
   </div></td>`;
   tbody.appendChild(tr);
+  if(typeof window.applySheetLock === 'function') window.applySheetLock();   // new rows honour the lock
 }
 
 function buildSkills() { /* no blank rows — skills are learned from the + Skills picker */ }
@@ -1729,12 +1730,12 @@ function addInvRow() {
   const tbody = document.getElementById('inv-body');
   const tr = document.createElement('tr');
   // DOM order of the text inputs is load-bearing: [item, qty, notes].
-  tr.innerHTML = `<td class="dl-cell"><div class="dl-row">
+  tr.innerHTML = `<td class="dl-cell"><div class="dl-row iv-grid">
     <button class="hot-pin" onclick="if(window.DCCEquip)DCCEquip.click(this);else if(window.DCCHotlist)DCCHotlist.toggleRow(this)" title="Equip / Hotlist" aria-label="Equip or Hotlist">○</button>
     <div class="dl-main">
       <div class="dl-line">
         <input type="text" class="dl-name" data-nolock placeholder="Item name...">
-        <label class="dl-qty" title="Quantity"><span>×</span><input type="text" data-nolock placeholder="1" inputmode="numeric"></label>
+        <label class="dl-qty" title="Quantity"><input type="text" data-nolock placeholder="1" inputmode="numeric"></label>
       </div>
       <div class="dl-sub"><input type="text" class="dl-notes" data-nolock placeholder="Notes…" title="Notes"></div>
     </div>
@@ -1812,21 +1813,22 @@ function turnBuildOpts(){
   const hslots = [...document.querySelectorAll('#hotlist-grid textarea')];
   hslots.forEach((ta, si) => {
     const h = String(ta.value || '').trim(); if(!h) return;
-    const nm = h.split(/\s×|\s—\s/)[0].trim(), rest = h.split(/\s—\s/)[1] || '';
+    const { name: label, rest } = turnHotSplit(h);
+    const nm = label.replace(/\s[×x]\s?\d+\s*$/, '').trim();
     const r = rows.find(x => norm(x.name) === norm(nm) || norm(x.tr.dataset.src) === norm(nm));
     if(r && (r.spell || r.dice)) {
       const heal = isFixedSkill(r.tr.dataset.src || '') || isFixedSkill(r.name);
       add('hotlist', { name: r.name, kind: r.dice ? 'attack' : 'other', slot: si,
         sub: r.dice ? turnHitStr(r) + ' to hit · ' + r.dice + (r.stat ? ' +' + r.stat.toUpperCase() : '') + ' dmg' + (r.mana ? ' · ' + r.mana + ' Mana' : '')
-                    : (heal ? 'Restore 2 Health Bar slots · ' : '') + (r.mana ? r.mana + ' Mana' : 'No Mana cost'),
+                    : (noteSansDmg(rest) || ((heal ? 'Restore 2 Health Bar slots · ' : '') + (r.mana ? r.mana + ' Mana' : ''))),
         blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
         btn: 'Cast', run: () => turnRollRow(r) });
       return;
     }
     const potion = /potion/i.test(h);
     const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
-    add('hotlist', { name: h.split(/\s—\s/)[0], kind: 'other', slot: si,
-      sub: (rest || 'Hotlist item') + (sick ? ' · ⚠ potion last turn — Potion Sickness' : ''),
+    add('hotlist', { name: label, kind: 'other', slot: si,
+      sub: rest,
       btn: 'Use', run: () => {
         addLog('Use Hotlist Item', nm, h, 'normal');
         if(potion) {
@@ -1910,6 +1912,16 @@ function turnAddDebuff(name, why){
   }
   addLog('Debuff: ' + name, 'gained', why || '', 'fumble');
 }
+// "Healing Potion ×3 — heals 3" → name "Healing Potion ×3", rest "heals 3". Splits at the
+// first " — ", " – ", " - ", ": " or " (" so the card's main line is just the name.
+function turnHotSplit(h){
+  h = String(h || '').trim();
+  const m = h.match(/\s[—–-]\s|:\s|\s\(/);
+  if(!m) return { name: h, rest: '' };
+  const name = h.slice(0, m.index).trim();
+  let rest = h.slice(m.index).trim().replace(/^[—–:-]\s*/, '');
+  return { name: name || h, rest: rest };
+}
 function turnUnpin(slot){
   const ta = document.querySelectorAll('#hotlist-grid textarea')[slot]; if(!ta) return;
   ta.value = '';
@@ -1934,20 +1946,31 @@ function renderTurn(){
     const can = !o.blocked && turnCan(o.kind);
     const btns = o.btns ? o.btns.map((b, j) => `<button class="tc-do" onclick="turnDo(${o.i},${j})">${turnEsc(b[0])}</button>`).join('')
                         : `<button class="tc-do" onclick="turnDo(${o.i})">${turnEsc(o.btn || 'Use')}</button>`;
-    return `<div class="turn-card${can ? '' : ' disabled'}"><div class="tc-main"><div class="tc-name">${turnEsc(o.name)}</div><div class="tc-sub">${turnEsc(o.blocked ? o.blocked + ' · ' + o.sub : o.sub)}</div></div>${btns}</div>`;
+    const subTxt = [o.blocked, o.sub].filter(Boolean).join(' · ');
+    return `<div class="turn-card${can ? '' : ' disabled'}"><div class="tc-main"><div class="tc-name">${turnEsc(o.name)}</div>${subTxt ? `<div class="tc-sub">${turnEsc(subTxt)}</div>` : ''}</div>${btns}</div>`;
   };
   const sec = (key, title, list, empty) => {
     const col = !!_turnCollapsed[key];
     return `<div class="turn-sec${col ? ' collapsed' : ''}"><div class="turn-sec-hd" onclick="turnToggleSec('${key}')"><span class="tsh-caret">▼</span><span class="tsh-title">${title}</span></div>
       <div class="turn-sec-body">${list.length ? list.map(card).join('') : `<div class="turn-empty">${empty}</div>`}</div></div>`;
   };
+  // The Mana inputs are a static node: lift them out before the re-render wipes the
+  // hub, then drop them back into row 2 (so they keep their value and listeners).
+  const manaEl = document.getElementById('turn-mana');
+  if(manaEl && manaEl.parentNode) manaEl.parentNode.removeChild(manaEl);
+  const potionHot = _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
+  const badges = potionHot ? `<span class="turn-badge warn" title="You drank a potion this turn or last — another one now causes Potion Sickness (Core p.99)">⚠ Potion Sickness risk</span>` : '';
   host.innerHTML = `
     <div class="turn-top">
       <div class="turn-row1">
         <div class="turn-econ">${pips}</div>
-        <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft</span>
         <button class="turn-mini" onclick="turnSpendAiFavor()" ${_turn.aiSpent || ai < 1 ? 'disabled' : ''} title="Once per turn: spend 1 AI Favor (you have ${ai}) for an extra non-Attack Action">+1 Action</button>
         <button class="turn-end-btn" onclick="endTurn()" title="Clear this turn's Actions and take any damage-over-time from Debuffs">End Turn</button>
+      </div>
+      <div class="turn-row2">
+        <span id="turn-mana-slot"></span>
+        <div class="turn-badges">${badges}</div>
+        <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft</span>
       </div>
     </div>
     ${sec('hotlist', 'Hotlist', O.hotlist, 'Nothing on your Hotlist. Pin spells with the ○ dot on the Skills tab, or items with the ○ dot on the Inventory tab (up to 10).')}
@@ -1955,6 +1978,8 @@ function renderTurn(){
     ${sec('interrupts', 'Interrupts', O.interrupts, '')}
     ${sec('actions', 'Actions', O.actions, '')}
     ${sec('checks', 'Use a Skill', O.checks, 'No other active skills.')}`;
+  const slot = document.getElementById('turn-mana-slot');
+  if(slot && manaEl) slot.replaceWith(manaEl);
 }
 // Keep the hub current while it's open.
 let _turnRenderT = null;
@@ -1964,7 +1989,10 @@ function turnMaybeRender(){
   clearTimeout(_turnRenderT); _turnRenderT = setTimeout(renderTurn, 150);
 }
 ['input', 'change'].forEach(ev => document.addEventListener(ev, e => {
-  if(e.target && e.target.closest && e.target.closest('#skills-body,#hotlist-grid,#dr-aifavor,#mana-current,#evade-move,#evade-step,#stats-col,.stats-col')) turnMaybeRender();
+  // Mana: re-render on change (blur), not on every keystroke — the hub re-render
+  // moves the Mana node, which would drop focus mid-typing.
+  if(ev === 'change' && e.target && e.target.id === 'mana-current') { turnMaybeRender(); return; }
+  if(e.target && e.target.closest && e.target.closest('#skills-body,#hotlist-grid,#dr-aifavor,#evade-move,#evade-step,#stats-col,.stats-col')) turnMaybeRender();
 }));
 
 // ── TABS ──
@@ -4174,6 +4202,63 @@ autoLoad();
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
 <style id="dcc-turn-style">
+/* ── v3 polish: grid rows (name+sub on the left, Rank/Qty column inline with the controls) ── */
+.dcc-list .dl-row{display:grid;align-items:center;column-gap:8px;row-gap:1px;padding:6px 4px;}
+.dl-row .dl-main,.dl-row .dl-line{display:contents;}
+.sk-grid{display:grid;grid-template-columns:22px minmax(0,1fr) 44px 118px;grid-template-areas:"pin name num ctrl" "pin sub num ctrl";column-gap:8px;}
+.iv-grid{display:grid;grid-template-columns:22px minmax(0,1fr) 44px 62px;grid-template-areas:"pin name num ctrl" "pin sub num ctrl";column-gap:8px;}
+.dl-row>.hot-pin{grid-area:pin;align-self:center;}
+.dl-row .dl-name{grid-area:name;}
+.dl-row .dl-rank,.dl-row .dl-qty{grid-area:num;align-self:center;justify-self:center;}
+.dl-row .dl-sub{grid-area:sub;}
+.dl-row .dl-ctrls{grid-area:ctrl;align-self:center;justify-content:flex-end;}
+.dl-head{padding:6px 4px 4px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);grid-template-areas:"pin name num ctrl";}
+.dl-head .dh-num{text-align:center;}
+.dl-head .dh-ctrl{text-align:right;}
+/* Rank / Qty read as a plain number while locked; a box only when editable */
+.dl-rank input,.dl-qty input{width:40px;}
+.dl-rank input[readonly]{border-color:transparent!important;background:transparent!important;font-size:17px;}
+/* sub-line reads as one run: Stat · Check · Notes, each sized to its text */
+.dcc-list .dl-sub{gap:5px;}
+.dcc-list .dl-sub select.dl-stat,.dcc-list .dl-sub .dl-check{field-sizing:content;flex:0 0 auto!important;width:auto;min-width:2ch;max-width:14ch;}
+.dcc-list .dl-sub select.dl-stat.lk-ro-sel{pointer-events:none;-webkit-appearance:none;appearance:none;background-image:none!important;}
+.dcc-list .dl-sub select.dl-stat{-webkit-appearance:none;appearance:none;}
+body.sheet-unlocked .dcc-list .dl-sub select.dl-stat{border-bottom:1px dashed var(--rule);}
+.dl-dot{color:var(--rule);font-size:11px;flex:0 0 auto;}
+.dl-dot:has(+ input:placeholder-shown[readonly]){display:none;}
+/* header bar: Sort on the left, tools right */
+.tab-head .sort-sel{margin-right:auto;}
+.dl-coins{justify-content:flex-end;}
+/* Turn header: row 1 actions · row 2 Mana / badges / Movement */
+.turn-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
+.turn-row2 .turn-mana{padding:0;background:transparent;}
+.turn-row2 .turn-stat{margin-left:auto;}
+.turn-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.turn-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:2px 9px;border:1px solid var(--rule);color:var(--muted);}
+.turn-badge.warn{border-color:#c98a12;color:#9a6508;background:rgba(232,170,40,.14);}
+body.dark .turn-badge.warn{color:#f0c060;}
+.turn-row1 .turn-mini{margin-left:auto;}
+/* Mobile: tabs wrap two per row (like D&D); sections reorder */
+@media (max-width:600px){
+  .tabs-row{display:flex!important;flex-wrap:wrap!important;overflow:visible!important;}
+  .tab-btn{flex:1 1 45%!important;white-space:nowrap!important;padding:11px 4px!important;font-size:13px!important;min-width:0!important;}
+  .sk-grid{grid-template-columns:20px minmax(0,1fr) 40px 112px;}
+  .iv-grid{grid-template-columns:20px minmax(0,1fr) 40px 70px;}
+  .dl-head .dh-ctrl{font-size:8px;}
+}
+@media (max-width:1024px){
+  .body-row{display:flex;flex-direction:column;gap:14px;}
+  .body-row>.stats-col,.body-row>.center-col,.center-col>.def-row{display:contents;}
+  .hp-section{order:1;}
+  .def-card{order:2;}
+  .stats-card{order:3;}
+  .side-stack{order:4;display:flex!important;flex-direction:row!important;gap:14px;}
+  .side-stack>.mini-card{flex:1 1 0;}
+  .buffs-card{order:5;}
+  .debuffs-card{order:6;}
+  .center-col>.tabs-card{order:7;}
+}
+
 /* ── Layout: Movement + AI Favor beside Defense; tabs below; Buffs / Debuffs under Stats ── */
 .def-row>.side-stack{flex:0 0 auto;display:flex;flex-direction:row;gap:14px;min-width:0;}
 .def-row>.side-stack>.mini-card{min-width:150px;}
@@ -4200,7 +4285,7 @@ autoLoad();
 .tab-tool-btn.solid:hover{filter:brightness(1.1);}
 .tab-head .sort-sel{border-radius:7px;padding:5px 6px;}
 /* coins row */
-.dl-coins{display:flex;gap:10px;align-items:center;padding:6px 2px 8px;border-bottom:1px solid var(--rule);flex-wrap:wrap;}
+.dl-coins{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .dl-coin{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
 .dl-coin input{width:72px;height:26px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:var(--red);text-align:center;outline:none;}
 /* ── Card-style rows (Skills / Inventory) ── */
@@ -4307,7 +4392,6 @@ body.dark .dcc-list input.dl-name{color:var(--ink);}
 .turn-card.disabled .tc-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
 .turn-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
 @media (max-width:600px){ .turn-card .tc-do{padding:9px 12px;font-size:12px;} .turn-econ{flex-basis:100%;} .turn-row1 .turn-stat{margin-right:auto;} }
-@media (max-width:600px){ .tabs-row{overflow-x:auto!important;scrollbar-width:none;} .tabs-row::-webkit-scrollbar{display:none;} .tab-btn{flex:0 0 auto!important;white-space:nowrap!important;padding:12px 12px!important;font-size:13px!important;} }
 </style>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}

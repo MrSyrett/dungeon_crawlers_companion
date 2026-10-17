@@ -204,7 +204,7 @@
     var nameJs = '\'' + jsq(e.kind) + '\',\'' + jsq(e.name) + '\'';
     var action = learned
       ? '<button class="dccs-act un" onclick="DCCSkills.unlearn(\'' + jsq(e.name) + '\')" title="Remove from your Skills">Unlearn</button>'
-      : '<button class="dccs-act" onclick="DCCSkills.pick(' + nameJs + ')" title="Add to your Skills — rename it first if you like">Learn</button>';
+      : '<button class="dccs-act" onclick="DCCSkills.learn(' + nameJs + ')" title="Add to your Skills">Learn</button>';
     return '<div class="dccs-item' + (open ? " open" : "") + (addOpen ? " adding" : "") + (learned ? " learned" : "") + '">' +
       '<div class="row">' +
         '<div class="body" onclick="DCCSkills.toggle(' + nameJs + ')" title="What does it do?">' +
@@ -213,7 +213,7 @@
         '</div>' +
         '<button class="dccs-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCSkills.toggle(' + nameJs + ')">i</button>' +
         action +
-      '</div>' + (learned ? "" : addBar) + detail +
+      '</div>' + detail +
     '</div>';
   }
   function renderPicker() {
@@ -256,7 +256,7 @@
         '<div class="dccs-search"><input id="dccs-search-input" type="search" placeholder="Search skills &amp; spells…" value="' + attr(query) + '" oninput="DCCSkills.search(this.value)"></div>' +
         '<div class="dccs-filters">' + chips + '</div>' +
         '<div class="dccs-list">' + rows + '</div>' +
-        '<div class="dccs-foot"><input id="dccs-custom" type="text" placeholder="Custom skill name…" onkeydown="if(event.key===\'Enter\')DCCSkills.learnCustom()"><button class="dccs-btn" onclick="DCCSkills.learnCustom()">Learn custom</button></div>' +
+        '<div class="dccs-hint">Need a renamed or custom skill? Make it in Homebrew and it shows up here.</div>' +
       '</div>';
     var newList = ov.querySelector(".dccs-list");
     if (newList) newList.scrollTop = savedScroll;
@@ -441,6 +441,12 @@
   }
 
   window.DCCSkills = {
+    learn: function (kind, name) {
+      var e = entries().find(function (x) { return x.kind === kind && x.name === name; }) || lookup(name);
+      if (!e || findSkillRow(e.name)) { renderPicker(); return; }
+      addToSheet(e.name, e);
+      renderPicker();
+    },
     unlearn: function (name) {
       var k = String(name || "").trim().toLowerCase();
       [].slice.call(document.querySelectorAll("#skills-body tr")).filter(function (tr) {
