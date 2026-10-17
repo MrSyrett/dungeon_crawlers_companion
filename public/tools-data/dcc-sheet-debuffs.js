@@ -198,7 +198,10 @@
     add.title = "Add a debuff from the rulebook";
     add.setAttribute("aria-label", add.title);
     add.addEventListener("click", openPicker);
-    el.parentNode.appendChild(add);
+    // In its own card the ＋ sits in the section header, right-aligned.
+    var bar = el.closest && el.closest(".cond-card") ? el.closest(".cond-card").querySelector(".section-bar") : null;
+    if (bar) { bar.classList.add("has-add"); bar.appendChild(add); }
+    else el.parentNode.appendChild(add);
     // chips sit inline, to the RIGHT of the ＋ button (they wrap; info drops below)
     var chips = document.createElement("div");
     chips.id = "dccd-chips";

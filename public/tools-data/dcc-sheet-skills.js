@@ -125,6 +125,12 @@
       ".dccs-addbar{display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid #2a2a2e;}",
       ".dccs-rename{flex:1;min-width:0;background:#0e0e10;border:1px solid #2a2a2e;border-radius:6px;color:#ece9e1;padding:7px 9px;font-size:13px;font-family:inherit;}",
       ".dccs-rename:focus{outline:none;border-color:#b82018;}",
+      ".dccs-act{flex:0 0 auto;border:1px solid #b82018;background:#b82018;color:#fff;border-radius:6px;padding:4px 11px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;}",
+      ".dccs-act:hover{filter:brightness(1.12);}",
+      ".dccs-act.un{background:transparent;color:#f0a8a3;border-color:#3a3a40;}",
+      ".dccs-act.un:hover{border-color:#b82018;}",
+      ".dccs-item.learned{border-color:#3d3524;background:#17150f;}",
+      ".dccs-tag{display:inline-block;margin-left:6px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#e6c15a;border:1px solid #5a4a1e;border-radius:4px;padding:0 5px;vertical-align:1px;}",
       ".dccs-hint{padding:9px 18px 16px;font-size:11px;color:#8a8a93;text-align:center;}",
       // info panel
       ".dccs-info .ef{color:#e6e3da;font-size:13px;line-height:1.55;margin-top:8px;}",
@@ -157,11 +163,12 @@
 
   // ── picker ────────────────────────────────────────────────────────────────────
   var query = "";
-  var filterKind = "all";   // 'all' | 'utility' | 'attack' | 'spell'
+  var filterKind = "all";   // 'all' | 'learned' | 'utility' | 'attack' | 'spell'
   var expanded = {};        // kind:name -> inline detail open in the picker
   var adding = null;        // kind:name -> rename/confirm bar open (only one at a time)
   var FILTERS = [
     { key: "all", label: "All" },
+    { key: "learned", label: "Learned" },
     { key: "utility", label: "Utility" },
     { key: "attack", label: "Attack" },
     { key: "spell", label: "Spells" },
@@ -179,6 +186,7 @@
   function closePicker() { var ov = document.getElementById("dccs-overlay"); if (ov) ov.style.display = "none"; query = ""; expanded = {}; adding = null; }
   function itemHtml(e) {
     var k = ekey(e);
+    var learned = !!findSkillRow(e.name);
     var open = !!expanded[k];
     var addOpen = adding === k;
     var detail = open
@@ -190,17 +198,22 @@
       ? '<div class="dccs-addbar">' +
           '<input class="dccs-rename" type="text" value="' + attr(e.name) + '" data-kind="' + attr(e.kind) + '" data-name="' + attr(e.name) + '" ' +
           'onkeydown="if(event.key===\'Enter\')DCCSkills.confirmAdd(this)">' +
-          '<button class="dccs-btn" onclick="DCCSkills.confirmAdd(this.previousElementSibling)">Add to sheet</button>' +
+          '<button class="dccs-btn" onclick="DCCSkills.confirmAdd(this.previousElementSibling)">Learn</button>' +
         '</div>'
       : "";
-    return '<div class="dccs-item' + (open ? " open" : "") + (addOpen ? " adding" : "") + '">' +
+    var nameJs = '\'' + jsq(e.kind) + '\',\'' + jsq(e.name) + '\'';
+    var action = learned
+      ? '<button class="dccs-act un" onclick="DCCSkills.unlearn(\'' + jsq(e.name) + '\')" title="Remove from your Skills">Unlearn</button>'
+      : '<button class="dccs-act" onclick="DCCSkills.pick(' + nameJs + ')" title="Add to your Skills — rename it first if you like">Learn</button>';
+    return '<div class="dccs-item' + (open ? " open" : "") + (addOpen ? " adding" : "") + (learned ? " learned" : "") + '">' +
       '<div class="row">' +
-        '<div class="body" onclick="DCCSkills.pick(\'' + jsq(e.kind) + '\',\'' + jsq(e.name) + '\')" title="Add to your skills — rename it first if you like">' +
-          '<div class="nm">' + esc(e.name) + '</div>' +
+        '<div class="body" onclick="DCCSkills.toggle(' + nameJs + ')" title="What does it do?">' +
+          '<div class="nm">' + esc(e.name) + (learned ? ' <span class="dccs-tag">Learned</span>' : '') + '</div>' +
           '<div class="mt">' + esc(metaLine(e)) + '</div>' +
         '</div>' +
-        '<button class="dccs-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCSkills.toggle(\'' + jsq(e.kind) + '\',\'' + jsq(e.name) + '\')">i</button>' +
-      '</div>' + addBar + detail +
+        '<button class="dccs-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCSkills.toggle(' + nameJs + ')">i</button>' +
+        action +
+      '</div>' + (learned ? "" : addBar) + detail +
     '</div>';
   }
   function renderPicker() {
@@ -220,6 +233,16 @@
     var showU = filterKind === "all" || filterKind === "utility";
     var showA = filterKind === "all" || filterKind === "attack";
     var showS = filterKind === "all" || filterKind === "spell";
+    if (filterKind === "learned") {
+      var mine = sheetSkills().filter(function (r) { return !q || r.name.toLowerCase().indexOf(q) >= 0; });
+      rows = mine.length ? '<div class="dccs-grp">On your sheet</div>' + mine.map(function (r) {
+        var e = lookup(r.src) || lookup(r.name);
+        return '<div class="dccs-item learned"><div class="row"><div class="body"><div class="nm">' + esc(r.name) + (r.rank !== "" ? ' <span class="dccs-tag">Rank ' + esc(r.rank) + '</span>' : '') + '</div>' +
+          '<div class="mt">' + esc(e ? metaLine(e) : "Custom skill") + '</div></div>' +
+          '<button class="dccs-act un" onclick="DCCSkills.unlearnRow(' + r.idx + ')">Unlearn</button></div></div>';
+      }).join("") : '<div class="dccs-grp">No skills on your sheet yet.</div>';
+      showU = showA = showS = false;
+    }
     if (showU && util.length) rows += '<div class="dccs-grp">Utility Skills</div>' + util.map(itemHtml).join("");
     if (showA && atk.length) rows += '<div class="dccs-grp">Attack Skills</div>' + atk.map(itemHtml).join("");
     if (showS && spells.length) rows += '<div class="dccs-grp">Spells</div>' + spells.map(itemHtml).join("");
@@ -229,11 +252,11 @@
     }).join("");
     ov.innerHTML =
       '<div class="dccs-modal" role="dialog" aria-label="Add a skill or spell">' +
-        '<div class="dccs-head"><h3>Add a Skill or Spell</h3><button class="dccs-x" onclick="DCCSkills.closePicker()" aria-label="Close">✕</button></div>' +
+        '<div class="dccs-head"><h3>Skills &amp; Spells</h3><button class="dccs-x" onclick="DCCSkills.closePicker()" aria-label="Close">✕</button></div>' +
         '<div class="dccs-search"><input id="dccs-search-input" type="search" placeholder="Search skills &amp; spells…" value="' + attr(query) + '" oninput="DCCSkills.search(this.value)"></div>' +
         '<div class="dccs-filters">' + chips + '</div>' +
         '<div class="dccs-list">' + rows + '</div>' +
-        '<div class="dccs-hint">Tap a skill to rename &amp; add it · tap the “i” for details</div>' +
+        '<div class="dccs-foot"><input id="dccs-custom" type="text" placeholder="Custom skill name…" onkeydown="if(event.key===\'Enter\')DCCSkills.learnCustom()"><button class="dccs-btn" onclick="DCCSkills.learnCustom()">Learn custom</button></div>' +
       '</div>';
     var newList = ov.querySelector(".dccs-list");
     if (newList) newList.scrollTop = savedScroll;
@@ -328,6 +351,7 @@
     var inputs = tr.querySelectorAll('input[type="text"]'); // [name, rank, checkType, notes]
     var sel = tr.querySelector("select");
     if (inputs[0]) inputs[0].value = name;
+    if (inputs[1] && !String(inputs[1].value).trim()) inputs[1].value = "0";   // newly learned → Rank 0
     if (e) {
       tr.dataset.src = e.name;   // remember the rulebook original so a rename still looks it up
       if (sel && e.stat) sel.value = String(e.stat).toLowerCase();
@@ -393,7 +417,52 @@
     return tr;
   }
 
+  // Skills currently on the sheet (named rows), with their row index for Unlearn.
+  function sheetSkills() {
+    return [].slice.call(document.querySelectorAll("#skills-body tr")).map(function (tr, idx) {
+      var t = tr.querySelectorAll('input[type="text"]');
+      return { idx: idx, tr: tr, name: t[0] ? String(t[0].value).trim() : "", rank: t[1] ? String(t[1].value).trim() : "", src: tr.dataset && tr.dataset.src ? tr.dataset.src : "" };
+    }).filter(function (r) { return r.name; });
+  }
+  // Unlearning a skill also takes it off the Hotlist.
+  function removeRow(tr) {
+    if (!tr) return;
+    var t = tr.querySelector('input[type="text"]');
+    var nm = t ? String(t.value).trim().toLowerCase() : "";
+    tr.remove();
+    if (nm) [].slice.call(document.querySelectorAll("#hotlist-grid textarea")).forEach(function (ta) {
+      var v = String(ta.value || "").trim(); var head = v.split(/\s×|\s—\s/)[0].trim().toLowerCase();
+      if (head === nm) { ta.value = ""; fireInput(ta); }
+    });
+    try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (_) {}
+    syncDamage();
+    try { if (typeof scheduleAutosave === "function") scheduleAutosave(); } catch (_) {}
+    try { if (typeof renderTurn === "function") renderTurn(); } catch (_) {}
+  }
+
   window.DCCSkills = {
+    unlearn: function (name) {
+      var k = String(name || "").trim().toLowerCase();
+      [].slice.call(document.querySelectorAll("#skills-body tr")).filter(function (tr) {
+        var t = tr.querySelector('input[type="text"]');
+        return (t && String(t.value).trim().toLowerCase() === k) || (tr.dataset.src || "").toLowerCase() === k;
+      }).forEach(removeRow);
+      renderPicker();
+    },
+    unlearnRow: function (idx) {
+      var tr = document.querySelectorAll("#skills-body tr")[idx];
+      removeRow(tr); renderPicker();
+    },
+    learnCustom: function () {
+      var inp = document.getElementById("dccs-custom"); if (!inp) return;
+      var name = String(inp.value || "").trim(); if (!name) return;
+      var e = lookup(name);
+      if (e && findSkillRow(e.name)) { inp.value = ""; renderPicker(); return; }
+      addToSheet(e ? e.name : name, e || null);
+      var tr = findSkillRow(e ? e.name : name);
+      if (tr && !e) { var t = tr.querySelectorAll('input[type="text"]'); if (t[1] && !t[1].value) t[1].value = "0"; if (t[2] && !t[2].value) t[2].value = "Active"; fireInput(t[0]); }
+      inp.value = ""; renderPicker();
+    },
     isAttackSkillRow: isAttackSkillRow,
     isAttackEntry: function (name) { return isAttackEntry(lookup(name)); },
     ensureWeaponSkill: ensureWeaponSkill,

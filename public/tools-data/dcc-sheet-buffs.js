@@ -225,7 +225,10 @@
     add.title = "Add a buff from the rulebook";
     add.setAttribute("aria-label", add.title);
     add.addEventListener("click", openPicker);
-    el.parentNode.appendChild(add);
+    // In its own card the ＋ sits in the section header, right-aligned.
+    var bar = el.closest && el.closest(".cond-card") ? el.closest(".cond-card").querySelector(".section-bar") : null;
+    if (bar) { bar.classList.add("has-add"); bar.appendChild(add); }
+    else el.parentNode.appendChild(add);
     var chips = document.createElement("div");
     chips.id = "dccb-chips";
     chips.className = "dccb-chips";
