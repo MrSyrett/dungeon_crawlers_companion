@@ -8049,17 +8049,25 @@ function init_trackers(root) {
     }).join('');
     return `<div class="cc-abils">${inner}</div>`;
   }
-  // Attack rows. list: [{ name, ex?, hit?, dmg?, roll?, rolllabel? }]
+  // Attack rows. list: [{ name, ex?, hit?, dmg?, note?, kind?, table?, roll?, rolllabel? }]
+  // hit/dmg → one attack button (.npc-mon-attack: d20 to-hit + damage, or damage
+  // alone with a save note, or a system roller named by `kind`); a bare roll →
+  // .npc-mon-roll (kind picks the system roller: a pool, the Alien table…).
   function ccAtks(list) {
     const cs = (list || []).filter(Boolean);
     if(!cs.length) return '';
     const rows = cs.map(a => {
       let btn = '';
+      const kindAttr = a.kind ? ` data-kind="${escAttr(a.kind)}"` : '';
+      const noteAttr = a.note ? ` data-note="${escAttr(a.note)}"` : '';
       if(a.hit || a.dmg) {
-        const face = [a.hit, a.dmg].filter(Boolean).join(' / ');
-        btn = `<button class="cc-atk-roll npc-mon-attack" data-hit="${escAttr(a.hit || '')}" data-dmg="${escAttr(a.dmg || '')}" data-atkname="${escAttr(a.name || 'attack')}" title="Roll attack and damage">\u{1F3B2} ${escAttr(face)}</button>`;
+        const face = a.hit ? [a.hit, a.dmg].filter(Boolean).join(' / ') : [a.note, a.dmg].filter(Boolean).join(' · ');
+        const what = a.kind === 'nim' ? 'Roll damage (a 1 on the first die misses; its top face crits)'
+          : a.hit ? 'Roll attack and damage' + (a.note ? ' (' + a.note + ')' : '') : 'Roll damage' + (a.note ? ' — ' + a.note : '');
+        btn = `<button class="cc-atk-roll npc-mon-attack" data-hit="${escAttr(a.hit || '')}" data-dmg="${escAttr(a.dmg || '')}" data-atkname="${escAttr(a.name || 'attack')}"${kindAttr}${noteAttr} title="${escAttr(what)}">\u{1F3B2} ${escAttr(face)}</button>`;
       } else if(a.roll) {
-        btn = `<button class="cc-atk-roll npc-mon-roll" data-roll="${escAttr(a.roll)}" data-rolllabel="${escAttr(a.rolllabel || a.name || 'roll')}" title="Roll ${escAttr(a.roll)}">\u{1F3B2} ${escAttr(a.roll)}</button>`;
+        const tableAttr = a.table ? ` data-table="${escAttr(JSON.stringify(a.table))}"` : '';
+        btn = `<button class="cc-atk-roll npc-mon-roll" data-roll="${escAttr(a.roll)}" data-rolllabel="${escAttr(a.rolllabel || a.name || 'roll')}"${kindAttr}${noteAttr}${tableAttr} title="Roll ${escAttr(a.roll)}${a.note ? ' — ' + escAttr(a.note) : ''}">\u{1F3B2} ${escAttr(a.roll)}</button>`;
       }
       // A generic fallback label ("Attack"/"Ability"/"Special") isn't a real title — the
       // content is the row text. So a titled entry shows its bold name + text; a titleless
@@ -8128,7 +8136,7 @@ function init_trackers(root) {
     const di = stats.findIndex(st => /^(def|defen[cs]e|ac|armou?r|evade|dodge|toughness)$/i.test(String(st.label || '')));
     if(di >= 0) { def = { l: stats[di].label, v: stats[di].val }; stats.splice(di, 1); }
     const abils = stats.map(st => ({ l: st.label, v: st.val, roll: st.roll || '', rolllabel: st.label }));
-    const atks = (g.lines || []).map(l => ({ name: l.label || '', ex: l.text || '', roll: l.roll || '', rolllabel: l.label }));
+    const atks = (g.lines || []).map(l => ({ name: l.label || '', ex: l.text || '', roll: l.roll || '', rolllabel: l.label, hit: l.hit || '', dmg: l.dmg || '', note: l.note || '', kind: l.kind || '', table: l.table || null }));
     // MMRPG has real game traits/tags (clickable chips) and powers — those keep their
     // own labelled sections. The descriptive notes render below as a read-aloud box.
     let chipSec = '', powerSec = '';
@@ -8148,6 +8156,19 @@ function init_trackers(root) {
     };
   }
   function monView(n) { return n.dmon ? dccView(n) : n.gmon ? xsView(n) : sdView(n); }
+
+  // Which dice-tray roller a card roll uses, by the creature's system. '' = the
+  // plain sum (d20 checks, damage, Ghostbusters pools, everything else).
+  function monRollKind(src, expr, hint) {
+    const e = String(expr || '').replace(/\s+/g, '');
+    if(hint === 'dmg') return '';
+    if(hint) return hint === 'ace' ? 'ace' : hint;
+    if(/^(yze|twd|vae|myz)$/.test(src) && /^\d+d6$/i.test(e)) return 'yz';
+    if(/^(sw|d62e)$/.test(src) && /^\d+d6(\+\d+)?$/i.test(e)) return 'wild';
+    if(src === 'ace' && /^\d+d6$/i.test(e)) return 'ace';
+    if(src === 'mmrpg' && /^3d6([+-]\d+)?$/i.test(e)) return 'd616';
+    return '';
+  }
 
 
   // Monster attack lines read like:
@@ -8401,23 +8422,34 @@ function init_trackers(root) {
         });
       });
     }
+    // Every roll on the card goes through the system's own dice: a dice pool in a
+    // Year Zero game counts sixes, D6 skills use the Wild Die, ACE! dice explode,
+    // Marvel rolls d616 — not a plain sum (see monRollKind / _monsterRoll).
+    const cardSrc = n.gmon ? (n.gmon.sys || n.gmon.src) : n.dmon ? 'dcc' : 'sd';
     card.querySelectorAll('.npc-mon-roll').forEach(b => {
       b.addEventListener('click', () => {
         const label = (n.name ? n.name + ' · ' : '') + (b.dataset.rolllabel || 'Roll');
+        const kind = monRollKind(cardSrc, b.dataset.roll, b.dataset.kind);
+        let table = null; try { table = b.dataset.table ? JSON.parse(b.dataset.table) : null; } catch(e) {}
+        if(kind && typeof window.rollMonsterToDiceTray === 'function' && window.rollMonsterToDiceTray({ kind: kind, label: label, roll: b.dataset.roll, note: b.dataset.note || '', table: table })) return;
         if(typeof window.rollToDiceTray === 'function') window.rollToDiceTray(label, b.dataset.roll);
       });
     });
     card.querySelectorAll('.npc-mon-attack').forEach(b => {
       b.addEventListener('click', () => {
         const label = (n.name ? n.name + ' · ' : '') + (b.dataset.atkname || 'attack');
-        const hit = b.dataset.hit || null, dmg = b.dataset.dmg || null;
+        const hit = b.dataset.hit || null, dmg = b.dataset.dmg || null, note = b.dataset.note || '';
         // DCC monsters don't roll to hit, and their "X+F" Evade DC stays hidden
-        // from players (the log is shared), so roll only the damage. SD monsters
-        // keep the d20 to-hit (rolled vs the player's AC).
+        // from players (the log is shared), so roll only the damage.
         if(n.hpMode === 'dcc') {
           if(typeof window.rollDccAttackToDiceTray === 'function') window.rollDccAttackToDiceTray(label, dmg);
+        } else if(b.dataset.kind === 'nim' && typeof window.rollMonsterToDiceTray === 'function') {
+          // Nimble: damage only — a 1 on the primary die misses, its top face crits.
+          window.rollMonsterToDiceTray({ kind: 'nimble', label: label, roll: dmg });
         } else if(typeof window.rollAttackToDiceTray === 'function') {
-          window.rollAttackToDiceTray(label, hit, dmg);
+          // d20 to-hit + damage (SD, D&D, LotR, ICRPG, JLU); with no to-hit, damage
+          // alone — the label then names the save ("DC 19 DEX").
+          window.rollAttackToDiceTray(label + (note && !/vs ARMOR/.test(note) ? ' · ' + note : ''), hit, dmg);
         }
       });
     });
@@ -8436,7 +8468,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd', 'vae', 'myz', 'lotr'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd', 'vae', 'myz', 'lotr', 'jlu'];
   // Map a system to its bestiary source. Unknown systems keep their own key (so
   // pickerMatches returns nothing and the picker says "No Combatants Found")
   // rather than silently falling back to the DCC bestiary.
@@ -11119,17 +11151,84 @@ function xsBestiary(src) {
   if(src === 'myz') return (typeof MYZ_BESTIARY !== 'undefined' || typeof MYZ_FACTIONS !== 'undefined') ? myzBestiary() : [];
   // LotR adversaries (D&D monster shape + group) plus any Nameless Things rolled this session.
   if(src === 'lotr') return ok(typeof LOTR_MONSTERS !== 'undefined' ? LOTR_MONSTERS : undefined).concat(Array.isArray(window.__lotrNamelessThings) ? window.__lotrNamelessThings : []);
+  if(src === 'jlu') return ok(typeof JLU_BESTIARY !== 'undefined' ? JLU_BESTIARY : undefined);
   return [];
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
 // group, D6 2e kind, ICRPG tier).
-function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : src === 'mmrpg' ? ('Rank ' + m.rank) : src === 'gb' ? (m.kind === 'ghost' ? 'Ghost' : 'NPC') : src === 'twd' ? (m._twdtype || '') : src === 'vae' ? (m._vaetype || '') : src === 'myz' ? (m._myztype || '') : (m.group || ''); }
+function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : src === 'mmrpg' ? ('Rank ' + m.rank) : src === 'gb' ? (m.kind === 'ghost' ? 'Ghost' : 'NPC') : src === 'twd' ? (m._twdtype || '') : src === 'vae' ? (m._vaetype || '') : src === 'myz' ? (m._myztype || '') : src === 'jlu' ? (m.role || '') : (m.group || ''); }
 function xsMonTypes(src) { return [...new Set(xsBestiary(src).map(m => xsMonType(src, m)).filter(Boolean))]; }
 // Star Wars die codes are stored as pips (3D+2 = 11).
 function swPipsCode(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p / 3), r = p % 3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); }
 function swPipsRoll(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p / 3), r = p % 3; return d ? d + 'd6' + (r ? '+' + r : '') : (r ? '' + r : ''); }
+// ── How a monster's attack rolls, per system (the Combat Tracker's buttons) ──
+// A summary line may carry { hit, dmg, note, kind } on top of { label, text, roll }:
+//   hit + dmg  → one d20 attack entry (to-hit and damage), e.g. D&D, ICRPG, JLU
+//   dmg + note → damage only, the note naming the save ("DC 19 DEX")
+//   kind       → a system-specific roller in the dice tray (Nimble damage,
+//                ACE! exploding pool, the Alien signature-attack table…)
+
+// D&D 5e (and the LotR adversaries, same shape): "Melee Weapon Attack: +4 to hit,
+// … Hit: 5 (1d6 + 2) slashing damage plus 7 (2d6) fire damage." → +4 / 1d6+2+2d6.
+// A save effect ("DC 19 Dexterity saving throw, taking 63 (18d6) fire damage")
+// rolls its damage and names the save. Only the first alternative of an "or" counts.
+function dndActionRoll(desc) {
+  const t = String(desc || '');
+  const h = /([+-]\s*\d+)\s*to hit/i.exec(t) || /Attack Roll:\s*([+-]\s*\d+)/i.exec(t);
+  const hit = h ? h[1].replace(/\s+/g, '') : '';
+  const at = t.search(/\bHit:\s*/i);
+  let clause = at >= 0 ? t.slice(at) : t;
+  clause = clause.split(/,?\s+or\s+\d+\s*\(/i)[0];
+  const groups = [];
+  clause.replace(/\((\d+d\d+(?:\s*[+-]\s*\d+)?)\)/gi, (all, g) => { groups.push(g.replace(/\s+/g, '')); return all; });
+  let dmg = groups.join('+');
+  if(!dmg) { const d = /(\d+d\d+(?:\s*[+-]\s*\d+)?)/i.exec(clause); if(d) dmg = d[1].replace(/\s+/g, ''); }
+  const dc = /DC\s*(\d+)\s*(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/i.exec(t);
+  return { hit: hit, dmg: dmg, note: dc ? 'DC ' + dc[1] + ' ' + dc[2].slice(0, 3).toUpperCase() : '' };
+}
+
+// ICRPG: a monster attacks with d20 + its stat bonus (vs the hero's ARMOR) and
+// deals EFFORT — Basic d4, Weapon d6, Gun d8, Magic/Energy d10, Ultimate d12 —
+// plus any Effort bonus. Bonuses come from its stats, or from ability lines like
+// "+5 STR, +3 all others" / "+6 STATS, +4 MAGIC EFFORT".
+function icrpgBonuses(m) {
+  const st = {}, eff = {};
+  let all = null, others = null;
+  if(m.stats && typeof m.stats === 'object') Object.keys(m.stats).forEach(k => { st[k.toUpperCase()] = +m.stats[k] || 0; });
+  (m.abilities || []).forEach(a => {
+    String(a).replace(/([+-]\d+)\s+(?:to\s+)?(all\s+others|all\s+rolls|all\s+stats|stats|all|STR|DEX|CON|INT|WIS|CHA|weapon\s+effort|magic\s+effort|ultimate\s+effort|effort|weapon|magic|ultimate)\b/gi, (x, n, k) => {
+      const v = +n, key = k.toLowerCase().replace(/\s+/g, ' ');
+      if(/^(str|dex|con|int|wis|cha)$/.test(key)) { if(st[key.toUpperCase()] == null) st[key.toUpperCase()] = v; }
+      else if(key === 'all others') others = v;
+      else if(/^(all rolls|all stats|stats|all)$/.test(key)) all = v;
+      else if(key === 'effort') eff.all = v;
+      else eff[key.split(' ')[0]] = v;
+      return x;
+    });
+  });
+  return { stat: k => (st[k] != null ? st[k] : all != null ? all : others != null ? others : 0), eff: kind => (eff[kind] != null ? eff[kind] : eff.all || 0) };
+}
+function icrpgAttackRoll(m, text) {
+  const t = String(text || '');
+  const B = icrpgBonuses(m);
+  const dice = /roll\s+(\d+d\d+)/i.exec(t);
+  let die = '', kind = '';
+  if(dice) die = dice[1].toLowerCase();
+  else if(/\bultimate\b/i.test(t)) { die = 'd12'; kind = 'ultimate'; }
+  else if(/\b(magic|energy)\b/i.test(t)) { die = 'd10'; kind = 'magic'; }
+  else if(/\bguns?\b/i.test(t)) { die = 'd8'; kind = 'gun'; }
+  else if(/\bweapon\b/i.test(t)) { die = 'd6'; kind = 'weapon'; }
+  else if(/\bbasic\b/i.test(t)) { die = 'd4'; kind = 'basic'; }
+  if(!die) return null;
+  const statKey = kind === 'magic' ? (B.stat('INT') >= B.stat('WIS') ? 'INT' : 'WIS')
+    : /\b(shoot|shot|arrow|bow|sling|spit|throw|hurl|gun|beam|ray|bolt)\b/i.test(t) ? 'DEX' : 'STR';
+  const hb = B.stat(statKey), eb = kind ? B.eff(kind) : 0;
+  const dmg = (/^\d/.test(die) ? die : '1' + die) + (eb ? (eb > 0 ? '+' : '') + eb : '');
+  return { hit: (hb >= 0 ? '+' : '') + hb, dmg: dmg, note: statKey + ' vs ARMOR' };
+}
+
 // A uniform description of a creature for the tracker card and generator card:
-//   { stats:[{label,val,roll?}], lines:[{label,text,roll?}], notes:[string], hp:number, tag:string }
+//   { stats:[{label,val,roll?}], lines:[{label,text,roll?, hit?,dmg?,note?,kind?}], notes:[string], hp:number, tag:string }
 function xsMonSummary(src, m) {
   const out = { stats: [], lines: [], notes: [], meta: [], hp: 10, tag: xsMonType(src, m) };
   if(src === 'ace') {
@@ -11138,13 +11237,17 @@ function xsMonSummary(src, m) {
     // Focuses are {stat, name} objects — render "Name (Stat)", not "[object Object]".
     const focusTxt = (m.focuses || []).map(f => typeof f === 'string' ? f : [f && f.name, (f && f.stat) ? '(' + f.stat + ')' : ''].filter(Boolean).join(' ')).filter(Boolean).join(', ');
     if(focusTxt) out.lines.push({ label: 'Focuses', text: focusTxt });
-    (m.attacks || []).forEach(a => out.lines.push({ label: a.name || 'Attack', text: [a.dice != null ? a.dice + ' dice' : '', a.damage != null ? a.damage + ' dmg' : '', a.note || ''].filter(Boolean).join(' · '), roll: a.dice ? a.dice + 'd6' : '' }));
+    // ACE! attacks roll a pool of exploding d6 (first die = Calamity Die) vs DEF;
+    // damage is the flat number on a hit.
+    (m.attacks || []).forEach(a => out.lines.push({ label: a.name || 'Attack', text: [a.dice != null ? a.dice + ' dice' : '', a.damage != null ? a.damage + ' dmg' : '', a.note || ''].filter(Boolean).join(' · '), roll: a.dice ? a.dice + 'd6' : '', kind: a.dice ? 'ace' : '', note: a.damage != null ? a.damage + ' damage on a hit' : '' }));
     out.notes = (m.notes || []).slice(); if(m.description) out.notes.unshift(m.description);
     out.hp = parseInt(m.health, 10) || 1;
   } else if(src === 'nim') {
     out.stats.push({ label: 'LV', val: String(m.level ?? '') }, { label: 'HP', val: m.hp != null ? String(m.hp) : (m.minion ? '1' : '') }, { label: 'Size', val: m.size || '' }, { label: 'Armor', val: m.armor || 'none' }, { label: 'Saves', val: m.saves || '' });
     if(m.legendary) out.stats.push({ label: 'Legendary', val: '✓' }); if(m.minion) out.stats.push({ label: 'Minion', val: '✓' });
-    (m.abilities || []).forEach(a => { const dm = /(\d+d\d+(?:\s*[+-]\s*\d+)?)/i.exec(a.text || ''); out.lines.push({ label: a.name || 'Ability', text: a.text || '', roll: dm ? dm[1].replace(/\s+/g, '') : '' }); });
+    // Nimble monsters don't roll to hit: they roll damage, a 1 on the primary
+    // (first) die is a miss and its top face crits (explodes).
+    (m.abilities || []).forEach(a => { const dm = /(\d+d\d+(?:\s*[+-]\s*\d+)?)/i.exec(a.text || ''); const r = dm ? dm[1].replace(/\s+/g, '') : ''; out.lines.push({ label: a.name || 'Ability', text: a.text || '', roll: r, dmg: r, kind: r ? 'nim' : '' }); });
     if(m.familyTrait) out.notes.push('Family trait: ' + m.familyTrait);
     out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : (m.minion ? 1 : 10);
   } else if(src === 'sw') {
@@ -11152,7 +11255,8 @@ function xsMonSummary(src, m) {
     [['Dexterity','DEX'],['Knowledge','KNO'],['Mechanical','MEC'],['Perception','PER'],['Strength','STR'],['Technical','TEC']].forEach(([k, l]) => { if(A[k] != null) out.stats.push({ label: l, val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
     if(m.move) out.stats.push({ label: 'Move', val: m.move });
     (m.skills || []).forEach(sk => { const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
-    (m.equipment || []).forEach(e => { const dm = /damage\s*(\d+D(?:\+\d)?)/i.exec(e); out.lines.push({ label: 'Gear', text: e, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
+    // Skill rolls use the Wild Die; weapon damage doesn't (kind 'dmg' = a plain sum).
+    (m.equipment || []).forEach(e => { const dm = /damage\s*(\d+D(?:\+\d)?)/i.exec(e); out.lines.push({ label: 'Gear', text: e, roll: dm ? dm[1].replace(/D/, 'd6') : '', kind: dm ? 'dmg' : '' }); });
     if(m.description) out.notes.push(m.description); if(m.notes) out.notes.push(m.notes);
     out.hp = 0;   // no hit points in D6 — the tracker card carries a wound track instead
   } else if(src === 'dnd' || src === 'lotr') {
@@ -11174,10 +11278,12 @@ function xsMonSummary(src, m) {
     ['damageResistances','damageImmunities','damageVulnerabilities','conditionImmunities'].forEach(k => { if(m[k]) out.lines.push({ label: k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).replace('Damage ', '').replace('Condition ', 'Cond. '), text: m[k] }); });
     const dmg = t => { const dm = /(\d+d\d+(?:\s*\+\s*\d+)?)/.exec(t || ''); return dm ? dm[1].replace(/\s+/g, '') : ''; };
     (m.traits || []).forEach(t => out.lines.push({ label: t.name || 'Trait', text: t.description || '' }));
-    (m.actions || []).forEach(a => out.lines.push({ label: a.name || 'Action', text: a.description || '', roll: dmg(a.description) }));
-    (m.bonusActions || []).forEach(a => out.lines.push({ label: 'Bonus — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
-    (m.reactions || []).forEach(a => out.lines.push({ label: 'Reaction — ' + (a.name || ''), text: a.description || '' }));
-    (m.legendaryActions || []).forEach(a => out.lines.push({ label: 'Legendary — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
+    // Attacks roll d20 + to-hit AND damage; save effects roll damage and name the DC.
+    const act = (label, a) => { const r = dndActionRoll(a.description); return { label: label, text: a.description || '', roll: r.dmg || dmg(a.description), hit: r.hit, dmg: r.dmg, note: r.note }; };
+    (m.actions || []).forEach(a => out.lines.push(act(a.name || 'Action', a)));
+    (m.bonusActions || []).forEach(a => out.lines.push(act('Bonus — ' + (a.name || ''), a)));
+    (m.reactions || []).forEach(a => out.lines.push(act('Reaction — ' + (a.name || ''), a)));
+    (m.legendaryActions || []).forEach(a => out.lines.push(act('Legendary — ' + (a.name || ''), a)));
     // Creature type and CR live in the header type line (see xsMonsterItem), so keep only
     // size, alignment and senses here — no duplicate type/CR in the Traits block.
     { const nt = [m.size, m.alignment, m.senses].filter(Boolean).join(' · '); if(nt) out.notes.push(nt); }
@@ -11192,8 +11298,14 @@ function xsMonSummary(src, m) {
     // attribute strip, not as generic "Special" lines. Everything else stays a line.
     (m.special || []).forEach(sp => {
       const md = /^\s*(Dodge|Parry)\s+(.+)$/i.exec(String(sp));
-      if(md) out.meta.push([md[1].charAt(0).toUpperCase() + md[1].slice(1).toLowerCase(), md[2].trim()]);
-      else out.lines.push({ label: 'Special', text: String(sp) });
+      if(md) { out.meta.push([md[1].charAt(0).toUpperCase() + md[1].slice(1).toLowerCase(), md[2].trim()]); return; }
+      // "Damage: Talons (Brawn+2D)" → a damage roll of Brawn + 2D (no Wild Die on damage).
+      const dd = /damage:?\s*([^(]*)\((\w+)\s*\+\s*(\d+)D(?:\+(\d))?\)/i.exec(String(sp));
+      if(dd) {
+        const ak = Object.keys(A).find(k => k.toLowerCase() === dd[2].toLowerCase());
+        const pips = (ak ? +A[ak] || 0 : 0) + (+dd[3]) * 3 + (+dd[4] || 0);
+        out.lines.push({ label: (dd[1] || 'Damage').trim() || 'Damage', text: String(sp).replace(/^damage:?\s*/i, ''), roll: swPipsRoll(pips), kind: 'dmg' });
+      } else out.lines.push({ label: 'Special', text: String(sp) });
     });
     if(m.description) out.notes.push(m.description);
     out.notes.push([m.kind, m.genre && m.genre !== 'core' ? m.genre : ''].filter(Boolean).join(' · '));
@@ -11204,7 +11316,11 @@ function xsMonSummary(src, m) {
     out.stats.push({ label: 'Hearts', val: m.hearts != null ? String(m.hearts) : '' }, { label: 'HP', val: String(m.hp != null ? m.hp : (m.hearts != null ? m.hearts * 10 : '')) });
     if(m.defense != null) out.stats.push({ label: 'DEF', val: (m.defense >= 0 ? '+' : '') + m.defense });
     ['STR','DEX','CON','INT','WIS','CHA'].forEach(k => { if(S[k] != null) out.stats.push({ label: k, val: (S[k] >= 0 ? '+' : '') + S[k], roll: '1d20' + (S[k] >= 0 ? '+' : '') + S[k] }); });
-    (m.attacks || []).forEach(a => out.lines.push({ label: 'Attack', text: String(a) }));
+    (m.attacks || []).forEach(a => {
+      const t = String(a), r = icrpgAttackRoll(m, t);
+      const nm = /^([^:,]{2,40})[:,]\s*(.*)$/.exec(t);
+      out.lines.push(Object.assign({ label: nm ? nm[1].trim() : 'Attack', text: nm ? nm[2] : t }, r ? { hit: r.hit, dmg: r.dmg, note: r.note, roll: r.dmg } : {}));
+    });
     (m.abilities || []).forEach(a => out.lines.push({ label: 'Ability', text: String(a) }));
     if(m.desc) out.notes.push(m.desc);
     // Tier already rides in the tag/type line, so keep only the world here.
@@ -11277,6 +11393,8 @@ function xsMonSummary(src, m) {
     if(m.gear) out.lines.push({ label: 'Gear', text: m.gear });
     if(m.stage) out.meta.push(['Stage', m.stage]);
     if(typeof ALIEN_ATTACKS !== 'undefined' && ALIEN_ATTACKS[m.name]) {
+      // One button rolls the creature's D6 signature-attack table and names the result.
+      out.lines.push({ label: 'Signature attack', text: 'Roll D6 on the table below', roll: '1d6', kind: 'alientable', table: ALIEN_ATTACKS[m.name].map(a => ({ roll: a.roll, name: a.name })) });
       ALIEN_ATTACKS[m.name].forEach(a => out.lines.push({ label: 'D6 ' + a.roll + ' · ' + a.name, text: a.effect }));
     }
     if(m.notes) out.notes.push(m.notes);
@@ -11361,6 +11479,24 @@ function xsMonSummary(src, m) {
       if(/swarm/i.test(st)) out.notes.push('Swarm — only harmed by fire or explosions.');
       out.hp = parseInt(str, 10) || 4;
     }
+  } else if(src === 'jlu') {
+    // Justice League Unlimited: d20 + attribute vs Defense / the Tension. Attacks
+    // carry their total bonus and damage dice; Resolve is the hit-point track.
+    const A = m.attributes || {}; const sign = n => (n >= 0 ? '+' : '') + n;
+    [['potency','POT'],['accuracy','ACC'],['agility','AGI'],['resistance','RES'],['spirit','SPI'],['mind','MND']].forEach(([k, l]) => {
+      if(A[k] != null) out.stats.push({ label: l, val: sign(+A[k]), roll: '1d20' + sign(+A[k]) });
+    });
+    out.stats.push({ label: 'Defense', val: String(m.defense ?? '') }, { label: 'Resolve', val: String(m.resolve ?? '') });
+    if(m.damageReduction) out.meta.push(['DR', String(m.damageReduction)]);
+    if(m.tier) out.meta.push(['Tier', String(m.tier)]);
+    if(m.origin) out.meta.push(['Origin', String(m.origin)]);
+    (m.attacks || []).forEach(a => {
+      const hit = a.bonus != null ? sign(+a.bonus) : '';
+      out.lines.push({ label: a.name || 'Attack', text: [a.type, a.range].filter(Boolean).join(' · '), roll: a.damage || '', hit: hit, dmg: a.damage || '' });
+    });
+    (m.abilities || []).forEach(a => out.lines.push({ label: a.name || 'Ability', text: a.text || '' }));
+    if(m.description) out.notes.push(m.description);
+    out.hp = parseInt(m.resolve, 10) || 10;
   }
   return out;
 }
@@ -11415,11 +11551,25 @@ function prepStatblockToItem(sb, sys, id) {
   const lines = [];
   (cfg.lines || []).forEach(([k, l]) => { const v = val(k); if(v !== '') lines.push({ label: l, text: v }); });
   // Freeform "abilities" box → one detail line each (dice runs stay rollable via ccDiceify in the card).
+  // Attack lines get the same roll as a bestiary monster of that system: D&D / LotR
+  // "+4 to hit … Hit: 5 (1d6 + 2)" → to-hit + damage (save effects: damage + DC),
+  // "+5 (1d8)" → to-hit + damage, Nimble → damage with the primary-die rule.
+  const SYSU = String(sys || '').toUpperCase();
   String(sb.abilities || '').split('\n').map(s => s.trim()).filter(Boolean).forEach(a => {
     if(/^[-–—]{3,}$/.test(a)) return;   // a "---" divider line is layout-only; skip it on the compact card
     const c = a.indexOf(':'), md = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/i.exec(a);
-    if(c > 0 && c < 32) lines.push({ label: a.slice(0, c), text: a.slice(c + 1).trim(), roll: md ? md[1].replace(/\s+/g, '') : '' });
-    else lines.push({ label: 'Ability', text: a, roll: md ? md[1].replace(/\s+/g, '') : '' });
+    const roll = md ? md[1].replace(/\s+/g, '') : '';
+    const line = (c > 0 && c < 32) ? { label: a.slice(0, c), text: a.slice(c + 1).trim(), roll: roll } : { label: 'Ability', text: a, roll: roll };
+    if(SYSU === 'DND' || SYSU === 'LOTR') {
+      const r = dndActionRoll(a);
+      if(r.hit || (r.note && r.dmg)) Object.assign(line, { hit: r.hit, dmg: r.dmg, note: r.note });
+    } else if(SYSU === 'NIM' && roll) {
+      Object.assign(line, { dmg: roll, kind: 'nim' });
+    } else if(roll && SYSU !== 'DCC') {
+      const h = /([+-]\d+)\s*(?:to hit\b|\()/i.exec(a);
+      if(h) Object.assign(line, { hit: h[1], dmg: roll });
+    }
+    lines.push(line);
   });
   // sb.type is already shown as the card's header type line (tag), so it's left out of
   // the notes/Traits block to avoid repeating the type line there.
@@ -11442,7 +11592,7 @@ function prepStatblockToItem(sb, sys, id) {
     tone: sb.sbtype === 'npc' ? 'var(--gold)' : (sb.sbtype === 'boss' ? roleTone : 'var(--red)'),
     hpMode: hpMode,
     statuses: [], statsOpen: true, traitsOpen: false,
-    gmon: { src: 'prep', stats: stats, lines: lines, notes: notes, meta: meta, page: '', chips: null }
+    gmon: { src: 'prep', sys: SYS.toLowerCase(), stats: stats, lines: lines, notes: notes, meta: meta, page: '', chips: null }
   };
   if(hpMode === 'dcc') {
     // DCC Health Bar: hpcount segments, each worth hpval (the pip value).
@@ -15348,6 +15498,8 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <script src="/tools-data/vae-gm-tables.js"></script>
 <script src="/tools-data/myz-data.js"></script>
 <script src="/tools-data/myz-gm-tables.js"></script>
+<!-- Justice League Unlimited bestiary for the Combat Tracker -->
+<script src="/tools-data/jlu-bestiary.js"></script>
 <!-- The Lord of the Rings: data layer (adversaries, journeys, councils, treasure, Eye, Shadow …) + the Loremaster suite -->
 <script src="/tools-data/lotr-data.js"></script>
 <script src="/tools-data/lotr-gm-tables.js"></script>
@@ -15924,6 +16076,76 @@ function init_dice(root) {
     return entry;
   };
 
+  // A Combat Tracker monster roll in its system's own dice (the card picks the
+  // kind — see monRollKind in init_trackers). Returns the log entry, or null when
+  // the spec doesn't apply (the caller then falls back to a plain sum).
+  //   yz         Year Zero pool (Alien, TWD, Vaesen, MYZ): count the sixes
+  //   wild       WEG D6 (Star Wars, D6 2e): the last die is the Wild Die
+  //   ace        ACE!: every die explodes on a 6; the first is the Calamity Die
+  //   d616       Marvel: 3d6 with the Marvel die in the middle (+ ability)
+  //   nimble     Nimble damage: a 1 on the primary die misses, its top face crits
+  //   alientable Alien: D6 on the creature's signature-attack table
+  root._monsterRoll = (spec) => {
+    const kind = spec && spec.kind, label = (spec && spec.label) || 'Roll';
+    const expr = String((spec && spec.roll) || '').replace(/\s+/g, '');
+    const pool = /^(\d+)d6([+-]\d+)?$/i.exec(expr);
+    if(kind === 'yz' && pool) {
+      const n = Math.min(40, +pool[1]); const rolls = []; for(let i = 0; i < n; i++) rolls.push(d6());
+      const c = yzCount(rolls), tier = yzTier(c.s);
+      return gmLog(label, c.s + ' · ' + tier.t, n + 'd6(' + rolls.join(',') + ') · ' + c.s + ' succ' + (c.b ? ' · ' + c.b + ' bane' + (c.b > 1 ? 's' : '') : ''), tier.type);
+    }
+    if(kind === 'wild' && pool) {
+      const n = Math.max(1, Math.min(30, +pool[1])), pips = +(pool[2] || 0);
+      const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
+      let w = d6(); const wf = [w]; const comp = (w === 1); let guard = 0;
+      while(w === 6 && guard++ < 20) { w = d6(); wf.push(w); }
+      const exploded = wf[0] === 6;
+      const total = reg.reduce((a, b) => a + b, 0) + wf.reduce((a, b) => a + b, 0) + pips;
+      return gmLog(label, total + (exploded ? ' ✦' : comp ? ' ⚠' : ''), n + 'D: [' + reg.join(' ') + '] ✦[' + wf.join('→') + ']' + (pips ? ' ' + (pips > 0 ? '+' : '') + pips : ''), exploded ? 'crit' : comp ? 'fumble' : '');
+    }
+    if(kind === 'ace' && pool) {
+      const n = Math.max(1, Math.min(30, +pool[1])); const dice = [];
+      for(let i = 0; i < n; i++) { const f = []; let v, t = 0; do { v = d6(); f.push(v); t += v; } while(v === 6 && f.length < 20); dice.push({ t: t, f: f }); }
+      const total = dice.reduce((a, d) => a + d.t, 0), cal = dice[0].f[0] === 1;
+      const det = n + 'd6: ' + dice.map((d, i) => { const s = d.f.length > 1 ? d.f.join('→') + '=' + d.t : String(d.t); return i === 0 ? '[' + s + ']' : s; }).join(' + ');
+      return gmLog(label, String(total) + (spec.note ? ' · ' + spec.note : ''), det + (cal ? ' · Calamity Die 1 — calamity on a miss' : ''), cal ? 'fumble' : '');
+    }
+    if(kind === 'd616') {
+      const mm = /^3d6([+-]\d+)?$/i.exec(expr); if(!mm) return null;
+      const mod = +(mm[1] || 0), a = d6(), mv = d6(), c = d6(), fant = mv === 1;
+      const sum = a + (fant ? 6 : mv) + c + mod;
+      return gmLog(label, sum + (fant ? ' · ✦ FANTASTIC' : ''), '3d6(' + a + ',' + mv + ',' + c + ') · ✦' + (fant ? 'Marvel 1→6' : 'Marvel ' + mv) + (mod ? ' ' + (mod > 0 ? '+' : '') + mod : ''), fant ? 'crit' : '');
+    }
+    if(kind === 'nimble') {
+      const { dice, mod } = parseFormula(expr); if(!dice.length) return null;
+      const bits = []; let total = mod, primary = null, crits = 0;
+      dice.forEach(([sides, count], gi) => {
+        const r = []; for(let i = 0; i < count; i++) r.push(1 + Math.floor(Math.random() * sides));
+        if(gi === 0) {
+          primary = r[0];
+          if(primary === sides) { let x = primary; while(x === sides && crits < 20) { x = 1 + Math.floor(Math.random() * sides); r.push(x); crits++; } }
+        }
+        total += r.reduce((a, b) => a + b, 0);
+        bits.push(count + 'd' + sides + '(' + r.join(',') + ')');
+      });
+      if(mod) bits.push((mod > 0 ? '+' : '') + mod);
+      if(primary === 1) return gmLog(label, 'MISS', 'primary die rolled 1 · ' + bits.join(' '), 'fumble');
+      return gmLog(label, 'Dmg: ' + total + (crits ? ' · CRIT' + (crits > 1 ? ' ×' + crits : '') : ''), bits.join(' '), crits ? 'crit' : '');
+    }
+    if(kind === 'alientable' && Array.isArray(spec.table) && spec.table.length) {
+      const r = d6();
+      const hit = spec.table.find(t => {
+        const s = String(t.roll || '').replace(/\s+/g, '');
+        let m;
+        if((m = /^(\d+)[–—-](\d+)$/.exec(s))) return r >= +m[1] && r <= +m[2];
+        if((m = /^(\d+)\+$/.exec(s))) return r >= +m[1];
+        return +s === r;
+      });
+      return gmLog(label, r + ' · ' + (hit ? hit.name : '—'), 'D6(' + r + ') on the signature-attack table', '');
+    }
+    return null;
+  };
+
   // Collapse duplicate remote rolls when restoring a saved log: by server id
   // when present, or by a content signature for older entries saved before ids
   // were tracked. Local (GM) rolls are never collapsed — identical ones are kept.
@@ -16013,6 +16235,15 @@ window.rollAttackToDiceTray = function(label, hitMod, dmgExpr, adv) {
   try {
     const node = getOrCreateInstance('dice');
     if(node && typeof node._attackRoll === 'function') return !!node._attackRoll(label, hitMod, dmgExpr, adv);
+  } catch(e) {}
+  return false;
+};
+
+// A Combat Tracker monster roll in its system's own dice (see _monsterRoll).
+window.rollMonsterToDiceTray = function(spec) {
+  try {
+    const node = getOrCreateInstance('dice');
+    if(node && typeof node._monsterRoll === 'function') return !!node._monsterRoll(spec);
   } catch(e) {}
   return false;
 };
