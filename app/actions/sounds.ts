@@ -10,6 +10,8 @@ import {
   canonicalCategory,
   canonicalSubcategory,
 } from "@/lib/sounds";
+import { SOUND_PREFIX, bucketRelFromUrl, soundBucket } from "@/lib/sound-files";
+import { deleteObject } from "@/lib/s3";
 
 // The library feeds a tool the whole table can open, so every mutation here
 // independently confirms the caller is an admin — the page being admin-only is
@@ -68,7 +70,15 @@ export async function deleteSound(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
-  await prisma.sound.delete({ where: { id } }).catch(() => {});
+  const row = await prisma.sound.delete({ where: { id } }).catch(() => null);
+  // A track stored in the site's bucket goes with its entry (unless another
+  // entry still plays the same file) — otherwise "Add everything in the bucket"
+  // would bring it straight back.
+  const rel = row ? bucketRelFromUrl(row.url) : null;
+  const cfg = rel ? soundBucket() : null;
+  if (rel && cfg && !(await prisma.sound.count({ where: { url: row!.url } }))) {
+    await deleteObject(cfg, SOUND_PREFIX + rel).catch(() => {});
+  }
   revalidatePath("/admin/sounds");
 }
 

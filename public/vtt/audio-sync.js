@@ -154,7 +154,12 @@
     }
 
     // iOS ladder: direct (CORS) -> same-origin proxy -> plain.
-    function proxied(u) { return PROXY + "?u=" + encodeURIComponent(u); }
+    // A Sound Library track stored on the site (/api/sounds/file/…) has its own
+    // same-origin stream (?stream=1); anything else goes through the proxy.
+    function proxied(u) {
+      if (/^(https?:\/\/[^/]+)?\/api\/sounds\/file\//i.test(u)) return u + (u.indexOf("?") >= 0 ? "&" : "?") + "stream=1";
+      return PROXY + "?u=" + encodeURIComponent(u);
+    }
     function setSrc(l, url) {
       l.url = url; l.stage = useGain ? "direct" : "plain";
       if (useGain) { try { l.a.crossOrigin = "anonymous"; } catch (e) {} }

@@ -12,6 +12,8 @@ import {
   DEFAULT_CATEGORY,
 } from "@/lib/sounds";
 import { createSound, bulkImportSounds } from "@/app/actions/sounds";
+import { publicSoundUrl, soundBucket } from "@/lib/sound-files";
+import { SoundStorage } from "@/components/SoundStorage";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,7 @@ type SoundRow = {
   id: string;
   label: string;
   url: string;
+  href?: string;
   category: string;
   subcategory: string;
 };
@@ -63,10 +66,12 @@ export default async function AdminSoundsPage() {
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) redirect("/dashboard"); // not an admin — nothing to see
 
-  const sounds: SoundRow[] = await prisma.sound.findMany({
-    orderBy: [{ category: "asc" }, { subcategory: "asc" }, { label: "asc" }],
-    select: { id: true, label: true, url: true, category: true, subcategory: true },
-  });
+  const sounds: SoundRow[] = (
+    await prisma.sound.findMany({
+      orderBy: [{ category: "asc" }, { subcategory: "asc" }, { label: "asc" }],
+      select: { id: true, label: true, url: true, category: true, subcategory: true },
+    })
+  ).map((s: SoundRow) => ({ ...s, href: publicSoundUrl(s.url) }));
 
   const total = sounds.length;
 
@@ -89,6 +94,9 @@ export default async function AdminSoundsPage() {
         <Icon name="library" className="text-[var(--text)]" /> on Music, Soundboard, or a Scene to drop it in.
         Dropbox share links are automatically rewritten to a directly-playable form on save.
       </p>
+
+      {/* ── Tracks stored on the site (the Railway bucket) ─────────────────── */}
+      <SoundStorage configured={!!soundBucket()} />
 
       {/* ── Add a track ─────────────────────────────────────────────────────── */}
       <section className="mb-6 rounded-lg border border-[var(--border)] bg-[var(--panel)]/40 p-5">

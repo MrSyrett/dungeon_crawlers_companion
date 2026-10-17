@@ -1,5 +1,7 @@
 import { loadToolTemplate } from "@/lib/tools";
 import { prisma } from "@/lib/prisma";
+import { normalizeAudioUrl } from "@/lib/sounds";
+import { publicSoundUrl } from "@/lib/sound-files";
 import { getHiddenSystemKeys } from "@/lib/systems";
 import { miniBar, miniBarHead } from "@/lib/minibar";
 import { isSystemKey, type SystemKey } from "@/components/systemStore";
@@ -300,6 +302,11 @@ function audioVolumeFix(vttToken: string): string {
     var abs;
     try { abs = new URL(url, location.href); } catch (e) { return { kind: "local", direct: url }; }
     if (abs.protocol !== "http:" && abs.protocol !== "https:") return { kind: "local", direct: url };
+    // A Sound Library track stored on the site redirects to the bucket, which
+    // may send no CORS headers: try it direct, then its own same-origin stream.
+    if (abs.origin === location.origin && abs.pathname.indexOf("/api/sounds/file/") === 0) {
+      return { kind: "xorigin", direct: abs.href, proxy: abs.href + (abs.search ? "&" : "?") + "stream=1" };
+    }
     if (abs.origin === location.origin) return { kind: "local", direct: url };
     return {
       kind: "xorigin",
@@ -392,6 +399,7 @@ function audioVolumeFix(vttToken: string): string {
         if (state !== 1) state = 0;
         try { a.crossOrigin = "anonymous"; } catch (e) {}   // proxy is same-origin -> fine
         try { srcDesc.set.call(a, info.proxy); a.load(); } catch (e) {}
+        replay();
       } else if (a._stage === "proxied") {
         // Proxy failed too (network/auth). Last resort: original url played plain
         // so the track still sounds — uncontrolled volume, i.e. the pre-fix
@@ -400,13 +408,23 @@ function audioVolumeFix(vttToken: string): string {
         if (state !== 1) state = 2;
         try { a.crossOrigin = null; } catch (e) {}
         try { srcDesc.set.call(a, info.direct); a.load(); } catch (e) {}
+        replay();
       }
       // _stage === "plain" -> already at the last resort; nothing more to try.
     });
 
-    // Keep the context running whenever the tools start playback.
-    var nativePlay = a.play;
-    a.play = function () { context(); resume(); return nativePlay.apply(a, arguments); };
+    // Keep the context running whenever the tools start playback. Also remember
+    // that playback was asked for: switching src down the fallback ladder
+    // reloads the element, which drops it back to paused, so replay() picks the
+    // track up again on the new source (the tool already thinks it's playing).
+    var nativePlay = a.play, nativePause = a.pause, wantPlay = false;
+    a.play = function () { wantPlay = true; context(); resume(); return nativePlay.apply(a, arguments); };
+    a.pause = function () { wantPlay = false; return nativePause.apply(a, arguments); };
+    a.addEventListener("ended", function () { if (!a.loop) wantPlay = false; });
+    function replay() {
+      if (!wantPlay) return;
+      try { var pr = nativePlay.call(a); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {}
+    }
 
     return a;
   }
@@ -478,6 +496,9 @@ function audioBroadcast(campaignId: string | null): string {
   function srcOf(a) {
     var s = ""; try { s = a.src; } catch (e) {}
     if (!s) { try { s = a.currentSrc; } catch (e2) {} }
+    // The iOS wrapper reports the URL as the tools set it, which for a Sound
+    // Library track stored on the site is a path — players need it absolute.
+    if (s && !/^[a-z][a-z0-9+.-]*:/i.test(s)) { try { s = new URL(s, location.href).href; } catch (e3) {} }
     return s || "";
   }
   function layer(a) {
@@ -574,6 +595,27 @@ export function keepOnlySystemData(html: string, system: SystemKey | null): stri
   );
 }
 
+// Sound Library tracks that moved from Dropbox into the site's bucket: old link →
+// the stored copy's signed link. Saved boards and scenes keep the old link; the
+// Music tool's normUrl() looks it up here at play time. Fail-open (no map).
+async function soundAliasScript(): Promise<string> {
+  try {
+    const rows: { url: string; prevUrl: string }[] = await prisma.sound.findMany({
+      where: { prevUrl: { not: "" } },
+      select: { url: true, prevUrl: true },
+    });
+    if (!rows.length) return "";
+    const map: Record<string, string> = {};
+    for (const r of rows) {
+      const old = normalizeAudioUrl(r.prevUrl);
+      if (old) map[old] = publicSoundUrl(r.url);
+    }
+    return `<script>window.__ddSoundAlias = ${JSON.stringify(map).replace(/</g, "\\u003c")};</script>\n`;
+  } catch {
+    return "";
+  }
+}
+
 export async function buildGmScreenHtml(opts: {
   savedState: unknown;
   vttToken?: string;
@@ -648,9 +690,10 @@ export async function buildGmScreenHtml(opts: {
   // The audio relay wraps window.Audio AFTER the iOS fix so it sees every element
   // the template creates (and the original URLs, not the proxied ones).
   const audioRelay = audioBroadcast(camp?.id ?? null);
+  const aliasScript = await soundAliasScript();
   html = html.replace(
     /<\/head>/i,
-    `${audioScript}\n${audioRelay}\n${tokenScript}${hiddenScript}${stateScript}${SHIM}\n</head>`,
+    `${audioScript}\n${audioRelay}\n${tokenScript}${hiddenScript}${aliasScript}${stateScript}${SHIM}\n</head>`,
   );
 
   // Chrome after <body>: the shared mini-bar (cookie mode) or the status-only

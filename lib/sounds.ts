@@ -55,6 +55,9 @@ export function canonicalSubcategory(raw: string): string {
 // screen's own normUrl so library tracks behave identically to pasted ones.)
 export function normalizeAudioUrl(raw: string): string | null {
   const u = (raw || "").trim();
+  // A track stored in the site's own bucket (lib/sound-files.ts): kept as its
+  // host-less path, without any ?s= signature (that's added when it's served).
+  if (u.startsWith("/api/sounds/file/")) return u.split("?")[0];
   if (!/^https?:\/\//i.test(u)) return null; // only real, fetchable URLs
 
   if (!/dropbox\.com/i.test(u)) return u;

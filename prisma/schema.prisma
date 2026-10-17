@@ -230,6 +230,10 @@ model Sound {
   // is the track's display Name.
   category    String   @default("Music")
   subcategory String   @default("")
+  // The Dropbox (or other) URL this track had before it moved into the bucket.
+  // Saved GM boards and scenes still hold that old link; the GM Screen maps it
+  // to the bucket copy at play time (lib/gm-screen.ts soundAliasScript).
+  prevUrl     String   @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

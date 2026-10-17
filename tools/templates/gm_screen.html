@@ -2676,16 +2676,24 @@ const GMScenes = (function() {
   const FADE = 1800;
 
   const clamp01 = v => Math.max(0, Math.min(1, v));
-  const isHttp = u => typeof u === 'string' && /^https?:\/\//i.test(u);
+  // http(s), or a Sound Library track stored on the site (/api/sounds/file/…).
+  const isHttp = u => typeof u === 'string' && (/^https?:\/\//i.test(u) || u.indexOf('/api/sounds/file/') === 0);
   function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function normUrl(u){
     // Dropbox share links serve a preview page unless raw=1 is set; drop the
     // short-lived st= token and force raw=1 so <audio> gets the file itself.
-    if(typeof u!=='string' || !/dropbox\.com/i.test(u)) return u;
-    const parts = u.split('?'); const base = parts[0];
-    const params = (parts[1]||'').split('&').filter(Boolean).filter(p=>!/^(st|dl|raw)=/i.test(p));
-    params.push('raw=1');
-    return base + '?' + params.join('&');
+    if(typeof u!=='string') return u;
+    if(/dropbox\.com/i.test(u)){
+      const parts = u.split('?'); const base = parts[0];
+      const params = (parts[1]||'').split('&').filter(Boolean).filter(p=>!/^(st|dl|raw)=/i.test(p));
+      params.push('raw=1');
+      u = base + '?' + params.join('&');
+    }
+    // A library track that has moved into the site's own storage: saved boards
+    // and scenes still hold its old (Dropbox) link, so play the stored copy.
+    // window.__ddSoundAlias is injected by lib/gm-screen.ts.
+    const alias = window.__ddSoundAlias;
+    return (alias && alias[u]) || u;
   }
   // One shared fade ticker for all elements (alive only while fades run) —
   // the old version spawned a 25Hz setInterval PER audio element, so a
@@ -13673,11 +13681,18 @@ function init_music(root) {
   function normUrl(u){
     // Dropbox share links serve a preview page unless raw=1 is set; drop the
     // short-lived st= token and force raw=1 so <audio> gets the file itself.
-    if(typeof u!=='string' || !/dropbox\.com/i.test(u)) return u;
-    const parts = u.split('?'); const base = parts[0];
-    const params = (parts[1]||'').split('&').filter(Boolean).filter(p=>!/^(st|dl|raw)=/i.test(p));
-    params.push('raw=1');
-    return base + '?' + params.join('&');
+    if(typeof u!=='string') return u;
+    if(/dropbox\.com/i.test(u)){
+      const parts = u.split('?'); const base = parts[0];
+      const params = (parts[1]||'').split('&').filter(Boolean).filter(p=>!/^(st|dl|raw)=/i.test(p));
+      params.push('raw=1');
+      u = base + '?' + params.join('&');
+    }
+    // A library track that has moved into the site's own storage: saved boards
+    // and scenes still hold its old (Dropbox) link, so play the stored copy.
+    // window.__ddSoundAlias is injected by lib/gm-screen.ts.
+    const alias = window.__ddSoundAlias;
+    return (alias && alias[u]) || u;
   }
 
   const $ = s => root.querySelector(s);
@@ -13707,7 +13722,8 @@ function init_music(root) {
   let active = audioA;
 
   const clamp01 = v => Math.max(0, Math.min(1, v));
-  const isHttp = u => typeof u === 'string' && /^https?:\/\//i.test(u);
+  // http(s), or a Sound Library track stored on the site (/api/sounds/file/…).
+  const isHttp = u => typeof u === 'string' && (/^https?:\/\//i.test(u) || u.indexOf('/api/sounds/file/') === 0);
   function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function fmt(t){ if(!isFinite(t)||t<0) t=0; const m=Math.floor(t/60), s=Math.floor(t%60); return m+':'+String(s).padStart(2,'0'); }
 

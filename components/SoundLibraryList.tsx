@@ -13,6 +13,8 @@ type SoundRow = {
   id: string;
   label: string;
   url: string;
+  /** A playable link: the signed one for a track in the site's bucket. */
+  href?: string;
   category: string;
   subcategory: string;
 };
@@ -186,13 +188,15 @@ export function SoundLibraryList({ sounds }: { sounds: SoundRow[] }) {
                                 <td className="px-4 py-3">
                                   <span className="block font-medium text-[var(--text)]">{s.label}</span>
                                   <a
-                                    href={s.url}
+                                    href={s.href || s.url}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="mt-0.5 block break-all text-[11px] text-[var(--muted)] hover:text-[var(--gold)]"
                                     title="Open the audio URL in a new tab"
                                   >
-                                    {s.url}
+                                    {s.url.startsWith("/api/sounds/file/")
+                                      ? "Stored on the site · " + decodeURIComponent(s.url.slice("/api/sounds/file/".length))
+                                      : s.url}
                                   </a>
 
                                   <button
@@ -226,7 +230,7 @@ export function SoundLibraryList({ sounds }: { sounds: SoundRow[] }) {
                                       />
                                       <input
                                         name="url"
-                                        type="url"
+                                        type="text"
                                         required
                                         defaultValue={s.url}
                                         placeholder="Direct audio URL"
