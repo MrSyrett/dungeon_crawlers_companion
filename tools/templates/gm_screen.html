@@ -4225,19 +4225,24 @@ GMScenes.renderPins();
       <div class="gen-panel" data-panel="dccneighborhood">
         <div class="gen-controls">
           <label class="gen-label">Kind
-            <select class="gen-select" id="gen-dccnbhd-kind">
+            <select class="gen-select" id="gen-dccnbhd-kind" onchange="dccNbhdAreaOpts(this.closest('.gen-panel'))">
               <option value="neighborhood">Neighborhood</option>
               <option value="quest">Quest</option>
             </select>
           </label>
           <label class="gen-label">Floor
-            <select class="gen-select" id="gen-dccnbhd-level">
+            <select class="gen-select" id="gen-dccnbhd-level" onchange="dccNbhdAreaOpts(this.closest('.gen-panel'))">
               <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option>
+            </select>
+          </label>
+          <label class="gen-label">Area
+            <select class="gen-select" id="gen-dccnbhd-area" onfocus="dccNbhdAreaOpts(this.closest('.gen-panel'), true)" onpointerdown="dccNbhdAreaOpts(this.closest('.gen-panel'), true)">
+              <option value="">Random book area</option>
             </select>
           </label>
         </div>
         <div class="gen-results" id="gen-dccnbhd-results">
-          <div class="gen-empty">Builds a parbaked scenario: a themed area (or staged Quest), its Mobs and a Boss drawn from the bestiary, plus reward, failure, and the ever-ticking clock.</div>
+          <div class="gen-empty">Builds a parbaked scenario: a book Neighborhood or Quest for Floors 1–5 with its Grinding Complications roll (floor d20, then the area's d6 on 1–6), its Mobs and a Boss drawn from the bestiary, plus app-made ideas for the hook, reward, failure, and the ever-ticking clock.</div>
         </div>
       </div>
 
@@ -4250,7 +4255,7 @@ GMScenes.renderPins();
               <option value="Mob">Mob</option>
               <option value="Elite">Elite</option>
               <option value="Boss">Boss (any tier)</option>
-              <option value="Rival Crawler">Rival Crawler</option>
+              <option value="Crawler">Crawler</option>
               <option value="NPC">NPC</option>
             </select>
           </label>
@@ -5179,6 +5184,7 @@ GMScenes.renderPins();
 <script src="/tools-data/dcc-buffs.js"></script>
 <script src="/tools-data/dcc-debuffs.js"></script>
 <script src="/tools-data/dcc-prep-tables.js"></script>
+<script src="/tools-data/dcc-grinding-tables.js"></script>
 <script>
 // Pull the user's saved homebrew (own + campaign-shared) from the app so the DCC
 // generators and the bestiary picker can draw them too. Empty when standalone.
@@ -11333,7 +11339,8 @@ function dccGenBestiary() {
 function dccRoleMatch(m, role) {
   if(!role) return true;
   if(role === 'Boss') return /Boss$/.test(String(m.role || ''));   // any boss tier
-  return String(m.role || '') === role;
+  const norm = r => (r === 'Rival Crawler' ? 'Crawler' : r);         // legacy alias
+  return norm(String(m.role || '')) === norm(role);
 }
 function dccLevelMatch(m, band) {
   if(!band) return true;
@@ -12043,9 +12050,69 @@ function dccMobLine(label, m) {
     '<span><b>' + esc(m.name) + '</b> <span style="opacity:.6">' + (label === 'Boss' ? esc(m.role) + ' · ' : '') + 'LV ' + esc(m.level) + ' · ' + esc(dccMonTotalHp(m)) + ' HP</span> ' +
     '<button class="btn small ghost gen-send-tracker" data-src="dcc" data-mon="' + dccSendAttr(m.name) + '" style="margin-left:4px;">Send</button></span></div>';
 }
-function genDccNeighborhood(kind, level) {
+// ── Book Grinding Complications (Core Tables 76–105; GM Toolkit Tables 2, 4–8, 14–18) ──
+// Data: /tools-data/dcc-grinding-tables.js (window.DCC_GRIND). Floors 1–2 share the Toolkit's
+// Tutorial Floor table. Roll d20 on the floor table; 1–6 = roll d6 on the current area's table.
+function dccGrind() { return (typeof window !== 'undefined' && window.DCC_GRIND) || null; }
+function dccGrindFloorTable(floor) {
+  const G = dccGrind(); if(!G) return null;
+  return G.floors[floor] || (floor === 2 ? G.floors[1] : null);
+}
+function dccGrindAreas(floor, kind) {
+  const G = dccGrind(); if(!G) return [];
+  return G.areas.filter(a => a.floor === floor && (!kind || a.kind.toLowerCase() === String(kind).toLowerCase()));
+}
+function dccGrindRowFor(rows, n) {
+  return rows.find(([rng]) => { const [lo, hi] = String(rng).split('-').map(Number); return n >= lo && n <= (hi || lo); }) || null;
+}
+function dccGrindRef(t) { return (t.source === 'Core' ? 'Core' : 'GM Toolkit') + ' ' + t.table + ', p.' + t.page; }
+// Returns HTML rows: the floor d20 roll and, on 1–6, the area d6 roll.
+function dccGrindRollRows(floor, area) {
+  const ft = dccGrindFloorTable(floor);
+  if(!ft) return row('Grinding complication', 'The books print no Grinding Complications table for Floor ' + floor + ' — improvise one.');
+  const d20 = 1 + Math.floor(Math.random() * 20);
+  const fr = dccGrindRowFor(ft.rows, d20);
+  let out = '<div class="gen-card-row"><span class="gen-card-row-label">Grinding complication</span><span><b>d20 = ' + d20 + '</b> ' + esc(fr ? fr[1] : '') +
+    ' <span style="opacity:.6">(' + esc(dccGrindRef(ft)) + ')</span></span></div>';
+  if(d20 <= 6) {
+    if(area) {
+      const d6 = 1 + Math.floor(Math.random() * 6);
+      const ar = dccGrindRowFor(area.rows, d6);
+      out += '<div class="gen-card-row"><span class="gen-card-row-label">↳ ' + esc(area.name) + '</span><span><b>d6 = ' + d6 + '</b> ' + esc(ar ? ar[1] : '') +
+        ' <span style="opacity:.6">(' + esc(dccGrindRef(area)) + ')</span></span></div>';
+    } else {
+      out += row('↳ Area', 'This area has no book table — improvise a local complication.');
+    }
+  }
+  return out;
+}
+// Fill the Area <select> with the book areas for the chosen floor + kind (keeps the current pick if still valid).
+function dccNbhdAreaOpts(panel, keep) {
+  if(!panel) return;
+  const sel = panel.querySelector('#gen-dccnbhd-area'); if(!sel) return;
+  const kind = (panel.querySelector('#gen-dccnbhd-kind') || {}).value || 'neighborhood';
+  const floor = parseInt((panel.querySelector('#gen-dccnbhd-level') || {}).value) || 1;
+  const key = kind + '|' + floor;
+  if(keep && sel.dataset.key === key) return;
+  const cur = sel.value, areas = dccGrindAreas(floor, kind);
+  sel.innerHTML = (areas.length ? '<option value="">Random book ' + (kind === 'quest' ? 'Quest' : 'Neighborhood') + '</option>' : '<option value="">No book areas for this floor</option>') +
+    areas.map(a => '<option value="' + esc(a.name) + '">' + esc(a.name) + '</option>').join('');
+  if(areas.some(a => a.name === cur)) sel.value = cur;
+  sel.dataset.key = key;
+}
+window.dccNbhdAreaOpts = dccNbhdAreaOpts;   // called from the panel's inline onchange/onfocus
+function genDccNeighborhood(kind, level, areaName) {
   if(!dccPrepReady()) return card('<div class="gen-empty">DCC prep tables didn’t load. Open the GM screen from the app.</div>');
   const P = DCC_PREP;
+  const areas = dccGrindAreas(level, kind);
+  const area = (areaName && areas.find(a => a.name === areaName)) || (areas.length ? R(areas) : null);
+  const label = kind === 'quest' ? 'Quest' : 'Neighborhood';
+  const name = area ? area.name : R(kind === 'quest' ? P.questNames : P.nbhdNames);
+  const tagTxt = 'Floor ' + level + (area ? ' · ' + (area.source === 'Core' ? 'Core' : 'GM Toolkit') : '');
+  const sourceNote = area
+    ? '<div class="gen-item-desc" style="text-transform:none;opacity:.75;">Book ' + label.toLowerCase() + ' — full write-up in ' + esc(area.source === 'Core' ? 'the Core Rulebook' : 'the Gamemasters Toolkit') + ' (its Grinding Complications are ' + esc(area.table) + ', p.' + esc(area.page) + '). Rows marked ✦ are app ideas, not book tables.</div>'
+    : '<div class="gen-item-desc" style="text-transform:none;opacity:.75;">No book ' + label.toLowerCase() + 's map to Floor ' + esc(level) + ' — name and rows marked ✦ are app ideas.</div>';
+  const idea = (l, v) => row('✦ ' + l, v);
   const mobs = dccScenarioMobs(level, 3);
   const boss = dccScenarioBoss(level);
   const allNames = mobs.map(m => m.name).concat(boss ? [boss.name] : []);
@@ -12054,24 +12121,26 @@ function genDccNeighborhood(kind, level) {
     : '';
   const roster = '<hr class="gen-card-divider">' + sendAll + mobs.map(m => dccMobLine('Mob', m)).join('') +
     (boss ? dccMobLine('Boss', boss) : '<div class="gen-card-row"><span class="gen-card-row-label">Boss</span><span style="opacity:.6">— pick one to suit the theme —</span></div>');
+  const header = '<div class="gen-card-header"><span class="gen-card-name">' + label + ': ' + esc(name) + '</span><span class="gen-card-tag">' + esc(tagTxt) + '</span></div>';
+  const grind = '<hr class="gen-card-divider">' + dccGrindRollRows(level, area);
   if(kind === 'quest') {
     const stages = [].concat(P.questStages).sort(() => Math.random() - 0.5).slice(0, 4)
-      .map((s, i) => '<div class="gen-card-row"><span class="gen-card-row-label">Stage ' + (i + 1) + '</span><span>' + esc(s) + '</span></div>').join('');
+      .map((s, i) => '<div class="gen-card-row"><span class="gen-card-row-label">✦ Stage ' + (i + 1) + '</span><span>' + esc(s) + '</span></div>').join('');
     return card(
-      '<div class="gen-card-header"><span class="gen-card-name">Quest: ' + esc(R(P.questNames)) + '</span><span class="gen-card-tag">Floor ' + esc(level) + '</span></div>' +
-      '<div class="gen-item-desc" style="text-transform:none;opacity:.85;">' + esc(R(P.questThemes)) + '</div>' +
-      row('Objective', R(P.questObjectives)) + row('Power player', R(P.questPowerPlayers)) + row('Strong start', R(P.strongStarts)) +
+      header + sourceNote +
+      (area ? '' : '<div class="gen-item-desc" style="text-transform:none;opacity:.85;">✦ ' + esc(R(P.questThemes)) + '</div>') +
+      idea('Objective', R(P.questObjectives)) + idea('Power player', R(P.questPowerPlayers)) + idea('Strong start', R(P.strongStarts)) +
       '<hr class="gen-card-divider">' + stages +
-      '<hr class="gen-card-divider">' + row('Reward', R(P.questRewards)) + row('If they fail', R(P.questFailures)) + row('Clock', R(P.timers)) +
-      roster
+      '<hr class="gen-card-divider">' + idea('Reward', R(P.questRewards)) + idea('If they fail', R(P.questFailures)) + idea('Clock', R(P.timers)) +
+      grind + roster
     );
   }
   return card(
-    '<div class="gen-card-header"><span class="gen-card-name">Neighborhood: ' + esc(R(P.nbhdNames)) + '</span><span class="gen-card-tag">Floor ' + esc(level) + '</span></div>' +
-    '<div class="gen-item-desc" style="text-transform:none;opacity:.85;">Theme: ' + esc(R(P.nbhdThemes)) + '</div>' +
-    row('Vibe', R(P.nbhdVibes)) + row('Strong start', R(P.strongStarts)) + row('Environment', R(P.environments)) +
-    row('Grinding snag', R(P.grindComplications)) + row('Mood beat', R(P.moods)) +
-    roster
+    header + sourceNote +
+    (area ? '' : '<div class="gen-item-desc" style="text-transform:none;opacity:.85;">✦ Theme: ' + esc(R(P.nbhdThemes)) + '</div>') +
+    idea('Vibe', R(P.nbhdVibes)) + idea('Strong start', R(P.strongStarts)) + idea('Environment', R(P.environments)) +
+    idea('Mood beat', R(P.moods)) +
+    grind + roster
   );
 }
 
@@ -13917,7 +13986,8 @@ window.init_gen = function(root) {
       const kind=root.querySelector('#gen-dccnbhd-kind').value;
       const level=parseInt(root.querySelector('#gen-dccnbhd-level').value)||1;
       const res=root.querySelector('#gen-dccnbhd-results'); res.innerHTML='';
-      res.appendChild(genDccNeighborhood(kind, level));
+      const areaSel=root.querySelector('#gen-dccnbhd-area');
+      res.appendChild(genDccNeighborhood(kind, level, areaSel ? areaSel.value : ''));
 
     } else if(activeTab==='map') {
       // Map-only generator (system-neutral). Same Dungeon Engine as the

@@ -1,7 +1,9 @@
 // HAND-AUTHORED GM-screen generator tables for Dungeon Crawler Carl.
 // NOT build-generated — there is no data/dcc/*.json source and scripts/build-dcc-data.mjs
 // does not touch this file. It feeds the DCC NPC and DCC Neighborhood/Quest generators
-// in the GM screen (the DCC analogue of sd-prep-tables.js). Flavor is grounded in the
+// in the GM screen (the DCC analogue of sd-prep-tables.js). Book tables (Grinding
+// Complications per floor/Neighborhood/Quest) live in dcc-grinding-tables.js; what remains
+// here is app-invented idea fodder for which the books print no table. Flavor is grounded in the
 // Core Rulebook Ch.6 (Dungeon NPCs, pp.304-311) and Ch.7 (Neighborhood/Quest structure).
 // One namespace object so it adds a single global.
 const DCC_PREP = {
@@ -31,7 +33,7 @@ const DCC_PREP = {
     { role: "Guide / Fixer", note: "Knows the neighborhood, the shortcuts, and who to bribe." },
     { role: "Quest-giver", note: "Has a job only the crawlers can do. The reward is real; so is the catch." },
     { role: "Non-Combatant local", note: "Lives here. Full stat block, but would very much rather not." },
-    { role: "Rival Crawler contact", note: "Actions against them are Unopposed at Difficulty 16/18/20 (F3/4/5), ±5." },
+    { role: "Crawler contact", note: "Actions against them are Unopposed at Difficulty 16/18/20 (F3/4/5), ±5." },
     { role: "Guild Recruiter", note: "Pitches membership. The perks are good. The fine print is worse." },
     { role: "Interviewer / Showrunner", note: "Wants a soundbite. A good one is worth Popularity." },
     { role: "Dungeon Admin", note: "Runs a piece of the system. Prohibited from in-Crawl help — usually." },
@@ -88,8 +90,11 @@ const DCC_PREP = {
   ],
 
   // ── Neighborhoods (Ch.7) ─────────────────────────────────────────────────────
+  // Book Neighborhoods/Quests for Floors 1–5 (with their Grinding Complications tables) are in
+  // /tools-data/dcc-grinding-tables.js (window.DCC_GRIND) and the generator uses those first.
+  // The names below are the app's own, used only for floors the books don't map (6+).
   nbhdNames: [
-    "Heavensworth", "Noir Town", "The Trash Fires", "Gutter Heights", "The Sepsis Ward",
+    "The Trash Fires", "Gutter Heights", "The Sepsis Ward",
     "Neon Bazaar", "The Rusted Mile", "Little Gehenna", "Pillbug Flats", "The Glass Warren",
     "Slaughterhouse Row", "The Bubbling Quarter", "Mannequin District", "The Hollow Choir",
     "Fungustown", "The Drowned Arcade", "Ashfall Commons", "The Meat Market", "Velvet Rot",
@@ -139,14 +144,7 @@ const DCC_PREP = {
     "Bioluminescent rot is the only light; leave its glow and you're Blinded.",
     "Vertical sprawl — catwalks, drops, and elevators that only the locals trust.",
   ],
-  grindComplications: [
-    "Reinforcements: the Mob you're farming calls in two more.",
-    "An audience gathers; the AI raises the difficulty for a ratings bump.",
-    "A rival crawler tries to steal your kill (and your loot).",
-    "A trap you already disarmed resets behind you.",
-    "The floor-collapse clock lurches forward an hour for no stated reason.",
-    "A Non-Combatant NPC wanders into the fight and will absolutely die without help.",
-  ],
+  // (Grinding complications come from the books now — see DCC_GRIND.)
   moods: [
     "A vendor gives the crawlers a free sample. Outcome: it's genuinely good, and now they feel bad about the vendor's inevitable fate.",
     "Two Mobs argue over territory instead of attacking. Outcome: the crawlers can pit them against each other — or interrupt and unite them.",
@@ -157,7 +155,7 @@ const DCC_PREP = {
 
   // ── Quests (Ch.7) ────────────────────────────────────────────────────────────
   questNames: [
-    "Hate High", "Bad Idea Jeans", "The Long Con", "Crown of Teeth", "Last Call at the Desperado",
+    "Bad Idea Jeans", "The Long Con", "Crown of Teeth", "Last Call at the Desperado",
     "The Understudy", "Company Town", "The Vig", "Saint of Small Mercies", "Reunion Tour",
     "The Patch Notes", "Debtor's Prize", "The Ninth Floor Tourist", "Severance",
   ],

@@ -101,7 +101,7 @@ const SCHEMAS: Record<string, Schema> = {
       const drStr = s(d, "dr");
       return {
         name: s(d, "name"),
-        role: s(d, "role") || "Mob",
+        role: (s(d, "role") === "Rival Crawler" ? "Crawler" : s(d, "role")) || "Mob", // legacy alias
         size: s(d, "size") || "4",
         level: s(d, "level") || "1",
         floor: /^\d+$/.test(drStr) ? drStr : "1",
@@ -853,7 +853,7 @@ function MonsterBody({ form, setForm }: BodyProps) {
           <select className={`${fieldBase} w-full`} value={role} onChange={(e) => set("role", e.target.value)}>
             <option value="Mob">Mob</option>
             {BOSS_SEVERITY.map((b) => <option key={b.role} value={b.role}>{b.role}</option>)}
-            <option value="Rival Crawler">Rival Crawler</option>
+            <option value="Crawler">Crawler</option>
             <option value="NPC">NPC</option>
           </select>
         </div>

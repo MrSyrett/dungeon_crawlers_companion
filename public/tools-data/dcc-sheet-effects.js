@@ -221,13 +221,19 @@
     if ((m = nm.match(/^(?:spell\s+)?scroll(?:\s+of)?\s*[:\-–—]?\s*(.+?)(?:\s*\(rank\s*(\d+)\))?$/i)) && spellBy(m[1])) {
       castFromScroll(spellBy(m[1]), parseInt(m[2], 10) || 1); return after(true);
     }
-    // Magic Tome / Spellbook: <Spell> — learn it (Rank 1d6−1, min 1).
+    // Magic Tome / Spellbook / "Tome of <Spell>" — reading it teaches the Spell and uses the tome up.
+    // Rank: the Rank written on the tome (the creation wizard's tomes note "at Rank N"), else 1d6−1 (min 1).
+    // Already know it? Nothing to learn — the tome is kept (it can still be traded or sold).
     if ((m = nm.match(/^(?:magic\s+tome|spellbook|tome)\s*(?:of)?\s*[:\-–—]?\s*(.+)$/i)) && spellBy(m[1])) {
-      var sp = spellBy(m[1]), rk = Math.max(1, roll(1, 6).total - 1);
+      var sp = spellBy(m[1]);
+      var rowOf = function () { return [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (tr) { var t = tr.querySelector('input[type="text"]'); return t && norm(t.value) === norm(sp.name); }); };
+      if (rowOf()) { log("Read " + nm, "Already known", "You already know " + sp.name + " — the tome is kept", "normal"); return after(false); }
+      var noted = String(notes || "").match(/\brank\s*(\d+)/i);
+      var rk = noted ? Math.max(1, Math.min(10, parseInt(noted[1], 10))) : Math.max(1, roll(1, 6).total - 1);
       try { if (window.DCCSkills && DCCSkills.learn) DCCSkills.learn("spell", sp.name); } catch (e) {}
-      var row = [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (tr) { var t = tr.querySelector('input[type="text"]'); return t && norm(t.value) === norm(sp.name); });
+      var row = rowOf();
       if (row) { var ins = row.querySelectorAll('input[type="text"]'); if (ins[1]) { ins[1].value = String(rk); fire(ins[1]); } }
-      log("Read " + nm, sp.name + " · Rank " + rk, "Learned the spell (Rank 1d6−1, min 1)", "crit");
+      log("Read " + nm, sp.name + " · Rank " + rk, noted ? "Learned the spell at the tome's Rank" : "Learned the spell (Rank 1d6−1, min 1)", "crit");
       return after(true);
     }
     if (/heal pet/i.test(low)) { var hp = parseInt((text.match(/(\d+)\s*Health Bar/i) || [])[1], 10) || 5; var gp = healPet(hp, "pet-hb"); log("Use " + nm, "Pet +" + gp + " HB", "Pet healed " + gp + " slots", "crit"); return after(true); }

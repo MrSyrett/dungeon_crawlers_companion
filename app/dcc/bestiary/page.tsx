@@ -24,7 +24,7 @@ const SIZE_NAMES: Record<number, string> = {
 // Bosses first (they anchor an encounter), then mobs; by level within a role.
 const ROLE_RANK: Record<string, number> = {
   "Floor Boss": 0, "Country Boss": 1, "Province Boss": 2, "City Boss": 3,
-  "Borough Boss": 4, "Neighborhood Boss": 5, "Quest Boss": 5.5, "Rival Crawler": 6,
+  "Borough Boss": 4, "Neighborhood Boss": 5, "Quest Boss": 5.5, "Crawler": 6, "Rival Crawler": 6,
   "Elite": 6.5, "Mob": 7, "NPC": 8,
 };
 const byRole = (a: DccMonster, b: DccMonster) =>
@@ -47,11 +47,11 @@ function validMonster(m: unknown): m is DccMonster {
     && STAT_ORDER.every((s) => !!(x.stats as Record<string, { score?: unknown }>)[s]);
 }
 
-// Group the many boss tiers into one "Boss" filter plus Mob / Rival Crawler.
+// Group the many boss tiers into one "Boss" filter plus Mob / Crawler.
 const ROLE_FILTERS: { key: string; label: string; test: (r: DccMonster["role"]) => boolean }[] = [
   { key: "mob", label: "Mobs", test: (r) => r === "Mob" },
   { key: "boss", label: "Bosses", test: (r) => r.endsWith("Boss") || r === "Elite" },
-  { key: "rival", label: "Rival Crawlers", test: (r) => r === "Rival Crawler" },
+  { key: "rival", label: "Crawlers", test: (r) => r === "Crawler" || r === "Rival Crawler" }, // "Rival Crawler" = legacy alias
   { key: "npc", label: "NPCs", test: (r) => r === "NPC" },
 ];
 

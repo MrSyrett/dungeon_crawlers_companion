@@ -152,7 +152,8 @@ export type DccMonsterRole =
   | "Floor Boss"
   | "Quest Boss"      // used in the Core adventure chapters
   | "Elite"           // used in the Core adventure chapters
-  | "Rival Crawler"
+  | "Crawler"         // the book's term (Core monster blocks: "Crawler, Medium (4), …")
+  | "Rival Crawler"   // legacy alias for "Crawler" (older saved homebrew)
   | "NPC";
 
 export interface DccMonsterAttack {

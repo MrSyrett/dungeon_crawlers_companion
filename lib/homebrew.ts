@@ -108,7 +108,7 @@ export const DCC_BENEFIT_STATS = ["str", "int", "con", "dex", "cha"] as const;
 export const DCC_STATS = ["STR", "INT", "CON", "DEX", "CHA"] as const;
 export const DCC_MONSTER_ROLES = [
   "Mob", "Neighborhood Boss", "Borough Boss", "City Boss", "Province Boss",
-  "Country Boss", "Floor Boss", "Quest Boss", "Elite", "Rival Crawler", "NPC",
+  "Country Boss", "Floor Boss", "Quest Boss", "Elite", "Crawler", "NPC",
 ] as const;
 export const DCC_SKILL_CATEGORIES = ["attack", "utility"] as const;
 export const DCC_SPELL_TYPES = ["attack", "utility", "heal"] as const;
@@ -610,7 +610,8 @@ function normalizeDccMonster(input: unknown): { name: string; data: Record<strin
   if (!name) throw new Error("A homebrew monster needs a name.");
 
   const roles = DCC_MONSTER_ROLES as readonly string[];
-  const role = roles.includes(str(o.role)) ? str(o.role) : "Mob";
+  const rawRole = str(o.role) === "Rival Crawler" ? "Crawler" : str(o.role); // legacy alias
+  const role = roles.includes(rawRole) ? rawRole : "Mob";
   const size = Math.min(8, Math.max(1, num(o.size) ?? 4));
   const level = Math.max(1, num(o.level) ?? 1);
   const floor = Math.max(0, num(o.floor) ?? 0);

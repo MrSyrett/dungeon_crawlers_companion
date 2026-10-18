@@ -93,10 +93,87 @@
     };
     // Floor 4/5: one more item from each of the spread's extra-loot tiers (same slot as before).
     W.lootExtra = extraLootSlots(lr).map((sl) => Object.assign(rollLootItem(sl, lr[sl.key], W.lootRolled[sl.key] && W.lootRolled[sl.key].name), { slot: sl.key }));
+    applyLootSpellChoices(true);
   }
   function extraLootSlots(lr) {
     const tiers = (FLOOR_CFG[W.floor] && FLOOR_CFG[W.floor].extraLootTiers) || [];
     return lr ? LOOT_SLOTS.filter((sl) => tiers.indexOf(lr[sl.key]) >= 0) : [];
+  }
+
+  // ── Spells instead of loot (Core p.116) ─────────────────────────────────────
+  // A Weapon, Armor or Item slot (never a Consumable) can be taken as Spells
+  // instead; that slot then gives no tier benefit. Spells roll on Table 27.
+  const LOOT_SPELL_TABLE = ["Astral Paw", "Confusing Fog", "Drain Life", "Heal Others", "Hole", "Ice Blast",
+    "Lightning Bolt", "Magic Missile", "Puddle Jumper", "Second Chance", "Shield", "Wisp Armor"];   // Table 27 (d12)
+  // Per tier: option a / option b → { n spells, rank die "1d4"|"2d4", mana potions }.
+  const LOOT_SPELL_OPTS = {
+    Bronze:   [{ n: 1, die: "1d4", potions: 1 }],
+    Silver:   [{ n: 1, die: "2d4", potions: 2 }, { n: 2, die: "1d4", potions: 0 }],
+    Gold:     [{ n: 3, die: "1d4", potions: 3 }],
+    Platinum: [{ n: 2, die: "2d4", potions: 4 }, { n: 4, die: "1d4", potions: 0 }],
+  };
+  const SPELL_SLOT_KEYS = ["weapon", "armor", "item"];
+  const optLabel = (o) => o.n + " Spell" + (o.n > 1 ? "s" : "") + " at Rank " + o.die + (o.potions ? " + " + o.potions + " Mana Potion" + (o.potions > 1 ? "s" : "") : "");
+  // The loot entries a spell choice can apply to: the spread's Weapon/Armor/Item, plus any
+  // Floor 4/5 bonus loot in those slots. Keyed "weapon" | "armor" | "item" | "x<i>".
+  function spellableLoot() {
+    const out = [], R = W.lootRolled;
+    if (R) SPELL_SLOT_KEYS.forEach((k) => { if (R[k]) out.push({ key: k, o: R[k], label: LOOT_SLOTS.find((sl) => sl.key === k).label }); });
+    (W.lootExtra || []).forEach((o, i) => { if (SPELL_SLOT_KEYS.indexOf(o.slot) >= 0) out.push({ key: "x" + i, o: o, label: "Bonus " + LOOT_SLOTS.find((sl) => sl.key === o.slot).label }); });
+    return out;
+  }
+  function rollLootSpells(tier, optIdx) {
+    const opts = LOOT_SPELL_OPTS[tier] || LOOT_SPELL_OPTS.Bronze, o = opts[Math.min(optIdx || 0, opts.length - 1)];
+    const roll = () => o.die === "2d4" ? d(4) + d(4) : d(4);
+    const list = [];
+    for (let i = 0; i < o.n; i++) list.push({ name: LOOT_SPELL_TABLE[d(12) - 1], rank: roll() });
+    return { opt: optIdx || 0, potions: o.potions, die: o.die, list: list };
+  }
+  // (Re)attach rolled spells to every loot entry whose slot is set to "spells".
+  function applyLootSpellChoices(reroll) {
+    const C = W.lootSpellChoice || (W.lootSpellChoice = {});
+    spellableLoot().forEach(({ key, o }) => {
+      const c = C[key];
+      if (!c || !c.on) { delete o.spells; return; }
+      if (reroll || !o.spells || o.spells.opt !== (c.opt || 0)) o.spells = rollLootSpells(o.tier, c.opt || 0);
+    });
+  }
+  // Resolve loot spells against what the crawler already knows (at create time):
+  // a known Spell gains 1d2+1 Ranks; one the crawler lacks the Mana to cast comes as a
+  // tome in the Inventory; on Floor 4/5 a duplicate may be swapped for any book Spell.
+  function resolveLootSpells(skills, mana, inv, log) {
+    const known = (nm) => skills.find((x) => String(x.name).toLowerCase() === String(nm).toLowerCase());
+    const tomes = [], tomeRows = {};
+    let potions = 0;
+    spellableLoot().forEach(({ o, label }) => {
+      if (!o.spells) return;
+      potions += o.spells.potions || 0;
+      o.spells.list.forEach((r) => {
+        let name = r.name, sp = spellByName(name);
+        if ((known(name) || tomes.indexOf(name) >= 0) && W.floor > 3 && W.lootSpellSub !== false) {
+          const pool = (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []).filter((x) => !x.passive && !known(x.name) && tomes.indexOf(x.name) < 0);
+          if (pool.length) { const sub = pool[Math.floor(Math.random() * pool.length)]; log.push(label + ": " + name + " (already known) swapped for " + sub.name); name = sub.name; sp = sub; }
+        }
+        const row = known(name);
+        if (row) { const add = d(2) + 1; row.rank = String(Math.min(10, (parseInt(row.rank, 10) || 0) + add)); log.push(label + ": " + name + " +" + add + " Ranks (already known)"); return; }
+        if (!sp) { log.push(label + ": " + name + " (not found)"); return; }
+        // A tome isn't a known Spell until it's read (reading it teaches the Spell and uses the
+        // tome up), so rolling the same unaffordable Spell again simply gives another tome.
+        if (sp.mana != null && Number(sp.mana) > mana) {
+          tomes.push(name);
+          const entry = { item: "Tome of " + sp.name, qty: "1", notes: "Read to learn " + sp.name + " at Rank " + r.rank + " (" + sp.mana + " Mana — more than you have now). Can be traded or sold." };
+          inv.push(entry); tomeRows[sp.name] = (tomeRows[sp.name] || 0) + 1;
+          log.push(label + ": " + sp.name + " as a tome (needs " + sp.mana + " Mana)" + (tomeRows[sp.name] > 1 ? " — another copy" : ""));
+          return;
+        }
+        skills.push(spellRow(sp, r.rank));
+        log.push(label + ": " + sp.name + " Rank " + r.rank);
+      });
+    });
+    if (potions) {
+      const mp = inv.find((x) => x.item === "Mana Potion");
+      if (mp) mp.qty = String((parseInt(mp.qty, 10) || 0) + potions); else inv.push({ item: "Mana Potion", qty: String(potions), notes: "" });
+    }
   }
 
   // Book data + the user's saved homebrew (own + campaign-shared). Homebrew is
@@ -349,6 +426,8 @@
       loot: "",         // thirdfloor: Table-25 row "1".."4"
       lootRolled: null, // thirdfloor: concrete rolled items per slot { weapon, armor, item, consumable }
       lootExtra: [],    // Floor 4/5: the extra Starting Loot items [{ slot, name, notes, tier }]
+      lootSpellChoice: {}, // Spells instead of loot: { weapon|armor|item|x<i>: { on, opt } } (Core p.116)
+      lootSpellSub: true,  // Floor 4/5: swap a duplicate loot Spell for another book Spell
       boosts: [],       // Floor 4/5: names of the 6 / 8 Skills chosen for the extra 2d2/1d2 boost
       story: { trauma: "", loose: "", regret: "" },
       gear: { clothes: "", useful: "", junk: "", weapon: "", extra: "" },
@@ -733,7 +812,16 @@
     if (!W.loot) { h += `<p class="dccw-warn">Pick a loot spread to continue.</p>`; return h; }
     if (!W.lootRolled) rollLoot();
     const R = W.lootRolled;
-    const line = (o) => `<li><b>${esc(o.name)}</b> <span class="dccw-sub">(${o.tier}${o.real ? "" : o.tierBenefit ? " · your choice of item, tier benefits applied" : " · GM's discretion"})</span><br><span class="dccw-sub">${esc(o.notes)}</span></li>`;
+    const keyOf = (o) => { if (o === R.weapon) return "weapon"; if (o === R.armor) return "armor"; if (o === R.item) return "item"; const i = (W.lootExtra || []).indexOf(o); return i >= 0 && SPELL_SLOT_KEYS.indexOf(o.slot) >= 0 ? "x" + i : ""; };
+    const spellCtl = (o) => {
+      const k = keyOf(o); if (!k) return "";
+      const c = (W.lootSpellChoice || {})[k] || {}, opts = LOOT_SPELL_OPTS[o.tier] || [];
+      let t = `<br><span class="dccw-chip ${c.on ? "on" : ""}" style="margin-top:4px;" onclick="DCCW.toggleLootSpells('${k}')">${c.on ? "✓ " : ""}Take Spells instead</span>`;
+      if (c.on && opts.length > 1) t += opts.map((op, i) => `<span class="dccw-chip ${(c.opt || 0) === i ? "on" : ""}" style="margin-top:4px;" onclick="DCCW.setLootSpellOpt('${k}',${i})">${esc(optLabel(op))}</span>`).join("");
+      if (c.on && o.spells) t += `<br><span class="dccw-sub">Table 27: ${esc(o.spells.list.map((r) => r.name + " (Rank " + r.rank + ")").join(", "))}${o.spells.potions ? " · +" + o.spells.potions + " Mana Potion" + (o.spells.potions > 1 ? "s" : "") : ""}. A Spell you already know gains 1d2+1 Ranks; one you lack the Mana for comes as a tome.</span>`;
+      return t;
+    };
+    const line = (o) => `<li>${o.spells ? `<b style="text-decoration:line-through;opacity:.6;">${esc(o.name)}</b> <span class="dccw-sub">(${o.tier} · taken as Spells — no tier benefit)</span>` : `<b>${esc(o.name)}</b> <span class="dccw-sub">(${o.tier}${o.real ? "" : o.tierBenefit ? " · your choice of item, tier benefits applied" : " · GM's discretion"})</span><br><span class="dccw-sub">${esc(o.notes)}</span>`}${spellCtl(o)}</li>`;
     h += `<div class="dccw-card" style="margin-top:10px;border-color:#b82018;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><b style="color:#f0a8a3;">Your loot — Spread ${esc(String(W.loot))}</b><button class="dccw-btn" onclick="DCCW.rerollLoot()">🎲 Reroll</button></div>
       <ul class="dccw-list">${line(R.weapon)}${line(R.armor)}${line(R.item)}${line(R.consumable)}</ul></div>`;
@@ -741,6 +829,9 @@
     if (X.length) {
       h += `<div class="dccw-card" style="border-color:#b82018;"><b style="color:#f0a8a3;">Floor ${W.floor} bonus loot</b> <span class="dccw-sub">(one more from your ${FLOOR_CFG[W.floor].extraLootTiers.join(" and ")} options; rerolls with the spread)</span>
         <ul class="dccw-list">${X.map(line).join("")}</ul></div>`;
+    }
+    if (W.floor > 3 && spellableLoot().some(({ o }) => o.spells)) {
+      h += `<p class="dccw-sub"><span class="dccw-chip ${W.lootSpellSub !== false ? "on" : ""}" onclick="DCCW.toggleLootSpellSub()">${W.lootSpellSub !== false ? "✓ " : ""}Swap a duplicate Spell for another from the book</span> (Fourth/Fifth Floor option)</p>`;
     }
     return h;
   }
@@ -1082,10 +1173,10 @@
     // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack.
     if (third && W.loot && atks[1]) {
       const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
-      const bonus = lr ? (TIER_WEAPON_SKILL[lr.weapon] || 0) : 0;
+      const bonus = lr && !(W.lootRolled && W.lootRolled.weapon && W.lootRolled.weapon.spells) ? (TIER_WEAPON_SKILL[lr.weapon] || 0) : 0;
       if (bonus) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + bonus));
       // Floor 4/5 bonus loot: an extra weapon upgrades the primary weapon the same way.
-      (W.lootExtra || []).forEach((o) => { if (o.slot === "weapon") { const b2 = TIER_WEAPON_SKILL[o.tier] || 0; if (b2) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + b2)); } });
+      (W.lootExtra || []).forEach((o) => { if (o.slot === "weapon" && !o.spells) { const b2 = TIER_WEAPON_SKILL[o.tier] || 0; if (b2) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + b2)); } });
     }
     // Floor 4/5 extra boosts (Core p.118): each chosen Skill +2d2 at Rank ≤4, else +1d2
     // (max 10). Applied last; the same roll goes to that skill's Attacks row(s).
@@ -1143,7 +1234,7 @@
         <li>Class: ${esc(W.class || "—")}</li>
         <li>${W.experiences.length} Experiences: ${esc(chosen.join(", ") || "—")}</li>
         <li>${cfg.statPoints} stat points distributed · Popularity ${statMod(fin.cha) * (W.floor === 3 ? 2 : 3)}</li>
-        <li>Loot (Spread ${esc(String(W.loot || "—"))}): ${esc(W.lootRolled ? [W.lootRolled.weapon, W.lootRolled.armor, W.lootRolled.item, W.lootRolled.consumable].concat(W.lootExtra || []).map((o) => o.name).join(", ") : "—")}</li>
+        <li>Loot (Spread ${esc(String(W.loot || "—"))}): ${esc(W.lootRolled ? [W.lootRolled.weapon, W.lootRolled.armor, W.lootRolled.item, W.lootRolled.consumable].concat(W.lootExtra || []).map((o) => o.spells ? o.tier + " " + ((o === W.lootRolled.weapon && "Weapon") || (o === W.lootRolled.armor && "Armor") || (o === W.lootRolled.item && "Item") || ("bonus " + (o.slot || ""))) + " as Spells: " + o.spells.list.map((r) => r.name + " R" + r.rank).join(", ") + (o.spells.potions ? " +" + o.spells.potions + " Mana Potions" : "") : o.name).join(" · ") : "—")}</li>
         <li>Skill &amp; attack ranks get their boosts on create (primary +2d4, others +1d4, plus Experience ranks).</li>
         ${W.floor > 3 ? `<li>Floor ${W.floor} extra boosts (+2d2 at Rank ≤4, else +1d2): ${esc((W.boosts || []).join(", ") || "—")}</li>` : ""}
       </ul></div>`;
@@ -1198,7 +1289,8 @@
       const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
       if (lr) {
         // Floor 4/5 bonus armor fills another gear slot, so its DR adds on.
-        const dr = (TIER_DR[lr.armor] || 0) + (W.lootExtra || []).filter((o) => o.slot === "armor").reduce((n, o) => n + (TIER_DR[o.tier] || 0), 0);
+        const mainArmorSpells = W.lootRolled && W.lootRolled.armor && W.lootRolled.armor.spells;
+        const dr = (mainArmorSpells ? 0 : (TIER_DR[lr.armor] || 0)) + (W.lootExtra || []).filter((o) => o.slot === "armor" && !o.spells).reduce((n, o) => n + (TIER_DR[o.tier] || 0), 0);
         drArmor = dr ? String(dr) : "";
       }
     }
@@ -1222,7 +1314,8 @@
     //   Platinum Armor:  +5 Constitution and +3 to Catcher or Taunt.
     if (third && W.loot) {
       const lrP = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
-      const count = (key) => (lrP && lrP[key] === "Platinum" ? 1 : 0) + (W.lootExtra || []).filter((o) => o.slot === key && o.tier === "Platinum").length;
+      const mainTaken = (key) => !!(W.lootRolled && W.lootRolled[key] && W.lootRolled[key].spells);
+      const count = (key) => (lrP && lrP[key] === "Platinum" && !mainTaken(key) ? 1 : 0) + (W.lootExtra || []).filter((o) => o.slot === key && o.tier === "Platinum" && !o.spells).length;
       const addEnh = (k, n) => { if (data.stats[k]) data.stats[k].enh = String((parseInt(data.stats[k].enh, 10) || 0) + n); };
       const pw = count("weapon"), pa = count("armor");
       if (pw) { const st = String((atks[1] && atks[1].stat) || "").toLowerCase() === "dex" ? "dex" : "str"; addEnh(st, 3 * pw); }
@@ -1236,6 +1329,7 @@
       }
     }
     // Inventory: the gear boxes, plus the four loot items on the fast-forward.
+    const lootSpellLog = [];
     const inv = gearItems().map((item) => ({ item, qty: "1", notes: "" }));
     // Casters start with Mana Potions — one item, quantity 5 (not "5 Mana Potions").
     if (W.combat.type === "spell") inv.push({ item: "Mana Potion", qty: "5", notes: "" });
@@ -1243,14 +1337,16 @@
       if (!W.lootRolled) rollLoot();
       const R = W.lootRolled;
       if (R) {
-        [R.weapon, R.armor, R.item, R.consumable].concat(W.lootExtra || []).forEach((o) => { if (o) inv.push({ item: o.name, qty: "1", notes: o.notes }); });
+        [R.weapon, R.armor, R.item, R.consumable].concat(W.lootExtra || []).forEach((o) => { if (o && !o.spells) inv.push({ item: o.name, qty: "1", notes: o.notes }); });
       }
+      resolveLootSpells(skills, fin.int, inv, lootSpellLog);
     }
     data.inventory = inv;
     const popularity = third ? String(statMod(fin.cha) * (W.floor === 3 ? 2 : 3)) : "";
     const notes = third
       ? `Created with the Crawler Wizard — Floor ${W.floor}, Level ${cfg.level}, Class ${W.class}. Skill ranks include the fast-forward boosts (primary +2d4, others +1d4) and Experience ranks.` +
         (W.floor > 3 ? ` Floor ${W.floor} extra skill boosts: ${(boostLog || []).join(", ") || "none"}.` : "") +
+        (lootSpellLog.length ? ` Spells taken instead of loot: ${lootSpellLog.join("; ")}.` : "") +
         (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "")
       : `Created with the Crawler Wizard. Knows Heal (Rank 1, 2 Mana, heal 2 slots, Interrupt).` +
         (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "");
@@ -1455,6 +1551,9 @@
     },
     setLoot(row) { W.loot = String(row); rollLoot(); render(); },
     rerollLoot() { rollLoot(); render(); },
+    toggleLootSpells(k) { const C = W.lootSpellChoice || (W.lootSpellChoice = {}); const c = C[k] || (C[k] = { on: false, opt: 0 }); c.on = !c.on; applyLootSpellChoices(false); render(); },
+    setLootSpellOpt(k, i) { const C = W.lootSpellChoice || (W.lootSpellChoice = {}); const c = C[k] || (C[k] = { on: true, opt: 0 }); c.on = true; c.opt = i; applyLootSpellChoices(false); render(); },
+    toggleLootSpellSub() { W.lootSpellSub = W.lootSpellSub === false; render(); },
   };
 
   window.DCCW = API;

@@ -1357,7 +1357,7 @@ const DCC_MONSTERS = [
   {
     "source": "Core",
     "name": "Bomb Tosser",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Humanoid"
@@ -1826,7 +1826,7 @@ const DCC_MONSTERS = [
   },
   {
     "name": "Bruiser",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Human"
@@ -2655,7 +2655,7 @@ const DCC_MONSTERS = [
   },
   {
     "name": "Cat Girl",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Humanoid"
@@ -4574,7 +4574,7 @@ const DCC_MONSTERS = [
   },
   {
     "name": "Derrick Qu",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Human"
@@ -4633,7 +4633,7 @@ const DCC_MONSTERS = [
       }
     ],
     "notes": [
-      "Block type line is \"Crawler, Medium (4), Human\" (Crawler #12,330,875); mapped to Rival Crawler. Rosie's grandson, initially antagonistic (traps her, flees) then becomes a reluctant ally NPC who sacrifices himself to clear a path into the Boss Chamber.",
+      "Block type line is \"Crawler, Medium (4), Human\" (Crawler #12,330,875); mapped to Crawler. Rosie's grandson, initially antagonistic (traps her, flees) then becomes a reluctant ally NPC who sacrifices himself to clear a path into the Boss Chamber.",
       "Skills — Wild Child: Stealth (2), Survival (3).",
       "Skills — Weirdo: Aliens & UFOs (5), Intimidate (3).",
       "Skills — Peanut Butter Factory Worker: Fabricate (3), Repair (4).",
@@ -4786,7 +4786,7 @@ const DCC_MONSTERS = [
   {
     "source": "Core",
     "name": "Doppelganger Saboteur",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Humanoid"
@@ -9011,7 +9011,7 @@ const DCC_MONSTERS = [
   {
     "source": "Core",
     "name": "Human Gunslinger",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Humanoid"
@@ -9080,7 +9080,7 @@ const DCC_MONSTERS = [
   {
     "source": "Core",
     "name": "Human Swashbuckler",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Humanoid"
@@ -10945,7 +10945,7 @@ const DCC_MONSTERS = [
   {
     "source": "Core",
     "name": "Mellow Surfer",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Human"
@@ -15142,7 +15142,7 @@ const DCC_MONSTERS = [
   {
     "source": "Core",
     "name": "Roller Derby Jammer",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Humanoid"
@@ -18273,7 +18273,7 @@ const DCC_MONSTERS = [
   },
   {
     "name": "Tigran Warrior",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Humanoid"
@@ -19633,7 +19633,7 @@ const DCC_MONSTERS = [
   },
   {
     "name": "Wise-Guy",
-    "role": "Rival Crawler",
+    "role": "Crawler",
     "size": 4,
     "tags": [
       "Human"
