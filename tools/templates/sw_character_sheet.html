@@ -773,7 +773,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
         </table>
         <div class="section-bar" style="margin-top:6px;"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="openWeaponPicker()">+ Weapons</button></span></div>
         <table class="tbl" id="weapons-tbl">
-          <thead><tr><th style="width:21%;">Weapon</th><th style="width:19%;">Skill</th><th style="width:66px;">Damage</th><th style="width:13%;">Range</th><th>Notes</th><th style="width:92px;"></th></tr></thead>
+          <thead><tr><th style="width:21%;">Weapon</th><th style="width:19%;">Skill</th><th style="width:66px;">Damage</th><th style="width:13%;">Range</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="weapons-body"></tbody>
         </table>
       </div>
@@ -1168,8 +1168,17 @@ function rollCode(label, basePips, opts) {
   const c = computeRoll(basePips, opts);
   addLog(label, c.total + c.mark, c.detail, c.type); return c.total;
 }
-function rollAttr(a) { rollCode(a, attr(a)); }
-function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; rollCode(name, rowTotal(tr)); }
+// Rolling an attribute or skill from the main sheet is a skill use: it takes an action, the
+// same way the Action tab's cards do (claim the next declared slot, raising the multi-action
+// penalty first only when every declared slot is already used). It never blocks the roll.
+var _fromActionTab = false;
+function actSheetSpend(run) {
+  if(_fromActionTab || typeof _act === 'undefined' || typeof renderAction !== 'function') { run(); return; }
+  if(_act.used >= _act.declared) { _act.declared = Math.min(9, _act.used + 1); const el = $('f-map'); if(el) el.value = actMap(); updateModNote(); }
+  run(); _act.used++; renderAction(); scheduleAutosave();
+}
+function rollAttr(a) { actSheetSpend(() => rollCode(a, attr(a))); }
+function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; actSheetSpend(() => rollCode(name, rowTotal(tr))); }
 function rollLoose(n) { const map = swMAP(), pips = Math.max(1, n * 3 - map * 3), r = rollDice(pips); addLog(n + 'D', r.total, [swDiceStr(pips, r), map ? '−' + map + 'D Multi-Action' : ''].filter(Boolean).join(' · '), 'normal'); }
 // ── Dice pool tray: 1D/2D/3D build a pool, Roll rolls it with the Wild Die ──────
 var swPool = 0;
@@ -1210,7 +1219,7 @@ function addWeaponRow(w) {
     + '<td><input type="text" class="wp-dmg num" value="' + esc(w.damage || '') + '" placeholder="4D" style="width:60px;"></td>'
     + '<td><input type="text" class="wp-range" value="' + esc(w.range || '') + '" placeholder="3-10/30/120"></td>'
     + '<td><input type="text" class="wp-notes" value="' + esc(w.notes || '') + '"></td>'
-    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))" title="Roll to-hit and damage">Attack</button>' + xBtn + '</td>';
+    + '<td style="white-space:nowrap;">' + xBtn + '</td>';
   $('weapons-body').appendChild(tr); return tr;
 }
 function refreshWeaponRows() { document.querySelectorAll('#weapons-body .wp-skill').forEach(sel => { const cur = sel.value; sel.innerHTML = skillOptions(cur); }); }
@@ -1314,7 +1323,8 @@ function actDeclare(delta) {
 }
 function actDo(i, j) {
   const o = _actOpts[i]; if(!o) return;
-  const run = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run; if(!run) return;
+  const run0 = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run; if(!run0) return;
+  const run = () => { _fromActionTab = true; try { run0(); } finally { _fromActionTab = false; } };   // the tab spends; the sheet hook must not
   if(_act.full && o.kind !== 'move') return;
   if(o.kind === 'move') { run(); renderAction(); scheduleAutosave(); return; }   // a segment, not a skill use
   if(o.kind === 'full') {
@@ -1389,19 +1399,14 @@ function renderAction() {
     + sec('attacks', 'Attacks', S.attacks, 'No weapons yet — add them from ' + ACT_CFG.weaponsHome + '.')
     + sec('reactions', ACT_CFG.reactTitle, S.reactions, null)
     + sec('powers', ACT_CFG.powerTitle, S.powers, null)
-    + sec('actions', 'Actions', S.actions, null)
-    + sec('skills', 'Use a Skill', S.skills, 'No skills yet.');
+    + sec('actions', 'Actions', S.actions, null);
 }
 
 var ACT_CFG = {
   weaponsHome: 'the Equipment tab',
   reactTitle: 'Reactions',
   powerTitle: 'The Force',
-  points: () => [
-    { label: 'Force Points', value: num(($('f-fp') || {}).value), btn: { label: forcePointArmed ? 'Active ✓' : 'Use', fn: 'toggleForcePoint()', title: 'Spend a Force Point: every skill and attribute code is doubled for the rest of this round' } },
-    { label: 'Dark Side', value: num(($('f-ds') || {}).value) },
-    { label: 'Skill Points', value: num(($('f-sp') || {}).value) },
-  ],
+  points: () => [],   // Force, Dark Side and Skill Points live on the main sheet (Use Force Point button there)
   badges: () => forcePointArmed ? ['Force Point — all codes doubled this round'] : [],
   build: (add) => {
     [...document.querySelectorAll('#weapons-body tr')].forEach(tr => {
@@ -1426,10 +1431,6 @@ var ACT_CFG = {
     add('actions', { name: 'Move', kind: 'move', sub: 'Takes a segment but is not a skill use (no multi-action penalty) · walk ' + Math.round(mv / 2) + ' m, any turn · run ' + mv + ' m, one 90° turn, −1D to every skill roll this round',
       btns: [['Walk', () => addLog('Walk', Math.round(mv / 2) + ' m', 'Movement segment · no penalty', 'normal')],
              ['Run', () => { if(!_act.ran) { _act.ran = true; updateModNote(); } addLog('Run', mv + ' m', 'Movement segment · −1D to every skill roll this round', 'normal'); }]] });
-    skillRows().forEach(tr => {
-      const nm = tr.querySelector('.sk-name-in').value.trim(); if(!nm) return;
-      add('skills', { name: nm, kind: 'action', sub: toCode(rowTotal(tr)) + ' · ' + (tr.dataset.attr || ''), btn: 'Roll', run: () => rollSkillRow(tr) });
-    });
   },
 };
 

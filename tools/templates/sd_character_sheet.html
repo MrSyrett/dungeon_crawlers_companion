@@ -1515,6 +1515,12 @@ function setDefaultTab(){ setTab(_tab || 'gear'); }
 var _sdTurn = { move: false, action: false, second: false, focus: '' };
 var _sdTurnOpts = [];
 var _sdTurnCollapsed = { checks: true };
+var _sdFromTab = false;   // true while an Action-tab card is running its roll (it spends the turn itself)
+// A stat check rolled from the main sheet uses your Action (never blocks the roll).
+function sdSheetCheckSpend(){
+  if(_sdFromTab) return;
+  if(!_sdTurn.action){ _sdTurn.action = true; if(typeof sdAfter === 'function') sdAfter(); }
+}
 function sdEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function sdHD(){ return typeof heroDarkOn === 'function' && heroDarkOn(); }
 // Can the turn still afford this kind of thing?
@@ -1603,9 +1609,6 @@ function sdBuildOpts(){
     run: () => { addLog('Multitask', '—', 'A small parallel task (no action)', 'normal'); return true; } });
   add('actions', { name: 'Improvise', kind: 'action', sub: 'Anything else you can describe — the GM sets the check', btn: 'Use',
     run: () => { addLog('Improvise', '—', 'Action spent on something else', 'normal'); return true; } });
-  // Stat checks
-  STATS.forEach(st => add('checks', { name: st.full, kind: 'action', sub: 'd20 ' + fmtMod(getStatMod(st.id)), btn: 'Roll',
-    run: () => { rollStat(st.id, st.full); return true; } }));
   return O;
 }
 
@@ -1618,7 +1621,8 @@ function sdTurnDo(i){
   const prev = advState;
   if(second) advState = (advState === 'advantage') ? null : 'disadvantage';
   let ok;
-  try { ok = o.run(); } finally { if(second) advState = prev; }
+  _sdFromTab = true;
+  try { ok = o.run(); } finally { _sdFromTab = false; if(second) advState = prev; }
   if(ok === false) { renderSDTurn(); return; }
   sdSpend(o.kind);
   sdAfter();
@@ -1637,7 +1641,6 @@ function renderSDTurn(){
   const host = document.getElementById('sd-turn'); if(!host) return;
   const O = sdBuildOpts();
   const pip = (on, lbl, cls) => `<span class="sdt-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}">${lbl}</span>`;
-  const luck = parseInt(document.getElementById('lk-val')?.value) || 0;
   const badges = (Array.isArray(_trackers) ? _trackers : []).map(t =>
     `<span class="sdt-badge${(typeof SD_TRACKERS_GOOD !== 'undefined' && SD_TRACKERS_GOOD.includes(t)) ? ' good' : ' bad'}">${sdEsc(t)}</span>`).join('')
     + (sdHD() ? (sdOneActionOnly() ? `<span class="sdt-badge bad" title="HeroDark: while Dying you have only one action on your turn">Dying · 1 action only</span>` : `<span class="sdt-badge hd" title="HeroDark: forgo your move for a second attack or cast, at disadvantage">HeroDark · 2nd action at disadv.</span>`) : '');
@@ -1654,15 +1657,11 @@ function renderSDTurn(){
         <div class="sdt-econ">${pip(_sdTurn.move, 'Move')}${pip(_sdTurn.action, 'Action')}</div>
         <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's move and action">End Turn</button>
       </div>
-      <div class="sdt-row2">
-        <span class="sdt-luck"><span class="sdt-lbl">Luck</span> <b>${luck}</b><button class="sdt-mini" onclick="sdSpendLuck()" ${luck < 1 ? 'disabled' : ''} title="Spend a luck token to reroll any roll">Spend</button></span>
-        <div class="sdt-badges">${badges}</div>
-      </div>
+      ${badges ? `<div class="sdt-row2"><div class="sdt-badges">${badges}</div></div>` : ''}
     </div>
     ${sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons on the Equipment tab.')}
     ${sec('spells', 'Spells', O.spells, 'No spells — learn them from the Spellbook on the Spells tab.')}
-    ${sec('actions', 'Actions', O.actions, '')}
-    ${sec('checks', 'Use a Skill', O.checks, '')}`;
+    ${sec('actions', 'Actions', O.actions, '')}`;
 }
 // Keep the controller current while it's open.
 let _sdTurnT = null;
@@ -3115,6 +3114,7 @@ function rollStat(id, name) {
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
     `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''}${str?' '+fmtMod(str)+' stress':''} = ${total}`, type);
   heroDarkLuckOnNat(roll, name + ' check');
+  if(typeof sdSheetCheckSpend === 'function') sdSheetCheckSpend();
 }
 
 // Evade: roll d20 + DEX against the attacker's Attack DC (the GM sets the DC).

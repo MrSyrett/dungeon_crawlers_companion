@@ -1265,11 +1265,19 @@ function rollSkill(name){
   var s=skillObj(name); if(!s)return;
   var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty();
   doPool(name+' ('+s.attr+')', pool, true);
+  actSheetRollSpend();
 }
 function rollAttr(k){
   var a=null; for(var i=0;i<ATTRS.length;i++){ if(ATTRS[i].key===k){ a=ATTRS[i]; break; } }
   var pool=attrVal(k)-condPenaltyFor(k)-critPenalty();
   doPool((a?a.name:k)+' ('+k+')', pool, true);
+  actSheetRollSpend();
+}
+// A skill or attribute roll from the main sheet takes the Full action (p.65). Silent when it's
+// already spent — the roll always goes ahead; Action-tab cards spend through actDo instead.
+function actSheetRollSpend(){
+  if(_actFromTab || !actCan('full')) return;
+  actSpend('full'); renderAction(); scheduleAutosave();
 }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
@@ -1646,7 +1654,7 @@ $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
 // Perform actions here; the Gear/Story tabs manage what you have. State lives in
 // S.act (saved with the sheet). End Turn resets the round's actions and logs
 // nothing; there is no round counter (that's the GM's to track).
-var _actOpts=[], _actCollapsed={skills:true};
+var _actOpts=[], _actCollapsed={}, _actFromTab=false;
 function actState(){ if(!S.act||typeof S.act!=='object') S.act={full:false,quick:0,used:0}; return S.act; }
 function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
 function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty()); }
@@ -1655,7 +1663,8 @@ function actDo(i,j){
   if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
   if(!actCan(o.kind)){ actSpend(o.kind, o.name); return; }
   var run=(o.btns&&o.btns[j])?o.btns[j][1]:o.run;
-  var ok=run(); if(ok===false){ renderAction(); return; }
+  _actFromTab=true; var ok; try{ ok=run(); } finally{ _actFromTab=false; }
+  if(ok===false){ renderAction(); return; }
   actSpend(o.kind, o.name);
   renderAction(); scheduleAutosave();
 }
@@ -1708,7 +1717,7 @@ function actSpend(kind,label){
 }
 function renderAction(){
   var host=$('act-hub'); if(!host) return;
-  var a=actState(), O={attacks:[],full:[],quick:[],interrupts:[],skills:[]}; _actOpts=[];
+  var a=actState(), O={attacks:[],full:[],quick:[],interrupts:[]}; _actOpts=[];
   // Attacks (full action)
   actAdd('attacks',{name:'Unarmed',kind:'full',sub:'Close Combat · '+actPoolOf('Close Combat',0)+' dice · Dmg 1 · Adjacent',btn:'Attack',run:function(){ rollUnarmed(); }},O);
   gearOf('weapon').filter(function(x){ return x.g.equipped; }).forEach(function(x){ var w=x.g, i=x.i;
@@ -1740,7 +1749,6 @@ function renderAction(){
   actAdd('interrupts',{name:'Defend',kind:'quick',sub:'Close Combat · against a close combat attack · declare before they roll',btn:'Roll',run:actSkillRoll('Close Combat','Defend')},O);
   actAdd('interrupts',{name:'Dodge',kind:'quick',sub:'Mobility · against a ranged attack you can see · declare before they roll',btn:'Roll',run:actSkillRoll('Mobility','Dodge')},O);
   // Use a skill (full action)
-  SKILLS.forEach(function(s){ actAdd('skills',{name:s.name,kind:'full',sub:s.attr+' · '+actPoolOf(s.name,0)+' dice',btn:'Roll',run:function(){ rollSkill(s.name); }},O); });
   // Broken (p.68): a single move action per round and nothing else.
   var broken=S.health && S.health.max>0 && num(S.health.dmg)>=S.health.max;
   if(broken) _actOpts.forEach(function(o){
@@ -1754,14 +1762,11 @@ function renderAction(){
   if(broken) badges='<span class="act-badge warn" title="At zero Health you can make a single move action per round and nothing else (p.68)">Broken</span>'+badges;
   host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div>'
     +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button></div>'
-    +'<div class="act-row2">'+(synth?'':'<span class="act-stat"><span class="al">Stress</span> <b>'+stress+'</b></span>')
-    +'<div class="act-badges">'+badges+'</div>'
-    +(synth?'':'<button class="act-mini" onclick="rollPanic()" title="When the GM calls for a Panic Roll">Roll Panic</button>')+'</div></div>'
+    +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+'</div>'
     +actSec('attacks','Attacks',O.attacks,'')
     +actSec('full','Full Actions',O.full,'')
     +actSec('quick','Quick Actions',O.quick,'')
-    +actSec('interrupts','Interrupts',O.interrupts,'')
-    +actSec('skills','Use a Skill',O.skills,'');
+    +actSec('interrupts','Interrupts',O.interrupts,'');
 }
 try{ if(localStorage.getItem('yze_dark')==='1') setDarkMode(true); }catch(e){}
 </script>

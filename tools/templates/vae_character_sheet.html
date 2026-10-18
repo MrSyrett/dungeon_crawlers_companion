@@ -1113,8 +1113,8 @@ function doRoll(label, baseN, skillN, gearN, attrKey, ctx){
   showPushOption();
 }
 // Pools subtract conditions + crit penalty from the Base dice (min 1 die enforced in doRoll).
-function rollSkill(name){ var s=skillObj(name); if(!s)return; var pen=skillPen(name); doRoll(name+' ('+s.attr+')', attrBase(s.attr)-pen, num(S.skills[name]), 0, s.attr, {ctype:attrType(s.attr)}); }
-function rollAttr(k){ var pen=condPenaltyFor(k)+critModFor(null); doRoll(attrName(k)+' ('+k+')', attrBase(k)-pen, 0, 0, k, {ctype:attrType(k)}); }
+function rollSkill(name){ var s=skillObj(name); if(!s)return; var pen=skillPen(name); doRoll(name+' ('+s.attr+')', attrBase(s.attr)-pen, num(S.skills[name]), 0, s.attr, {ctype:attrType(s.attr)}); actMainRoll(); }
+function rollAttr(k){ var pen=condPenaltyFor(k)+critModFor(null); doRoll(attrName(k)+' ('+k+')', attrBase(k)-pen, 0, 0, k, {ctype:attrType(k)}); actMainRoll(); }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
   var skName=String(w.skill||'Close Combat').split('/')[0].trim(), s=skillObj(skName)||{attr:'PHY'};
@@ -1164,7 +1164,9 @@ function doPush(){
 // End Turn clears the two bubbles (no Roll Log entry, no round counter).
 function actFresh(){ return {slow:false, fast:false, slowAsFast:false, brokeFree:false}; }
 var _act=actFresh();
-var _actCollapsed={skills:true};
+var _actCollapsed={};
+var _actFromTab=false;
+function actMainRoll(){ if(_actFromTab||typeof _act==='undefined'||!_act) return; if(!_act.slow){ _act.slow=true; if(typeof renderAction==='function') renderAction(); if(typeof scheduleAutosave==='function') scheduleAutosave(); } }
 var _actOpts=[];
 function actCan(kind){ if(kind==='slow') return !_act.slow; if(kind==='fast') return !_act.fast||!_act.slow; return true; }
 function actSpend(kind){
@@ -1182,7 +1184,8 @@ function actDo(i){
   var o=_actOpts[i]; if(!o) return;
   if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
   if(!actCan(o.kind)){ addLog(o.name, 'No '+(o.kind==='slow'?'slow':'')+' action left', o.kind==='slow'?'Your slow action is spent this round.':'Both actions are spent this round.', 'normal'); return; }
-  var ok=o.run(); if(ok===false){ renderAction(); return; }
+  var ok; _actFromTab=true; try{ ok=o.run(); } finally{ _actFromTab=false; }
+  if(ok===false){ renderAction(); return; }
   actSpend(o.kind); renderAction(); scheduleAutosave();
 }
 function actKindLabel(k){ return k==='slow'?'Slow':k==='fast'?'Fast':'Free'; }
@@ -1203,7 +1206,6 @@ function actBuild(){
   ACT_SYS.react.forEach(mk('react','fast'));
   ACT_SYS.slow.forEach(mk('slow','slow'));
   ACT_SYS.fast.forEach(mk('fast','fast'));
-  SKILLS.forEach(function(s){ add('skills',{ name:s.name, kind:'slow', sub:attrName(s.attr)+' + '+s.name+' '+num(S.skills[s.name]), btn:'Roll', run:function(){ rollSkill(s.name); } }); });
   // Broken (p.63–64).
   if(S.brokenPhys) _actOpts.forEach(function(o){ if(!o.blocked) o.blocked='Physically Broken'; });
   else if(S.brokenMent) _actOpts.forEach(function(o){ if(!o.blocked&&!o.mb) o.blocked='Mentally Broken'; });
@@ -1220,13 +1222,12 @@ function renderAction(){
   var sec=function(key,title,list,empty){ var col=!!_actCollapsed[key];
     return '<div class="act-sec'+(col?' collapsed':'')+'"><div class="act-sec-hd" onclick="actToggleSec(\''+key+'\')"><span class="caret">▼</span><span class="ttl">'+title+'</span></div><div class="act-sec-body">'+(list.length?list.map(card).join(''):'<div class="act-empty">'+empty+'</div>')+'</div></div>'; };
   host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div><button class="act-end" onclick="actEndTurn()" title="Clear this round\'s slow and fast actions">End Turn</button></div>'
-    +'<div class="act-row2">'+actRow2()+'</div></div>'
+    +(function(r){ return r?'<div class="act-row2">'+r+'</div>':''; })(actRow2())+'</div>'
     +sec('attacks','Attacks',O.attacks,'No weapons equipped — equip one on the Gear tab.')
     +(ACT_SYS.specialTitle?sec('special',ACT_SYS.specialTitle,O.special,ACT_SYS.specialEmpty||''):'')
     +sec('react','Reactions',O.react,'')
     +sec('slow','Slow Actions',O.slow,'')
-    +sec('fast','Fast Actions',O.fast,'')
-    +sec('skills','Use a Skill',O.skills,'');
+    +sec('fast','Fast Actions',O.fast,'');
 }
 
 // "Typical" slow and fast actions — core rulebook p.60 table; reactions p.59–62.
@@ -1265,11 +1266,10 @@ var ACT_SYS={
   ]
 };
 function actRow2(){
-  var b='', any=false;
-  CONDS.forEach(function(c){ if(S.conditions&&S.conditions[c.name]){ any=true; b+='<span class="act-badge'+(c.type==='Mental'?' mental':' warn')+'">'+esc(c.name)+'</span>'; } });
-  if(S.brokenPhys){ any=true; b+='<span class="act-badge bad">Physically Broken</span>'; }
-  if(S.brokenMent){ any=true; b+='<span class="act-badge bad">Mentally Broken</span>'; }
-  return '<span class="act-res">Conditions</span>'+(any?b:'<span class="act-badge">None</span>');
+  var b='';
+  if(S.brokenPhys) b+='<span class="act-badge bad">Physically Broken</span>';
+  if(S.brokenMent) b+='<span class="act-badge bad">Mentally Broken</span>';
+  return b;
 }
 
 function setTab(name){ [].forEach.call(document.querySelectorAll('.tab-btn'),function(b){ b.classList.toggle('on', b.dataset.tab===name); }); [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); }); try{ localStorage.setItem('vae_tab',name); }catch(e){} if(name==='action'&&typeof renderAction==='function') renderAction(); }

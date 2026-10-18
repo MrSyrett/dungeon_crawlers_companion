@@ -1294,8 +1294,8 @@ function doMyzRoll(label, baseN, skillN, gearN, attrKey, ctx){
   _lastRoll={label:label, base:base, skill:skill, gear:gear, pen:pen, attr:attrKey, ctx:ctx||null};
   showPushOption();
 }
-function rollSkill(name){ var s=skillObj(name); var attr=s?s.attr:(name===S.specialist?S.key:null); if(!attr)return; doMyzRoll(name+' ('+attr+')', attrCur(attr), num(S.skills[name])-critModFor(name), 0, attr, null); }
-function rollAttr(k){ doMyzRoll(attrName(k)+' ('+k+')', attrCur(k), -critModFor(null), 0, k, null); }
+function rollSkill(name){ var s=skillObj(name); var attr=s?s.attr:(name===S.specialist?S.key:null); if(!attr)return; doMyzRoll(name+' ('+attr+')', attrCur(attr), num(S.skills[name])-critModFor(name), 0, attr, null); actMainRoll(); }
+function rollAttr(k){ doMyzRoll(attrName(k)+' ('+k+')', attrCur(k), -critModFor(null), 0, k, null); actMainRoll(); }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
   var isGun=(w.skill==='Shoot');
@@ -1361,7 +1361,9 @@ function doPush(){
 // End Turn clears the bubbles (no Roll Log entry, no round counter).
 function actFresh(owed){ return {slow:!!owed, fast:false, slowAsFast:false, owed:!!owed, defended:false, defendOwed:false, aimed:false}; }
 var _act=actFresh(false);
-var _actCollapsed={skills:true};
+var _actCollapsed={};
+var _actFromTab=false;
+function actMainRoll(){ if(_actFromTab||typeof _act==='undefined'||!_act) return; if(!_act.slow){ _act.slow=true; if(typeof renderAction==='function') renderAction(); if(typeof scheduleAutosave==='function') scheduleAutosave(); } }
 var _actOpts=[];
 function actCan(kind){ if(kind==='slow') return !_act.slow; if(kind==='fast') return anyBroken()?!_act.fast:(!_act.fast||!_act.slow); return true; }
 function actSpend(kind){
@@ -1390,7 +1392,8 @@ function actDo(i){
   var o=_actOpts[i]; if(!o) return;
   if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
   if(!actCan(o.kind)){ addLog(o.name, o.kind==='slow'?'No action left':'No maneuver left', o.kind==='slow'?'Your action is spent this turn.':(anyBroken()?'Broken — only one maneuver per turn.':'Your action and maneuver are both spent this turn.'), 'normal'); return; }
-  var ok=o.run(); if(ok===false){ renderAction(); return; }
+  var ok; _actFromTab=true; try{ ok=o.run(); } finally{ _actFromTab=false; }
+  if(ok===false){ renderAction(); return; }
   actSpend(o.kind); renderAction(); scheduleAutosave();
 }
 function actKindLabel(k){ return k==='slow'?'Action':k==='fast'?'Maneuver':'Free'; }
@@ -1408,9 +1411,6 @@ function actBuild(){
   add('react',{ name:'Defend', kind:'free', sub:'Fight roll as you are attacked in close combat — each success cancels one of the attacker’s or buys a stunt. Costs your next action (keep your maneuver). Once per turn; −2 if unarmed vs a weapon.', blocked:_act.defended?'Already defended this turn':'', btn:'Roll', run:function(){ return actDefend(); } });
   ACT_SYS.slow.forEach(function(a){ add('slow',{ name:a.n, kind:'slow', sub:a.d, btn:(a.skill||a.run)?'Roll':'Use', run:a.run||(a.skill?function(){ actSkill(a.n,a.skill); }:function(){ return actNote(a.n,a.d); }) }); });
   ACT_SYS.fast.forEach(function(a){ add('fast',{ name:a.n, kind:'fast', sub:a.d, btn:a.skill?'Roll':'Use', run:a.run||(a.skill?function(){ rollSkill(a.skill); }:function(){ return actNote(a.n,a.d); }) }); });
-  var sks=SKILLS.map(function(s){ return {name:s.name, attr:s.attr}; });
-  if(S.specialist&&!skillObj(S.specialist)&&S.key) sks.push({name:S.specialist, attr:S.key});
-  sks.forEach(function(s){ add('skills',{ name:s.name, kind:'slow', sub:attrName(s.attr)+' + '+s.name+' '+num(S.skills[s.name]), btn:'Roll', run:function(){ rollSkill(s.name); } }); });
   // Broken (p.89): no skills, actions or mutations — only a maneuver.
   if(anyBroken()) _actOpts.forEach(function(o){ if(o.kind!=='fast'&&!o.blocked) o.blocked='Broken'; });
   return O;
@@ -1431,8 +1431,7 @@ function renderAction(){
     +(ACT_SYS.specialTitle?sec('special',ACT_SYS.specialTitle,O.special,ACT_SYS.specialEmpty||''):'')
     +sec('react','Reactions',O.react,'')
     +sec('slow','Actions',O.slow,'')
-    +sec('fast','Maneuvers',O.fast,'')
-    +sec('skills','Use a Skill',O.skills,'');
+    +sec('fast','Maneuvers',O.fast,'');
 }
 
 // Lists from the core rulebook, Chapter 6 (pp.80–89).
@@ -1468,8 +1467,7 @@ function actSpecial(add){
   });
 }
 function actRow2(){
-  var b='<span class="act-res">MP <b>'+clamp(num(S.mp),0,MP_MAX)+'</b>/'+MP_MAX+'</span>';
-  b+='<span class="act-res">Bullets <b>'+bulletsOnHand()+'</b></span>';
+  var b='<span class="act-res">Bullets <b>'+bulletsOnHand()+'</b></span>';
   ATTR_KEYS.forEach(function(k){ if(isBroken(k)) b+='<span class="act-badge bad">'+esc(attrName(k))+' Broken</span>'; });
   CONDS.forEach(function(c){ if(S.conditions&&S.conditions[c.name]) b+='<span class="act-badge warn">'+esc(c.name)+'</span>'; });
   return b;

@@ -908,6 +908,8 @@ function rollCheck(key,kind){
   if(dis){ addLog(a.name+' Check','✗ '+dis, "Can't act while "+dis, 'fumble'); return; }
   var label=a.name+(kind==='noncombat'?' Non-Combat':' Check');
   doCheck(label, key, kind==='noncombat'?{bonus:ncBonus(key)}:{});
+  // A main-sheet ability roll uses the Standard action (spent quietly; never blocks).
+  if(turnCan('std')){ turnSpend('std'); renderTurn(); scheduleAutosave(); }
 }
 function setAbility(k,v){ S.abilities[k]=num(v);
   if(k==='resilience'){ S.health.max=healthMax(); if(S.health.cur<1||S.health.cur>S.health.max)S.health.cur=S.health.max; }
@@ -1457,9 +1459,6 @@ function turnBuildOpts(){
   add('reactions',{name:'Release', sub:'Something you’re grabbing moves or attacks — let it go', btns:[{label:'Use',kind:'react',run:function(){ addLog('Release','—','Released your grab','normal'); return true; }}]});
   add('reactions',{name:'Skulk', sub:'Targeted by a ranged attack — duck behind someone in reach; they become the target (TN is the lower defense)', btns:[{label:'Use',kind:'react',run:function(){ addLog('Skulk','—','Ducked behind someone — they’re the new target','normal'); return true; }}]});
   var na=condNoAct(); if(na) ['attacks','powers','actions','reactions'].forEach(function(k){ O[k].forEach(function(o){ o.blocked=na+' — can’t act'; }); });
-  // Ability checks (no action of their own — the Narrator decides what they cost)
-  ABILITIES.forEach(function(a){ var sc=ab(a.key);
-    add('checks',{name:a.name+' check', sub:'d616 '+(sc>=0?'+':'')+sc, btns:[{label:'Roll',kind:'free',run:function(){ rollAbility(a.key); return true; }}]}); });
   return O;
 }
 function turnDo(i,j){
@@ -1475,7 +1474,7 @@ function renderTurn(){
   var host=$('mm-turn'); if(!host||!S) return;
   var O=turnBuildOpts(), t=turnState();
   var pip=function(on,lbl){ return '<span class="turn-pip'+(on?' used':'')+'">'+lbl+'</span>'; };
-  var badges=(t.dodge>0?'<span class="turn-badge">Dodging</span>':'')+(karmaArmed?'<span class="turn-badge gold">Karma edge armed</span>':'')
+  var badges=(t.dodge>0?'<span class="turn-badge">Dodging</span>':'')
     +activeConds().map(function(n){ return '<span class="turn-badge warn">'+tEsc(n)+'</span>'; }).join('');
   var run=runSpeed(); if(speedHalvedByCond()) run=Math.floor(run/2);
   var card=function(o){
@@ -1491,8 +1490,6 @@ function renderTurn(){
     +'<div class="turn-row1"><div class="turn-econ">'+pip(t.std,'Standard')+pip(t.move,'Movement')+pip(t.react,'Reaction')+'</div>'
     +'<button class="turn-end-btn" onclick="endTurn()" title="Reset your actions for the next turn">End Turn</button></div>'
     +'<div class="turn-row2">'
-    +'<span class="turn-stat"><span class="tm-lbl">Focus</span> <b>'+num(S.focus.cur)+'</b>/'+num(S.focus.max||focusMax())+'</span>'
-    +'<span class="turn-stat"><span class="tm-lbl">Karma</span> <b>'+num(S.karma.cur)+'</b>/'+num(S.karma.max||karmaMax())+'</span>'
     +'<button class="turn-mini'+(karmaArmed?' on':'')+'" onclick="toggleKarma();renderTurn()" '+(num(S.karma.cur)<=0&&!karmaArmed?'disabled':'')+' title="Spend 1 Karma for an edge on your next roll">Karma Edge</button>'
     +'<div class="turn-badges">'+badges+'</div>'
     +'<span class="turn-stat turn-speed"><span class="tm-lbl">Speed</span> <b>'+run+'</b></span>'
@@ -1500,8 +1497,7 @@ function renderTurn(){
     +sec('attacks','Attacks',O.attacks,'')
     +sec('powers','Powers',O.powers,'No powers with an action. Powers are chosen in the character builder.')
     +sec('actions','Actions',O.actions,'')
-    +sec('reactions','Reactions',O.reactions,'')
-    +sec('checks','Ability Checks',O.checks,'');
+    +sec('reactions','Reactions',O.reactions,'');
 }
 // Keep the controller current while it's open.
 var _turnRT=null;

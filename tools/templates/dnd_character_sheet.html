@@ -1479,7 +1479,7 @@ function buildAbilities(){
     box.innerHTML =
       '<span class="abil-boost" id="ab-boost-' + a.id + '" title="Bonus from an equipped magic item (included in the score)" style="display:none;"></span>' +
       '<div class="abil-name">' + a.name + '</div>' +
-      '<div class="abil-mod" id="mod-' + a.id + '" onclick="rollAbility(\'' + a.id + '\')" title="Roll a ' + a.name + ' check">+0</div>' +
+      '<div class="abil-mod" id="mod-' + a.id + '" onclick="sheetRollAbility(\'' + a.id + '\')" title="Roll a ' + a.name + ' check (uses your Action)">+0</div>' +
       '<input class="abil-score" id="sc-' + a.id + '" type="number" value="10" readonly tabindex="-1" oninput="onStatInput()" title="Set at character creation, level-up, or by items">' +
       '<div class="abil-save" onclick="rollSave(\'' + a.id + '\')" title="Roll a ' + a.name + ' save">' +
         '<span class="prof-dot locked" id="svp-' + a.id + '" onclick="event.stopPropagation();toggleSaveProf(\'' + a.id + '\')" title="Save proficiency — unlock the sheet to edit"></span>' +
@@ -1504,8 +1504,8 @@ function buildSkills(){
     row.innerHTML =
       '<span class="prof-dot locked" id="skp-' + cssId(sk.name) + '" onclick="cycleSkill(\'' + esc(sk.name) + '\')" title="Skill proficiency — unlock the sheet to edit"></span>' +
       '<span class="sk-abil">' + sk.ability + '</span>' +
-      '<span class="sk-name" onclick="rollSkill(\'' + esc(sk.name) + '\')" title="' + esc(sk.description) + '">' + esc(sk.name) + '</span>' +
-      '<span class="sk-val" id="skv-' + cssId(sk.name) + '" data-ov="skv-' + cssId(sk.name) + '" onclick="rollSkill(\'' + esc(sk.name) + '\')">+0</span>';
+      '<span class="sk-name" onclick="sheetRollSkill(\'' + esc(sk.name) + '\')" title="' + esc(sk.description) + '">' + esc(sk.name) + '</span>' +
+      '<span class="sk-val" id="skv-' + cssId(sk.name) + '" data-ov="skv-' + cssId(sk.name) + '" onclick="sheetRollSkill(\'' + esc(sk.name) + '\')">+0</span>';
     list.appendChild(row);
   });
 }
@@ -4302,6 +4302,17 @@ function renderTurn(){
 }
 function useTurnOpt(i){ const o = _turnOpts[i]; if(o && !o.disabled && o.run){ if(_turnSub !== 'reaction') startOfTurnClear(); o.run(); } }   // reactions happen on others' turns — keep a carried Dodge/Ready
 function afterTurnAction(){ renderTurn(); scheduleAutosave(); }
+// An ability or skill check rolled from the main sheet is the "use an ability / check"
+// action, so it spends the Action on the Action tab. Never blocks the roll; the Action
+// tab's own cards (Hide, Search…) call rollSkill() directly and spend for themselves.
+function checkSpendsAction(){
+  if(typeof _locked !== 'undefined' && !_locked) return;   // unlocked = editing, no roll happened
+  if(_turn.action) return;                                 // already spent — just roll
+  startOfTurnClear(); _turn.action = true; _turn.actionType = 'other';
+  afterTurnAction();
+}
+function sheetRollAbility(id){ rollAbility(id); checkSpendsAction(); }
+function sheetRollSkill(name){ rollSkill(name); checkSpendsAction(); }
 function toggleEcon(type){
   if(type === 'action' && _turn.ready){ fireReadied(); return; }
   if(type !== 'reaction') startOfTurnClear();

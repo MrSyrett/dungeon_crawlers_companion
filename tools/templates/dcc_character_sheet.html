@@ -793,7 +793,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
                   <span class="formula-eq">=</span>
                   <div class="formula-extra-item">
                     <input type="text" class="formula-total" id="evade-total" readonly placeholder="—"
-                           role="button" tabindex="0" onclick="rollEvade()" onkeydown="rollEvadeKey(event)"
+                           role="button" tabindex="0" onclick="sheetRollEvade()" onkeydown="rollEvadeKey(event)"
                            title="Roll Evade" aria-label="Roll Evade">
                     <span class="formula-sublabel">Evade Total</span>
                   </div>
@@ -1106,7 +1106,7 @@ function buildStats() {
         <div class="stat-mod-wrap">
           <span class="stat-score-label">${s.abbr} Mod</span>
           <span class="stat-mod-val" id="${s.id}-mod" role="button" tabindex="0"
-                onclick="rollStat('${s.id}','${s.name}')" onkeydown="rollStatKey(event,'${s.id}','${s.name}')"
+                onclick="sheetRollStat('${s.id}','${s.name}')" onkeydown="rollStatKey(event,'${s.id}','${s.name}')"
                 title="Roll d20 + ${s.abbr} Mod" aria-label="Roll d20 plus ${s.abbr} modifier">—</span>
         </div>
       </div>
@@ -1836,6 +1836,23 @@ function turnSpend(kind, label){
   return true;
 }
 function turnAfter(){ renderTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+// Rolls made from the main sheet (Stat mods, the Evade box) also spend the turn —
+// quietly: the roll always goes through, and an already-spent turn just isn't charged.
+function turnSpendQuiet(kind, label){
+  if(!turnCan(kind)) return false;
+  turnSpend(kind, label); turnAfter(); return true;
+}
+// A Stat Check from the Stats card is a "Make a Check" Action (Core p.64).
+function sheetRollStat(id, name){
+  rollStat(id, name);
+  turnSpendQuiet('other', name + ' Check');
+}
+// Evade from the Defense card: one Evade Action covers every Attack aimed at you this
+// round (p.81) — the first roll spends the Action, later ones are free (same as the tab).
+function sheetRollEvade(){
+  rollEvade();
+  if(!_turn.evading && turnSpendQuiet('other', 'Evade')) { _turn.evading = true; turnAfter(); }
+}
 
 // Skill rows by role. [name, rank, checkType, notes]
 function turnSkillRows(){
@@ -2160,7 +2177,7 @@ function clearLog() {
 function rollStatKey(e, id, name) {
   if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space') {
     e.preventDefault();
-    rollStat(id, name);
+    sheetRollStat(id, name);
   }
 }
 
@@ -2180,7 +2197,7 @@ function rollStat(id, name) {
 function rollEvadeKey(e) {
   if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space') {
     e.preventDefault();
-    rollEvade();
+    sheetRollEvade();
   }
 }
 

@@ -1243,11 +1243,19 @@ function rollSkill(name){
   var s=skillObj(name); if(!s)return;
   var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(name);
   doPool(name+' ('+s.attr+')', pool, true);
+  actSheetRollSpend();
 }
 function rollAttr(k){
   var a=null; for(var i=0;i<ATTRS.length;i++){ if(ATTRS[i].key===k){ a=ATTRS[i]; break; } }
   var pool=attrVal(k)-condPenaltyFor(k)-critPenalty();
   doPool((a?a.name:k)+' ('+k+')', pool, true);
+  actSheetRollSpend();
+}
+// A skill or attribute roll from the main sheet takes your one action for the turn. Silent when
+// it's already spent — the roll always goes ahead; Action-tab cards spend through actDo instead.
+function actSheetRollSpend(){
+  if(_actFromTab || !actCan('action')) return;
+  actSpend('action'); renderAction(); scheduleAutosave();
 }
 // Explosives (p.71) list a Blast Power ("BP 8") instead of damage: on a hit, roll that
 // many dice at everyone within Short range of the impact — each 6 is 1 damage — and
@@ -1569,7 +1577,7 @@ $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
 // Perform actions here; the Gear/Story tabs manage what you have. State lives in
 // S.act (saved with the sheet). End Turn resets the round's actions and logs
 // nothing; there is no round counter (that's the GM's to track).
-var _actOpts=[], _actCollapsed={skills:true};
+var _actOpts=[], _actCollapsed={}, _actFromTab=false;
 function actState(){ if(!S.act||typeof S.act!=='object') S.act={full:false,quick:0,used:0}; return S.act; }
 function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
 function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(skName)); }
@@ -1578,7 +1586,8 @@ function actDo(i,j){
   if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
   if(!actCan(o.kind)){ actSpend(o.kind, o.name); return; }
   var run=(o.btns&&o.btns[j])?o.btns[j][1]:o.run;
-  var ok=run(); if(ok===false){ renderAction(); return; }
+  _actFromTab=true; var ok; try{ ok=run(); } finally{ _actFromTab=false; }
+  if(ok===false){ renderAction(); return; }
   actSpend(o.kind, o.name);
   renderAction(); scheduleAutosave();
 }
@@ -1622,7 +1631,7 @@ function actSpend(kind,label){
 }
 function renderAction(){
   var host=$('act-hub'); if(!host) return;
-  var a=actState(), O={attacks:[],brawl:[],skills:[]}; _actOpts=[];
+  var a=actState(), O={attacks:[],brawl:[]}; _actOpts=[];
   var weps=gearOf('weapon').filter(function(x){ return x.g.equipped; });
   var ow=!!(a.used && a.overwatch);
   weps.filter(function(x){ return /ranged/i.test(x.g.skill||''); }).forEach(function(x){ var w=x.g,i=x.i;
@@ -1636,19 +1645,15 @@ function renderAction(){
   actAdd('brawl',{name:'First aid',tag:'Phase 5',kind:'action',sub:'Medicine · a Broken person within Short range — not yourself · back up with 1 Health +1 per extra success',btn:'Roll',run:actSkillRoll('Medicine','First aid')},O);
   actAdd('brawl',{name:'Bark orders',tag:'Any phase',kind:'action',sub:'Leadership · each success = +1 die for an ally this round (max 3 each); can\'t be helped',btn:'Roll',run:actSkillRoll('Leadership','Orders')},O);
   actAdd('brawl',{name:'Other',tag:'Phase 6',kind:'action',sub:'Barricade a door, hotwire a car, set off explosives… the GM decides the roll',btn:'Use',run:actLogOnly('Other action','Phase 6','Barricade, hotwire, explosives, radio… — GM decides if a roll is needed')},O);
-  SKILLS.forEach(function(s){ actAdd('skills',{name:s.name,kind:'action',sub:s.attr+' · '+actPoolOf(s.name,0)+' dice',btn:'Roll',run:function(){ rollSkill(s.name); }},O); });
   // Broken (p.67): you can say a few words or crawl behind the nearest cover, but every skill roll fails.
   var broken=S.health && S.health.max>0 && num(S.health.dmg)>=S.health.max;
   if(broken) _actOpts.forEach(function(o){ o.blocked='Broken — skill rolls fail; you can only talk or crawl to cover'; });
-  var stress=clamp(num(S.stress),0,10);
-  var badges=stress>0?'<span class="act-badge warn" title="A 1 on any stress die is a walker — you mess up and the Threat Level rises; you can\'t push that roll">⚠ '+stress+' stress '+(stress>1?'dice':'die')+' — walker risk</span>':'';
+  var badges=(broken?'<span class="act-badge warn" title="All skill rolls fail automatically while Broken (p.67)">Broken</span>':'')+(ow?'<span class="act-badge" title="Fire your ranged weapon if anyone moves into the area">Overwatch</span>':'');
   host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ"><span class="act-pip'+(a.used?' used':'')+'">Action</span></div>'
     +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s action">End Turn</button></div>'
-    +'<div class="act-row2"><span class="act-stat"><span class="al">Stress</span> <b>'+stress+'</b></span><div class="act-badges">'+(broken?'<span class="act-badge warn" title="All skill rolls fail automatically while Broken (p.67)">Broken</span>':'')+(ow?'<span class="act-badge" title="Fire your ranged weapon if anyone moves into the area">Overwatch</span>':'')+badges+'</div></div>'
-    +'<div class="act-note">Quick, simple things — shouting a few words, drawing a knife, grabbing a gun — are free.</div></div>'
+    +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+'</div>'
     +actSec('attacks','Attacks',O.attacks,'')
-    +actSec('brawl','Brawl Actions',O.brawl,'')
-    +actSec('skills','Use a Skill',O.skills,'');
+    +actSec('brawl','Brawl Actions',O.brawl,'');
 }
 try{ if(localStorage.getItem('twd_dark')==='1') setDarkMode(true); }catch(e){}
 </script>

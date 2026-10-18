@@ -670,7 +670,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
         <div class="vital vc">
           <div class="vlbl"><span>Initiative · Speed</span></div>
-          <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn" style="margin-left:8px;align-self:center;" onclick="rollInitiative()" title="Roll initiative">🎲</button></div>
+          <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn" style="margin-left:8px;align-self:center;" onclick="nimInitiative()" title="Roll initiative (starts a new encounter: sets your starting actions)">🎲</button></div>
           <div class="vline">init +<input type="number" id="init-bonus" data-nolock value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" data-nolock value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
         </div>
         <div class="vital vc">
@@ -832,7 +832,7 @@ function findItem(name, cats) { const n = norm(name); if(!n) return null; return
 // ═══ BUILD STATIC UI ══════════════════════════════════════════════════════
 function buildStats() {
   $('stats-grid').innerHTML = STATS.map(s =>
-    `<div class="stat-cell"><div class="sn" onclick="rollSave('${s}')" title="Roll a ${s} save">${s}</div><input type="number" id="st-${s}" value="0" min="-5" max="10" oninput="recalc()">` +
+    `<div class="stat-cell"><div class="sn" onclick="rollSave('${s}'); nimSheetCheckSpend()" title="Roll a ${s} save (uses 1 action on the Action tab)">${s}</div><input type="number" id="st-${s}" value="0" min="-5" max="10" oninput="recalc()">` +
     `<div class="save-toggle"><button id="adv-${s}" onclick="toggleSave('${s}','adv')" title="Advantaged save">▲</button><button id="dis-${s}" onclick="toggleSave('${s}','dis')" title="Disadvantaged save">▼</button></div></div>`).join('');
   $('skills-body').innerHTML = SKILLS.map(([n, s]) =>
     `<tr><td class="sk-name" onclick="rollSkill('${n}')">${n}<small>${s}</small></td><td style="width:44px;"><input type="number" id="skp-${n}" data-nolock class="no-spin" value="0" min="0" oninput="recalc()" title="Extra skill points"></td><td class="sk-total" id="skt-${n}">+0</td></tr>`).join('');
@@ -1003,7 +1003,7 @@ function d20Check(label, bonus, opts) {
   d20Check.lastNat = r.value;   // natural die, for rules keyed on it (Initiative: a natural 20 = all 3 actions)
   return total;
 }
-function rollSkill(name) { const s = SKILLS.find(x => x[0] === name); d20Check(name + ' check', skillTotal(name, s[1])); }
+function rollSkill(name) { const s = SKILLS.find(x => x[0] === name); d20Check(name + ' check', skillTotal(name, s[1])); if(typeof nimSheetCheckSpend === 'function') nimSheetCheckSpend(); }
 function rollSave(s) {
   // A save's inherent advantage/disadvantage combines with any manual tray toggle:
   // same direction keeps it, the opposite direction cancels to a normal roll
@@ -1711,6 +1711,12 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
    No round counter; End Turn writes nothing to the roll log. */
 var _nturn = { attacks: 0, moves: 0, reacted: {}, assessed: [] };
 var _nturnCollapsed = { checks: true };
+var _nimFromTab = false;   // true while an Action-tab card runs its roll (the card spends its own cost)
+// An ability-score or skill roll from the main sheet uses 1 action (never blocks the roll).
+function nimSheetCheckSpend(){
+  if(_nimFromTab) return;
+  if(actions > 0){ nimSpend(1); if(typeof nimAfter === 'function') nimAfter(); }
+}
 var _nturnOpts = [];
 function nimEsc(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function nimDying(){ if(Array.isArray(conditions) && conditions.some(c => /^dying$/i.test(c))) return true; const mx = num($('hp-max').value); return mx > 0 && num($('hp-cur').value) <= 0; }   // core p.9: at 0 HP you gain Dying
@@ -1794,8 +1800,6 @@ function nimBuild(){
     if(used.includes(sk[0])) { addLog('Assess', '✗', sk[0] + ' already used to Assess this encounter (foes adapt)', 'normal'); return false; }
     nimSpend(1); (_nturn.assessed = used).push(sk[0]);
     d20Check('Assess · ' + sk[0], skillTotal(sk[0], sk[1]), { dc: 12 }); return true; } });
-  // Use a Skill (any skill check, 1 action)
-  SKILLS.forEach(([n, st]) => { const t = skillTotal(n, st); add('checks', { name: n, cost: 1, sub: (t >= 0 ? '+' : '') + t + ' · ' + st, btn: 'Roll', run: () => { nimSpend(1); rollSkill(n); return true; } }); });
   return O;
 }
 function nimDo(i){
@@ -1803,7 +1807,7 @@ function nimDo(i){
   if(o.blocked) { addLog(o.name, '✗', o.blocked, 'normal'); return; }
   if(actions < o.cost) { addLog(o.name, '✗', 'Not enough actions (' + o.cost + ' needed, ' + actions + ' left)', 'normal'); return; }
   let arg; if(o.assess) { const sel = document.getElementById('nim-assess-skill'); arg = sel ? sel.value : 'Perception'; }
-  const ok = o.run(arg);
+  let ok; _nimFromTab = true; try { ok = o.run(arg); } finally { _nimFromTab = false; }
   nimAfter();
   return ok;
 }
@@ -1839,13 +1843,11 @@ function renderNimTurn(){
     + (manaMax || mana ? '<span class="nturn-stat"><span class="nl">Mana</span> <b>' + mana + '</b>/' + manaMax + '</span>' : '')
     + '<div class="nturn-badges">' + badges + '</div>'
     + '<span class="nturn-stat"><span class="nl">Speed</span> <b>' + speed + '</b>' + (_nturn.moves ? ' <span class="nd">· moved ' + (_nturn.moves * speed) + '</span>' : '') + '</span>'
-    + '<button class="nturn-mini" onclick="nimInitiative()" title="Roll Initiative — single digit: 1 action, two digits: 2, 20+: all 3">Initiative</button>'
     + '</div></div>'
     + sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons from the Item Store (Inventory tab).')
     + sec('spells', 'Spells', O.spells, 'No spells — add them from the Spellbook (Spells tab).')
     + sec('reactions', 'Heroic Reactions', O.reactions, '')
-    + sec('actions', 'Actions', O.actions, '')
-    + sec('checks', 'Use a Skill', O.checks, '');
+    + sec('actions', 'Actions', O.actions, '');
 }
 var _nturnT = null;
 function nimTurnMaybeRender(){ const p = document.getElementById('tab-action'); if(!p || !p.classList.contains('on')) return; clearTimeout(_nturnT); _nturnT = setTimeout(renderNimTurn, 60); }
