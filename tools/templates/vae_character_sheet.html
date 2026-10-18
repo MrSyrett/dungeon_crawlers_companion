@@ -1203,8 +1203,68 @@ function actDo(i){
   actSpend(o.kind); renderAction(); scheduleAutosave();
 }
 function actKindLabel(k){ return k==='slow'?'Slow':k==='fast'?'Fast':'Free'; }
+// ═══ EQUIPMENT — use items from the inventory (Action tab) ═════════════════
+// VAESEN core: gear adds bonus dice to the skill test it helps (Gear table,
+// ch.5) — a skill test is a slow action; bandages or medical equipment are
+// required to treat injuries with Medicine; poison comes in doses. Magic items
+// work but carry a risk; some items of power are used with a skill test.
+// Only items with something to do are listed. Quantity rides on the item name
+// ("Simple bandages ×2"); poison doses on g.charges.
+function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/,'').replace(/\s+x\d+\s*$/i,'').trim(); }
+function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
+function eqConsume(i){ var g=S.gear[i]; if(!g) return; var q=eqQty(g);
+  if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); delete g.charges; } else S.gear.splice(i,1);
+  renderInventory(); }
+function eqNorm(s){ return String(s||'').toLowerCase().replace(/\s*\(.*?\)\s*/g,' ').replace(/[^a-z0-9]+/g,' ').trim(); }
+function eqFind(list, nm){ var n=eqNorm(nm); for(var k=0;k<list.length;k++){ if(eqNorm(list[k].name)===n) return list[k]; } return null; }
+// Skills named in a text, in the order they appear.
+function eqSkillsIn(text){ text=String(text||''); var hits=[];
+  SKILLS.forEach(function(s){ var ix=text.toLowerCase().indexOf(s.name.toLowerCase()); if(ix>=0) hits.push({n:s.name,ix:ix}); });
+  hits.sort(function(a,b){ return a.ix-b.ix; }); return hits.map(function(h){ return h.n; }); }
+function eqRoll(label, sk, bonus){ var s=skillObj(sk); if(!s) return; doRoll(label+' · '+sk+' ('+s.attr+')'+(bonus?' +'+bonus+' gear':''), attrBase(s.attr)-skillPen(sk), num(S.skills[sk]), num(bonus), s.attr, {ctype:attrType(s.attr)}); }
+function eqBuild(add){
+  var MAGIC=G(window.VAE_MAGIC_ITEMS), POWER=G(window.VAE_ITEMS_OF_POWER);
+  gearOf('gear').forEach(function(x){ var g=x.g, i=x.i, nm=eqBaseName(g); if(!nm) return;
+    var q=eqQty(g), qs=q>1?' ×'+q:'';
+    var gd=eqFind(GEARS, nm), mg=eqFind(MAGIC, nm), pw=eqFind(POWER, nm);
+    // Poison: required to poison someone; each use spends a dose.
+    if(/poison/i.test(nm) && !/laboratory/i.test(nm)){
+      var tox=(String((gd&&gd.comment)||g.note||'').match(/toxicity\s*(\d+)/i)||[])[1];
+      var start=num((nm.match(/\((\d+)\s*doses?\)/i)||[])[1])||1, left=(g.charges!=null&&g.charges!=='')?num(g.charges):start;
+      add('equip',{ name:nm+qs, kind:'slow', sub:left+' dose'+(left===1?'':'s')+' left · poison someone'+(tox?' · toxicity '+tox:''), btn:'Use', run:function(){
+        if(g.charges==null||g.charges==='') g.charges=start; g.charges=Math.max(0,num(g.charges)-1); var rem=g.charges;
+        addLog(nm,'Poison given','One dose used'+(tox?' — toxicity '+tox+': the victim resists, and the GM applies the effect':'')+'. '+rem+' dose'+(rem===1?'':'s')+' left.','normal');
+        if(rem<=0) eqConsume(i); else renderInventory(); } });
+      return;
+    }
+    // Magic items: work, but carry a risk.
+    if(mg){
+      var mb=(String(mg.effect||'').match(/([A-Z][a-z]+(?: [A-Z][a-z]+)?)\s*\+\s*(\d+)/)||[]), msk=mb[1]&&skillObj(mb[1])?mb[1]:(eqSkillsIn(mg.effect)[0]||''), mbon=(mb[1]===msk)?num(mb[2]):0;
+      var eat=/porridge/i.test(nm);
+      add('equip',{ name:nm+qs, kind:'slow', sub:(msk?msk+(mbon?' +'+mbon:'')+' · ':'')+(mg.effect||'')+' · Risk: '+(mg.risk||'—'), btn:msk?'Roll':'Use', run:function(){
+        if(msk) eqRoll(nm, msk, mbon);
+        addLog(nm,'Magic item',(msk?'':(mg.effect||'')+' ')+'Risk: '+(mg.risk||'—'),'fumble');
+        if(eat) eqConsume(i); } });
+      return;
+    }
+    // Items of power used with a skill test (e.g. holy water with Inspiration).
+    if(pw){ if(!/\buse\b/i.test(pw.effect||'')) return; var psk=eqSkillsIn(pw.effect)[0]; if(!psk) return;
+      add('equip',{ name:nm+qs, kind:'slow', sub:psk+' · '+(pw.effect||''), btn:'Roll', run:function(){ eqRoll(nm, psk, 0); } }); return; }
+    // Gear with a bonus to a skill test.
+    var bonus=gd?num(String(gd.bonus||'').replace(/[^\d-]/g,'')):num((String(g.note||'').match(/\(\+(\d+)\)/)||[])[1]);
+    // Combat bonuses (a horse or dog in Close Combat) add to the attack itself, so they aren't rolled here.
+    var sks=eqSkillsIn(gd?gd.comment:g.note).filter(function(sk){ return sk!=='Close Combat' && sk!=='Ranged Combat'; });
+    if(!bonus||!sks.length) return;
+    sks.forEach(function(sk){
+      var med=(sk==='Medicine');
+      add('equip',{ name:(med?'Treat Injuries · ':'')+nm+qs+(!med&&sks.length>1?' · '+sk:''), kind:'slow',
+        sub:sk+' +'+bonus+(med?' · a Broken friend: success ends Broken, extra successes heal Conditions':(gd&&gd.comment?' · '+gd.comment:'')), btn:'Roll',
+        run:function(){ eqRoll(med?('Treat Injuries · '+nm):nm, sk, bonus); } });
+    });
+  });
+}
 function actBuild(){
-  var O={attacks:[], special:[], react:[], slow:[], fast:[], skills:[]};
+  var O={attacks:[], special:[], react:[], slow:[], fast:[], skills:[], equip:[]};
   _actOpts=[];
   var add=function(sec,o){ o.i=_actOpts.length; _actOpts.push(o); O[sec].push(o); };
   // Attacks: the always-available unarmed attack + every equipped weapon (slow).
@@ -1214,6 +1274,7 @@ function actBuild(){
     add('attacks',{ name:w.name||'Weapon', kind:'slow', sub:bits.join(' · '), btn:'Attack', run:function(){ rollAttack(i); } });
   });
   if(typeof actSpecial==='function') actSpecial(add);
+  eqBuild(add);
   var mk=function(sec,kind){ return function(a){ var sk=(typeof a.skill==='function')?a.skill():a.skill;
     add(sec,{ name:a.n, kind:kind, sub:(sk&&a.showSkill?sk+' · ':'')+a.d, mb:!!a.mb, blocked:(a.once&&_act[a.once])?'Once per round':'', btn:(sk||a.run)?'Roll':'Use',
       run:a.run||(sk?function(){ actRoll(a.n,sk); if(a.once) _act[a.once]=true; }:function(){ return actNote(a.n,a.d); }) }); }; };
@@ -1239,6 +1300,7 @@ function renderAction(){
     +(function(r){ return r?'<div class="act-row2">'+r+'</div>':''; })(actRow2())+'</div>'
     +sec('attacks','Attacks',O.attacks,'No weapons equipped — equip one on the Gear tab.')
     +(ACT_SYS.specialTitle?sec('special',ACT_SYS.specialTitle,O.special,ACT_SYS.specialEmpty||''):'')
+    +sec('equip','Equipment',O.equip,'No usable items — add bandages, tools, poison or magic items on the Gear tab.')
     +sec('react','Reactions',O.react,'')
     +sec('slow','Slow Actions',O.slow,'')
     +sec('fast','Fast Actions',O.fast,'');
@@ -1275,8 +1337,7 @@ var ACT_SYS={
     {n:'Stand Up', mb:true, d:'Get back on your feet.'},
     {n:'Draw / Swap Weapon', mb:true, d:'Draw a weapon or swap to another.'},
     {n:'Shout', mb:true, d:'Shout more than a few words.'},
-    {n:'Small Act', mb:true, d:'Turn around, close a door, put out a candle…'},
-    {n:'Use Item', mb:true, d:'Use a piece of equipment quickly.'}
+    {n:'Small Act', mb:true, d:'Turn around, close a door, put out a candle…'}
   ]
 };
 function actRow2(){

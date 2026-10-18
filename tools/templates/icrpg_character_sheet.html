@@ -1071,11 +1071,11 @@ function icWeapon(r){
   var desc=(g&&g.desc)||(l&&l.desc)||'', eff=((g&&g.effects)||[]).join(' ');
   var tag=icNorm(r.tag)+' '+icNorm(g?g.category:'');
   var isW = /\b(weapon|firearm)\b/.test(tag) || /^\s*weapon\b/i.test(desc) ||
-            /\b(sword|axe|bow|dagger|knife|knives|mace|spear|hammer|pistol|rifle|gun|blaster|crossbow|club|staff|whip|blade|cannon|shotgun|revolver|shooter|sabre|saber|flail|halberd|sling)\b/i.test(r.name);
+            /\b(?:long|short|great|broad|bastard|battle|war|hand|cross)?(sword|axe|bow|dagger|knife|knives|mace|spear|hammer|pistol|rifle|gun|blaster|club|staff|whip|blade|cannon|shotgun|revolver|shooter|sabre|saber|flail|halberd|sling)s?\b/i.test(r.name);
   if(!isW) return null;
   var txt=r.name+' '+desc+' '+eff+' '+r.note;
   var gun = /firearm/.test(tag) || /\b(pistol|rifle|gun|blaster|shotgun|revolver|shooter|cannon|rail)\b/i.test(r.name);
-  var ranged = gun || /\b(bow|crossbow|sling|javelin|throwing)\b/i.test(r.name) || /\branged\b/i.test(desc);
+  var ranged = gun || /\b(?:long|short|cross)?(bow|sling|javelin|throwing)s?\b/i.test(r.name) || /\branged\b/i.test(desc);
   var energy = /\benergy\b|magic(al)? damage/i.test(txt) || /\bMAGIC\b/.test(txt);
   var dieCode = gun ? 'd8' : energy ? 'd10' : 'd6';
   // LOOT bonuses written on the item: "+2 Attempts / Effort", "-2 to Attempts", "+1 Effort", "+6 WEAPON EFFORT".
@@ -1107,19 +1107,136 @@ function icSpellOf(r, fromLoot){
     hard:/\bwith a HARD (INT|WIS|CHA) roll\b/i.test(desc),
     desc: desc.replace(/^\s*(INT|WIS|CHA)?\s*spell\s*,\s*/i,''), scroll:!!fromLoot };
 }
-function icConsumable(r){
-  var l=icFind(LOOT, r.name), g=icFind(GEAR, r.name);
-  var desc=(l&&l.desc)||(g&&g.desc)||'', eff=((l&&l.effects)||[]).concat((g&&g.effects)||[]).join(' ')+' '+r.note;
-  // "Heal 5 HP" or a dice amount — "Heal 2D6 HP", "Heal all allies 1D8".
-  var hm=eff.match(/heal\s+(\d+(?:d\d+)?)\s*HP/i)||desc.match(/heal\s+(?:all allies\s+)?(\d+(?:d\d+)?)\b/i);
-  if(!hm || !/^\s*(food|potion|drink|consumable|item)\b/i.test(desc)) return null;
-  var dm=hm[1].match(/^(\d+)d(\d+)$/i);
-  return { name:r.name, heal: dm ? 0 : parseInt(hm[1],10), healDice: dm ? { n:parseInt(dm[1],10), s:parseInt(dm[2],10) } : null, healTxt: hm[1].toUpperCase(), desc:desc };
+// ── Equipment: LOOT you can USE (p.29: CARRIED items must be EQUIPPED to be used) ──────
+// A loot row is listed when its card text gives it something to do: heal / lose HP, a stat
+// roll, damage, a fuse/duration, "next roll EASY", a light, a TARGET change, or a count of
+// uses. FOOD, EXPLOSIVES, scrolls and anything with "N uses" / "consume" are consumables:
+// using one takes a use (tracked as "N uses left" in the row's note) and the row goes at 0.
+// Using an item is your Action for the TURN.
+var IC_STATS_RE='STR|DEX|CON|INT|WIS|CHA';
+function icDiceRoll(code){   // "2D6" / "1D8" / "5" → { total, txt }
+  var m=String(code).match(/^(\d*)d(\d+)$/i);
+  if(!m) return { total:parseInt(code,10)||0, txt:String(code) };
+  var n=parseInt(m[1]||'1',10), sd=parseInt(m[2],10), rs=[], t=0;
+  for(var k=0;k<n;k++){ var x=die(sd); rs.push(x); t+=x; }
+  return { total:t, txt:n+'D'+sd+'('+rs.join('+')+')' };
 }
-
+function icUsesLeft(r, desc){
+  var m=(r.note||'').match(/\b(\d+)\s*(?:uses?|count|sips?|charges?)\s*left\b/i);
+  if(m) return parseInt(m[1],10);
+  m=desc.match(/\b(\d+)\s*(?:uses?|count|sips?|charges?)\b/i) || desc.match(/\b(\d+)\s+(?:sips|swigs)\b/i);
+  return m ? parseInt(m[1],10) : 1;
+}
+function icEquipOf(r){
+  if(icWeapon(r) || icSpellOf(r,true)) return null;            // Attacks / Spells sections own those
+  var l=icFind(LOOT, r.name), g=icFind(GEAR, r.name);
+  var desc=((l&&l.desc)||(g&&g.desc)||r.note||'').trim(), eff=((l&&l.effects)||[]).concat((g&&g.effects)||[]).join(' ');
+  if(!desc) return null;
+  if(/^\s*(armor|weapon|trap|ammo|standard ammunition|vehicle|item\/vehicle|chest|defense\s*[+-]|[+-]\d+\s*defense)\b/i.test(desc)) return null;
+  if(g && /^(armor|weapon|firearm)$/i.test(g.category||'')) return null;
+  if(/\b(arrows?|arrowheads|bullets?|darts|bolts|shells)\b/i.test(r.name) || /^\s*\d+\s*arrowheads?\b/i.test(desc)) return null;   // ammunition rides with its weapon
+  var txt=desc+' '+eff, it={ name:r.name, desc:desc, fx:[] };
+  var lead=(desc.match(/^\s*(?:[A-Za-z ]+:\s*)?([A-Za-z]+)/)||['',''])[1].toLowerCase();   // "Roasted: Food, …"
+  it.consumable = /^(food|explosive|scroll|potion|drink|substance)$/.test(lead) || /\b\d+\s*(uses?|count|sips?|bites?)\b(?!\s+of)|\b1 use\b(?!\s+of)|one use|\bconsume\b|then destroy|destroy this|single-use|1-use|\bshatter\b/i.test(desc);
+  if(/\brecharg/i.test(desc)) it.consumable=false;
+  // A kit that runs out on a natural 1 (Medical Kit) is not used up otherwise.
+  it.emptyOnNat1 = /natural 1.{0,20}(empty|used up|gone)/i.test(desc);
+  if(it.emptyOnNat1) it.consumable=false;
+  // Healing (self, unless the card heals "an ally") / harm to yourself.
+  var toAlly = /\b(an ally|a dying ally|ally for|allies near|all allies|any ally)\b/i.test(desc) && !/\byou\b/i.test(desc.split(/heal/i)[0]||'');
+  var hm=desc.match(/\bheal\s+(?:up to\s+)?\d+\s+people\s+(?:for\s+)?(\d+d\d+|\d+\s*HEARTS?|\d+)(?![a-z])/i) || desc.match(/\bheal\s+(?:[a-z ]{0,30}?\s)?(full\s+HP|to\s+full\s+HP|\d+\s*HEARTS?|\d+d\d+|\d+)(?![a-z])/i) || eff.match(/heal\s+(to full HP|\d+d\d+|\d+)\s*HP/i) ||
+           desc.match(/\brestore\s+(full\s+HP)/i) || (/^(food)$/.test(lead) && desc.match(/=\s*(\d+d\d+)\s*HP\b/i));
+  if(hm){ var h=hm[1].replace(/\s+/g,' ').trim();
+    it.heal = /full/i.test(h) ? 'full' : /HEART/i.test(h) ? String(parseInt(h,10)*10) : h.toUpperCase(); it.healAlly = toAlly && !/^\s*(food|potion|drink)\b/i.test(desc) || /heal (an )?ally|ally for 1 HP|a dying ally/i.test(desc);
+    if(/when (camping|succeeding)|on a successful|over heart max when/i.test(desc)) it.heal=null;   // conditional heals stay passive
+  }
+  var lm=desc.match(/\blose\s+(\d+d\d+|\d+)\s*HP/i) || desc.match(/\btake\s+(\d+d\d+|\d+)\s*damage\b/i); if(lm) it.lose=lm[1].toUpperCase();
+  if(/\bdrop to 1 HP\b/i.test(desc)) it.dropTo1=true;
+  // A stat roll the card asks for: "Roll INT", "with an INT roll", "Roll WIS or INT", "HARD STR roll", "EASY WIS check".
+  var sr=desc.match(new RegExp('\\b(?:roll\\s+)?(HARD\\s+|EASY\\s+)?('+IC_STATS_RE+')(?:\\s+or\\s+('+IC_STATS_RE+'))?\\s+(?:roll|check)\\b','i')) ||
+         desc.match(new RegExp('\\broll\\s+(HARD\\s+|EASY\\s+)?('+IC_STATS_RE+')(?:\\s+or\\s+('+IC_STATS_RE+'))?\\b','i'));
+  var srPre=sr ? desc.slice(Math.max(0, sr.index-22), sr.index) : '', srPost=sr ? desc.slice(sr.index+sr[0].length, sr.index+sr[0].length+12) : '';
+  if(sr && (/(any|successful|allies|ally|they|creatures?|target|enemies|who hear)\s+(gets?\s+|make\s+|makes\s+|roll\s+)?(a\s+|an\s+)?$/i.test(srPre) || /^s?\s+(are|is)\b|^\s*EASY\b|^\s+to resist/i.test(srPost))) sr=null;
+  if(sr && !/to put down|to remove|to control, destroy or resist|they can break free|only a HARD STR roll can set you free|creatures who hear make a CON/i.test(desc)){
+    var a1=sr[2].toUpperCase(), a2=sr[3]?sr[3].toUpperCase():null;
+    it.check={ stat: a2 && statTotal(a2)>statTotal(a1) ? a2 : a1, hard:/hard/i.test(sr[1]||''), easy:/easy/i.test(sr[1]||'') };
+  }
+  // Damage the item deals (explosives, bombs, coils).
+  var dm=desc.match(/explodes?\s+for\s+(\d+d\d+)/i) || desc.match(/(?:inflict|takes?|deal|deals|does)\s+(\d+d\d+)\s*(?:\w+\s+)?damage\b/i) || desc.match(/\b(\d+d\d+)\s+(?:\w+\s+)?damage\b/i);
+  if(it.lose && dm && dm[1].toUpperCase()===it.lose) dm=null;
+  if(dm && !/heal/i.test(desc.slice(Math.max(0,desc.search(new RegExp(dm[1],'i'))-12), desc.search(new RegExp(dm[1],'i'))))) it.dmg=dm[1].toUpperCase();
+  if(it.heal && it.dmg && it.dmg===it.heal) it.dmg=null;
+  // Timers on the card: fuse / duration.
+  var tm=desc.match(/\b(?:in\s+)?(\d+d\d+)\s+(ROUNDS?|TURNS?|days?|hours?)\b(?:\s+fuse)?/i);
+  if(tm) it.timer={ dice:tm[1].toUpperCase(), unit:tm[2].toUpperCase() };
+  if(/next (roll|check)s? (is |are )?EASY|make your next roll EASY|checks are EASY for|rolls? (are |is )?EASY for \d/i.test(desc)) it.easyNext=true;
+  if(/reducing the current TARGET by 1|-1 TARGET/i.test(txt)) it.targetDown=1;
+  if((/\b(lantern|torch|candle|lamp|illumidrone|flare)\b/i.test(r.name) || /\b(casts?|emits?|sheds?|gives? off|provides?)\b[^.,]{0,25}\blight\b|\blights (all|up|the|everything)\b|\blight this\b/i.test(desc)) && !/darkness/i.test(desc)) it.light=true;
+  it.uses = it.consumable ? icUsesLeft(r, desc) : 0;
+  var actionable = it.heal || it.lose || it.dropTo1 || it.check || it.dmg || it.timer || it.easyNext || it.targetDown || it.light || it.consumable || it.emptyOnNat1;
+  if(!actionable) return null;
+  var bits=[];
+  if(it.heal) bits.push((it.healAlly?'Ally heals ':'Heal ')+(it.heal==='full'?'to full':it.heal)+' HP');
+  if(it.lose) bits.push('Lose '+it.lose+' HP');
+  if(it.dropTo1) bits.push('Drop to 1 HP');
+  if(it.check) bits.push((it.check.hard?'HARD ':it.check.easy?'EASY ':'')+'d20'+icSgn(statTotal(it.check.stat))+' '+it.check.stat);
+  if(it.dmg) bits.push(it.dmg+' damage');
+  if(it.timer) bits.push(it.timer.dice+' '+it.timer.unit);
+  if(it.easyNext) bits.push('next roll EASY');
+  if(it.targetDown) bits.push('TARGET −1');
+  if(it.light) bits.push('light');
+  if(it.consumable) bits.push(it.uses>1?it.uses+' uses':'consumed');
+  if(it.emptyOnNat1) bits.push('empty on a natural 1');
+  if(!(it.heal || it.lose || it.dropTo1 || it.check || it.dmg)){   // say what it does when there is no roll to show
+    var gist=desc.replace(/^\s*(?:[A-Za-z ]+:\s*)?(food|item|explosive|scroll|substance|tools?|book|wand|staff)\s*[,:]\s*/i,'').replace(/^\s*\d+\s*(uses?|count)\s*,\s*/i,'');
+    bits.unshift(gist.length>70 ? gist.slice(0,69)+'…' : gist);
+  }
+  it.sub=bits.join(' · ');
+  return it;
+}
+function icLootRow(name){ return [].find.call(document.querySelectorAll('#loot-body tr'), function(tr){ return icNorm((tr.querySelector('.it-name')||{}).value)===icNorm(name); }); }
+// Take one use: count down "N uses left" in the note, or remove the row on the last one.
+function icSpendUse(it){
+  var tr=icLootRow(it.name); if(!tr) return 'gone';
+  var left=it.uses-1;
+  if(left<=0){ tr.remove(); return 'used up'; }
+  var n=tr.querySelector('.it-note'), cur=n.value.replace(/\s*\b\d+\s*(?:uses?|count|sips?|charges?)\s*left\b\s*/i,' ').trim();
+  n.value=(cur?cur+' · ':'')+left+(left===1?' use left':' uses left');
+  return left+' left';
+}
+function icUseItem(it){
+  var res=[], det=[], type='normal';
+  var hp=num($('f-hp').value), max=num($('f-hpmax').value);
+  var setHp=function(v){ v=Math.max(0, Math.min(max, v)); $('f-hp').value=v; onHp(); hp=v; };
+  var ok=true;
+  if(it.check){
+    var md0=_icTurn.mode; if(it.check.easy && md0==='normal') _icTurn.mode='easy';
+    var c=icCheck(it.check.stat, 20, { hard:it.check.hard });
+    _icTurn.mode=md0;
+    ok=c.hit; res.push(icVerdict(c)); det.push(icCheckDetail(c, it.check.stat)+(it.check.easy?' (EASY)':''));
+    type=c.crit?'crit':c.fumble?'fumble':'normal';
+    if(it.emptyOnNat1 && c.d===1){ var tr=icLootRow(it.name); if(tr) tr.remove(); det.push('natural 1 — the kit is empty'); }
+  }
+  if(ok){
+    if(it.heal){
+      if(it.healAlly){ var hr=it.heal==='full'?null:icDiceRoll(it.heal); res.push('Ally +'+(hr?hr.total:'full')+' HP'); if(hr && /d/i.test(it.heal)) det.push(hr.txt); }
+      else { var before=hp, hr2=it.heal==='full'?{ total:max, txt:'full' }:icDiceRoll(it.heal); setHp(it.heal==='full'?max:hp+hr2.total); res.push('+'+(hp-before)+' HP'); det.push((/d/i.test(it.heal)?hr2.txt+' · ':'')+'HP '+before+' → '+hp); if(!it.check) type='crit'; }
+    }
+    if(it.lose){ var lr=icDiceRoll(it.lose), b2=hp; setHp(hp-lr.total); res.push('−'+(b2-hp)+' HP'); det.push((/d/i.test(it.lose)?lr.txt+' · ':'')+'HP '+b2+' → '+hp); }
+    if(it.dropTo1){ var b3=hp; setHp(1); res.push('1 HP'); det.push('HP '+b3+' → 1'); }
+    if(it.dmg){ var dr=icDiceRoll(it.dmg); res.push(dr.total+' damage'); det.push(dr.txt+' damage'); }
+    if(it.timer){ var tr2=icDiceRoll(it.timer.dice); det.push(it.timer.unit+': '+tr2.txt+' = '+tr2.total); }
+    if(it.easyNext){ _icTurn.mode='easy'; det.push('EASY set on the Action tab'); }
+    if(it.targetDown){ var t0=num($('f-target').value); if(t0>0){ $('f-target').value=t0-1; det.push('TARGET '+t0+' → '+(t0-1)); } }
+    if(it.light) det.push('Lit');
+  }
+  if(it.consumable) det.push(icSpendUse(it));
+  det.push(it.desc.slice(0,110));
+  addLog('Use '+it.name, res.join(' · ')||'Used', det.join(' · '), type);
+}
 function icBuildOpts(){
   _icOpts=[];
-  var O={ attacks:[], spells:[], items:[], abilities:[], actions:[], checks:[] };
+  var O={ attacks:[], spells:[], equip:[], abilities:[], actions:[], checks:[] };
   var add=function(sec,o){ o.i=_icOpts.length; _icOpts.push(o); O[sec].push(o); };
   var loot=icRows('loot');
 
@@ -1151,19 +1268,10 @@ function icBuildOpts(){
       } });
   });
 
-  // Items — food & potions that heal; using one eats it (the Loot row goes).
-  icRows('loot').forEach(function(r){
-    var it=icConsumable(r); if(!it) return;
-    add('items', { name:it.name, kind:'action', btn:'Use', sub:'Heal '+it.healTxt+' HP',
-      run:function(){
-        var amt=it.heal, rolls=[];
-        if(it.healDice){ amt=0; for(var k=0;k<it.healDice.n;k++){ var x=die(it.healDice.s); rolls.push(x); amt+=x; } }
-        var hp=num($('f-hp').value), max=num($('f-hpmax').value), nhp=Math.min(max, hp+amt);
-        $('f-hp').value=nhp; onHp();
-        var row=[].find.call(document.querySelectorAll('#loot-body tr'), function(tr){ return icNorm((tr.querySelector('.it-name')||{}).value)===icNorm(it.name); });
-        if(row){ row.remove(); scheduleAutosave(); }
-        addLog('Use '+it.name, '+'+(nhp-hp)+' HP', (it.healDice?it.healTxt+'('+rolls.join('+')+') · ':'')+'HP '+hp+' → '+nhp+' · '+it.desc.slice(0,90), 'crit');
-      } });
+  // Equipment — LOOT with something to do when USED (consumables lose a use).
+  loot.forEach(function(r){
+    var it=icEquipOf(r); if(!it) return;
+    add('equip', { name:it.name, kind:'action', btn:'Use', sub:it.sub, run:function(){ icUseItem(it); } });
   });
 
   // Abilities / Powers that you use (not the always-on ones).
@@ -1266,7 +1374,7 @@ function icRenderTurn(){
     '</div>'+
     sec('attacks','Attacks',O.attacks,'')+
     sec('spells','Spells',O.spells,'')+
-    sec('items','Items',O.items,'')+
+    sec('equip','Equipment',O.equip,'')+
     sec('abilities','Abilities',O.abilities,'')+
     sec('actions','Actions',O.actions,'')+
     sec('checks','Use a Stat',O.checks,'');

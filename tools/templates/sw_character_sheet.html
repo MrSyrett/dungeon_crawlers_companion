@@ -152,7 +152,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .pts-note b{color:var(--ink);}.pts-note .bad{color:var(--red);}.pts-note .good{color:var(--sw-dk);}
 
 /* VITALS */
-.vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;border-bottom:1px solid var(--rule);align-items:stretch;}
+.vitals{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;border-bottom:1px solid var(--rule);align-items:stretch;}
 .vital{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:7px 9px;}
 .vital.wide{grid-column:1 / -1;}
 .vital.half{grid-column:span 2;}
@@ -741,10 +741,6 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
           <div class="vbig"><input type="text" id="f-armor-pips" class="code" placeholder="+1D" style="width:64px;" oninput="recalc()"></div>
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="none (set from Equipment)" style="width:100%;text-align:left;" oninput="recalc()"></div>
         </div>
-        <div class="vital">
-          <div class="vlbl"><span>Movement</span></div>
-          <div class="vline" style="text-align:center;line-height:1.35;" title="Core rules p.13: walk up to 5 m (any turn), run up to 10 m (one 90° turn, −1D to skill rolls), crawl 2 m when prone (−1D)">Walk 5 m · Run 10 m<br><small>crawl 2 m prone</small></div>
-        </div>
       </div>
 
       </div>
@@ -1102,12 +1098,13 @@ function onMapChange() { _act.declared = Math.max(1, swMAP() + 1); updateModNote
 function currentMods() {
   const w = WOUND_PEN[wound] || 0, map = swMAP() * 3;   // Multi-Action Penalty: each die = 3 pips
   const run = (typeof _act !== 'undefined' && _act.ran) ? 3 : 0;   // running this round: −1D to every skill roll (p.12)
-  return { actions: swMAP(), wound: w, run: run, mod: 0, total: -(w + map + run) };
+  const rel = (typeof _act !== 'undefined' && _act.reload) ? 3 : 0;   // changed a power pack this round: −1D to every die code (p.51)
+  return { actions: swMAP(), wound: w, run: run, reload: rel, mod: 0, total: -(w + map + run + rel) };
 }
 function updateModNote() {
   if(typeof renderActionSoon === 'function') renderActionSoon();
   const m = currentMods(); const parts = [];
-  if(m.actions) parts.push('−' + m.actions + 'D Multi-Action'); if(m.wound) parts.push('−' + toCode(m.wound) + ' ' + wound); if(m.run) parts.push('−1D running'); if(forcePointArmed) parts.push('Force Point: all codes doubled this round');
+  if(m.actions) parts.push('−' + m.actions + 'D Multi-Action'); if(m.wound) parts.push('−' + toCode(m.wound) + ' ' + wound); if(m.run) parts.push('−1D running'); if(m.reload) parts.push('−1D reloading'); if(forcePointArmed) parts.push('Force Point: all codes doubled this round');
   const note = $('mod-note'); if(note) note.textContent = parts.length ? parts.join(' · ') : 'No modifiers.';
   const fb = $('fp-btn'); if(fb) fb.textContent = forcePointArmed ? 'Force Point active ✓' : 'Use Force Point';
 }
@@ -1340,6 +1337,7 @@ function addForcePowerByName(name) {
 // End Turn clears the actions and the penalty (nothing is logged). Management —
 // editing weapons, powers and skills — stays on the other tabs.
 var _act = { declared: 1, used: 0, full: '', collapsed: { skills: true } };
+var medpacsToday = 0;   // medpacs used on this character today (Rules Companion +3 each beyond the first)
 var _actOpts = [];
 function actMap() { return Math.max(0, (_act.declared || 1) - 1); }
 function actSetDeclared(n) {
@@ -1355,8 +1353,9 @@ function actDo(i, j) {
   const o = _actOpts[i]; if(!o) return;
   const run0 = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run; if(!run0) return;
   const run = () => { _fromActionTab = true; try { run0(); } finally { _fromActionTab = false; } };   // the tab spends; the sheet hook must not
-  if(_act.full && o.kind !== 'move' && o.kind !== 'free') return;
-  if(o.kind === 'move' || o.kind === 'free') { run(); renderAction(); scheduleAutosave(); return; }   // a segment, not a skill use
+  const freeBtn = !!(o.btns && o.btns[j] && o.btns[j][2] === 'free');   // a bookkeeping button on an action card
+  if(_act.full && o.kind !== 'move' && o.kind !== 'free' && !freeBtn) return;
+  if(o.kind === 'move' || o.kind === 'free' || freeBtn) { run(); renderAction(); scheduleAutosave(); return; }   // a segment, not a skill use
   if(o.kind === 'full') {
     if((_act.used || 0) > 0) return;                        // declared at the start of the round, before any other action
     _act.declared = 1; const me = $('f-map'); if(me) me.value = 0; updateModNote();   // the round's only skill use
@@ -1393,7 +1392,7 @@ function renderActionSoon() { clearTimeout(_actT); _actT = setTimeout(renderActi
 function renderAction() {
   const host = $('d6-action'); if(!host) return;
   _actOpts = [];
-  const S = { attacks: [], reactions: [], powers: [], actions: [], skills: [] };
+  const S = { attacks: [], reactions: [], powers: [], equipment: [], actions: [], skills: [] };
   const add = (sec, o) => { o.i = _actOpts.length; _actOpts.push(o); S[sec].push(o); };
   ACT_CFG.build(add);
   const map = actMap(), used = _act.used || 0;
@@ -1404,6 +1403,7 @@ function renderAction() {
   const badges = [];
   if(map) badges.push('<span class="turn-badge warn" title="Multi-Action Penalty">−' + map + 'D to every roll</span>');
   if(_act.ran) badges.push('<span class="turn-badge warn" title="Running this round">Running · −1D to skill rolls</span>');
+  if(_act.reload) badges.push('<span class="turn-badge warn" title="Changed a power pack this round">Reloaded · −1D this round</span>');
   if(_act.full) badges.push('<span class="turn-badge" title="Only movement may follow this round">' + esc(_act.full) + ' · movement only</span>');
   ACT_CFG.badges().forEach(b => badges.push('<span class="turn-badge good">' + esc(b) + '</span>'));
   const pts = ACT_CFG.points().map(p => '<span class="turn-stat"><span class="tm-lbl">' + esc(p.label) + '</span> <b>' + esc(p.value) + '</b>' + (p.btn ? ' <button class="turn-mini" onclick="' + p.btn.fn + '" title="' + esc(p.btn.title || '') + '">' + esc(p.btn.label) + '</button>' : '') + '</span>').join('');
@@ -1429,7 +1429,84 @@ function renderAction() {
     + sec('attacks', 'Attacks', S.attacks, 'No weapons yet — add them from ' + ACT_CFG.weaponsHome + '.')
     + sec('reactions', ACT_CFG.reactTitle, S.reactions, null)
     + sec('powers', ACT_CFG.powerTitle, S.powers, null)
+    + sec('equipment', 'Equipment', S.equipment, null)
     + sec('actions', 'Actions', S.actions, null);
+}
+
+// ═══ ACTION TAB · EQUIPMENT (use items from the Equipment list) ══════════
+// Equipment rows are matched by name to the uses below (Star Wars 1st edition
+// core rules). Quantity = the rows with that name, times any count written in
+// the name ("Medpac x3", "3 Medpacs"). Using a consumable spends one (the row
+// goes at zero); other items are never spent. Gear with nothing to do (clothes,
+// comlink, rations…) and custom items with no recognised use aren't listed.
+function eqParse(name) {
+  let s = String(name || '').trim(), n = 1, m;
+  if((m = /^(.*?)\s*(?:[x×]\s*(\d+)|\((\d+)\))$/i.exec(s)) && (m[2] || m[3])) { s = m[1]; n = +(m[2] || m[3]); }
+  else if((m = /^(\d+)\s*[x×]?\s+(.+)$/i.exec(s))) { n = +m[1]; s = m[2]; }
+  return { base: s.trim(), n: Math.max(1, n) };
+}
+// Spend one of an item group: the last row's count drops by one, or the row goes.
+function eqSpend(rows) {
+  const tr = rows[rows.length - 1]; if(!tr) return;
+  const inp = tr.querySelector('.gr-name'), p = eqParse(inp.value);
+  if(p.n > 1) inp.value = p.base + (p.n - 1 > 1 ? ' ×' + (p.n - 1) : '');
+  else { const link = tr.dataset.link; if(link) { const atk = document.querySelector('#weapons-body tr[data-link="' + link + '"]'); if(atk) atk.remove(); } tr.remove(); }
+  scheduleAutosave();
+}
+// Roll a skill by name (untrained → its attribute) and return the total.
+function eqSkillRoll(name, label, opts) {
+  const tr = actSkillRow(name);
+  if(tr) return rollCode((tr.querySelector('.sk-name-in').value.trim() || name) + (label || ''), rowTotal(tr), opts);
+  const def = D.skills().find(s => norm(s.name) === norm(name));
+  const a = def ? String(def.attribute || '').split(/[,&/]/)[0].trim() : '';
+  return rollCode(name + ' (untrained ' + (a || '—') + ')' + (label || ''), a ? attr(a) : 3, opts);
+}
+const SW_ITEM_USES = [
+  { re: /^med ?pacs?$/i, consumable: true, build: (g) => {
+      // Rules Companion revised use: medpacs may be used more than once a day, but each
+      // one beyond the first that day adds +3 to the difficulty (core p.53 base 10/15/20).
+      const extra = 3 * Math.max(0, medpacsToday), dc = 10 + extra, btns = [];
+      if(wound === 'wounded') btns.push(['Treat self', () => { const t = eqSkillRoll('Medicine', ' — medpac on yourself' + (extra ? ' (+' + extra + ', medpac #' + (medpacsToday + 1) + ' today)' : ''), { dc: dc }); medpacsToday++; if(t >= dc) setWound('none'); g.spend(); }]);
+      btns.push(['Treat ally', () => { eqSkillRoll('Medicine', ' — medpac (beat 10 wounded · 15 incapacitated · 20 mortally wounded)'); addLog('Medpac', 'Used up', 'On a success the patient’s wound status drops one level · +3 difficulty for each medpac that patient has already had today (Rules Companion)', 'normal'); g.spend(); }]);
+      if(medpacsToday > 0) btns.push(['New day', () => { medpacsToday = 0; addLog('Medpacs', 'New day', 'Medpac difficulty penalty reset', 'normal'); scheduleAutosave(); renderAction(); }, 'free']);
+      return { kind: 'action', sub: 'Medicine roll: 10 wounded · 15 incapacitated · 20 mortally wounded · +3 per medpac beyond the first that day (Rules Companion)' + (medpacsToday ? ' · ' + medpacsToday + ' used on you today → +' + (3 * medpacsToday) : '') + ' · success heals one wound level', btns: btns };
+  } },
+  { re: /^smoke grenades?$/i, consumable: true, build: (g) => ({ kind: 'action', btn: 'Throw',
+      sub: 'Grenade roll to place it · fills 10 m with thick smoke: blaster difficulties +5 through it (p.101)',
+      run: () => { eqSkillRoll('Grenade', ' — smoke grenade'); addLog('Smoke Grenade', 'Smoke', 'Nobody can see through it · +5 to blaster difficulty numbers', 'normal'); g.spend(); } }) },
+  { re: /^blaster ammo packs?$/i, consumable: true, build: (g) => ({ kind: 'free', btn: 'Reload', blocked: _act.reload ? 'Already reloaded this round' : '',
+      sub: 'Not an action segment, but −1D to every die code this round (p.51)',
+      run: () => { _act.reload = true; updateModNote(); addLog('Reload', 'New power pack', '−1D to every die code this round', 'normal'); g.spend(); } }) },
+  { re: /^flares?$/i, consumable: true, build: (g) => ({ kind: 'free', btn: 'Light', sub: 'Light a flare',
+      run: () => { addLog('Flare', 'Lit', 'Lights the area', 'normal'); g.spend(); } }) },
+  { re: /^(glow ?rod|worklight)s?$/i, build: (g) => ({ kind: 'free', btn: 'Light', sub: /glow/i.test(g.name) ? 'Beam of light, about 20 m · about 50 hours per power cell' : 'Work light',
+      run: () => addLog(g.name, 'On', 'Lights the area', 'normal') }) },
+  { re: /^computer tool kits?$/i, build: () => ({ kind: 'action', btn: 'Repair', sub: 'Computer Programming/Repair', run: () => eqSkillRoll('Computer Programming/Repair', ' — tool kit') }) },
+  { re: /^droid tool kits?$/i, build: () => ({ kind: 'action', btn: 'Repair', sub: 'Droid Programming/Repair', run: () => eqSkillRoll('Droid Programming/Repair', ' — tool kit') }) },
+  { re: /^vehicle tool kits?$/i, build: () => ({ kind: 'action', sub: 'Repulsorlift Repair or Starship Repair',
+      btns: [['Repulsorlift', () => eqSkillRoll('Repulsorlift Repair', ' — tool kit')], ['Starship', () => eqSkillRoll('Starship Repair', ' — tool kit')]] }) },
+  { re: /^security systems tool kits?$/i, build: () => ({ kind: 'action', btn: 'Bypass', sub: 'Security', run: () => eqSkillRoll('Security', ' — tool kit') }) },
+  { re: /(^rope|syntherope|grappl)/i, build: () => ({ kind: 'action', btn: 'Climb', sub: 'Climbing/Jumping', run: () => eqSkillRoll('Climbing/Jumping', ' — rope') }) },
+  { re: /^macrobinoculars?$/i, build: () => ({ kind: 'action', btn: 'Search', sub: 'Search · zoom and range-finding', run: () => eqSkillRoll('Search', ' — macrobinoculars') }) },
+  { re: /space suit/i, build: () => ({ kind: 'action', btn: 'Suit up', sub: 'Hulled ship: Survival 10 to get into it in time (p.60)',
+      run: () => eqSkillRoll('Survival', ' — get into the space suit', { dc: 10 }) }) },
+];
+// Add one Equipment card per usable item group to the Action tab.
+function eqBuild(add) {
+  const groups = {};
+  [...document.querySelectorAll('#gear-body tr')].forEach(tr => {
+    const inp = tr.querySelector('.gr-name'); if(!inp || !inp.value.trim()) return;
+    const p = eqParse(inp.value), use = SW_ITEM_USES.find(u => u.re.test(p.base)); if(!use) return;
+    const k = norm(p.base); (groups[k] = groups[k] || { name: p.base, use: use, rows: [], total: 0 });
+    groups[k].rows.push(tr); groups[k].total += p.n;
+  });
+  Object.values(groups).forEach(g => {
+    g.spend = () => eqSpend(g.rows);
+    const o = g.use.build(g);
+    o.name = g.name + (g.total > 1 ? ' ×' + g.total : '');
+    o.sub = [o.sub, g.use.consumable ? 'used up when used' : '', o.kind === 'free' ? 'not a skill use' : ''].filter(Boolean).join(' · ');
+    add('equipment', o);
+  });
 }
 
 var ACT_CFG = {
@@ -1461,6 +1538,7 @@ var ACT_CFG = {
     add('actions', { name: 'Move', kind: 'move', sub: 'Takes a segment but is not a skill use (no multi-action penalty) · walk up to 5 m, any turn · run up to 10 m, one 90° turn, −1D to every skill roll this round · crawl 2 m when prone (−1D)',
       btns: [['Walk', () => addLog('Walk', '5 m', 'Movement segment · no penalty', 'normal')],
              ['Run', () => { if(!_act.ran) { _act.ran = true; updateModNote(); } addLog('Run', '10 m', 'Movement segment · −1D to every skill roll this round', 'normal'); }]] });
+    eqBuild(add);
   },
 };
 
@@ -1689,7 +1767,7 @@ function collectSheet() {
     name: v('f-name'), template: v('f-template'), species: v('f-species'), sex: v('f-sex'), age: v('f-age'), height: v('f-height'), weight: v('f-weight'), physical: v('f-physical'),
     attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attr: tr.dataset.attr, adds: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
-    wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), map: num(v('f-map')), actionTurn: _act, credits: v('f-credits'),
+    wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), map: num(v('f-map')), actionTurn: _act, medpacsToday: medpacsToday, credits: v('f-credits'),
     armor: { name: v('f-armor'), pips: fromCode(v('f-armor-pips')) || 0 }, wildDie: swWild(),
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || undefined, fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
     force: [...document.querySelectorAll('#force-body tr')].map(tr => ({ name: tr.dataset.name })).filter(f => f.name),
@@ -1705,7 +1783,7 @@ function applySheet(d) {
   ATTRS.forEach(a => set('at-' + a, toCode(d.attrs && d.attrs[a] != null ? d.attrs[a] : 6)));
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; forcePointArmed = false; renderWoundTrack();
-  set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0); forcePointArmed = !!_act.fp; set('f-credits', d.credits);
+  set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0); forcePointArmed = !!_act.fp; medpacsToday = Math.max(0, num(d.medpacsToday || 0)); set('f-credits', d.credits);
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-pips', ar.pips ? toCode(ar.pips, true) : ''); $('f-wild').checked = d.wildDie === true; onWildChange();   // old saves' 2nd-edition "move" value is ignored
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(w => addWeaponRow(w));
   ensureUnarmed();

@@ -1126,6 +1126,12 @@ function castSpell(btn) {
     if(num($('mana-cur').value) < tier) { addLog(name, '✗', 'Not enough mana (' + tier + ' needed)', 'fumble'); return; }
     $('mana-cur').value = num($('mana-cur').value) - tier;
   }
+  spellEffect(name, tier, sp);
+  scheduleAutosave();
+}
+// The spell itself, once paid for (mana here; a scroll or wand charge from the Action tab's Equipment).
+// Spends 1 action the way the attack roll does.
+function spellEffect(name, tier, sp) {
   const dmg = sp ? /Damage:\s*([^.]+)/i.exec(sp.text) : null;
   const dd = dmg ? /^\s*d([468])\1\b/i.exec(dmg[1]) : null;
   if(dd) {
@@ -1149,8 +1155,7 @@ function castSpell(btn) {
     }
     rollAttack(name + (tier ? ' (tier ' + tier + ')' : ''), ex, { noMiss: /does not miss/i.test(dmg[1]), vicious: /Vicious/i.test(dmg[1]) });
   }
-  else { addLog(name, tier ? '−' + tier + ' mana' : 'cantrip', sp ? sp.text.slice(0, 140) : '', 'normal'); spendAction(); }
-  scheduleAutosave();
+  else { addLog(name, tier ? 'tier ' + tier : 'cantrip', sp ? sp.text.slice(0, 140) : '', 'normal'); spendAction(); }
 }
 function abilityPools() { const c = cls(); return c ? [c.abilityPool].concat(c.extraPools || []).filter(Boolean) : []; }
 function fillPoolPick() {
@@ -1744,7 +1749,7 @@ function nimAfter(){ renderActions(); renderNimTurn(); if(typeof scheduleAutosav
 function nimSpend(n){ actions = Math.max(0, actions - n); }
 
 function nimBuild(){
-  const O = { attacks: [], spells: [], reactions: [], actions: [], checks: [] };
+  const O = { attacks: [], spells: [], equip: [], reactions: [], actions: [], checks: [] };
   _nturnOpts = [];
   const add = (sec, o) => { o.i = _nturnOpts.length; _nturnOpts.push(o); O[sec].push(o); };
   const rushed = _nturn.attacks;   // dis count for the NEXT attack this turn
@@ -1782,6 +1787,8 @@ function nimBuild(){
         nimDyingSave();
         return true; } });
   });
+  // Equipment (usable inventory items)
+  nimEquipOpts(add, rushed);
   // Heroic Reactions — 1 action each, off-turn, each 1/round
   const armor = (typeof armorValue === 'function') ? armorValue() : 0;
   const melee = [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: (tr.querySelector('.atk-name') || {}).value || '', dmg: (tr.querySelector('.atk-dmg') || {}).value || '', props: (tr.querySelector('.atk-props') || {}).value || '' }))
@@ -1807,6 +1814,139 @@ function nimBuild(){
     nimSpend(1); (_nturn.assessed = used).push(sk[0]);
     d20Check('Assess · ' + sk[0], skillTotal(sk[0], sk[1]), { dc: 12 }); return true; } });
   return O;
+}
+
+/* ═══ EQUIPMENT — inventory items you can USE (core: Key Equipment, Spell Scrolls & Wands) ═══
+   • Potions: 1 action to drink (core: "Potions require one action to drink"); the heal is rolled and
+     applied, and the potion is used up.
+   • Torches: 1 use each (a "stack of 2" is two); a lantern is not used up (oil lasts until a Safe Rest).
+     Light reaches 6 spaces. Lighting one is 1 action here (the book gives no cost).
+   • Spell Scrolls: cast without mana for the spell's normal actions; a DC 10 Arcana check first unless
+     you know a spell from that school (fail = wasted). The scroll is used up either way.
+   • Wands: no mana; proficient (your class's weapons list "Wands") casts for the normal actions, otherwise a
+     DC 10 + tier Arcana check. A charge is spent either way. Charges live in the row's note ("3 charges").
+   • Magic items with an action (Gem of Escape, Glacier in a Bottle, Ball of Spiders, Lumina…): 1 action,
+     LVL dice are rolled, one-time items are used up.
+   • Tools: a skill check against the tray DC (the GM sets it). Never used up.
+   Quantity: one row = one item unless the name or note says "×N". The scroll/wand spell is read from the
+   item name or the row's note (e.g. note "Fireball"). */
+const NIM_TOOL_SKILL = { 'lock pick':'Finesse', 'crowbar':'Might', 'grappling hook':'Might', 'magnifying glass':'Examination', 'telescope':'Perception', 'instrument':'Influence' };
+function nimQtyTok(s){ const m = /(?:×|\bx)\s*(\d+)\b/i.exec(String(s || '')); return m ? +m[1] : null; }
+function nimBaseName(n){ return String(n || '').replace(/\s*(?:×|\bx)\s*\d+\b/i, '').trim(); }
+function nimEqQty(row){ const q = nimQtyTok(row.note) ?? nimQtyTok(row.name); if(q != null) return q; const st = /stack of (\d+)/i.exec(row.name); return st ? +st[1] : 1; }
+function nimEqCharges(row, it){ const m = /(\d+)\s*charges?\b/i.exec(row.note) || /(\d+)\s*charges?\b/i.exec((it && it.properties) || ''); return m ? +m[1] : null; }
+function nimKnownSchools(){ const out = {}; document.querySelectorAll('#spells-body .sp-name').forEach(i => { const sp = D.spells().find(x => norm(x.name) === norm(i.value)); if(sp && sp.school) out[norm(sp.school)] = 1; }); return out; }
+// The spell a scroll / wand holds: a spell name inside the item name, its note or (named wands) its text.
+function nimEqSpell(row, it){
+  const hay = norm(nimBaseName(row.name).replace(/^(wand|spell scroll|scroll)\s*(of)?\s*/i, '') + ' | ' + row.note + ' | ' + ((it && it.description) || '').replace(/(Like spell scrolls|Spell scrolls are)[\s\S]*/i, ''));
+  let best = null;
+  D.spells().forEach(sp => { const n = norm(sp.name); if(n.length > 2 && new RegExp('(^|[^a-z])' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z]|$)').test(hay) && (!best || n.length > norm(best.name).length)) best = sp; });
+  return best;
+}
+function nimEqOf(tr){
+  const g = c => { const el = tr.querySelector(c); return el ? el.value.trim() : ''; };
+  const row = { tr: tr, name: g('.inv-name'), note: g('.inv-note') };
+  if(!row.name) return null;
+  const base = nimBaseName(row.name), it = findItem(base) || findItem(base.replace(/\s*\(.*\)\s*$/, '')) || null;
+  if(it && (isWeapon(it) || ['Cloth','Leather','Mail','Plate','Shield'].includes(it.category))) return null;
+  const txt = [(it && it.properties) || '', (it && it.description) || '', row.note].join(' ');
+  const cat = (it && it.category) || '';
+  const o = { row: row, it: it, name: base, qty: nimEqQty(row), cost: 1 };
+  const heal = /\bHeal\s+(\d+d\d+(?:\s*[+-]\s*\d+)?)\s*HP/i.exec(txt);
+  if(heal && !/Wand|Spell Scroll/.test(cat)) { o.kind = 'heal'; o.heal = heal[1].replace(/\s+/g, ''); o.consume = true; o.sub = 'Heal ' + o.heal + ' HP · 1 action'; }
+  else if(/^torch\b/i.test(base)) { o.kind = 'light'; o.consume = true; o.sub = 'Light 6 spaces for 1 dungeon · 1 use'; }
+  else if(/\blantern\b/i.test(base)) { o.kind = 'light'; o.lantern = true; o.sub = 'Light 6 spaces until your next Safe Rest'; }
+  else if(cat === 'Spell Scroll' || /\bscroll\b/i.test(base)) {
+    o.kind = 'scroll'; o.consume = true; o.spell = nimEqSpell(row, it);
+    const known = o.spell && nimKnownSchools()[norm(o.spell.school || '')];
+    o.check = known ? 0 : 10;
+    const c = nimSpellCost(o.spell); o.cost = o.spell ? c.n : 1; if(o.spell && c.timed) o.blocked = 'Casting time ' + c.timed;
+    o.sub = (o.spell ? o.spell.name + ' · ' + o.cost + ' action' + (o.cost === 1 ? '' : 's') : 'Name the spell in the note') + ' · no mana' + (o.check ? ' · DC 10 Arcana first' : '') + ' · used up';
+  }
+  else if(cat === 'Wand' || /^wand\b/i.test(base)) {
+    o.kind = 'wand'; o.spell = nimEqSpell(row, it);
+    const tierM = /Tier\s*(\d)/i.exec(base + ' ' + ((it && it.properties) || '')), tier = o.spell ? num(o.spell.tier) : tierM ? +tierM[1] : 0;
+    const prof = /wands?/i.test((cls() || {}).weapons || '');
+    o.check = prof ? 0 : 10 + tier; o.charges = nimEqCharges(row, it);
+    const c = nimSpellCost(o.spell); o.cost = o.spell ? c.n : 1; if(o.spell && c.timed) o.blocked = 'Casting time ' + c.timed;
+    if(o.charges === 0) o.blocked = 'No charges left';
+    o.sub = (o.spell ? o.spell.name + ' · ' + o.cost + ' action' + (o.cost === 1 ? '' : 's') : 'Name the spell in the note') + (o.charges != null ? ' · ' + o.charges + ' charge' + (o.charges === 1 ? '' : 's') : '') + (o.check ? ' · DC ' + o.check + ' Arcana (not proficient)' : '');
+  }
+  else if(cat === 'Magic Item' && /\(1 Action\)|\bAction:|as an action|one-time use|as a reaction/i.test(txt)) {
+    o.kind = 'magic'; o.consume = /one-time use|crush one|single-use/i.test(txt);
+    const lv = /LVL\s*d(\d+)/i.exec(txt); if(lv) o.lvlDie = +lv[1];
+    o.healToo = /heal allies in the area for the same amount/i.test(txt);
+    o.reaction = /as a reaction/i.test(txt) && !/\bAction:/i.test(txt);
+    o.sub = (o.reaction ? 'Reaction · ' : '1 action · ') + (o.lvlDie ? level() + 'd' + o.lvlDie + ' · ' : '') + (o.consume ? 'one use' : 'not used up');
+  }
+  else if(NIM_TOOL_SKILL[norm(base)]) { o.kind = 'tool'; o.skill = NIM_TOOL_SKILL[norm(base)]; o.sub = o.skill + ' check (GM sets the DC) · 1 action'; }
+  else return null;
+  if(o.consume && o.qty > 1) o.sub += ' · ×' + o.qty;
+  return o;
+}
+// Use one up: count "×N" down (in the note), or remove the row (and a linked attack row) on the last one.
+function nimEqTakeOne(o){
+  const tr = o.row.tr; if(!tr || !tr.isConnected) return 'gone';
+  if(o.qty <= 1) { removeInvRow(tr.querySelector('.row-x') || tr); return 'used up'; }
+  const left = o.qty - 1, note = tr.querySelector('.inv-note'), nm = tr.querySelector('.inv-name');
+  if(nimQtyTok(note.value) != null) note.value = note.value.replace(/(?:×|\bx)\s*\d+\b/i, '×' + left);
+  else if(nimQtyTok(nm.value) != null) nm.value = nm.value.replace(/(?:×|\bx)\s*\d+\b/i, '×' + left);
+  else note.value = (note.value ? note.value + ' · ' : '') + '×' + left;
+  return left + ' left';
+}
+function nimEqSpendCharge(o){
+  const note = o.row.tr.querySelector('.inv-note'), left = Math.max(0, o.charges - 1);
+  if(/\d+\s*charges?\b/i.test(note.value)) note.value = note.value.replace(/\d+\s*charges?\b/i, left + ' charge' + (left === 1 ? '' : 's'));
+  else note.value = (note.value ? note.value + ' · ' : '') + left + ' charge' + (left === 1 ? '' : 's');
+  return left + ' charge' + (left === 1 ? '' : 's') + ' left';
+}
+function nimRollExpr(expr){ const m = /(\d+)d(\d+)\s*([+-]\s*\d+)?/i.exec(expr); if(!m) return { total: num(expr), txt: String(expr) }; const r = Array.from({ length: +m[1] }, () => dN(+m[2])); const b = m[3] ? num(m[3].replace(/\s/g, '')) : 0; return { total: r.reduce((a, x) => a + x, 0) + b, txt: m[1] + 'd' + m[2] + ': ' + r.join('+') + (b ? (b > 0 ? ' +' : ' ') + b : '') }; }
+function nimHealSelf(n){ const cur = num($('hp-cur').value), mx = num($('hp-max').value); const nv = mx > 0 ? Math.min(mx, cur + n) : cur + n; $('hp-cur').value = nv; return { from: cur, to: nv }; }
+function nimArcana(label, dc){ d20Check(label + ' · Arcana', skillTotal('Arcana', 'INT'), { dc: dc }); const nat = d20Check.lastNat, t = nat + skillTotal('Arcana', 'INT'); return nat === 20 || (nat !== 1 && t >= dc); }
+// Cast the scroll / wand spell: pay actions here, not mana. A harmful spell is an attack (Rushed + Dying save).
+function nimEqCast(o, rushed){
+  const sp = o.spell, dm = /Damage:\s*([^.]+)/i.exec(sp.text), harmful = !!(dm && (parseDamage(dm[1]) || /^\s*d([468])\1\b/i.test(dm[1])));
+  if(harmful) nimNetDis(rushed);
+  const before = actions; spellEffect(sp.name + ' (' + (o.kind === 'wand' ? 'wand' : 'scroll') + ')', num(sp.tier), sp); actions = before;
+  if(harmful) { _nturn.attacks += 1; }
+  return harmful;
+}
+function nimUseItem(o, rushed){
+  const det = [];
+  if(o.kind === 'heal') {
+    const r = nimRollExpr(o.heal), h = nimHealSelf(r.total);
+    nimSpend(o.cost);
+    addLog('Use ' + o.name, '+' + (h.to - h.from) + ' HP', r.txt + ' · HP ' + h.from + ' → ' + h.to + ' · ' + nimEqTakeOne(o), 'crit');
+  } else if(o.kind === 'light') {
+    nimSpend(o.cost);
+    addLog('Use ' + o.name, 'Lit', 'Light up to 6 spaces' + (o.lantern ? ' until your next Safe Rest (refill 1 gp)' : ' for 1 dungeon · ' + nimEqTakeOne(o)) + ' · foes may target the light bearer', 'normal');
+  } else if(o.kind === 'scroll' || o.kind === 'wand') {
+    nimSpend(o.cost);
+    let ok = true;
+    if(o.check) ok = nimArcana(o.name, o.check);
+    const tail = o.kind === 'scroll' ? nimEqTakeOne(o) : (o.charges != null ? nimEqSpendCharge(o) : 'charge spent');
+    if(!ok) { addLog('Use ' + o.name, 'Wasted', 'Arcana check failed — ' + (o.kind === 'scroll' ? 'the scroll is wasted' : 'the charge is spent') + ' · ' + tail, 'fumble'); return; }
+    if(o.spell) { if(nimEqCast(o, rushed)) nimDyingSave(); addLog(o.name, o.kind === 'scroll' ? 'Scroll read' : 'Wand used', 'No mana · ' + tail, 'normal'); }
+    else addLog('Use ' + o.name, 'Cast', 'Name the spell in the row\'s note to roll it · ' + tail, 'normal');
+  } else if(o.kind === 'magic') {
+    nimSpend(o.cost);
+    let res = 'Used';
+    if(o.lvlDie) { const n = Math.max(1, level()), r = nimRollExpr(n + 'd' + o.lvlDie); res = r.total + (o.healToo ? ' dmg / heal' : ''); det.push(r.txt + (o.healToo ? ' damage to enemies within 6 spaces; allies heal the same' : '')); if(o.healToo) { const h = nimHealSelf(r.total); det.push('you: HP ' + h.from + ' → ' + h.to); } }
+    det.push(((o.it && o.it.description) || '').slice(0, 100));
+    if(o.consume) det.push(nimEqTakeOne(o));
+    addLog('Use ' + o.name, res, det.join(' · '), 'normal');
+  } else if(o.kind === 'tool') {
+    nimSpend(o.cost);
+    d20Check(o.name + ' · ' + o.skill, skillTotal(o.skill, (SKILLS.find(x => x[0] === o.skill) || [])[1]), { note: 'using ' + o.name });
+  }
+  recalc();
+}
+function nimEquipOpts(add, rushed){
+  document.querySelectorAll('#inv-body tr').forEach(tr => {
+    const o = nimEqOf(tr); if(!o) return;
+    add('equip', { name: o.name, cost: o.cost, sub: o.sub, blocked: o.blocked || '', btn: o.kind === 'tool' ? 'Roll' : o.kind === 'wand' || o.kind === 'scroll' ? 'Cast' : 'Use',
+      run: () => { nimUseItem(o, rushed); return true; } });
+  });
 }
 function nimDo(i){
   const o = _nturnOpts[i]; if(!o) return;
@@ -1852,6 +1992,7 @@ function renderNimTurn(){
     + '</div></div>'
     + sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons from the Item Store (Inventory tab).')
     + sec('spells', 'Spells', O.spells, 'No spells — add them from the Spellbook (Spells tab).')
+    + sec('equip', 'Equipment', O.equip, 'No usable items — potions, torches, scrolls, wands and tools from the Item Store (Inventory tab) show here.')
     + sec('reactions', 'Heroic Reactions', O.reactions, '')
     + sec('actions', 'Actions', O.actions, '');
 }

@@ -264,6 +264,8 @@
       if (r && r.kind === 'weapon') { var w = r.it; obj = { kind: 'weapon', optName: name, name: w.name, bonus: w.bonus || '', damage: w.damage != null ? num(w.damage) : 1, range: w.range || '', ammo: w.ammo || '—', weight: w.weight || '1', skill: w.skill || 'Ranged Combat', equipped: false }; }
       else if (r && r.kind === 'armor') { var a = r.it; obj = { kind: 'armor', optName: name, name: a.name, rating: num(a.rating), air: a.air || '', weight: a.weight || '1', note: a.comment || a.note || '', equipped: false }; }
       else if (r && r.kind === 'gear') { var g = r.it; obj = { kind: 'gear', optName: name, name: g.name, weight: g.weight || '1', note: g.effect || g.note || '' }; }
+      // "D6 doses Naproleve": roll the doses now; the count rides on the name ("Naproleve ×4"), which the sheet's Action tab uses up one at a time.
+      if (obj && obj.kind === 'gear' && /^d6\s+(doses|flares)\b/i.test(name)) { var dq = 1 + Math.floor(Math.random() * 6); obj.name = obj.name + (dq > 1 ? ' ×' + dq : ''); }
       else { obj = { kind: 'gear', optName: name, name: name, weight: '1', note: '' }; }
       startGear.push(obj); render();
     },

@@ -1405,8 +1405,106 @@ function actDo(i){
   actSpend(o.kind); renderAction(); scheduleAutosave();
 }
 function actKindLabel(k){ return k==='slow'?'Action':k==='fast'?'Maneuver':'Free'; }
+// ═══ EQUIPMENT — use items from the inventory (Action tab) ═════════════════
+// MUTANT: YEAR ZERO core: using an item is a maneuver (p.80); a skill roll with
+// gear is an action. Recovery (p.89): a ration of grub restores 1 Strength, a
+// ration of water 1 Agility (after four hours' rest); conditions block it (p.92):
+// Starving — no Strength back; Dehydrated — no trauma back at all; Sleepless —
+// no Wits back; Hypothermic — no Strength or Wits back. Eating while starving
+// (drinking while dehydrated) ends the condition instead. Booze (p.93): one dose
+// heals 1 damage + 1 doubt but causes 1 confusion; the healing wears off after
+// D6 hours. Artifact effects are from the Artifacts chapter.
+// Quantity rides on the item name ("Soda Can ×2"); doses on g.charges.
+function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/,'').replace(/\s+x\d+\s*$/i,'').trim(); }
+function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
+function eqConsume(i){ var g=S.gear[i]; if(!g) return; var q=eqQty(g);
+  if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); delete g.charges; } else S.gear.splice(i,1);
+  renderInventory(); }
+// Dosed items: the dose count is rolled/set on first use; the last dose discards the item.
+function eqUseDose(i, start){ var g=S.gear[i]; if(!g) return 0;
+  if(g.charges==null||g.charges===''){ g.charges=(start==='D6')?die6():num(start); }
+  g.charges=Math.max(0,num(g.charges)-1);
+  var left=g.charges; if(left<=0) eqConsume(i); else renderInventory();
+  return left; }
+function eqDoseTxt(g, start){ return (g.charges!=null&&g.charges!=='')?(num(g.charges)+' dose'+(num(g.charges)===1?'':'s')+' left'):(start==='D6'?'D6 doses (rolled on first use)':start+' doses'); }
+// Which condition stops this attribute recovering (p.92), if any.
+function eqRecoverBlock(k){ var c=S.conditions||{};
+  if(c.Dehydrated) return 'Dehydrated'; if(k==='STR'&&c.Starving) return 'Starving';
+  if(k==='WIT'&&c.Sleepless) return 'Sleepless'; if((k==='STR'||k==='WIT')&&c.Hypothermic) return 'Hypothermic'; return ''; }
+// Restore n points of trauma (or 'all') on attribute k. Returns the points healed.
+function eqRecover(k, n){ if(eqRecoverBlock(k)) return 0; var t=attrTrauma(k); var h=(n==='all')?t:Math.min(t,num(n)); S.trauma[k]=t-h; return h; }
+function eqRefresh(){ renderTrauma(); renderAttrSkills(); renderConds(); }
+function eqHealLog(label, k, h, what){ var b=eqRecoverBlock(k);
+  addLog(label, h?('+'+h+' '+attrName(k)):(b?'No effect':'—'), h?(h+' '+what+' healed — '+attrName(k)+' now '+attrCur(k)+'.'):(b?(b+' — you can’t recover '+attrName(k)+' right now.'):('No '+what+' to heal.')), h?'crit':'normal'); }
+// Grub / water ration (from Supplies or a gear row).
+function eqRation(kind, spend){ var isG=(kind==='grub'), k=isG?'STR':'AGI', cond=isG?'Starving':'Dehydrated', nm=isG?'Grub':'Water';
+  var c=S.conditions||{};
+  spend();
+  if(c[cond]){ c[cond]=false; addLog(nm+' ration', cond+' ended', 'You are no longer '+cond.toLowerCase()+'. '+(isG?'Another ration per point restores lost Strength.':'Another ration per point restores lost Agility.'),'crit'); eqRefresh(); return; }
+  if(attrTrauma(k)>0){ var h=eqRecover(k,1); eqHealLog(nm+' ration', k, h, isG?'damage':'fatigue'); if(h) addLog(nm+' ration','Note','Recovery needs at least four hours of rest.','normal'); eqRefresh(); return; }
+  addLog(nm+' ration','Eaten', isG?'Your daily ration of grub.':'Your daily ration of water.','normal');
+}
+function eqRationSub(kind){ var isG=(kind==='grub'), k=isG?'STR':'AGI', cond=isG?'Starving':'Dehydrated', c=S.conditions||{};
+  if(c[cond]) return 'Ends '+cond;
+  if(attrTrauma(k)>0){ var b=eqRecoverBlock(k); return b?('Daily ration · '+b+' — no '+attrName(k)+' recovery'):('Recover 1 '+attrName(k)+' (after 4 hours’ rest)'); }
+  return 'Your daily ration'; }
+// The skill a "Gear Bonus +N …" item helps, if this mutant can roll it.
+function eqGearBonus(text){ text=String(text||'');
+  if(/weapon damage|armor rating|protection rating/i.test(text)) return null;   // weapons/armor are on the Attacks/Gear side
+  var m=text.match(/gear bonus\s*\+\s*(\d+)\s*(?:to\s+)?([A-Za-z][A-Za-z\- ]*)/i)||text.match(/\+\s*(\d+)\s*gear bonus\s*(?:to\s+)?([A-Za-z][A-Za-z\- ]*)/i);
+  if(!m) return null;
+  var want=m[2].toLowerCase(), names=SKILLS.map(function(s){ return s.name; }); if(S.specialist) names.push(S.specialist);
+  var all=names.concat(['Find the Path','Jury-Rig','Intimidate','Shake It Off','Command','Make a Deal','Inspire','Sniff','Endure','Force','Fight','Sneak','Move','Shoot','Scout','Comprehend','Know the Zone','Sense Emotion','Manipulate','Heal']);
+  var hit=null; all.forEach(function(n){ if(!hit && want.indexOf(n.toLowerCase())===0) hit=n; });
+  return hit?{skill:hit, bonus:parseInt(m[1],10), can:names.indexOf(hit)>=0}:null; }
+// MYZ item rules, matched on the item's base name.
+var MYZ_EQ_RULES=[
+  { re:/^booze/i, kind:'fast', btn:'Drink', dose:10, sub:'1 dose: heal 1 damage + 1 doubt, take 1 confusion · the healing wears off after D6 hours',
+    run:function(g,i){ var hs=eqRecover('STR',1), he=eqRecover('EMP',1); var w=attrTrauma('WIT'); S.trauma.WIT=Math.min(attrBase('WIT'),w+1); var hrs=die6();
+      var left=eqUseDose(i,10);
+      addLog('Booze', (hs||he)?('+'+hs+' Strength · +'+he+' Empathy · −1 Wits'):'−1 Wits', 'One dose: '+(hs?'1 damage healed':'no damage healed'+(eqRecoverBlock('STR')?' ('+eqRecoverBlock('STR')+')':''))+', '+(he?'1 doubt healed':'no doubt healed'+(eqRecoverBlock('EMP')?' ('+eqRecoverBlock('EMP')+')':''))+', 1 confusion taken. The healed trauma returns in '+hrs+' hour'+(hrs>1?'s':'')+' (D6). '+left+' dose'+(left===1?'':'s')+' left.', 'normal');
+      if(isBroken('WIT')) addLog('Broken by Confusion','Wits 0','The booze knocked you out of action.','fumble');
+      eqRefresh(); } },
+  { re:/^painkillers/i, kind:'fast', btn:'Eat', dose:'D6', sub:'Heals all damage (not critical injuries)',
+    run:function(g,i){ var h=eqRecover('STR','all'); var left=eqUseDose(i,'D6'); eqHealLog('Painkillers','STR',h,'damage'); addLog('Painkillers',left+' left','Doses remaining: '+left+(left?'':' — discarded')+'.','normal'); eqRefresh(); } },
+  { re:/^energy pills/i, kind:'fast', btn:'Eat', dose:'D6', sub:'Heals all fatigue',
+    run:function(g,i){ var h=eqRecover('AGI','all'); var left=eqUseDose(i,'D6'); eqHealLog('Energy pills','AGI',h,'fatigue'); addLog('Energy pills',left+' left','Doses remaining: '+left+(left?'':' — discarded')+'.','normal'); eqRefresh(); } },
+  { re:/^stimulants/i, kind:'fast', btn:'Eat', dose:'D6', sub:'Heals all confusion · you may stay awake for days',
+    run:function(g,i){ var h=eqRecover('WIT','all'); var left=eqUseDose(i,'D6'); eqHealLog('Stimulants','WIT',h,'confusion'); addLog('Stimulants',left+' left','Doses remaining: '+left+(left?'':' — discarded')+'.','normal'); eqRefresh(); } },
+  { re:/^antidepressants/i, kind:'fast', btn:'Eat', dose:'D6', sub:'Heals all doubt',
+    run:function(g,i){ var h=eqRecover('EMP','all'); var left=eqUseDose(i,'D6'); eqHealLog('Antidepressants','EMP',h,'doubt'); addLog('Antidepressants',left+' left','Doses remaining: '+left+(left?'':' — discarded')+'.','normal'); eqRefresh(); } },
+  { re:/^soda can/i, kind:'fast', btn:'Drink', sub:'Heals 3 damage · discard after opening',
+    run:function(g,i){ var h=eqRecover('STR',3); eqHealLog('Soda can','STR',h,'damage'); eqConsume(i); eqRefresh(); } },
+  { re:/^regen/i, kind:'fast', btn:'Inject', sub:'Heals ALL permanent trauma; you keep your mutations · one dose',
+    run:function(g,i){ addLog('REGEN','Injected','All permanent trauma is healed — restore any attribute points you lost permanently (Stats tab). You keep all your mutations.','crit'); eqConsume(i); } },
+  { re:/^air mattress/i, kind:'free', btn:'Sleep', sub:'Sleep on it for an hour: recover all lost Wits',
+    run:function(g,i){ var h=eqRecover('WIT','all'); eqHealLog('Air mattress','WIT',h,'confusion'); eqRefresh(); } },
+  { re:/^hand grenade/i, kind:'slow', btn:'Throw', sub:'Shoot (no gear bonus) · Short range · Blast Power 9 · damage 2',
+    run:function(g,i){ var s=skillObj('Shoot')||{attr:'AGI'}; doMyzRoll('Hand grenade · Shoot', attrCur(s.attr), num(S.skills['Shoot'])-critModFor('Shoot'), 0, s.attr, {kind:'attack',wdmg:2}); addLog('Hand grenade','Blast Power 9','Explodes at the target’s range — everyone there is hit (weapon damage 2).','normal'); eqConsume(i); } },
+  { re:/^smoke grenade/i, kind:'fast', btn:'Throw', sub:'Black smoke lets you escape the conflict instead of moving',
+    run:function(g,i){ addLog('Smoke grenade','Thrown','Black smoke fills the area — you can escape the conflict (instead of a Move roll).','normal'); eqConsume(i); } },
+  { re:/^flashlight/i, kind:'fast', btn:'Use', sub:'Needs a battery · disperses darkness up to Short range',
+    run:function(g,i){ addLog('Flashlight','On','Darkness is dispersed up to Short range — you can Shoot and Scout there.','normal'); } }
+];
+function eqRuleFor(g){ var nm=eqBaseName(g); for(var k=0;k<MYZ_EQ_RULES.length;k++){ if(MYZ_EQ_RULES[k].re.test(nm)) return MYZ_EQ_RULES[k]; } return null; }
+function eqBuild(add){
+  // Rations from Supplies.
+  ['grub','water'].forEach(function(k){ var n=num((S.supplies||{})[k]); if(n<1) return;
+    add('equip',{ name:(k==='grub'?'Grub':'Water')+' ×'+n, kind:'fast', sub:'Supplies · '+eqRationSub(k), btn:k==='grub'?'Eat':'Drink', run:function(){ eqRation(k,function(){ bumpSupply(k,-1); renderSupplies(); }); } }); });
+  gearOf('gear').forEach(function(x){ var g=x.g, i=x.i, nm=eqBaseName(g); if(!nm) return;
+    var q=eqQty(g), qs=q>1?' ×'+q:'';
+    if(/^(grub|water)\b/i.test(nm) && !/zone/i.test(nm)){ var k=/^grub/i.test(nm)?'grub':'water';
+      add('equip',{ name:nm+qs, kind:'fast', sub:eqRationSub(k), btn:k==='grub'?'Eat':'Drink', run:function(){ eqRation(k,function(){ eqConsume(i); }); } }); return; }
+    var r=eqRuleFor(g);
+    if(r){ add('equip',{ name:nm+qs, kind:r.kind, sub:(r.dose?eqDoseTxt(g,r.dose)+' · ':'')+r.sub, btn:r.btn||'Use', run:function(){ return r.run(g,i); } }); return; }
+    var gb=eqGearBonus(g.note);
+    if(gb){ var s=skillObj(gb.skill)||{attr:({'Find the Path':'WIT','Jury-Rig':'WIT','Intimidate':'STR','Shake It Off':'EMP','Command':'EMP','Make a Deal':'EMP','Inspire':'EMP','Sniff':'WIT'})[gb.skill]||'WIT'};
+      add('equip',{ name:nm+qs, kind:'slow', sub:gb.skill+' · Gear Bonus +'+gb.bonus, blocked:gb.can?'':('Needs the '+gb.skill+' skill'), btn:'Roll',
+        run:function(){ doMyzRoll(nm+' · '+gb.skill+' ('+s.attr+')', attrCur(s.attr), num(S.skills[gb.skill])-critModFor(gb.skill), gb.bonus, s.attr, null); } }); }
+  });
+}
 function actBuild(){
-  var O={attacks:[], special:[], react:[], slow:[], fast:[], skills:[]};
+  var O={attacks:[], special:[], react:[], slow:[], fast:[], skills:[], equip:[]};
   _actOpts=[];
   var add=function(sec,o){ o.i=_actOpts.length; _actOpts.push(o); O[sec].push(o); };
   // Attacks: the always-available unarmed attack + every equipped weapon (an action).
@@ -1416,6 +1514,7 @@ function actBuild(){
     add('attacks',{ name:w.name||'Weapon', kind:'slow', sub:bits.join(' · '), btn:'Attack', run:function(){ rollAttack(i); } });
   });
   if(typeof actSpecial==='function') actSpecial(add);
+  eqBuild(add);
   add('react',{ name:'Defend', kind:'free', sub:'Fight roll as you are attacked in close combat — each success cancels one of the attacker’s or buys a stunt. Costs your next action (keep your maneuver). Once per turn; −2 if unarmed vs a weapon.', blocked:_act.defended?'Already defended this turn':'', btn:'Roll', run:function(){ return actDefend(); } });
   ACT_SYS.slow.forEach(function(a){ add('slow',{ name:a.n, kind:'slow', sub:a.d, btn:(a.skill||a.run)?'Roll':'Use', run:a.run||(a.skill?function(){ actSkill(a.n,a.skill); }:function(){ return actNote(a.n,a.d); }) }); });
   ACT_SYS.fast.forEach(function(a){ add('fast',{ name:a.n, kind:'fast', sub:a.d, btn:a.skill?'Roll':'Use', run:a.run||(a.skill?function(){ rollSkill(a.skill); }:function(){ return actNote(a.n,a.d); }) }); });
@@ -1437,6 +1536,7 @@ function renderAction(){
     +'<div class="act-row2">'+actRow2()+'</div></div>'
     +sec('attacks','Attacks',O.attacks,'No weapons equipped — equip one on the Gear tab.')
     +(ACT_SYS.specialTitle?sec('special',ACT_SYS.specialTitle,O.special,ACT_SYS.specialEmpty||''):'')
+    +sec('equip','Equipment',O.equip,'No usable items — add grub, water, booze or artifacts on the Gear tab.')
     +sec('react','Reactions',O.react,'')
     +sec('slow','Actions',O.slow,'')
     +sec('fast','Maneuvers',O.fast,'');
@@ -1461,8 +1561,7 @@ var ACT_SYS={
     {n:'Get Item', d:'Get an item from your gear.'},
     {n:'Pick Up Item', d:'Pick up an item from the ground (e.g. a dropped weapon).'},
     {n:'Aim', d:'+1 to your Shoot roll this turn (+2 from solid cover). Aim and fire in the same turn.', run:function(){ return actAim(); }},
-    {n:'Reload', d:'Load one bullet after each shot of a single-shot gun; bows and slingshots also need it. Clip/magazine guns don’t.'},
-    {n:'Use Item', d:'Use a piece of gear or an artifact.'}
+    {n:'Reload', d:'Load one bullet after each shot of a single-shot gun; bows and slingshots also need it. Clip/magazine guns don’t.'}
   ]
 };
 // Mutations fire with Mutation Points (misfire check included — see useMutation).

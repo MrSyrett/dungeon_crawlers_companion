@@ -1602,7 +1602,7 @@ function sdSpend(kind){
 function sdAfter(){ renderSDTurn(); if(typeof saveSheet === 'function') saveSheet(false); }
 
 function sdBuildOpts(){
-  const O = { attacks: [], spells: [], actions: [], checks: [] };
+  const O = { attacks: [], spells: [], equipment: [], actions: [], checks: [] };
   const add = (sec, o) => { o.i = _sdTurnOpts.length; o.sec = sec; _sdTurnOpts.push(o); O[sec].push(o); };
   _sdTurnOpts = [];
   // A Focused chip cleared by hand ends the focus too.
@@ -1656,6 +1656,14 @@ function sdBuildOpts(){
         else if(foc && r && r.roll === 1 && _sdTurn.focus === nm) sdEndFocus();
         return true; } });
   });
+  // Equipment — usable items you carry (gear slots + Inventory).
+  sdUsableItems().forEach(e => {
+    const oilless = e.rule.needs && !sdItemRefs().some(x => e.rule.needs.test(x.name));
+    add('equipment', { name: e.name, kind: e.rule.kind,
+      blocked: oilless ? 'Needs an oil flask' : '',
+      sub: [e.rule.cons ? '×' + e.qty : 'reusable', e.rule.sub(e)].filter(Boolean).join(' · '),
+      btn: /^potion/i.test(e.name) ? 'Quaff' : 'Use', run: () => sdUseItem(e) });
+  });
   // Actions
   const moveAgain = _sdTurn.move && !_sdTurn.action;
   add('actions', { name: moveAgain ? 'Move again' : 'Move', kind: 'move',
@@ -1672,6 +1680,148 @@ function sdBuildOpts(){
   add('actions', { name: 'Improvise', kind: 'action', sub: 'Anything else you can describe — the GM sets the check', btn: 'Use',
     run: () => { addLog('Improvise', '—', 'Action spent on something else', 'normal'); return true; } });
   return O;
+}
+
+// ── Equipment: use items from your gear slots and Inventory ──────────────────
+// Rules (Core pp.34, 84, 88, 286-311): quaffing a potion or activating a magic item
+// is multitasking (no action); lighting, throwing, setting or working gear takes
+// your action. A Potion of Healing heals by the imbiber's level. Consumables lose
+// one when used (the row goes at 0); reusable gear is never consumed. Scrolls and
+// wands live in the Spells section, weapons in Attacks.
+// kind: 'free' | 'action'.  cons: used up.  use(ctx) does the effect; return false
+// to cancel (nothing spent).
+const SD_ITEM_USE = [
+  { rx: /^potion of healing$/i, kind: 'free', cons: true,
+    sub: () => 'Heal ' + sdPotionHealDice() + ' (by level) · quaff (no action)',
+    use: c => { const dice = sdPotionHealDice(), r = sdRollDice(dice), g = sdHealHP(r.total);
+      addLog('Quaff ' + c.name, '+' + g + ' HP', dice + '(' + r.rolls.join('+') + ')=' + r.total + (g < r.total ? ' · capped at max HP' : '') + ' · HP ' + sdHPText(), 'crit'); } },
+  { rx: /^potion of invisibility$/i, kind: 'free', cons: true, sub: () => 'Invisible 10 rounds or until you attack/cast · quaff',
+    use: c => { addTracker('Invisible'); addLog('Quaff ' + c.name, 'Invisible', '10 rounds, or until you attack or cast a spell', 'crit'); } },
+  { rx: /^potion of vitality$/i, kind: 'free', cons: true, sub: () => 'Roll your class HP die — gain that many max HP for good · quaff',
+    use: c => { const cls = typeof shopSheetClass === 'function' ? shopSheetClass() : null;
+      const hd = (cls && typeof RC_CLASS_INFO !== 'undefined' && RC_CLASS_INFO[cls] && RC_CLASS_INFO[cls].hd) || '';
+      if(!hd){ addLog('Quaff ' + c.name, '—', 'Roll your class\'s hit points die and add it to your max HP (no class on the sheet). Curse: a 2nd Potion of Vitality in your lifetime needs a DC 18 CON check or you die.', 'normal'); return; }
+      const r = sdRollDice(hd), mx = document.getElementById('hp-max'), cu = document.getElementById('hp-current');
+      if(mx) mx.value = String((parseInt(mx.value) || 0) + r.total);
+      if(cu) { cu.value = String((parseInt(cu.value) || 0) + r.total); }
+      if(typeof onHPChange === 'function') onHPChange();
+      addLog('Quaff ' + c.name, '+' + r.total + ' max HP', hd + '(' + r.rolls.join('+') + ') — permanent. Curse: a 2nd Potion of Vitality in your lifetime needs a DC 18 CON check or you die.', 'crit'); } },
+  { rx: /^potion\b/i, kind: 'free', cons: true, sub: c => sdItemBenefit(c.name) + ' · quaff',
+    use: c => addLog('Quaff ' + c.name, 'Drunk', sdItemBenefit(c.name) || 'Effect per the item', 'crit') },
+  { rx: /^torch(es)?$/i, kind: 'action', cons: true, sub: () => 'Light: near, 1 hour of real time',
+    use: c => { addTracker('Light'); addLog('Light ' + c.name, 'Lit', 'Sheds light to a near distance for 1 hour of real time', 'normal'); } },
+  { rx: /^candles?$/i, kind: 'action', cons: true, sub: () => 'Light: close, 20 real minutes',
+    use: c => { addTracker('Light'); addLog('Light ' + c.name, 'Lit', 'Close light for 20 real minutes', 'normal'); } },
+  { rx: /^lantern$/i, kind: 'action', cons: false, needs: /^oil,? flask$|^flasks? of oil$/i,
+    sub: () => 'Light: double near · burns one oil flask per hour',
+    use: c => { const oil = sdItemRefs().find(x => /^oil,? flask$|^flasks? of oil$/i.test(x.name));
+      if(!oil){ addLog('Light ' + c.name, '✗', 'No oil — a lantern needs an oil flask', 'fumble'); return false; }
+      sdConsumeItem(oil); addTracker('Light');
+      addLog('Light ' + c.name, 'Lit', 'Light out to a double near distance for 1 hour of real time · −1 Oil flask', 'normal'); } },
+  { rx: /^oil,? flask$|^flasks? of oil$/i, kind: 'action', cons: true, sub: () => 'Spill & light: close area, 1d4 dmg/round for 4 rounds',
+    use: c => { const r = sdRollDice('1d4'); addLog('Burning oil', r.total + ' dmg', 'd4(' + r.rolls[0] + ') this round · the close area burns for 4 rounds, 1d4 each round', 'normal'); } },
+  { rx: /^holy water/i, kind: 'action', cons: true, sub: () => '2d4 damage to an undead',
+    use: c => { const r = sdRollDice('2d4'); addLog(c.name, r.total + ' dmg', '2d4(' + r.rolls.join('+') + ') to an undead creature', 'normal'); } },
+  { rx: /^flash seed/i, kind: 'action', cons: true, sub: () => 'Dark-adapted in near: DC 12 CON or blinded 1 round',
+    use: c => addLog('Throw ' + c.name, 'Flash!', 'Dark-adapted creatures in near who see it: DC 12 CON or blinded 1 round', 'normal') },
+  { rx: /^caltrops/i, kind: 'action', cons: true, sub: () => 'Stepping on them: 1 dmg, half speed 10 rounds',
+    use: c => addLog('Scatter ' + c.name, 'Set', 'Living creatures who step on them take 1 damage and move at half speed for 10 rounds', 'normal') },
+  { rx: /^ball bearings?$/i, kind: 'action', cons: false, sub: () => 'DEX check (DC 12) to roll it near in a line',
+    use: c => rollStat('dex', c.name + ' (DEX, DC 12)') },
+  { rx: /^net$/i, kind: 'action', cons: false, sub: () => 'DEX check (DC 15) to entrap one close target',
+    use: c => rollStat('dex', c.name + ' (DEX, DC 15)') },
+  { rx: /^crowbar$/i, kind: 'action', cons: false, sub: () => 'STR check with advantage to pry something open',
+    use: c => { const prev = advState; advState = advState === 'disadvantage' ? null : 'advantage';
+      try { rollStat('str', 'Pry open (STR, crowbar)'); } finally { advState = prev; } } },
+  { rx: /^rope|^grappling hook$/i, kind: 'action', cons: false, sub: () => 'Climb — STR check (GM sets the DC)',
+    use: c => rollStat('str', 'Climb (STR, ' + c.name + ')') },
+  { rx: /^flint/i, kind: 'action', cons: false, sub: () => 'Routine fire-lighting always succeeds',
+    use: c => addLog('Use ' + c.name, 'Fire lit', 'Routine attempts to light a fire always succeed', 'normal') },
+  { rx: /^rations?$/i, kind: 'free', cons: true, sub: () => 'One day of food and water (out of combat)',
+    use: c => addLog('Eat ' + c.name, 'Fed', 'One day of food and water', 'normal') },
+  { rx: /^charcoal/i, kind: 'action', cons: true, sub: () => 'Leech the poison out of one edible item',
+    use: c => addLog('Use ' + c.name, 'Purified', 'The poison is leeched out of an edible item — it\'s safe', 'normal') },
+  { rx: /^tallow/i, kind: 'action', cons: true, sub: () => 'Grease a door, a person or a close area for a day',
+    use: c => addLog('Use ' + c.name, 'Greased', 'Absurdly slippery for a day', 'normal') },
+  { rx: /^glow paste/i, kind: 'action', cons: false, sub: () => 'Leave a faint glowing mark for a day (5 uses a jar)',
+    use: c => addLog('Use ' + c.name, 'Marked', 'A faint green glow for one day · mark off one of the jar\'s 5 uses', 'normal') },
+  { rx: /^miner'?s putty/i, kind: 'action', cons: false, sub: () => 'One glob bonds 500 lbs for a day (3 uses a jar)',
+    use: c => addLog('Use ' + c.name, 'Bonded', 'Bonds up to 500 lbs; flakes off in a day · mark off one of the jar\'s 3 uses', 'normal') },
+];
+function sdPotionHealDice(){ const lv = parseInt(document.getElementById('f-level')?.value) || 0; return lv >= 10 ? '4d12' : lv >= 7 ? '3d10' : lv >= 4 ? '2d8' : '1d6'; }
+function sdRollDice(expr){ const m = String(expr).match(/^(\d*)d(\d+)$/i); const n = parseInt(m && m[1] || '1'), s = parseInt(m ? m[2] : '6');
+  const rolls = Array.from({ length: n }, () => d(s)); return { total: rolls.reduce((a, b) => a + b, 0), rolls }; }
+function sdHPText(){ return (document.getElementById('hp-current')?.value || '0') + '/' + (document.getElementById('hp-max')?.value || '?'); }
+function sdHealHP(n){
+  const cu = document.getElementById('hp-current'); if(!cu) return 0;
+  const cur = parseInt(cu.value) || 0, mx = parseInt(document.getElementById('hp-max')?.value);
+  const next = isNaN(mx) ? cur + n : Math.min(mx, cur + n);
+  cu.value = String(Math.max(cur, next));
+  if(typeof onHPChange === 'function') onHPChange();
+  return Math.max(0, next - cur);
+}
+// "Benefit." line of a magic item from the shop data (potions etc.).
+function sdItemBenefit(name){
+  const k = String(name || '').trim().toLowerCase();
+  const all = (typeof SHOP_MAGIC !== 'undefined' && SHOP_MAGIC) ? Object.values(SHOP_MAGIC).flat() : [];
+  const it = all.find(x => String(x.name).toLowerCase() === k);
+  if(!it) return '';
+  const m = String(it.full || '').match(/Benefit\.\s*([^]*?)(?:\s+(?:Curse|Personality)\.|$)/);
+  return (m ? m[1] : it.note || '').trim();
+}
+function sdItemRule(name){ const n = String(name || '').trim(); return SD_ITEM_USE.find(x => x.rx.test(n)) || null; }
+// Every carried item: enabled gear slots, then the Inventory. qty '' counts as 1.
+function sdItemRefs(){
+  const out = [];
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    if(row.classList.contains('gear-slot-disabled')) return;
+    const nm = (row.querySelector('.gear-name')?.value || '').trim(); if(!nm || /^↳ /.test(nm)) return;
+    const raw = (row.querySelector('.gear-qty')?.value || '').trim(), q = raw === '' ? 1 : parseInt(raw, 10);
+    if(isNaN(q) || q <= 0) return;
+    out.push({ name: nm, qty: q, row });
+  });
+  (Array.isArray(_inventory) ? _inventory : []).forEach((it, idx) => {
+    const nm = String(it.name || '').trim(); if(!nm) return;
+    const raw = String(it.qty || '').trim(), q = raw === '' ? 1 : parseInt(raw, 10);
+    if(isNaN(q) || q <= 0) return;
+    out.push({ name: nm, qty: q, inv: it });
+  });
+  return out;
+}
+// Spend one of an item; the row goes at 0.
+function sdConsumeItem(ref){
+  const left = ref.qty - 1;
+  if(ref.row){
+    const nameEl = ref.row.querySelector('.gear-name'), qtyEl = ref.row.querySelector('.gear-qty');
+    if(left > 0) qtyEl.value = String(left);
+    else { nameEl.value = ''; qtyEl.value = ''; if(typeof onGearNameInput === 'function') onGearNameInput(nameEl); if(typeof refreshGearSlots === 'function') refreshGearSlots(); }
+  } else if(ref.inv){
+    if(left > 0) ref.inv.qty = String(left);
+    else { const i = _inventory.indexOf(ref.inv); if(i >= 0) _inventory.splice(i, 1); }
+    if(typeof renderInventory === 'function') renderInventory();
+  }
+  return left;
+}
+// Usable items, merged by name (gear slots are spent before the Inventory).
+function sdUsableItems(){
+  const map = new Map();
+  sdItemRefs().forEach(ref => {
+    const rule = sdItemRule(ref.name); if(!rule) return;
+    const k = ref.name.toLowerCase();
+    if(!map.has(k)) map.set(k, { name: ref.name, rule, qty: 0, refs: [] });
+    const e = map.get(k); e.qty += ref.qty; e.refs.push(ref);
+  });
+  return [...map.values()];
+}
+function sdUseItem(e){
+  const ctx = { name: e.name };
+  const ok = e.rule.use(ctx);
+  if(ok === false) return false;
+  if(e.rule.cons){
+    sdConsumeItem(e.refs[0]);
+  }
+  if(typeof saveSheet === 'function') saveSheet(false);
+  return true;
 }
 
 // Per-attack toggles on the Action tab (versatile 1H/2H, always-advantage).
@@ -1728,6 +1878,7 @@ function renderSDTurn(){
     </div>
     ${sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons on the Equipment tab.')}
     ${sec('spells', 'Spells', O.spells, 'No spells — learn them from the Spellbook on the Spells tab.')}
+    ${sec('equipment', 'Equipment', O.equipment, 'No usable items — potions, torches, lanterns & oil, holy water, rope, crowbars and the like show here.')}
     ${sec('actions', 'Actions', O.actions, '')}`;
 }
 // Keep the controller current while it's open.
@@ -1739,7 +1890,7 @@ function sdTurnMaybe(){
 ['input','change','click'].forEach(ev => document.addEventListener(ev, e => {
   const t = e.target; if(!t || !t.closest) return;
   if(t.closest('#sd-turn')) return;
-  if(t.closest('#attacks-body,#spells-list,#trk-list,#stats-grid,.sd-vitals,.trk-picker,[id*="tracker"]')) sdTurnMaybe();
+  if(t.closest('#attacks-body,#spells-list,#gear-list,#inventory-list,#trk-list,#stats-grid,.sd-vitals,.trk-picker,[id*="tracker"]')) sdTurnMaybe();
 }));
 
 

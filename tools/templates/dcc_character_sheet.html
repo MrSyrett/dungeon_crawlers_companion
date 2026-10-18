@@ -1895,7 +1895,7 @@ function turnGate(o){
 function turnBuildOpts(){
   const rows = turnSkillRows();
   const curMana = turnNum('mana-current', 0);
-  const O = { hotlist: [], attacks: [], checks: [], actions: [], interrupts: [] };
+  const O = { hotlist: [], attacks: [], equipment: [], checks: [], actions: [], interrupts: [] };
   const add = (sec, o) => { if(!o.blocked) o.blocked = turnGate(o); o.i = _turnOpts.length; _turnOpts.push(o); O[sec].push(o); };
   _turnOpts = [];
   // Hotlist — the 10 pinned slots: Spells (cast from their Skills row; must be on the
@@ -1919,21 +1919,22 @@ function turnBuildOpts(){
         btn: 'Cast', run: () => turnRollRow(r) });
       return;
     }
-    const potion = /potion/i.test(h);
-    const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
-    // Quantity lives in the details line, not the name.
-    const inv = window.DCCFx ? DCCFx.invRowByName(nm) : null;
-    const qty = inv ? (inv.querySelectorAll('input[type="text"]')[1] || {}).value : ((label.match(/\s[×x]\s?(\d+)\s*$/) || [])[1] || '');
-    add('hotlist', { name: nm, kind: 'other', slot: si, spell: /\bscroll\b/i.test(nm),
-      sub: [qty ? '×' + qty : '', rest].filter(Boolean).join(' · '),
-      btn: 'Use', run: () => {
-        if(window.DCCFx) { const inv = DCCFx.invRowByName(nm); if(inv) DCCFx.useRow(inv); else DCCFx.useByName(nm, rest); }
-        else addLog('Use Hotlist Item', nm, h, 'normal');
-        if(potion) {
-          if(sick) turnAddDebuff('Potion Sickness', 'Two potions within two rounds — Poisoned for 15 seconds (Core p.99)');
-          _turn.potionRound = _turn.round;
-        }
-        return true; } });
+    // A pinned item with no Inventory row (hand-typed slot) — usable from Equipment.
+    const full = h.split(/\s[×x]\s?\d+|\s[—–]\s/)[0].trim();
+    const inv = window.DCCFx ? (DCCFx.invRowByName(full) || DCCFx.invRowByName(nm)) : null;
+    if(!inv) {
+      const qty = (label.match(/\s[×x]\s?(\d+)\s*$/) || [])[1] || '';
+      add('equipment', turnItemOpt({ name: nm, qty, sub: rest, pinned: true, use: () => window.DCCFx ? DCCFx.useByName(nm, rest) : addLog('Use Hotlist Item', nm, h, 'normal') }));
+    }
+  });
+  // Equipment — usable Inventory items (potions, scrolls, tomes, bandages, dynamite,
+  // torches, kits…). In combat an item must be in your Hotlist to use it ("Use a Hotlist
+  // Item", Core p.64/98); Retrieve pins it there first. Worn accessories activate directly.
+  if(window.DCCFx && DCCFx.usable) [...document.querySelectorAll('#inv-body tr')].forEach(tr => {
+    const u = DCCFx.usable(tr); if(!u) return;
+    const pinned = u.worn || (window.DCCHotlist && DCCHotlist.isPinned(u.name));
+    add('equipment', turnItemOpt({ name: u.name, qty: u.qty > 1 || u.cons ? String(u.qty || 1) : '', sub: u.sub, pinned, worn: u.worn, cons: u.cons, tr,
+      use: () => DCCFx.useRow(tr) }));
   });
   // Attacks — weapon / attack skills (Dmg in their Notes). Attack spells are cast from the Hotlist.
   rows.filter(r => r.dice && !r.spell).forEach(r => add('attacks', {
@@ -1979,6 +1980,31 @@ function turnBuildOpts(){
   return O;
 }
 
+// One Equipment card. Use = the "Use a Hotlist Item" Action; an item that isn't in the
+// Hotlist yet shows Retrieve (an Action that pins it) and its Use is blocked until then.
+// Potions: a second one within two rounds gives Potion Sickness (Core p.99).
+function turnItemOpt(x){
+  const potion = /potion/i.test(x.name);
+  const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
+  const useFn = () => {
+    x.use();
+    if(potion) {
+      if(sick) turnAddDebuff('Potion Sickness', 'Two potions within two rounds — Poisoned for 15 seconds (Core p.99)');
+      _turn.potionRound = _turn.round;
+    }
+    return true;
+  };
+  const o = { name: x.name, kind: 'other', spell: /\bscroll\b/i.test(x.name),
+    sub: [x.qty ? '×' + x.qty : '', x.pinned ? '' : 'Not in Hotlist', x.cons === false && !x.worn ? 'reusable' : '', x.sub].filter(Boolean).join(' · ') };
+  if(x.pinned) { o.btn = 'Use'; o.run = useFn; return o; }
+  o.btns = [['Retrieve', () => {
+    const pin = x.tr && x.tr.querySelector('.hot-pin');
+    if(pin && window.DCCHotlist) DCCHotlist.toggleRow(pin);
+    if(!(window.DCCHotlist && DCCHotlist.isPinned(x.name))) { addLog('Retrieve', '✗', 'Hotlist is full (10 slots) — clear one first', 'normal'); return false; }
+    addLog('Retrieve', x.name, 'Inventory → Hotlist', 'normal'); return true;
+  }]];
+  return o;
+}
 function turnDo(i, j){
   const o = _turnOpts[i]; if(!o) return;
   const run = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run;
@@ -2080,8 +2106,9 @@ function renderTurn(){
         <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft</span>
       </div>
     </div>
-    ${sec('hotlist', 'Hotlist', O.hotlist, 'Nothing on your Hotlist. Pin spells with the ○ dot on the Skills tab, or items with the ○ dot on the Inventory tab (up to 10).')}
+    ${sec('hotlist', 'Hotlist', O.hotlist, 'No spells on your Hotlist. Pin spells with the ○ dot on the Skills tab (10 slots, shared with items).')}
     ${sec('attacks', 'Attacks', O.attacks, 'No attack skills yet. Add a weapon or weapon skill — its Notes carry the Dmg dice.')}
+    ${sec('equipment', 'Equipment', O.equipment, 'No usable items. Potions, scrolls, tomes, bandages, dynamite, torches and kits in your Inventory show here.')}
     ${sec('interrupts', 'Interrupts', O.interrupts, '')}
     ${sec('actions', 'Actions', O.actions, '')}
     ${sec('checks', 'Use a Skill', O.checks, 'No other active skills.')}`;
@@ -2099,7 +2126,7 @@ function turnMaybeRender(){
   // Mana: re-render on change (blur), not on every keystroke — the hub re-render
   // moves the Mana node, which would drop focus mid-typing.
   if(ev === 'change' && e.target && e.target.id === 'mana-current') { turnMaybeRender(); return; }
-  if(e.target && e.target.closest && e.target.closest('#skills-body,#hotlist-grid,#dr-aifavor,#debuffs,#evade-move,#evade-step,#stats-col,.stats-col')) turnMaybeRender();
+  if(e.target && e.target.closest && e.target.closest('#skills-body,#inv-body,#hotlist-grid,#dr-aifavor,#debuffs,#evade-move,#evade-step,#stats-col,.stats-col')) turnMaybeRender();
 }));
 
 // ── TABS ──

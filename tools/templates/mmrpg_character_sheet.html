@@ -1309,7 +1309,7 @@ function mkEquip(x,equipped){ x=x||{};
     owner:x.owner||'',ability:x.ability||'melee',range:x.range||'',notes:x.notes||'',special:x.special||'',
     damageBonus:x.damageBonus||'',multBonus:num(x.multBonus)||0,multAbilities:Array.isArray(x.multAbilities)?x.multAbilities.slice():null,
     flatMult:num(x.flatMult)||0,noDamage:!!x.noDamage,grantsMovement:Array.isArray(x.grantsMovement)?x.grantsMovement:null,equipped:!!equipped,
-    _iconic:!!x._iconic,powerValue:x.powerValue};
+    _iconic:!!x._iconic,powerValue:x.powerValue,qty:num(x.qty)>1?num(x.qty):undefined};
 }
 // ── Picker ──
 var _pk=null, _pkRows=[];
@@ -1422,9 +1422,48 @@ function usePower(p, kind){
   if(key) rollDamage(key);
   return true;
 }
+// ── Action tab · Equipment ──
+// Usable items from the Equipment tab. Marvel gear is mostly worn or wielded (its
+// powers and bonuses already show up elsewhere), so this lists the thrown one-shots:
+// grenades (Core p.35) and Spider-Grenades (Spider-Verse). Throwing one is a standard
+// action that rolls its attack and uses it up. Quantity = entries with that name ×
+// each entry's qty. A grenade launcher stays a weapon in Attacks.
+function isGrenade(w){ return !!w && !!w.name && /grenade/i.test(w.name) && !/launcher/i.test(w.name); }
+function eqSpendItem(name){
+  var n=String(name||'').toLowerCase().trim(), i;
+  for(i=S.attacks.length-1;i>=0;i--){ var w=S.attacks[i]; if(String(w.name||'').toLowerCase().trim()!==n) continue;
+    if(num(w.qty)>1) w.qty=num(w.qty)-1; else S.attacks.splice(i,1);
+    break; }
+  renderAttacks(); renderDamage(); renderDerived(); scheduleAutosave();
+}
+var SPIDER_GRENADES=[
+  ['Web','Affected characters are webbed up and paralyzed; on a Fantastic success, also pinned','Webgrabber'],
+  ['Upshot','Affected characters are lifted 3 spaces up and fall prone; on a Fantastic success, also stunned for one round','Upshot'],
+  ['Concuss','Affected characters are deafened for one round; on a Fantastic success, also stunned','Concussion Burst'],
+];
+function eqBuildOpts(add){
+  var groups={}, order=[];
+  (S.attacks||[]).forEach(function(w,i){
+    var spider=/^spider-?grenades?$/i.test(String(w.name||'').trim());
+    if(!(isWeaponRow(w)&&isGrenade(w)) && !spider) return;
+    var k=String(w.name).toLowerCase().trim();
+    if(!groups[k]){ groups[k]={w:w,i:i,total:0,spider:spider}; order.push(k); }
+    groups[k].total+=Math.max(1,num(w.qty)||1);
+  });
+  order.forEach(function(k){ var g=groups[k], w=g.w, nm=w.name+(g.total>1?' ×'+g.total:'');
+    if(g.spider){
+      add('equipment',{name:nm, sub:'Agility attack vs the Agility defense of everyone within 2 spaces · or plant it to go off later (Agility vs TN 13 to avoid) · used up', blocked:condDisabled('agility',true),
+        btns:SPIDER_GRENADES.map(function(t){ return {label:t[0],kind:'std',run:function(){ doCheck('Spider-Grenade: '+t[2],'agility',{attack:true}); addLog('Spider-Grenade: '+t[2],'Within 2 spaces',t[1],'normal'); eqSpendItem(w.name); return true; }}; })});
+      return; }
+    var flash=/flash/i.test(w.name);
+    add('equipment',{name:nm, sub:'Challenging Agility check to land it on the target space (else 1d6 spaces off) · hits everyone within 2 spaces vs their '+(flash?'Vigilance defense — blinded (Fantastic: stunned) for one round':'Agility defense'+(w.noDamage?'':' · ×'+weaponMult(w,w.ability||'agility')+' damage'))+' · used up',
+      blocked:condDisabled(w.ability||'agility',true),
+      btns:[{label:'Throw',kind:'std',run:function(){ rollAttack(S.attacks.indexOf(w)); eqSpendItem(w.name); return true; }}]});
+  });
+}
 function turnBuildOpts(){
   _turnOpts=[];
-  var O={attacks:[],powers:[],actions:[],reactions:[],checks:[]};
+  var O={attacks:[],powers:[],equipment:[],actions:[],reactions:[],checks:[]};
   function add(sec,o){ o.i=_turnOpts.length; _turnOpts.push(o); O[sec].push(o); }
   var abName=function(k){ var a=ABILITIES.find(function(x){return x.key===k;}); return a?a.name:k; };
   // Attacks — the four damage abilities + your weapons
@@ -1434,7 +1473,7 @@ function turnBuildOpts(){
     add('attacks',{name:abName(k)+' Attack', sub:'d616 '+(sc>=0?'+':'')+sc+' vs '+vs+' · dmg Marvel die ×'+mult+' +'+sc, blocked:dis?dis+' — can’t attack':'',
       btns:[{label:'Attack',kind:'std',run:function(){ rollDamage(k); return true; }}]});
   });
-  (S.attacks||[]).forEach(function(w,i){ if(!isWeaponRow(w)||!w.name) return;
+  (S.attacks||[]).forEach(function(w,i){ if(!isWeaponRow(w)||!w.name||isGrenade(w)) return;   // grenades are thrown from Equipment
     var k=w.ability||'melee', mult=weaponMult(w,k);
     add('attacks',{name:w.name, sub:abName(k)+(w.range?' · '+w.range:'')+(w.noDamage?' · no damage':' · ×'+mult)+(w.equipped?' · equipped':''), blocked:condDisabled(k,true),
       btns:[{label:'Attack',kind:'std',run:function(){ rollAttack(i); return true; }}]});
@@ -1447,6 +1486,7 @@ function turnBuildOpts(){
       blocked:short?'Not enough Focus':(cost>focusCap()?'Over your Focus cap ('+focusCap()+')':(pdis?pdis+' — can’t attack':'')),
       btns:kinds.map(function(kd){ return {label:kinds.length>1?KIND_LBL[kd]:'Use', kind:kd, run:function(){ return usePower(p,kd); }}; })});
   });
+  eqBuildOpts(add);
   // Actions
   var run=runSpeed(), hv=speedHalvedByCond()?Math.floor(run/2):run, nm=condNoMove(), nmB=nm?nm+' — can’t move':'';
   add('actions',{name:'Move', sub:'Run '+hv+' spaces (Climb/Swim/Jump '+Math.floor(hv/2)+')', blocked:nmB, btns:[{label:'Move',kind:'move',run:function(){ addLog('Move','Run '+hv,'Movement action','normal'); return true; }}]});
@@ -1463,7 +1503,7 @@ function turnBuildOpts(){
   add('reactions',{name:'Fastball Special', sub:'An ally throws you at a foe (their Agility check succeeds) — close attack, double damage (triple on a Fantastic)', blocked:condDisabled('melee',true), btns:[{label:'Attack',kind:'react',run:function(){ rollDamage('melee',{hitX:2,fanX:3,label:'Fastball Special'}); return true; }}]});
   add('reactions',{name:'Release', sub:'Something you’re grabbing moves or attacks — let it go', btns:[{label:'Use',kind:'react',run:function(){ addLog('Release','—','Released your grab','normal'); return true; }}]});
   add('reactions',{name:'Skulk', sub:'Targeted by a ranged attack — duck behind someone in reach; they become the target (TN is the lower defense)', btns:[{label:'Use',kind:'react',run:function(){ addLog('Skulk','—','Ducked behind someone — they’re the new target','normal'); return true; }}]});
-  var na=condNoAct(); if(na) ['attacks','powers','actions','reactions'].forEach(function(k){ O[k].forEach(function(o){ o.blocked=na+' — can’t act'; }); });
+  var na=condNoAct(); if(na) ['attacks','powers','equipment','actions','reactions'].forEach(function(k){ O[k].forEach(function(o){ o.blocked=na+' — can’t act'; }); });
   return O;
 }
 function turnDo(i,j){
@@ -1501,6 +1541,7 @@ function renderTurn(){
     +'</div></div>'
     +sec('attacks','Attacks',O.attacks,'')
     +sec('powers','Powers',O.powers,'No powers with an action. Powers are chosen in the character builder.')
+    +(O.equipment.length?sec('equipment','Equipment',O.equipment,''):'')
     +sec('actions','Actions',O.actions,'')
     +sec('reactions','Reactions',O.reactions,'');
 }

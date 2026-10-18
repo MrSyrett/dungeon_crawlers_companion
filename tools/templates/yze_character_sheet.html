@@ -1720,7 +1720,7 @@ function actOutOfAmmo(w){ var a=parseInt(w.ammo,10); return (!isNaN(a) && a<=0) 
 // A weapon's full ammo rating: the one remembered at its first supply roll, else the catalog's.
 function actAmmoMax(w){ var m=parseInt(w.ammoMax,10); if(!isNaN(m)) return m;
   var c=G(window.ALIEN_WEAPONS).find(function(d){ return d.name===w.name; }); m=c?parseInt(c.ammo,10):NaN; return isNaN(m)?0:m; }
-function actSkillRoll(name, label){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')', pool, true); }; }
+function actSkillRoll(name, label, bonus){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var pool=attrVal(s.attr)+num(S.skills[name])+num(bonus)-condPenaltyFor(s.attr)-critPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')'+(num(bonus)?' +'+num(bonus)+' gear':''), pool, true); }; }
 function actLogOnly(label, result, detail){ return function(){ addLog(label, result, detail||'', 'normal'); }; }
 
 // ALIEN (Evolved, p.60): each round, one FULL action + one QUICK action, or two
@@ -1740,9 +1740,88 @@ function actSpend(kind,label){
   if(kind==='full') a.full=true; else a.quick++;
   return true;
 }
+// ═══ EQUIPMENT — use items from the inventory (Action tab) ═════════════════
+// Lists the gear you can do something with. Using an item spends the action the
+// ALIEN book gives it, applies its effect and, for consumables, uses one up.
+// Quantity rides on the item name ("Naproleve ×3"), the same way claimed loot
+// stacks. Effects come from the ALIEN core Gear & Tech chapter (p.94–99);
+// first aid p.68. Only gear with something to do is listed.
+function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/,'').replace(/\s+x\d+\s*$/i,'').trim(); }
+function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
+// Use one up: lower the count, or remove the item when it was the last one.
+function eqConsume(i){ var g=S.gear[i]; if(!g) return; var q=eqQty(g);
+  if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); } else S.gear.splice(i,1);
+  renderInventory(); }
+// A skill bonus printed in the item's effect: "Comtech +1", "(Heavy Machinery +2)", "+2 dice to Observation".
+function eqSkillBonus(text){ text=String(text||''); var best=null;
+  SKILLS.forEach(function(s){ if(best) return; var nm=s.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    var m=text.match(new RegExp(nm+'\\s*(?:skill\\s*)?\\+\\s*(\\d+)','i'))||text.match(new RegExp('\\+\\s*(\\d+)\\s*(?:dice?\\s*)?(?:to\\s+)?'+nm,'i'));
+    if(m) best={skill:s.name, bonus:parseInt(m[1],10)}; });
+  return best; }
+function eqStress(d, label){ return function(){ if(actSynth()){ addLog(label,'—','Synthetics have no Stress','normal'); return false; }
+  if(d==='zero') S.stress=0; else S.stress=clamp(num(S.stress)+d,0,10);
+  renderStress(); return true; }; }
+function eqNote(label, result, text){ addLog(label, result, text||'', 'normal'); }
+// ALIEN item rules, matched on the item's base name.
+var ALIEN_EQ_RULES=[
+  { re:/^personal medkit/i, kind:'full', btn:'First aid', sub:'Give first aid · Medical Aid +2 · single use · someone Adjacent who is Broken',
+    run:function(g,i){ actSkillRoll('Medical Aid','First aid · Personal medkit',2)(); eqNote('Personal medkit','Used up','On a success the Broken character is back up with 1 Health per success rolled, and a lethal critical injury is stabilized.'); eqConsume(i); } },
+  { re:/^surgical kit/i, kind:'full', btn:'First aid', sub:'Give first aid · Medical Aid +2 · also surgery on critical injuries',
+    run:function(g,i){ actSkillRoll('Medical Aid','First aid · Surgical kit',2)(); } },
+  { re:/^naproleve/i, kind:'quick', btn:'Inject', stress:true, sub:'Stress Level to zero · each dose beyond the first this shift: −1 die to all skill rolls until the shift ends',
+    run:function(g,i){ if(eqStress('zero','Naproleve')()===false) return false; eqNote('Naproleve','Stress 0','Stress Level reduced to zero. A second dose this shift gives −1 die to all skill rolls until the end of the shift.'); eqConsume(i); } },
+  { re:/^neversleep/i, kind:'quick', btn:'Take', stress:true, sub:'Stress +1 · no need for sleep for a day · you can’t relieve stress meanwhile',
+    run:function(g,i){ if(eqStress(1,'Neversleep pills')()===false) return false; eqNote('Neversleep pills','Stress +1','Stress now '+num(S.stress)+'. No sleep needed for a day — you cannot relieve stress during that time.'); eqConsume(i); } },
+  { re:/^hydr8tion/i, kind:'quick', btn:'Take', sub:'Eliminates fatigue from hypersleep',
+    run:function(g,i){ eqNote('Hydr8tion','Taken','Fatigue from hypersleep is gone.'); eqConsume(i); } },
+  { re:/^recreational drugs/i, kind:'quick', stress:true, sub:'Stress +1 or −1 · each dose beyond the first this shift: −1 die to all skill rolls',
+    btns:[['+1 Stress',function(g,i){ if(eqStress(1,'Recreational drugs')()===false) return false; eqNote('Recreational drugs','Stress +1','Stress now '+num(S.stress)+'. A second dose this shift gives −1 die to all skill rolls until the end of the shift.'); eqConsume(i); }],
+          ['−1 Stress',function(g,i){ if(eqStress(-1,'Recreational drugs')()===false) return false; eqNote('Recreational drugs','Stress −1','Stress now '+num(S.stress)+'. A second dose this shift gives −1 die to all skill rolls until the end of the shift.'); eqConsume(i); }]] },
+  { re:/^coffee/i, kind:'free', btn:'Drink', stress:true, sub:'Stress +1 · postpones fatigue from lack of sleep for one shift',
+    run:function(g,i){ if(eqStress(1,'Coffee')()===false) return false; eqNote('Coffee','Stress +1','Stress now '+num(S.stress)+'. Fatigue from lack of sleep is postponed one shift.'); eqConsume(i); } },
+  { re:/^colony specialty meal/i, kind:'free', btn:'Eat', stress:true, sub:'Food for one day · Stress −1',
+    run:function(g,i){ if(eqStress(-1,'Colony specialty meal')()===false) return false; eqNote('Colony specialty meal','Stress −1','Food needs met for one day. Stress now '+num(S.stress)+'.'); eqConsume(i); } },
+  { re:/^beer|booze/i, kind:'free', btn:'Drink', stress:true, sub:'Stress −1 · each dose beyond the first this shift: −1 die to all skill rolls',
+    run:function(g,i){ if(eqStress(-1,'Beer and booze')()===false) return false; eqNote('Beer and booze','Stress −1','Stress now '+num(S.stress)+'. A second dose this shift gives −1 die to all skill rolls until the end of the shift.'); eqConsume(i); } },
+  { re:/^(prefab meal|candy bar)/i, kind:'free', btn:'Eat', sub:'Food for one day',
+    run:function(g,i){ eqNote(eqBaseName(g),'Eaten','Food needs met for one day.'); eqConsume(i); } },
+  { re:/^water bottle/i, kind:'free', btn:'Drink', sub:'Water for one day',
+    run:function(g,i){ eqNote('Water bottle','Drunk','Water needs met for one day.'); eqConsume(i); } },
+  { re:/bug juice/i, kind:'free', btn:'Drink', sub:'Food and water for one day',
+    run:function(g,i){ eqNote(eqBaseName(g),'Drunk','Food and water needs met for one day.'); eqConsume(i); } },
+  { re:/flashlight/i, kind:'quick', btn:'Use', sub:'Removes the effects of darkness in a zone · Short range',
+    run:function(g,i){ eqNote(eqBaseName(g),'On','Darkness no longer affects you in this zone (Short range).'); } },
+  { re:/motion tracker/i, kind:'quick', btn:'Scan', sub:'Detects movement — not creatures in stealth mode',
+    run:function(g,i){ eqNote(eqBaseName(g),'Scanning',String(g.note||'Detects motion.')+' The GM tells you what shows up.'); } }
+];
+function eqRuleFor(g){ var nm=eqBaseName(g); for(var k=0;k<ALIEN_EQ_RULES.length;k++){ if(ALIEN_EQ_RULES[k].re.test(nm)) return ALIEN_EQ_RULES[k]; } return null; }
+function eqBuild(O){
+  var synth=actSynth();
+  gearOf('gear').forEach(function(x){ var g=x.g, i=x.i, nm=eqBaseName(g); if(!nm) return;
+    var q=eqQty(g), qs=q>1?' ×'+q:'';
+    var r=isAlien()?eqRuleFor(g):null;
+    if(r){
+      var o={name:nm+qs, tag:r.kind==='full'?'Full':r.kind==='quick'?'Quick':'No action', kind:r.kind, sub:r.sub, blocked:(r.stress&&synth)?'Synthetic — no Stress':''};
+      if(r.btns) o.btns=r.btns.map(function(b){ return [b[0], function(){ return b[1](g,i); }]; });
+      else { o.btn=r.btn||'Use'; o.run=function(){ return r.run(g,i); }; }
+      actAdd('equip',o,O); return;
+    }
+    // Power cell: refills one item's power supply — offered for each drained weapon.
+    if(isAlien() && /^power cell/i.test(nm)){
+      var drained=gearOf('weapon').filter(function(w){ var m=actAmmoMax(w.g), c=parseInt(w.g.ammo,10); return m>0 && !isNaN(c) && c<m; });
+      if(!drained.length) actAdd('equip',{name:nm+qs,tag:'Quick',kind:'quick',sub:'Restores full power supply to one item · mark it on that item',btn:'Use',run:function(){ eqNote('Power cell','Used','Full power supply restored to one item — note the new rating on it.'); eqConsume(i); }},O);
+      drained.forEach(function(w){ var m=actAmmoMax(w.g);
+        actAdd('equip',{name:nm+qs+' → '+(w.g.name||'weapon'),tag:'Quick',kind:'quick',sub:'Power '+w.g.ammo+' → '+m,btn:'Recharge',run:function(){ w.g.ammo=String(m); eqNote('Power cell → '+(w.g.name||'weapon'),'Power '+m,'Full power supply restored.'); eqConsume(i); renderAttacks(); }},O); });
+      return;
+    }
+    // Any other gear with a printed skill bonus: roll that skill with the bonus (a full action).
+    var sb=eqSkillBonus(g.note);
+    if(sb && sb.skill!=='Close Combat' && sb.skill!=='Ranged Combat' && !/weapon|damage/i.test(String(g.note||''))) actAdd('equip',{name:nm+qs,tag:'Full',kind:'full',sub:sb.skill+' +'+sb.bonus+' · '+actPoolOf(sb.skill,sb.bonus)+' dice',btn:'Roll',run:actSkillRoll(sb.skill,nm,sb.bonus)},O);
+  });
+}
 function renderAction(){
   var host=$('act-hub'); if(!host) return;
-  var a=actState(), O={attacks:[],full:[],quick:[],interrupts:[]}; _actOpts=[];
+  var a=actState(), O={attacks:[],full:[],quick:[],interrupts:[],equip:[]}; _actOpts=[];
   // Attacks (full action)
   actAdd('attacks',{name:'Unarmed',kind:'full',sub:'Close Combat · '+actPoolOf('Close Combat',0)+' dice · Dmg 1 · Adjacent',btn:'Attack',run:function(){ rollUnarmed(); }},O);
   gearOf('weapon').filter(function(x){ return x.g.equipped; }).forEach(function(x){ var w=x.g, i=x.i;
@@ -1751,6 +1830,7 @@ function renderAction(){
     var am=parseInt(w.ammo,10);
     if(!isNaN(am) && am>0) actAdd('attacks',{name:(w.name||'Weapon')+' · supply roll',tag:'No action',kind:'free',sub:'After each attack — skip if you spent an extra success to conserve ammo · '+Math.min(6,am)+' dice, each 1 = −1 ammo',btn:'Supply',run:function(){ rollSupply(i); }},O); });
   actAdd('attacks',{name:'Special close attack',kind:'full',sub:'Disarm · Pass · Shove · Grapple — Close Combat, no weapon bonus, no damage',btn:'Roll',run:actSkillRoll('Close Combat','Special attack')},O);
+  eqBuild(O);
   // Full actions (book list, p.60)
   [['Jump or climb','Mobility','Mobility'],['Take full cover','','No roll — you are in full cover'],['Interact with a terminal','Comtech','Comtech'],
    ['Use machinery','Heavy Machinery','Heavy Machinery'],['Give first aid','Medical Aid','Medical Aid · someone Adjacent who is Broken'],
@@ -1789,6 +1869,7 @@ function renderAction(){
     +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button></div>'
     +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+'</div>'
     +actSec('attacks','Attacks',O.attacks,'')
+    +actSec('equip','Equipment',O.equip,'No usable items — add medkits, drugs, food or tools on the Gear tab.')
     +actSec('full','Full Actions',O.full,'')
     +actSec('quick','Quick Actions',O.quick,'')
     +actSec('interrupts','Interrupts',O.interrupts,'');

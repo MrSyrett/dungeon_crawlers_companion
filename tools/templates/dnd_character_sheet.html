@@ -2241,7 +2241,7 @@ function addInvRow(it){
   if(num(it.plus)) tr.dataset.plus = num(it.plus);   // a +N base weapon/armor (magic enhancement), or a named magic weapon's parsed +N
   if(it.base) tr.dataset.base = it.base;             // the base weapon chosen for a "Weapon (any sword)"-style magic weapon
   if(it.scroll) tr.dataset.scroll = it.scroll;       // the spell a Spell Scroll contains
-  const cmax = magicChargesMax(ref);
+  const cmax = itemChargesMax(ref);
   if(cmax) tr.dataset.charges = (it.charges != null && it.charges !== '') ? Math.max(0, Math.min(cmax, num(it.charges))) : cmax;
   tr.innerHTML =
     '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"><div class="inv-detail inv-subline"></div><div class="inv-charges"></div></td>' +
@@ -2300,13 +2300,13 @@ function magicChargesMax(ref){
 }
 function renderInvCharges(tr){
   const box = tr.querySelector('.inv-charges'); if(!box) return;
-  const max = magicChargesMax(invRowRef(tr));
+  const max = itemChargesMax(invRowRef(tr)), unit = magicChargesMax(invRowRef(tr)) ? 'charges' : 'uses';
   if(!max){ box.innerHTML = ''; box.style.display = 'none'; return; }
   const cur = Math.max(0, Math.min(max, num(tr.dataset.charges != null && tr.dataset.charges !== '' ? tr.dataset.charges : max)));
   tr.dataset.charges = cur;
   let pips = ''; for(let i=1;i<=max;i++) pips += '<span class="res-pip' + (i > cur ? ' used' : '') + '" onclick="setCharges(this.closest(\'tr\'),' + i + ')" title="Charge ' + i + '"></span>';
   box.style.display = '';
-  box.innerHTML = '<span class="inv-charges-lbl"><b>' + cur + '</b>/' + max + ' charges</span>' + pips;
+  box.innerHTML = '<span class="inv-charges-lbl"><b>' + cur + '</b>/' + max + ' ' + unit + '</span>' + pips;
 }
 // Click pip i: spend down to i−1 if it's charged, else recharge up to i.
 function setCharges(tr, i){ const cur = num(tr.dataset.charges || 0); tr.dataset.charges = (i <= cur ? i - 1 : i); renderInvCharges(tr); scheduleAutosave(); }
@@ -2319,6 +2319,7 @@ function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
 function onInvNameChange(input){
   const tr = input.closest('tr');
   if(!tr.dataset.ref){ const ref = resolveItemRef(input.value); if(ref) tr.dataset.ref = ref; }
+  if((tr.dataset.charges == null || tr.dataset.charges === '') && itemChargesMax(invRowRef(tr))) tr.dataset.charges = itemChargesMax(invRowRef(tr));
   renderInvActions(tr); renderInvDetail(tr); syncEquippedWeaponName(tr); scheduleAutosave();
 }
 function removeInvRow(btn){
@@ -2408,6 +2409,143 @@ function useConsumable(tr){
   const name = tr.querySelector('.inv-name').value || invRowRef(tr);
   const left = consumeRow(tr);
   addLog('Use ' + name, '✦', 'one used' + (left > 0 ? ' · ' + left + ' left' : ' · none left'), 'normal');
+}
+
+// ═══ ACTION TAB · EQUIPMENT — use items from the inventory ════════════════
+// Lists every inventory row that has something to do when used and runs it from the
+// Action tab: spends the right part of the turn (2024: drinking or administering a
+// potion is a Bonus Action; using an object is the Utilize action; Acid / Alchemist's
+// Fire / Holy Water / Oil replace one attack of the Attack action), rolls what the item
+// rolls, applies what the sheet tracks (HP, Temp HP, conditions, charges) and consumes
+// one of a consumable. Non-consumables are never used up.
+// Mundane gear (2024 PHB), matched by catalog ref or typed name, "(vial)"-style notes ignored.
+//   cost: 'action' (Utilize) | 'bonus' | 'attack' (replaces one attack)
+//   consume: uses one up · charges: uses tracked on the row · check: the roll it makes
+//   save/dmg: thrown items — the target's DEX save vs 8 + DEX mod + PB, damage on a failure
+const GEAR_USES = {
+  'torch': { cost:'bonus', consume:true, verb:'Light', effect:'Lit with a Tinderbox (Bonus Action) — Bright Light 20 ft and Dim Light 20 ft beyond for 1 hour' },
+  'candle': { cost:'bonus', consume:true, verb:'Light', effect:'Lit with a Tinderbox — Bright Light 5 ft and Dim Light 5 ft beyond for 1 hour' },
+  'lamp': { cost:'bonus', verb:'Light', effect:'Lit with a Tinderbox — Bright Light 15 ft and Dim Light 30 ft beyond; burns 6 hours on a flask of Oil' },
+  'hooded lantern': { cost:'bonus', verb:'Light', effect:'Lit with a Tinderbox — Bright Light 30 ft and Dim Light 30 ft beyond; burns 6 hours on a flask of Oil. Lower the hood (Bonus Action) for Dim Light 5 ft' },
+  'bullseye lantern': { cost:'bonus', verb:'Light', effect:'Lit with a Tinderbox — Bright Light in a 60-ft Cone and Dim Light 60 ft beyond; burns 6 hours on a flask of Oil' },
+  'tinderbox': { cost:'bonus', verb:'Light', effect:'Light a Candle, Lamp, Lantern or Torch (anything else with exposed fuel takes 1 minute)' },
+  'oil': { cost:'attack', consume:true, verb:'Throw', save:'DEX', effect:'Thrown at a creature or object within 20 ft — on a failed save it is covered in oil; if it takes Fire damage within 1 minute it takes an extra 5 Fire damage' },
+  'acid': { cost:'attack', consume:true, verb:'Throw', save:'DEX', dmg:'2d6', dtype:'Acid', effect:'Thrown at a creature or object within 20 ft — 2d6 Acid damage on a failed save' },
+  "alchemist's fire": { cost:'attack', consume:true, verb:'Throw', save:'DEX', dmg:'1d4', dtype:'Fire', effect:'Thrown at a creature or object within 20 ft — on a failed save 1d4 Fire damage and it starts Burning' },
+  'holy water': { cost:'attack', consume:true, verb:'Throw', save:'DEX', dmg:'2d8', dtype:'Radiant', effect:'Thrown at a creature within 20 ft — on a failed save 2d8 Radiant damage if it is a Fiend or Undead' },
+  'antitoxin': { cost:'bonus', consume:true, verb:'Drink', effect:'Advantage on saving throws to avoid or end the Poisoned condition for 1 hour' },
+  'poison, basic': { cost:'bonus', consume:true, verb:'Apply', effect:'Coats one weapon or up to three pieces of ammunition for 1 minute — a creature that takes Piercing or Slashing damage from it takes an extra 1d4 Poison damage' },
+  'basic poison': { cost:'bonus', consume:true, verb:'Apply', effect:'Coats one weapon or up to three pieces of ammunition for 1 minute — a creature that takes Piercing or Slashing damage from it takes an extra 1d4 Poison damage' },
+  "healer's kit": { cost:'action', charges:10, verb:'Stabilize', effect:'Stabilize a creature at 0 Hit Points without a Wisdom (Medicine) check' },
+  "thieves' tools": { cost:'action', verb:'Use', tool:true, check:{ abil:'DEX' }, effect:'Pick a lock or disarm a trap (DEX check, + Proficiency Bonus if proficient with Thieves\' Tools)' },
+  'ball bearings': { cost:'action', verb:'Spill', effect:'Cover a level 10-ft square within 10 ft — each creature entering it succeeds on a DC 10 DEX save or has the Prone condition (10 minutes to recover the bearings)' },
+  'caltrops': { cost:'action', verb:'Spread', effect:'Cover a 5-ft square within 5 ft — a creature entering it succeeds on a DC 15 DEX save or takes 1 Piercing damage and its Speed drops to 0 until the start of its next turn (10 minutes to recover)' },
+  'crowbar': { cost:'action', verb:'Pry', check:{ abil:'STR', adv:'Crowbar' }, effect:'Advantage on a Strength check where the leverage helps' },
+  'grappling hook': { cost:'action', verb:'Throw', check:{ skill:'Acrobatics' }, effect:'Throw it at a railing, ledge or other catch within 50 ft — it catches on a DC 13 DEX (Acrobatics) check' },
+  'manacles': { cost:'action', verb:'Bind', check:{ skill:'Sleight of Hand' }, effect:'Bind an unwilling Small or Medium creature within 5 ft that is Grappled, Incapacitated or Restrained (DC 13 DEX (Sleight of Hand)); escaping takes DC 20 Sleight of Hand or DC 25 Athletics' },
+  'rope': { cost:'action', verb:'Tie', check:{ skill:'Sleight of Hand' }, effect:'Tie a knot (DC 10 DEX (Sleight of Hand)) or bind an unwilling Grappled, Incapacitated or Restrained creature (DC 15)' },
+  "climber's kit": { cost:'action', verb:'Anchor', effect:'Anchor yourself — you can\'t fall more than 25 ft from the anchor point and can\'t move more than 25 ft from it without undoing the anchor (Bonus Action)' },
+  'potion of healing': { cost:'bonus', consume:true, verb:'Drink', heal:'2d4+2', effect:'Regain 2d4 + 2 Hit Points' },
+};
+function gearKey(s){ return norm(s).replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim(); }
+function gearUse(ref){
+  const k = gearKey(ref); if(!k) return null;
+  return GEAR_USES[k] || GEAR_USES[k.replace(/(?:es|s)$/, '')] || GEAR_USES[k.replace(/^(?:flask|vial|bag|bottle) of /, '')] || null;
+}
+function gearChargesMax(ref){ const g = gearUse(ref); return g && g.charges ? g.charges : 0; }
+function itemChargesMax(ref){ return magicChargesMax(ref) || gearChargesMax(ref); }
+const HEAL_RX = /(?:regain(?:s|ing)?|restores?|heals?)\s+(\d+d\d+(?:\s*\+\s*\d+)?)\s+hit points/i;
+// The action a magic item's text says it takes (reaction > bonus > action); null = no activation.
+function magicUseCost(m){
+  const d = String(m.description || '');
+  if(/\b(?:use|take|as) an? reaction\b/i.test(d)) return 'reaction';
+  if(/\bbonus action\b/i.test(d)) return 'bonus';
+  if(/\bmagic action\b|\bas an action\b|\bas a action\b/i.test(d)) return 'action';
+  return magicChargesMax(m.name) ? 'action' : null;   // charged items: spending charges is a Magic action
+}
+// What using one inventory row does — or null when it has nothing to do.
+function invUse(tr){
+  const ref = invRowRef(tr), name = (tr.querySelector('.inv-name').value || ref || '').trim();
+  const qty = num(tr.querySelector('.inv-qty').value);
+  if(tr.dataset.scroll){ const sp = spellByName(tr.dataset.scroll); if(!sp) return null;
+    return { kind:'scroll', name, ref, qty, cost: turnCastType(sp.castingTime) || 'action', consume:true, verb:'Cast', sp,
+      meta:'Spell Scroll · ' + (sp.level === 0 ? 'Cantrip' : 'Lvl ' + sp.level) + ' · ' + sp.range + ' · scroll +' + scrollStats(sp.level).atk + ' / DC ' + scrollStats(sp.level).dc }; }
+  const m = magicData(ref);
+  if(m){
+    const isPotion = /^Potion$/i.test(m.type || ''), heal = potionHealExpr(ref) || ((String(m.description || '').match(HEAL_RX) || [])[1] || '').replace(/\s+/g, '');
+    if(isPotion){ const oil = /^oil of/i.test(m.name);
+      return { kind:'potion', name, ref, qty, m, cost: oil ? 'action' : 'bonus', consume:true, verb: oil ? 'Apply' : 'Drink', heal, meta: tcClip(m.description, 110) }; }
+    if(/^Scroll$/i.test(m.type || '')) return { kind:'magic', name, ref, qty, m, cost:'action', consume:true, verb:'Read', meta: tcClip(m.description, 110) };
+    const cost = magicUseCost(m); if(!cost) return null;
+    const cmax = magicChargesMax(ref), doses = /\bdoses?\b/i.test(m.description || '');
+    return { kind:'magic', name, ref, qty, m, cost, consume: doses, cmax, charges: cmax ? num(tr.dataset.charges) : null, verb:'Use', heal, meta: tcClip(m.description, 110) };
+  }
+  const g = gearUse(ref) || gearUse(name); if(!g) return null;
+  const cmax = g.charges || 0;
+  return Object.assign({}, g, { kind:'gear', name, ref, qty, cmax, charges: cmax ? num(tr.dataset.charges) : null, meta: g.effect, heal: g.heal || '' });
+}
+const ITEM_COST_LBL = { action:'Action', bonus:'Bonus Action', reaction:'Reaction', attack:'Replaces an attack' };
+// Is that part of the turn still free? ('attack' = one attack of the Attack action is left.)
+function itemCostSpent(cost){
+  if(cost === 'attack') return turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction());
+  return cost === 'action' ? _turn.action : !!_turn[cost];
+}
+function itemSpendCost(cost){
+  if(cost === 'attack'){ _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; return; }
+  _turn[cost] = true; if(cost === 'action') _turn.actionType = 'other';
+}
+// Heal yourself (capped at max HP); coming back from 0 clears the death saves.
+function healSelf(expr){
+  const hd = rollDiceExpr(expr, false);
+  const curEl = $('f-hp-cur'), max = num($('f-hp-max').textContent), before = num(curEl.value);
+  if(isDead()) return { hd, cur: before, max, dead:true };
+  const cur = max ? Math.min(max, before + hd.total) : before + hd.total; curEl.value = cur;
+  if(before === 0 && cur > 0) reviveFromDown();
+  return { hd, cur, max };
+}
+function equipmentOpts(filterCost){
+  const out = [];
+  invRows().forEach(tr => {
+    const u = invUse(tr); if(!u || u.qty <= 0) return;
+    if(filterCost && u.cost !== filterCost) return;
+    const noCharge = u.cmax && u.charges <= 0;
+    const usesHTML = u.cmax ? ('<b>' + Math.max(0, u.charges) + '</b>/' + u.cmax + (u.kind === 'gear' ? ' uses' : ' ch')) : (u.qty > 1 || u.consume ? '<b>×' + u.qty + '</b>' : '');
+    out.push({ name: u.name, meta: ITEM_COST_LBL[u.cost] + (u.consume ? ' · consumable' : '') + ' · ' + (u.meta || ''), usesHTML,
+      disabled: itemCostSpent(u.cost) || noCharge, run(){ useInvItem(tr.dataset.rid); } });
+  });
+  return out;
+}
+function useInvItem(rid){
+  const tr = invRows().find(r => r.dataset.rid === rid); if(!tr) return;
+  const u = invUse(tr); if(!u || itemCostSpent(u.cost) || isIncapacitated()) return;
+  if(u.cmax && u.charges <= 0){ addLog(u.name, '✗', 'No charges left', 'fumble'); return; }
+  if(rollsOff()) return;   // using an item rolls — the sheet must be locked (play mode)
+  if(u.kind === 'scroll'){ if(spellsBlockedByArmor('Scroll')) return; itemSpendCost(u.cost); castScroll(tr); afterTurnAction(); return; }
+  itemSpendCost(u.cost);
+  const bits = [], tag = ITEM_COST_LBL[u.cost];
+  let result = '✦', type = 'normal';
+  if(u.heal){ const h = healSelf(u.heal);
+    if(h.dead){ bits.push('the character is dead — no healing'); type = 'fumble'; }
+    else { result = '+' + h.hd.total + ' HP'; bits.push('heal ' + h.hd.detail + ' · HP ' + h.cur + (h.max ? '/' + h.max : '')); } }
+  const nm = norm(u.ref);
+  if(/potion of heroism/.test(nm)){ const t = $('f-hp-temp'); if(t && num(t.value) < 10) t.value = 10; result = '+10 Temp HP'; bits.push('Temp HP 10 · Bless for 1 hour (add 1d4 to attack rolls and saves)'); }
+  if(/elixir of health/.test(nm)){ const cleared = ['Blinded','Deafened','Paralyzed','Poisoned'].filter(activeCond);
+    if(cleared.length){ activeConditions = activeConditions.filter(c => !cleared.some(x => norm(x) === norm(c))); renderConditions(); recalc(); }
+    bits.push(cleared.length ? 'ended ' + cleared.join(', ') : 'cures disease; ends Blinded, Deafened, Paralyzed and Poisoned'); }
+  if(/keoghtom's ointment/.test(nm) && activeCond('Poisoned')){ activeConditions = activeConditions.filter(c => norm(c) !== 'poisoned'); renderConditions(); recalc(); bits.push('Poisoned ended'); }
+  if(u.save){ const dc = 8 + modOf('DEX') + profBonus(); result = 'DC ' + dc;
+    bits.push('target makes a DC ' + dc + ' ' + u.save + ' save');
+    if(u.dmg){ const dd = rollDiceExpr(u.dmg, false); result += ' · ' + dd.total + ' ' + u.dtype; bits.push('on a failure ' + dd.total + ' ' + u.dtype + ' (' + dd.detail + ')'); } }
+  const special = /potion of heroism|elixir of health/.test(nm);
+  if(u.kind === 'gear') bits.push(u.effect); else if(!u.heal && !special) bits.push(tcClip(u.m.description, 160));
+  if(u.cmax){ tr.dataset.charges = Math.max(0, u.charges - 1); renderInvCharges(tr); bits.push((u.charges - 1) + '/' + u.cmax + (u.kind === 'gear' ? ' uses' : ' charges') + ' left' + (u.kind === 'magic' ? ' (spend extra charges on the Inventory pips)' : '')); }
+  if(u.consume){ const left = consumeRow(tr); bits.push('consumed' + (left > 0 ? ' (' + left + ' left)' : ' (none left)')); }
+  addLog((u.verb || 'Use') + ' ' + u.name, result, tag + ' · ' + bits.join(' · '), type);
+  if(u.check){ const c = u.check;
+    if(c.skill) rollSkill(c.skill);
+    else { const prof = u.tool && /thieves'?\s*tools/i.test(($('f-proficiencies') || {}).value || '');
+      d20Check((u.ref || u.name) + ' (' + c.abil + ')', modOf(c.abil) + (prof ? profBonus() : 0), { kind:'check', abil:c.abil, adv: c.adv || '', note: prof ? 'proficient +' + profBonus() : (u.tool ? 'not proficient' : '') }); } }
+  scheduleAutosave(); afterTurnAction();
 }
 
 // ── EQUIPMENT: item kinds, equip toggles, AC, weapon attack rows ──────────
@@ -4005,7 +4143,6 @@ const STANDARD_ACTIONS = [
   { name:'Search', desc:'Make a Wisdom check — Insight, Medicine, Perception or Survival — to discern something.' },
   { name:'Shove', desc:'Unarmed Strike in place of one attack of the Attack action: a creature up to one size larger makes a Strength or Dexterity save (DC 8 + STR mod + PB, its choice) or is pushed 5 ft or knocked Prone. No attack roll.' },
   { name:'Study', desc:'Make an Intelligence check — Arcana, History, Investigation, Nature or Religion — to recall or discern lore.' },
-  { name:'Utilize', desc:'Use a nonmagical object, or a magic item that requires an action.' },
 ];
 
 function tcClip(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n-1) + '…' : s; }
@@ -4286,6 +4423,7 @@ function renderTurn(){
   if(_turnSub === 'action'){
     h += turnSecHTML('a-spells', 'Spells', turnSpellsHTML('action'));
     h += turnSecHTML('a-feats', 'Features', turnCardsHTML(activatedFeatures().filter(f => f.type === 'action').map(featureOpt)));
+    h += turnSecHTML('a-equip', 'Equipment', turnCardsHTML(equipmentOpts()), 'Utilize · potions · gear');
     h += turnSecHTML('a-standard', 'Standard Actions', turnCardsHTML(STANDARD_ACTIONS.map(a => standardOpt(a, 'action'))));
   } else if(_turnSub === 'bonus'){
     const _cs = concentratedSpell(), _sus = _cs && spellSustain(_cs);
@@ -4296,11 +4434,13 @@ function renderTurn(){
     h += turnSecHTML('b-offhand', 'Off-hand Attack', turnCardsHTML(offhandOpts()), 'Light weapons');
     h += turnSecHTML('b-spells', 'Spells', turnSpellsHTML('bonus'));
     h += turnSecHTML('b-feats', 'Features', turnCardsHTML(activatedFeatures().filter(f => f.type === 'bonus').map(featureOpt)));
+    h += turnSecHTML('b-equip', 'Equipment', turnCardsHTML(equipmentOpts('bonus')));
     if(!h) h = '<p class="turn-empty">No bonus actions yet — bonus-action spells and features show up here.</p>';
   } else {
     h += turnSecHTML('r-oa', 'Opportunity Attack', turnOppAttacksHTML());
     h += turnSecHTML('r-spells', 'Spells', turnSpellsHTML('reaction'));
     h += turnSecHTML('r-feats', 'Features', turnCardsHTML(activatedFeatures().filter(f => f.type === 'reaction').map(featureOpt)));
+    h += turnSecHTML('r-equip', 'Equipment', turnCardsHTML(equipmentOpts('reaction')));
   }
   body.innerHTML = h;
 }
