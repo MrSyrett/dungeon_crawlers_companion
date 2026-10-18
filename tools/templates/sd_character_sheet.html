@@ -1251,6 +1251,10 @@ function sdApplySpellErrata(row){
   const nameEl = row.querySelector('.spell-input'); const nm = (nameEl && nameEl.value || '').trim();
   const e = SD_SPELL_ERRATA[nm]; if(!e) return;
   const sp = SD_SPELLS.find(s => s.name === nm && /^(Priest|Wizard|Both)$/.test(s.caster)); if(!sp) return;
+  // Shared names (Turn Undead, Speak With Dead, Polymorph…) also exist on the Witch /
+  // Necromancer lists: a row carrying one of those versions is never touched.
+  const dEl = row.querySelector('.spell-desc'), dv = (dEl && dEl.value || '').trim();
+  if(dv && SD_SPELLS.some(s => s.name === nm && !/^(Priest|Wizard|Both)$/.test(s.caster) && s.desc === dv)) return;
   const put = (sel, oldV, newV) => { const el = row.querySelector(sel); if(el && oldV !== undefined && (el.value || '').trim() === oldV) { el.value = newV; if(sel === '.spell-desc' && typeof autoResizeDesc === 'function') autoResizeDesc(el); } };
   put('.spell-level', e.level, sp.tier); put('.spell-range', e.range, sp.range); put('.spell-duration', e.duration, sp.duration);
   put('.spell-damage', e.damage, spellRollDice(sp)); put('.spell-desc', e.desc, sp.desc);
@@ -1747,14 +1751,14 @@ function masteryBonus(level) { return 1 + Math.floor((parseInt(level)||1) / 2); 
 
 // Delver "Trusty Gear": the chosen gear/weapon type. { kind:'weapon'|'gear',
 // value:'Longsword' } or null. Persisted with the sheet. When a WEAPON was
-// chosen, attack rolls with it gain 2 + half your level (round down): +2 at
-// level 1, +1 at each even level.
+// chosen, attack rolls with it gain 1 + half your level (round down): +1 at
+// level 1, +1 more at each even level (Cursed Scroll Compilation).
 let _charTrusty = null;
 function trustyWeaponAtkBonus(weaponName) {
   if(!_charTrusty || _charTrusty.kind !== 'weapon' || !_charTrusty.value) return 0;
   if(String(weaponName||'').trim().toLowerCase() !== String(_charTrusty.value).trim().toLowerCase()) return 0;
   const lvl = (typeof sheetLevel === 'function') ? (sheetLevel()||1) : 1;
-  return 2 + Math.floor(lvl/2);
+  return 1 + Math.floor(lvl/2);
 }
 
 // Roustabout "wield a new weapon or armor" talents grant extra proficiencies
@@ -1786,7 +1790,7 @@ function getStatMod(id) {
 
 // ═══ AUTO ARMOR CLASS ════════════════════════════════════════════════════════
 // AC is computed from equipped armor + shield + DEX per the Shadowdark rules:
-//   none 10+DEX · leather 11+DEX · chainmail/mithral 13+DEX · plate 15 (no DEX)
+//   none 10+DEX · leather 11+DEX · chainmail/mithral chainmail 13+DEX · plate/mithral plate 15 (no DEX)
 //   shield +2 · enchanted "+N <armor/shield>" adds N. Best body armor wins;
 //   one shield stacks. Disabled (struck-out) gear slots don't count. When the AC
 //   Bonus toggle is on, its value is folded in here too.
@@ -1794,6 +1798,7 @@ function getStatMod(id) {
 // toggle. When that switch is off, AC is edited by hand.
 // Body-armor definitions (lower-cased match). base = AC, dex = adds DEX mod.
 const AC_ARMOR = [
+  { match:'mithral plate mail', base:15, dex:false, soak:5 },
   { match:'plate mail',         base:15, dex:false, soak:5 },
   { match:'plate',              base:15, dex:false, soak:5 },
   { match:'mithral chainmail',  base:13, dex:true,  soak:3 },
@@ -1827,13 +1832,13 @@ function acParseItem(name) {
 let _innateAC = 0;
 
 // Class AC features that scale with level and aren't stored on a gear slot.
-// Basilisk Warrior's Stone Skin: +3 AC at level 1, +1 at each even level
-// (3 + half level, round down), and only while unarmored.
+// Basilisk Warrior's Stone Skin: +2 AC at level 1, +1 at each even level
+// (2 + half level, round down), and only while unarmored (Cursed Scroll Compilation).
 function classInnateAC(unarmored) {
   const cls = (document.getElementById('f-class')?.value || '').trim().toLowerCase();
   const lvl = (typeof sheetLevel === 'function') ? (sheetLevel() || 1) : 1;
   let bonus = 0;
-  if(cls === 'basilisk warrior' && unarmored) bonus += 3 + Math.floor(lvl/2);   // Stone Skin
+  if(cls === 'basilisk warrior' && unarmored) bonus += 2 + Math.floor(lvl/2);   // Stone Skin
   return bonus;
 }
 
@@ -5255,7 +5260,7 @@ const SHOP_WEAPONS = [
   {name:'Shortsword',    gp:7,  note:'1d6'},
   {name:'Spear',         sp:5,  note:'1d6, Thrown'},
   {name:'Staff',         sp:5,  note:'1d4, Two-handed'},
-  {name:'Warhammer',     gp:10, note:'1d10, Two-handed, 2 slots'},
+  {name:'Warhammer',     gp:10, note:'1d10, Two-handed'},
   {name:'Blowgun',       gp:5,  note:'1 damage, Near. Firing from hiding does not reveal your position'},
   {name:'Bolas',         gp:2,  note:'Near. Hit a legged creature horse-sized or smaller: speed drops to close until it frees itself (DC 15 STR/DEX)'},
   {name:'Morningstar',   gp:5,  note:'1d6/1d8, Versatile'},
@@ -5271,17 +5276,21 @@ const SHOP_ARMOR = [
   {name:'Chainmail',     gp:60, note:'AC 13 + DEX, disadv. stealth/swim, 2 slots'},
   {name:'Plate mail',    gp:130,note:'AC 15, no swim, disadv. stealth, 3 slots'},
   {name:'Shield',        gp:10, note:'+2 AC, occupies one hand'},
+  // Mithral (metal armor only, core p.36): cost x4, one fewer gear slot, no stealth/swim penalty.
+  {name:'Mithral chainmail',  gp:240, note:'AC 13 + DEX, no stealth/swim penalty, 1 slot'},
+  {name:'Mithral plate mail', gp:520, note:'AC 15, no stealth/swim penalty, 2 slots'},
+  {name:'Mithral shield',     gp:40,  note:'+2 AC, occupies one hand'},
 ];
 const SHOP_BASIC = [
   {name:'Arrows',         qty:'20', gp:1,  note:'Ammo for bows'},
   {name:'Backpack',       gp:2,  note:'First one free to carry'},
   {name:'Ball bearing',   gp:1,  note:'DC 12 DEX to roll it a near distance in a straight line. Triggers traps as if an adult human stepped there; lost once it does.'},
-  {name:'Caltrops',       sp:5,  note:'One bag'},
+  {name:'Caltrops',       sp:5,  note:'One bag. Living creatures who step on them take 1 damage and move at half speed for 10 rounds.'},
   {name:'Candle',         qty:'3', cp:5,  note:'Close light for 20 real minutes. Can be hidden behind a cloak or hand.'},
   {name:'Charcoal, jar',  gp:1,  note:'One use. Leeches the poison out of an edible item, making it safe.'},
   {name:'Crossbow bolts', qty:'20', gp:1,  note:'Ammo for crossbows'},
   {name:'Crawling Kit',   gp:7,  note:'Backpack, flint & steel, 2 torches, 3 rations, 10 iron spikes, grappling hook, rope', kit:true},
-  {name:'Crowbar',        sp:5,  note:''},
+  {name:'Crowbar',        sp:5,  note:'Advantage on checks to pry open stuck objects.'},
   {name:'Flash seed',     gp:1,  note:'Sulfurous seed that bursts in a flash of light on impact. Dark-adapted creatures in near who see it: DC 12 CON or blinded 1 round.'},
   {name:'Flask or bottle',sp:3,  note:'Holds one draught'},
   {name:'Flint & Steel',  sp:5,  note:'Routine fire-lighting succeeds'},
@@ -5289,12 +5298,12 @@ const SHOP_BASIC = [
   {name:'Grappling Hook', gp:1,  note:''},
   {name:'Holy water, flask', sp:5, note:'Deals 2d4 damage to an undead creature.'},
   {name:'Iron Spikes',    qty:'10', gp:1,  note:''},
-  {name:'Lantern',        gp:5,  note:'Casts light like torch, shutter, 1 hr/oil'},
+  {name:'Lantern',        gp:5,  note:'Light out to a double near distance. Needs oil (one flask = 1 hour of real time). Has a shutter to hide the light.'},
   {name:'Lantern hook',   sp:5,  note:'Connects to a belt, allowing hands-free use of a lantern.'},
   {name:"Miner's putty, jar", sp:5, note:'Three uses of tacky putty. One glob bonds 500 lbs. of weight; dries and flakes off in a day.'},
   {name:'Mirror',         gp:10, note:''},
   {name:'Net',            sp:5,  note:'Close range, one target. DC 15 DEX to entrap a human-sized or smaller creature. It escapes on a DC 12 DEX check on its turn.'},
-  {name:'Oil, flask',     sp:5,  note:'Fuel or thrown weapon, 1d4/round'},
+  {name:'Oil, flask',     sp:5,  note:'Fuels a lantern for 1 hour of real time. Spilled and lit, it covers a close area and burns for 4 rounds, 1d4 damage each round.'},
   {name:'Pole',           sp:5,  note:"Wooden, 10' long"},
   {name:'Rations',        qty:'3', sp:5,  note:'Food + water, one day each'},
   {name:'Rope (60 ft)',   gp:1,  note:'Hemp'},
@@ -5518,7 +5527,7 @@ function homebrewShopItems() {
 
 // ── Gear slot cost (Shadowdark pg. 33-35) ──
 // Bastard sword / greataxe / greatsword take 2 slots; chainmail 2, plate mail 3.
-const GEAR_SLOT_COST = { 'Chainmail':2, 'Plate mail':3 };
+const GEAR_SLOT_COST = { 'Chainmail':2, 'Plate mail':3, 'Mithral chainmail':1, 'Mithral plate mail':2 };   // mithral: one fewer slot
 function itemSlotCost(name) {
   let n = String(name||'').trim();
   if(!n) return 1;
@@ -5606,7 +5615,9 @@ const ENCHANT_ARMOR = [
   { name:'Chainmail',          note:'AC 13 + DEX' },
   { name:'Plate mail',         note:'AC 15' },
   { name:'Mithral chainmail',  note:'AC 13 + DEX, no stealth/swim penalty' },
+  { name:'Mithral plate mail', note:'AC 15, no stealth/swim penalty' },
   { name:'Shield',             note:'+2 AC' },
+  { name:'Mithral shield',     note:'+2 AC' },
 ];
 
 function openEnchantPicker(kind) {

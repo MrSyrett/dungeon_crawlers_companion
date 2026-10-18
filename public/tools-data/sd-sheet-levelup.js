@@ -6,6 +6,10 @@
 
 const CCW_PRIEST_SPELLS_KNOWN = {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[3,1,0,0,0],4:[3,2,0,0,0],5:[3,2,1,0,0],6:[3,2,2,0,0],7:[3,3,2,1,0],8:[3,3,2,2,0],9:[3,3,2,2,1],10:[3,3,3,2,2]};
 const CCW_WIZARD_SPELLS_KNOWN = {1:[3,0,0,0,0],2:[4,0,0,0,0],3:[4,1,0,0,0],4:[4,2,0,0,0],5:[4,2,1,0,0],6:[4,3,2,0,0],7:[4,3,2,1,0],8:[4,4,2,2,0],9:[4,4,3,2,1],10:[4,4,4,2,2]};
+// Cursed Scroll Compilation tables. Knight of St. Ydris casts witch spells on its
+// own slower table (tiers 1-3); the Necromancer's table matches the Priest's.
+const CCW_KNIGHT_SPELLS_KNOWN = {1:[0,0,0,0,0],2:[0,0,0,0,0],3:[1,0,0,0,0],4:[2,0,0,0,0],5:[3,0,0,0,0],6:[3,1,0,0,0],7:[3,2,0,0,0],8:[3,3,0,0,0],9:[3,3,1,0,0],10:[3,3,2,0,0]};
+const CCW_NECRO_SPELLS_KNOWN  = {1:[2,0,0,0,0],2:[3,0,0,0,0],3:[3,1,0,0,0],4:[3,2,0,0,0],5:[3,2,1,0,0],6:[3,2,2,0,0],7:[3,3,2,1,0],8:[3,3,2,2,0],9:[3,3,2,2,1],10:[3,3,3,2,2]};
 const CCW_WITCH_SPELLS_KNOWN  = {1:[3,0,0,0,0],2:[4,0,0,0,0],3:[4,1,0,0,0],4:[4,2,0,0,0],5:[4,2,1,0,0],6:[4,3,2,0,0],7:[4,3,2,1,0],8:[4,4,2,2,0],9:[4,4,3,2,1],10:[4,4,4,2,2]};
 
 let _lvl = null;
@@ -39,7 +43,8 @@ function startLevelUp() {
     newSpells: [], spellSrc: null, spellSrcOf: {}, spellsNeeded: 0, spellTiers: [], spellTierCap: 0, extraHd: null,
   };
   // Spell gains for casters
-  const table = clsKey==='Priest' ? CCW_PRIEST_SPELLS_KNOWN : clsKey==='Wizard' ? CCW_WIZARD_SPELLS_KNOWN : clsKey==='Witch' ? CCW_WITCH_SPELLS_KNOWN : null;
+  const table = clsKey==='Priest' ? CCW_PRIEST_SPELLS_KNOWN : clsKey==='Wizard' ? CCW_WIZARD_SPELLS_KNOWN : clsKey==='Witch' ? CCW_WITCH_SPELLS_KNOWN
+    : clsKey==='Knight of St. Ydris' ? CCW_KNIGHT_SPELLS_KNOWN : clsKey==='Necromancer' ? CCW_NECRO_SPELLS_KNOWN : null;
   if(table) {
     const oldRow = table[_lvl.oldLevel] || [0,0,0,0,0];
     const newRow = table[_lvl.newLevel] || oldRow;
@@ -48,14 +53,6 @@ function startLevelUp() {
       for(let g=0;g<gain;g++) _lvl.spellTiers.push(t+1);
     }
     _lvl.spellsNeeded = _lvl.spellTiers.length;
-  } else if(clsKey === 'Knight of St. Ydris') {
-    // Knight of St. Ydris: no spell until level 3, then one new spell each level.
-    // The player picks any tier up to the level cap — tier 1 (L3–5), 2 (L6–8),
-    // 3 (L9+) — rather than a forced tier (see cap mode in the New Spells step).
-    if(newLevel >= 3) {
-      _lvl.spellsNeeded = 1;
-      _lvl.spellTierCap = Math.min(3, Math.floor(newLevel/3));
-    }
   } else if(RC_CLASS_INFO[clsKey] && RC_CLASS_INFO[clsKey]._caster) {
     // Homebrew casters learn one new spell per level, at the highest tier their
     // level unlocks (tier = ceil(level/2), capped at 5).
@@ -180,8 +177,9 @@ function lvlNext() {
 
 function lvlHP() {
   const hd = RC_CLASS_INFO[_lvl.cls].hd;
-  const conMod = _rc_mod(parseInt(document.getElementById('con-val')?.value)||10);
-  let h = '<p class="ccw-hint">Roll your class hit die (1'+hd.slice(1)+') '+(conMod!==0?((conMod>0?'+':'')+conMod+' CON '):'')+'and add the result to your maximum HP (minimum 1).</p>';
+  // Core p.38: roll your class's hit points die and add it to your maximum HP —
+  // no CON modifier after 1st level. Dwarves (Stout) roll it with advantage.
+  let h = '<p class="ccw-hint">Roll your class hit die (1'+hd.slice(1)+')'+(lvlIsDwarf()?' with advantage (Dwarf: Stout)':'')+' and add the result to your maximum HP.</p>';
   h += '<div style="display:flex;gap:6px;align-items:stretch;margin-bottom:10px;">';
   h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="lvlRollHP()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll 1'+hd.slice(1)+'</button>';
   h += '<button style="flex:0 0 auto;margin:0;padding:0 12px;background:#1a3a4a;border:1px solid #2d6a7a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="lvlMaxHP()" title="Take the maximum die result">⬆ Max</button>';
@@ -195,16 +193,16 @@ function lvlHP() {
 // Take the maximum hit die result instead of rolling
 function lvlMaxHP() {
   const hdNum = parseInt(RC_CLASS_INFO[_lvl.cls].hd.split('d')[1]);
-  const conMod = _rc_mod(parseInt(document.getElementById('con-val')?.value)||10);
-  _lvl.hpRoll = Math.max(1, hdNum + conMod);
+  _lvl.hpRoll = Math.max(1, hdNum);
   lvlRender();
 }
 function lvlRollHP() {
   const hdNum = parseInt(RC_CLASS_INFO[_lvl.cls].hd.split('d')[1]);
-  const conMod = _rc_mod(parseInt(document.getElementById('con-val')?.value)||10);
-  _lvl.hpRoll = Math.max(1, Math.ceil(Math.random()*hdNum) + conMod);
+  const r = () => Math.ceil(Math.random()*hdNum);
+  _lvl.hpRoll = Math.max(1, lvlIsDwarf() ? Math.max(r(), r()) : r());
   lvlRender();
 }
+function lvlIsDwarf() { return /^dwarf/i.test((document.getElementById('f-ancestry')?.value || '').trim()); }
 
 
 function lvlTalentRows() {

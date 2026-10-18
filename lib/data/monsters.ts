@@ -2882,7 +2882,7 @@ export const MONSTERS: Monster[] = [
     "i": "+5",
     "w": "+4",
     "ch": "+5",
-    "notes": "Legendary Undead: Immune to morale checks. Only damaged by magical sources. Hostile spells targeting Mordanticus are DC 18 to cast. Crown of Gehemna: 3/day, cause a spell being cast within far to fail. Necrosis: DC 15 CON or go to 0 HP. Healing spells are DC 15 to cast on the target while at 0 HP due to this effect. Phylactery: Cannot be killed while the spirit vessel (a diamond) is intact. Spells (INT): Absorb DC 13, Banish DC 14, Bind DC 12, Blast DC 14 (5d8 near), Phase DC 13, True Name DC 15."
+    "notes": "Legendary Undead: Immune to morale checks. Only damaged by magical sources. Hostile spells targeting Mordanticus are DC 18 to cast. Crown of Gehemna: 3/day, cause a spell being cast within far to fail. Necrosis: DC 15 CON or go to 0 HP. Healing spells are DC 15 to cast on the target while at 0 HP due to this effect. Phylactery: Cannot be killed while the spirit vessel (a diamond) is intact. Absorb (INT DC 13): Near, one target. Target loses the ability to cast one random spell until it rests, and Mordanticus regains a lost spell of the same tier or less. Banish (INT DC 14): All extradimensional creatures within near DC 15 CHA or sent back to their home planes. Bind (INT DC 12): One humanoid in far paralyzed 1d4 rounds. Blast (INT DC 14): One creature in near takes 5d8 damage. Phase (INT DC 13): Self. Teleport up to one mile. True Name (INT DC 15): Near. Learn the True Name of the target."
   },
   {
     "name": "Morzo Moth",
@@ -3522,7 +3522,7 @@ export const MONSTERS: Monster[] = [
     "i": "+5",
     "w": "+6",
     "ch": "+5",
-    "notes": "Legendary: Only damaged by magical sources. Hostile spells targeting Rathgamnon are DC 18 to cast. Roar: In place of attacks, all creatures who can hear within far DC 18 CHA or be rendered blind and speechless for 1d4 days. Spells (WIS): Abjure DC 13, Abolish DC 13 (5d8 far), Anchor DC 14, Gate DC 14, Portent DC 14, Time Stop DC 15."
+    "notes": "Legendary: Only damaged by magical sources. Hostile spells targeting Rathgamnon are DC 18 to cast. Roar: In place of attacks, all creatures who can hear within far DC 18 CHA or be rendered blind and speechless for 1d4 days. Abjure (WIS DC 13): Self. End any hostile magical effects affecting Rathgamnon. Abolish (WIS DC 13): One target in far takes 5d8 damage. Anchor (WIS DC 14): One target in far DC 18 STR or bound by chains of golden runes for 1d4 rounds. Gate (WIS DC 14): Open a portal at a point within near to another location on any plane. Lasts 1d6 rounds or until dismissed. Portent (WIS DC 14): Lasts 2d4 rounds. One target in near has advantage or disadvantage on all attack rolls and checks. Time Stop (WIS DC 15): Self. Time freezes for everyone else for 1d4 rounds; everything that happens during the freeze resolves at once when it ends."
   },
   {
     "name": "Reaver",
@@ -4098,7 +4098,7 @@ export const MONSTERS: Monster[] = [
     "i": "+4",
     "w": "+4",
     "ch": "+3",
-    "notes": "Roar: In place of attacks, all creatures who can hear within far DC 18 CHA or paralyzed 1d4 rounds. Spells (WIS): Gate DC 14, Omens DC 12, Riddle DC 12, Time Bend DC 14, Unmake DC 13 (3d8 far)."
+    "notes": "Roar: In place of attacks, all creatures who can hear within far DC 18 CHA or paralyzed 1d4 rounds. Gate (WIS DC 14): Open a portal at a point within near to another location on any plane. Lasts 1d6 rounds or until dismissed. Omens (WIS DC 12): Self. ADV on all actions for 1d4 rounds. Riddle (WIS DC 12): One target in far DC 15 INT or stupefied 1d4 rounds. Time Bend (WIS DC 14): One target in near frozen in time for 1d4 rounds. Unmake (WIS DC 13): One target in far takes 3d8 damage."
   },
   {
     "name": "Spider",

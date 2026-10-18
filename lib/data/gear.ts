@@ -39,7 +39,7 @@ export const GEAR: GearItem[] = [
     "name": "Caltrops",
     "category": "basic",
     "cost": "5 sp",
-    "desc": "One bag"
+    "desc": "One bag. Living creatures who step on them take 1 damage and move at half speed for 10 rounds."
   },
   {
     "name": "Candle",
@@ -71,7 +71,7 @@ export const GEAR: GearItem[] = [
     "name": "Crowbar",
     "category": "basic",
     "cost": "5 sp",
-    "desc": ""
+    "desc": "Advantage on checks to pry open stuck objects."
   },
   {
     "name": "Flash seed",
@@ -120,7 +120,7 @@ export const GEAR: GearItem[] = [
     "name": "Lantern",
     "category": "basic",
     "cost": "5 gp",
-    "desc": "Casts light like torch, shutter, 1 hr/oil"
+    "desc": "Light out to a double near distance. Needs oil (one flask = 1 hour of real time). Has a shutter to hide the light."
   },
   {
     "name": "Lantern hook",
@@ -150,7 +150,7 @@ export const GEAR: GearItem[] = [
     "name": "Oil, flask",
     "category": "basic",
     "cost": "5 sp",
-    "desc": "Fuel or thrown weapon, 1d4/round"
+    "desc": "Fuels a lantern for 1 hour of real time. Spilled and lit, it covers a close area and burns for 4 rounds, 1d4 damage each round."
   },
   {
     "name": "Pole",
@@ -470,6 +470,24 @@ export const GEAR: GearItem[] = [
     "desc": "+2 AC, occupies one hand"
   },
   {
+    "name": "Mithral chainmail",
+    "category": "armor",
+    "cost": "240 gp",
+    "desc": "AC 13 + DEX, no stealth/swim penalty, 1 slot"
+  },
+  {
+    "name": "Mithral plate mail",
+    "category": "armor",
+    "cost": "520 gp",
+    "desc": "AC 15, no stealth/swim penalty, 2 slots"
+  },
+  {
+    "name": "Mithral shield",
+    "category": "armor",
+    "cost": "40 gp",
+    "desc": "+2 AC, occupies one hand"
+  },
+  {
     "name": "Magic Wand",
     "category": "magic",
     "cost": "",
@@ -670,7 +688,7 @@ export const GEAR: GearItem[] = [
     "category": "magic",
     "cost": "",
     "magicType": "Armor & Shields",
-    "desc": "Golden plate mail carved from head to toe with warrior angels. Bonus. +3 plate mail. Only a lawful worshipper of Saint Terragnis can wear this armor. Benefit. Hostile spells that target you are DC 18 to cast. Once per month, you can summon an Avatar of Saint Terragnis (treat as an archangel) to fight by your side for 10 rounds. r to fight the Legion of the that day; so will we.” orc priest"
+    "desc": "Golden plate mail carved from head to toe with warrior angels. Bonus. +3 plate mail. Only a lawful worshipper of Saint Terragnis can wear this armor. Benefit. Hostile spells that target you are DC 18 to cast. Once per month, you can summon an Avatar of Saint Terragnis (treat as an archangel) to fight by your side for 10 rounds."
   },
   {
     "name": "Armor of the Oni",
@@ -1055,7 +1073,7 @@ export const GEAR: GearItem[] = [
     "category": "magic",
     "cost": "",
     "magicType": "Wondrous",
-    "desc": "Up to three times per day, regain 1d4 hit points when you smoke this pipe. “There's nothing better than a -Ralina, halfling…"
+    "desc": "A long, curved pipe that smells of cloves and resin. Benefit. Up to three times per day, regain 1d4 hit points when you smoke this pipe."
   },
   {
     "name": "Pipes of the Sewers",
@@ -1069,7 +1087,7 @@ export const GEAR: GearItem[] = [
     "category": "magic",
     "cost": "",
     "magicType": "Wondrous",
-    "desc": "A black, velvet square of cloth that unfolds into a wide circle. Benefit. The Portable Hole folds open on a flat surface into a 6-foot wide, 6-foot deep hole. It has 20 gear slots of storage. The hole closes when you fold the cloth into a small square. Curse. Placing this item inside a Bag of Holding or another Portable Hole destroys both items and all held inside them. cheese, a pipe, and a story.” elating a halfling saying"
+    "desc": "A black, velvet square of cloth that unfolds into a wide circle. Benefit. The Portable Hole folds open on a flat surface into a 6-foot wide, 6-foot deep hole. It has 20 gear slots of storage. The hole closes when you fold the cloth into a small square. Curse. Placing this item inside a Bag of Holding or another Portable Hole destroys both items and all held inside them."
   },
   {
     "name": "Sphere of Annihilation",
@@ -1161,6 +1179,13 @@ export const GEAR: GearItem[] = [
     "cost": "",
     "magicType": "Wondrous",
     "desc": "A thin, weighty rod of dark iron inscribed with spiraling runes. Benefit. This wand contains the spells dispel magic (pg. 59) and protection from energy (pg. 68). Curse. Each time you fail a spellcasting check with this wand, you also lose the ability to cast a random spell you know until you complete a rest. WAR HORN OF THE ANGELS An opalescent ox horn capped with a golden mouthpiece. Benefit. Only a lawful being can wield the horn. Once per day, you can blow the horn to cast rebuke unholy (pg. 69) with a +4 bonus. A demon or devil who hears the horn has disadvantage on its Charisma check vs. your rebuke unholy spellcasting check."
+  },
+  {
+    "name": "War Horn of the Angels",
+    "category": "magic",
+    "cost": "",
+    "magicType": "Wondrous",
+    "desc": "An opalescent ox horn with a golden mouthpiece. Benefit. Only a lawful being can use the horn. Once per day, blow it to cast rebuke unholy with a +4 bonus. Demons and devils who hear it have disadvantage on their Charisma check against that casting."
   },
   {
     "name": "Well of Many Worlds",

@@ -896,7 +896,9 @@ function ccwRandomize() {
   _ccw.name = _rc_roll(RC_NAMES[_ccw.ancestry] || RC_NAMES.Human);
   const eff = ccwEffStats();
   const hdNum = parseInt(RC_CLASS_INFO[_ccw.cls].hd.split('d')[1]);
-  let hp = Math.ceil(Math.random()*hdNum) + _rc_mod(eff.CON);
+  // Dwarf (Stout): roll hit points with advantage, and start with +2 HP.
+  const _hd = () => Math.ceil(Math.random()*hdNum);
+  let hp = (_ccw.ancestry==='Dwarf' ? Math.max(_hd(), _hd()) : _hd()) + _rc_mod(eff.CON);
   if(_ccw.ancestry==='Dwarf') hp += 2;
   _ccw.hp = Math.max(1, hp);
 
@@ -1754,7 +1756,9 @@ function ccwMaxHP() {
 function ccwRollHP() {
   const hdNum = parseInt(RC_CLASS_INFO[_ccw.cls].hd.split('d')[1]);
   const eff = ccwEffStats();
-  let hp = Math.ceil(Math.random()*hdNum) + _rc_mod(eff.CON);
+  // Dwarf (Stout): roll hit points with advantage, and start with +2 HP.
+  const _hd = () => Math.ceil(Math.random()*hdNum);
+  let hp = (_ccw.ancestry==='Dwarf' ? Math.max(_hd(), _hd()) : _hd()) + _rc_mod(eff.CON);
   if(_ccw.ancestry==='Dwarf') hp += 2;
   _ccw.hp = Math.max(1, hp);
   ccwRender();
@@ -1840,7 +1844,7 @@ function ccwApply() {
     if(c.cls === 'Fighter' && c.mastery && /^Weapon Mastery[:.]/i.test(f))
       return 'Weapon Mastery (' + c.mastery + '): +1 to attack and damage, plus half your level (round down).';
     if(c.cls === 'Delver' && c.trusty && c.trusty.value && /^Trusty Gear[:.]/i.test(f))
-      return 'Trusty Gear (' + c.trusty.value + '): Gain 2 + half your level (round down) on '
+      return 'Trusty Gear (' + c.trusty.value + '): Gain 1 + half your level (round down) on '
         + (c.trusty.kind === 'weapon' ? 'attack rolls' : 'checks') + ' made with it.';
     return f;
   });

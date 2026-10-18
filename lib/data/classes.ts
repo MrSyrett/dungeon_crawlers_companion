@@ -125,7 +125,7 @@ export const SD_CLASSES: SdClass[] = [
     "weapons": "Club, crossbow, dagger, shortbow, shortsword",
     "armor": "Leather armor, mithral chainmail",
     "talent": [
-      "1/day, all attacks that would hit you this round miss instead",
+      "Gain advantage on initiative rolls (reroll if duplicate)",
       "Backstab deals +1 dice of damage",
       "Backstab deals +1 dice of damage",
       "Backstab deals +1 dice of damage",
@@ -138,7 +138,28 @@ export const SD_CLASSES: SdClass[] = [
       "+1 to melee and ranged attacks",
       "Choose a talent or +2 stat points"
     ],
-    "talentBands": null,
+    "talentBands": [
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        6,
+        9
+      ],
+      [
+        10,
+        11
+      ],
+      [
+        12,
+        12
+      ]
+    ],
     "features": [
       "Backstab: Hit unaware target → extra weapon die damage + half level dice.",
       "Thievery: Advantage on climbing, sneaking, disguises, traps, locks, pickpocketing."
@@ -175,12 +196,12 @@ export const SD_CLASSES: SdClass[] = [
     "weapons": "Dagger, staff",
     "armor": "None",
     "talent": [
-      "Make 1 random magic item (your choice of type)",
-      "+2 to Intelligence stat or +1 to spellcasting checks",
-      "+2 to Intelligence stat or +1 to spellcasting checks",
-      "+2 to Intelligence stat or +1 to spellcasting checks",
-      "+2 to Intelligence stat or +1 to spellcasting checks",
-      "+2 to Intelligence stat or +1 to spellcasting checks",
+      "Make 1 random magic item of a type you choose",
+      "+2 to Intelligence stat or +1 to wizard spellcasting checks",
+      "+2 to Intelligence stat or +1 to wizard spellcasting checks",
+      "+2 to Intelligence stat or +1 to wizard spellcasting checks",
+      "+2 to Intelligence stat or +1 to wizard spellcasting checks",
+      "+2 to Intelligence stat or +1 to wizard spellcasting checks",
       "Advantage on casting one spell you know",
       "Advantage on casting one spell you know",
       "Advantage on casting one spell you know",
@@ -188,7 +209,28 @@ export const SD_CLASSES: SdClass[] = [
       "Learn one additional wizard spell of any tier you know",
       "Choose a talent or +2 stat points"
     ],
-    "talentBands": null,
+    "talentBands": [
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        7
+      ],
+      [
+        8,
+        9
+      ],
+      [
+        10,
+        11
+      ],
+      [
+        12,
+        12
+      ]
+    ],
     "features": [
       "Spellcasting (INT). Know 3 tier 1 spells. Add spells per level.",
       "Learning Spells: Study scroll 1 day, DC 15 INT check to learn permanently.",
@@ -226,25 +268,25 @@ export const SD_CLASSES: SdClass[] = [
     "weapons": "Crossbow, dagger, mace, shortbow, shortsword, spear, staff",
     "armor": "Leather armor, chainmail, shields",
     "talent": [
-      "You find a random wand (you choose)",
-      "+1 to melee/ranged attacks or +1 to Magical Dabbler rolls",
-      "+1 to melee/ranged attacks or +1 to Magical Dabbler rolls",
-      "+1 to melee/ranged attacks or +1 to Magical Dabbler rolls",
-      "+1 to melee/ranged attacks or +1 to Magical Dabbler rolls",
-      "+1 to melee/ranged attacks or +1 to Magical Dabbler rolls",
-      "+2 points to any stats",
-      "+2 points to any stats",
-      "+2 points to any stats",
-      "Presence effects become DC 9 to enact",
-      "Presence effects become DC 9 to enact",
+      "You have advantage on downtime checks (excluding carousing)",
+      "+1 to melee and ranged attacks or +1 to Fascinate rolls",
+      "+1 to melee and ranged attacks or +1 to Fascinate rolls",
+      "+1 to melee and ranged attacks or +1 to Fascinate rolls",
+      "+1 to melee and ranged attacks or +1 to Fascinate rolls",
+      "+1 to melee and ranged attacks or +1 to Fascinate rolls",
+      "+2 points to distribute to any stats",
+      "+2 points to distribute to any stats",
+      "+2 points to distribute to any stats",
+      "Add +2 to your group's carousing event rolls",
+      "Add +2 to your group's carousing event rolls",
       "Choose a talent"
     ],
     "talentBands": null,
     "features": [
       "Bardic Arts: Advantage on oration, performing arts, lore, and diplomacy.",
-      "Magical Dabbler: Activate scrolls/wands using CHA. Critical fail = wizard mishap.",
-      "Presence (DC 12 CHA): Inspire (give luck token) or Fascinate (transfix targets ≤ lvl 4).",
-      "Prolific: +1d6 to learning rolls. Groups with bards +1d6 to carousing.",
+      "Fascinate (Focus): DC 12 CHA check — transfix all targets within near of LV 1 + half your level (round down) or less. If you fail (other than a focus check), you can't use it again until you rest.",
+      "Inspire: Each day, grant a number of luck tokens equal to your CHA modifier (min. 1).",
+      "Magical Dabbler: Activate spell scrolls and wands using your CHA modifier. On a critical failure, roll a wizard mishap. In place of a talent roll, you may find a random priest or wizard wand (your choice of type).",
       "Languages: 4 additional common + 1 rare language."
     ],
     "caster": true,
@@ -295,7 +337,7 @@ export const SD_CLASSES: SdClass[] = [
     "talentBands": null,
     "features": [
       "Wayfinder: Advantage on Navigation, Tracking, Bushcraft, Stealth, Wild animal checks.",
-      "Herbalism (INT check): Prepare a herbal remedy. Remedies expire in 3 rounds.",
+      "Herbalism (INT check): Prepare a herbal remedy you choose. If you fail, you can't make that remedy again until you rest. Unused remedies expire in 3 rounds.",
       "  Salve (DC 11): Heals 1 HP.",
       "  Stimulant (DC 12): You can't be surprised for 10 rounds.",
       "  Foebane (DC 13): ADV on attacks and damage against one creature type you choose for 1d6 rounds.",
@@ -627,7 +669,8 @@ export const SD_CLASSES: SdClass[] = [
     "features": [
       "Assassin: Advantage on checks to sneak and hide. Your attacks deal double damage against targets that are unaware of your presence.",
       "Smoke Step: 3/day, teleport to a location you can see within near. This does not use your action.",
-      "Black Lotus: Roll one talent on the Black Lotus Talents table (d12)."
+      "Black Lotus: Roll one talent on the Black Lotus Talents table (d12).",
+      "Languages: Diabolic."
     ],
     "caster": false,
     "optional": true,
@@ -780,7 +823,7 @@ export const SD_CLASSES: SdClass[] = [
     "features": [
       "Basilisk Blood: Advantage on Constitution checks to avoid harmful maladies, poisons, or afflictions.",
       "Petrifying Gaze: One creature of your level or less that meets your gaze must pass a DC 15 CON check or be petrified for 1d4 rounds (it still takes damage while petrified). Usable per day equal to your CON modifier (minimum 1).",
-      "Stone Skin: Add 3 + half your level (round down) to your AC while unarmored. Advantage on checks to hide in natural environments."
+      "Stone Skin: Add 2 + half your level (round down) to your AC while unarmored. Advantage on checks to hide in natural environments."
     ],
     "caster": false,
     "optional": true,
@@ -832,7 +875,7 @@ export const SD_CLASSES: SdClass[] = [
       "Languages: You know two additional common languages.",
       "Scavenger: When you expend the last of a consumable item carried since your last rest, roll a d6. On a 5 or 6, you regain one use of that item.",
       "Trailblazer: Advantage on Climbing, Swimming, Foraging, understanding unknown languages, and avoiding or escaping natural terrain hazards.",
-      "Trusty Gear: Choose one type of gear or weapon you can wield. Gain 2 + half your level (round down) on checks or attack rolls made with that type."
+      "Trusty Gear: Choose one type of gear or weapon you can wield. Gain 1 + half your level (round down) on checks or attack rolls made with that type."
     ],
     "caster": false,
     "optional": true,
@@ -1036,7 +1079,7 @@ export const SD_CLASSES: SdClass[] = [
     "features": [
       "Death Sense: Sense the location and general nature of undead and dying creatures within near.",
       "River of Death: You do not die at 0 CON, and you roll a d6 for your death timer instead of a d4.",
-      "Spellcasting (CHA): Cast necromancer spells you know. Know two tier 1 necromancer spells to start; learn more per the Necromancer Spells Known table. DC is 10 + the spell's tier."
+      "Spellcasting (CHA): Cast necromancer spells you know. Know two tier 1 necromancer spells to start; learn more per the Necromancer Spells Known table. DC is 10 + the spell's tier. If you fail, you can't cast that spell again until you rest; on a natural 1, also roll on the Necromancer Mishaps table."
     ],
     "caster": true,
     "optional": true,

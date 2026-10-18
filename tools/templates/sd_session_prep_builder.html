@@ -588,7 +588,8 @@ body.flow-mode .page + .page {
         </select>
         <select id="reward-type" class="gen-select" style="flex:1;background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="random_all">Random (All)</option>
-          <option value="random">Magic Item</option>
+          <option value="bookmagic">Magic Item (book generator)</option>
+          <option value="random">Magic Item (named)</option>
           <option value="Weapon">Weapon</option>
           <option value="Armor">Armor</option>
           <option value="Wand">Wand</option>
@@ -626,7 +627,7 @@ body.flow-mode .page + .page {
             <option value="Abandoned">Abandoned</option><option value="Undead">Undead</option>
             <option value="Aberrant">Aberrant</option><option value="Giant">Giant</option>
             <option value="Vermin">Vermin</option><option value="Aquatic">Aquatic</option>
-            <option value="Desert">Desert</option><option value="Underdark">Underdark</option>
+            <option value="Desert">Desert</option><option value="Deep Tunnels">Deep Tunnels</option>
             <option value="Arcane">Arcane</option><option value="Fire">Fire</option>
             <option value="Cold">Cold</option><option value="Infernal">Infernal</option>
           </optgroup>
@@ -643,12 +644,16 @@ body.flow-mode .page + .page {
       <div class="field-group" style="flex:0 0 108px;margin-bottom:0;">
         <label class="field-label">Type</label>
         <select id="enc-type" style="width:100%;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-family:'Montserrat',sans-serif;font-size:11px;padding:5px 8px;outline:none;">
-          <option value="">Mixed</option>
-          <option value="Guardian">Guardian</option>
-          <option value="Puzzle">Puzzle</option>
-          <option value="Setback">Setback</option>
-          <option value="Climax">Climax</option>
-          <option value="Reward">Reward</option>
+          <option value="">Mixed (d10)</option>
+          <option value="Empty">Empty</option>
+          <option value="Trap">Trap</option>
+          <option value="Minor hazard">Minor hazard</option>
+          <option value="Solo monster">Solo monster</option>
+          <option value="NPC">NPC</option>
+          <option value="Monster mob">Monster mob</option>
+          <option value="Major hazard">Major hazard</option>
+          <option value="Treasure">Treasure</option>
+          <option value="Boss monster">Boss monster</option>
         </select>
       </div>
       </div>
@@ -657,9 +662,11 @@ body.flow-mode .page + .page {
         <button class="btn-add" style="flex:1;border-color:#e8c84a;color:#e8c84a;" onclick="randEncounterBatch()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random</button>
         <select id="enc-count" style="width:64px;flex-shrink:0;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-family:'Montserrat',sans-serif;font-size:11px;padding:5px 4px;outline:none;">
           <option value="1">×1</option>
+          <option value="book" title="Roll the site size (d6): small 5, medium 8 or large 12 rooms">Site</option>
           <option value="5">×5</option>
           <option value="8">×8</option>
           <option value="10">×10</option>
+          <option value="12">×12</option>
         </select>
       </div>
       <div id="locations-list" class="entity-list" style="margin-top:8px;"></div>
@@ -670,6 +677,7 @@ body.flow-mode .page + .page {
       <div class="section-divider">Maps</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
         <select id="mapgen-rooms" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+          <option value="book">Site size (d6)</option>
           <option value="5" selected>5 Rooms</option>
           <option value="8">8 Rooms</option>
           <option value="10">10 Rooms</option>
@@ -2068,7 +2076,9 @@ function generateDungeonMap(numRooms, style) {
 function randMap() {
   if(!window.DungeonEngine) return;
   const v = id => document.getElementById(id);
-  const rooms = parseInt(v('mapgen-rooms')?.value) || 5;
+  const rv = v('mapgen-rooms')?.value;
+  // "Site size (d6)": core p. 130 — small 5, medium 8, large 12 rooms.
+  const rooms = rv === 'book' ? [5,5,8,8,8,12][Math.floor(Math.random()*6)] : (parseInt(rv) || 5);
   // Generated by the shared Dungeon Engine — same hand-drawn look as the Map Maker.
   const gen = window.DungeonEngine.generateToPNG({
     rooms,
@@ -2228,7 +2238,7 @@ function addStatBlock(data={}) {
     </div>
     <div class="field-group">
       <label class="field-label accent">Traits / Actions / Abilities</label>
-      <textarea class="sb-abilities-input short" placeholder="Traits&#10;Legendary Resistance: 3/day, auto-succeed saves&#10;Actions&#10;Multiattack: Makes 3 attacks" oninput="autosave()">${escH(data.abilities||'')}</textarea>
+      <textarea class="sb-abilities-input short" placeholder="Talents&#10;Petrifying Gaze. Any creature that meets its gaze: DC 15 CON or petrified.&#10;Rend. If both claw attacks hit the same target, deal an extra 1d8 damage." oninput="autosave()">${escH(data.abilities||'')}</textarea>
     </div>
     <div style="background:var(--ui-panel);padding:6px;border-radius:3px;" class="field-group">
       <div class="checkbox-row">
@@ -3053,23 +3063,31 @@ if(window.innerWidth <= 768) {
 <!-- Generator tables (~135KB of static data) — split out so the browser
      caches them instead of re-downloading inline on every open. -->
 <script src="/tools-data/sd-prep-tables.js"></script>
+<script src="/tools-data/sd-people-tables.js"></script>
+<script src="/tools-data/sd-book-gen.js"></script>
 <script>
 
 // ── Treasure generator (ported from GM Screen) ───────────────────────────
 function _spbGenTreasureItem(tierKey, type) {
   if(type==='random_all') {
-    type = _R(['random','random','Weapon','Armor','Wand','Ring','Cloak','Boots','Potion','Scroll','table','mundane','gem','luxury']);
+    type = _R(['random','random','Weapon','Armor','Wand','Ring','Cloak','Boots','Potion','Scroll','table','mundane','gem','luxury'].concat(window.SDBookGen ? ['bookmagic','bookmagic'] : []));
+  }
+  if(type==='bookmagic' && window.SDBookGen) {   // core pp. 282–295
+    const m = window.SDBookGen.magicItem();
+    return { name: m.name, stats: m.type + '. ' + m.summary + ' · Name idea: ' + m.ideaName };
   }
   if(type==='table') {
     const tier = TREASURE_TIERS[tierKey]||TREASURE_T1;
     const item = _R(tier).replace(/^[PNFL]\. /, '');
     return { name: 'Treasure Roll (Tier '+tierKey+')', stats: item };
   }
-  if(type==='mundane') { return { name: 'Mundane Loot', stats: _R(MUNDANE_LOOT) }; }
-  if(type==='gem')     { return { name: 'Gemstone', stats: _R(GEMS) }; }
+  // Unique feature (core p. 278) on mundane treasure.
+  const uf = window.SDBookGen ? ' · Unique feature: ' + window.SDBookGen.uniqueFeature() : '';
+  if(type==='mundane') { return { name: 'Mundane Loot', stats: _R(MUNDANE_LOOT) + uf }; }
+  if(type==='gem')     { const g = _R(GEMS); return { name: 'Gemstone', stats: g && g.name ? g.name + ' (' + g.value + ')' : String(g) }; }
   if(type==='luxury')  {
     const pool = _R(LUX_ITEM_POOLS);
-    return { name: 'Luxury Item', stats: _R(LUX_FEAT)+' '+_R(pool) };
+    return { name: 'Luxury Item', stats: _R(LUX_FEAT)+' '+_R(pool) + uf };
   }
   const pool = type==='random' ? MAGIC_ITEM_POOLS[_R(LOOT_TYPES)] : (MAGIC_ITEM_POOLS[type]||POTIONS);
   const item = _R(pool);
@@ -3086,7 +3104,7 @@ function _spbGenEncEntry(type) {
   if(type==='secret')   return { hdr:'Secret', text:_R(SECRETS_D1)+' '+_R(SECRETS_D2) };
   if(type==='trap') {
     const trap = TRAPS[Math.ceil(Math.random()*12)-1];
-    return { hdr:'Trap: '+trap.trap, text:'Trigger: '+trap.trigger+' — '+trap.effect };
+    return { hdr:'Trap: '+trap.trap, text:'Trigger: '+trap.trigger+' — '+trap.damage };
   }
   if(type==='hazard') {
     return { hdr:'Hazard', text:_R(HAZARDS_DMG)+' / '+_R(HAZARDS_WKN)+' / '+_R(HAZARDS_MOV) };
@@ -3115,139 +3133,81 @@ function randStrongOpen() {
 }
 
 // ── Encounters ────────────────────────────────────────────────────────────
-const ENC_SUBTYPES = {
-  guardian: 'Guardian', puzzle: 'Puzzle', setback: 'Setback',
-  climax: 'Boss', reward: 'Treasure',
-  'Combat Encounter': 'Mooks', 'Exploration Chamber': 'Scenic',
-  'Trap Room': 'Trap', 'Treasure Cache': 'Treasure',
-  'Side Chamber': 'Scenic', 'Barracks': 'Mooks',
-  'Storage Room': 'Scenic', 'Secret Room': 'Secret Area',
-  'Sub-Boss Lair': 'Sub-Boss', 'Puzzle Room': 'Puzzle',
-  'Shrine': 'Sanctuary', 'Laboratory': 'Scenic',
-  'Prison Cells': 'Social', 'Collapsed Section': 'Environmental',
-  'Natural Cave': 'Scenic', 'Guard Post': 'Sentry',
-  'Armory': 'Treasure', 'Ritual Chamber': 'Environmental',
-};
-const ROOM_POOL_LABELS = ['Guardian','Puzzle','Setback','Climax','Reward'];
-const ROOM_POOL_TYPES  = ['combat','npc','exploration','combat','exploration'];
+// Rooms come from the core rulebook's "Shadowdark Maps" generator (pp. 130–131)
+// in /tools-data/sd-book-gen.js: one d10 room-type roll per room (Empty, Trap,
+// Minor hazard, Solo monster, NPC, Monster mob, Major hazard, Treasure, Boss
+// monster) plus that type's detail table; in a batch the objective/boss sits in
+// the room with the highest roll. The Motif adds an optional flavour idea from
+// the app's motif room tables (DUN_R1–R5, not book tables), and a motif that is
+// also a book biome (e.g. Deep Tunnels, Desert, Ruins) adds a biome encounter.
+const BOOK_ROOM_TYPES = ['Empty','Trap','Minor hazard','Solo monster','NPC','Monster mob','Major hazard','Treasure','Boss monster'];
+const BOOK_ROOM_LOCTYPE = { 'Solo monster':'combat', 'Monster mob':'combat', 'Boss monster':'combat', 'NPC':'npc' };
+const BOOK_ROOM_IDEA = { 'Solo monster':'DUN_R1', 'Monster mob':'DUN_R1', 'Trap':'DUN_R3', 'Minor hazard':'DUN_R3', 'Major hazard':'DUN_R3', 'NPC':'DUN_R2', 'Boss monster':'DUN_R4', 'Treasure':'DUN_R5' };
 
-// The Type dropdown beside Motif. Encounter text is written per motif and per
-// ROOM ROLE — the roles *are* the kinds of encounter available, so the dropdown
-// lists them directly. Each role carries its own colour via ROOM_POOL_TYPES
-// (Guardian/Climax combat, Puzzle npc, Setback/Reward exploration).
-// Returns the pool index, or -1 for "Mixed".
-function _encRoleIndex() {
-  const sel = document.getElementById('enc-type');
-  if(!sel || !sel.value) return -1;
-  return ROOM_POOL_LABELS.indexOf(sel.value);
+function _encMotif() {
+  const motifSel = document.getElementById('enc-motif');
+  const motifs = DUN_MOTIFS.filter(function(m){ return m !== 'none'; });
+  return (motifSel && motifSel.value !== 'random') ? motifSel.value : _R(motifs);
+}
+// One location card for a rolled book room {n, roll, type, detail, objective}.
+function _addBookRoom(rm, mot, withNumber) {
+  const tables = { DUN_R1: DUN_R1, DUN_R2: DUN_R2, DUN_R3: DUN_R3, DUN_R4: DUN_R4, DUN_R5: DUN_R5 };
+  const ideaTbl = tables[BOOK_ROOM_IDEA[rm.type]];
+  const ideaPool = ideaTbl ? ideaTbl[mot] : null;
+  const lines = [];
+  if(rm.objective) lines.push('★ The site\'s objective or boss is here (highest room roll).');
+  if(ideaPool && ideaPool.length) lines.push('Idea (' + mot + '): ' + _R(ideaPool));
+  const biomePool = BIOME_ENC_TABLES[mot];
+  if(biomePool && rm.type !== 'Empty') lines.push('[' + mot + ' encounter] ' + _R(biomePool));
+  addLocation({
+    name: (withNumber ? 'Room ' + rm.n + ' · ' : '') + rm.type + (rm.detail ? ' — ' + rm.detail : ''),
+    type: BOOK_ROOM_LOCTYPE[rm.type] || 'exploration',
+    tag: '',
+    readaloud: '',
+    desc: lines.join('\n\n'),
+  });
 }
 
 function randEncounter() {
-  const motifSel = document.getElementById('enc-motif');
-  const motifs = DUN_MOTIFS.filter(function(m){ return m !== 'none'; });
-  const mot = (motifSel && motifSel.value !== 'random') ? motifSel.value : _R(motifs);
-  const roomPools = [DUN_R1, DUN_R2, DUN_R3, DUN_R4, DUN_R5];
-  const role = _encRoleIndex();
-  const poolIdx = role >= 0 ? role : Math.floor(Math.random() * roomPools.length);
-  const pool = roomPools[poolIdx];
-  const entries = pool[mot] || pool[_R(Object.keys(pool))];
-  const desc = _R(entries);
-  const biomePool = BIOME_ENC_TABLES[mot];
-  const biomeEnc = biomePool ? '\n\n[' + mot + ' Encounter] ' + _R(biomePool) : '';
-  const label = ROOM_POOL_LABELS[poolIdx];
-  const subtype = ENC_SUBTYPES[label] || label;
-  addLocation({
-    name: '',
-    type: ROOM_POOL_TYPES[poolIdx],
-    tag: subtype,
-    readaloud: '',
-    desc: desc + biomeEnc
-  });
+  if(!window.SDBookGen) return;
+  const mot = _encMotif();
+  const sel = document.getElementById('enc-type');
+  const want = sel && sel.value ? sel.value : '';
+  // Roll d10 rooms until we hit the requested type (Mixed = the first roll).
+  let rm;
+  for(let i = 0; i < 200; i++) {
+    rm = window.SDBookGen.dungeon({ size: 1 }).rooms[0];
+    if(!want || rm.type === want) break;
+  }
+  rm.objective = false;
+  _addBookRoom(rm, mot, false);
   autosave();
 }
 
-function _addEnc(mot, poolIdx) {
-  const roomPools = [DUN_R1, DUN_R2, DUN_R3, DUN_R4, DUN_R5];
-  const labels    = ['Guardian','Puzzle','Setback','Climax','Reward'];
-  const types     = ['combat','npc','exploration','combat','exploration'];
-  const pool = roomPools[poolIdx];
-  const entries = pool[mot] || pool[_R(Object.keys(pool))];
-  const desc = _R(entries);
-  const biomePool = BIOME_ENC_TABLES[mot];
-  const biomeEnc = biomePool ? '\n\n[' + mot + '] ' + _R(biomePool) : '';
-  const label = labels[poolIdx];
-  const subtype = ENC_SUBTYPES[label] || label;
-  addLocation({ name: '', type: types[poolIdx], tag: subtype, readaloud: '', desc: desc + biomeEnc });
-}
-
-// Extra room types for middle rooms (indices into a conceptual extra pool)
-const ENC_EXTRA_LABELS = ['Side Chamber','Trap Room','Exploration Chamber','Secret Room','Barracks','Shrine','Prison Cells','Guard Post','Collapsed Section','Ritual Chamber'];
-
-function _addExtraEnc(mot) {
-  const label = _R(ENC_EXTRA_LABELS);
-  const motifs = DUN_MOTIFS.filter(function(m){ return m !== 'none'; });
-  const useMot = mot || _R(motifs);
-  // Get desc from a random room pool for variety
-  const pools = [DUN_R1, DUN_R2, DUN_R3];
-  const pool = _R(pools);
-  const entries = pool[useMot] || pool[_R(Object.keys(pool))];
-  const desc = _R(entries);
-  const biomePool = BIOME_ENC_TABLES[useMot];
-  const biomeEnc = biomePool ? '\n\n[' + useMot + '] ' + _R(biomePool) : '';
-  const subtype = ENC_SUBTYPES[label] || 'Scenic';
-  addLocation({ name: '', type: 'exploration', tag: subtype, readaloud: '', desc: desc + biomeEnc });
-}
-
 function randEncounterBatch() {
+  if(!window.SDBookGen) return;
   const countSel = document.getElementById('enc-count');
-  const motifSel = document.getElementById('enc-motif');
-  const n = parseInt(countSel ? countSel.value : 1) || 1;
-  const motifs = DUN_MOTIFS.filter(function(m){ return m !== 'none'; });
-  const mot = (motifSel && motifSel.value !== 'random') ? motifSel.value : _R(motifs);
-
-  const role = _encRoleIndex();
-  if(role >= 0) {
-    // A specific role: every room comes from that pool. The structured
-    // Guardian→Climax→Reward run only makes sense for a mixed dungeon.
-    for(let i = 0; i < n; i++) _addEnc(mot, role);
+  const sel = document.getElementById('enc-type');
+  const mot = _encMotif();
+  const cv = countSel ? countSel.value : '1';
+  if(sel && sel.value) {
+    // A specific room type: every room is that type (no objective marking).
+    const n = parseInt(cv) || 1;
+    for(let i = 0; i < n; i++) randEncounter();
     readFields(); renderPreview();
     return;
   }
-
-  if(n === 1) {
-    // Single: fully random
-    randEncounter();
-    readFields(); renderPreview();
-    return;
-  }
-
-  // Structured dungeon format: Guardian → [extras] → Boss → Reward
-  // Always: Room 1=Guardian(0), last=Reward(4), second-to-last=Climax(3)
-  // Middle rooms fill with Puzzle(1), Setback(2), then extra room types
-  _addEnc(mot, 0); // Guardian
-
-  const midCount = n - 3; // rooms between guardian and climax
-  // Mandatory: puzzle then setback in order
-  const mid = [];
-  if(midCount >= 1) mid.push(1); // Puzzle
-  if(midCount >= 2) mid.push(2); // Setback
-  // Fill remaining middle slots with extra room types (no shuffle — keep Puzzle→Setback order)
-  for(let i = mid.length; i < midCount; i++) mid.push('extra');
-  mid.forEach(function(slot) {
-    if(slot === 'extra') _addExtraEnc(mot);
-    else _addEnc(mot, slot);
-  });
-
-  _addEnc(mot, 3); // Climax/Boss
-  _addEnc(mot, 4); // Reward
+  // Mixed: roll a site. "book" = roll the site size (d6 → 5d10 / 8d10 / 12d10).
+  const dn = window.SDBookGen.dungeon({ size: cv === 'book' ? 'roll' : (parseInt(cv) || 1) });
+  if(dn.rooms.length === 1) dn.rooms[0].objective = false;
+  dn.rooms.forEach(function(rm){ _addBookRoom(rm, mot, dn.rooms.length > 1); });
   readFields(); renderPreview();
 }
 
 // ── Random NPC ────────────────────────────────────────────────────────────
-const NPC_AGE       = ['young (late teens)','young adult (early 20s)','adult (30s)','middle-aged (40s)','older (50s)','elderly (60s+)'];
-const NPC_BUILD     = ['stocky','lean','wiry','heavyset','lanky','muscular','slender','broad-shouldered'];
-const NPC_DRESS     = ['tattered rags','patched wool','worn leather','sturdy wool','clean linen','simple leather','fine silk','embroidered cloth','well-tailored wool','travelling gear'];
-const NPC_FEATURE   = ['a scar across the cheek','a crooked nose','calloused hands','a missing finger','bright eyes','a guarded expression','an easy smile','deep-set eyes','prominent eyebrows','laugh lines','a weathered face'];
+// Every NPC detail comes from the core rulebook tables (pp.124–129) in
+// /tools-data/sd-people-tables.js. The story role and "wants" are the app's own
+// (the book has no table for them).
 
 // Drops in a stat block already filled with a random monster — the book
 // bestiary plus any homebrew, the same pool the search uses.
@@ -3261,28 +3221,19 @@ function randMonster() {
 }
 
 function randNPC() {
-  const anc  = _R(['Human','Human','Human','Dwarf','Elf','Halfling','Half-Orc','Goblin']);
-  const name = _R(NPC_NAMES[anc] || NPC_NAMES.Human);
+  const P = window.SD_PEOPLE;
+  if(!P) return;
+  const n = P.npc();
   const role = _R(['Villain','Quest Giver','Rival','Ally','Wild Card','Informant','Prisoner','Guardian']);
-  const occ  = _R(OCCUPATIONS);
-  const age  = _R(NPC_AGE);
-  const build = _R(NPC_BUILD);
-  const dress = _R(NPC_DRESS);
-  const feature = _R(NPC_FEATURE);
-  const demeanor = _R(DEMEANOR);
-  const quirk = _R(QUIRKS);
-  const want  = _R(WANTS);
-  const secret = _R(SECRETS);
-  const flavor = age + ', ' + build + ' ' + anc.toLowerCase() +
-    '. Dressed in ' + dress + '. ' + feature.charAt(0).toUpperCase() + feature.slice(1) + '. ' +
-    demeanor.charAt(0).toUpperCase() + demeanor.slice(1) + ' in manner. ' + quirk.charAt(0).toUpperCase() + quirk.slice(1) + '.';
+  const flavor = n.age + ' ' + n.ancestry.toLowerCase() + ', ' + n.alignment.toLowerCase() + ', ' + n.wealth.toLowerCase() + ' means. ' +
+    'Appearance: ' + n.appearance.toLowerCase() + '. Does: ' + n.does.toLowerCase() + '.';
   addStatBlock({
     sbtype: role === 'Villain' ? 'boss' : role === 'Rival' ? 'boss' : 'npc',
-    name: name + ' (' + anc + ')',
-    type: occ + ' — ' + role,
+    name: n.name + ' ' + n.identifier + ' (' + n.ancestry + ')',
+    type: n.occupation + ' — ' + role,
     ac: '', hd: '', hp: '', mv: '', atk: '',
     flavor: flavor,
-    notes: 'Wants: ' + want + '\nSecret: ' + secret
+    notes: 'Wants: ' + _R(WANTS) + '\nSecret: ' + n.secret
   });
   autosave();
 }

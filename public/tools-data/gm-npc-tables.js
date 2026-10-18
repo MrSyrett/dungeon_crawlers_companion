@@ -88,26 +88,32 @@
     // ── SHADOWDARK (fantasy — the original set) ────────────────────────────
     SD: {
       kindLabel: 'Ancestry',
-      kinds: ['Human', 'Human', 'Human', 'Dwarf', 'Elf', 'Halfling', 'Half-Orc', 'Goblin'],
+      // Ancestry d12 (Core p.124): Human 1-4, Elf 5-6, Dwarf 7-8, Halfling 9-10, Half-orc 11, Goblin 12.
+      kinds: ['Human', 'Human', 'Human', 'Human', 'Elf', 'Elf', 'Dwarf', 'Dwarf', 'Halfling', 'Halfling', 'Half-Orc', 'Goblin'],
+      // NPC Names by Ancestry (Core p.128) — the book's d20 lists, exactly. The GM Screen
+      // normally rolls Shadowdark NPCs from /tools-data/sd-people-tables.js; this is the fallback.
       names: {
-        Dwarf:    ['Hera', 'Torin', 'Ginny', 'Gant', 'Olga', 'Dendor', 'Ygrid', 'Pike', 'Sarda', 'Brigg', 'Zorlin', 'Yorin', 'Jorgen', 'Trogin', 'Riga', 'Barton', 'Katrina', 'Egrim', 'Elsa', 'Orgo'],
+        Dwarf:    ['Hera', 'Torin', 'Ginny', 'Gant', 'Olga', 'Dendor', 'Ygrid', 'Pike', 'Sarda', 'Brigg', 'Zorli', 'Yorin', 'Jorgena', 'Trogin', 'Riga', 'Barton', 'Katrina', 'Egrim', 'Elsa', 'Orgo'],
         Elf:      ['Sarenia', 'Ravos', 'Imeria', 'Farond', 'Isolden', 'Kieren', 'Mirenel', 'Riarden', 'Allindra', 'Arlomas', 'Sylara', 'Tyr', 'Rinariel', 'Saramir', 'Vedana', 'Elindos', 'Ophelia', 'Cydaros', 'Tiramel', 'Varond'],
-        Goblin:   ['Kog', 'Dibbs', 'Fronk', 'Irv', 'Squag', 'Mort', 'Vig', 'Sticks', 'Gorb', 'Yogg', 'Plok', 'Zrak', 'Dent', 'Krik', 'Bort', 'Mizzo', 'Nabo', 'Hink', 'Kreeb', 'Bree'],
+        Goblin:   ['Kog', 'Dibbs', 'Fronk', 'Irv', 'Squag', 'Mort', 'Vig', 'Sticks', 'Gorb', 'Yogg', 'Plok', 'Zrak', 'Dent', 'Krik', 'Mizzo', 'Bort', 'Nabo', 'Hink', 'Bree', 'Kreeb'],
         Halfling: ['Myrtle', 'Robby', 'Nora', 'Percy', 'Daisy', 'Jolly', 'Evelyn', 'Horace', 'Willie', 'Gertie', 'Peri', 'Carlsby', 'Nyx', 'Kellan', 'Fern', 'Harlow', 'Moira', 'Sage', 'Reenie', 'Wendry'],
-        'Half-Orc': ['Boraal', 'Troga', 'Zoraal', 'Urgan', 'Krell', 'Scalgin', 'Voraga', 'Morak', 'Draga', 'Sorak', 'Ulgar', 'Varga', 'Kresh', 'Jala', 'Torvash', 'Zana', 'Gartak', 'Rokara', 'Ziraak', 'Iskana'],
-        Human:    ['Hesta', 'Matteo', 'Rosalin', 'Endric', 'Kiara', 'Yao', 'Corina', 'Rowan', 'Hariko', 'Ikam', 'Mariel', 'Jin', 'Hana', 'Lios', 'Indra', 'Remy', 'Nura', 'Vakesh', 'Una', 'Nabilo', 'Bram', 'Odessa', 'Torvin', 'Maren', 'Aldous', 'Vesna', 'Grigor', 'Selka', 'Brannoc', 'Lysa', 'Dorek', 'Ysolde', 'Halvard', 'Petra', 'Osric', 'Nadja', 'Ferren', 'Wenna', 'Godric', 'Aldis', 'Kestrel', 'Varo', 'Delphine', 'Emeric', 'Roswin']
+        'Half-Orc': ['Troga', 'Boraal', 'Urgana', 'Zoraal', 'Scalga', 'Krell', 'Voraga', 'Morak', 'Draga', 'Sorak', 'Varga', 'Ulgar', 'Jala', 'Kresh', 'Zana', 'Torvash', 'Rokara', 'Gartak', 'Iskana', 'Ziraak'],
+        Human:    ['Hesta', 'Matteo', 'Rosalin', 'Endric', 'Kiara', 'Yao', 'Corina', 'Rowan', 'Hariko', 'Ikam', 'Mariel', 'Jin', 'Hana', 'Lios', 'Indra', 'Remy', 'Nura', 'Vakesh', 'Una', 'Nabilo']
       },
       builds: BUILD_STD, hair: HAIR_STD, eyes: EYES_STD, features: FEAT_STD, demeanor: DEMEANOR_STD, quirks: Q_BASE,
       dress: {
         Poor: ['tattered rags', 'patched wool', 'worn leather', 'dirty linen', 'frayed homespun'],
         Standard: ['sturdy wool', 'clean linen', 'simple leather', 'serviceable clothes', 'travelling gear'],
-        Wealthy: ['fine silk', 'embroidered cloth', 'well-tailored wool', 'polished leather', 'rich velvet']
+        Wealthy: ['fine silk', 'embroidered cloth', 'well-tailored wool', 'polished leather', 'rich velvet'],
+        Extravagant: ['jeweled silks', 'cloth-of-gold finery', 'furs and a gilded cloak', 'a noble\'s court dress', 'velvet dripping with rings']
       },
       wants: W_BASE.concat(['passage through the wilds', 'a monster driven off', 'a relic recovered from a ruin', 'a curse lifted', 'a hot meal and no questions', 'a missing villager found', 'the tax collector gone', 'a blessing from the temple', 'a debt to the guild cleared', 'the road made safe again']),
       secrets: S_BASE.concat(['serves a hidden dark master', 'is cursed and hides the signs', 'made a pact for their luck', 'knows where a hoard lies buried', 'is the last of a doomed bloodline', 'consorts with something in the woods', 'stole from the temple coffers', 'is marked by a wandering fiend']),
-      occupations: ['farmer', 'blacksmith', 'merchant', 'innkeeper', 'guard', 'beggar', 'priest', 'healer', 'scholar', 'scribe', 'hunter', 'herbalist', 'sailor', 'soldier', 'thief', 'miner', 'carpenter', 'baker', 'shepherd', 'fisherman'],
-      coin: { Poor: function () { return _d(6) + ' cp'; }, Standard: function () { return _d(6) + ' sp, ' + _d(6) + ' cp'; }, Wealthy: function () { return (_d(6) * 5) + ' gp, ' + _d(6) + ' sp'; } },
-      age: function (k) { return k === 'Goblin' ? String(_d(20) + 5) : k === 'Elf' ? String(_d(400) + 50) : k === 'Dwarf' ? String(_d(200) + 30) : String(_d(40) + 15); }
+      // Occupation (Core p.125, d4 x d4).
+      occupations: ['Gravedigger', 'Carpenter', 'Scholar', 'Blacksmith', 'Tax collector', 'Farmer', 'Bartender', 'Beggar', 'Baker', 'Cook', 'Sailor', 'Butcher', 'Locksmith', 'Cobbler', 'Friar/nun', 'Merchant'],
+      coin: { Poor: function () { return _d(6) + ' cp'; }, Standard: function () { return _d(6) + ' sp, ' + _d(6) + ' cp'; }, Wealthy: function () { return (_d(6) * 5) + ' gp, ' + _d(6) + ' sp'; }, Extravagant: function () { return (_d(6) * 25) + ' gp'; } },
+      // Age (Core p.124, d8): Child, Adolescent, Adult 3-4, Middle-Aged 5-6, Elderly, Ancient.
+      age: function () { return _pick(['Child', 'Adolescent', 'Adult', 'Adult', 'Middle-Aged', 'Middle-Aged', 'Elderly', 'Ancient']); }
     },
 
     // ── DUNGEONS & DRAGONS (classic-fantasy, its own set) ──────────────────
