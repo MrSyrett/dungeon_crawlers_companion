@@ -92,12 +92,21 @@ const SW_GEAR = [
     }
   },
   {
-    "name": "Rejuvenation Tank",
+    "stats": "Healing time: wounded 2D hours, incapacitated 2D days, mortally wounded 2D weeks",
+    "name": "Bacta Tank",
     "category": "Medical",
-    "description": "Rejuve tanks are filled with bacta, a specially-formulated treatment liquid which promotes rapid healing and acts as a disinfectant. Anyone placed in a tank will be healed: wounded in 2D hours, incapacitated in 2D days, mortally wounded in 2D weeks (p.53, Healing Table p.140).",
-    "book": "core",
-    "page": 53,
-    "stats": "Healing time: wounded 2D hours, incapacitated 2D days, mortally wounded 2D weeks"
+    "description": "The mainstay of modern medicine (also called a rejuve tank). A patient wounded beyond a medpac's capacity is connected to breathing equipment and fully immersed in bacta, a specially-formulated liquid that accelerates the body's natural healing; almost any injury not involving the loss of a limb can be healed, faster than natural healing and without scars. Availability 2.",
+    "cost": "3000",
+    "page": 96,
+    "book": "sourcebook",
+    "superseded": {
+      "name": "Bacta Tank",
+      "category": "Medical",
+      "description": "Rejuve tanks are filled with bacta, a specially-formulated treatment liquid which promotes rapid healing and acts as a disinfectant. Anyone placed in a tank will be healed: wounded in 2D hours, incapacitated in 2D days, mortally wounded in 2D weeks (p.53, Healing Table p.140).",
+      "book": "core",
+      "page": 53,
+      "stats": "Healing time: wounded 2D hours, incapacitated 2D days, mortally wounded 2D weeks"
+    }
   },
   {
     "name": "Comlink",
@@ -140,19 +149,27 @@ const SW_GEAR = [
     }
   },
   {
+    "cost": "100",
     "name": "Pocket Computer",
     "category": "Misc",
-    "description": "Availability 1.",
-    "cost": "100",
-    "page": 96,
-    "book": "sourcebook",
+    "description": "An average pocket computer has a keyboard/memory unit, computer probe, and a touch-sensitive screen/scanner that can process only images within a few centimeters of the unit. Computing power and memory store several thousand volumes worth of information, retrieving any existing data in less than a second. Datapads also serve as interfaces for larger computer banks. Only one character can use a datapad at a time (no combined action).",
+    "book": "companion",
+    "page": 31,
     "superseded": {
       "name": "Pocket Computer",
       "category": "Misc",
-      "description": "A portable computer.",
-      "book": "core",
-      "page": 141,
-      "cost": "100"
+      "description": "Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook",
+      "superseded": {
+        "name": "Pocket Computer",
+        "category": "Misc",
+        "description": "A portable computer.",
+        "book": "core",
+        "page": 141,
+        "cost": "100"
+      }
     }
   },
   {
@@ -413,28 +430,55 @@ const SW_GEAR = [
     "book": "sourcebook"
   },
   {
+    "cost": "1000",
     "name": "Space Suit (emergency)",
     "category": "Survival",
-    "description": "Vacuum suit for emergencies; a space suit is usually reserved for operation in vacuum. Availability 2.",
-    "cost": "1000",
-    "page": 96,
-    "book": "sourcebook"
+    "description": "Not built to stand extensive exposure. Emergency suits begin to leak after 72 hours of use; for game purposes such leaks are treated as a wound to the occupant. After 120 hours emergency suits no longer have significant pressurization effects and the occupant dies.",
+    "stats": "Leaks (wound) after 72 hours; fatal after 120 hours",
+    "book": "companion",
+    "page": 31,
+    "superseded": {
+      "name": "Space Suit (emergency)",
+      "category": "Survival",
+      "description": "Vacuum suit for emergencies; a space suit is usually reserved for operation in vacuum. Availability 2.",
+      "cost": "1000",
+      "page": 96,
+      "book": "sourcebook"
+    }
   },
   {
+    "cost": "1500",
     "name": "Space Suit (utility)",
     "category": "Survival",
-    "description": "Working vacuum suit. Availability 2.",
-    "cost": "1500",
-    "page": 96,
-    "book": "sourcebook"
+    "description": "Lasts for hundreds of hours of exposure without loss of pressurization or breakdown of radiation protection. Utility suits leak when the occupant is wounded by a sharp melee, projectile, blaster or other attack which can puncture the suit, giving the occupant an additional wound.",
+    "stats": "Hundreds of hours; extra wound when punctured",
+    "book": "companion",
+    "page": 31,
+    "superseded": {
+      "name": "Space Suit (utility)",
+      "category": "Survival",
+      "description": "Working vacuum suit. Availability 2.",
+      "cost": "1500",
+      "page": 96,
+      "book": "sourcebook"
+    }
   },
   {
+    "cost": "2000",
     "name": "Space Suit (high quality)",
     "category": "Survival",
-    "description": "Availability 2.",
-    "cost": "2000",
-    "page": 96,
-    "book": "sourcebook"
+    "description": "Lasts about as long as a utility suit, but can instantly seal far larger ruptures. High quality suits will not leak until the occupant takes a mortal wound.",
+    "stats": "Hundreds of hours; leaks only on a mortal wound",
+    "book": "companion",
+    "page": 31,
+    "superseded": {
+      "name": "Space Suit (high quality)",
+      "category": "Survival",
+      "description": "Availability 2.",
+      "cost": "2000",
+      "page": 96,
+      "book": "sourcebook"
+    }
   },
   {
     "name": "Survival Tent (single-person)",
@@ -643,14 +687,6 @@ const SW_GEAR = [
     "category": "Tool",
     "description": "Tools for working on (and defeating) security systems. Availability 1, R.",
     "cost": "200",
-    "page": 96,
-    "book": "sourcebook"
-  },
-  {
-    "name": "Bacta Tank",
-    "category": "Medical",
-    "description": "The mainstay of modern medicine (also called a rejuve tank). A patient wounded beyond a medpac's capacity is connected to breathing equipment and fully immersed in bacta, a specially-formulated liquid that accelerates the body's natural healing; almost any injury not involving the loss of a limb can be healed, faster than natural healing and without scars. Availability 2.",
-    "cost": "3000",
     "page": 96,
     "book": "sourcebook"
   },
@@ -974,37 +1010,6 @@ const SW_GEAR = [
     "description": "Where an item can be acquired: 1 readily available throughout the galaxy; 2 only in large cities and space ports of the Empire and Corporate Sector; 3 specialized, only on the planet of origin; 4 rare, difficult to find anywhere; F fee or permit required; R restricted — needs a local or Imperial license (background checks, high fees); X illegal — severe punishments. Any item may be illegal somewhere (any weapon on pacifist Alderaan). Black market: almost any F, R or X item is available without fee or restriction, but opportunities are rare, may take time or involve danger, goods tend to be inferior, and prices are always at least triple. Listed prices are the manufacturer's suggested price and vary with locale, availability and streetwise, bargain and con skills; theft is a popular alternative.",
     "page": 96,
     "book": "sourcebook"
-  },
-  {
-    "name": "Pocket computer (datapad)",
-    "category": "Misc",
-    "description": "An average pocket computer has a keyboard/memory unit, computer probe, and a touch-sensitive screen/scanner that can process only images within a few centimeters of the unit. Computing power and memory store several thousand volumes worth of information, retrieving any existing data in less than a second. Datapads also serve as interfaces for larger computer banks. Only one character can use a datapad at a time (no combined action).",
-    "book": "companion",
-    "page": 31
-  },
-  {
-    "name": "Emergency space suit",
-    "category": "Survival",
-    "description": "Not built to stand extensive exposure. Emergency suits begin to leak after 72 hours of use; for game purposes such leaks are treated as a wound to the occupant. After 120 hours emergency suits no longer have significant pressurization effects and the occupant dies.",
-    "stats": "Leaks (wound) after 72 hours; fatal after 120 hours",
-    "book": "companion",
-    "page": 31
-  },
-  {
-    "name": "Utility space suit",
-    "category": "Survival",
-    "description": "Lasts for hundreds of hours of exposure without loss of pressurization or breakdown of radiation protection. Utility suits leak when the occupant is wounded by a sharp melee, projectile, blaster or other attack which can puncture the suit, giving the occupant an additional wound.",
-    "stats": "Hundreds of hours; extra wound when punctured",
-    "book": "companion",
-    "page": 31
-  },
-  {
-    "name": "High quality space suit",
-    "category": "Survival",
-    "description": "Lasts about as long as a utility suit, but can instantly seal far larger ruptures. High quality suits will not leak until the occupant takes a mortal wound.",
-    "stats": "Hundreds of hours; leaks only on a mortal wound",
-    "book": "companion",
-    "page": 31
   },
   {
     "name": "Medpac (revised use)",

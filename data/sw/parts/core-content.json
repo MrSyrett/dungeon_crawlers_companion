@@ -371,7 +371,7 @@
       "stats": "Difficulty 10/15/20 by wound level; one use"
     },
     {
-      "name": "Rejuvenation Tank",
+      "name": "Bacta Tank",
       "category": "Medical",
       "description": "Rejuve tanks are filled with bacta, a specially-formulated treatment liquid which promotes rapid healing and acts as a disinfectant. Anyone placed in a tank will be healed: wounded in 2D hours, incapacitated in 2D days, mortally wounded in 2D weeks (p.53, Healing Table p.140).",
       "book": "core",

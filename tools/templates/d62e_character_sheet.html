@@ -751,11 +751,15 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
           <thead><tr><th style="width:38%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="gear-body"></tbody>
         </table>
-        <div class="section-bar" style="margin-top:6px;"><span>Weapons</span></div>
+        <!-- Attack rows behind the Action tab's Attacks: one per weapon in the Gear list (linked
+             by data-link) plus the permanent Unarmed strike. Not shown — weapons are added and
+             removed in Gear; a linked row follows its gear row's name and note. -->
+        <div id="weapons-store" hidden style="display:none;">
         <table class="tbl" id="weapons-tbl">
           <thead><tr><th style="width:20%;">Weapon</th><th style="width:19%;">Skill</th><th style="width:84px;">Damage</th><th style="width:13%;">Range</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="weapons-body"></tbody>
         </table>
+        </div>
       </div>
 
       <div class="tab-panel" id="tab-background">
@@ -1613,8 +1617,39 @@ function addGearRow(g) {
   g = g || {}; const tr = document.createElement('tr');
   if(g.link) tr.dataset.link = g.link;
   if(g.uses !== undefined && g.uses !== '') tr.dataset.uses = g.uses;   // uses left on a limited-use item (Healer's Pack)
-  tr.innerHTML = '<td><input type="text" class="gr-name" value="' + esc(g.name || '') + '" placeholder="Item" oninput="scheduleAutosave()"></td><td><input type="text" class="gr-note" value="' + esc(g.note || '') + '" oninput="scheduleAutosave()"></td><td><button class="row-x" onclick="deleteGearRow(this)">✕</button></td>';
+  tr.innerHTML = '<td><input type="text" class="gr-name" value="' + esc(g.name || '') + '" placeholder="Item" oninput="scheduleAutosave()"></td><td><input type="text" class="gr-note" value="' + esc(g.note || '') + '"' + (g.link ? ' placeholder="Skill · damage · range (e.g. Marksmanship · 3D+2 · 10/30/60)"' : '') + ' oninput="scheduleAutosave()"></td><td><button class="row-x" onclick="deleteGearRow(this)">✕</button></td>';
+  if(g.link) tr.addEventListener('input', () => syncLinkedWeapon(tr));
   $('gear-body').appendChild(tr); return tr;
+}
+// A weapon's gear row drives its (hidden) attack row: the name, and the note read as
+// "skill · damage · range" in any order — a token naming a skill sets the skill, a die
+// code or Brawn formula (3D+2, Brawn+1D) the damage, and a range (10/30/60, melee) the range.
+function syncLinkedWeapon(gr) {
+  const link = gr.dataset.link; if(!link) return;
+  const atk = [...document.querySelectorAll('#weapons-body tr')].find(w => w.dataset.link === link); if(!atk) return;
+  atk.querySelector('.wp-name').value = gr.querySelector('.gr-name').value;
+  const skills = new Map([...atk.querySelectorAll('.wp-skill option')].filter(o => o.value).map(o => [norm(o.value), o.value]));
+  String(gr.querySelector('.gr-note').value || '').split(/[·|;,]/).map(t => t.trim()).filter(Boolean).forEach(t => {
+    const tk = t.replace(/^(dmg|damage)\s*/i, '').trim();
+    if(skills.has(norm(tk))) atk.querySelector('.wp-skill').value = skills.get(norm(tk));
+    else if(/^((brawn|str(ength)?)(\s*\+\s*\d+D?(\+\d)?)?|\d+D(\+\d)?)$/i.test(tk)) atk.querySelector('.wp-dmg').value = tk;
+    else if(/^(melee|\d+(\s*-\s*\d+)?(\s*\/\s*\d+(\s*-\s*\d+)?){1,3})$/i.test(tk)) atk.querySelector('.wp-range').value = tk.replace(/\s+/g, '');
+  });
+  scheduleAutosave();
+}
+// Old saves may hold weapon rows with no Gear row (added before the Weapons list was
+// folded into Gear). Give each one a linked gear row so it can be seen and removed.
+function linkLooseWeapons() {
+  document.querySelectorAll('#weapons-body tr').forEach(atk => {
+    if(atk.dataset.link || atk.dataset.fixed) return;
+    const name = atk.querySelector('.wp-name').value.trim(); if(!name) { atk.remove(); return; }
+    const link = nextLinkToken(); atk.dataset.link = link;
+    const xb = atk.querySelector('.row-x'); if(xb) xb.remove();
+    const gr = [...document.querySelectorAll('#gear-body tr')].find(r => !r.dataset.link && norm(r.querySelector('.gr-name').value) === norm(name));
+    if(gr) { gr.dataset.link = link; gr.addEventListener('input', () => syncLinkedWeapon(gr)); return; }
+    const note = [atk.querySelector('.wp-skill').value, atk.querySelector('.wp-dmg').value, atk.querySelector('.wp-range').value].filter(Boolean).join(' · ');
+    addGearRow({ name: name, note: note, link: link });
+  });
 }
 // Removing an equipment row also removes its linked attack row (if any).
 function deleteGearRow(el) {
@@ -1732,7 +1767,7 @@ function renderAction() {
   host.innerHTML =
     '<div class="turn-top">'
     + '<div class="turn-row1"><div class="turn-econ">' + pips + '</div><button class="turn-end-btn" onclick="actEndTurn()" title="Clear this round\'s actions and the Multi-Action Penalty">End Turn</button></div>'
-    + '<div class="turn-row2">' + pts + '<div class="turn-badges">' + badges.join('') + '</div><span class="turn-stat move"><span class="tm-lbl">Move</span> <b>' + esc(($('f-move') || {}).value || '—') + '</b></span></div>'
+    + '<div class="turn-row2">' + pts + '<div class="turn-badges">' + badges.join('') + '</div></div>'
     + '</div>'
     + sec('attacks', 'Attacks', S.attacks, 'No weapons yet — add them from ' + ACT_CFG.weaponsHome + '.')
     + sec('reactions', ACT_CFG.reactTitle, S.reactions, null)
@@ -1860,7 +1895,7 @@ var ACT_CFG = {
 };
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
-var _tab = 'traits';
+var _tab = 'action';   // sheets open on the Action tab
 const TABS = ['action','traits','gear','background','notes'];
 function setTab(name) {
   if(name === 'powers') name = 'traits';   // Powers folded into the Traits tab
@@ -1872,7 +1907,7 @@ function setTab(name) {
   });
   if(name === 'action') renderAction();
 }
-function setDefaultTab() { setTab(_tab || 'traits'); }
+function setDefaultTab() { _tab = 'action'; setTab('action'); }
 
 // ═══ PICKERS ══════════════════════════════════════════════════════════════
 function fillPickers() {
@@ -2058,6 +2093,7 @@ function applySheet(d) {
   $('flaws-body').innerHTML = ''; (d.flaws || []).forEach(t => addTraitRow('flaws', typeof t === 'string' ? { name: t } : t));
   $('talents-body').innerHTML = ''; (d.talents || []).forEach(t => addTraitRow('talents', typeof t === 'string' ? { name: t } : t));
   $('gear-body').innerHTML = ''; (d.gear || []).forEach(g => addGearRow(typeof g === 'string' ? { name: g } : g));
+  linkLooseWeapons();
   // Funds is a number box now; coerce old free-text wealth values to their numeric part.
   set('f-wealth', d.wealth == null || d.wealth === '' ? '' : ((String(d.wealth).match(/-?\d+(\.\d+)?/) || [''])[0]));
   set('f-background', d.background); set('f-personality', d.personality); set('f-notes', d.notes);

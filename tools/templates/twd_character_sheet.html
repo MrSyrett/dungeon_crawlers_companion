@@ -1381,7 +1381,7 @@ function setTab(name){
   [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
   try{ localStorage.setItem('twd_tab',name); }catch(e){}
 }
-function setDefaultTab(){ var t='combat'; try{ t=localStorage.getItem('twd_tab')||'combat'; }catch(e){} if(!$('tab-'+t))t='combat'; setTab(t); }
+function setDefaultTab(){ setTab('combat'); }   // sheets always open on the Action tab
 
 // ── Rules ──
 function openRules(){

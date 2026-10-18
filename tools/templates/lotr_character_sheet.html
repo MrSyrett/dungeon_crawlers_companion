@@ -209,12 +209,6 @@ body.dark .econ-chip.avail{background:rgba(90,200,120,.18);color:#7ad48a;}
 .turn-end-btn{flex:0 0 auto;background:var(--acc);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:var(--f-ui);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .turn-end-btn:hover{background:#a8861d;}
 .turn-row2{display:flex;align-items:center;gap:14px;padding:0 10px 7px;flex-wrap:wrap;}
-.turn-move{display:flex;align-items:center;gap:6px;font-family:var(--f-ui);font-weight:600;color:var(--muted);text-transform:uppercase;flex:0 0 auto;}
-.turn-move .tm-lbl{font-size:9px;font-weight:600;letter-spacing:.08em;}
-.turn-move .tm-val{font-family:var(--f-num);font-size:13px;color:var(--ink);}
-.turn-move .tm-val b{color:var(--acc-dk);font-size:15px;min-width:18px;display:inline-block;text-align:center;border-bottom:1px dashed transparent;outline:none;cursor:text;padding:0 2px;}
-.turn-move .tm-val b:hover,.turn-move .tm-val b:focus{border-bottom-color:var(--acc);background:var(--panel-2);border-radius:3px 3px 0 0;}
-.turn-move .tm-slash{color:var(--muted);margin:0 1px;}
 .turn-slots{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1 1 auto;min-width:0;}
 .tslot{display:flex;align-items:center;gap:4px;}
 .tslot-lbl{font-family:var(--f-ui);font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:0;cursor:pointer;}
@@ -430,12 +424,20 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .row-i:hover{color:var(--acc);}
 .cbt input.auto{color:var(--acc-dk);}
 .inv-actions{white-space:nowrap;text-align:right;width:1%;}
+.sp-prep{width:14px;height:14px;border:2px solid var(--acc-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
+.sp-prep.on{background:var(--acc);}
 .inv-qty-cell{width:44px;}
 .tbl .inv-qty{width:36px;text-align:center;}
 .inv-detail{font-family:var(--f-ui);font-size:10px;font-weight:600;color:var(--muted);line-height:1.25;letter-spacing:.02em;text-transform:uppercase;white-space:normal;}
 .inv-subline{margin-top:2px;}
 .inv-subline:empty{display:none;}
-.inv-val-cell{width:64px;white-space:nowrap;}
+.inv-val-cell{width:1%;white-space:nowrap;}
+.inv-val-line{display:flex;align-items:center;justify-content:space-between;gap:4px;}
+.inv-info-slot{display:inline-flex;}
+.inv-name-line{display:flex;align-items:center;gap:6px;}
+.inv-name-line .inv-name{flex:1 1 auto;min-width:0;}
+.inv-eq-slot{flex:0 0 14px;width:14px;height:14px;display:inline-flex;}
+.inv-tbl td:first-child > div:not(.inv-name-line){margin-left:20px;}
 .inv-cost-val{font-family:var(--f-num);font-size:11px;font-weight:600;color:var(--ink);}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:var(--f-ui);font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
 .notes-box{padding:8px 10px;}
@@ -1416,10 +1418,6 @@ body.dark{--scar-c:#3a1f48;}
           </div>
           <div class="turn-row2">
             <div class="turn-slots" id="turn-slots"></div>
-            <div class="turn-move" title="Movement left this turn — type to set">
-              <span class="tm-lbl">Move</span>
-              <span class="tm-val"><b id="turn-move-left" contenteditable="true" data-nolock inputmode="numeric" spellcheck="false" onfocus="moveFocus(this)" onblur="setMoveLeft(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">30</b><span class="tm-slash">/</span><span id="turn-move-max">30</span> ft</span>
-            </div>
           </div>
           <div class="turn-subtabs">
             <button class="turn-subtab on" data-sub="action" onclick="setTurnSub('action')">Actions</button>
@@ -1672,7 +1670,7 @@ let skillProf = {};                // { Athletics:1 } (0 none, 1 proficient, 2 e
 let deathSucc = 0, deathFail = 0;
 let activeConditions = [];
 let exhaustion = 0;                // 2014 six-level track
-let _tab = 'features';
+let _tab = 'turn';   // sheets open on the Action tab
 let _lineage = '';                 // subculture (mirrors #f-subculture)
 let _adv = 'norm';
 let _lastRoll = null;
@@ -2355,9 +2353,9 @@ function addInvRow(it){
   if(Array.isArray(it.rewards) && it.rewards.length) tr.dataset.rewards = it.rewards.join(',');
   if(it.uses != null && it.uses !== '') tr.dataset.charges = num(it.uses);
   tr.innerHTML =
-    '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"><div class="inv-detail inv-subline"></div><div class="inv-uses"></div><div class="inv-rw"></div></td>' +
+    '<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></div><div class="inv-detail inv-subline"></div><div class="inv-uses"></div><div class="inv-rw"></div></td>' +
     '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" data-nolock oninput="scheduleAutosave();updateCarry()"></td>' +
-    '<td class="inv-val-cell"><span class="inv-cost-val"></span></td>' +
+    '<td class="inv-val-cell"><div class="inv-val-line"><span class="inv-cost-val"></span><span class="inv-info-slot"></span></div></td>' +
     '<td class="inv-actions"></td>';
   $('inv-body').appendChild(tr);
   renderInvActions(tr);
@@ -2408,11 +2406,16 @@ function renderInvActions(tr){
   const kind = invRowKind(tr);
   const eq = tr.dataset.equipped === '1';
   const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield');
-  const equipBtn = canEquip ? '<button class="equip-btn' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="Equip / Unequip">' + (eq?'Equipped':'Equip') + '</button>' : '';
+  // Equip / unequip is a pip in front of the name (the D&D sheet's Prepared-pip look);
+  // rows that can't be equipped keep an empty slot so every name lines up.
+  const slotEl = tr.querySelector('.inv-eq-slot');
+  if(slotEl) slotEl.innerHTML = canEquip ? '<span class="sp-prep inv-eq-pip' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="' + (eq ? 'Equipped — click to unequip' : 'Not equipped — click to equip') + '"></span>' : '';
+  const equipBtn = '';
   const rwN = invRewards(tr).length;
   const rwBtn = canEquip ? '<button class="rw-btn' + (rwN ? ' has' : '') + '" onclick="openRewardPicker(this.closest(\'tr\'))" title="Rewards — fine war gear earned at 3rd, 5th, 7th and 9th level">' + (rwN ? '★ ' + rwN : '+ Reward') + '</button>' : '';
   const infoBtn = itemData(invRowRef(tr)) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
-  tr.querySelector('.inv-actions').innerHTML = infoBtn + rwBtn + equipBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+  const infoSlot = tr.querySelector('.inv-info-slot'); if(infoSlot) infoSlot.innerHTML = infoBtn;   // ⓘ sits right after the Value
+  tr.querySelector('.inv-actions').innerHTML = rwBtn + equipBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
 }
 // ── Rewards (one of each per item; Armour: Close-fitting / Cunning-make; Weapon: Fell /
 // Grievous / Keen; Shield: Reinforced) ──
@@ -3206,7 +3209,7 @@ function setTab(name){
   if(name === 'fellowship') renderFellowship();
   syncTabHeight();
 }
-function setDefaultTab(){ setTab(_tab || 'features'); }
+function setDefaultTab(){ setTab('turn'); }   // sheets open on the Action tab
 function syncTabHeight(){
   const lr = document.querySelector('.left-region'), bar = document.querySelector('.tabs-bar');
   if(!lr || !bar) return;
@@ -3751,7 +3754,7 @@ function applySheet(d){
   if(!d.hdUsed && d.hdLeft != null) hdSetRemaining(num(d.hdLeft));
   $('insp-btn').classList.toggle('on', !!d.inspiration);
   deathSucc = d.deathSucc || 0; deathFail = d.deathFail || 0;
-  activeConditions = (d.activeConditions || []).filter(c => AUTO_CONDS.indexOf(c) < 0); defenses = d.defenses || {}; companions = Array.isArray(d.companions) ? d.companions : []; exhaustion = num(d.exhaustion); _tab = d.tab || _tab;
+  activeConditions = (d.activeConditions || []).filter(c => AUTO_CONDS.indexOf(c) < 0); defenses = d.defenses || {}; companions = Array.isArray(d.companions) ? d.companions : []; exhaustion = num(d.exhaustion); _tab = 'turn';   // always open on the Action tab
   set('f-proficiencies', d.proficiencies); set('f-notes', d.notes);
   set('f-gp', d.gp || 0); set('f-sp', d.sp || 0); set('f-cp', d.cp || 0);
   customFeatures = d.customFeatures || [];

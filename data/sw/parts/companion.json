@@ -81,7 +81,7 @@
   "templates": [],
   "weapons": [
     {
-      "name": "Hands",
+      "name": "Hands (brawling)",
       "kind": "Melee",
       "damage": null,
       "damageText": "STR",
@@ -105,7 +105,7 @@
       "page": 78
     },
     {
-      "name": "Gaderffii",
+      "name": "Gaderffii (Gaffi Stick)",
       "kind": "Melee",
       "damage": null,
       "damageText": "STR+1D",
@@ -389,7 +389,7 @@
       "page": 31
     },
     {
-      "name": "Pocket computer (datapad)",
+      "name": "Pocket Computer",
       "category": "Misc",
       "description": "An average pocket computer has a keyboard/memory unit, computer probe, and a touch-sensitive screen/scanner that can process only images within a few centimeters of the unit. Computing power and memory store several thousand volumes worth of information, retrieving any existing data in less than a second. Datapads also serve as interfaces for larger computer banks. Only one character can use a datapad at a time (no combined action).",
       "book": "companion",
@@ -405,7 +405,7 @@
       "page": 31
     },
     {
-      "name": "Emergency space suit",
+      "name": "Space Suit (emergency)",
       "category": "Survival",
       "description": "Not built to stand extensive exposure. Emergency suits begin to leak after 72 hours of use; for game purposes such leaks are treated as a wound to the occupant. After 120 hours emergency suits no longer have significant pressurization effects and the occupant dies.",
       "stats": "Leaks (wound) after 72 hours; fatal after 120 hours",
@@ -413,7 +413,7 @@
       "page": 31
     },
     {
-      "name": "Utility space suit",
+      "name": "Space Suit (utility)",
       "category": "Survival",
       "description": "Lasts for hundreds of hours of exposure without loss of pressurization or breakdown of radiation protection. Utility suits leak when the occupant is wounded by a sharp melee, projectile, blaster or other attack which can puncture the suit, giving the occupant an additional wound.",
       "stats": "Hundreds of hours; extra wound when punctured",
@@ -421,7 +421,7 @@
       "page": 31
     },
     {
-      "name": "High quality space suit",
+      "name": "Space Suit (high quality)",
       "category": "Survival",
       "description": "Lasts about as long as a utility suit, but can instantly seal far larger ruptures. High quality suits will not leak until the occupant takes a mortal wound.",
       "stats": "Hundreds of hours; leaks only on a mortal wound",

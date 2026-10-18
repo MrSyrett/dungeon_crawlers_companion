@@ -514,11 +514,22 @@ const SW_WEAPONS = [
     "name": "Hands (brawling)",
     "kind": "Melee",
     "damage": null,
-    "damageText": "str",
+    "damageText": "STR",
+    "range": "Point-blank (less than 3 meters)",
     "skill": "brawling",
-    "notes": "Difficulty to hit: 5. Unarmed attack; roll the attacker's strength code as the damage code. Attacker must be within 2 m. Can be parried by brawling parry or melee parry (p.49).",
-    "book": "core",
-    "page": 139
+    "notes": "Revised Melee Weapons chart (replaces the bottom of the core Weapons Chart). Difficulty scale 3-5.",
+    "book": "companion",
+    "page": 78,
+    "superseded": {
+      "name": "Hands (brawling)",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "str",
+      "skill": "brawling",
+      "notes": "Difficulty to hit: 5. Unarmed attack; roll the attacker's strength code as the damage code. Attacker must be within 2 m. Can be parried by brawling parry or melee parry (p.49).",
+      "book": "core",
+      "page": 139
+    }
   },
   {
     "name": "Club",
@@ -556,25 +567,38 @@ const SW_WEAPONS = [
     }
   },
   {
-    "name": "Gaderffii (Gaffi Stick)",
-    "kind": "Melee",
-    "damage": 3,
-    "damageText": "Str+1D",
-    "skill": "melee weapons",
     "cost": "50",
     "availability": "3 — only on the planet of origin (Tatooine)",
-    "notes": "Difficulty to hit: 5. Double-edged axe of scrap alloys and composites carried by the Tusken Raiders; each is handmade and no two are identical — smooth or jagged blades, pointed tips and hooks. 'Gaffi stick' has become slang for any mean-looking large non-powered weapon.",
-    "page": 96,
-    "book": "sourcebook",
+    "name": "Gaderffii (Gaffi Stick)",
+    "kind": "Melee",
+    "damage": null,
+    "damageText": "STR+1D",
+    "range": "Point-blank",
+    "skill": "melee weapons",
+    "notes": "Difficulty scale 3-5.",
+    "book": "companion",
+    "page": 78,
     "superseded": {
       "name": "Gaderffii (Gaffi Stick)",
       "kind": "Melee",
       "damage": 3,
-      "damageText": "str+1D",
+      "damageText": "Str+1D",
       "skill": "melee weapons",
-      "notes": "Difficulty to hit: 5. A curved, double-pointed weapon carried by the Tusken Raiders of Tatooine, but adopted by many Rebels as a useful multi-purpose tool and melee weapon (p.52).",
-      "book": "core",
-      "page": 139
+      "cost": "50",
+      "availability": "3 — only on the planet of origin (Tatooine)",
+      "notes": "Difficulty to hit: 5. Double-edged axe of scrap alloys and composites carried by the Tusken Raiders; each is handmade and no two are identical — smooth or jagged blades, pointed tips and hooks. 'Gaffi stick' has become slang for any mean-looking large non-powered weapon.",
+      "page": 96,
+      "book": "sourcebook",
+      "superseded": {
+        "name": "Gaderffii (Gaffi Stick)",
+        "kind": "Melee",
+        "damage": 3,
+        "damageText": "str+1D",
+        "skill": "melee weapons",
+        "notes": "Difficulty to hit: 5. A curved, double-pointed weapon carried by the Tusken Raiders of Tatooine, but adopted by many Rebels as a useful multi-purpose tool and melee weapon (p.52).",
+        "book": "core",
+        "page": 139
+      }
     }
   },
   {
@@ -1194,28 +1218,6 @@ const SW_WEAPONS = [
     "notes": "Built into the Eliminator 434 assassin Droid.",
     "page": 57,
     "book": "sourcebook"
-  },
-  {
-    "name": "Hands",
-    "kind": "Melee",
-    "damage": null,
-    "damageText": "STR",
-    "range": "Point-blank (less than 3 meters)",
-    "skill": "brawling",
-    "notes": "Revised Melee Weapons chart (replaces the bottom of the core Weapons Chart). Difficulty scale 3-5.",
-    "book": "companion",
-    "page": 78
-  },
-  {
-    "name": "Gaderffii",
-    "kind": "Melee",
-    "damage": null,
-    "damageText": "STR+1D",
-    "range": "Point-blank",
-    "skill": "melee weapons",
-    "notes": "Difficulty scale 3-5.",
-    "book": "companion",
-    "page": 78
   },
   {
     "name": "Lajik whip",

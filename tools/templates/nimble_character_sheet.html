@@ -219,6 +219,10 @@ details.feats summary::-webkit-details-marker{display:none;}
 .tab-panel.on{display:block;}
 /* Section-bar right-side controls + buttons (open the pickers/shops) */
 .hdr-right{display:flex;align-items:center;gap:8px;}
+/* Inventory header: title · coins (centred) · slots + Item Store */
+.section-bar.inv-bar{display:grid;grid-template-columns:1fr auto 1fr;}
+.inv-bar .hdr-right{justify-self:end;}
+.inv-coins{display:flex;align-items:center;gap:5px;font-weight:700;font-size:11px;letter-spacing:.08em;}
 .hdr-btn{background:transparent;border:1px solid var(--nim);color:var(--nim-dk);border-radius:6px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .hdr-btn:hover{background:var(--nim-lt);}
 .hdr-btn:hover{background:rgba(255,255,255,.3);}
@@ -485,12 +489,16 @@ body.dark .tabs-bar{background:#1a201c;}
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
-/* Narrow phones: 6 tabs can't share one row — use an even 3×2 grid. */
+/* Narrow phones: 5 tabs can't share one row — 3 on top, 2 below. */
 @media (max-width:389px){
-  .tabs-bar{display:grid;grid-template-columns:repeat(3,1fr);}
+  .tabs-bar{display:grid;grid-template-columns:repeat(6,1fr);}
+  .tabs-bar .tab-btn{grid-column:span 2;}
+  .tabs-bar .tab-btn:nth-child(n+4){grid-column:span 3;}
   .tabs-bar .tab-btn{padding:11px 4px;min-height:40px;min-width:0;}
 }
 @media (max-width:600px){ .nturn-row2 > .nturn-stat:last-child{margin-left:auto;} }
+/* Phones: the Inventory header's coins drop to their own centred line. */
+@media (max-width:600px){ .section-bar.inv-bar{grid-template-columns:1fr auto;row-gap:6px;} .inv-bar .inv-coins{grid-column:1 / -1;grid-row:2;justify-self:center;} }
 </style>
 </head>
 <body>
@@ -691,7 +699,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="card tabs-card">
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
-        <button class="tab-btn" data-tab="attacks" onclick="setTab('attacks')">Attacks</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="features" onclick="setTab('features')">Features</button>
         <button class="tab-btn" data-tab="inventory" onclick="setTab('inventory')">Inventory</button>
@@ -700,8 +707,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="tab-panel" id="tab-action"><div id="nim-turn"></div></div>
 
-      <div class="tab-panel" id="tab-attacks">
-        <div class="section-bar"><span>Attacks</span><span class="hdr-right"><span class="sb-note">Add weapons from the Item Store</span></span></div>
+      <!-- Attack rows: the data store behind the Action tab's Attacks section (no tab of its own).
+           Weapons bought in the Item Store add a linked row; deleting the Inventory weapon removes it.
+           The Unarmed Strike is always present. Saved as data.attacks. -->
+      <div id="atk-store" hidden style="display:none;">
         <table class="tbl">
           <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
           <tbody id="attacks-body"></tbody>
@@ -726,12 +735,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
 
       <div class="tab-panel" id="tab-inventory">
-        <div class="section-bar"><span>Inventory</span><span class="hdr-right"><span class="sb-note" id="slots-note"></span><button class="hdr-btn" onclick="openStore()">Item Store</button></span></div>
+        <div class="section-bar inv-bar"><span>Inventory</span><span class="inv-coins">Coins <input type="number" id="f-gold" data-nolock value="50" style="width:64px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp <input type="number" id="f-silver" data-nolock value="0" style="width:54px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> sp</span><span class="hdr-right"><span class="sb-note" id="slots-note"></span><button class="hdr-btn" onclick="openStore()">Item Store</button></span></div>
         <table class="tbl">
           <thead><tr><th>Item</th><th style="width:54px;">Slots</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="inv-body"></tbody>
         </table>
-        <div class="add-row"><span class="hint" style="margin:0 0 0 auto;">Coins <input type="number" id="f-gold" data-nolock value="50" style="width:64px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp <input type="number" id="f-silver" data-nolock value="0" style="width:54px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> sp</span></div>
       </div>
 
       <div class="tab-panel" id="tab-notes">
@@ -1234,10 +1242,10 @@ function fillDatalists() {
 }
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
-var _tab = 'features';
-const TABS = ['action','attacks','spells','features','inventory','notes'];
+var _tab = 'action';
+const TABS = ['action','spells','features','inventory','notes'];
 function setTab(name) {
-  if(!TABS.includes(name)) name = 'features';
+  if(!TABS.includes(name)) name = 'action';
   _tab = name;
   TABS.forEach(t => {
     const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
@@ -1245,7 +1253,7 @@ function setTab(name) {
   });
   if(name === 'action' && typeof renderNimTurn === 'function') renderNimTurn();
 }
-function setDefaultTab() { setTab(_tab || (cls() && cls().spellcasting ? 'spells' : 'features')); }
+function setDefaultTab() { setTab('action'); }   // sheets always open on the Action tab
 
 // ═══ PICKERS / SHOPS (modal browse lists replacing the old add-dropdowns) ══
 // — Spellbook (Spells tab) —————————————————————————————————————————————————
@@ -1432,7 +1440,9 @@ function applySheet(d) {
   _restoreLinkSeq();
   set('f-gold', d.gold ?? 50); set('f-silver', d.silver || 0); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
   conditions = Array.isArray(d.conditions) ? d.conditions.slice() : []; renderConditions();
-  _tab = TABS.includes(d.tab) ? d.tab : _tab;
+  _tab = 'action';
+  // The Action-tab script loads after the first autoLoad(): hand it the saved turn to apply then.
+  if(typeof _nturn === 'undefined') window._nturnPending = d.turn || null;
   if(typeof _nturn !== 'undefined') { Object.assign(_nturn, { attacks: 0, moves: 0, reacted: {}, assessed: [] }, (d.turn && typeof d.turn === 'object') ? d.turn : {}); if(!_nturn.reacted || typeof _nturn.reacted !== 'object') _nturn.reacted = {}; if(!Array.isArray(_nturn.assessed)) _nturn.assessed = []; }
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
@@ -1965,7 +1975,6 @@ function renderNimTurn(){
   const O = nimBuild();
   let pips = ''; for(let k = 1; k <= 3; k++) pips += '<span class="nturn-pip' + (k > actions ? ' used' : '') + (k > max ? ' locked' : '') + '">Action ' + k + '</span>';
   const mana = num($('mana-cur').value), manaMax = num($('mana-max').value);
-  const speed = (typeof speedValue === 'function') ? speedValue() : 6;
   const badges = (nimDying() ? '<span class="nturn-badge warn" title="Dying: actions are limited to 1">Dying · 1 action</span>' : '')
     + (_nturn.attacks ? '<span class="nturn-badge" title="Rushed Attacks: each attack after the first this turn has cumulative disadvantage">Rushed · next attack dis ×' + _nturn.attacks + '</span>' : '');
   const card = o => {
@@ -1982,7 +1991,6 @@ function renderNimTurn(){
     + '<div class="nturn-row2">'
     + (manaMax || mana ? '<span class="nturn-stat"><span class="nl">Mana</span> <b>' + mana + '</b>/' + manaMax + '</span>' : '')
     + '<div class="nturn-badges">' + badges + '</div>'
-    + '<span class="nturn-stat"><span class="nl">Speed</span> <b>' + speed + '</b>' + (_nturn.moves ? ' <span class="nd">· moved ' + (_nturn.moves * speed) + '</span>' : '') + '</span>'
     + '</div></div>'
     + sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons from the Item Store (Inventory tab).')
     + sec('spells', 'Spells', O.spells, 'No spells — add them from the Spellbook (Spells tab).')
@@ -1997,6 +2005,13 @@ function nimTurnMaybeRender(){ const p = document.getElementById('tab-action'); 
   nimTurnMaybeRender();
 }));
 document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#cond-list')) nimTurnMaybeRender(); });
+// First paint: autoLoad() ran before this script defined the turn controller, so the
+// Action tab was shown empty (and the saved turn state skipped). Apply it and draw now.
+(function(){
+  const t = window._nturnPending; delete window._nturnPending;
+  if(t && typeof t === 'object') { Object.assign(_nturn, t); if(!_nturn.reacted || typeof _nturn.reacted !== 'object') _nturn.reacted = {}; if(!Array.isArray(_nturn.assessed)) _nturn.assessed = []; }
+  const p = document.getElementById('tab-action'); if(p && p.classList.contains('on')) renderNimTurn();
+})();
 </script>
 <style id="nim-turn-style">
 #tab-action{padding:0;}

@@ -772,11 +772,15 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
           <thead><tr><th style="width:36%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="gear-body"></tbody>
         </table>
-        <div class="section-bar" style="margin-top:6px;"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="openWeaponPicker()">+ Weapons</button></span></div>
+        <!-- Attack rows behind the Action tab's Attacks: one per weapon in the Equipment list
+             (linked by data-link) plus the permanent Unarmed strike. Not shown — weapons are
+             added and removed in Equipment; a linked row follows its gear row's name and note. -->
+        <div id="weapons-store" hidden style="display:none;">
         <table class="tbl" id="weapons-tbl">
           <thead><tr><th style="width:21%;">Weapon</th><th style="width:19%;">Skill</th><th style="width:66px;">Damage</th><th style="width:13%;">Range</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="weapons-body"></tbody>
         </table>
+        </div>
       </div>
 
       <div class="tab-panel" id="tab-ship">
@@ -1424,7 +1428,7 @@ function renderAction() {
   host.innerHTML =
     '<div class="turn-top">'
     + '<div class="turn-row1"><div class="turn-econ">' + pips + '</div><button class="turn-end-btn" onclick="actEndTurn()" title="Clear this round\'s actions and the Multi-Action Penalty">End Turn</button></div>'
-    + '<div class="turn-row2">' + pts + '<div class="turn-badges">' + badges.join('') + '</div><span class="turn-stat move"><span class="tm-lbl">Move</span> <b>walk 5 m · run 10 m</b></span></div>'
+    + '<div class="turn-row2">' + pts + '<div class="turn-badges">' + badges.join('') + '</div></div>'
     + '</div>'
     + sec('attacks', 'Attacks', S.attacks, 'No weapons yet — add them from ' + ACT_CFG.weaponsHome + '.')
     + sec('reactions', ACT_CFG.reactTitle, S.reactions, null)
@@ -1532,7 +1536,7 @@ var ACT_CFG = {
 };
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
-var _tab = 'equipment';
+var _tab = 'action';   // sheets open on the Action tab
 const TABS = ['action','force','equipment','ship','background','notes'];
 function setTab(name) {
   if(name === 'attacks') name = 'action';   // old saves remembered the Attacks tab
@@ -1544,7 +1548,7 @@ function setTab(name) {
   });
   if(name === 'action') renderAction();
 }
-function setDefaultTab() { setTab(_tab || 'equipment'); }
+function setDefaultTab() { setTab(_tab || 'action'); }
 
 // ═══ PICKERS / SHOPS ══════════════════════════════════════════════════════
 function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
@@ -1599,9 +1603,12 @@ function renderForcePicker() {
 // — Equipment store ————————————————————————————————————————————————————————
 function openGearPicker() { $('gearstore-search').value = ''; $('gearstore-overlay').classList.add('open'); renderGearPicker(); $('gearstore-search').focus(); }
 function closeGearPicker() { $('gearstore-overlay').classList.remove('open'); }
+// Gear-list entries that are rules notes rather than items (kept for the reference pages).
+const SW_SHOP_RULES = /^(medpac \(revised use\)|equipment availability codes|capital ship template)$/i;
 function renderGearPicker() {
   const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value;
   const gearList = (fc === 'Weapon' ? [] : D.gear().filter(g => {
+    if(SW_SHOP_RULES.test(g.name)) return false;   // rules entries, not things you can buy
     if(fc && g.category !== fc) return false;
     if(q && !(norm(g.name).includes(q) || norm(g.category || '').includes(q))) return false;
     return true;
@@ -1617,10 +1624,11 @@ function renderGearPicker() {
   if(!list.length) { box.innerHTML = '<p class="brow-empty">No equipment matches.</p>'; return; }
   box.innerHTML = list.map(e => {
     if(e.type === 'weapon') {
-      const w = e._w, dmg = w.damageText || toCode(w.damage), have = weaponRowExists(w.name);
-      const meta = [w.kind || 'Weapon', w.range].filter(Boolean).map(esc).join(' · ');
-      const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-weapon="' + esc(w.name) + '">+ Add</button>';
-      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(w.name) + (dmg ? '<span class="brow-cost">' + esc(dmg) + '</span>' : '') + '</div>' +
+      const w = e._w, dmg = w.damageText || toCode(w.damage), have = weaponRowExists(w.name), price = creditCost(w.cost);
+      const meta = [w.kind || 'Weapon', dmg ? 'Dmg ' + dmg : '', w.range].filter(Boolean).map(esc).join(' · ');
+      const btn = have ? '<button class="brow-add have">Added ✓</button>'
+        : '<div class="brow-btns">' + (price != null ? '<button class="brow-add buy" data-buy-weapon="' + esc(w.name) + '">Buy</button>' : '') + '<button class="brow-add" data-add-weapon="' + esc(w.name) + '">+ Add</button></div>';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(w.name) + (price != null ? '<span class="brow-cost">' + price + ' cr</span>' : '') + '</div>' +
         (meta ? '<div class="brow-meta">' + meta + '</div>' : '') + '</div>' + btn + '</div>';
     }
     const g = e._g;
@@ -1652,12 +1660,24 @@ function buyGear(name) {
   addLog('Bought', 'Money', g.name + ' — ' + price + ' cr · ' + creditsNum() + ' cr left', 'normal');
   scheduleAutosave(); return true;
 }
+// Buying a weapon: deduct its price, then add it the usual way (gear row + linked attack).
+function buyWeapon(name) {
+  const w = findWeapon(name); if(!w || weaponRowExists(w.name)) return false;
+  const price = creditCost(w.cost);
+  if(price == null) { addWeaponFromEquip(name); return true; }
+  if(creditsNum() < price) return false;
+  $('f-credits').value = creditsNum() - price;
+  addWeaponFromEquip(name);
+  addLog('Bought', 'Money', w.name + ' — ' + price + ' cr · ' + creditsNum() + ' cr left', 'normal');
+  scheduleAutosave(); return true;
+}
 // Wire all browse lists once (event delegation).
 (function wireSwPickers() {
   const sb = $('skill-body'); if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-skill]'); if(b) { if(addSkillByName(b.dataset.addSkill)) _flashBrow(b); renderSkillPicker(); } });
   const wb = $('weapon-body'); if(wb) wb.addEventListener('click', e => { const b = e.target.closest('[data-add-weapon]'); if(b) { addWeaponFromData(b.dataset.addWeapon); _flashBrow(b); } });
   const fb = $('force-pbody'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-force]'); if(b) { if(addForcePowerByName(b.dataset.addForce)) _flashBrow(b); renderForcePicker(); } });
   const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => {
+    const bw = e.target.closest('[data-buy-weapon]'); if(bw) { if(buyWeapon(bw.dataset.buyWeapon)) renderGearPicker(); else { const o = bw.textContent; bw.textContent = 'Need cr'; setTimeout(() => bw.textContent = o, 700); } return; }
     const wpn = e.target.closest('[data-add-weapon]'); if(wpn) { addWeaponFromEquip(wpn.dataset.addWeapon); renderGearPicker(); return; }
     const arm = e.target.closest('[data-add-armor]'); if(arm) { addGearFromData(arm.dataset.addArmor); _flashBrow(arm); renderGearPicker(); return; }
     const buy = e.target.closest('[data-buy-gear]'); if(buy) { if(buyGear(buy.dataset.buyGear)) _flashBrow(buy); else { const o = buy.textContent; buy.textContent = 'Need cr'; setTimeout(() => buy.textContent = o, 700); } return; }
@@ -1671,8 +1691,9 @@ function addCustomSkill() { addSkillRow({ name:'', attr:'Dexterity', adds:0 }); 
 function addCustomWeapon() {
   const link = nextLink();
   addWeaponRow({ name: 'New weapon', link: link });
-  addGearRow({ name: 'New weapon', link: link });
-  closeGearPicker(); closeWeaponPicker(); scheduleAutosave();
+  const gr = addGearRow({ name: 'New weapon', link: link });
+  closeGearPicker(); closeWeaponPicker(); setTab('equipment'); scheduleAutosave();
+  const inp = gr.querySelector('.gr-name'); if(inp) { inp.focus(); inp.select(); }
 }
 function addCustomGear() { addGearRow(); closeGearPicker(); scheduleAutosave(); }
 function rollForce(power, skill) { const p = skillPips(skill); if(p === null) { addLog(power, '✗', 'You have no ' + skill + ' skill — add it to the skill list', 'fumble'); return; } rollCode(power + ' (' + skill + ')', p); }
@@ -1681,8 +1702,39 @@ function rollForce(power, skill) { const p = skillPips(skill); if(p === null) { 
 function addGearRow(g) {
   g = g || {}; const tr = document.createElement('tr');
   if(g.link) tr.dataset.link = g.link;
-  tr.innerHTML = '<td><input type="text" class="gr-name" value="' + esc(g.name || '') + '" placeholder="Comlink"></td><td><input type="text" class="gr-note" value="' + esc(g.note || '') + '"></td><td><button class="row-x" onclick="removeGearRow(this)">✕</button></td>';
+  tr.innerHTML = '<td><input type="text" class="gr-name" value="' + esc(g.name || '') + '" placeholder="Comlink"></td><td><input type="text" class="gr-note" value="' + esc(g.note || '') + '"' + (g.link ? ' placeholder="Skill · damage · range (e.g. Blaster · 4D · 3-10/30/120)"' : '') + '></td><td><button class="row-x" onclick="removeGearRow(this)">✕</button></td>';
+  if(g.link) tr.addEventListener('input', () => syncLinkedWeapon(tr));
   $('gear-body').appendChild(tr); return tr;
+}
+// A weapon's gear row drives its (hidden) attack row: the name, and the note read as
+// "skill · damage · range" in any order — a token naming a skill sets the skill, a die
+// code (4D, 3D+1, STR+1D) the damage, and a range like 3-10/30/120 the range.
+function syncLinkedWeapon(gr) {
+  const link = gr.dataset.link; if(!link) return;
+  const atk = document.querySelector('#weapons-body tr[data-link="' + link + '"]'); if(!atk) return;
+  atk.querySelector('.wp-name').value = gr.querySelector('.gr-name').value;
+  const skills = new Map([...atk.querySelectorAll('.wp-skill option')].filter(o => o.value).map(o => [norm(o.value), o.value]));
+  String(gr.querySelector('.gr-note').value || '').split(/[·|;,]/).map(t => t.trim()).filter(Boolean).forEach(t => {
+    const tk = t.replace(/^(dmg|damage)\s*/i, '').trim();
+    if(skills.has(norm(tk))) atk.querySelector('.wp-skill').value = skills.get(norm(tk));
+    else if(/^((str(ength)?)(\s*\+\s*\d+D(\+\d)?)?|\d+D(\+\d)?)$/i.test(tk)) atk.querySelector('.wp-dmg').value = tk;
+    else if(/^\d+(\s*-\s*\d+)?(\s*\/\s*\d+(\s*-\s*\d+)?){1,3}$/.test(tk)) atk.querySelector('.wp-range').value = tk.replace(/\s+/g, '');
+  });
+  scheduleAutosave();
+}
+// Old saves may hold weapon rows with no Equipment row (added before the Weapons list
+// was folded into Equipment). Give each one a linked gear row so it can be seen and removed.
+function linkLooseWeapons() {
+  document.querySelectorAll('#weapons-body tr').forEach(atk => {
+    if(atk.dataset.link || atk.dataset.fixed) return;
+    const name = atk.querySelector('.wp-name').value.trim(); if(!name) { atk.remove(); return; }
+    const link = nextLink(); atk.dataset.link = link;
+    const xb = atk.querySelector('.row-x'); if(xb) xb.remove();
+    const gr = [...document.querySelectorAll('#gear-body tr')].find(r => !r.dataset.link && norm(r.querySelector('.gr-name').value) === norm(name));
+    if(gr) { gr.dataset.link = link; gr.addEventListener('input', () => syncLinkedWeapon(gr)); return; }
+    const note = [atk.querySelector('.wp-skill').value, atk.querySelector('.wp-dmg').value, atk.querySelector('.wp-range').value].filter(Boolean).join(' · ');
+    addGearRow({ name: name, note: note, link: link });
+  });
 }
 // Deleting a gear row also removes its linked Attack row (if any).
 function removeGearRow(btn) {
@@ -1780,9 +1832,10 @@ function applySheet(d) {
   $('gear-body').innerHTML = ''; (d.gear || []).forEach(g => addGearRow(g));
   // Advance the link counter past any restored tokens so new adds never collide.
   _linkSeq = Math.max(_linkSeq, ...[...document.querySelectorAll('[data-link]')].map(el => parseInt(String(el.dataset.link).replace(/\D/g, ''), 10) || 0), 0);
+  linkLooseWeapons();
   const sh = d.ship || {}; set('sh-name', sh.name); set('sh-craft', sh.craft); set('sh-speed', sh.speed); set('sh-hull', sh.hull); set('sh-weapons', sh.weapons);
   set('f-background', d.background); set('f-personality', d.personality); set('f-connection', d.connection); set('f-quote', d.quote); set('f-special', d.special); set('f-notes', d.notes);
-  _tab = d.tab === 'attacks' ? 'action' : (TABS.includes(d.tab) ? d.tab : _tab);
+  _tab = 'action';   // a loaded character opens on the Action tab (the saved tab is ignored)
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
   setDefaultTab();

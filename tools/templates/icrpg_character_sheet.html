@@ -1005,7 +1005,7 @@ function setTab(name){
   try{ localStorage.setItem('icrpg_tab', name); }catch(e){}
   if(name==='action' && typeof icRenderTurn==='function') icRenderTurn();
 }
-function setDefaultTab(){ var t='abilities'; try{ t=localStorage.getItem('icrpg_tab')||'abilities'; }catch(e){} if(!$('tab-'+t)) t='abilities'; setTab(t); }
+function setDefaultTab(){ setTab('action'); }   // sheets always open on the Action tab
 
 // ═══ ACTION TAB (the turn controller) ═══════════════════════════════════════
 // ICRPG core: each TURN is ACTION ONLY, MOVE NEAR + ACTION, or MOVE FAR (the whole

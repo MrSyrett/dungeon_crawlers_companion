@@ -196,6 +196,13 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .w-roll:active{transform:translateY(1px);box-shadow:0 0 0 #7a0d11,inset 0 1px 3px rgba(0,0,0,.35);}
 .dmg-cell .w-roll{width:100%;padding:7px 8px;font-size:12.5px;}
 .dmg-cell .dmg-wpn{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--mv-dk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+/* Equip pip in front of the item name (D&D Prepared-pip look); a blank placeholder keeps names aligned */
+.eq-name{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.eq-name input{flex:1 1 120px;min-width:0;}
+.eq-pip{width:14px;height:14px;border:2px solid var(--mv-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;box-sizing:border-box;}
+.eq-pip.on{background:var(--mv);border-color:var(--mv-dk);}
+.eq-pip.none{visibility:hidden;cursor:default;}
+body.dark .eq-pip{border-color:#f4a6a8;}
 /* Equip toggle on weapon rows */
 .tbl .w-equip{background:transparent;color:var(--mv-dk);border:1px solid var(--mv);border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;}
 .tbl .w-equip:hover{background:var(--input-bg);}
@@ -488,6 +495,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .turn-end-btn{flex:0 0 auto;background:var(--mv);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-left:auto;}
 .turn-end-btn:hover{filter:brightness(1.1);}
 .turn-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
+.turn-subtabs{display:flex;gap:0;border-top:1px solid var(--rule);}
+.turn-subtab{flex:1;padding:9px 4px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.turn-subtab.on{color:var(--mv-dk);border-bottom-color:var(--mv);background:var(--paper);}
+body.dark .turn-subtab.on{color:#f4a6a8;}
 .turn-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;white-space:nowrap;}
 .turn-stat .tm-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
 .turn-stat b{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--ink);}
@@ -755,7 +766,7 @@ body.dark .turn-badge.gold,body.dark .turn-badge.warn{color:#f0c060;}
 
       <div class="tab-panel" id="tab-equipment">
         <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('equip')">＋ Add Equipment</button></span></div>
-        <table class="tbl" id="atk-tbl"><thead><tr><th>Item</th><th style="width:16%;">Attacks with</th><th style="width:14%;">Range</th><th style="width:12%;">Dmg</th><th style="width:96px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
+        <table class="tbl" id="atk-tbl"><thead><tr><th>Item</th><th style="width:16%;">Attacks with</th><th style="width:14%;">Range</th><th style="width:12%;">Dmg</th><th style="width:34px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
         <div id="atk-empty" class="tbl-empty">No equipment yet. Add a weapon, gear or vehicle from the list — a weapon rolls its ability and deals Marvel die × (multiplier + weapon bonus) + ability.</div>
       </div>
 
@@ -910,7 +921,7 @@ function rollCheck(key,kind){
   if(dis){ addLog(a.name+' Check','✗ '+dis, "Can't act while "+dis, 'fumble'); return; }
   var label=a.name+(kind==='noncombat'?' Non-Combat':' Check');
   doCheck(label, key, kind==='noncombat'?{bonus:ncBonus(key)}:{});
-  // A main-sheet ability roll uses the Standard action (spent quietly; never blocks).
+  // A main-sheet ability roll uses the action (spent quietly; never blocks).
   if(turnCan('std')){ turnSpend('std'); renderTurn(); scheduleAutosave(); }
 }
 function setAbility(k,v){ S.abilities[k]=num(v);
@@ -1190,7 +1201,7 @@ function pcCardHTML(kind, i, name, meta, desc){
     +(desc?'<span class="pc-caret">▾</span>':'')
     +'<span class="pc-name">'+esc(name)+'</span>'
     +(meta?'<span class="pc-meta">'+esc(meta)+'</span>':'')
-    +'<button class="row-x" onclick="event.stopPropagation();delItem(\''+kind+'\','+i+')">✕</button></div>';
+    +'</div>';   // no delete ✕ — powers, traits and tags are changed in the character builder (Create / Rebuild)
   return '<div class="pc-card'+(desc?' collapsed':' no-desc')+'">'+head+(desc?'<div class="pc-desc">'+esc(desc)+'</div>':'')+'</div>';
 }
 // Powers are grouped under their Power Set, the set name serving as the section
@@ -1241,17 +1252,15 @@ function renderAttacks(){
     if(isW){
       var opts=ABILITIES.map(function(a){ return '<option value="'+a.key+'"'+(w.ability===a.key?' selected':'')+'>'+a.name+'</option>'; }).join('');
       var mAb=(Array.isArray(w.multAbilities)&&w.multAbilities.length>1)?' <span class="eq-tag" title="Bonus applies to: '+esc(w.multAbilities.join(', '))+'">+'+esc(w.multAbilities.map(function(k){return k.slice(0,3);}).join('/'))+'</span>':'';
-      tr.innerHTML='<td><input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Weapon">'+own+mAb+'</td>'
+      tr.innerHTML='<td><div class="eq-name">'+eqPip(w,i,true)+'<input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Weapon">'+own+mAb+'</div></td>'
         +'<td><select onchange="aEdit('+i+',\'ability\',this.value)">'+opts+'</select></td>'
         +'<td><input value="'+esc(w.range||'')+'" oninput="aEdit('+i+',\'range\',this.value)" placeholder="Reach / 10"></td>'
         +'<td><input class="cx" value="'+esc(w.damageBonus||'')+'" oninput="aEdit('+i+',\'dmg\',this.value)" placeholder="+1"></td>'
-        +'<td style="text-align:right;white-space:nowrap;"><button class="w-equip'+(w.equipped?' on':'')+'" onclick="toggleEquip('+i+')">'+(w.equipped?'Equipped':'Equip')+'</button> <button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
+        +'<td style="text-align:right;white-space:nowrap;"><button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
     } else {
-      var act=isActivatable(w);
-      var eqBtn=act?'<button class="w-equip'+(w.equipped?' on':'')+'" onclick="toggleEquip('+i+')">'+(w.equipped?'Equipped':'Equip')+'</button> ':'';
-      tr.innerHTML='<td><input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Item">'+own+'</td>'
+      tr.innerHTML='<td><div class="eq-name">'+eqPip(w,i,isActivatable(w))+'<input value="'+esc(w.name||'')+'" oninput="aEdit('+i+',\'name\',this.value)" placeholder="Item">'+own+'</div></td>'
         +'<td colspan="3" style="font-family:\'Barlow Condensed\';font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);">'+esc((w.tier&&w.tier!=='Common'?w.tier+' ':'')+(w.type||w.category||'Item'))+'</td>'
-        +'<td style="text-align:right;white-space:nowrap;">'+eqBtn+'<button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
+        +'<td style="text-align:right;white-space:nowrap;"><button class="row-x" onclick="delItem(\'attacks\','+i+')">✕</button></td>';
     }
     body.appendChild(tr);
     // details: Special (book effect) and Notes on their own line(s) below
@@ -1276,6 +1285,9 @@ function aEdit(i,f,v){ var w=S.attacks[i]; if(!w)return;
 function addAttack(){ var w=mkEquip({name:'',damageBonus:'+1',multBonus:1},false); S.attacks.push(w); renderAttacks(); setTab('equipment'); scheduleAutosave(); }
 // Equip a weapon to add its damage-multiplier bonus to the matching ability's
 // attack. Bonuses don't stack (rules): use the greatest equipped bonus per ability.
+// The Equip pip in front of an item's name (same look as D&D's Prepared pip). Items that
+// can't be equipped get an invisible placeholder so every name lines up.
+function eqPip(w,i,can){ return can?'<span class="eq-pip'+(w.equipped?' on':'')+'" onclick="toggleEquip('+i+')" title="'+(w.equipped?'Equipped — click to unequip':'Equip')+'"></span>':'<span class="eq-pip none" aria-hidden="true"></span>'; }
 function toggleEquip(i){ var w=S.attacks[i]; if(!w)return; w.equipped=!w.equipped; renderAttacks(); renderDamage(); renderDerived(); scheduleAutosave(); }
 // An item is "activatable" (gets an Equip toggle) when equipping it changes the
 // sheet: a damage-mult bonus or a granted movement mode.
@@ -1389,13 +1401,13 @@ function tEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g
 function turnCan(kind){ var t=turnState();
   if(kind==='free') return true;
   if(kind==='std') return !t.std;
-  if(kind==='move') return !t.move;
+  if(kind==='move') return true;            // movement is a given — no bubble to spend
   if(kind==='react') return !t.react;
-  if(kind==='stdmove') return !t.std && !t.move;
+  if(kind==='stdmove') return !t.std;
   return true; }
 function turnSpend(kind){ var t=turnState();
   if(kind==='std') t.std=true; else if(kind==='move') t.move=true; else if(kind==='react') t.react=true;
-  else if(kind==='stdmove'){ t.std=true; t.move=true; } }
+  else if(kind==='stdmove'){ t.std=true; } }
 // Which action slots a power can use, from its action text.
 function powerKinds(a){ a=String(a||'').toLowerCase(); var k=[];
   if(/both standard and movement/.test(a)) return ['stdmove'];
@@ -1411,7 +1423,7 @@ function powerAttackKey(p){ var e=String(p.effect||''), m=/\b(melee|agility|ego|
   if(/\bmakes? (?:a|an|one)\s+(?:[\w-]+\s+)?close attack/i.test(e)) return 'melee';
   if(/\bmakes? (?:a|an|one)\s+(?:[\w-]+\s+)?ranged attack/i.test(e)) return 'agility';
   return ''; }
-var KIND_LBL={std:'Standard',move:'Movement',react:'Reaction',stdmove:'Std + Move'};
+var KIND_LBL={std:'Action',move:'Move',react:'Reaction',stdmove:'Action + Move'};
 function usePower(p, kind){
   var cost=powerFocus(p);
   if(cost>num(S.focus.cur)){ addLog(p.name,'✗','Needs '+cost+' Focus — you have '+num(S.focus.cur),'fumble'); return false; }
@@ -1482,15 +1494,15 @@ function turnBuildOpts(){
   (S.powers||[]).forEach(function(p){
     var kinds=powerKinds(p.action); if(!kinds.length) return;
     var cost=powerFocus(p), short=cost>num(S.focus.cur), pk=powerAttackKey(p), pdis=pk?condDisabled(pk,true):'';
-    add('powers',{name:p.name, sub:[p.action, cost?cost+' Focus':(p.cost&&!/^none$/i.test(p.cost)?p.cost:''), p.duration].filter(Boolean).join(' · '),
+    add('powers',{name:p.name, kinds:kinds, sub:[String(p.action||'').replace(/\bstandard\b/gi,'Action'), cost?cost+' Focus':(p.cost&&!/^none$/i.test(p.cost)?p.cost:''), p.duration].filter(Boolean).join(' · '),
       blocked:short?'Not enough Focus':(cost>focusCap()?'Over your Focus cap ('+focusCap()+')':(pdis?pdis+' — can’t attack':'')),
       btns:kinds.map(function(kd){ return {label:kinds.length>1?KIND_LBL[kd]:'Use', kind:kd, run:function(){ return usePower(p,kd); }}; })});
+    // (a power card on the Action / Reaction subtab shows only the buttons for that subtab — see renderTurn)
   });
   eqBuildOpts(add);
   // Actions
   var run=runSpeed(), hv=speedHalvedByCond()?Math.floor(run/2):run, nm=condNoMove(), nmB=nm?nm+' — can’t move':'';
-  add('actions',{name:'Move', sub:'Run '+hv+' spaces (Climb/Swim/Jump '+Math.floor(hv/2)+')', blocked:nmB, btns:[{label:'Move',kind:'move',run:function(){ addLog('Move','Run '+hv,'Movement action','normal'); return true; }}]});
-  add('actions',{name:'Move Again', sub:'Spend your standard action to move a second time', blocked:nmB, btns:[{label:'Move',kind:'std',run:function(){ addLog('Move Again','Run '+hv,'Standard action spent on movement','normal'); return true; }}]});
+  add('actions',{name:'Move Again', sub:'Spend your action to move a second time', blocked:nmB, btns:[{label:'Move',kind:'std',run:function(){ addLog('Move Again','Run '+hv,'Action spent on movement','normal'); return true; }}]});
   add('actions',{name:'Dodge', sub:'Attacks against you have trouble until your next turn', btns:[{label:'Dodge',kind:'std',run:function(){ turnState().dodge=2; addLog('Dodge','Dodging','Attacks against you have trouble until your next turn','normal'); return true; }}]});
   add('actions',{name:'Grab', sub:'Melee check vs Melee defense — a Fantastic also pins', blocked:condDisabled('melee',true), btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Grab','melee',{attack:true}); return true; }}]});
   add('actions',{name:'Escape', sub:'Melee check vs the grabber’s Melee defense (or the Narrator’s TN — 20 webbing/chains, 16 rope)', btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Escape','melee',{}); return true; }}]});
@@ -1515,35 +1527,46 @@ function turnDo(i,j){
 }
 function endTurn(){ var t=turnState(); t.std=t.move=t.react=false; if(t.dodge>0) t.dodge--; renderTurn(); scheduleAutosave(); }
 function turnToggleSec(k){ _turnCollapsed[k]=!_turnCollapsed[k]; renderTurn(); }
+// Action / Reaction subtabs (like D&D's Actions / Bonus Actions / Reactions).
+function turnSub(){ var t=turnState(); return t.sub==='reaction'?'reaction':'action'; }
+function setTurnSub(sub){ turnState().sub=sub; renderTurn(); scheduleAutosave(); }
 function renderTurn(){
   var host=$('mm-turn'); if(!host||!S) return;
   var O=turnBuildOpts(), t=turnState();
   var pip=function(on,lbl){ return '<span class="turn-pip'+(on?' used':'')+'">'+lbl+'</span>'; };
   var badges=(t.dodge>0?'<span class="turn-badge">Dodging</span>':'')
     +activeConds().map(function(n){ return '<span class="turn-badge warn">'+tEsc(n)+'</span>'; }).join('');
-  var run=runSpeed(); if(speedHalvedByCond()) run=Math.floor(run/2);
+  var sub=turnSub();
+  // On a subtab, a card shows only the buttons for that subtab's cost (a power usable as an
+  // action or a reaction shows its action button on Action and its reaction button on Reaction).
+  var onTab=function(b){ return sub==='reaction'?b.kind==='react':b.kind!=='react'; };
   var card=function(o){
-    var anyOk=!o.blocked && o.btns.some(function(b){ return turnCan(b.kind); });
-    var btns=o.btns.map(function(b,j){ var ok=!o.blocked&&turnCan(b.kind); return '<button class="tc-do'+(ok?'':' off')+'" onclick="turnDo('+o.i+','+j+')">'+tEsc(b.label)+'</button>'; }).join('');
+    var vis=o.btns.map(function(b,j){ return {b:b,j:j}; }).filter(function(x){ return onTab(x.b); });
+    var anyOk=!o.blocked && vis.some(function(x){ return turnCan(x.b.kind); });
+    var btns=vis.map(function(x){ var b=x.b, ok=!o.blocked&&turnCan(b.kind); return '<button class="tc-do'+(ok?'':' off')+'" onclick="turnDo('+o.i+','+x.j+')">'+tEsc(vis.length===1&&b.label===KIND_LBL[b.kind]?'Use':b.label)+'</button>'; }).join('');
     var sub=[o.blocked,o.sub].filter(Boolean).join(' · ');
     return '<div class="turn-card'+(anyOk?'':' disabled')+'"><div class="tc-main"><div class="tc-name">'+tEsc(o.name)+'</div>'+(sub?'<div class="tc-sub">'+tEsc(sub)+'</div>':'')+'</div><div class="tc-btns">'+btns+'</div></div>';
   };
+  var only=function(list){ return list.filter(function(o){ return o.btns.some(onTab); }); };
   var sec=function(key,title,list,empty){ var col=!!_turnCollapsed[key];
     return '<div class="turn-sec'+(col?' collapsed':'')+'"><div class="turn-sec-hd" onclick="turnToggleSec(\''+key+'\')"><span class="tsh-caret">▼</span><span class="tsh-title">'+title+'</span></div>'
       +'<div class="turn-sec-body">'+(list.length?list.map(card).join(''):'<div class="turn-empty">'+empty+'</div>')+'</div></div>'; };
   host.innerHTML='<div class="turn-top">'
-    +'<div class="turn-row1"><div class="turn-econ">'+pip(t.std,'Standard')+pip(t.move,'Movement')+pip(t.react,'Reaction')+'</div>'
+    +'<div class="turn-row1"><div class="turn-econ">'+pip(t.std,'Action')+pip(t.react,'Reaction')+'</div>'
     +'<button class="turn-end-btn" onclick="endTurn()" title="Reset your actions for the next turn">End Turn</button></div>'
     +'<div class="turn-row2">'
     +'<button class="turn-mini'+(karmaArmed?' on':'')+'" onclick="toggleKarma();renderTurn()" '+(num(S.karma.cur)<=0&&!karmaArmed?'disabled':'')+' title="Spend 1 Karma for an edge on your next roll">Karma Edge</button>'
     +'<div class="turn-badges">'+badges+'</div>'
-    +'<span class="turn-stat turn-speed"><span class="tm-lbl">Speed</span> <b>'+run+'</b></span>'
-    +'</div></div>'
-    +sec('attacks','Attacks',O.attacks,'')
-    +sec('powers','Powers',O.powers,'No powers with an action. Powers are chosen in the character builder.')
-    +(O.equipment.length?sec('equipment','Equipment',O.equipment,''):'')
-    +sec('actions','Actions',O.actions,'')
-    +sec('reactions','Reactions',O.reactions,'');
+    +'</div>'
+    +'<div class="turn-subtabs"><button class="turn-subtab'+(sub==='action'?' on':'')+'" onclick="setTurnSub(\'action\')">Actions</button><button class="turn-subtab'+(sub==='reaction'?' on':'')+'" onclick="setTurnSub(\'reaction\')">Reactions</button></div>'
+    +'</div>'
+    +(sub==='reaction'
+      ? (only(O.powers).length?sec('powers','Powers',only(O.powers),''):'')
+        +sec('reactions','Reactions',O.reactions,'')
+      : sec('attacks','Attacks',O.attacks,'')
+        +sec('powers','Powers',only(O.powers),'No powers with an action. Powers are chosen in the character builder.')
+        +(O.equipment.length?sec('equipment','Equipment',O.equipment,''):'')
+        +sec('actions','Actions',O.actions,''));
 }
 // Keep the controller current while it's open.
 var _turnRT=null;
@@ -1557,7 +1580,7 @@ function setTab(name){
   try{ localStorage.setItem('mmrpg_tab',name); }catch(e){}
   if(name==='action' && typeof renderTurn==='function') renderTurn();
 }
-function setDefaultTab(){ var t='powers'; try{ t=localStorage.getItem('mmrpg_tab')||'powers'; }catch(e){} if(!$('tab-'+t))t='powers'; setTab(t); }
+function setDefaultTab(){ setTab('action'); }   // sheets always open on the Action tab
 
 // ── Header selects ──
 function fillHeaderSelects(){ return; /* identity is display-only now; selects removed */
@@ -1863,7 +1886,7 @@ function applySheet(d){
   if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||'',from:p.from||''}; });
   if(Array.isArray(d.iconics)) S.iconics=d.iconics.slice();
   S.turn={std:false, move:false, react:false, dodge:0};
-  if(d.turn&&typeof d.turn==='object') ['std','move','react','dodge'].forEach(function(k){ if(d.turn[k]!=null) S.turn[k]=d.turn[k]; });
+  if(d.turn&&typeof d.turn==='object') ['std','move','react','dodge','sub'].forEach(function(k){ if(d.turn[k]!=null) S.turn[k]=d.turn[k]; });
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.tags)) S.tags=d.tags.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.attacks)) S.attacks=d.attacks.map(function(w){ return mkEquip(w, w.equipped); });

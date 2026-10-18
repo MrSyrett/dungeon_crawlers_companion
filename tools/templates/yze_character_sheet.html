@@ -513,6 +513,10 @@ body.dark .act-badge.warn{color:#f0c060;}
 .act-mini{margin-left:auto;background:transparent;border:1px solid var(--yz-dk);color:var(--yz-dk);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .act-mini:hover{background:var(--yz-lt);}
 .act-note{font-size:11px;color:var(--muted);padding:0 10px 8px;line-height:1.35;}
+.act-subtabs{display:flex;gap:0;border-top:1px solid var(--rule);}
+.act-subtab{flex:1;padding:9px 4px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.act-subtab.on{color:var(--yz-dk);border-bottom-color:var(--yz);background:var(--paper);}
+body.dark .act-subtab.on{color:var(--yz);}
 .act-sec{border-bottom:1px solid var(--rule);}
 .act-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
 .act-sec-hd .caret{color:var(--yz-dk);font-size:10px;transition:transform .12s;flex-shrink:0;}
@@ -1456,7 +1460,7 @@ function setTab(name){
   [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
   try{ localStorage.setItem('yze_tab',name); }catch(e){}
 }
-function setDefaultTab(){ var t='combat'; try{ t=localStorage.getItem('yze_tab')||'combat'; }catch(e){} if(!$('tab-'+t))t='combat'; setTab(t); }
+function setDefaultTab(){ setTab('combat'); }   // sheets always open on the Action tab
 
 // ── Rules ──
 // Alien Evolved Edition quick rules. Kept inline (not in shared YZE_RULES, which
@@ -1633,7 +1637,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
-  if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used)};
+  if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),sub:d.act.sub==='quick'?'quick':'full'};
   _lastRoll=null;
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
@@ -1695,6 +1699,8 @@ function actDo(i,j){
 }
 function actToggle(k){ _actCollapsed[k]=!_actCollapsed[k]; renderAction(); }
 function actEndTurn(){ var a=actState(); a.full=false; a.quick=0; a.used=0; renderAction(); scheduleAutosave(); }
+// Subtabs: Full Actions | Quick Actions — each shows the cards of that cost.
+function actSetSub(k){ actState().sub=k; renderAction(); scheduleAutosave(); }
 function actCard(o){
   var can=!o.blocked && actCan(o.kind);
   var btns=o.btns ? o.btns.map(function(b,j){ return '<button class="ac-do" onclick="actDo('+o.i+','+j+')">'+esc(b[0])+'</button>'; }).join('')
@@ -1845,14 +1851,20 @@ function renderAction(){
   var stress=clamp(num(S.stress),0,10), synth=actSynth();
   var badges=(!synth && stress>0)?'<span class="act-badge warn" title="Each Stress Die that shows a 1 triggers a Stress Response, and you can\'t push that roll">⚠ Stress Response risk</span>':'';
   if(broken) badges='<span class="act-badge warn" title="At zero Health you can make a single move action per round and nothing else (p.68)">Broken</span>'+badges;
+  var sub=a.sub==='quick'?'quick':'full';
+  var eqFull=O.equip.filter(function(o){ return o.kind==='full'; }), eqQuick=O.equip.filter(function(o){ return o.kind!=='full'; });
+  var tabs='<div class="act-subtabs"><button class="act-subtab'+(sub==='full'?' on':'')+'" onclick="actSetSub(\'full\')">Full Actions</button>'
+    +'<button class="act-subtab'+(sub==='quick'?' on':'')+'" onclick="actSetSub(\'quick\')">Quick Actions</button></div>';
   host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div>'
     +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button></div>'
-    +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+'</div>'
-    +actSec('attacks','Attacks',O.attacks,'')
-    +(O.equip.length?actSec('equip','Equipment',O.equip,'No consumables — add medkits, drugs or power cells on the Gear tab.'):'')
-    +actSec('full','Full Actions',O.full,'')
-    +actSec('quick','Quick Actions',O.quick,'')
-    +actSec('interrupts','Interrupts',O.interrupts,'');
+    +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+tabs+'</div>'
+    +(sub==='full'
+      ? actSec('attacks','Attacks',O.attacks,'')
+        +(eqFull.length?actSec('equip','Equipment',eqFull,''):'')
+        +actSec('full','Full Actions',O.full,'')
+      : (eqQuick.length?actSec('equip-q','Equipment',eqQuick,''):'')
+        +actSec('quick','Quick Actions',O.quick,'')
+        +actSec('interrupts','Interrupts',O.interrupts,''));
 }
 try{ if(localStorage.getItem('yze_dark')==='1') setDarkMode(true); }catch(e){}
 </script>

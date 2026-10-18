@@ -531,6 +531,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .act-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
 body.dark .act-pip{color:#d8cfbf;}
 body.dark .act-sec-hd .ttl{color:#d8cfbf;}
+.act-subtabs{display:flex;gap:0;border-top:1px solid var(--rule);}
+.act-subtab{flex:1;padding:9px 4px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--act-font);font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.act-subtab.on{color:var(--yz-dk);border-bottom-color:var(--yz);background:var(--paper);}
+body.dark .act-subtab.on{color:#d8cfbf;}
 body.dark .act-res b{color:#d8cfbf;}
 body.dark .act-badge.warn{color:#f0c060;}
 @media (max-width:600px){
@@ -1370,6 +1374,8 @@ function doPush(){
 function actFresh(owed){ return {slow:!!owed, fast:false, slowAsFast:false, owed:!!owed, defended:false, defendOwed:false, aimed:false}; }
 var _act=actFresh(false);
 var _actCollapsed={};
+var _actSub='slow';   // Action-tab subtab: 'slow' | 'fast' (saved as actSub)
+function actSetSub(k){ _actSub=k==='fast'?'fast':'slow'; renderAction(); scheduleAutosave(); }
 var _actFromTab=false;
 function actMainRoll(){ if(_actFromTab||typeof _act==='undefined'||!_act) return; if(!_act.slow){ _act.slow=true; if(typeof renderAction==='function') renderAction(); if(typeof scheduleAutosave==='function') scheduleAutosave(); } }
 var _actOpts=[];
@@ -1489,7 +1495,11 @@ function actBuild(){
 }
 function renderAction(){
   var host=$('act-hub'); if(!host||!S) return;
-  var O=actBuild();
+  var O=actBuild(), sub=_actSub==='fast'?'fast':'slow';
+  // Each subtab shows the cards of its own cost (anything not fast sits under Actions).
+  var mine=function(list){ return list.filter(function(o){ return sub==='fast' ? o.kind==='fast' : o.kind!=='fast'; }); };
+  var tabs='<div class="act-subtabs"><button class="act-subtab'+(sub==='slow'?' on':'')+'" onclick="actSetSub(\'slow\')">Actions</button>'
+    +'<button class="act-subtab'+(sub==='fast'?' on':'')+'" onclick="actSetSub(\'fast\')">Maneuvers</button></div>';
   var pip=function(on,lbl){ return '<span class="act-pip'+(on?' used':'')+'">'+lbl+'</span>'; };
   var pips=pip(_act.slow, _act.slowAsFast?'Action → Maneuver':(_act.owed?'Action (lost to Defend)':'Action'))+pip(_act.fast,'Maneuver');
   var card=function(o){ var can=!o.blocked&&actCan(o.kind);
@@ -1498,13 +1508,16 @@ function renderAction(){
   var sec=function(key,title,list,empty){ var col=!!_actCollapsed[key];
     return '<div class="act-sec'+(col?' collapsed':'')+'"><div class="act-sec-hd" onclick="actToggleSec(\''+key+'\')"><span class="caret">▼</span><span class="ttl">'+title+'</span></div><div class="act-sec-body">'+(list.length?list.map(card).join(''):'<div class="act-empty">'+empty+'</div>')+'</div></div>'; };
   host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div><button class="act-end" onclick="actEndTurn()" title="Clear this turn\'s action and maneuver">End Turn</button></div>'
-    +'<div class="act-row2">'+actRow2()+'</div></div>'
-    +sec('attacks','Attacks',O.attacks,'No weapons equipped — equip one on the Gear tab.')
-    +(ACT_SYS.specialTitle?sec('special',ACT_SYS.specialTitle,O.special,ACT_SYS.specialEmpty||''):'')
-    +(O.equip.length?sec('equip','Equipment',O.equip,'No consumables — add booze, meds, soda or grenades on the Gear tab.'):'')
-    +sec('react','Reactions',O.react,'')
-    +sec('slow','Actions',O.slow,'')
-    +sec('fast','Maneuvers',O.fast,'');
+    +'<div class="act-row2">'+actRow2()+'</div>'+tabs+'</div>'
+    +(sub==='slow'
+      ? sec('attacks','Attacks',O.attacks,'No weapons equipped — equip one on the Gear tab.')
+        +(ACT_SYS.specialTitle&&mine(O.special).length?sec('special',ACT_SYS.specialTitle,mine(O.special),''):'')
+        +(mine(O.equip).length?sec('equip','Equipment',mine(O.equip),''):'')
+        +sec('react','Reactions',O.react,'')
+        +sec('slow','Actions',O.slow,'')
+      : (ACT_SYS.specialTitle&&mine(O.special).length?sec('special-f',ACT_SYS.specialTitle,mine(O.special),''):'')
+        +(mine(O.equip).length?sec('equip-f','Equipment',mine(O.equip),''):'')
+        +sec('fast','Maneuvers',O.fast,''));
 }
 
 // Lists from the core rulebook, Chapter 6 (pp.80–89).
@@ -1550,7 +1563,7 @@ function setTab(name){
   [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
   try{ localStorage.setItem('myz_tab',name); }catch(e){} if(name==='action'&&typeof renderAction==='function') renderAction();
 }
-function setDefaultTab(){ var t='action'; try{ t=localStorage.getItem('myz_tab')||'action'; }catch(e){} if(!$('tab-'+t))t='action'; setTab(t); }
+function setDefaultTab(){ setTab('action'); }   // sheets always open on the Action tab
 
 // ── Rules ──
 var MYZ_RULES=[
@@ -1669,7 +1682,7 @@ function collectSheet(){
   S.name=($('f-name').value||'').trim(); S.pronouns=$('f-pronouns').value;
   S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value);
   { var fd=$('f-dream'); if(fd)S.dream=fd.value; var fden=$('f-den'); if(fden)S.den=fden.value; }
-  return Object.assign({}, S, { act:_act, system:'MYZ', class:(S.role||'Mutant'), campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
+  return Object.assign({}, S, { act:_act, actSub:_actSub, system:'MYZ', class:(S.role||'Mutant'), campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
 }
 function applySheet(d){
   d=d||{}; if(!S) S=blankState();
@@ -1694,6 +1707,7 @@ function applySheet(d){
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||''}; });
   _act=actFresh(false); if(d.act&&typeof d.act==='object'){ ['slow','fast','slowAsFast','owed','defended','defendOwed','aimed'].forEach(function(k){ _act[k]=!!d.act[k]; }); }
+  _actSub=d.actSub==='fast'?'fast':'slow';
   _lastRoll=null; renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
