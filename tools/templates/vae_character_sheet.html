@@ -523,8 +523,15 @@ body.dark .act-badge.warn{color:#f0c060;}
   .act-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
   .act-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .act-end{margin-left:0;}
-  .act-row2{justify-content:center;}
+  .act-row2{justify-content:flex-end;}
   .act-card .ac-do{padding:9px 12px;font-size:12px;}
+}
+/* Mobile Gear header: Resources / Capital chips drop under the title instead of overflowing the card. */
+@media (max-width:600px){
+  #tab-gear .section-bar.cbar{flex-wrap:wrap;row-gap:6px;}
+  #tab-gear .section-bar.cbar .hdr-right{display:contents;}
+  #tab-gear .section-bar.cbar .hdr-btn{margin-left:auto;}
+  #tab-gear .section-bar.cbar .eco-wrap{flex:1 1 100%;margin-left:0!important;justify-content:flex-start!important;}
 }
 </style>
 </head>

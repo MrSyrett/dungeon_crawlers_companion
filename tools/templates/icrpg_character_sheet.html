@@ -509,6 +509,12 @@ body.dark .tabs-bar{background:#1a161a;}
 .log-clear,.log-action-btn,.tray-input,.tray-select,.tray-toggle,.dice-btn{border-radius:6px;}
 .log-entry{border-radius:8px;}
 #log-collapse-btn{border-radius:6px 0 0 6px;}
+/* Mobile tab bar: 6 tabs as an even 3×2 grid (no orphan tab on its own row). */
+@media (max-width:600px){
+  .tabs-bar{display:grid;grid-template-columns:repeat(3,1fr);}
+  .tabs-bar .tab-btn{padding:10px 4px;min-width:0;}
+  .ic-modes button,.ic-coin{min-height:28px;}
+}
 </style>
 
 </head>

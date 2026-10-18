@@ -551,6 +551,11 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
   #d6-action .turn-row2 .turn-badges:empty{display:none;}
   #d6-action .tc-do{padding:9px 12px;font-size:12px;}
 }
+/* Mobile tab bar: 6 tabs as an even 3×2 grid instead of 4 + 2. */
+@media (max-width:600px){
+  .tabs-bar{display:grid;grid-template-columns:repeat(3,1fr);}
+  .tabs-bar .tab-btn{min-height:40px;padding:10px 4px;min-width:0;}
+}
 </style>
 </head>
 <body>

@@ -914,6 +914,10 @@ body.dark .tabs-bar{background:#1a1a1f;}
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+/* Narrow phones: keep the Action / Bonus Action / Reaction boxes readable. */
+@media (max-width:389px){
+  .econ-chip{font-size:11px;letter-spacing:0;padding:6px 3px;}
+}
 </style>
 </head>
 <body>

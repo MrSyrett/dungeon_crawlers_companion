@@ -1106,6 +1106,19 @@ body:not(.dark) .death-pip,body:not(.dark) .exh-pip{border-color:#8a7a52;}
 .sh-pip.scar::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;color:#f0dcff;}
 body.dark{--scar-c:#3a1f48;}
 
+/* Phones: give the weapon name room in the Action-tab attack table (headers in the compact UI face, slimmer Attack button). */
+@media (max-width:600px){
+  .atk-tbl th{font-family:var(--f-ui);font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+  .atk-tbl th,.atk-tbl td{padding-left:3px;padding-right:3px;}
+  .atk-tbl .mini-roll{padding-left:10px;padding-right:10px;letter-spacing:.02em;}
+}
+/* Narrow phones: keep the Action / Bonus Action / Reaction boxes readable. */
+@media (max-width:389px){
+  .turn-econ{gap:4px;}
+  .econ-chip{font-size:10px;letter-spacing:0;padding:6px 2px;}
+  .turn-subtab{font-size:11px;letter-spacing:.02em;padding:9px 2px;}
+  .atk-tbl .mini-roll{padding-left:7px;padding-right:7px;font-size:12px;}
+}
 </style>
 </head>
 <body class="dark">
