@@ -687,12 +687,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="card tabs-card">
       <div class="tabs-bar">
+        <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
         <button class="tab-btn" data-tab="attacks" onclick="setTab('attacks')">Attacks</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="features" onclick="setTab('features')">Features</button>
         <button class="tab-btn" data-tab="inventory" onclick="setTab('inventory')">Inventory</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
       </div>
+
+      <div class="tab-panel" id="tab-action"><div id="nim-turn"></div></div>
 
       <div class="tab-panel" id="tab-attacks">
         <div class="section-bar"><span>Attacks</span><span class="hdr-right"><span class="sb-note">Add weapons from the Item Store</span></span></div>
@@ -914,7 +917,7 @@ function renderWounds() {
   const max = num($('wounds-max').value) || 6; const wrap = $('wound-pips'); wrap.innerHTML = '';
   for(let i = 1; i <= max; i++) { const p = document.createElement('div'); p.className = 'pip wound' + (i <= wounds ? ' on' : ''); p.textContent = i; p.onclick = () => { wounds = i === wounds ? i - 1 : i; recalc(); scheduleAutosave(); }; wrap.appendChild(p); }
 }
-function renderActions() { const wrap = $('action-pips'); wrap.innerHTML = ''; for(let i = 1; i <= 3; i++) { const p = document.createElement('div'); p.className = 'pip act' + (i > actions ? ' spent' : ''); p.textContent = i; p.onclick = () => { actions = i > actions ? i : i - 1; renderActions(); }; wrap.appendChild(p); } }
+function renderActions() { if(typeof nimMaxActions === 'function' && actions > nimMaxActions()) actions = nimMaxActions(); if(typeof nimTurnMaybeRender === 'function') nimTurnMaybeRender(); const wrap = $('action-pips'); wrap.innerHTML = ''; for(let i = 1; i <= 3; i++) { const p = document.createElement('div'); p.className = 'pip act' + (i > actions ? ' spent' : ''); p.textContent = i; p.onclick = () => { actions = i > actions ? i : i - 1; renderActions(); }; wrap.appendChild(p); } }
 function spendAction() { if(actions > 0) { actions -= 1; renderActions(); } }
 function resetActions() { actions = 3; renderActions(); }
 
@@ -1000,6 +1003,7 @@ function d20Check(label, bonus, opts) {
   else if(dc) { if(total >= dc) { type = 'crit'; verdict = ' ✓ vs DC ' + dc; } else { type = 'fumble'; verdict = ' ✗ vs DC ' + dc; } }
   addLog(label, String(total), 'd20: ' + r.value + (bonus ? (bonus > 0 ? ' +' : ' ') + bonus : '') + (r.note ? ' ' + r.note : '') + (opts.note ? ' · ' + opts.note : '') + verdict, type);
   clearAdv();
+  d20Check.lastNat = r.value;   // natural die, for rules keyed on it (Initiative: a natural 20 = all 3 actions)
   return total;
 }
 function rollSkill(name) { const s = SKILLS.find(x => x[0] === name); d20Check(name + ' check', skillTotal(name, s[1])); }
@@ -1017,8 +1021,11 @@ function rollSave(s) {
 function rollInitiative() {
   if(/Advantage on Initiative/i.test(ancestryText()) && !advState) setAdv(1);
   const t = d20Check('Initiative', initBonus(), { dc: null });
-  actions = t >= 20 ? 3 : t >= 10 ? 2 : 1; renderActions();
-  addLog('Start of combat', actions + ' action' + (actions > 1 ? 's' : ''), t >= 20 ? '20+: all 3 actions' : t >= 10 ? 'two digits: 2 actions' : 'single digit: 1 action', 'normal');
+  const nat20 = d20Check.lastNat === 20;   // core p.15: "A result of 20+ (or a natural 20)" = all 3
+  actions = (t >= 20 || nat20) ? 3 : t >= 10 ? 2 : 1;
+  const dyingCap = (typeof nimMaxActions === 'function') ? nimMaxActions() : 3; if(actions > dyingCap) actions = dyingCap;
+  renderActions();
+  addLog('Start of combat', actions + ' action' + (actions > 1 ? 's' : ''), (t >= 20 || nat20 ? (nat20 && t < 20 ? 'natural 20' : '20+') + ': all 3 actions' : t >= 10 ? 'two digits: 2 actions' : 'single digit: 1 action') + (dyingCap < 3 ? ' · Dying: limited to 1' : ''), 'normal');
 }
 function rollLoose(sides) { const r = rollAdv(sides); addLog('d' + sides, String(r.value), r.note || '', 'normal'); clearAdv(); }
 
@@ -1026,12 +1033,16 @@ function rollLoose(sides) { const r = rollAdv(sides); addLog('d' + sides, String
 function parseDamage(expr) {
   const m = /(\d+)d(\d+)\s*([+-]\s*(?:STR|DEX|INT|WIL|KEY|LVL|\d+))*/i.exec(String(expr || ''));
   if(!m) return null;
-  const mods = [...String(expr).matchAll(/([+-])\s*(STR|DEX|INT|WIL|KEY|LVL|\d+)/gi)].map(x => ({ sign: x[1] === '-' ? -1 : 1, what: x[2].toUpperCase() }));
-  return { count: num(m[1]), sides: num(m[2]), mods };
+  // Modifiers come from the matched formula only (was: the whole string, so "1d4+STR or 1d6+STR" added STR twice).
+  const modsOf = s => [...String(s).matchAll(/([+-])\s*(STR|DEX|INT|WIL|KEY|LVL|\d+)/gi)].map(x => ({ sign: x[1] === '-' ? -1 : 1, what: x[2].toUpperCase() }));
+  // "1d4; on hit: 1+STR" (Unarmed Strike, core p.34): the die only decides hit/miss/crit; damage is the on-hit formula.
+  const oh = /on hit:\s*([0-9A-Z+\-\s]+)/i.exec(String(expr));
+  return { count: num(m[1]), sides: num(m[2]), mods: modsOf(m[0]), onHit: oh ? modsOf('+' + oh[1].trim()) : null };
 }
 function keyStat() { const c = cls(); return c ? Math.max(...c.keyStats.map(stat)) : Math.max(...STATS.map(stat)); }
 function modValue(what) { if(what === 'KEY') return keyStat(); if(what === 'LVL') return level(); if(/^\d+$/.test(what)) return num(what); return stat(what); }
-function rollAttack(name, expr) {
+function rollAttack(name, expr, opts) {
+  opts = opts || {};   // { noMiss: "does not miss" spells, vicious: Vicious property (+1 die per crit roll) }
   const p = parseDamage(expr);
   if(!p) { addLog(name, '?', 'Could not read damage "' + expr + '"', 'normal'); return; }
   const dice = []; const n = advState ? Math.max(1, num($('adv-n').value)) : 0;
@@ -1040,11 +1051,14 @@ function rollAttack(name, expr) {
   let kept = pool.slice();
   for(let i = 0; i < n; i++) { const idx = advState === 1 ? kept.indexOf(Math.min(...kept)) : kept.indexOf(Math.max(...kept)); kept.splice(idx, 1); }
   const primary = kept[0];
-  if(primary === 1) { addLog(name, 'MISS', 'primary die rolled 1 [' + pool.join(',') + ']', 'fumble'); clearAdv(); spendAction(); return; }
-  let total = kept.reduce((a, b) => a + b, 0), crits = 0, detail = p.count + 'd' + p.sides + ': ' + kept.join('+');
+  if(primary === 1 && !opts.noMiss) { addLog(name, 'MISS', 'primary die rolled 1 [' + pool.join(',') + ']', 'fumble'); clearAdv(); spendAction(); return; }
+  let total = p.onHit ? 0 : kept.reduce((a, b) => a + b, 0), crits = 0, detail = p.count + 'd' + p.sides + ': ' + kept.join('+') + (p.onHit ? ' (hit)' : '');
   let explode = primary;
-  while(explode === p.sides && crits < 20) { explode = dN(p.sides); crits += 1; total += explode; detail += '' + explode; }
-  let bonus = 0; p.mods.forEach(m => { bonus += m.sign * modValue(m.what); });
+  while(explode === p.sides && crits < 20) {
+    explode = dN(p.sides); crits += 1; total += explode; detail += ' +' + explode + '!';   // was '' + explode, which glued digits together ("1d10: 102")
+    if(opts.vicious) { const v = dN(p.sides); total += v; detail += ' +' + v + ' vicious'; }
+  }
+  let bonus = 0; (p.onHit || p.mods).forEach(m => { bonus += m.sign * modValue(m.what); });
   total += bonus;
   if(bonus) detail += (bonus > 0 ? ' +' : ' ') + bonus;
   if(n) detail += ' ' + (advState === 1 ? 'adv' : 'dis') + (n > 1 ? n : '') + ' [' + pool.join(',') + ']';
@@ -1073,7 +1087,7 @@ function addAttackRow(a) {
   // weapon; the fixed Unarmed strike has no ✕ either. Only legacy/unlinked rows
   // from old saves keep a per-row ✕.
   const removeBtn = (a.link || a.fixed) ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button>`;
-  tr.innerHTML = `<td><input type="text" class="atk-name" value="${esc(a.name)}" placeholder="Longsword"></td><td><input type="text" class="atk-dmg" value="${esc(a.damage)}" placeholder="1d8+STR" oninput="refreshAttackRows()"></td><td><input type="text" class="atk-props" value="${esc(a.props)}" placeholder="2-handed, Reach 2"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this.closest('tr').querySelector('.atk-name').value||'Attack', this.closest('tr').querySelector('.atk-dmg').value)">🎲 Attack</button>${removeBtn}</td>`;
+  tr.innerHTML = `<td><input type="text" class="atk-name" value="${esc(a.name)}" placeholder="Longsword"></td><td><input type="text" class="atk-dmg" value="${esc(a.damage)}" placeholder="1d8+STR" oninput="refreshAttackRows()"></td><td><input type="text" class="atk-props" value="${esc(a.props)}" placeholder="2-handed, Reach 2"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this.closest('tr').querySelector('.atk-name').value||'Attack', this.closest('tr').querySelector('.atk-dmg').value, { vicious: /vicious/i.test(this.closest('tr').querySelector('.atk-props').value) })">🎲 Attack</button>${removeBtn}</td>`;
   $('attacks-body').appendChild(tr); refreshAttackRows();
 }
 function refreshAttackRows() {}
@@ -1110,7 +1124,28 @@ function castSpell(btn) {
     $('mana-cur').value = num($('mana-cur').value) - tier;
   }
   const dmg = sp ? /Damage:\s*([^.]+)/i.exec(sp.text) : null;
-  if(dmg && parseDamage(dmg[1])) { rollAttack(name + (tier ? ' (tier ' + tier + ')' : ''), dmg[1]); }
+  const dd = dmg ? /^\s*d([468])\1\b/i.exec(dmg[1]) : null;
+  if(dd) {
+    // d44 / d66 / d88: two dice read as tens + ones; "these rolls cannot miss or crit" (core Glossary p.55).
+    const s = num(dd[1]), a = dN(s), b = dN(s);
+    addLog(name + (tier ? ' (tier ' + tier + ')' : ''), String(a * 10 + b), 'd' + s + s + ': ' + a + '|' + b + ' damage (cannot miss or crit)' + (/advantage/i.test(dmg[1]) ? ' · the spell rolls with advantage: roll again and keep the higher' : ''), 'normal');
+    spendAction();
+  }
+  else if(dmg && parseDamage(dmg[1])) {
+    let ex = dmg[1];
+    // Cantrip scaling (Spells ch., "High Levels: … every 5 levels").
+    const steps = tier === 0 && sp ? Math.floor(level() / 5) : 0;
+    if(steps) {
+      const flat = /High Levels:\s*\+(\d+) damage every 5 levels/i.exec(sp.text);
+      const dice = /High Levels:\s*\+(\d+)d(\d+) every 5 levels/i.exec(sp.text);
+      const inc = /High Levels:\s*Increment the die size 1 step every 5 levels/i.test(sp.text);
+      const lead = /(\d+)d(\d+)/i.exec(ex);
+      if(flat) ex = ex.replace(/(\d+d\d+(?:\s*[+-]\s*(?:STR|DEX|INT|WIL|KEY|LVL|\d+))*)/i, '$1+' + (num(flat[1]) * steps));
+      else if(dice && lead && num(dice[2]) === num(lead[2])) ex = ex.replace(lead[0], (num(lead[1]) + num(dice[1]) * steps) + 'd' + lead[2]);
+      else if(inc && lead) { const L = [4, 6, 8, 10, 12, 20]; const i = Math.max(0, L.indexOf(num(lead[2]))); ex = ex.replace(lead[0], lead[1] + 'd' + L[Math.min(L.length - 1, i + steps)]); }
+    }
+    rollAttack(name + (tier ? ' (tier ' + tier + ')' : ''), ex, { noMiss: /does not miss/i.test(dmg[1]), vicious: /Vicious/i.test(dmg[1]) });
+  }
   else { addLog(name, tier ? '−' + tier + ' mana' : 'cantrip', sp ? sp.text.slice(0, 140) : '', 'normal'); spendAction(); }
   scheduleAutosave();
 }
@@ -1192,7 +1227,7 @@ function fillDatalists() {
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
 var _tab = 'features';
-const TABS = ['attacks','spells','features','inventory','notes'];
+const TABS = ['action','attacks','spells','features','inventory','notes'];
 function setTab(name) {
   if(!TABS.includes(name)) name = 'features';
   _tab = name;
@@ -1200,6 +1235,7 @@ function setTab(name) {
     const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
     const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
   });
+  if(name === 'action' && typeof renderNimTurn === 'function') renderNimTurn();
 }
 function setDefaultTab() { setTab(_tab || (cls() && cls().spellcasting ? 'spells' : 'features')); }
 
@@ -1367,7 +1403,7 @@ function collectSheet() {
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),
     inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value, link: tr.dataset.link || '' })).filter(i => i.name),
-    gold: num(v('f-gold')), silver: num(v('f-silver')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(), tab: _tab,
+    gold: num(v('f-gold')), silver: num(v('f-silver')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(), tab: _tab, turn: (typeof _nturn !== 'undefined' ? Object.assign({}, _nturn) : undefined),
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
 }
@@ -1389,6 +1425,7 @@ function applySheet(d) {
   set('f-gold', d.gold ?? 50); set('f-silver', d.silver || 0); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
   conditions = Array.isArray(d.conditions) ? d.conditions.slice() : []; renderConditions();
   _tab = TABS.includes(d.tab) ? d.tab : _tab;
+  if(typeof _nturn !== 'undefined') { Object.assign(_nturn, { attacks: 0, moves: 0, reacted: {}, assessed: [] }, (d.turn && typeof d.turn === 'object') ? d.turn : {}); if(!_nturn.reacted || typeof _nturn.reacted !== 'object') _nturn.reacted = {}; if(!Array.isArray(_nturn.assessed)) _nturn.assessed = []; }
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
   setDefaultTab();
@@ -1658,5 +1695,218 @@ input.no-spin::-webkit-inner-spin-button,input.no-spin::-webkit-outer-spin-butto
 })();
 </script>
 
+<script>
+/* ═══ ACTION TAB — the turn controller (Nimble core: "Actions", "Reactions", "Rushed Attacks", "Initiative") ═══
+   • 3 actions per turn; ALL recharge at the end of your turn (End Turn). The pips are the
+     sheet's existing `actions` counter, so the Vitals pips and this tab stay in step.
+   • Attack = 1 action (no to-hit roll — the primary die decides, as rollAttack already does).
+     Additional attacks on the same turn are RUSHED: cumulative disadvantage (2nd attack dis 1, 3rd dis 2).
+   • Cast a Spell = the spell's listed action cost (+ its tier in mana). Casting-time spells are out of combat.
+   • Move = 1 action, up to Speed. Assess = 1 action: a DC 12 skill check.
+   • Heroic Reactions cost 1 action, are taken off-turn, each no more than 1/round:
+     Defend (reduce one attack's damage by your Armor), Interpose, Opportunity Attack (melee, disadvantage), Help.
+     Reactions spend the actions you didn't use, so they lower what you start your next turn with.
+   • Dying (Dying condition, or 0 HP): actions are limited to 1, and attacking/casting a spell
+     costs 1 Wound unless you pass a DC 10 STR save (rolled automatically after the action).
+   • Harmful spells are attacks (Glossary: "casting a harmful spell"), so they count toward Rushed.
+     Rushed disadvantage nets against any advantage/disadvantage already set in the tray (core p.8).
+   • Assess: each skill once per encounter (tracked until the next Initiative roll).
+   No round counter; End Turn writes nothing to the roll log. */
+var _nturn = { attacks: 0, moves: 0, reacted: {}, assessed: [] };
+var _nturnCollapsed = { checks: true };
+var _nturnOpts = [];
+function nimEsc(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function nimDying(){ if(Array.isArray(conditions) && conditions.some(c => /^dying$/i.test(c))) return true; const mx = num($('hp-max').value); return mx > 0 && num($('hp-cur').value) <= 0; }   // core p.9: at 0 HP you gain Dying
+// Set the tray to (current adv/dis) minus k instances of disadvantage — instances cancel one for one (core p.8).
+function nimNetDis(k){ if(!k) return; const cur = advState ? advState * Math.max(1, num($('adv-n').value)) : 0; const net = cur - k; advState = 0; $('adv-n').value = Math.max(1, Math.abs(net)); if(net) setAdv(net > 0 ? 1 : -1); else clearAdv(); }
+// Dying: attacking/casting causes 1 Wound unless a DC 10 STR save (core p.9). Uses the hero's STR save adv/dis.
+function nimDyingSave(){
+  if(!nimDying()) return;
+  clearAdv(); if(saveAdv === 'STR') setAdv(1); else if(saveDis === 'STR') setAdv(-1);
+  $('adv-n').value = 1;
+  d20Check('Dying · STR save', stat('STR'), { dc: 10, note: 'fail = 1 Wound' });
+  const nat = d20Check.lastNat, t = nat + stat('STR');
+  const pass = nat === 20 || (nat !== 1 && t >= 10);
+  if(!pass) { wounds += 1; recalc(); }
+}
+function nimMaxActions(){ return nimDying() ? 1 : 3; }
+function nimSpellCost(sp){ if(!sp || !sp.actions) return { n: 1, timed: '' }; const m = /(\d+)\s*Actions?/i.exec(sp.actions); if(m) return { n: +m[1], timed: '' }; const t = /Casting Time:\s*([^.;]+)/i.exec(sp.actions); return { n: 0, timed: t ? t[1].trim() : sp.actions }; }
+function nimAfter(){ renderActions(); renderNimTurn(); if(typeof scheduleAutosave === 'function') scheduleAutosave(); }
+function nimSpend(n){ actions = Math.max(0, actions - n); }
+
+function nimBuild(){
+  const O = { attacks: [], spells: [], reactions: [], actions: [], checks: [] };
+  _nturnOpts = [];
+  const add = (sec, o) => { o.i = _nturnOpts.length; _nturnOpts.push(o); O[sec].push(o); };
+  const rushed = _nturn.attacks;   // dis count for the NEXT attack this turn
+  // Attacks (rows from the Attacks tab — management stays there)
+  document.querySelectorAll('#attacks-body tr').forEach(tr => {
+    const name = (tr.querySelector('.atk-name') || {}).value || ''; const dmg = (tr.querySelector('.atk-dmg') || {}).value || '';
+    if(!name.trim()) return;
+    const props = (tr.querySelector('.atk-props') || {}).value || '';
+    add('attacks', { name: name, cost: 1, sub: [dmg, props, rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
+      btn: 'Attack', run: () => {
+        nimNetDis(rushed);
+        rollAttack(name, dmg, { vicious: /vicious/i.test(props) });   // spends 1 action
+        _nturn.attacks += 1; nimDyingSave(); return true; } });
+  });
+  // Spells (rows from the Spells tab)
+  const mana = num($('mana-cur').value);
+  document.querySelectorAll('#spells-body tr').forEach(tr => {
+    const name = (tr.querySelector('.sp-name') || {}).value || ''; if(!name.trim()) return;
+    const tier = num((tr.querySelector('.sp-tier') || {}).value);
+    const sp = D.spells().find(x => norm(x.name) === norm(name));
+    const c = nimSpellCost(sp);
+    const dm = sp ? /Damage:\s*([^.]+)/i.exec(sp.text) : null;
+    const rng = sp ? /Range:\s*([^.]+)|Reach:\s*([^.]+)/i.exec(sp.text) : null;
+    const blocked = c.timed ? 'Casting time ' + c.timed : (tier > mana ? 'Not enough mana' : '');
+    const harmful = !!(dm && (parseDamage(dm[1]) || /^\s*d([468])\1\b/i.test(dm[1])));   // a harmful spell is an attack → Rushed
+    add('spells', { name: name, cost: c.timed ? 99 : c.n,
+      sub: [c.timed ? '' : c.n + ' action' + (c.n === 1 ? '' : 's'), tier ? tier + ' mana' : 'Cantrip', dm ? dm[1].trim() : '', rng ? 'Range ' + (rng[1] || rng[2]).trim() : '', harmful && rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
+      blocked: blocked, btn: 'Cast', run: () => {
+        const before = actions, adv0 = advState, n0 = $('adv-n').value;
+        if(harmful) nimNetDis(rushed);
+        castSpell(tr.querySelector('button.small-btn'));   // spends mana + 1 action (or aborts)
+        if(actions === before) { advState = 0; $('adv-n').value = n0; if(adv0) setAdv(adv0); else clearAdv(); return false; }
+        if(c.n > 1) nimSpend(c.n - 1);
+        if(harmful) _nturn.attacks += 1;
+        nimDyingSave();
+        return true; } });
+  });
+  // Heroic Reactions — 1 action each, off-turn, each 1/round
+  const armor = (typeof armorValue === 'function') ? armorValue() : 0;
+  const melee = [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: (tr.querySelector('.atk-name') || {}).value || '', dmg: (tr.querySelector('.atk-dmg') || {}).value || '', props: (tr.querySelector('.atk-props') || {}).value || '' }))
+    .filter(a => a.name.trim() && !/\brange|ranged|bow|crossbow|sling|ballista/i.test(a.props + ' ' + a.name));   // Thrown melee weapons (Dagger, Hand Axe) still count as melee
+  const oaw = melee.find(a => !/unarmed/i.test(a.name)) || melee[0];   // prefer a real melee weapon
+  const R = (key, name, sub, run, extra) => add('reactions', Object.assign({ name: name, cost: 1, react: key, sub: sub, btn: 'Use', blocked: _nturn.reacted[key] ? 'Used this round' : '', run: () => { const ok = run(); if(ok !== false) { nimSpend(1); _nturn.reacted[key] = true; } return ok !== false; } }, extra || {}));
+  R('defend', 'Defend', 'Reduce one attack\'s damage by your Armor (' + armor + ')', () => { addLog('Defend', '−' + armor + ' dmg', 'Reaction · reduce the attack\'s damage by Armor ' + armor, 'normal'); });
+  R('interpose', 'Interpose', 'Swap into the space of a creature within 2 spaces and become the target', () => { addLog('Interpose', '↔', 'Reaction · swapped in to become the target', 'normal'); });
+  R('oa', 'Opportunity Attack', oaw ? oaw.name + ' · ' + oaw.dmg + ' · melee, with disadvantage' : 'Needs a melee weapon on the Attacks tab', () => {
+    if(!oaw) return false;
+    nimNetDis(1);
+    const before = actions; rollAttack(oaw.name + ' (opportunity)', oaw.dmg, { vicious: /vicious/i.test(oaw.props) }); if(actions < before) actions = before;   // the reaction pays its own action
+    nimDyingSave();
+  }, { btn: 'Attack', blocked: _nturn.reacted.oa ? 'Used this round' : (oaw ? '' : 'No melee weapon') });
+  R('help', 'Help', 'Give an ally advantage on a roll (explain how; one Help per roll)', () => { addLog('Help', 'Advantage', 'Reaction · an ally gains advantage on their roll', 'normal'); });
+  // Actions
+  const speed = (typeof speedValue === 'function') ? speedValue() : 6;
+  add('actions', { name: 'Move', cost: 1, sub: 'Up to Speed ' + speed + ' (difficult terrain halves it)', btn: 'Move', run: () => { nimSpend(1); _nturn.moves += 1; addLog('Move', speed + ' spaces', 'Action · move up to Speed ' + speed, 'normal'); return true; } });
+  const used = _nturn.assessed || [];
+  add('actions', { name: 'Assess', cost: 1, sub: 'DC 12 skill check — ask a question, create an opening, or anticipate danger' + (used.length ? ' · used this encounter: ' + used.join(', ') : ''), assess: true, btn: 'Roll', blocked: SKILLS.every(([n]) => used.includes(n)) ? 'Every skill used this encounter' : '', run: (skill) => {
+    const sk = SKILLS.find(x => x[0] === skill) || SKILLS.find(x => x[0] === 'Perception');
+    if(used.includes(sk[0])) { addLog('Assess', '✗', sk[0] + ' already used to Assess this encounter (foes adapt)', 'normal'); return false; }
+    nimSpend(1); (_nturn.assessed = used).push(sk[0]);
+    d20Check('Assess · ' + sk[0], skillTotal(sk[0], sk[1]), { dc: 12 }); return true; } });
+  // Use a Skill (any skill check, 1 action)
+  SKILLS.forEach(([n, st]) => { const t = skillTotal(n, st); add('checks', { name: n, cost: 1, sub: (t >= 0 ? '+' : '') + t + ' · ' + st, btn: 'Roll', run: () => { nimSpend(1); rollSkill(n); return true; } }); });
+  return O;
+}
+function nimDo(i){
+  const o = _nturnOpts[i]; if(!o) return;
+  if(o.blocked) { addLog(o.name, '✗', o.blocked, 'normal'); return; }
+  if(actions < o.cost) { addLog(o.name, '✗', 'Not enough actions (' + o.cost + ' needed, ' + actions + ' left)', 'normal'); return; }
+  let arg; if(o.assess) { const sel = document.getElementById('nim-assess-skill'); arg = sel ? sel.value : 'Perception'; }
+  const ok = o.run(arg);
+  nimAfter();
+  return ok;
+}
+function nimEndTurn(){
+  actions = nimMaxActions();
+  _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {};
+  nimAfter();
+}
+// Initiative starts a new encounter: clear the per-turn and per-encounter (Assess) trackers, then roll.
+function nimInitiative(){ _nturn.attacks = 0; _nturn.moves = 0; _nturn.reacted = {}; _nturn.assessed = []; rollInitiative(); nimAfter(); }
+function nimToggleSec(k){ _nturnCollapsed[k] = !_nturnCollapsed[k]; renderNimTurn(); }
+function renderNimTurn(){
+  const host = document.getElementById('nim-turn'); if(!host) return;
+  const max = nimMaxActions(); if(actions > max) actions = max;
+  const O = nimBuild();
+  let pips = ''; for(let k = 1; k <= 3; k++) pips += '<span class="nturn-pip' + (k > actions ? ' used' : '') + (k > max ? ' locked' : '') + '">Action ' + k + '</span>';
+  const mana = num($('mana-cur').value), manaMax = num($('mana-max').value);
+  const speed = (typeof speedValue === 'function') ? speedValue() : 6;
+  const badges = (nimDying() ? '<span class="nturn-badge warn" title="Dying: actions are limited to 1">Dying · 1 action</span>' : '')
+    + (_nturn.attacks ? '<span class="nturn-badge" title="Rushed Attacks: each attack after the first this turn has cumulative disadvantage">Rushed · next attack dis ×' + _nturn.attacks + '</span>' : '');
+  const card = o => {
+    const can = !o.blocked && actions >= o.cost;
+    const sub = [o.blocked, o.sub].filter(Boolean).join(' · ');
+    const usedA = _nturn.assessed || [], firstA = (SKILLS.find(([n]) => n === 'Perception' && !usedA.includes(n)) || SKILLS.find(([n]) => !usedA.includes(n)) || ['Perception'])[0];
+    const assess = o.assess ? '<select id="nim-assess-skill" class="nturn-sel" data-nolock onclick="event.stopPropagation()">' + SKILLS.map(([n]) => '<option' + (n === firstA ? ' selected' : '') + (usedA.includes(n) ? ' disabled' : '') + '>' + n + '</option>').join('') + '</select>' : '';
+    return '<div class="nturn-card' + (can ? '' : ' disabled') + '"><div class="nc-main"><div class="nc-name">' + nimEsc(o.name) + '</div>' + (sub ? '<div class="nc-sub">' + nimEsc(sub) + '</div>' : '') + '</div>' + assess + '<button class="nc-do" onclick="nimDo(' + o.i + ')">' + nimEsc(o.btn) + '</button></div>';
+  };
+  const sec = (k, title, list, empty) => '<div class="nturn-sec' + (_nturnCollapsed[k] ? ' collapsed' : '') + '"><div class="nturn-sec-hd" onclick="nimToggleSec(\'' + k + '\')"><span class="nc-caret">▼</span><span class="nc-title">' + title + '</span></div><div class="nturn-sec-body">' + (list.length ? list.map(card).join('') : '<div class="nturn-empty">' + empty + '</div>') + '</div></div>';
+  host.innerHTML =
+    '<div class="nturn-top"><div class="nturn-row1"><div class="nturn-econ">' + pips + '</div>'
+    + '<button class="nturn-end" onclick="nimEndTurn()" title="All actions recharge at the end of your turn">End Turn</button></div>'
+    + '<div class="nturn-row2">'
+    + (manaMax || mana ? '<span class="nturn-stat"><span class="nl">Mana</span> <b>' + mana + '</b>/' + manaMax + '</span>' : '')
+    + '<div class="nturn-badges">' + badges + '</div>'
+    + '<span class="nturn-stat"><span class="nl">Speed</span> <b>' + speed + '</b>' + (_nturn.moves ? ' <span class="nd">· moved ' + (_nturn.moves * speed) + '</span>' : '') + '</span>'
+    + '<button class="nturn-mini" onclick="nimInitiative()" title="Roll Initiative — single digit: 1 action, two digits: 2, 20+: all 3">Initiative</button>'
+    + '</div></div>'
+    + sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons from the Item Store (Inventory tab).')
+    + sec('spells', 'Spells', O.spells, 'No spells — add them from the Spellbook (Spells tab).')
+    + sec('reactions', 'Heroic Reactions', O.reactions, '')
+    + sec('actions', 'Actions', O.actions, '')
+    + sec('checks', 'Use a Skill', O.checks, '');
+}
+var _nturnT = null;
+function nimTurnMaybeRender(){ const p = document.getElementById('tab-action'); if(!p || !p.classList.contains('on')) return; clearTimeout(_nturnT); _nturnT = setTimeout(renderNimTurn, 60); }
+['input','change'].forEach(ev => document.addEventListener(ev, e => {
+  if(e.target && e.target.closest && e.target.closest('#nim-turn')) return;
+  nimTurnMaybeRender();
+}));
+document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#cond-list')) nimTurnMaybeRender(); });
+</script>
+<style id="nim-turn-style">
+#tab-action{padding:0;}
+.nturn-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.nturn-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
+.nturn-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+.nturn-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--nim);color:var(--nim-dk);border-radius:12px;padding:3px 11px;}
+.nturn-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.nturn-pip.locked{opacity:.35;}
+.nturn-end{flex:0 0 auto;background:var(--nim);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.nturn-end:hover{filter:brightness(1.1);}
+.nturn-row2{display:flex;align-items:center;gap:12px;padding:0 10px 9px;flex-wrap:wrap;}
+.nturn-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;white-space:nowrap;}
+.nturn-stat .nl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.nturn-stat b{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--ink);}
+.nturn-stat .nd{font-size:11px;}
+.nturn-badges{display:flex;gap:6px;flex-wrap:wrap;flex:1 1 auto;}
+.nturn-badge{display:inline-flex;align-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:2px 9px;border:1px solid var(--nim);color:var(--nim-dk);background:var(--nim-lt);}
+.nturn-badge.warn{border-color:#c98a12;color:#9a6508;background:rgba(232,170,40,.14);}
+body.dark .nturn-badge.warn{color:#f0c060;}
+.nturn-mini{background:transparent;border:1px solid var(--nim);color:var(--nim-dk);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+.nturn-mini:hover{background:var(--nim-lt);}
+.nturn-sec{border-bottom:1px solid var(--rule);}
+.nturn-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.nturn-sec-hd .nc-caret{color:var(--nim);font-size:10px;transition:transform .12s;}
+.nturn-sec.collapsed .nc-caret{transform:rotate(-90deg);}
+.nturn-sec-hd .nc-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--nim-dk);}
+.nturn-sec.collapsed .nturn-sec-body{display:none;}
+.nturn-sec-body{padding:2px 12px 6px;}
+.nturn-card{display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid var(--rule);}
+.nturn-card:last-child{border-bottom:none;}
+.nturn-card .nc-main{flex:1;min-width:0;}
+.nturn-card .nc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--ink);line-height:1.15;}
+.nturn-card .nc-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.nturn-card .nc-do{flex:0 0 auto;background:var(--nim);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.nturn-card .nc-do:hover{filter:brightness(1.1);}
+.nturn-card.disabled{opacity:.42;}
+.nturn-card.disabled .nc-do{background:var(--muted);pointer-events:none;}
+.nturn-card.disabled .nc-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.nturn-sel{flex:0 0 auto;border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:4px 6px;}
+.nturn-empty{font-size:12px;color:var(--muted);padding:10px 2px;}
+@media (max-width:600px){
+  .nturn-row1 .nturn-econ{flex-basis:100%;justify-content:center;}
+  .nturn-row1{justify-content:center;}
+  .nturn-row2 .nturn-badges{order:-1;flex-basis:100%;justify-content:center;}
+  .nturn-row2 .nturn-badges:empty{display:none;}
+  .nturn-card .nc-do{padding:9px 12px;font-size:12px;}
+  .nturn-card{flex-wrap:wrap;}
+  .nturn-card .nturn-sel{order:3;}
+}
+</style>
 </body>
 </html>

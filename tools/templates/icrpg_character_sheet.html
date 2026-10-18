@@ -708,12 +708,15 @@ body.dark .tabs-bar{background:#1a161a;}
 
       <div class="card tabs-card">
       <div class="tabs-bar">
+        <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
         <button class="tab-btn" data-tab="abilities" onclick="setTab('abilities')">Abilities</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="loot" onclick="setTab('loot')">Loot</button>
         <button class="tab-btn" data-tab="story" onclick="setTab('story')">Story</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
       </div>
+
+      <div class="tab-panel" id="tab-action"><div id="ic-turn"></div></div>
 
       <div class="tab-panel" id="tab-abilities">
         <div class="section-bar"><span>Abilities · Powers · Augments</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('abil')">＋ Add</button></span></div>
@@ -994,8 +997,282 @@ function setTab(name){
   [].forEach.call(document.querySelectorAll('.tab-btn'), function(b){ b.classList.toggle('on', b.dataset.tab===name); });
   [].forEach.call(document.querySelectorAll('.tab-panel'), function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
   try{ localStorage.setItem('icrpg_tab', name); }catch(e){}
+  if(name==='action' && typeof icRenderTurn==='function') icRenderTurn();
 }
 function setDefaultTab(){ var t='abilities'; try{ t=localStorage.getItem('icrpg_tab')||'abilities'; }catch(e){} if(!$('tab-'+t)) t='abilities'; setTab(t); }
+
+// ═══ ACTION TAB (the turn controller) ═══════════════════════════════════════
+// ICRPG core: each TURN is ACTION ONLY, MOVE NEAR + ACTION, or MOVE FAR (the whole
+// TURN). Rolls are D20 + STAT vs the room TARGET (HARD +3 / EASY −3); a successful
+// ATTEMPT rolls EFFORT (Basic d4, Weapons & Tools d6, Guns d8, Magic & Energy d10),
+// and a natural 20 adds an ULTIMATE d12. Recover = sacrifice a TURN: D20 + CON →
+// regain CON + 1 HP. Management (adding loot, abilities, spells) stays in the other
+// tabs — this tab only performs. No round counter; End Turn logs nothing.
+var _icTurn = { move:false, action:false, far:false, mode:'normal' };
+var _icCollapsed = { checks:true };
+var _icOpts = [];
+var IC_EFF = { d4:'Basic', d6:'WeaponsTools', d8:'Guns', d10:'MagicEnergy', d12:'Ultimate' };
+var IC_EFF_LABEL = { d4:'Basic', d6:'Weapons & Tools', d8:'Guns', d10:'Magic & Energy', d12:'Ultimate' };
+// Core-book spells listed under "WIS SPELLS (Roll WIS to cast)" (Master Ed. p.48–49);
+// the spell data has no stat field, so these would otherwise default to INT.
+var IC_WIS_SPELLS = ['elemental air','elemental earth','elemental fire','elemental ice','elemental beast','elemental storm','elemental vortex','elemental water','radiant shield','healing nova','healing touch','holy bulwark','invulnerability','cleanse','lion heart','regeneration','resurrection','yogi stasis','far seer','quickness','astral connection','atom palm','astral self','wild growth','vine whip','enchant','animal friend','woodshaper','dire form','forager','gathering stone'];
+
+function icNorm(s){ return String(s==null?'':s).trim().toLowerCase(); }
+function icFind(list, name){ var k=icNorm(name); return list.find(function(x){ return icNorm(x.name)===k; }) || null; }
+function icRows(kind){
+  return [].map.call(document.querySelectorAll('#'+kind+'-body tr'), function(tr){
+    var g=function(c){ var el=tr.querySelector(c); return el?el.value.trim():''; };
+    return { name:g('.it-name'), tag:g('.it-tag'), note:g('.it-note') };
+  }).filter(function(r){ return r.name; });
+}
+function icEffBonus(dieCode){ var el=$('ef-'+(IC_EFF[dieCode]||'')); return el?num(el.value):0; }
+function icTarget(){ var t=target(); return _icTurn.mode==='hard'?t+3:_icTurn.mode==='easy'?t-3:t; }
+function icModeTag(){ return _icTurn.mode==='hard'?' (HARD)':_icTurn.mode==='easy'?' (EASY)':''; }
+function icSgn(n){ return (n>=0?'+':'')+n; }
+
+// D20 + stat vs the (Hard/Easy-adjusted) TARGET.
+// opt.bonus = flat ATTEMPT bonus from loot; opt.hard = the card itself is a HARD roll
+// (stacks with the Easy toggle to Normal; already-Hard stays +3).
+function icCheck(ab, critOn, opt){
+  opt=opt||{};
+  var d=die(20), t=((ab==='DEF') ? Math.min(10, statTotal('CON')+num($('f-armor').value)) : statTotal(ab))+(opt.bonus||0), total=d+t, tgt=icTarget()+((opt.hard && _icTurn.mode!=='hard')?3:0);
+  var crit = d>=(critOn||20), fumble = d===1;
+  return { d:d, t:t, total:total, tgt:tgt, crit:crit, fumble:fumble, hit: crit || (!fumble && total>=tgt), hardCard: !!opt.hard };
+}
+function icCheckDetail(c, ab){ return 'd20('+c.d+') '+icSgn(c.t)+' '+ab+' = '+c.total+' vs '+c.tgt+(c.hardCard?(_icTurn.mode==='easy'?' (HARD + EASY)':' (HARD)'):icModeTag()); }
+function icVerdict(c){ return c.crit?'★ NAT '+c.d+' — ULTIMATE':c.hit?'✓ Success':c.fumble?'✗ NAT 1':'✗ Miss'; }
+// EFFORT: the die + its trained bonus (+ extra flat), with ULTIMATE d12 on a crit.
+// opt.bonusDie = which EFFORT type's trained bonus applies (default: the die's own),
+// opt.count = number of dice (e.g. 4D12), opt.ultDice = ULTIMATE d12s on a crit.
+function icEffort(dieCode, crit, extra, alwaysUlt, opt){
+  opt=opt||{};
+  var n=dieVal(dieCode), cnt=Math.max(1,opt.count||1), rs=[], r=0;
+  for(var k=0;k<cnt;k++){ var x=die(n); rs.push(x); r+=x; }
+  var bon=icEffBonus(opt.bonusDie||dieCode)+(extra||0), tot=r+bon, parts=(cnt>1?cnt:'')+dieCode+'('+rs.join('+')+')'+(bon?' '+icSgn(bon):'');
+  if(crit || alwaysUlt){ var ud=(crit&&opt.ultDice)||1, ub=icEffBonus('d12'); for(var j=0;j<ud;j++){ var u=die(12); tot+=u; parts+=' + ULTIMATE d12('+u+')'; } tot+=ub; if(ub) parts+=' '+icSgn(ub); }
+  return { total:tot, detail:parts };
+}
+
+// ── what can be done this turn ──────────────────────────────────────────────
+function icWeapon(r){
+  var g=icFind(GEAR, r.name), l=icFind(LOOT, r.name);
+  var desc=(g&&g.desc)||(l&&l.desc)||'', eff=((g&&g.effects)||[]).join(' ');
+  var tag=icNorm(r.tag)+' '+icNorm(g?g.category:'');
+  var isW = /\b(weapon|firearm)\b/.test(tag) || /^\s*weapon\b/i.test(desc) ||
+            /\b(sword|axe|bow|dagger|knife|knives|mace|spear|hammer|pistol|rifle|gun|blaster|crossbow|club|staff|whip|blade|cannon|shotgun|revolver|shooter|sabre|saber|flail|halberd|sling)\b/i.test(r.name);
+  if(!isW) return null;
+  var txt=r.name+' '+desc+' '+eff+' '+r.note;
+  var gun = /firearm/.test(tag) || /\b(pistol|rifle|gun|blaster|shotgun|revolver|shooter|cannon|rail)\b/i.test(r.name);
+  var ranged = gun || /\b(bow|crossbow|sling|javelin|throwing)\b/i.test(r.name) || /\branged\b/i.test(desc);
+  var energy = /\benergy\b|magic(al)? damage/i.test(txt) || /\bMAGIC\b/.test(txt);
+  var dieCode = gun ? 'd8' : energy ? 'd10' : 'd6';
+  // LOOT bonuses written on the item: "+2 Attempts / Effort", "-2 to Attempts", "+1 Effort", "+6 WEAPON EFFORT".
+  var att=txt.match(/([+-]\d+)\s*(?:to\s+)?Attempts?\b(?!\s+when)/i), eff2=txt.match(/([+-]\d+)\s*(?:Attempts?\s*\/\s*)?(?:WEAPON\s+)?Effort\b/i);
+  return { name:r.name, stat: ranged?'DEX':'STR', die:dieCode,
+    critOn: /natural 19 or 20|nat(ural)? 19/i.test(txt) ? 19 : 20,
+    alwaysUlt: /always (inflicts |does )?ULTIMATE(?! (when|against|vs|in|on|to)\b)/i.test(txt) || /ULTIMATE effort every time/i.test(txt) || /ULTIMATE damage/.test(eff),
+    ultDice: /double ULTIMATE on nat(ural)? 20/i.test(txt) ? 2 : 1,
+    attBonus: att ? parseInt(att[1],10) : 0, effBonus: eff2 ? parseInt(eff2[1],10) : 0,
+    strDmg: /\+STR damage|add STR to (damage|your EFFORT)/i.test(txt) };
+}
+function icSpellOf(r, fromLoot){
+  var s=icFind(SPELLS, r.name), l=fromLoot?icFind(LOOT, r.name):null;
+  // A loot row is a spell scroll only when its loot text says so ("INT Spell, …").
+  if(fromLoot && !(l && /^\s*(INT|WIS|CHA)?\s*SPELL\b/i.test(l.desc||''))) return null;
+  var desc=(fromLoot?(l&&l.desc):'')||(s&&s.desc)||r.note||'';
+  var school=(s&&s.school)||r.tag||'';
+  var m=desc.match(/\b(INT|WIS|CHA)\s+spell\b/i) || r.note.match(/\b(INT|WIS|CHA)\b/) || desc.match(/\broll\s+(INT|WIS|CHA)\b/i);
+  var stat = m ? m[1].toUpperCase() : (IC_WIS_SPELLS.indexOf(icNorm(r.name))>=0 || /holy/i.test(school)) ? 'WIS' : 'INT';
+  // Effort: the spell's own die, else by wording — harmful magic rolls MAGIC & ENERGY d10.
+  var dieCode = (s&&s.effort) || (/\bULTIMATE\b/.test(desc)?'d12':/\bWEAPON\b/.test(desc)?'d6':
+    /\bMAGIC\b|magic(al)? damage|energy damage|\b(damage|bolt|blast|missile|burn|explod\w*|inflict\w*|harm\w*)\b/i.test(desc)?'d10':'');
+  // A spell's own dice are MAGIC effort (a d8 spell is not GUNS, a 4D12 blast is not ULTIMATE);
+  // WEAPON / BASIC spells keep those types, and a spell that says ULTIMATE uses that bonus.
+  var bonusDie = dieCode==='d6'||dieCode==='d4' ? dieCode : (dieCode==='d12' && /\bULTIMATE\b/.test(desc)) ? 'd12' : dieCode ? 'd10' : '';
+  var cm = dieCode ? desc.match(new RegExp('\\b(\\d+)\\s*'+dieCode+'\\b','i')) : null;
+  return { name:r.name, stat:stat, die:dieCode, bonusDie:bonusDie, count: cm ? parseInt(cm[1],10) : 1,
+    noRoll:/(?<!anyone )\b(with )?no roll\b|no attempt needed/i.test(desc),
+    hard:/\bwith a HARD (INT|WIS|CHA) roll\b/i.test(desc),
+    desc: desc.replace(/^\s*(INT|WIS|CHA)?\s*spell\s*,\s*/i,''), scroll:!!fromLoot };
+}
+function icConsumable(r){
+  var l=icFind(LOOT, r.name), g=icFind(GEAR, r.name);
+  var desc=(l&&l.desc)||(g&&g.desc)||'', eff=((l&&l.effects)||[]).concat((g&&g.effects)||[]).join(' ')+' '+r.note;
+  // "Heal 5 HP" or a dice amount — "Heal 2D6 HP", "Heal all allies 1D8".
+  var hm=eff.match(/heal\s+(\d+(?:d\d+)?)\s*HP/i)||desc.match(/heal\s+(?:all allies\s+)?(\d+(?:d\d+)?)\b/i);
+  if(!hm || !/^\s*(food|potion|drink|consumable|item)\b/i.test(desc)) return null;
+  var dm=hm[1].match(/^(\d+)d(\d+)$/i);
+  return { name:r.name, heal: dm ? 0 : parseInt(hm[1],10), healDice: dm ? { n:parseInt(dm[1],10), s:parseInt(dm[2],10) } : null, healTxt: hm[1].toUpperCase(), desc:desc };
+}
+
+function icBuildOpts(){
+  _icOpts=[];
+  var O={ attacks:[], spells:[], items:[], abilities:[], actions:[], checks:[] };
+  var add=function(sec,o){ o.i=_icOpts.length; _icOpts.push(o); O[sec].push(o); };
+  var loot=icRows('loot');
+
+  // Attacks — every weapon you carry, plus bare hands.
+  var weapons=loot.map(icWeapon).filter(Boolean);
+  weapons.push({ name:'Unarmed', stat:'STR', die:'d4', critOn:20 });
+  weapons.forEach(function(w){
+    var xb=(w.strDmg?statTotal('STR'):0)+(w.effBonus||0), eb=icEffBonus(w.die)+xb;
+    add('attacks', { name:w.name, kind:'action', btn:'Attack',
+      sub:'d20'+icSgn(statTotal(w.stat)+(w.attBonus||0))+' '+w.stat+' · Effort '+w.die+(eb?icSgn(eb):'')+(w.alwaysUlt?' + d12':'')+(w.critOn<20?' · crit '+w.critOn+'+':''),
+      run:function(){
+        var c=icCheck(w.stat, w.critOn, { bonus:w.attBonus||0 }), res=icVerdict(c), det=icCheckDetail(c, w.stat);
+        if(c.hit){ var e=icEffort(w.die, c.crit, xb, w.alwaysUlt, { ultDice:w.ultDice }); res+='  |  Effort '+e.total; det+='  |  '+e.detail; }
+        addLog(w.name, res, det, c.crit?'crit':c.fumble?'fumble':'normal');
+      } });
+  });
+
+  // Spells — from the Spells tab, plus spell scrolls carried as loot.
+  icRows('spell').map(function(r){ return icSpellOf(r,false); }).concat(loot.map(function(r){ return icSpellOf(r,true); })).filter(Boolean).forEach(function(sp){
+    add('spells', { name:sp.name, kind:'action', btn:'Cast',
+      sub:(sp.noRoll?'No roll':(sp.hard?'HARD ':'')+'d20'+icSgn(statTotal(sp.stat))+' '+sp.stat)+(sp.die?' · Effort '+(sp.count>1?sp.count:'')+sp.die+(icEffBonus(sp.bonusDie)?icSgn(icEffBonus(sp.bonusDie)):''):'')+(sp.scroll?' · scroll':''),
+      run:function(){
+        var eo={ bonusDie:sp.bonusDie, count:sp.count };
+        if(sp.noRoll){ var e0=sp.die?icEffort(sp.die,false,0,false,eo):null; addLog(sp.name, 'Cast'+(e0?'  |  Effort '+e0.total:''), (e0?e0.detail+' · ':'')+sp.desc.slice(0,140), 'normal'); return; }
+        var c=icCheck(sp.stat, 20, { hard:sp.hard }), res=icVerdict(c), det=icCheckDetail(c, sp.stat);
+        if(c.hit && sp.die){ var e=icEffort(sp.die, c.crit, 0, false, eo); res+='  |  Effort '+e.total; det+='  |  '+e.detail; }
+        else if(c.hit && c.crit){ det+=' · ULTIMATE result'; }
+        addLog(sp.name, res, det, c.crit?'crit':c.fumble?'fumble':'normal');
+      } });
+  });
+
+  // Items — food & potions that heal; using one eats it (the Loot row goes).
+  icRows('loot').forEach(function(r){
+    var it=icConsumable(r); if(!it) return;
+    add('items', { name:it.name, kind:'action', btn:'Use', sub:'Heal '+it.healTxt+' HP',
+      run:function(){
+        var amt=it.heal, rolls=[];
+        if(it.healDice){ amt=0; for(var k=0;k<it.healDice.n;k++){ var x=die(it.healDice.s); rolls.push(x); amt+=x; } }
+        var hp=num($('f-hp').value), max=num($('f-hpmax').value), nhp=Math.min(max, hp+amt);
+        $('f-hp').value=nhp; onHp();
+        var row=[].find.call(document.querySelectorAll('#loot-body tr'), function(tr){ return icNorm((tr.querySelector('.it-name')||{}).value)===icNorm(it.name); });
+        if(row){ row.remove(); scheduleAutosave(); }
+        addLog('Use '+it.name, '+'+(nhp-hp)+' HP', (it.healDice?it.healTxt+'('+rolls.join('+')+') · ':'')+'HP '+hp+' → '+nhp+' · '+it.desc.slice(0,90), 'crit');
+      } });
+  });
+
+  // Abilities / Powers that you use (not the always-on ones).
+  icRows('abil').forEach(function(r){
+    var a=icFind(ABILITIES, r.name), desc=(a&&a.desc)||r.note||'';
+    if(!/\b(roll|turn|once|use|spend|instead|cast|summon|heal|attack|sacrifice|activate)\b/i.test(desc+' '+r.note)) return;
+    add('abilities', { name:r.name, kind:'action', btn:'Use', sub:desc.slice(0,110)+(desc.length>110?'…':''),
+      run:function(){ addLog(r.name, 'Used', desc.slice(0,200), 'normal'); } });
+  });
+
+  // Actions — the core turn options.
+  add('actions', { name:'Move Far', kind:'far', btn:'Move', sub:'Spend the whole TURN moving twice as far',
+    run:function(){ addLog('Move Far', '—', 'Whole TURN spent moving', 'normal'); } });
+  add('actions', { name:'Recover', kind:'far', btn:'Roll', sub:'Sacrifice your TURN: d20'+icSgn(statTotal('CON'))+' CON → regain '+(statTotal('CON')+1)+' HP',
+    run:function(){
+      var c=icCheck('CON'), det=icCheckDetail(c,'CON');
+      if(c.hit){ var hp=num($('f-hp').value), max=num($('f-hpmax').value), nhp=Math.min(max, hp+statTotal('CON')+1); $('f-hp').value=nhp; onHp(); addLog('Recover', '✓ +'+(nhp-hp)+' HP', det+' · HP '+hp+' → '+nhp, c.crit?'crit':'normal'); }
+      else addLog('Recover', icVerdict(c), det, c.fumble?'fumble':'normal');
+    } });
+  var heal=statTotal('INT')>=statTotal('WIS')?'INT':'WIS';
+  add('actions', { name:'Stabilize an Ally', kind:'action', btn:'Roll', sub:'d20'+icSgn(statTotal(heal))+' '+heal+' — stops a dying ally\'s timer',
+    run:function(){ var c=icCheck(heal); addLog('Stabilize', c.hit?'✓ Stable':icVerdict(c), icCheckDetail(c,heal), c.crit?'crit':c.fumble?'fumble':'normal'); } });
+  // DYING (p.16): unconscious — on your next TURN roll 1D4 for how many ROUNDS you have
+  // left, and each TURN roll a D20 hoping for a natural-20 MIRACLE. Nothing else is possible.
+  if($('f-dying').checked) add('actions', { name:'Roll for Dying', kind:'free', dying:true, btn:'Roll', sub:'First TURN at 0 HP: 1D4 = ROUNDS left before you die',
+    run:function(){ var d=die(4); addLog('Dying', d+' ROUND'+(d===1?'':'S'), 'd4('+d+') — dead in '+d+' ROUND'+(d===1?'':'S')+' without help or a MIRACLE', d===1?'fumble':'normal'); } });
+  if($('f-dying').checked) add('actions', { name:'It\'s a Miracle', kind:'action', dying:true, btn:'Roll', sub:'Dying: d20 — a natural 20 wakes you with 1 HP',
+    run:function(){ var d=die(20); if(d===20){ $('f-hp').value=1; $('f-dying').checked=false; onHp(); } addLog('Miracle', d===20?'★ NAT 20 — back with 1 HP':'d20('+d+')', d===20?'Conscious at 1 HP':'Still dying', d===20?'crit':'normal'); } });
+
+  // Use a stat check (+ Defense, which resists danger and costs nothing).
+  STAT_ABBR.forEach(function(ab){
+    add('checks', { name:ab+' Check', kind:'action', btn:'Roll', sub:'d20'+icSgn(statTotal(ab))+' vs '+icTarget()+icModeTag(),
+      run:function(){ var c=icCheck(ab); addLog(ab+' Check', c.total+'  '+icVerdict(c), icCheckDetail(c,ab), c.crit?'crit':c.fumble?'fumble':'normal'); } });
+  });
+  var def=Math.min(10, statTotal('CON')+num($('f-armor').value));
+  add('checks', { name:'Defense (resist)', kind:'free', resist:true, btn:'Roll', sub:'d20'+icSgn(def)+' to resist danger · no Action',
+    run:function(){ var c=icCheck('DEF'); addLog('Defense', c.total+'  '+icVerdict(c), icCheckDetail(c,'DEF'), c.crit?'crit':c.fumble?'fumble':'normal'); } });
+  return O;
+}
+
+// ── economy ─────────────────────────────────────────────────────────────────
+function icCan(kind, o){
+  // DYING = unconscious: only the dying rolls (and Defense, which the GM may still call for).
+  if($('f-dying').checked && o && !o.dying && !o.resist) return false;
+  if(kind==='free') return true;
+  if(kind==='far') return !_icTurn.move && !_icTurn.action;   // Move Far / Recover take the whole TURN
+  return !_icTurn.action;
+}
+function icDo(i){
+  var o=_icOpts[i]; if(!o) return;
+  if(!icCan(o.kind, o)){ addLog('Turn', $('f-dying').checked&&!o.dying?'Unconscious':'No Action left', $('f-dying').checked&&!o.dying?'You\'re DYING — only the Dying and Miracle rolls are possible.':o.kind==='far'?'That takes your whole TURN.':'You\'ve already acted this TURN. End your turn to reset.', 'normal'); return; }
+  o.run();
+  if(o.kind==='far'){ _icTurn.move=true; _icTurn.action=true; _icTurn.far=true; }
+  else if(o.kind==='action') _icTurn.action=true;
+  icAfter();
+}
+function icToggle(slot){
+  if(slot==='move'){ if(_icTurn.far) return; _icTurn.move=!_icTurn.move; }
+  else if(_icTurn.far){ _icTurn.far=false; _icTurn.move=false; _icTurn.action=false; }   // un-mark a whole-TURN action
+  else _icTurn.action=!_icTurn.action;
+  icAfter();
+}
+function icSetMode(m){ _icTurn.mode=m; icAfter(); }
+function icEndTurn(){ _icTurn.move=false; _icTurn.action=false; _icTurn.far=false; _icTurn.mode='normal'; icAfter(); }
+function icCoin(){
+  var b=$('coin-btn'); if(!b || b.classList.contains('on')) return;
+  var d=die(12); toggleCoin(); addLog('Hero Coin', '+'+d, 'd12('+d+') added to a roll — coin spent', 'crit'); icAfter();
+}
+function icAfter(){ icRenderTurn(); scheduleAutosave(); }
+function icToggleSec(k){ _icCollapsed[k]=!_icCollapsed[k]; icRenderTurn(); }
+
+// ── render ──────────────────────────────────────────────────────────────────
+function icRenderTurn(){
+  var host=$('ic-turn'); if(!host) return;
+  var O=icBuildOpts();
+  var pip=function(on, lbl, slot, title){ return '<button class="ic-pip'+(on?' used':'')+'" onclick="icToggle(\''+slot+'\')" title="'+esc(title)+'">'+lbl+'</button>'; };
+  var hp=num($('f-hp').value), max=num($('f-hpmax').value), coinOn=!$('coin-btn').classList.contains('on');
+  var badges='';
+  if($('f-dying').checked) badges+='<span class="ic-badge warn">Dying</span>';
+  if(_icTurn.far) badges+='<span class="ic-badge">Whole turn used</span>';
+  var modeBtn=function(m,l){ return '<button class="ic-mode'+(_icTurn.mode===m?' on':'')+'" onclick="icSetMode(\''+m+'\')">'+l+'</button>'; };
+  var card=function(o){
+    var can=icCan(o.kind, o);
+    return '<div class="ic-card'+(can?'':' disabled')+'"><div class="ic-main"><div class="ic-name">'+esc(o.name)+'</div>'+(o.sub?'<div class="ic-sub">'+esc(o.sub)+'</div>':'')+'</div>'+
+      '<button class="ic-do" onclick="icDo('+o.i+')">'+esc(o.btn)+'</button></div>';
+  };
+  var sec=function(key,title,list,empty){
+    if(!list.length && !empty) return '';
+    var col=!!_icCollapsed[key];
+    return '<div class="ic-sec'+(col?' collapsed':'')+'"><div class="ic-sec-hd" onclick="icToggleSec(\''+key+'\')"><span class="ic-caret">▼</span><span class="ic-title">'+title+'</span></div>'+
+      '<div class="ic-sec-body">'+(list.length?list.map(card).join(''):'<div class="ic-empty">'+empty+'</div>')+'</div></div>';
+  };
+  host.innerHTML=
+    '<div class="ic-top">'+
+      '<div class="ic-row1"><div class="ic-econ">'+pip(_icTurn.move,'Move','move','Move NEAR (click to mark)')+pip(_icTurn.action,'Action','action','Your one roll this TURN (click to mark)')+'</div>'+
+        '<button class="ic-end" onclick="icEndTurn()" title="Reset Move and Action for your next TURN">End Turn</button></div>'+
+      '<div class="ic-row2">'+
+        '<span class="ic-stat"><span class="ic-lbl">HP</span> <b>'+hp+'</b>/'+max+'</span>'+
+        '<span class="ic-stat"><span class="ic-lbl">Target</span> <b>'+icTarget()+'</b></span>'+
+        '<span class="ic-modes">'+modeBtn('easy','Easy')+modeBtn('normal','Normal')+modeBtn('hard','Hard')+'</span>'+
+        '<span class="ic-badges">'+badges+'</span>'+
+        '<button class="ic-coin" onclick="icCoin()" '+(coinOn?'':'disabled')+' title="Hero Coin: add a D12 to any roll (then it\'s spent)">'+(coinOn?'Hero Coin +d12':'Coin spent')+'</button>'+
+      '</div>'+
+    '</div>'+
+    sec('attacks','Attacks',O.attacks,'')+
+    sec('spells','Spells',O.spells,'')+
+    sec('items','Items',O.items,'')+
+    sec('abilities','Abilities',O.abilities,'')+
+    sec('actions','Actions',O.actions,'')+
+    sec('checks','Use a Stat',O.checks,'');
+}
+// Keep the controller current while it's open (it has no inputs of its own).
+var _icRenderT=null;
+function icMaybeRender(){
+  var p=$('tab-action'); if(!p || !p.classList.contains('on')) return;
+  clearTimeout(_icRenderT); _icRenderT=setTimeout(icRenderTurn, 150);
+}
+['input','change'].forEach(function(ev){ document.addEventListener(ev, function(e){
+  if(e.target && e.target.closest && e.target.closest('#loot-body,#spell-body,#abil-body,#stats-grid,#effort-body,#f-hp,#f-hpmax,#f-target,#f-armor,#f-dying')) icMaybeRender();
+}); });
+
 
 // ── Rules ───────────────────────────────────────────────────────────────────
 function openRules(){
@@ -1091,7 +1368,7 @@ document.querySelector('.log-header').addEventListener('click', function(e){ if(
 (function(){ if(window.innerWidth<=768) document.querySelector('.roll-log').classList.add('collapsed'); })();
 function setDarkMode(on){ document.body.classList.toggle('dark', on);  try{ localStorage.setItem('icrpg_dark', on?'1':'0'); }catch(e){} }
 function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
-function toggleCoin(){ var b=$('coin-btn'); var on=b.classList.toggle('on'); b.textContent=on?'Spent':'Available'; scheduleAutosave(); }
+function toggleCoin(){ var b=$('coin-btn'); var on=b.classList.toggle('on'); b.textContent=on?'Spent':'Available'; scheduleAutosave(); if(typeof icMaybeRender==='function') icMaybeRender(); }
 
 // ═══ SAVE / LOAD ════════════════════════════════════════════════════════════
 function collectSheet(){
@@ -1104,6 +1381,7 @@ function collectSheet(){
     target:num(v('f-target')), dying:$('f-dying').checked, coin:$('coin-btn').classList.contains('on'),
     notes:v('f-notes'), stats:stats, effort:effort,
     abilities:collectRows('abil'), spells:collectRows('spell'), loot:collectRows('loot'),
+    turn:{ move:_icTurn.move, action:_icTurn.action, far:_icTurn.far, mode:_icTurn.mode },
     campaign:(typeof _campaign!=='undefined' && _campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null,
   };
 }
@@ -1122,6 +1400,7 @@ function applySheet(d){
   $('spell-body').innerHTML=''; (d.spells||[]).forEach(function(x){ addRow('spell', x); });
   $('loot-body').innerHTML=''; (d.loot||[]).forEach(function(x){ addRow('loot', x); });
   if(typeof campaignRestore==='function') campaignRestore(d.campaign);
+  if(d.turn && typeof d.turn==='object'){ _icTurn.move=!!d.turn.move; _icTurn.action=!!d.turn.action; _icTurn.far=!!d.turn.far; _icTurn.mode=(['easy','hard'].indexOf(d.turn.mode)>=0)?d.turn.mode:'normal'; }
   recalc(); renderHearts(); setDefaultTab();
   if(window.__ddSaveTitle && d.name) try{ window.__ddSaveTitle(d.name); }catch(e){}
 }
@@ -1351,6 +1630,58 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js -->
 <script src="/tools-data/dice-anim.js"></script>
+<style id="ic-action-style">
+/* ── Action tab (turn controller) ── */
+#tab-action{padding:0;}
+.ic-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.ic-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
+.ic-econ{display:flex;gap:6px;flex:1 1 auto;flex-wrap:wrap;}
+.ic-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;border:1.5px solid var(--icrpg);color:var(--icrpg-dk);background:transparent;border-radius:12px;padding:3px 13px;cursor:pointer;}
+.ic-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.ic-end{flex:0 0 auto;margin-left:auto;background:var(--icrpg);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.ic-end:hover{filter:brightness(1.1);}
+.ic-row2{display:flex;align-items:center;gap:10px;padding:0 10px 9px;flex-wrap:wrap;}
+.ic-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;}
+.ic-stat .ic-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.ic-stat b{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--ink);}
+.ic-modes{display:inline-flex;border:1px solid var(--rule);border-radius:7px;overflow:hidden;}
+.ic-mode{background:transparent;border:none;border-right:1px solid var(--rule);color:var(--muted);padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;}
+.ic-mode:last-child{border-right:none;}
+.ic-mode.on{background:var(--icrpg);color:#fff;}
+.ic-badges{display:inline-flex;gap:6px;flex-wrap:wrap;}
+.ic-badges:empty{display:none;}
+.ic-badge{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--rule);color:var(--muted);border-radius:12px;padding:2px 9px;}
+.ic-badge.warn{border-color:var(--red);color:var(--red);background:rgba(192,57,43,.1);}
+.ic-coin{margin-left:auto;background:transparent;border:1px solid var(--gold);color:#8a6a08;border-radius:7px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+body.dark .ic-coin{color:#f0cf62;}
+.ic-coin[disabled]{opacity:.45;cursor:default;}
+.ic-sec{border-bottom:1px solid var(--rule);}
+.ic-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.ic-caret{color:var(--icrpg);font-size:10px;transition:transform .12s;}
+.ic-sec.collapsed .ic-caret{transform:rotate(-90deg);}
+.ic-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--icrpg-dk);}
+.ic-sec.collapsed .ic-sec-body{display:none;}
+.ic-sec-body{padding:2px 12px 6px;}
+.ic-card{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--rule);}
+.ic-card:last-child{border-bottom:none;}
+.ic-main{flex:1;min-width:0;}
+.ic-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--ink);line-height:1.15;}
+.ic-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.ic-do{flex:0 0 auto;background:var(--icrpg);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.ic-do:hover{filter:brightness(1.12);}
+.ic-card.disabled{opacity:.42;}
+.ic-card.disabled .ic-do{background:var(--muted);cursor:default;pointer-events:none;}
+.ic-card.disabled .ic-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.ic-empty{font-size:12px;color:var(--muted);padding:10px 2px;}
+@media (max-width:600px){
+  .ic-econ{flex-basis:100%;justify-content:center;}
+  .ic-row1{justify-content:center;}
+  .ic-end{margin-left:0;}
+  .ic-badges{order:-1;flex-basis:100%;justify-content:center;}
+  .ic-coin{margin-left:auto;}
+  .ic-do{padding:9px 12px;font-size:12px;}
+}
+</style>
 <style id="dd-lock-style">
 .log-lock{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;line-height:1;transition:background .12s,border-color .12s;}
 .log-lock:hover{background:rgba(255,255,255,.35);}

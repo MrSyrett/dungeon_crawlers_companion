@@ -477,6 +477,63 @@ body.dark .a-tile .atv{color:#f0888e;}
 /* dd-no-spin-global — hide number-input spinner arrows everywhere */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+
+/* ═══ Action tab (per-turn controller) — same look as the D&D / DCC Action tabs ═══ */
+#tab-action{padding:0;}
+.turn-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.turn-row1{display:flex;align-items:center;gap:8px;padding:8px 10px 6px;flex-wrap:wrap;}
+.turn-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+.turn-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--mv);color:var(--mv-dk);border-radius:12px;padding:3px 11px;}
+.turn-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.turn-end-btn{flex:0 0 auto;background:var(--mv);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-left:auto;}
+.turn-end-btn:hover{filter:brightness(1.1);}
+.turn-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
+.turn-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;white-space:nowrap;}
+.turn-stat .tm-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.turn-stat b{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--ink);}
+.turn-speed{margin-left:auto;}
+.turn-mini{background:transparent;border:1px solid var(--gold);color:#8a6a08;border-radius:6px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+.turn-mini.on{background:var(--gold);color:#fff;}
+.turn-mini[disabled]{opacity:.45;cursor:default;}
+.turn-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.turn-badges:empty{display:none;}
+.turn-badge{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:2px 9px;border:1px solid var(--blue);color:var(--blue);background:rgba(43,108,176,.1);}
+.turn-badge.gold{border-color:var(--gold);color:#8a6a08;background:rgba(200,160,32,.12);}
+.turn-badge.warn{border-color:#c98a12;color:#9a6508;background:rgba(232,170,40,.14);}
+.turn-sec{border-bottom:1px solid var(--rule);}
+.turn-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.turn-sec-hd .tsh-caret{color:var(--mv);font-size:10px;transition:transform .12s;}
+.turn-sec.collapsed .tsh-caret{transform:rotate(-90deg);}
+.turn-sec-hd .tsh-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mv-dk);}
+.turn-sec.collapsed .turn-sec-body{display:none;}
+.turn-sec-body{padding:2px 12px 6px;background:var(--paper);}
+.turn-card{display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid var(--rule);}
+.turn-card:last-child{border-bottom:none;}
+.turn-card .tc-main{flex:1;min-width:0;}
+.turn-card .tc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--ink);line-height:1.15;}
+.turn-card .tc-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.turn-card .tc-btns{display:flex;gap:5px;flex:0 0 auto;}
+.turn-card .tc-do{background:var(--mv);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.turn-card .tc-do:hover{filter:brightness(1.12);}
+.turn-card .tc-do.off{background:var(--muted);opacity:.5;cursor:default;}
+.turn-card.disabled{opacity:.45;}
+.turn-card.disabled .tc-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.turn-empty{font-size:12px;color:var(--muted);padding:10px 2px;}
+body.dark .turn-top,body.dark .turn-sec-hd{background:#1b1d23;}
+body.dark .turn-sec-body{background:transparent;}
+body.dark .turn-sec-hd .tsh-title,body.dark .turn-pip{color:#f4a6a8;}
+body.dark .turn-pip.used{background:#2a2c33;border-color:#2a2c33;color:#777;}
+body.dark .turn-mini{color:#f0cf62;}
+body.dark .turn-badge{color:#9cc4ee;}
+body.dark .turn-badge.gold,body.dark .turn-badge.warn{color:#f0c060;}
+@media(max-width:600px){
+  .turn-row1 .turn-econ{flex-basis:100%;justify-content:center;}
+  .turn-row1{justify-content:center;}
+  .turn-end-btn{margin-left:0;}
+  .turn-row2 .turn-badges{order:-1;flex-basis:100%;justify-content:center;}
+  .turn-card .tc-do{padding:9px 11px;font-size:12px;}
+  .tabs-bar .tab-btn{flex:1 1 30%;}
+}
 </style>
 </head>
 <body>
@@ -668,18 +725,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
       </div>
 
-      <div class="card card-attacks">
-      <div class="section-bar accent"><span>Attacks</span></div>
-      <div class="dmg-wrap" id="dmg-wrap"></div>
-      </div>
-
       <div class="card tabs-card">
       <div class="tabs-bar">
+        <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
         <button class="tab-btn" data-tab="powers" onclick="setTab('powers')">Powers</button>
         <button class="tab-btn" data-tab="traits" onclick="setTab('traits')">Traits &amp; Tags</button>
         <button class="tab-btn" data-tab="equipment" onclick="setTab('equipment')">Equipment</button>
         <button class="tab-btn" data-tab="bio" onclick="setTab('bio')">Bio</button>
       </div>
+
+      <div class="tab-panel" id="tab-action"><div id="mm-turn"></div></div>
 
       <div class="tab-panel" id="tab-powers">
         <div id="powers-list"></div>
@@ -783,6 +838,7 @@ function blankState(){
     abilities:{melee:0,agility:0,resilience:0,vigilance:0,ego:0,logic:0},
     health:{cur:0,max:0}, focus:{cur:0,max:0}, karma:{cur:1,max:1}, healthDR:0, focusDR:0,
     conditions:{}, powers:[], traits:[], tags:[], attacks:[], iconics:[],
+    turn:{std:false, move:false, react:false, dodge:0},
     levelup:{abilityBoxes:0, powerBoxes:[], traitBox:0, picks:[]},
     history:'', personality:'', features:'', base:'', notes:'' };
   return st;
@@ -792,7 +848,7 @@ function ab(k){ return num((S.abilities||{})[k]); }
 function healthMax(){ return Math.max(10, ab('resilience')*30); }
 function focusMax(){ return Math.max(10, ab('vigilance')*30); }
 function karmaMax(){ return rank(); }
-function runSpeed(){ var s=5+Math.floor(ab('agility')/5); if(/Big|Huge|Gigantic/.test(S.size))s+=1; if(/Tiny|Little|Small/.test(S.size))s-=1; return s; }
+function runSpeed(){ var s=5+Math.max(0,Math.floor(ab('agility')/5)); if(/Big|Huge|Gigantic/.test(S.size))s+=1; if(/Tiny|Little|Small/.test(S.size))s-=1; return s; }
 function dmgMult(){ return rank(); }
 // ── Power bonuses: read flat, unconditional numeric bonuses out of the
 // character's powers and apply them automatically. Handles the common
@@ -931,7 +987,8 @@ function renderDamage(){
       +'<button class="w-roll'+(dis?' w-disabled':'')+'" onclick="rollDamage(\''+k+'\')"'+(dis?' title="'+dis+' — can’t attack"':'')+'>Attack</button></div>';
   }).join('');
 }
-function rollDamage(key){
+function rollDamage(key,o){
+  o=o||{}; var hitX=o.hitX||1, fanX=o.fanX||2;   // damage factor on a success / on a Fantastic
   var a=ABILITIES.find(function(x){return x.key===key;}); if(!a)return;
   var dis=condDisabled(key,true);
   if(dis){ addLog(a.name+' Attack','✗ '+dis, "Can't act while "+dis, 'fumble'); return; }
@@ -940,11 +997,12 @@ function rollDamage(key){
   var r=roll616(); if(usedK) edges-=1;
   var score=ab(key); var total=r.sum+score;
   var mult=attackMult(key);
-  var dmg=r.marvelVal*mult*(r.fantastic?2:1)+score;
+  var fx=r.fantastic?fanX:hitX;   // the whole damage (Marvel die × mult + ability) is doubled/tripled
+  var dmg=(r.marvelVal*mult+score)*fx;
   var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
   var cTxt=ct.t?' · '+ct.why.join(', '):'';
-  var detail=dieStr(r)+' '+r.sum+' +'+score+etTxt+(usedK?' · Karma':'')+cTxt+' · dmg '+r.marvelVal+'×'+mult+(r.fantastic?'×2':'')+' +'+score;
-  addLog(a.name+' Attack', (r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg', detail, r.fantastic?'crit':'normal');
+  var detail=dieStr(r)+' '+r.sum+' +'+score+etTxt+(usedK?' · Karma':'')+cTxt+(r.ultimate?' · Ultimate Fantastic — auto-success':'')+' · dmg ('+r.marvelVal+'×'+mult+' +'+score+')'+(fx>1?'×'+fx:'')+(o.note?' · '+o.note:'');
+  addLog(o.label||(a.name+' Attack'), (r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg', detail, r.fantastic?'crit':'normal');
   edges=0;troubles=0;renderTray();
 }
 // ── Condition penalties: automate the parts that map to sheet mechanics.
@@ -978,6 +1036,10 @@ function condDisabled(key,isAtk){
   });
   return why;
 }
+// A condition that stops all movement (Grabbed, Pinned, Paralyzed, Stunned), or ''.
+function condNoMove(){ var n=activeConds().filter(function(n){ return CONDMECH[n]&&CONDMECH[n].noMove; })[0]; return n||''; }
+// A condition that stops every action (Unconscious, Asleep), or ''.
+function condNoAct(){ var n=activeConds().filter(function(n){ return CONDMECH[n]&&CONDMECH[n].disableAll; })[0]; return n||''; }
 function speedHalvedByCond(){ return activeConds().some(function(n){ return CONDMECH[n]&&CONDMECH[n].halveSpeed; }); }
 
 // ── Render: conditions (toggle chips) ──
@@ -1017,11 +1079,13 @@ function roll616(){
   // apply edges/troubles by rerolling extreme dice, keeping better/worse
   var dice=[{v:d1,marvel:false},{v:m,marvel:true},{v:d2,marvel:false}];
   function faceOf(x){ return x.marvel && x.v===1 ? 6 : x.v; }
-  var n=Math.abs(netE);
+  // An ultimate Fantastic (6 M 6) ignores any trouble (Core p.14).
+  var ultimate0=(d1===6 && m===1 && d2===6);
+  var n=(netE<0&&ultimate0)?0:Math.abs(netE);
   for(var i=0;i<n && i<3;i++){
-    // pick the die to reroll: lowest for edge, highest for trouble
+    // pick the die to reroll: lowest for edge, highest for trouble ("an M is always the best die")
     var idx=0, best=faceOf(dice[0]);
-    for(var j=1;j<3;j++){ var f=faceOf(dice[j]); if(netE>0? f<best : f>best){ best=f; idx=j; } }
+    for(var j=1;j<3;j++){ var f=faceOf(dice[j]); if(netE>0? f<best : (f>best||(f===best&&dice[j].marvel&&dice[j].v===1))){ best=f; idx=j; } }
     var nv=die6(); var oldf=faceOf(dice[idx]);
     var tmp={v:nv,marvel:dice[idx].marvel}; var newf=faceOf(tmp);
     if(netE>0? newf>oldf : newf<oldf){ dice[idx].v=nv; }
@@ -1029,7 +1093,8 @@ function roll616(){
   var fantastic=(dice[1].marvel && dice[1].v===1);
   var marvelVal=fantastic?6:dice[1].v;
   var sum=faceOf(dice[0])+marvelVal+faceOf(dice[2]);
-  var res={d1:dice[0].v, m:dice[1].v, d2:dice[2].v, marvelVal:marvelVal, fantastic:fantastic, sum:sum};
+  var res={d1:dice[0].v, m:dice[1].v, d2:dice[2].v, marvelVal:marvelVal, fantastic:fantastic, sum:sum,
+    ultimate:(fantastic && dice[0].v===6 && dice[2].v===6)};
   animate616(res);
   return res;
 }
@@ -1061,7 +1126,7 @@ function doCheck(label, abilityKey, opts){
   var kTxt=usedK?' · Karma':'';
   var bTxt=bonus?' (incl. +'+bonus+' power)':'';
   var cTxt=ct.t?' · '+ct.why.join(', '):'';
-  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+bTxt+etTxt+kTxt+cTxt+(r.fantastic?' · Fantastic! (Yes, and…)':'');
+  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+bTxt+etTxt+kTxt+cTxt+(r.ultimate?' · Ultimate Fantastic (6 M 6) — automatic success':(r.fantastic?' · Fantastic! (Yes, and…)':''));
   addLog(label, (r.fantastic?'FANTASTIC · ':'')+total, detail, r.fantastic?'crit':'normal');
   edges=0; troubles=0; renderTray();
   return r;
@@ -1071,20 +1136,24 @@ function rollFree(){ doCheck('d616', null, {}); }
 function rollAttack(i){
   var w=S.attacks[i]; if(!w)return; var k=w.ability||'melee';
   var mod=0;
+  var dis=condDisabled(k,true); if(dis){ addLog((w.name||'Attack'),'✗ '+dis, "Can't act while "+dis, 'fumble'); return; }
+  var ct=condTrouble(k,true); troubles+=ct.t;
   var usedK=consumeKarma(); if(usedK) edges+=1;
   var r=roll616(); if(usedK) edges-=1;
   var score=ab(k); var total=r.sum+score+mod;
   // A weapon adds its bonus to the damage multiplier (greater of the two, no stacking);
   // a grenade uses its own flat multiplier. Flash-bang deals no Health damage.
-  var mult=w.flatMult?num(w.flatMult):(dmgMult()+(num(w.multBonus)||0));
+  var mult=weaponMult(w,k);
   var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
   var resultTxt, dmgTxt;
   if(w.noDamage){ dmgTxt='no damage'; resultTxt=(r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmgTxt; }
-  else { var dmg=r.marvelVal*mult*(r.fantastic?2:1)+score; dmgTxt='dmg '+r.marvelVal+'×'+mult+(r.fantastic?'×2':'')+' +'+score; resultTxt=(r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg'; }
-  var detail=dieStr(r)+' '+r.sum+' +'+score+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+(usedK?' · Karma':'')+' · '+dmgTxt;
+  else { var dmg=(r.marvelVal*mult+score)*(r.fantastic?2:1); dmgTxt='dmg ('+r.marvelVal+'×'+mult+' +'+score+')'+(r.fantastic?'×2':''); resultTxt=(r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg'; }
+  var detail=dieStr(r)+' '+r.sum+' +'+score+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+(usedK?' · Karma':'')+(ct.t?' · '+ct.why.join(', '):'')+' · '+dmgTxt;
   addLog((w.name||'Attack')+' ('+ABILITIES.find(function(x){return x.key===k;}).name+')', resultTxt, detail, r.fantastic?'crit':'normal');
   edges=0;troubles=0;renderTray();
 }
+// Weapon bonus and power bonus to the same multiplier don't stack — use the greater (Core p.34).
+function weaponMult(w,k){ return w.flatMult?num(w.flatMult):(dmgMult()+Math.max(num(w.multBonus)||0, pDmgBonus(k))); }
 function toggleKarma(){ if(!karmaArmed){ if(num(S.karma.cur)<=0){ addLog('Karma','✗','No Karma left','fumble'); return; } karmaArmed=true; } else karmaArmed=false; $('karma-btn').classList.toggle('on',karmaArmed); }
 function bumpTray(w,d){ if(w==='edge')edges=clamp(edges+d,0,6); else troubles=clamp(troubles+d,0,6); renderTray(); }
 function renderTray(){ $('tray-edge').textContent=edges; $('tray-trouble').textContent=troubles; }
@@ -1297,11 +1366,153 @@ function pickAdd(idx){ var x=_pkRows[idx]; if(!x)return;
   scheduleAutosave();
 }
 
+// ═══ ACTION TAB — the per-turn controller ═══════════════════════════════════
+// Each turn: one STANDARD action, one MOVEMENT action and one REACTION (per round),
+// in any order; the standard action can be spent to move a second time (Core rules,
+// "Your Turn"). Attacks, powers and the standard actions/reactions are buttons that
+// do the thing and spend the matching action; powers spend their Focus cost. The
+// Powers / Equipment tabs stay the place to manage what you have. End Turn resets
+// the actions (Dodge lasts until your next turn, so it outlives one End Turn) and
+// writes nothing to the Roll Log. No round counter — that's the Narrator's.
+var _turnOpts=[];
+var _turnCollapsed={checks:true};
+function turnState(){ if(!S.turn) S.turn={std:false,move:false,react:false,dodge:0}; return S.turn; }
+function tEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function turnCan(kind){ var t=turnState();
+  if(kind==='free') return true;
+  if(kind==='std') return !t.std;
+  if(kind==='move') return !t.move;
+  if(kind==='react') return !t.react;
+  if(kind==='stdmove') return !t.std && !t.move;
+  return true; }
+function turnSpend(kind){ var t=turnState();
+  if(kind==='std') t.std=true; else if(kind==='move') t.move=true; else if(kind==='react') t.react=true;
+  else if(kind==='stdmove'){ t.std=true; t.move=true; } }
+// Which action slots a power can use, from its action text.
+function powerKinds(a){ a=String(a||'').toLowerCase(); var k=[];
+  if(/both standard and movement/.test(a)) return ['stdmove'];
+  if(/standard/.test(a)) k.push('std');
+  if(/movement/.test(a)) k.push('move');
+  if(/reaction/.test(a)) k.push('react');
+  return k; }
+function focusCap(){ return 5*rank(); }   // can't spend more than 5 × rank Focus at once (Core p.81)
+function powerFocus(p){ var m=/(\d+)\s*(?:or more\s*)?focus/i.exec(String(p.cost||'')); return m?+m[1]:0; }
+// The ability a power attacks with: named outright, else a close attack is a Melee check and a
+// ranged attack is (by default) an Agility check (Core p.30).
+function powerAttackKey(p){ var e=String(p.effect||''), m=/\b(melee|agility|ego|logic)\s+attack/i.exec(e); if(m) return m[1].toLowerCase();
+  if(/\bmakes? (?:a|an|one)\s+(?:[\w-]+\s+)?close attack/i.test(e)) return 'melee';
+  if(/\bmakes? (?:a|an|one)\s+(?:[\w-]+\s+)?ranged attack/i.test(e)) return 'agility';
+  return ''; }
+var KIND_LBL={std:'Standard',move:'Movement',react:'Reaction',stdmove:'Std + Move'};
+function usePower(p, kind){
+  var cost=powerFocus(p);
+  if(cost>num(S.focus.cur)){ addLog(p.name,'✗','Needs '+cost+' Focus — you have '+num(S.focus.cur),'fumble'); return false; }
+  if(cost){ S.focus.cur=num(S.focus.cur)-cost; renderVitals(); }
+  var key=powerAttackKey(p);
+  var first=String(p.effect||'').split(/(?<=\.)\s/)[0]||'';
+  addLog(p.name, (cost?'−'+cost+' Focus':'Used'), [KIND_LBL[kind], p.duration, p.range].filter(Boolean).join(' · ')+(key?'':(first?' — '+first:'')), 'normal');
+  if(key) rollDamage(key);
+  return true;
+}
+function turnBuildOpts(){
+  _turnOpts=[];
+  var O={attacks:[],powers:[],actions:[],reactions:[],checks:[]};
+  function add(sec,o){ o.i=_turnOpts.length; _turnOpts.push(o); O[sec].push(o); }
+  var abName=function(k){ var a=ABILITIES.find(function(x){return x.key===k;}); return a?a.name:k; };
+  // Attacks — the four damage abilities + your weapons
+  DMG_ABILITIES.forEach(function(k){
+    var sc=ab(k), mult=attackMult(k), dis=condDisabled(k,true);
+    var vs=(k==='melee'||k==='agility')?abName(k)+' defense':'the defense the power names';
+    add('attacks',{name:abName(k)+' Attack', sub:'d616 '+(sc>=0?'+':'')+sc+' vs '+vs+' · dmg Marvel die ×'+mult+' +'+sc, blocked:dis?dis+' — can’t attack':'',
+      btns:[{label:'Attack',kind:'std',run:function(){ rollDamage(k); return true; }}]});
+  });
+  (S.attacks||[]).forEach(function(w,i){ if(!isWeaponRow(w)||!w.name) return;
+    var k=w.ability||'melee', mult=weaponMult(w,k);
+    add('attacks',{name:w.name, sub:abName(k)+(w.range?' · '+w.range:'')+(w.noDamage?' · no damage':' · ×'+mult)+(w.equipped?' · equipped':''), blocked:condDisabled(k,true),
+      btns:[{label:'Attack',kind:'std',run:function(){ rollAttack(i); return true; }}]});
+  });
+  // Powers — anything with an action; one button per action it can use
+  (S.powers||[]).forEach(function(p){
+    var kinds=powerKinds(p.action); if(!kinds.length) return;
+    var cost=powerFocus(p), short=cost>num(S.focus.cur), pk=powerAttackKey(p), pdis=pk?condDisabled(pk,true):'';
+    add('powers',{name:p.name, sub:[p.action, cost?cost+' Focus':(p.cost&&!/^none$/i.test(p.cost)?p.cost:''), p.duration].filter(Boolean).join(' · '),
+      blocked:short?'Not enough Focus':(cost>focusCap()?'Over your Focus cap ('+focusCap()+')':(pdis?pdis+' — can’t attack':'')),
+      btns:kinds.map(function(kd){ return {label:kinds.length>1?KIND_LBL[kd]:'Use', kind:kd, run:function(){ return usePower(p,kd); }}; })});
+  });
+  // Actions
+  var run=runSpeed(), hv=speedHalvedByCond()?Math.floor(run/2):run, nm=condNoMove(), nmB=nm?nm+' — can’t move':'';
+  add('actions',{name:'Move', sub:'Run '+hv+' spaces (Climb/Swim/Jump '+Math.floor(hv/2)+')', blocked:nmB, btns:[{label:'Move',kind:'move',run:function(){ addLog('Move','Run '+hv,'Movement action','normal'); return true; }}]});
+  add('actions',{name:'Move Again', sub:'Spend your standard action to move a second time', blocked:nmB, btns:[{label:'Move',kind:'std',run:function(){ addLog('Move Again','Run '+hv,'Standard action spent on movement','normal'); return true; }}]});
+  add('actions',{name:'Dodge', sub:'Attacks against you have trouble until your next turn', btns:[{label:'Dodge',kind:'std',run:function(){ turnState().dodge=2; addLog('Dodge','Dodging','Attacks against you have trouble until your next turn','normal'); return true; }}]});
+  add('actions',{name:'Grab', sub:'Melee check vs Melee defense — a Fantastic also pins', blocked:condDisabled('melee',true), btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Grab','melee',{attack:true}); return true; }}]});
+  add('actions',{name:'Escape', sub:'Melee check vs the grabber’s Melee defense (or the Narrator’s TN — 20 webbing/chains, 16 rope)', btns:[{label:'Roll',kind:'std',run:function(){ doCheck('Escape','melee',{}); return true; }}]});
+  add('actions',{name:'Help', sub:'Give an ally (or yourself) an edge on their next action', btns:[{label:'Use',kind:'std',run:function(){ addLog('Help','Edge','An ally gets an edge on their next action','normal'); return true; }}]});
+  // Reactions
+  add('reactions',{name:'Escape', sub:'When grabbed, pinned or paralyzed by something physical — Melee check vs the grabber’s Melee defense', btns:[{label:'Roll',kind:'react',run:function(){ doCheck('Escape (reaction)','melee',{}); return true; }}]});
+  add('reactions',{name:'Help Teammate', sub:'A teammate fails an action check — they gain an edge on it', btns:[{label:'Use',kind:'react',run:function(){ addLog('Help Teammate','Edge','Ally gets an edge','normal'); return true; }}]});
+  add('reactions',{name:'Interpose', sub:'Move (free) in front of someone in reach who’s attacked — you become the target; TN is the lower defense', btns:[{label:'Use',kind:'react',run:function(){ addLog('Interpose','—','Took the attack for an ally','normal'); return true; }}]});
+  add('reactions',{name:'Ram', sub:'After a full-speed straight-line move + Move Again up to a foe — close attack, foe takes double damage (triple + prone on a Fantastic); you take regular damage', blocked:condDisabled('melee',true), btns:[{label:'Attack',kind:'react',run:function(){ rollDamage('melee',{hitX:2,fanX:3,label:'Ram',note:'on a hit you take regular damage too'}); return true; }}]});
+  add('reactions',{name:'Fastball Special', sub:'An ally throws you at a foe (their Agility check succeeds) — close attack, double damage (triple on a Fantastic)', blocked:condDisabled('melee',true), btns:[{label:'Attack',kind:'react',run:function(){ rollDamage('melee',{hitX:2,fanX:3,label:'Fastball Special'}); return true; }}]});
+  add('reactions',{name:'Release', sub:'Something you’re grabbing moves or attacks — let it go', btns:[{label:'Use',kind:'react',run:function(){ addLog('Release','—','Released your grab','normal'); return true; }}]});
+  add('reactions',{name:'Skulk', sub:'Targeted by a ranged attack — duck behind someone in reach; they become the target (TN is the lower defense)', btns:[{label:'Use',kind:'react',run:function(){ addLog('Skulk','—','Ducked behind someone — they’re the new target','normal'); return true; }}]});
+  var na=condNoAct(); if(na) ['attacks','powers','actions','reactions'].forEach(function(k){ O[k].forEach(function(o){ o.blocked=na+' — can’t act'; }); });
+  // Ability checks (no action of their own — the Narrator decides what they cost)
+  ABILITIES.forEach(function(a){ var sc=ab(a.key);
+    add('checks',{name:a.name+' check', sub:'d616 '+(sc>=0?'+':'')+sc, btns:[{label:'Roll',kind:'free',run:function(){ rollAbility(a.key); return true; }}]}); });
+  return O;
+}
+function turnDo(i,j){
+  var o=_turnOpts[i]; if(!o) return; var b=o.btns[j||0]; if(!b) return;
+  if(o.blocked){ addLog(o.name,'✗',o.blocked,'fumble'); return; }
+  if(!turnCan(b.kind)){ addLog(o.name,'✗','Your '+(KIND_LBL[b.kind]||'action')+' action is already spent this turn','normal'); return; }
+  if(b.run()===false){ renderTurn(); return; }
+  turnSpend(b.kind); renderTurn(); scheduleAutosave();
+}
+function endTurn(){ var t=turnState(); t.std=t.move=t.react=false; if(t.dodge>0) t.dodge--; renderTurn(); scheduleAutosave(); }
+function turnToggleSec(k){ _turnCollapsed[k]=!_turnCollapsed[k]; renderTurn(); }
+function renderTurn(){
+  var host=$('mm-turn'); if(!host||!S) return;
+  var O=turnBuildOpts(), t=turnState();
+  var pip=function(on,lbl){ return '<span class="turn-pip'+(on?' used':'')+'">'+lbl+'</span>'; };
+  var badges=(t.dodge>0?'<span class="turn-badge">Dodging</span>':'')+(karmaArmed?'<span class="turn-badge gold">Karma edge armed</span>':'')
+    +activeConds().map(function(n){ return '<span class="turn-badge warn">'+tEsc(n)+'</span>'; }).join('');
+  var run=runSpeed(); if(speedHalvedByCond()) run=Math.floor(run/2);
+  var card=function(o){
+    var anyOk=!o.blocked && o.btns.some(function(b){ return turnCan(b.kind); });
+    var btns=o.btns.map(function(b,j){ var ok=!o.blocked&&turnCan(b.kind); return '<button class="tc-do'+(ok?'':' off')+'" onclick="turnDo('+o.i+','+j+')">'+tEsc(b.label)+'</button>'; }).join('');
+    var sub=[o.blocked,o.sub].filter(Boolean).join(' · ');
+    return '<div class="turn-card'+(anyOk?'':' disabled')+'"><div class="tc-main"><div class="tc-name">'+tEsc(o.name)+'</div>'+(sub?'<div class="tc-sub">'+tEsc(sub)+'</div>':'')+'</div><div class="tc-btns">'+btns+'</div></div>';
+  };
+  var sec=function(key,title,list,empty){ var col=!!_turnCollapsed[key];
+    return '<div class="turn-sec'+(col?' collapsed':'')+'"><div class="turn-sec-hd" onclick="turnToggleSec(\''+key+'\')"><span class="tsh-caret">▼</span><span class="tsh-title">'+title+'</span></div>'
+      +'<div class="turn-sec-body">'+(list.length?list.map(card).join(''):'<div class="turn-empty">'+empty+'</div>')+'</div></div>'; };
+  host.innerHTML='<div class="turn-top">'
+    +'<div class="turn-row1"><div class="turn-econ">'+pip(t.std,'Standard')+pip(t.move,'Movement')+pip(t.react,'Reaction')+'</div>'
+    +'<button class="turn-end-btn" onclick="endTurn()" title="Reset your actions for the next turn">End Turn</button></div>'
+    +'<div class="turn-row2">'
+    +'<span class="turn-stat"><span class="tm-lbl">Focus</span> <b>'+num(S.focus.cur)+'</b>/'+num(S.focus.max||focusMax())+'</span>'
+    +'<span class="turn-stat"><span class="tm-lbl">Karma</span> <b>'+num(S.karma.cur)+'</b>/'+num(S.karma.max||karmaMax())+'</span>'
+    +'<button class="turn-mini'+(karmaArmed?' on':'')+'" onclick="toggleKarma();renderTurn()" '+(num(S.karma.cur)<=0&&!karmaArmed?'disabled':'')+' title="Spend 1 Karma for an edge on your next roll">Karma Edge</button>'
+    +'<div class="turn-badges">'+badges+'</div>'
+    +'<span class="turn-stat turn-speed"><span class="tm-lbl">Speed</span> <b>'+run+'</b></span>'
+    +'</div></div>'
+    +sec('attacks','Attacks',O.attacks,'')
+    +sec('powers','Powers',O.powers,'No powers with an action. Powers are chosen in the character builder.')
+    +sec('actions','Actions',O.actions,'')
+    +sec('reactions','Reactions',O.reactions,'')
+    +sec('checks','Ability Checks',O.checks,'');
+}
+// Keep the controller current while it's open.
+var _turnRT=null;
+function turnMaybeRender(){ var p=$('tab-action'); if(!p||!p.classList.contains('on')) return; clearTimeout(_turnRT); _turnRT=setTimeout(renderTurn,120); }
+['input','change'].forEach(function(ev){ document.addEventListener(ev,function(e){ var t=e.target; if(t&&(t.id==='v-focus'||t.id==='v-karma'||t.id==='v-health')) turnMaybeRender(); }); });
+
 // ── Tabs ──
 function setTab(name){
   [].forEach.call(document.querySelectorAll('.tab-btn'),function(b){ b.classList.toggle('on', b.dataset.tab===name); });
   [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
   try{ localStorage.setItem('mmrpg_tab',name); }catch(e){}
+  if(name==='action' && typeof renderTurn==='function') renderTurn();
 }
 function setDefaultTab(){ var t='powers'; try{ t=localStorage.getItem('mmrpg_tab')||'powers'; }catch(e){} if(!$('tab-'+t))t='powers'; setTab(t); }
 
@@ -1608,6 +1819,8 @@ function applySheet(d){
   S.conditions={}; if(d.conditions) CONDITIONS.forEach(function(c){ if(d.conditions[c.name])S.conditions[c.name]=true; });
   if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||'',from:p.from||''}; });
   if(Array.isArray(d.iconics)) S.iconics=d.iconics.slice();
+  S.turn={std:false, move:false, react:false, dodge:0};
+  if(d.turn&&typeof d.turn==='object') ['std','move','react','dodge'].forEach(function(k){ if(d.turn[k]!=null) S.turn[k]=d.turn[k]; });
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.tags)) S.tags=d.tags.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.attacks)) S.attacks=d.attacks.map(function(w){ return mkEquip(w, w.equipped); });
@@ -1626,6 +1839,7 @@ function renderAll(){
   $('f-history').value=S.history||''; $('f-personality').value=S.personality||''; $('f-features').value=S.features||''; $('f-base').value=S.base||''; $('f-notes').value=S.notes||'';
   if(!S.health.max)S.health.max=healthMax(); if(!S.focus.max)S.focus.max=focusMax();
   renderAbilities(); renderVitals(); renderDerived(); renderConditions(); renderPowers(); renderTraitsTags(); renderAttacks(); renderDamage(); renderTray(); updateFoot(); refreshWizardButtons();
+  if(typeof renderTurn==='function') renderTurn();
 }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent='Rank '+rank(); }
 function saveSheet(quiet){

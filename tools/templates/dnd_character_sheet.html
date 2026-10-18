@@ -1630,7 +1630,7 @@ function rollCtx(kind, extra){
   let xdis = extra.dis || '';
   if(!xdis && /^(STR|DEX)$/.test(extra.abil || '')){ const ap = armorPenalties(); if(ap.nonProf) xdis = 'not proficient with ' + ap.nonProf; }
   if(!xdis && extra.skill === 'Stealth'){ const ap = armorPenalties(); if(ap.stealth) xdis = ap.stealth + ' (Stealth Disadv.)'; }
-  const disSrc = cm.dis || xdis, advSrc = cm.adv || extra.adv || (kind === 'saveDex' && typeof _turn !== 'undefined' && _turn.dodge ? 'Dodge' : '');
+  const disSrc = cm.dis || xdis, advSrc = cm.adv || extra.adv || (kind === 'saveDex' && typeof _turn !== 'undefined' && _turn.dodge && !isIncapacitated() && !(activeCond('Grappled') || activeCond('Restrained')) ? 'Dodge' : '');
   const advOn = _adv === 'adv' || !!advSrc, disOn = _adv === 'dis' || !!disSrc;
   const mode = (advOn && disOn) ? 'norm' : advOn ? 'adv' : disOn ? 'dis' : 'norm';
   const pen = exhPenalty(), why = [];
@@ -1963,7 +1963,7 @@ function atkCalc(tr, opts){
   const offhand = !!opts.offhand;
   const twf = offhand && hasFightingStyle('Two-Weapon Fighting');
   if(offhand) styles.push(twf ? 'Two-Weapon Fighting: ability mod added to off-hand damage' : 'off-hand: no ability mod to damage');
-  const dmgAbil = offhand ? (twf ? am : 0) : am;
+  const dmgAbil = offhand ? ((twf || am < 0) ? am : 0) : am;   // Light: no ability mod to the extra attack's damage unless it's negative
   const dmgFlat = (dice ? dice.flat : 0) + dmgAbil + bonus + magic + dmgStyle;
   const hit = am + (prof ? PB : 0) + bonus + magic + hitStyle;
   const dmgExpr = dice ? (dice.n ? dice.n + 'd' + dice.sides + (dmgFlat ? ' ' + sgn(dmgFlat) : '') : String(dmgFlat)) : '';
@@ -2171,9 +2171,13 @@ function doAttack(tr, sneakD6, asReaction, opts){
     if(_turn.reaction){ addLog('Opportunity Attack', '—', 'Reaction already used this turn — End Turn to refresh', 'normal'); return; }
   } else if(offhand){
     if(_turn.bonus){ addLog('Off-hand attack', '—', 'Bonus Action already used this turn — End Turn to refresh', 'normal'); return; }
+    if(!offhandReady(tr)){ addLog('Off-hand attack', '—', 'Take the Attack action with a different Light weapon first', 'normal'); return; }
   } else if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){
     addLog('Attack', '—', 'No attack left this turn — End Turn to refresh', 'normal'); return;
   }
+  // Loading: only one piece of ammunition per action / bonus action / reaction (Crossbow Expert ignores it).
+  if(!asReaction && !offhand && rowWeaponInfo(tr).loading && _turn.loadingFired && !hasFeature('Crossbow Expert')){
+    addLog('Attack', '—', 'Loading — this weapon fires only once per action', 'normal'); return; }
   sneakD6 = sneakD6 || 0;
   if(sneakD6 > 0){ if(_turn.sneakUsed){ addLog('Sneak Attack', '—', 'Already used this turn — End Turn to refresh', 'normal'); return; } _turn.sneakUsed = true; }
   const c = atkCalc(tr, { offhand });
@@ -2211,7 +2215,9 @@ function doAttack(tr, sneakD6, asReaction, opts){
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
   if(asReaction){ _turn.reaction = true; }                                 // spend the Reaction
   else if(offhand){ _turn.bonus = true; }                                  // spend the Bonus Action
-  else { startOfTurnClear(); _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++; }   // spend the Attack action
+  else { startOfTurnClear(); _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++;   // spend the Attack action
+    if(c.info.loading) _turn.loadingFired = true;
+    if(c.info.light){ const k = atkRowKey(tr); _turn.lightAtk = (_turn.lightAtk || []).filter(x => x !== k).concat([k]); } }
   if(typeof renderTurn === 'function' && $('tab-turn')) renderTurn();
 }
 
@@ -3984,17 +3990,17 @@ let _turnCollapsed = {};   // { sectionId: true } — collapsed section state
 const STANDARD_ACTIONS = [
   { name:'Dash', desc:'Gain extra movement equal to your Speed for this turn.' },
   { name:'Disengage', desc:"Your movement doesn't provoke Opportunity Attacks this turn." },
-  { name:'Dodge', desc:'Until your next turn, attacks against you have Disadvantage and you make Dexterity saves with Advantage.' },
-  { name:'Grapple', desc:'An unarmed strike; on a hit the target makes a Strength or Dexterity save (DC 8 + STR mod + PB) or is Grappled.' },
+  { name:'Dodge', desc:'Until your next turn, attacks against you have Disadvantage (if you can see the attacker) and you make Dexterity saves with Advantage. Ends if you are Incapacitated or your Speed is 0.' },
+  { name:'Grapple', desc:'Unarmed Strike in place of one attack of the Attack action: a creature up to one size larger makes a Strength or Dexterity save (DC 8 + STR mod + PB, its choice) or is Grappled. No attack roll.' },
   { name:'Help', desc:"Give an ally Advantage on an attack, or help with a task you're proficient in." },
   { name:'Hide', desc:'Make a Dexterity (Stealth) check (DC 15) to gain the Invisible condition.' },
   { name:'Improvise', desc:'Do something not covered by another action — the GM decides how it works.' },
   { name:'Influence', desc:"Make a check to shift a creature's attitude (Persuasion, Deception, Intimidation…)." },
   { name:'Magic', desc:'Cast a spell, or use a magic item / feature with the Magic action. Your spells are in the Spells section.' },
   { name:'Ready', desc:'Choose a trigger and a prepared response; it uses your Reaction when it fires.' },
-  { name:'Search', desc:'Make a Wisdom (Perception) or Intelligence (Investigation) check.' },
-  { name:'Shove', desc:'An unarmed strike; on a hit the target makes a Strength or Dexterity save or is pushed 5 ft or knocked Prone.' },
-  { name:'Study', desc:'Make an Intelligence check to recall or discern lore.' },
+  { name:'Search', desc:'Make a Wisdom check — Insight, Medicine, Perception or Survival — to discern something.' },
+  { name:'Shove', desc:'Unarmed Strike in place of one attack of the Attack action: a creature up to one size larger makes a Strength or Dexterity save (DC 8 + STR mod + PB, its choice) or is pushed 5 ft or knocked Prone. No attack roll.' },
+  { name:'Study', desc:'Make an Intelligence check — Arcana, History, Investigation, Nature or Religion — to recall or discern lore.' },
   { name:'Utilize', desc:'Use a nonmagical object, or a magic item that requires an action.' },
 ];
 
@@ -4014,6 +4020,9 @@ function attacksPerAction(){
   const f = classList().find(cl => norm(cl.cls) === 'fighter');
   if(f){ const L = num(f.level); extra = L>=20?3:L>=11?2:L>=5?1:0; }
   if(!extra && typeof autoFeatures === 'function' && autoFeatures().some(x => /extra attack/i.test(x.name))) extra = 1;
+  // Warlock Pact of the Blade: Thirsting Blade (attack twice) / Devouring Blade (three times) — pact weapon only.
+  if(extra < 2){ const inv = [].concat(((choices || {})['class:Warlock'] || {}).invocations || []).map(norm);
+    if(inv.includes('devouring blade')) extra = 2; else if(!extra && inv.includes('thirsting blade')) extra = 1; }
   return 1 + extra;
 }
 // Guess a feature's action cost from its text: reaction > bonus > action, else
@@ -4074,6 +4083,15 @@ function standardOpt(a, sub){
   const isAttack = (sub === 'action' && a.name === 'Attack');
   const disabled = isAttack ? actionFullySpent() : (sub === 'action' ? _turn.action : _turn[sub]);
   if(sub === 'action' && a.name === 'Search') return { name: a.name, meta: a.desc, usesHTML: '', disabled, run(){ openSearchChoice(); } };
+  // Grapple / Shove (2024) are Unarmed Strike options that replace ONE attack of the Attack
+  // action (so they combine with Extra Attack) — no attack roll; the target saves vs your DC.
+  if(sub === 'action' && (a.name === 'Grapple' || a.name === 'Shove')){
+    const noAtk = turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction());
+    const dc = 8 + (hasFeature('Martial Arts') ? Math.max(modOf('STR'), modOf('DEX')) : modOf('STR')) + profBonus();   // Monk Martial Arts: DEX may set the DC
+    return { name: a.name, meta: 'DC ' + dc + ' · ' + a.desc, usesHTML: '', disabled: noAtk,
+      run(){ _turn.action = true; _turn.actionType = 'attack'; _turn.attacksMade++;
+        addLog(a.name, 'DC ' + dc, 'Unarmed Strike (one attack of your Attack action) · target makes a STR or DEX save (its choice) or is ' + (a.name === 'Grapple' ? 'Grappled' : 'pushed 5 ft or knocked Prone'), 'normal'); afterTurnAction(); } };
+  }
   if(sub === 'action' && a.name === 'Ready') return { name: a.name, meta: a.desc, usesHTML: '', disabled,
     run(){ _turn.action = true; _turn.actionType = 'ready'; _turn.ready = 1; addLog('Ready', 'Waiting', 'Readied action — click the yellow Action chip when the trigger happens (uses your Reaction)', 'normal'); afterTurnAction(); } };
   return { name: a.name, meta: a.desc, usesHTML: '', disabled,
@@ -4095,9 +4113,11 @@ function openSearchChoice(){
     ov = document.createElement('div'); ov.id = 'search-overlay'; ov.className = 'ov';
     ov.onclick = e => { if(e.target === ov) ov.classList.remove('open'); };
     ov.innerHTML = '<div class="modal" style="max-width:360px;"><div class="modal-hd"><div class="ttl">Search</div><button class="x" onclick="document.getElementById(\'search-overlay\').classList.remove(\'open\')">&#10005;</button></div>' +
-      '<div class="modal-bd" style="display:flex;flex-direction:column;gap:8px;"><p style="margin:0 0 4px;">Which check?</p>' +
-      '<button class="m-btn" onclick="doSearch(\'Perception\')">Perception (WIS) — notice something</button>' +
-      '<button class="m-btn" onclick="doSearch(\'Investigation\')">Investigation (INT) — deduce or find a clue</button></div></div>';
+      '<div class="modal-bd" style="display:flex;flex-direction:column;gap:8px;"><p style="margin:0 0 4px;">Which Wisdom check?</p>' +
+      '<button class="m-btn" onclick="doSearch(\'Perception\')">Perception — notice a hidden creature or object</button>' +
+      '<button class="m-btn" onclick="doSearch(\'Insight\')">Insight — discern a creature\'s mood or intent</button>' +
+      '<button class="m-btn" onclick="doSearch(\'Medicine\')">Medicine — diagnose an ailment or cause of death</button>' +
+      '<button class="m-btn" onclick="doSearch(\'Survival\')">Survival — find tracks or food</button></div></div>';
     document.body.appendChild(ov);
   }
   ov.classList.add('open');
@@ -4133,7 +4153,14 @@ function castableSpells(sub){
     .filter(x => turnCastType(x.sp.castingTime) === sub)
     .sort((a, b) => (a.sp.level - b.sp.level) || a.sk.name.localeCompare(b.sk.name));
 }
-function turnCastSpell(name, sub){ if(isIncapacitated && isIncapacitated()){ addLog('Cast', '✗', 'Incapacitated — you can\'t take actions', 'fumble'); return; } if(castSpellFull(name)){ _turn[sub] = true; afterTurnAction(); } }
+// 2024: on your own turn you can expend only ONE spell slot to cast a spell (Action and Bonus Action spells combined).
+function slotsSpentTotal(){ return Object.keys(slotUsed || {}).reduce((n, k) => n + (num(slotUsed[k]) || 0), 0); }
+function slotCastBlocked(sk, sp, sub){ return sub !== 'reaction' && _turn.slotCast && sp && sp.level > 0 && hasSlotTracking() && !(isFreeCastSpell(sk) && !freeCastUsed[norm(sk.name)]); }
+function turnCastSpell(name, sub){ if(isIncapacitated && isIncapacitated()){ addLog('Cast', '✗', 'Incapacitated — you can\'t take actions', 'fumble'); return; }
+  const sk = spellsKnown.find(s => norm(s.name) === norm(name)), sp = spellByName(name);
+  if(slotCastBlocked(sk || { name }, sp, sub)){ addLog('Cast ' + name, '—', 'You already expended a spell slot this turn — only cantrips or slot-free casts until End Turn', 'normal'); return; }
+  const before = slotsSpentTotal();
+  if(castSpellFull(name)){ _turn[sub] = true; if(sub !== 'reaction' && slotsSpentTotal() > before) _turn.slotCast = true; afterTurnAction(); } }
 function toggleTurnSec(id){ _turnCollapsed[id] = !_turnCollapsed[id]; renderTurn(); scheduleAutosave(); }
 // ── Opportunity Attack: mirrors the Attacks section, melee options only ──
 // Unarmed Strikes and melee weapons qualify; ranged weapons and spell-attack rows don't.
@@ -4147,6 +4174,9 @@ function isMeleeAttackRow(tr){
 function oppAttack(i){ if(_turn.reaction || isIncapacitated()) return; const tr = document.querySelectorAll('#attacks-body tr')[i]; if(tr) doAttack(tr, 0, true); }
 // Light-weapon extra attack (Bonus Action): offered for each equipped Light weapon when another
 // Light weapon is equipped (or a mastered Nick weapon, which can fold it into the Attack action).
+function atkRowKey(tr){ return tr.dataset.rid || tr.dataset.weapon || (tr.querySelector('.atk-name') || {}).value || ''; }
+// 2024 Light property: the Bonus Action attack needs an Attack-action attack this turn with a DIFFERENT Light weapon.
+function offhandReady(tr){ const k = atkRowKey(tr); return _turn.actionType === 'attack' && (_turn.lightAtk || []).some(x => x !== k); }
 function offhandOpts(){
   const rows = [...document.querySelectorAll('#attacks-body tr')].filter(tr => { const i = rowWeaponInfo(tr); return i.w && i.light; });
   const nick = rows.some(tr => rowMasteryName(tr) === 'Nick');
@@ -4155,7 +4185,7 @@ function offhandOpts(){
     const c = atkCalc(tr, { offhand:true }), nm = (tr.querySelector('.atk-name').value || '').trim() || 'Attack';
     const isNick = rowMasteryName(tr) === 'Nick';
     return { name: 'Off-hand: ' + nm, meta: 'Light weapon · ' + sgn(c.hit) + ' to hit · ' + (c.dmgExpr || '—') + (c.dtype ? ' ' + c.dtype : '') + ' · ' + (hasFightingStyle('Two-Weapon Fighting') ? 'Two-Weapon Fighting adds ' + c.abil : 'no ability mod to damage') + (isNick ? ' · Nick: can be part of the Attack action' : ''),
-      usesHTML:'', disabled: _turn.bonus || isIncapacitated(), run(){ doAttack(tr, 0, false, { offhand:true }); } };
+      usesHTML:'', disabled: _turn.bonus || isIncapacitated() || !offhandReady(tr), run(){ doAttack(tr, 0, false, { offhand:true }); } };
   });
 }
 // Mirrors the Attacks section (same table + row layout), melee rows only, read-only,
@@ -4214,7 +4244,7 @@ function turnSpellsHTML(sub){
     h += '<div class="turn-sl-hd">' + (lvl === 0 ? 'Cantrips' : 'Level ' + lvl) + '</div>';
     byLvl[lvl].forEach(({ sk, sp }) => {
       const free = sp.level === 0 ? Infinity : freeSlotsAtOrAbove(sp.level);
-      const noSlot = sp.level > 0 && hasSlotTracking() && free <= 0;
+      const noSlot = (sp.level > 0 && hasSlotTracking() && free <= 0) || slotCastBlocked(sk, sp, sub);
       h += spellRowHTML(sk, sp, { prep:false, nameInput:false, turnSub:sub, noUpcast:true, disabled: econ || noSlot });
     });
   });
@@ -4270,11 +4300,11 @@ function renderTurn(){
   }
   body.innerHTML = h;
 }
-function useTurnOpt(i){ const o = _turnOpts[i]; if(o && !o.disabled && o.run){ startOfTurnClear(); o.run(); } }
+function useTurnOpt(i){ const o = _turnOpts[i]; if(o && !o.disabled && o.run){ if(_turnSub !== 'reaction') startOfTurnClear(); o.run(); } }   // reactions happen on others' turns — keep a carried Dodge/Ready
 function afterTurnAction(){ renderTurn(); scheduleAutosave(); }
 function toggleEcon(type){
   if(type === 'action' && _turn.ready){ fireReadied(); return; }
-  startOfTurnClear();
+  if(type !== 'reaction') startOfTurnClear();
   if(type === 'action'){
     if(actionFullySpent()){ _turn.action = false; _turn.actionType = null; _turn.attacksMade = 0; }
     else { _turn.action = true; _turn.actionType = 'other'; }
@@ -4291,7 +4321,6 @@ function endTurn(){
   // carry past End Turn once (2) and clear when you act again or end that turn.
   const carryDodge = _turn.dodge === 1 ? 2 : 0, carryReady = _turn.ready === 1 ? 2 : 0;
   _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:carryDodge, ready:carryReady };
-  addLog('End Turn', '⟳', 'Action, Bonus Action, Reaction & Movement reset', 'normal');
   renderTurn(); scheduleAutosave();
 }
 

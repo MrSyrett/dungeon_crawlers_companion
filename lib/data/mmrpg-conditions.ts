@@ -94,7 +94,8 @@ export const MMRPG_CONDITIONS = [
       "disable": [
         "melee",
         "agility"
-      ]
+      ],
+      "noMove": true
     }
   },
   {
@@ -106,7 +107,8 @@ export const MMRPG_CONDITIONS = [
       "trouble": [
         "melee",
         "agility"
-      ]
+      ],
+      "noMove": true
     }
   },
   {

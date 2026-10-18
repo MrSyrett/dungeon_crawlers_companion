@@ -478,6 +478,53 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .cond-grp .cg-lbl{display:flex;align-items:center;gap:6px;}
 .armor-in{width:40px;}
 
+:root{--act-font:'Cormorant Garamond',serif;}
+
+/* ── ACTION tab (round controller: 1 Slow + 1 Fast; a Slow may be spent as a 2nd Fast) ── */
+#tab-action{padding:0;}
+.act-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.act-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
+.act-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+.act-pip{font-family:var(--act-font);font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--yz);color:var(--yz-dk);border-radius:12px;padding:3px 11px;background:transparent;}
+.act-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.act-end{flex:0 0 auto;background:var(--yz);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:var(--act-font);font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;margin-left:auto;}
+.act-end:hover{filter:brightness(1.1);}
+.act-row2{display:flex;align-items:center;gap:8px;padding:0 10px 9px;flex-wrap:wrap;min-height:22px;}
+.act-res{font-family:var(--act-font);font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.act-res b{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--yz-dk);}
+.act-badge{display:inline-flex;align-items:center;font-family:var(--act-font);font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:2px 9px;border:1px solid var(--rule);color:var(--muted);}
+.act-badge.warn{border-color:#c98a12;color:#9a6508;background:rgba(232,170,40,.14);}
+.act-badge.bad{border-color:var(--red);color:var(--red);background:rgba(178,60,47,.1);}
+.act-badge.mental{border-color:var(--blue);color:var(--blue);background:rgba(53,80,138,.1);}
+.act-sec{border-bottom:1px solid var(--rule);}
+.act-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.act-sec-hd .caret{color:var(--yz);font-size:10px;transition:transform .12s;flex-shrink:0;}
+.act-sec.collapsed .caret{transform:rotate(-90deg);}
+.act-sec-hd .ttl{font-family:var(--act-font);font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--yz-dk);}
+.act-sec.collapsed .act-sec-body{display:none;}
+.act-sec-body{padding:2px 12px 6px;}
+.act-card{display:flex;align-items:center;gap:6px;padding:6px 2px;border-bottom:1px solid var(--rule);}
+.act-card:last-child{border-bottom:none;}
+.act-card .ac-main{flex:1;min-width:0;}
+.act-card .ac-name{font-family:var(--act-font);font-weight:800;font-size:14px;color:var(--ink);line-height:1.15;}
+.act-card .ac-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.act-card .ac-do{flex:0 0 auto;background:var(--yz);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:var(--act-font);font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.act-card .ac-do:hover{filter:brightness(1.12);}
+.act-card.disabled{opacity:.42;}
+.act-card.disabled .ac-do{background:var(--muted);cursor:default;pointer-events:none;}
+.act-card.disabled .ac-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.act-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
+body.dark .act-pip{color:#d8cfbf;}
+body.dark .act-sec-hd .ttl{color:#d8cfbf;}
+body.dark .act-res b{color:#d8cfbf;}
+body.dark .act-badge.warn{color:#f0c060;}
+@media (max-width:600px){
+  .act-row1{justify-content:center;}
+  .act-econ{flex-basis:100%;justify-content:center;}
+  .act-end{margin-left:0;}
+  .act-row2{justify-content:center;}
+  .act-card .ac-do{padding:9px 12px;font-size:12px;}
+}
 </style>
 </head>
 <body class="sheet-locked">
@@ -659,16 +706,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="card tabs-card m-tabs">
         <div class="tabs-bar">
-          <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Combat</button>
+          <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
           <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
           <button class="tab-btn" data-tab="story" onclick="setTab('story')">Story</button>
           <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
         </div>
 
-        <div class="tab-panel" id="tab-combat">
-          <div class="section-bar"><span>Attacks</span></div>
-          <table class="tbl" id="atk-tbl"><thead><tr><th style="width:34%;">Weapon</th><th style="width:12%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:22%;">Range</th><th style="width:23%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-          <div id="atk-empty" class="tbl-empty">No weapons equipped.</div>
+        <div class="tab-panel" id="tab-action">
+          <div id="act-hub"></div>
         </div>
 
         <div class="tab-panel" id="tab-gear">
@@ -797,11 +842,21 @@ function condPenaltyFor(attrKey){ return condCount(attrType(attrKey)); }
 function typeFull(type){ var names=(type==='Physical')?PHYS_CONDS:MENT_CONDS; return names.every(function(n){ return !!S.conditions[n]; }); }
 function critPenalty(){ var n=0; (S.crits||[]).forEach(function(c){ n+=Math.abs(num(c.mod)); }); return n; }
 function parseCritMod(eff){ var m=String(eff||'').match(/[-−–]\s*(\d+)/); return m?parseInt(m[1],10):0; }
+// Afflictions read "<SKILL> −N" (core pp.65–66) — the penalty applies only to that
+// skill. "Fear −N" is for fear tests, not skills. A custom injury that names no skill
+// applies to every roll.
+function critModFor(sk){ var n=0; (S.crits||[]).forEach(function(c){ var m=Math.abs(num(c.mod)); if(!m)return;
+    var eff=String(c.effect||'').toLowerCase(), named=SKILLS.filter(function(x){ return eff.indexOf(x.name.toLowerCase())>=0; }).map(function(x){ return x.name; });
+    if(named.length){ if(sk&&named.indexOf(sk)>=0) n+=m; } else if(!/\bfear\b/.test(eff)) n+=m; });
+  return n; }
+// Armor makes you clumsy: −1/−2/−3 to AGILITY for light/medium/heavy (core p.73).
+function armorAgiPenalty(){ var n=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped){ var m=String((g.note||'')+' '+(g.name||'')).match(/agility\s*[-−–]\s*(\d+)/i); if(m) n+=parseInt(m[1],10); else if(/heavy armor/i.test(g.name||'')) n+=3; else if(/medium armor/i.test(g.name||'')) n+=2; else if(/light armor/i.test(g.name||'')) n+=1; } }); return n; }
+function skillPen(name){ var s=skillObj(name); return (s?condPenaltyFor(s.attr):0)+critModFor(name)+(name==='Agility'?armorAgiPenalty():0); }
 
 // ── Attributes + skills ──
 function renderAttrSkills(){
   var host=$('attr-skills'); if(!host)return; host.innerHTML='';
-  var cp=critPenalty();
+  var cp=critModFor(null);
   ATTRS.forEach(function(a){
     var pen=condPenaltyFor(a.key)+cp, cur=Math.max(0,attrBase(a.key)-pen);
     var star=(S.key===a.key)?'<span class="key-star" title="key attribute">★</span>':'';
@@ -813,7 +868,7 @@ function renderAttrSkills(){
       +'<button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="attribute − conditions">'+cur+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
-      var lvl=num(S.skills[s.name]), spool=Math.max(0,attrBase(a.key)+lvl-pen), esn=s.name.replace(/'/g,"\\'");
+      var lvl=num(S.skills[s.name]), spool=Math.max(0,attrBase(a.key)+lvl-skillPen(s.name)), esn=s.name.replace(/'/g,"\\'");
       var key=(S.keySkill===s.name)?' ◆':'';
       var spips='';
       for(var j=1;j<=5;j++){ spips+='<button class="pip sk'+(j<=lvl?' on':'')+'" title="level '+j+'" onclick="setSkill(\''+esn+'\','+j+')"></button>'; }
@@ -848,6 +903,7 @@ function renderConds(){
     be.onclick=function(){ if(g[0]==='phys')S.brokenPhys=!S.brokenPhys; else S.brokenMent=!S.brokenMent; renderConds(); renderAttrSkills(); scheduleAutosave(); };
     host.appendChild(be);
   });
+  if(typeof renderAction==='function') renderAction();
 }
 // Mark the next free condition of a type; returns the name marked, or null if the
 // three were already full — in which case the fourth (Broken) is set instead.
@@ -907,7 +963,7 @@ function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'
 function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
 function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating'||f==='bonus')?num(v):v; scheduleAutosave(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
-function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); scheduleAutosave(); }
+function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.kind==='armor') renderAttrSkills(); scheduleAutosave(); }
 function invIn(i,f,val,cls,ph){ return '<input'+(cls?' class="'+cls+'"':'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
 function eqBox(i,on){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="Equip">'; }
 function renderInventory(){
@@ -934,9 +990,9 @@ function renderInventory(){
   renderArmorVal(); relock();
 }
 function renderAttacks(){
-  var body=$('atk-body'); if(!body)return; body.innerHTML='';
+  var body=$('atk-body'); if(!body){ renderArmorVal(); if(typeof renderAction==='function') renderAction(); return; } body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
-  // Kick or Punch Attack is always available (Close Combat, base damage 1, Arm's length).
+  // Kick or Punch Attack is always available (Force, damage 1, range 0).
   var ur=document.createElement('tr');
   ur.innerHTML='<td class="atk-name">Kick or Punch</td><td>0</td><td>1</td><td>Arm’s length</td><td style="text-align:right;"><button class="atk-roll" onclick="rollUnarmed()">Attack</button></td>';
   body.appendChild(ur);
@@ -948,9 +1004,8 @@ function renderAttacks(){
 }
 // The always-available Kick or Punch Attack: Close Combat, base damage 1, Arm's length.
 function rollUnarmed(){
-  var s=skillObj('Close Combat')||{attr:'PHY'};
-  var pen=condPenaltyFor('PHY')+critPenalty();
-  doRoll('Kick or Punch · Close Combat', attrBase('PHY')-pen, num(S.skills['Close Combat']), 0, 'PHY', {kind:'attack',wdmg:1,ctype:attrType('PHY')});
+  // Unarmed attacks use FORCE (core p.60; weapons table: Kick or punch, damage 1, range 0).
+  doRoll('Kick or Punch · Force', attrBase('PHY')-skillPen('Force'), num(S.skills['Force']), 0, 'PHY', {kind:'attack',wdmg:1,ctype:attrType('PHY')});
 }
 function renderGear(){ renderInventory(); }
 function renderWeapons(){ renderInventory(); renderAttacks(); }
@@ -1057,12 +1112,12 @@ function doRoll(label, baseN, skillN, gearN, attrKey, ctx){
   showPushOption();
 }
 // Pools subtract conditions + crit penalty from the Base dice (min 1 die enforced in doRoll).
-function rollSkill(name){ var s=skillObj(name); if(!s)return; var pen=condPenaltyFor(s.attr)+critPenalty(); doRoll(name+' ('+s.attr+')', attrBase(s.attr)-pen, num(S.skills[name]), 0, s.attr, {ctype:attrType(s.attr)}); }
-function rollAttr(k){ var pen=condPenaltyFor(k)+critPenalty(); doRoll(attrName(k)+' ('+k+')', attrBase(k)-pen, 0, 0, k, {ctype:attrType(k)}); }
+function rollSkill(name){ var s=skillObj(name); if(!s)return; var pen=skillPen(name); doRoll(name+' ('+s.attr+')', attrBase(s.attr)-pen, num(S.skills[name]), 0, s.attr, {ctype:attrType(s.attr)}); }
+function rollAttr(k){ var pen=condPenaltyFor(k)+critModFor(null); doRoll(attrName(k)+' ('+k+')', attrBase(k)-pen, 0, 0, k, {ctype:attrType(k)}); }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
   var skName=String(w.skill||'Close Combat').split('/')[0].trim(), s=skillObj(skName)||{attr:'PHY'};
-  var pen=condPenaltyFor(s.attr)+critPenalty();
+  var pen=skillObj(skName)?skillPen(skName):condPenaltyFor(s.attr)+critModFor(null);
   doRoll((w.name||'Attack')+' · '+skName, attrBase(s.attr)-pen, num(S.skills[skName]), weaponBonus(w.bonus), s.attr, {kind:'attack',wdmg:num(w.damage),ctype:attrType(s.attr)});
 }
 function rollQuick(){ var n=clamp(num($('tray-mod').value),1,12); $('tray-mod').value='0'; var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
@@ -1096,8 +1151,128 @@ function doPush(){
 }
 
 // ── Tabs ──
-function setTab(name){ [].forEach.call(document.querySelectorAll('.tab-btn'),function(b){ b.classList.toggle('on', b.dataset.tab===name); }); [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); }); try{ localStorage.setItem('vae_tab',name); }catch(e){} }
-function setDefaultTab(){ var t='combat'; try{ t=localStorage.getItem('vae_tab')||'combat'; }catch(e){} if(!$('tab-'+t))t='combat'; setTab(t); }
+// ═══ ACTION TAB — the round controller ══════════════════════════════════════
+// Vaesen core p.59: each round you get ONE slow action and ONE fast action; you
+// may spend the slow action as a second fast action instead (never the reverse).
+// Reactions (dodge, parry, break free, hold, chase, resist magic) are fast actions
+// you may take at any time in the round, even before your turn (p.59, p.61).
+// Reloading is not an action — you reload between actions (p.61).
+// Broken (p.63–64): physically Broken = no actions at all; mentally Broken = may
+// still move, flee, parry and dodge, but not attack, perform rituals or reason.
+// The Action tab only performs actions — weapons/gear are managed on the Gear tab.
+// End Turn clears the two bubbles (no Roll Log entry, no round counter).
+function actFresh(){ return {slow:false, fast:false, slowAsFast:false, brokeFree:false}; }
+var _act=actFresh();
+var _actCollapsed={skills:true};
+var _actOpts=[];
+function actCan(kind){ if(kind==='slow') return !_act.slow; if(kind==='fast') return !_act.fast||!_act.slow; return true; }
+function actSpend(kind){
+  if(kind==='slow'){ if(_act.slow) return false; _act.slow=true; return true; }
+  if(kind==='fast'){ if(!_act.fast){ _act.fast=true; return true; } if(!_act.slow){ _act.slow=true; _act.slowAsFast=true; return true; } return false; }
+  return true;
+}
+function actEndTurn(){ _act=actFresh(); renderAction(); scheduleAutosave(); }
+function actToggleSec(k){ _actCollapsed[k]=!_actCollapsed[k]; renderAction(); }
+function actNote(name, text){ addLog(name, '—', text, 'normal'); return true; }
+function actRoll(label, sk){ var s=skillObj(sk); if(!s)return; doRoll(label+' · '+sk+' ('+s.attr+')', attrBase(s.attr)-skillPen(sk), num(S.skills[sk]), 0, s.attr, {ctype:attrType(s.attr)}); }
+// Parry with CLOSE COMBAT if you hold a melee weapon, FORCE if unarmed (p.61).
+function actParrySkill(){ return gearOf('weapon').some(function(o){ return o.g.equipped && /close combat/i.test(o.g.skill||''); })?'Close Combat':'Force'; }
+function actDo(i){
+  var o=_actOpts[i]; if(!o) return;
+  if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
+  if(!actCan(o.kind)){ addLog(o.name, 'No '+(o.kind==='slow'?'slow':'')+' action left', o.kind==='slow'?'Your slow action is spent this round.':'Both actions are spent this round.', 'normal'); return; }
+  var ok=o.run(); if(ok===false){ renderAction(); return; }
+  actSpend(o.kind); renderAction(); scheduleAutosave();
+}
+function actKindLabel(k){ return k==='slow'?'Slow':k==='fast'?'Fast':'Free'; }
+function actBuild(){
+  var O={attacks:[], special:[], react:[], slow:[], fast:[], skills:[]};
+  _actOpts=[];
+  var add=function(sec,o){ o.i=_actOpts.length; _actOpts.push(o); O[sec].push(o); };
+  // Attacks: the always-available unarmed attack + every equipped weapon (slow).
+  add('attacks',{ name:ACT_SYS.unarmed, kind:'slow', sub:ACT_SYS.unarmedSub, btn:'Attack', run:function(){ rollUnarmed(); } });
+  gearOf('weapon').filter(function(o){ return o.g.equipped; }).forEach(function(o){ var w=o.g, i=o.i;
+    var bits=[(w.skill?String(w.skill).split('/')[0].trim():''), 'Bonus '+(w.bonus!=null&&w.bonus!==''?w.bonus:0), 'Damage '+(w.damage!=null?w.damage:1), w.range!=null&&w.range!==''?'Range '+w.range:''].filter(Boolean);
+    add('attacks',{ name:w.name||'Weapon', kind:'slow', sub:bits.join(' · '), btn:'Attack', run:function(){ rollAttack(i); } });
+  });
+  if(typeof actSpecial==='function') actSpecial(add);
+  var mk=function(sec,kind){ return function(a){ var sk=(typeof a.skill==='function')?a.skill():a.skill;
+    add(sec,{ name:a.n, kind:kind, sub:(sk&&a.showSkill?sk+' · ':'')+a.d, mb:!!a.mb, blocked:(a.once&&_act[a.once])?'Once per round':'', btn:(sk||a.run)?'Roll':'Use',
+      run:a.run||(sk?function(){ actRoll(a.n,sk); if(a.once) _act[a.once]=true; }:function(){ return actNote(a.n,a.d); }) }); }; };
+  ACT_SYS.react.forEach(mk('react','fast'));
+  ACT_SYS.slow.forEach(mk('slow','slow'));
+  ACT_SYS.fast.forEach(mk('fast','fast'));
+  SKILLS.forEach(function(s){ add('skills',{ name:s.name, kind:'slow', sub:attrName(s.attr)+' + '+s.name+' '+num(S.skills[s.name]), btn:'Roll', run:function(){ rollSkill(s.name); } }); });
+  // Broken (p.63–64).
+  if(S.brokenPhys) _actOpts.forEach(function(o){ if(!o.blocked) o.blocked='Physically Broken'; });
+  else if(S.brokenMent) _actOpts.forEach(function(o){ if(!o.blocked&&!o.mb) o.blocked='Mentally Broken'; });
+  return O;
+}
+function renderAction(){
+  var host=$('act-hub'); if(!host||!S) return;
+  var O=actBuild();
+  var pip=function(on,lbl){ return '<span class="act-pip'+(on?' used':'')+'">'+lbl+'</span>'; };
+  var pips=pip(_act.slow, _act.slowAsFast?'Slow → Fast':'Slow')+pip(_act.fast,'Fast');
+  var card=function(o){ var can=!o.blocked&&actCan(o.kind);
+    var sub=[o.blocked, actKindLabel(o.kind), o.sub].filter(Boolean).join(' · ');
+    return '<div class="act-card'+(can?'':' disabled')+'"><div class="ac-main"><div class="ac-name">'+esc(o.name)+'</div>'+(sub?'<div class="ac-sub">'+esc(sub)+'</div>':'')+'</div><button class="ac-do" onclick="actDo('+o.i+')">'+esc(o.btn||'Use')+'</button></div>'; };
+  var sec=function(key,title,list,empty){ var col=!!_actCollapsed[key];
+    return '<div class="act-sec'+(col?' collapsed':'')+'"><div class="act-sec-hd" onclick="actToggleSec(\''+key+'\')"><span class="caret">▼</span><span class="ttl">'+title+'</span></div><div class="act-sec-body">'+(list.length?list.map(card).join(''):'<div class="act-empty">'+empty+'</div>')+'</div></div>'; };
+  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div><button class="act-end" onclick="actEndTurn()" title="Clear this round\'s slow and fast actions">End Turn</button></div>'
+    +'<div class="act-row2">'+actRow2()+'</div></div>'
+    +sec('attacks','Attacks',O.attacks,'No weapons equipped — equip one on the Gear tab.')
+    +(ACT_SYS.specialTitle?sec('special',ACT_SYS.specialTitle,O.special,ACT_SYS.specialEmpty||''):'')
+    +sec('react','Reactions',O.react,'')
+    +sec('slow','Slow Actions',O.slow,'')
+    +sec('fast','Fast Actions',O.fast,'')
+    +sec('skills','Use a Skill',O.skills,'');
+}
+
+// "Typical" slow and fast actions — core rulebook p.60 table; reactions p.59–62.
+// mb:true = still allowed while mentally Broken (p.64).
+var ACT_SYS={
+  unarmed:'Kick or Punch', unarmedSub:'Force · Damage 1 · Range 0',
+  specialTitle:'',
+  react:[
+    {n:'Dodge', skill:'Agility', showSkill:true, mb:true, d:'Dodge a gunshot or other ranged attack. Each success removes one of the attacker’s. Declare before they roll.'},
+    {n:'Parry', skill:function(){ return actParrySkill(); }, showSkill:true, mb:true, d:'Parry a close combat attack (Close Combat if armed, Force if unarmed). Each success removes one of the attacker’s. Declare before they roll.'},
+    {n:'Break Free', skill:'Force', mb:true, once:'brokeFree', d:'Force roll to break a grapple — once per round. The holder may resist (opposed).'},
+    {n:'Hold', skill:'Force', mb:true, d:'Resist someone breaking free of your grapple — turns it into an opposed Force roll.'},
+    {n:'Chase', skill:'Agility', mb:true, d:'Stop an enemy fleeing from your zone — each success removes one of theirs.'},
+    {n:'Resist Magic', mb:true, d:'Resist a spell or curse cast on you; the GM says which skill the magic calls for.'}
+  ],
+  slow:[
+    {n:'Grapple', skill:'Force', d:'Wrestle, push or grapple — can be parried. On a hit the target is restrained: they can only try to break free or shout (an extra success silences them).'},
+    {n:'Flee', skill:'Agility', mb:true, d:'Agility roll to leave the fight; fail and you stay in your zone. You can’t flee through a zone held by an enemy.'},
+    {n:'Persuade', skill:'Manipulation', d:'Manipulation roll to sway, bribe or bluff someone.'},
+    {n:'Lure Enemy', skill:'Agility', d:'Lure an enemy to a certain place.'},
+    {n:'Perform Ritual', d:'Perform a ritual against the vaesen — describe it; usually no roll, and it often takes several rounds.'},
+    {n:'Survey the Situation', skill:'Vigilance', d:'Vigilance roll to read the fight and the surroundings.'},
+    {n:'Treat Injuries', skill:'Medicine', d:'Treat a Broken friend’s critical injury: success ends Broken, extra successes heal Conditions. (Healing Conditions otherwise takes hours.)'},
+    {n:'Treat with Inspiration', skill:'Inspiration', d:'Treat a Broken friend with Inspiration instead of Medicine — same effect.'},
+    {n:'Climb a Wall', skill:'Agility', mb:true, d:'Agility roll to climb.'}
+  ],
+  fast:[
+    {n:'Move Within Zone', mb:true, d:'Reposition anywhere in your zone (e.g. close in for a melee attack).'},
+    {n:'Move to Next Zone', mb:true, d:'Enter an adjacent zone.'},
+    {n:'Take Cover', mb:true, d:'Get behind cover — its Protection dice reduce ranged damage from other zones. You can still dodge.'},
+    {n:'Stand Up', mb:true, d:'Get back on your feet.'},
+    {n:'Draw / Swap Weapon', mb:true, d:'Draw a weapon or swap to another.'},
+    {n:'Shout', mb:true, d:'Shout more than a few words.'},
+    {n:'Small Act', mb:true, d:'Turn around, close a door, put out a candle…'},
+    {n:'Use Item', mb:true, d:'Use a piece of equipment quickly.'}
+  ]
+};
+function actRow2(){
+  var b='', any=false;
+  CONDS.forEach(function(c){ if(S.conditions&&S.conditions[c.name]){ any=true; b+='<span class="act-badge'+(c.type==='Mental'?' mental':' warn')+'">'+esc(c.name)+'</span>'; } });
+  if(S.brokenPhys){ any=true; b+='<span class="act-badge bad">Physically Broken</span>'; }
+  if(S.brokenMent){ any=true; b+='<span class="act-badge bad">Mentally Broken</span>'; }
+  return '<span class="act-res">Conditions</span>'+(any?b:'<span class="act-badge">None</span>');
+}
+
+function setTab(name){ [].forEach.call(document.querySelectorAll('.tab-btn'),function(b){ b.classList.toggle('on', b.dataset.tab===name); }); [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); }); try{ localStorage.setItem('vae_tab',name); }catch(e){} if(name==='action'&&typeof renderAction==='function') renderAction(); }
+function setDefaultTab(){ var t='action'; try{ t=localStorage.getItem('vae_tab')||'action'; }catch(e){} if(!$('tab-'+t))t='action'; setTab(t); }
 
 // ── Rules ──
 var VAE_RULES=[
@@ -1185,7 +1360,7 @@ function collectSheet(){
   S.name=($('f-name').value||'').trim(); S.pronouns=$('f-pronouns').value; S.age=$('f-age').value;
   S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.memento=$('f-memento').value;
   ['motivation','trauma','secret'].forEach(function(k){ var el=$('f-'+k); if(el)S[k]=el.value; });
-  return Object.assign({}, S, { system:'VAE', class:(S.archetype||'Investigator'), campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
+  return Object.assign({}, S, { act:_act, system:'VAE', class:(S.archetype||'Investigator'), campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
 }
 function applySheet(d){
   d=d||{}; if(!S) S=blankState();
@@ -1207,6 +1382,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits=Array.isArray(d.crits)?d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }):[];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||''}; });
+  _act=actFresh(); if(d.act&&typeof d.act==='object'){ ['slow','fast','slowAsFast','brokeFree'].forEach(function(k){ _act[k]=!!d.act[k]; }); }
   _lastRoll=null; renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}

@@ -1503,6 +1503,53 @@ function dccDiceAtRank(base, upgrades, rank) {
   });
   return count + 'd' + die;
 }
+// Table 37 (Core p.176): the Rank damage die is the die closest to the Rank without
+// going over — Rank 1 is a flat +1. Returns [[count, sides], ...] (sides 1 = flat).
+function dccRankDieSpec(rank) {
+  const r = Math.min(20, parseInt(rank, 10) || 0);
+  if(r < 1) return [];
+  if(r === 1) return [[1, 1]];
+  if(r >= 20) return [[2, 10]];
+  if(r >= 18) return [[1, 10], [1, 8]];
+  if(r >= 16) return [[2, 8]];
+  if(r >= 14) return [[1, 8], [1, 6]];
+  return [[1, r >= 12 ? 12 : r >= 10 ? 10 : r >= 8 ? 8 : r >= 6 ? 6 : r >= 4 ? 4 : 2]];
+}
+function dccRollRankDie(rank) {
+  let total = 0; const parts = [];
+  dccRankDieSpec(rank).forEach(([n, s]) => { for(let k = 0; k < n; k++) { const v = s === 1 ? 1 : d(s); total += v; parts.push((s === 1 ? '+1' : 'd' + s) + '(' + v + ')'); } });
+  return { total, parts };
+}
+// Rank damage dice an attack row adds from its unlocked "add 1 Rank damage die"
+// upgrades (unconditional ones only — "If the target is…" riders are left to the GM).
+// Not base damage, so it is never doubled on a Critical Hit.
+function dccRankDiceFor(row, rank) {
+  const inputs = row.querySelectorAll('input[type="text"]');
+  const entry = dccCombatEntry(row.dataset.src || (inputs[0] ? inputs[0].value : ''));
+  let n = 0;
+  (entry ? entry.upgrades : []).forEach(u => {
+    if(Number(u.rank) > rank) return;
+    const t = String(u.text || '');
+    if(/(^|and\s+)add 1 rank damage die/i.test(t) && !/^\s*if\b/i.test(t)) n++;
+  });
+  let total = 0, txt = '';
+  for(let k = 0; k < n; k++) { const r = dccRollRankDie(rank); total += r.total; txt += '+RankDie[' + r.parts.join('+') + ']'; }
+  return { n, total, txt };
+}
+// Which Stat Mod an attack row adds to DAMAGE. A rulebook Attack's Base Damage line
+// names it ("1d4 + STR Piercing"), and it can differ from the to-hit Stat or be absent
+// ("1d8 Piercing" adds none) — Core p.176. Custom rows use their own (to-hit) Stat.
+function dccDmgStatOf(row, hitStat) {
+  const inputs = row.querySelectorAll('input[type="text"]');
+  const key = row.dataset.src || (inputs[0] ? inputs[0].value : '');
+  const e = dccCombatEntry(key) || (row.dataset.src && inputs[0] ? dccCombatEntry(inputs[0].value) : null);
+  if(!e) return hitStat;
+  const list = e.kind === 'skill' ? (typeof DCC_SKILLS !== 'undefined' ? DCC_SKILLS : []) : (typeof DCC_SPELLS !== 'undefined' ? DCC_SPELLS : []);
+  const src = list.find(x => x.name === e.name);
+  const m = String(src && src.desc || '').match(/Base Damage:?\s*(?:is\s+)?\d*d\d+\s*(?:\+\s*(STR|DEX|INT|CON|CHA)\b)?/i);
+  if(!m) return hitStat;
+  return m[1] ? m[1].toLowerCase() : '';
+}
 // Non-damage clauses of the upgrades unlocked at this Rank (debuffs, riders, etc.),
 // for the row's hover title so the extra abilities are visible at a glance.
 function dccAbilitiesAtRank(upgrades, rank) {
@@ -1764,7 +1811,7 @@ function buildInventory() { /* no blank rows — items come from + Items */ }
 // button). Potions: at most one every other turn, or the Potion Sickness Debuff. End
 // Turn clears the Actions. No round counter is shown — that's the GM's to track;
 // _turn.round only counts turns internally for the potion rule.
-let _turn = { round: 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, potionRound: 0, done: [] };
+let _turn = { round: 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, potionRound: 0, evading: false, done: [] };
 let _turnOpts = [];
 const TURN_ACTIONS = 2;
 const _turnCollapsed = { checks: true };
@@ -1807,12 +1854,32 @@ function turnSkillRows(){
 function turnFindSkill(rx){ return turnSkillRows().find(r => rx.test(r.name) || rx.test(r.tr.dataset.src || '')) || null; }
 function turnRollRow(r){ const b = r.tr.querySelector('.skill-roll-btn'); return b ? rollSkill(b) : null; }
 function turnHitStr(r){ const sm = r.stat ? getStatMod(r.stat) : 0; const n = r.rank + sm; return 'd20' + (n >= 0 ? '+' : '−') + Math.abs(n); }
+// "2d4 +STR dmg" — the damage Stat is the weapon's own (dccDmgStatOf), plus any Rank die.
+function turnDmgStr(r){
+  const ds = dccDmgStatOf(r.tr, r.stat), rk = dccRankDiceFor(r.tr, r.rank).n;
+  return r.dice + (rk ? ' +' + (rk > 1 ? rk + '×' : '') + 'Rank die' : '') + (ds ? ' +' + ds.toUpperCase() : '') + ' dmg';
+}
+// Debuffs that limit what you can do this turn (Core p.94 Dying, Table 11 p.97).
+function turnDebuffSet(){
+  const raw = document.getElementById('debuffs')?.value || '';
+  return new Set(raw.split(',').map(t => t.trim().replace(/\s*[x×]\s*\d+$/i, '').trim().toLowerCase()).filter(Boolean));
+}
+function turnGate(o){
+  const db = turnDebuffSet();
+  const hb0 = [...document.querySelectorAll('.hp-pip')].every(p => p.dataset.active === 'false');
+  if(db.has('dying') || hb0) return 'Dying — no Actions until healed';
+  if(db.has('paralyzed')) return 'Paralyzed — no Actions';
+  if(db.has('enraged') && o.kind !== 'attack' && !o.move) return 'Enraged — only Attack and Move';
+  if(db.has('muted') && o.spell) return 'Muted — can\'t cast Spells';
+  if(o.move && (db.has('held') || db.has('terrified'))) return (db.has('held') ? 'Held' : 'Terrified') + ' — no Move Actions';
+  return '';
+}
 
 function turnBuildOpts(){
   const rows = turnSkillRows();
   const curMana = turnNum('mana-current', 0);
   const O = { hotlist: [], attacks: [], checks: [], actions: [], interrupts: [] };
-  const add = (sec, o) => { o.i = _turnOpts.length; _turnOpts.push(o); O[sec].push(o); };
+  const add = (sec, o) => { if(!o.blocked) o.blocked = turnGate(o); o.i = _turnOpts.length; _turnOpts.push(o); O[sec].push(o); };
   _turnOpts = [];
   // Hotlist — the 10 pinned slots: Spells (cast from their Skills row; must be on the
   // Hotlist to cast, Core p.98) and items (potions, scrolls, gear).
@@ -1825,17 +1892,23 @@ function turnBuildOpts(){
     const r = rows.find(x => norm(x.name) === norm(nm) || norm(x.tr.dataset.src) === norm(nm));
     if(r && (r.spell || r.dice)) {
       const heal = isFixedSkill(r.tr.dataset.src || '') || isFixedSkill(r.name);
-      add('hotlist', { name: r.name, kind: r.dice ? 'attack' : 'other', slot: si,
-        sub: r.dice ? turnHitStr(r) + ' to hit · ' + r.dice + (r.stat ? ' +' + r.stat.toUpperCase() : '') + ' dmg' + (r.mana ? ' · ' + r.mana + ' Mana' : '')
-                    : (noteSansDmg(rest) || ((heal ? 'Restore 2 Health Bar slots · ' : '') + (r.mana ? r.mana + ' Mana' : ''))),
-        blocked: r.mana && r.mana > curMana ? 'Not enough Mana' : '',
+      // Spell cards read like the others: effect · Mana (no Rank / Interrupt notes).
+      const summ = window.DCCFx && DCCFx.spellSummary ? DCCFx.spellSummary(r.name, r.rank, r.tr.dataset.src) : (heal ? 'Heal 2 Bars' : '');
+      add('hotlist', { name: r.name, kind: r.dice ? 'attack' : 'other', slot: si, spell: r.spell,
+        sub: r.dice ? turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.mana ? ' · ' + r.mana + ' Mana' : '')
+                    : [summ, r.mana ? r.mana + ' Mana' : ''].filter(Boolean).join(' · '),
+        // Spells can't be cast untrained (Core p.58); scrolls are the exception.
+        blocked: r.spell && r.rank < 1 ? 'No Ranks — can\'t cast untrained' : r.mana && r.mana > curMana ? 'Not enough Mana' : '',
         btn: 'Cast', run: () => turnRollRow(r) });
       return;
     }
     const potion = /potion/i.test(h);
     const sick = potion && _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
-    add('hotlist', { name: label, kind: 'other', slot: si,
-      sub: rest,
+    // Quantity lives in the details line, not the name.
+    const inv = window.DCCFx ? DCCFx.invRowByName(nm) : null;
+    const qty = inv ? (inv.querySelectorAll('input[type="text"]')[1] || {}).value : ((label.match(/\s[×x]\s?(\d+)\s*$/) || [])[1] || '');
+    add('hotlist', { name: nm, kind: 'other', slot: si, spell: /\bscroll\b/i.test(nm),
+      sub: [qty ? '×' + qty : '', rest].filter(Boolean).join(' · '),
       btn: 'Use', run: () => {
         if(window.DCCFx) { const inv = DCCFx.invRowByName(nm); if(inv) DCCFx.useRow(inv); else DCCFx.useByName(nm, rest); }
         else addLog('Use Hotlist Item', nm, h, 'normal');
@@ -1848,7 +1921,7 @@ function turnBuildOpts(){
   // Attacks — weapon / attack skills (Dmg in their Notes). Attack spells are cast from the Hotlist.
   rows.filter(r => r.dice && !r.spell).forEach(r => add('attacks', {
     name: r.name, kind: 'attack',
-    sub: turnHitStr(r) + ' to hit · ' + r.dice + (r.stat ? ' +' + r.stat.toUpperCase() : '') + ' dmg' + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
+    sub: turnHitStr(r) + ' to hit · ' + turnDmgStr(r) + (r.rank > 0 ? '' : ' · untrained (Disadvantage)'),
     btn: 'Attack', run: () => turnRollRow(r),
   }));
   // Use a Skill — the other active skills.
@@ -1857,22 +1930,27 @@ function turnBuildOpts(){
     btn: 'Roll', run: () => turnRollRow(r),
   }));
   // Actions (Table 3 / Table 4)
-  const move = turnNum('evade-move', 20);
-  add('actions', { name: 'Move', kind: 'other', sub: 'Move up to ' + move + ' ft (on top of the free Step)', btn: 'Move',
+  const move = turnMove();
+  add('actions', { name: 'Move', kind: 'other', move: true, sub: 'Move up to ' + move + ' ft (on top of the free Step)' + (move < turnNum('evade-move', 20) ? ' · halved (Fatigued)' : ''), btn: 'Move',
     run: () => { _turn.moves++; addLog('Move', move + ' ft', 'Move Action — up to ' + move + ' ft', 'normal'); return true; } });
   add('actions', { name: 'Retrieve', kind: 'other', sub: 'Move an item from Inventory to the Hotlist or your hand', btn: 'Use',
     run: () => { addLog('Retrieve', '—', 'Inventory → Hotlist / hand', 'normal'); return true; } });
   add('actions', { name: 'Help', kind: 'other', sub: 'Before an ally\'s non-combat Check: +1d2 (no Ranks in it) or +1d6 (with Ranks)',
     btns: [['+1d2', () => { const n = d(2); addLog('Help', '+' + n, 'd2(' + n + ') — no Skill Ranks', 'normal'); return true; }],
            ['+1d6', () => { const n = d(6); addLog('Help', '+' + n, 'd6(' + n + ') — with Skill Ranks', 'normal'); return true; }]] });
-  add('actions', { name: 'Call a Play', kind: 'other', sub: 'Plan an Action — an ally gets a bonus when they perform it', btn: 'Use',
-    run: () => { addLog('Call a Play', '—', 'Ally gains a bonus performing the called Action', 'normal'); return true; } });
+  // Call a Play (Core p.86): roll 2d6, keep the higher — added to the ally's Check
+  // when they perform the called Action (or to their damage if they'd hit anyway).
+  add('actions', { name: 'Call a Play', kind: 'other', sub: 'Plan an Action for an ally — 2d6 keep the higher as their bonus', btn: 'Roll',
+    run: () => { const a = d(6), b = d(6), n = Math.max(a, b); addLog('Call a Play', '+' + n, '2d6[' + a + ',' + b + '] keep high → +' + n + ' to the ally\'s Check (or damage, if they hit without it)', 'normal'); return true; } });
   const clue = turnFindSkill(/^(perception|investigation)$/i);
   add('actions', { name: 'Look for Clues', kind: 'other', sub: 'Boss fights only — ' + (clue ? 'rolls ' + clue.name : 'Unopposed Perception / Investigation'), btn: clue ? 'Roll' : 'Use',
     run: () => clue ? turnRollRow(clue) : (addLog('Look for Clues', '—', 'Boss encounter: gain info about the foe or environment', 'normal'), true) });
   // Interrupts (Crawler Reaction Phase)
-  add('interrupts', { name: 'Evade', kind: 'other', sub: 'Evade Check vs. each Attack aimed at you this round', btn: 'Roll',
-    run: () => { rollEvade(); return true; } });
+  // One Evade Action covers every Attack aimed at you this round, with a separate
+  // Evade Check for each (Core p.81) — so once you're Evading, more rolls are free.
+  add('interrupts', { name: 'Evade', kind: _turn.evading ? 'free' : 'other',
+    sub: _turn.evading ? 'Already Evading this round — roll the Check for another Attack (no Action)' : 'Evade Check vs. each Attack aimed at you this round', btn: 'Roll',
+    run: () => { rollEvade(); _turn.evading = true; return true; } });
   add('interrupts', { name: 'Intervene', kind: 'other', sub: 'Add 1d6 to another crawler\'s d20 Check after it\'s announced (not Stat Checks)', btn: 'Roll',
     run: () => { const n = d(6); addLog('Intervene', '+' + n, 'd6(' + n + ') added to an ally\'s Check', 'normal'); return true; } });
   const taunt = turnFindSkill(/^taunt$/i);
@@ -1908,7 +1986,7 @@ function endTurn(){
   // End-of-turn damage from Debuffs (auto-applied to the Health Bar). No turn summary
   // goes to the Roll Log — only the DoT rolls themselves, when there are any.
   if(typeof rollDoT === 'function') rollDoT();
-  Object.assign(_turn, { round: (_turn.round || 1) + 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, done: [] });
+  Object.assign(_turn, { round: (_turn.round || 1) + 1, used: 0, extra: 0, extraUsed: 0, aiSpent: false, moves: 0, evading: false, done: [] });
   turnAfter();
 }
 // Add a rulebook Debuff through the Debuffs tracker (chips), or to the raw field.
@@ -1937,12 +2015,16 @@ function turnUnpin(slot){
   try { if(window.DCCHotlist) DCCHotlist.refresh(); } catch(e) {}
   turnAfter();
 }
+// Move value this turn: Fatigued halves it (Table 11). Steps: none while Held,
+// Terrified or with Stiff Legs (Table 11, Core p.97).
+function turnMove(){ const m = turnNum('evade-move', 20); return turnDebuffSet().has('fatigued') ? Math.floor(m / 2) : m; }
+function turnStep(){ const db = turnDebuffSet(); return (db.has('held') || db.has('terrified') || db.has('stiff legs')) ? 0 : turnNum('evade-step', 10); }
 function turnToggleSec(key){ _turnCollapsed[key] = !_turnCollapsed[key]; renderTurn(); }
 
 function renderTurn(){
   const host = document.getElementById('dcc-turn'); if(!host) return;
   const O = turnBuildOpts();
-  const step = turnNum('evade-step', 10), move = turnNum('evade-move', 20);
+  const step = turnStep(), move = turnMove();
   const taken = _turn.used + _turn.extraUsed;
   const moved = taken * step + _turn.moves * move;
   const pip = (on, lbl, cls) => `<span class="turn-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}">${lbl}</span>`;
@@ -2000,7 +2082,7 @@ function turnMaybeRender(){
   // Mana: re-render on change (blur), not on every keystroke — the hub re-render
   // moves the Mana node, which would drop focus mid-typing.
   if(ev === 'change' && e.target && e.target.id === 'mana-current') { turnMaybeRender(); return; }
-  if(e.target && e.target.closest && e.target.closest('#skills-body,#hotlist-grid,#dr-aifavor,#evade-move,#evade-step,#stats-col,.stats-col')) turnMaybeRender();
+  if(e.target && e.target.closest && e.target.closest('#skills-body,#hotlist-grid,#dr-aifavor,#debuffs,#evade-move,#evade-step,#stats-col,.stats-col')) turnMaybeRender();
 }));
 
 // ── TABS ──
@@ -2156,9 +2238,9 @@ function consumeSpellMana(row) {
   return true;
 }
 
-// ── AI FAVOR AUTOMATION ──
+// ── AI FAVOR HELPERS ── (no longer called on every roll — see rollSkill)
 // A weapon/skill that "grants AI Favor N" (Dungeon Crawler Carl's audience reward)
-// bumps the AI Favor tracker when its Attack or Skill is rolled. The amount is read
+// can bump the AI Favor tracker via addAiFavor(). The amount is read
 // from the row's own Effects/Notes text if present, else looked up from the matching
 // rulebook entry's description (DCC_SKILLS / DCC_SPELLS).
 function aiFavorAmount(name, rowText) {
@@ -2204,7 +2286,7 @@ function rollSkill(btn) {
   const statId = sel?.value||'';
   const dm = activeDebuffMods();
   const diceStr = skillDmgOf(row);
-  const wooz = !!diceStr && dm.noDex && statId === 'dex';    // Woozy: no DEX Mod on an Attack
+  const wooz = !!diceStr && dm.noDex && statId === 'dex';    // Woozy: no DEX Mod on an Attack Check (damage unaffected)
   const statMod = statId && !wooz ? getStatMod(statId) : 0;
   const totalMod = rank + statMod + dm.penalty;
   const {result: roll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), dm.dis ? 'disadvantage' : null));
@@ -2215,13 +2297,28 @@ function rollSkill(btn) {
   if(diceStr) {
     // Attack skill: To Hit (vs the target's Evade) and Damage in one roll.
     const m = diceStr.match(/^(\d*)d(\d+)$/i);
-    const num = parseInt(m[1]||'1', 10), sides = parseInt(m[2], 10);
+    // Natural 20 = Critical Hit: twice as many base damage dice (Core p.79); the
+    // Rank damage die and Stat Mod are added once.
+    const num = parseInt(m[1]||'1', 10) * (roll === 20 ? 2 : 1), sides = parseInt(m[2], 10);
     const rolls = Array.from({length:num}, ()=>d(sides));
-    const bang = hasBuff('Bang Bro') && !/spell/i.test(inputs[2].value) && !/\bmana\b/i.test(inputs[3].value) ? 2 : 0;   // Bang Bro: +2 Fire/Electric on weapon hits
-    const dmg = rolls.reduce((a,b)=>a+b,0) + statMod + bang;
-    const sm = (statId ? `+${statId.toUpperCase()}(${statMod})` : '') + (bang ? '+Bang Bro(2)' : '');
+    // Damage Stat Mod comes from the weapon's Base Damage line, which can differ from
+    // the to-hit Stat (Dagger: DEX to hit, + STR damage; Handgun: no Stat) — Core p.176.
+    const dStat = dccDmgStatOf(row, statId);
+    const dMod = dStat ? getStatMod(dStat) : 0;
+    const rk = dccRankDiceFor(row, rank);          // "add 1 Rank damage die" upgrades (Table 37)
+    // Bang Bro: +2 Fire/Electric on weapon hits, +1d6 more at Ranks 5, 10 and 15.
+    let bang = 0, bangTxt = '';
+    if(hasBuff('Bang Bro') && !/spell/i.test(inputs[2].value) && !/\bmana\b/i.test(inputs[3].value)) {
+      const br = dccSkillRankFor({ name: 'Bang Bro' }) || 1;
+      const bn = (br >= 5 ? 1 : 0) + (br >= 10 ? 1 : 0) + (br >= 15 ? 1 : 0);
+      const brs = Array.from({length:bn}, ()=>d(6));
+      bang = 2 + brs.reduce((a,b)=>a+b,0);
+      bangTxt = '+Bang Bro(2' + (bn ? '+' + bn + 'd6:' + brs.join('+') : '') + ')';
+    }
+    const dmg = rolls.reduce((a,b)=>a+b,0) + rk.total + dMod + bang;
+    const sm = rk.txt + (dStat ? `+${dStat.toUpperCase()}(${dMod})` : '') + bangTxt;
     addLog(`${name}` + (roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), `Hit: ${total}  |  Dmg: ${dmg}`,
-      `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${diceStr}(${rolls.join('+')})${sm}=${dmg}`, type);
+      `${base}+Rank(${rank})${statLabel.replace(' + ','+')}${debuffTag(dm)}=${total}  |  ${num}d${sides}${roll===20?' crit':''}(${rolls.join('+')})${sm}=${dmg}`, type);
   } else {
     addLog(`${name}`+(roll===20?' ★':roll===1?' ✗':''), total,
       `${base}+Rank(${rank})${statLabel}${debuffTag(dm)}=${total}`, type);
@@ -2229,7 +2326,8 @@ function rollSkill(btn) {
   // Using a skill marks it for advancement (Core p.169).
   const chk = row.querySelector('input[type="checkbox"]');
   if(chk && chk.style.visibility !== 'hidden' && !chk.checked) { chk.checked = true; try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
-  addAiFavor(aiFavorAmount(name, inputs[3] ? inputs[3].value : ''), name);
+  // A weapon's "AI Favor N" is NOT per roll: it's earned for using that wimpy Attack
+  // for most of your Attacks in a combat of 3+ rounds (Core p.175) — the GM awards it.
   return { name, total, roll, attack: !!diceStr };
 }
 
@@ -2546,7 +2644,7 @@ function applySheet(data) {
   // Combat
   if(data.combat) {
     const c = data.combat;
-    const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
+    const set = (id,v) => { const el=document.getElementById(id); if(el) el.value = v == null ? '' : v; };   // a partial save mustn't write "undefined"
     // The saved Evade/DR Buffs are hand-entered only; clear any stale skill-overlay
     // tracking so the post-restore refresh() layers the skill bonus on cleanly.
     try { if(window.DCCSkillBuff){ DCCSkillBuff.resetTracking('evade-buffs'); DCCSkillBuff.resetTracking('dr-buffs'); } } catch(e){}
@@ -4261,6 +4359,14 @@ body.sheet-unlocked .dcc-list .dl-sub select.dl-stat{border-bottom:1px dashed va
 .turn-badge.warn{border-color:#c98a12;color:#9a6508;background:rgba(232,170,40,.14);}
 body.dark .turn-badge.warn{color:#f0c060;}
 .turn-row1 .turn-mini{margin-left:auto;}
+@media (max-width:600px){
+  .turn-row1 .turn-econ{flex-basis:100%;justify-content:center;}
+  .turn-row1 .turn-mini{margin-left:0;}
+  .turn-row1{justify-content:center;}
+  .turn-row2 .turn-badges{order:-1;flex-basis:100%;justify-content:center;}
+  .turn-row2 .turn-badges:empty{display:none;}
+  .turn-row2 .turn-stat{margin-left:auto;}
+}
 /* Mobile: tabs wrap two per row (like D&D); sections reorder */
 @media (max-width:600px){
   .tabs-row{display:flex!important;flex-wrap:wrap!important;overflow:visible!important;}

@@ -492,6 +492,57 @@ body.synthetic .synth-hide{display:none !important;}
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
 </style>
+<style id="act-style">
+/* ── Action tab (combat controller) ── */
+#tab-combat{padding:0;}
+.act-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.act-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
+.act-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+.act-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;border:1.5px solid var(--yz-dk);color:var(--yz-dk);border-radius:12px;padding:3px 12px;background:transparent;}
+.act-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.act-end{flex:0 0 auto;background:var(--yz-dk);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.act-end:hover{filter:brightness(1.12);}
+.act-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
+.act-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;}
+.act-stat .al{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.act-stat b{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--ink);}
+.act-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.act-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:2px 9px;border:1px solid var(--rule);color:var(--muted);}
+.act-badge.warn{border-color:#c98a12;color:#9a6508;background:rgba(232,170,40,.14);}
+body.dark .act-badge.warn{color:#f0c060;}
+.act-mini{margin-left:auto;background:transparent;border:1px solid var(--yz-dk);color:var(--yz-dk);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+.act-mini:hover{background:var(--yz-lt);}
+.act-note{font-size:11px;color:var(--muted);padding:0 10px 8px;line-height:1.35;}
+.act-sec{border-bottom:1px solid var(--rule);}
+.act-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.act-sec-hd .caret{color:var(--yz-dk);font-size:10px;transition:transform .12s;flex-shrink:0;}
+.act-sec.collapsed .caret{transform:rotate(-90deg);}
+.act-sec-hd .ttl{font-family:'Oswald','Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--yz-dk);}
+.act-sec.collapsed .act-sec-body{display:none;}
+.act-sec-body{padding:2px 12px 6px;}
+.act-card{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--rule);}
+.act-card:last-child{border-bottom:none;}
+.act-card .ac-main{flex:1;min-width:0;}
+.act-card .ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--ink);line-height:1.15;}
+.act-card .ac-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.act-card .ac-tag{display:inline-block;margin-left:6px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);border:1px solid var(--yz-lt);border-radius:4px;padding:0 5px;vertical-align:1px;}
+.act-card .ac-do{flex:0 0 auto;background:var(--yz-dk);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.act-card .ac-do:hover{filter:brightness(1.12);}
+.act-card.disabled{opacity:.42;}
+.act-card.disabled .ac-do{background:var(--muted);cursor:default;pointer-events:none;}
+.act-card.disabled .ac-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.act-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
+body.dark .act-pip{color:#5fd6ea;border-color:#5fd6ea;}
+body.dark .act-sec-hd .ttl,body.dark .act-sec-hd .caret,body.dark .act-card .ac-tag{color:var(--yz);}
+body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
+@media (max-width:600px){
+  .act-row1{justify-content:center;}
+  .act-econ{flex-basis:100%;justify-content:center;}
+  .act-row2 .act-badges{order:-1;flex-basis:100%;justify-content:center;}
+  .act-row2 .act-badges:empty{display:none;}
+  .act-card .ac-do{padding:9px 12px;font-size:12px;}
+}
+</style>
 </head>
 <body>
 <script>
@@ -695,16 +746,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="card tabs-card m-tabs">
       <div class="tabs-bar">
-        <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Combat</button>
+        <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Action</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
         <button class="tab-btn" data-tab="story" onclick="setTab('story')">Story</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
       </div>
 
-      <div class="tab-panel" id="tab-combat">
-        <div class="section-bar"><span>Attacks</span></div>
-        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:28%;">Weapon</th><th style="width:11%;">Bonus</th><th style="width:9%;">Dmg</th><th style="width:16%;">Range</th><th style="width:16%;">Ammo</th><th style="width:20%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-      </div>
+      <div class="tab-panel" id="tab-combat"><div id="act-hub"></div></div>
 
       <div class="tab-panel" id="tab-gear">
         <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span><span class="e-lbl" style="margin-left:auto;">Cash $</span><input id="f-cash" class="armor-in" style="width:76px;text-align:right;" placeholder="0" oninput="S.cash=this.value;scheduleAutosave()"></div>
@@ -814,7 +862,7 @@ function isAndroid(){ return !!(S && S.android); }
 var ATTR_KEYS=ATTRS.map(function(a){return a.key;});
 function skillsByAttr(k){ return SKILLS.filter(function(s){return s.attr===k;}); }
 function skillObj(name){ return SKILLS.find(function(s){return s.name===name;}); }
-function weaponBonus(b){ var m=String(b||'').match(/-?\d+/); return m?parseInt(m[0],10):0; }
+function weaponBonus(b){ var m=String(b||'').replace(/[−–]/g,'-').match(/-?\d+/); return m?parseInt(m[0],10):0; }   // catalog writes "−1" with a typographic minus
 function itemWeight(w){ w=String(w||'1'); if(w==='—'||w==='-'||w==='')return 0; if(w==='½'||w==='1/2')return 0.5; if(w==='¼'||w==='1/4')return 0.25; var n=parseFloat(w); return isNaN(n)?1:n; }
 
 // ── State ──
@@ -854,6 +902,7 @@ function syncHealthMax(){ var m=derivedMax('health'); S.health.max=m; if(S.healt
 
 // ── Render: attributes with their skills nested underneath ──
 function renderAttrSkills(){
+  if(typeof renderAction==='function' && $('act-hub') && S) setTimeout(renderAction,0);
   var host=$('attr-skills'); if(!host)return; host.innerHTML='';
   ATTRS.forEach(function(a){
     var cpen=(typeof critPenalty==='function')?critPenalty():0;
@@ -921,6 +970,7 @@ function setRad(n){ var prev=num(S.radiation); S.radiation=(prev===n)?n-1:n; if(
 // Full-auto fire and facing fear both raise Stress one step (Machinegunner ignores full-auto).
 function stressUp(){ bumpStress(1); addLog('Stress','Level '+clamp(num(S.stress),0,10),'+1 step — full-auto fire or facing fear','fumble'); }
 function renderStress(){
+  if(typeof renderAction==='function' && $('act-hub') && S) setTimeout(renderAction,0);
   var host=$('stress-pips'); if(!host)return; var s=clamp(num(S.stress),0,10), pips='';
   for(var i=1;i<=10;i++){ pips+='<button class="spip'+(i<=s?' on':'')+'" onclick="setStress('+i+')" title="stress '+i+'">'+i+'</button>'; }
   host.innerHTML=pips; var v=$('stress-val'); if(v)v.textContent=s;
@@ -1047,6 +1097,7 @@ function renderInventory(){
   renderEnc(); renderArmorVal(); relock();
 }
 function renderAttacks(){
+  if(typeof renderAction==='function') renderAction();   // the Action tab lists equipped weapons
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
   // Unarmed Attack is always available (Close Combat, base damage 1, Adjacent).
@@ -1280,7 +1331,9 @@ function rollSupply(i){
   var w=S.gear[i]; if(!w)return;
   var rating=parseInt(w.ammo,10);
   if(isNaN(rating)||rating<=0){ addLog('Supply · '+(w.name||'Weapon'),'—','No ammo supply rating to roll','normal'); return; }
-  var rolls=[],ones=0; for(var k=0;k<Math.min(12,rating);k++){ var d=die6(); rolls.push(d); if(d===1)ones++; }
+  // Core p.28: roll dice equal to the current rating, up to a maximum of six.
+  var rolls=[],ones=0; for(var k=0;k<Math.min(6,rating);k++){ var d=die6(); rolls.push(d); if(d===1)ones++; }
+  if(w.ammoMax==null||w.ammoMax==='') w.ammoMax=String(rating);   // remembered so Reload can refill it
   var nr=Math.max(0,rating-ones); w.ammo=String(nr);
   animDice(rolls,[],ones>0?'fumble':'normal');
   addLog('Supply · '+(w.name||'Weapon'), nr+(ones?'  (−'+ones+')':'  (no loss)'), poolStr(rolls)+' · each 1 lowers supply by one'+(nr===0?' · OUT OF AMMO':''), ones?'fumble':'normal');
@@ -1383,7 +1436,7 @@ var ALIEN_RULES=[
   { title:'Panic', text:'When you face something truly horrifying, the GM calls for a Panic Roll: D6 + Stress Level − Resolve on the Panic table. The higher the total, the worse you break.' },
   { title:'Health & Resolve', text:'Health = ⌈(Strength + Agility) ÷ 2⌉. Resolve = ⌈(Wits + Empathy) ÷ 2⌉ — your Resolve rating is subtracted on Stress Response and Panic rolls. At 0 Health you\'re Broken and roll a Critical Injury.' },
   { title:'Armor & damage', text:'A hit deals the weapon\'s damage +1 per extra success. Armor is a static soak — subtract your Armor Rating from each hit\'s damage (no roll). Armor-piercing attacks count your rating 1 step lower; a called shot at a weak spot takes −2 but knocks the rating down 1 step. Air-tight suits also track an Air Supply.' },
-  { title:'Ammo & supply', text:'Ammo and consumables carry a supply rating. When you fire full-auto or the GM calls for it, roll Supply Dice equal to the rating — each 1 lowers the rating by one. Full-auto fire also raises your Stress by one (unless you\'re a Machinegunner).' },
+  { title:'Ammo & supply', text:'Ammo, air and power carry a supply rating. After each ranged attack, make a supply roll: roll dice equal to the rating (max six) — each 1 lowers the rating by one. Skip it if you spent an extra success to conserve ammo. At zero you must reload (a quick action). Full-auto: each burst after the first gives +1 Stress.' },
   { title:'Ranges', text:'Adjacent · Short · Medium · Long · Extreme. Each weapon lists the band(s) it can reach; close combat happens at Adjacent.' },
   { title:'Radiation', text:'Each new dose of Radiation calls for a Stamina roll — one success or take a point of damage; heavy doses also force a Critical Injury. Radiation never heals on its own.' },
   { title:'Critical injuries', text:'Broken by damage → roll D66 on the physical Critical Injuries table. A lethal crit forces a Stamina death save each time its time limit passes until it\'s treated.' },
@@ -1546,6 +1599,7 @@ function applySheet(d){
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
+  if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used)};
   _lastRoll=null;
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
@@ -1587,6 +1641,127 @@ $('f-pronouns').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-appearance').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
 // Key attribute + career are set at creation (read-only header displays) — no change listeners.
+// ═══ ACTION TAB — the combat controller ═════════════════════════════════════
+// Perform actions here; the Gear/Story tabs manage what you have. State lives in
+// S.act (saved with the sheet). End Turn resets the round's actions and logs
+// nothing; there is no round counter (that's the GM's to track).
+var _actOpts=[], _actCollapsed={skills:true};
+function actState(){ if(!S.act||typeof S.act!=='object') S.act={full:false,quick:0,used:0}; return S.act; }
+function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
+function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty()); }
+function actDo(i,j){
+  var o=_actOpts[i]; if(!o) return;
+  if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
+  if(!actCan(o.kind)){ actSpend(o.kind, o.name); return; }
+  var run=(o.btns&&o.btns[j])?o.btns[j][1]:o.run;
+  var ok=run(); if(ok===false){ renderAction(); return; }
+  actSpend(o.kind, o.name);
+  renderAction(); scheduleAutosave();
+}
+function actToggle(k){ _actCollapsed[k]=!_actCollapsed[k]; renderAction(); }
+function actEndTurn(){ var a=actState(); a.full=false; a.quick=0; a.used=0; renderAction(); scheduleAutosave(); }
+function actCard(o){
+  var can=!o.blocked && actCan(o.kind);
+  var btns=o.btns ? o.btns.map(function(b,j){ return '<button class="ac-do" onclick="actDo('+o.i+','+j+')">'+esc(b[0])+'</button>'; }).join('')
+                  : '<button class="ac-do" onclick="actDo('+o.i+')">'+esc(o.btn||'Roll')+'</button>';
+  var sub=[o.blocked,o.sub].filter(Boolean).join(' · ');
+  return '<div class="act-card'+(can?'':' disabled')+'"><div class="ac-main"><div class="ac-name">'+esc(o.name)+(o.tag?'<span class="ac-tag">'+esc(o.tag)+'</span>':'')+'</div>'+(sub?'<div class="ac-sub">'+esc(sub)+'</div>':'')+'</div>'+btns+'</div>';
+}
+function actSec(key,title,list,empty){
+  var col=!!_actCollapsed[key];
+  return '<div class="act-sec'+(col?' collapsed':'')+'"><div class="act-sec-hd" onclick="actToggle(\''+key+'\')"><span class="caret">▼</span><span class="ttl">'+esc(title)+'</span></div>'
+    +'<div class="act-sec-body">'+(list.length?list.map(actCard).join(''):'<div class="act-empty">'+esc(empty||'')+'</div>')+'</div></div>';
+}
+function actAdd(sec,o,O){ o.i=_actOpts.length; _actOpts.push(o); O[sec].push(o); }
+function actWeaponSub(w){
+  var sk=w.skill||'Close Combat', bits=[sk, actPoolOf(sk, weaponBonus(w.bonus))+' dice'];
+  if(w.bonus!=null&&w.bonus!==''&&w.bonus!=='0') bits.push('Mod '+w.bonus);
+  bits.push('Dmg '+(w.damage!=null?w.damage:1));
+  if(w.range) bits.push(w.range);
+  if(w.ammo!=null&&w.ammo!==''&&w.ammo!=='—') bits.push('Ammo '+w.ammo);
+  return bits.join(' · ');
+}
+function actOutOfAmmo(w){ var a=parseInt(w.ammo,10); return (!isNaN(a) && a<=0) ? 'Out of ammo' : ''; }
+// A weapon's full ammo rating: the one remembered at its first supply roll, else the catalog's.
+function actAmmoMax(w){ var m=parseInt(w.ammoMax,10); if(!isNaN(m)) return m;
+  var c=G(window.ALIEN_WEAPONS).find(function(d){ return d.name===w.name; }); m=c?parseInt(c.ammo,10):NaN; return isNaN(m)?0:m; }
+function actSkillRoll(name, label){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty(); doPool((label?label+' · ':'')+name+' ('+s.attr+')', pool, true); }; }
+function actLogOnly(label, result, detail){ return function(){ addLog(label, result, detail||'', 'normal'); }; }
+
+// ALIEN (Evolved, p.60): each round, one FULL action + one QUICK action, or two
+// QUICK actions (the second forfeits the full action). Quick actions include
+// movement, and Defend / Dodge can interrupt out of turn — but they still need a
+// quick action, so save one if you expect to be attacked.
+function actCan(kind){
+  var a=actState();
+  if(kind==='free') return true;
+  if(kind==='full') return !a.full && a.quick<2;
+  return a.quick===0 || (a.quick===1 && !a.full);
+}
+function actSpend(kind,label){
+  var a=actState();
+  if(kind==='free') return true;
+  if(!actCan(kind)){ addLog('Action', 'No '+(kind==='full'?'full':'quick')+' action left', kind==='full'?'You used both quick actions (two quick actions forfeit your full action). End your turn to reset.':'Your actions are spent this round. End your turn to reset.', 'normal'); return false; }
+  if(kind==='full') a.full=true; else a.quick++;
+  return true;
+}
+function renderAction(){
+  var host=$('act-hub'); if(!host) return;
+  var a=actState(), O={attacks:[],full:[],quick:[],interrupts:[],skills:[]}; _actOpts=[];
+  // Attacks (full action)
+  actAdd('attacks',{name:'Unarmed',kind:'full',sub:'Close Combat · '+actPoolOf('Close Combat',0)+' dice · Dmg 1 · Adjacent',btn:'Attack',run:function(){ rollUnarmed(); }},O);
+  gearOf('weapon').filter(function(x){ return x.g.equipped; }).forEach(function(x){ var w=x.g, i=x.i;
+    actAdd('attacks',{name:w.name||'Weapon',kind:'full',sub:actWeaponSub(w),blocked:actOutOfAmmo(w),btn:'Attack',run:function(){ rollAttack(i); }},O);
+    // p.66: after each ranged attack, make an ammo supply roll (no action) — unless an extra success was spent to conserve ammo.
+    var am=parseInt(w.ammo,10);
+    if(!isNaN(am) && am>0) actAdd('attacks',{name:(w.name||'Weapon')+' · supply roll',tag:'No action',kind:'free',sub:'After each attack — skip if you spent an extra success to conserve ammo · '+Math.min(6,am)+' dice, each 1 = −1 ammo',btn:'Supply',run:function(){ rollSupply(i); }},O); });
+  actAdd('attacks',{name:'Special close attack',kind:'full',sub:'Disarm · Pass · Shove · Grapple — Close Combat, no weapon bonus, no damage',btn:'Roll',run:actSkillRoll('Close Combat','Special attack')},O);
+  // Full actions (book list, p.60)
+  [['Jump or climb','Mobility','Mobility'],['Take full cover','','No roll — you are in full cover'],['Interact with a terminal','Comtech','Comtech'],
+   ['Use machinery','Heavy Machinery','Heavy Machinery'],['Give first aid','Medical Aid','Medical Aid · someone Adjacent who is Broken'],
+   ['Clear a jammed weapon','Heavy Machinery','Heavy Machinery'],['Persuade someone','Manipulation','Manipulation'],
+   ['Give orders','Command','Command · each success = +1 die to their roll carrying out the order'],['Drive a vehicle','Piloting','Piloting'],
+   ['Break free','Close Combat','Close Combat · opposed, to escape a grapple']].forEach(function(r){
+    actAdd('full',{name:r[0],kind:'full',sub:r[2],btn:r[1]?'Roll':'Use',run:r[1]?actSkillRoll(r[1],r[0]):actLogOnly(r[0],'Full action',r[2])},O); });
+  if(!actSynth() && S.signature) actAdd('full',{name:'Signature item',kind:'full',sub:S.signature+' · once per session: −1 Stress',btn:'Use',run:function(){ if(num(S.stress)<1){ addLog('Signature item','—','No Stress to shed','normal'); return false; } bumpStress(-1); addLog('Signature item','−1 Stress','Stress now '+num(S.stress)+' · once per session','normal'); }},O);
+  // Quick actions (p.60)
+  [['Move','Into an adjacent zone'],['Close in / back off','Between Short and Adjacent range in your zone'],['Peek through a door or hatch','Move to it and look'],
+   ['Lock a door or hatch',''],['Take partial cover',''],['Pick up an item','From the ground']].forEach(function(r){
+    actAdd('quick',{name:r[0],kind:'quick',sub:r[1],btn:'Use',run:actLogOnly(r[0],'Quick action',r[1])},O); });
+  // Reload (p.67, quick action): refill an equipped weapon whose ammo has dropped below its rating.
+  var reloadable=gearOf('weapon').filter(function(x){ var m=actAmmoMax(x.g), c=parseInt(x.g.ammo,10); return x.g.equipped && m>0 && !isNaN(c) && c<m; });
+  if(!reloadable.length) actAdd('quick',{name:'Reload a weapon',kind:'quick',sub:'',btn:'Use',run:actLogOnly('Reload a weapon','Quick action','')},O);
+  reloadable.forEach(function(x){ var w=x.g, m=actAmmoMax(w);
+    actAdd('quick',{name:'Reload '+(w.name||'weapon'),kind:'quick',sub:'Ammo '+w.ammo+' → '+m+' · mark off a reload',btn:'Reload',run:function(){ w.ammo=String(m); addLog('Reload · '+(w.name||'Weapon'),'Ammo '+m,'Quick action · mark off one reload','normal'); renderInventory(); renderAttacks(); }},O); });
+  actAdd('quick',{name:'Aim',kind:'quick',sub:'+2 dice to your next ranged attack · Short range or more',btn:'Aim',run:function(){ var t=$('tray-mod'); if(t) t.value=String(clamp(num(t.value)+2,-6,12)); addLog('Aim','+2 dice','Added to your next roll (± Dice)','normal'); }},O);
+  actAdd('quick',{name:'Rally a broken character',kind:'quick',sub:'Command · same zone · +1 Health per success',btn:'Roll',run:actSkillRoll('Command','Rally')},O);
+  // Interrupts (quick, out of turn)
+  actAdd('interrupts',{name:'Defend',kind:'quick',sub:'Close Combat · against a close combat attack · declare before they roll',btn:'Roll',run:actSkillRoll('Close Combat','Defend')},O);
+  actAdd('interrupts',{name:'Dodge',kind:'quick',sub:'Mobility · against a ranged attack you can see · declare before they roll',btn:'Roll',run:actSkillRoll('Mobility','Dodge')},O);
+  // Use a skill (full action)
+  SKILLS.forEach(function(s){ actAdd('skills',{name:s.name,kind:'full',sub:s.attr+' · '+actPoolOf(s.name,0)+' dice',btn:'Roll',run:function(){ rollSkill(s.name); }},O); });
+  // Broken (p.68): a single move action per round and nothing else.
+  var broken=S.health && S.health.max>0 && num(S.health.dmg)>=S.health.max;
+  if(broken) _actOpts.forEach(function(o){
+    if(o.name==='Move'){ if(a.quick>=1||a.full) o.blocked='Broken — one move per round'; }
+    else o.blocked='Broken — you can only move';
+  });
+  var fullUsed=a.full||a.quick>=2, quickUsed=a.quick>=1;
+  var pips='<span class="act-pip'+(fullUsed?' used':'')+'">'+(a.quick>=2?'Quick':'Full')+'</span><span class="act-pip'+(quickUsed?' used':'')+'">Quick</span>';
+  var stress=clamp(num(S.stress),0,10), synth=actSynth();
+  var badges=(!synth && stress>0)?'<span class="act-badge warn" title="Each Stress Die that shows a 1 triggers a Stress Response, and you can\'t push that roll">⚠ Stress Response risk</span>':'';
+  if(broken) badges='<span class="act-badge warn" title="At zero Health you can make a single move action per round and nothing else (p.68)">Broken</span>'+badges;
+  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ">'+pips+'</div>'
+    +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button></div>'
+    +'<div class="act-row2">'+(synth?'':'<span class="act-stat"><span class="al">Stress</span> <b>'+stress+'</b></span>')
+    +'<div class="act-badges">'+badges+'</div>'
+    +(synth?'':'<button class="act-mini" onclick="rollPanic()" title="When the GM calls for a Panic Roll">Roll Panic</button>')+'</div></div>'
+    +actSec('attacks','Attacks',O.attacks,'')
+    +actSec('full','Full Actions',O.full,'')
+    +actSec('quick','Quick Actions',O.quick,'')
+    +actSec('interrupts','Interrupts',O.interrupts,'')
+    +actSec('skills','Use a Skill',O.skills,'');
+}
 try{ if(localStorage.getItem('yze_dark')==='1') setDarkMode(true); }catch(e){}
 </script>
 

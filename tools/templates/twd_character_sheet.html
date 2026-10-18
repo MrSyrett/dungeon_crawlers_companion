@@ -511,6 +511,57 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
 </style>
+<style id="act-style">
+/* ── Action tab (combat controller) ── */
+#tab-combat{padding:0;}
+.act-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.act-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
+.act-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+.act-pip{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;border:1.5px solid var(--yz-dk);color:var(--yz-dk);border-radius:12px;padding:3px 12px;background:transparent;}
+.act-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.act-end{flex:0 0 auto;background:var(--yz-dk);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.act-end:hover{filter:brightness(1.12);}
+.act-row2{display:flex;align-items:center;gap:10px;padding:0 10px 8px;flex-wrap:wrap;}
+.act-stat{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:12px;}
+.act-stat .al{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.act-stat b{font-family:'Share Tech Mono',monospace;font-size:15px;color:var(--ink);}
+.act-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.act-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:2px 9px;border:1px solid var(--rule);color:var(--muted);}
+.act-badge.warn{border-color:#c98a12;color:#9a6508;background:rgba(232,170,40,.14);}
+body.dark .act-badge.warn{color:#f0c060;}
+.act-mini{margin-left:auto;background:transparent;border:1px solid var(--yz-dk);color:var(--yz-dk);border-radius:6px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+.act-mini:hover{background:var(--yz-lt);}
+.act-note{font-size:11px;color:var(--muted);padding:0 10px 8px;line-height:1.35;}
+.act-sec{border-bottom:1px solid var(--rule);}
+.act-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.act-sec-hd .caret{color:var(--yz-dk);font-size:10px;transition:transform .12s;flex-shrink:0;}
+.act-sec.collapsed .caret{transform:rotate(-90deg);}
+.act-sec-hd .ttl{font-family:'Oswald','Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--yz-dk);}
+.act-sec.collapsed .act-sec-body{display:none;}
+.act-sec-body{padding:2px 12px 6px;}
+.act-card{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--rule);}
+.act-card:last-child{border-bottom:none;}
+.act-card .ac-main{flex:1;min-width:0;}
+.act-card .ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--ink);line-height:1.15;}
+.act-card .ac-sub{font-size:11px;color:var(--muted);line-height:1.3;}
+.act-card .ac-tag{display:inline-block;margin-left:6px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--yz-dk);border:1px solid var(--yz-lt);border-radius:4px;padding:0 5px;vertical-align:1px;}
+.act-card .ac-do{flex:0 0 auto;background:var(--yz-dk);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.act-card .ac-do:hover{filter:brightness(1.12);}
+.act-card.disabled{opacity:.42;}
+.act-card.disabled .ac-do{background:var(--muted);cursor:default;pointer-events:none;}
+.act-card.disabled .ac-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.act-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
+body.dark .act-pip{color:#5fd6ea;border-color:#5fd6ea;}
+body.dark .act-sec-hd .ttl,body.dark .act-sec-hd .caret,body.dark .act-card .ac-tag{color:var(--yz);}
+body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
+@media (max-width:600px){
+  .act-row1{justify-content:center;}
+  .act-econ{flex-basis:100%;justify-content:center;}
+  .act-row2 .act-badges{order:-1;flex-basis:100%;justify-content:center;}
+  .act-row2 .act-badges:empty{display:none;}
+  .act-card .ac-do{padding:9px 12px;font-size:12px;}
+}
+</style>
 </head>
 <body>
 <script>
@@ -704,17 +755,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
       <div class="card tabs-card m-tabs">
       <div class="tabs-bar">
-        <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Combat</button>
+        <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Action</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
         <button class="tab-btn" data-tab="story" onclick="setTab('story')">Story</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
       </div>
 
-      <div class="tab-panel" id="tab-combat">
-        <div class="section-bar"><span>Attacks</span></div>
-        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:36%;">Weapon</th><th style="width:12%;">Bonus</th><th style="width:10%;">Dmg</th><th style="width:20%;">Range</th><th style="width:22%;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-        <div id="atk-empty" class="tbl-empty">No weapons equipped. Add a weapon on the Gear tab and tap Equip.</div>
-      </div>
+      <div class="tab-panel" id="tab-combat"><div id="act-hub"></div></div>
 
       <div class="tab-panel" id="tab-gear">
         <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span></div>
@@ -823,7 +870,7 @@ function syncVariant(){
 var ATTR_KEYS=ATTRS.map(function(a){return a.key;});
 function skillsByAttr(k){ return SKILLS.filter(function(s){return s.attr===k;}); }
 function skillObj(name){ return SKILLS.find(function(s){return s.name===name;}); }
-function weaponBonus(b){ var m=String(b||'').match(/-?\d+/); return m?parseInt(m[0],10):0; }
+function weaponBonus(b){ var m=String(b||'').replace(/[−–]/g,'-').match(/-?\d+/); return m?parseInt(m[0],10):0; }
 function itemWeight(w){ w=String(w||'1'); if(w==='—'||w==='-'||w==='')return 0; if(w==='½'||w==='1/2')return 0.5; if(w==='¼'||w==='1/4')return 0.25; var n=parseFloat(w); return isNaN(n)?1:n; }
 
 // ── State ──
@@ -854,6 +901,7 @@ function derivedMax(which){
 
 // ── Render: attributes with their skills nested underneath ──
 function renderAttrSkills(){
+  if(typeof renderAction==='function' && $('act-hub') && S) setTimeout(renderAction,0);
   var host=$('attr-skills'); if(!host)return; host.innerHTML='';
   var cpen=(typeof critPenalty==='function')?critPenalty():0;
   ATTRS.forEach(function(a){
@@ -861,7 +909,7 @@ function renderAttrSkills(){
     var head='<div class="attr-row"><span class="a-name" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool" style="cursor:pointer;">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
-      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key)-cpen;
+      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key)-cpen-skillPenalty(s.name);
       var esn=s.name.replace(/'/g,"\\'");
       rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+' (level '+lvl+')">'+s.name+'</button><button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="roll pool = attribute + skill − penalties">'+Math.max(0,pool)+'d</button></div>';
     });
@@ -897,6 +945,7 @@ function renderVitals(){
   renderStress();
 }
 function renderStress(){
+  if(typeof renderAction==='function' && $('act-hub') && S) setTimeout(renderAction,0);
   var host=$('stress-pips'); if(!host)return; var s=clamp(num(S.stress),0,10), pips='';
   for(var i=1;i<=10;i++){ pips+='<button class="spip'+(i<=s?' on':'')+'" onclick="setStress('+i+')" title="stress '+i+'">'+i+'</button>'; }
   host.innerHTML=pips; var v=$('stress-val'); if(v)v.textContent=s;
@@ -979,11 +1028,18 @@ function addRelRow(){ S.relationships.push({name:'',note:''}); renderRelationshi
 // armor sums into the Armor rating shown in the Health section.
 function relock(){ try{ if(window.applySheetLock) window.applySheetLock(); }catch(e){} }
 function gearOf(kind){ var out=[]; S.gear.forEach(function(g,i){ if((g.kind||'gear')===kind) out.push({g:g,i:i}); }); return out; }
+// Core p.67: worn armor's penalty is subtracted from every Mobility roll (soft vest −1, body armor −2, metal-plated −3).
+function armorMobPenalty(){ var n=0; S.gear.forEach(function(g){ if(g.kind!=='armor'||!g.equipped) return;
+  var c=G(window.TWD_ARMOR).find(function(a){ return a.name===g.name; }), m=String((c&&c.penalty)||g.note||'').match(/[-−–]\s*(\d+)/);
+  n+=m?parseInt(m[1],10):0; }); return n; }
+function skillPenalty(name){ return name==='Mobility'?armorMobPenalty():0; }
 function armorRating(){ var r=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped) r+=num(g.rating); }); return r; }
 function renderArmorVal(){ var el=$('armor-val'); if(el) el.textContent=armorRating(); }
-function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=(f==='damage'||f==='rating')?num(v):v; scheduleAutosave(); if(f==='weight')renderEnc(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
+// Weapon damage is a number, except explosives which keep their Blast Power text ("BP 8").
+function dmgVal(v){ return /BP\s*\d+/i.test(String(v))?String(v).trim():num(v); }
+function gEdit(i,f,v){ var g=S.gear[i]; if(!g)return; g[f]=f==='damage'?dmgVal(v):f==='rating'?num(v):v; scheduleAutosave(); if(f==='weight')renderEnc(); if(f==='rating')renderArmorVal(); if((g.kind==='weapon')&&g.equipped)renderAttacks(); }
 function gDel(i){ S.gear.splice(i,1); renderInventory(); renderAttacks(); scheduleAutosave(); }
-function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); scheduleAutosave(); }
+function gEquip(i,on){ var g=S.gear[i]; if(!g)return; g.equipped=!!on; renderAttacks(); renderArmorVal(); if(g.kind==='armor') renderAttrSkills(); scheduleAutosave(); }
 function invIn(i,f,val,cls,ph){ return '<input'+(cls?' class="'+cls+'"':'')+' value="'+esc(val==null?'':val)+'" oninput="gEdit('+i+',\''+f+'\',this.value)"'+(ph?' placeholder="'+ph+'"':'')+'>'; }
 function eqBox(i,on){ return '<input type="checkbox" class="eqbox" data-nolock '+(on?'checked':'')+' onchange="gEquip('+i+',this.checked)" title="Equip">'; }
 // One combined inventory list — general gear, weapons and armor together, in
@@ -1022,6 +1078,7 @@ function renderInventory(){
   renderEnc(); renderArmorVal(); relock();
 }
 function renderAttacks(){
+  if(typeof renderAction==='function') renderAction();   // the Action tab lists equipped weapons
   var body=$('atk-body'); if(!body)return; body.innerHTML='';
   var eq=gearOf('weapon').filter(function(o){ return o.g.equipped; });
   // Foot or Fist Attack is always available (Close Combat, base damage 1, Short range).
@@ -1155,7 +1212,7 @@ function badTag(ones){ return ones>0 ? ' · ⚠ '+ones+' walker'+(ones>1?'s':'')
 // The bad state fired: in The Walking Dead a walker (a 1 on a Stress Die) means
 // you mess up — raise the Threat Level one step — and you can't push the roll.
 function onBad(label){ messUp(); }
-function messUp(){ addLog('Messed up','⚠ Threat Level rises','A 1 on a stress die is a walker — you mess up: raise the Threat Level one step (you drew a walker, or something else goes wrong). You can succeed and still mess up, and you can\'t push a roll that rolled a walker.','fumble'); }
+function messUp(){ addLog('Messed up','⚠ Walker — you mess up','A 1 on a stress die is a walker (p.50): the GM raises the Threat Level one step, or walkers come at you (a single attack), or something else goes wrong. You can succeed and still mess up, and you can\'t push a roll that rolled a walker.','fumble'); }
 
 // Roll base dice, plus a number of Stress Dice equal to stress level.
 // Each 6 is a success; a 1 on a Stress Die is a walker — the bad state.
@@ -1183,13 +1240,22 @@ function doPool(label, poolSize, pushable){
 }
 function rollSkill(name){
   var s=skillObj(name); if(!s)return;
-  var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty();
+  var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(name);
   doPool(name+' ('+s.attr+')', pool, true);
 }
 function rollAttr(k){
   var a=null; for(var i=0;i<ATTRS.length;i++){ if(ATTRS[i].key===k){ a=ATTRS[i]; break; } }
   var pool=attrVal(k)-condPenaltyFor(k)-critPenalty();
   doPool((a?a.name:k)+' ('+k+')', pool, true);
+}
+// Explosives (p.71) list a Blast Power ("BP 8") instead of damage: on a hit, roll that
+// many dice at everyone within Short range of the impact — each 6 is 1 damage — and
+// each extra attack success adds +1 damage. Plain weapons: damage +1 per extra success.
+function blastPower(d){ var m=String(d==null?'':d).match(/BP\s*(\d+)/i); return m?parseInt(m[1],10):0; }
+function atkResult(hit, succ, wdmg, bp){
+  if(!hit) return {t:'MISS',type:'fumble'};
+  if(bp) return {t:'HIT · Blast Power '+bp+(succ>1?' +'+(succ-1)+' dmg':'')+' — everyone within Short',type:'crit'};
+  return {t:'HIT · '+(wdmg+(succ-1))+' dmg',type:'crit'};
 }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
@@ -1200,13 +1266,13 @@ function rollAttack(i){
   var poolSize=pool+mod, floored=false; if(poolSize<1){ poolSize=1; floored=true; } poolSize=Math.min(20,poolSize);
   var r=rollDicePool(poolSize), c=countPool(r.all), hit=c.succ>=1;
   var bad=r.stressOnes>0;
-  var dmg=hit?(num(w.damage)+(c.succ-1)):0;
-  var t=hit?{t:'HIT · '+dmg+' dmg',type:'crit'}:{t:'MISS',type:'fumble'};
+  var bp=blastPower(w.damage);
+  var t=atkResult(hit, c.succ, num(w.damage), bp);
   var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+badTag(r.stressOnes);
   animDice(r.base, r.stress, glowFor(c.succ, bad));
   addLog(label, c.succ+'  '+t.t, detail, t.type);
   if(bad){ _lastRoll=null; onBad(label); return; }
-  _lastRoll={label:label,base:r.base,stress:r.stress,kind:'attack',wdmg:num(w.damage)}; showPushOption();
+  _lastRoll={label:label,base:r.base,stress:r.stress,kind:'attack',wdmg:num(w.damage),bp:bp}; showPushOption();
 }
 // ── Panic (Alien) ──
 function panicLookup(total){
@@ -1302,7 +1368,7 @@ function doPush(){
   stress.forEach(function(v){ if(v===1)ones++; });
   var bad=alien && ones>0;
   var cc=countPool(base.concat(stress)), t;
-  if(pr.kind==='attack'){ var hit=cc.succ>=1, dmg=hit?(pr.wdmg+(cc.succ-1)):0; t=hit?{t:'HIT · '+dmg+' dmg',type:'crit'}:{t:'MISS',type:'fumble'}; }
+  if(pr.kind==='attack') t=atkResult(cc.succ>=1, cc.succ, pr.wdmg, pr.bp||0);
   else t=tierOf(cc.succ);
   var detail=poolStr(base)+(stress.length?' + '+stress.length+' stress('+stress.join(',')+')':'')+' · '+cc.succ+' succ · PUSHED'
     +(alien?' (+1 stress)'+badTag(ones):(cc.bane?' — a condition / '+cc.bane+' damage or stress':' — take a condition'));
@@ -1447,16 +1513,17 @@ function applySheet(d){
   var inv=[];
   if(Array.isArray(d.gear)) d.gear.forEach(function(g){
     var kind=g.kind || (g.rating!=null?'armor':(g.damage!=null?'weapon':'gear'));
-    if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',grip:g.grip||'',bonus:g.bonus||'',damage:g.damage!=null?num(g.damage):1,range:g.range||'',weight:g.weight||'1',skill:g.skill||'Melee'});
+    if(kind==='weapon') inv.push({kind:'weapon',equipped:g.equipped!==false,name:g.name||'',grip:g.grip||'',bonus:g.bonus||'',damage:g.damage!=null?dmgVal(g.damage):1,range:g.range||'',weight:g.weight||'1',skill:g.skill||'Melee'});
     else if(kind==='armor') inv.push({kind:'armor',equipped:g.equipped!==false,name:g.name||'',rating:num(g.rating),weight:g.weight||'1',note:g.note||''});
     else inv.push({kind:'gear',name:g.name||'',weight:g.weight||'1',note:g.note||''});
   });
   // Legacy saves: a separate weapons[] array and a numeric armor — fold them in.
-  if(Array.isArray(d.weapons)) d.weapons.forEach(function(w){ inv.push({kind:'weapon',equipped:true,name:w.name||'',grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?num(w.damage):1,range:w.range||'',weight:w.weight||'1',skill:w.skill||'Melee'}); });
+  if(Array.isArray(d.weapons)) d.weapons.forEach(function(w){ inv.push({kind:'weapon',equipped:true,name:w.name||'',grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?dmgVal(w.damage):1,range:w.range||'',weight:w.weight||'1',skill:w.skill||'Melee'}); });
   if(d.armor!=null && num(d.armor)>0 && !inv.some(function(x){return x.kind==='armor';})) inv.push({kind:'armor',equipped:true,name:'Armor',rating:num(d.armor),weight:'1',note:''});
   S.gear=inv;
   S.crits = Array.isArray(d.crits) ? d.crits.map(function(c){ return {name:c.name||'',effect:c.effect||'',mod:num(c.mod)}; }) : [];
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
+  if(d.act && typeof d.act==='object') S.act={full:!!d.act.full,quick:num(d.act.quick),used:num(d.act.used),overwatch:!!d.act.overwatch};
   _lastRoll=null;
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
@@ -1497,6 +1564,91 @@ $('f-pronouns').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-appearance').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
 // Key attribute + career are set at creation (read-only header displays) — no change listeners.
+// ═══ ACTION TAB — the combat controller ═════════════════════════════════════
+// Perform actions here; the Gear/Story tabs manage what you have. State lives in
+// S.act (saved with the sheet). End Turn resets the round's actions and logs
+// nothing; there is no round counter (that's the GM's to track).
+var _actOpts=[], _actCollapsed={skills:true};
+function actState(){ if(!S.act||typeof S.act!=='object') S.act={full:false,quick:0,used:0}; return S.act; }
+function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
+function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(skName)); }
+function actDo(i,j){
+  var o=_actOpts[i]; if(!o) return;
+  if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
+  if(!actCan(o.kind)){ actSpend(o.kind, o.name); return; }
+  var run=(o.btns&&o.btns[j])?o.btns[j][1]:o.run;
+  var ok=run(); if(ok===false){ renderAction(); return; }
+  actSpend(o.kind, o.name);
+  renderAction(); scheduleAutosave();
+}
+function actToggle(k){ _actCollapsed[k]=!_actCollapsed[k]; renderAction(); }
+function actEndTurn(){ var a=actState(); a.full=false; a.quick=0; a.used=0; a.overwatch=false; renderAction(); scheduleAutosave(); }
+function actCard(o){
+  var can=!o.blocked && actCan(o.kind);
+  var btns=o.btns ? o.btns.map(function(b,j){ return '<button class="ac-do" onclick="actDo('+o.i+','+j+')">'+esc(b[0])+'</button>'; }).join('')
+                  : '<button class="ac-do" onclick="actDo('+o.i+')">'+esc(o.btn||'Roll')+'</button>';
+  var sub=[o.blocked,o.sub].filter(Boolean).join(' · ');
+  return '<div class="act-card'+(can?'':' disabled')+'"><div class="ac-main"><div class="ac-name">'+esc(o.name)+(o.tag?'<span class="ac-tag">'+esc(o.tag)+'</span>':'')+'</div>'+(sub?'<div class="ac-sub">'+esc(sub)+'</div>':'')+'</div>'+btns+'</div>';
+}
+function actSec(key,title,list,empty){
+  var col=!!_actCollapsed[key];
+  return '<div class="act-sec'+(col?' collapsed':'')+'"><div class="act-sec-hd" onclick="actToggle(\''+key+'\')"><span class="caret">▼</span><span class="ttl">'+esc(title)+'</span></div>'
+    +'<div class="act-sec-body">'+(list.length?list.map(actCard).join(''):'<div class="act-empty">'+esc(empty||'')+'</div>')+'</div></div>';
+}
+function actAdd(sec,o,O){ o.i=_actOpts.length; _actOpts.push(o); O[sec].push(o); }
+function actWeaponSub(w){
+  var sk=w.skill||'Close Combat', bits=[sk, actPoolOf(sk, weaponBonus(w.bonus))+' dice'];
+  if(w.bonus!=null&&w.bonus!==''&&w.bonus!=='0') bits.push('Mod '+w.bonus);
+  bits.push('Dmg '+(w.damage!=null?w.damage:1));
+  if(w.range) bits.push(w.range);
+  if(w.ammo!=null&&w.ammo!==''&&w.ammo!=='—') bits.push('Ammo '+w.ammo);
+  return bits.join(' · ');
+}
+function actOutOfAmmo(w){ var a=parseInt(w.ammo,10); return (!isNaN(a) && a<=0) ? 'Out of ammo' : ''; }
+function actSkillRoll(name, label){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty()-skillPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')', pool, true); }; }
+function actLogOnly(label, result, detail){ return function(){ addLog(label, result, detail||'', 'normal'); }; }
+
+// THE WALKING DEAD (Core p.64-67): in a brawl everyone gets ONE action per round,
+// resolved by phase — 1 Taking Cover, 2 Ranged Combat, 3 Close Combat,
+// 4 Movement, 5 First Aid, 6 Other. Quick, simple things (shout a few words, draw
+// a knife, grab a gun off the counter) are free. Barking orders (Leadership) is
+// your action for the round.
+function actCan(kind){ if(kind==='free') return true; return !actState().used; }
+function actSpend(kind,label){
+  if(kind==='free') return true;
+  if(!actCan(kind)){ addLog('Action','No action left','You get one action per round in a brawl. End your turn to reset.','normal'); return false; }
+  actState().used=1; return true;
+}
+function renderAction(){
+  var host=$('act-hub'); if(!host) return;
+  var a=actState(), O={attacks:[],brawl:[],skills:[]}; _actOpts=[];
+  var weps=gearOf('weapon').filter(function(x){ return x.g.equipped; });
+  var ow=!!(a.used && a.overwatch);
+  weps.filter(function(x){ return /ranged/i.test(x.g.skill||''); }).forEach(function(x){ var w=x.g,i=x.i;
+    actAdd('attacks',{name:w.name||'Weapon',tag:ow?'Overwatch · Phase 4':'Phase 2',kind:ow?'free':'action',sub:actWeaponSub(w),blocked:actOutOfAmmo(w),btn:ow?'Fire':'Attack',run:function(){ if(ow) actState().overwatch=false; rollAttack(i); }},O); });
+  actAdd('attacks',{name:'Foot or Fist',tag:'Phase 3',kind:'action',sub:'Close Combat · '+actPoolOf('Close Combat',0)+' dice · Dmg 1 · Short',btn:'Attack',run:function(){ rollUnarmed(); }},O);
+  weps.filter(function(x){ return !/ranged/i.test(x.g.skill||''); }).forEach(function(x){ var w=x.g,i=x.i;
+    actAdd('attacks',{name:w.name||'Weapon',tag:'Phase 3',kind:'action',sub:actWeaponSub(w),btn:'Attack',run:function(){ rollAttack(i); }},O); });
+  actAdd('brawl',{name:'Take cover',tag:'Phase 1',kind:'action',sub:'Mobility · in cover now on a success (ranged attacks need +1 success); fail = in cover at round end',btn:'Roll',run:actSkillRoll('Mobility','Take cover')},O);
+  actAdd('brawl',{name:'Overwatch',tag:'Phase 2',kind:'action',sub:'Ranged Combat · cover an area; fire in the Movement phase if anyone enters it',btn:'Use',run:function(){ actState().overwatch=true; addLog('Overwatch','Ranged action','Covering an area — fire in Phase 4 if anyone moves into it'); }},O);
+  actAdd('brawl',{name:'Move',tag:'Phase 4',kind:'action',sub:'Mobility · one range step closer or further (Short ↔ Long); opposed if chased',btn:'Roll',run:actSkillRoll('Mobility','Move')},O);
+  actAdd('brawl',{name:'First aid',tag:'Phase 5',kind:'action',sub:'Medicine · a Broken person within Short range — not yourself · back up with 1 Health +1 per extra success',btn:'Roll',run:actSkillRoll('Medicine','First aid')},O);
+  actAdd('brawl',{name:'Bark orders',tag:'Any phase',kind:'action',sub:'Leadership · each success = +1 die for an ally this round (max 3 each); can\'t be helped',btn:'Roll',run:actSkillRoll('Leadership','Orders')},O);
+  actAdd('brawl',{name:'Other',tag:'Phase 6',kind:'action',sub:'Barricade a door, hotwire a car, set off explosives… the GM decides the roll',btn:'Use',run:actLogOnly('Other action','Phase 6','Barricade, hotwire, explosives, radio… — GM decides if a roll is needed')},O);
+  SKILLS.forEach(function(s){ actAdd('skills',{name:s.name,kind:'action',sub:s.attr+' · '+actPoolOf(s.name,0)+' dice',btn:'Roll',run:function(){ rollSkill(s.name); }},O); });
+  // Broken (p.67): you can say a few words or crawl behind the nearest cover, but every skill roll fails.
+  var broken=S.health && S.health.max>0 && num(S.health.dmg)>=S.health.max;
+  if(broken) _actOpts.forEach(function(o){ o.blocked='Broken — skill rolls fail; you can only talk or crawl to cover'; });
+  var stress=clamp(num(S.stress),0,10);
+  var badges=stress>0?'<span class="act-badge warn" title="A 1 on any stress die is a walker — you mess up and the Threat Level rises; you can\'t push that roll">⚠ '+stress+' stress '+(stress>1?'dice':'die')+' — walker risk</span>':'';
+  host.innerHTML='<div class="act-top"><div class="act-row1"><div class="act-econ"><span class="act-pip'+(a.used?' used':'')+'">Action</span></div>'
+    +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s action">End Turn</button></div>'
+    +'<div class="act-row2"><span class="act-stat"><span class="al">Stress</span> <b>'+stress+'</b></span><div class="act-badges">'+(broken?'<span class="act-badge warn" title="All skill rolls fail automatically while Broken (p.67)">Broken</span>':'')+(ow?'<span class="act-badge" title="Fire your ranged weapon if anyone moves into the area">Overwatch</span>':'')+badges+'</div></div>'
+    +'<div class="act-note">Quick, simple things — shouting a few words, drawing a knife, grabbing a gun — are free.</div></div>'
+    +actSec('attacks','Attacks',O.attacks,'')
+    +actSec('brawl','Brawl Actions',O.brawl,'')
+    +actSec('skills','Use a Skill',O.skills,'');
+}
 try{ if(localStorage.getItem('twd_dark')==='1') setDarkMode(true); }catch(e){}
 </script>
 

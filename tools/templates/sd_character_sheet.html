@@ -532,6 +532,56 @@ body.dark .sl::after{background:#3a3320;}
   .sd-tabs-card{order:5;}
 }
 @media(max-width:460px){.hdr-metarow>*{flex:1 1 47%!important;}}
+
+/* ═══ ACTION TAB (turn controller) ═══ */
+#tab-action{padding:0;}
+.sdt-top{background:var(--box);border-bottom:1px solid var(--rule);}
+.sdt-row1{display:flex;align-items:center;gap:8px;padding:9px 10px 6px;flex-wrap:wrap;}
+.sdt-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
+.sdt-pip{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid var(--gold);color:var(--gold-ink);border-radius:12px;padding:3px 12px;}
+.sdt-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.sdt-end{flex:0 0 auto;background:var(--gold);color:var(--on-gold);border:none;border-radius:7px;padding:7px 14px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.sdt-end:hover{filter:brightness(1.08);}
+.sdt-row2{display:flex;align-items:center;gap:10px;padding:0 10px 9px;flex-wrap:wrap;}
+.sdt-luck{display:inline-flex;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;font-size:12px;color:var(--ink);}
+.sdt-lbl{font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);}
+.sdt-luck b{font-size:15px;min-width:14px;text-align:center;}
+.sdt-mini{background:transparent;border:1px solid var(--gold);color:var(--gold-ink);border-radius:6px;padding:2px 9px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.sdt-mini:hover:not([disabled]){background:var(--gold);color:var(--on-gold);}
+.sdt-mini[disabled]{opacity:.45;cursor:default;}
+.sdt-badges{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;}
+.sdt-badge{font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.06em;text-transform:uppercase;border-radius:12px;padding:2px 9px;border:1px solid var(--rule);color:var(--muted);}
+.sdt-badge.good{border-color:var(--gold);color:var(--gold-ink);background:rgba(200,160,32,.12);}
+.sdt-badge.bad{border-color:#c0251e;color:#c0251e;background:rgba(192,37,30,.08);}
+body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
+.sdt-badge.hd{border-color:var(--rule);}
+.sdt-sec{border-bottom:1px solid var(--rule);}
+.sdt-sec-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--box);cursor:pointer;user-select:none;}
+.sdt-caret{color:var(--gold-ink);font-size:10px;transition:transform .12s;}
+.sdt-sec.collapsed .sdt-caret{transform:rotate(-90deg);}
+.sdt-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink);}
+.sdt-sec.collapsed .sdt-sec-body{display:none;}
+.sdt-sec-body{padding:2px 12px 6px;}
+.sdt-card{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--rule);}
+.sdt-card:last-child{border-bottom:none;}
+.sdt-main{flex:1;min-width:0;}
+.sdt-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;color:var(--ink);line-height:1.2;}
+.sdt-sub{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;color:var(--muted);line-height:1.35;}
+.sdt-do{flex:0 0 auto;background:var(--gold);color:var(--on-gold);border:none;border-radius:6px;padding:6px 12px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.sdt-do:hover{filter:brightness(1.08);}
+.sdt-card.disabled{opacity:.42;}
+.sdt-card.disabled .sdt-do{background:var(--muted);color:#fff;pointer-events:none;}
+.sdt-card.disabled .sdt-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.sdt-empty{font-family:'Montserrat',sans-serif;font-size:11px;color:var(--muted);padding:10px 2px;}
+.sd-atk-sl{margin-top:14px;}
+.sd-atk-hint{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted);}
+@media (max-width:600px){
+  .sdt-row1{justify-content:center;}
+  .sdt-econ{flex-basis:100%;justify-content:center;}
+  .sdt-row2{justify-content:space-between;}
+  .sdt-badges{margin-left:0;}
+  .sdt-do{padding:9px 13px;font-size:11px;}
+}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, ink on the gold buttons */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico,.dice-roll-btn .dcc-ico,.dice-btn:hover .dcc-ico,.atk-roll-btn:hover .dcc-ico,.spell-cast-btn:hover .dcc-ico,.stat-mod:hover .dcc-ico{color:var(--on-gold,#161616)}.atk-roll-btn .dcc-ico,.spell-cast-btn .dcc-ico{color:var(--gold-ink,#8a6c0c)}</style>
 </head>
@@ -759,33 +809,17 @@ body.dark .sl::after{background:#3a3320;}
       </div><!-- end vitals card -->
 
 
-      <!-- TABS: Attacks / Spells / Talents / Gear -->
+      <!-- TABS: Action / Spells / Talents / Equipment -->
       <div class="card sd-tabs-card">
       <div class="tabs-bar">
-        <button class="tab-btn" data-tab="attacks" onclick="setTab('attacks')">Attacks</button>
+        <button class="tab-btn" data-tab="action" onclick="setTab('action')">Action</button>
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Equipment</button>
       </div>
 
-      <!-- ATTACKS TAB -->
-      <div class="tab-panel" id="tab-attacks">
-        <div class="sl">Attacks</div>
-        <table class="attacks-table">
-          <thead>
-            <tr>
-              <th style="width:34%">Weapon / Attack</th>
-              <th style="width:64px">Bonus</th>
-              <th style="width:52px">Stat</th>
-              <th style="width:70px">Range</th>
-              <th style="width:132px">Damage</th>
-              <th style="width:24px;text-align:center;" title="Always Advantage">▲</th>
-              <th style="width:32px"></th>
-            </tr>
-          </thead>
-          <tbody id="attacks-body"></tbody>
-        </table>
-      </div>
+      <!-- ACTION TAB: the turn controller (rendered by renderSDTurn) -->
+      <div class="tab-panel" id="tab-action"><div id="sd-turn"></div></div>
 
       <!-- SPELLS TAB -->
       <div class="tab-panel" id="tab-spells">
@@ -822,6 +856,23 @@ body.dark .sl::after{background:#3a3320;}
             <button onclick="openShop()" style="padding:3px 12px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;border-radius:6px;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">+ Item</button>
           </div></div>
         <div id="gear-list"></div>
+
+        <!-- ATTACKS (managed here; rolled from the Action tab) -->
+        <div class="sl sd-atk-sl"><span>Attacks</span><span class="sd-atk-hint">Roll them from the Action tab</span></div>
+        <table class="attacks-table">
+          <thead>
+            <tr>
+              <th style="width:34%">Weapon / Attack</th>
+              <th style="width:64px">Bonus</th>
+              <th style="width:52px">Stat</th>
+              <th style="width:70px">Range</th>
+              <th style="width:132px">Damage</th>
+              <th style="width:24px;text-align:center;" title="Always Advantage">▲</th>
+              <th style="width:32px"></th>
+            </tr>
+          </thead>
+          <tbody id="attacks-body"></tbody>
+        </table>
 
         <div class="free-carry">
           <div class="sl"><span>Inventory</span></div>
@@ -1272,11 +1323,11 @@ let _itemBonusAtk   = { meleeAtk:0, meleeDmg:0, rangedAtk:0, rangedDmg:0 };
 let _itemBonusApplied = { hp:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 };
 let _applyingItemBonuses = false;   // re-entrancy guard
 
-// ── HeroDark rules are the STANDARD for this system (not an opt-in) ───────────
-// HeroDark IS the system now: Max HP at level 1, choose talents at level-up, an
-// even-level Skill Talent, unlimited Luck, a Luck point on any natural 1 or 20, a
-// 3-Action turn, Dying (not unconscious) at 0 HP, plus Stress and the Evade/Armor
-// defense model. heroDarkOn() hard-returns true so all of it is always active.
+// ── HeroDark option (set at character creation, saved as options.heroDark) ─────
+// When on: Max HP at level 1, choose talents at level-up, an even-level Skill
+// Talent, unlimited Luck, a Luck point on any natural 1 or 20, a second action
+// (attack/cast at disadvantage) in place of your move, Dying (not unconscious) at
+// 0 HP, plus Stress and the Evade/Armor defense model. Off = core Shadowdark.
 function defaultOptions(){ return { heroDark:false }; }
 let options = defaultOptions();
 function heroDarkOn(){ return !!(options && options.heroDark); }
@@ -1434,16 +1485,196 @@ function onStatChange(id) {
 
 // ═══ TABS (Attacks / Spells / Talents / Gear) ═════════════════════════════════════════
 var _tab = 'gear';
-const TABS = ['attacks','spells','talents','gear'];
+const TABS = ['action','spells','talents','gear'];
 function setTab(name){
+  if(name === 'attacks') name = 'action';          // old saves: the Attacks tab is now the Action tab
   if(TABS.indexOf(name) < 0) name = 'gear';
   _tab = name;
   TABS.forEach(function(t){
     var panel = document.getElementById('tab-'+t); if(panel) panel.classList.toggle('on', t===name);
     var btn = document.querySelector('.tab-btn[data-tab="'+t+'"]'); if(btn) btn.classList.toggle('on', t===name);
   });
+  if(name === 'action' && typeof renderSDTurn === 'function') renderSDTurn();
 }
 function setDefaultTab(){ setTab(_tab || 'gear'); }
+
+// ═══ ACTION TAB — the turn controller ═══════════════════════════════════════════
+// Shadowdark turn (Core): move up to NEAR and take ONE action — or skip the action
+// to move a second time. An action is: attack, cast a spell, make a check (Hide,
+// Search, …), Help, or anything else you can describe. Multitasking (stand up,
+// speak, activate a magic item, quaff a potion) doesn't use the action (Core p.88).
+// HeroDark: you may forgo your move to take a second attack/cast, made at
+// disadvantage; while Dying you get only one action (move OR act) on your turn.
+// Focus spells (Core p.50): a successful cast starts focus; at the start of each
+// turn (or on taking damage) roll to maintain it — a failure ends it, a nat 1 is a
+// critical failure. The focused spell name rides in _sdTurn.focus (survives End Turn).
+// Spells: spellcasting check vs 10 + tier; a failure loses the spell until you rest
+// (rollSpell() already handles lost spells, scrolls and wands — this tab just calls it).
+// End Turn clears the bubbles and writes nothing to the Roll Log. No round counter.
+var _sdTurn = { move: false, action: false, second: false, focus: '' };
+var _sdTurnOpts = [];
+var _sdTurnCollapsed = { checks: true };
+function sdEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function sdHD(){ return typeof heroDarkOn === 'function' && heroDarkOn(); }
+// Can the turn still afford this kind of thing?
+//  'move'   — your Move, or a second Move in place of your Action
+//  'action' — your Action (HeroDark: or your Move, as a second action at disadvantage)
+// HeroDark Dying: only one action on your turn (move or act, not both).
+function sdOneActionOnly(){ return sdHD() && typeof isDyingActive === 'function' && isDyingActive(); }
+// The HeroDark second action is "a second attack or cast a spell" only.
+function sdSecondOk(sec){ return sec === 'attacks' || sec === 'spells'; }
+function sdCan(kind, sec){
+  if(kind === 'free') return true;
+  if(sdOneActionOnly()) return !_sdTurn.move && !_sdTurn.action;
+  if(kind === 'move') return !_sdTurn.move || !_sdTurn.action;
+  return !_sdTurn.action || (sdHD() && !_sdTurn.move && sdSecondOk(sec));
+}
+function sdSecondAction(sec){ return _sdTurn.action && sdHD() && !_sdTurn.move && !sdOneActionOnly() && sdSecondOk(sec); }
+function sdSetFocus(nm){ _sdTurn.focus = nm; if(typeof addTracker === 'function') addTracker('Focused'); }
+function sdEndFocus(){ _sdTurn.focus = ''; if(typeof trackerActive === 'function' && trackerActive('Focused')) removeTracker('Focused'); }
+function sdSpend(kind){
+  if(kind === 'move'){ if(!_sdTurn.move) _sdTurn.move = true; else _sdTurn.action = true; return; }
+  if(kind === 'action'){ if(!_sdTurn.action) _sdTurn.action = true; else { _sdTurn.move = true; _sdTurn.second = true; } }
+}
+function sdAfter(){ renderSDTurn(); if(typeof saveSheet === 'function') saveSheet(false); }
+
+function sdBuildOpts(){
+  const O = { attacks: [], spells: [], actions: [], checks: [] };
+  const add = (sec, o) => { o.i = _sdTurnOpts.length; o.sec = sec; _sdTurnOpts.push(o); O[sec].push(o); };
+  _sdTurnOpts = [];
+  // A Focused chip cleared by hand ends the focus too.
+  if(_sdTurn.focus && typeof trackerActive === 'function' && !trackerActive('Focused')) _sdTurn.focus = '';
+  const isFocusRow = row => /^focus/i.test((row.querySelector('.spell-duration')?.value || '').trim());
+  // Attacks — every named row of the Attacks table (managed on the Equipment tab).
+  document.querySelectorAll('#attacks-body tr').forEach(tr => {
+    const f = atkFields(tr), nm = (f.name?.value || '').trim(); if(!nm) return;
+    const st = normStat(f.stat?.value), hit = parseMod(f.bonus?.value || '') + (st ? getStatMod(st) : 0);
+    const dmg = (typeof activeDamage === 'function' ? activeDamage(tr) : (f.damage?.value || '')) || '';
+    const adv = tr.querySelector('.atk-adv-btn')?.classList.contains('on');
+    add('attacks', { name: nm, kind: 'action',
+      sub: [fmtMod(hit) + ' to hit', dmg ? dmg + ' dmg' : '', (f.range?.value || '').trim(), adv ? 'advantage' : ''].filter(Boolean).join(' · '),
+      btn: 'Attack', run: () => { const b = tr.querySelector('.atk-roll-btn'); if(b) rollAttack(b); return true; } });
+  });
+  // Focus upkeep (free): check at the start of your turn, or when you take damage.
+  if(_sdTurn.focus){
+    const frow = [...document.querySelectorAll('#spells-list .spell-row')].find(r => (r.querySelector('.spell-input')?.value || '').trim() === _sdTurn.focus);
+    if(frow){
+      const ft = parseInt(frow.querySelector('.spell-level')?.value) || 1;
+      add('spells', { name: 'Maintain Focus: ' + _sdTurn.focus, kind: 'free',
+        sub: 'Start of turn or when hurt · DC ' + (10 + ft) + ' · fail ends it (not lost)', btn: 'Check',
+        run: () => { const b = frow.querySelector('.spell-cast-btn'); if(!b) return true;
+          const r = rollSpell(b, { focus: true }); if(!r || !r.success) sdEndFocus(); return true; } });
+    }
+    add('spells', { name: 'End Focus', kind: 'free', sub: 'Drop ' + _sdTurn.focus + ' at any time', btn: 'End',
+      run: () => { addLog('Focus Ended', '○', _sdTurn.focus, 'normal'); sdEndFocus(); return true; } });
+  }
+  // Spells — known spells, scrolls and wands from the Spells tab.
+  document.querySelectorAll('#spells-list .spell-row').forEach(row => {
+    const nm = (row.querySelector('.spell-input')?.value || '').trim(); if(!nm) return;
+    const tier = parseInt(row.querySelector('.spell-level')?.value) || 1;
+    const lost = row.querySelector('.spell-lost-btn')?.classList.contains('on');
+    const spent = row.dataset.wandspent === '1';
+    const src = row.dataset.src || '';
+    const dmg = (row.querySelector('.spell-damage')?.value || '').trim();
+    const rng = (row.querySelector('.spell-range')?.value || '').trim();
+    const foc = isFocusRow(row);
+    add('spells', { name: nm, kind: 'action',
+      blocked: spent ? 'Wand spent until you rest' : lost ? 'Lost until you rest' : '',
+      sub: ['Tier ' + tier + ' · DC ' + (10 + tier), rng, dmg ? dmg + (isHealingSpell(nm) ? ' heal' : ' dmg') : '', foc ? (_sdTurn.focus && _sdTurn.focus !== nm ? 'focus · ends focus on ' + _sdTurn.focus : 'focus') : '', src === 'scroll' ? 'scroll' : src === 'wand' ? 'wand' : ''].filter(Boolean).join(' · '),
+      btn: 'Cast', run: () => { const b = row.querySelector('.spell-cast-btn'); if(!b) return true;
+        const r = rollSpell(b);
+        if(foc && r && r.success) sdSetFocus(nm);
+        else if(foc && r && r.roll === 1 && _sdTurn.focus === nm) sdEndFocus();
+        return true; } });
+  });
+  // Actions
+  const moveAgain = _sdTurn.move && !_sdTurn.action;
+  add('actions', { name: moveAgain ? 'Move again' : 'Move', kind: 'move',
+    sub: moveAgain ? 'Up to near — uses your action' : 'Up to near (about 30 ft)', btn: 'Move',
+    run: () => true });
+  add('actions', { name: 'Help', kind: 'action', sub: 'An ally gets advantage on their next check for this task', btn: 'Use',
+    run: () => { addLog('Help', '▲', 'An ally gains advantage on a related check', 'normal'); return true; } });
+  add('actions', { name: 'Hide', kind: 'action', sub: 'DEX check to slip out of sight', btn: 'Roll',
+    run: () => { rollStat('dex', 'Hide (DEX)'); return true; } });
+  add('actions', { name: 'Search', kind: 'action', sub: 'WIS check to spot something hidden (INT to study it)', btn: 'Roll',
+    run: () => { rollStat('wis', 'Search (WIS)'); return true; } });
+  add('actions', { name: 'Multitask', kind: 'free', sub: 'Stand up, speak, activate a magic item, quaff a potion — doesn\'t use your action', btn: 'Use',
+    run: () => { addLog('Multitask', '—', 'A small parallel task (no action)', 'normal'); return true; } });
+  add('actions', { name: 'Improvise', kind: 'action', sub: 'Anything else you can describe — the GM sets the check', btn: 'Use',
+    run: () => { addLog('Improvise', '—', 'Action spent on something else', 'normal'); return true; } });
+  // Stat checks
+  STATS.forEach(st => add('checks', { name: st.full, kind: 'action', sub: 'd20 ' + fmtMod(getStatMod(st.id)), btn: 'Roll',
+    run: () => { rollStat(st.id, st.full); return true; } }));
+  return O;
+}
+
+function sdTurnDo(i){
+  const o = _sdTurnOpts[i]; if(!o) return;
+  if(o.blocked){ addLog(o.name, '✗', o.blocked, 'fumble'); return; }
+  if(!sdCan(o.kind, o.sec)){ addLog('Turn', 'Nothing left', 'You have already moved and acted — End Turn to reset', 'normal'); return; }
+  // HeroDark second action (Move spent as an action): roll at disadvantage.
+  const second = o.kind === 'action' && sdSecondAction(o.sec);
+  const prev = advState;
+  if(second) advState = (advState === 'advantage') ? null : 'disadvantage';
+  let ok;
+  try { ok = o.run(); } finally { if(second) advState = prev; }
+  if(ok === false) { renderSDTurn(); return; }
+  sdSpend(o.kind);
+  sdAfter();
+}
+function sdEndTurn(){ _sdTurn = { move: false, action: false, second: false, focus: _sdTurn.focus || '' }; sdAfter(); }
+function sdSpendLuck(){
+  const el = document.getElementById('lk-val'); const n = parseInt(el && el.value) || 0;
+  if(n < 1){ addLog('Luck', '✗', 'No luck tokens to spend', 'fumble'); return; }
+  adjustLuck(-1);
+  addLog('Luck spent', '✦', 'Reroll any one roll you just made · ' + (n - 1) + ' left', 'crit');
+  sdAfter();
+}
+function sdToggleSec(k){ _sdTurnCollapsed[k] = !_sdTurnCollapsed[k]; renderSDTurn(); }
+
+function renderSDTurn(){
+  const host = document.getElementById('sd-turn'); if(!host) return;
+  const O = sdBuildOpts();
+  const pip = (on, lbl, cls) => `<span class="sdt-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}">${lbl}</span>`;
+  const luck = parseInt(document.getElementById('lk-val')?.value) || 0;
+  const badges = (Array.isArray(_trackers) ? _trackers : []).map(t =>
+    `<span class="sdt-badge${(typeof SD_TRACKERS_GOOD !== 'undefined' && SD_TRACKERS_GOOD.includes(t)) ? ' good' : ' bad'}">${sdEsc(t)}</span>`).join('')
+    + (sdHD() ? (sdOneActionOnly() ? `<span class="sdt-badge bad" title="HeroDark: while Dying you have only one action on your turn">Dying · 1 action only</span>` : `<span class="sdt-badge hd" title="HeroDark: forgo your move for a second attack or cast, at disadvantage">HeroDark · 2nd action at disadv.</span>`) : '');
+  const card = o => {
+    const can = !o.blocked && sdCan(o.kind, o.sec);
+    const sub = [o.blocked, (o.kind === 'action' && sdSecondAction(o.sec) && can) ? 'uses your move · disadvantage' : '', o.sub].filter(Boolean).join(' · ');
+    return `<div class="sdt-card${can ? '' : ' disabled'}"><div class="sdt-main"><div class="sdt-name">${sdEsc(o.name)}</div>${sub ? `<div class="sdt-sub">${sdEsc(sub)}</div>` : ''}</div><button class="sdt-do" onclick="sdTurnDo(${o.i})">${sdEsc(o.btn)}</button></div>`;
+  };
+  const sec = (key, title, list, empty) => `<div class="sdt-sec${_sdTurnCollapsed[key] ? ' collapsed' : ''}"><div class="sdt-sec-hd" onclick="sdToggleSec('${key}')"><span class="sdt-caret">▼</span><span class="sdt-title">${title}</span></div>`
+    + `<div class="sdt-sec-body">${list.length ? list.map(card).join('') : `<div class="sdt-empty">${empty}</div>`}</div></div>`;
+  host.innerHTML = `
+    <div class="sdt-top">
+      <div class="sdt-row1">
+        <div class="sdt-econ">${pip(_sdTurn.move, 'Move')}${pip(_sdTurn.action, 'Action')}</div>
+        <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's move and action">End Turn</button>
+      </div>
+      <div class="sdt-row2">
+        <span class="sdt-luck"><span class="sdt-lbl">Luck</span> <b>${luck}</b><button class="sdt-mini" onclick="sdSpendLuck()" ${luck < 1 ? 'disabled' : ''} title="Spend a luck token to reroll any roll">Spend</button></span>
+        <div class="sdt-badges">${badges}</div>
+      </div>
+    </div>
+    ${sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons on the Equipment tab.')}
+    ${sec('spells', 'Spells', O.spells, 'No spells — learn them from the Spellbook on the Spells tab.')}
+    ${sec('actions', 'Actions', O.actions, '')}
+    ${sec('checks', 'Use a Skill', O.checks, '')}`;
+}
+// Keep the controller current while it's open.
+let _sdTurnT = null;
+function sdTurnMaybe(){
+  const p = document.getElementById('tab-action'); if(!p || !p.classList.contains('on')) return;
+  clearTimeout(_sdTurnT); _sdTurnT = setTimeout(renderSDTurn, 150);
+}
+['input','change','click'].forEach(ev => document.addEventListener(ev, e => {
+  const t = e.target; if(!t || !t.closest) return;
+  if(t.closest('#sd-turn')) return;
+  if(t.closest('#attacks-body,#spells-list,#trk-list,#stats-grid,.sd-vitals,.trk-picker,[id*="tracker"]')) sdTurnMaybe();
+}));
+
 
 // Weapon types the character has mastered (Fighter class feature + any talent
 // grants). Bonus per the rules = +1 atk/dmg, plus half your level (round down).
@@ -2552,7 +2783,10 @@ function buildSpells() {
 function adjustLuck(delta) {
   const el = document.getElementById('lk-val');
   if(!el) return;
-  el.value = (parseInt(el.value) || 0) + delta;
+  let n = (parseInt(el.value) || 0) + delta;
+  // Core p.79: one luck token at a time (HeroDark: unlimited). Never below 0.
+  if(delta > 0 && !(typeof heroDarkOn === 'function' && heroDarkOn())) n = Math.min(n, Math.max(1, parseInt(el.value) || 0));
+  el.value = Math.max(0, n);
 }
 
 function autoResizeDesc(el) {
@@ -3117,7 +3351,28 @@ function rollAttack(btn) {
   heroDarkLuckOnNat(hitRoll, name);
 }
 
-function rollSpell(btn) {
+// Critical failure (natural 1) on a spellcasting check — Core p.45: the spell
+// fails; a focus spell ends; a wizard loses the spell until a rest AND rolls on
+// the Wizard Mishap table for the spell's tier (p.46-47); a priest loses it until
+// penance + a rest. Logs the consequence (and the wizard's d12 mishap roll).
+function sdSpellCritFail(name, tier){
+  const cls = (document.getElementById('f-class')?.value || '').trim().toLowerCase();
+  if(cls === 'wizard'){
+    const tbl = tier >= 5 ? '5' : tier >= 3 ? '3-4' : '1-2';
+    const r = d(12);
+    addLog('Wizard Mishap', 'd12: ' + r, name + ' — roll on Wizard Mishap Tier ' + tbl + ' (Core p.46-47)' + (r === 1 ? ' · Devastation! roll twice' : ''), 'fumble');
+  } else if(cls === 'priest'){
+    addLog('Penance', '✗', name + ' — your deity revokes it until you complete penance and a rest (Core p.45)', 'fumble');
+  } else {
+    addLog('Critical Failure', '✗', name + ' — natural 1: apply your class’s mishap or penance rule', 'fumble');
+  }
+}
+
+// opts.focus: a check to MAINTAIN focus (Core p.50) — a failure just ends the
+// spell (not lost, no scroll/wand use); a natural 1 is a standard critical failure.
+// Returns { success, roll } so the Action tab can track focus.
+function rollSpell(btn, opts) {
+  opts = opts || {};
   const row = btn.closest('.spell-row');
   const name       = row.querySelector('.spell-input').value || 'Spell';
   const spellLevel = parseInt(row.querySelector('.spell-level')?.value) || 1;
@@ -3126,16 +3381,16 @@ function rollSpell(btn) {
   const dc         = 10 + spellLevel;
   const isAdvSpell = row.querySelector('.spell-adv-btn')?.classList.contains('on');
   const isLost     = row.querySelector('.spell-lost-btn')?.classList.contains('on');
-  const source     = row.dataset.src || '';   // 'scroll' | 'wand' | ''
+  const source     = opts.focus ? '' : (row.dataset.src || '');   // 'scroll' | 'wand' | '' (a focus check spends nothing)
   const wandSpent  = row.dataset.wandspent === '1';
 
   if(isLost) {
     addLog(`${name}`, '✗ LOST', 'This spell is lost until you rest', 'fumble');
-    return;
+    return { success: false, roll: 0 };
   }
-  if(wandSpent) {
+  if(wandSpent && !opts.focus) {
     addLog(`${name}`, '✗ WAND SPENT', 'This wand stops working until you rest', 'fumble');
-    return;
+    return { success: false, roll: 0 };
   }
 
   // Parse bonus (accepts "+3", "3", "-1")
@@ -3156,19 +3411,22 @@ function rollSpell(btn) {
   const exh     = exhaustedPenalty();
   const str     = (typeof stressPenalty === 'function') ? stressPenalty() : 0;
   const total   = roll + bonus + castMod + gBonus + exh + str;
-  const success = total >= dc;
+  // Core p.78: a natural 20 succeeds to maximum capacity, a natural 1 fails.
+  const success = roll === 20 ? true : roll === 1 ? false : total >= dc;
   const type    = !success ? 'fumble' : roll===20 ? 'crit' : 'normal';
   const base    = advDetail || `d20(${roll})`;
   // Healing spells make the same spellcasting check, but "HIT"/"MISS" reads
   // oddly when nothing is being attacked — call it SUCCESS/FAILED instead.
   const healing = isHealingSpell(name);
-  const verdict = success ? `✓ ${healing ? 'SUCCESS' : 'HIT'} (DC ${dc})`
-                          : `✗ ${healing ? 'FAILED' : 'MISS'} (DC ${dc}) — spell lost!`;
+  const failNote = (opts.focus && roll !== 1) ? ' — focus ends' : (source === 'scroll' ? '' : source === 'wand' ? '' : ' — spell lost!');
+  const verdict = success ? `✓ ${opts.focus ? 'FOCUS HELD' : healing ? 'SUCCESS' : 'HIT'} (DC ${dc})${roll===20 ? ' ✷ crit — double one numerical effect' : ''}`
+                          : `✗ ${opts.focus ? 'FOCUS LOST' : healing ? 'FAILED' : 'MISS'} (DC ${dc})${roll===1 ? ' ✗ NAT 1' : ''}${failNote}`;
   const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : '', exh !== 0 ? `${exh} exhausted` : '', str !== 0 ? `${str} stress` : ''].filter(Boolean).join(' ');
 
   // Mark as lost if failed — but only for spells you know. A scroll is consumed
   // whether it hits or misses; a wand is handled below (spent until rest on a fail).
-  if(!success && !source) {
+  // Maintaining focus: a plain failure only ends the spell (Core p.50).
+  if(!success && !source && !(opts.focus && roll !== 1)) {
     row.querySelector('.spell-lost-btn')?.classList.add('on');
     row.classList.add('lost');
   }
@@ -3194,8 +3452,10 @@ function rollSpell(btn) {
   const detailStr = `${base}${bonusPart} vs DC ${dc} (10+${spellLevel})`
     + (dmgBreakdown ? `  |  ${dmgBreakdown}` : '');
 
-  addLog(`${name} (Tier ${spellLevel})${isAdvSpell?' ▲':''}`, resultStr, detailStr, type);
+  addLog(`${opts.focus ? 'Focus: ' : ''}${name} (Tier ${spellLevel})${isAdvSpell?' ▲':''}`, resultStr, detailStr, type);
+  if(roll === 1) sdSpellCritFail(name, spellLevel);
   heroDarkLuckOnNat(roll, name);
+  const ret = { success, roll };
 
   // ── Scroll / Wand consumption ── (only when Auto is on; off = track by hand)
   if(source && _autoConsume) {
@@ -3231,6 +3491,7 @@ function rollSpell(btn) {
     saveSheet(false);
    }
   }
+  return ret;
 }
 
 // Find the gear slot for a "Scroll: <spell>" / "Wand: <spell>" item.
@@ -3515,6 +3776,7 @@ function collectSheet(){
       spellStat: document.getElementById('spell-stat')?.value || '',
       spellGBonus: document.getElementById('spell-gbonus')?.value || '',
       tab: _tab,
+      turn: Object.assign({}, _sdTurn),
       campaign: _campaign ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
       mastery: Array.isArray(_charMastery) ? _charMastery : [],
       trusty: _charTrusty || null,
@@ -3643,7 +3905,9 @@ function _applySDData(d){
     if(spellStatEl) spellStatEl.value = d._sheet?.spellStat || '';
     const spellGBEl = document.getElementById('spell-gbonus');
     if(spellGBEl) spellGBEl.value = d._sheet?.spellGBonus || '';
-    _tab = (TABS.indexOf(d._sheet?.tab) >= 0) ? d._sheet.tab : _tab;
+    _tab = (d._sheet?.tab === 'attacks') ? 'action' : (TABS.indexOf(d._sheet?.tab) >= 0) ? d._sheet.tab : _tab;
+    _sdTurn = { move: false, action: false, second: false, focus: '' };
+    if(d._sheet && d._sheet.turn && typeof d._sheet.turn === 'object') Object.assign(_sdTurn, d._sheet.turn);
     _charMastery = Array.isArray(d._sheet?.mastery) ? d._sheet.mastery.slice() : [];
     _charTrusty = (d._sheet && d._sheet.trusty && d._sheet.trusty.value) ? d._sheet.trusty : null;
     _charExtraWeapons = Array.isArray(d._sheet?.extraWeapons) ? d._sheet.extraWeapons.slice() : [];
@@ -4476,7 +4740,7 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   .main-body > .left-col > .sl:nth-child(3){order:4;}
   #trk-list{order:4;}
   .tabs-bar{order:5;}
-  #tab-attacks,#tab-spells,#tab-talents,#tab-gear{order:6;}
+  #tab-action,#tab-spells,#tab-talents,#tab-gear{order:6;}
   /* Ability scores stay stacked (single column) */
   .stats-grid{display:flex;flex-direction:column;}
   /* Header stacking + field grids */
@@ -4571,7 +4835,7 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   .main-body > .left-col > .sl:nth-child(3){order:4;}  /* Trackers label */
   #trk-list{order:4;}
   .tabs-bar{order:5;}
-  #tab-attacks,#tab-spells,#tab-talents,#tab-gear{order:6;}
+  #tab-action,#tab-spells,#tab-talents,#tab-gear{order:6;}
   /* Ability scores stay stacked (single column) on phones */
   .stats-grid{display:flex;flex-direction:column;}
   .hdr-fields,.hdr-fields-2{grid-template-columns:1fr 1fr;}

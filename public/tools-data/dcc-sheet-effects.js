@@ -10,7 +10,7 @@
 //       rolls the slots for the ally.
 //     • Shield / Hot Stuff Aura mark Shield slots over the Health Bar.
 //     • Oakhide / Bang Bro / Wisp Armor / Water Breathing add their Buff chip
-//       (Oakhide's DR and Bang Bro's +2 damage are applied by the sheet while active).
+//       (Oakhide's DR and Bang Bro's +2 (+1d6 per Rank 5/10/15) damage are applied by the sheet while active).
 //     • Utility spells that call for no Check just cast (Mana spent, effect logged) —
 //       no pointless d20. Attack spells and anything with a Check still roll.
 //   ITEMS (Use on the Turn tab Hotlist — pin them from the Inventory tab)
@@ -93,6 +93,12 @@
     ov.querySelectorAll("button[data-i]").forEach(function (b) { b.addEventListener("click", function () { ov.remove(); cb(options[+b.dataset.i].value); }); });
     ov.querySelector("button[data-x]").addEventListener("click", function () { ov.remove(); });
   }
+  // Table 37 Rank damage die (sheet helper), with a d4 fallback if it isn't loaded.
+  function rankDieRoll(rank) { if (typeof dccRollRankDie === "function") return dccRollRankDie(rank); var r = roll(1, 4); return { total: r.total, parts: ["d4(" + r.total + ")"] }; }
+  function rankDieLabel(rank) {
+    if (typeof dccRankDieSpec !== "function") return "d4";
+    return dccRankDieSpec(rank).map(function (x) { return x[1] === 1 ? "1" : (x[0] > 1 ? x[0] : "") + "d" + x[1]; }).join("+") || "1";
+  }
   function rankTier(rank, tiers) { var v = tiers[0]; [5, 10, 15].forEach(function (r, i) { if (rank >= r && tiers[i + 1] != null) v = tiers[i + 1]; }); return v; }
 
   // ── SPELL effects ────────────────────────────────────────────────────────────
@@ -134,9 +140,10 @@
         return true;
       }
       case "Nature's Breath": {
-        var bonus = R >= 15 ? 3 : R >= 10 ? 2 : R >= 5 ? 1 : 0, die = rankTier(R, [4, 6, 8, 10]), r3 = roll(1, die), tot = r3.total + bonus;
+        // "Roll a Nature's Breath Rank damage die" — Table 37 (Core p.176), +1 per upgrade tier.
+        var bonus = R >= 15 ? 3 : R >= 10 ? 2 : R >= 5 ? 1 : 0, r3 = rankDieRoll(R), tot = r3.total + bonus;
         choose("Nature's Breath — heal " + tot + " slots", [{ label: "Myself", value: "self" }, { label: "My pet", value: "pet" }, { label: "An ally", value: "ally" }], function (who) {
-          var detail = "d" + die + "(" + r3.rolls[0] + ")" + (bonus ? "+" + bonus : "") + "=" + tot + " slots";
+          var detail = r3.parts.join("+") + (bonus ? "+" + bonus : "") + "=" + tot + " slots";
           if (who === "self") { var g = healSelf(tot); log("Nature's Breath" + tag, "+" + g + " HB", detail, "crit"); }
           else if (who === "pet") { var gp = healPet(tot, "pet-hb"); log("Nature's Breath" + tag, "Pet +" + gp + " HB", detail, "crit"); }
           else log("Nature's Breath" + tag, "+" + tot + " HB", "Ally heals · " + detail, "crit");
@@ -271,7 +278,7 @@
     var type = d20 === 20 ? "crit" : d20 === 1 ? "fumble" : "normal";
     if (m) {
       var dice = typeof dccDiceAtRank === "function" ? dccDiceAtRank((m[1] || "1") + "d" + m[2], sp.upgrades || [], rank) : (m[1] || "1") + "d" + m[2];
-      var dm = dice.match(/(\d+)d(\d+)/), r = roll(parseInt(dm[1], 10), parseInt(dm[2], 10)), dmg = r.total + sm;
+      var dm = dice.match(/(\d+)d(\d+)/), r = roll(parseInt(dm[1], 10) * (d20 === 20 ? 2 : 1), parseInt(dm[2], 10)), dmg = r.total + sm;   // Nat 20: double base dice (Core p.79)
       log(sp.name + " (scroll)" + (d20 === 20 ? " ★ NAT 20" : d20 === 1 ? " ✗ NAT 1" : ""), "Hit: " + hit + "  |  Dmg: " + dmg, "d20(" + d20 + ")+Rank(" + rank + ")+" + stat.toUpperCase() + "(" + sm + ")=" + hit + "  |  " + dice + "(" + r.rolls.join("+") + ")+" + stat.toUpperCase() + "(" + sm + ")=" + dmg, type);
     } else {
       log(sp.name + " (scroll)", hit, "Spell Check d20(" + d20 + ")+Rank(" + rank + ")+" + stat.toUpperCase() + "(" + sm + ")=" + hit, type);
@@ -320,7 +327,28 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
 
+  // Short effect line for a spell card ("Heal 2 Bars"), by Rank. Empty when the spell
+  // has no automated effect worth summarising.
+  function spellSummary(name, rank, src) {
+    var sp = spellBy(src) || spellBy(name); if (!sp) return "";
+    var R = rank || 1, t = function (a) { return rankTier(R, a); };
+    switch (sp.name) {
+      case "Heal": return "Heal 2 Bars";
+      case "Heal Self": return R >= 15 ? "Heal to full" : "Heal " + t(["1d4", "1d6", "2d6"]) + " Bars";
+      case "Heal Others": return "Ally heals " + t(["1d4", "1d6", "2d6"]) + " Bars";
+      case "Heal Critter": return "Pet heals to full";
+      case "Intimate Touches": return "Heal " + Math.max(1, statMod("cha")) + " Bars";
+      case "Nature's Breath": return "Heal " + rankDieLabel(R) + (R >= 5 ? "+" + (R >= 15 ? 3 : R >= 10 ? 2 : 1) : "") + " Bars";
+      case "Shield": return t([2, 5, 10, 15]) + " Shield slots";
+      case "Hot Stuff Aura": return Math.max(1, statMod("cha")) + " Shield slots";
+      case "Oakhide": return "+" + (2 + (R >= 5 ? 2 : 0) + (R >= 10 ? 2 : 0) + (R >= 15 ? 2 : 0)) + " DR";
+      case "Bang Bro": return "+2" + (R >= 5 ? "+" + (R >= 15 ? 3 : R >= 10 ? 2 : 1) + "d6" : "") + " weapon damage";
+    }
+    return "";
+  }
+
   window.DCCFx = {
+    spellSummary: spellSummary,
     spellEffect: spellEffect, useRow: useRow, useByName: useByName, invRowByName: invRowByName,
     stackAdd: stackAdd, isConsumable: isConsumable, refreshUse: refreshUse, choose: choose,
   };

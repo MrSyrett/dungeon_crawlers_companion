@@ -1811,7 +1811,7 @@ function recalc(){
   updateHitDiceUI();
   updateHPBadge();
   refreshWizardButtons();
-  refreshAtkActions();
+  refreshTurnHub();   // re-renders the Action tab (attack rows included) so conditions/speed grey cards out
   renderShadow();
   renderXP();
   renderRewardCount();
@@ -2055,6 +2055,7 @@ function setUnconscious(on){
   const has = activeCond('Unconscious');
   if(on && !has){ activeConditions.push('Unconscious'); renderConditions(); }
   else if(!on && has){ activeConditions = activeConditions.filter(c => norm(c) !== norm('Unconscious')); renderConditions(); }
+  refreshTurnHub();
 }
 function reviveFromDown(){ deathSucc = 0; deathFail = 0; renderDeath(); setUnconscious(false); addLog('Revived', '✚', 'Above 0 HP — death saves cleared', 'normal'); }
 // ── Dice-pool tray ──
@@ -2283,7 +2284,8 @@ function doAttack(tr, sneakD6, asReaction, opts){
   if(isIncapacitated()){ addLog('Attack', '✗', "Incapacitated — you can't take actions, bonus actions or reactions", 'fumble'); return; }
   const offhand = !!opts.offhand;
   if(asReaction){ if(_turn.reaction){ addLog('Opportunity Attack', '—', 'Reaction already used this turn — End Turn to refresh', 'normal'); return; } }
-  else if(offhand){ if(_turn.bonus){ addLog('Off-hand attack', '—', 'Bonus action already used this turn — End Turn to refresh', 'normal'); return; } }
+  else if(offhand){ if(_turn.bonus){ addLog('Off-hand attack', '—', 'Bonus action already used this turn — End Turn to refresh', 'normal'); return; }
+    if(!(_turn.actionType === 'attack' && _turn.attacksMade > 0)){ addLog('Off-hand attack', '—', 'Take the Attack action with a light melee weapon first', 'normal'); return; } }
   else if(turnActionSpentByOther() || (_turn.actionType === 'attack' && _turn.attacksMade >= attacksPerAction())){ addLog('Attack', '—', 'No attack left this turn — End Turn to refresh', 'normal'); return; }
   sneakD6 = sneakD6 || 0;
   if(sneakD6 > 0){ if(_turn.sneakUsed){ addLog('Sneak Attack', '—', 'Already used this turn — End Turn to refresh', 'normal'); return; } _turn.sneakUsed = true; }
@@ -2314,9 +2316,9 @@ function doAttack(tr, sneakD6, asReaction, opts){
     dmgTotal = (dmgTotal || 0) + ss;
     dmgLine += (dmgLine ? ' + ' : '') + 'sneak ' + sn + 'd6(' + sf.join('+') + ')';
   }
-  const result = misFail ? 'Miss (' + hitTotal + ')' : 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
-  const extras = [].concat(c.styles, gwfNote, c.notes, c.keen ? ['Keen: crit on 19–20'] : [], ctx.note ? [ctx.note] : [], misFail ? ['Miserable: natural ' + r.nat + ' — automatic miss'] : []);
-  const detail = 'to hit ' + d20Detail(r) + ' ' + sgn(hitMod) + ' (' + c.hitBreakdown + ')' + (dmgLine && !misFail ? ' · damage ' + dmgLine : '') + (extras.length ? ' · ' + extras.join(' · ') : '');
+  const result = misFail ? 'Miss (' + hitTotal + ')' : r.nat === 1 ? 'Miss (natural 1)' : 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
+  const extras = [].concat(c.styles, gwfNote, c.notes, c.keen ? ['Keen: crit on 19–20'] : [], ctx.note ? [ctx.note] : [], misFail ? ['Miserable: natural ' + r.nat + ' — automatic miss'] : r.nat === 1 ? ['natural 1 — automatic miss'] : []);
+  const detail = 'to hit ' + d20Detail(r) + ' ' + sgn(hitMod) + ' (' + c.hitBreakdown + ')' + (dmgLine && !fumble ? ' · damage ' + dmgLine : '') + (extras.length ? ' · ' + extras.join(' · ') : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
   if(asReaction){ _turn.reaction = true; }
   else if(offhand){ _turn.bonus = true; }
@@ -3128,9 +3130,10 @@ function attacksPerAction(){
 // LotR feature text leads with its cost: "Bonus action: …", "Reaction when …", "Action in combat: …", "Action + craft slot: …".
 function featureActionType(text){
   const t = String(text || '').trim();
-  if(/^bonus action\b/i.test(t) || /\bas a bonus action\b/i.test(t)) return 'bonus';
+  const choice = /^choose\b/i.test(t);   // "Choose one: … (X as a bonus action)" is a pick, not an activation
+  if(/^bonus action\b/i.test(t) || (!choice && /\bas a bonus action\b/i.test(t))) return 'bonus';
   if(/^reaction\b/i.test(t)) return 'reaction';
-  if(/^action\b/i.test(t)) return 'action';
+  if(/^action\b/i.test(t) || /\baction \+ craft slot\b/i.test(t)) return 'action';
   return null;
 }
 function activatedFeatures(){
@@ -3167,6 +3170,7 @@ function standardOpt(a, sub){
     run(){ _turn.action = true; _turn.actionType = 'ready'; _turn.ready = 1; addLog('Ready', 'Waiting', 'Readied action — click the yellow Action chip when the trigger happens (uses your Reaction)', 'normal'); afterTurnAction(); } };
   return { name: a.name, meta: a.desc, usesHTML: '', disabled,
     run(){
+      if(sub === 'action' && a.name === 'Hide' && rollsOff()) return;
       if(sub === 'action'){
         if(a.name === 'Dash') _turn.dash = true;
         if(a.name === 'Dodge') _turn.dodge = 1;
@@ -3193,7 +3197,7 @@ function openSearchChoice(){
 }
 function doSearch(skill){
   const ov = $('search-overlay'); if(ov) ov.classList.remove('open');
-  if(_turn.action || isIncapacitated()) return;
+  if(_turn.action || isIncapacitated() || rollsOff()) return;
   _turn.action = true; _turn.actionType = 'other';
   addLog('Search', 'Action', skill + ' check', 'normal'); afterTurnAction();
   rollSkill(skill);
@@ -3202,6 +3206,7 @@ function doSearch(skill){
 function startOfTurnClear(){ if(_turn.dodge === 2) _turn.dodge = 0; if(_turn.ready === 2) _turn.ready = 0; }
 // The yellow (readied) Action chip: the trigger happened — spend the Reaction.
 function fireReadied(){
+  if(_turn.reaction || isIncapacitated()){ addLog('Readied action', '—', isIncapacitated() ? 'Incapacitated — no reactions' : 'Reaction already used — the readied response is lost', 'normal'); return; }
   _turn.ready = 0; _turn.reaction = true;
   if(_turn.actionType === 'ready') _turn.actionType = 'other';
   addLog('Readied action', '⚡', 'Trigger happened — your readied response uses your Reaction', 'normal');
@@ -3222,12 +3227,13 @@ function isMeleeAttackRow(tr){
 }
 function oppAttack(i){ if(_turn.reaction || isIncapacitated()) return; const tr = document.querySelectorAll('#attacks-body tr')[i]; if(tr) doAttack(tr, 0, true); }
 function offhandOpts(){
-  const rows = [...document.querySelectorAll('#attacks-body tr')].filter(tr => { const i = rowWeaponInfo(tr); return i.w && i.light; });
+  const rows = [...document.querySelectorAll('#attacks-body tr')].filter(tr => { const i = rowWeaponInfo(tr); return i.w && i.light && !i.ranged; });
   if(rows.length < 2) return [];
+  const attacked = _turn.actionType === 'attack' && _turn.attacksMade > 0;
   return rows.map(tr => {
     const c = atkCalc(tr, { offhand:true }), nm = (tr.querySelector('.atk-name').value || '').trim() || 'Attack';
     return { name: 'Off-hand: ' + nm, meta: 'Light weapon · ' + sgn(c.hit) + ' to hit · ' + (c.dmgExpr || '—') + (c.dtype ? ' ' + c.dtype : '') + ' · ' + (hasFightingStyle('Two-Weapon Fighting') ? 'Two-Weapon Fighting adds ' + c.abil : 'no ability mod to damage'),
-      usesHTML:'', disabled: _turn.bonus || isIncapacitated(), run(){ doAttack(tr, 0, false, { offhand:true }); } };
+      usesHTML:'', disabled: _turn.bonus || !attacked || isIncapacitated(), run(){ doAttack(tr, 0, false, { offhand:true }); } };
   });
 }
 function turnOppAttacksHTML(){
@@ -3320,7 +3326,6 @@ function endTurn(){
   // carry past End Turn once (2) and clear when you act again or end that turn.
   const carryDodge = _turn.dodge === 1 ? 2 : 0, carryReady = _turn.ready === 1 ? 2 : 0;
   _turn = { action:false, actionType:null, attacksMade:0, bonus:false, reaction:false, move:0, sneakUsed:false, dash:false, dodge:carryDodge, ready:carryReady };
-  addLog('End Turn', '⟳', 'Action, bonus action, reaction & movement reset', 'normal');
   renderTurn(); scheduleAutosave();
 }
 
