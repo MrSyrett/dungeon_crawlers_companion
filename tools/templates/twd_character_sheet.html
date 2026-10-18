@@ -35,7 +35,7 @@
   T.ALIEN_ARMOR=(T.TWD_ARMOR||[]).map(function(a){return {name:a.name,rating:a.level,air:"\u2014",weight:"1",cost:"",comment:"Mobility "+a.penalty};});
   T.YZE_GEAR=(T.TWD_GEAR||[]).map(function(g){return {name:g.name,weight:g.slots,note:g.bonus||""};});
   T.YZE_CRITS_PHYSICAL=(T.TWD_CRITS||[]).map(function(c){return {roll:c.roll,injury:c.injury,lethal:c.lethal,timeLimit:c.timeLimit,effect:c.penalty,healing:c.recovery};});
-  T.YZE_CRITS_MENTAL=[]; T.YZE_PANIC=[]; T.YZE_CONDITIONS=[]; T.YZE_TRAITS=[]; T.ALIEN_TRAITS=[];
+  T.YZE_CRITS_MENTAL=[]; T.YZE_CONDITIONS=[]; T.YZE_TRAITS=[]; T.ALIEN_TRAITS=[];
   T.YZE_RULES=[
     {title:"Dice pool",text:"Roll D6 equal to your attribute + skill (+ any gear bonus). Each 6 is a success; usually one success passes."},
     {title:"Stress dice",text:"Add one stress die per point of stress. A 1 on a stress die means you mess up \u2014 usually the Threat Level rises a step."},
@@ -854,7 +854,7 @@ function die6(){ return 1+Math.floor(Math.random()*6); }
 function G(x){ return (typeof x!=='undefined'&&Array.isArray(x))?x:[]; }
 
 var ATTRS=G(window.YZE_ATTRIBUTES), WEAPONS=G(window.YZE_WEAPONS),
-    CONDS=G(window.YZE_CONDITIONS), CRITP=G(window.YZE_CRITS_PHYSICAL), CRITM=G(window.YZE_CRITS_MENTAL), PANIC=G(window.YZE_PANIC);
+    CONDS=G(window.YZE_CONDITIONS), CRITP=G(window.YZE_CRITS_PHYSICAL), CRITM=G(window.YZE_CRITS_MENTAL);
 // Variant-swappable data: SKILLS and TRAITS change between YZE SRD and Alien.
 var BASE_SKILLS=G(window.YZE_SKILLS), ALIEN_SK=G(window.ALIEN_SKILLS);
 var BASE_TRAITS=G(window.YZE_TRAITS), ALIEN_TR=G(window.ALIEN_TRAITS);
@@ -984,6 +984,7 @@ function setSkill(name,n){ n=clamp(n,0,5); S.skills[name]=(S.skills[name]===n)?n
 
 // ── Talents (Alien) ──
 function renderTalents(){
+  if(typeof renderEnc==='function') setTimeout(renderEnc,0);   // Packmule changes the carry limit
   var host=$('tln-list'); if(!host)return; host.innerHTML='';
   (S.talents||[]).forEach(function(t,i){
     var card=document.createElement('div'); card.className='tln-card';
@@ -993,7 +994,7 @@ function renderTalents(){
   });
   var emp=$('tln-empty'); if(emp) emp.style.display=(S.talents&&S.talents.length)?'none':'block';
 }
-function tlnEdit(i,f,v){ if(S.talents&&S.talents[i]){ S.talents[i][f]=v; scheduleAutosave(); } }
+function tlnEdit(i,f,v){ if(S.talents&&S.talents[i]){ S.talents[i][f]=v; if(f==='name'&&typeof renderEnc==='function') renderEnc(); scheduleAutosave(); } }
 function tlnDel(i){ S.talents.splice(i,1); renderTalents(); scheduleAutosave(); }
 
 // ── Career (Alien) ──
@@ -1106,14 +1107,16 @@ function rollUnarmed(){
   var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+badTag(r.stressOnes);
   animDice(r.base, r.stress, glowFor(c.succ, bad));
   addLog(label, c.succ+'  '+t.t, detail, t.type);
-  if(bad){ _lastRoll=null; onBad(label); return; }
+  if(bad){ _lastRoll=null; clearPushButtons(); onBad(label); return; }   // a walker: no push, and no older roll stays pushable
   _lastRoll={label:label,base:r.base,stress:r.stress,kind:'attack',wdmg:1}; showPushOption();
 }
 // Back-compat aliases (other code calls these names).
 function renderWeapons(){ renderInventory(); renderAttacks(); }
 function renderGear(){ renderInventory(); }
+// TWD core p.28: you can carry a number of slots equal to Strength + 2 (Packmule talent: +1).
+function encLimit(){ var n=attrVal('STR')+2; (S.talents||[]).forEach(function(t){ if(t&&/^packmule$/i.test(String(t.name||'').trim())) n++; }); return n; }
 function renderEnc(){
-  var limit=attrVal('STR')*2, load=0;
+  var limit=encLimit(), load=0;
   S.gear.forEach(function(g){ load+=itemWeight(g.weight==null?'1':g.weight); });
   var loadStr=(Math.round(load*100)/100).toString();
   var le=$('enc-limit'), lo=$('enc-load'); if(le)le.textContent=limit; if(lo){ lo.textContent=loadStr; lo.className='e-val'+(load>limit?' over':''); }
@@ -1235,7 +1238,7 @@ function doPool(label, poolSize, pushable){
   var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+((!isAlien()&&c.bane)?' · '+c.bane+' bane'+(c.bane>1?'s':''):'')+badTag(r.stressOnes);
   animDice(r.base, r.stress, glowFor(c.succ, bad));
   addLog(label, c.succ+'  '+t.t, detail, t.type);
-  if(bad){ _lastRoll=null; onBad(label); return; }
+  if(bad){ _lastRoll=null; clearPushButtons(); onBad(label); return; }   // a walker: no push, and no older roll stays pushable
   if(pushable){ _lastRoll={label:label,base:r.base,stress:r.stress}; showPushOption(); }
   else _lastRoll=null;
 }
@@ -1280,23 +1283,9 @@ function rollAttack(i){
   var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+badTag(r.stressOnes);
   animDice(r.base, r.stress, glowFor(c.succ, bad));
   addLog(label, c.succ+'  '+t.t, detail, t.type);
-  if(bad){ _lastRoll=null; onBad(label); return; }
+  if(bad){ _lastRoll=null; clearPushButtons(); onBad(label); return; }   // a walker: no push, and no older roll stays pushable
   _lastRoll={label:label,base:r.base,stress:r.stress,kind:'attack',wdmg:num(w.damage),bp:bp}; showPushOption();
 }
-// ── Panic (Alien) ──
-function panicLookup(total){
-  for(var i=0;i<PANIC.length;i++){ var r=PANIC[i].roll;
-    if(r.indexOf('+')>=0){ if(total>=parseInt(r,10))return PANIC[i]; continue; }
-    var m=r.split(/[–-]/); if(m.length===2){ if(total>=parseInt(m[0],10)&&total<=parseInt(m[1],10))return PANIC[i]; continue; }
-    if(parseInt(r,10)===total)return PANIC[i];
-  }
-  return PANIC[PANIC.length-1];
-}
-function rollPanic(){
-  var stress=clamp(num(S.stress),0,10), roll=die6(), total=roll+stress, row=panicLookup(total);
-  addLog('Panic · d6 '+roll+' + stress '+stress+' = '+total, row?row.effect:'—', row?row.detail:'', total>=10?'fumble':'normal');
-}
-function forcePanic(label){ addLog((label||'')+' · PANIC','⚠ 1 on a Stress Die','You can\'t push this roll — Panic Roll forced.','fumble'); rollPanic(); }
 function rollQuick(){
   // The ±Dice field doubles as the free-pool size here. Zero it first so doPool's
   // modifier step doesn't add it a second time, then roll a pool of that many dice.

@@ -214,8 +214,8 @@ var MYZ_ARTIFACTS = [
   { roll: "423-426", name: "Kevlar Vest",       desc: "Armor Rating 6 against damage from external attacks. DEV Req: Technology 10. DEV Bonus: Technology +D6." },
   { roll: "431-434", name: "Lifestyle Magazine",desc: "No effect. Tiny item. DEV Bonus: Culture +D6." },
   { roll: "435-442", name: "Map of the Zone",   desc: "Gear Bonus +3 to Find the Path. Tiny item. DEV Req: Culture 10. DEV Bonus: Culture +D6." },
-  { roll: "443-446", name: "Motor Boat",        desc: "Carries 7, increases combat move, halves coastal-sector time, escapes/rams at sea (gasoline or booze, 1 dose/sector). Gear Bonus +3, Resilience ... DEV Req: Technology 20. DEV Bonus: Technology +D6." },
-  { roll: "451-454", name: "Painkillers",       desc: "Eating heals all damage (no effect vs critical injuries); only D6 doses, then discard. Tiny item." },
+  { roll: "443-446", name: "Motor Boat",        desc: "Carries 7, increases combat move, halves coastal-sector time, escapes/rams at sea (gasoline or booze, 1 dose/sector). Gear Bonus +3, Resilience 2. DEV Req: Technology 20. DEV Bonus: Technology +D6." },
+  { roll: "451-454", name: "Painkillers",       desc: "Eating heals all damage (no effect vs critical injuries); only D6 doses, then discard. Tiny item. DEV Req: Technology 20." },
   { roll: "455-462", name: "Painting",          desc: "No effect. DEV Bonus: Culture +D6." },
   { roll: "463-466", name: "Perfume Bottle",    desc: "Gear Bonus +2 Manipulate. Tiny item. DEV Req: Culture 10. DEV Bonus: Culture +D6." },
   { roll: "511-514", name: "Protective Suit",   desc: "Protection Rating 6 against the Rot. DEV Req: Technology 10. DEV Bonus: Technology +D6." },
@@ -278,7 +278,7 @@ var MYZ_CRITS = [
 
 var MYZ_CONDITIONS = [
   { name: "Starving",    desc: "After 1 day with no grub. Can't recover Damage (Strength) at all; suffer +1 damage/day without grub; if broken by damage while starving you die after another day. Cured by eating 1 ration of grub." },
-  { name: "Dehydrated",  desc: "After 1 day with no water. Can't recover ANY trauma; suffer +1 fatigue/day; if broken by any trauma while dehydrated you die after a day. Cured by drinking 1 ration of water." },
+  { name: "Dehydrated",  desc: "After 1 day with no water. Can't recover ANY trauma; suffer 1 damage + 1 fatigue per day without water; if broken by any trauma while dehydrated you die after a day. Cured by drinking 1 ration of water." },
   { name: "Sleepless",   desc: "After a day without 4+ hours sleep. Can't recover Confusion (Wits) at all; suffer +1 confusion/day; if broken by confusion while sleepless you collapse unconscious. Cured by 4 hours of sleep." },
   { name: "Hypothermic", desc: "From exposure to severe cold (roll Endure vs cold; on failure become hypothermic). Immediately suffer 1 damage + 1 confusion; possible hallucinations; keep rolling Endure at intervals; if broken by damage while hypothermic you die next time called on to roll. Can't restore Strength or Wits until warm again." },
 ];
@@ -319,7 +319,7 @@ var MYZ_BESTIARY = [
   { name: "Worm Swarm",    mod: "-1", stats: "Swarm, Strength 8 (grows); Armor —; only fire/explosions", attack: "Engulfing (dmg 1; doubt instead of damage first turn); each damage dealt raises its Strength by 1", desc: "Collective-minded cluster of millions of black worms that engulfs and eats prey alive." },
   { name: "Zone Dogs",     mod: "+1", stats: "STR 4, AGI 6; Fight 2, Move 3; Armor —", attack: "Bite (dmg 2)", desc: "Packs of scrawny, often furless mutated mutts." },
   { name: "Zone Rats",     mod: "+1", stats: "Swarm, STR 8, AGI 5; Armor —; only fire/explosions", attack: "Teeth (dmg 1); every attack inflicts 1 Rot Point", desc: "Hordes of arm-long rats made bigger and meaner by the Rot." },
-  { name: "Zone Spider",   mod: "±0", stats: "STR 5; Fight 2, Move 2; Armor 3", attack: "Bite (dmg 1 + poison: 1 fatigue/turn until Healed)", desc: "Mutated spiders of absurd size in tunnels/ruins; paralyze prey with venom." },
+  { name: "Zone Spider",   mod: "±0", stats: "STR 5; Fight 2, Move 2; Armor 3", attack: "Bite (dmg 1 + poison: if it deals damage, 1 fatigue/turn until the victim is broken or a Heal roll sucks it out, −2 on yourself)", desc: "Mutated spiders of absurd size in tunnels/ruins; paralyze prey with venom." },
   { name: "Zone Wasps",    mod: "±0", stats: "Swarm, STR 5; Armor 2; only fire/explosions", attack: "Bite (dmg 1); any damage also inflicts 1 confusion; pheromones raise swarm Strength 1/turn", desc: "Fist-sized black-and-yellow wasps with hallucinogenic venom." },
   { name: "Zone Leeches",  mod: "±0", stats: "Swarm, STR 6; Armor —; only fire/explosions", attack: "Bite (dmg 1); once attached, +1 damage/turn until removed (Fight roll to pull off, -2 on yourself)", desc: "Fist-sized eyeless blood-suckers that sense heat and latch on." },
 ];

@@ -1896,7 +1896,7 @@ const SB_CONFIG = {
       }
       var s = m.stats || '';
       var skills = s.replace(/STR\s*\d+,?\s*/i, '').replace(/AGI\s*\d+,?\s*/i, '').replace(/WIT\s*\d+,?\s*/i, '').replace(/EMP\s*\d+,?\s*/i, '').replace(/Armor\s*[^;]*;?/i, '').replace(/^[;,\s]+/, '').trim();
-      return { sbtype: 'mob', name: m.name || '', type: 'MONSTER' + (m.mod ? (' // ' + m.mod) : ''), str: pick(/STR\s*(\d+)/i, s), agi: pick(/AGI\s*(\d+)/i, s), wit: pick(/WIT\s*(\d+)/i, s), emp: pick(/EMP\s*(\d+)/i, s), armor: pick(/Armor\s*(\d+)/i, s), skills: skills, abilities: ['Attack: ' + (m.attack || ''), m.desc || ''].filter(Boolean).join('\n') };
+      return { sbtype: 'mob', name: m.name || '', type: 'MONSTER' + (m.mod ? (' // ' + m.mod) : ''), str: pick(/(?:STR|Strength)\s*(\d+)/i, s), agi: pick(/(?:AGI|Agility)\s*(\d+)/i, s), wit: pick(/WIT\s*(\d+)/i, s), emp: pick(/EMP\s*(\d+)/i, s), armor: pick(/Armor\s*(\d+)/i, s), skills: skills, abilities: ['Attack: ' + (m.attack || ''), m.desc || ''].filter(Boolean).join('\n') };
     },
     sub: function (m) { return m._myzkind === 'monster' ? ('Monster · ' + m.mod) : (m._myzkind === 'humanoid' ? ('Humanoid · ' + m.mod) : 'NPC'); }
   },

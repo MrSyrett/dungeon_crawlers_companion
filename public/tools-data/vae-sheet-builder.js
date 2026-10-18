@@ -156,7 +156,7 @@
     h += '<button class="m-btn ghost" style="margin-left:8px;" onclick="window.YZEB.rollRes()">🎲 Roll</button>';
     // Item 1: show the currently selected Living Standard + starting Capital beside the Roll button.
     if (resourcesPick != null) { var t = resTierObj(resourcesPick);
-      h += '<span class="yzeb-sub" style="margin-left:10px;">' + (t ? '<b style="color:#d8cfbf;">' + esc(t.name) + '</b> · Capital <b style="color:#d8cfbf;">' + num(t.capital) + '</b>' + (num(t.bonus) ? ' · Resources bonus ' + (num(t.bonus) > 0 ? '+' : '') + num(t.bonus) : '') : 'Resources ' + resourcesPick) + '</span>'; }
+      h += '<span class="yzeb-sub" style="margin-left:10px;">' + (t ? '<b style="color:#d8cfbf;">' + esc(t.name) + '</b> · Capital <b style="color:#d8cfbf;">' + num(t.capital) + '</b>' + (num(t.bonus) ? ' · Bartering ' + (num(t.bonus) > 0 ? '+' : '') + num(t.bonus) + ' Manipulation' : '') : 'Resources ' + resourcesPick) + '</span>'; }
     h += '</div>';
     h += '<p class="m-hint" style="margin-top:12px;"><b>Suggested equipment:</b> ' + esc(a.equipment) + '</p>';
     var opts = arr((W.VAE_ARCHETYPE_GEAR || {})[archetype]);

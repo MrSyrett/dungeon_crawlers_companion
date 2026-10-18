@@ -51,8 +51,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {mode === "general" && (
       <section className="mb-8">
         <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-          Your carry limit equals double your Strength. Items cost slots (heavy ones more, light ones ½
-          or ¼; tiny items are free). Most gear grants a bonus to one skill — you may use the bonus from
+          Your carry limit is your Strength + 2 slots (Strength 2 carries four). Most items take one slot; heavy ones take more, light ones
+          (a knife, a ration) take ½, and tiny items are free. Most gear grants a bonus to one skill — you may use the bonus from
           only one item on a given roll.
         </p>
         <div className={`${panelCls} mb-4`}>

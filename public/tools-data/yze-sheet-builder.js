@@ -78,7 +78,7 @@
     h += '<div class="yzeb-gtabs">'
       + '<button class="builder-chip' + (!android ? ' sel' : '') + '" onclick="window.YZEB.setAndroid(false)">Human</button>'
       + '<button class="builder-chip' + (android ? ' sel' : '') + '" onclick="window.YZEB.setAndroid(true)">Synthetic</button></div>';
-    if (android) h += '<p class="m-hint" style="margin-top:4px;">Synthetics add +3 to two attributes (next step), can’t push, have no Stress or Panic, and carry no signature item.</p>';
+    if (android) h += '<p class="m-hint" style="margin-top:4px;">Synthetics add +3 to two attributes (next step), can’t push, and have no Stress or Panic.</p>';
     h += '<div class="m-lbl" style="margin-top:14px;">Career <span class="yzeb-sub">(sets your key attribute)</span></div>';
     h += '<div class="yzeb-list">' + CAREERS.map(function (c) {
       return prow(c.name, 'Key ' + c.key, c.skills.join(' · '), career === c.name, "window.YZEB.setCareer('" + c.name.replace(/'/g, "\\'") + "')", career === c.name ? '✓ Chosen' : 'Choose');
@@ -127,14 +127,11 @@
     h += '<div class="yzeb-list">' + (c.agendas || []).map(function (a, idx) {
       return prow(a, '', '', agenda === a, "window.YZEB.pickAgenda(" + idx + ")", agenda === a ? '✓ Chosen' : 'Choose');
     }).join('') + '</div>';
-    if (!android) {
-      h += '<div class="m-lbl" style="margin-top:14px;">Signature item</div>';
-      h += '<div class="yzeb-list">' + (c.signature || []).map(function (s, idx) {
-        return prow(s, '', '', signature === s, "window.YZEB.pickSig(" + idx + ")", signature === s ? '✓ Chosen' : 'Choose');
-      }).join('') + '</div>';
-    } else {
-      h += '<p class="m-hint" style="margin-top:14px;">Synthetics have no signature item.</p>';
-    }
+    // Every PC — synthetics included — picks a signature item (core p.28, creation step 9).
+    h += '<div class="m-lbl" style="margin-top:14px;">Signature item</div>';
+    h += '<div class="yzeb-list">' + (c.signature || []).map(function (s, idx) {
+      return prow(s, '', '', signature === s, "window.YZEB.pickSig(" + idx + ")", signature === s ? '✓ Chosen' : 'Choose');
+    }).join('') + '</div>';
     h += '<div class="yzeb-2col" style="margin-top:14px;">';
     h += '<div><div class="m-lbl">Buddy</div><input class="m-input" value="' + esc(buddy) + '" placeholder="A crewmate you trust" oninput="window.YZEB.setBuddy(this.value)"></div>';
     h += '<div><div class="m-lbl">Rival</div><input class="m-input" value="' + esc(rival) + '" placeholder="A crewmate you clash with" oninput="window.YZEB.setRival(this.value)"></div>';
@@ -149,7 +146,7 @@
 
   // Career starting-cash formula → parsed {n dice, mult}.
   function cashFormula() { var c = careerObj(career); return (c && c.cashRoll) || 'D6x100'; }
-  function cashParse(f) { var m = String(f || 'D6x100').match(/^(\d*)D6(x100)?$/i); return { n: (m && m[1]) ? parseInt(m[1], 10) : 1, mult: (m && m[2]) ? 100 : 1 }; }
+  function cashParse(f) { var m = String(f || 'D6x100').replace(/,/g, '').match(/^(\d*)D6(?:[x×](\d+))?$/i); return { n: (m && m[1]) ? parseInt(m[1], 10) : 1, mult: (m && m[2]) ? parseInt(m[2], 10) : 1 }; }
 
   // Resolve a career starting-gear option name to its compendium entry.
   function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
@@ -193,12 +190,12 @@
   function renderNav() {
     var el = $('yzeb-nav'); if (!el) return;
     var aLeft = ATTR_BUDGET - attrTotal(), sLeft = SKILL_BUDGET - skillSpent();
-    var ready = aLeft === 0 && sLeft >= 0 && !!career && !!talentPick && (!android || androidBonus.length === 2) && (android || !!signature);
+    var ready = aLeft === 0 && sLeft >= 0 && !!career && !!talentPick && (!android || androidBonus.length === 2) && !!signature;
     var msg = '';
     if (step === 1) msg = (aLeft !== 0 ? aLeft + ' attribute points left' : (android && androidBonus.length < 2 ? 'Choose ' + (2 - androidBonus.length) + ' synthetic bonus attribute' + (2 - androidBonus.length === 1 ? '' : 's') : 'Attributes set'));
     else if (step === 2) msg = (sLeft === 0 ? 'Skills set' : sLeft + ' skill points left');
     else if (step === 0 && !career) msg = 'Pick a career';
-    else if (step === 3) msg = (!talentPick ? 'Pick a starting talent' : (!android && !signature ? 'Pick a signature item' : ''));
+    else if (step === 3) msg = (!talentPick ? 'Pick a starting talent' : (!signature ? 'Pick a signature item' : ''));
     else if (step === 4) msg = startGear.length + ' of 2 gear chosen';
     var left = step > 0 ? '<button class="m-btn ghost" onclick="window.YZEB.back()">‹ Back</button>' : '<button class="m-btn ghost" onclick="window.YZEB.close()">Cancel</button>';
     var right = step < STEPS.length - 1
@@ -240,7 +237,7 @@
     back: function () { if (step > 0) { step--; render(); } },
     setName: function (v) { name = v; },
     setPronouns: function (v) { pronouns = v; },
-    setAndroid: function (v) { android = !!v; if (!android) { androidBonus = []; } else { signature = ''; } render(); },
+    setAndroid: function (v) { android = !!v; if (!android) { androidBonus = []; } render(); },
     androidPlus: function (k) { if (!android) return; var i = androidBonus.indexOf(k); if (i >= 0) androidBonus.splice(i, 1); else { if (androidBonus.length >= 2) return; androidBonus.push(k); } render(); },
     setBuddy: function (v) { buddy = v; },
     setRival: function (v) { rival = v; },
@@ -277,7 +274,7 @@
       ATTRS.forEach(function (a) { d.attrs[a.key] = attrs[a.key] + (androidBonus.indexOf(a.key) >= 0 ? 3 : 0); });
       ASK.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
       d.android = android; d.buddy = buddy; d.rival = rival; d.cash = cash;
-      d.agenda = agenda; d.signature = android ? '' : signature;
+      d.agenda = agenda; d.signature = signature;
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
       if (startGear.length) d.gear = startGear.map(function (g) { return g; });
       try { applySheet(d); } catch (e) {}

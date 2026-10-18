@@ -724,7 +724,7 @@ body.dark .act-badge.warn{color:#f0c060;}
         <div class="card mprot m-trauma" style="flex:1 1 0;min-width:0;">
           <div class="section-bar accent cbar"><span>Trauma &amp; Rot</span><span class="broken-tag hide" id="broken-tag" style="margin-left:auto;">Broken</span></div>
           <div class="vitals" id="trauma-tracks"></div>
-          <div class="vrow" style="padding:4px 10px 8px;"><span class="v-lbl">Rot Pts</span><div class="vboxes" id="rot-boxes"></div><button class="dice-btn mini" style="flex:0 0 auto;margin-left:auto;padding:5px 9px;font-size:10px;" onclick="rollContamination()" title="Roll one Base Die — on a 1, one Rot Point becomes permanent">Contamination</button></div>
+          <div class="vrow" style="padding:4px 10px 8px;"><span class="v-lbl">Rot Pts</span><div class="vboxes" id="rot-boxes"></div><button class="dice-btn mini" style="flex:0 0 auto;margin-left:auto;padding:5px 9px;font-size:10px;" onclick="rollContamination()" title="Lose one Rot Point (decontamination): roll one Base Die — on a 1 it stays and becomes permanent">Decontaminate</button></div>
         </div>
       </div>
 
@@ -948,7 +948,7 @@ function renderTrauma(){
 // Click a remaining pip to set current value to it (toggling the top pip off);
 // trauma = base − remaining.
 function setTraumaRemain(k,i){ var base=attrBase(k), cur=base-attrTrauma(k); var ncur=(cur===i)?i-1:i; ncur=clamp(ncur,0,base); S.trauma[k]=base-ncur; renderTrauma(); renderAttrSkills(); scheduleAutosave();
-  if(isBroken(k)) addLog('Broken by Damage', attrName(k)+' 0', 'Roll a critical injury (D66) — tap Roll on Critical Injuries.','fumble'); }
+  if(isBroken(k)) addLog('Broken by '+(TRAUMA_NAME[k]||'trauma'), attrName(k)+' 0', k==='STR'?'Roll a critical injury (D66) — tap Roll on Critical Injuries.':'No critical injury — you are out of action until someone Heals you or you recover '+attrName(k)+'.','fumble'); }
 function setTrauma(k,n){ var max=attrBase(k); n=clamp(n,0,max); S.trauma[k]=(S.trauma[k]===n)?n-1:n; renderTrauma(); renderAttrSkills(); scheduleAutosave(); }
 
 // ── Render: Mutation Points + Rot ──
@@ -968,22 +968,27 @@ function setRot(n){ var perm=clamp(num(S.rotPerm),0,ROT_MAX), prev=clamp(num(S.r
   S.rot=target; renderRot(); scheduleAutosave();
   if(target>prev) rotCheck(target);   // checking a new Rot pip triggers a Rot check
 }
-// Checking a Rot pip: roll Base Dice equal to current Rot Points; any 1 → 1 Trauma to Strength.
+// Checking a Rot pip (core p.126): every time you suffer a Rot Point, roll Base Dice equal
+// to your TOTAL Rot Points — every 1 rolled is one point of damage (trauma to Strength).
 function rotCheck(r){ r=clamp(num(r!=null?r:S.rot),0,ROT_MAX); if(r<1)return;
   var a=rollSet(r), ones=count1(a); animDice(a,[],[],ones?'fumble':'crit');
-  if(ones>0){ S.trauma.STR=clamp(attrTrauma('STR')+1,0,attrBase('STR')); renderTrauma(); renderAttrSkills();
-    addLog('Rot Check ('+r+')','1 Trauma · Strength', poolStr(a)+' · a 1 means the Rot bites — 1 point of Damage to Strength','fumble');
+  if(ones>0){ S.trauma.STR=clamp(attrTrauma('STR')+ones,0,attrBase('STR')); renderTrauma(); renderAttrSkills();
+    addLog('Rot Check ('+r+')',ones+' Damage · Strength', poolStr(a)+' · each 1 is one point of Damage to Strength','fumble');
     if(isBroken('STR')) addLog('Broken by Rot','Strength 0','Roll a critical injury (D66) — tap Roll on Critical Injuries.','fumble');
   } else { addLog('Rot Check ('+r+')','No harm', poolStr(a)+' · no 1s — the Rot holds off for now','crit'); }
   scheduleAutosave();
 }
-// Contamination: roll one Base Die; on a 1, one Rot Point becomes permanent (filled, uncheckable).
-function rollContamination(){ var a=rollSet(1), one=count1(a)>0; animDice(a,[],[],one?'fumble':'crit');
-  if(one){ var perm=clamp(num(S.rotPerm),0,ROT_MAX);
-    if(perm>=ROT_MAX){ addLog('Contamination','No change', poolStr(a)+' · all Rot is already permanent','normal'); return; }
-    S.rotPerm=perm+1; if(num(S.rot)<S.rotPerm)S.rot=S.rotPerm; renderRot();
-    addLog('Contamination','Rot made permanent', poolStr(a)+' · a 1 — Rot Point '+S.rotPerm+' is now permanent','fumble'); scheduleAutosave();
-  } else { addLog('Contamination','Safe', poolStr(a)+' · no 1 — no permanent Rot','crit'); }
+// Decontamination (core p.126): every time you are about to LOSE a Rot Point (one per day
+// in the Ark, or half on washing), roll one Base Die — on a 1 the point stays and becomes
+// permanent; otherwise it leaves your body.
+function rollContamination(){
+  var perm=clamp(num(S.rotPerm),0,ROT_MAX), r=clamp(num(S.rot),perm,ROT_MAX);
+  if(r<=perm){ addLog('Decontamination','Nothing to lose', perm?'Only permanent Rot Points left — they never go away.':'No Rot Points.','normal'); return; }
+  var a=rollSet(1), one=count1(a)>0; animDice(a,[],[],one?'fumble':'crit');
+  if(one){ S.rotPerm=perm+1; if(num(S.rot)<S.rotPerm)S.rot=S.rotPerm; renderRot();
+    addLog('Decontamination','Rot made permanent', poolStr(a)+' · a 1 — this Rot Point stays and is now permanent ('+S.rotPerm+' permanent)','fumble');
+  } else { S.rot=r-1; renderRot(); addLog('Decontamination','1 Rot Point lost', poolStr(a)+' · no 1 — the Rot Point leaves your body ('+S.rot+' left)','crit'); }
+  scheduleAutosave();
 }
 
 // ── Render: conditions (trackers — they block recovery, no dice penalty) ──
@@ -1298,22 +1303,25 @@ function rollSkill(name){ var s=skillObj(name); var attr=s?s.attr:(name===S.spec
 function rollAttr(k){ doMyzRoll(attrName(k)+' ('+k+')', attrCur(k), -critModFor(null), 0, k, null); actMainRoll(); }
 function rollAttack(i){
   var w=S.gear[i]; if(!w||w.kind!=='weapon')return;
-  var isGun=(w.skill==='Shoot');
+  var isShoot=(w.skill==='Shoot');
+  // Only firearms use bullets (core p.86-87): bows/crossbows use arrows, slingshots stones, thrown
+  // weapons nothing, the flamethrower a dose of booze, the scrap cannon an explosive charge.
+  var isGun=isShoot && /pistol|derringer|rifle|revolver|shotgun|musket|\bgun\b|carbine|smg/i.test(w.name||'') && !/flare gun|flamethrower|cannon|bow|sling/i.test(w.name||'');
   if(isGun){ var blt=num((S.supplies||{}).bullets);
     if(blt<1){ addLog((w.name||'Gun')+' · Shoot','No bullets','Out of ammo — you need at least 1 Bullet to fire.','fumble'); return; }
     bumpSupply('bullets',-1);
   }
-  var skName=isGun?'Shoot':'Fight', s=skillObj(skName)||{attr:(isGun?'AGI':'STR')};
+  var skName=isShoot?'Shoot':'Fight', s=skillObj(skName)||{attr:(isShoot?'AGI':'STR')};
   doMyzRoll((w.name||'Attack')+' · '+skName+(isGun?' · −1 bullet':''), attrCur(s.attr), num(S.skills[skName])-critModFor(skName), weaponBonus(w.bonus), s.attr, {kind:'attack',wdmg:num(w.damage),weaponIdx:i});
 }
 function rollQuick(){ var n=clamp(num($('tray-mod').value),1,12); $('tray-mod').value='0';
   var a=rollSet(n), succ=count6(a); animDice(a,[],[],glowFor(succ)); addLog(n+'d6 free pool', succ+'  '+tierOf(succ).t, poolStr(a)+' · '+succ+' succ', tierOf(succ).type); _lastRoll=null; }
 function rollArmor(){ var r=armorRating(); if(r<1){ addLog('Armor','—','No armor equipped — equip armor on the Gear tab.','fumble'); return; }
-  var a=rollSet(Math.min(12,r)), blk=count6(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 stops 1 Damage', blk?'crit':'fumble'); }
+  var a=rollSet(Math.min(12,r)), blk=count6(a), wear=count1(a); animDice(a,[],[],blk?'crit':'normal'); addLog('Armor ('+r+')', blk+' blocked', poolStr(a)+' · each 6 stops 1 Damage'+(wear?' · unless all damage was stopped, Armor Rating drops by '+wear+' (one per 1)':''), blk?'crit':'fumble'); }
 function rollRot(){ var r=clamp(num(S.rot),0,ROT_MAX); if(r<1){ addLog('Rot','—','No Rot Points — nothing to roll.','normal'); return; }
-  var a=rollSet(r), dmg=count6(a); animDice(a,[],[],dmg?'fumble':'normal');
+  var a=rollSet(r), dmg=count1(a); animDice(a,[],[],dmg?'fumble':'normal');
   if(dmg>0){ S.trauma.STR=clamp(attrTrauma('STR')+dmg,0,attrBase('STR')); renderTrauma(); renderAttrSkills(); }
-  addLog('Rot ('+r+')', dmg+' Damage', poolStr(a)+' · each 6 is 1 point of Damage to Strength', dmg?'fumble':'crit'); scheduleAutosave(); }
+  addLog('Rot ('+r+')', dmg+' Damage', poolStr(a)+' · each 1 is 1 point of Damage to Strength', dmg?'fumble':'crit'); scheduleAutosave(); }
 
 // ── Push (MYZ): keep 6s and the 1-symbols; re-roll the blanks. Trauma = base 1s. ──
 function clearPushButtons(){ var es=$('log-entries'); if(!es)return; [].forEach.call(es.querySelectorAll('.push-inline'),function(b){ b.remove(); }); }
@@ -1487,7 +1495,7 @@ var MYZ_RULES=[
   {title:'Pushing',text:'Re-roll every blank once — keep 6s and the 1-symbols. Each 1 on a Base Die is 1 trauma to the attribute you used, and earns 1 Mutation Point; each 1 on a Gear Die breaks the gear.'},
   {title:'Mutation Points',text:'Start each session with MP equal to your number of mutations (max 10). Spend them to fire mutations — they never fail, but a 1 on the misfire check triggers the misfire table.'},
   {title:'Critical injuries',text:'Broken by Damage (Strength 0)? Roll D66 for a critical injury. Some are lethal with a time limit — a Heal within it saves you.'},
-  {title:'The Rot',text:'Each Rot Point you hold adds a Base Die to the Rot roll; every 6 is a point of Damage. Decontaminate one per day in a clean place.'}
+  {title:'The Rot',text:'Every time you suffer a Rot Point, roll Base Dice equal to your total Rot Points; every 1 is a point of Damage. In a Rot-free place you lose one Rot Point a day (washing in clean water removes half at once) — roll a Base Die for each: on a 1 it stays and becomes permanent.'}
 ];
 function openRules(){ var h='<p class="m-hint">Mutant: Year Zero is the original Year Zero Engine — D6 dice pools where each 6 is a success. There is no stress or panic; pushing costs trauma and feeds your mutations.</p>';
   h+=MYZ_RULES.map(function(q){ return '<p><b>'+esc(q.title)+'.</b> '+esc(q.text)+'</p>'; }).join('');

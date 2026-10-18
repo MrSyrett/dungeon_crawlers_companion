@@ -725,7 +725,7 @@ body.dark .act-badge.warn{color:#f0c060;}
         </div>
 
         <div class="tab-panel" id="tab-gear">
-          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right" style="flex:1 1 auto;align-items:center;gap:8px;"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button><span class="eco-wrap" style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;"><span class="eco-chip" id="res-disp" data-nolock style="cursor:pointer;" title="Resources — click to roll for Capital (your standard of living, set at creation)" onclick="rollResources()"></span><span class="eco-chip cap" id="cap-disp" data-nolock title="Capital — spending money for the Item Shop"></span></span></span></div>
+          <div class="section-bar cbar"><span>Inventory</span><span class="hdr-right" style="flex:1 1 auto;align-items:center;gap:8px;"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add Gear</button><span class="eco-wrap" style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;"><span class="eco-chip" id="res-disp" data-nolock style="cursor:pointer;" title="Resources — click to roll for preparatory gear: each success pays 1 point of item cost (core p.73)" onclick="rollResources()"></span><span class="eco-chip cap" id="cap-disp" data-nolock style="cursor:pointer;" title="Capital — per-mystery spending power from your Living Standard (spent instead of, or added to, Resources successes). Click at the start of a new mystery to restore it." onclick="newMysteryCapital()"></span></span></span></div>
           <table class="tbl" id="inv-tbl"><thead><tr><th style="width:30px;" title="Equip weapons &amp; armor">Eq</th><th style="width:30%;">Item</th><th>Details</th><th style="width:9%;">Cost</th><th style="width:26px;"></th></tr></thead><tbody id="inv-body"></tbody></table>
           <div id="inv-empty" class="tbl-empty">No gear yet.</div>
         </div>
@@ -837,7 +837,7 @@ var S=null, _lastRoll=null;
 function blankState(){
   var st={ name:'', archetype:'', key:'', age:'', pronouns:'',
     attrs:{PHY:2,PRE:2,LOG:2,EMP:2}, skills:{},
-    conditions:{}, brokenPhys:false, brokenMent:false, resources:3, capital:0, memento:'',
+    conditions:{}, brokenPhys:false, brokenMent:false, resources:3, capital:0, purchase:0, memento:'',
     xp:0, gear:[], talents:[], crits:[],
     motivation:'', trauma:'', secret:'', relationships:[], appearance:'', notes:'' };
   SKILLS.forEach(function(s){ st.skills[s.name]=0; });
@@ -850,13 +850,11 @@ function condPenaltyFor(attrKey){ return condCount(attrType(attrKey)); }
 function typeFull(type){ var names=(type==='Physical')?PHYS_CONDS:MENT_CONDS; return names.every(function(n){ return !!S.conditions[n]; }); }
 function critPenalty(){ var n=0; (S.crits||[]).forEach(function(c){ n+=Math.abs(num(c.mod)); }); return n; }
 function parseCritMod(eff){ var m=String(eff||'').match(/[-−–]\s*(\d+)/); return m?parseInt(m[1],10):0; }
-// Afflictions read "<SKILL> −N" (core pp.65–66) — the penalty applies only to that
-// skill. "Fear −N" is for fear tests, not skills. A custom injury that names no skill
-// applies to every roll.
-function critModFor(sk){ var n=0; (S.crits||[]).forEach(function(c){ var m=Math.abs(num(c.mod)); if(!m)return;
-    var eff=String(c.effect||'').toLowerCase(), named=SKILLS.filter(function(x){ return eff.indexOf(x.name.toLowerCase())>=0; }).map(function(x){ return x.name; });
-    if(named.length){ if(sk&&named.indexOf(sk)>=0) n+=m; } else if(!/\bfear\b/.test(eff)) n+=m; });
-  return n; }
+// Afflictions read "<SKILL> −N" (core pp.65–66), but they are NOT a standing penalty:
+// the Gamemaster activates an Affliction once per session (core p.67 — Increased
+// Difficulty, Social Stigma, My Own Worst Enemy or Loss of Control). So pools are not
+// reduced automatically; the GM applies the −N with the dice-tray modifier when it hits.
+function critModFor(sk){ return 0; }
 // Armor makes you clumsy: −1/−2/−3 to AGILITY for light/medium/heavy (core p.73).
 function armorAgiPenalty(){ var n=0; S.gear.forEach(function(g){ if(g.kind==='armor'&&g.equipped){ var m=String((g.note||'')+' '+(g.name||'')).match(/agility\s*[-−–]\s*(\d+)/i); if(m) n+=parseInt(m[1],10); else if(/heavy armor/i.test(g.name||'')) n+=3; else if(/medium armor/i.test(g.name||'')) n+=2; else if(/light armor/i.test(g.name||'')) n+=1; } }); return n; }
 function skillPen(name){ var s=skillObj(name); return (s?condPenaltyFor(s.attr):0)+critModFor(name)+(name==='Agility'?armorAgiPenalty():0); }
@@ -925,16 +923,22 @@ function addCondition(type){
 // ── Resources / memento ──
 var RES_TABLE=G(window.VAE_RESOURCES);
 function resTier(v){ v=clamp(num(v),1,8); for(var i=0;i<RES_TABLE.length;i++){ if(RES_TABLE[i].level===v) return RES_TABLE[i]; } return {level:v,name:RES_NAMES[v]||'',bonus:0,capital:0}; }
-function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-disp'); if(e)e.innerHTML='🎲 Resources '+v+' · '+esc(RES_NAMES[v]||''); var c=$('cap-disp'); if(c)c.innerHTML='⛁ Capital '+num(S.capital); }
+function renderRes(){ var v=clamp(num(S.resources),1,8); var e=$('res-disp'); if(e)e.innerHTML='🎲 Resources '+v+' · '+esc(RES_NAMES[v]||'')+(num(S.purchase)?' · '+num(S.purchase)+' succ':''); var c=$('cap-disp'); if(c)c.innerHTML='⛁ Capital '+num(S.capital); }
 function bumpRes(d){ S.resources=clamp(num(S.resources)+d,1,8); renderRes(); scheduleAutosave(); }
-// Roll your Resources to generate Capital (each 6 + the Living-Standards bonus → money).
+// Preparatory gear (core p.73): roll dice equal to your Resources; each success buys
+// one point of item cost (a cost-3 item costs three successes). Successes can be
+// pooled with friends. Capital (Living Standards table) can be spent instead of, or on
+// top of, successes, and is used up until the next mystery. The table's Bonus is added
+// to MANIPULATION when bartering — it does not change this roll.
 function rollResources(){
   var v=clamp(num(S.resources),1,8), tier=resTier(v);
-  var a=rollSet(Math.max(1,v)), succ=count6(a), gained=Math.max(0,succ+num(tier.bonus));
-  S.capital=num(S.capital)+gained; renderRes(); scheduleAutosave();
-  animDice(a,[],[],gained?'crit':'normal');
-  addLog('Resources ('+v+' · '+esc(tier.name)+')', '+'+gained+' Capital', poolStr(a)+' · '+succ+' succ'+(tier.bonus?(' '+(tier.bonus>0?'+':'')+tier.bonus+' bonus'):'')+' → '+num(S.capital)+' total', gained?'crit':'fumble');
+  var a=rollSet(Math.max(1,v)), succ=count6(a);
+  S.purchase=succ; renderRes(); scheduleAutosave();
+  animDice(a,[],[],succ?'crit':'normal');
+  addLog('Resources ('+v+' · '+esc(tier.name)+')', succ+' success'+(succ===1?'':'es')+' to spend', poolStr(a)+' · buy temporary gear (cost N = N successes)'+(num(tier.bonus)?(' · Bartering: '+(tier.bonus>0?'+':'')+tier.bonus+' to Manipulation'):''), succ?'crit':'fumble');
 }
+// A new mystery: Capital is restored to your Living Standard and unspent successes lapse.
+function newMysteryCapital(){ var t=resTier(S.resources); S.capital=num(t.capital); S.purchase=0; renderRes(); scheduleAutosave(); updatePickerCap(); addLog('New mystery','Capital '+num(S.capital),esc(t.name)+' · unspent Resources successes cleared','normal'); }
 function useMemento(){
   var healed=0;
   CONDS.forEach(function(c){ if(healed<2 && S.conditions[c.name]){ S.conditions[c.name]=false; healed++; } });
@@ -1044,7 +1048,8 @@ function pickerPool(kind){
   G(window.VAE_HB_GEAR).filter(function(d){return d.rating==null;}).forEach(function(d){ g.push({name:d.name,cost:'',note:'Homebrew'+(d.desc?' · '+d.desc:''),price:num(d.cost),data:d}); });
   return g;
 }
-function updatePickerCap(){ var c=$('picker-cap'); if(!c)return; var fam=GEAR_FAM(_pk); c.style.display=fam?'block':'none'; if(fam) c.innerHTML='Capital available: <b style="color:var(--yz-dk);">'+num(S.capital)+'</b> · buy gear with Capital (⛁); items with no price are found, not bought.'; }
+function buyPower(){ return num(S.purchase)+num(S.capital); }
+function updatePickerCap(){ var c=$('picker-cap'); if(!c)return; var fam=GEAR_FAM(_pk); c.style.display=fam?'block':'none'; if(fam) c.innerHTML='Resources successes: <b style="color:var(--yz-dk);">'+num(S.purchase)+'</b> · Capital: <b style="color:var(--yz-dk);">'+num(S.capital)+'</b> · an item of cost N takes N (successes first, then Capital); items with no price are found, not bought.'; }
 function openPicker(kind){ _pk=kind; var gearFam=GEAR_FAM(kind); var tabs=$('picker-tabs'); if(tabs) tabs.style.display=gearFam?'flex':'none';
   $('picker-title').textContent=gearFam?'✦ Item Shop':(kind==='talent'?'✦ Talents':'✦ Add');
   if(tabs&&gearFam){ [].forEach.call(tabs.children,function(b){ b.classList.toggle('on', b.dataset.pk===kind); }); }
@@ -1058,13 +1063,13 @@ function renderPicker(){
   var el=$('picker-body');
   if(!rows.length){ el.innerHTML='<div class="brow-empty">'+(_pk==='gear'?'No matches — use “Add custom”.':'No matches.')+'</div>'; _pkRows=rows; return; }
   el.innerHTML=rows.map(function(x,idx){
-    var p=num(x.price), afford=num(S.capital)>=p;
-    var priceTag=(fam&&p>0)?'<span class="brow-cost" title="Costs '+p+' Capital">'+p+' ⛁</span>':'';
+    var p=num(x.price), afford=buyPower()>=p;
+    var priceTag=(fam&&p>0)?'<span class="brow-cost" title="Cost '+p+' — paid with Resources successes and/or Capital">'+p+' ⛁</span>':'';
     var btns;
     if(fam&&p>0){
       // Priced item: buy with Capital, or just add it (found, no cost).
-      var buy='<button class="brow-add'+(afford?'':' have')+'"'+(afford?'':' disabled title="Need '+p+' Capital"')+' onclick="pickAdd('+idx+',\'buy\')">'+(afford?('Buy '+p):('Need '+p))+'</button>';
-      var add='<button class="brow-add alt" title="Add without spending Capital (found or granted)" onclick="pickAdd('+idx+',\'add\')">＋ Add</button>';
+      var buy='<button class="brow-add'+(afford?'':' have')+'"'+(afford?'':' disabled title="Need '+p+' (successes + Capital)"')+' onclick="pickAdd('+idx+',\'buy\')">'+(afford?('Buy '+p):('Need '+p))+'</button>';
+      var add='<button class="brow-add alt" title="Add without paying (found or granted)" onclick="pickAdd('+idx+',\'add\')">＋ Add</button>';
       btns='<div class="brow-btns">'+buy+add+'</div>';
     } else {
       btns='<button class="brow-add" onclick="pickAdd('+idx+',\'add\')">＋ Add</button>';
@@ -1076,13 +1081,15 @@ function renderPicker(){
 function pickAdd(idx,mode){
   var x=_pkRows[idx]; if(!x)return;
   var fam=GEAR_FAM(_pk), p=fam?num(x.price):0, buying=(mode==='buy'&&p>0);
-  if(buying){ if(num(S.capital)<p){ addLog('Item Shop','Not enough Capital','“'+(x.name||'Item')+'” costs '+p+' · you have '+num(S.capital)+' Capital','fumble'); return; } S.capital=num(S.capital)-p; renderRes(); }
+  var paidS=0, paidC=0;
+  if(buying){ if(buyPower()<p){ addLog('Item Shop','Not enough','“'+(x.name||'Item')+'” costs '+p+' · you have '+num(S.purchase)+' successes + '+num(S.capital)+' Capital','fumble'); return; }
+    paidS=Math.min(num(S.purchase),p); paidC=p-paidS; S.purchase=num(S.purchase)-paidS; S.capital=num(S.capital)-paidC; renderRes(); }
   if(_pk==='weap'){ var w=x.data||{}; S.gear.push({kind:'weapon',equipped:false,name:w.name||x.name,bonus:weaponBonus(w.bonus),damage:w.damage!=null?w.damage:1,range:(w.range!=null&&w.range!==0?String(w.range):'0'),weight:w.cost!=null?w.cost:'',skill:w.skill||'Close Combat'}); renderWeapons(); setTab('gear'); }
   else if(_pk==='armor'){ var a=x.data||{}; S.gear.push({kind:'armor',equipped:false,name:a.name||x.name,rating:num(a.rating),weight:a.weight||'',note:a.note||''}); renderInventory(); setTab('gear'); }
   else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else { var d=x.data||{}; S.gear.push({kind:'gear',name:d.name||x.name,weight:d.weight||'',note:d.note||d.desc||''}); renderGear(); setTab('gear'); }
-  if(buying) addLog('Item Shop','Bought '+x.name,'−'+p+' Capital → '+num(S.capital)+' Capital left','crit');
-  else if(fam&&p>0) addLog('Item Shop','Added '+x.name,'Found/granted — no Capital spent','normal');
+  if(buying) addLog('Item Shop','Bought '+x.name,'Cost '+p+': '+(paidS?paidS+' success'+(paidS===1?'':'es'):'')+(paidS&&paidC?' + ':'')+(paidC?paidC+' Capital':'')+' → '+num(S.purchase)+' successes, '+num(S.capital)+' Capital left','crit');
+  else if(fam&&p>0) addLog('Item Shop','Added '+x.name,'Found/granted — nothing spent','normal');
   scheduleAutosave(); updatePickerCap(); renderPicker();
 }
 function addCustomFromPicker(){
@@ -1286,8 +1293,8 @@ function setDefaultTab(){ var t='action'; try{ t=localStorage.getItem('vae_tab')
 var VAE_RULES=[
   {title:'Dice pool',text:'Roll D6 equal to attribute + skill (+ gear/weapon bonus). Each 6 is a success; one is enough. There are no stress dice.'},
   {title:'Conditions',text:'Harm marks Conditions — three physical, three mental, each −1 die to the matching attributes. A fourth of a type makes you Broken and rolls a critical injury.'},
-  {title:'Pushing',text:'Re-roll every blank once (keep your 6s). Pushing always costs you one Condition of your choice.'},
-  {title:'Fear',text:'Seeing a vaesen or horror forces a Fear test: roll Logic or Empathy vs its Fear value. Fail and you are Terrified, taking mental Conditions equal to the shortfall.'},
+  {title:'Pushing',text:'Once per action, re-roll every die that is not a 6. It costs one Condition — physical for a Physique/Precision roll, mental for Logic/Empathy (the GM may let you choose) — and it applies after the roll, so a push can Break you.'},
+  {title:'Fear',text:'Seeing a vaesen or horror forces a Fear test: roll Logic or Empathy, +1 die per player character present (max +3), needing successes equal to the Fear value. Fail and you are Terrified, taking mental Conditions equal to the Fear value minus your successes.'},
   {title:'Banishing',text:'Vaesen are rarely beaten in combat. Each is banished by a specific ritual — and each hides a secret that complicates it.'},
   {title:'Advancement',text:'Each session grants XP (1 per yes to eight questions). 5 XP is one Advance: raise a skill a step, or learn any talent.'}
 ];
@@ -1339,7 +1346,7 @@ function addCrit(c){ if(!S.crits)S.crits=[]; S.crits.push({name:(c&&c.name)||'',
 function critDel(i){ S.crits.splice(i,1); renderCrits(); renderAttrSkills(); scheduleAutosave(); }
 function renderCrits(){
   var host=$('crit-list'); if(!host)return; host.innerHTML='';
-  (S.crits||[]).forEach(function(c,i){ var el=document.createElement('span'); el.className='cond crit-badge'; el.title=(c.effect||'')+(num(c.mod)?' · pool −'+Math.abs(num(c.mod)):'');
+  (S.crits||[]).forEach(function(c,i){ var el=document.createElement('span'); el.className='cond crit-badge'; el.title=(c.effect||'')+(num(c.mod)?' · the GM can apply −'+Math.abs(num(c.mod))+' once per session':'');
     el.innerHTML='<span class="cb-i" style="color:var(--yz-dk);font-weight:800;">ⓘ</span><span>'+esc(c.name||'Injury')+'</span>'+(num(c.mod)?'<span style="color:var(--yz-dk);font-weight:800;">−'+Math.abs(num(c.mod))+'</span>':'');
     el.onclick=function(){ critInfo(i); }; host.appendChild(el); });
   var e=$('crit-empty'); if(e) e.style.display=(S.crits&&S.crits.length)?'none':'block';
@@ -1375,6 +1382,7 @@ function applySheet(d){
   ['name','archetype','key','keySkill','age','pronouns','appearance','notes','memento','motivation','trauma','secret'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
   if(d.xp!=null)S.xp=num(d.xp); if(d.resources!=null)S.resources=clamp(num(d.resources),1,8);
   S.capital = (d.capital!=null) ? num(d.capital) : resTier(S.resources).capital;
+  S.purchase = num(d.purchase);
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
   if(d.skills) SKILLS.forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });
   if(d.conditions) CONDS.forEach(function(c){ S.conditions[c.name]=!!d.conditions[c.name]; });

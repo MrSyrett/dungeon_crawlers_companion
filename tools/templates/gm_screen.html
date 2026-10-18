@@ -4815,6 +4815,13 @@ GMScenes.renderPins();
               <option value="mood">Mood Element</option>
             </select>
           </label>
+          <label class="gen-label" title="Threat Level (core p.158): 1–4 fringe sectors, 5–8 central Zone, 9+ unusually dangerous. Add +3 at night. The Threat Roll is this many Base Dice.">Threat Level
+            <select class="gen-select myz-tl">
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3 · fringe</option><option value="4">4</option>
+              <option value="5">5</option><option value="6">6 · central</option><option value="7">7</option><option value="8">8</option>
+              <option value="9">9 · dangerous</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+            </select>
+          </label>
         </div>
         <div class="gen-results myz-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to generate a Zone sector.</div></div>
       </div>
@@ -11688,7 +11695,7 @@ function xsMonSummary(src, m) {
     // The Walking Dead: walkers have no stats; animals use Attack Dice/Damage/Health;
     // human NPCs are a dice-pool tier (Trained 5 / Expert 8) with 3 Health.
     if(m._twdkind === 'walker') {
-      out.notes.push('The dead have no stat block — driven by Threat Level (0–6) and Swarm Size. On a hit, roll Walker Attack (D66).');
+      out.notes.push('The dead have no stat block — driven by Threat Level (0–6) and Swarm Size. Single attack: the PC makes one skill roll; on a failure, roll Walker Attack (D66).');
       out.hp = 1;
     } else if(m._twdkind === 'animal') {
       out.stats.push({ label: 'Attack', val: String(m.attackDice ?? ''), roll: m.attackDice ? m.attackDice + 'd6' : '' }, { label: 'Damage', val: String(m.damage ?? '') }, { label: 'Health', val: String(m.health ?? '') });
@@ -11753,7 +11760,8 @@ function xsMonSummary(src, m) {
       out.hp = (m.str != null ? parseInt(m.str, 10) : 0) || 3;
     } else {
       const st = m.stats || '';
-      const str = pick(/STR\s*(\d+)/i, st), agi = pick(/AGI\s*(\d+)/i, st), arm = pick(/Armor\s*(\d+)/i, st);
+      // Swarms and plant fields print "Strength N" in full (core pp.176–183).
+      const str = pick(/(?:STR|Strength)\s*(\d+)/i, st), agi = pick(/(?:AGI|Agility)\s*(\d+)/i, st), arm = pick(/Armor\s*(\d+)/i, st);
       if(str) out.stats.push({ label: 'STR', val: str, roll: str + 'd6' });
       if(agi) out.stats.push({ label: 'AGI', val: agi, roll: agi + 'd6' });
       if(arm) out.stats.push({ label: 'Armor', val: arm });
@@ -19164,7 +19172,11 @@ window.init_vtt = init_vtt;
     var mx=maxEnd(tbl), n;
     if(mx<=6){ n=d6(); }
     else if(mx<=12){ n=d6()+d6(); }
-    else { var codes=[]; tbl.forEach(function(r){ var b=bounds(r.roll); var lo=isFinite(b[0])?b[0]:b[1], hi=isFinite(b[1])?b[1]:b[0]; for(var v=lo;v<=hi;v++) codes.push(v); }); n= codes.length? codes[Math.floor(Math.random()*codes.length)] : (d6()*10+d6()); }
+    else if(mx<=18){ n=d6()+d6()+d6(); }   // 3D6 tables (3–18): colony allegiance, surface encounters
+    // D66 / D666: roll real tens/ones (/hundreds) dice. A range such as "16–21" then only
+    // covers the valid results 16 and 21 (2/36), not every integer between them.
+    else if(mx<=66){ n=d6()*10+d6(); }
+    else { n=d6()*100+d6()*10+d6(); }
     var row=null; for(var i=0;i<tbl.length;i++){ var b=bounds(tbl[i].roll); if(n>=b[0]&&n<=b[1]){ row=tbl[i]; break; } } if(!row)row=tbl[tbl.length-1];
     return { code: row.roll, row: row };
   }
@@ -19255,6 +19267,8 @@ window.init_vtt = init_vtt;
     var mx=maxEnd(tbl), n;
     if(mx<=6){ n=d6(); }
     else if(mx<=12){ n=d6()+d6(); }
+    else if(mx<=66){ n=d6()*10+d6(); }                        // D66: real tens + ones (ranges like 16–21 = 2 results)
+    else if(mx<=666){ n=d6()*100+d6()*10+d6(); }              // D666
     else { var codes=[]; tbl.forEach(function(r){ var b=bounds(r.roll); var lo=isFinite(b[0])?b[0]:b[1], hi=isFinite(b[1])?b[1]:b[0]; for(var v=lo;v<=hi;v++) codes.push(v); }); n= codes.length? codes[Math.floor(Math.random()*codes.length)] : (mx>66? d6()*100+d6()*10+d6() : d6()*10+d6()); }
     var row=null; for(var i=0;i<tbl.length;i++){ var b=bounds(tbl[i].roll); if(n>=b[0]&&n<=b[1]){ row=tbl[i]; break; } } if(!row)row=tbl[tbl.length-1];
     return { code: row.roll, row: row };
@@ -19326,8 +19340,10 @@ window.init_vtt = init_vtt;
   function rollTable(tbl){
     if(!tbl||!tbl.length) return { code:'—', row:{ result:'(no table)' } };
     var mx=maxEnd(tbl), n;
-    if(mx<=6){ n=d6(); }
-    else { var codes=[]; tbl.forEach(function(r){ var b=bounds(r.roll); for(var v=b[0];v<=b[1];v++) codes.push(v); }); n= codes.length? codes[Math.floor(Math.random()*codes.length)] : (d6()*10+d6()); }
+    // D6 tables roll one die; D66 tables (codes 11–66) roll tens + ones. A range like
+    // "16–21" covers only the real D66 codes 16 and 21 (2/36), not 16..21 — so roll the
+    // two dice and match numerically rather than counting every integer in the range.
+    if(mx<=6){ n=d6(); } else { n=d6()*10+d6(); }
     var row=null; for(var i=0;i<tbl.length;i++){ var b=bounds(tbl[i].roll); if(n>=b[0]&&n<=b[1]){ row=tbl[i]; break; } } if(!row)row=tbl[tbl.length-1];
     return { code: row.roll, row: row };
   }
@@ -19422,12 +19438,28 @@ window.init_vtt = init_vtt;
       if(kind==='myzsector'){
         var sub=o.sub||'full';
         if(sub==='full'){
-          var env=rollTable(d.sectorEnvironment), body=line('Environment',env.code,env.row.result);
-          if(/ruins|industries|settlement/i.test(env.row.result)){ var isInd=/industr/i.test(env.row.result); var r=rollTable(isInd?d.ruinsIndustry:d.ruinsNormal); body+=line(isInd?'Industrial Ruin':'Ruin',r.code,r.row.result); }
-          var rot=rollTable(d.rotLevel); body+=line('Rot',rot.code,rot.row.result);
-          var t=threat(); body+=line('Threat · '+t.type,t.th.code,t.th.row.result);
-          var md=rollTable(moodAll(d)); body+=line('Mood',md.code,md.row.result);
-          html=card('Zone Sector','',body);
+          // Core pp.156–159: environment → dominant ruin (only where the Ruin column says Yes) →
+          // Rot Level → Threat Roll (Base Dice = Threat Level: each 6 is an artifact where the
+          // Artifact column says Yes; any 1 means a threat, more 1s = more dangerous) → mood.
+          // Settlements are described, not rolled up this way.
+          var env=rollTable(d.sectorEnvironment), envName=env.row.result, body=line('Environment',env.code,envName);
+          if(/settlement/i.test(envName)){
+            body+=line('Settlement','','Describe it in detail instead of rolling ruins, threats and artifacts (see the Special Zone Sectors, Chapter 15).');
+            html=card('Zone Sector','',body);
+          } else {
+            var hasRuin=/ruins|industries/i.test(envName), isInd=/industr/i.test(envName);
+            if(hasRuin){ var r=rollTable(isInd?d.ruinsIndustry:d.ruinsNormal); body+=line(isInd?'Industrial Ruin':'Ruin',r.code,r.row.result); }
+            var rot=rollTable(d.rotLevel); body+=line('Rot',rot.code,rot.row.result);
+            var tlSel=panel.querySelector('.myz-tl'), tl=Math.max(1,parseInt(tlSel&&tlSel.value,10)||3), dice=[], sixes=0, ones=0;
+            for(var k=0;k<tl;k++){ var v=d6(); dice.push(v); if(v===6)sixes++; if(v===1)ones++; }
+            body+=line('Threat Roll','TL '+tl, tl+'d6 ('+dice.join(',')+')');
+            if(ones>0){ var t=threat(); body+=line('Threat · '+t.type+(ones>1?' · '+ones+'× danger':''),t.th.code,t.th.row.result); }
+            else body+=line('Threat','','None this time.');
+            if(hasRuin && sixes>0){ var ar=ARTIFACTS(); for(var a=0;a<sixes;a++){ if(!ar.length)break; var art=rollTable(ar); body+=line('Artifact',art.code,art.row.name||art.row.result||''); } }
+            else if(sixes>0) body+=line('Artifacts','','None — this environment has no artifacts.');
+            var md=rollTable(moodAll(d)); body+=line('Mood',md.code,md.row.result);
+            html=card('Zone Sector','',body);
+          }
         } else if(sub==='sectorEnvironment'){ var e=rollTable(d.sectorEnvironment); html=card('Sector Environment · '+e.code,'',esc(e.row.result)); }
         else if(sub==='ruins'){ var rn=rollTable(d.ruinsNormal), ri=rollTable(d.ruinsIndustry); html=card('Ruins','', line('Normal',rn.code,rn.row.result)+line('Industry',ri.code,ri.row.result)); }
         else if(sub==='rotLevel'){ var rl=rollTable(d.rotLevel); html=card('Rot Level · '+rl.code,'',esc(rl.row.result)); }

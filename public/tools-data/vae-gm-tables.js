@@ -450,7 +450,7 @@ const VAE_GM_TABLES = {
   },
   {
    "roll": "54",
-   "result": "Village elder (Farmer)"
+   "result": "Village elder (Farmer or Blacksmith)"
   },
   {
    "roll": "55",

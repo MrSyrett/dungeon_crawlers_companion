@@ -460,7 +460,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 /* ── Variant: YZE SRD vs ALIEN ── */
 body[data-variant="alien"] .yze-only{display:none !important;}
 body:not([data-variant="alien"]) .alien-only{display:none !important;}
-/* Synthetic (Android) reconfiguration: no Stress, no Panic, no signature item */
+/* Synthetic (Android) reconfiguration: no Stress, no Panic, no Resolve, can't push */
 body.synthetic .synth-hide{display:none !important;}
 /* Story Points (round pips, max 3) */
 .story-pips{display:flex;gap:5px;flex:0 0 auto;}
@@ -731,7 +731,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
         <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes" style="flex:0 1 auto;"></div><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini synth-hide" style="margin-left:auto;flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button></div>
         <div class="vrow alien-only"><span class="v-lbl">Radiation</span><div class="vboxes" id="rad-boxes"></div></div>
         <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
-        <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="Full-auto fire or facing fear raises Stress one step (Machinegunner ignores full-auto)">+1</button></div>
+        <div class="vrow alien-only synth-hide"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="stressUp()" title="+1 Stress: a 2nd/3rd full-auto burst (Machinegunner ignores it), over-encumbered movement, fatigue, or any unnerving event (core p.72)">+1</button></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span></div>
       </div>
       </div>
@@ -769,7 +769,7 @@ body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
         <div class="section-bar alien-only"><span>Agenda, Ties &amp; Fortune</span></div>
         <div class="blk alien-only" style="padding-top:2px;">
           <div class="fld"><label>Personal agenda<span class="hint">Advance it for a Story Point (cinematic) or bonus XP</span></label><input type="text" id="f-agenda" placeholder="Your secret goal — only you know it" oninput="S.agenda=this.value;scheduleAutosave()"></div>
-          <div class="fld synth-hide"><label>Signature item<span class="hint">Once per session, interact to reduce Stress by 1</span></label><input type="text" id="f-signature" placeholder="The one thing you'd never leave behind" oninput="S.signature=this.value;scheduleAutosave()"></div>
+          <div class="fld"><label>Signature item<span class="hint">Sentimental value only — a tiny item that says who you are</span></label><input type="text" id="f-signature" placeholder="The one thing you'd never leave behind" oninput="S.signature=this.value;scheduleAutosave()"></div>
           <div class="fld"><label>Buddy<span class="hint">The crewmate you trust</span></label><input type="text" id="f-buddy" placeholder="Someone you'd take a risk for" oninput="S.buddy=this.value;scheduleAutosave()"></div>
           <div class="fld"><label>Rival<span class="hint">The crewmate you clash with</span></label><input type="text" id="f-rival" placeholder="A source of drama aboard" oninput="S.rival=this.value;scheduleAutosave()"></div>
         </div>
@@ -883,6 +883,8 @@ function blankState(){
 function attrVal(k){ return num((S.attrs||{})[k]); }
 function condPenaltyFor(attrKey){
   // physical conditions penalise Str/Agi rolls; mental penalise Wits/Emp.
+  // ALIEN has no conditions (they're a generic-YZE rule) — stale ones never count there.
+  if(isAlien()) return 0;
   var type=(attrKey==='STR'||attrKey==='AGI')?'Physical':'Mental';
   var n=0; CONDS.forEach(function(c){ if(c.type===type && S.conditions[c.name]) n++; }); return n;
 }
@@ -906,12 +908,11 @@ function renderAttrSkills(){
   if(typeof renderAction==='function' && $('act-hub') && S) setTimeout(renderAction,0);
   var host=$('attr-skills'); if(!host)return; host.innerHTML='';
   ATTRS.forEach(function(a){
-    var cpen=(typeof critPenalty==='function')?critPenalty():0;
-    var apool=Math.max(0, attrVal(a.key)-condPenaltyFor(a.key)-cpen);
+    var apool=Math.max(0, attrVal(a.key)-condPenaltyFor(a.key));
     var head='<div class="attr-row"><span class="a-name" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool" style="cursor:pointer;">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
-      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key)-cpen;
+      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key)-critPenalty(s.name);
       var esn=s.name.replace(/'/g,"\\'");
       rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+' (level '+lvl+')">'+s.name+'</button><button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="roll pool = attribute + skill − penalties">'+Math.max(0,pool)+'d</button></div>';
     });
@@ -921,7 +922,7 @@ function renderAttrSkills(){
   });
 }
 function renderAttrs(){ renderAttrSkills(); }
-function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n;
+function setAttr(k,n){ var max=(S.key===k)?(isAndroid()?8:5):(isAndroid()?7:4); n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n;
   if(isAlien()){ if(k==='STR'||k==='AGI'){ S.health.max=derivedMax('health'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; } renderVitals(); }
   renderAttrSkills(); renderEnc(); scheduleAutosave(); }
 
@@ -959,7 +960,7 @@ function setStoryPoints(n){ S.storyPoints=(num(S.storyPoints)===n)?n-1:n; if(S.s
 function spendStoryPoint(){
   if(num(S.storyPoints)<1){ addLog('Story Point','—','None to spend — advance your agenda to earn one (max 3)','normal'); return; }
   S.storyPoints=num(S.storyPoints)-1; renderStoryPoints(); scheduleAutosave();
-  addLog('Story Point spent','Automatic success','Count a roll as succeeding, add +1 success, or activate a talent — '+S.storyPoints+' left','crit');
+  addLog('Story Point spent','+1 success','One base die in this skill roll counts as a 6 — spend it before or after pushing · '+S.storyPoints+' left','crit');
 }
 function renderRadiation(){
   var host=$('rad-boxes'); if(!host)return; var r=clamp(num(S.radiation),0,10), b='';
@@ -967,9 +968,17 @@ function renderRadiation(){
   host.innerHTML=b;
 }
 function setRad(n){ var prev=num(S.radiation); S.radiation=(prev===n)?n-1:n; if(S.radiation<0)S.radiation=0; renderRadiation(); scheduleAutosave();
-  if(S.radiation>prev){ addLog('Radiation','Level '+S.radiation,'Each new dose: roll Stamina — one 6 or you take a point of damage; at higher Radiation Levels, also roll a Critical Injury.','fumble'); } }
+  // Core p.77: every time you gain a rad, roll dice equal to your total rads — each 6 is 1 damage.
+  // Broken by radiation → no critical injury; make death rolls until out of the hotspot.
+  for(var r=prev+1;r<=S.radiation;r++) radiationDose(r); }
+function radiationDose(total){
+  var rolls=[],hits=0; for(var k=0;k<total;k++){ var d=die6(); rolls.push(d); if(d===6)hits++; }
+  var st=S.health, before=num(st.dmg); if(hits&&st.max>0){ st.dmg=Math.min(st.max,before+hits); renderVitals(); scheduleAutosave(); }
+  var broke=st.max>0&&before<st.max&&st.dmg>=st.max;
+  animDice(rolls,[],hits?'fumble':'normal');
+  addLog('Radiation · '+total+' rad'+(total>1?'s':''), hits?(hits+' damage'):'No damage', poolStr(rolls)+' · each 6 = 1 damage'+(broke?' · BROKEN by radiation: no critical injury — make death rolls at the same interval until you leave the hotspot':''), hits?'fumble':'normal'); }
 // Full-auto fire and facing fear both raise Stress one step (Machinegunner ignores full-auto).
-function stressUp(){ bumpStress(1); addLog('Stress','Level '+clamp(num(S.stress),0,10),'+1 step — full-auto fire or facing fear','fumble'); }
+function stressUp(){ if(isBrokenNow()){ addLog('Stress','—','Broken — you cannot gain more stress (core p.68)','normal'); return; } bumpStress(1); addLog('Stress','Level '+clamp(num(S.stress),0,10),'+1 step — a 2nd/3rd full-auto burst, over-encumbered movement, fatigue or another unnerving event','fumble'); }
 function renderStress(){
   if(typeof renderAction==='function' && $('act-hub') && S) setTimeout(renderAction,0);
   var host=$('stress-pips'); if(!host)return; var s=clamp(num(S.stress),0,10), pips='';
@@ -977,7 +986,9 @@ function renderStress(){
   host.innerHTML=pips; var v=$('stress-val'); if(v)v.textContent=s;
 }
 function setStress(n){ S.stress=(num(S.stress)===n)?n-1:n; if(S.stress<0)S.stress=0; renderStress(); scheduleAutosave(); }
-function bumpStress(d){ S.stress=clamp(num(S.stress)+d,0,10); renderStress(); scheduleAutosave(); }
+function bumpStress(d){ if(d>0&&isBrokenNow())return; S.stress=clamp(num(S.stress)+d,0,10); renderStress(); scheduleAutosave(); }
+// Core p.68: while broken you cannot gain more stress and never make panic rolls.
+function isBrokenNow(){ return !!(S&&S.health&&S.health.max>0&&num(S.health.dmg)>=S.health.max); }
 function setDamage(w,n){ var st=S[w]; st.dmg=(st.dmg===n)?n-1:n; renderVitals(); scheduleAutosave(); }
 // Health is a depleting bar. Box i = the i-th point of health from the left.
 // Click the current top-filled box to take one damage; click any box to set
@@ -1263,13 +1274,13 @@ function doPool(label, poolSize, pushable){
 }
 function rollSkill(name){
   var s=skillObj(name); if(!s)return;
-  var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty();
+  var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty(name);
   doPool(name+' ('+s.attr+')', pool, true);
   actSheetRollSpend();
 }
 function rollAttr(k){
   var a=null; for(var i=0;i<ATTRS.length;i++){ if(ATTRS[i].key===k){ a=ATTRS[i]; break; } }
-  var pool=attrVal(k)-condPenaltyFor(k)-critPenalty();
+  var pool=attrVal(k)-condPenaltyFor(k);
   doPool((a?a.name:k)+' ('+k+')', pool, true);
   actSheetRollSpend();
 }
@@ -1288,8 +1299,8 @@ function rollUnarmed(){
   doWeaponAttack({name:'Unarmed',skill:'Close Combat',bonus:'',damage:1,range:'Adjacent'});
 }
 function doWeaponAttack(w){
-  var skName=w.skill||'Melee', s=skillObj(skName)||{attr:'STR'};
-  var pool=attrVal(s.attr)+num(S.skills[skName])+weaponBonus(w.bonus)-condPenaltyFor(s.attr)-critPenalty();
+  var skName=w.skill||(isAlien()?'Close Combat':'Melee'), s=skillObj(skName)||{attr:'STR'};
+  var pool=attrVal(s.attr)+num(S.skills[skName])+weaponBonus(w.bonus)-condPenaltyFor(s.attr)-critPenalty(skName);
   var label=(w.name||'Attack')+' · '+skName;
   var mod=clamp(num($('tray-mod').value),-6,6); $('tray-mod').value='0';
   var poolSize=pool+mod, floored=false; if(poolSize<1){ poolSize=1; floored=true; } poolSize=Math.min(20,poolSize);
@@ -1324,6 +1335,7 @@ function rollStressResponse(label){
 }
 // Made when you face something horrifying (the "Roll Panic" button / GM call).
 function rollPanic(){
+  if(isAlien()&&isBrokenNow()){ addLog('Panic','—','Broken characters never make panic rolls (core p.68)','normal'); return; }
   var stress=clamp(num(S.stress),0,10), res=resolveRating(), roll=die6(), total=roll+stress-res, row=yzeRowLookup(PANIC,total);
   animDice([roll], [], total<=0?'normal':'fumble');   // show the D6 roll with the 3D dice
   addLog('Panic · d6 '+roll+' + stress '+stress+' − Resolve '+res+' = '+total, row?row.effect:'—', row?row.detail:'', total<=0?'normal':'fumble');
@@ -1368,7 +1380,19 @@ function critLookup(table,code){
 }
 // ── Critical Injuries (tracked; each one's penalty subtracts from every pool) ──
 function parseCritMod(eff){ var m=String(eff||'').match(/[-−–]\s*(\d+)/); return m?parseInt(m[1],10):0; }
-function critPenalty(){ var n=0; (S.crits||[]).forEach(function(c){ n+=Math.abs(num(c.mod)); }); return n; }
+// A critical injury's dice penalty applies only to the rolls its effect names (core p.70):
+// the listed skills ("−2 dice on OBSERVATION and COMTECH rolls"), or every skill of an
+// attribute ("−1 die on all skill rolls based on Wits"). Penalties the sheet can't scope
+// ("rolls that normally require two arms") are left for the player to apply on the tray.
+function critAppliesTo(c, skillName){
+  if(!skillName) return false;
+  var eff=String(c&&c.effect||'').toLowerCase(), sk=skillObj(skillName);
+  if(eff.indexOf(String(skillName).toLowerCase())>=0) return true;
+  var m=eff.match(/based on (strength|agility|wits|empathy)/);
+  if(m&&sk){ var map={strength:'STR',agility:'AGI',wits:'WITS',empathy:'EMP'}; return sk.attr===map[m[1]]; }
+  return false;
+}
+function critPenalty(skillName){ var n=0; (S.crits||[]).forEach(function(c){ if(num(c.mod)&&critAppliesTo(c,skillName)) n+=Math.abs(num(c.mod)); }); return n; }
 function addCrit(c){ if(!S.crits)S.crits=[]; S.crits.push({name:(c&&c.name)||'',effect:(c&&c.effect)||'',mod:num(c&&c.mod)}); renderCrits(); scheduleAutosave(); }
 function addCritBlank(){ addCrit({name:'',effect:'',mod:0}); }
 function critEdit(i,f,v){ var c=S.crits[i]; if(!c)return; c[f]=(f==='mod')?num(v):v; scheduleAutosave(); }
@@ -1386,7 +1410,8 @@ function renderCrits(){
   var e=$('crit-empty'); if(e) e.style.display=(S.crits&&S.crits.length)?'none':'block';
 }
 function critInfo(i){ var c=(S.crits||[])[i]; if(!c)return; var b=$('crit-info-body'); if(!b)return;
-  var modTxt=num(c.mod)?('<div style="margin-top:10px;font-size:12px;color:#9fb4b8;">Removes '+Math.abs(num(c.mod))+' dice from your pools while this injury is active.</div>'):'';
+  var hit=SKILLS.filter(function(sk){ return critAppliesTo(c,sk.name); }).map(function(sk){ return sk.name; });
+  var modTxt=num(c.mod)?('<div style="margin-top:10px;font-size:12px;color:#9fb4b8;">'+(hit.length?('Removes '+Math.abs(num(c.mod))+' dice from '+esc(hit.join(', '))+' rolls while this injury is active.'):('A '+Math.abs(num(c.mod))+'-dice penalty the sheet can\'t scope automatically — apply it with the ± dice tray on the rolls it names.'))+'</div>'):'';
   b.innerHTML='<div style="font-weight:800;font-size:17px;color:var(--yz);margin-bottom:8px;">'+esc(c.name||'Injury')+'</div>'
     +'<div style="font-size:13px;line-height:1.55;">'+(esc(c.effect||'')||'No additional effect recorded.')+'</div>'+modTxt
     +'<div style="display:flex;gap:8px;margin-top:18px;"><button class="m-btn warn" onclick="critDel('+i+');closeCritInfo();">Remove injury</button><button class="m-btn ghost" onclick="closeCritInfo()">Close</button></div>';
@@ -1443,14 +1468,14 @@ var ALIEN_RULES=[
   { title:'Pushing', text:'Failed and no Stress Die showed a 1? Push: re-roll every die that isn\'t already a 6, keeping your successes. Pushing raises your Stress Level by one (adding another Stress Die to the re-roll). You can push once. Synthetics can never push.' },
   { title:'Stress Response', text:'When a Stress Die comes up 1, roll D6 + Stress Level − Resolve and read the Stress Response table. This is the small, automatic reaction — not a full Panic.' },
   { title:'Panic', text:'When you face something truly horrifying, the GM calls for a Panic Roll: D6 + Stress Level − Resolve on the Panic table. The higher the total, the worse you break.' },
-  { title:'Health & Resolve', text:'Health = ⌈(Strength + Agility) ÷ 2⌉. Resolve = ⌈(Wits + Empathy) ÷ 2⌉ — your Resolve rating is subtracted on Stress Response and Panic rolls. At 0 Health you\'re Broken and roll a Critical Injury.' },
+  { title:'Health & Resolve', text:'Health = ⌈(Strength + Agility) ÷ 2⌉, +1 per Hardened talent. Resolve = ⌈(Wits + Empathy) ÷ 2⌉, +1 per Seen It All talent — subtracted on Stress Response and Panic rolls. At 0 Health you\'re Broken: roll a Critical Injury; while broken you can\'t gain stress or make panic rolls.' },
   { title:'Armor & damage', text:'A hit deals the weapon\'s damage +1 per extra success. Armor is a static soak — subtract your Armor Rating from each hit\'s damage (no roll). Armor-piercing attacks count your rating 1 step lower; a called shot at a weak spot takes −2 but knocks the rating down 1 step. Air-tight suits also track an Air Supply.' },
   { title:'Ammo & supply', text:'Ammo, air and power carry a supply rating. After each ranged attack, make a supply roll: roll dice equal to the rating (max six) — each 1 lowers the rating by one. Skip it if you spent an extra success to conserve ammo. At zero you must reload (a quick action). Full-auto: each burst after the first gives +1 Stress.' },
   { title:'Ranges', text:'Adjacent · Short · Medium · Long · Extreme. Each weapon lists the band(s) it can reach; close combat happens at Adjacent.' },
-  { title:'Radiation', text:'Each new dose of Radiation calls for a Stamina roll — one success or take a point of damage; heavy doses also force a Critical Injury. Radiation never heals on its own.' },
+  { title:'Radiation', text:'Weak radiation gives 1 rad per shift, strong 1 per stretch, extreme 1 per round. Each time you gain a rad, roll dice equal to your total rads — every 6 is 1 damage. Broken by radiation? No critical injury — make death rolls instead. No Health recovery in a hotspot; once out, lose 1 rad per shift.' },
   { title:'Critical injuries', text:'Broken by damage → roll D66 on the physical Critical Injuries table. A lethal crit forces a Stamina death save each time its time limit passes until it\'s treated.' },
-  { title:'Story Points', text:'Advance your personal Agenda to earn a Story Point (hold at most 3). Spend one to count a roll as an automatic success, add +1 success, or trigger a talent. Cinematic play runs on Story Points; campaign play earns XP.' },
-  { title:'Experience', text:'In campaign play, gain XP at the end of a session for taking part, exploring somewhere new, surviving real danger, and acting on your Agenda, Buddy or Rival. Spend 5 × the new level to raise a skill, or 5 XP to learn a talent from your career or the General list.' }
+  { title:'Story Points', text:'In cinematic play, advancing your personal Agenda at risk or sacrifice earns a Story Point (hold at most 3). Spend one to turn one base die in a skill roll into an automatic 6 — before or after pushing. Campaign play earns XP instead.' },
+  { title:'Experience', text:'In campaign play, gain 1 XP per "yes" after each session: you took part; risked or sacrificed for your agenda; risked your life for your buddy; stood up to your rival; made a panic roll; overcame a dangerous event; made a significant discovery; did something extraordinary; earned money. Spend 5 × the new level to raise a skill (5 XP for a new skill at 1), or 5 XP for a talent from your career or the General list.' }
 ];
 function openRules(){
   var R=ALIEN_RULES;
@@ -1657,7 +1682,7 @@ $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
 var _actOpts=[], _actCollapsed={}, _actFromTab=false;
 function actState(){ if(!S.act||typeof S.act!=='object') S.act={full:false,quick:0,used:0}; return S.act; }
 function actSynth(){ return (typeof isAndroid==='function') && isAndroid(); }
-function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty()); }
+function actPoolOf(skName, bonus){ var s=skillObj(skName)||{attr:'STR'}; return Math.max(1, attrVal(s.attr)+num(S.skills[skName])+num(bonus)-condPenaltyFor(s.attr)-critPenalty(skName)); }
 function actDo(i,j){
   var o=_actOpts[i]; if(!o) return;
   if(o.blocked){ addLog(o.name, o.blocked, '', 'normal'); return; }
@@ -1695,7 +1720,7 @@ function actOutOfAmmo(w){ var a=parseInt(w.ammo,10); return (!isNaN(a) && a<=0) 
 // A weapon's full ammo rating: the one remembered at its first supply roll, else the catalog's.
 function actAmmoMax(w){ var m=parseInt(w.ammoMax,10); if(!isNaN(m)) return m;
   var c=G(window.ALIEN_WEAPONS).find(function(d){ return d.name===w.name; }); m=c?parseInt(c.ammo,10):NaN; return isNaN(m)?0:m; }
-function actSkillRoll(name, label){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty(); doPool((label?label+' · ':'')+name+' ('+s.attr+')', pool, true); }; }
+function actSkillRoll(name, label){ return function(){ var s=skillObj(name); if(!s){ addLog(label||name,'—','No '+name+' skill on this sheet','normal'); return; } var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr)-critPenalty(name); doPool((label?label+' · ':'')+name+' ('+s.attr+')', pool, true); }; }
 function actLogOnly(label, result, detail){ return function(){ addLog(label, result, detail||'', 'normal'); }; }
 
 // ALIEN (Evolved, p.60): each round, one FULL action + one QUICK action, or two

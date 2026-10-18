@@ -31,7 +31,8 @@
   function talentObj(nm) { for (var i = 0; i < TALENTS.length; i++) if (TALENTS[i].name === nm) return TALENTS[i]; return null; }
   function talentDesc(nm) { var t = talentObj(nm); return t ? t.desc : ''; }
   function isCareerSkill(nm) { var c = careerObj(career); return !!(c && c.skills.indexOf(nm) >= 0); }
-  function skillCap(nm) { return isCareerSkill(nm) ? 3 : 1; }
+  // TWD core p.25: at creation no skill may exceed 2, except your archetype's key skill (3).
+  function skillCap(nm) { return isCareerSkill(nm) ? 3 : 2; }
 
   function reset() {
     step = 0; name = ''; pronouns = ''; key = ''; career = ''; talentPick = ''; issue = ''; drive = ''; anchorPc = ''; anchorNpc = '';
@@ -89,7 +90,7 @@
   }
   function stepSkills() {
     var sLeft = SKILL_BUDGET - skillSpent();
-    var h = '<p class="m-hint">Distribute <b style="color:#d8cfbf;">12</b> skill points — key skills ★ to 3, the rest to 1. <b>Remaining: ' + sLeft + '</b></p>';
+    var h = '<p class="m-hint">Distribute <b style="color:#d8cfbf;">12</b> skill points — your key skill ★ up to 3, the rest up to 2. <b>Remaining: ' + sLeft + '</b></p>';
     ATTRS.forEach(function (a) {
       h += '<div class="a-attr">' + esc(a.name) + '</div><div class="a-skills">';
       h += ASK.filter(function (s) { return s.attr === a.key; }).map(function (s) {

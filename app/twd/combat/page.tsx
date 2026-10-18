@@ -38,9 +38,10 @@ export default function TwdCombatPage() {
         </p>
         <p className="max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
           If any stress die comes up a <b>1</b> (a walker on the custom dice), you&rsquo;ve
-          <b className="text-[var(--sys-link)]"> messed up</b>: usually the Threat Level rises a step —
-          you made noise, missed a lurking walker, or drew the dead to you. See <b>The Dead</b> for the
-          Threat Level ladder.
+          <b className="text-[var(--sys-link)]"> messed up</b> and you can&rsquo;t push that roll. The GM
+          raises the Threat Level a step or hits you with a single walker attack (or something else goes
+          wrong — you run out of ammo, break something). You can succeed and still mess up. See <b>The
+          Dead</b> for the Threat Level ladder.
         </p>
       </section>
 

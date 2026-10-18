@@ -100,8 +100,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
           <h2 className={`${secH} mb-3 mt-8`}>Resources & Capital</h2>
           <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
-            A character&rsquo;s Resources rating sets their living standard. Roll Resources to see how much
-            Capital you have on hand for purchases — richer investigators can simply spend Capital to buy gear.
+            A character&rsquo;s Resources rating sets their living standard. In the preparation phase each player
+            rolls dice equal to their Resources; every success pays one point of an item&rsquo;s cost (a cost-3 item
+            takes three successes), and successes can be pooled. Capital is extra spending power for each mystery —
+            spent instead of, or on top of, successes and used up until the next mystery. The Bonus is added to
+            Manipulation when bartering for an item.
           </p>
           <div className={tableWrap}>
             <table className="w-full border-collapse text-[13px]">

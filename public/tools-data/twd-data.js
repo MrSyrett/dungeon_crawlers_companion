@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 
-// ── Attributes (STR/AGI/WITS/EMP, rated 1–5; key attribute may reach 5) ──────────
+// ── Attributes (STR/AGI/WITS/EMP: 13 points at creation, each 2–4; the key attribute may reach 5) ─
 const TWD_ATTRIBUTES = [
   { key: "STR", name: "Strength", desc: "Raw muscle, brawn, and the ability to take a hit." },
   { key: "AGI", name: "Agility", desc: "Speed, body control, and coordination." },
@@ -37,17 +37,17 @@ const TWD_SKILLS = [
 // ── Archetypes (key attribute, key skill, three talents, sample Issues & Drives) ─
 const TWD_ARCHETYPES = [
   { name: "The Criminal", key: "STR", keySkill: "Close Combat", talents: ["Threatening Posture", "Fixer", "Fights Dirty"], issues: ["I never obey authority", "Drug addict", "Ashamed of my past"], drives: ["Nobody takes a swing at me and gets away with it", "Hate", "I will find my sisters"] },
-  { name: "The Doctor", key: "EMP", keySkill: "Medicine", talents: ["Emergency Medicine", "Doctor/Patient Hierarchy", "Seen It All"], issues: ["I always put patients first, even enemies", "Haunted by those I couldn't save", "Addicted to the meds I ration"], drives: ["Do no harm", "Find a cure", "Keep my people alive"] },
-  { name: "The Farmer", key: "STR", keySkill: "Force", talents: ["Tracker", "Tough as Nails", "Living off the Land"], issues: ["Stubborn to a fault", "Distrust of outsiders", "Grieving the land I lost"], drives: ["Build something that lasts", "Feed my family", "Work the land again"] },
-  { name: "The Homemaker", key: "STR", keySkill: "Endure", talents: ["Innocent Face", "Back Against the Wall", "Rather Die Than Break"], issues: ["Underestimated by everyone", "Can't let go of the old world", "Fierce when cornered"], drives: ["Protect the home", "Keep the family together", "Never be weak again"] },
-  { name: "The Kid", key: "AGI", keySkill: "Mobility", talents: ["Knife Fighter", "Stubborn", "A Child of this World"], issues: ["Reckless", "Hides real feelings", "Trusts the wrong people"], drives: ["Prove I'm not a kid", "Find a real family", "Survive, whatever it takes"] },
-  { name: "The Law Enforcer", key: "WITS", keySkill: "Scout", talents: ["Steady Hands", "Watchful", "Moral Compass"], issues: ["Still believes in the rules", "Guilt over the badge", "Can't turn off the suspicion"], drives: ["Protect the innocent", "Keep order", "Atone for the past"] },
-  { name: "The Nobody", key: "AGI", keySkill: "Stealth", talents: ["Speed Freak", "Wallflower", "Gatherer"], issues: ["Invisible to everyone", "Expects to be left behind", "Hoards in secret"], drives: ["Finally be seen", "Belong somewhere", "Stay alive by staying unnoticed"] },
-  { name: "The Outcast", key: "WITS", keySkill: "Survival", talents: ["Knows All the Tricks", "Scavenger", "Lone Wolf"], issues: ["Betrayed before, trusts no one", "Survives on nothing", "Pushes people away"], drives: ["Owe nothing to anyone", "Prove I don't need them", "Find one person worth trusting"] },
-  { name: "The Politician", key: "EMP", keySkill: "Manipulation", talents: ["Recruiter", "Mind Games", "Right Word at the Right Time"], issues: ["Ends justify the means", "Addicted to being in charge", "Hides what they really want"], drives: ["Rebuild society", "Win them over", "Never lose power again"] },
-  { name: "The Preacher", key: "EMP", keySkill: "Leadership", talents: ["Shepherd", "Guarded by a Higher Power", "Preacher"], issues: ["Crisis of faith", "Carries everyone's burdens", "Judges too quickly"], drives: ["Tend to the flock", "Find meaning in the end of the world", "Save souls, not just lives"] },
-  { name: "The Scientist", key: "WITS", keySkill: "Tech", talents: ["Intuition", "Techno Babbler", "Handy"], issues: ["Trusts data over people", "Obsessed with a problem", "Can't delegate"], drives: ["Understand the outbreak", "Build the thing that saves us", "Leave knowledge behind"] },
-  { name: "The Soldier", key: "AGI", keySkill: "Ranged Combat", talents: ["Disillusioned", "Eye on the Ball", "Suppressive Fire"], issues: ["Follows orders, even bad ones", "Numb to violence", "Can't stand down"], drives: ["Complete the mission", "Protect the squad", "Make the violence mean something"] },
+  { name: "The Doctor", key: "EMP", keySkill: "Medicine", talents: ["Emergency Medicine", "Doctor/Patient Hierarchy", "Seen It All"], issues: ["Bitter", "Sworn to help", "Unanswered love"], drives: ["Fear of dying", "Higher purpose", "I will find my wife"] },
+  { name: "The Farmer", key: "STR", keySkill: "Force", talents: ["Tracker", "Tough as Nails", "Living off the Land"], issues: ["Rage", "Sick", "Dogmatist"], drives: ["I do what is right", "Never give up", "Jesus walks with me"] },
+  { name: "The Homemaker", key: "STR", keySkill: "Endure", talents: ["Innocent Face", "Back Against the Wall", "Rather Die Than Break"], issues: ["Bloodthirsty", "Alcoholic", "Craves attention and love"], drives: ["Sworn to never be a victim again", "Has endured hell", "Won't give up my dream"] },
+  { name: "The Kid", key: "AGI", keySkill: "Mobility", talents: ["Knife Fighter", "Stubborn", "A Child of this World"], issues: ["Afraid of the dark", "People treat me like a child", "Won't let anyone come close"], drives: ["My father thinks that I am strong", "Kids will grow up to rule this world", "I will protect my friends"] },
+  { name: "The Law Enforcer", key: "WITS", keySkill: "Scout", talents: ["Steady Hands", "Watchful", "Moral Compass"], issues: ["Does not trust strangers", "Depressed", "I take risks to protect my child"], drives: ["Does what it takes", "I am the law", "We will build a new world"] },
+  { name: "The Nobody", key: "AGI", keySkill: "Stealth", talents: ["Speed Freak", "Wallflower", "Gatherer"], issues: ["Afraid to speak my mind", "I do not care if I live", "Kleptomaniac"], drives: ["I cannot be killed", "This is my chance", "Love"] },
+  { name: "The Outcast", key: "WITS", keySkill: "Survival", talents: ["Knows All the Tricks", "Scavenger", "Lone Wolf"], issues: ["Alcoholic", "People do not like me", "Odd behavior"], drives: ["I am a survivor", "This is my new family", "Craves revenge"] },
+  { name: "The Politician", key: "EMP", keySkill: "Manipulation", talents: ["Recruiter", "Mind Games", "Right Word at the Right Time"], issues: ["I never apologize", "Terrified of the walking dead", "I promise more than I can deliver"], drives: ["I will lead them", "My ancestors fought hard", "This is a new beginning"] },
+  { name: "The Preacher", key: "EMP", keySkill: "Leadership", talents: ["Shepherd", "Guarded by a Higher Power", "Preacher"], issues: ["Afraid of conflict", "Delusional", "Selfish"], drives: ["I walk with the Lord", "Make amends", "These are the final days"] },
+  { name: "The Scientist", key: "WITS", keySkill: "Tech", talents: ["Intuition", "Techno Babbler", "Handy"], issues: ["Hateful", "Understands the world with logic, not emotions", "Morally flexible"], drives: ["I will save us all", "Fear of dying", "There is always a chance"] },
+  { name: "The Soldier", key: "AGI", keySkill: "Ranged Combat", talents: ["Disillusioned", "Eye on the Ball", "Suppressive Fire"], issues: ["I won't kill another human being", "I know what is best", "I protect the weak"], drives: ["I saw my friend get eaten", "I will find a way to solve this", "Discipline"] },
 ];
 
 // ── Talents: one per archetype at creation, plus general talents earned with XP ──
@@ -146,6 +146,7 @@ const TWD_RANGED_WEAPONS = [
   { name: "Molotov cocktail", damage: "BP 6", bonus: "0", range: "Short", slots: "½" },
   { name: "Hand grenade", damage: "BP 8", bonus: "+1", range: "Short", slots: "½" },
   { name: "Rocket launcher", damage: "BP 10", bonus: "+2", range: "Long", slots: "2" },
+  { name: "Tank cannon", damage: "BP 12", bonus: "+3", range: "Extreme", slots: "X" },
 ];
 
 // ── Armor (roll ARMOR LEVEL dice; each success stops one damage; PENALTY to Mobility) ─
@@ -167,6 +168,7 @@ const TWD_GEAR = [
   { name: "Crowbar", slots: "1", bonus: "Force +2" },
   { name: "Dog", slots: "—", bonus: "Close Combat +2" },
   { name: "Field kitchen", slots: "1", bonus: "—" },
+  { name: "Horse", slots: "—", bonus: "—" },
   { name: "Guitar", slots: "1", bonus: "Leadership +1" },
   { name: "Lockpicks", slots: "—", bonus: "Stealth +2" },
   { name: "Pack of gum/cigarettes", slots: "—", bonus: "Manipulation +1" },
@@ -193,8 +195,8 @@ const TWD_THREAT = [
   { level: 2, situation: "Walkers are close by, not aware of you yet. The GM maps where they are." },
   { level: 3, situation: "The walkers are aware of you. All nearby walkers shamble toward you and you must fight to get out. All PCs take one point of stress." },
   { level: 4, situation: "The walkers are closing in on you." },
-  { level: 5, situation: "The walkers are upon you — a desperate fight or flight." },
-  { level: 6, situation: "You are overwhelmed by the dead." },
+  { level: 5, situation: "They are at arm's length." },
+  { level: 6, situation: "The dead are in your face, surrounding you." },
 ];
 
 // ── Swarm Size (how big a group of walkers is) ───────────────────────────────────
@@ -248,7 +250,7 @@ const TWD_CRITS = [
   { roll: "66", injury: "Impaled heart", lethal: "Yes", timeLimit: "—", penalty: "You die", recovery: "—" },
 ];
 
-var TWD_ARCHETYPE_GEAR = {
+const TWD_ARCHETYPE_GEAR = {
   "The Criminal": ["Big revolver","Axe","Lockpick","Motorbike","Shotgun","Stash of drugs and medicine"],
   "The Doctor": ["Basic medical gear","Medications and drugs","Spear (Scalpel taped to a stick)","Car","Diary","Pistol"],
   "The Farmer": ["Shotgun","Axe","Jeep","Toolbox","Tent","Survival equipment"],
