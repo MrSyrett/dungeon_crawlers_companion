@@ -306,7 +306,7 @@ const D62E_POWERS = [
     "kind": "psionic",
     "genre": "scifi",
     "skill": "Perceive",
-    "difficulty": "5 (+10 if the target is unfriendly, hostile, or resistant)",
+    "difficulty": "5 (+10 if the target is unfriendly, hostile, or Wounded)",
     "description": "Read the surface thoughts of a visible living target and understand what it is sensing; exceeding the Difficulty by 10 probes deeper into subconscious or repressed thoughts.",
     "page": 187
   },

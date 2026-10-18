@@ -720,7 +720,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
 
     <div class="center-col">
       <div class="card">
-      <div class="section-bar gold"><span>Status</span></div>
+      <div class="section-bar gold"><span>Status</span><span class="hdr-right"><button class="hdr-btn" data-nolock onclick="rollResist()" title="Roll Strength (+ armor) against a damage roll. Not an action: no wound, running or multi-action penalty (core p.14). A Force Point still doubles it.">Resist Damage</button></span></div>
       <div class="vitals">
         <div class="vital wide">
           <div class="vlbl"><span>Wounds</span><small id="wound-note">unhurt</small></div>
@@ -742,8 +742,8 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="none (set from Equipment)" style="width:100%;text-align:left;" oninput="recalc()"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Move</span></div>
-          <div class="vbig"><input type="number" id="f-move" value="10" oninput="recalc()"></div>
+          <div class="vlbl"><span>Movement</span></div>
+          <div class="vline" style="text-align:center;line-height:1.35;" title="Core rules p.13: walk up to 5 m (any turn), run up to 10 m (one 90° turn, −1D to skill rolls), crawl 2 m when prone (−1D)">Walk 5 m · Run 10 m<br><small>crawl 2 m prone</small></div>
         </div>
       </div>
 
@@ -835,9 +835,10 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
       <button class="dice-btn" onclick="addPoolDice(2)" title="Add 2 dice to the pool">+2D</button>
       <button class="dice-btn" onclick="addPoolDice(3)" title="Add 3 dice to the pool">+3D</button>
       <button class="dice-btn clear" onclick="clearPool()" title="Empty the pool">Clear</button>
-      <button class="dice-btn roll" onclick="rollPool()" title="Roll the pool with the Wild Die">Roll</button>
+      <button class="dice-btn roll" onclick="rollPool()" title="Roll the pool">Roll</button>
     </div>
-    <div class="tray-note">The pool rolls with the Wild Die — the last die explodes on a 6 and a 1 is a complication. Wounds and an armed Force Point still apply to attribute, skill and weapon rolls.</div>
+    <label class="tray-note" style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="f-wild" data-nolock onchange="onWildChange()"> Wild Die (house rule — 2nd edition)</label>
+    <div class="tray-note" id="wild-note">Book rules (1st edition): every roll is plain dice + pips. Wounds and an armed Force Point still apply to attribute, skill and weapon rolls.</div>
   </div>
 </div>
 </div>
@@ -965,7 +966,7 @@ function fillPickers() {
 }
 function renderWoundTrack() {
   $('wound-track').innerHTML = WOUNDS.map(([k, lbl]) => '<button class="' + (wound === k ? 'on' + (k === 'none' ? ' ok' : '') : '') + '" onclick="setWound(\'' + k + '\')">' + lbl + '</button>').join('');
-  const note = { none:'unhurt', incapacitated:'Incapacitated: unconscious 10D minutes; can\'t act', stunned:'−1D this round and next; no Strength penalty', wounded:'−1D to everything; wounded again → incapacitated', mortal:'roll 2D each round: die on a roll under the rounds elapsed' }[wound];
+  const note = { none:'unhurt', incapacitated:'Incapacitated: unconscious; can\'t act until healed (p.14)', stunned:'−1D this round and next (Rules Companion; core: can\'t act the rest of the round); no Strength penalty', wounded:'−1D to skill and attribute rolls (never to Strength vs damage); wounded again → incapacitated', mortal:'roll 2D each round: die on a roll under the rounds elapsed' }[wound];
   $('wound-note').textContent = note;
 }
 function setWound(k) { const prev = wound; wound = k; renderWoundTrack(); updateModNote(); if(k !== prev) addLog('Wound status', WOUNDS.find(w => w[0] === k)[1], k === 'none' ? 'Healed up' : 'Wound modifiers apply to every roll', k === 'none' ? 'normal' : 'fumble'); scheduleAutosave(); }
@@ -1010,7 +1011,9 @@ function recalc() {
   refreshWeaponRows(); updateModNote();
 }
 // ═══ ADVANCEMENT (LEVEL UP) — spend Skill Points to raise skills ══════════
-// 1 point = 1 pip (3 pips = 1D). Spent points are removed; unspent stay. Every
+// Core rules p.15: raising a skill one pip costs as many Skill Points as the
+// number before the "D" (2D→2D+1 costs 2; a full 1D costs three times that).
+// Attributes can never be raised. Spent points are removed; unspent stay. Every
 // skill is listed — like character creation — so you can raise ones you don't
 // have yet (they get added on Apply). Allocation is keyed by skill name.
 var _lvlAlloc = null;   // { skillKey: pipsToAdd }
@@ -1021,7 +1024,11 @@ function openLevelUp() {
 }
 function closeLevelUp() { $('levelup-overlay').classList.remove('open'); _lvlAlloc = null; }
 function _lvlBudget() { return Math.max(0, num($('f-sp').value)); }
-function _lvlSpent() { return Object.values(_lvlAlloc || {}).reduce((a, b) => a + b, 0); }
+// Cost of raising a skill `add` pips from `base` pips: each pip costs the dice
+// number of the code it is raised from (minimum 1 for a 0D code).
+function _lvlCost(base, add) { let c = 0; for(let i = 0; i < add; i++) c += Math.max(1, Math.floor((base + i) / 3)); return c; }
+function _lvlBaseOf(key) { const s = _lvlAllSkills().find(x => x.key === key); return s ? s.base : 0; }
+function _lvlSpent() { const all = _lvlAllSkills(); return Object.keys(_lvlAlloc || {}).reduce((a, k) => { const s = all.find(x => x.key === k); return a + _lvlCost(s ? s.base : 0, _lvlAlloc[k] || 0); }, 0); }
 // Every skill: those on the sheet, then the standard list, then Force skills.
 function _lvlAllSkills() {
   const rows = skillRows(); const seen = new Set(); const out = [];
@@ -1032,7 +1039,7 @@ function _lvlAllSkills() {
 }
 function renderLevelUp() {
   const budget = _lvlBudget(), spent = _lvlSpent(), left = budget - spent;
-  let h = '<p class="m-hint">Spend your <b>' + budget + '</b> Skill Point' + (budget === 1 ? '' : 's') + ' to raise skills — <b>1 point = 1 pip</b> (3 pips = 1D). Every skill is here; raise one you don\'t have and it\'s added. Unspent points stay on your sheet.</p>';
+  let h = '<p class="m-hint">Spend your <b>' + budget + '</b> Skill Point' + (budget === 1 ? '' : 's') + ' to raise skills — each pip costs as many points as the number before the D (2D → 2D+1 costs 2; 4D → 5D costs 12). Attributes can\'t be raised. Every skill is here; raise one you don\'t have and it\'s added. Unspent points stay on your sheet.</p>';
   h += '<input class="m-input" id="lvl-search" placeholder="Search skills…" oninput="_lvlQ=this.value;renderLvlList()" value="' + esc(_lvlQ) + '" style="margin-bottom:8px;">';
   h += '<div class="alloc" id="lvl-list" style="max-height:46vh;overflow:auto;"></div>';
   $('levelup-body').innerHTML = h;
@@ -1049,7 +1056,7 @@ function renderLvlList() {
       + '<span style="flex:1;font-weight:700;">' + esc(s.name) + (s.owned ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:11px;">' + (s.attr === 'Force' ? 'Force' : s.attr.slice(0, 3)) + '</span>') + '</span>'
       + '<span style="font-family:\'Share Tech Mono\',monospace;min-width:92px;text-align:right;">' + toCode(s.base) + (add ? ' → ' + toCode(nu) : '') + '</span>'
       + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(\'' + s.key + '\',-1)"' + (add <= 0 ? ' disabled' : '') + '>−</button>'
-      + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(\'' + s.key + '\',1)"' + (left <= 0 ? ' disabled' : '') + '>+</button></div>';
+      + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(\'' + s.key + '\',1)" title="Next pip costs ' + _lvlCost(nu, 1) + ' SP"' + (left < _lvlCost(nu, 1) ? ' disabled' : '') + '>+</button></div>';
   });
   if(!list.length) h = '<p class="brow-empty">No skills match.</p>';
   const box = $('lvl-list'); if(box) box.innerHTML = h;
@@ -1058,7 +1065,7 @@ function renderLvlList() {
 }
 function lvlStep(key, d) {
   const cur = _lvlAlloc[key] || 0;
-  if(d > 0 && _lvlSpent() >= _lvlBudget()) return;
+  if(d > 0 && _lvlSpent() + _lvlCost(_lvlBaseOf(key) + cur, 1) > _lvlBudget()) return;
   const nv = Math.max(0, cur + d);
   if(nv) _lvlAlloc[key] = nv; else delete _lvlAlloc[key];
   renderLvlList();
@@ -1121,7 +1128,16 @@ function toggleForcePoint() {
 // (GM's call — the total is kept, no dice removed). Skill/attribute/attack/Force
 // checks use the Wild Die; damage rolls do not. `rolls` includes every face rolled
 // (incl. explosions) so the dice animation matches the pool shown in the log.
+// Wild Die is a 2nd-edition rule, off by default (the books are 1st edition); the
+// per-character house-rule toggle (#f-wild, saved as wildDie) switches it on.
+function swWild() { const el = $('f-wild'); return !!(el && el.checked); }
+function onWildChange() {
+  const on = swWild(); const n = $('wild-note');
+  if(n) n.textContent = on ? 'House rule: the last die of every skill, attribute, attack, Force and pool roll is a Wild Die — it explodes on a 6 and a 1 is a complication. Damage rolls never use it.' : 'Book rules (1st edition): every roll is plain dice + pips. Wounds and an armed Force Point still apply to attribute, skill and weapon rolls.';
+  renderPool(); scheduleAutosave();
+}
 function rollDice(pips, wild) {
+  wild = !!wild && swWild();
   pips = Math.max(0, pips); const d = Math.floor(pips / 3), p = pips % 3; const rolls = [];
   let wildFaces = null, complication = false;
   for(let i = 0; i < d; i++) {
@@ -1185,9 +1201,9 @@ function actSheetSpend(run) {
 function rollAttr(a) { actSheetSpend(() => rollCode(a, attr(a))); }
 function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; actSheetSpend(() => rollCode(name, rowTotal(tr))); }
 function rollLoose(n) { const map = swMAP(), pips = Math.max(1, n * 3 - map * 3), r = rollDice(pips); addLog(n + 'D', r.total, [swDiceStr(pips, r), map ? '−' + map + 'D Multi-Action' : ''].filter(Boolean).join(' · '), 'normal'); }
-// ── Dice pool tray: 1D/2D/3D build a pool, Roll rolls it with the Wild Die ──────
+// ── Dice pool tray: 1D/2D/3D build a pool, Roll rolls it (Wild Die only with the house rule) ──
 var swPool = 0;
-function renderPool() { const el = $('sw-pool-display'); if(el) el.textContent = swPool > 0 ? (swPool + 'D  ·  last die is Wild') : 'Empty — tap 1D / 2D / 3D to build a pool'; }
+function renderPool() { const el = $('sw-pool-display'); if(el) el.textContent = swPool > 0 ? (swPool + 'D' + (swWild() ? '  ·  last die is Wild' : '')) : 'Empty — tap 1D / 2D / 3D to build a pool'; }
 function addPoolDice(n) { swPool = Math.min(30, swPool + n); renderPool(); }
 function clearPool() { swPool = 0; renderPool(); }
 function rollPool() {
@@ -1197,6 +1213,15 @@ function rollPool() {
   const ws = wildStyle(r);
   addLog(swPool + 'D Pool', r.total + ws.mark, [swDiceStr(pips, r), map ? '−' + map + 'D Multi-Action' : '', ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
   clearPool();
+}
+// Resisting damage (core p.14): roll Strength (+ armor dice, p.47) — not an action, so no wound,
+// running or multi-action penalty and it never uses up an action. A Force Point doubles it (p.15).
+function rollResist() {
+  const ap = fromCode(($('f-armor-pips') || {}).value || '') || 0, base = attr('Strength') + ap;
+  let pips = base, fp = false;
+  if(forcePointArmed) { pips = base * 2; fp = true; _act.fpRolls = (_act.fpRolls || 0) + 1; }
+  const r = rollDice(Math.max(1, pips), true), ws = wildStyle(r);
+  addLog('Resist damage (Strength)', r.total + ws.mark, [swDiceStr(pips, r), ap ? 'incl. armor ' + toCode(ap, true) : '', fp ? 'Force Point (doubled)' : '', 'no wound / multi-action penalty · not an action', ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
 }
 function callDarkSide() {
   $('f-ds').value = num($('f-ds').value) + 1; $('f-fp').value = num($('f-fp').value) + 1;
@@ -1330,8 +1355,8 @@ function actDo(i, j) {
   const o = _actOpts[i]; if(!o) return;
   const run0 = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run; if(!run0) return;
   const run = () => { _fromActionTab = true; try { run0(); } finally { _fromActionTab = false; } };   // the tab spends; the sheet hook must not
-  if(_act.full && o.kind !== 'move') return;
-  if(o.kind === 'move') { run(); renderAction(); scheduleAutosave(); return; }   // a segment, not a skill use
+  if(_act.full && o.kind !== 'move' && o.kind !== 'free') return;
+  if(o.kind === 'move' || o.kind === 'free') { run(); renderAction(); scheduleAutosave(); return; }   // a segment, not a skill use
   if(o.kind === 'full') {
     if((_act.used || 0) > 0) return;                        // declared at the start of the round, before any other action
     _act.declared = 1; const me = $('f-map'); if(me) me.value = 0; updateModNote();   // the round's only skill use
@@ -1383,7 +1408,7 @@ function renderAction() {
   ACT_CFG.badges().forEach(b => badges.push('<span class="turn-badge good">' + esc(b) + '</span>'));
   const pts = ACT_CFG.points().map(p => '<span class="turn-stat"><span class="tm-lbl">' + esc(p.label) + '</span> <b>' + esc(p.value) + '</b>' + (p.btn ? ' <button class="turn-mini" onclick="' + p.btn.fn + '" title="' + esc(p.btn.title || '') + '">' + esc(p.btn.label) + '</button>' : '') + '</span>').join('');
   const card = o => {
-    const can = !o.blocked && !(_act.full && o.kind !== 'move') && !(o.kind === 'full' && used > 0);
+    const can = !o.blocked && !(_act.full && o.kind !== 'move' && o.kind !== 'free') && !(o.kind === 'full' && used > 0);
     let btns = '';
     if(o.btns) btns = o.btns.map((b, j) => '<button class="tc-do" onclick="actDo(' + o.i + ',' + j + ')">' + esc(b[0]) + '</button>').join('');
     else if(o.run) btns = '<button class="tc-do" onclick="actDo(' + o.i + ')">' + esc(o.btn || 'Roll') + '</button>';
@@ -1399,7 +1424,7 @@ function renderAction() {
   host.innerHTML =
     '<div class="turn-top">'
     + '<div class="turn-row1"><div class="turn-econ">' + pips + '</div><button class="turn-end-btn" onclick="actEndTurn()" title="Clear this round\'s actions and the Multi-Action Penalty">End Turn</button></div>'
-    + '<div class="turn-row2">' + pts + '<div class="turn-badges">' + badges.join('') + '</div><span class="turn-stat move"><span class="tm-lbl">Move</span> <b>' + esc(($('f-move') || {}).value || '—') + '</b></span></div>'
+    + '<div class="turn-row2">' + pts + '<div class="turn-badges">' + badges.join('') + '</div><span class="turn-stat move"><span class="tm-lbl">Move</span> <b>walk 5 m · run 10 m</b></span></div>'
     + '</div>'
     + sec('attacks', 'Attacks', S.attacks, 'No weapons yet — add them from ' + ACT_CFG.weaponsHome + '.')
     + sec('reactions', ACT_CFG.reactTitle, S.reactions, null)
@@ -1432,10 +1457,10 @@ var ACT_CFG = {
       add('powers', { name: name, kind: 'action', sub: [def.difficulty, def.time].filter(Boolean).join(' · ') + (skills.length > 1 ? ' · each skill roll is an action' : ''),
         btns: skills.map(s => [s.slice(0, 3), () => rollForce(name, s)]) });
     });
-    const mv = num(($('f-move') || {}).value) || 10;
-    add('actions', { name: 'Move', kind: 'move', sub: 'Takes a segment but is not a skill use (no multi-action penalty) · walk ' + Math.round(mv / 2) + ' m, any turn · run ' + mv + ' m, one 90° turn, −1D to every skill roll this round',
-      btns: [['Walk', () => addLog('Walk', Math.round(mv / 2) + ' m', 'Movement segment · no penalty', 'normal')],
-             ['Run', () => { if(!_act.ran) { _act.ran = true; updateModNote(); } addLog('Run', mv + ' m', 'Movement segment · −1D to every skill roll this round', 'normal'); }]] });
+    add('reactions', { name: 'Resist Damage', kind: 'free', sub: 'Strength' + (fromCode(($('f-armor-pips') || {}).value || '') ? ' + armor' : '') + ' vs the damage roll · not an action — no wound or multi-action penalty', btn: 'Resist', run: () => rollResist() });
+    add('actions', { name: 'Move', kind: 'move', sub: 'Takes a segment but is not a skill use (no multi-action penalty) · walk up to 5 m, any turn · run up to 10 m, one 90° turn, −1D to every skill roll this round · crawl 2 m when prone (−1D)',
+      btns: [['Walk', () => addLog('Walk', '5 m', 'Movement segment · no penalty', 'normal')],
+             ['Run', () => { if(!_act.ran) { _act.ran = true; updateModNote(); } addLog('Run', '10 m', 'Movement segment · −1D to every skill roll this round', 'normal'); }]] });
   },
 };
 
@@ -1665,7 +1690,7 @@ function collectSheet() {
     attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attr: tr.dataset.attr, adds: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
     wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), map: num(v('f-map')), actionTurn: _act, credits: v('f-credits'),
-    armor: { name: v('f-armor'), pips: fromCode(v('f-armor-pips')) || 0 }, move: num(v('f-move')) || 10,
+    armor: { name: v('f-armor'), pips: fromCode(v('f-armor-pips')) || 0 }, wildDie: swWild(),
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || undefined, fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
     force: [...document.querySelectorAll('#force-body tr')].map(tr => ({ name: tr.dataset.name })).filter(f => f.name),
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value, note: tr.querySelector('.gr-note').value, link: tr.dataset.link || undefined })).filter(g => g.name),
@@ -1681,7 +1706,7 @@ function applySheet(d) {
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; forcePointArmed = false; renderWoundTrack();
   set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0); forcePointArmed = !!_act.fp; set('f-credits', d.credits);
-  const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-pips', ar.pips ? toCode(ar.pips, true) : ''); set('f-move', d.move || 10);
+  const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-pips', ar.pips ? toCode(ar.pips, true) : ''); $('f-wild').checked = d.wildDie === true; onWildChange();   // old saves' 2nd-edition "move" value is ignored
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(w => addWeaponRow(w));
   ensureUnarmed();
   $('force-body').innerHTML = ''; (d.force || []).forEach(addForceRow);

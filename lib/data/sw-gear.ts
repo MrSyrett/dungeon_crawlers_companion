@@ -76,6 +76,7 @@ export const SW_GEAR: SwGear[] = [
     }
   },
   {
+    "stats": "Difficulty 10/15/20 by wound level; one use",
     "name": "Medpac",
     "category": "Medical",
     "description": "The standard first aid kit of the civilized galaxy: limited diagnostic computers, drugs, syntheflesh, antiseptics, coagulants and other medicinal items in a compact package — enough to treat most light wounds and help in life-or-death situations until better facilities are reached. Availability 1.",
@@ -119,6 +120,7 @@ export const SW_GEAR: SwGear[] = [
   {
     "name": "Macrobinoculars",
     "category": "Misc",
+    "cost": "100",
     "description": "Light intensifier viewers with primitive yet rugged image-enhancing chips for magnification, ranging and targeting information. They provide zoom capability for viewing far away images and line-of-sight sensors for determining distance. A Droid may be fitted with them (1D of building dice) only if it already has some form of vision.",
     "book": "companion",
     "page": 31,
@@ -220,6 +222,7 @@ export const SW_GEAR: SwGear[] = [
   {
     "name": "Glow rod",
     "category": "Tool",
+    "cost": "10",
     "description": "A small tube-like item, about the size of a computer screen stylus, that casts an intense and concentrated beam of light in a given direction. Provides limited illumination for about 50 hours before its power cell must be replaced.",
     "stats": "About 50 hours per power cell",
     "book": "companion",
@@ -752,6 +755,7 @@ export const SW_GEAR: SwGear[] = [
   {
     "name": "Syntherope",
     "category": "Tool",
+    "cost": "2",
     "description": "A powerful coil of rope that is highly impervious to damage. It has a standard strength of 3D that holds up through incapacitating damage. Syntherope comes in 15 meter coils and is extremely light, making it easy to carry.",
     "stats": "Strength 3D; 15 meter coils",
     "book": "companion",
@@ -792,6 +796,7 @@ export const SW_GEAR: SwGear[] = [
   {
     "name": "Chronometer",
     "category": "Misc",
+    "cost": "25",
     "description": "Chronometers come in all sizes, from those small enough to wear on the wrist or install on a starship control panel to large free-standing models used as dwelling decorations. They are usually set for a particular planet, with a dual setting that keeps Galactic Standard time.",
     "book": "companion",
     "page": 32,
@@ -815,6 +820,7 @@ export const SW_GEAR: SwGear[] = [
   {
     "name": "Breath mask",
     "category": "Survival",
+    "cost": "50",
     "description": "In near-vacuum conditions characters can survive for limited amounts of time with breath masks, which provide life-sustaining gases through a cup that fits snugly over the mouth and nose. They offer no protection from the cold and do not allow survival in hard vacuum.",
     "book": "companion",
     "page": 32,
@@ -830,6 +836,7 @@ export const SW_GEAR: SwGear[] = [
   {
     "name": "Recording rod",
     "category": "Misc",
+    "cost": "30",
     "description": "Audio recorders with laminate-cylinder storage, enough for 100 hours of recording.",
     "stats": "100 hours of recording",
     "book": "companion",

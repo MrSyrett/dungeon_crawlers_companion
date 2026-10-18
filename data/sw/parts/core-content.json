@@ -148,7 +148,7 @@
       "book": "core",
       "page": 139,
       "range": "3-10/11-30/31-50",
-      "skill": "bows",
+      "skill": "crossbow",
       "notes": "Archaic weapon using stressed string to launch small spears or bolts; used by the Ewoks of Endor and many other primitive species. Must be reloaded each time it is fired; reloading costs 1D from all skill and attribute codes but does not take an action segment (p.52)."
     },
     {
@@ -159,7 +159,7 @@
       "book": "core",
       "page": 139,
       "range": "3-10/11-30/31-100",
-      "skill": "bows",
+      "skill": "longbow",
       "notes": "Archaic weapon using stressed string to launch arrows; used by Ewoks and many primitive species. Must be reloaded each time it is fired; reloading costs 1D from all skill and attribute codes but does not take an action segment (p.52)."
     },
     {
@@ -170,7 +170,7 @@
       "book": "core",
       "page": 139,
       "range": "3-4/5-8/9-12",
-      "skill": "archaic guns",
+      "skill": "black-powder pistol",
       "notes": "A primitive slug-throwing hand gun, common among pre-industrial civilizations. Reloading takes a full combat round; at short range firers usually get one shot off, then use the pistol as a club or throw it aside (p.52)."
     },
     {
@@ -181,7 +181,7 @@
       "book": "core",
       "page": 139,
       "range": "3-10/11-30/31-100",
-      "skill": "archaic guns",
+      "skill": "musket",
       "notes": "A pre-industrial military arm. Reloading is an action, taking an action segment and costing 1D from all skill and attribute codes (p.52)."
     },
     {
@@ -192,7 +192,7 @@
       "book": "core",
       "page": 139,
       "range": "3-30/31-100/101-300",
-      "skill": "archaic guns",
+      "skill": "rifle",
       "notes": "A mass-produced, machined and vastly improved musket; characteristic of newly-industrializing cultures. Reloading costs 1D from all skill and attribute codes but does not take an action segment. Rifles may fire from one to twenty shots before requiring reloading (p.52)."
     },
     {
@@ -203,7 +203,7 @@
       "book": "core",
       "page": 139,
       "range": "3-10/11-50/51-100",
-      "skill": "archaic guns",
+      "skill": "submachinegun",
       "notes": "A rapid-fire rifle characteristic of neo-atomic civilizations; fires bursts of multiple bullets. Reloading as for rifles. Most fire four to ten bursts before needing to be reloaded (p.52)."
     },
     {
@@ -214,7 +214,7 @@
       "book": "core",
       "page": 139,
       "range": "3-10/11-30/31-50",
-      "skill": "bowcaster",
+      "skill": "wookiee bowcaster",
       "notes": "A unique variant of the crossbow used by Wookiees; throws explosive bolts which do considerably more damage than regular crossbows. Clip-loaded, fires up to six shots before it must be reloaded; reloading costs 1D from all die codes but does not take an action segment (p.52)."
     },
     {

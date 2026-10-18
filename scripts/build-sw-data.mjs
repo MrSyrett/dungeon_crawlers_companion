@@ -9,7 +9,7 @@
 // Books are layered in order: core → Sourcebook → Companion. A skill, Force
 // power, item, vehicle or character with the same name as an earlier entry
 // REPLACES it (the earlier version is kept under `superseded` so the reference
-// pages can show what changed); table keys the Companion defines replace the
+// pages can show what changed; fields the later book omits carry over); table keys the Companion defines replace the
 // core table, and the core table moves to tables.superseded. quickRules are
 // concatenated.
 // After editing anything under data/sw/:  node scripts/build-sw-data.mjs
@@ -60,8 +60,16 @@ for (const key of keys) {
     for (const row of rows) {
       const i = merged[e.key].findIndex((r) => norm(r.name) === norm(row.name));
       if (i >= 0 && BOOK_RANK[row.book] > BOOK_RANK[merged[e.key][i].book]) {
-        // A later book replaces the earlier entry in place (keeps order).
-        merged[e.key][i] = { ...row, superseded: merged[e.key][i] };
+        // A later book replaces the earlier entry in place (keeps order). Fields the later
+        // book doesn't restate (e.g. a Companion chart row with damage but no range bands,
+        // cost or crew) carry over from the earlier entry instead of being wiped; its own
+        // book/page/source always win.
+        const prev = merged[e.key][i], carry = {};
+        for (const k of Object.keys(prev)) {
+          if (k === "superseded" || k === "book" || k === "page" || k === "source") continue;
+          if (row[k] === undefined) carry[k] = prev[k];
+        }
+        merged[e.key][i] = { ...carry, ...row, superseded: prev };
         replaced++;
       } else if (i >= 0) {
         problems.push(`${e.key}: duplicate "${row.name}" in ${key}`);

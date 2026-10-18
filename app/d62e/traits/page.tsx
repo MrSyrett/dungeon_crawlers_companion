@@ -39,13 +39,13 @@ const KIND_HEADING: Record<string, string> = {
   superpower: "Superpowers", limitation: "Limitations", magic: "Magic", psionic: "Psionics",
 };
 const KIND_INTRO: Record<string, string> = {
-  perk: "Advantages bought with skill dice (or character points), representing edges, connections, and boons.",
+  perk: "Advantages bought with skill dice, representing edges, connections, and boons.",
   flaw: "Drawbacks taken for extra dice; the more disruptive the flaw, the greater the return.",
   talent: "Special knacks and trained abilities a character can learn, each with a point cost.",
   asset: "Resources and heroic reputations a character can invoke twice per session for +3D or a Hero Point.",
   trouble: "Complications the character can willingly trigger for a Hero Point while the GM springs a complication.",
   superpower: "Extraordinary abilities — an extension of Talents — bought in ranks from a Superpower Dice pool.",
-  limitation: "The flaws for superpowers: each grants Superpower Dice back to the pool.",
+  limitation: "The flaws for superpowers: each lowers a power's total cost by its value (never below 1).",
   magic: "Spells from the magic system — each rolled with its skill against a difficulty.",
   psionic: "Psionic powers — each rolled with its skill against a difficulty.",
 };
@@ -92,7 +92,7 @@ export default async function D62eTraitsPage({ searchParams }: { searchParams: P
     options: p.options ?? undefined,
   }));
   const limRows: Row[] = D62E_LIMITATIONS.map((l) => ({
-    name: l.name, kind: "limitation", genre: l.genre, cost: `+${l.value}D back`, description: l.description,
+    name: l.name, kind: "limitation", genre: l.genre, cost: `−${l.value} cost`, description: l.description,
   }));
 
   // Homebrew rows.
@@ -109,7 +109,7 @@ export default async function D62eTraitsPage({ searchParams }: { searchParams: P
   const hbLimRows: Row[] = hbLim.map((h) => {
     const d = h.data as Record<string, unknown>;
     const v = typeof d.value === "number" ? d.value : Number(d.value) || 0;
-    return { name: h.name, kind: "limitation", genre: sd(d, "genre") || "superhero", cost: `+${v}D back`, description: sd(d, "description"), homebrew: true };
+    return { name: h.name, kind: "limitation", genre: sd(d, "genre") || "superhero", cost: `−${v} cost`, description: sd(d, "description"), homebrew: true };
   });
 
   const ALL: Row[] = [...hbTraitRows, ...hbPowerRows, ...hbLimRows, ...perkRows, ...powerRows, ...limRows];

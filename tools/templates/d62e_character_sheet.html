@@ -682,7 +682,7 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
         <div class="section-bar accent"><span>Attributes</span></div>
         <div class="stats-grid" id="stats-grid"></div>
         <table class="skills-table"><tbody id="skills-body"></tbody></table>
-        <div class="add-row" style="justify-content:space-between;"><span class="cp-hdr map-hdr" title="Multi-Action Penalty — dice subtracted from every dice-pool roll until you reset it">−<input type="number" id="f-map" class="no-spin" value="0" min="0" step="1" data-nolock style="width:42px;" oninput="onMapChange()">D <button type="button" class="map-reset" onclick="resetMAP()" title="Reset the Multi-Action Penalty to 0">Reset</button></span><span class="cp-hdr">Character Points <input type="number" id="f-cp" data-nolock class="no-spin" value="0" min="0" oninput="scheduleAutosave()"></span></div>
+        <div class="add-row" style="justify-content:space-between;"><span class="cp-hdr map-hdr" title="Multi-Action Penalty — dice subtracted from every dice-pool roll until you reset it">−<input type="number" id="f-map" class="no-spin" value="0" min="0" step="1" data-nolock style="width:42px;" oninput="onMapChange()">D <button type="button" class="map-reset" onclick="resetMAP()" title="Reset the Multi-Action Penalty to 0">Reset</button></span><span class="cp-hdr" title="Experience Points (Experience Points module, p.86) — spent in Level Up">XP <input type="number" id="f-cp" data-nolock class="no-spin" value="0" min="0" oninput="scheduleAutosave()"></span></div>
       </div>
       <div id="magic-panel" class="card" hidden></div>
       <div id="advancement-panel" class="card" hidden></div>
@@ -876,8 +876,11 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
 const CORE_ATTRS = ['Agility','Brawn','Knowledge','Perception'];
 const OPTIONAL_ATTRS = ['Charm','Mechanical','Technical','Mysticism','Magic'];
 const ALL_ATTRS = CORE_ATTRS.concat(OPTIONAL_ATTRS);
-const WOUNDS = [['none','Healthy'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
-const WOUND_PEN = { none:0, stunned:0, wounded:3, incapacitated:3, mortal:3 };
+// Damage conditions (p.33): Staggered (−1D until the next round; staggered again → stunned),
+// Stunned (no actions rest of round), Wounded (−1D; wounded again → incapacitated),
+// Incapacitated (unconscious), Mortally Wounded (2D survival roll each round).
+const WOUNDS = [['none','Healthy'],['staggered','Staggered'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
+const WOUND_PEN = { none:0, staggered:3, stunned:0, wounded:3, incapacitated:3, mortal:3 };
 const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const $ = id => document.getElementById(id);
 const num = v => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
@@ -898,8 +901,8 @@ const D = {
   attrInfo:  () => (typeof D62E_ATTRIBUTE_INFO  !== 'undefined' ? D62E_ATTRIBUTE_INFO  : []),
   tables:    () => (typeof D62E_TABLES          !== 'undefined' ? D62E_TABLES          : null),
 };
-let wound = 'none', heroArmed = false;
-function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'troubles', superpowers:false, rollMode:'additive', successTarget:6, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+let wound = 'none', heroArmed = 0;   // number of Hero Points armed for the next roll
+function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'heroic', pips:false, advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'troubles', superpowers:false, rollMode:'additive', successTarget:6, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
 let options = defaultOptions();
 
 // ═══ DICE CODES ═══════════════════════════════════════════════════════════
@@ -923,7 +926,10 @@ const diceOf = p => Math.floor(Math.max(0, num(p)) / 3);
 // Successes module disables pips: adjustments move in whole dice (3 pips) and
 // displays floor any leftover pips so the sheet reads in whole dice.
 function inSuccessMode() { return !!(typeof options !== 'undefined' && options && options.rollMode === 'successes'); }
-function pipStep() { return inSuccessMode() ? 3 : 1; }
+// Pips are an optional module (p.94; the core game uses whole dice). With it off, or in the
+// Successes house rule, the sheet creates no new pips (existing pips still show and roll).
+function pipsOn() { return !!(typeof options !== 'undefined' && options && options.pips) && !inSuccessMode(); }
+function pipStep() { return pipsOn() ? 1 : 3; }
 function codeDisp(p) { let v = num(p); if(inSuccessMode()) v = Math.floor(Math.max(0, v) / 3) * 3; return code(v); }
 const currentGenre = () => ($('f-genre') && $('f-genre').value) || 'core';
 function genreOk(item) { const g = item && item.genre; const cur = currentGenre(); if(cur === 'all') return true; return !g || g === 'core' || g === cur; }
@@ -1008,9 +1014,11 @@ function addSkillByName(name) {
 }
 function hasCharacter() { return !!(($('f-name') && $('f-name').value.trim()) || ($('f-template') && $('f-template').value.trim()) || ($('f-archetype') && $('f-archetype').value.trim()) || skillRows().length); }
 function refreshWizardButtons() { const built = hasCharacter(); const bb = $('build-btn'), lb = $('level-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lb) lb.style.display = built ? '' : 'none'; }
-// ═══ ADVANCEMENT (LEVEL UP) — spend Character Points ══════════════════════
-// Skill pip cost = current dice number of the skill.
-// Attribute pip cost = 10 × current dice number of the attribute.
+// ═══ ADVANCEMENT (LEVEL UP) — spend Experience Points (module, p.86-87) ══════
+// D6 2e has no "Character Points" (that is WEG Star Wars); advancement uses XP.
+// Skill step cost = the skill's OWN current rating in dice (not attribute + skill), min 1;
+// advanced skills cost double (p.97). Attribute step cost = 10 × its current dice.
+// With pips (the sheet always allows them) each +1 step costs the same as a die step.
 var _lvlAttr = null, _lvlSkill = null, _lvlQ = '';
 function openLevelUp() {
   if(!hasCharacter()) { D62EB.launch(); return; }
@@ -1019,23 +1027,27 @@ function openLevelUp() {
 function closeLevelUp() { $('levelup-overlay').classList.remove('open'); _lvlAttr = null; _lvlSkill = null; }
 function _cpBudget() { return Math.max(0, num($('f-cp').value)); }
 function _pipCostSkill(pips) { return Math.max(1, diceOf(pips)); }
+function _pipCostAdv(pips) { return 2 * _pipCostSkill(pips); }
+function _skillCostFn(s) { return s && s.adv ? _pipCostAdv : _pipCostSkill; }
 function _pipCostAttr(pips) { return 10 * Math.max(1, diceOf(pips)); }
-function _sumCost(basePips, added, costFn) { let c = 0; for(let k = 0; k < added; k++) c += costFn(basePips + k); return c; }
-// CP cost of the next step (1 pip normally, 1 full die in Successes mode).
+// One charge per step: a die (or, with Pips, a +1 pip) costs the current rating once.
+function _sumCost(basePips, added, costFn) { const st = pipStep(); let c = 0; for(let k = 0; k < added; k += st) c += costFn(basePips + k); return c; }
+// XP cost of the next step (1 pip normally, 1 full die in Successes mode).
 function _stepCostAttr(base, cur) { const s = pipStep(); return _sumCost(base, cur + s, _pipCostAttr) - _sumCost(base, cur, _pipCostAttr); }
-function _stepCostSkill(base, cur) { const s = pipStep(); return _sumCost(base, cur + s, _pipCostSkill) - _sumCost(base, cur, _pipCostSkill); }
+function _stepCostSkill(base, cur, fn) { const s = pipStep(); fn = fn || _pipCostSkill; return _sumCost(base, cur + s, fn) - _sumCost(base, cur, fn); }
 // Every skill: those on the sheet first, then the standard list (so you can raise
 // skills you don't have yet — added on Apply). Keyed by name.
 function _lvlAllSkills() {
   const rows = skillRows(); const seen = new Set(); const out = [];
-  rows.forEach(tr => { const nm = tr.querySelector('.sk-name-in').value.trim() || '(unnamed)'; seen.add(norm(nm)); out.push({ key: norm(nm), name: nm, attr: tr.dataset.attr, tr: tr, base: rowTotal(tr), owned: true }); });
-  D.skills().slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(def => { if(seen.has(norm(def.name))) return; seen.add(norm(def.name)); out.push({ key: norm(def.name), name: def.name, attr: def.attribute, tr: null, base: attr(def.attribute), owned: false }); });
+  // `own` = the skill's own rating (pips above the attribute) — what XP cost is based on.
+  rows.forEach(tr => { const nm = tr.querySelector('.sk-name-in').value.trim() || '(unnamed)'; seen.add(norm(nm)); const own = codeOrZero(tr.querySelector('.sk-adds').value); const adv = !!(options && options.specialization && tr.dataset.adv === '1'); out.push({ key: norm(nm), name: nm, attr: tr.dataset.attr, tr: tr, base: rowTotal(tr), own: own, adv: adv, owned: true }); });
+  D.skills().slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(def => { if(seen.has(norm(def.name))) return; seen.add(norm(def.name)); out.push({ key: norm(def.name), name: def.name, attr: def.attribute, tr: null, base: attr(def.attribute), own: 0, adv: false, owned: false }); });
   return out;
 }
 function _lvlSpent() {
   let total = 0;
   activeAttrs().forEach(a => { total += _sumCost(attr(a), _lvlAttr[a] || 0, _pipCostAttr); });
-  _lvlAllSkills().forEach(s => { total += _sumCost(s.base, _lvlSkill[s.key] || 0, _pipCostSkill); });
+  _lvlAllSkills().forEach(s => { total += _sumCost(s.own, _lvlSkill[s.key] || 0, _skillCostFn(s)); });
   return total;
 }
 function _lvlRow(labelHtml, baseCode, newCode, nextCost, add, stepFn, left) {
@@ -1043,11 +1055,11 @@ function _lvlRow(labelHtml, baseCode, newCode, nextCost, add, stepFn, left) {
     + '<span style="flex:1;font-weight:700;">' + labelHtml + '</span>'
     + '<span style="font-family:\'Share Tech Mono\',monospace;min-width:96px;text-align:right;">' + baseCode + (newCode ? ' → ' + newCode : '') + '</span>'
     + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="' + stepFn + ',-1)"' + (add <= 0 ? ' disabled' : '') + '>−</button>'
-    + '<button class="m-btn ghost" style="padding:4px 8px;min-width:44px;" onclick="' + stepFn + ',1)"' + (nextCost > left ? ' disabled' : '') + ' title="Next pip costs ' + nextCost + ' CP">+' + nextCost + '</button></div>';
+    + '<button class="m-btn ghost" style="padding:4px 8px;min-width:44px;" onclick="' + stepFn + ',1)"' + (nextCost > left ? ' disabled' : '') + ' title="Next step costs ' + nextCost + ' XP">+' + nextCost + '</button></div>';
 }
 function renderLevelUp() {
   const budget = _cpBudget();
-  let h = '<p class="m-hint">Spend <b>' + budget + '</b> Character Point' + (budget === 1 ? '' : 's') + ' to raise skills and attributes. A skill pip costs its current dice number; an attribute pip costs 10× its current dice number. The <b>+N</b> button shows the next pip\'s cost. Raise a skill you don\'t have and it\'s added.</p>';
+  let h = '<p class="m-hint">Spend <b>' + budget + '</b> experience point' + (budget === 1 ? '' : 's') + ' to raise skills and attributes. Raising a skill costs XP equal to the skill\'s own current rating (minimum 1; advanced skills cost double); raising an attribute costs 10× its current dice. ' + (pipsOn() ? 'With the Pips module, +1 and +2 are bought first at the same cost. ' : 'Whole dice only (Pips module off). ') + 'The <b>+N</b> button shows the next step\'s cost. Raise a skill you don\'t have and it\'s added.</p>';
   h += '<div class="m-lbl">Attributes</div><div class="alloc" id="lvl-attr-list"></div>';
   h += '<div class="m-lbl" style="margin-top:12px;">Skills</div>';
   h += '<input class="m-input" id="lvl-search" placeholder="Search skills…" oninput="_lvlQ=this.value;renderLvlBody()" value="' + esc(_lvlQ) + '" style="margin-bottom:8px;">';
@@ -1063,11 +1075,11 @@ function renderLvlBody() {
   const q = norm(_lvlQ);
   const list = _lvlAllSkills().filter(s => !q || s.key.includes(q));
   let sh = '';
-  list.forEach(s => { const add = _lvlSkill[s.key] || 0, nu = s.base + add; const label = esc(s.name) + (s.owned ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:11px;">' + esc(s.attr.slice(0, 3)) + '</span>'); sh += _lvlRow(label, codeDisp(s.base), add ? codeDisp(nu) : '', _stepCostSkill(s.base, add), add, "lvlStepSkill('" + s.key + "'", left); });
+  list.forEach(s => { const add = _lvlSkill[s.key] || 0, nu = s.base + add; const label = esc(s.name) + (s.owned ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:11px;">' + esc(s.attr.slice(0, 3)) + '</span>'); sh += _lvlRow(label, codeDisp(s.base), add ? codeDisp(nu) : '', _stepCostSkill(s.own, add, _skillCostFn(s)), add, "lvlStepSkill('" + s.key + "'", left); });
   if(!list.length) sh = '<p class="brow-empty">No skills match.</p>';
   const sb = $('lvl-skill-list'); if(sb) { const top = sb.scrollTop; sb.innerHTML = sh; sb.scrollTop = top; }
-  $('levelup-ft').innerHTML = '<span class="m-hint" style="margin:0;">CP left: <b style="color:' + (left ? 'var(--d62e-dk)' : '#999') + ';">' + left + '</b> / ' + budget + '</span>'
-    + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"' + (spent <= 0 ? ' disabled' : '') + '>Apply (' + spent + ' CP)</button></span>';
+  $('levelup-ft').innerHTML = '<span class="m-hint" style="margin:0;">XP left: <b style="color:' + (left ? 'var(--d62e-dk)' : '#999') + ';">' + left + '</b> / ' + budget + '</span>'
+    + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"' + (spent <= 0 ? ' disabled' : '') + '>Apply (' + spent + ' XP)</button></span>';
 }
 function lvlStepAttr(a, d) {
   const step = pipStep(), cur = _lvlAttr[a] || 0;
@@ -1076,7 +1088,7 @@ function lvlStepAttr(a, d) {
 }
 function lvlStepSkill(key, d) {
   const s = _lvlAllSkills().find(x => x.key === key); if(!s) return; const step = pipStep(), cur = _lvlSkill[key] || 0;
-  if(d > 0 && _stepCostSkill(s.base, cur) > _cpBudget() - _lvlSpent()) return;
+  if(d > 0 && _stepCostSkill(s.own, cur, _skillCostFn(s)) > _cpBudget() - _lvlSpent()) return;
   const nv = Math.max(0, cur + d * step); if(nv) _lvlSkill[key] = nv; else delete _lvlSkill[key]; renderLvlBody();
 }
 function lvlApply() {
@@ -1090,9 +1102,9 @@ function lvlApply() {
     else { addSkillRow({ name: s.name, attribute: s.attr, pips: add }); }
     changed.push(s.name + ' +' + add + 'p');
   });
-  $('f-cp').value = Math.max(0, _cpBudget() - spent);
-  recalc(); scheduleAutosave();
-  addLog('Advancement', '−' + spent + ' CP', changed.join(', ') + ' · ' + num($('f-cp').value) + ' CP left', 'crit');
+  $('f-cp').value = Math.max(0, _cpBudget() - spent); if(options) options.xp = num($('f-cp').value);
+  recalc(); scheduleAutosave(); if(typeof renderAdvancementPanel === 'function') renderAdvancementPanel();
+  addLog('Advancement', '−' + spent + ' XP', changed.join(', ') + ' · ' + num($('f-cp').value) + ' XP left', 'crit');
   closeLevelUp();
 }
 function recalc() {
@@ -1131,58 +1143,89 @@ function updateModNote() {
   if(heroArmed) parts.push('Hero Point: ' + heroArmDesc());
   if(assetBonusPips) parts.push('Asset: +' + code(assetBonusPips) + ' next roll');
   const note = $('mod-note'); if(note) note.textContent = parts.length ? parts.join(' · ') : 'No modifiers.';
-  const hb = $('hero-btn'); if(hb) hb.textContent = heroArmed ? 'Hero armed ✓' : heroArmLabel();
+  const hb = $('hero-btn'); if(hb) hb.textContent = heroArmed ? 'Hero armed ✓' + (heroArmed > 1 ? ' ×' + heroArmed : '') : heroArmLabel();
 }
 function heroModel() { return (typeof options !== 'undefined' && options && options.heroModel) || 'heroic'; }
-function heroArmLabel() { return { heroic:'Spend: double', basic:'Spend: +1 die', classic:'Spend: +wild', superheroic:'Spend: boost' }[heroModel()]; }
-function heroArmDesc() { return { heroic:'code doubled', basic:'+1 extra die', classic:'+1D wild', superheroic:'code doubled (boost)' }[heroModel()]; }
+// Hero Point models (pp.28, 75-76, 207). Heroic: one point doubles a roll's die code.
+// Basic: each point adds one ordinary die, any number per roll. Classic: each point adds a
+// wild die, up to the attribute's dice. Superheroic: a point buys an extra action with no
+// multi-action penalty (other uses — +1 Talent rank, gift to an ally, ignore a die-code cap —
+// are handled by hand).
+function heroMulti() { const m = heroModel(); return m === 'basic' || m === 'classic'; }
+function heroArmLabel() { return { heroic:'Spend: double', basic:'Spend: +1 die', classic:'Spend: +wild', superheroic:'Spend: free action' }[heroModel()]; }
+function heroArmDesc() { const n = heroArmed || 1; return { heroic:'code doubled', basic:'+' + n + ' extra die', classic:'+' + n + ' wild die' + (n > 1 ? 's' : ''), superheroic:'no multi-action penalty on this action' }[heroModel()]; }
 function toggleHeroPoint() {
-  if(!heroArmed) {
-    if(num($('f-hero').value) <= 0) { addLog('Hero Points', '✗', 'No Hero Points left', 'fumble'); return; }
-    heroArmed = true;
-    const eff = { heroic:'Next roll doubles its die code.', basic:'Next roll adds one extra normal d6.', classic:'Next roll adds +1D wild (up to your attribute die).', superheroic:'Next roll is boosted — doubling its die code (or spend for another use).' }[heroModel()];
-    addLog('Hero Point', '★', eff + ' A Hero Point can also reroll a failed roll or avoid being Stunned.', 'crit');
+  const have = num($('f-hero').value);
+  if(!heroArmed || (heroMulti() && heroArmed < have)) {
+    if(have <= heroArmed) { addLog('Hero Points', '✗', 'No Hero Points left', 'fumble'); return; }
+    heroArmed++;
+    const eff = { heroic:'Next roll doubles its die code.', basic:'Next roll adds ' + heroArmed + ' extra ordinary d6 (click again to add more).', classic:'Next roll adds ' + heroArmed + ' wild ' + (heroArmed > 1 ? 'dice' : 'die') + ' (no more than the attribute\'s dice; click again to add more).', superheroic:'Next roll is an extra action with no multi-action penalty.' }[heroModel()];
+    addLog('Hero Point', '★', eff + (heroModel() === 'heroic' ? ' A Hero Point can instead reroll a failed roll (no doubling down) or avoid being Stunned.' : ''), 'crit');
   }
-  else heroArmed = false;
+  else heroArmed = 0;
   updateModNote(); if(typeof renderAction === 'function') renderAction();
 }
-// WEG-style pips. When `wild` is set, the LAST die is the Wild Die. The Alt Wild Die
-// option (options.wildDie) picks the behaviour on a natural 1:
-//   core   — 1 is a Complication (flag only, no subtraction); 6 explodes.
-//   basic/ — 1 is a Mishap: remove the Wild Die AND the single highest other die; 6 explodes.
-//   classic
-//   simple — 1 does nothing special; 6 explodes.
+// Pips. When `wild` is set, the LAST die is the Wild Die. options.wildDie picks the variant:
+//   core    (p.26-27) — 1 is a Complication (flag only, nothing removed). 6 is an Advantage:
+//            on a success the player picks Exceptional Success +1 Hero Point or Ordinary +2;
+//            only if the roll would FAIL is the 6 exploded (rerolled, adding) for +1 Hero Point.
+//            The roll keeps `baseTotal` (Wild Die counted once) and `total` (exploded).
+//   basic   (p.71) — 6 explodes; a first-roll 1 removes the Wild Die and the highest other die.
+//   classic (p.72) — 6 explodes; a first-roll 1 is not added (a Mishap): roll a d6 —
+//            1-5 penalty (also lose the highest other die), 6 complication.
+//   simple  (p.73) — 1 counts normally; 6 explodes.
 // `extraPlain` adds N ordinary (non-wild, non-exploding) d6 to the roll — used by the
 // Basic Hero Point model. `rolls` includes every face rolled so the animation matches.
-function rollDice(p, wild, extraPlain) {
+function rollDice(p, wild, extraPlain, extraWild) {
   p = Math.max(0, num(p)); const d = Math.floor(p / 3), pipsRem = p % 3; const rolls = []; const regular = [];
   const variant = (typeof options !== 'undefined' && options && options.wildDie) ? options.wildDie : 'core';
   for(let i = 0; i < (extraPlain || 0); i++) { const f = 1 + Math.floor(Math.random() * 6); rolls.push(f); regular.push(f); }
-  let wildFaces = null, complication = false, mishap = false;
+  // Classic Hero Points: extra wild dice, each exploding on a 6.
+  for(let i = 0; i < (extraWild || 0); i++) { let f = 1 + Math.floor(Math.random() * 6); rolls.push(f); regular.push(f); let g = 0; while(f === 6 && g++ < 20) { f = 1 + Math.floor(Math.random() * 6); rolls.push(f); regular.push(f); } }
+  let wildFaces = null, complication = false, mishap = false, mishapDie = 0, wildDropped = false;
   for(let i = 0; i < d; i++) {
     let f = 1 + Math.floor(Math.random() * 6);
     if(wild && i === d - 1) {
       wildFaces = [f];
-      if(f === 1) { if(variant === 'core') complication = true; else if(variant === 'basic' || variant === 'classic') mishap = true; }
+      if(f === 1) {
+        if(variant === 'core') complication = true;
+        else if(variant === 'basic') mishap = true;
+        else if(variant === 'classic') { wildDropped = true; mishapDie = 1 + Math.floor(Math.random() * 6); if(mishapDie === 6) complication = true; else mishap = true; }
+      }
       let guard = 0;
       while(f === 6 && guard++ < 20) { f = 1 + Math.floor(Math.random() * 6); wildFaces.push(f); }
       rolls.push.apply(rolls, wildFaces);
     } else { rolls.push(f); regular.push(f); }
   }
   let total = rolls.reduce((a, b) => a + b, 0) + pipsRem;
-  if(mishap && wildFaces) { total -= wildFaces.reduce((a, b) => a + b, 0); if(regular.length) total -= Math.max.apply(null, regular); if(total < 0) total = 0; }
+  if((mishap || wildDropped) && wildFaces) { total -= wildFaces.reduce((a, b) => a + b, 0); if(mishap && regular.length) total -= Math.max.apply(null, regular); if(total < 0) total = 0; }
+  // Core Wild Die: a 6 only explodes when the roll would otherwise fail, so keep the
+  // un-exploded total too (Wild Die counted once as 6).
+  const coreAdv = variant === 'core' && !!wildFaces && wildFaces[0] === 6;
+  const baseTotal = coreAdv ? total - wildFaces.slice(1).reduce((a, b) => a + b, 0) : total;
   // Successes module: count each rolled die (including exploded Wild Die faces) at
   // or above the target number. Pips don't roll a die, so they don't score.
   const succMode = !!(typeof options !== 'undefined' && options && options.rollMode === 'successes');
   const target = Math.max(1, Math.min(6, num(options && options.successTarget) || 6));
   let successes = 0; if(succMode) rolls.forEach(f => { if(f >= target) successes++; });
-  return { rolls, total: total, pips: pipsRem, wildFaces: wildFaces, complication: complication, mishap: mishap, variant: variant, succMode: succMode, target: target, successes: successes };
+  return { rolls, total: total, baseTotal: baseTotal, coreAdv: coreAdv, pips: pipsRem, wildFaces: wildFaces, complication: complication, mishap: mishap, mishapDie: mishapDie, variant: variant, succMode: succMode, target: target, successes: successes };
 }
 function wildStyle(r) {
-  if(r.wildFaces && r.wildFaces[0] === 6) return { type: 'crit', mark: ' ✦', note: '✦ Advantage — the Wild Die exploded!' };
-  if(r.complication) return { type: 'fumble', mark: ' ⚠', note: '⚠ Complication — the Wild Die rolled a 1 (GM\'s call)' };
-  if(r.mishap) return { type: 'fumble', mark: ' ⚠', note: '⚠ Mishap — Wild Die 1: removed the Wild Die and your highest other die' };
+  if(r.coreAdv) return { type: 'crit', mark: ' ✦', note: '✦ Advantage (Wild Die 6): if this succeeds, take an Exceptional Success +1 Hero Point or an Ordinary Success +2 Hero Points; if it would fail, the 6 explodes → ' + r.total + ' and +1 Hero Point' };
+  if(r.wildFaces && r.wildFaces[0] === 6) return { type: 'crit', mark: ' ✦', note: '✦ The Wild Die exploded!' };
+  if(r.complication && r.variant === 'classic') return { type: 'fumble', mark: ' ⚠', note: '⚠ Mishap (Wild Die 1, not added; mishap die ' + r.mishapDie + ') — a Complication (GM\'s call)' };
+  if(r.complication) return { type: 'fumble', mark: ' ⚠', note: '⚠ Complication — the Wild Die rolled a 1 (GM\'s call: partial success +1 Hero Point or failure +2; on a failure, +1 Hero Point and a complication)' };
+  if(r.mishap && r.variant === 'classic') return { type: 'fumble', mark: ' ⚠', note: '⚠ Mishap (Wild Die 1; mishap die ' + r.mishapDie + ') — a penalty: the Wild Die and your highest other die are dropped' };
+  if(r.mishap) return { type: 'fumble', mark: ' ⚠', note: '⚠ Wild Die 1 — removed the Wild Die and your highest other die' };
   return { type: '', mark: '', note: '' };
+}
+// Core Wild Die Advantage: the 6 explodes only if the un-exploded roll would fail.
+// With a known Difficulty Number the sheet resolves that; without one it reports the
+// un-exploded total and names the exploded total in the note.
+function coreAdvTotal(r, dc) {
+  if(!r.coreAdv) return r.total;
+  if(dc) return r.baseTotal > dc ? r.baseTotal : r.total;
+  return r.baseTotal;
 }
 function diceStr(p, r) {
   const wildN = r.wildFaces ? r.wildFaces.length : 0;
@@ -1193,28 +1236,32 @@ function diceStr(p, r) {
 // combine several rolls into one log entry, e.g. an attack + its damage).
 function computeRoll(basePips, opts) {
   opts = opts || {}; const m = opts.noMods ? { total: 0 } : currentMods();
-  let p = basePips + (m.total || 0); let heroInfo = ''; let extraPlain = 0;
+  let p = basePips + (m.total || 0); let heroInfo = ''; let extraPlain = 0, extraWild = 0, waived = 0;
   if(heroArmed && !opts.noMods) {
-    const model = heroModel();
-    if(model === 'heroic' || model === 'superheroic') { p *= 2; heroInfo = 'Hero Point (code doubled)'; }
-    else if(model === 'classic') { p += 3; heroInfo = 'Hero Point (+1D wild)'; }
-    else { extraPlain = 1; heroInfo = 'Hero Point (+1 die)'; }  // basic
-    heroArmed = false; $('f-hero').value = Math.max(0, num($('f-hero').value) - 1);
+    const model = heroModel(), n = heroArmed;
+    if(model === 'heroic') { p *= 2; heroInfo = 'Hero Point (code doubled)'; }
+    else if(model === 'superheroic') { waived = (m.actions || 0) * 3; p += waived; heroInfo = 'Hero Point (extra action, no multi-action penalty)'; }
+    else if(model === 'classic') { extraWild = n; heroInfo = 'Hero Point' + (n > 1 ? 's' : '') + ' (+' + n + ' wild)'; }
+    else { extraPlain = n; heroInfo = 'Hero Point' + (n > 1 ? 's' : '') + ' (+' + n + ' ' + (n > 1 ? 'dice' : 'die') + ')'; }  // basic
+    heroArmed = 0; $('f-hero').value = Math.max(0, num($('f-hero').value) - n);
   }
   if(assetBonusPips && !opts.noMods) { p += assetBonusPips; heroInfo = [heroInfo, 'Asset +' + code(assetBonusPips)].filter(Boolean).join(' · '); assetBonusPips = 0; }
   if(p < 1) p = 1;
-  const r = rollDice(p, !opts.noWild, extraPlain);
+  const r = rollDice(p, !opts.noWild, extraPlain, extraWild);
   const dc = opts.dc !== undefined ? opts.dc : null;
   const ws = wildStyle(r);
   if(r.succMode) {
     const succTxt = 'target ' + r.target + '+ · ' + r.successes + ' success' + (r.successes === 1 ? '' : 'es') + (r.pips ? ' (+' + r.pips + ' pips, no die)' : '');
-    const detailS = [diceStr(p, r), heroInfo, m.total ? 'mods ' + code(m.total, true) : '', ws.note, succTxt, dc ? 'vs ' + dc + ' successes' + (r.successes >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
+    const detailS = [diceStr(p, r), heroInfo, (m.total || 0) + waived ? 'mods ' + code((m.total || 0) + waived, true) : '', ws.note, succTxt, dc ? 'vs ' + dc + ' successes' + (r.successes >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
     const typeS = ws.type || (dc ? (r.successes >= dc ? 'crit' : 'fumble') : (r.successes > 0 ? 'crit' : 'fumble'));
     return { total: r.successes, mark: ws.mark, detail: detailS, type: typeS };
   }
-  const detail = [diceStr(p, r), heroInfo, m.total ? 'mods ' + code(m.total, true) : '', ws.note, dc ? 'vs ' + dc + (r.total >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
-  const type = ws.type || (dc ? (r.total >= dc ? 'crit' : 'fumble') : 'normal');
-  return { total: r.total, mark: ws.mark, detail: detail, type: type };
+  // Success needs a total GREATER than the Difficulty Number; equal fails (p.26).
+  const tot = coreAdvTotal(r, dc);
+  const modShown = (m.total || 0) + waived;
+  const detail = [diceStr(p, r), heroInfo, modShown ? 'mods ' + code(modShown, true) : '', ws.note, dc ? 'vs ' + dc + (tot > dc ? ' — success' : ' — failure (must beat the number)') : ''].filter(Boolean).join(' · ');
+  const type = ws.type || (dc ? (tot > dc ? 'crit' : 'fumble') : 'normal');
+  return { total: tot, mark: ws.mark, detail: detail, type: type };
 }
 function rollCode(label, basePips, opts) {
   const c = computeRoll(basePips, opts);
@@ -1253,7 +1300,7 @@ function rollPool() {
     var st = 'target ' + r.target + '+ · ' + r.successes + ' success' + (r.successes === 1 ? '' : 'es');
     addLog(d62ePool + 'D Pool', r.successes + ws.mark, [diceStr(pips, r), st, mapNote, ws.note].filter(Boolean).join(' · '), ws.type || (r.successes > 0 ? 'crit' : 'fumble'));
   } else {
-    addLog(d62ePool + 'D Pool', r.total + ws.mark, [diceStr(pips, r), mapNote, ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
+    addLog(d62ePool + 'D Pool', coreAdvTotal(r, null) + ws.mark, [diceStr(pips, r), mapNote, ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
   }
   clearPool();
 }
@@ -1261,7 +1308,7 @@ function rollPool() {
 // ═══ WOUNDS ═══════════════════════════════════════════════════════════════
 function renderWoundTrack() {
   $('wound-track').innerHTML = WOUNDS.map(([k, lbl]) => '<button class="' + (wound === k ? 'on' + (k === 'none' ? ' ok' : '') : '') + '" onclick="setWound(\'' + k + '\')">' + lbl + '</button>').join('');
-  const note = { none:'healthy', stunned:'Stunned: can\'t act rest of round; clears next round (a Hero Point avoids it)', wounded:'Wounded: −1D to all checks; wounded again → incapacitated', incapacitated:'Incapacitated: knocked out / out of the fight', mortal:'Mortally Wounded: dying — roll to survive each round' }[wound];
+  const note = { none:'healthy', staggered:'Staggered: −1D to all rolls (not Brawn to resist damage) until the start of next round; staggered again → stunned', stunned:'Stunned: can\'t act rest of round; clears at the start of next round (a Hero Point avoids it)', wounded:'Wounded: prone, lose the rest of the round, then −1D to all rolls (not Brawn to resist damage); wounded again → incapacitated; clears after medical treatment or 24 hours\' rest', incapacitated:'Incapacitated: prone and unconscious; wounded again → mortally wounded; clears after treatment or 24 hours', mortal:'Mortally Wounded: unconscious; roll 2D at the end of each round — under the rounds since → death; only treatment clears it' }[wound];
   $('wound-note').textContent = note;
 }
 function setWound(k) {
@@ -1284,7 +1331,8 @@ function refreshOptNote() {
   if(options.specialization) extras.push('Specializations');
   if(options.magicPoints) extras.push('Magic Points');
   if(options.advancement && options.advancement !== 'none') extras.push('Adv: ' + options.advancement);
-  if(options.rollMode === 'successes') extras.push('Successes (' + (num(options.successTarget) || 6) + '+)');
+  if(options.pips) extras.push('Pips');
+  if(options.rollMode === 'successes') extras.push('Successes (' + (num(options.successTarget) || 6) + '+, house rule)');
   el.textContent = wd + ' · Hero: ' + hm + (extras.length ? ' · ' + extras.join(' · ') : '');
 }
 function applyOptions() {
@@ -1333,11 +1381,12 @@ function renderAdvancementPanel() {
   const title = { xp:'Advancement — XP', milestone:'Advancement — Milestones', narrative:'Advancement — Narrative' }[mode] || 'Advancement';
   let body = '';
   if(mode === 'xp') {
-    body = '<div class="trk-row"><label>Experience Points</label><input type="number" min="0" class="trk-num" value="' + esc(options.xp) + '" oninput="optField(\'xp\', num(this.value))"></div>'
-      + '<div class="trk-ref">Raise a skill = its current rating in XP (min 1); raise an attribute = 10× its rating. With pips, buy +1/+2 before the next die.</div>';
+    const xpNow = $('f-cp') ? num($('f-cp').value) : num(options.xp);
+    body = '<div class="trk-row"><label>Experience Points</label><input type="number" min="0" class="trk-num" value="' + esc(xpNow) + '" oninput="optField(\'xp\', num(this.value)); if($(\'f-cp\')) $(\'f-cp\').value = num(this.value);"></div>'
+      + '<div class="trk-ref">Same pool as the XP box — spend it with Level Up. Raise a skill = its own current rating in XP (min 1; advanced skills ×2); raise an attribute = 10× its dice. ' + (pipsOn() ? 'With pips, buy +1/+2 before the next die. ' : '') + 'Session awards: slow 2–3, moderate 4–6, fast 7–10 (+3 with Classic Hero Points).</div>';
   } else if(mode === 'milestone') {
     body = '<div class="trk-row"><label>Milestones reached</label><input type="number" min="0" class="trk-num" value="' + esc(options.milestones) + '" oninput="optField(\'milestones\', num(this.value))"></div>'
-      + '<div class="trk-ref">Each milestone = +1 attribute die and +3 skill dice (or +9 pips), or a new/raised Perk instead.</div>';
+      + '<div class="trk-ref">Each milestone = +1 attribute die and +3 skill dice' + (pipsOn() ? ' (or +9 pips)' : '') + ', or a new/raised Perk instead.</div>';
   } else {
     body = (options.arcs || []).map((a, i) =>
       '<div class="arc-row"><input type="text" value="' + esc(a.skill) + '" placeholder="skill" oninput="setArc(' + i + ',\'skill\',this.value)">'
@@ -1489,7 +1538,7 @@ function addLimitRow(l) {
 function limitExists(name) { const n = norm(name); return [...document.querySelectorAll('#limits-body .lm-name')].some(inp => norm(inp.value) === n); }
 function addLimitByName(name) {
   const l = D.limitations().find(x => x.name === name); if(!l || limitExists(l.name)) return false;
-  const note = ['+' + (+l.value || 0) + 'D back', l.description || ''].filter(Boolean).join(' — ');
+  const note = ['−' + (+l.value || 0) + ' to the cost of the power it is attached to (min 1)', l.description || ''].filter(Boolean).join(' — ');
   addLimitRow({ name: l.name, note: note }); scheduleAutosave(); return true;
 }
 function openLimitPicker() { $('limit-search').value = ''; $('limit-overlay').classList.add('open'); renderLimitPicker(); $('limit-search').focus(); }
@@ -1502,7 +1551,7 @@ function renderLimitPicker() {
   box.innerHTML = list.map(l => {
     const have = limitExists(l.name);
     const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-limit="' + esc(l.name) + '">+ Add</button>';
-    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(l.name) + '<span class="brow-cost" style="color:#4bb371;">+' + (+l.value || 0) + 'D back</span></div>' + (l.description ? '<div class="brow-desc">' + esc(l.description) + '</div>' : '') + '</div>' + btn + '</div>';
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(l.name) + '<span class="brow-cost" style="color:#4bb371;">−' + (+l.value || 0) + ' cost</span></div>' + (l.description ? '<div class="brow-desc">' + esc(l.description) + '</div>' : '') + '</div>' + btn + '</div>';
   }).join('');
 }
 
@@ -1693,7 +1742,7 @@ var ACT_CFG = {
   weaponsHome: 'the Gear tab',
   reactTitle: 'Defenses',
   powerTitle: 'Powers',
-  points: () => [],   // Hero and Character Points live on the main sheet (Hero Point "Spend" button there)
+  points: () => [],   // Hero Points and XP live on the main sheet (Hero Point "Spend" button there)
   badges: () => heroArmed ? ['Hero Point armed — ' + heroArmDesc()] : [],
   build: (add) => {
     [...document.querySelectorAll('#weapons-body tr')].forEach(tr => {
@@ -1885,7 +1934,7 @@ function collectSheet() {
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value.trim(), note: tr.querySelector('.gr-note').value.trim(), link: tr.dataset.link || '' })).filter(g => g.name),
     wealth: v('f-wealth'), background: v('f-background'), personality: v('f-personality'), notes: v('f-notes'),
     options: {
-      noDodge: !!options.noDodge, wildDie: options.wildDie || 'core', heroModel: options.heroModel || 'heroic',
+      noDodge: !!options.noDodge, wildDie: options.wildDie || 'core', heroModel: options.heroModel || 'heroic', pips: !!options.pips,
       advancement: options.advancement || 'none', magicPoints: !!options.magicPoints,
       specialization: !!options.specialization, attrBudget: !!options.attrBudget, powerLevel: options.powerLevel || 'none',
       traitModule: (options.traitModule === 'perks' || options.traitModule === 'none') ? options.traitModule : 'troubles', superpowers: !!options.superpowers,
@@ -1906,7 +1955,7 @@ function applySheet(d) {
   set('f-name', d.name); set('f-genre', d.genre || 'core'); set('f-template', d.template || ''); set('f-archetype', d.archetype || '');
   buildStats(d.attrs && typeof d.attrs === 'object' ? d.attrs : { Agility:9, Brawn:9, Knowledge:9, Perception:9 });
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
-  wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = false; assetBonusPips = 0; renderWoundTrack();
+  wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = 0; assetBonusPips = 0; renderWoundTrack();
   set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0); set('f-map', d.map || 0); if(d.actionTurn && typeof d.actionTurn === 'object') Object.assign(_act, d.actionTurn); _act.declared = Math.max(1, num(d.map || 0) + 1, _act.used || 0);
   set('f-move', d.move != null ? d.move : '10');
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);

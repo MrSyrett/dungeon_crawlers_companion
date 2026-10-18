@@ -1865,6 +1865,7 @@ function locBlockInner(l){
 // driven by SB_CONFIG so scripts/make-session-builders.mjs can swap it per
 // system (the block between the SB_CONFIG markers is replaced wholesale).
 /* SB_CONFIG_START */
+const _d6Def = (m, k) => { const r = (m.special||[]).map(x => new RegExp('^\\s*' + k + '\\s+(\\d+)', 'i').exec(String(x))).find(Boolean); return r ? r[1] : ''; };
 const _d6Code = p => { p = Math.round(Number(p)||0); const d = Math.floor(p/3), r = p%3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); };
 const SB_CONFIG = {
   typePlaceholder: 'FOE // HUMANOID',
@@ -1878,8 +1879,8 @@ const SB_CONFIG = {
     sbtype: /villain|boss|dragon|giant|robot/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'boss' : /npc|ally|civilian|detective|medic/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'npc' : 'mob', name: m.name || '',
     type: [String(m.kind||'Foe').toUpperCase(), m.genre && m.genre !== 'core' ? String(m.genre).toUpperCase() : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     agi: c('Agility'), bra: c('Brawn'), kno: c('Knowledge'), per: c('Perception'),
-    dodge: '', parry: '', move: m.move || '',
-    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.special||[]).map(x => 'Special: ' + x), ...(m.talents||[]).map(x => 'Talent: ' + x), ...(m.powers||[]).map(x => 'Power: ' + x)].filter(Boolean).join('\n'),
+    dodge: _d6Def(m, 'Dodge'), parry: _d6Def(m, 'Parry'), move: m.move || '',
+    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.special||[]).filter(x => !/^\s*(Dodge|Parry)\s+\d/i.test(x)).map(x => 'Special: ' + x), ...(m.talents||[]).map(x => 'Talent: ' + x), ...(m.powers||[]).map(x => 'Power: ' + x)].filter(Boolean).join('\n'),
   }; }, sub: m => String(m.kind||'') + (m.genre && m.genre !== 'core' ? ' · ' + m.genre : '') },
 };
 const _DCC_SIZE_NAMES = {1:'Tiny',2:'Small',3:'Petite',4:'Medium',5:'Large',6:'Huge',7:'Colossal',8:'Gargantuan'};

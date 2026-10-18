@@ -25,7 +25,9 @@
     if (m) m[1].split(/,|\band\b/).forEach(part => { const mm = /(Control|Sense|Alter)\s*\(?(\d+D(?:\+\d)?)?/i.exec(part); if (mm) out[mm[1][0].toUpperCase() + mm[1].slice(1).toLowerCase()] = fromCode(mm[2] || '1D'); });
     return out;
   }
-  function spent() { let n = 0; Object.values(alloc).forEach(v => n += v); Object.values(forceAlloc).forEach(v => n += v); return n; }
+  // Only dice ADDED count against the 7D (core p.8): the Force skill dice printed on
+  // the template are part of the template, not the allocation.
+  function spent() { let n = 0; Object.values(alloc).forEach(v => n += v); const base = tpl ? forceSkills(tpl) : {}; Object.keys(forceAlloc).forEach(k => n += Math.max(0, forceAlloc[k] - (base[k] || 0))); return n; }
 
   function ensure() {
     if (ov) return;
@@ -124,7 +126,7 @@
     const prev = collectSheet();
     applySheet({
       name: details.name || '', template: tpl.name, species: details.species || speciesFor(tpl), sex: details.sex, age: details.age, height: details.height, weight: details.weight, physical: details.physical,
-      attrs, skills: sk, wound: 'none', forcePoints: 1, darkSide: 0, skillPoints: 0, credits: creditsNum, armor, move: 10,
+      attrs, skills: sk, wound: 'none', forcePoints: 1, darkSide: 0, skillPoints: 0, credits: creditsNum, armor,
       weapons: wp, force: [], gear, ship, background: details.background, personality: details.personality, connection: details.connection, quote: details.quote, special: tpl.specialRule || '', notes: extraNotes.join('\n'),
       campaign: prev.campaign,
     });

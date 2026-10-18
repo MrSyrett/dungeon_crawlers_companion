@@ -4,7 +4,7 @@
    "name": "Additional Attributes",
    "category": "Core Module",
    "genre": "core",
-   "summary": "Adds optional extra attributes that can be slotted into any game, each bringing its own skill list. Charm governs social interactions and suits any game; Mechanical and Technical are rooted in the science fiction genre, while Mysticism and Magic are rooted in fantasy, though any can be added however you like. Adding an attribute broadens what characters can do and grants +3D of attribute dice at creation.",
+   "summary": "Adds optional extra attributes that can be slotted into any game, each bringing its own skill list. Charm governs social interactions and suits any game; Mechanical and Technical are rooted in the science fiction genre, while Mysticism and Magic are rooted in fantasy, though any can be added however you like. Adding an attribute broadens what characters can do and grants +3D of attribute dice at creation, and each added skill module grants +2D of skill dice.",
    "page": 62
   },
   {
@@ -18,7 +18,7 @@
    "name": "Alternate Wild Die",
    "category": "Core Module",
    "genre": "core",
-   "summary": "Offers three additional Wild Die variants (Basic, Classic, Simple) beyond the core rule; only use one. In each, one rolled die is the wild die: rolling a 6 explodes it (add the result and reroll), while a 1 triggers a mishap. In Basic and Classic a 1 removes the wild die and the single highest other die from the total, whereas Simple only explodes on 6 with no penalty for a 1. They trade rules complexity for swingier results.",
+   "summary": "Offers three additional Wild Die variants (Basic, Classic, Simple) beyond the core rule; only use one. In each, one rolled die is the wild die and a 6 always explodes (add it and reroll, again on further 6s). Basic: a 1 on the first roll removes the wild die and the single highest other die. Classic: a first-roll 1 is not added and causes a mishap — roll a die: 1-5 a penalty (also lose the highest other die), 6 a complication. Simple: a 1 counts normally. They trade rules complexity for swingier results.",
    "page": 71
   },
   {
@@ -374,7 +374,7 @@
    "skill": null,
    "cost": null,
    "description": "The character who drinks this potion removes the Wounded or Incapacitated condition from themselves.",
-   "page": 82
+   "page": 81
   },
   {
    "name": "Gem of Trueseeing",
@@ -387,7 +387,7 @@
    "skill": null,
    "cost": null,
    "description": "While tightly clutching this gem, the character gains the infravision talent.",
-   "page": 82
+   "page": 81
   },
   {
    "name": "Blessed Water",
@@ -400,7 +400,7 @@
    "skill": "Throwing",
    "cost": null,
    "description": "When splashed or thrown on undead or demonic foes, the blessed water does 5D damage.",
-   "page": 82
+   "page": 81
   },
   {
    "name": "Hide/Fur",

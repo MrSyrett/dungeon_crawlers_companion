@@ -488,7 +488,7 @@
    "name": "Superpowers",
    "category": "Superhero Module",
    "genre": "superhero",
-   "summary": "Superpowers are talents with more extreme application, purchased with dice set aside at creation (Young Heroes 8D up to Galactic & Cosmic Heroes 24D). Each has a base point cost; ranks add more. Enhancements customize a power (Additional Effect, Bestow, Extended Range, Multiple Targets, Side Effect on limitation side, Singularity, Super-science) and their cost is paid at each rank. Limitations reduce total cost (never below 1): Ability Loss, Allergy, Burnout, Debt, Flaw, Minor Stigma, Others Only, Price, Restricted, Side Effect, Singularity. Powers can be reskinned narratively.",
+   "summary": "Superpowers are talents with more extreme application, purchased with dice set aside at creation (Young Heroes 8D up to Galactic & Cosmic Heroes 24D). Each has a base point cost; ranks add more. Enhancements customize a power (Additional Effect, Bestow, Extended Range, Multiple Targets; Super-science is in Gadgets & Gear) and their cost is paid at each rank. Limitations reduce total cost (never below 1): Ability Loss, Allergy, Burnout, Debt, Flaw, Minor Stigma, Others Only, Price, Restricted, Side Effect, Singularity. Powers can be reskinned narratively.",
    "page": 212
   },
   {
@@ -517,68 +517,79 @@
   {
    "name": "Ability Loss",
    "genre": "superhero",
-   "value": 2,
-   "description": "Using the power temporarily costs you the use of another ability, sense, or attribute until you rest — e.g. going blind while using X-ray senses."
+   "value": 3,
+   "description": "Cost 3 for one rank, 4 for two. The Talent switches off at known, regular times (a phase of the moon, daylight), or using it costs you a skill you have trained. At the second rank, getting the Talent or skill back also needs some simple procedure (a ritual, a dose of serum).",
+   "page": 224
   },
   {
    "name": "Allergy",
    "genre": "superhero",
-   "value": 1,
-   "description": "A specific, reasonably common substance or condition weakens, disables, or harms you while present (a classic elemental weakness)."
+   "value": 3,
+   "description": "Cost 3 for one rank, 4 for two. Exposure to a fairly common substance or situation (smoke, sunlight, a food) removes all your rerolls until it ends; at the second rank you lose all actions and your superpowers until you get away from it. One rank per Allergy, but a Talent can have several.",
+   "page": 224
   },
   {
    "name": "Burnout",
    "genre": "superhero",
-   "value": 2,
-   "description": "On a Wild Die complication (a rolled 1), the power shuts down and can't be used again until you rest or meet a set condition."
+   "value": 1,
+   "description": "Works like the Burnout Flaw: under set circumstances the Talent goes away. More ranks mean the Burnout is more likely; a Talent may have several versions with different triggers.",
+   "page": 224
   },
   {
    "name": "Debt",
    "genre": "superhero",
-   "value": 1,
-   "description": "The power exists because of an obligation — a patron, mentor, or organization who can call in the favor at a bad time."
+   "value": 3,
+   "description": "Someone or something granted the Talent with strings attached — you must keep begging the giver or doing tasks for them to keep it. One rank only.",
+   "page": 225
   },
   {
    "name": "Flaw",
    "genre": "superhero",
    "value": 1,
-   "description": "A specific, narrow circumstance switches the power off entirely (a magnetic field, a spoken word, direct sunlight)."
+   "description": "Every difficulty for using the Talent rises by +2 per rank.",
+   "page": 225
   },
   {
    "name": "Minor Stigma",
    "genre": "superhero",
-   "value": 1,
-   "description": "The power marks you visibly or socially — an obvious mutation, an aura, a reputation — drawing suspicion, fear, or unwanted attention."
+   "value": 3,
+   "description": "You must perform the 'proper rituals' before or after using the Talent (sketching the prey before the hunt, purification after a kill). One rank only.",
+   "page": 225
   },
   {
    "name": "Others Only",
    "genre": "superhero",
    "value": 2,
-   "description": "The power can never be used on yourself; it only affects other targets."
+   "description": "Cost 2 / 3 / 4 for ranks 1 / 2 / 3. You cannot use the Talent yourself, only grant it to others — all three target groups (sentient, nonsentient living, nonliving) at rank 1, two groups at rank 2, one at rank 3. Granting it is an action for you, one target per round; once per Talent, and not for Talents like Immortality or Longevity.",
+   "page": 225
   },
   {
    "name": "Price",
    "genre": "superhero",
-   "value": 2,
-   "description": "Each use costs a resource — Hero Points, Character Points, money, or your own health."
+   "value": 1,
+   "description": "You must meet some obligation to use the Talent — e.g. time back in your native environment or −1D per rank to damage resistance — or pay a fee such as 3 experience points or 1 Hero Point per rank for each adventure in which you use it.",
+   "page": 226
   },
   {
    "name": "Restricted",
    "genre": "superhero",
    "value": 1,
-   "description": "The power only functions under a specific condition of time, place, emotion, or circumstance (only at night, only when angry)."
+   "description": "The Talent is held back in a way no other Limitation covers (for example a natural weapon that only works against certain things). More restrictive means more ranks; several versions allowed.",
+   "page": 226
   },
   {
    "name": "Side Effect",
    "genre": "superhero",
-   "value": 1,
-   "description": "Using the power inflicts an unwanted secondary effect on you or your surroundings (deafening noise, collateral damage, exhaustion)."
+   "value": 2,
+   "description": "Using the Talent gives off something obvious — whistling, a glow, a stench. Sneaking gets +4 difficulty per rank while it is in use, and interaction attempts at least +1 per rank.",
+   "page": 226
   },
   {
    "name": "Singularity",
    "genre": "superhero",
    "value": 1,
-   "description": "The power has a single fixed application or works only once per scene — it can't be varied or repeated freely."
+   "description": "Cost 1 per Talent in the group. Only one Talent of the group works each round; switching at the start of your turn is free (at rank 2, +1 point per Talent, switching takes an action). Two ranks at most, and every Talent in the group must share the same rank.",
+   "page": 226
   }
  ]
 }

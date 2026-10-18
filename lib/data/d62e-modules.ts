@@ -8,7 +8,7 @@ export const D62E_MODULES = [
     "name": "Additional Attributes",
     "category": "Core Module",
     "genre": "core",
-    "summary": "Adds optional extra attributes that can be slotted into any game, each bringing its own skill list. Charm governs social interactions and suits any game; Mechanical and Technical are rooted in the science fiction genre, while Mysticism and Magic are rooted in fantasy, though any can be added however you like. Adding an attribute broadens what characters can do and grants +3D of attribute dice at creation.",
+    "summary": "Adds optional extra attributes that can be slotted into any game, each bringing its own skill list. Charm governs social interactions and suits any game; Mechanical and Technical are rooted in the science fiction genre, while Mysticism and Magic are rooted in fantasy, though any can be added however you like. Adding an attribute broadens what characters can do and grants +3D of attribute dice at creation, and each added skill module grants +2D of skill dice.",
     "page": 62
   },
   {
@@ -22,7 +22,7 @@ export const D62E_MODULES = [
     "name": "Alternate Wild Die",
     "category": "Core Module",
     "genre": "core",
-    "summary": "Offers three additional Wild Die variants (Basic, Classic, Simple) beyond the core rule; only use one. In each, one rolled die is the wild die: rolling a 6 explodes it (add the result and reroll), while a 1 triggers a mishap. In Basic and Classic a 1 removes the wild die and the single highest other die from the total, whereas Simple only explodes on 6 with no penalty for a 1. They trade rules complexity for swingier results.",
+    "summary": "Offers three additional Wild Die variants (Basic, Classic, Simple) beyond the core rule; only use one. In each, one rolled die is the wild die and a 6 always explodes (add it and reroll, again on further 6s). Basic: a 1 on the first roll removes the wild die and the single highest other die. Classic: a first-roll 1 is not added and causes a mishap — roll a die: 1-5 a penalty (also lose the highest other die), 6 a complication. Simple: a 1 counts normally. They trade rules complexity for swingier results.",
     "page": 71
   },
   {
@@ -211,7 +211,7 @@ export const D62E_MODULES = [
     "name": "Superpowers",
     "category": "Superhero Module",
     "genre": "superhero",
-    "summary": "Superpowers are talents with more extreme application, purchased with dice set aside at creation (Young Heroes 8D up to Galactic & Cosmic Heroes 24D). Each has a base point cost; ranks add more. Enhancements customize a power (Additional Effect, Bestow, Extended Range, Multiple Targets, Side Effect on limitation side, Singularity, Super-science) and their cost is paid at each rank. Limitations reduce total cost (never below 1): Ability Loss, Allergy, Burnout, Debt, Flaw, Minor Stigma, Others Only, Price, Restricted, Side Effect, Singularity. Powers can be reskinned narratively.",
+    "summary": "Superpowers are talents with more extreme application, purchased with dice set aside at creation (Young Heroes 8D up to Galactic & Cosmic Heroes 24D). Each has a base point cost; ranks add more. Enhancements customize a power (Additional Effect, Bestow, Extended Range, Multiple Targets; Super-science is in Gadgets & Gear) and their cost is paid at each rank. Limitations reduce total cost (never below 1): Ability Loss, Allergy, Burnout, Debt, Flaw, Minor Stigma, Others Only, Price, Restricted, Side Effect, Singularity. Powers can be reskinned narratively.",
     "page": 212
   }
 ] as unknown as D62eModule[];

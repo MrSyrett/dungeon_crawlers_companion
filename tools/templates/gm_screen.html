@@ -1450,6 +1450,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .gmt-roll { flex: 0 0 auto; padding: 6px 12px; background: var(--gold); color: #1a1a1a; border: none; border-radius: 4px; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .gmt-roll:hover { filter: brightness(1.1); }
 .gmt-die { flex: 1 1 auto; min-width: 44px; padding: 11px 0; }
+.gmt-wild { display: inline-flex; align-items: center; gap: 6px; font-family: 'Geist', sans-serif; font-size: 11px; color: var(--light); cursor: pointer; }
 .gmt-kob { gap: 4px; }
 /* Marvel edge/trouble counters (mirror the sheet's tray) */
 .gmt-mv { gap: 8px; flex-wrap: wrap; }
@@ -2277,6 +2278,12 @@ body[data-cview="free"] .cst-log-rail{display:none}
   window.GM_SYSTEM = SYS;
   window.GM_SYSTEM_KEYS = VISIBLE_KEYS;
   window.SYS_LABEL = SYS_LABEL;   // friendly names for other tools (e.g. the prep picker)
+  // Star Wars Wild Die house rule (WEG 1st edition has none). Default OFF; the GM
+  // toggles it in the SW dice tray. gmSwWildDie() reads it, gmSwWildDie(bool) sets it.
+  window.gmSwWildDie = function (v) {
+    if (typeof v === 'boolean') { try { localStorage.setItem('gm_sw_wild_die', v ? '1' : '0'); } catch (e) {} return v; }
+    try { return localStorage.getItem('gm_sw_wild_die') === '1'; } catch (e) { return false; }
+  };
   // Paint the read-only system indicator in the top bar.
   function paintSysLabel() {
     document.querySelectorAll('#gm-system-label .gm-sys-name').forEach(el => { el.textContent = SYS_LABEL[SYS] || SYS; });
@@ -4097,7 +4104,7 @@ GMScenes.renderPins();
             <div class="ai-sec-title">Gear Drop</div>
             <input type="text" class="ai-input xs-tr-name" placeholder="Where it's found (e.g. Abandoned outpost)">
             <div class="ai-row">
-              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option><option value="credits">Credits only</option></select>
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option></select>
               <select class="ai-select xs-tr-count" title="How many items to roll">
                 <option value="1">1</option><option value="2">2</option>
                 <option value="3">3</option><option value="5">5</option>
@@ -4110,7 +4117,6 @@ GMScenes.renderPins();
             <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
             <div class="ai-row">
               <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
-              <button class="btn small ghost xs-tr-credits" type="button" title="Add a credit stash">💰 Credits</button>
             </div>
             <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
             <div class="ai-status xs-tr-status"></div>
@@ -8092,6 +8098,8 @@ function init_trackers(root) {
     };
   }
   const SW_WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
+  // D6 System 2e adds Staggered below Stunned (core p.33).
+  const D62E_WOUNDS = [['none','Unhurt'],['staggered','Stagger'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
 
   // ══ Combat card renderer ════════════════════════════════════════════════
   // Every system's monster is described the same way — a "view" — and one set of
@@ -8261,7 +8269,11 @@ function init_trackers(root) {
     if(hint === 'dmg') return '';
     if(hint) return hint === 'ace' ? 'ace' : hint;
     if(/^(yze|twd|vae|myz)$/.test(src) && /^\d+d6$/i.test(e)) return 'yz';
-    if(/^(sw|d62e)$/.test(src) && /^\d+d6(\+\d+)?$/i.test(e)) return 'wild';
+    // Star Wars (WEG 1st edition) has no Wild Die: SW rolls are plain dice + pips
+    // unless the GM turned on the Wild Die house rule (see gmSwWildDie). D6 2e
+    // uses its own book Wild Die (d62eWild).
+    if(src === 'd62e' && /^\d+d6(\+\d+)?$/i.test(e)) return 'wild62';
+    if(src === 'sw' && /^\d+d6(\+\d+)?$/i.test(e)) return window.gmSwWildDie && window.gmSwWildDie() ? 'wild' : 'swplain';
     if(src === 'ace' && /^\d+d6$/i.test(e)) return 'ace';
     if(src === 'mmrpg' && /^3d6([+-]\d+)?$/i.test(e)) return 'd616';
     return '';
@@ -8436,13 +8448,14 @@ function init_trackers(root) {
           <div class="cc-pips">${pips}</div>
         </div>`;
     } else if(mode === 'sw') {
-      const w = SW_WOUNDS.some(x => x[0] === n.wound) ? n.wound : 'none';
+      const WL = (n.gmon && (n.gmon.sys || n.gmon.src) === 'd62e') ? D62E_WOUNDS : SW_WOUNDS;
+      const w = WL.some(x => x[0] === n.wound) ? n.wound : 'none';
       n.wound = w;
       defeated = w === 'incapacitated' || w === 'mortal';
-      const colors = { none: '#173a17', stunned: '#3a3410', wounded: '#c08020', incapacitated: '#7a1a12', mortal: '#4a0f0a' };
-      const fg = { none: '#7bbf7b', stunned: '#d6c04a', wounded: '#0d0e10', incapacitated: '#ffb4ac', mortal: '#ffb4ac' };
-      const idx2 = SW_WOUNDS.findIndex(x => x[0] === w);
-      const track = SW_WOUNDS.map(([k, lbl], i) => `<button class="cc-wound${i <= idx2 ? ' on' : ''}" data-wound="${k}" style="${i <= idx2 ? `background:${colors[k]};color:${fg[k]}` : ''}" title="${lbl}">${lbl}</button>`).join('');
+      const colors = { none: '#173a17', staggered: '#2f3a14', stunned: '#3a3410', wounded: '#c08020', incapacitated: '#7a1a12', mortal: '#4a0f0a' };
+      const fg = { none: '#7bbf7b', staggered: '#b9cf6a', stunned: '#d6c04a', wounded: '#0d0e10', incapacitated: '#ffb4ac', mortal: '#ffb4ac' };
+      const idx2 = WL.findIndex(x => x[0] === w);
+      const track = WL.map(([k, lbl], i) => `<button class="cc-wound${i <= idx2 ? ' on' : ''}" data-wound="${k}" style="${i <= idx2 ? `background:${colors[k]};color:${fg[k]}` : ''}" title="${lbl}">${lbl}</button>`).join('');
       hpBlockHtml = `
         <div class="cc-hp">
           <div class="cc-hp-head"><span class="cc-hp-lab">Wounds</span></div>
@@ -8520,7 +8533,8 @@ function init_trackers(root) {
       });
     }
     // Every roll on the card goes through the system's own dice: a dice pool in a
-    // Year Zero game counts sixes, D6 skills use the Wild Die, ACE! dice explode,
+    // Year Zero game counts sixes, D6 2e skills use the Wild Die (Star Wars only
+    // with the Wild Die house rule on), ACE! dice explode,
     // Marvel rolls d616 — not a plain sum (see monRollKind / _monsterRoll).
     const cardSrc = n.gmon ? (n.gmon.sys || n.gmon.src) : n.dmon ? 'dcc' : 'sd';
     card.querySelectorAll('.npc-mon-roll').forEach(b => {
@@ -11554,9 +11568,10 @@ function xsMonSummary(src, m) {
   } else if(src === 'sw') {
     const A = m.attributes || {};
     [['Dexterity','DEX'],['Knowledge','KNO'],['Mechanical','MEC'],['Perception','PER'],['Strength','STR'],['Technical','TEC']].forEach(([k, l]) => { if(A[k] != null) out.stats.push({ label: l, val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
-    if(m.move) out.stats.push({ label: 'Move', val: m.move });
+    // 1st edition has no Move stat; only the Sourcebook creatures print a Speed Code.
+    if(m.move) out.stats.push({ label: 'Speed', val: String(m.move).replace(/^Speed Code\s*/i, '') });
     (m.skills || []).forEach(sk => { const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
-    // Skill rolls use the Wild Die; weapon damage doesn't (kind 'dmg' = a plain sum).
+    // Skill rolls use the Wild Die only with the SW house rule on; weapon damage doesn't (kind 'dmg' = a plain sum).
     (m.equipment || []).forEach(e => { const dm = /damage\s*(\d+D(?:\+\d)?)/i.exec(e); out.lines.push({ label: 'Gear', text: e, roll: dm ? dm[1].replace(/D/, 'd6') : '', kind: dm ? 'dmg' : '' }); });
     if(m.description) out.notes.push(m.description); if(m.notes) out.notes.push(m.notes);
     out.hp = 0;   // no hit points in D6 — the tracker card carries a wound track instead
@@ -11594,18 +11609,39 @@ function xsMonSummary(src, m) {
     // track lives on the tracker card, like Star Wars.
     const A = m.attributes || {};
     Object.keys(A).forEach(k => { out.stats.push({ label: k.slice(0, 3).toUpperCase(), val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
-    (m.skills || []).forEach(sk => { const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
+    // Book stat blocks list skills as dice ADDED to the governing attribute ("Brawn
+    // Skills 4D · Athletics 2D" = Athletics 6D), so a skill rolls attribute + skill.
+    // "Agility Skills 2D" lines are the attribute itself and roll as printed.
+    const D62E_SKILL_ATTR = { acrobatics:'Agility', melee:'Agility', shooting:'Agility', 'sleight of hand':'Agility', flying:'Agility', riding:'Agility',
+      athletics:'Brawn', intimidation:'Brawn', stamina:'Brawn', throwing:'Brawn',
+      medicine:'Knowledge', scholar:'Knowledge', sciences:'Knowledge', barter:'Knowledge', languages:'Knowledge',
+      driving:'Perception', investigation:'Perception', stealth:'Perception', survival:'Perception', gambling:'Perception', streetwise:'Perception', gunnery:'Perception',
+      piloting:'Mechanical', navigation:'Mechanical', computers:'Technical' };
+    (m.skills || []).forEach(sk => {
+      const t = String(sk), dm = /\+?\s*(\d+)D(?:\+(\d))?/.exec(t);
+      let roll = '';
+      if(dm) {
+        let pips = (+dm[1]) * 3 + (+dm[2] || 0);
+        const nm = t.slice(0, dm.index).replace(/\(.*?\)/g, '').replace(/[:\s]+$/, '').trim().toLowerCase();
+        const attr = /skills$/.test(nm) ? null : D62E_SKILL_ATTR[nm];
+        const ak = attr && Object.keys(A).find(k => k.toLowerCase() === attr.toLowerCase());
+        if(ak) pips += +A[ak] || 0;
+        roll = swPipsRoll(pips);
+      }
+      out.lines.push({ label: 'Skill', text: t, roll: roll });
+    });
     // Dodge / Parry are static defenses — surface them on the meta line under the
     // attribute strip, not as generic "Special" lines. Everything else stays a line.
     (m.special || []).forEach(sp => {
       const md = /^\s*(Dodge|Parry)\s+(.+)$/i.exec(String(sp));
       if(md) { out.meta.push([md[1].charAt(0).toUpperCase() + md[1].slice(1).toLowerCase(), md[2].trim()]); return; }
-      // "Damage: Talons (Brawn+2D)" → a damage roll of Brawn + 2D (no Wild Die on damage).
+      // "Damage: Talons (Brawn+2D)" → a damage roll of Brawn + 2D. D62e damage is a
+      // normal die code with a Wild Die (a damage roll can invoke a Complication, p.33).
       const dd = /damage:?\s*([^(]*)\((\w+)\s*\+\s*(\d+)D(?:\+(\d))?\)/i.exec(String(sp));
       if(dd) {
         const ak = Object.keys(A).find(k => k.toLowerCase() === dd[2].toLowerCase());
         const pips = (ak ? +A[ak] || 0 : 0) + (+dd[3]) * 3 + (+dd[4] || 0);
-        out.lines.push({ label: (dd[1] || 'Damage').trim() || 'Damage', text: String(sp).replace(/^damage:?\s*/i, ''), roll: swPipsRoll(pips), kind: 'dmg' });
+        out.lines.push({ label: (dd[1] || 'Damage').trim() || 'Damage', text: String(sp).replace(/^damage:?\s*/i, ''), roll: swPipsRoll(pips) });
       } else out.lines.push({ label: 'Special', text: String(sp) });
     });
     if(m.description) out.notes.push(m.description);
@@ -11818,7 +11854,7 @@ const PREP_SB_FIELDS = {
   DND:  { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['speed','Speed']], hp:'hp' },
   ACE:  { stats:[['smarts','SMA'],['moves','MOV'],['style','STY'],['brawn','BRA'],['power','POW']], def:['defence','DEF'], lines:[['focuses','Focuses']], hp:'health' },
   NIM:  { stats:[], def:['armor','Armor'], meta:[['level','LV'],['saves','Saves']], hp:'hp' },
-  SW:   { stats:[['dex','DEX'],['kno','KNO'],['mec','MEC'],['per','PER'],['str','STR'],['tec','TEC']], def:['armor','Armor'], meta:[['move','Move'],['force','Force']], hp:'health' },
+  SW:   { stats:[['dex','DEX'],['kno','KNO'],['mec','MEC'],['per','PER'],['str','STR'],['tec','TEC']], def:['armor','Armor'], meta:[['move','Speed'],['force','Force']], hp:'health' },   // 1e: no Move stat; 'move' holds a creature's Speed Code
   D62E: { stats:[['agi','AGI'],['bra','BRA'],['kno','KNO'],['per','PER']], meta:[['dodge','Dodge'],['parry','Parry'],['move','Move']], hp:'health' },
   ICRPG:{ stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['def','DEF'], meta:[['hearts','Hearts']], hp:'hp' },
   // MMRPG: Rank lives in the type line (header), so it's left off the meta line to avoid showing it twice.
@@ -16253,7 +16289,7 @@ function init_dice(root) {
   }
 
   // Remembered per-tray counts so a roll doesn't reset what the GM dialed in.
-  const _tray = { yz: 5, wild: 4, ghost: 4, co: 2, mvE: 0, mvT: 0 };
+  const _tray = { yz: 5, wild: 4, swPips: 0, ghost: 4, co: 2, mvE: 0, mvT: 0 };
 
   // ════════ YZE — Year Zero Engine (D6 pool: each 6 a success, each 1 a bane) ════════
   function yzCount(rolls) { let s = 0, b = 0; rolls.forEach(v => { if(v === 6) s++; else if(v === 1) b++; }); return { s, b }; }
@@ -16281,19 +16317,67 @@ function init_dice(root) {
     wireStepper('wd-n', 1, 15, v => { _tray.wild = v; });
     trayEl.querySelector('#wd-roll').onclick = wildRoll;
   }
-  function wildRoll() {
-    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 1));
+  // D6 System 2e tray: same pool, but the D62e Wild Die rule (see d62eWild).
+  function renderWildTrayD62e() {
+    renderWildTray();
+    trayEl.querySelector('#wd-roll').onclick = () => {
+      const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 1));
+      _tray.wild = n;
+      const r = d62eWild(n);
+      gmLog('D6 wild pool', r.base + (r.adv ? ' ✦ Advantage' : r.comp ? ' ⚠ Complication' : ''), n + 'D: [' + r.reg.join(' ') + '] ✦[' + r.wf.join('→') + ']' + (r.adv ? ' · if it fails: ' + r.chain : ''), r.adv ? 'crit' : r.comp ? 'fumble' : '');
+    };
+  }
+  // D62e Wild Die (core p.26-27): 6 = Advantage (on a success: exceptional success
+  // or +2 Hero Points; only on a failure does the 6 keep rolling and add on),
+  // 1 = Complication (no die is removed). base = the plain sum; chain = the sum
+  // with the Wild Die kept rolling on 6s, used only when the roll would fail.
+  function d62eWild(n) {
+    const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
+    let w = d6(); const wf = [w]; let guard = 0;
+    while(w === 6 && guard++ < 20) { w = d6(); wf.push(w); }
+    const sumReg = reg.reduce((a, b) => a + b, 0);
+    return { reg: reg, wf: wf, adv: wf[0] === 6, comp: wf[0] === 1, base: sumReg + wf[0], chain: sumReg + wf.reduce((a, b) => a + b, 0) };
+  }
+  function wildRoll(nArg, pipsArg) {
+    const n = typeof nArg === 'number' ? nArg : Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#wd-n') || {}).value, 10) || 1));
+    const pips = typeof pipsArg === 'number' ? pipsArg : 0;
     _tray.wild = n;
     const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
     let w = d6(); const wildFaces = [w]; const complication = (w === 1); let guard = 0;
     while(w === 6 && guard++ < 20) { w = d6(); wildFaces.push(w); }
     const exploded = wildFaces[0] === 6;
-    const total = reg.reduce((a, b) => a + b, 0) + wildFaces.reduce((a, b) => a + b, 0);
+    const total = reg.reduce((a, b) => a + b, 0) + wildFaces.reduce((a, b) => a + b, 0) + pips;
     // Format matches the animation parser: "<n>D: [regular dice] ✦[wild→chain]".
-    const detail = n + 'D: [' + reg.join(' ') + '] ✦[' + wildFaces.join('→') + ']';
+    const detail = n + 'D: [' + reg.join(' ') + '] ✦[' + wildFaces.join('→') + ']' + (pips ? ' +' + pips : '');
     const type = exploded ? 'crit' : complication ? 'fumble' : '';
     const tag = exploded ? ' ✦' : complication ? ' ⚠' : '';
     gmLog('D6 wild pool', total + tag, detail, type);
+  }
+
+  // ════════ Star Wars (WEG 1st edition) — dice + pips, Wild Die only as a house rule ════════
+  // The 1st-edition books have no Wild Die. The GM can switch on the 2nd-edition
+  // Wild Die as a house rule (default OFF, remembered in localStorage); it then
+  // applies to this tray and to the Combat Tracker's SW card rolls.
+  function renderSWTray() {
+    const on = window.gmSwWildDie();
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row">' + stepperHtml('swd-n', _tray.wild, 1, 15)
+      + '<span class="gmt-etl">D +</span>' + stepperHtml('swd-p', _tray.swPips || 0, 0, 2)
+      + '<button class="gmt-roll" id="swd-roll">Roll</button></div>'
+      + '<div class="gmt-row"><label class="gmt-wild" title="WEG Star Wars 1st edition has no Wild Die. Turn this on to use the 2nd-edition Wild Die as a house rule (GM rolls only; players set it on their own sheets).">'
+      + '<input type="checkbox" id="swd-wild"' + (on ? ' checked' : '') + '> Wild Die (house rule — 2nd edition)</label></div></div>';
+    wireStepper('swd-n', 1, 15, v => { _tray.wild = v; });
+    wireStepper('swd-p', 0, 2, v => { _tray.swPips = v; });
+    trayEl.querySelector('#swd-wild').onchange = e => { window.gmSwWildDie(e.target.checked); };
+    trayEl.querySelector('#swd-roll').onclick = swRoll;
+  }
+  function swRoll() {
+    const n = Math.max(1, Math.min(15, parseInt((trayEl.querySelector('#swd-n') || {}).value, 10) || 1));
+    const p = Math.max(0, Math.min(2, parseInt((trayEl.querySelector('#swd-p') || {}).value, 10) || 0));
+    _tray.wild = n; _tray.swPips = p;
+    if(window.gmSwWildDie()) { wildRoll(n, p); return; }
+    const r = []; for(let i = 0; i < n; i++) r.push(d6());
+    const total = r.reduce((a, b) => a + b, 0) + p;
+    gmLog('D6 pool', String(total), n + 'd6(' + r.join(',') + ')' + (p ? ' +' + p : ''), '');
   }
 
   // ════════ Ghostbusters — like the wild pool, but one die is the Ghost Die ════════
@@ -16391,7 +16475,7 @@ function init_dice(root) {
     TWD: renderYZETray,
     VAE: renderYZETray,
     MYZ: renderYZETray,
-    SW: renderWildTray, ACE: renderWildTray, D62E: renderWildTray,
+    SW: renderSWTray, ACE: renderWildTray, D62E: renderWildTrayD62e,
     GB: renderGhostTray,
     CO: renderCandelaTray,
     MMRPG: renderMarvelTray,
@@ -16621,7 +16705,8 @@ function init_dice(root) {
   // kind — see monRollKind in init_trackers). Returns the log entry, or null when
   // the spec doesn't apply (the caller then falls back to a plain sum).
   //   yz         Year Zero pool (Alien, TWD, Vaesen, MYZ): count the sixes
-  //   wild       WEG D6 (Star Wars, D6 2e): the last die is the Wild Die
+  //   wild       WEG D6 (D6 2e; Star Wars with the Wild Die house rule): the last die is the Wild Die
+  //   swplain    Star Wars 1st edition: plain dice + pips (no Wild Die)
   //   ace        ACE!: every die explodes on a 6; the first is the Calamity Die
   //   d616       Marvel: 3d6 with the Marvel die in the middle (+ ability)
   //   nimble     Nimble damage: a 1 on the primary die misses, its top face crits
@@ -16635,6 +16720,14 @@ function init_dice(root) {
       const c = yzCount(rolls), tier = yzTier(c.s);
       return gmLog(label, c.s + ' · ' + tier.t, n + 'd6(' + rolls.join(',') + ') · ' + c.s + ' succ' + (c.b ? ' · ' + c.b + ' bane' + (c.b > 1 ? 's' : '') : ''), tier.type);
     }
+    if(kind === 'wild62' && pool) {
+      // D6 System 2e Wild Die (p.26-27): a 6 is an Advantage, a 1 a Complication.
+      // The Wild Die only keeps rolling on a 6 when the action would otherwise fail,
+      // so the score is the plain sum, with the "if it fails" total alongside.
+      const n = Math.max(1, Math.min(30, +pool[1])), pips = +(pool[2] || 0);
+      const r = d62eWild(n);
+      return gmLog(label, (r.base + pips) + (r.adv ? ' ✦ Advantage' : r.comp ? ' ⚠ Complication' : ''), n + 'D: [' + r.reg.join(' ') + '] ✦[' + r.wf.join('→') + ']' + (pips ? ' +' + pips : '') + (r.adv ? ' · if it fails: ' + (r.chain + pips) : ''), r.adv ? 'crit' : r.comp ? 'fumble' : '');
+    }
     if(kind === 'wild' && pool) {
       const n = Math.max(1, Math.min(30, +pool[1])), pips = +(pool[2] || 0);
       const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
@@ -16643,6 +16736,13 @@ function init_dice(root) {
       const exploded = wf[0] === 6;
       const total = reg.reduce((a, b) => a + b, 0) + wf.reduce((a, b) => a + b, 0) + pips;
       return gmLog(label, total + (exploded ? ' ✦' : comp ? ' ⚠' : ''), n + 'D: [' + reg.join(' ') + '] ✦[' + wf.join('→') + ']' + (pips ? ' ' + (pips > 0 ? '+' : '') + pips : ''), exploded ? 'crit' : comp ? 'fumble' : '');
+    }
+    if(kind === 'swplain' && pool) {
+      // Star Wars 1st edition: roll the dice, add the pips — no exploding 6, no complication.
+      const n = Math.max(1, Math.min(30, +pool[1])), pips = +(pool[2] || 0);
+      const r = []; for(let i = 0; i < n; i++) r.push(d6());
+      const total = r.reduce((a, b) => a + b, 0) + pips;
+      return gmLog(label, String(total), n + 'd6(' + r.join(',') + ')' + (pips ? ' ' + (pips > 0 ? '+' : '') + pips : ''), '');
     }
     if(kind === 'ace' && pool) {
       const n = Math.max(1, Math.min(30, +pool[1])); const dice = [];
@@ -18829,7 +18929,7 @@ function wireAiConsole(root) {
     },
     sw: {
       list: () => ((typeof SW_WEAPONS !== 'undefined' && Array.isArray(SW_WEAPONS)) ? SW_WEAPONS : []).filter(w => !/^(Starship|Capital|Vehicle|Artillery|Droid)$/.test(w.kind)).map(w => ({ name: w.name, category: 'weapon', desc: [w.damageText || swPipsCode(w.damage), w.range, w.cost && w.cost + ' cr'].filter(Boolean).join(' · ') }))
-        .concat(((typeof SW_GEAR !== 'undefined' && Array.isArray(SW_GEAR)) ? SW_GEAR : []).filter(g => !/^(Vehicle|Housing)$/.test(g.category)).map(g => ({ name: g.name, category: g.category === 'Armor' ? 'Armor' : g.category === 'Droid' ? 'Droid' : 'gear', desc: [g.stats, g.cost && g.cost + ' cr', g.description].filter(Boolean).join(' · ').slice(0, 160) }))),
+        .concat(((typeof SW_GEAR !== 'undefined' && Array.isArray(SW_GEAR)) ? SW_GEAR : []).filter(g => !/^(Vehicle|Housing)$/.test(g.category) && !/^(Armor improvement|Equipment availability codes|Capital ship template|Droid equipment \(building dice\)|Medpac \(revised use\)|Passage \(starliner ticket\))$|Services$/.test(g.name) /* rules entries and services aren't loot */).map(g => ({ name: g.name, category: g.category === 'Armor' ? 'Armor' : g.category === 'Droid' ? 'Droid' : 'gear', desc: [g.stats, g.cost && g.cost + ' cr', g.description].filter(Boolean).join(' · ').slice(0, 160) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'Armor',label:'Armor',cats:['Armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'Droid',label:'Droids',cats:['Droid'] }],
       randomCats: ['weapon','Armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 + (Math.random() < 0.3 ? 500 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'Star Wars gear list',
     },
@@ -18845,7 +18945,8 @@ function wireAiConsole(root) {
     d62e: {
       list: () => ((typeof D62E_EQUIPMENT !== 'undefined' && Array.isArray(D62E_EQUIPMENT)) ? D62E_EQUIPMENT : []).map(e => ({ name: e.name, category: (e.category === 'weapon' || e.category === 'armor') ? e.category : 'gear', desc: [e.damage ? e.damage + ' dmg' : '', e.protection ? '+' + e.protection + ' prot' : '', e.range, e.era && e.era !== 'core' ? e.era : '', e.cost != null ? e.cost + ' cr' : '', e.description].filter(Boolean).join(' · ').slice(0, 160) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
-      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 + (Math.random() < 0.3 ? 500 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'D6 2e equipment list',
+      // D62e has no currency or prices (wealth is handled narratively), so no money roll.
+      randomCats: ['weapon','armor','gear','gear'], money: null, label: 'GEAR DROP', empty: 'D6 2e equipment list',
     },
     mmrpg: {
       list: () => ((typeof MMRPG_EQUIPMENT !== 'undefined' && Array.isArray(MMRPG_EQUIPMENT)) ? MMRPG_EQUIPMENT : []).map(e => {

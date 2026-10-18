@@ -197,14 +197,15 @@ const SB_CONFIG = {
   hp: null,
   rows: [
     [{ key:'dex', label:'DEX', th:'Dexterity', ph:'2D' }, { key:'kno', label:'KNOW', th:'Knowledge', ph:'2D' }, { key:'mec', label:'MECH', th:'Mechanical', ph:'2D' }, { key:'per', label:'PERC', th:'Perception', ph:'2D' }, { key:'str', label:'STR', th:'Strength', ph:'2D' }, { key:'tec', label:'TECH', th:'Technical', ph:'2D' }],
-    [{ key:'move', label:'MOVE' }, { key:'force', label:'FORCE PTS', th:'Force Points' }, { key:'armor', label:'ARMOR' }],
+    // 1st edition prints no Move stat; Sourcebook creatures carry a Speed Code (key stays 'move' for saved prep).
+    [{ key:'move', label:'SPEED', th:'Speed Code (creatures)' }, { key:'force', label:'FORCE PTS', th:'Force Points' }, { key:'armor', label:'ARMOR' }],
   ],
   abilitiesLabel: 'Skills, Equipment & Notes', abilitiesPlaceholder: 'One per line — blaster 4D · Stormtrooper armor (+1D)',
   mobs: { placeholder: 'Search the Star Wars Bestiary…', pool: () => (typeof SW_CHARACTERS !== 'undefined' && Array.isArray(SW_CHARACTERS)) ? SW_CHARACTERS : [], toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _swCode(A[k]); return {
     sbtype: /villain/i.test(m.group||'') ? 'boss' : /hero|rebel|civilian|alien/i.test(m.group||'') ? 'npc' : 'mob', name: m.name || '',
     type: [String(m.group||'').toUpperCase(), m.book === 'sourcebook' ? 'SOURCEBOOK' : m.book === 'companion' ? 'RULES COMPANION' : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     dex: c('Dexterity'), kno: c('Knowledge'), mec: c('Mechanical'), per: c('Perception'), str: c('Strength'), tec: c('Technical'),
-    move: m.move || '', force: '', armor: ((m.equipment||[]).find(e => /armor/i.test(e)) || '').split(/[:(]/)[0].trim(),
+    move: String(m.move || '').replace(/^Speed Code\s*/i, ''), force: '', armor: ((m.equipment||[]).find(e => /armor/i.test(e)) || '').split(/[:(]/)[0].trim(),
     abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.equipment||[]).map(x => 'Gear: ' + x), m.notes ? 'Notes: ' + m.notes : ''].filter(Boolean).join('\\n'),
   }; }, sub: m => String(m.group||'') + (m.book !== 'core' ? ' · ' + m.book : '') },
 };`,
@@ -226,7 +227,8 @@ const SB_CONFIG = {
     abilities: [...(m.traits||[]).map(t => t.name + ': ' + t.description), ...(m.actions||[]).map(a => a.name + ': ' + a.description), ...(m.bonusActions||[]).map(a => 'Bonus — ' + a.name + ': ' + a.description), ...(m.reactions||[]).map(a => 'Reaction — ' + a.name + ': ' + a.description), ...(m.legendaryActions||[]).map(a => 'Legendary — ' + a.name + ': ' + a.description)].join('\\n'),
   }; }, sub: m => String(m.type||'') + ' · CR ' + m.cr + (m.legendaryActions && m.legendaryActions.length ? ' · legendary' : '') },
 };`,
-  d62e: `const _d6Code = p => { p = Math.round(Number(p)||0); const d = Math.floor(p/3), r = p%3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); };
+  d62e: `const _d6Def = (m, k) => { const r = (m.special||[]).map(x => new RegExp('^\\\\s*' + k + '\\\\s+(\\\\d+)', 'i').exec(String(x))).find(Boolean); return r ? r[1] : ''; };
+const _d6Code = p => { p = Math.round(Number(p)||0); const d = Math.floor(p/3), r = p%3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); };
 const SB_CONFIG = {
   typePlaceholder: 'FOE // HUMANOID',
   hp: null,
@@ -239,8 +241,8 @@ const SB_CONFIG = {
     sbtype: /villain|boss|dragon|giant|robot/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'boss' : /npc|ally|civilian|detective|medic/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'npc' : 'mob', name: m.name || '',
     type: [String(m.kind||'Foe').toUpperCase(), m.genre && m.genre !== 'core' ? String(m.genre).toUpperCase() : ''].filter(Boolean).join(' // '), flavor: m.description || '',
     agi: c('Agility'), bra: c('Brawn'), kno: c('Knowledge'), per: c('Perception'),
-    dodge: '', parry: '', move: m.move || '',
-    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.special||[]).map(x => 'Special: ' + x), ...(m.talents||[]).map(x => 'Talent: ' + x), ...(m.powers||[]).map(x => 'Power: ' + x)].filter(Boolean).join('\\n'),
+    dodge: _d6Def(m, 'Dodge'), parry: _d6Def(m, 'Parry'), move: m.move || '',
+    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.special||[]).filter(x => !/^\\s*(Dodge|Parry)\\s+\\d/i.test(x)).map(x => 'Special: ' + x), ...(m.talents||[]).map(x => 'Talent: ' + x), ...(m.powers||[]).map(x => 'Power: ' + x)].filter(Boolean).join('\\n'),
   }; }, sub: m => String(m.kind||'') + (m.genre && m.genre !== 'core' ? ' · ' + m.genre : '') },
 };`,
   co: `const SB_CONFIG = {

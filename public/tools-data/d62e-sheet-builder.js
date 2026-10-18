@@ -14,13 +14,15 @@
   // traitPicks / powerPicks map name -> chosen rank (number, >=1). Absent = not picked.
   let traitPicks = {}, traitKind = '', traitQ = '';
   let powerPicks = {}, powerLevel = 'none', powerKind = '', powerQ = '';
-  let limitPicks = {}, limitQ = '';   // Superpower Limitations = the "flaws" for powers; each grants dice back.
+  // Superpower Limitations (pp.224-226) attach to one power and lower THAT power's total cost
+  // (never below 1). limitPicks maps power name -> [limitation names].
+  let limitPicks = {}, limitQ = '';
   let bopts = {}, bgearCat = '', bgearQ = '', bgearEra = '';
   let ov = null;
   const STEP_LABELS = { Traits: 'Perks, Flaws & Talents', Extras: 'Troubles & Assets', Powers: 'Superpowers' };
   // Replace a scrollable list's contents in place, preserving its scroll position + focus.
   function relist(id, html, wire) { const el = $(id); if (!el) { if (wire) wire(); return; } const sp = el.scrollTop; el.innerHTML = html; el.scrollTop = sp; if (wire) wire(); }
-  function freshOpts() { return (typeof defaultOptions === 'function') ? defaultOptions() : { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'troubles', superpowers:false, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+  function freshOpts() { return (typeof defaultOptions === 'function') ? defaultOptions() : { noDodge:false, wildDie:'core', heroModel:'heroic', pips:false, advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'troubles', superpowers:false, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
   // ── Power Levels (pg 212): key, label, superpower-dice pool ──
   const POWER_LEVELS = [['none','None',0],['young','Young Heroes',8],['street','Street Level',10],['standard','Standard Hero',12],['national','National Heroic Team',16],['worldwide','Worldwide Heroic Team',20],['galactic','Galactic & Cosmic Heroes',24]];
   function powerLevelDice() { const r = POWER_LEVELS.find(l => l[0] === powerLevel); return r ? r[2] : 0; }
@@ -70,26 +72,37 @@
       if (t.kind === 'perk') d -= r; else if (t.kind === 'flaw') d += r; else if (t.kind === 'talent') d -= talentCostFor(t, r); });
     return d;
   }
-  function skillBudgetPips() { return Math.max(0, SKILL_TOTAL + traitDeltaDice() * 3); }
+  // Each optional attribute's skill module adds +2D to the skill pool (p.20), alongside its +3D of attribute dice.
+  function skillBudgetPips() { return Math.max(0, SKILL_TOTAL + 6 * extraSkillModules() + traitDeltaDice() * 3); }
   function perkPoints() { let n = 0; Object.keys(traitPicks).forEach(k => { const t = perksData().find(x => x.name === k); if (t && t.kind === 'perk') n += traitPicks[k] || 1; }); return n; }
   function flawPoints() { let n = 0; Object.keys(traitPicks).forEach(k => { const t = perksData().find(x => x.name === k); if (t && t.kind === 'flaw') n += traitPicks[k] || 1; }); return n; }
   // ── Power cost parsing (pg 212) — only superpowers spend from the pool ──
   function powerCostFor(p, rank) { if (p.kind !== 'superpower' || p.cost == null) return 0; return isPerRank(p.cost) ? leadingInt(p.cost) * (rank || 1) : leadingInt(p.cost); }
   function powerPerRank(p) { return p.kind === 'superpower' && isPerRank(p.cost); }
-  function powerPoolSpent() { let s = 0; Object.keys(powerPicks).forEach(n => { const p = powersData().find(x => x.name === n); if (p) s += powerCostFor(p, powerPicks[n] || 1); }); return s; }
+  function powerLimits(n) { return (Array.isArray(limitPicks[n]) ? limitPicks[n] : []).filter(l => limitObj(l)); }
+  function limitCut(n) { return powerLimits(n).reduce((a, l) => a + (+limitObj(l).value || 0), 0); }
+  // A power's cost after its own limitations — never below 1 (p.224).
+  function netPowerCost(p, rank) { const base = powerCostFor(p, rank); if (!base) return base; return Math.max(1, base - limitCut(p.name)); }
+  function powerPoolSpent() { let s = 0; Object.keys(powerPicks).forEach(n => { const p = powersData().find(x => x.name === n); if (p) s += netPowerCost(p, powerPicks[n] || 1); }); return s; }
   // Limitations grant Superpower Dice back to the pool (the "flaw" side of powers).
   function limitObj(nm) { return limitsData().find(x => x.name === nm) || null; }
-  function limitBonus() { let n = 0; Object.keys(limitPicks).forEach(k => { const l = limitObj(k); if (l && limitPicks[k]) n += (+l.value || 0); }); return n; }
-  function powerPoolTotal() { return powerLevelDice() + limitBonus(); }
+  function powerPoolTotal() { return powerLevelDice(); }
   function charAttrs() {
     if (mode === 'alacarte') return Object.assign({}, attrAlloc);
     return tpl ? Object.assign({}, tpl.attributes) : { Agility: 9, Brawn: 9, Knowledge: 9, Perception: 9 };
   }
   function attrSpent() { return Object.values(attrAlloc).reduce((a, b) => a + b, 0); }
+  // Pips are a module (p.94): with it off, or in the Successes house rule, skills take whole dice.
+  const pipsAllowed = () => !!(bopts && bopts.pips) && !(bopts && bopts.rollMode === 'successes');
+  function wholeSkillDice() { Object.keys(skillAlloc).forEach(k => { const v = Math.floor(skillAlloc[k] / 3) * 3; if (v) skillAlloc[k] = v; else delete skillAlloc[k]; }); }
+  // With pips, at most 2D (6 pips) may be split into +1/+2 modifiers at creation (p.94).
+  const PIP_SPLIT_MAX = 6;
+  function pipsSplit() { return Object.values(skillAlloc).reduce((a, v) => a + (v % 3), 0); }
   function skillSpent() { return Object.values(skillAlloc).reduce((a, b) => a + Math.max(0, b), 0); }
   // Additional Attribute Budgets option (read from the sheet's live options): +3D (9 pips)
   // of attribute budget for each attribute the character has beyond the four core.
   const attrBudgetOn = () => !!(bopts && bopts.attrBudget);
+  function extraSkillModules() { return attrBudgetOn() ? Object.keys(charAttrs()).filter(a => CORE_ATTRS.indexOf(a) < 0).length : 0; }
   function optionalCount() { return Object.keys(attrAlloc).filter(a => CORE_ATTRS.indexOf(a) < 0).length; }
   function attrTotal() { return ATTR_TOTAL + (attrBudgetOn() ? 9 * optionalCount() : 0); }
   // Recommended skills for a template: structured skills + text in the description / talents field.
@@ -171,8 +184,9 @@
     h += optRow('Advancement', 'Growth tracker shown on the sheet.', bsel('advancement', [['none','None'],['xp','XP'],['milestone','Milestone'],['narrative','Narrative']]));
     h += optRow('Magic Points Casting', 'Cast from a points pool instead of straight rolls.', bchk('magicPoints'));
     h += optRow('Skill Specializations & Advanced Skills', 'Adds Adv / Spec controls to each skill on the sheet.', bchk('specialization'));
-    h += optRow('Additional Attribute Budgets', 'Scales the a-la-carte attribute budget +3D per attribute beyond the core four.', bchk('attrBudget'));
-    h += optRow('Roll Resolution', 'Additive totals the dice (standard). Successes counts each die at or above a target number — set the target in the roll log.', bsel('rollMode', [['additive','Additive'],['successes','Successes']]));
+    h += optRow('Additional Attribute Budgets', 'Each attribute beyond the core four adds +3D to the attribute budget and +2D to the skill budget (p.20).', bchk('attrBudget'));
+    h += optRow('Pips (p.94)', 'Optional module — the core game uses whole dice only. On: die codes can carry +1/+2, up to 2D split into pips at creation, and pips can be bought with XP.', bchk('pips'));
+    h += optRow('Roll Resolution <span style="color:#df8a8a;font-weight:600;">(house rule)</span>', 'Not in the D6 2e book. Additive totals the dice (the book\'s rule). Successes counts each die at or above a target number — set the target in the roll log; whole dice only.', bsel('rollMode', [['additive','Additive'],['successes','Successes (house rule)']]));
     h += '<div class="m-lbl" style="margin-top:14px;">Optional modules</div>';
     h += optRow('Character Traits Module', 'Two versions of the same system — pick one, or neither. <b>Perks, Flaws &amp; Talents</b> adjust your skill dice; <b>Troubles &amp; Assets</b> grant Hero Points and benefits.', bsel('traitModule', [['perks','Perks, Flaws & Talents'],['troubles','Troubles & Assets'],['none','Neither']]));
     h += optRow('Superpowers', 'An extension of Talents — adds a Superpower Dice pool and a Superpowers step to the builder.', bchk('superpowers'));
@@ -181,7 +195,7 @@
       genre = e.target.value;
       // Genre nudges the optional modules toward that genre's usual setup.
       if (genre === 'superhero') { bopts.superpowers = true; bopts.traitModule = 'none'; traitPicks = {}; }
-      else if (genre === 'scifi') { bopts.traitModule = 'perks'; bopts.rollMode = 'successes'; traitPicks = {}; }
+      else if (genre === 'scifi') { bopts.traitModule = 'perks'; traitPicks = {}; }   // roll mode is left as the user set it
       if (mode === 'template' && tpl && !templateGenreOk(tpl)) { tpl = null; mode = null; }
       maxStep = Math.min(maxStep, step);   // module/step set may have changed — re-walk from here
       render();
@@ -189,12 +203,15 @@
     b.querySelectorAll('[data-optk]').forEach(el => el.addEventListener('click', () => {
       const k = el.dataset.optk; bopts[k] = !bopts[k];
       // Turning Superpowers off drops any picked powers / power level.
-      if (k === 'superpowers' && !bopts.superpowers) { powerPicks = {}; powerLevel = 'none'; bopts.powerLevel = 'none'; }
+      if (k === 'superpowers' && !bopts.superpowers) { powerPicks = {}; powerLevel = 'none'; limitPicks = {}; bopts.powerLevel = 'none'; }
+      // Pips off: whole dice only — drop any pips already put on skills.
+      if (k === 'pips' && !bopts.pips) wholeSkillDice();
       if (maxStep > step) maxStep = step;   // step set changed — re-walk from here
       render();
     }));
     b.querySelectorAll('[data-opts]').forEach(el => el.addEventListener('change', () => {
       const k = el.dataset.opts; bopts[k] = el.value;
+      if (k === 'rollMode' && el.value === 'successes') wholeSkillDice();
       // Switching the trait module clears picks from the other version.
       if (k === 'traitModule') { traitPicks = {}; traitKind = ''; traitQ = ''; }
       if (maxStep > step) maxStep = step;
@@ -224,7 +241,7 @@
     const budget = attrBudgetOn(); const total = attrTotal(); const left = total - attrSpent();
     note.textContent = left < 0 ? 'Over budget by ' + code(-left) + ' — lower an attribute' : 'Attribute dice left: ' + code(left);
     let h = '<p class="m-hint">Assign <b>' + code(total) + '</b> across your attributes — each between <b>1D and 5D</b>.'
-      + (budget ? ' Each optional attribute beyond the core four adds <b>+3D</b> to the budget.' : '') + ' Dice are whole here (fine-tune with pips on the sheet later).</p><div class="alloc">';
+      + (budget ? ' Each optional attribute beyond the core four adds <b>+3D</b> to the budget.' : '') + ' Attribute dice are whole here.</p><div class="alloc">';
     const keys = CORE_ATTRS.concat(Object.keys(attrAlloc).filter(a => CORE_ATTRS.indexOf(a) < 0));
     keys.forEach(a => {
       const v = attrAlloc[a] || 0;
@@ -259,9 +276,10 @@
     const groups = {};
     skillsData().forEach(s => { if (!genreOk(s)) return; if (base[s.attribute] == null) return; (groups[s.attribute] = groups[s.attribute] || []).push(s); });
     const delta = traitDeltaDice();
-    const succ = !!(bopts && bopts.rollMode === 'successes'); const dstep = succ ? 3 : 1;
-    let h = '<p class="m-hint">Spend <b>' + code(budget) + '</b> of skill adds — no more than <b>2D</b> on any one skill (' + (succ ? 'whole dice only' : 'pips are fine') + ')'
-      + (delta ? '. Base 7D ' + (delta < 0 ? '−' : '+') + ' ' + code(Math.abs(delta) * 3) + ' from your perks/flaws/talents = ' + code(budget) : '') + '. A skill\'s code is its attribute plus the adds you put on it.'
+    const pipsOk = pipsAllowed(); const dstep = pipsOk ? 1 : 3;
+    let h = '<p class="m-hint">Spend <b>' + code(budget) + '</b> of skill adds — no more than <b>2D</b> on any one skill (' + (pipsOk ? 'Pips module: you may split up to 2D into +1/+2 — ' + pipsSplit() + '/' + PIP_SPLIT_MAX + ' pips used' : 'whole dice only') + ')'
+      + (extraSkillModules() ? '. Base 7D + ' + code(6 * extraSkillModules()) + ' for ' + extraSkillModules() + ' optional skill module' + (extraSkillModules() > 1 ? 's' : '') : '')
+      + (delta ? '. ' + (delta < 0 ? '−' : '+') + ' ' + code(Math.abs(delta) * 3) + ' from your perks/flaws/talents = ' + code(budget) : '') + '. A skill\'s code is its attribute plus the adds you put on it.'
       + (rec.length ? ' <b style="color:#f0a860;">Recommended:</b> ' + rec.map(esc).join(', ') + '.' : '') + '</p><div class="alloc">';
     Object.keys(base).forEach(a => {
       const list = groups[a]; if (!list || !list.length) return;
@@ -279,6 +297,7 @@
       const k = btn.dataset.s, d = Number(btn.dataset.d);
       const nv = Math.max(0, (skillAlloc[k] || 0) + d);
       if (nv > SKILL_PER) return; if (d > 0 && skillBudgetPips() - skillSpent() < Math.abs(d)) return;
+      if (d > 0 && pipsSplit() - ((skillAlloc[k] || 0) % 3) + (nv % 3) > PIP_SPLIT_MAX) return;
       if (nv) skillAlloc[k] = nv; else delete skillAlloc[k]; render();
     }));
   }
@@ -373,15 +392,15 @@
 
   // ── Step: Powers (own dice pool by Power Level, pg 212) ─────────────────────
   function renderPowers(b, note) {
-    const total = powerPoolTotal(), spent = powerPoolSpent(), bonus = limitBonus();
+    const total = powerPoolTotal(), spent = powerPoolSpent();
     note.textContent = powerLevel === 'none' ? 'Powers (optional)' : 'Power dice: ' + spent + ' / ' + total + (spent > total ? '  ⚠ over pool' : '');
-    let h = '<p class="m-hint">Superpowers are an extension of Talents. Pick a <b>Power Level</b> to get a Superpower Dice pool (pg 212) — superpowers spend from it. <b>Limitations</b> are the flaws for superpowers: each grants dice back to the pool. Picked powers &amp; limitations go on the sheet.</p>';
+    let h = '<p class="m-hint">Superpowers are an extension of Talents. Pick a <b>Power Level</b> to get a Superpower Dice pool (pg 212) — superpowers spend from it. <b>Limitations</b> are the flaws for superpowers: attach one to a picked power and it lowers that power\'s cost by its value (a power never costs less than 1). Picked powers &amp; limitations go on the sheet.</p>';
     h += '<div class="m-lbl">Power Level</div><select class="m-input" id="d62eb-plevel" style="max-width:280px;">'
       + POWER_LEVELS.map(l => '<option value="' + l[0] + '"' + (powerLevel === l[0] ? ' selected' : '') + '>' + esc(l[1]) + (l[2] ? ' (' + l[2] + ')' : '') + '</option>').join('') + '</select>';
-    if (powerLevel !== 'none') h += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:#f0a860;margin:8px 0 4px;">Superpower dice: <b>' + spent + ' / ' + total + '</b>' + (bonus ? ' <span style="color:#8ad48a;">(+' + bonus + ' from limitations)</span>' : '') + (spent > total ? ' <span style="color:#df8a8a;">— over pool</span>' : '') + '</div>';
+    if (powerLevel !== 'none') h += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:#f0a860;margin:8px 0 4px;">Superpower dice: <b>' + spent + ' / ' + total + '</b>' + (spent > total ? ' <span style="color:#df8a8a;">— over pool</span>' : '') + '</div>';
     h += '<div style="display:flex;gap:6px;margin:8px 0;"><input class="m-input" id="d62eb-power-search" placeholder="Search superpowers…" value="' + esc(powerQ) + '" style="flex:1;"></div>';
     h += '<div class="brow-list" id="d62eb-power-list" style="max-height:32vh;overflow:auto;padding:0;">' + powerListHtml() + '</div>';
-    h += '<div class="m-lbl" style="margin-top:12px;">Limitations <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(flaws for superpowers — grant dice back)</span></div>';
+    h += '<div class="m-lbl" style="margin-top:12px;">Limitations reference <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(attach them to a picked power above)</span></div>';
     h += '<div style="display:flex;gap:6px;margin:6px 0;"><input class="m-input" id="d62eb-limit-search" placeholder="Search limitations…" value="' + esc(limitQ) + '" style="flex:1;"></div>';
     h += '<div class="brow-list" id="d62eb-limit-list" style="max-height:28vh;overflow:auto;padding:0;">' + limitListHtml() + '</div>';
     b.innerHTML = h;
@@ -395,30 +414,27 @@
       const box = $('d62eb-power-list');
       box.querySelectorAll('[data-power]').forEach(btn => btn.addEventListener('click', () => {
         const p = powersData().find(x => x.name === btn.dataset.power); if (!p) return;
-        if (powerPicks[p.name] != null) delete powerPicks[p.name]; else powerPicks[p.name] = 1;
+        if (powerPicks[p.name] != null) { delete powerPicks[p.name]; delete limitPicks[p.name]; } else powerPicks[p.name] = 1;
         render();
       }));
       box.querySelectorAll('[data-prank]').forEach(btn => btn.addEventListener('click', () => {
         const p = powersData().find(x => x.name === btn.dataset.prank); if (!p || powerPicks[p.name] == null) return;
         const nv = (powerPicks[p.name] || 1) + Number(btn.dataset.d); powerPicks[p.name] = Math.max(1, Math.min(5, nv)); render();
       }));
-    }
-    function wireLimits() {
-      $('d62eb-limit-list').querySelectorAll('[data-limit]').forEach(btn => btn.addEventListener('click', () => {
-        const l = limitObj(btn.dataset.limit); if (!l) return;
-        if (limitPicks[l.name] != null) delete limitPicks[l.name]; else limitPicks[l.name] = 1;
-        render();
+      box.querySelectorAll('select[data-plimit]').forEach(sel => sel.addEventListener('change', () => {
+        const n = sel.dataset.plimit, l = sel.value; if (!l || powerPicks[n] == null) return;
+        const cur = powerLimits(n); if (cur.indexOf(l) < 0) cur.push(l); limitPicks[n] = cur; render();
+      }));
+      box.querySelectorAll('[data-unlimit]').forEach(btn => btn.addEventListener('click', () => {
+        const n = btn.dataset.unlimit, l = btn.dataset.l; limitPicks[n] = powerLimits(n).filter(x => x !== l); if (!limitPicks[n].length) delete limitPicks[n]; render();
       }));
     }
+    function wireLimits() {}
   }
   function limitListHtml() {
     const list = limitsData().filter(l => genreOk(l) && (!limitQ || norm(l.name).includes(limitQ) || norm(l.description || '').includes(limitQ))).sort((a, c) => a.name.localeCompare(c.name));
     if (!list.length) return '<p class="brow-empty">No limitations match.</p>';
-    return list.map(l => {
-      const on = limitPicks[l.name] != null;
-      const btn = '<button class="brow-add" data-limit="' + esc(l.name) + '"' + (on ? ' style="background:#1a3a1a;color:#a0f0a0;"' : '') + '>' + (on ? 'Added ✓' : '+ Add') + '</button>';
-      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(l.name) + '<span class="brow-cost" style="color:#8ad48a;">+' + (+l.value || 0) + 'D back</span></div>' + (l.description ? '<div class="brow-desc">' + esc(l.description) + '</div>' : '') + '</div>' + btn + '</div>';
-    }).join('');
+    return list.map(l => '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(l.name) + '<span class="brow-cost" style="color:#8ad48a;">−' + (+l.value || 0) + ' cost</span></div>' + (l.description ? '<div class="brow-desc">' + esc(l.description) + '</div>' : '') + '</div></div>').join('');
   }
   function powerListHtml() {
     // Superpowers only — magic & psionic are a separate system, excluded here.
@@ -428,9 +444,16 @@
       const on = powerPicks[p.name] != null; const r = powerPicks[p.name] || 1;
       const costLabel = p.kind === 'superpower' ? (p.cost != null ? esc(String(p.cost)) : 'free') : 'free';
       const stepper = (on && powerPerRank(p)) ? '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:6px;"><button class="a-rk" data-prank="' + esc(p.name) + '" data-d="-1"' + (r <= 1 ? ' disabled' : '') + '>−</button><span style="font-family:\'Share Tech Mono\',monospace;color:#f0a860;">R' + r + '</span><button class="a-rk" data-prank="' + esc(p.name) + '" data-d="1"' + (r >= 5 ? ' disabled' : '') + '>+</button></span>' : '';
-      const spend = (on && p.kind === 'superpower') ? ' · spends ' + powerCostFor(p, r) : '';
+      const cut = on ? limitCut(p.name) : 0;
+      const spend = (on && p.kind === 'superpower') ? ' · spends ' + netPowerCost(p, r) + (cut ? ' (' + powerCostFor(p, r) + ' − ' + cut + ' limitations, min 1)' : '') : '';
+      const lims = powerLimits(p.name);
+      const limUi = (on && p.kind === 'superpower') ? '<div class="brow-meta" style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">'
+        + lims.map(l => '<span style="border:1px solid #3a5a3a;border-radius:10px;padding:1px 6px;color:#a0f0a0;">' + esc(l) + ' −' + (+limitObj(l).value || 0) + ' <button class="a-rk" data-unlimit="' + esc(p.name) + '" data-l="' + esc(l) + '" title="remove">✕</button></span>').join('')
+        + '<select class="m-input" data-plimit="' + esc(p.name) + '" style="width:auto;padding:2px 6px;font-size:12px;"><option value="">＋ limitation…</option>'
+        + limitsData().filter(l => genreOk(l) && lims.indexOf(l.name) < 0).sort((a, c) => a.name.localeCompare(c.name)).map(l => '<option value="' + esc(l.name) + '">' + esc(l.name) + ' (−' + (+l.value || 0) + ')</option>').join('')
+        + '</select></div>' : '';
       const btn = '<button class="brow-add" data-power="' + esc(p.name) + '"' + (on ? ' style="background:#5a3a1a;color:#f0c9a0;"' : '') + '>' + (on ? 'Added ✓' : '+ Add') + '</button>';
-      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(p.name) + '<span class="brow-cost">' + costLabel + '</span></div><div class="brow-meta">' + [p.kind, p.genre].filter(Boolean).map(esc).join(' · ') + spend + '</div>' + (p.description ? '<div class="brow-desc">' + esc(p.description) + '</div>' : '') + '</div><span style="display:flex;align-items:center;">' + stepper + btn + '</span></div>';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(p.name) + '<span class="brow-cost">' + costLabel + '</span></div><div class="brow-meta">' + [p.kind, p.genre].filter(Boolean).map(esc).join(' · ') + spend + '</div>' + limUi + (p.description ? '<div class="brow-desc">' + esc(p.description) + '</div>' : '') + '</div><span style="display:flex;align-items:center;">' + stepper + btn + '</span></div>';
     }).join('');
   }
 
@@ -505,14 +528,15 @@
     if (bopts.superpowers) Object.keys(powerPicks).forEach(n => {
       if (powerPicks[n] == null) return; const p = powersData().find(x => x.name === n); if (!p) return;
       const r = powerPicks[n] || 1; let nm = p.name; if (powerPerRank(p)) nm += ' (R' + r + ')';
-      const cost = (p.kind === 'superpower' && p.cost != null) ? 'Cost ' + powerCostFor(p, r) : '';
+      const cut = limitCut(n);
+      const cost = (p.kind === 'superpower' && p.cost != null) ? 'Cost ' + netPowerCost(p, r) + (cut ? ' (' + powerCostFor(p, r) + ' − ' + cut + ' from ' + powerLimits(n).join(', ') + ')' : '') : '';
       powers.push({ name: nm, kind: p.kind || 'superpower', note: powerMeta(p, cost) });
     });
     // Limitations (flaws for superpowers) — only when the Superpowers module is on.
     const limitations = [];
     if (bopts.superpowers) Object.keys(limitPicks).forEach(n => {
-      if (limitPicks[n] == null) return; const l = limitObj(n); if (!l) return;
-      limitations.push({ name: l.name, note: ['+' + (+l.value || 0) + 'D back', l.description || ''].filter(Boolean).join(' — ') });
+      if (powerPicks[n] == null) return;
+      powerLimits(n).forEach(ln => { const l = limitObj(ln); limitations.push({ name: l.name + ' (' + n + ')', note: ['On ' + n + ': −' + (+l.value || 0) + ' to its cost (min 1)', l.description || ''].filter(Boolean).join(' — ') }); });
     });
     // Character Traits module (perks/flaws/talents OR troubles/assets — mutually exclusive), routed to buckets by kind.
     const tmSel = bopts.traitModule || 'troubles';
