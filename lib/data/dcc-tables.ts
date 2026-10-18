@@ -221,7 +221,7 @@ export const DCC_TABLES: DccTables = {
     {
       "result": "Major Fail",
       "margin": "Fail by 10+",
-      "attack": "You miss badly - drop an item, need to reload, or suffer the Take Down Debuff.",
+      "attack": "You miss badly, with a consequence such as dropping a weapon or other item, losing your footing (reduced Movement), or running out of ammunition.",
       "evade": "Take additional damage equal to the Floor Number and gain a Minor Injury after combat.",
       "nonCombat": "Fail with a real consequence; you cannot retry that skill this scene."
     },

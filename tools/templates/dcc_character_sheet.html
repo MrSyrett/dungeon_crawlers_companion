@@ -1267,7 +1267,7 @@ function updateHpPips() {
   });
 }
 
-// ── REST (Core p.76) ──
+// ── REST (Core p.94) ──
 // Short Rest (2 hrs): heal 5 Health Bar slots + regain half total Mana (round down).
 // Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.
 // Re-activate the n lowest-% lost Health Bar slots (fill upward). Returns how many.
@@ -1324,7 +1324,7 @@ function dccSkillRadial(btn) {
   if(window.DCCHotlist) DCCHotlist.toggleRow(btn);
 }
 
-// ── DYING (Core p.75) ── 0% Health Bar → Dying debuff + CON-Mod countdown; healed → clear.
+// ── DYING (Core p.94) ── 0% Health Bar → Dying debuff + CON-Mod countdown; healed → clear.
 function checkDying() {
   const pips = [...document.querySelectorAll('.hp-pip')];
   if(!pips.length) return;

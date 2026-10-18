@@ -8627,7 +8627,7 @@ const DCC_MONSTERS = [
       },
       "INT": {
         "score": 7,
-        "mod": 4
+        "mod": 3
       },
       "CON": {
         "score": 10,
@@ -10277,6 +10277,93 @@ const DCC_MONSTERS = [
     "page": 108,
     "source": "GM Toolkit",
     "flavor": "The second tier of the Rev-Up empire, these Laminak consultants don’t need to speak to a manager. They are the managers. They run their business with brutal efficiency."
+  },
+  {
+    "source": "Core",
+    "name": "Legion, the Feral Rat King",
+    "role": "Neighborhood Boss",
+    "size": 4,
+    "tags": [
+      "Rodent",
+      "Feral"
+    ],
+    "level": 59,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 67,
+        "mod": 6
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 55,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 58,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 2,
+        "mod": 1
+      }
+    },
+    "attacks": [
+      {
+        "name": "Burrow Lunge",
+        "toHit": "16+F+F",
+        "damage": "No damage",
+        "damageType": "None",
+        "range": "20ft range",
+        "rider": "Legion burrows under the trash and surfaces beside any crawler in the pit; if that crawler fails to Evade, he makes a free Rabid Chomp."
+      },
+      {
+        "name": "Rabid Chomp",
+        "toHit": "16+F+F",
+        "damage": "5d6+6+F",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains The Taint Debuff."
+      },
+      {
+        "name": "Trash Thrash",
+        "toHit": "16+F+F",
+        "damage": "3d8+6+F",
+        "damageType": "Bludgeoning",
+        "range": "30ft Cone",
+        "rider": "Any crawler who fails to Evade gains the Queasy Debuff."
+      }
+    ],
+    "notes": [
+      "Knot the Solution—A crawler can untie the tails with a DEX-Opposed Ropework Skill Check, dropping Legion's DR to 0 as the rats spread out.",
+      "Naught But Cheese—Hitting one of the rats with a quarter-pound hunk of cheese (Throwing Skill) deals no damage but gives the Boss 1 fewer Action next round.",
+      "Not of One Mind—Area Attacks roll with Advantage against Legion.",
+      "Feral—All to-hit and damage values include an extra +F (already added above)."
+    ],
+    "page": 536
   },
   {
     "name": "Literal Murder Hornets",
@@ -19546,60 +19633,6 @@ const DCC_MONSTERS = [
   },
   {
     "name": "Wise-Guy",
-    "role": "Rival Crawler",
-    "size": 4,
-    "tags": [
-      "Human"
-    ],
-    "level": 5,
-    "hbSlots": [
-      2,
-      2,
-      2,
-      2,
-      2
-    ],
-    "surprise": "13+F",
-    "evade": "11+F",
-    "move": "20+S",
-    "dr": 3,
-    "stats": {
-      "STR": {
-        "score": 3,
-        "mod": 2
-      },
-      "INT": {
-        "score": 6,
-        "mod": 3
-      },
-      "CON": {
-        "score": 4,
-        "mod": 2
-      },
-      "DEX": {
-        "score": 2,
-        "mod": 1
-      },
-      "CHA": {
-        "score": 5,
-        "mod": 2
-      }
-    },
-    "attacks": [
-      {
-        "name": "Magic Missile Spell",
-        "toHit": "13+F",
-        "damage": "2d4+3",
-        "damageType": "Force",
-        "range": "Line of Sight range"
-      }
-    ],
-    "notes": [],
-    "page": 136,
-    "source": "GM Toolkit"
-  },
-  {
-    "name": "Wise-Guyy",
     "role": "Rival Crawler",
     "size": 4,
     "tags": [

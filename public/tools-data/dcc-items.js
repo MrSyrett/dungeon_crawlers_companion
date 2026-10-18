@@ -142,7 +142,7 @@ const DCC_ITEMS = [
     "name": "Scratcher Ticket",
     "category": "consumable",
     "tier": "Platinum",
-    "effect": "Single-use randomized effect (see p.218).",
+    "effect": "Scratch it as an Action in combat for a random effect; reusable after its Cooldown (the book samples are 30 minutes).",
     "page": 218,
     "source": "Core"
   },
@@ -199,7 +199,7 @@ const DCC_ITEMS = [
     "category": "consumable",
     "tier": "Platinum",
     "effect": "Spiky weapons only; doubles Stat Mod damage + 1 damage per 10 wielder Levels.",
-    "page": 223,
+    "page": 224,
     "source": "Core"
   },
   {
@@ -207,7 +207,7 @@ const DCC_ITEMS = [
     "category": "material",
     "tier": "Gold",
     "effect": "Clothing enchantment (Fleeting — remove patch, lose bonus).",
-    "page": 223,
+    "page": 224,
     "source": "Core"
   },
   {
@@ -262,18 +262,18 @@ const DCC_ITEMS = [
     "name": "Alchemy Crafting Table (Tier 1)",
     "category": "tool",
     "tier": "Gold",
-    "effect": "Craft potions and poisons; tier adds to crafting checks. 25,000 g / found in boxes.",
+    "effect": "Craft potions and poisons. Table tier adds to crafting checks; levels up +1 each new floor. 25,000 g new, or found in boxes.",
     "price": 25000,
-    "page": 221,
+    "page": 223,
     "source": "Core"
   },
   {
     "name": "Metalworking Crafting Table (Tier 1)",
     "category": "tool",
     "tier": "Gold",
-    "effect": "Craft weapons; tier adds to crafting checks.",
+    "effect": "Craft weapons. Table tier adds to crafting checks; levels up +1 each new floor. 25,000 g new, or found in boxes.",
     "price": 25000,
-    "page": 221,
+    "page": 223,
     "source": "Core"
   },
   {
@@ -308,7 +308,7 @@ const DCC_ITEMS = [
     "category": "armor",
     "tier": "Silver",
     "slot": "Feet",
-    "effect": "Keep taking Move Actions while Dying.",
+    "effect": "With the Dying Debuff you can still take Move Actions and read HUD messages about moving in certain directions.",
     "page": 216,
     "source": "Core"
   },
@@ -361,7 +361,7 @@ const DCC_ITEMS = [
     "name": "Selfie Stick of the Self-Mutilator",
     "category": "weapon",
     "tier": "Platinum",
-    "slot": "Hand",
+    "slot": "Hand/Holding",
     "effect": "−1 Health Bar slot; entering combat with a Minor Injury = +1 Popularity (2 for Major) and equal extra Actions/round.",
     "page": 218,
     "source": "Core"
@@ -397,7 +397,7 @@ const DCC_ITEMS = [
     "name": "Enchanted Wand of Incontinence",
     "category": "weapon",
     "tier": "Legendary",
-    "slot": "Hand",
+    "slot": "Hand/Holding",
     "effect": "+10% CON; 1/session make a creature within 30 ft void bowels + Fatigued.",
     "page": 219,
     "source": "Core"
@@ -406,8 +406,112 @@ const DCC_ITEMS = [
     "name": "Hand Grips of Hella Holding",
     "category": "armor",
     "tier": "Legendary",
-    "slot": "Hands",
+    "slot": "Hands/Holding",
     "effect": "+10% STR, +3 DR, unbreakable grip.",
+    "page": 219,
+    "source": "Core"
+  },
+  {
+    "name": "Arcanist Crafting Table (Tier 1)",
+    "category": "tool",
+    "tier": "Gold",
+    "effect": "Imbue items with inherent Spells. Table tier adds to crafting checks; levels up +1 each new floor. 25,000 g new, or found in boxes.",
+    "price": 25000,
+    "page": 223,
+    "source": "Core"
+  },
+  {
+    "name": "Armorer Crafting Table (Tier 1)",
+    "category": "tool",
+    "tier": "Gold",
+    "effect": "Craft armor. Table tier adds to crafting checks; levels up +1 each new floor. 25,000 g new, or found in boxes.",
+    "price": 25000,
+    "page": 223,
+    "source": "Core"
+  },
+  {
+    "name": "Engineering Crafting Table (Tier 1)",
+    "category": "tool",
+    "tier": "Gold",
+    "effect": "Make things with moving parts, fluids and/or chemicals (such as bullets). Table tier adds to crafting checks; levels up +1 each new floor. 25,000 g new, or found in boxes.",
+    "price": 25000,
+    "page": 223,
+    "source": "Core"
+  },
+  {
+    "name": "Sapper's Crafting Table (Tier 1)",
+    "category": "tool",
+    "tier": "Gold",
+    "effect": "Craft explosives. Table tier adds to crafting checks; levels up +1 each new floor. 25,000 g new, or found in boxes.",
+    "price": 25000,
+    "page": 223,
+    "source": "Core"
+  },
+  {
+    "name": "Writing Crafting Table (Tier 1)",
+    "category": "tool",
+    "tier": "Gold",
+    "effect": "Write scrolls. Table tier adds to crafting checks; levels up +1 each new floor. 25,000 g new, or found in boxes.",
+    "price": 25000,
+    "page": 223,
+    "source": "Core"
+  },
+  {
+    "name": "Crafting Table Upgrade Coupon",
+    "category": "material",
+    "tier": "Platinum",
+    "effect": "Raises a crafting table one tier. Bought outright, an upgrade costs 250,000 g.",
+    "page": 223,
+    "source": "Core"
+  },
+  {
+    "name": "Personal Space Coupon",
+    "category": "material",
+    "tier": "Platinum",
+    "effect": "Exchange with a Bopca to add a room type to your personal space.",
+    "page": 216,
+    "source": "Core"
+  },
+  {
+    "name": "Medicine or Lube? Scratcher",
+    "category": "consumable",
+    "tier": "Platinum",
+    "effect": "Action in combat, roll 1d2: 1 = one target within 20 ft is lubed (Staggered Debuff); 2 = the target gets a Level 15 Heal Other Spell. Cooldown 30 minutes.",
+    "page": 218,
+    "source": "Core"
+  },
+  {
+    "name": "Nebular Roulette Scratcher",
+    "category": "consumable",
+    "tier": "Platinum",
+    "effect": "Action in combat, roll 1d6: 1 = you take 2d12+F Electric damage; 2–6 = the target takes 2d12+F Electric damage. Cooldown 30 minutes.",
+    "page": 218,
+    "source": "Core"
+  },
+  {
+    "name": "Borant Corporation Reset Button",
+    "category": "accessory",
+    "tier": "Celestial",
+    "slot": "Accessory",
+    "effect": "Attach to your clothing. Once per floor, press it to restart the current scene (up to 10 minutes in); in combat, only during the first round.",
+    "page": 219,
+    "source": "Core"
+  },
+  {
+    "name": "Beret of Divine Intervention",
+    "category": "armor",
+    "tier": "Celestial",
+    "slot": "Head",
+    "effect": "Choose a Skill and max it out at Rank 15. Near a deity your personal rewards double (triple near your own deity).",
+    "page": 219,
+    "source": "Core"
+  },
+  {
+    "name": "The Sassy Stiletto",
+    "category": "weapon",
+    "tier": "Celestial",
+    "slot": "Hand/Holding",
+    "effect": "+5 to all Stats; Dagger Skill at Rank 15; Critical Hits on a Natural 16–20. Intelligent: makes Look for Clues Checks for you (10 Ranks of Perception) at no Action cost.",
     "page": 219,
     "source": "Core"
   },

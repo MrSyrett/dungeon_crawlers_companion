@@ -228,7 +228,20 @@ export const DCC_SPELLS: DccSpell[] = [
     "stat": "INT",
     "passive": false,
     "desc": "Target a non-Boss Mob of half your level or less. On a Standard Success, it stands its ground, but it loses its DEX Mod for the duration of the combat. On a higher success, it uses two of its Actions during the next round to run away. Range 25 feet. Scary-ass Mobs are immune to Fear effects (GM's discretion).",
-    "upgrades": [],
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+5ft Blast radius."
+      },
+      {
+        "rank": 10,
+        "text": "+5ft Blast radius, and on a Critical Hit, the affected creatures gain the Paralyzed Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+5ft Blast radius."
+      }
+    ],
     "page": 204,
     "source": "Core"
   },

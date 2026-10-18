@@ -47,7 +47,7 @@
     { "result": "Standard Success", "margin": "Succeed by 0-9", "attack": "Your attack hits; roll damage. No bonuses.", "evade": "You avoid the attack.", "nonCombat": "Your action worked. No bonuses." },
     { "result": "Near Miss Fail", "margin": "Fail by 1-2", "attack": "GM announces \"Near Miss,\" encouraging allies to use an Intervene Action.", "evade": "You get hit (a Near Miss can be saved by an Intervene).", "nonCombat": "Fail, or succeed with complications." },
     { "result": "Standard Fail", "margin": "Fail by 3-9", "attack": "You miss.", "evade": "You get hit.", "nonCombat": "Fail, or succeed with consequences." },
-    { "result": "Major Fail", "margin": "Fail by 10+", "attack": "You miss badly - drop an item, need to reload, or suffer the Take Down Debuff.", "evade": "Take additional damage equal to the Floor Number and gain a Minor Injury after combat.", "nonCombat": "Fail with a real consequence; you cannot retry that skill this scene." },
+    { "result": "Major Fail", "margin": "Fail by 10+", "attack": "You miss badly, with a consequence such as dropping a weapon or other item, losing your footing (reduced Movement), or running out of ammunition.", "evade": "Take additional damage equal to the Floor Number and gain a Minor Injury after combat.", "nonCombat": "Fail with a real consequence; you cannot retry that skill this scene." },
     { "result": "Critical Fail", "margin": "Natural 1", "attack": "The worst outcome - hit an ally, break a weapon, gain a Debuff. Always misses.", "evade": "Take twice as much damage and gain a Major Injury after combat.", "nonCombat": "The worst possible outcome." }
   ],
   "damageTypes": {

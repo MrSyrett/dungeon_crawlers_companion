@@ -192,7 +192,7 @@
   },
   {
     "name": "Artist Alley Mogul",
-    "categories": ["Bard"],
+    "categories": ["Bard", "Merchant"],
     "grants": [
       "+5 Dexterity",
       "+5 Charisma",
@@ -226,7 +226,7 @@
   },
   {
     "name": "NecroBard",
-    "categories": ["Bard"],
+    "categories": ["Bard", "Necromancer"],
     "grants": [
       "+3 to Intelligence, Constitution, and Charisma",
       "-2 Strength",
@@ -623,7 +623,7 @@
   },
   {
     "name": "Necromancer",
-    "categories": ["Mage"],
+    "categories": ["Mage", "Necromancer"],
     "grants": [
       "+2 Intelligence and Dexterity",
       "-2 Constitution and Charisma",

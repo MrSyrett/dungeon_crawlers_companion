@@ -223,7 +223,8 @@ export const DCC_CLASSES: DccClass[] = [
   {
     "name": "Artist Alley Mogul",
     "categories": [
-      "Bard"
+      "Bard",
+      "Merchant"
     ],
     "grants": [
       "+5 Dexterity",
@@ -261,7 +262,8 @@ export const DCC_CLASSES: DccClass[] = [
   {
     "name": "NecroBard",
     "categories": [
-      "Bard"
+      "Bard",
+      "Necromancer"
     ],
     "grants": [
       "+3 to Intelligence, Constitution, and Charisma",
@@ -711,7 +713,8 @@ export const DCC_CLASSES: DccClass[] = [
   {
     "name": "Necromancer",
     "categories": [
-      "Mage"
+      "Mage",
+      "Necromancer"
     ],
     "grants": [
       "+2 Intelligence and Dexterity",

@@ -92,8 +92,8 @@
   {
     "name": "Wisp Armor",
     "kind": "internal",
-    "effect": "Spell: magic damage against you is reduced to its Rank 1 base damage (1 die + Stat Mod).",
-    "duration": "See the spell."
+    "effect": "Spell: magic damage against you is reduced to its Rank 1 base damage (1 die + Stat Mod), with no Upgrades or other bonuses; you are also immune to Mind Control.",
+    "duration": "5 minutes (10 at Rank 5, 15 at Rank 10, 20 at Rank 15)."
   },
   {
     "name": "Water Breathing",

@@ -221,7 +221,8 @@ const DCC_CLASSES = [
   {
     "name": "Artist Alley Mogul",
     "categories": [
-      "Bard"
+      "Bard",
+      "Merchant"
     ],
     "grants": [
       "+5 Dexterity",
@@ -259,7 +260,8 @@ const DCC_CLASSES = [
   {
     "name": "NecroBard",
     "categories": [
-      "Bard"
+      "Bard",
+      "Necromancer"
     ],
     "grants": [
       "+3 to Intelligence, Constitution, and Charisma",
@@ -709,7 +711,8 @@ const DCC_CLASSES = [
   {
     "name": "Necromancer",
     "categories": [
-      "Mage"
+      "Mage",
+      "Necromancer"
     ],
     "grants": [
       "+2 Intelligence and Dexterity",

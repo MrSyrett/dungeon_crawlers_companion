@@ -41,7 +41,14 @@
 
   // ── Third-Floor+ fast-forward (Core pp.115-118) ─────────────────────────────
   // level, total stat points to distribute, and number of Experiences by floor.
-  const FLOOR_CFG = { 3: { level: 10, statPoints: 27, experiences: 6 }, 4: { level: 20, statPoints: 57, experiences: 8 }, 5: { level: 30, statPoints: 87, experiences: 10 } };
+  // Floors 4 and 5 each build on the Third Floor (Core p.118): +30 / +60 stat points,
+  // +2 / +4 Experiences, choose 6 / 8 Skills for an extra boost, and one more Starting
+  // Loot from the Bronze+Silver (Floor 4) or Gold+Platinum (Floor 5) options of the spread.
+  const FLOOR_CFG = {
+    3: { level: 10, statPoints: 27, experiences: 6, boosts: 0, extraLootTiers: [] },
+    4: { level: 20, statPoints: 57, experiences: 8, boosts: 6, extraLootTiers: ["Bronze", "Silver"] },
+    5: { level: 30, statPoints: 87, experiences: 10, boosts: 8, extraLootTiers: ["Gold", "Platinum"] },
+  };
   // Table 25 starting-loot rows: each gives a Weapon / Armor / Item / Consumable at a tier.
   const LOOT_ROWS = [
     { row: 1, weapon: "Platinum", armor: "Gold", item: "Silver", consumable: "Bronze" },
@@ -64,8 +71,14 @@
     { key: "consumable", label: "Consumable", cats: ["consumable", "scroll", "tome"], generic: LOOT_CONS },
   ];
   function lootCatalog() { return typeof DCC_ITEMS !== "undefined" ? DCC_ITEMS : []; }
-  function rollLootItem(slot, tier) {
-    const pool = lootCatalog().filter((it) => slot.cats.indexOf(it.category) >= 0 && it.tier === tier);
+  // Core p.116: the starting Weapon and Armor are your own pick with the TIER's benefits (the
+  // random-magic-item route is an optional GM rule), so those two slots are never a catalog roll —
+  // that also kept a rolled armor's own DR from stacking on the tier DR when it was equipped.
+  // Items and Consumables are specific book choices and still come from the item catalog.
+  function rollLootItem(slot, tier, avoid) {
+    if (slot.key === "weapon" || slot.key === "armor") return { name: tier + " " + slot.label, notes: (slot.generic[tier] || ""), tier: tier, real: false, tierBenefit: true };
+    let pool = lootCatalog().filter((it) => slot.cats.indexOf(it.category) >= 0 && it.tier === tier);
+    if (avoid) { const rest = pool.filter((it) => it.name !== avoid); if (rest.length) pool = rest; }   // bonus loot: prefer a different item
     if (pool.length) { const it = pool[Math.floor(Math.random() * pool.length)]; return { name: it.name, notes: (it.slot ? it.slot + " — " : "") + it.effect, tier: tier, real: true }; }
     return { name: tier + " " + slot.label, notes: (slot.generic[tier] || ""), tier: tier, real: false };
   }
@@ -78,6 +91,12 @@
       item: rollLootItem(LOOT_SLOTS[2], lr.item),
       consumable: rollLootItem(LOOT_SLOTS[3], lr.consumable),
     };
+    // Floor 4/5: one more item from each of the spread's extra-loot tiers (same slot as before).
+    W.lootExtra = extraLootSlots(lr).map((sl) => Object.assign(rollLootItem(sl, lr[sl.key], W.lootRolled[sl.key] && W.lootRolled[sl.key].name), { slot: sl.key }));
+  }
+  function extraLootSlots(lr) {
+    const tiers = (FLOOR_CFG[W.floor] && FLOOR_CFG[W.floor].extraLootTiers) || [];
+    return lr ? LOOT_SLOTS.filter((sl) => tiers.indexOf(lr[sl.key]) >= 0) : [];
   }
 
   // Book data + the user's saved homebrew (own + campaign-shared). Homebrew is
@@ -329,6 +348,8 @@
       experiences: [],  // thirdfloor: [{ exp: name, skills: [] }]
       loot: "",         // thirdfloor: Table-25 row "1".."4"
       lootRolled: null, // thirdfloor: concrete rolled items per slot { weapon, armor, item, consumable }
+      lootExtra: [],    // Floor 4/5: the extra Starting Loot items [{ slot, name, notes, tier }]
+      boosts: [],       // Floor 4/5: names of the 6 / 8 Skills chosen for the extra 2d2/1d2 boost
       story: { trauma: "", loose: "", regret: "" },
       gear: { clothes: "", useful: "", junk: "", weapon: "", extra: "" },
       gearInit: false,
@@ -339,13 +360,13 @@
   // Experiences, Stat Points, and Loot between the base steps.
   const STEP_DEFS = {
     intro: "Upgrade", basics: "Basics", race: "Race", class: "Class", stats: "Stats", background: "Background",
-    combat: "Combat", experiences: "Experiences", statpoints: "Stat Points", loot: "Loot",
+    combat: "Combat", experiences: "Experiences", statpoints: "Stat Points", loot: "Loot", boosts: "Skill Boosts",
     story: "Story", gear: "Gear", review: "Review",
   };
   function steps() {
     let keys;
     if (isUpgrade()) keys = ["intro", "race", "class", "statpoints", "review"];
-    else if (W.path === "thirdfloor") keys = ["basics", "race", "class", "stats", "background", "combat", "experiences", "statpoints", "loot", "story", "gear", "review"];
+    else if (W.path === "thirdfloor") keys = ["basics", "race", "class", "stats", "background", "combat", "experiences", "statpoints", "loot"].concat(W.floor > 3 ? ["boosts"] : []).concat(["story", "gear", "review"]);
     else keys = ["basics", "race", "stats", "background", "combat", "story", "gear", "review"];
     return keys.map((k) => ({ key: k, title: STEP_DEFS[k] }));
   }
@@ -509,7 +530,7 @@
     const key = STEPS[W.step].key;
     const body = ({
       intro: renderUpgradeIntro, basics: renderBasics, race: renderRace, class: renderClass, stats: renderStats, background: renderBackground,
-      combat: renderCombat, experiences: renderExperiences, statpoints: renderStatPoints, loot: renderLoot,
+      combat: renderCombat, experiences: renderExperiences, statpoints: renderStatPoints, loot: renderLoot, boosts: renderBoosts,
       story: renderStory, gear: renderGear, review: renderReview,
     })[key]();
     // Pips are clickable to jump to any step already reached (≤ maxStep).
@@ -712,10 +733,38 @@
     if (!W.loot) { h += `<p class="dccw-warn">Pick a loot spread to continue.</p>`; return h; }
     if (!W.lootRolled) rollLoot();
     const R = W.lootRolled;
-    const line = (o) => `<li><b>${esc(o.name)}</b> <span class="dccw-sub">(${o.tier}${o.real ? "" : " · GM's discretion"})</span><br><span class="dccw-sub">${esc(o.notes)}</span></li>`;
+    const line = (o) => `<li><b>${esc(o.name)}</b> <span class="dccw-sub">(${o.tier}${o.real ? "" : o.tierBenefit ? " · your choice of item, tier benefits applied" : " · GM's discretion"})</span><br><span class="dccw-sub">${esc(o.notes)}</span></li>`;
     h += `<div class="dccw-card" style="margin-top:10px;border-color:#b82018;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><b style="color:#f0a8a3;">Your loot — Spread ${esc(String(W.loot))}</b><button class="dccw-btn" onclick="DCCW.rerollLoot()">🎲 Reroll</button></div>
       <ul class="dccw-list">${line(R.weapon)}${line(R.armor)}${line(R.item)}${line(R.consumable)}</ul></div>`;
+    const X = W.lootExtra || [];
+    if (X.length) {
+      h += `<div class="dccw-card" style="border-color:#b82018;"><b style="color:#f0a8a3;">Floor ${W.floor} bonus loot</b> <span class="dccw-sub">(one more from your ${FLOOR_CFG[W.floor].extraLootTiers.join(" and ")} options; rerolls with the spread)</span>
+        <ul class="dccw-list">${X.map(line).join("")}</ul></div>`;
+    }
+    return h;
+  }
+
+  // ── step: extra skill boosts (Fourth/Fifth Floor, Core p.118) ───────────────
+  // Candidates are the skills the crawler will have (names only; ranks roll at finish).
+  function boostCandidates() {
+    const seen = new Set();
+    return buildSkillsAndAttacks(true).skills.map((s) => s.name).filter((n) => {
+      const k = String(n).toLowerCase();
+      if (k === "heal" || seen.has(k)) return false;
+      seen.add(k); return true;
+    });
+  }
+  function boostsNeeded() { return Math.min(FLOOR_CFG[W.floor].boosts || 0, boostCandidates().length); }
+  function renderBoosts() {
+    const n = FLOOR_CFG[W.floor].boosts;
+    const cands = boostCandidates();
+    W.boosts = (W.boosts || []).filter((b) => cands.indexOf(b) >= 0);   // drop picks no longer on the list
+    const need = boostsNeeded();
+    let h = `<h3>Floor ${W.floor} skill boosts</h3><p class="dccw-hint">Choose <b>${n}</b> Skills. When you finish, each gains <b>2d2</b> Ranks if it's at Rank 4 or less, or <b>1d2</b> if it's Rank 5+ (after all other boosts; max Rank 10). <b>${W.boosts.length}/${need}</b> chosen.</p><div>`;
+    h += cands.map((sk) => { const on = W.boosts.indexOf(sk) >= 0; return `<span class="dccw-chip ${on ? "on" : ""}" style="padding-right:12px;"><span onclick="DCCW.toggleBoost('${attr(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span></span>`; }).join("");
+    h += `</div>`;
+    if (W.boosts.length !== need) h += `<p class="dccw-warn">Choose ${need} skills to continue.</p>`;
     return h;
   }
 
@@ -944,7 +993,7 @@
 
   // Skills + attacks with fast-forward rank boosts applied (Third-Floor+ only).
   // Rolls happen here, so only call at finish (never during render — it'd flicker).
-  function buildSkillsAndAttacks() {
+  function buildSkillsAndAttacks(dryRun) {
     const third = isThird();
     const b1 = () => (third ? d(4) : 0);           // +1d4
     const bP = () => (third ? d(4) + d(4) : 0);    // +2d4 to the primary attack
@@ -1035,8 +1084,28 @@
       const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
       const bonus = lr ? (TIER_WEAPON_SKILL[lr.weapon] || 0) : 0;
       if (bonus) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + bonus));
+      // Floor 4/5 bonus loot: an extra weapon upgrades the primary weapon the same way.
+      (W.lootExtra || []).forEach((o) => { if (o.slot === "weapon") { const b2 = TIER_WEAPON_SKILL[o.tier] || 0; if (b2) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + b2)); } });
     }
-    return { skills, atks, notes: grantNotes };
+    // Floor 4/5 extra boosts (Core p.118): each chosen Skill +2d2 at Rank ≤4, else +1d2
+    // (max 10). Applied last; the same roll goes to that skill's Attacks row(s).
+    const boostLog = [];
+    if (third && !dryRun && W.floor > 3 && W.mode !== "upgrade") {
+      const strip = (x) => String(x || "").toLowerCase().replace(/\s*\(spell\)\s*$/, "").trim();
+      const picks = new Set((W.boosts || []).map((b) => String(b).toLowerCase()));
+      skills.forEach((s) => {
+        const k = String(s.name).toLowerCase();
+        if (!picks.has(k)) return;
+        picks.delete(k);   // one boost per chosen skill
+        const cur = parseInt(s.rank, 10) || 0;
+        const add = cur <= 4 ? d(2) + d(2) : d(2);
+        s.rank = String(Math.min(10, cur + add));
+        const sk = strip(s.src || s.name);
+        atks.forEach((a) => { if (strip(a.src || a.name) === sk || strip(a.name) === k) a.rank = String(Math.min(10, (parseInt(a.rank, 10) || 0) + add)); });
+        boostLog.push(s.name + " +" + add);
+      });
+    }
+    return { skills, atks, notes: grantNotes, boostLog };
   }
 
   // ── step: review ──────────────────────────────────────────────────────────────
@@ -1073,10 +1142,10 @@
       extra = `<div class="dccw-card"><b>Fast-forward — Floor ${W.floor}:</b><ul class="dccw-list">
         <li>Class: ${esc(W.class || "—")}</li>
         <li>${W.experiences.length} Experiences: ${esc(chosen.join(", ") || "—")}</li>
-        <li>${cfg.statPoints} stat points distributed · Popularity ${statMod(fin.cha) * (W.floor - 1)}</li>
-        <li>Loot (Spread ${esc(String(W.loot || "—"))}): ${esc(W.lootRolled ? [W.lootRolled.weapon, W.lootRolled.armor, W.lootRolled.item, W.lootRolled.consumable].map((o) => o.name).join(", ") : "—")}</li>
+        <li>${cfg.statPoints} stat points distributed · Popularity ${statMod(fin.cha) * (W.floor === 3 ? 2 : 3)}</li>
+        <li>Loot (Spread ${esc(String(W.loot || "—"))}): ${esc(W.lootRolled ? [W.lootRolled.weapon, W.lootRolled.armor, W.lootRolled.item, W.lootRolled.consumable].concat(W.lootExtra || []).map((o) => o.name).join(", ") : "—")}</li>
         <li>Skill &amp; attack ranks get their boosts on create (primary +2d4, others +1d4, plus Experience ranks).</li>
-        ${W.floor > 3 ? `<li style="color:#e9b24c;">Then apply the Floor ${W.floor} extra boosts on the sheet (choose ${W.floor === 4 ? 6 : 8} skills, +2d2/+1d2).</li>` : ""}
+        ${W.floor > 3 ? `<li>Floor ${W.floor} extra boosts (+2d2 at Rank ≤4, else +1d2): ${esc((W.boosts || []).join(", ") || "—")}</li>` : ""}
       </ul></div>`;
     }
     return `<h3>Meet your crawler</h3>
@@ -1101,6 +1170,7 @@
     if (key === "experiences") { ensureExpSlots(); return W.experiences.every((s) => s.exp && (s.skills || []).length === 2 && (s.skills || []).every((sk) => !isChoiceSkill(sk) || !!((s.choices || {})[sk]))); }
     if (key === "statpoints") return statPointsSpent() === statBudget();
     if (key === "loot") return !!W.loot;
+    if (key === "boosts") return (W.boosts || []).length === boostsNeeded();
     return true;
   }
 
@@ -1111,7 +1181,7 @@
     const cfg = third ? FLOOR_CFG[W.floor] : null;
     const fin = finalStats();
     const race = raceByName(W.race);
-    const { skills, atks, notes: grantNotes } = buildSkillsAndAttacks();
+    const { skills, atks, notes: grantNotes, boostLog } = buildSkillsAndAttacks();
     const data = {};
     data.header = { "f-name": W.basics.name, "f-race": W.race, "f-gender": W.basics.gender, "f-level": third ? String(cfg.level) : "1", "f-floor": third ? String(W.floor) : "1", "f-crawler": W.basics.crawler, "f-class": third ? W.class : "" };
     data.stats = {};
@@ -1124,7 +1194,14 @@
     }
     // Armor DR from the chosen loot spread.
     let drArmor = "";
-    if (third && W.loot) { const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot)); if (lr) drArmor = String(TIER_DR[lr.armor] || ""); }
+    if (third && W.loot) {
+      const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
+      if (lr) {
+        // Floor 4/5 bonus armor fills another gear slot, so its DR adds on.
+        const dr = (TIER_DR[lr.armor] || 0) + (W.lootExtra || []).filter((o) => o.slot === "armor").reduce((n, o) => n + (TIER_DR[o.tier] || 0), 0);
+        drArmor = dr ? String(dr) : "";
+      }
+    }
     data.combat = {
       evadeBuffs: "", evadeMove: "20", evadeStep: "10", drArmor: drArmor, drBuffs: "",
       drAiFavor: String(aiFavor),                    // AI Favor -> its own box, not notes
@@ -1140,6 +1217,24 @@
     data.gear = [];
     data.accessories = [];
     data.skills = skills;
+    // Platinum loot benefits (Core p.116), as gear bonuses on the Enhanced stats:
+    //   Platinum Weapon: +3 Strength or Dexterity (the stat the primary attack uses);
+    //   Platinum Armor:  +5 Constitution and +3 to Catcher or Taunt.
+    if (third && W.loot) {
+      const lrP = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
+      const count = (key) => (lrP && lrP[key] === "Platinum" ? 1 : 0) + (W.lootExtra || []).filter((o) => o.slot === key && o.tier === "Platinum").length;
+      const addEnh = (k, n) => { if (data.stats[k]) data.stats[k].enh = String((parseInt(data.stats[k].enh, 10) || 0) + n); };
+      const pw = count("weapon"), pa = count("armor");
+      if (pw) { const st = String((atks[1] && atks[1].stat) || "").toLowerCase() === "dex" ? "dex" : "str"; addEnh(st, 3 * pw); }
+      if (pa) {
+        addEnh("con", 5 * pa);
+        const has = (nm) => skills.find((x) => String(x.name).toLowerCase() === nm.toLowerCase());
+        const target = has("Taunt") && !has("Catcher") ? "Taunt" : "Catcher";
+        const row = has(target);
+        if (row) row.rank = String(Math.min(10, (parseInt(row.rank, 10) || 0) + 3 * pa));
+        else { const sd = skillByName(target); skills.push({ name: sd ? sd.name : target, rank: String(Math.min(10, 3 * pa)), stat: skillStatLc(target), checkType: sd && sd.passive ? "Passive" : "Active", notes: "Platinum Armor (+3)", checked: false, src: sd ? sd.name : "" }); }
+      }
+    }
     // Inventory: the gear boxes, plus the four loot items on the fast-forward.
     const inv = gearItems().map((item) => ({ item, qty: "1", notes: "" }));
     // Casters start with Mana Potions — one item, quantity 5 (not "5 Mana Potions").
@@ -1148,14 +1243,14 @@
       if (!W.lootRolled) rollLoot();
       const R = W.lootRolled;
       if (R) {
-        [R.weapon, R.armor, R.item, R.consumable].forEach((o) => { if (o) inv.push({ item: o.name, qty: "1", notes: o.notes }); });
+        [R.weapon, R.armor, R.item, R.consumable].concat(W.lootExtra || []).forEach((o) => { if (o) inv.push({ item: o.name, qty: "1", notes: o.notes }); });
       }
     }
     data.inventory = inv;
-    const popularity = third ? String(statMod(fin.cha) * (W.floor - 1)) : "";
+    const popularity = third ? String(statMod(fin.cha) * (W.floor === 3 ? 2 : 3)) : "";
     const notes = third
       ? `Created with the Crawler Wizard — Floor ${W.floor}, Level ${cfg.level}, Class ${W.class}. Skill ranks include the fast-forward boosts (primary +2d4, others +1d4) and Experience ranks.` +
-        (W.floor > 3 ? ` Still to apply on the sheet: the Floor ${W.floor} extra skill boosts (choose ${W.floor === 4 ? 6 : 8} skills, +2d2 if Rank ≤4 else +1d2).` : "") +
+        (W.floor > 3 ? ` Floor ${W.floor} extra skill boosts: ${(boostLog || []).join(", ") || "none"}.` : "") +
         (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "")
       : `Created with the Crawler Wizard. Knows Heal (Rank 1, 2 Mana, heal 2 slots, Interrupt).` +
         (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "");
@@ -1324,7 +1419,14 @@
     setGear(k, v) { W.gear[k] = v; },
     // Third-Floor+ ------------------------------------------------------------
     setPath(p) { W.path = p; W.maxStep = W.step; clampStep(); render(); },
-    setFloor(f) { W.floor = f; W.experiences = []; render(); },
+    setFloor(f) { W.floor = f; W.experiences = []; W.boosts = []; if (W.loot) rollLoot(); render(); },
+    toggleBoost(sk) {
+      W.boosts = W.boosts || [];
+      const i = W.boosts.indexOf(sk);
+      if (i >= 0) W.boosts.splice(i, 1);
+      else if (W.boosts.length < boostsNeeded()) W.boosts.push(sk);
+      render();
+    },
     setClass(v) { W.class = v; render(); },
     setExp(idx, name) { if (W.experiences[idx]) { W.experiences[idx] = { exp: name, skills: [], choices: {} }; render(); } },
     toggleExpSkill(idx, sk) {

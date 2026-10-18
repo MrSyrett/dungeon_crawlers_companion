@@ -18,6 +18,9 @@ export const DCC_LOOT: DccLoot = {
         "Magic Tome",
         "1d6 Bandages",
         "Rope (50 ft)",
+        "Canoe and Paddle",
+        "Bicycle",
+        "Hang Glider",
         "Torches ×10",
         "Stick of Basic Dynamite"
       ],
@@ -38,6 +41,7 @@ export const DCC_LOOT: DccLoot = {
         "2 Poison Antidotes",
         "100 Crawler Biscuits",
         "Good Healing Potion",
+        "Heal Pet Potion",
         "Stick of Good Goblin Dynamite"
       ],
       "page": 216,
@@ -53,7 +57,8 @@ export const DCC_LOOT: DccLoot = {
         "Potion of +2 Skill (Permanent)",
         "Spellbooks",
         "Spell Scrolls",
-        "a Crafting Table",
+        "Magic Paper",
+        "a Crafting, Sapper, Engineer, Alchemy or Metalworking Table",
         "Gold Standard Healing Potion",
         "Scroll of Upgrade"
       ],
@@ -73,6 +78,8 @@ export const DCC_LOOT: DccLoot = {
         "Crafting Tables + Upgrade Coupons",
         "Personal Space Coupons",
         "Good Mana Refill Potion",
+        "Spellbooks",
+        "Spell Scrolls",
         "Scroll of Upgrade"
       ],
       "page": 218,

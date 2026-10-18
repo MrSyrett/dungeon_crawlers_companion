@@ -4230,12 +4230,9 @@ GMScenes.renderPins();
               <option value="quest">Quest</option>
             </select>
           </label>
-          <label class="gen-label">Floor / Level
+          <label class="gen-label">Floor
             <select class="gen-select" id="gen-dccnbhd-level">
-              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="8">8</option><option value="10">10</option><option value="12">12</option>
-              <option value="16">16</option><option value="20">20</option><option value="30">30</option>
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option>
             </select>
           </label>
         </div>
@@ -4282,31 +4279,36 @@ GMScenes.renderPins();
       <!-- DCC ENCOUNTER PANEL (a scaled group of DCC monsters) -->
       <div class="gen-panel" data-panel="dccencounter">
         <div class="gen-controls">
-          <label class="gen-label">Party Level
-            <select class="gen-select" id="gen-dccenc-level">
-              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="8">8</option><option value="10">10</option><option value="12">12</option>
-              <option value="16">16</option><option value="20">20</option><option value="30">30</option>
+          <label class="gen-label">Floor
+            <select class="gen-select" id="gen-dccenc-floor">
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option>
             </select>
           </label>
-          <label class="gen-label">Size
-            <select class="gen-select" id="gen-dccenc-size">
-              <option value="skirmish">Skirmish (2&ndash;3)</option>
-              <option value="standard" selected>Standard (4&ndash;6)</option>
-              <option value="horde">Horde (8&ndash;12)</option>
+          <label class="gen-label">Party Size
+            <select class="gen-select" id="gen-dccenc-party">
+              <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option>
+              <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+            </select>
+          </label>
+          <label class="gen-label">Power
+            <select class="gen-select" id="gen-dccenc-power">
+              <option value="weak">Weak (50%)</option>
+              <option value="moderate" selected>Moderate (100%)</option>
+              <option value="strong">Strong (150%)</option>
+              <option value="overwhelming">Overwhelming (200%)</option>
             </select>
           </label>
           <label class="gen-label">Boss
             <select class="gen-select" id="gen-dccenc-boss">
               <option value="">No boss</option>
-              <option value="elite">Add an Elite</option>
-              <option value="boss">Add a Boss</option>
+              <option value="Neighborhood Boss">Neighborhood Boss</option>
+              <option value="Borough Boss">Borough Boss</option>
+              <option value="City Boss">City Boss</option>
             </select>
           </label>
         </div>
         <div class="gen-results" id="gen-dccenc-results">
-          <div class="gen-empty">Assembles a group of DCC mobs near the chosen level, optionally led by an Elite or Boss. Send the whole group, or any single member, to the tracker.</div>
+          <div class="gen-empty">Builds a fight the book’s way: Table 49 (Adversary Power) sets how many Mobs for your party size, Table 51 sets the Mob Levels for the Floor, and a Boss comes from the next Floor band (Neighborhood low, Borough mid, City high). Send the whole group, or any single member, to the tracker.</div>
         </div>
       </div>
 
@@ -11932,32 +11934,73 @@ function genDccMonster(role, band) {
   if(!pool.length) return card('<div class="gen-empty">No DCC creature matches those filters.</div>');
   return dccMonGenCard(pool[Math.floor(Math.random() * pool.length)], { send: true });
 }
-function dccEncSizeRange(key) {
-  return key === 'skirmish' ? [2, 3] : key === 'horde' ? [8, 12] : [4, 6];
+// Core Table 51 (Mob Level, Floor & Damage Dice): typical Mob Levels per Floor band.
+// Bosses use the NEXT band down ("make them like Mobs for the Floor, except use the next
+// row down"): Neighborhood Bosses the low end, Borough the middle, City the high end.
+const DCC_FLOOR_BANDS = [
+  { floors: [1, 1],   lv: [1, 4] },     { floors: [2, 2],   lv: [5, 9] },
+  { floors: [3, 4],   lv: [10, 29] },   { floors: [5, 7],   lv: [30, 59] },
+  { floors: [8, 10],  lv: [60, 99] },   { floors: [11, 13], lv: [100, 159] },
+  { floors: [14, 16], lv: [160, 249] }, { floors: [17, 18], lv: [250, 400] },
+];
+function dccFloorBand(floor) {
+  const i = Math.max(0, DCC_FLOOR_BANDS.findIndex(b => floor >= b.floors[0] && floor <= b.floors[1]));
+  return { mob: DCC_FLOOR_BANDS[i].lv, boss: (DCC_FLOOR_BANDS[i + 1] || DCC_FLOOR_BANDS[i]).lv };
+}
+// Core Table 49 (Adversary Power): Mobs per party size 2–7. Overwhelming is "N+".
+const DCC_ADVERSARY_POWER = {
+  weak:         [1, 2, 2, 3, 3, 4],
+  moderate:     [2, 3, 4, 5, 6, 7],
+  strong:       [3, 5, 6, 8, 9, 11],
+  overwhelming: [4, 6, 8, 10, 12, 14],
+};
+function dccAdversaryCount(party, power) {
+  const row = DCC_ADVERSARY_POWER[power] || DCC_ADVERSARY_POWER.moderate;
+  return row[Math.min(7, Math.max(2, party)) - 2];
+}
+// Mobs whose Level sits in the band; if none, the closest ones to it.
+function dccMobsInBand(band, role) {
+  const all = dccGenBestiary().filter(m => dccRoleMatch(m, role || 'Mob'));
+  const inBand = all.filter(m => { const lv = parseInt(m.level, 10) || 0; return lv >= band[0] && lv <= band[1]; });
+  if(inBand.length) return inBand;
+  const mid = (band[0] + band[1]) / 2;
+  return all.map(m => ({ m, d: Math.abs((parseInt(m.level, 10) || 0) - mid) })).sort((a, b) => a.d - b.d).slice(0, 8).map(x => x.m);
+}
+// A Boss of the given tier for a Floor: target Level is the low / middle / high end of the
+// next band; prefer that exact tier, else any Boss, nearest to the target.
+function dccBossForFloor(floor, tier) {
+  const bb = dccFloorBand(floor).boss;
+  const target = tier === 'City Boss' ? bb[1] : tier === 'Borough Boss' ? Math.round((bb[0] + bb[1]) / 2) : bb[0];
+  const pick = role => dccGenBestiary().filter(m => dccRoleMatch(m, role))
+    .map(m => ({ m, d: Math.abs((parseInt(m.level, 10) || 0) - target) })).sort((a, b) => a.d - b.d).map(x => x.m);
+  return pick(tier)[0] || pick('Boss')[0] || null;
 }
 function dccNearestByLevel(level, role) {
   return dccGenBestiary().filter(m => dccRoleMatch(m, role))
     .map(m => ({ m, d: Math.abs((parseInt(m.level, 10) || 0) - level) }))
     .sort((a, b) => a.d - b.d).map(x => x.m);
 }
-function genDccEncounter(level, sizeKey, bossKey) {
-  const rng = dccEncSizeRange(sizeKey);
-  const n = rng[0] + Math.floor(Math.random() * (rng[1] - rng[0] + 1));
-  const near = dccNearestByLevel(level, 'Mob').slice(0, Math.max(6, n * 3));   // closest-in-level pool
+function genDccEncounter(floor, party, power, bossTier) {
+  const band = dccFloorBand(floor).mob;
+  const n = dccAdversaryCount(party, power);
+  const pool = dccMobsInBand(band, 'Mob');
+  const inBand = pool.some(m => { const lv = parseInt(m.level, 10) || 0; return lv >= band[0] && lv <= band[1]; });
   const group = [];
-  for(let i = 0; i < n && near.length; i++) group.push(near[Math.floor(Math.random() * near.length)]);
-  if(bossKey === 'elite') { const el = dccNearestByLevel(level, 'Elite')[0]; if(el) group.unshift(el); }
-  else if(bossKey === 'boss') { const bs = dccNearestByLevel(level, 'Boss')[0]; if(bs) group.unshift(bs); }
+  for(let i = 0; i < n && pool.length; i++) group.push(pool[Math.floor(Math.random() * pool.length)]);
+  if(bossTier) { const bs = dccBossForFloor(floor, bossTier); if(bs) group.unshift(bs); }
   if(!group.length) return card('<div class="gen-empty">No DCC monsters available to build an encounter.</div>');
   const names = group.map(m => m.name);
+  const powerLbl = { weak: 'Weak', moderate: 'Moderate', strong: 'Strong', overwhelming: 'Overwhelming' }[power] || 'Moderate';
   const rows = group.map(m =>
     '<div class="gen-card-row"><span class="gen-card-row-label">' + esc(m.role || 'Mob') + '</span>' +
     '<span><b>' + esc(m.name) + '</b> <span style="opacity:.6">LV ' + esc(m.level) + ' · ' + esc(dccMonTotalHp(m)) + ' HP</span> ' +
     '<button class="btn small ghost gen-send-tracker" data-src="dcc" data-mon="' + dccSendAttr(m.name) + '" style="margin-left:4px;">Send</button></span></div>'
   ).join('');
   return card(
-    '<div class="gen-card-header"><span class="gen-card-name">Encounter · LV ' + esc(level) + '</span>' +
-      '<span class="gen-card-tag">' + group.length + ' creature' + (group.length === 1 ? '' : 's') + '</span></div>' +
+    '<div class="gen-card-header"><span class="gen-card-name">Encounter · Floor ' + esc(floor) + '</span>' +
+      '<span class="gen-card-tag">' + esc(powerLbl) + ' · ' + n + (power === 'overwhelming' ? '+' : '') + ' Mob' + (n === 1 ? '' : 's') + ' for ' + esc(party) + ' crawlers</span></div>' +
+    '<div class="gen-item-desc" style="text-transform:none;opacity:.8;">Typical Mob Levels on this Floor: ' + (band[1] >= 400 ? band[0] + '+' : band[0] + '–' + band[1]) + ' (Table 51)' +
+      (inBand ? '' : ' — the bestiary has no Mobs at that Level yet, so the nearest are shown') + '.</div>' +
     '<div class="gen-card-actions"><button class="btn small primary gen-send-tracker-all" data-src="dcc" data-mons="' + dccSendAttr(names.join('|')) + '">Send all to Tracker</button></div>' +
     '<hr class="gen-card-divider">' + rows
   );
@@ -11984,14 +12027,16 @@ function genDccNpc(roleFilter) {
 // A parbaked scenario: theme + hook, Mobs and a Boss pulled from the bestiary,
 // environment/complication flavor, and (for Quests) a staged spine with a
 // reward, a failure clause, and the floor-collapse clock.
-function dccScenarioMobs(level, n) {
-  const near = dccNearestByLevel(level, 'Mob').slice(0, Math.max(6, n * 3));
+// `floor` is the dungeon Floor: Mobs come from that Floor's Table 51 Level band, the
+// Boss is a Neighborhood Boss from the next band (Core p.272).
+function dccScenarioMobs(floor, n) {
+  const pool = dccMobsInBand(dccFloorBand(floor).mob, 'Mob').slice().sort(() => Math.random() - 0.5);
   const out = [], seen = {};
-  for(let i = 0; i < near.length && out.length < n; i++) { const m = near[i]; if(seen[m.name]) continue; seen[m.name] = 1; out.push(m); }
+  for(let i = 0; i < pool.length && out.length < n; i++) { const m = pool[i]; if(seen[m.name]) continue; seen[m.name] = 1; out.push(m); }
   return out;
 }
-function dccScenarioBoss(level) {
-  return dccNearestByLevel(level, 'Boss')[0] || dccNearestByLevel(level, 'Elite')[0] || null;
+function dccScenarioBoss(floor) {
+  return dccBossForFloor(floor, 'Neighborhood Boss');
 }
 function dccMobLine(label, m) {
   return '<div class="gen-card-row"><span class="gen-card-row-label">' + label + '</span>' +
@@ -13855,11 +13900,12 @@ window.init_gen = function(root) {
       for(let i=0;i<count;i++) res.appendChild(genXsMonster(src, type, band));
 
     } else if(activeTab==='dccencounter') {
-      const level=parseInt(root.querySelector('#gen-dccenc-level').value)||1;
-      const size=root.querySelector('#gen-dccenc-size').value;
+      const floor=parseInt(root.querySelector('#gen-dccenc-floor').value)||1;
+      const party=parseInt(root.querySelector('#gen-dccenc-party').value)||4;
+      const power=root.querySelector('#gen-dccenc-power').value;
       const boss=root.querySelector('#gen-dccenc-boss').value;
       const res=root.querySelector('#gen-dccenc-results'); res.innerHTML='';
-      res.appendChild(genDccEncounter(level, size, boss));
+      res.appendChild(genDccEncounter(floor, party, power, boss));
 
     } else if(activeTab==='dccnpc') {
       const role=root.querySelector('#gen-dccnpc-role').value;
@@ -16488,7 +16534,12 @@ function init_dice(root) {
         detailParts.push(`${bits.join(' ')}=${dmgTotal}`);
       }
     }
-    const entry = { label: label || 'Attack', adv: 'none', detail: detailParts.join('  |  '), total: dmgTotal !== null ? ('Dmg: ' + dmgTotal) : '—', crit: '' };
+    // "+F" is the Floor Number (Core p.267): it isn't a die, so it can't be summed here —
+    // flag it on the result so the GM adds the current Floor (once per +F).
+    const fCount = (String(dmgExpr || '').match(/\+\s*F\b/gi) || []).length;
+    const fTag = fCount ? ' +' + (fCount > 1 ? fCount + '×' : '') + 'F' : '';
+    if(fCount) detailParts.push('+' + (fCount > 1 ? fCount + '×' : '') + 'F (add the Floor Number)');
+    const entry = { label: label || 'Attack', adv: 'none', detail: detailParts.join('  |  '), total: dmgTotal !== null ? ('Dmg: ' + dmgTotal + fTag) : '—', crit: '' };
     log.unshift(entry);
     if(log.length > 100) log.length = 100;
     renderLog();
@@ -17291,7 +17342,7 @@ function init_party(root) {
 
     let segHtml = '';
     for(let i=0;i<10;i++) segHtml += '<span style="flex:1;background:'+HPCOL[i]+';opacity:'+(activeOf(i)?'1':'.16')+';"></span>';
-    let body = '<div class="pcard-hp"><div class="pcard-hp-head"><span class="pcard-hp-lab">Hit Points</span><span class="pcard-hp-val">' + hpPct + '%</span></div>'
+    let body = '<div class="pcard-hp"><div class="pcard-hp-head"><span class="pcard-hp-lab">Health Bar</span><span class="pcard-hp-val">' + hpPct + '%</span></div>'
       + '<div style="display:flex;gap:2px;height:11px;border-radius:6px;overflow:hidden;">' + segHtml + '</div></div>';
     body += pcStats(c.stats.map(s => ({ l: s.abbr, m: (s.mod==null ? '—' : (s.mod>=0?'+':'')+s.mod), s: (s.enh||'—') + '/' + (s.unenh||'—') })));
     body += '<div class="pty-line dim" style="margin:-4px 0 8px;font-size:9px;">Mods from ' + esc(c.modSource) + ' scores · Enh/Unenh shown</div>';

@@ -91,6 +91,8 @@
     if (/\+(\d+)\s*(?:DR\b|Damage Resistance)/i.test(e)) return true;
     if (/\+(\d+)\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/i.test(e)) return true;
     if (/\+(\d+)\s*(?:to\s+)?(?:a\s+)?(?:chosen\s+)?stat\b/i.test(e)) return true;
+    if (/\+(\d+)%\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/i.test(e)) return true;
+    if (/\+(\d+)\s*to\s+all\s+stats\b/i.test(e)) return true;
     if (/\+(\d+)\s+[A-Za-z][A-Za-z'/\- ]*?\s+skills?\b/i.test(e)) return true;
     return false;
   }
@@ -144,6 +146,18 @@
     if (dr) out.dr += parseInt(dr[1], 10);
     var re = /\+(\d+)\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi, m;
     while ((m = re.exec(e))) { var id = STAT_ID[m[2].toLowerCase()]; if (id) out.stats[id] = (out.stats[id] || 0) + parseInt(m[1], 10); }
+    // "+N to all Stats" (e.g. The Sassy Stiletto).
+    var allm = e.match(/\+(\d+)\s*to\s+all\s+stats\b/i);
+    if (allm) ["str", "int", "con", "dex", "cha"].forEach(function (sid) { out.stats[sid] = (out.stats[sid] || 0) + parseInt(allm[1], 10); });
+    // "+N% <Stat>": the book (Randomized Magic Items) sets the percentage's value when you get the item,
+    // rounding down, and records the number — so take N% of the Stat's current value at equip time.
+    var pre = /\+(\d+)%\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi, pm;
+    while ((pm = pre.exec(e))) {
+      var pid = STAT_ID[pm[2].toLowerCase()]; if (!pid) continue;
+      var cur = document.getElementById(pid + "-enh"); var base = cur ? num(cur.value) : 0;
+      var val = Math.floor(base * parseInt(pm[1], 10) / 100);
+      if (val > 0) out.stats[pid] = (out.stats[pid] || 0) + val;
+    }
     // "+N to a chosen Stat" — ask which one (rings of +N to a Stat).
     var chosen = e.match(/\+(\d+)\s*(?:to\s+)?(?:a\s+)?(?:chosen\s+)?stat\b/i);
     if (chosen && !Object.keys(out.stats).length) {

@@ -4,12 +4,12 @@ const DCC_QUICK_RULES = [
   {
     title: "Dice & rounding",
     text: "The d20 resolves Success or Failure; roll high. Other dice (d2 through d12) are mostly for damage and effects, and a d2 is often used when helping. The GM never rolls a d20 for Mobs or effects. Whenever rounding is called for, round down.",
-    page: 9
+    page: 10
   },
   {
     title: "Stat Mods & Enhanced Stats",
     text: "Stat Mod by score: 1–2 +1, 3–5 +2, 6–9 +3, 10–19 +4, 20–49 +5, 50–99 +6, 100+ +7 and up. The full Stat name (Intelligence) means the score; the abbreviation (Int) means the Mod. Unenhanced Stats are your base plus potions and level-ups; Enhanced adds gear, Spells, and Buffs.",
-    page: 10
+    page: 11
   },
   {
     title: "The core mechanic",
