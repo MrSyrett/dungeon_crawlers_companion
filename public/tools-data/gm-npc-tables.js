@@ -118,16 +118,17 @@
 
     // ── DUNGEONS & DRAGONS (classic-fantasy, its own set) ──────────────────
     DND: {
-      kindLabel: 'Race',
-      kinds: ['Human', 'Human', 'Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Half-Orc', 'Tiefling', 'Dragonborn'],
+      kindLabel: 'Species',
+      kinds: ['Human', 'Human', 'Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Orc', 'Goliath', 'Tiefling', 'Dragonborn'],
       names: {
         Human:      ['Aldric', 'Seraphina', 'Barrett', 'Lira', 'Cassius', 'Mira', 'Dorn', 'Selene', 'Garrick', 'Ophelia', 'Tomas', 'Belen', 'Rhea', 'Quillon', 'Isolde', 'Marek', 'Yara', 'Falken', 'Nadia', 'Corwin', 'Alaric', 'Rosalind', 'Theron', 'Vivenna', 'Roderick', 'Elowen', 'Baldwin', 'Serena', 'Percival', 'Adeline', 'Gideon', 'Calla', 'Leoric', 'Brynn', 'Osmund', 'Veyra', 'Hadrian', 'Delia', 'Aurelio', 'Maeve', 'Bertrand', 'Cordelia', 'Emrys', 'Thalia', 'Wystan'],
         Elf:        ['Aramil', 'Silaqui', 'Thamior', 'Naivara', 'Erevan', 'Shava', 'Aelar', 'Birel', 'Enna', 'Galinndan', 'Mindartis', 'Quelenna', 'Soveliss', 'Thia', 'Varis', 'Lia', 'Hadarai', 'Meriele', 'Peren', 'Ielenia'],
         Dwarf:      ['Adrik', 'Kathra', 'Baern', 'Gunnloda', 'Dain', 'Vistra', 'Thoradin', 'Hlin', 'Eberk', 'Sannl', 'Rurik', 'Amber', 'Brottor', 'Diesa', 'Harbek', 'Gurdis', 'Morgran', 'Torbera', 'Ulfgar', 'Bardryn'],
         Halfling:   ['Alton', 'Cora', 'Milo', 'Portia', 'Lyle', 'Verna', 'Osborn', 'Seraphina', 'Roscoe', 'Amaryllis', 'Eldon', 'Jillian', 'Finnan', 'Nedda', 'Lidda', 'Merla', 'Garret', 'Andry', 'Wellby', 'Callie'],
         Gnome:      ['Alston', 'Bimpnottin', 'Dimble', 'Ella', 'Fonkin', 'Loopmottin', 'Namfoodle', 'Roywyn', 'Seebo', 'Nissa', 'Warryn', 'Zanna', 'Boddynock', 'Duvamil', 'Gerbo', 'Mardnab', 'Orryn', 'Tana', 'Zook', 'Lorilla'],
-        'Half-Orc': ['Grennik', 'Ownka', 'Dench', 'Baggi', 'Feng', 'Emen', 'Holg', 'Kansif', 'Mhurren', 'Neega', 'Ront', 'Ovak', 'Shump', 'Sutha', 'Thokk', 'Vola', 'Krusk', 'Engong', 'Myev', 'Gell'],
+        Orc:        ['Grennik', 'Ownka', 'Dench', 'Baggi', 'Feng', 'Emen', 'Holg', 'Kansif', 'Mhurren', 'Neega', 'Ront', 'Ovak', 'Shump', 'Sutha', 'Thokk', 'Vola', 'Krusk', 'Engong', 'Myev', 'Gell'],
         Tiefling:   ['Akmenos', 'Damaia', 'Barakas', 'Kallista', 'Leucis', 'Nemeia', 'Mordai', 'Orianna', 'Skamos', 'Phelaia', 'Therai', 'Rieta', 'Iados', 'Ea', 'Hope', 'Torment', 'Creed', 'Sorrow', 'Ambition', 'Mayhem'],
+        Goliath:    ['Aukan', 'Eglath', 'Gae-Al', 'Gauthak', 'Ilikan', 'Keothi', 'Kuori', 'Lo-Kag', 'Manneo', 'Maveith', 'Nalla', 'Orilo', 'Paavu', 'Pethani', 'Thalai', 'Thotham', 'Uthal', 'Vaunea', 'Vimak', 'Kavaki'],
         Dragonborn: ['Arjhan', 'Akra', 'Balasar', 'Biri', 'Donaar', 'Farideh', 'Ghesh', 'Harann', 'Kriv', 'Kava', 'Medrash', 'Nala', 'Pandjed', 'Perra', 'Rhogar', 'Surina', 'Torinn', 'Thava', 'Kerkan', 'Uadjit']
       },
       builds: BUILD_STD, hair: HAIR_STD, eyes: EYES_STD, features: FEAT_STD, demeanor: DEMEANOR_STD, quirks: Q_BASE,
@@ -146,13 +147,13 @@
     // ── INDEX CARD RPG (gritty sword-and-sorcery, weird edge) ──────────────
     ICRPG: {
       kindLabel: 'Type',
-      kinds: ['Human', 'Human', 'Elf', 'Dwarf', 'Half-Orc', 'Gnome', 'Ghost', 'Golem'],
+      kinds: ['Human', 'Human', 'Elf', 'Dwarf', 'Torton', 'Gerblin', 'Ghost', 'Golem'],   // Alfheim life forms (ICRPG Master Edition) + spirits/constructs
       names: {
         Human:  ['Kel', 'Bram', 'Sena', 'Dax', 'Rook', 'Vesh', 'Tamsin', 'Corl', 'Ivo', 'Petra', 'Hask', 'Nell', 'Drov', 'Mara', 'Ansel', 'Bex', 'Corvin', 'Suri', 'Halden', 'Rue'],
         Elf:    ['Syl', 'Aeliss', 'Ferox', 'Nimriel', 'Thal', 'Ovar', 'Lisha', 'Kaelen', 'Wren', 'Solren', 'Ysolt', 'Mirel', 'Tavariel', 'Ellum', 'Vashti', 'Orin', 'Lorel', 'Cyril', 'Anwe', 'Faelar'],
         Dwarf:  ['Borin', 'Hilda', 'Grund', 'Vesna', 'Dolgan', 'Runa', 'Karr', 'Brenna', 'Torvic', 'Agda', 'Molgor', 'Yara', 'Ferd', 'Kolba', 'Snorri', 'Brunn', 'Hettie', 'Vgot', 'Durn', 'Osla'],
-        'Half-Orc': ['Grash', 'Oda', 'Murg', 'Vek', 'Sarn', 'Toza', 'Ruk', 'Brakka', 'Hurn', 'Zeda', 'Gorlin', 'Uska', 'Drav', 'Nokka', 'Skoll', 'Yarg', 'Wenna', 'Brog', 'Tesk', 'Oma'],
-        Gnome:  ['Fizzle', 'Wob', 'Nix', 'Tink', 'Bramble', 'Cog', 'Sprocket', 'Dweeble', 'Pip', 'Gizmo', 'Quill', 'Fenn', 'Bodge', 'Wrenk', 'Stub', 'Plink', 'Doss', 'Mim', 'Grib', 'Tocket'],
+        Torton: ['Shellwick', 'Old Morro', 'Tummet', 'Grovel', 'Ploddus', 'Shenna', 'Barnacle', 'Oorth', 'Mosswell', 'Tessaly', 'Kemp', 'Drudge', 'Ullo', 'Halvard Slowfoot', 'Brenna Stillwater', 'Turv', 'Saltback', 'Odo', 'Pellam', 'Quorn'],
+        Gerblin: ['Snik', 'Grubb', 'Nettle', 'Skab', 'Tizz', 'Wort', 'Krink', 'Moggle', 'Pox', 'Rattle', 'Fitch', 'Gnash', 'Splint', 'Dreg', 'Zib', 'Snaggle', 'Quib', 'Skrit', 'Lumpy', 'Hobb'],
         Ghost:  ['the Grey Woman', 'Old Pell', 'the Weeping Boy', 'Lady Ash', 'the Hollow Monk', 'Silent Job', 'the Pale Rider', 'Mother Bones', 'the Drowned Man', 'Whistler', 'the Faceless Clerk', 'Gallows Kate'],
         Golem:  ['Unit-9', 'Clatter', 'the Warden', 'Ironjaw', 'Cinder', 'Millstone', 'the Sentinel', 'Rustpile', 'Ballast', 'the Faithful', 'Anvil', 'Grinder']
       },
@@ -174,14 +175,14 @@
     // ── NIMBLE (heroic high fantasy) ───────────────────────────────────────
     NIM: {
       kindLabel: 'Ancestry',
-      kinds: ['Human', 'Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Half-Orc', 'Dragonborn'],
+      kinds: ['Human', 'Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Orc', 'Dragonborn'],
       names: {
         Human:      ['Edren', 'Sable', 'Callum', 'Wyn', 'Thorne', 'Elise', 'Garrow', 'Neva', 'Roan', 'Brisa', 'Kade', 'Marlo', 'Tamsyn', 'Dessa', 'Oren', 'Pia', 'Hale', 'Vira', 'Cort', 'Lena', 'Faye', 'Dax', 'Nyssa', 'Corin', 'Wren', 'Talon', 'Esme', 'Rurik', 'Sela', 'Fenn', 'Aria', 'Kellan', 'Nova', 'Jarek', 'Lyra', 'Dorran', 'Mika', 'Sten', 'Rilla', 'Vael', 'Nessa', 'Torin', 'Elda', 'Ryker', 'Iona'],
         Elf:        ['Aelin', 'Faevyn', 'Lorien', 'Sylwen', 'Caeli', 'Theren', 'Ivarion', 'Naeris', 'Oleander', 'Yllian', 'Miravel', 'Solenne', 'Aerith', 'Vaelor', 'Illian', 'Neriah', 'Thessaly', 'Gwyneth', 'Rael', 'Elowen'],
         Dwarf:      ['Durgan', 'Brynn', 'Hoskar', 'Verra', 'Balin', 'Onna', 'Grimm', 'Karda', 'Dolf', 'Thessa', 'Rurgan', 'Yorda', 'Brannor', 'Sigrun', 'Kholdan', 'Mabsa', 'Torgan', 'Wenna', 'Gundren', 'Halda'],
         Halfling:   ['Pippa', 'Finnick', 'Rosie', 'Bandon', 'Merry', 'Tilda', 'Odo', 'Clover', 'Bram', 'Poppy', 'Sam', 'Hazel', 'Dob', 'Prim', 'Milo', 'Marigold', 'Ned', 'Bonnie', 'Colby', 'Wren'],
         Gnome:      ['Tibbin', 'Wren', 'Fizwick', 'Nella', 'Bobkin', 'Zephyr', 'Dabble', 'Minx', 'Cogsley', 'Trixie', 'Fendrel', 'Gimble', 'Sprig', 'Wobbet', 'Quibble', 'Tansy', 'Doddle', 'Perrin', 'Snick', 'Bimble'],
-        'Half-Orc': ['Ragga', 'Thokk', 'Muraga', 'Vorn', 'Sharda', 'Grulk', 'Enna', 'Karrok', 'Uzza', 'Drenn', 'Golra', 'Skarn', 'Yeva', 'Brokka', 'Torg', 'Naza', 'Hurgan', 'Ossa', 'Vrag', 'Mella'],
+        Orc:        ['Ragga', 'Thokk', 'Muraga', 'Vorn', 'Sharda', 'Grulk', 'Enna', 'Karrok', 'Uzza', 'Drenn', 'Golra', 'Skarn', 'Yeva', 'Brokka', 'Torg', 'Naza', 'Hurgan', 'Ossa', 'Vrag', 'Mella'],
         Dragonborn: ['Sartha', 'Vharos', 'Kyra', 'Baldric', 'Ossira', 'Rhal', 'Tessari', 'Vok', 'Nadira', 'Draka', 'Solmar', 'Ashka', 'Verrik', 'Myrha', 'Torvax', 'Sinza', 'Hadros', 'Elka', 'Pyria', 'Grithax']
       },
       builds: BUILD_STD, hair: HAIR_STD, eyes: EYES_STD, features: FEAT_STD, demeanor: DEMEANOR_STD, quirks: Q_BASE,

@@ -1063,6 +1063,9 @@ button.cc-abil:hover { background: rgba(255,255,255,0.05); border-radius: 6px; }
 .gen-tab-select option { background: var(--panel); color: var(--white); }
 /* Shadowdark core-rulebook generator controls (see /tools-data/sd-book-gen.js) — only for SD. */
 html:not([data-gm-sys="SD"]) .sd-only { display: none !important; }
+/* D&D gets its own SRD encounter builder in the Encounter generator (the event/biome tables are Shadowdark's). */
+html[data-gm-sys="DND"] .no-dnd { display: none !important; }
+html:not([data-gm-sys="DND"]) .dnd-only { display: none !important; }
 .gen-body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 .gen-panel { display: none; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
 .gen-panel.active { display: flex; }
@@ -2304,6 +2307,8 @@ body[data-cview="free"] .cst-log-rail{display:none}
   // Filter every Generators dropdown (the live tool + any toolbar clones) under root.
   window.applyGmSystemToGenerators = function (root) {
     (root || document).querySelectorAll('.gen-tab-select').forEach(applyToSelect);
+    // The shared dungeon motif "Deep Tunnels" is Shadowdark's word; D&D calls it the Underdark.
+    (root || document).querySelectorAll('option[value="Deep Tunnels"]').forEach(o => { o.textContent = SYS === 'DND' ? 'Underdark' : 'Deep Tunnels'; });
   };
   window.setGmSystem = function (v) {
     const key = String(v || '').toUpperCase();
@@ -3590,7 +3595,19 @@ GMScenes.renderPins();
       </div>
       <div class="gen-panel" data-panel="encounter">
         <div class="gen-controls">
-          <label class="gen-label">Type
+          <label class="gen-label dnd-only">Party Level
+            <select class="gen-select" id="gen-dndenc-level"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option></select>
+          </label>
+          <label class="gen-label dnd-only">Party Size
+            <select class="gen-select" id="gen-dndenc-size"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select>
+          </label>
+          <label class="gen-label dnd-only">Difficulty
+            <select class="gen-select" id="gen-dndenc-diff"><option value="low">Low</option><option value="moderate" selected>Moderate</option><option value="high">High</option></select>
+          </label>
+          <label class="gen-label dnd-only">Creatures
+            <select class="gen-select" id="gen-dndenc-group"><option value="">Any Type</option><option>Humanoids</option><option>Dragons</option><option>Undead</option><option>Beasts</option><option>Monstrosities</option><option>Fiends</option><option>Celestials</option><option>Fey</option><option>Giants</option><option>Elementals</option><option>Constructs</option><option>Aberrations</option><option>Oozes</option><option>Plants</option></select>
+          </label>
+          <label class="gen-label no-dnd">Type
             <select class="gen-select" id="gen-enc-type">
               <option value="random_all">Random (All Types)</option>
               <optgroup label="── Events ──">
@@ -3627,7 +3644,7 @@ GMScenes.renderPins();
               </optgroup>
             </select>
           </label>
-          <label class="gen-label">Amount
+          <label class="gen-label no-dnd">Amount
             <select class="gen-select" id="gen-enc-count">
               <option value="1">1</option>
               <option value="3">3</option>
@@ -8263,7 +8280,7 @@ function init_trackers(root) {
   function monView(n) { return n.dmon ? dccView(n) : n.gmon ? xsView(n) : sdView(n); }
 
   // Which dice-tray roller a card roll uses, by the creature's system. '' = the
-  // plain sum (d20 checks, damage, Ghostbusters pools, everything else).
+  // plain sum (d20 checks, damage, everything else).
   function monRollKind(src, expr, hint) {
     const e = String(expr || '').replace(/\s+/g, '');
     if(hint === 'dmg') return '';
@@ -8276,6 +8293,8 @@ function init_trackers(root) {
     if(src === 'sw' && /^\d+d6(\+\d+)?$/i.test(e)) return window.gmSwWildDie && window.gmSwWildDie() ? 'wild' : 'swplain';
     if(src === 'ace' && /^\d+d6$/i.test(e)) return 'ace';
     if(src === 'mmrpg' && /^3d6([+-]\d+)?$/i.test(e)) return 'd616';
+    // Ghostbusters: one die of every pool is the Ghost Die (Training Manual p.4).
+    if(src === 'gb' && /^\d+d6$/i.test(e)) return 'gbghost';
     return '';
   }
 
@@ -12217,7 +12236,7 @@ function genShop(type, tier) {
     return card(`<div class="gen-card-header"><span class="gen-card-name">${esc(name)}</span><span class="gen-card-tag">Shop · ${esc(t2)}</span></div>${row('Proprietor',prop)}<hr class="gen-card-divider"><div class="gen-card-row"><span class="gen-card-row-label">Stock</span><span>${stock.map(esc).join('<br>')}</span></div>`);
   } else {
     const menu=[...DND_TAVERN_FOOD[t2]].sort(()=>Math.random()-.5).slice(0,4);
-    const rooms=t2==='Poor'?'Shared floor (2 cp/night)':t2==='Wealthy'?'Private room (1 gp/night)':'Shared room (5 cp/night)';
+    const rooms=t2==='Poor'?'Poor lodging (1 sp/night)':t2==='Wealthy'?'Wealthy lodging (2 gp/night)':'Modest lodging (5 sp/night)';   // D&D lodging (SRD)
     return card(`<div class="gen-card-header"><span class="gen-card-name">${esc(name)}</span><span class="gen-card-tag">Tavern · ${esc(t2)}</span></div>${row('Proprietor',prop)}<hr class="gen-card-divider"><div class="gen-card-row"><span class="gen-card-row-label">Menu</span><span>${menu.map(esc).join('<br>')}</span></div>${row('Lodging',rooms)}<hr class="gen-card-divider">${row('Rumour',R(TAVERN_RUMORS_EXTRA))}`);
   }
 }
@@ -12238,6 +12257,68 @@ function genEncounterItem(type) {
   const pool = BIOME_ENC_TABLES[type];
   if(pool) return card(`<div class="gen-card-header"><span class="gen-card-name">${esc(type)} Encounter</span></div><div class="gen-item-desc">${esc(R(pool))}</div>`);
   return card(`<div class="gen-empty">Unknown type</div>`);
+}
+
+// ── D&D encounter builder (SRD 5.2 "XP Budget per Character" table) ─────
+// The budget is the per-character XP for the difficulty × party size; creatures
+// are drawn from the D&D bestiary (DND_MONSTERS) until the budget is spent.
+const DND_XP_BUDGET = { // level: [Low, Moderate, High]
+  1:[50,75,100], 2:[100,150,200], 3:[150,225,400], 4:[250,375,500], 5:[500,750,1100],
+  6:[600,1000,1400], 7:[750,1300,1700], 8:[1000,1700,2100], 9:[1300,2000,2600], 10:[1600,2300,3100],
+  11:[1900,2900,4100], 12:[2200,3700,4700], 13:[2600,4200,5400], 14:[2900,4900,6200], 15:[3300,5400,7800],
+  16:[3800,6100,9800], 17:[4500,7200,11700], 18:[5000,8700,14200], 19:[5500,10700,17200], 20:[6400,13200,22000] };
+function dndCrNum(cr) { const s = String(cr == null ? '' : cr); return s.indexOf('/') >= 0 ? (parseFloat(s.split('/')[0]) / parseFloat(s.split('/')[1]) || 0) : (parseFloat(s) || 0); }
+function dndEncPool(group, maxCr) {
+  const all = (typeof DND_MONSTERS !== 'undefined' && Array.isArray(DND_MONSTERS)) ? DND_MONSTERS : [];
+  return all.filter(m => (+m.xp || 0) > 0 && (!group || m.group === group) && dndCrNum(m.cr) <= maxCr);
+}
+// Returns [{ m, n }] spending up to `budget` XP; at most two creatures per character.
+function dndBuildEncounter(level, size, budget, group) {
+  const pool = dndEncPool(group, Math.max(1, level));
+  if(!pool.length) return [];
+  const R1 = a => a[Math.floor(Math.random() * a.length)];
+  const under = pool.filter(m => m.xp <= budget);
+  const leads = under.filter(m => m.xp >= budget * 0.35);
+  const lead = R1(leads.length ? leads : (under.length ? under : pool));
+  const out = [{ m: lead, n: 1 }]; let left = budget - lead.xp, total = 1;
+  const kin = pool.filter(m => m.group === lead.group);
+  while(total < size * 2) {
+    const fits = (kin.some(m => m.xp <= left) ? kin : pool).filter(m => m.xp <= left);
+    if(!fits.length) break;
+    // Prefer more of a creature already in the fight, as printed encounters do.
+    const again = out.filter(o => o.m.xp <= left);
+    const pick = (again.length && Math.random() < 0.6) ? R1(again).m : R1(fits);
+    const ex = out.find(o => o.m === pick); if(ex) ex.n++; else out.push({ m: pick, n: 1 });
+    left -= pick.xp; total++;
+  }
+  return out;
+}
+function genDndEncounter(level, size, diff, group) {
+  level = Math.min(20, Math.max(1, level | 0)); size = Math.min(8, Math.max(1, size | 0));
+  const di = diff === 'low' ? 0 : diff === 'high' ? 2 : 1;
+  const budget = DND_XP_BUDGET[level][di] * size;
+  const list = dndBuildEncounter(level, size, budget, group);
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+  if(!list.length) { wrap.appendChild(card('<div class="gen-empty">No creature in the bestiary fits those options.</div>')); return wrap; }
+  const used = list.reduce((a, o) => a + o.m.xp * o.n, 0);
+  const label = ['Low','Moderate','High'][di];
+  wrap.appendChild(card('<div class="gen-card-header"><span class="gen-card-name">' + esc(label) + ' Encounter</span><span class="gen-card-tag">' + size + ' × level ' + level + '</span></div>' +
+    row('XP budget', budget.toLocaleString() + ' XP') + row('Creatures', list.map(o => (o.n > 1 ? o.n + ' × ' : '') + o.m.name + ' (CR ' + o.m.cr + ')').join(', ')) +
+    row('XP used', used.toLocaleString() + ' XP')));
+  list.forEach(o => { const c = xsMonGenCard('dnd', o.m, { send: true }); if(o.n > 1) { const nm = c.querySelector('.gen-card-name'); if(nm) nm.textContent = o.n + ' × ' + o.m.name; } wrap.appendChild(c); });
+  return wrap;
+}
+// D&D treasure for the Adventure generator: a magic item from DND_MAGIC_ITEMS,
+// rarity capped by party level (levels 1–4 up to Uncommon, 5–10 Rare, 11–16 Very Rare, 17+ Legendary).
+function genDndTreasureCard(level) {
+  const items = (typeof DND_MAGIC_ITEMS !== 'undefined' && Array.isArray(DND_MAGIC_ITEMS)) ? DND_MAGIC_ITEMS : [];
+  const order = ['Common','Uncommon','Rare','Very Rare','Legendary'];
+  const cap = level >= 17 ? 4 : level >= 11 ? 3 : level >= 5 ? 2 : 1;
+  const pool = items.filter(it => { const i = order.indexOf(String(it.rarity || '').replace(/\s*\(.*$/, '')); return i >= 0 && i <= cap; });
+  if(!pool.length) return card('<div class="gen-empty">No magic items loaded.</div>');
+  const it = pool[Math.floor(Math.random() * pool.length)];
+  return card('<div class="gen-item-name">' + esc(it.name) + '</div><div class="gen-card-tag">' + esc([it.rarity, it.type, it.attunement ? 'attunement' : ''].filter(Boolean).join(' · ')) + '</div><div class="gen-item-desc">' + esc(String(it.description || '').slice(0, 220)) + '</div>');
 }
 
 const ALL_ENC_TYPES = ['happens','rumor','secret','trap','hazard',
@@ -13808,6 +13889,11 @@ window.init_gen = function(root) {
       const type=root.querySelector('#gen-enc-type').value;
       const count=parseInt(root.querySelector('#gen-enc-count').value)||1;
       const res=root.querySelector('#gen-enc-results'); res.innerHTML='';
+      if(window.GM_SYSTEM === 'DND') {
+        const v = id => (root.querySelector(id) || {}).value;
+        res.appendChild(genDndEncounter(parseInt(v('#gen-dndenc-level'))||1, parseInt(v('#gen-dndenc-size'))||4, v('#gen-dndenc-diff')||'moderate', v('#gen-dndenc-group')||''));
+        return;
+      }
       for(let i=0;i<count;i++){
         const t = (type==='random_all' || type==='random')
           ? ALL_ENC_TYPES[Math.floor(Math.random()*ALL_ENC_TYPES.length)]
@@ -13911,9 +13997,13 @@ window.init_gen = function(root) {
 
       // ── 3 Monsters ──
       const monsters = [];
+      const dndPool = window.GM_SYSTEM === 'DND' ? dndEncPool('', Math.max(1, +level || 1)) : null;
       for(let i=0;i<nMon;i++){
         const useDb = monSrc==='database' || (monSrc==='mix' && Math.random()<0.5);
-        if(useDb && typeof allMonsters === 'function') {
+        if(dndPool) {
+          // D&D: creatures from the D&D bestiary up to the party's level in CR.
+          if(dndPool.length) monsters.push(xsMonGenCard('dnd', dndPool[Math.floor(Math.random()*dndPool.length)], { send: true }));
+        } else if(useDb && typeof allMonsters === 'function') {
           const pool=allMonsters();
           const m=pool[Math.floor(Math.random()*pool.length)];
           monsters.push(monsterCard(m));
@@ -13965,7 +14055,7 @@ window.init_gen = function(root) {
         const tCols = Math.min(nTres, 5);
         grid.style.cssText = 'display:grid;grid-template-columns:repeat(' + tCols + ',1fr);gap:4px;';
         for(let i=0;i<nTres;i++){
-          const t=genTreasure(level,'random_all');
+          const t=window.GM_SYSTEM === 'DND' ? genDndTreasureCard(+level || 1) : genTreasure(level,'random_all');
           t.style.padding='5px 6px'; t.style.gap='2px'; t.style.fontSize='11px';
           grid.appendChild(t);
         }
@@ -16707,6 +16797,7 @@ function init_dice(root) {
   //   yz         Year Zero pool (Alien, TWD, Vaesen, MYZ): count the sixes
   //   wild       WEG D6 (D6 2e; Star Wars with the Wild Die house rule): the last die is the Wild Die
   //   swplain    Star Wars 1st edition: plain dice + pips (no Wild Die)
+  //   gbghost    Ghostbusters: the last die is the Ghost Die (6 counts 0)
   //   ace        ACE!: every die explodes on a 6; the first is the Calamity Die
   //   d616       Marvel: 3d6 with the Marvel die in the middle (+ ability)
   //   nimble     Nimble damage: a 1 on the primary die misses, its top face crits
@@ -16736,6 +16827,16 @@ function init_dice(root) {
       const exploded = wf[0] === 6;
       const total = reg.reduce((a, b) => a + b, 0) + wf.reduce((a, b) => a + b, 0) + pips;
       return gmLog(label, total + (exploded ? ' ✦' : comp ? ' ⚠' : ''), n + 'D: [' + reg.join(' ') + '] ✦[' + wf.join('→') + ']' + (pips ? ' ' + (pips > 0 ? '+' : '') + pips : ''), exploded ? 'crit' : comp ? 'fumble' : '');
+    }
+    if(kind === 'gbghost' && pool) {
+      // Ghostbusters: the last die is the Ghost Die; its ghost face (6) counts 0.
+      // On a ghost or NPC the Ghost Die helps it (a failure may still help; a
+      // success is spectacular) — Operations Manual p.27.
+      const n = Math.max(1, Math.min(30, +pool[1]));
+      const reg = []; for(let i = 0; i < n - 1; i++) reg.push(d6());
+      const g = d6(), isGhost = (g === 6);
+      const total = reg.reduce((a, b) => a + b, 0) + (isGhost ? 0 : g);
+      return gmLog(label, total + (isGhost ? ' · 👻 GHOST' : ''), n + 'd6(' + reg.concat([g]).join(',') + ')' + (isGhost ? ' · Ghost = 0 — for a spook it still helps: spectacular on a success, a silver lining on a failure' : ''), isGhost ? 'crit' : '');
     }
     if(kind === 'swplain' && pool) {
       // Star Wars 1st edition: roll the dice, add the pips — no exploding 6, no complication.

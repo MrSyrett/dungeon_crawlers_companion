@@ -910,7 +910,8 @@ function rollD20Test(label,attrKey,extra){
   if(adv==='adv'){pick=Math.max(r1,r2);} else if(adv==='dis'){pick=Math.min(r1,r2);}
   var total=pick+mod;
   var tn=num($('tension').value);
-  var type=(pick===20)?'crit':(pick===1)?'fumble':'normal';
+  // Splash Page: natural 20 or beating the Tension by 15+; Editorial Cut: natural 1 or missing it by 15+ (p.33-34).
+  var type=(pick===20||(tn&&total>=tn+15))?'crit':(pick===1||(tn&&total<=tn-15))?'fumble':'normal';
   var outcome=tn?(total>=tn?' ✓ vs '+tn:' ✗ vs '+tn):'';
   var dtxt=(adv==='adv')?('d20['+r1+','+r2+'→'+pick+' adv]'):(adv==='dis')?('d20['+r1+','+r2+'→'+pick+' dis]'):('d20:'+pick);
   var detail=dtxt+(mod?(mod>0?' +'+mod:' '+mod):'')+(condPenalty()?' (cond)':'');
@@ -951,7 +952,7 @@ function openRules(){
   var h='';
   if(R.length){ h+=R.map(function(q){ return '<p><b>'+esc(q.title)+'.</b> '+esc(q.body||q.text)+'</p>'; }).join(''); }
   else{
-    h+='<h4>The Test</h4><p>Roll d20 + Attribute + bonuses vs the Tension. Nat 20 Crit, nat 1 Fumble. Advantage keeps the higher of two dice; Disadvantage the lower.</p>';
+    h+='<h4>The Test</h4><p>Roll d20 + Attribute + bonuses vs the Tension. Natural 20 or beating the Tension by 15+ is a Splash Page; natural 1 or missing by 15+ is an Editorial Cut. Advantage keeps the higher of two dice; Disadvantage the lower.</p>';
     h+='<h4>Resolve</h4><p>One pool for Hit Points and Power fuel. Every Activation costs at least 1 Resolve.</p>';
     h+='<h4>Conditions</h4><p>Scratched −2, Injured −4, Wounded Disadvantage, Out. Penalties apply automatically.</p>';
     h+='<h4>PAX</h4><p>Attributes 5 PAX per +3; Powers their PAX-per-Grade (×2 outside Kit); Knowledge & Traits 4 each; +1 Resolve 2 PAX.</p>';

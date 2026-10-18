@@ -20,7 +20,7 @@
   };
   const STAT_IDS = ["smarts", "moves", "style", "brawn"];
   const STAT_NAME = { smarts: "Smarts", moves: "Moves", style: "Style", brawn: "Brawn", power: "Power" };
-  const POINTS = 12, MIN = 2, MAX = 5;
+  const POINTS = 12, MIN = 1, MAX = 5;   // Hero Checklist (ACE Omnibus): "Each Stat must be between 1 and 5"
 
   // ── builder state ──
   let st = null;
@@ -212,7 +212,7 @@
     const left = POINTS - used;
     const hints = { smarts: "clever, perceptive, knowledgeable", moves: "quick, accurate, agile · Defence = ×3", style: "cool, stylish, charismatic", brawn: "strong, tough · Health = Brawn", power: "magic / psionics · costs 1 Karma per use" };
     return (
-      '<p class="m-hint">Spend <b>12 points</b> across your Stats. Each must be between <b>2</b> and <b>5</b>; 3 is an average adult.' +
+      '<p class="m-hint">Spend <b>12 points</b> across your Stats. Each must be between <b>1</b> and <b>5</b>; 3 is an average adult.' +
       (hasPower() ? " Your Role grants a <b>Power</b> Stat — it shares the same 12 points, no extras." : "") + "</p>" +
       '<div class="aceb-pts">Points left: <b class="' + (left === 0 ? "good" : left < 0 ? "bad" : "") + '">' + left + "</b> / " + POINTS + '<button class="aceb-chip" data-random="1" style="margin-left:12px;">🎲 Randomise</button><button class="aceb-chip" data-reset="1" style="margin-left:6px;">Reset to 3s</button></div>' +
       ids.map((id) => {

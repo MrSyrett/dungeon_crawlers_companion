@@ -1,14 +1,15 @@
 // Index Card RPG character builder — the "Create" button on the sheet.
 // Walks ICRPG creation: pick a World, an identity (Life Form + Type), assign 6
-// stat points (up to +3 each at start), and take the Type's starting loot &
+// stat points (any array, Master Ed. p.25) and 4 Effort points (p.26), and take the Type's starting loot &
 // abilities. Uses the sheet's globals (ICRPG_* data, $, esc, applySheet,
 // collectSheet, saveSheet, syncDocTitle, addLog, STAT_ABBR) — load after the sheet.
 (function () {
   const STEPS = ['World', 'Identity', 'Stats', 'Loadout'];
-  const MAX_TOTAL = 6, MAX_PER = 3;
+  const MAX_TOTAL = 6, MAX_PER = 6, EFF_TOTAL = 4;
+  const EFF_KEYS = [['Basic', 'Basic d4'], ['WeaponsTools', 'Weapons & Tools d6'], ['Guns', 'Guns d8'], ['MagicEnergy', 'Magic & Energy d10'], ['Ultimate', 'Ultimate d12']];
   const ABBR = (typeof STAT_ABBR !== 'undefined' && STAT_ABBR) || ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
   let step = 0, world = '', lifeForm = '', type = '', name = '';
-  let alloc = {}, picks = { abilities: {}, loot: {} }, _lastStep = -1, ov = null;
+  let alloc = {}, effAlloc = {}, picks = { abilities: {}, loot: {} }, _lastStep = -1, ov = null;
 
   const G = x => (typeof x !== 'undefined' && Array.isArray(x)) ? x : [];
   const worlds = () => G(typeof ICRPG_WORLDS !== 'undefined' ? ICRPG_WORLDS : undefined);
@@ -18,6 +19,7 @@
   const worldName = (k) => { const w = worlds().find(x => x.key === k); return w ? w.name : k; };
   const typeObj = () => types().find(t => t.name === type) || null;
   const spent = () => ABBR.reduce((n, a) => n + (alloc[a] || 0), 0);
+  const effSpent = () => Object.keys(effAlloc).reduce((n, k) => n + (effAlloc[k] || 0), 0);
 
   // Parse a life-form stat bonus string like "+1 STR, +1 DEX" into {STR:1,DEX:1}.
   function parseBonus(str) {
@@ -70,10 +72,10 @@
       $('icb-type').addEventListener('change', upd);
       upd();
     } else if (step === 2) {
-      const left = MAX_TOTAL - spent();
-      note.textContent = 'Points left: ' + left;
+      const left = MAX_TOTAL - spent(), effLeft = EFF_TOTAL - effSpent();
+      note.textContent = 'Stat points left: ' + left + ' · Effort points left: ' + effLeft;
       const lfo = lifeforms().find(x => x.name === lifeForm), bonus = lfo ? parseBonus(lfo.statBonus) : {};
-      let h = '<p class="m-hint">Spend <b>' + MAX_TOTAL + '</b> points across your six Stats — up to <b>+' + MAX_PER + '</b> in any one at creation (hard cap is +10; Milestones raise them later). Your Life Form bonus is added on top.</p><div class="alloc"><div class="a-skills" style="grid-template-columns:1fr;">';
+      let h = '<p class="m-hint">Spend <b>' + MAX_TOTAL + '</b> points across your six Stats, in any array (no Stat can ever exceed +10). Your Life Form bonus is added on top.</p><div class="alloc"><div class="a-skills" style="grid-template-columns:1fr;">';
       ABBR.forEach(a => {
         const v = alloc[a] || 0, bo = bonus[a] || 0, total = v + bo;
         h += '<div class="a-row"><span class="a-name">' + a + (bo ? ' <span style="color:#8a8a8a;">(+' + bo + ' life form)</span>' : '') + '</span>'
@@ -81,7 +83,15 @@
           + '<button class="a-rk" data-a="' + a + '" data-d="-1"' + (v <= 0 ? ' disabled' : '') + '>−</button>'
           + '<button class="a-rk" data-a="' + a + '" data-d="1"' + (v >= MAX_PER || left <= 0 ? ' disabled' : '') + '>+</button></div>';
       });
+      h += '</div></div><p class="m-hint" style="margin-top:10px;">Spend <b>' + EFF_TOTAL + '</b> points boosting your EFFORT types.</p><div class="alloc"><div class="a-skills" style="grid-template-columns:1fr;">';
+      EFF_KEYS.forEach(([k, lbl]) => {
+        const v = effAlloc[k] || 0;
+        h += '<div class="a-row"><span class="a-name">' + esc(lbl) + '</span><span class="a-code">+' + v + '</span>'
+          + '<button class="a-rk" data-e="' + k + '" data-d="-1"' + (v <= 0 ? ' disabled' : '') + '>−</button>'
+          + '<button class="a-rk" data-e="' + k + '" data-d="1"' + (effLeft <= 0 ? ' disabled' : '') + '>+</button></div>';
+      });
       b.innerHTML = h + '</div></div>';
+      b.querySelectorAll('button[data-e]').forEach(btn => btn.addEventListener('click', () => { const k = btn.dataset.e; effAlloc[k] = Math.max(0, (effAlloc[k] || 0) + Number(btn.dataset.d)); if (!effAlloc[k]) delete effAlloc[k]; render(); }));
       b.querySelectorAll('button[data-a]').forEach(btn => btn.addEventListener('click', () => { const k = btn.dataset.a; alloc[k] = Math.max(0, (alloc[k] || 0) + Number(btn.dataset.d)); if (!alloc[k]) delete alloc[k]; render(); }));
     } else {
       note.textContent = 'Starting kit';
@@ -118,7 +128,7 @@
     const prev = (typeof collectSheet === 'function') ? collectSheet() : {};
     applySheet({
       system: 'ICRPG', name: name || '', world: world, lifeForm: lifeForm, type: type,
-      stats: stats, effort: {}, hp: 10, hpMax: 10, armor: 0, target: 12, level: 0,
+      stats: stats, effort: Object.assign({}, effAlloc), hp: 10, hpMax: 10, armor: 0, target: 12, level: 0,
       abilities: abilities, spells: [], loot: loot,
       story: '', notes: '', dying: false, coin: false,
       campaign: prev.campaign || null,
@@ -128,12 +138,13 @@
   }
 
   window.ICRPGB = {
-    launch() { step = 0; world = ''; lifeForm = ''; type = ''; name = ''; alloc = {}; picks = { abilities: {}, loot: {} }; _lastStep = -1; render(); },
+    launch() { step = 0; world = ''; lifeForm = ''; type = ''; name = ''; alloc = {}; effAlloc = {}; picks = { abilities: {}, loot: {} }; _lastStep = -1; render(); },
     close() { if (ov) ov.classList.remove('open'); },
     next() {
       if (step === 0 && !world) { $('icb-note').textContent = 'Pick a world first'; return; }
       if (step === 1) { readIdentity(); }
       if (step === 2 && spent() < MAX_TOTAL) { $('icb-note').textContent = 'Spend all ' + MAX_TOTAL + ' points — ' + (MAX_TOTAL - spent()) + ' left'; return; }
+      if (step === 2 && effSpent() < EFF_TOTAL) { $('icb-note').textContent = 'Spend all ' + EFF_TOTAL + ' Effort points — ' + (EFF_TOTAL - effSpent()) + ' left'; return; }
       if (step === STEPS.length - 1) { finish(); this.close(); return; }
       step++; render();
     },

@@ -8,7 +8,7 @@ export const DND_MAGIC_ITEMS: DndMagicItem[] = [
     "type": "Potion",
     "rarity": "Common",
     "attunement": false,
-    "description": "A single dose of red liquid; drinking it as an action restores 2d4 + 2 hit points.",
+    "description": "A single dose of red liquid; drinking it (a Bonus Action) restores 2d4 + 2 Hit Points.",
     "source": "srd"
   },
   {
@@ -16,7 +16,7 @@ export const DND_MAGIC_ITEMS: DndMagicItem[] = [
     "type": "Potion",
     "rarity": "Uncommon",
     "attunement": false,
-    "description": "Drinking this potion as an action recovers 4d4 + 4 hit points.",
+    "description": "Drinking this potion (a Bonus Action) restores 4d4 + 4 Hit Points.",
     "source": "srd"
   },
   {
@@ -24,7 +24,7 @@ export const DND_MAGIC_ITEMS: DndMagicItem[] = [
     "type": "Potion",
     "rarity": "Rare",
     "attunement": false,
-    "description": "Drinking this potion as an action recovers 8d4 + 8 hit points.",
+    "description": "Drinking this potion (a Bonus Action) restores 8d4 + 8 Hit Points.",
     "source": "srd"
   },
   {
@@ -32,7 +32,7 @@ export const DND_MAGIC_ITEMS: DndMagicItem[] = [
     "type": "Potion",
     "rarity": "Very Rare",
     "attunement": false,
-    "description": "Drinking this potion as an action recovers 10d4 + 20 hit points.",
+    "description": "Drinking this potion (a Bonus Action) restores 10d4 + 20 Hit Points.",
     "source": "srd"
   },
   {

@@ -816,7 +816,7 @@ const STATS = [
   { id:'brawn',  name:'Brawn',  hint:'strong · tough' },
   { id:'power',  name:'Power',  hint:'magic · psionics', optional:true },
 ];
-const CREATION = { points:12, min:2, max:5, karma:6, karmaMax:10, minDef:8 };
+const CREATION = { points:12, min:1, max:5, karma:6, karmaMax:10, minDef:8 };
 const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const $ = id => document.getElementById(id);
 const num = v => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };

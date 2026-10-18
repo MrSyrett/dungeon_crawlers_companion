@@ -2670,11 +2670,11 @@ export const MMRPG_CHARACTERS = [
     "focus": 30,
     "karma": null,
     "abilities": {
-      "melee": 2,
-      "agility": 2,
-      "resilience": 2,
-      "vigilance": 2,
-      "ego": 2,
+      "melee": 1,
+      "agility": 1,
+      "resilience": 1,
+      "vigilance": 1,
+      "ego": 1,
       "logic": 0
     },
     "speed": {},
@@ -4410,7 +4410,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "BLACK TOM CASSIDY",
     "realName": "Thomas “Tom” Samuel Eamon Cassidy",
-    "rank": 1,
+    "rank": 3,
     "health": 60,
     "focus": 90,
     "karma": null,
@@ -5062,7 +5062,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "BLOB",
     "realName": "Frederick J. “Fred” Dukes",
-    "rank": 1,
+    "rank": 4,
     "health": 210,
     "focus": 60,
     "karma": null,
@@ -16475,16 +16475,16 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "INNER DEMON",
     "realName": "",
-    "rank": 1,
+    "rank": 2,
     "health": 60,
     "focus": 60,
     "karma": null,
     "abilities": {
-      "melee": 1,
-      "agility": 1,
-      "resilience": 1,
-      "vigilance": 1,
-      "ego": 1,
+      "melee": 2,
+      "agility": 2,
+      "resilience": 2,
+      "vigilance": 2,
+      "ego": 2,
       "logic": 0
     },
     "speed": {},
@@ -18346,8 +18346,8 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "KID OMEGA",
     "realName": "Quintavius Quirinius “Quentin” Quire",
-    "rank": 1,
-    "health": null,
+    "rank": 5,
+    "health": 60,
     "focus": 240,
     "karma": null,
     "abilities": {
@@ -21784,7 +21784,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "MASTER OFTHE WORLD",
     "realName": "Eshu",
-    "rank": 1,
+    "rank": 4,
     "health": 120,
     "focus": 60,
     "karma": null,
@@ -22589,7 +22589,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "MISTER SINISTER",
     "realName": "Nathaniel Essex",
-    "rank": 1,
+    "rank": 5,
     "health": 90,
     "focus": 150,
     "karma": null,
@@ -22884,7 +22884,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "MOJO",
     "realName": "Mojo",
-    "rank": 1,
+    "rank": 4,
     "health": 150,
     "focus": 90,
     "karma": null,
@@ -28807,7 +28807,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "SEBASTIAN SHAW",
     "realName": "Sebastian Hiram Shaw",
-    "rank": 1,
+    "rank": 4,
     "health": 120,
     "focus": 60,
     "karma": null,
@@ -29260,7 +29260,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "SHADOW KING",
     "realName": "Unknown",
-    "rank": 1,
+    "rank": 5,
     "health": 60,
     "focus": 240,
     "karma": null,
@@ -33254,7 +33254,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "SPIDERLING",
     "realName": "",
-    "rank": 6,
+    "rank": 1,
     "health": 30,
     "focus": 30,
     "karma": null,
@@ -37362,7 +37362,7 @@ export const MMRPG_CHARACTERS = [
   {
     "name": "TOAD",
     "realName": "Mortimer “Mort” Toynbee",
-    "rank": 1,
+    "rank": 3,
     "health": 60,
     "focus": 90,
     "karma": null,

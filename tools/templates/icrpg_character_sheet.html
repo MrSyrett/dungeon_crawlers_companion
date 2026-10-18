@@ -686,7 +686,7 @@ body.dark .tabs-bar{background:#1a161a;}
           <div class="vbig" style="margin-top:2px;">
             <input type="number" id="f-hp" data-nolock value="10" oninput="onHp()"> <span style="color:var(--muted);font-size:20px;">/</span>
             <input type="number" id="f-hpmax" data-nolock value="10" oninput="onHp()">
-            <button class="small-btn ghost" style="margin-left:8px;" onclick="rollFree('d6','Recover')">Recover d6</button>
+            <button class="small-btn ghost" style="margin-left:8px;" onclick="icRecover()" title="Sacrifice your TURN: d20 + CON vs TARGET → regain CON + 1 HP (p.17)">Recover</button>
           </div>
           <div class="hearts" id="hearts"></div>
         </div>
@@ -698,7 +698,7 @@ body.dark .tabs-bar{background:#1a161a;}
         </div>
         <div class="vital">
           <div class="vlbl"><span>Defense</span></div>
-          <div class="vbig"><span class="calc" id="def-val" title="Enemies roll d20 vs your Defense">10</span></div>
+          <div class="vbig"><span class="calc" id="def-val" title="Roll d20 + Defense to resist danger; enemies must meet or beat 10 + your Defense">10</span></div>
         </div>
         <div class="vital">
           <div class="vlbl"><span>Armor</span></div>
@@ -1045,6 +1045,12 @@ function icCheck(ab, critOn, opt){
   var crit = d>=(critOn||20), fumble = d===1;
   return { d:d, t:t, total:total, tgt:tgt, crit:crit, fumble:fumble, hit: crit || (!fumble && total>=tgt), hardCard: !!opt.hard };
 }
+// RECOVER (p.17): d20 + CON vs the current TARGET; success regains CON + 1 HP.
+function icRecover(){
+  var c=icCheck('CON'), det=icCheckDetail(c,'CON');
+  if(c.hit){ var hp=num($('f-hp').value), max=num($('f-hpmax').value), nhp=Math.min(max, hp+statTotal('CON')+1); $('f-hp').value=nhp; onHp(); addLog('Recover', '✓ +'+(nhp-hp)+' HP', det+' · HP '+hp+' → '+nhp, c.crit?'crit':'normal'); }
+  else addLog('Recover', icVerdict(c), det, c.fumble?'fumble':'normal');
+}
 function icCheckDetail(c, ab){ return 'd20('+c.d+') '+icSgn(c.t)+' '+ab+' = '+c.total+' vs '+c.tgt+(c.hardCard?(_icTurn.mode==='easy'?' (HARD + EASY)':' (HARD)'):icModeTag()); }
 function icVerdict(c){ return c.crit?'★ NAT '+c.d+' — ULTIMATE':c.hit?'✓ Success':c.fumble?'✗ NAT 1':'✗ Miss'; }
 // EFFORT: the die + its trained bonus (+ extra flat), with ULTIMATE d12 on a crit.
@@ -1172,11 +1178,7 @@ function icBuildOpts(){
   add('actions', { name:'Move Far', kind:'far', btn:'Move', sub:'Spend the whole TURN moving twice as far',
     run:function(){ addLog('Move Far', '—', 'Whole TURN spent moving', 'normal'); } });
   add('actions', { name:'Recover', kind:'far', btn:'Roll', sub:'Sacrifice your TURN: d20'+icSgn(statTotal('CON'))+' CON → regain '+(statTotal('CON')+1)+' HP',
-    run:function(){
-      var c=icCheck('CON'), det=icCheckDetail(c,'CON');
-      if(c.hit){ var hp=num($('f-hp').value), max=num($('f-hpmax').value), nhp=Math.min(max, hp+statTotal('CON')+1); $('f-hp').value=nhp; onHp(); addLog('Recover', '✓ +'+(nhp-hp)+' HP', det+' · HP '+hp+' → '+nhp, c.crit?'crit':'normal'); }
-      else addLog('Recover', icVerdict(c), det, c.fumble?'fumble':'normal');
-    } });
+    run:icRecover });
   var heal=statTotal('INT')>=statTotal('WIS')?'INT':'WIS';
   add('actions', { name:'Stabilize an Ally', kind:'action', btn:'Roll', sub:'d20'+icSgn(statTotal(heal))+' '+heal+' — stops a dying ally\'s timer',
     run:function(){ var c=icCheck(heal); addLog('Stabilize', c.hit?'✓ Stable':icVerdict(c), icCheckDetail(c,heal), c.crit?'crit':c.fumble?'fumble':'normal'); } });

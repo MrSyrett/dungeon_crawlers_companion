@@ -704,7 +704,7 @@ body.dark .turn-badge.gold,body.dark .turn-badge.warn{color:#f0c060;}
 
     <div class="center-col">
       <div class="card card-vitals">
-      <div class="section-bar accent"><span>Vitals</span><span class="hdr-right"><button class="hdr-btn" onclick="recover('health')" title="Resilience check vs 10 → regain Marvel die × rank">Recover Health</button><button class="hdr-btn" onclick="recover('focus')" title="Vigilance check vs 10 → regain Marvel die × rank">Recover Focus</button></span></div>
+      <div class="section-bar accent"><span>Vitals</span><span class="hdr-right"><button class="hdr-btn" onclick="recover('health')" title="Spend 1 Karma: Resilience check vs 10 → regain Marvel die × rank">Recover Health</button><button class="hdr-btn" onclick="recover('focus')" title="Spend 1 Karma: Vigilance check vs 10 → regain Marvel die × rank">Recover Focus</button></span></div>
       <div class="vitals" id="vitals">
         <div class="vital speed">
           <div class="vlbl"><span>Speed</span><small>&amp; Initiative</small></div>
@@ -1068,6 +1068,9 @@ function toggleCondition(name){ if(!S.conditions)S.conditions={}; S.conditions[n
   renderConditions(); renderAbilities(); renderDamage(); renderDerived(); scheduleAutosave(); }
 function recover(w){
   var abl=(w==='health')?'resilience':'vigilance';
+  // Recovery costs a point of Karma (Core "Recovering with Karma"); no Karma, no check.
+  if(num(S.karma.cur)<=0){ addLog('Recover '+(w==='health'?'Health':'Focus'),'—','Needs 1 Karma to make a recovery check','normal'); return; }
+  S.karma.cur=num(S.karma.cur)-1;
   var r=roll616(); var total=r.sum+ab(abl);
   if(total>=10){ var gain=r.marvelVal*rank()*(r.fantastic?2:1); S[w].cur=clamp(num(S[w].cur)+gain,0,(w==='health'?healthMax():focusMax()));
     addLog('Recover '+(w==='health'?'Health':'Focus'),'+'+gain+(w==='health'?' Health':' Focus'), dieStr(r)+' + '+ab(abl)+' = '+total+(r.fantastic?' · Fantastic (×2)':''), 'crit'); }
