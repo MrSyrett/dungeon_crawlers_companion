@@ -570,11 +570,11 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 .sdt-do{flex:0 0 auto;background:var(--gold);color:var(--on-gold);border:none;border-radius:6px;padding:6px 12px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .sdt-do:hover{filter:brightness(1.08);}
 .sdt-card.disabled{opacity:.42;}
+.sdt-tog{flex:0 0 auto;margin-right:6px;background:transparent;border:1px solid var(--rule);border-radius:6px;padding:5px 7px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;white-space:nowrap;}
+.sdt-tog.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 .sdt-card.disabled .sdt-do{background:var(--muted);color:#fff;pointer-events:none;}
 .sdt-card.disabled .sdt-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
 .sdt-empty{font-family:'Montserrat',sans-serif;font-size:11px;color:var(--muted);padding:10px 2px;}
-.sd-atk-sl{margin-top:14px;}
-.sd-atk-hint{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted);}
 @media (max-width:600px){
   .sdt-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .sdt-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
@@ -862,8 +862,9 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
           </div></div>
         <div id="gear-list"></div>
 
-        <!-- ATTACKS (managed here; rolled from the Action tab) -->
-        <div class="sl sd-atk-sl"><span>Attacks</span><span class="sd-atk-hint">Roll them from the Action tab</span></div>
+        <!-- ATTACKS — hidden store: rows are made from equipped weapons and rolled
+             (with their 1H/2H and advantage toggles) from the Action tab. -->
+        <div id="sd-atk-store" style="display:none;">
         <table class="attacks-table">
           <thead>
             <tr>
@@ -878,6 +879,7 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
           </thead>
           <tbody id="attacks-body"></tbody>
         </table>
+        </div>
 
         <div class="free-carry">
           <div class="sl"><span>Inventory</span></div>
@@ -1562,7 +1564,13 @@ function sdBuildOpts(){
     const st = normStat(f.stat?.value), hit = parseMod(f.bonus?.value || '') + (st ? getStatMod(st) : 0);
     const dmg = (typeof activeDamage === 'function' ? activeDamage(tr) : (f.damage?.value || '')) || '';
     const adv = tr.querySelector('.atk-adv-btn')?.classList.contains('on');
-    add('attacks', { name: nm, kind: 'action',
+    const tg = [];
+    const dbtn = tr.querySelector('.atk-dmg-btn');
+    if(dbtn && typeof damageParts === 'function' && damageParts(tr).length >= 2)
+      tg.push({ label: dbtn.textContent || '1H', on: false, title: dbtn.title || 'Switch damage (one- / two-handed)', fn: () => cycleAtkDamage(dbtn) });
+    const abtn = tr.querySelector('.atk-adv-btn');
+    if(abtn) tg.push({ label: '▲ Adv', on: !!adv, title: 'Always roll this attack with advantage', fn: () => { toggleAtkAdv(abtn); if(typeof saveSheet === 'function') saveSheet(false); } });
+    add('attacks', { name: nm, kind: 'action', toggles: tg,
       sub: [fmtMod(hit) + ' to hit', dmg ? dmg + ' dmg' : '', (f.range?.value || '').trim(), adv ? 'advantage' : ''].filter(Boolean).join(' · '),
       btn: 'Attack', run: () => { const b = tr.querySelector('.atk-roll-btn'); if(b) rollAttack(b); return true; } });
   });
@@ -1616,6 +1624,11 @@ function sdBuildOpts(){
   return O;
 }
 
+// Per-attack toggles on the Action tab (versatile 1H/2H, always-advantage).
+function sdTurnTog(i, k){
+  const o = _sdTurnOpts[i], t = o && o.toggles && o.toggles[k]; if(!t) return;
+  t.fn(); renderSDTurn();
+}
 function sdTurnDo(i){
   const o = _sdTurnOpts[i]; if(!o) return;
   if(o.blocked){ addLog(o.name, '✗', o.blocked, 'fumble'); return; }
@@ -1651,7 +1664,7 @@ function renderSDTurn(){
   const card = o => {
     const can = !o.blocked && sdCan(o.kind, o.sec);
     const sub = [o.blocked, (o.kind === 'action' && sdSecondAction(o.sec) && can) ? 'uses your move · disadvantage' : '', o.sub].filter(Boolean).join(' · ');
-    return `<div class="sdt-card${can ? '' : ' disabled'}"><div class="sdt-main"><div class="sdt-name">${sdEsc(o.name)}</div>${sub ? `<div class="sdt-sub">${sdEsc(sub)}</div>` : ''}</div><button class="sdt-do" onclick="sdTurnDo(${o.i})">${sdEsc(o.btn)}</button></div>`;
+    return `<div class="sdt-card${can ? '' : ' disabled'}"><div class="sdt-main"><div class="sdt-name">${sdEsc(o.name)}</div>${sub ? `<div class="sdt-sub">${sdEsc(sub)}</div>` : ''}</div>${(o.toggles || []).map((t, k) => `<button class="sdt-tog${t.on ? ' on' : ''}" data-nolock title="${sdEsc(t.title)}" onclick="sdTurnTog(${o.i},${k})">${sdEsc(t.label)}</button>`).join('')}<button class="sdt-do" onclick="sdTurnDo(${o.i})">${sdEsc(o.btn)}</button></div>`;
   };
   const sec = (key, title, list, empty) => `<div class="sdt-sec${_sdTurnCollapsed[key] ? ' collapsed' : ''}"><div class="sdt-sec-hd" onclick="sdToggleSec('${key}')"><span class="sdt-caret">▼</span><span class="sdt-title">${title}</span></div>`
     + `<div class="sdt-sec-body">${list.length ? list.map(card).join('') : `<div class="sdt-empty">${empty}</div>`}</div></div>`;
