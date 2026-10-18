@@ -1913,7 +1913,7 @@ function turnGate(o){
 function turnBuildOpts(){
   const rows = turnSkillRows();
   const curMana = turnNum('mana-current', 0);
-  const O = { hotlist: [], attacks: [], equipment: [], checks: [], actions: [], interrupts: [] };
+  const O = { hotlist: [], attacks: [], checks: [], actions: [], interrupts: [] };
   const add = (sec, o) => { if(!o.blocked) o.blocked = turnGate(o); o.i = _turnOpts.length; _turnOpts.push(o); O[sec].push(o); };
   _turnOpts = [];
   // Hotlist — the 10 pinned slots: Spells (cast from their Skills row; must be on the
@@ -1937,24 +1937,27 @@ function turnBuildOpts(){
         btn: 'Cast', run: () => turnRollRow(r) });
       return;
     }
-    // A pinned item with no Inventory row (hand-typed slot) — usable from Equipment.
+    // A pinned item with no Inventory row (hand-typed slot) — usable from the Hotlist.
     const full = h.split(/\s[×x]\s?\d+|\s[—–]\s/)[0].trim();
     const inv = window.DCCFx ? (DCCFx.invRowByName(full) || DCCFx.invRowByName(nm)) : null;
     // Only consumables with a set effect (same rule as the Inventory list below).
     if(!inv && window.DCCFx && DCCFx.listable && DCCFx.listable(nm)) {
       const qty = (label.match(/\s[×x]\s?(\d+)\s*$/) || [])[1] || '';
-      add('equipment', turnItemOpt({ name: nm, qty, sub: rest, use: () => window.DCCFx ? DCCFx.useByName(nm, rest) : addLog('Use Hotlist Item', nm, h, 'normal') }));
+      add('hotlist', turnItemOpt({ name: nm, qty, sub: rest, slot: si, use: () => window.DCCFx ? DCCFx.useByName(nm, rest) : addLog('Use Hotlist Item', nm, h, 'normal') }));
     }
   });
-  // Equipment — consumable items with a set effect (potions, scrolls, tomes, bandages,
-  // antidotes, dynamite, torches, flares…) that are on the Hotlist. In combat an item must
+  // Hotlist items — consumables with a set effect (potions, scrolls, tomes, bandages,
+  // antidotes, dynamite, torches, flares…) pinned to the Hotlist share its section. In combat an item must
   // be in your Hotlist to use it ("Use a Hotlist Item", Core p.64/98); pinning one with the
   // Inventory ○ costs an Action (dccRadialEquip). Reusable gear and Rations aren't listed.
   if(window.DCCFx && DCCFx.usable) [...document.querySelectorAll('#inv-body tr')].forEach(tr => {
     const u = DCCFx.usable(tr); if(!u) return;
     if(!(window.DCCHotlist && DCCHotlist.isPinned(u.name))) return;
-    add('equipment', turnItemOpt({ name: u.name, qty: String(u.qty || 1), sub: u.sub, tr, use: () => DCCFx.useRow(tr) }));
+    const si = hslots.findIndex(ta => { const t = String(ta.value || '').trim(); if(!t) return false;
+      const ln = turnHotSplit(t).name.replace(/\s[×x]\s?\d+\s*$/, '').trim(); return norm(ln) === norm(u.name) || norm(t.split(/\s[×x]\s?\d+|\s[—–]\s/)[0]) === norm(u.name); });
+    add('hotlist', turnItemOpt({ name: u.name, qty: String(u.qty || 1), sub: u.sub, tr, slot: si < 0 ? 99 : si, use: () => DCCFx.useRow(tr) }));
   });
+  O.hotlist.sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));   // spells and items in Hotlist slot order
   // Attacks — weapon / attack skills (Dmg in their Notes). Attack spells are cast from the Hotlist.
   rows.filter(r => r.dice && !r.spell).forEach(r => add('attacks', {
     name: r.name, kind: 'attack',
@@ -2011,7 +2014,7 @@ function turnItemOpt(x){
     }
     return true;
   };
-  return { name: x.name, kind: 'other', spell: /\bscroll\b/i.test(x.name), btn: 'Use', run: useFn,
+  return { name: x.name, kind: 'other', slot: x.slot, spell: /\bscroll\b/i.test(x.name), btn: 'Use', run: useFn,
     sub: [x.qty ? '×' + x.qty : '', x.sub].filter(Boolean).join(' · ') };
 }
 function turnDo(i, j){
@@ -2117,9 +2120,8 @@ function renderTurn(){
         <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft</span>
       </div>
     </div>
-    ${sec('hotlist', 'Hotlist', O.hotlist, 'No spells on your Hotlist. Pin spells with the ○ dot on the Skills tab (10 slots, shared with items).')}
+    ${sec('hotlist', 'Hotlist', O.hotlist, 'Your Hotlist is empty. Pin spells with the ○ on the Skills tab, and potions, scrolls, tomes, bandages, dynamite or torches with the ○ in the Inventory (1 Action; 10 slots).')}
     ${sec('attacks', 'Attacks', O.attacks, 'No attack skills yet. Add a weapon or weapon skill — its Notes carry the Dmg dice.')}
-    ${sec('equipment', 'Equipment', O.equipment, 'No consumables on your Hotlist. Pin potions, scrolls, tomes, bandages, dynamite or torches with the ○ in the Inventory (1 Action).')}
     ${sec('interrupts', 'Interrupts', O.interrupts, '')}
     ${sec('actions', 'Actions', O.actions, '')}
     ${sec('checks', 'Use a Skill', O.checks, 'No other active skills.')}`;
