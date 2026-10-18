@@ -2,7 +2,8 @@
 //   1. Role (sets key attribute + specialist skill + the three role talents)
 //   2. Attributes (14 points; each 2–4, key may reach 5)
 //   3. Skills (10 points; max 3 each; at least 1 in your specialist skill)
-//   4. Talent & Mutation (one of the role's three talents; one random/picked mutation)
+//   4. Talent & Mutation (one of the role's three talents; one random/picked mutation, plus the
+//      optional second mutation, which costs one step off an attribute — core rulebook, Two mutations?)
 //   5. Starting Gear (weapons / gear / armor; grub, water, bullets set on the sheet)
 // Hands a finished character to applySheet(). Reads sheet globals:
 // MYZ_ATTRIBUTES, MYZ_SKILLS, MYZ_ROLES, MYZ_TALENTS, MYZ_MUTATIONS,
@@ -27,6 +28,7 @@
 
   var step = 0;
   var name = '', pronouns = '', role = '', key = '', specialist = '', talentPick = '', mutPick = '', weaponPick = '', artifactPick = '', dream = '', den = '';
+  var mut2On = false, mut2Pick = '', mut2Attr = '';   // optional second mutation + the attribute it lowers
   var attrs = {}, skills = {}, startGear = [], gearTab = 'weap', supplies = { grub: 0, water: 0, bullets: 0 };
 
   function roleObj(nm) { for (var i = 0; i < ROLES.length; i++) if (ROLES[i].name === nm) return ROLES[i]; return null; }
@@ -48,7 +50,7 @@
   function skillCap() { return 3; }
 
   function reset() {
-    step = 0; name = ''; pronouns = ''; role = ''; key = ''; specialist = ''; talentPick = ''; mutPick = ''; weaponPick = ''; artifactPick = ''; dream = ''; den = '';
+    step = 0; name = ''; pronouns = ''; role = ''; key = ''; specialist = ''; talentPick = ''; mutPick = ''; mut2On = false; mut2Pick = ''; mut2Attr = ''; weaponPick = ''; artifactPick = ''; dream = ''; den = '';
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
     skills = {}; SK.forEach(function (s) { skills[s.name] = 0; });
     startGear = []; gearTab = 'weap'; supplies = { grub: 0, water: 0, bullets: 0 };
@@ -128,6 +130,20 @@
     h += '<div class="yzeb-list" style="max-height:220px;">' + MUT.map(function (m) {
       return prow(m.name, 'D66 ' + m.roll, m.desc, mutPick === m.name, "window.YZEB.pickMut('" + m.name.replace(/'/g, "\\'") + "')", mutPick === m.name ? '✓ Chosen' : 'Choose');
     }).join('') + '</div>';
+    // Optional second mutation (core rulebook "Two mutations?"): draw another, but one attribute drops one step.
+    if (mutPick) {
+      h += '<div class="m-lbl" style="margin-top:14px;"><label style="cursor:pointer;"><input type="checkbox" ' + (mut2On ? 'checked ' : '') + 'onchange="window.YZEB.toggleMut2(this.checked)"> Start with a second mutation</label> <span class="yzeb-sub">(costs one step off an attribute of your choice)</span></div>';
+      if (mut2On) {
+        h += '<p class="m-hint">Lower one attribute by 1 — it may drop to 1, though that is hardly advisable.</p><div class="yzeb-list">' + ATTRS.map(function (a) {
+          var v = attrs[a.key], dis = v <= 1;
+          return prow(a.name, v + ' → ' + (v - 1), '', mut2Attr === a.key, dis ? '' : "window.YZEB.pickMut2Attr('" + a.key + "')", mut2Attr === a.key ? '✓ Lowered' : (dis ? 'At 1' : 'Lower'));
+        }).join('') + '</div>';
+        h += '<div class="m-lbl" style="margin-top:10px;">Second mutation <button class="builder-chip" style="margin-left:6px;" onclick="window.YZEB.rollMut2()">⚄ Random</button></div>';
+        h += '<div class="yzeb-list" style="max-height:220px;">' + MUT.filter(function (m) { return m.name !== mutPick; }).map(function (m) {
+          return prow(m.name, 'D66 ' + m.roll, m.desc, mut2Pick === m.name, "window.YZEB.pickMut2('" + m.name.replace(/'/g, "\\'") + "')", mut2Pick === m.name ? '✓ Chosen' : 'Choose');
+        }).join('') + '</div>';
+      }
+    }
     return h;
   }
   function gearSources() {
@@ -175,7 +191,7 @@
       return '<button class="yzeb-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') + '" onclick="window.YZEB.goStep(' + i + ')"><span class="yzeb-step-n">' + (i + 1) + '</span>' + esc(s) + '</button>';
     }).join('');
   }
-  function ready() { return !!role && attrTotal() === ATTR_BUDGET && skillSpent() <= SKILL_BUDGET && num(skills[specialist]) >= 1; }
+  function ready() { return !!role && attrTotal() === ATTR_BUDGET && skillSpent() <= SKILL_BUDGET && num(skills[specialist]) >= 1 && (!mut2On || (!!mut2Pick && !!mut2Attr)); }
   function renderNav() {
     var el = $('yzeb-nav'); if (!el) return;
     var left = step > 0 ? '<button class="m-btn ghost" onclick="window.YZEB.back()">‹ Back</button>' : '<button class="m-btn ghost" onclick="window.YZEB.close()">Cancel</button>';
@@ -222,8 +238,12 @@
       render();
     },
     pickTalent: function (t) { talentPick = (talentPick === t) ? '' : t; render(); },
-    pickMut: function (m) { mutPick = (mutPick === m) ? '' : m; render(); },
-    rollMut: function () { if (MUT.length) { mutPick = MUT[Math.floor(Math.random() * MUT.length)].name; render(); } },
+    pickMut: function (m) { mutPick = (mutPick === m) ? '' : m; if (!mutPick || mut2Pick === mutPick) mut2Pick = ''; if (!mutPick) { mut2On = false; mut2Attr = ''; } render(); },
+    toggleMut2: function (on) { mut2On = !!on; if (!on) { mut2Pick = ''; mut2Attr = ''; } render(); },
+    pickMut2: function (m) { mut2Pick = (mut2Pick === m) ? '' : m; render(); },
+    rollMut2: function () { var pool = MUT.filter(function (m) { return m.name !== mutPick; }); if (pool.length) { mut2Pick = pool[Math.floor(Math.random() * pool.length)].name; render(); } },
+    pickMut2Attr: function (k) { mut2Attr = (mut2Attr === k) ? '' : k; render(); },
+    rollMut: function () { if (MUT.length) { mutPick = MUT[Math.floor(Math.random() * MUT.length)].name; if (mut2Pick === mutPick) mut2Pick = ''; render(); } },
     pickWeapon: function (nm) { weaponPick = (weaponPick === nm) ? '' : nm; render(); },
     rollSupplies: function () { doRollSupplies(); render(); },
     rollArtifact: function () { if (ARTIFACTS.length) { artifactPick = ARTIFACTS[Math.floor(Math.random() * ARTIFACTS.length)].name; render(); } },
@@ -241,6 +261,10 @@
       if (specialist) d.skills[specialist] = skills[specialist] || 0;
       if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }];
       if (mutPick) { var mo = mutObj(mutPick); d.mutations = [{ name: mutPick, note: mo ? mo.desc : '', spend: 1 }]; d.mp = 1; }
+      if (mutPick && mut2On && mut2Pick && mut2Attr) {
+        var mo2 = mutObj(mut2Pick); d.mutations.push({ name: mut2Pick, note: mo2 ? mo2.desc : '', spend: 1 });
+        d.attrs[mut2Attr] = Math.max(1, num(d.attrs[mut2Attr]) - 1);   // the price of a second mutation
+      }
       d.supplies = { grub: num(supplies.grub), water: num(supplies.water), bullets: num(supplies.bullets) };
       if (dream) d.dream = dream; if (den) d.den = den;
       var gearList = [], g = roleGear();
