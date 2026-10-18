@@ -21,7 +21,7 @@ export const SPELLS: Spell[] = [
     "range": "Close",
     "duration": "Instant",
     "damage": "",
-    "desc": "Touch a creature to restore 1 + half your level (round down) d6 HP.",
+    "desc": "Touch: the target regains (1 + half your level, rounded down) d6 hit points.",
     "heal": "scaling"
   },
   {
@@ -31,25 +31,7 @@ export const SPELLS: Spell[] = [
     "range": "Close",
     "duration": "5 rounds",
     "damage": "",
-    "desc": "One touched weapon deals +1d6 damage (1d8 vs undead)."
-  },
-  {
-    "name": "Light",
-    "tier": "1",
-    "caster": "Both",
-    "range": "Close",
-    "duration": "1 hour",
-    "damage": "",
-    "desc": "One object glows with bright heatless light illuminating near range."
-  },
-  {
-    "name": "Protection From Evil",
-    "tier": "1",
-    "caster": "Both",
-    "range": "Close",
-    "duration": "Focus",
-    "damage": "",
-    "desc": "Chaotic creatures have disadvantage on attacks vs target. Target has ADV on saves vs chaotic magic."
+    "desc": "A touched weapon becomes magical with +1 to attack and damage rolls for the duration."
   },
   {
     "name": "Shield of Faith",
@@ -58,7 +40,7 @@ export const SPELLS: Spell[] = [
     "range": "Self",
     "duration": "5 rounds",
     "damage": "",
-    "desc": "+2 bonus to AC for duration."
+    "desc": "You gain a +2 bonus to AC for the duration."
   },
   {
     "name": "Turn Undead",
@@ -67,98 +49,25 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "Instant",
     "damage": "",
-    "desc": "Undead in near flee (CHA vs your spellcheck). Fail by 10+ and ≤ your level = destroyed."
+    "desc": "Present your holy symbol: undead within near make a CHA check vs. your spellcasting check — fail by 10+ (and LV ≤ yours) is destroyed, else they flee for 5 rounds."
   },
   {
-    "name": "Augury",
-    "tier": "2",
-    "caster": "Priest",
-    "range": "Self",
-    "duration": "Instant",
-    "damage": "",
-    "desc": "Ask if an action in the next hour will bring good or ill. Answer is weal, woe, weal and woe, or nothing."
-  },
-  {
-    "name": "Bless",
-    "tier": "2",
-    "caster": "Priest",
-    "range": "Near",
-    "duration": "Focus",
-    "damage": "",
-    "desc": "Up to 3 allies in near gain +1 to attacks and saves."
-  },
-  {
-    "name": "Blind/Deafen",
-    "tier": "2",
-    "caster": "Priest",
-    "range": "Near",
-    "duration": "Focus",
-    "damage": "",
-    "desc": "DC 13 CON or one target is blinded or deafened (your choice)."
-  },
-  {
-    "name": "Cleansing Weapon",
-    "tier": "2",
-    "caster": "Priest",
+    "name": "Light",
+    "tier": "1",
+    "caster": "Both",
     "range": "Close",
-    "duration": "5 rounds",
-    "damage": "1d4",
-    "desc": "Touched weapon deals +1d4 damage (+1d6 vs undead) for duration."
+    "duration": "1 hour",
+    "damage": "",
+    "desc": "A touched object sheds bright, heatless light out to near for 1 hour of real time."
   },
   {
-    "name": "Smite",
-    "tier": "2",
-    "caster": "Priest",
+    "name": "Protection From Evil",
+    "tier": "1",
+    "caster": "Both",
     "range": "Close",
-    "duration": "Instant",
-    "damage": "2d6",
-    "desc": "Your next weapon attack deals +2d6 radiant damage."
-  },
-  {
-    "name": "Zone of Truth",
-    "tier": "2",
-    "caster": "Priest",
-    "range": "Near",
     "duration": "Focus",
     "damage": "",
-    "desc": "Creatures in near-sized area cannot lie. DC 13 CHA to resist."
-  },
-  {
-    "name": "Command",
-    "tier": "3",
-    "caster": "Priest",
-    "range": "Near",
-    "duration": "Focus",
-    "damage": "",
-    "desc": "DC 14 WIS or one target follows a one-word command each round."
-  },
-  {
-    "name": "Lay To Rest",
-    "tier": "3",
-    "caster": "Priest",
-    "range": "Close",
-    "duration": "Instant",
-    "damage": "",
-    "desc": "Permanently destroy one undead creature you touch. DC 14 CON to resist."
-  },
-  {
-    "name": "Mass Cure",
-    "tier": "3",
-    "caster": "Priest",
-    "range": "Near",
-    "duration": "Instant",
-    "damage": "",
-    "desc": "All allies in near regain 2d6 HP.",
-    "heal": "2d6"
-  },
-  {
-    "name": "Rebuke Unholy",
-    "tier": "3",
-    "caster": "Priest",
-    "range": "Near",
-    "duration": "Instant",
-    "damage": "4d6",
-    "desc": "All undead and chaotic creatures in near take 4d6 radiant damage. DC 14 CON half."
+    "desc": "Chaotic beings have disadvantage on attacks and hostile spellcasting against the target and can't possess, compel or beguile it."
   },
   {
     "name": "Alarm",
@@ -167,7 +76,7 @@ export const SPELLS: Spell[] = [
     "range": "Close",
     "duration": "1 day",
     "damage": "",
-    "desc": "Ward a door or threshold. You are mentally alerted when a creature passes through."
+    "desc": "Ward one touched object (e.g. a threshold). A mental bell rings if an undesignated creature touches or passes it."
   },
   {
     "name": "Burning Hands",
@@ -175,8 +84,8 @@ export const SPELLS: Spell[] = [
     "caster": "Wizard",
     "range": "Close",
     "duration": "Instant",
-    "damage": "2d6",
-    "desc": "Circle of flame roars out to a close area. DC 11 DEX half."
+    "damage": "1d6",
+    "desc": "A circle of flame roars out to close range around you: 1d6 damage to creatures there, flammables catch fire."
   },
   {
     "name": "Charm Person",
@@ -185,7 +94,7 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "1d8 days",
     "damage": "",
-    "desc": "Beguile one humanoid of level 2 or less in near. Regards you as a trusted friend."
+    "desc": "One humanoid of LV 2 or less in near regards you as a friend. Ends if you or allies hurt it; it knows afterwards."
   },
   {
     "name": "Detect Magic",
@@ -194,7 +103,25 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "Focus",
     "damage": "",
-    "desc": "Sense magic within near. Focus 2 rounds to learn general properties."
+    "desc": "Sense magic within near range. Focus for two rounds to learn its general properties. Full barriers block it."
+  },
+  {
+    "name": "Feather Fall",
+    "tier": "1",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Cast as you fall: your descent slows and you land safely on your feet."
+  },
+  {
+    "name": "Floating Disk",
+    "tier": "1",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "10 rounds",
+    "damage": "",
+    "desc": "A floating disk of force carries up to 20 gear slots, hovering at waist height and staying within near of you."
   },
   {
     "name": "Hold Portal",
@@ -203,7 +130,7 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "10 rounds",
     "damage": "",
-    "desc": "Magically hold a portal closed for duration."
+    "desc": "Hold a portal shut. Opening it takes a STR check vs. your spellcasting check; knock ends the spell."
   },
   {
     "name": "Mage Armor",
@@ -212,7 +139,7 @@ export const SPELLS: Spell[] = [
     "range": "Self",
     "duration": "10 rounds",
     "damage": "",
-    "desc": "Your AC becomes 14 (18 on critical success)."
+    "desc": "Your AC becomes 14 (18 on a critical spellcasting check) for the duration."
   },
   {
     "name": "Magic Missile",
@@ -221,7 +148,7 @@ export const SPELLS: Spell[] = [
     "range": "Far",
     "duration": "Instant",
     "damage": "1d4",
-    "desc": "ADV on cast check. Glowing bolt of force deals 1d4 damage to one target."
+    "desc": "You have advantage to cast it. A bolt of force deals 1d4 damage to one target."
   },
   {
     "name": "Sleep",
@@ -230,25 +157,79 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "Instant",
     "damage": "",
-    "desc": "Creatures level 2 or less in a near cube fall into deep sleep."
+    "desc": "Creatures of LV 2 or less in a near-sized cube from you fall into a deep sleep. Shaking or injury wakes them."
+  },
+  {
+    "name": "Augury",
+    "tier": "2",
+    "caster": "Priest",
+    "range": "Self",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Ask the GM one question about a course of action; you learn whether it leads to weal or woe."
+  },
+  {
+    "name": "Bless",
+    "tier": "2",
+    "caster": "Priest",
+    "range": "Close",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "One creature you touch gains a luck token."
+  },
+  {
+    "name": "Blind/Deafen",
+    "tier": "2",
+    "caster": "Priest",
+    "range": "Near",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Blind or deafen one creature you can see. It has disadvantage on tasks that need the lost sense."
+  },
+  {
+    "name": "Cleansing Weapon",
+    "tier": "2",
+    "caster": "Priest",
+    "range": "Close",
+    "duration": "5 rounds",
+    "damage": "1d4",
+    "desc": "A touched weapon is wreathed in purifying flame: +1d4 damage (1d6 vs. undead) for the duration."
+  },
+  {
+    "name": "Smite",
+    "tier": "2",
+    "caster": "Priest",
+    "range": "Near",
+    "duration": "Instant",
+    "damage": "1d6",
+    "desc": "Punishing flames strike a creature you can see in range for 1d6 damage."
+  },
+  {
+    "name": "Zone of Truth",
+    "tier": "2",
+    "caster": "Priest",
+    "range": "Near",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "One creature you can see can't tell a deliberate lie while it stays in range."
   },
   {
     "name": "Acid Arrow",
     "tier": "2",
     "caster": "Wizard",
     "range": "Far",
-    "duration": "Instant",
-    "damage": "4d4",
-    "desc": "Arrow of acid deals 4d4 damage, then 2d4 next round."
+    "duration": "Focus",
+    "damage": "1d6",
+    "desc": "A corrosive bolt hits one foe for 1d6 damage each round you keep focus."
   },
   {
     "name": "Alter Self",
     "tier": "2",
     "caster": "Wizard",
     "range": "Self",
-    "duration": "Focus",
+    "duration": "5 rounds",
     "damage": "",
-    "desc": "Assume a different humanoid form for the duration."
+    "desc": "Gain one anatomical feature (gills, claws…). Can't grow wings or limbs."
   },
   {
     "name": "Detect Thoughts",
@@ -257,7 +238,34 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "Focus",
     "damage": "",
-    "desc": "Learn the surface thoughts of one creature you can see each round."
+    "desc": "Read one visible creature's immediate thoughts each round. It may notice (WIS vs. your last check), ending the spell."
+  },
+  {
+    "name": "Fixed Object",
+    "tier": "2",
+    "caster": "Wizard",
+    "range": "Close",
+    "duration": "5 rounds",
+    "damage": "",
+    "desc": "A touched object of 5 lb or less is fixed in place and can hold up to 5,000 lb for the duration."
+  },
+  {
+    "name": "Hold Person",
+    "tier": "2",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Paralyze one humanoid of LV 4 or less you can see in range."
+  },
+  {
+    "name": "Invisibility",
+    "tier": "2",
+    "caster": "Wizard",
+    "range": "Close",
+    "duration": "10 rounds",
+    "damage": "",
+    "desc": "A touched creature turns invisible; the spell ends if it attacks or casts a spell."
   },
   {
     "name": "Knock",
@@ -266,7 +274,7 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "Instant",
     "damage": "",
-    "desc": "Open one magically locked door, chest, or portal."
+    "desc": "A door, window, gate, chest or portal you can see bursts open, defeating mundane locks — with a loud knock."
   },
   {
     "name": "Levitate",
@@ -275,16 +283,16 @@ export const SPELLS: Spell[] = [
     "range": "Self",
     "duration": "Focus",
     "damage": "",
-    "desc": "Rise or descend up to a near distance per round. You hover if not moving."
+    "desc": "Float a near distance vertically per round; push off solid objects to move sideways."
   },
   {
     "name": "Mirror Image",
     "tier": "2",
     "caster": "Wizard",
     "range": "Self",
-    "duration": "Focus",
+    "duration": "5 rounds",
     "damage": "",
-    "desc": "3 duplicates. Attackers have a 1-in-4 chance of hitting the real you."
+    "desc": "Create illusory duplicates equal to half your level (min. 1). Each attack against you misses and pops one; the spell ends when all are gone."
   },
   {
     "name": "Misty Step",
@@ -293,7 +301,7 @@ export const SPELLS: Spell[] = [
     "range": "Self",
     "duration": "Instant",
     "damage": "",
-    "desc": "Teleport a near distance to a visible location."
+    "desc": "Teleport a near distance to a spot you can see."
   },
   {
     "name": "Silence",
@@ -302,16 +310,98 @@ export const SPELLS: Spell[] = [
     "range": "Far",
     "duration": "Focus",
     "damage": "",
-    "desc": "Magical silence in a near cube. No spells can be cast within."
+    "desc": "Mute all sound in a near cube within range. Creatures inside are deafened and make no sound."
   },
   {
     "name": "Web",
     "tier": "2",
     "caster": "Wizard",
-    "range": "Near",
+    "range": "Far",
+    "duration": "5 rounds",
+    "damage": "",
+    "desc": "A near-sized cube of sticky web in range. A stuck creature can't move and must win a STR check vs. your spellcasting check to break free."
+  },
+  {
+    "name": "Command",
+    "tier": "3",
+    "caster": "Priest",
+    "range": "Far",
     "duration": "Focus",
     "damage": "",
-    "desc": "Sticky webs fill a near cube. DC 12 STR to move through."
+    "desc": "Issue a one-word command to one creature in range who understands you; it obeys while you focus. A directly harmful command allows a CHA check vs. your last spellcasting check to end it."
+  },
+  {
+    "name": "Lay To Rest",
+    "tier": "3",
+    "caster": "Priest",
+    "range": "Close",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Instantly destroy one undead creature of LV 9 or less that you touch."
+  },
+  {
+    "name": "Mass Cure",
+    "tier": "3",
+    "caster": "Priest",
+    "range": "Near",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "All allies within near of you regain 2d6 hit points.",
+    "heal": "2d6"
+  },
+  {
+    "name": "Rebuke Unholy",
+    "tier": "3",
+    "caster": "Priest",
+    "range": "Near",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Present your holy symbol: opposed outsiders within near make a CHA check vs. your spellcasting check — fail by 10+ (and LV ≤ yours) is destroyed, else they flee for 5 rounds."
+  },
+  {
+    "name": "Restoration",
+    "tier": "3",
+    "caster": "Priest",
+    "range": "Close",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Your touch removes one curse, illness or affliction of your choice."
+  },
+  {
+    "name": "Speak With Dead",
+    "tier": "3",
+    "caster": "Both",
+    "range": "Close",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "A dead body you touch answers up to three yes-or-no questions, truthfully. Cast it again within 24 hours and a failed check counts as a critical failure."
+  },
+  {
+    "name": "Animate Dead",
+    "tier": "3",
+    "caster": "Wizard",
+    "range": "Close",
+    "duration": "1 day",
+    "damage": "",
+    "desc": "Touched humanoid remains rise as a zombie or skeleton under your control, acting on your turn. Crumbles after 1 day."
+  },
+  {
+    "name": "Dispel Magic",
+    "tier": "3",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "End one spell affecting one target you can see in range."
+  },
+  {
+    "name": "Fabricate",
+    "tier": "3",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "10 rounds",
+    "damage": "",
+    "desc": "Turn a tree-sized pile of raw materials into a finished work (e.g. rocks into a bridge). It reverts when the spell ends. Can't target creatures."
   },
   {
     "name": "Fireball",
@@ -319,62 +409,71 @@ export const SPELLS: Spell[] = [
     "caster": "Wizard",
     "range": "Far",
     "duration": "Instant",
-    "damage": "6d6",
-    "desc": "Explosion in a near cube at far. 6d6 damage. DC 14 DEX half."
+    "damage": "4d6",
+    "desc": "A flame bursts into a near-sized cube where it lands: 4d6 damage to every creature inside."
   },
   {
     "name": "Fly",
     "tier": "3",
     "caster": "Wizard",
-    "range": "Close",
+    "range": "Self",
+    "duration": "5 rounds",
+    "damage": "",
+    "desc": "You can fly a near distance and hover in place for the duration."
+  },
+  {
+    "name": "Gaseous Form",
+    "tier": "3",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "10 rounds",
+    "damage": "",
+    "desc": "You and your gear become a smoke cloud: you can fly, pass through any gap smoke could, and sense movement out to near. You can't cast spells in this form."
+  },
+  {
+    "name": "Illusion",
+    "tier": "3",
+    "caster": "Wizard",
+    "range": "Far",
     "duration": "Focus",
     "damage": "",
-    "desc": "One creature can fly at double near speed for duration."
+    "desc": "A visible, audible illusion fills up to a near-sized cube in range. It can't harm. Inspecting it takes a WIS check vs. your last spellcasting check to see through; touching it reveals it."
   },
   {
     "name": "Lightning Bolt",
     "tier": "3",
     "caster": "Wizard",
-    "range": "Near",
+    "range": "Far",
     "duration": "Instant",
-    "damage": "6d6",
-    "desc": "Bolt of lightning strikes near range in a line. 6d6 damage. DC 14 DEX half."
+    "damage": "3d6",
+    "desc": "A bolt of lightning hits every creature in a straight line out to far: 3d6 damage."
   },
   {
     "name": "Magic Circle",
     "tier": "3",
     "caster": "Wizard",
-    "range": "Close",
-    "duration": "1 hour",
-    "damage": "",
-    "desc": "Ward an area against chaotic or lawful creatures (choose). They cannot enter or affect those within."
-  },
-  {
-    "name": "Polymorph",
-    "tier": "3",
-    "caster": "Wizard",
     "range": "Near",
     "duration": "Focus",
     "damage": "",
-    "desc": "Transform one creature into a beast you choose. Target uses beast stats."
+    "desc": "A near-sized circle of runes around you: creatures of a named type can't attack, harm-cast at, possess or beguile anyone inside."
   },
   {
-    "name": "Stoneskin",
+    "name": "Protection From Energy",
     "tier": "3",
     "caster": "Wizard",
     "range": "Close",
     "duration": "Focus",
     "damage": "",
-    "desc": "Target gains +4 AC and resistance to non-magical weapon damage."
+    "desc": "One touched creature becomes impervious to fire, cold or electricity (choose one) while you focus."
   },
   {
-    "name": "Animate Dead",
-    "tier": "4",
+    "name": "Sending",
+    "tier": "3",
     "caster": "Wizard",
-    "range": "Close",
-    "duration": "1 day",
+    "range": "Unlimited",
+    "duration": "Instant",
     "damage": "",
-    "desc": "Animate a humanoid corpse as a skeleton or zombie under your control."
+    "desc": "Send a brief mental message to a familiar creature anywhere on the same plane."
   },
   {
     "name": "Commune",
@@ -383,34 +482,80 @@ export const SPELLS: Spell[] = [
     "range": "Self",
     "duration": "Instant",
     "damage": "",
-    "desc": "Ask your deity 3 yes/no questions. Truthful answers."
-  },
-  {
-    "name": "Control Water",
-    "tier": "4",
-    "caster": "Priest",
-    "range": "Far",
-    "duration": "Focus",
-    "damage": "",
-    "desc": "Control a body of water up to 100 feet wide. Raise, lower, redirect."
+    "desc": "Ask the GM up to three yes-or-no questions, answered truthfully."
   },
   {
     "name": "Flame Strike",
     "tier": "4",
     "caster": "Priest",
-    "range": "Near",
+    "range": "Far",
     "duration": "Instant",
-    "damage": "8d6",
-    "desc": "Column of divine fire strikes a near-sized area. 8d6 damage. DC 15 DEX half."
+    "damage": "2d6",
+    "desc": "A holy pillar of fire strikes one creature you can see in range for 2d6 damage."
   },
   {
-    "name": "Telekinesis",
+    "name": "Pillar of Salt",
     "tier": "4",
-    "caster": "Wizard",
+    "caster": "Priest",
+    "range": "Near",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Turn a creature you can see of LV 5 or less into a salt statue. Keep focus 3 rounds in a row and it becomes permanent."
+  },
+  {
+    "name": "Regenerate",
+    "tier": "4",
+    "caster": "Priest",
+    "range": "Close",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "A touched creature regains 1d4 HP on your turn while you focus, and regrows lost body parts.",
+    "heal": "1d4"
+  },
+  {
+    "name": "Wrath",
+    "tier": "4",
+    "caster": "Priest",
+    "range": "Self",
+    "duration": "10 rounds",
+    "damage": "1d8",
+    "desc": "Your weapons become magical +2 and deal an extra 1d8 damage for the duration."
+  },
+  {
+    "name": "Control Water",
+    "tier": "4",
+    "caster": "Both",
     "range": "Far",
     "duration": "Focus",
     "damage": "",
-    "desc": "Lift a creature or object up to 1,000 lbs and move it a near distance."
+    "desc": "Move and shape water: a section up to 100 feet wide and deep changes shape, defies gravity or changes flow."
+  },
+  {
+    "name": "Arcane Eye",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Conjure an invisible, grape-sized eye in range that you see through (it sees in the dark) and can move each round."
+  },
+  {
+    "name": "Cloudkill",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Far",
+    "duration": "5 rounds",
+    "damage": "2d6",
+    "desc": "A spreading near-sized cloud of poison: creatures inside are blinded and take 2d6 damage at the start of their turns; LV 9 or less ending a turn fully inside dies."
+  },
+  {
+    "name": "Confusion",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Mesmerize one creature you can see: it can't take actions and moves randomly. If LV 9+, it may make a WIS check vs. your last spellcasting check each turn to end it."
   },
   {
     "name": "Dimension Door",
@@ -419,25 +564,88 @@ export const SPELLS: Spell[] = [
     "range": "Self",
     "duration": "Instant",
     "damage": "",
-    "desc": "Teleport yourself and up to 4 willing targets up to 100 miles."
+    "desc": "Teleport yourself and up to one other willing creature to any point you can see."
+  },
+  {
+    "name": "Divination",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Ask the GM one yes-or-no question, answered truthfully. Cast it again within 24 hours and a failed check counts as a critical failure."
+  },
+  {
+    "name": "Passwall",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Close",
+    "duration": "5 rounds",
+    "damage": "",
+    "desc": "Open a tunnel of your height, up to near deep, through a barrier you touch for the duration."
+  },
+  {
+    "name": "Polymorph",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Close",
+    "duration": "10 rounds",
+    "damage": "",
+    "desc": "Turn a touched creature into another natural creature of equal or smaller size (unwilling: LV up to half yours). Reverts at 0 HP."
+  },
+  {
+    "name": "Resilient Sphere",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Close",
+    "duration": "5 rounds",
+    "damage": "",
+    "desc": "A weightless glassy sphere surrounds you out to close range; nothing can pass through or crush it. You can roll it a near distance on your turn."
+  },
+  {
+    "name": "Stoneskin",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "10 rounds",
+    "damage": "",
+    "desc": "Your AC becomes 17 (20 on a critical spellcasting check) for the duration."
+  },
+  {
+    "name": "Telekinesis",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Far",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Lift a creature or object of 1,000 lb or less with your mind; move it a near distance and hold it in place."
+  },
+  {
+    "name": "Wall of Force",
+    "tier": "4",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "5 rounds",
+    "damage": "",
+    "desc": "Conjure a thin, transparent wall of force covering a near-sized area in a shape you choose. Nothing on this plane can physically pass through it."
   },
   {
     "name": "Divine Vengeance",
     "tier": "5",
     "caster": "Priest",
-    "range": "Near",
-    "duration": "Instant",
-    "damage": "10d6",
-    "desc": "Call down divine wrath. All enemies in near take 10d6 damage. DC 18 DEX half."
+    "range": "Self",
+    "duration": "10 rounds",
+    "damage": "",
+    "desc": "Become your god's avatar: fly near, your weapons are magical, and you gain +4 to weapon attacks and damage."
   },
   {
     "name": "Dominion",
     "tier": "5",
     "caster": "Priest",
-    "range": "Far",
-    "duration": "Focus",
+    "range": "Near",
+    "duration": "10 rounds",
     "damage": "",
-    "desc": "DC 18 WIS or control one creature you can see. They obey commands."
+    "desc": "Summon mighty beings (16 combined levels or less) that aid you of their own will for 10 rounds. Can't recast until you do penance."
   },
   {
     "name": "Heal",
@@ -446,7 +654,43 @@ export const SPELLS: Spell[] = [
     "range": "Close",
     "duration": "Instant",
     "damage": "",
-    "desc": "One touched creature is restored to full HP and cured of all conditions."
+    "desc": "One touched creature is healed to full hit points. You can't cast this again until you rest."
+  },
+  {
+    "name": "Judgment",
+    "tier": "5",
+    "caster": "Priest",
+    "range": "Close",
+    "duration": "5 rounds",
+    "damage": "",
+    "desc": "Banish a touched intelligent creature of LV 10 or less to face your god. It returns in 5 rounds at full HP or 1 HP, as its deeds merit."
+  },
+  {
+    "name": "Prophecy",
+    "tier": "5",
+    "caster": "Priest",
+    "range": "Self",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Ask the GM one question; it is answered truthfully with your god's knowledge. Can't recast until you complete penance."
+  },
+  {
+    "name": "Plane Shift",
+    "tier": "5",
+    "caster": "Both",
+    "range": "Close",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Transport yourself and willing creatures within close range to another plane of your choice — a random spot there unless you've been to the place before."
+  },
+  {
+    "name": "Antimagic Shell",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "A near-sized cube of null-magic moves with you: no spells can be cast in it, magic items and spells have no effect there, and no magic can enter."
   },
   {
     "name": "Create Undead",
@@ -455,7 +699,16 @@ export const SPELLS: Spell[] = [
     "range": "Close",
     "duration": "1 day",
     "damage": "",
-    "desc": "Summon a powerful undead creature to serve you for 1 day."
+    "desc": "Summon a wight or wraith under your control that acts on your turn. It melts away after 1 day."
+  },
+  {
+    "name": "Disintegrate",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Far",
+    "duration": "Instant",
+    "damage": "3d8",
+    "desc": "A green ray turns a creature or object to ash: LV 5 or less dies outright, LV 6+ takes 3d8 damage. Destroys a non-magical object up to tree-sized."
   },
   {
     "name": "Hold Monster",
@@ -464,7 +717,70 @@ export const SPELLS: Spell[] = [
     "range": "Near",
     "duration": "Focus",
     "damage": "",
-    "desc": "Paralyze one creature you can see. DC 18 CON each round to resist."
+    "desc": "Paralyze one creature you can see. If it is LV 9+, it can make a STR check vs. your last spellcasting check each turn to end it."
+  },
+  {
+    "name": "Power Word Kill",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "One creature of LV 9 or less that hears your Word of Doom dies."
+  },
+  {
+    "name": "Prismatic Orb",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Far",
+    "duration": "Instant",
+    "damage": "3d8",
+    "desc": "An orb of fire, cold or electricity (your choice) deals 3d8 damage to a target in range — double if the energy is anathema to it."
+  },
+  {
+    "name": "Scrying",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "See and hear a chosen creature or location on the same plane while you focus (DC 18 to cast if unfamiliar). Watched creatures may notice with a WIS check each round."
+  },
+  {
+    "name": "Shapechange",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Become a natural creature you've seen of LV 10 or less (gear included), keeping your INT, WIS and CHA. At 0 HP you revert at 1 HP."
+  },
+  {
+    "name": "Summon Extraplanar",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Near",
+    "duration": "Focus",
+    "damage": "",
+    "desc": "Summon an elemental or outsider of LV 7 or less, under your control and acting on your turn. Lose focus and it turns hostile."
+  },
+  {
+    "name": "Teleport",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Close",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "You and willing creatures within close range teleport to a known sigil or a place you've been on this plane; elsewhere, a 50% chance of arriving off-target."
+  },
+  {
+    "name": "Wish",
+    "tier": "5",
+    "caster": "Wizard",
+    "range": "Self",
+    "duration": "Instant",
+    "damage": "",
+    "desc": "Alter reality: state one wish as exactly as you can and the GM interprets it. A failed check is a critical failure, with the mishap rolled at disadvantage."
   },
   {
     "name": "Cauldron",
