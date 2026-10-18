@@ -519,8 +519,9 @@ body.dark .act-sec-hd .ttl{color:#d8cfbf;}
 body.dark .act-res b{color:#d8cfbf;}
 body.dark .act-badge.warn{color:#f0c060;}
 @media (max-width:600px){
-  .act-row1{justify-content:center;}
-  .act-econ{flex-basis:100%;justify-content:center;}
+  .act-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
+  .act-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
+  .act-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .act-end{margin-left:0;}
   .act-row2{justify-content:center;}
   .act-card .ac-do{padding:9px 12px;font-size:12px;}

@@ -536,8 +536,9 @@ body.dark .act-pip{color:#5fd6ea;border-color:#5fd6ea;}
 body.dark .act-sec-hd .ttl,body.dark .act-sec-hd .caret,body.dark .act-card .ac-tag{color:var(--yz);}
 body.dark .act-mini{color:var(--yz);border-color:var(--yz);}
 @media (max-width:600px){
-  .act-row1{justify-content:center;}
-  .act-econ{flex-basis:100%;justify-content:center;}
+  .act-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
+  .act-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
+  .act-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .act-row2 .act-badges{order:-1;flex-basis:100%;justify-content:center;}
   .act-row2 .act-badges:empty{display:none;}
   .act-card .ac-do{padding:9px 12px;font-size:12px;}

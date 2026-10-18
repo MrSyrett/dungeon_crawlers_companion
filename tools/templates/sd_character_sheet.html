@@ -576,8 +576,9 @@ body.dark .sdt-badge.bad{color:#f08a84;border-color:#a8433d;}
 .sd-atk-sl{margin-top:14px;}
 .sd-atk-hint{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted);}
 @media (max-width:600px){
-  .sdt-row1{justify-content:center;}
-  .sdt-econ{flex-basis:100%;justify-content:center;}
+  .sdt-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
+  .sdt-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
+  .sdt-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   .sdt-row2{justify-content:space-between;}
   .sdt-badges{margin-left:0;}
   .sdt-do{padding:9px 13px;font-size:11px;}

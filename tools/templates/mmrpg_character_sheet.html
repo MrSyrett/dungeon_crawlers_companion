@@ -527,8 +527,9 @@ body.dark .turn-mini{color:#f0cf62;}
 body.dark .turn-badge{color:#9cc4ee;}
 body.dark .turn-badge.gold,body.dark .turn-badge.warn{color:#f0c060;}
 @media(max-width:600px){
-  .turn-row1 .turn-econ{flex-basis:100%;justify-content:center;}
-  .turn-row1{justify-content:center;}
+  .turn-row1 .turn-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
+  .turn-row1 .turn-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
+  .turn-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .turn-end-btn{margin-left:0;}
   .turn-row2 .turn-badges{order:-1;flex-basis:100%;justify-content:center;}
   .turn-card .tc-do{padding:9px 11px;font-size:12px;}

@@ -1674,8 +1674,9 @@ body.dark .ic-coin{color:#f0cf62;}
 .ic-card.disabled .ic-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
 .ic-empty{font-size:12px;color:var(--muted);padding:10px 2px;}
 @media (max-width:600px){
-  .ic-econ{flex-basis:100%;justify-content:center;}
-  .ic-row1{justify-content:center;}
+  .ic-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
+  .ic-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
+  .ic-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .ic-end{margin-left:0;}
   .ic-badges{order:-1;flex-basis:100%;justify-content:center;}
   .ic-coin{margin-left:auto;}

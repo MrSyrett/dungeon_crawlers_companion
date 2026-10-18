@@ -516,8 +516,9 @@ body.dark #d6-action .turn-badge.warn{color:#f0c060;}
 #d6-action .turn-card.info .tc-name{font-family:'Share Tech Mono',monospace;font-size:15px;}
 #d6-action .turn-empty{font-size:12px;color:var(--muted);padding:10px 2px;line-height:1.5;}
 @media (max-width:600px){
-  #d6-action .turn-row1{justify-content:center;}
-  #d6-action .turn-econ{flex-basis:100%;justify-content:center;}
+  #d6-action .turn-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
+  #d6-action .turn-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
+  #d6-action .turn-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
   #d6-action .turn-end-btn{margin-left:0;}
   #d6-action .turn-row2 .turn-badges{order:-1;flex-basis:100%;justify-content:center;}
   #d6-action .turn-row2 .turn-badges:empty{display:none;}

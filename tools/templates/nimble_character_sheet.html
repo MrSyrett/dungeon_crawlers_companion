@@ -142,6 +142,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 
 /* VITALS — combat tiles (card style), sit in the main column above Attacks */
 .vitals{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;border-bottom:1px solid var(--rule);align-items:stretch;}
+/* five tiles since the Actions tile moved to the Action tab: the last one fills the row */
+.vitals>.vital:last-child:nth-child(3n+2){grid-column:span 2;}
 .vital{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:7px 8px;}
 .vital.wide{grid-column:1 / -1;}
 /* Every tile centres its content */
@@ -299,7 +301,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .hdr-field.wide{grid-column:span 2 !important;}
   .hdr-metarow>*{flex:1 1 31%!important;}
   .blk-grid{grid-template-columns:1fr;}
-  .vitals{grid-template-columns:1fr 1fr;}
+  .vitals{grid-template-columns:1fr 1fr;} .vitals>.vital:last-child:nth-child(3n+2){grid-column:auto;} .vitals>.vital:last-child:nth-child(odd){grid-column:span 2;}
 }
 @container (max-width:460px){
   .hdr-metarow>*{flex:1 1 47%!important;}
@@ -375,7 +377,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .blk-grid{grid-template-columns:1fr;}
   /* Vitals stay two-up on mobile (fills the width; Wounds boxes wrap) — keep the
      column dividers so each pair reads as two cells */
-  .vitals{grid-template-columns:1fr 1fr;}
+  .vitals{grid-template-columns:1fr 1fr;} .vitals>.vital:last-child:nth-child(3n+2){grid-column:auto;} .vitals>.vital:last-child:nth-child(odd){grid-column:span 2;}
   /* Roll targets big enough for a thumb */
   .stat-cell .sn{display:block;min-height:40px;line-height:40px;font-size:15px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
   .stat-cell input{height:44px;width:64px;}
@@ -672,11 +674,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <div class="vline">init +<input type="number" id="init-bonus" data-nolock value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" data-nolock value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
         </div>
         <div class="vital vc">
-          <div class="vlbl"><span>Actions</span></div>
-          <div class="pips" id="action-pips"></div>
-          <div class="vline"><button class="small-btn ghost" id="new-turn-btn" onclick="resetActions()">New turn</button></div>
-        </div>
-        <div class="vital vc">
           <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><span id="armor-val">0</span></div>
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;" oninput="recalc()"> +<input type="number" id="armor-bonus" data-nolock value="0" oninput="recalc()"></div>
@@ -917,7 +914,7 @@ function renderWounds() {
   const max = num($('wounds-max').value) || 6; const wrap = $('wound-pips'); wrap.innerHTML = '';
   for(let i = 1; i <= max; i++) { const p = document.createElement('div'); p.className = 'pip wound' + (i <= wounds ? ' on' : ''); p.textContent = i; p.onclick = () => { wounds = i === wounds ? i - 1 : i; recalc(); scheduleAutosave(); }; wrap.appendChild(p); }
 }
-function renderActions() { if(typeof nimMaxActions === 'function' && actions > nimMaxActions()) actions = nimMaxActions(); if(typeof nimTurnMaybeRender === 'function') nimTurnMaybeRender(); const wrap = $('action-pips'); wrap.innerHTML = ''; for(let i = 1; i <= 3; i++) { const p = document.createElement('div'); p.className = 'pip act' + (i > actions ? ' spent' : ''); p.textContent = i; p.onclick = () => { actions = i > actions ? i : i - 1; renderActions(); }; wrap.appendChild(p); } }
+function renderActions() { if(typeof nimMaxActions === 'function' && actions > nimMaxActions()) actions = nimMaxActions(); if(typeof nimTurnMaybeRender === 'function') nimTurnMaybeRender(); const wrap = $('action-pips'); if(!wrap) return; wrap.innerHTML = '';   /* the Actions tile was retired — the Action tab is the tracker */ for(let i = 1; i <= 3; i++) { const p = document.createElement('div'); p.className = 'pip act' + (i > actions ? ' spent' : ''); p.textContent = i; p.onclick = () => { actions = i > actions ? i : i - 1; renderActions(); }; wrap.appendChild(p); } }
 function spendAction() { if(actions > 0) { actions -= 1; renderActions(); } }
 function resetActions() { actions = 3; renderActions(); }
 
@@ -1899,8 +1896,9 @@ body.dark .nturn-badge.warn{color:#f0c060;}
 .nturn-sel{flex:0 0 auto;border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:4px 6px;}
 .nturn-empty{font-size:12px;color:var(--muted);padding:10px 2px;}
 @media (max-width:600px){
-  .nturn-row1 .nturn-econ{flex-basis:100%;justify-content:center;}
-  .nturn-row1{justify-content:center;}
+  .nturn-row1 .nturn-econ{flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;gap:4px;}
+  .nturn-row1 .nturn-econ > *{padding:3px 8px;font-size:11px;white-space:nowrap;flex:0 1 auto;min-width:0;}
+  .nturn-row1{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:6px;}
   .nturn-row2 .nturn-badges{order:-1;flex-basis:100%;justify-content:center;}
   .nturn-row2 .nturn-badges:empty{display:none;}
   .nturn-card .nc-do{padding:9px 12px;font-size:12px;}
