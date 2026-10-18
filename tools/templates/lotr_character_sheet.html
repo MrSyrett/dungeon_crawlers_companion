@@ -2440,37 +2440,37 @@ function toggleReward(rid, name){
 window.addRewardToItem = function(rid, name){ const tr = invRows().find(r => r.dataset.rid === rid); if(!tr) return false; const list = invRewards(tr); if(list.indexOf(name) < 0) list.push(name); tr.dataset.rewards = list.join(','); renderInvActions(tr); renderInvDetail(tr); recalc(); return true; };
 
 // ═══ ACTION TAB · EQUIPMENT — use items from the inventory ════════════════
-// Gear with something to do when used, run from the Action tab: it spends the part of
-// the turn the item takes (Use an Object = your action), rolls what it rolls, applies what
-// the sheet tracks (HP, inspiration, uses on the row) and uses up a consumable.
-// Bundles ("Torches (bundle of 10)", "Pipe-weed … (10 uses)") track their contents on the
-// row and lose one bundle from the quantity when the last one is used.
-//   cost: 'action' | 'bonus' | 'free' (takes time outside combat)
+// Only CONSUMABLES with one set effect (torches and candles, oil, herbal remedies, the
+// healer's kit's uses), run from the Action tab: it spends the part of the turn the item
+// takes (Use an Object = your action), rolls what it rolls and uses one up. Reusable,
+// versatile gear (rope, tools, lanterns…) and journey rations aren't listed; pipe-smoking
+// stays on its Features button.
+// Bundles ("Torches (bundle of 10)") track their contents on the row and lose one bundle
+// from the quantity when the last one is used.
+//   cost: 'action' | 'bonus'
 const GEAR_USES = {
   'torch': { cost:'action', consume:true, verb:'Light', effect:'Bright light 20 ft and dim light 20 ft beyond for 1 hour (lighting it with a tinderbox takes an action)' },
   'torches': { cost:'action', pack:10, verb:'Light', effect:'Light one torch — bright light 20 ft and dim light 20 ft beyond for 1 hour' },
   'candle': { cost:'action', pack:10, verb:'Light', effect:'Light one candle — bright light 5 ft and dim light 5 ft beyond for 1 hour' },
-  'lamp': { cost:'action', verb:'Light', effect:'Bright light 15 ft and dim light 30 ft beyond; burns 6 hours on a flask of oil' },
-  'lantern, hooded': { cost:'action', verb:'Light', effect:'Bright light 30 ft and dim light 30 ft beyond; burns 6 hours on a flask of oil. Lowering the hood (an action) reduces it to dim light 5 ft' },
-  'lantern, bullseye': { cost:'action', verb:'Light', effect:'Bright light in a 60-ft cone and dim light 60 ft beyond; burns 6 hours on a flask of oil' },
-  'tinderbox': { cost:'action', verb:'Light', effect:'Light a torch or anything else with abundant, exposed fuel (other fire takes 1 minute)' },
+  // Lamps and lanterns aren't used up — lighting one burns a flask of oil from the Inventory.
+  'lamp': { cost:'action', fuel:'oil', verb:'Light', effect:'Bright light 15 ft and dim light 30 ft beyond for 6 hours' },
+  'lantern, hooded': { cost:'action', fuel:'oil', verb:'Light', effect:'Bright light 30 ft and dim light 30 ft beyond for 6 hours · lowering the hood (an action) reduces it to dim light 5 ft' },
+  'lantern, bullseye': { cost:'action', fuel:'oil', verb:'Light', effect:'Bright light in a 60-ft cone and dim light 60 ft beyond for 6 hours' },
+  'hooded lantern': { cost:'action', fuel:'oil', verb:'Light', effect:'Bright light 30 ft and dim light 30 ft beyond for 6 hours · lowering the hood (an action) reduces it to dim light 5 ft' },
+  'bullseye lantern': { cost:'action', fuel:'oil', verb:'Light', effect:'Bright light in a 60-ft cone and dim light 60 ft beyond for 6 hours' },
   'oil': { cost:'action', consume:true, verb:'Throw', attack:true, effect:'Splash a creature within 5 ft or throw it up to 20 ft (ranged attack, improvised weapon) — on a hit the target is covered in oil; if it takes fire damage within 1 minute it takes an extra 5 fire damage' },
   "healer's kit": { cost:'action', charges:10, verb:'Stabilise', effect:'Stabilise a dying creature (0 hit points) without a Wisdom (Medicine) check. Leech-craft: spend a use to treat the d20 as a 10' },
   'herbal remedy': { cost:'action', consume:true, verb:'Drink', effect:'Advantage on saving throws against disease and poison for 1 hour (or spend it for advantage on an Intelligence (Medicine) check)' },
   'remedy': { cost:'action', consume:true, verb:'Drink', effect:'Advantage on saving throws against disease and poison for 1 hour (or spend it for advantage on an Intelligence (Medicine) check)' },
-  "thieves' tools": { cost:'action', verb:'Use', tool:true, check:{ abil:'DEX' }, effect:'Pick a lock or disarm a trap (Dexterity check, + proficiency bonus if proficient with thieves\' tools)' },
-  'manacles': { cost:'action', verb:'Bind', effect:'Bind a Small or Medium creature — escaping takes a DC 20 Dexterity check, breaking them a DC 20 Strength check' },
-  "climber's kit": { cost:'action', verb:'Anchor', effect:'Anchor yourself — you can\'t fall more than 25 ft from the anchor point, and can\'t climb more than 25 ft away from it without undoing the anchor' },
-  'pipe': { cost:'free', verb:'Smoke', pipe:true, effect:'An hour smoking one use of pipe-weed — gain inspiration (needs pipe proficiency; once per long rest)' },
-  'pipe-weed': { cost:'free', pack:10, hidden:true },
 };
 function gearKey(s){ return norm(s).replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim(); }
 function gearUse(ref){
   const k = gearKey(ref); if(!k) return null;
-  if(/^pipe-weed\b/.test(k)) return GEAR_USES['pipe-weed'];
   return GEAR_USES[k] || GEAR_USES[k.replace(/(?:es|s)$/, '')] || (/^herbal remed/.test(k) ? GEAR_USES['herbal remedy'] : null);
 }
 function gearChargesMax(ref){ const g = gearUse(ref); return g ? (g.charges || g.pack || 0) : 0; }
+// The first Inventory row holding a lamp/lantern's fuel (a flask of oil), or null.
+function fuelRow(fuel){ return invRows().find(r => num(r.querySelector('.inv-qty').value) > 0 && [invRowRef(r), r.querySelector('.inv-name').value].some(x => gearUse(x) === GEAR_USES[fuel])) || null; }
 function invQty(tr){ return num(tr.querySelector('.inv-qty').value); }
 // Use one up: a bundle loses one of its contents (and one bundle when it's empty); anything else loses one.
 function consumeRow(tr){
@@ -2491,16 +2491,15 @@ function renderInvUses(tr){
   box.style.display = ''; box.innerHTML = '<b>' + cur + '</b>/' + max + (gearUse(invRowRef(tr)).pack ? ' in bundle' : ' uses') + ' <button class="inv-uses-btn" onclick="resetInvUses(this.closest(\'tr\'))" title="Refill / restock">↺</button>';
 }
 function resetInvUses(tr){ tr.dataset.charges = gearChargesMax(invRowRef(tr)); renderInvUses(tr); scheduleAutosave(); }
-function pipeWeedRow(){ return invRows().find(r => { const g = gearUse(invRowRef(r)); return g && g === GEAR_USES['pipe-weed'] && invQty(r) > 0; }) || null; }
 function invUse(tr){
   const ref = invRowRef(tr), name = (tr.querySelector('.inv-name').value || ref || '').trim();
-  const g = gearUse(ref) || gearUse(name); if(!g || g.hidden) return null;
+  const g = gearUse(ref) || gearUse(name); if(!g) return null;
   const cmax = g.charges || 0;
   return Object.assign({}, g, { name, ref, qty: invQty(tr), cmax, charges: cmax ? num(tr.dataset.charges) : null, meta: g.effect });
 }
-const ITEM_COST_LBL = { action:'Action', bonus:'Bonus Action', reaction:'Reaction', free:'No action · takes time' };
-function itemCostSpent(cost){ return cost === 'free' ? false : cost === 'action' ? _turn.action : !!_turn[cost]; }
-function itemSpendCost(cost){ if(cost === 'free') return; _turn[cost] = true; if(cost === 'action') _turn.actionType = 'other'; }
+const ITEM_COST_LBL = { action:'Action', bonus:'Bonus Action', reaction:'Reaction' };
+function itemCostSpent(cost){ return cost === 'action' ? _turn.action : !!_turn[cost]; }
+function itemSpendCost(cost){ _turn[cost] = true; if(cost === 'action') _turn.actionType = 'other'; }
 function equipmentOpts(filterCost){
   const out = [];
   invRows().forEach(tr => {
@@ -2510,11 +2509,8 @@ function equipmentOpts(filterCost){
     if(u.cmax){ usesHTML = '<b>' + Math.max(0, u.charges) + '</b>/' + u.cmax + ' uses'; if(u.charges <= 0) blocked = 'no uses left'; }
     else if(u.pack){ usesHTML = '<b>' + num(tr.dataset.charges) + '</b>/' + u.pack + (u.qty > 1 ? ' · ×' + u.qty : ''); }
     else if(u.consume || u.qty > 1) usesHTML = '<b>×' + u.qty + '</b>';
-    if(u.pipe){ const w = pipeWeedRow(), r = resourcesForFeature('Pipe-smoking')[0];
-      if(!pipeProficient()) blocked = 'needs pipe proficiency';
-      else if(!w) blocked = 'no pipe-weed';
-      else if(r && (resourceUsed[r.key] || 0) >= r.max) blocked = 'already smoked since your last long rest'; }
-    out.push({ name: u.name, meta: ITEM_COST_LBL[u.cost] + (u.consume || u.pack ? ' · consumable' : '') + (blocked ? ' · ' + blocked : '') + ' · ' + (u.meta || ''), usesHTML,
+    if(u.fuel && !blocked && !fuelRow(u.fuel)) blocked = 'needs a flask of oil';
+    out.push({ name: u.name, meta: ITEM_COST_LBL[u.cost] + (u.consume || u.pack ? ' · consumable' : '') + (u.fuel && !blocked ? ' · burns 1 flask of oil' : '') + (blocked ? ' · ' + blocked : '') + ' · ' + (u.meta || ''), usesHTML,
       disabled: itemCostSpent(u.cost) || !!blocked, run(){ useInvItem(tr.dataset.rid); } });
   });
   return out;
@@ -2523,18 +2519,15 @@ function useInvItem(rid){
   const tr = invRows().find(r => r.dataset.rid === rid); if(!tr) return;
   const u = invUse(tr); if(!u || itemCostSpent(u.cost) || isIncapacitated()) return;
   if(u.cmax && u.charges <= 0){ addLog(u.name, '✗', 'No uses left', 'fumble'); return; }
+  if(u.fuel && !fuelRow(u.fuel)){ addLog(u.name, '✗', 'No oil — a lamp or lantern burns a flask of oil', 'fumble'); return; }
   if(rollsOff()) return;
-  if(u.pipe){ const w = pipeWeedRow(); if(!w || !pipeProficient()) return;
-    const wn = (w.querySelector('.inv-name').value || invRowRef(w)).trim(); const c = consumeRow(w);
-    smokePipe(); addLog('Smoke a pipe', '✦', 'An hour with ' + wn + ' · ' + c.left + ' ' + (c.unit === 'left' ? 'uses left' : 'uses left in this pouch'), 'normal'); afterTurnAction(); return; }
   itemSpendCost(u.cost);
   const bits = [ITEM_COST_LBL[u.cost], u.effect]; let result = '✦';
   if(u.cmax){ tr.dataset.charges = Math.max(0, u.charges - 1); renderInvUses(tr); bits.push((u.charges - 1) + '/' + u.cmax + ' uses left'); }
   if(u.consume || u.pack){ const c = consumeRow(tr); bits.push('used' + (c.left > 0 ? ' (' + c.left + ' ' + c.unit + ')' : ' (none left)')); }
+  if(u.fuel){ const c = consumeRow(fuelRow(u.fuel)); bits.push('burned 1 flask of oil' + (c.left > 0 ? ' (' + c.left + ' left)' : ' (none left)')); }
   addLog((u.verb || 'Use') + ' ' + u.name, result, bits.join(' · '), 'normal');
   if(u.attack) d20Check(u.name + ' (improvised, ranged)', modOf('DEX'), { kind:'attack', abil:'DEX', note:'improvised weapon — no proficiency' });
-  if(u.check){ const c = u.check, prof = u.tool && /thieves'?\s*tools/i.test(($('f-proficiencies') || {}).value || '');
-    d20Check((u.ref || u.name) + ' (' + c.abil + ')', modOf(c.abil) + (prof ? profBonus() : 0), { kind:'check', abil:c.abil, note: prof ? 'proficient +' + profBonus() : 'not proficient' }); }
   scheduleAutosave(); afterTurnAction();
 }
 

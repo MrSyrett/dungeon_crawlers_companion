@@ -2412,23 +2412,25 @@ function useConsumable(tr){
 }
 
 // ═══ ACTION TAB · EQUIPMENT — use items from the inventory ════════════════
-// Lists every inventory row that has something to do when used and runs it from the
+// Lists only CONSUMABLES with one set effect — potions, scrolls, thrown flasks, torches,
+// kits with uses, magic items that spend a charge or a dose — and runs them from the
 // Action tab: spends the right part of the turn (2024: drinking or administering a
 // potion is a Bonus Action; using an object is the Utilize action; Acid / Alchemist's
 // Fire / Holy Water / Oil replace one attack of the Attack action), rolls what the item
-// rolls, applies what the sheet tracks (HP, Temp HP, conditions, charges) and consumes
-// one of a consumable. Non-consumables are never used up.
+// rolls, applies what the sheet tracks (HP, Temp HP, conditions, charges) and uses one up.
+// Reusable, versatile gear (rope, tools…) and rations are not listed; lamps and lanterns are,
+// because lighting one burns a flask of Oil.
 // Mundane gear (2024 PHB), matched by catalog ref or typed name, "(vial)"-style notes ignored.
 //   cost: 'action' (Utilize) | 'bonus' | 'attack' (replaces one attack)
-//   consume: uses one up · charges: uses tracked on the row · check: the roll it makes
+//   consume: uses one up · charges: uses tracked on the row · fuel: burns one of that item (lantern → Oil)
 //   save/dmg: thrown items — the target's DEX save vs 8 + DEX mod + PB, damage on a failure
 const GEAR_USES = {
   'torch': { cost:'bonus', consume:true, verb:'Light', effect:'Lit with a Tinderbox (Bonus Action) — Bright Light 20 ft and Dim Light 20 ft beyond for 1 hour' },
   'candle': { cost:'bonus', consume:true, verb:'Light', effect:'Lit with a Tinderbox — Bright Light 5 ft and Dim Light 5 ft beyond for 1 hour' },
-  'lamp': { cost:'bonus', verb:'Light', effect:'Lit with a Tinderbox — Bright Light 15 ft and Dim Light 30 ft beyond; burns 6 hours on a flask of Oil' },
-  'hooded lantern': { cost:'bonus', verb:'Light', effect:'Lit with a Tinderbox — Bright Light 30 ft and Dim Light 30 ft beyond; burns 6 hours on a flask of Oil. Lower the hood (Bonus Action) for Dim Light 5 ft' },
-  'bullseye lantern': { cost:'bonus', verb:'Light', effect:'Lit with a Tinderbox — Bright Light in a 60-ft Cone and Dim Light 60 ft beyond; burns 6 hours on a flask of Oil' },
-  'tinderbox': { cost:'bonus', verb:'Light', effect:'Light a Candle, Lamp, Lantern or Torch (anything else with exposed fuel takes 1 minute)' },
+  // Lamps and lanterns aren't used up — lighting one burns a flask of Oil from the Inventory.
+  'lamp': { cost:'bonus', fuel:'oil', verb:'Light', effect:'Bright Light 15 ft and Dim Light 30 ft beyond for 6 hours' },
+  'hooded lantern': { cost:'bonus', fuel:'oil', verb:'Light', effect:'Bright Light 30 ft and Dim Light 30 ft beyond for 6 hours · lower the hood (Bonus Action) for Dim Light 5 ft' },
+  'bullseye lantern': { cost:'bonus', fuel:'oil', verb:'Light', effect:'Bright Light in a 60-ft Cone and Dim Light 60 ft beyond for 6 hours' },
   'oil': { cost:'attack', consume:true, verb:'Throw', save:'DEX', effect:'Thrown at a creature or object within 20 ft — on a failed save it is covered in oil; if it takes Fire damage within 1 minute it takes an extra 5 Fire damage' },
   'acid': { cost:'attack', consume:true, verb:'Throw', save:'DEX', dmg:'2d6', dtype:'Acid', effect:'Thrown at a creature or object within 20 ft — 2d6 Acid damage on a failed save' },
   "alchemist's fire": { cost:'attack', consume:true, verb:'Throw', save:'DEX', dmg:'1d4', dtype:'Fire', effect:'Thrown at a creature or object within 20 ft — on a failed save 1d4 Fire damage and it starts Burning' },
@@ -2437,14 +2439,6 @@ const GEAR_USES = {
   'poison, basic': { cost:'bonus', consume:true, verb:'Apply', effect:'Coats one weapon or up to three pieces of ammunition for 1 minute — a creature that takes Piercing or Slashing damage from it takes an extra 1d4 Poison damage' },
   'basic poison': { cost:'bonus', consume:true, verb:'Apply', effect:'Coats one weapon or up to three pieces of ammunition for 1 minute — a creature that takes Piercing or Slashing damage from it takes an extra 1d4 Poison damage' },
   "healer's kit": { cost:'action', charges:10, verb:'Stabilize', effect:'Stabilize a creature at 0 Hit Points without a Wisdom (Medicine) check' },
-  "thieves' tools": { cost:'action', verb:'Use', tool:true, check:{ abil:'DEX' }, effect:'Pick a lock or disarm a trap (DEX check, + Proficiency Bonus if proficient with Thieves\' Tools)' },
-  'ball bearings': { cost:'action', verb:'Spill', effect:'Cover a level 10-ft square within 10 ft — each creature entering it succeeds on a DC 10 DEX save or has the Prone condition (10 minutes to recover the bearings)' },
-  'caltrops': { cost:'action', verb:'Spread', effect:'Cover a 5-ft square within 5 ft — a creature entering it succeeds on a DC 15 DEX save or takes 1 Piercing damage and its Speed drops to 0 until the start of its next turn (10 minutes to recover)' },
-  'crowbar': { cost:'action', verb:'Pry', check:{ abil:'STR', adv:'Crowbar' }, effect:'Advantage on a Strength check where the leverage helps' },
-  'grappling hook': { cost:'action', verb:'Throw', check:{ skill:'Acrobatics' }, effect:'Throw it at a railing, ledge or other catch within 50 ft — it catches on a DC 13 DEX (Acrobatics) check' },
-  'manacles': { cost:'action', verb:'Bind', check:{ skill:'Sleight of Hand' }, effect:'Bind an unwilling Small or Medium creature within 5 ft that is Grappled, Incapacitated or Restrained (DC 13 DEX (Sleight of Hand)); escaping takes DC 20 Sleight of Hand or DC 25 Athletics' },
-  'rope': { cost:'action', verb:'Tie', check:{ skill:'Sleight of Hand' }, effect:'Tie a knot (DC 10 DEX (Sleight of Hand)) or bind an unwilling Grappled, Incapacitated or Restrained creature (DC 15)' },
-  "climber's kit": { cost:'action', verb:'Anchor', effect:'Anchor yourself — you can\'t fall more than 25 ft from the anchor point and can\'t move more than 25 ft from it without undoing the anchor (Bonus Action)' },
   'potion of healing': { cost:'bonus', consume:true, verb:'Drink', heal:'2d4+2', effect:'Regain 2d4 + 2 Hit Points' },
 };
 function gearKey(s){ return norm(s).replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim(); }
@@ -2452,6 +2446,8 @@ function gearUse(ref){
   const k = gearKey(ref); if(!k) return null;
   return GEAR_USES[k] || GEAR_USES[k.replace(/(?:es|s)$/, '')] || GEAR_USES[k.replace(/^(?:flask|vial|bag|bottle) of /, '')] || null;
 }
+// The first Inventory row holding a lamp/lantern's fuel (a flask of Oil), or null.
+function fuelRow(fuel){ return invRows().find(r => num(r.querySelector('.inv-qty').value) > 0 && [invRowRef(r), r.querySelector('.inv-name').value].some(x => gearUse(x) === GEAR_USES[fuel])) || null; }
 function gearChargesMax(ref){ const g = gearUse(ref); return g && g.charges ? g.charges : 0; }
 function itemChargesMax(ref){ return magicChargesMax(ref) || gearChargesMax(ref); }
 const HEAL_RX = /(?:regain(?:s|ing)?|restores?|heals?)\s+(\d+d\d+(?:\s*\+\s*\d+)?)\s+hit points/i;
@@ -2478,6 +2474,7 @@ function invUse(tr){
     if(/^Scroll$/i.test(m.type || '')) return { kind:'magic', name, ref, qty, m, cost:'action', consume:true, verb:'Read', meta: tcClip(m.description, 110) };
     const cost = magicUseCost(m); if(!cost) return null;
     const cmax = magicChargesMax(ref), doses = /\bdoses?\b/i.test(m.description || '');
+    if(!cmax && !doses) return null;   // permanent items with no charges aren't consumables
     return { kind:'magic', name, ref, qty, m, cost, consume: doses, cmax, charges: cmax ? num(tr.dataset.charges) : null, verb:'Use', heal, meta: tcClip(m.description, 110) };
   }
   const g = gearUse(ref) || gearUse(name); if(!g) return null;
@@ -2510,8 +2507,9 @@ function equipmentOpts(filterCost){
     if(filterCost && u.cost !== filterCost) return;
     const noCharge = u.cmax && u.charges <= 0;
     const usesHTML = u.cmax ? ('<b>' + Math.max(0, u.charges) + '</b>/' + u.cmax + (u.kind === 'gear' ? ' uses' : ' ch')) : (u.qty > 1 || u.consume ? '<b>×' + u.qty + '</b>' : '');
-    out.push({ name: u.name, meta: ITEM_COST_LBL[u.cost] + (u.consume ? ' · consumable' : '') + ' · ' + (u.meta || ''), usesHTML,
-      disabled: itemCostSpent(u.cost) || noCharge, run(){ useInvItem(tr.dataset.rid); } });
+    const noFuel = u.fuel && !fuelRow(u.fuel);
+    out.push({ name: u.name, meta: ITEM_COST_LBL[u.cost] + (u.consume ? ' · consumable' : '') + (u.fuel ? (noFuel ? ' · needs a flask of Oil' : ' · burns 1 flask of Oil') : '') + ' · ' + (u.meta || ''), usesHTML,
+      disabled: itemCostSpent(u.cost) || noCharge || noFuel, run(){ useInvItem(tr.dataset.rid); } });
   });
   return out;
 }
@@ -2519,6 +2517,7 @@ function useInvItem(rid){
   const tr = invRows().find(r => r.dataset.rid === rid); if(!tr) return;
   const u = invUse(tr); if(!u || itemCostSpent(u.cost) || isIncapacitated()) return;
   if(u.cmax && u.charges <= 0){ addLog(u.name, '✗', 'No charges left', 'fumble'); return; }
+  if(u.fuel && !fuelRow(u.fuel)){ addLog(u.name, '✗', 'No Oil — a lamp or lantern burns a flask of Oil', 'fumble'); return; }
   if(rollsOff()) return;   // using an item rolls — the sheet must be locked (play mode)
   if(u.kind === 'scroll'){ if(spellsBlockedByArmor('Scroll')) return; itemSpendCost(u.cost); castScroll(tr); afterTurnAction(); return; }
   itemSpendCost(u.cost);
@@ -2540,11 +2539,8 @@ function useInvItem(rid){
   if(u.kind === 'gear') bits.push(u.effect); else if(!u.heal && !special) bits.push(tcClip(u.m.description, 160));
   if(u.cmax){ tr.dataset.charges = Math.max(0, u.charges - 1); renderInvCharges(tr); bits.push((u.charges - 1) + '/' + u.cmax + (u.kind === 'gear' ? ' uses' : ' charges') + ' left' + (u.kind === 'magic' ? ' (spend extra charges on the Inventory pips)' : '')); }
   if(u.consume){ const left = consumeRow(tr); bits.push('consumed' + (left > 0 ? ' (' + left + ' left)' : ' (none left)')); }
+  if(u.fuel){ const left = consumeRow(fuelRow(u.fuel)); bits.push('burned 1 flask of Oil' + (left > 0 ? ' (' + left + ' left)' : ' (none left)')); }
   addLog((u.verb || 'Use') + ' ' + u.name, result, tag + ' · ' + bits.join(' · '), type);
-  if(u.check){ const c = u.check;
-    if(c.skill) rollSkill(c.skill);
-    else { const prof = u.tool && /thieves'?\s*tools/i.test(($('f-proficiencies') || {}).value || '');
-      d20Check((u.ref || u.name) + ' (' + c.abil + ')', modOf(c.abil) + (prof ? profBonus() : 0), { kind:'check', abil:c.abil, adv: c.adv || '', note: prof ? 'proficient +' + profBonus() : (u.tool ? 'not proficient' : '') }); } }
   scheduleAutosave(); afterTurnAction();
 }
 
@@ -4423,7 +4419,7 @@ function renderTurn(){
   if(_turnSub === 'action'){
     h += turnSecHTML('a-spells', 'Spells', turnSpellsHTML('action'));
     h += turnSecHTML('a-feats', 'Features', turnCardsHTML(activatedFeatures().filter(f => f.type === 'action').map(featureOpt)));
-    h += turnSecHTML('a-equip', 'Equipment', turnCardsHTML(equipmentOpts()), 'Utilize · potions · gear');
+    h += turnSecHTML('a-equip', 'Equipment', turnCardsHTML(equipmentOpts()), 'Utilize · potions · consumables');
     h += turnSecHTML('a-standard', 'Standard Actions', turnCardsHTML(STANDARD_ACTIONS.map(a => standardOpt(a, 'action'))));
   } else if(_turnSub === 'bonus'){
     const _cs = concentratedSpell(), _sus = _cs && spellSustain(_cs);

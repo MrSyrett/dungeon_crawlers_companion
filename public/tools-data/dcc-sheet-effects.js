@@ -189,51 +189,36 @@
     if (/^(weapon|armor|accessory|tool)$/i.test(cat)) return false;
     return CONSUMABLE_RX.test(r.name);
   }
-  // Reusable gear that does something when used (never consumed). A skill regex means
-  // "roll that Skill if the crawler has it"; otherwise the effect is just logged.
-  var GEAR = [
-    { rx: /^lock\s*picks?$|lockpick/i, skill: /^lockpicking$/i, sub: "Lockpicking Check" },
-    { rx: /\brope\b|grappling hook|climbing gear/i, skill: /^climbing$/i, sub: "Climbing Check" },
-    { rx: /first aid kit|medkit|medical kit/i, skill: /^first aid$/i, sub: "First Aid Check" },
-    { rx: /spyglass|binoculars/i, skill: /^perception$/i, sub: "Perception Check at range" },
-    { rx: /^lantern$|flashlight/i, light: true, sub: "Light: bright 20 ft / dim 20 ft" },
-    { rx: /bear trap/i, sub: "Set the trap" },
-    { rx: /fire extinguisher/i, sub: "Put out a fire" },
-    { rx: /megaphone|air horn|signal whistle/i, sub: "Make a lot of noise" },
-  ];
-  function gearOf(name) { var n = String(name || ""); for (var i = 0; i < GEAR.length; i++) if (GEAR[i].rx.test(n)) return GEAR[i]; return null; }
   function clip(s, n) { s = String(s || "").trim(); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
-  // An Inventory row the Action tab's Equipment section can Use — or null (weapons,
-  // armor, worn accessories with nothing to activate, and plain junk aren't listed).
-  // { tr, name, qty, notes, cons, sub, worn }
+  // An Inventory row the Action tab's Equipment section can Use — or null. Only items
+  // that are used up AND have one set effect are listed (potions, scrolls, tomes,
+  // bandages, antidotes, dynamite, torches, flares…). Reusable / versatile gear (rope,
+  // lockpicks, kits, lanterns, worn accessories), Rations (eaten at a rest) and
+  // cooldown items (Scratchers) stay in the Inventory.
+  // { tr, name, qty, notes, cons, sub }
+  var NOT_LISTED_RX = /crawler biscuits|\brations?\b|energy drink|scratcher|waterskin|wineskin/i;
   function usable(tr) {
     var r = rowOf(tr); if (!r.name) return null;
     var it = itemBy(r.name), cat = (tr.dataset && tr.dataset.cat) || (it && it.category) || "";
-    if (/^(weapon|armor)$/i.test(cat)) return null;
-    var cons = isConsumable(tr), g = gearOf(r.name);
+    if (/^(weapon|armor|material|accessory|tool)$/i.test(cat)) return null;
+    if (!isConsumable(tr) || NOT_LISTED_RX.test(r.name)) return null;
     var eff = (it && it.effect) || "";
-    // Worn accessories / tools only when they have something to activate.
-    var act = /^(accessory|tool)$/i.test(cat) && /once per|press it|activate|\baction\b/i.test(eff) && !/crafting table/i.test(r.name);
-    if (!cons && !g && !act) return null;
-    if (/^(material)$/i.test(cat)) return null;
     if (!eff && /^(?:magic\s+tome|spellbook|tome)\b/i.test(r.name)) eff = "Read it to learn the Spell (uses up the tome)";
     if (!eff && /^(?:spell\s+)?scroll\b/i.test(r.name)) eff = "Cast the Spell once — no Mana, usable untrained";
-    var sub = g && !cons ? g.sub : clip(eff && !/^adventuring gear\.?$/i.test(eff) ? eff : (r.notes || (g ? g.sub : "")), 90);
-    return { tr: tr, name: r.name, qty: r.qty, notes: r.notes, cons: cons, sub: sub, worn: act, gear: g };
+    var lit = lightOf(r.name);
+    if (lit && (!eff || /^adventuring gear\.?$/i.test(eff) || /torches/i.test(r.name))) eff = lit;
+    if (/smoke bomb/i.test(r.name) && (!eff || /^adventuring gear\.?$/i.test(eff))) eff = SMOKE;
+    var sub = clip(eff && !/^adventuring gear\.?$/i.test(eff) ? eff : r.notes, 90);
+    return { tr: tr, name: r.name, qty: r.qty, notes: r.notes, cons: true, sub: sub, worn: false };
   }
-  function skillRowBy(rx) {
-    return [].slice.call(document.querySelectorAll("#skills-body tr")).find(function (tr) {
-      var t = tr.querySelector('input[type="text"]'); return t && rx.test(String(t.value).trim());
-    }) || null;
+  // Consumed light sources: what lighting one does.
+  function lightOf(name) {
+    if (/torch/i.test(name)) return "Bright 20 ft / dim 20 ft for about an hour";
+    if (/glow stick/i.test(name)) return "Dim light 10 ft for several hours";
+    if (/\bflare\b/i.test(name)) return "Bright red light 20 ft for about 15 minutes";
+    return "";
   }
-  function gearEffect(g, nm, it) {
-    if (g.skill) {
-      var sr = skillRowBy(g.skill), b = sr && sr.querySelector(".skill-roll-btn");
-      if (b && typeof rollSkill === "function") { rollSkill(b); log("Use " + nm, "—", "Rolled " + (sr.querySelector('input[type="text"]') || {}).value + " with the " + nm, "normal"); return; }
-      log("Use " + nm, "—", g.sub.replace(/ Check.*$/, "") + ": you have no Ranks in it — the GM sets the Check", "normal"); return;
-    }
-    log("Use " + nm, g.light ? "Lit" : "Used", (it && it.effect && !/^adventuring gear\.?$/i.test(it.effect) ? it.effect : g.sub), "normal");
-  }
+  var SMOKE = "Fills about a 10 ft area with thick smoke — blocks sight";
 
   // Keep a pinned Hotlist slot's "×qty" in step (or clear it at 0).
   function syncHotQty(name, qty) {
@@ -316,10 +301,9 @@
       });
       return;
     }
-    if (/scratcher/i.test(low)) { log("Use " + nm, "Scratch!", "Single-use randomized effect — GM rolls on p.218", "normal"); return after(true); }
-    if (/torch/i.test(low)) { log("Light " + nm.replace(/\s*[×x]\s*\d+$/, ""), "Lit", "Bright 20 ft / dim 20 ft for about an hour", "normal"); return after(true); }
-    var g = gearOf(nm);
-    if (g && !CONSUMABLE_RX.test(nm)) { gearEffect(g, nm, it); return after(false); }
+    if (/scratcher/i.test(low)) { log("Use " + nm, "Scratch!", ((it && it.effect) || "Random effect — GM rolls on p.218") + " · reusable after its Cooldown", "normal"); return after(false); }
+    if (lightOf(nm)) { log("Light " + nm.replace(/\s*[×x]\s*\d+$/, ""), "Lit", lightOf(nm), "normal"); return after(true); }
+    if (/smoke bomb/i.test(low)) { log("Use " + nm, "Smoke", SMOKE, "normal"); return after(true); }
     log("Use " + nm, "Used", (it && it.effect && !/^adventuring gear\.?$/i.test(it.effect) ? it.effect : "") || notes || "", "normal");
     return after(true);
   }
@@ -407,5 +391,6 @@
     spellEffect: spellEffect, useRow: useRow, useByName: useByName, invRowByName: invRowByName,
     stackAdd: stackAdd, isConsumable: isConsumable, refreshUse: refreshUse, choose: choose,
     usable: usable,
+    listable: function (name) { var it = itemBy(name), cat = (it && it.category) || ""; if (/^(weapon|armor|material|accessory|tool|mundane)$/i.test(cat) && !CONSUMABLE_RX.test(name)) return false; return (/^(consumable|scroll|tome)$/i.test(cat) || CONSUMABLE_RX.test(name)) && !NOT_LISTED_RX.test(name); },
   };
 })();

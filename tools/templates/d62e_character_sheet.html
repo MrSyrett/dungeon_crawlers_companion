@@ -1667,7 +1667,7 @@ function actDo(i, j) {
   const run0 = (o.btns && o.btns[j]) ? o.btns[j][1] : o.run; if(!run0) return;
   const run = () => { _fromActionTab = true; try { run0(); } finally { _fromActionTab = false; } };   // the tab spends; the sheet hook must not
   if(_act.full) return;                                     // Full Defense: no other actions this turn
-  if(o.kind === 'free') { run(); renderAction(); scheduleAutosave(); return; }   // not an action (lighting a torch, resisting with worn gear)
+  if(o.kind === 'free') { run(); renderAction(); scheduleAutosave(); return; }   // not an action
   if(o.kind === 'full') {
     if((_act.used || 0) > 0) return;                        // can't enter Full Defense after acting
     _act.declared = 1; const me = $('f-map'); if(me) me.value = 0; updateModNote();   // it is the only action → no multi-action penalty
@@ -1745,9 +1745,9 @@ function renderAction() {
 // Gear rows are matched by name to the uses below (D6 System 2e core rules,
 // Equipment chapter). Quantity = the rows with that name, times any count written
 // in the name ("Torch x3", "3 Torches"). A consumable is spent when used (the row
-// goes at zero); a limited-use item counts its uses down; other items are never
-// spent. Gear with nothing to do (rope, radio…) and custom items with no recognised
-// use aren't listed. Medicine difficulties (p.40): 10 stunned, 15 wounded or
+// goes at zero); a limited-use item counts its uses down. Only consumables with one
+// set effect are listed; reusable or versatile gear (rope, tools, lamps, suits…),
+// rations and custom items aren't. Medicine difficulties (p.40): 10 stunned, 15 wounded or
 // incapacitated, 20 mortally wounded; success needs a total above the number.
 function eqParse(name) {
   let s = String(name || '').trim(), n = 1, m;
@@ -1806,31 +1806,8 @@ const D62E_ITEM_USES = [
         addLog('Blessed Water (Throwing' + (tr ? '' : ', untrained') + ')', 'Hit ' + atk.total + atk.mark + ' · Dmg ' + d.total, 'Attack ' + atk.detail + '  ·  Damage ' + d.detail + ' · undead or demonic foes only', atk.type);
         g.spend();
       } }) },
-  { re: /^(torch|candle|lamp|candle or lamp|flashlight)(e?s)?$/i, build: (g) => ({ kind: 'free', btn: 'Light', sub: 'Lowers the difficulty of tests in the dark by 5 or 10',
-      run: () => addLog(g.name, 'Lit', 'Darkness difficulties −5 or −10', 'normal') }) },
-  { re: /^climbing kits?$/i, build: () => ({ kind: 'action', btn: 'Climb', sub: 'Acrobatics +2D to climb difficult terrain or obstacles', run: () => eqSkillRoll('Acrobatics', 6, ' — climbing kit') }) },
-  { re: /^grappling hooks?$/i, build: () => ({ kind: 'action', btn: 'Climb', sub: 'Acrobatics +1D to climb (attached to a rope)', run: () => eqSkillRoll('Acrobatics', 3, ' — grappling hook') }) },
-  { re: /^lockpicking tools?$/i, build: () => ({ kind: 'action', btn: 'Pick', sub: 'Lockpicking +1D', run: () => eqSkillRoll('Lockpicking', 3, ' — lockpicking tools') }) },
-  { re: /^binoculars?$/i, build: () => ({ kind: 'action', btn: 'Look', sub: 'Investigation +1D to view things 3 m or more away (daylight only)', run: () => eqSkillRoll('Investigation', 3, ' — binoculars') }) },
-  { re: /^telescopes?$/i, build: () => ({ kind: 'action', btn: 'Look', sub: 'Investigation +2D to view things 3 m or more away · two rounds to set up', run: () => eqSkillRoll('Investigation', 6, ' — telescope') }) },
-  { re: /^crowbars?$/i, build: () => ({ kind: 'action', btn: 'Pry', sub: 'Athletics +1D to pry open jammed or sealed doors', run: () => eqSkillRoll('Athletics', 3, ' — crowbar') }) },
-  { re: /^shovels?$/i, build: () => ({ kind: 'action', btn: 'Dig', sub: 'Athletics +1D to dig', run: () => eqSkillRoll('Athletics', 3, ' — shovel') }) },
-  { re: /^tool kits?$/i, build: () => {
-      const have = ['Use/Repair Mechanical', 'Use/Repair Technical', 'Upgrade'].filter(n => actSkillRow(n));
-      return { kind: 'action', sub: '+1D to repairs, modifications, upgrades or construction — only with the right skill', blocked: have.length ? '' : 'Needs a Use/Repair or Upgrade skill',
-        btns: have.map(n => [{ 'Use/Repair Mechanical': 'Mech', 'Use/Repair Technical': 'Tech' }[n] || n, () => eqSkillRoll(n, 3, ' — tool kit')]) };
-  } },
-  { re: /^handcomps?$/i, build: () => {
-      const have = skillRows().filter(r => r.dataset.attr === 'Knowledge').map(r => r.querySelector('.sk-name-in').value.trim()).filter(Boolean).slice(0, 3);
-      return { kind: 'action', sub: '+1D to a Knowledge skill (works as a tool kit)', blocked: have.length ? '' : 'No Knowledge skills',
-        btns: have.map(n => [n.slice(0, 4), () => eqSkillRoll(n, 3, ' — handcomp')]) };
-  } },
-  { re: /^gas masks?$/i, build: () => ({ kind: 'free', btn: 'Resist', sub: 'Stamina +2D against gas attacks (worn)', run: () => eqSkillRoll('Stamina', 6, ' — gas mask') }) },
-  { re: /^enviro-?suits?$/i, build: () => ({ kind: 'free', btn: 'Resist', sub: 'Stamina +2D against environmental conditions · counts as a gas mask', run: () => eqSkillRoll('Stamina', 6, ' — enviro-suit') }) },
-  { re: /^cold weather gear$/i, build: () => ({ kind: 'free', btn: 'Resist', sub: 'Stamina +1D against cold weather', run: () => eqSkillRoll('Stamina', 3, ' — cold weather gear') }) },
-  { re: /^gem of trueseeing$/i, build: (g) => ({ kind: 'free', btn: 'Clutch', sub: 'Grants the infravision talent while held tightly', run: () => addLog(g.name, 'Infravision', 'While you clutch the gem', 'normal') }) },
-  { re: /^utility belts?$/i, build: () => ({ kind: 'action', sub: '+1 to Athletics (grapple gun), Investigation (forensic kit), Stealth (smoke bombs) or Perception (binoculars)',
-      btns: [['Ath', () => eqSkillRoll('Athletics', 1, ' — grapple gun')], ['Inv', () => eqSkillRoll('Investigation', 1, ' — forensic kit')], ['Ste', () => eqSkillRoll('Stealth', 1, ' — smoke bombs')], ['Per', () => eqSkillRoll('Perception', 1, ' — binoculars')]] }) },
+  { re: /^(torch|candle)(e?s)?$/i, consumable: true, build: (g) => ({ kind: 'action', btn: 'Light', sub: 'Lowers the difficulty of tests in the dark by 5 or 10',
+      run: () => { addLog(g.name, 'Lit', 'Darkness difficulties −5 or −10 · burns out', 'normal'); g.spend(); } }) },
 ];
 function eqBuild(add) {
   const groups = {};

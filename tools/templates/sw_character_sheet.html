@@ -1436,9 +1436,9 @@ function renderAction() {
 // ═══ ACTION TAB · EQUIPMENT (use items from the Equipment list) ══════════
 // Equipment rows are matched by name to the uses below (Star Wars 1st edition
 // core rules). Quantity = the rows with that name, times any count written in
-// the name ("Medpac x3", "3 Medpacs"). Using a consumable spends one (the row
-// goes at zero); other items are never spent. Gear with nothing to do (clothes,
-// comlink, rations…) and custom items with no recognised use aren't listed.
+// the name ("Medpac x3", "3 Medpacs"). Using one spends one (the row goes at
+// zero). Only consumables with one set effect are listed; reusable or versatile
+// gear (tool kits, rope, glow rods, suits…), rations and custom items aren't.
 function eqParse(name) {
   let s = String(name || '').trim(), n = 1, m;
   if((m = /^(.*?)\s*(?:[x×]\s*(\d+)|\((\d+)\))$/i.exec(s)) && (m[2] || m[3])) { s = m[1]; n = +(m[2] || m[3]); }
@@ -1479,17 +1479,6 @@ const SW_ITEM_USES = [
       run: () => { _act.reload = true; updateModNote(); addLog('Reload', 'New power pack', '−1D to every die code this round', 'normal'); g.spend(); } }) },
   { re: /^flares?$/i, consumable: true, build: (g) => ({ kind: 'free', btn: 'Light', sub: 'Light a flare',
       run: () => { addLog('Flare', 'Lit', 'Lights the area', 'normal'); g.spend(); } }) },
-  { re: /^(glow ?rod|worklight)s?$/i, build: (g) => ({ kind: 'free', btn: 'Light', sub: /glow/i.test(g.name) ? 'Beam of light, about 20 m · about 50 hours per power cell' : 'Work light',
-      run: () => addLog(g.name, 'On', 'Lights the area', 'normal') }) },
-  { re: /^computer tool kits?$/i, build: () => ({ kind: 'action', btn: 'Repair', sub: 'Computer Programming/Repair', run: () => eqSkillRoll('Computer Programming/Repair', ' — tool kit') }) },
-  { re: /^droid tool kits?$/i, build: () => ({ kind: 'action', btn: 'Repair', sub: 'Droid Programming/Repair', run: () => eqSkillRoll('Droid Programming/Repair', ' — tool kit') }) },
-  { re: /^vehicle tool kits?$/i, build: () => ({ kind: 'action', sub: 'Repulsorlift Repair or Starship Repair',
-      btns: [['Repulsorlift', () => eqSkillRoll('Repulsorlift Repair', ' — tool kit')], ['Starship', () => eqSkillRoll('Starship Repair', ' — tool kit')]] }) },
-  { re: /^security systems tool kits?$/i, build: () => ({ kind: 'action', btn: 'Bypass', sub: 'Security', run: () => eqSkillRoll('Security', ' — tool kit') }) },
-  { re: /(^rope|syntherope|grappl)/i, build: () => ({ kind: 'action', btn: 'Climb', sub: 'Climbing/Jumping', run: () => eqSkillRoll('Climbing/Jumping', ' — rope') }) },
-  { re: /^macrobinoculars?$/i, build: () => ({ kind: 'action', btn: 'Search', sub: 'Search · zoom and range-finding', run: () => eqSkillRoll('Search', ' — macrobinoculars') }) },
-  { re: /space suit/i, build: () => ({ kind: 'action', btn: 'Suit up', sub: 'Hulled ship: Survival 10 to get into it in time (p.60)',
-      run: () => eqSkillRoll('Survival', ' — get into the space suit', { dc: 10 }) }) },
 ];
 // Add one Equipment card per usable item group to the Action tab.
 function eqBuild(add) {

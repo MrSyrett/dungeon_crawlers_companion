@@ -1819,18 +1819,17 @@ function nimBuild(){
 /* ═══ EQUIPMENT — inventory items you can USE (core: Key Equipment, Spell Scrolls & Wands) ═══
    • Potions: 1 action to drink (core: "Potions require one action to drink"); the heal is rolled and
      applied, and the potion is used up.
-   • Torches: 1 use each (a "stack of 2" is two); a lantern is not used up (oil lasts until a Safe Rest).
-     Light reaches 6 spaces. Lighting one is 1 action here (the book gives no cost).
+   • Torches: 1 use each (a "stack of 2" is two). Light reaches 6 spaces. Lighting one is 1 action here
+     (the book gives no cost).
    • Spell Scrolls: cast without mana for the spell's normal actions; a DC 10 Arcana check first unless
      you know a spell from that school (fail = wasted). The scroll is used up either way.
    • Wands: no mana; proficient (your class's weapons list "Wands") casts for the normal actions, otherwise a
      DC 10 + tier Arcana check. A charge is spent either way. Charges live in the row's note ("3 charges").
-   • Magic items with an action (Gem of Escape, Glacier in a Bottle, Ball of Spiders, Lumina…): 1 action,
-     LVL dice are rolled, one-time items are used up.
-   • Tools: a skill check against the tray DC (the GM sets it). Never used up.
+   • One-time magic items with an action (Gem of Escape, Lumina…): 1 action, LVL dice are rolled, used up.
+   Only items that are used up (or spend a charge) and do one set thing are listed: reusable gear (lantern,
+   rope, tools, per-rest magic items) and rations are not.
    Quantity: one row = one item unless the name or note says "×N". The scroll/wand spell is read from the
    item name or the row's note (e.g. note "Fireball"). */
-const NIM_TOOL_SKILL = { 'lock pick':'Finesse', 'crowbar':'Might', 'grappling hook':'Might', 'magnifying glass':'Examination', 'telescope':'Perception', 'instrument':'Influence' };
 function nimQtyTok(s){ const m = /(?:×|\bx)\s*(\d+)\b/i.exec(String(s || '')); return m ? +m[1] : null; }
 function nimBaseName(n){ return String(n || '').replace(/\s*(?:×|\bx)\s*\d+\b/i, '').trim(); }
 function nimEqQty(row){ const q = nimQtyTok(row.note) ?? nimQtyTok(row.name); if(q != null) return q; const st = /stack of (\d+)/i.exec(row.name); return st ? +st[1] : 1; }
@@ -1855,7 +1854,6 @@ function nimEqOf(tr){
   const heal = /\bHeal\s+(\d+d\d+(?:\s*[+-]\s*\d+)?)\s*HP/i.exec(txt);
   if(heal && !/Wand|Spell Scroll/.test(cat)) { o.kind = 'heal'; o.heal = heal[1].replace(/\s+/g, ''); o.consume = true; o.sub = 'Heal ' + o.heal + ' HP · 1 action'; }
   else if(/^torch\b/i.test(base)) { o.kind = 'light'; o.consume = true; o.sub = 'Light 6 spaces for 1 dungeon · 1 use'; }
-  else if(/\blantern\b/i.test(base)) { o.kind = 'light'; o.lantern = true; o.sub = 'Light 6 spaces until your next Safe Rest'; }
   else if(cat === 'Spell Scroll' || /\bscroll\b/i.test(base)) {
     o.kind = 'scroll'; o.consume = true; o.spell = nimEqSpell(row, it);
     const known = o.spell && nimKnownSchools()[norm(o.spell.school || '')];
@@ -1872,14 +1870,13 @@ function nimEqOf(tr){
     if(o.charges === 0) o.blocked = 'No charges left';
     o.sub = (o.spell ? o.spell.name + ' · ' + o.cost + ' action' + (o.cost === 1 ? '' : 's') : 'Name the spell in the note') + (o.charges != null ? ' · ' + o.charges + ' charge' + (o.charges === 1 ? '' : 's') : '') + (o.check ? ' · DC ' + o.check + ' Arcana (not proficient)' : '');
   }
-  else if(cat === 'Magic Item' && /\(1 Action\)|\bAction:|as an action|one-time use|as a reaction/i.test(txt)) {
-    o.kind = 'magic'; o.consume = /one-time use|crush one|single-use/i.test(txt);
+  else if(cat === 'Magic Item' && /\(1 Action\)|\bAction:|as an action|one-time use|as a reaction/i.test(txt) && /one-time use|crush one|single-use/i.test(txt)) {
+    o.kind = 'magic'; o.consume = true;
     const lv = /LVL\s*d(\d+)/i.exec(txt); if(lv) o.lvlDie = +lv[1];
     o.healToo = /heal allies in the area for the same amount/i.test(txt);
     o.reaction = /as a reaction/i.test(txt) && !/\bAction:/i.test(txt);
     o.sub = (o.reaction ? 'Reaction · ' : '1 action · ') + (o.lvlDie ? level() + 'd' + o.lvlDie + ' · ' : '') + (o.consume ? 'one use' : 'not used up');
   }
-  else if(NIM_TOOL_SKILL[norm(base)]) { o.kind = 'tool'; o.skill = NIM_TOOL_SKILL[norm(base)]; o.sub = o.skill + ' check (GM sets the DC) · 1 action'; }
   else return null;
   if(o.consume && o.qty > 1) o.sub += ' · ×' + o.qty;
   return o;
@@ -1919,7 +1916,7 @@ function nimUseItem(o, rushed){
     addLog('Use ' + o.name, '+' + (h.to - h.from) + ' HP', r.txt + ' · HP ' + h.from + ' → ' + h.to + ' · ' + nimEqTakeOne(o), 'crit');
   } else if(o.kind === 'light') {
     nimSpend(o.cost);
-    addLog('Use ' + o.name, 'Lit', 'Light up to 6 spaces' + (o.lantern ? ' until your next Safe Rest (refill 1 gp)' : ' for 1 dungeon · ' + nimEqTakeOne(o)) + ' · foes may target the light bearer', 'normal');
+    addLog('Use ' + o.name, 'Lit', 'Light up to 6 spaces for 1 dungeon · ' + nimEqTakeOne(o) + ' · foes may target the light bearer', 'normal');
   } else if(o.kind === 'scroll' || o.kind === 'wand') {
     nimSpend(o.cost);
     let ok = true;
@@ -1935,16 +1932,13 @@ function nimUseItem(o, rushed){
     det.push(((o.it && o.it.description) || '').slice(0, 100));
     if(o.consume) det.push(nimEqTakeOne(o));
     addLog('Use ' + o.name, res, det.join(' · '), 'normal');
-  } else if(o.kind === 'tool') {
-    nimSpend(o.cost);
-    d20Check(o.name + ' · ' + o.skill, skillTotal(o.skill, (SKILLS.find(x => x[0] === o.skill) || [])[1]), { note: 'using ' + o.name });
   }
   recalc();
 }
 function nimEquipOpts(add, rushed){
   document.querySelectorAll('#inv-body tr').forEach(tr => {
     const o = nimEqOf(tr); if(!o) return;
-    add('equip', { name: o.name, cost: o.cost, sub: o.sub, blocked: o.blocked || '', btn: o.kind === 'tool' ? 'Roll' : o.kind === 'wand' || o.kind === 'scroll' ? 'Cast' : 'Use',
+    add('equip', { name: o.name, cost: o.cost, sub: o.sub, blocked: o.blocked || '', btn: o.kind === 'wand' || o.kind === 'scroll' ? 'Cast' : 'Use',
       run: () => { nimUseItem(o, rushed); return true; } });
   });
 }
@@ -1992,7 +1986,7 @@ function renderNimTurn(){
     + '</div></div>'
     + sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons from the Item Store (Inventory tab).')
     + sec('spells', 'Spells', O.spells, 'No spells — add them from the Spellbook (Spells tab).')
-    + sec('equip', 'Equipment', O.equip, 'No usable items — potions, torches, scrolls, wands and tools from the Item Store (Inventory tab) show here.')
+    + sec('equip', 'Equipment', O.equip, 'No consumables — potions, torches, scrolls and wands from the Item Store (Inventory tab) show here.')
     + sec('reactions', 'Heroic Reactions', O.reactions, '')
     + sec('actions', 'Actions', O.actions, '');
 }

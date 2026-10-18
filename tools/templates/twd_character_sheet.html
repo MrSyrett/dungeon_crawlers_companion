@@ -1618,51 +1618,9 @@ function actSpend(kind,label){
   if(!actCan(kind)){ addLog('Action','No action left','You get one action per round in a brawl. End your turn to reset.','normal'); return false; }
   actState().used=1; return true;
 }
-// ═══ EQUIPMENT — use items from the inventory (Action tab) ═════════════════
-// THE WALKING DEAD core: gear gives a bonus to one skill (p.80 — only one item's
-// bonus per roll); medical gear is needed for first aid and to stabilize (p.67–68);
-// a ration of food a day lets you heal one Health (p.67). Using gear in a brawl
-// is your one action for the round, in the phase of the skill it helps.
-// Quantity rides on the item name ("Ration of food ×3"), like claimed loot.
-function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/,'').replace(/\s+x\d+\s*$/i,'').trim(); }
-function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
-function eqConsume(i){ var g=S.gear[i]; if(!g) return; var q=eqQty(g);
-  if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); } else S.gear.splice(i,1);
-  renderInventory(); }
-// The skill bonus written on the item ("Medicine +1", "Scout +2").
-function eqSkillBonus(text){ text=String(text||''); var best=null;
-  SKILLS.forEach(function(s){ if(best) return; var nm=s.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    var m=text.match(new RegExp(nm+'\\s*\\+\\s*(\\d+)','i')); if(m) best={skill:s.name, bonus:parseInt(m[1],10)}; });
-  // The book's table says "Manipulate +2"; the skill is Manipulation.
-  if(!best){ var mm=text.match(/manipulat\w*\s*\+\s*(\d+)/i); if(mm) best={skill:'Manipulation', bonus:parseInt(mm[1],10)}; }
-  return best; }
-// Brawl phase of the skill the item helps (p.64): ranged 2, close 3, movement 4, first aid 5, other 6.
-function eqPhase(sk){ return sk==='Ranged Combat'?'Phase 2':sk==='Close Combat'?'Phase 3':sk==='Mobility'?'Phase 4':sk==='Medicine'?'Phase 5':'Phase 6'; }
-function eqBuild(O){
-  gearOf('gear').forEach(function(x){ var g=x.g, i=x.i, nm=eqBaseName(g); if(!nm) return;
-    var q=eqQty(g), qs=q>1?' ×'+q:'';
-    // A ration a day: one Health heals that day (p.67). Not a brawl action.
-    if(/^ration/i.test(nm)){
-      var st=S.health||{}, hurt=num(st.dmg)>0;
-      actAdd('equip',{name:nm+qs,tag:'No action',kind:'free',sub:'Your ration for the day'+(hurt?' · heal 1 Health':'')+' · without food you can’t heal',btn:'Eat',run:function(){
-        var h=S.health, healed=false; if(h && num(h.dmg)>0){ h.dmg=num(h.dmg)-1; healed=true; renderVitals(); }
-        addLog('Ration of food', healed?'+1 Health':'Eaten', healed?('Daily ration — you heal one Health ('+Math.max(0,num(h.max)-num(h.dmg))+'/'+num(h.max)+').'):'Daily ration eaten — you can heal today.', 'normal');
-        eqConsume(i); }},O);
-      return;
-    }
-    // Combat bonuses (a dog in Close Combat) add to the attack itself, so they aren't rolled here.
-    var sb=eqSkillBonus(g.note); if(!sb || sb.skill==='Close Combat' || sb.skill==='Ranged Combat') return;
-    // Medical gear: first aid on a Broken person within Short range — not yourself (p.67).
-    if(sb.skill==='Medicine'){
-      actAdd('equip',{name:nm+qs,tag:'Phase 5',kind:'action',sub:'First aid · Medicine +'+sb.bonus+' · '+actPoolOf('Medicine',sb.bonus)+' dice · a Broken person within Short range, not yourself · back up with 1 Health +1 per extra success',btn:'First aid',run:actSkillRoll('Medicine','First aid · '+nm,sb.bonus)},O);
-      return;
-    }
-    actAdd('equip',{name:nm+qs,tag:eqPhase(sb.skill),kind:'action',sub:sb.skill+' +'+sb.bonus+' · '+actPoolOf(sb.skill,sb.bonus)+' dice · if the GM agrees it helps',btn:'Roll',run:actSkillRoll(sb.skill,nm,sb.bonus)},O);
-  });
-}
 function renderAction(){
   var host=$('act-hub'); if(!host) return;
-  var a=actState(), O={attacks:[],brawl:[],equip:[]}; _actOpts=[];
+  var a=actState(), O={attacks:[],brawl:[]}; _actOpts=[];
   var weps=gearOf('weapon').filter(function(x){ return x.g.equipped; });
   var ow=!!(a.used && a.overwatch);
   weps.filter(function(x){ return /ranged/i.test(x.g.skill||''); }).forEach(function(x){ var w=x.g,i=x.i;
@@ -1670,7 +1628,6 @@ function renderAction(){
   actAdd('attacks',{name:'Foot or Fist',tag:'Phase 3',kind:'action',sub:'Close Combat · '+actPoolOf('Close Combat',0)+' dice · Dmg 1 · Short',btn:'Attack',run:function(){ rollUnarmed(); }},O);
   weps.filter(function(x){ return !/ranged/i.test(x.g.skill||''); }).forEach(function(x){ var w=x.g,i=x.i;
     actAdd('attacks',{name:w.name||'Weapon',tag:'Phase 3',kind:'action',sub:actWeaponSub(w),btn:'Attack',run:function(){ rollAttack(i); }},O); });
-  eqBuild(O);
   actAdd('brawl',{name:'Take cover',tag:'Phase 1',kind:'action',sub:'Mobility · in cover now on a success (ranged attacks need +1 success); fail = in cover at round end',btn:'Roll',run:actSkillRoll('Mobility','Take cover')},O);
   actAdd('brawl',{name:'Overwatch',tag:'Phase 2',kind:'action',sub:'Ranged Combat · cover an area; fire in the Movement phase if anyone enters it',btn:'Use',run:function(){ actState().overwatch=true; addLog('Overwatch','Ranged action','Covering an area — fire in Phase 4 if anyone moves into it'); }},O);
   actAdd('brawl',{name:'Move',tag:'Phase 4',kind:'action',sub:'Mobility · one range step closer or further (Short ↔ Long); opposed if chased',btn:'Roll',run:actSkillRoll('Mobility','Move')},O);
@@ -1685,7 +1642,6 @@ function renderAction(){
     +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s action">End Turn</button></div>'
     +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+'</div>'
     +actSec('attacks','Attacks',O.attacks,'')
-    +actSec('equip','Equipment',O.equip,'No usable items — add medical gear, rations or tools on the Gear tab.')
     +actSec('brawl','Brawl Actions',O.brawl,'');
 }
 try{ if(localStorage.getItem('twd_dark')==='1') setDarkMode(true); }catch(e){}

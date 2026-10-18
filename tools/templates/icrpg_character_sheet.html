@@ -1108,11 +1108,11 @@ function icSpellOf(r, fromLoot){
     desc: desc.replace(/^\s*(INT|WIS|CHA)?\s*spell\s*,\s*/i,''), scroll:!!fromLoot };
 }
 // ── Equipment: LOOT you can USE (p.29: CARRIED items must be EQUIPPED to be used) ──────
-// A loot row is listed when its card text gives it something to do: heal / lose HP, a stat
-// roll, damage, a fuse/duration, "next roll EASY", a light, a TARGET change, or a count of
-// uses. FOOD, EXPLOSIVES, scrolls and anything with "N uses" / "consume" are consumables:
-// using one takes a use (tracked as "N uses left" in the row's note) and the row goes at 0.
-// Using an item is your Action for the TURN.
+// Only CONSUMABLES with a set effect are listed: FOOD, EXPLOSIVES, scrolls, potions and anything
+// with "N uses" / "consume" (plus kits that run out on a natural 1, like the Medical Kit).
+// Using one takes a use (tracked as "N uses left" in the row's note) and the row goes at 0.
+// Reusable / rechargeable gear (lanterns, tools, rope…) and plain rations are not listed —
+// those are used in play, not as one set roll. Using an item is your Action for the TURN.
 var IC_STATS_RE='STR|DEX|CON|INT|WIS|CHA';
 function icDiceRoll(code){   // "2D6" / "1D8" / "5" → { total, txt }
   var m=String(code).match(/^(\d*)d(\d+)$/i);
@@ -1139,6 +1139,7 @@ function icEquipOf(r){
   var lead=(desc.match(/^\s*(?:[A-Za-z ]+:\s*)?([A-Za-z]+)/)||['',''])[1].toLowerCase();   // "Roasted: Food, …"
   it.consumable = /^(food|explosive|scroll|potion|drink|substance)$/.test(lead) || /\b\d+\s*(uses?|count|sips?|bites?)\b(?!\s+of)|\b1 use\b(?!\s+of)|one use|\bconsume\b|then destroy|destroy this|single-use|1-use|\bshatter\b/i.test(desc);
   if(/\brecharg/i.test(desc)) it.consumable=false;
+  if(/^\s*(torch(es)?|candles?|flares?)\s*(\(\d+\)|[x×]\s*\d+)?\s*$/i.test(r.name)) it.consumable=true;   // burns down: one use each
   // A kit that runs out on a natural 1 (Medical Kit) is not used up otherwise.
   it.emptyOnNat1 = /natural 1.{0,20}(empty|used up|gone)/i.test(desc);
   if(it.emptyOnNat1) it.consumable=false;
@@ -1173,8 +1174,11 @@ function icEquipOf(r){
   if(/reducing the current TARGET by 1|-1 TARGET/i.test(txt)) it.targetDown=1;
   if((/\b(lantern|torch|candle|lamp|illumidrone|flare)\b/i.test(r.name) || /\b(casts?|emits?|sheds?|gives? off|provides?)\b[^.,]{0,25}\blight\b|\blights (all|up|the|everything)\b|\blight this\b/i.test(desc)) && !/darkness/i.test(desc)) it.light=true;
   it.uses = it.consumable ? icUsesLeft(r, desc) : 0;
-  var actionable = it.heal || it.lose || it.dropTo1 || it.check || it.dmg || it.timer || it.easyNext || it.targetDown || it.light || it.consumable || it.emptyOnNat1;
-  if(!actionable) return null;
+  if(!(it.consumable || it.emptyOnNat1)) return null;                    // reusable gear isn't an Action-tab item
+  if(/\bkit\b/i.test(r.name) && !/\b(medical|first aid|med|healer'?s?)\b/i.test(r.name)) return null;   // tool/crafting kits are reusable gear
+  // Rations / supplies are eaten at rest, not used in a turn (ICRPG's FOOD category also holds
+  // elixirs, pills and brews with real effects — those stay).
+  if(/\b(rations?|trail ?mix|hardtack|water ?skin|canteen)\b/i.test(r.name) || /\bday of SUPPLIES\b/i.test(desc)) return null;
   var bits=[];
   if(it.heal) bits.push((it.healAlly?'Ally heals ':'Heal ')+(it.heal==='full'?'to full':it.heal)+' HP');
   if(it.lose) bits.push('Lose '+it.lose+' HP');

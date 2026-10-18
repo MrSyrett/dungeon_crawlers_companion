@@ -1321,7 +1321,25 @@ function rest(kind) {
 
 // The Skills-row radial pins an attack skill or spell to the Hotlist.
 function dccSkillRadial(btn) {
+  const was = btn.classList.contains('on');
   if(window.DCCHotlist) DCCHotlist.toggleRow(btn);
+  dccEquipCost(btn, was);
+}
+// The Inventory-row radial: equips gear, or pins other items to the Hotlist.
+function dccRadialEquip(btn) {
+  const was = btn.classList.contains('on');
+  if(window.DCCEquip) DCCEquip.click(btn); else if(window.DCCHotlist) DCCHotlist.toggleRow(btn);
+  dccEquipCost(btn, was);
+}
+// Equipping an item or pinning it to the Hotlist from the Inventory / Skills list is a
+// Retrieve-style Action (Core p.64); unequipping / unpinning is free. Like the other
+// main-sheet actions it always goes through — with no Action left it just isn't charged.
+// (The character wizard and the item picker equip through DCCEquip directly — no cost.)
+function dccEquipCost(btn, was) {
+  if(was || !btn.classList.contains('on') || typeof turnSpendQuiet !== 'function') return;
+  const tr = btn.closest('tr'), inp = tr && tr.querySelector('input[type="text"]');
+  const nm = inp ? inp.value.trim() : 'item';
+  if(turnSpendQuiet('other', 'Equip ' + nm)) addLog('Equip', nm, '1 Action — ' + (tr && tr.dataset.equipped === '1' ? 'equipped' : 'added to the Hotlist'), 'normal');
 }
 
 // ── DYING (Core p.94) ── 0% Health Bar → Dying debuff + CON-Mod countdown; healed → clear.
@@ -1785,7 +1803,7 @@ function addInvRow() {
   const tr = document.createElement('tr');
   // DOM order of the text inputs is load-bearing: [item, qty, notes].
   tr.innerHTML = `<td class="dl-cell"><div class="dl-row iv-grid">
-    <button class="hot-pin" onclick="if(window.DCCEquip)DCCEquip.click(this);else if(window.DCCHotlist)DCCHotlist.toggleRow(this)" title="Equip / Hotlist" aria-label="Equip or Hotlist">○</button>
+    <button class="hot-pin" onclick="dccRadialEquip(this)" title="Equip / Hotlist" aria-label="Equip or Hotlist">○</button>
     <div class="dl-main">
       <div class="dl-line">
         <input type="text" class="dl-name" data-nolock placeholder="Item name...">
@@ -1922,19 +1940,20 @@ function turnBuildOpts(){
     // A pinned item with no Inventory row (hand-typed slot) — usable from Equipment.
     const full = h.split(/\s[×x]\s?\d+|\s[—–]\s/)[0].trim();
     const inv = window.DCCFx ? (DCCFx.invRowByName(full) || DCCFx.invRowByName(nm)) : null;
-    if(!inv) {
+    // Only consumables with a set effect (same rule as the Inventory list below).
+    if(!inv && window.DCCFx && DCCFx.listable && DCCFx.listable(nm)) {
       const qty = (label.match(/\s[×x]\s?(\d+)\s*$/) || [])[1] || '';
-      add('equipment', turnItemOpt({ name: nm, qty, sub: rest, pinned: true, use: () => window.DCCFx ? DCCFx.useByName(nm, rest) : addLog('Use Hotlist Item', nm, h, 'normal') }));
+      add('equipment', turnItemOpt({ name: nm, qty, sub: rest, use: () => window.DCCFx ? DCCFx.useByName(nm, rest) : addLog('Use Hotlist Item', nm, h, 'normal') }));
     }
   });
-  // Equipment — usable Inventory items (potions, scrolls, tomes, bandages, dynamite,
-  // torches, kits…). In combat an item must be in your Hotlist to use it ("Use a Hotlist
-  // Item", Core p.64/98); Retrieve pins it there first. Worn accessories activate directly.
+  // Equipment — consumable items with a set effect (potions, scrolls, tomes, bandages,
+  // antidotes, dynamite, torches, flares…) that are on the Hotlist. In combat an item must
+  // be in your Hotlist to use it ("Use a Hotlist Item", Core p.64/98); pinning one with the
+  // Inventory ○ costs an Action (dccRadialEquip). Reusable gear and Rations aren't listed.
   if(window.DCCFx && DCCFx.usable) [...document.querySelectorAll('#inv-body tr')].forEach(tr => {
     const u = DCCFx.usable(tr); if(!u) return;
-    const pinned = u.worn || (window.DCCHotlist && DCCHotlist.isPinned(u.name));
-    add('equipment', turnItemOpt({ name: u.name, qty: u.qty > 1 || u.cons ? String(u.qty || 1) : '', sub: u.sub, pinned, worn: u.worn, cons: u.cons, tr,
-      use: () => DCCFx.useRow(tr) }));
+    if(!(window.DCCHotlist && DCCHotlist.isPinned(u.name))) return;
+    add('equipment', turnItemOpt({ name: u.name, qty: String(u.qty || 1), sub: u.sub, tr, use: () => DCCFx.useRow(tr) }));
   });
   // Attacks — weapon / attack skills (Dmg in their Notes). Attack spells are cast from the Hotlist.
   rows.filter(r => r.dice && !r.spell).forEach(r => add('attacks', {
@@ -1951,8 +1970,6 @@ function turnBuildOpts(){
   const move = turnMove();
   add('actions', { name: 'Move', kind: 'other', move: true, sub: 'Move up to ' + move + ' ft (on top of the free Step)' + (move < turnNum('evade-move', 20) ? ' · halved (Fatigued)' : ''), btn: 'Move',
     run: () => { _turn.moves++; addLog('Move', move + ' ft', 'Move Action — up to ' + move + ' ft', 'normal'); return true; } });
-  add('actions', { name: 'Retrieve', kind: 'other', sub: 'Move an item from Inventory to the Hotlist or your hand', btn: 'Use',
-    run: () => { addLog('Retrieve', '—', 'Inventory → Hotlist / hand', 'normal'); return true; } });
   add('actions', { name: 'Help', kind: 'other', sub: 'Before an ally\'s non-combat Check: +1d2 (no Ranks in it) or +1d6 (with Ranks)',
     btns: [['+1d2', () => { const n = d(2); addLog('Help', '+' + n, 'd2(' + n + ') — no Skill Ranks', 'normal'); return true; }],
            ['+1d6', () => { const n = d(6); addLog('Help', '+' + n, 'd6(' + n + ') — with Skill Ranks', 'normal'); return true; }]] });
@@ -1971,17 +1988,17 @@ function turnBuildOpts(){
     run: () => { rollEvade(); _turn.evading = true; return true; } });
   add('interrupts', { name: 'Intervene', kind: 'other', sub: 'Add 1d6 to another crawler\'s d20 Check after it\'s announced (not Stat Checks)', btn: 'Roll',
     run: () => { const n = d(6); addLog('Intervene', '+' + n, 'd6(' + n + ') added to an ally\'s Check', 'normal'); return true; } });
+  // Skill-gated Interrupts only show when the crawler has the skill.
   const taunt = turnFindSkill(/^taunt$/i);
-  add('interrupts', { name: 'Taunt', kind: 'other', sub: taunt ? 'INT-Opposed ' + taunt.name + ' Check to pull a Mob\'s Attacks onto you' : 'Needs the Taunt skill', blocked: taunt ? '' : 'No Taunt skill',
-    btn: 'Roll', run: () => taunt ? turnRollRow(taunt) : null });
+  if(taunt) add('interrupts', { name: 'Taunt', kind: 'other', sub: 'INT-Opposed ' + taunt.name + ' Check to pull a Mob\'s Attacks onto you',
+    btn: 'Roll', run: () => turnRollRow(taunt) });
   const catcher = turnFindSkill(/^catcher$/i);
-  add('interrupts', { name: 'Catcher', kind: 'other', sub: catcher ? 'Take the hit for an adjacent ally (you can\'t Evade it)' : 'Needs Ranks in Catcher', blocked: catcher ? '' : 'No Catcher skill',
+  if(catcher) add('interrupts', { name: 'Catcher', kind: 'other', sub: 'Take the hit for an adjacent ally (you can\'t Evade it)',
     btn: 'Use', run: () => { addLog('Catcher', '—', 'Took the hit for an ally (can\'t Evade it)', 'normal'); return true; } });
   return O;
 }
 
-// One Equipment card. Use = the "Use a Hotlist Item" Action; an item that isn't in the
-// Hotlist yet shows Retrieve (an Action that pins it) and its Use is blocked until then.
+// One Equipment card (a Hotlist item). Use = the "Use a Hotlist Item" Action.
 // Potions: a second one within two rounds gives Potion Sickness (Core p.99).
 function turnItemOpt(x){
   const potion = /potion/i.test(x.name);
@@ -1994,16 +2011,8 @@ function turnItemOpt(x){
     }
     return true;
   };
-  const o = { name: x.name, kind: 'other', spell: /\bscroll\b/i.test(x.name),
-    sub: [x.qty ? '×' + x.qty : '', x.pinned ? '' : 'Not in Hotlist', x.cons === false && !x.worn ? 'reusable' : '', x.sub].filter(Boolean).join(' · ') };
-  if(x.pinned) { o.btn = 'Use'; o.run = useFn; return o; }
-  o.btns = [['Retrieve', () => {
-    const pin = x.tr && x.tr.querySelector('.hot-pin');
-    if(pin && window.DCCHotlist) DCCHotlist.toggleRow(pin);
-    if(!(window.DCCHotlist && DCCHotlist.isPinned(x.name))) { addLog('Retrieve', '✗', 'Hotlist is full (10 slots) — clear one first', 'normal'); return false; }
-    addLog('Retrieve', x.name, 'Inventory → Hotlist', 'normal'); return true;
-  }]];
-  return o;
+  return { name: x.name, kind: 'other', spell: /\bscroll\b/i.test(x.name), btn: 'Use', run: useFn,
+    sub: [x.qty ? '×' + x.qty : '', x.sub].filter(Boolean).join(' · ') };
 }
 function turnDo(i, j){
   const o = _turnOpts[i]; if(!o) return;
@@ -2091,6 +2100,7 @@ function renderTurn(){
   // hub, then drop them back into row 2 (so they keep their value and listeners).
   const manaEl = document.getElementById('turn-mana');
   if(manaEl && manaEl.parentNode) manaEl.parentNode.removeChild(manaEl);
+  const hlSlots = [...document.querySelectorAll('#hotlist-grid textarea')], hlMax = hlSlots.length || 10, hlUsed = hlSlots.filter(t => t.value.trim()).length;
   const potionHot = _turn.potionRound && (_turn.round - _turn.potionRound) < 2;
   const badges = potionHot ? `<span class="turn-badge warn" title="You drank a potion this turn or last — another one now causes Potion Sickness (Core p.99)">⚠ Potion Sickness risk</span>` : '';
   host.innerHTML = `
@@ -2102,13 +2112,14 @@ function renderTurn(){
       </div>
       <div class="turn-row2">
         <span id="turn-mana-slot"></span>
+        <span class="turn-mana turn-hl" title="Hotlist slots in use / maximum (pin with the ○ on Skills / Inventory)"><span class="tm-lbl">Hotlist</span><span class="mana-input hl-box${hlUsed >= hlMax ? ' full' : ''}">${hlUsed}</span><span class="mana-slash">/</span><span class="mana-input hl-box max">${hlMax}</span></span>
         <div class="turn-badges">${badges}</div>
         <span class="turn-stat"><span class="tm-lbl">Movement</span> <b>${moved}</b> ft</span>
       </div>
     </div>
     ${sec('hotlist', 'Hotlist', O.hotlist, 'No spells on your Hotlist. Pin spells with the ○ dot on the Skills tab (10 slots, shared with items).')}
     ${sec('attacks', 'Attacks', O.attacks, 'No attack skills yet. Add a weapon or weapon skill — its Notes carry the Dmg dice.')}
-    ${sec('equipment', 'Equipment', O.equipment, 'No usable items. Potions, scrolls, tomes, bandages, dynamite, torches and kits in your Inventory show here.')}
+    ${sec('equipment', 'Equipment', O.equipment, 'No consumables on your Hotlist. Pin potions, scrolls, tomes, bandages, dynamite or torches with the ○ in the Inventory (1 Action).')}
     ${sec('interrupts', 'Interrupts', O.interrupts, '')}
     ${sec('actions', 'Actions', O.actions, '')}
     ${sec('checks', 'Use a Skill', O.checks, 'No other active skills.')}`;
@@ -4448,6 +4459,9 @@ body.dark .turn-badge.warn{color:#f0c060;}
 .turn-mana .tm-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dcc-dk);margin-right:2px;}
 .turn-mana .mana-input{width:52px;height:28px;font-size:15px;font-weight:700;}
 .turn-mana #mana-max{background:var(--paper);color:var(--muted);cursor:default;}
+.turn-mana .hl-box{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:default;}
+.turn-mana .hl-box.max{background:var(--paper);color:var(--muted);}
+.turn-mana .hl-box.full{border-color:var(--dcc-dk);color:var(--dcc-dk);}
 /* ── Tab header (title + tools), like the D&D sheet's Spells / Equipment ── */
 .tab-head{display:flex;align-items:center;gap:8px;padding:2px 2px 9px;border-bottom:1px solid var(--dcc-lt);margin-bottom:4px;flex-wrap:wrap;}
 .tab-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--dcc-dk);}

@@ -1745,19 +1745,14 @@ function actSpend(kind,label){
 // ALIEN book gives it, applies its effect and, for consumables, uses one up.
 // Quantity rides on the item name ("Naproleve ×3"), the same way claimed loot
 // stacks. Effects come from the ALIEN core Gear & Tech chapter (p.94–99);
-// first aid p.68. Only gear with something to do is listed.
+// first aid p.68. Only consumables with a set effect are listed —
+// reusable gear (tools, lights, trackers, surgical kit) and plain food/water are not.
 function eqBaseName(g){ return String((g&&g.name)||'').replace(/\s*×\s*\d+\s*$/,'').replace(/\s+x\d+\s*$/i,'').trim(); }
 function eqQty(g){ var m=String((g&&g.name)||'').match(/×\s*(\d+)\s*$/)||String((g&&g.name)||'').match(/\sx(\d+)\s*$/i); return m?Math.max(0,parseInt(m[1],10)):1; }
 // Use one up: lower the count, or remove the item when it was the last one.
 function eqConsume(i){ var g=S.gear[i]; if(!g) return; var q=eqQty(g);
   if(q>1){ g.name=eqBaseName(g)+(q-1>1?' ×'+(q-1):''); } else S.gear.splice(i,1);
   renderInventory(); }
-// A skill bonus printed in the item's effect: "Comtech +1", "(Heavy Machinery +2)", "+2 dice to Observation".
-function eqSkillBonus(text){ text=String(text||''); var best=null;
-  SKILLS.forEach(function(s){ if(best) return; var nm=s.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    var m=text.match(new RegExp(nm+'\\s*(?:skill\\s*)?\\+\\s*(\\d+)','i'))||text.match(new RegExp('\\+\\s*(\\d+)\\s*(?:dice?\\s*)?(?:to\\s+)?'+nm,'i'));
-    if(m) best={skill:s.name, bonus:parseInt(m[1],10)}; });
-  return best; }
 function eqStress(d, label){ return function(){ if(actSynth()){ addLog(label,'—','Synthetics have no Stress','normal'); return false; }
   if(d==='zero') S.stress=0; else S.stress=clamp(num(S.stress)+d,0,10);
   renderStress(); return true; }; }
@@ -1766,8 +1761,6 @@ function eqNote(label, result, text){ addLog(label, result, text||'', 'normal');
 var ALIEN_EQ_RULES=[
   { re:/^personal medkit/i, kind:'full', btn:'First aid', sub:'Give first aid · Medical Aid +2 · single use · someone Adjacent who is Broken',
     run:function(g,i){ actSkillRoll('Medical Aid','First aid · Personal medkit',2)(); eqNote('Personal medkit','Used up','On a success the Broken character is back up with 1 Health per success rolled, and a lethal critical injury is stabilized.'); eqConsume(i); } },
-  { re:/^surgical kit/i, kind:'full', btn:'First aid', sub:'Give first aid · Medical Aid +2 · also surgery on critical injuries',
-    run:function(g,i){ actSkillRoll('Medical Aid','First aid · Surgical kit',2)(); } },
   { re:/^naproleve/i, kind:'quick', btn:'Inject', stress:true, sub:'Stress Level to zero · each dose beyond the first this shift: −1 die to all skill rolls until the shift ends',
     run:function(g,i){ if(eqStress('zero','Naproleve')()===false) return false; eqNote('Naproleve','Stress 0','Stress Level reduced to zero. A second dose this shift gives −1 die to all skill rolls until the end of the shift.'); eqConsume(i); } },
   { re:/^neversleep/i, kind:'quick', btn:'Take', stress:true, sub:'Stress +1 · no need for sleep for a day · you can’t relieve stress meanwhile',
@@ -1783,16 +1776,6 @@ var ALIEN_EQ_RULES=[
     run:function(g,i){ if(eqStress(-1,'Colony specialty meal')()===false) return false; eqNote('Colony specialty meal','Stress −1','Food needs met for one day. Stress now '+num(S.stress)+'.'); eqConsume(i); } },
   { re:/^beer|booze/i, kind:'free', btn:'Drink', stress:true, sub:'Stress −1 · each dose beyond the first this shift: −1 die to all skill rolls',
     run:function(g,i){ if(eqStress(-1,'Beer and booze')()===false) return false; eqNote('Beer and booze','Stress −1','Stress now '+num(S.stress)+'. A second dose this shift gives −1 die to all skill rolls until the end of the shift.'); eqConsume(i); } },
-  { re:/^(prefab meal|candy bar)/i, kind:'free', btn:'Eat', sub:'Food for one day',
-    run:function(g,i){ eqNote(eqBaseName(g),'Eaten','Food needs met for one day.'); eqConsume(i); } },
-  { re:/^water bottle/i, kind:'free', btn:'Drink', sub:'Water for one day',
-    run:function(g,i){ eqNote('Water bottle','Drunk','Water needs met for one day.'); eqConsume(i); } },
-  { re:/bug juice/i, kind:'free', btn:'Drink', sub:'Food and water for one day',
-    run:function(g,i){ eqNote(eqBaseName(g),'Drunk','Food and water needs met for one day.'); eqConsume(i); } },
-  { re:/flashlight/i, kind:'quick', btn:'Use', sub:'Removes the effects of darkness in a zone · Short range',
-    run:function(g,i){ eqNote(eqBaseName(g),'On','Darkness no longer affects you in this zone (Short range).'); } },
-  { re:/motion tracker/i, kind:'quick', btn:'Scan', sub:'Detects movement — not creatures in stealth mode',
-    run:function(g,i){ eqNote(eqBaseName(g),'Scanning',String(g.note||'Detects motion.')+' The GM tells you what shows up.'); } }
 ];
 function eqRuleFor(g){ var nm=eqBaseName(g); for(var k=0;k<ALIEN_EQ_RULES.length;k++){ if(ALIEN_EQ_RULES[k].re.test(nm)) return ALIEN_EQ_RULES[k]; } return null; }
 function eqBuild(O){
@@ -1814,9 +1797,6 @@ function eqBuild(O){
         actAdd('equip',{name:nm+qs+' → '+(w.g.name||'weapon'),tag:'Quick',kind:'quick',sub:'Power '+w.g.ammo+' → '+m,btn:'Recharge',run:function(){ w.g.ammo=String(m); eqNote('Power cell → '+(w.g.name||'weapon'),'Power '+m,'Full power supply restored.'); eqConsume(i); renderAttacks(); }},O); });
       return;
     }
-    // Any other gear with a printed skill bonus: roll that skill with the bonus (a full action).
-    var sb=eqSkillBonus(g.note);
-    if(sb && sb.skill!=='Close Combat' && sb.skill!=='Ranged Combat' && !/weapon|damage/i.test(String(g.note||''))) actAdd('equip',{name:nm+qs,tag:'Full',kind:'full',sub:sb.skill+' +'+sb.bonus+' · '+actPoolOf(sb.skill,sb.bonus)+' dice',btn:'Roll',run:actSkillRoll(sb.skill,nm,sb.bonus)},O);
   });
 }
 function renderAction(){
@@ -1869,7 +1849,7 @@ function renderAction(){
     +'<button class="act-end" onclick="actEndTurn()" title="Reset this round\'s actions">End Turn</button></div>'
     +(badges?'<div class="act-row2"><div class="act-badges">'+badges+'</div></div>':'')+'</div>'
     +actSec('attacks','Attacks',O.attacks,'')
-    +actSec('equip','Equipment',O.equip,'No usable items — add medkits, drugs, food or tools on the Gear tab.')
+    +(O.equip.length?actSec('equip','Equipment',O.equip,'No consumables — add medkits, drugs or power cells on the Gear tab.'):'')
     +actSec('full','Full Actions',O.full,'')
     +actSec('quick','Quick Actions',O.quick,'')
     +actSec('interrupts','Interrupts',O.interrupts,'');
