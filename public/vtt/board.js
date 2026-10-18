@@ -160,6 +160,40 @@
       });
       return group.length ? group : null;
     }
+    // A door drawn over a wall (or window) erases the section of that barrier the
+    // door covers, so the doorway is passable when the door opens. A barrier only
+    // counts when it runs along the door: near-parallel, and both door ends lie on
+    // its line (within a quarter cell). Whatever is left either side stays.
+    function cutBarriersForDoor(d) {
+      var g = state.map.ppg || 70, tol = g * 0.25;
+      var dl = Math.hypot(d.x2 - d.x1, d.y2 - d.y1); if (!dl) return false;
+      var cut = false;
+      ["walls", "windows"].forEach(function (key) {
+        var arr = state.map[key] || [], out = [];
+        arr.forEach(function (w) {
+          var vx = w.x2 - w.x1, vy = w.y2 - w.y1, L = Math.hypot(vx, vy);
+          if (L < 1e-6) { out.push(w); return; }
+          var ux = vx / L, uy = vy / L;
+          // parallel? (sine of the angle between door and wall)
+          var sin = Math.abs(((d.x2 - d.x1) / dl) * uy - ((d.y2 - d.y1) / dl) * ux);
+          var off1 = Math.abs((d.x1 - w.x1) * uy - (d.y1 - w.y1) * ux);
+          var off2 = Math.abs((d.x2 - w.x1) * uy - (d.y2 - w.y1) * ux);
+          if (sin > 0.1 || off1 > tol || off2 > tol) { out.push(w); return; }
+          var t1 = (d.x1 - w.x1) * ux + (d.y1 - w.y1) * uy, t2 = (d.x2 - w.x1) * ux + (d.y2 - w.y1) * uy;
+          var a = Math.max(0, Math.min(t1, t2)), b = Math.min(L, Math.max(t1, t2));
+          if (b - a < 1) { out.push(w); return; }            // door doesn't overlap this piece
+          cut = true;
+          var keep = function (s0, s1) {
+            if (s1 - s0 < 1) return;                          // drop slivers
+            var piece = Object.assign({}, w, { x1: w.x1 + ux * s0, y1: w.y1 + uy * s0, x2: w.x1 + ux * s1, y2: w.y1 + uy * s1 });
+            out.push(piece);
+          };
+          keep(0, a); keep(b, L);
+        });
+        if (cut) state.map[key] = out;
+      });
+      return cut;
+    }
     // Finish (or cancel) an in-progress polygon-wall being drawn with the Wall tool.
     function finishWallPath() {
       if (!state.wallPath) return;
@@ -1091,7 +1125,11 @@
         // only ever the Erase tool now, so a stray click can't delete a barrier.
         if (len >= (state.map.ppg || 70) * 0.3) {
           if (drag.kind === "window") state.map.windows.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
-          else if (drag.kind === "door") state.map.doors.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2, closed: true, locked: false });
+          else if (drag.kind === "door") {
+            var nd = { x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2, closed: true, locked: false };
+            state.map.doors.push(nd);
+            cutBarriersForDoor(nd);                           // erase the wall under the doorway
+          }
           else state.map.walls.push({ x1: drag.x1, y1: drag.y1, x2: drag.x2, y2: drag.y2 });
           bumpGeom();
           emit("map", state.map);
