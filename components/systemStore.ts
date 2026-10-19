@@ -13,9 +13,6 @@ export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--sd)" },
-  // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
-  // system: one TARGET, roll for EFFORT, five worlds.
-  { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },
   { key: "NIM", name: "Nimble", short: "NIM", accent: "var(--nimble)" },
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.
@@ -30,9 +27,6 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
   // same system (one sheet, one shelf, one tab).
   { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },
-  // Candela Obscura (Darrington Press) — gaslamp horror on the Illuminated
-  // Worlds engine: d6 dice pools, roles & specialties, drives & actions.
-  { key: "CO", name: "Candela Obscura", short: "CO", accent: "var(--candela)" },
   { key: "MMRPG", name: "Marvel Multiverse RPG", short: "Marvel", accent: "var(--mmrpg)" },
   // Justice League Unlimited RPG (Quickstart) — DC's d20 super-hero system:
   // six attributes, a single Resolve pool, Tiers E–S, and a comic-book
@@ -66,6 +60,12 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // D6 dice pools, NO stress dice, health modeled by Conditions (three physical +
   // three mental), the Fear test, and a Gothic investigate-and-banish campaign loop.
   { key: "VAE", name: "Vaesen", short: "Vaesen", accent: "var(--vae)" },
+  // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
+  // system: one TARGET, roll for EFFORT, five worlds.
+  { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },
+  // Candela Obscura (Darrington Press) — gaslamp horror on the Illuminated
+  // Worlds engine: d6 dice pools, roles & specialties, drives & actions.
+  { key: "CO", name: "Candela Obscura", short: "CO", accent: "var(--candela)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

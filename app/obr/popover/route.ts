@@ -269,23 +269,23 @@ const PAGE = String.raw`<!doctype html>
           // read as one undifferentiated list.
           var GROUPS = [
             { key: "SD", name: "Shadowdark", cls: "sd" },
-            { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
-            { key: "ACE", name: "ACE!", cls: "ace" },
-            { key: "KOB", name: "Kids on Bikes", cls: "kob" },
             { key: "NIM", name: "Nimble", cls: "nim" },
-            { key: "SW", name: "Star Wars", cls: "sw" },
             { key: "DND", name: "D&D", cls: "dnd" },
             { key: "LOTR", name: "The Lord of the Rings", cls: "lotr" },
-            { key: "D62E", name: "D6 System 2e", cls: "d62e" },
-            { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" },
-            { key: "CO", name: "Candela Obscura", cls: "co" },
+            { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
+            { key: "KOB", name: "Kids on Bikes", cls: "kob" },
             { key: "MMRPG", name: "Marvel Multiverse RPG", cls: "mmrpg" },
             { key: "JLU", name: "Justice League Unlimited", cls: "jlu" },
             { key: "GB", name: "Ghostbusters", cls: "gb" },
+            { key: "SW", name: "Star Wars", cls: "sw" },
+            { key: "ACE", name: "ACE!", cls: "ace" },
+            { key: "D62E", name: "D6 System 2e", cls: "d62e" },
             { key: "YZE", name: "Alien RPG", cls: "yze" },
             { key: "TWD", name: "The Walking Dead", cls: "twd" },
             { key: "MYZ", name: "Mutant: Year Zero", cls: "myz" },
-            { key: "VAE", name: "Vaesen", cls: "vae" }
+            { key: "VAE", name: "Vaesen", cls: "vae" },
+            { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" },
+            { key: "CO", name: "Candela Obscura", cls: "co" }
           ];
           var seen = {};
           var html = "";
