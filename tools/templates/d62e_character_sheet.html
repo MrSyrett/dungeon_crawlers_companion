@@ -1866,7 +1866,7 @@ function eqBuild(add) {
 
 var ACT_CFG = {
   weaponsHome: 'the Gear tab',
-  reactTitle: 'Defenses',
+  reactTitle: 'Reactions',
   powerTitle: 'Powers',
   points: () => [],   // Hero Points and XP live on the main sheet (Hero Point "Spend" button there)
   badges: () => heroArmed ? ['Hero Point armed — ' + heroArmDesc()] : [],
@@ -1876,11 +1876,6 @@ var ACT_CFG = {
       const s = weaponSkillPips(tr), dmg = (tr.querySelector('.wp-dmg') || {}).value || '', rng = (tr.querySelector('.wp-range') || {}).value || '';
       add('attacks', { name: nm, kind: 'action', sub: [s.name + ' ' + code(s.pips), dmg ? 'Dmg ' + dmg : '', rng].filter(Boolean).join(' · '), btn: 'Attack', run: () => rollWeaponAttack(tr) });
     });
-    const dv = ($('dodge-val') || {}).textContent || '—', pv = ($('parry-val') || {}).textContent || '—';
-    add('reactions', { name: 'Dodge ' + dv + ' · Parry ' + pv, kind: 'info', sub: 'Static defenses — Dodge resists ranged attacks, Parry blocks melee (no action needed)' });
-    const sc = n => { const tr = actSkillRow(n); return tr ? code(rowTotal(tr)) : 'untrained'; };
-    add('reactions', { name: 'Full Defense', kind: 'full', sub: 'Optional (Active & Responsive Combat): your only action this turn (not after acting, no movement) — add Acrobatics (' + sc('Acrobatics') + ') to Dodge and Melee (' + sc('Melee') + ') to Parry', btn: 'Defend',
-      run: () => { actRollSkill('Acrobatics', ' — Full Defense (add to Dodge ' + dv + ')'); actRollSkill('Melee', ' — Full Defense (add to Parry ' + pv + ')'); } });
     [...document.querySelectorAll('#powers-body tr')].forEach(tr => {
       const nm = (tr.querySelector('.pw-name') || {}).value || ''; if(!nm.trim()) return;
       const note = ((tr.querySelector('.pw-note') || {}).value || '').split(' — ')[0];
@@ -1890,6 +1885,10 @@ var ACT_CFG = {
     add('actions', { name: 'Move', kind: 'move', sub: 'An action segment (p.32) · walk ' + Math.round(mv / 2) + ' m · run ' + mv + ' m, −1D to every skill roll this round',
       btns: [['Walk', () => addLog('Walk', Math.round(mv / 2) + ' m', 'Movement action', 'normal')],
              ['Run', () => { if(!_act.ran) { _act.ran = true; updateModNote(); } addLog('Run', mv + ' m', 'Movement action · −1D to every skill roll this round', 'normal'); }]] });
+    const dv = ($('dodge-val') || {}).textContent || '—', pv = ($('parry-val') || {}).textContent || '—';
+    const sc = n => { const tr = actSkillRow(n); return tr ? code(rowTotal(tr)) : 'untrained'; };
+    add('actions', { name: 'Full Defense', kind: 'full', sub: 'Optional (Active & Responsive Combat): your only action this turn (not after acting, no movement) — add Acrobatics (' + sc('Acrobatics') + ') to Dodge and Melee (' + sc('Melee') + ') to Parry', btn: 'Defend',
+      run: () => { actRollSkill('Acrobatics', ' — Full Defense (add to Dodge ' + dv + ')'); actRollSkill('Melee', ' — Full Defense (add to Parry ' + pv + ')'); } });
     eqBuild(add);
   },
 };

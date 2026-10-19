@@ -122,7 +122,7 @@
     const c = st.cls; const gold = (D.tables() && D.tables().creation && D.tables().creation.startingGold) || 50;
     return '<p class="m-hint">Start with your class\'s listed gear, or take <b>' + gold + " gp</b> and shop. Your class is proficient with: " + esc(c.armor) + " · " + esc(c.weapons) + ".</p>" +
       '<div class="nb-chips"><span class="nb-chip' + (st.gearMode === "class" ? " on" : "") + '" data-gear="class">Class starting gear</span><span class="nb-chip' + (st.gearMode === "gold" ? " on" : "") + '" data-gear="gold">' + gold + " gp instead</span></div>" +
-      (st.gearMode === "class" ? '<div class="nb-list" style="max-height:30vh;">' + c.startingGear.map((g) => { const it = D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, ""))); return '<div class="nb-card on"><b>' + esc(g) + "</b><small>" + (it ? esc([it.armor && "Armor " + it.armor, it.damage, it.properties].filter(Boolean).join(" · ")) : "") + "</small></div>"; }).join("") + "</div>" : '<p class="m-hint">Add purchases from the equipment list on the sheet afterwards.</p>');
+      (st.gearMode === "class" ? '<div class="nb-list" style="max-height:30vh;">' + c.startingGear.map((g) => { const g2 = g.replace(/^\d+\s+/, "").replace(/\s*\(.*\)$/, ""); const it = D.items().find((i) => norm(i.name) === norm(g2)) || D.items().find((i) => norm(i.name) === norm(g2).replace(/(?:es|s)$/, "")) || D.items().find((i) => norm(i.name) === norm(g2).replace(/s$/, "")); return '<div class="nb-card on"><b>' + esc(g) + "</b><small>" + (it ? esc([it.armor && "Armor " + it.armor, it.damage, it.properties].filter(Boolean).join(" · ")) : "") + "</small></div>"; }).join("") + "</div>" : '<p class="m-hint">Add purchases from the equipment list on the sheet afterwards.</p>');
   }
   function rName() {
     const c = st.cls; const row = (k, v) => '<div><div class="k">' + k + '</div><div class="v">' + v + "</div></div>";
@@ -157,14 +157,23 @@
     // sharing one token, so the attack has no ✕ and removing the item removes it —
     // matching how weapons added from the Item Store behave.
     const attacks = []; let _bl = 0;
-    const inventory = gear.map((g) => {
-      const it = D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, "")));
-      const row = { name: g, slots: it && /2-handed/i.test(it.properties || "") ? 2 : 1, note: it ? [it.armor && "Armor " + it.armor, it.damage, it.properties].filter(Boolean).join(" · ") : "" };
-      if (it && it.damage) { const link = "w-b" + (++_bl); row.link = link; attacks.push({ name: it.name, damage: it.damage, props: it.properties || "", link: link }); }
-      return row;
+    // "2 Daggers" → one "Dagger" row with Qty 2 (and one attack); repeated entries stack the same way.
+    const findIt = (n) => { const k = norm(n.replace(/\s*\(.*\)$/, "")); return D.items().find((i) => norm(i.name) === k) || D.items().find((i) => norm(i.name) === k.replace(/(?:es|s)$/, "")) || D.items().find((i) => norm(i.name) === k.replace(/s$/, "")); };
+    const inventory = [];
+    let armorTaken = false, shieldTaken = false;
+    gear.forEach((g) => {
+      const m = /^(\d+)\s+(.+)$/.exec(String(g).trim()), qty = m ? +m[1] : 1, label = m ? m[2] : g;
+      const it = findIt(label) || (m ? null : findIt(g));
+      const name = it ? it.name : label;
+      const dup = inventory.find((r) => norm(r.name) === norm(name)); if (dup) { dup.qty += qty; return; }
+      const row = { name: name, qty: qty, slots: it && /2-handed/i.test(it.properties || "") ? 2 : 1, note: it ? [it.armor && "Armor " + it.armor, it.damage, it.properties].filter(Boolean).join(" · ") : "" };
+      if (it && it.damage) { const link = "w-b" + (++_bl); row.link = link; row.equipped = true; attacks.push({ name: it.name, damage: it.damage, props: it.properties || "", link: link }); }
+      if (it && ["Cloth", "Leather", "Mail", "Plate"].includes(it.category)) { row.equipped = !armorTaken; armorTaken = true; }
+      if (it && it.category === "Shield") { row.equipped = !shieldTaken; shieldTaken = true; }
+      inventory.push(row);
     });
-    const armorItem = gear.map((g) => D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, "")) && ["Cloth", "Leather", "Mail", "Plate"].includes(i.category))).find(Boolean);
-    const shieldItem = gear.map((g) => D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, "")) && i.category === "Shield")).find(Boolean);
+    const armorItem = inventory.filter((r) => r.equipped).map((r) => D.items().find((i) => norm(i.name) === norm(r.name) && ["Cloth", "Leather", "Mail", "Plate"].includes(i.category))).find(Boolean);
+    const shieldItem = inventory.filter((r) => r.equipped).map((r) => D.items().find((i) => norm(i.name) === norm(r.name) && i.category === "Shield")).find(Boolean);
     // Casters: start with the cantrips of their class schools.
     const spells = [];
     if (c.spellcasting) {

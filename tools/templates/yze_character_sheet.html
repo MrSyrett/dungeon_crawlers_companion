@@ -1826,7 +1826,7 @@ function renderAction(){
     actAdd('full',{name:r[0],kind:'full',sub:r[2],btn:r[1]?'Roll':'Use',run:r[1]?actSkillRoll(r[1],r[0]):actLogOnly(r[0],'Full action',r[2])},O); });
   if(!actSynth() && S.signature) actAdd('full',{name:'Signature item',kind:'full',sub:S.signature+' · once per session: −1 Stress',btn:'Use',run:function(){ if(num(S.stress)<1){ addLog('Signature item','—','No Stress to shed','normal'); return false; } bumpStress(-1); addLog('Signature item','−1 Stress','Stress now '+num(S.stress)+' · once per session','normal'); }},O);
   // Quick actions (p.60)
-  [['Move','Into an adjacent zone'],['Close in / back off','Between Short and Adjacent range in your zone'],['Peek through a door or hatch','Move to it and look'],
+  [['Move','Into an adjacent zone, or close in / back off between Short and Adjacent range in your zone'],['Peek through a door or hatch','Move to it and look'],
    ['Lock a door or hatch',''],['Take partial cover',''],['Pick up an item','From the ground']].forEach(function(r){
     actAdd('quick',{name:r[0],kind:'quick',sub:r[1],btn:'Use',run:actLogOnly(r[0],'Quick action',r[1])},O); });
   // Reload (p.67, quick action): refill an equipped weapon whose ammo has dropped below its rating.

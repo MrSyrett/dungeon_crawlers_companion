@@ -194,6 +194,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tbl input,.tbl select{width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
 .tbl input:focus{border-bottom-color:var(--nim);}
 .tbl input.num{width:44px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;}
+/* Inventory: equip pip before the name (like D&D's Prepared pip); an empty slot keeps names aligned */
+.inv-name-line{display:flex;align-items:center;gap:6px;}
+.inv-name-line .inv-name{flex:1 1 auto;min-width:0;}
+.inv-eq-slot{flex:0 0 14px;width:14px;height:14px;display:inline-flex;}
+.inv-eq-pip{width:14px;height:14px;border:2px solid var(--nim-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;box-sizing:border-box;}
+.inv-eq-pip.on{background:var(--nim);}
+.tbl input.num.inv-qty{width:36px;}
 .tbl .mono{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
 .tbl .desc{font-family:'Barlow',sans-serif;font-size:11px;color:var(--muted);line-height:1.35;}
 .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;}
@@ -737,7 +744,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="tab-panel" id="tab-inventory">
         <div class="section-bar inv-bar"><span>Inventory</span><span class="inv-coins">Coins <input type="number" id="f-gold" data-nolock value="50" style="width:64px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp <input type="number" id="f-silver" data-nolock value="0" style="width:54px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> sp</span><span class="hdr-right"><span class="sb-note" id="slots-note"></span><button class="hdr-btn" onclick="openStore()">Item Store</button></span></div>
         <table class="tbl">
-          <thead><tr><th>Item</th><th style="width:54px;">Slots</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
+          <thead><tr><th>Item</th><th style="width:40px;" title="Quantity">Qty</th><th style="width:54px;" title="Inventory slots per item">Slots</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="inv-body"></tbody>
         </table>
       </div>
@@ -923,7 +930,7 @@ function recalc() {
   renderFeatures(); refreshAttackRows(); refreshSpellRows();
 }
 function hdMax() { const a = ancestryText(); return level() + (/\+2 max Hit Dice/i.test(a) ? 2 : 0) + (/\+1 max Hit Die/i.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0); }
-function slotsUsed() { let n = 0; document.querySelectorAll('#inv-body tr').forEach(tr => { n += parseFloat(tr.querySelector('.inv-slots').value) || 0; }); return Math.round(n * 10) / 10; }
+function slotsUsed() { let n = 0; document.querySelectorAll('#inv-body tr').forEach(tr => { n += (parseFloat(tr.querySelector('.inv-slots').value) || 0) * invQty(tr); }); return Math.round(n * 10) / 10; }
 function renderWounds() {
   const max = num($('wounds-max').value) || 6; const wrap = $('wound-pips'); wrap.innerHTML = '';
   for(let i = 1; i <= max; i++) { const p = document.createElement('div'); p.className = 'pip wound' + (i <= wounds ? ' on' : ''); p.textContent = i; p.onclick = () => { wounds = i === wounds ? i - 1 : i; recalc(); scheduleAutosave(); }; wrap.appendChild(p); }
@@ -1187,13 +1194,70 @@ function addInvRow(i) {
   i = i || { name:'', slots:1, note:'' };
   const tr = document.createElement('tr');
   if(i.link) tr.dataset.link = i.link;
-  tr.innerHTML = `<td><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
+  if(i.equipped != null) tr.dataset.equipped = i.equipped ? '1' : '0';
+  const q = Math.max(1, parseInt(i.qty, 10) || 1);
+  tr.innerHTML = `<td><div class="inv-name-line"><span class="inv-eq-slot"></span><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item" oninput="refreshInvEquip(this.closest('tr'))"></div></td><td><input type="number" class="num inv-qty" value="${q}" step="1" min="1" oninput="recalc()"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
   $('inv-body').appendChild(tr);
+  refreshInvEquip(tr);
   return tr;
+}
+function invQty(tr) { const el = tr.querySelector('.inv-qty'); return Math.max(1, parseInt(el && el.value, 10) || 1); }
+// ── Equip / unequip (Core p.33: Armor counts "while equipped"; swapping a weapon or shield is free 1/round;
+//    worn armor takes 1 inventory slot, unworn armor 2 — p.21). Equipped weapons are the ones offered as
+//    attacks on the Action tab; the equipped armor / shield fill the Armor fields.
+const ARMOR_CATS = ['Cloth','Leather','Mail','Plate'];
+function invItemOf(tr) { const n = (tr.querySelector('.inv-name') || {}).value || ''; return findItem(n) || findItem(n.replace(/\s*\(.*\)\s*$/, '')) || null; }
+function invEquipKind(tr) { const it = invItemOf(tr); if(!it) return ''; if(ARMOR_CATS.includes(it.category)) return 'armor'; if(it.category === 'Shield') return 'shield'; return isWeapon(it) ? 'weapon' : ''; }
+function invEquipped(tr) { return tr.dataset.equipped === '1'; }
+function refreshInvEquip(tr) {
+  if(!tr) return; const slot = tr.querySelector('.inv-eq-slot'); if(!slot) return;
+  const k = invEquipKind(tr), on = invEquipped(tr);
+  slot.innerHTML = k ? '<span class="inv-eq-pip' + (on ? ' on' : '') + '" data-nolock onclick="toggleInvEquip(this)" title="' + (on ? 'Equipped — click to unequip' : 'Not equipped — click to equip') + '"></span>' : '';
+}
+function toggleInvEquip(el) { const tr = el.closest('tr'); if(tr) setInvEquipped(tr, !invEquipped(tr)); }
+function setInvEquipped(tr, on, quiet) {
+  const k = invEquipKind(tr), it = invItemOf(tr); if(!k || !it) return;
+  const field = k === 'armor' ? 'f-armor' : k === 'shield' ? 'f-shield' : '';
+  if(on && field) {   // one suit of armor / one shield at a time
+    document.querySelectorAll('#inv-body tr').forEach(o => { if(o !== tr && invEquipKind(o) === k && invEquipped(o)) { o.dataset.equipped = '0'; if(k === 'armor') o.querySelector('.inv-slots').value = 2; refreshInvEquip(o); } });
+    $(field).value = it.name;
+  }
+  if(!on && field && norm($(field).value) === norm(it.name)) $(field).value = '';
+  tr.dataset.equipped = on ? '1' : '0';
+  if(k === 'armor') tr.querySelector('.inv-slots').value = on ? 1 : 2;   // worn 1 slot, unworn 2
+  refreshInvEquip(tr);
+  if(!quiet) { addLog(on ? 'Equip' : 'Unequip', it.name, k === 'weapon' ? (on ? 'Ready to attack' : 'Stowed — not offered as an attack') : 'Armor ' + armorValue(), 'normal'); recalc(); scheduleAutosave(); if(typeof renderNimTurn === 'function') renderNimTurn(); }
+}
+// An attack row is offered when it isn't tied to an Inventory weapon, or that weapon is equipped.
+function atkRowReady(tr) {
+  const link = tr.dataset.link; if(!link) return true;
+  const inv = [...document.querySelectorAll('#inv-body tr')].find(r => r.dataset.link === link);
+  return !inv || invEquipped(inv);
+}
+// Saves from before equip tracking (or rows with no flag): weapons count as equipped, armor / shield
+// when they match the Armor fields. Old "2 Daggers"-style rows become "Dagger" × 2 with their attack.
+function migrateInvRows() {
+  document.querySelectorAll('#inv-body tr').forEach(tr => {
+    const nm = tr.querySelector('.inv-name'), m = /^(\d+)\s+(.+)$/.exec(nm.value.trim());
+    if(m && !findItem(nm.value)) {
+      const base = m[2].trim(), it = findItem(base) || findItem(base.replace(/(?:es|s)$/i, '')) || findItem(base.replace(/s$/i, ''));
+      if(it) {
+        nm.value = it.name; tr.querySelector('.inv-qty').value = +m[1];
+        if(!tr.querySelector('.inv-slots').value || +tr.querySelector('.inv-slots').value > 1) tr.querySelector('.inv-slots').value = /2-handed/i.test(it.properties || '') ? 2 : 1;
+        if(isWeapon(it) && !tr.dataset.link) { const link = _nextLink(); tr.dataset.link = link; addAttackRow({ name: it.name, damage: it.damage || '', props: it.properties || '', link }); }
+      }
+    }
+    if(tr.dataset.equipped == null) {
+      const k = invEquipKind(tr), it = invItemOf(tr);
+      tr.dataset.equipped = (k === 'weapon') || (k === 'armor' && it && norm($('f-armor').value) === norm(it.name)) || (k === 'shield' && it && norm($('f-shield').value) === norm(it.name)) ? '1' : '0';
+    }
+    refreshInvEquip(tr);
+  });
 }
 // Delete an inventory row; if it's a linked weapon, delete its attack row too.
 function removeInvRow(btn) {
   const tr = btn.closest('tr'); if(!tr) return;
+  if(invEquipped(tr) && invEquipKind(tr) !== 'weapon') setInvEquipped(tr, false, true);   // taking off armor / shield clears the Armor field
   const link = tr.dataset.link;
   if(link) document.querySelectorAll('#attacks-body tr').forEach(a => { if(a.dataset.link === link) a.remove(); });
   tr.remove(); recalc(); scheduleAutosave();
@@ -1203,10 +1267,12 @@ function addInvFromItem(name) {
   const two = /2-handed/i.test(it.properties || '') || ['Mail','Plate'].includes(it.category) && false;
   const weapon = isWeapon(it);
   const link = weapon ? _nextLink() : '';
-  addInvRow({ name: it.name, slots: two ? 2 : 1, note: [it.armor && 'Armor ' + it.armor, it.damage, it.properties, it.cost].filter(Boolean).join(' · '), link });
-  if(['Cloth','Leather','Mail','Plate'].includes(it.category)) $('f-armor').value = it.name;
-  if(it.category === 'Shield') $('f-shield').value = it.name;
+  // Stack with an existing row of the same item (one Dagger row × 2, not two rows).
+  const same = [...document.querySelectorAll('#inv-body tr')].find(r => norm(r.querySelector('.inv-name').value) === norm(it.name));
+  if(same) { same.querySelector('.inv-qty').value = invQty(same) + 1; recalc(); scheduleAutosave(); return; }
+  const tr = addInvRow({ name: it.name, slots: two ? 2 : 1, note: [it.armor && 'Armor ' + it.armor, it.damage, it.properties, it.cost].filter(Boolean).join(' · '), link, equipped: false });
   if(weapon) addAttackRow({ name: it.name, damage: it.damage || '', props: it.properties || '', link });
+  if(weapon || ARMOR_CATS.includes(it.category) || it.category === 'Shield') setInvEquipped(tr, true, true);   // bought gear goes on / in hand
   recalc(); scheduleAutosave();
 }
 function renderFeatures() {
@@ -1418,7 +1484,7 @@ function collectSheet() {
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),
-    inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value, link: tr.dataset.link || '' })).filter(i => i.name),
+    inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: invQty(tr), slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value, link: tr.dataset.link || '', equipped: invEquipKind(tr) ? invEquipped(tr) : undefined })).filter(i => i.name),
     gold: num(v('f-gold')), silver: num(v('f-silver')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(), tab: _tab, turn: (typeof _nturn !== 'undefined' ? Object.assign({}, _nturn) : undefined),
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
@@ -1437,7 +1503,7 @@ function applySheet(d) {
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
-  _restoreLinkSeq();
+  _restoreLinkSeq(); migrateInvRows();
   set('f-gold', d.gold ?? 50); set('f-silver', d.silver || 0); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
   conditions = Array.isArray(d.conditions) ? d.conditions.slice() : []; renderConditions();
   _tab = 'action';
@@ -1766,7 +1832,7 @@ function nimBuild(){
   // Attacks (rows from the Attacks tab — management stays there)
   document.querySelectorAll('#attacks-body tr').forEach(tr => {
     const name = (tr.querySelector('.atk-name') || {}).value || ''; const dmg = (tr.querySelector('.atk-dmg') || {}).value || '';
-    if(!name.trim()) return;
+    if(!name.trim() || !atkRowReady(tr)) return;   // only equipped weapons
     const props = (tr.querySelector('.atk-props') || {}).value || '';
     add('attacks', { name: name, cost: 1, sub: [dmg, props, rushed ? 'Rushed: disadvantage ×' + rushed : ''].filter(Boolean).join(' · '),
       btn: 'Attack', run: () => {
@@ -1801,7 +1867,7 @@ function nimBuild(){
   nimEquipOpts(add, rushed);
   // Heroic Reactions — 1 action each, off-turn, each 1/round
   const armor = (typeof armorValue === 'function') ? armorValue() : 0;
-  const melee = [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: (tr.querySelector('.atk-name') || {}).value || '', dmg: (tr.querySelector('.atk-dmg') || {}).value || '', props: (tr.querySelector('.atk-props') || {}).value || '' }))
+  const melee = [...document.querySelectorAll('#attacks-body tr')].filter(atkRowReady).map(tr => ({ name: (tr.querySelector('.atk-name') || {}).value || '', dmg: (tr.querySelector('.atk-dmg') || {}).value || '', props: (tr.querySelector('.atk-props') || {}).value || '' }))
     .filter(a => a.name.trim() && !/\brange|ranged|bow|crossbow|sling|ballista/i.test(a.props + ' ' + a.name));   // Thrown melee weapons (Dagger, Hand Axe) still count as melee
   const oaw = melee.find(a => !/unarmed/i.test(a.name)) || melee[0];   // prefer a real melee weapon
   const R = (key, name, sub, run, extra) => add('reactions', Object.assign({ name: name, cost: 1, react: key, sub: sub, btn: 'Use', blocked: _nturn.reacted[key] ? 'Used this round' : '', run: () => { const ok = run(); if(ok !== false) { nimSpend(1); _nturn.reacted[key] = true; } return ok !== false; } }, extra || {}));
@@ -1816,7 +1882,6 @@ function nimBuild(){
   R('help', 'Help', 'Give an ally advantage on a roll (explain how; one Help per roll)', () => { addLog('Help', 'Advantage', 'Reaction · an ally gains advantage on their roll', 'normal'); });
   // Actions
   const speed = (typeof speedValue === 'function') ? speedValue() : 6;
-  add('actions', { name: 'Move', cost: 1, sub: 'Up to Speed ' + speed + ' (difficult terrain halves it)', btn: 'Move', run: () => { nimSpend(1); _nturn.moves += 1; addLog('Move', speed + ' spaces', 'Action · move up to Speed ' + speed, 'normal'); return true; } });
   const used = _nturn.assessed || [];
   add('actions', { name: 'Assess', cost: 1, sub: 'DC 12 skill check — ask a question, create an opening, or anticipate danger' + (used.length ? ' · used this encounter: ' + used.join(', ') : ''), assess: true, btn: 'Roll', blocked: SKILLS.every(([n]) => used.includes(n)) ? 'Every skill used this encounter' : '', run: (skill) => {
     const sk = SKILLS.find(x => x[0] === skill) || SKILLS.find(x => x[0] === 'Perception');
@@ -1838,11 +1903,11 @@ function nimBuild(){
    • One-time magic items with an action (Gem of Escape, Lumina…): 1 action, LVL dice are rolled, used up.
    Only items that are used up (or spend a charge) and do one set thing are listed: reusable gear (lantern,
    rope, tools, per-rest magic items) and rations are not.
-   Quantity: one row = one item unless the name or note says "×N". The scroll/wand spell is read from the
+   Quantity: the row's Qty (older rows: a "×N" in the name or note). The scroll/wand spell is read from the
    item name or the row's note (e.g. note "Fireball"). */
 function nimQtyTok(s){ const m = /(?:×|\bx)\s*(\d+)\b/i.exec(String(s || '')); return m ? +m[1] : null; }
 function nimBaseName(n){ return String(n || '').replace(/\s*(?:×|\bx)\s*\d+\b/i, '').trim(); }
-function nimEqQty(row){ const q = nimQtyTok(row.note) ?? nimQtyTok(row.name); if(q != null) return q; const st = /stack of (\d+)/i.exec(row.name); return st ? +st[1] : 1; }
+function nimEqQty(row){ if(row.tr && row.tr.querySelector('.inv-qty') && invQty(row.tr) > 1) return invQty(row.tr); const q = nimQtyTok(row.note) ?? nimQtyTok(row.name); if(q != null) return q; const st = /stack of (\d+)/i.exec(row.name); return st ? +st[1] : 1; }
 function nimEqCharges(row, it){ const m = /(\d+)\s*charges?\b/i.exec(row.note) || /(\d+)\s*charges?\b/i.exec((it && it.properties) || ''); return m ? +m[1] : null; }
 function nimKnownSchools(){ const out = {}; document.querySelectorAll('#spells-body .sp-name').forEach(i => { const sp = D.spells().find(x => norm(x.name) === norm(i.value)); if(sp && sp.school) out[norm(sp.school)] = 1; }); return out; }
 // The spell a scroll / wand holds: a spell name inside the item name, its note or (named wands) its text.
@@ -1895,8 +1960,9 @@ function nimEqOf(tr){
 function nimEqTakeOne(o){
   const tr = o.row.tr; if(!tr || !tr.isConnected) return 'gone';
   if(o.qty <= 1) { removeInvRow(tr.querySelector('.row-x') || tr); return 'used up'; }
-  const left = o.qty - 1, note = tr.querySelector('.inv-note'), nm = tr.querySelector('.inv-name');
-  if(nimQtyTok(note.value) != null) note.value = note.value.replace(/(?:×|\bx)\s*\d+\b/i, '×' + left);
+  const left = o.qty - 1, note = tr.querySelector('.inv-note'), nm = tr.querySelector('.inv-name'), qf = tr.querySelector('.inv-qty');
+  if(qf && invQty(tr) > 1) qf.value = left;
+  else if(nimQtyTok(note.value) != null) note.value = note.value.replace(/(?:×|\bx)\s*\d+\b/i, '×' + left);
   else if(nimQtyTok(nm.value) != null) nm.value = nm.value.replace(/(?:×|\bx)\s*\d+\b/i, '×' + left);
   else note.value = (note.value ? note.value + ' · ' : '') + '×' + left;
   return left + ' left';

@@ -540,6 +540,7 @@ body.dark .sl::after{background:#3a3320;}
 .sdt-econ{display:flex;gap:6px;flex:1 1 auto;min-width:0;flex-wrap:wrap;}
 .sdt-pip{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid var(--gold);color:var(--gold-ink);border-radius:12px;padding:3px 12px;}
 .sdt-pip.used{background:var(--rule);border-color:var(--rule);color:var(--muted);text-decoration:line-through;}
+.sdt-pip.hd{border-style:dashed;}
 .sdt-end{flex:0 0 auto;background:var(--gold);color:var(--on-gold);border:none;border-radius:7px;padding:7px 14px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .sdt-end:hover{filter:brightness(1.08);}
 .sdt-row2{display:flex;align-items:center;gap:10px;padding:0 10px 9px;flex-wrap:wrap;}
@@ -1558,12 +1559,12 @@ function setTab(name){
 function setDefaultTab(){ setTab('action'); }   // sheets always open on the Action tab
 
 // ═══ ACTION TAB — the turn controller ═══════════════════════════════════════════
-// Shadowdark turn (Core): move up to NEAR and take ONE action — or skip the action
-// to move a second time. An action is: attack, cast a spell, make a check (Hide,
-// Search, …), Help, or anything else you can describe. Multitasking (stand up,
-// speak, activate a magic item, quaff a potion) doesn't use the action (Core p.88).
-// HeroDark: you may forgo your move to take a second attack/cast, made at
-// disadvantage; while Dying you get only one action (move OR act) on your turn.
+// Shadowdark turn (Core): move up to NEAR and take ONE action. Moving is a given, so
+// the tab tracks only the Action: attack, cast a spell, make a check (Hide, Search,
+// …), Help, or anything else you can describe. Quaffing a potion is multitasking
+// and free (Core p.88). HeroDark: you may forgo your move for a second attack/cast
+// at disadvantage — a second bubble ("2nd · Disadv.") that only shows in HeroDark
+// (it rides in _sdTurn.move); while Dying you get only one action on your turn.
 // Focus spells (Core p.50): a successful cast starts focus; at the start of each
 // turn (or on taking damage) roll to maintain it — a failure ends it, a nat 1 is a
 // critical failure. The focused spell name rides in _sdTurn.focus (survives End Turn).
@@ -1582,23 +1583,20 @@ function sdSheetCheckSpend(){
 function sdEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function sdHD(){ return typeof heroDarkOn === 'function' && heroDarkOn(); }
 // Can the turn still afford this kind of thing?
-//  'move'   — your Move, or a second Move in place of your Action
-//  'action' — your Action (HeroDark: or your Move, as a second action at disadvantage)
-// HeroDark Dying: only one action on your turn (move or act, not both).
+//  'action' — your Action (HeroDark: or a second attack/cast in place of your move, at disadvantage)
+// HeroDark Dying: only one action on your turn.
 function sdOneActionOnly(){ return sdHD() && typeof isDyingActive === 'function' && isDyingActive(); }
 // The HeroDark second action is "a second attack or cast a spell" only.
 function sdSecondOk(sec){ return sec === 'attacks' || sec === 'spells'; }
 function sdCan(kind, sec){
   if(kind === 'free') return true;
-  if(sdOneActionOnly()) return !_sdTurn.move && !_sdTurn.action;
-  if(kind === 'move') return !_sdTurn.move || !_sdTurn.action;
+  if(sdOneActionOnly()) return !_sdTurn.action;
   return !_sdTurn.action || (sdHD() && !_sdTurn.move && sdSecondOk(sec));
 }
 function sdSecondAction(sec){ return _sdTurn.action && sdHD() && !_sdTurn.move && !sdOneActionOnly() && sdSecondOk(sec); }
 function sdSetFocus(nm){ _sdTurn.focus = nm; if(typeof addTracker === 'function') addTracker('Focused'); }
 function sdEndFocus(){ _sdTurn.focus = ''; if(typeof trackerActive === 'function' && trackerActive('Focused')) removeTracker('Focused'); }
 function sdSpend(kind){
-  if(kind === 'move'){ if(!_sdTurn.move) _sdTurn.move = true; else _sdTurn.action = true; return; }
   if(kind === 'action'){ if(!_sdTurn.action) _sdTurn.action = true; else { _sdTurn.move = true; _sdTurn.second = true; } }
 }
 function sdAfter(){ renderSDTurn(); if(typeof saveSheet === 'function') saveSheet(false); }
@@ -1677,18 +1675,12 @@ function sdBuildOpts(){
       btn: /^potion/i.test(e.name) ? 'Quaff' : 'Use', run: () => sdUseItem(e) });
   });
   // Actions
-  const moveAgain = _sdTurn.move && !_sdTurn.action;
-  add('actions', { name: moveAgain ? 'Move again' : 'Move', kind: 'move',
-    sub: moveAgain ? 'Up to near — uses your action' : 'Up to near (about 30 ft)', btn: 'Move',
-    run: () => true });
   add('actions', { name: 'Help', kind: 'action', sub: 'An ally gets advantage on their next check for this task', btn: 'Use',
     run: () => { addLog('Help', '▲', 'An ally gains advantage on a related check', 'normal'); return true; } });
   add('actions', { name: 'Hide', kind: 'action', sub: 'DEX check to slip out of sight', btn: 'Roll',
     run: () => { rollStat('dex', 'Hide (DEX)'); return true; } });
   add('actions', { name: 'Search', kind: 'action', sub: 'WIS check to spot something hidden (INT to study it)', btn: 'Roll',
     run: () => { rollStat('wis', 'Search (WIS)'); return true; } });
-  add('actions', { name: 'Multitask', kind: 'free', sub: 'Stand up, speak, activate a magic item, quaff a potion — doesn\'t use your action', btn: 'Use',
-    run: () => { addLog('Multitask', '—', 'A small parallel task (no action)', 'normal'); return true; } });
   return O;
 }
 
@@ -1827,8 +1819,8 @@ function sdTurnDo(i, k){
   const o0 = _sdTurnOpts[i]; if(!o0) return;
   const o = (k != null && o0.pre && o0.pre[k]) ? Object.assign({}, o0, { run: o0.pre[k].run }) : o0;   // e.g. Backstab
   if(o.blocked){ addLog(o.name, '✗', o.blocked, 'fumble'); return; }
-  if(!sdCan(o.kind, o.sec)){ addLog('Turn', 'Nothing left', 'You have already moved and acted — End Turn to reset', 'normal'); return; }
-  // HeroDark second action (Move spent as an action): roll at disadvantage.
+  if(!sdCan(o.kind, o.sec)){ addLog('Turn', 'Nothing left', 'You have already used your action — End Turn to reset', 'normal'); return; }
+  // HeroDark second action (move given up for it): roll at disadvantage.
   const second = o.kind === 'action' && sdSecondAction(o.sec);
   const prev = advState;
   if(second) advState = (advState === 'advantage') ? null : 'disadvantage';
@@ -1853,12 +1845,12 @@ function renderSDTurn(){
   const host = document.getElementById('sd-turn'); if(!host) return;
   const O = sdBuildOpts();
   const pip = (on, lbl, cls) => `<span class="sdt-pip${on ? ' used' : ''}${cls ? ' ' + cls : ''}">${lbl}</span>`;
-  const badges = (Array.isArray(_trackers) ? _trackers : []).filter(t => t !== 'Light').map(t =>
-    `<span class="sdt-badge${(typeof SD_TRACKERS_GOOD !== 'undefined' && SD_TRACKERS_GOOD.includes(t)) ? ' good' : ' bad'}">${sdEsc(t)}</span>`).join('')
-    + (sdHD() ? (sdOneActionOnly() ? `<span class="sdt-badge bad" title="HeroDark: while Dying you have only one action on your turn">Dying · 1 action only</span>` : `<span class="sdt-badge hd" title="HeroDark: forgo your move for a second attack or cast, at disadvantage">HeroDark · 2nd action at disadv.</span>`) : '');
+  // HeroDark: a second bubble for the attack/cast taken in place of your move (at disadvantage).
+  const second = sdHD() && !sdOneActionOnly()
+    ? `<span class="sdt-pip${_sdTurn.move ? ' used' : ''} hd" title="HeroDark: give up your move for a second attack or cast, made at disadvantage">2nd · Disadv.</span>` : '';
   const card = o => {
     const can = !o.blocked && sdCan(o.kind, o.sec);
-    const sub = [o.blocked, (o.kind === 'action' && sdSecondAction(o.sec) && can) ? 'uses your move · disadvantage' : '', o.sub].filter(Boolean).join(' · ');
+    const sub = [o.blocked, (o.kind === 'action' && sdSecondAction(o.sec) && can) ? '2nd action (instead of moving) · disadvantage' : '', o.sub].filter(Boolean).join(' · ');
     return `<div class="sdt-card${can ? '' : ' disabled'}"><div class="sdt-main"><div class="sdt-name">${sdEsc(o.name)}</div>${sub ? `<div class="sdt-sub">${sdEsc(sub)}</div>` : ''}</div>${(o.toggles || []).map((t, k) => `<button class="sdt-tog${t.on ? ' on' : ''}" data-nolock title="${sdEsc(t.title)}" onclick="sdTurnTog(${o.i},${k})">${sdEsc(t.label)}</button>`).join('')}${(o.pre || []).map((b, k) => `<button class="sdt-do sdt-alt" title="${sdEsc(b.title || '')}" onclick="sdTurnDo(${o.i},${k})">${sdEsc(b.label)}</button>`).join('')}<button class="sdt-do" onclick="sdTurnDo(${o.i})">${sdEsc(o.btn)}</button></div>`;
   };
   const sec = (key, title, list, empty) => `<div class="sdt-sec${_sdTurnCollapsed[key] ? ' collapsed' : ''}"><div class="sdt-sec-hd" onclick="sdToggleSec('${key}')"><span class="sdt-caret">▼</span><span class="sdt-title">${title}</span></div>`
@@ -1866,10 +1858,9 @@ function renderSDTurn(){
   host.innerHTML = `
     <div class="sdt-top">
       <div class="sdt-row1">
-        <div class="sdt-econ">${pip(_sdTurn.move, 'Move')}${pip(_sdTurn.action, 'Action')}</div>
-        <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's move and action">End Turn</button>
+        <div class="sdt-econ">${pip(_sdTurn.action, 'Action')}${second}</div>
+        <button class="sdt-end" onclick="sdEndTurn()" title="Clear this turn's action">End Turn</button>
       </div>
-      ${badges ? `<div class="sdt-row2"><div class="sdt-badges">${badges}</div></div>` : ''}
     </div>
     ${sec('attacks', 'Attacks', O.attacks, 'No attacks yet — add weapons on the Equipment tab.')}
     ${sec('spells', 'Spells', O.spells, 'No spells — learn them from the Spellbook on the Spells tab.')}
