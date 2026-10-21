@@ -14,10 +14,48 @@
 //                  recessed, domed glass inset tinted by the chosen color, with
 //                  a single top-left glint. The color tints the glass, not the
 //                  metal ring.
+//   • image frames — fixed artwork (e.g. Pirate Borg's barrel hoop on parchment):
+//                  a background image behind the art and a frame image on top.
+//                  These ignore the color and ring-thickness controls.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getSystemSnapshot } from "@/components/systemStore";
 
-type RingStyle = "flat" | "beveled" | "steelglass";
+type RingStyle = "flat" | "beveled" | "steelglass" | "pirateborg";
+
+// Image-based frames. `bg` sits behind the art (shows through transparent art),
+// `frame` is drawn on top; `inner` is the radius (fraction of the token radius)
+// the art is clipped to — just under the frame's solid edge so it tucks beneath.
+const IMAGE_FRAMES: Partial<Record<RingStyle, { bg: string; frame: string; inner: number }>> = {
+  pirateborg: { bg: "/themes/pb-token-bg.webp", frame: "/themes/pb-token-frame.webp", inner: 0.875 },
+};
+const frameCache: Record<string, HTMLImageElement> = {};
+function frameImg(src: string): HTMLImageElement | null {
+  if (typeof window === "undefined") return null;
+  let img = frameCache[src];
+  if (!img) {
+    img = new Image();
+    img.src = src;
+    frameCache[src] = img;
+  }
+  return img.complete && img.naturalWidth > 0 ? img : null;
+}
+// Resolves once every frame image for `style` has loaded (or failed).
+function whenFrameReady(style: RingStyle): Promise<void> {
+  const f = IMAGE_FRAMES[style];
+  if (!f) return Promise.resolve();
+  return Promise.all(
+    [f.bg, f.frame].map((src) => {
+      frameImg(src);
+      const img = frameCache[src];
+      if (img.complete) return Promise.resolve();
+      return new Promise<void>((res) => {
+        img.addEventListener("load", () => res(), { once: true });
+        img.addEventListener("error", () => res(), { once: true });
+      });
+    }),
+  ).then(() => undefined);
+}
 
 const EXPORT_SIZE = 512; // finished token dimensions in px
 const PREVIEW_SIZE = 440; // on-screen preview canvas (CSS + backing px scaled by DPR)
@@ -26,6 +64,7 @@ const STYLES: { id: RingStyle; label: string; hint: string }[] = [
   { id: "steelglass", label: "Steel Glass", hint: "Brushed-steel bezel over tinted glass — the pack look" },
   { id: "flat", label: "Flat", hint: "Simple solid ring" },
   { id: "beveled", label: "Beveled", hint: "Raised, rounded ring" },
+  { id: "pirateborg", label: "Pirate Borg", hint: "Weathered barrel-hoop frame on parchment" },
 ];
 
 // A spread of useful ring colors — metals plus a few saturated hues.
@@ -233,6 +272,44 @@ function drawSteelGlass(
   if (image && p.above) paintArt(ctx, size, cx, cy, rInner, p, image);
 }
 
+// Image frame: background image → art (clipped inside the frame, or unclipped
+// on top in mini mode) → frame image. Sizing matches the other styles (zoom = 1
+// covers the inner disc).
+function drawImageFrame(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  p: DrawParams,
+  image: HTMLImageElement | null,
+  f: { bg: string; frame: string; inner: number },
+) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const rInner = (size / 2) * f.inner;
+  const bg = frameImg(f.bg);
+  const frame = frameImg(f.frame);
+  ctx.imageSmoothingQuality = "high";
+  if (bg) ctx.drawImage(bg, 0, 0, size, size);
+  const art = (clip: boolean) => {
+    if (!image) return;
+    ctx.save();
+    if (clip) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+    }
+    paintArt(ctx, size, cx, cy, rInner, p, image);
+    ctx.restore();
+  };
+  if (p.above) {
+    if (frame) ctx.drawImage(frame, 0, 0, size, size);
+    art(false);
+  } else {
+    art(true);
+    if (frame) ctx.drawImage(frame, 0, 0, size, size);
+  }
+}
+
 // Draw the complete token into `ctx` at the given square `size`. Pure w.r.t. the
 // passed state, so the preview and the export share identical output.
 function drawToken(
@@ -242,6 +319,11 @@ function drawToken(
   image: HTMLImageElement | null,
 ) {
   ctx.clearRect(0, 0, size, size);
+  const imgFrame = IMAGE_FRAMES[p.style];
+  if (imgFrame) {
+    drawImageFrame(ctx, size, p, image, imgFrame);
+    return;
+  }
   if (p.style === "steelglass") {
     drawSteelGlass(ctx, size, p, image);
     return;
@@ -359,6 +441,23 @@ export default function TokenMaker() {
   const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [dropActive, setDropActive] = useState(false);
+  // Bumped when an image frame finishes loading so the preview redraws.
+  const [frameVer, setFrameVer] = useState(0);
+  const isImageFrame = !!IMAGE_FRAMES[style];
+
+  // Preload image frames; redraw when they arrive. Once they're in, open on the
+  // Pirate Borg frame if the site is set to Pirate Borg.
+  useEffect(() => {
+    let live = true;
+    Promise.all((Object.keys(IMAGE_FRAMES) as RingStyle[]).map(whenFrameReady)).then(() => {
+      if (!live) return;
+      setFrameVer((v) => v + 1);
+      if (getSystemSnapshot() === "PB") setStyle((cur) => (cur === "steelglass" ? "pirateborg" : cur));
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
 
   // "Save to campaign tokens" — the GM's own campaigns and the current pick.
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
@@ -395,7 +494,7 @@ export default function TokenMaker() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     drawToken(ctx, px, params, image);
-  }, [params, image]);
+  }, [params, image, frameVer]);
 
   const loadFile = useCallback((file: File | null | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -712,7 +811,7 @@ export default function TokenMaker() {
       <div className="flex min-w-0 flex-col gap-7">
         <div>
           <ControlHeading>Ring style</ControlHeading>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {STYLES.map((s) => {
               const active = style === s.id;
               return (
@@ -727,7 +826,7 @@ export default function TokenMaker() {
                       : "border-[var(--border)] bg-[var(--panel)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]"
                   }`}
                 >
-                  <RingIcon style={s.id} color={active ? color : "#8d96a3"} />
+                  <RingIcon style={s.id} color={active ? color : "#8d96a3"} ver={frameVer} />
                   <span>{s.label}</span>
                 </button>
               );
@@ -735,6 +834,7 @@ export default function TokenMaker() {
           </div>
         </div>
 
+        {!isImageFrame && (
         <div>
           <ControlHeading>Color</ControlHeading>
           <div className="flex flex-wrap items-center gap-2">
@@ -767,6 +867,7 @@ export default function TokenMaker() {
             </label>
           </div>
         </div>
+        )}
 
         <div>
           <ControlHeading>Image placement</ControlHeading>
@@ -799,7 +900,7 @@ export default function TokenMaker() {
           </p>
         </div>
 
-        {style !== "steelglass" && (
+        {style !== "steelglass" && !isImageFrame && (
           <div>
             <ControlHeading>
               Ring thickness <Value>{Math.round(ringFrac * 100)}%</Value>
@@ -974,7 +1075,7 @@ function Slider({
 }
 
 // A tiny inline swatch that previews each ring style in the style picker.
-function RingIcon({ style, color }: { style: RingStyle; color: string }) {
+function RingIcon({ style, color, ver }: { style: RingStyle; color: string; ver?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const c = ref.current;
@@ -987,6 +1088,6 @@ function RingIcon({ style, color }: { style: RingStyle; color: string }) {
     const ctx = c.getContext("2d");
     if (!ctx) return;
     drawToken(ctx, s, { style, color, ringFrac: 0.2, above: false, zoom: 1, offsetX: 0, offsetY: 0 }, null);
-  }, [style, color]);
+  }, [style, color, ver]);
   return <canvas ref={ref} className="h-[22px] w-[22px]" aria-hidden />;
 }
