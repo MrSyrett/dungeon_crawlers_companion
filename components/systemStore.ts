@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE" | "LOTR" | "DB";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE" | "LOTR" | "DB" | "PB";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -25,6 +25,10 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Dragonbane (Free League, 2023) — roll-under D20 vs skill level, Dragons (1) and
   // Demons (20), boons & banes, no levels: skills improve through advancement marks.
   { key: "DB", name: "Dragonbane", short: "DB", accent: "var(--db)" },
+  // Pirate Borg (Limithron, a MÖRK BORG derivative) — d20 + ability vs DR, roll high;
+  // PCs roll attack and defense, armor is a damage-reduction die, Devil's Luck,
+  // no levels: getting better is d6 rolls per ability. Mechanics adapted.
+  { key: "PB", name: "Pirate Borg", short: "PB", accent: "var(--pb)" },
   // Accent is the covers' hot magenta (--dcc), not the app's brick --red.
   { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--dcc)" },
   // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the

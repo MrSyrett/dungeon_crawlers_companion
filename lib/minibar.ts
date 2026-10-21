@@ -126,6 +126,9 @@ const THEME_FONTS: Partial<Record<SystemKey, string>> = {
   // Dragonbane: Hideout + Minion Pro are self-hosted (@font-face in
   // public/tokens.css); only the reading face comes from the Google set.
   DB: "family=EB+Garamond:ital,wght@0,400;0,600;1,400",
+  // Pirate Borg: JSL Blackletter (Shadowdark's) + 1651 Alchemy are self-hosted
+  // (@font-face in public/tokens.css); only the reading face is from the Google set.
+  PB: "family=EB+Garamond:ital,wght@0,400;0,600;1,400",
 };
 
 // What goes in <head>: the shared tokens (BEFORE the tool's own CSS so the tool

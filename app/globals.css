@@ -172,6 +172,17 @@
   src: url("/fonts/minion-pro.woff2") format("woff2");
 }
 
+/* Pirate Borg: the display face is Shadowdark's JSL Blackletter (declared at the
+   top of this file — one file, two systems); 1651 Alchemy is the accent face
+   for labels, section eyebrows and entry names. One weight, self-hosted. */
+@font-face {
+  font-family: "1651 Alchemy";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/1651-alchemy.woff2") format("woff2");
+}
+
 /* ===========================================================================
    THE SITE'S OWN LOOK
    Everything below the system accents is the app talking, not a game. Four
@@ -298,6 +309,13 @@
   --db: #b3261e;
   --db-ink: #e0614f;
   --db-gold: #c9a14a;
+  /* Pirate Borg — blood red on black. --pb is the brand blood (rules, borders,
+     fills, buttons); --pb-ink is lifted for small text on the near-black panels (4.7:1 on
+     #161212, 5.0:1 on #0d0b0b);
+     --pb-bone is the parchment/bone of the light ground and the label ink. */
+  --pb: #a3121a;
+  --pb-ink: #e6463a;
+  --pb-bone: #e8e0cc;
   /* Dungeon Crawler Carl accent — the covers' hot magenta. (Its pages used to
      borrow --red, which is the app's muted brick and nowhere near the books.) */
   --dcc: #e8275f;
@@ -1450,6 +1468,52 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* --- Pirate Borg: blood on black -------------------------------------------
+   JSL Blackletter letters the titles in blood red; 1651 Alchemy takes the
+   labels and section eyebrows in bone; EB Garamond carries the reading. The
+   ground is the splatter texture recoloured — black field, blood-red spatter
+   (public/themes/pb-splatter.webp) — under a scrim that keeps the middle of the
+   page, where the panels sit, dark. */
+:root[data-system="PB"]:not([data-chrome]) body {
+  --sys-head: var(--pb-ink);
+  --sys-sub: var(--pb-bone);
+  --sys-link: var(--pb-ink);
+  --sys-hilite: var(--pb);
+  --sys-action: var(--pb);
+  --panel: #0d0b0b;
+  --panel-2: #161212;
+  --border: #3a2424;
+  --text: #ece4d4;
+  --muted: #a89a8a;
+  --gold: var(--pb-ink);
+  --sys-display: "JSL Blackletter";
+  --sys-text: var(--font-garamond);
+  --sys-label: "1651 Alchemy";
+  background-color: #0a0808;
+  background-image:
+    radial-gradient(120% 90% at 50% 45%, rgba(10, 8, 8, 0.55) 30%, rgba(10, 8, 8, 0.15) 75%, rgba(0, 0, 0, 0.45) 100%),
+    url("/themes/pb-splatter.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* The blackletter on the page title and section heads; h3 (entry names, stat
+   block titles) in the accent face, where a fraktur would stop being legible
+   at card size. No uppercase tracking — neither face wants it. */
+:root[data-system="PB"]:not([data-chrome]) body h1,
+:root[data-system="PB"]:not([data-chrome]) body h2,
+:root[data-system="PB"]:not([data-chrome]) body [data-dash-head] {
+  font-family: "JSL Blackletter", var(--font-garamond), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+:root[data-system="PB"]:not([data-chrome]) body h3 {
+  font-family: "1651 Alchemy", var(--font-garamond), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
 /* --- Justice League Unlimited: an art-deco skyline -------------------------
    Russo One over Rubik. Bruce Timm's design language is flat, geometric and
    squared off, with no texture and no gradient in the drawing itself.
@@ -1803,6 +1867,7 @@ body {
 [data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
 [data-sys="LOTR"],  .home-tile[data-sys="LOTR"]  { --tile-accent: var(--lotr-ink);    --tile-sub: #b9cfa6;            --tile-namefont: var(--font-garamond);   --tile-face: "Ringbearer", var(--font-garamond); --tile-bg: #07120c; --tile-tex: url("/themes/lotr-mist.webp"); --tile-zoom: 1.4; --tile-scrim: 0.12; }
 [data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #120d09; --tile-tex: url("/themes/db-parchment.webp"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
+[data-sys="PB"],    .home-tile[data-sys="PB"]    { --tile-accent: var(--pb-ink);      --tile-sub: var(--pb-bone);     --tile-namefont: var(--font-garamond);   --tile-face: "JSL Blackletter", var(--font-garamond); --tile-bg: #0a0808; --tile-tex: url("/themes/pb-splatter.webp"); --tile-zoom: 1.15; --tile-scrim: 0.2; }
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.

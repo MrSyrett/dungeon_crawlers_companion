@@ -166,6 +166,15 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/dragonbane/npcs", label: "NPCs" },
     { href: "/dragonbane/adventuring", label: "Adventuring" },
   ],
+  PB: [
+    { href: "/pirate-borg/rules", label: "Rules" },
+    { href: "/pirate-borg/classes", label: "Classes" },
+    { href: "/pirate-borg/backgrounds", label: "Backgrounds" },
+    { href: "/pirate-borg/gear", label: "Gear" },
+    { href: "/pirate-borg/magic", label: "Relics & Rituals" },
+    { href: "/pirate-borg/bestiary", label: "Bestiary" },
+    { href: "/pirate-borg/naval", label: "Naval" },
+  ],
 };
 
 // The Library (formerly "Rulebooks", at /rules — which now redirects here). Its
@@ -200,6 +209,7 @@ export const HOMEBREW: Partial<Record<SystemKey, string>> = {
   VAE: "/vae/homebrew",
   LOTR: "/lotr/homebrew",
   DB: "/dragonbane/homebrew",
+  PB: "/pirate-borg/homebrew",
 };
 
 export function homebrewFor(system: SystemKey): string | null {
@@ -334,6 +344,10 @@ const CONCEPT: Record<string, string[]> = {
   Professions: ["archetype"],
   "Heroic Abilities": ["traits", "skills"],
   NPCs: ["creatures"],
+  // Pirate Borg
+  Rules: ["rules"],
+  "Relics & Rituals": ["magic"],
+  Naval: ["vehicles", "rules"],
 };
 
 // When the user switches system while on a compendium page, keep them in the
@@ -401,6 +415,7 @@ const PREFIX_SYSTEM: { prefix: string; key: SystemKey }[] = [
   { prefix: "/vae/", key: "VAE" },
   { prefix: "/lotr/", key: "LOTR" },
   { prefix: "/dragonbane/", key: "DB" },
+  { prefix: "/pirate-borg/", key: "PB" },
 ];
 
 // Shadowdark's reference pages live at top-level routes (historical), so match

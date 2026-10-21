@@ -141,6 +141,20 @@ const SYSTEMS = [
     chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
     mob: "Monster", boss: "Boss", npc: "NPC", typePh: "MONSTER // LARGE // FEROCITY 2", titlePh: "e.g. The Sinking Tower", subtitlePh: "e.g. A Dragonbane adventure",
   },
+  // Pirate Borg. HAND-BUILT: pb_session_prep_builder.html was derived from the
+  // Dragonbane builder and carries Pirate Borg-only sections (the Job, voyage
+  // legs with the trade winds, foul weather, changing winds and maritime events,
+  // ships with hull, crew skill modifiers, specialty crew, cargo and shanties,
+  // It's a Trap!, plunder & treasure, MÖRK BORG-style foes), so the loop below
+  // skips writing it. The entry records its keys/palette/schema.
+  {
+    file: "pb_session_prep_builder.html", key: "pb_session", ls: "pb_builder_v1", cfg: "pb", random: "Random Foe", handBuilt: true,
+    name: "Pirate Borg", title: "Pirate Borg — Adventure",
+    accent: "#a3121a", accentDark: "#7a0d13", red: "#a3121a", redDark: "#7a0d13", highlight: "#e6463a", boxBg: "#e3d7bd",
+    paper: "#ece3cf", previewBg: "#0a0808", displayFont: '"JSL Blackletter", "EB Garamond", Georgia, serif',
+    chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Foes", mobsHeading: "Foes &amp; Folk",
+    mob: "Foe", boss: "Boss", npc: "NPC", typePh: "UNDEAD // ZOMBIES // TRAPPED IN THE TROPICS", titlePh: "e.g. The Drowned Bell of Port Maw", subtitlePh: "e.g. A Pirate Borg adventure",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -318,6 +332,19 @@ const SB_CONFIG = {
   abilitiesPlaceholder: 'One per line — Skills: Awareness 12, Evade 10 · Broadsword: skill 14, 2D6 + D4 · monster attacks as a D6 table: 1. Claw: …',
   mobs: { placeholder: 'Search monsters, NPCs & animals…', pool: () => dbMobPool(), toCard: m => dbMobToCard(m), sub: m => String(m.group || '') },
 };`,
+  // Pirate Borg (MÖRK BORG-style): HP / Morale / armor die / the PC's DR to hit
+  // it and to defend against it; attacks ("Cutlass: d6") and specials one per
+  // line. The hand-built template's pbMobPool/pbMobToCard map PB_MONSTERS + pb-monster.
+  pb: `const SB_CONFIG = {
+  typePlaceholder: 'UNDEAD // ZOMBIES // TRAPPED IN THE TROPICS',
+  hp: null,
+  rows: [
+    [{ key:'hp', label:'HP' }, { key:'morale', label:'MORALE', ph:'7 or –' }, { key:'armor', label:'ARMOR', ph:'−d2' }, { key:'atkdr', label:'TO HIT', ph:'DR12' }, { key:'defdr', label:'DEFEND', ph:'DR12' }],
+  ],
+  abilitiesLabel: 'Attacks & Specials',
+  abilitiesPlaceholder: 'One per line — Cutlass: d6 · Musket: 2d6 (Reload 2) · Zombie Infection: … · a d6 attack table: 1-2. Sandblast: …',
+  mobs: { placeholder: 'Search the bestiary…', pool: () => pbMobPool(), toCard: m => pbMobToCard(m), sub: m => [m.group, 'HP ' + m.hp].filter(Boolean).join(' · ') },
+};`,
   myz: `const SB_CONFIG = {
   typePlaceholder: 'BEAST // STR 5 · FIGHT 2',
   hp: null,
@@ -455,6 +482,7 @@ const MOB_DATA = {
   vae: '',
   lotr: '<script src="/tools-data/lotr-data.js"></script>',
   db: '<script src="/tools-data/db-data.js"></script><script src="/tools-data/db-gm-tables.js"></script>',
+  pb: '<script src="/tools-data/pb-data.js"></script><script src="/tools-data/pb-gm-tables.js"></script>',
 };
 
 function rep(s, a, b, all = true) {
@@ -483,6 +511,7 @@ const BANNERS = {
   vae:    ["#2a2016", "#b8924e", "#efe6d4", 700, "#e7dec9"],
   lotr:   ["#0f2118", "#1f4a30", "#e2c36b", 400, "#d9e4cc"],
   db:     ["#1d1712", "#4a1410", "#e0614f", 400, "#e3d2ad"],
+  pb:     ["#0d0b0b", "#3a0a0d", "#e8e0cc", 400, "#e6463a"],
 };
 
 for (const S of SYSTEMS) {

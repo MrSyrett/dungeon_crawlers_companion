@@ -207,6 +207,10 @@ function extractDocTitle(tool: string, data: object): string | null {
       const sheet = JSON.parse(blob.db_sheet) as { name?: unknown };
       if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
     }
+    if (tool === "pb-character" && typeof blob.pb_sheet === "string") {
+      const sheet = JSON.parse(blob.pb_sheet) as { name?: unknown };
+      if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
+    }
 
     // Every session-prep tool keeps its blob under its registered key. A prep may
     // be a single (legacy) chapter or a multi-chapter doc { chapters:[…] } — the

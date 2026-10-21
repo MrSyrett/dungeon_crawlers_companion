@@ -35,6 +35,7 @@ type HbType =
   | "vae-weapon" | "vae-gear"
   | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
   | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc"
+  | "pb-weapon" | "pb-armor" | "pb-gear" | "pb-relic" | "pb-ritual" | "pb-monster" | "pb-ship"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {

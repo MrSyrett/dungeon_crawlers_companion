@@ -46,7 +46,7 @@ const TILE_FONTS = [
   "/fonts/dead-kansas.woff2",
 ];
 const TILE_ART = [
-  "icrpg-grain", "dnd-cover", "lotr-mist", "db-parchment", "dcc-splatter", "kob-halftone", "co-grunge",
+  "icrpg-grain", "dnd-cover", "lotr-mist", "db-parchment", "pb-splatter", "dcc-splatter", "kob-halftone", "co-grunge",
   "mmrpg-burst", "jlu-skyline", "gb-ectoplasm", "sw-starfield", "ace-speedlines",
   "d62e-blueprint", "yze-raster", "twd-grunge", "myz-metal", "vae-paper", "tool-map", "tool-token",
 ];

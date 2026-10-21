@@ -191,6 +191,15 @@ const DB_GEAR_CAT_OPTS: readonly Opt[] = ["Clothes", "Musical Instruments", "Tra
 const dbCostForm = (d: Data): Data => { const c = (d.cost ?? {}) as Data; return { costAmount: c.amount ?? "", costUnit: c.unit ?? "silver" }; };
 const dbCostTxt = (d: Data): string => { const c = (d.cost ?? null) as Data | null; return c && c.amount != null ? `${c.amount} ${c.unit}` : "—"; };
 
+// Pirate Borg vocabularies — mirror lib/homebrew's PB normalisers (kept local so
+// this client bundle never pulls in lib/data/pb-data).
+const PB_TIER_OPTS: readonly Opt[] = [["0", "Tier 0 — no protection"], ["1", "Tier 1 (light) −d2"], ["2", "Tier 2 (medium) −d4"], ["3", "Tier 3 (heavy) −d6"]];
+const PB_MON_DIE_OPTS: readonly Opt[] = [["", "No armor"], ["d2", "−d2"], ["d4", "−d4"], ["d6", "−d6"], ["d8", "−d8"], ["d10", "−d10"], ["d12", "−d12"]];
+const PB_HULL_OPTS: readonly Opt[] = [["", "None"], ["d2", "Tier 1 −d2"], ["d4", "Tier 2 −d4"], ["d6", "Tier 3 −d6"]];
+const PB_MON_CAT_OPTS: readonly Opt[] = [["npc", "NPC"], ["undead", "Undead"], ["beast", "Beast"], ["spirit", "Spirit"], ["monster", "Monster"]];
+const PB_ABIL_OPTS: readonly Opt[] = [["AGILITY", "AGILITY (default)"], ["STRENGTH", "STRENGTH"], ["PRESENCE", "PRESENCE"], ["TOUGHNESS", "TOUGHNESS"], ["SPIRIT", "SPIRIT"]];
+const pbSigned = (v: unknown): string => { const n = typeof v === "number" ? v : NaN; return Number.isFinite(n) ? (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : "±0") : "—"; };
+
 const SCHEMAS: Record<string, Schema> = {
   "nimble-item": {
     title: "Homebrew Items", noun: "Item",
@@ -977,6 +986,145 @@ const SCHEMAS: Record<string, Schema> = {
       return { ...d, skills: Array.isArray(d.skills) ? d.skills : Object.entries(sk).map(([name, level]) => ({ name, level })), strBonus: db.STR ?? "", aglBonus: db.AGL ?? "", armorName: ar.name ?? "", armorRating: ar.rating ?? "" }; },
     summary: (d) => `${sv(d, "kind") || "NPC"} · HP ${sv(d, "hp")}${d.boss ? " · boss" : ""}`,
   },
+  // ── Pirate Borg ──
+  "pb-weapon": {
+    title: "Homebrew Weapons", noun: "Weapon",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "type", label: "Type", type: "select", options: [["melee", "Melee"], ["ranged", "Ranged"]] },
+      { key: "damage", label: "Damage", type: "text", placeholder: "d6, 2d4" },
+      { key: "cost", label: "Cost (silver)", type: "number", placeholder: "25" },
+      { key: "hands", label: "Hands", type: "select", options: [["1", "One-handed"], ["2", "Two-handed"]] },
+      { key: "reach", label: "Reach (feet)", type: "number", placeholder: "10" },
+      { key: "range", label: "Range (feet)", type: "number", placeholder: "30" },
+      { key: "reload", label: "Reload (actions)", type: "number", placeholder: "2" },
+      { key: "ammo", label: "Ammo", type: "text", datalist: ["shot", "darts"], placeholder: "shot" },
+      { key: "blackPowder", label: "Black powder (ignores armor; fumbles misfire)", type: "checkbox" },
+      { key: "thrown", label: "Can be thrown", type: "checkbox" },
+      { key: "sword", label: "Counts as a sword", type: "checkbox" },
+      { key: "special", label: "Special", type: "textarea", full: true, placeholder: "Target tests STRENGTH DR12 or is pulled to the shooter." },
+    ],
+    blank: () => ({ type: "melee", hands: "1" }),
+    toForm: (d) => ({ ...d, hands: String(d.hands ?? 1), reach: d.reach ?? "", range: d.range ?? "", reload: d.reload ?? "", cost: d.cost ?? "" }),
+    summary: (d) => `${sv(d, "damage") || "—"} · ${sv(d, "type")}${d.cost != null && d.cost !== "" ? ` · ${sv(d, "cost")}s` : ""}`,
+  },
+  "pb-armor": {
+    title: "Homebrew Clothing, Armor & Hats", noun: "Armor or Hat",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "slot", label: "Slot", type: "select", options: [["clothing", "Clothing / armor"], ["hat", "Hat"]] },
+      { key: "cost", label: "Cost (silver)", type: "number", placeholder: "20" },
+      { key: "tier", label: "Armor tier (clothing)", type: "select", options: PB_TIER_OPTS },
+      { key: "agilityDR", label: "AGILITY test DR + (clothing)", type: "number", placeholder: "0, 2 or 4" },
+      { key: "defenseDR", label: "Defense DR + (clothing)", type: "number", placeholder: "0 or 2" },
+      { key: "damageReduction", label: "Damage reduction (hat)", type: "number", placeholder: "1" },
+      { key: "sacrifice", label: "Can break to ignore one attack (hat)", type: "checkbox" },
+      { key: "metal", label: "Metal (relics & rituals almost never work)", type: "checkbox" },
+      { key: "special", label: "Special", type: "textarea", full: true },
+    ],
+    blank: () => ({ slot: "clothing", tier: "1" }),
+    toForm: (d) => ({ ...d, tier: String(d.tier ?? 0), cost: d.cost ?? "" }),
+    summary: (d) => sv(d, "slot") === "hat" ? `Hat${d.damageReduction ? ` · −${sv(d, "damageReduction")} damage` : ""}` : `Tier ${sv(d, "tier") || 0}${d.armorDie ? ` · −${sv(d, "armorDie")}` : ""}`,
+  },
+  "pb-gear": {
+    title: "Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["gear", "Gear"], ["container", "Container"], ["vessel", "Vessel"]] },
+      { key: "cost", label: "Cost (silver)", type: "number", placeholder: "10" },
+      { key: "costText", label: "Price text (optional)", type: "text", placeholder: "20-200s" },
+      { key: "capacity", label: "Holds (items, containers)", type: "number", placeholder: "8" },
+      { key: "uses", label: "Uses", type: "text", placeholder: "d6, PRESENCE + 4" },
+      { key: "consumable", label: "Consumable", type: "checkbox" },
+      { key: "heal", label: "Heals", type: "text", placeholder: "d6" },
+      { key: "effect", label: "Effect", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "gear" }),
+    toForm: (d) => ({ ...d, cost: d.cost ?? "" }),
+    summary: (d) => `${sv(d, "category") || "gear"} · ${sv(d, "costText") || "—"}`,
+  },
+  "pb-relic": {
+    title: "Homebrew Ancient Relics", noun: "Relic",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "duration", label: "Duration", type: "text", placeholder: "d6 turns" },
+      { key: "text", label: "Effect", type: "textarea", full: true, placeholder: "What happens when you use your action to activate it…" },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "duration") || "relic",
+  },
+  "pb-ritual": {
+    title: "Homebrew Arcane Rituals", noun: "Ritual",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "duration", label: "Duration", type: "text", placeholder: "d6 rounds" },
+      { key: "text", label: "Effect", type: "textarea", full: true, placeholder: "Cast with SPIRIT DR12; on a failure roll a Mystical Mishap…" },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "duration") || "ritual",
+  },
+  "pb-monster": {
+    title: "Homebrew Creatures & NPCs", noun: "Creature",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: PB_MON_CAT_OPTS },
+      { key: "group", label: "Group", type: "text", placeholder: "Redcoats, Zombies…" },
+      { key: "hp", label: "HP", type: "number", placeholder: "8" },
+      { key: "morale", label: "Morale (2–12, or – to never break)", type: "text", placeholder: "7" },
+      { key: "armorName", label: "Armor name", type: "text", placeholder: "Leather Vest, Thick Shell" },
+      { key: "armorDie", label: "Armor die", type: "select", options: PB_MON_DIE_OPTS },
+      { key: "drAttack", label: "DR for PCs to hit it", type: "number", placeholder: "12" },
+      { key: "drDefend", label: "DR for PCs to defend", type: "number", placeholder: "12" },
+      { key: "defendWith", label: "PCs defend with", type: "select", options: PB_ABIL_OPTS },
+      { key: "attacksPerRound", label: "Attacks per round", type: "text", placeholder: "1, 2, 1 per 2 PCs" },
+      { key: "attackChoice", label: "Uses ONE of its attacks each round", type: "checkbox" },
+      { key: "blackPowder", label: "Has black powder weapons (ignore armor)", type: "checkbox" },
+      { key: "ignoresArmor", label: "Its attacks ignore armor", type: "checkbox" },
+      { key: "boss", label: "Boss", type: "checkbox" },
+      { key: "text", label: "Description", type: "textarea", full: true },
+      { key: "attacks", label: "Attacks", type: "objectList", full: true, addLabel: "+ Attack", fields: [
+        { key: "name", label: "Name", type: "text", placeholder: "Cutlass" },
+        { key: "damage", label: "Damage", type: "text", placeholder: "d6" },
+        { key: "notes", label: "Notes", type: "text", placeholder: "Reload: 2 actions; + TOUGHNESS DR12 or poisoned" },
+      ] },
+      { key: "specials", label: "Special", type: "objectList", full: true, addLabel: "+ Special", fields: [
+        { key: "name", label: "Name", type: "text", placeholder: "Quick" },
+        { key: "text", label: "Effect", type: "textarea", placeholder: "DR14 to attack and defend against." },
+      ] },
+    ],
+    blank: () => ({ category: "monster", hp: 5, morale: "7", defendWith: "AGILITY", attacks: [{ name: "", damage: "d6" }], specials: [] }),
+    toForm: (d) => { const a = (d.armor ?? null) as Data | null; const dr = (d.dr ?? {}) as Data;
+      return { ...d, morale: d.morale == null ? "–" : String(d.morale), armorName: a?.name ?? "", armorDie: a?.die ?? "", drAttack: dr.attack ?? "", drDefend: dr.defend ?? "", defendWith: d.defendWith ?? "AGILITY", attacksPerRound: d.attacksPerRound ?? "", attackChoice: !!d.attackChoice }; },
+    summary: (d) => `HP ${sv(d, "hp")} · Morale ${d.morale == null ? "–" : sv(d, "morale")}`,
+  },
+  "pb-ship": {
+    title: "Homebrew Ships", noun: "Ship",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "type", label: "Type", type: "select", options: [["ship", "Ship"], ["boat", "Boat"], ["fortification", "Fortification"]] },
+      { key: "hp", label: "HP", type: "number", placeholder: "30" },
+      { key: "hullDie", label: "Hull", type: "select", options: PB_HULL_OPTS },
+      { key: "agility", label: "Agility (modifier)", type: "number", placeholder: "2" },
+      { key: "speed", label: "Speed (hexes)", type: "number", placeholder: "5" },
+      { key: "skill", label: "Crew skill (modifier)", type: "number", placeholder: "0" },
+      { key: "broadsides", label: "Broadsides", type: "text", placeholder: "d6" },
+      { key: "broadsidesAttacks", label: "Broadside attacks", type: "number", placeholder: "1" },
+      { key: "smallArms", label: "Small arms", type: "text", placeholder: "d4" },
+      { key: "smallArmsAttacks", label: "Small-arms attacks", type: "number", placeholder: "1" },
+      { key: "ram", label: "Ram", type: "text", placeholder: "d4" },
+      { key: "crewMin", label: "Crew (min)", type: "number", placeholder: "3" },
+      { key: "crewMax", label: "Crew (max)", type: "number", placeholder: "10" },
+      { key: "cargo", label: "Cargo (slots)", type: "number", placeholder: "2" },
+      { key: "cost", label: "Cost (silver)", type: "number" },
+      { key: "skillNote", label: "No crew skill? note", type: "text", placeholder: "Use passengers' stats." },
+      { key: "special", label: "Special", type: "textarea", full: true },
+      { key: "text", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ type: "ship", hp: 30, hullDie: "d2", agility: 0, speed: 4, skill: 0, crewMin: 3, crewMax: 10, cargo: 2 }),
+    toForm: (d) => { const h = (d.hull ?? null) as Data | null; const c = (d.crew ?? null) as Data | null;
+      return { ...d, hullDie: h?.die ?? "", crewMin: c?.min ?? "", crewMax: c?.max ?? "", agility: d.agility ?? "", skill: d.skill ?? "", cargo: d.cargo ?? "", broadsidesAttacks: d.broadsidesAttacks ?? "", smallArmsAttacks: d.smallArmsAttacks ?? "", cost: d.cost ?? "" }; },
+    summary: (d) => `HP ${sv(d, "hp")} · Speed ${sv(d, "speed")} · Skill ${pbSigned(d.skill)}`,
+  },
   "mmrpg-power": {
     title: "Homebrew Powers", noun: "Power",
     fields: [
@@ -1093,6 +1241,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("mmrpg-")) return "--mmrpg";
   if (kind.startsWith("lotr-")) return "--lotr";
   if (kind.startsWith("db-")) return "--db";
+  if (kind.startsWith("pb-")) return "--pb-ink"; // lifted blood: --pb is too dark for button text on black
   return "--dnd";
 }
 

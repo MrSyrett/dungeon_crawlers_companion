@@ -1,0 +1,73 @@
+// Pirate Borg — ancient relics (pg. 62-63), arcane rituals (pg. 64-65), mystical mishaps (pg. 66-67).
+// Names and numbers exact; effects lightly paraphrased. Use rules live in PB_RULES.relics / PB_RULES.rituals.
+// `scaling` = a duration/amount that adds SPIRIT; `ignoresArmor`, `test`, `heal`, `damage` are hints for automation.
+
+export const PB_RELICS = [
+  { roll: 1, name: "Cross of the Paragon", text: "One ally gets +1 to attack and +1 to damage for d6 turns.", duration: "d6 turns", target: "ally", bonus: { attack: 1, damage: 1 } },
+  { roll: 2, name: "Conch Shell from the Abyss", text: "Ask a nearby corpse (or any creature that died at sea within 100 miles) one question." },
+  { roll: 3, name: "Map Inked in Ectoplasm", text: "Learn the location of all traps and secret doors within 30' for d4+SPIRIT rounds.", duration: "d4+SPIRIT rounds" },
+  { roll: 4, name: "Will-o'-the-Wisp Lantern", text: "Emit 15' of light or darkness for d6+SPIRIT rounds.", duration: "d6+SPIRIT rounds" },
+  { roll: 5, name: "Pages from the Necronomicon", text: "All creatures that can hear your voice test DR14 or lose d4+SPIRIT HP (ignore armor).", damage: "d4+SPIRIT", ignoresArmor: true, targetTest: { dr: 14 }, area: "all who hear" },
+  { roll: 6, name: "Rune Encrusted Flintlock Pistol", text: "One creature you see loses d6+SPIRIT HP (ignore armor). Takes 1 action to reload.", damage: "d6+SPIRIT", ignoresArmor: true, reload: 1 },
+  { roll: 7, name: "Jade Die", text: "Roll a die. Odd: you gain d8 temporary HP. Even: choose a creature — it gets +d8 on its next damage roll.", tempHp: "d8" },
+  { roll: 8, name: "Undead Bird", text: "It can speak with animals (dead or alive) for d6+SPIRIT rounds.", duration: "d6+SPIRIT rounds" },
+  { roll: 9, name: "Mermaid Scales", text: "Eat a scale: breathe underwater for d4 hours.", duration: "d4 hours", consumable: true },
+  { roll: 10, name: "Charon's Obol", text: "If you are killed, return to life the next round with 1 HP. Disappears after one use.", singleUse: true, cheatDeath: { hp: 1 } },
+  { roll: 11, name: "Cup of the Carpenter", text: "Choose a creature to regain d6+SPIRIT HP.", heal: "d6+SPIRIT" },
+  { roll: 12, name: "Heart of the Sea", text: "Create or destroy 15 gallons of water or 30 cubic feet of fog." },
+  { roll: 13, name: "Necklace of Eyeballs", text: "Become invisible for d6+SPIRIT rounds or until you attack or take damage. Attack and defend with DR6.", duration: "d6+SPIRIT rounds", attackDR: 6, defenseDR: 6 },
+  { roll: 14, name: "Crown of the Sunken Lord", text: "A water shield surrounds you: −d2 protection for d2+SPIRIT rounds (in addition to armor).", duration: "d2+SPIRIT rounds", extraArmor: "d2" },
+  { roll: 15, name: "Crystalline Skull", text: "The skull can hear and repeat the thoughts of a nearby creature for d6+SPIRIT minutes.", duration: "d6+SPIRIT minutes" },
+  { roll: 16, name: "Codex Tablet", text: "Read and understand any language, glyphs or runes for 1+SPIRIT rounds.", duration: "1+SPIRIT rounds" },
+  { roll: 17, name: "Skeleton Key", text: "Open any door or lock. Crumbles after 1 use.", singleUse: true },
+  { roll: 18, name: "Mummified Monkey Head", text: "The head speaks: 1 creature tests SPIRIT DR12 or must obey a 1-word command.", targetTest: { ability: "SPIRIT", dr: 12 } },
+  { roll: 19, name: "Great Old One Figurine", text: "One human is terrorized for d4 rounds unless they succeed at a PRESENCE DR14 test. They can test each round.", duration: "d4 rounds", targetTest: { ability: "PRESENCE", dr: 14 } },
+  { roll: 20, name: "Broken Compass", text: "The compass points toward an object you know of for 1+SPIRIT rounds.", duration: "1+SPIRIT rounds" },
+];
+
+export const PB_RITUALS = [
+  { roll: 1, numeral: "I", name: "Call of the Sea", text: "d6 creatures can breathe underwater and swim 40' a round for d4+SPIRIT hours.", targets: "d6", duration: "d4+SPIRIT hours" },
+  { roll: 2, numeral: "II", name: "Curse of the Drowned", text: "For d6 rounds a creature gets +4 to all DRs and is DR −4 to defend against.", duration: "d6 rounds" },
+  { roll: 3, numeral: "III", name: "Dark Delusions", text: "An illusion or vision of your design appears in the mind of any creatures you can see for d4+SPIRIT minutes.", duration: "d4+SPIRIT minutes" },
+  { roll: 4, numeral: "IV", name: "Obfuscate Time", text: "d2 creatures recover 2d10+SPIRIT HP, but age 2d10 months.", targets: "d2", heal: "2d10+SPIRIT" },
+  { roll: 5, numeral: "V", name: "Eldritch Tentacles", text: "Tentacles appear and attack up to d6 creatures of your choice, dealing d6 damage each.", targets: "d6", damage: "d6" },
+  { roll: 6, numeral: "VI", name: "Heart Hex", text: "Raise one creature's reaction by one level (pg. 31). If it is already friendly, it falls in love with a creature of your choice for d4+SPIRIT days.", duration: "d4+SPIRIT days" },
+  { roll: 7, numeral: "VII", name: "Thalassomancy", text: "The lungs of d2+SPIRIT creatures fill with sea water: they suffocate for d4 rounds, losing d4 HP each round.", targets: "d2+SPIRIT", damage: "d4 per round for d4 rounds" },
+  { roll: 8, numeral: "VIII", name: "Light of a Thousand Stars", text: "30' of light radiates from an object for 2d12 hours and can't be extinguished. All attacks are −4 DR to hit / +4 to defend.", duration: "2d12 hours" },
+  { roll: 9, numeral: "IX", name: "Return from the Locker", text: "A recently killed creature returns to life with 1 HP, its lungs expelling black ichor and bilge water." },
+  { roll: 10, numeral: "X", name: "Mind Manacles", text: "One creature you can see must obey your commands for d2+SPIRIT rounds.", duration: "d2+SPIRIT rounds" },
+  { roll: 11, numeral: "XI", name: "Mists of Confusion", text: "d4+SPIRIT creatures each roll a new reaction (pg. 31).", targets: "d4+SPIRIT" },
+  { roll: 12, numeral: "XII", name: "Divination", text: "Ask the spirits or gods 3 yes-or-no questions." },
+  { roll: 13, numeral: "XIII", name: "Phantasmal Fauna", text: "Summon a ghostly hound or shark that obeys your commands and dissipates at sunset. HP 5, Morale –, ghostly form −d2, bite d6.", summon: "phantasmal-fauna" },
+  { roll: 14, numeral: "XIV", name: "Release the Kraken", text: "The Kraken appears in nearby waters." },
+  { roll: 15, numeral: "XV", name: "Reopen the Grave", text: "Summon d2+SPIRIT zombies or skeletons under your control.", targets: "d2+SPIRIT" },
+  { roll: 16, numeral: "XVI", name: "Mermaid's Kiss", text: "A creature gains +1 to STRENGTH, AGILITY and TOUGHNESS for d4 days.", duration: "d4 days", abilityBonus: { STRENGTH: 1, AGILITY: 1, TOUGHNESS: 1 } },
+  { roll: 17, numeral: "XVII", name: "Spiritual Ward", text: "One creature gains −d4 protection for d2 days, in addition to armor.", duration: "d2 days", extraArmor: "d4" },
+  { roll: 18, numeral: "XVIII", name: "Summon the Ferryman", text: "A human of your choice loses 3d8 HP. If you fail the cast, you or an ally loses the HP instead (don't roll a Mishap).", damage: "3d8", failureOverride: "you or an ally loses the HP instead; no mishap" },
+  { roll: 19, numeral: "XIX", name: "The Black Spot", text: "Name a human you have met. They must test DR12 or die within d8 days.", targetTest: { dr: 12 } },
+  { roll: 20, numeral: "XX", name: "Weathercraft", text: "For the next d4 hours the weather obeys you: change the wind's direction and speed (all ships get ±1 speed) and start or stop rain, fog or thunderstorms.", duration: "d4 hours" },
+];
+
+// `hidden` = the part printed in italics: things the caster might not immediately realize.
+export const PB_MISHAPS = [
+  { roll: 1, text: "Everything before you vanishes and you are alone on a gray island. A figure robed in black can be seen on a boat in the distance.", hidden: "Welcome to purgatory." },
+  { roll: 2, text: "Everyone within d20 feet vomits briny water and sea urchins (and loses 4 HP).", damage: 4 },
+  { roll: 3, text: "A wraith appears — the ghost of an old captain. Roll reaction for it (pg. 31).", hidden: "It leaves after d6 rounds." },
+  { roll: 4, text: "You are possessed by an ancient, arcane spirit for d4 rounds. Roll reaction (pg. 31) to see how you react to others." },
+  { roll: 5, text: "You go insane, convinced this world is a dream you must wake from. Test SPIRIT DR12 every dawn to see if you come to your senses." },
+  { roll: 6, text: "Nothing happens…", hidden: "…until the Kraken appears in d6 days." },
+  { roll: 7, text: "Gravity behaves as if everything within 30' is underwater…", hidden: "…for d8 minutes." },
+  { roll: 8, text: "d12 BIRDS! They swarm you and all around. HP 2, Morale –, no armor, bite d2.", hidden: "They flee when half are defeated.", summon: "mishap-birds" },
+  { roll: 9, text: "All metal within 30' becomes molten hot and glows red for 1 minute.", hidden: "Anyone touching metal after the first round is burned for d2 damage." },
+  { roll: 10, text: "Your vision permanently fills with water; the world looks submerged and obscured. PRESENCE tests involving sight are +4 DR from now on.", hidden: "Underwater you see like a fish." },
+  { roll: 11, text: "The weather and time of day are immediately, completely different.", hidden: "You and everything within a 3-mile radius have traveled 4d12 hours into the future." },
+  { roll: 12, text: "Clouds darken, winds pick up and the temperature drops d10 × 10 degrees.", hidden: "A thunderstorm moves in." },
+  { roll: 13, text: "A massive earthquake shakes the ground. At sea, tidal waves swell." },
+  { roll: 14, text: "You've simply forgotten how to cast the ritual.", hidden: "You no longer know it — remove it from your sheet.", removeRitual: true },
+  { roll: 15, text: "Eldritch voices whisper in your ears. Test SPIRIT DR12 or take d2 damage out of horror.", hidden: "If you pass, the next time you consider accessing the arcane you discover you know one random new ritual." },
+  { roll: 16, text: "The ritual succeeds, but in the worst way possible. GM decides: a different target, it goes off at the wrong time, you cast it on yourself, etc." },
+  { roll: 17, text: "Your mind is lost at sea for what seems like 3d10 years, yet no time has passed.", hidden: "Others watch as you age 3d10 years in a matter of seconds." },
+  { roll: 18, text: "Hundreds of tiny crabs swarm you. They're harmless and provide an extra −d2 damage reduction (not armor).", hidden: "They leave after d6 days, but return every full moon.", extraArmor: "d2" },
+  { roll: 19, text: "Everyone you can see recovers 3d6 HP…", hidden: "…including your enemies.", heal: "3d6" },
+  { roll: 20, text: "Time stops and you experience a moment of absolute cosmic understanding and bliss.", hidden: "When you regain your composure, time resumes, you have learned a new ritual of your choice and your SPIRIT is increased by +1.", ability: { SPIRIT: 1 } },
+];

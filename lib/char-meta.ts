@@ -112,6 +112,16 @@ export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | n
         level: null,
       };
     }
+    // Pirate Borg: no levels — the class column shows the class.
+    const pbs = blob?.pb_sheet;
+    if (typeof pbs === "string") {
+      const s = JSON.parse(pbs) as { name?: unknown; class?: unknown };
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls: typeof s.class === "string" ? s.class.trim() : "",
+        level: null,
+      };
+    }
     // Marvel Multiverse RPG: "level" is Rank; the class column shows the origin.
     const mmrpg = blob?.mmrpg_sheet;
     if (typeof mmrpg === "string") {

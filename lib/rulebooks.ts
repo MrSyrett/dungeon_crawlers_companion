@@ -125,6 +125,7 @@ const SYSTEM_ALIASES: Partial<Record<SystemKey, string[]>> = {
   MYZ: ["mutant", "mutantyearzero"],
   VAE: ["vaesen", "vaesennordichorror"],
   DB: ["dragonbane", "dragonbanerpg", "drakarochdemoner", "dragonbanecore"],
+  PB: ["pirateborg", "pirateborgrpg", "pirateborgplayersguidebook", "pirateborgrulesreference", "pirateborgcore", "pirateborgcorerules", "trappedinthetropics"],
   LOTR: ["lotr", "lordoftherings", "lordoftheringsroleplaying", "lordoftheringsrpg", "theonering", "tor", "lotr5e"],
 };
 const ALL_SYSTEMS_NAMES = new Set(["all", "allsystems", "both", "shared", "general", "any", "everysystem"]);

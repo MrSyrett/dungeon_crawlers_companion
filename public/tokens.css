@@ -64,6 +64,10 @@
   --db: #b3261e;
   --db-ink: #e0614f;
   --db-gold: #c9a14a;
+  /* Pirate Borg — blood red on black (mirrors app/globals.css). */
+  --pb: #a3121a;
+  --pb-ink: #e6463a;
+  --pb-bone: #e8e0cc;
   --dcc: #e8275f;
   --dcc-gold: #f2c230;
   /* ---- The systems' SECOND colours, mirrored from app/globals.css ----------
@@ -1045,6 +1049,15 @@ body {
   font-display: swap;
   src: url("/fonts/minion-pro.woff2") format("woff2");
 }
+/* Pirate Borg's accent face (labels, eyebrows); its display face is the JSL
+   Blackletter declared above for Shadowdark. Same file app/globals.css declares. */
+@font-face {
+  font-family: "1651 Alchemy";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/1651-alchemy.woff2") format("woff2");
+}
 /* Star Wars' logo face. A LOGO font, not a text font: its real uppercase slots
    hold alternate glyphs ("ADVENTURE" comes out "ADRENTKRE"), its digits are
    pieces of the STAR WARS logo lockup, and most symbols are words from the crawl
@@ -1377,6 +1390,44 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+/* --- Pirate Borg (blood on black) ----------------------------------------- */
+:root[data-themed][data-system="PB"] {
+  --sub-color: #d9cdb4;
+  --section-hdr-dark: var(--pb-ink);
+  --sys-display: "JSL Blackletter", "EB Garamond", ui-serif, Georgia, serif;
+  --sys-text: "EB Garamond", ui-serif, Georgia, serif;
+  --sys-label: "1651 Alchemy", "EB Garamond", ui-serif, Georgia, serif;
+  --ui-bg: #0d0b0b;
+  --ui-panel: #161212;
+  --ui-border: #3a2424;
+  --ui-text: #ece4d4;
+  --ui-muted: #a89a8a;
+  --ui-accent: var(--pb-ink);
+  --ui-highlight: var(--pb);
+  --font-display: "JSL Blackletter", "EB Garamond", ui-serif, Georgia, serif;
+}
+:root[data-themed][data-system="PB"] body,
+:root[data-themed][data-system="PB"] .preview-area {
+  background-color: #0a0808;
+  background-image:
+    radial-gradient(120% 90% at 50% 45%, rgba(10, 8, 8, 0.55) 30%, rgba(10, 8, 8, 0.15) 75%, rgba(0, 0, 0, 0.45) 100%),
+    url("/themes/pb-splatter.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* Light mode (the sheet's own toggle — body without .dark): bone ground with
+   blood-red spatter (public/themes/pb-splatter-light.webp). Dragonbane keeps
+   its equivalent line in the sheet template; it is here so the PB sheet gets it
+   without carrying it. Character sheet only: the prep builder has no .dark. */
+:root[data-themed][data-system="PB"][data-tool="character"] body:not(.dark) {
+  background-color: #e8e0cc;
+  background-image:
+    radial-gradient(120% 90% at 50% 45%, rgba(232, 224, 204, 0.22) 30%, rgba(232, 224, 204, 0) 70%, rgba(60, 10, 10, 0.14) 100%),
+    url("/themes/pb-splatter-light.webp");
 }
 
 /* --- Justice League Unlimited ---------------------------------------------- */

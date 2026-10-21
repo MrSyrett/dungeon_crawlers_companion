@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session" | "icrpg-character" | "icrpg-session" | "co-character" | "co-session" | "yze-character" | "yze-session" | "mmrpg-character" | "mmrpg-session" | "jlu-character" | "jlu-session" | "gb-character" | "gb-session" | "twd-character" | "twd-session" | "myz-character" | "myz-session" | "vae-character" | "vae-session" | "lotr-character" | "lotr-session" | "db-character" | "db-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session" | "icrpg-character" | "icrpg-session" | "co-character" | "co-session" | "yze-character" | "yze-session" | "mmrpg-character" | "mmrpg-session" | "jlu-character" | "jlu-session" | "gb-character" | "gb-session" | "twd-character" | "twd-session" | "myz-character" | "myz-session" | "vae-character" | "vae-session" | "lotr-character" | "lotr-session" | "db-character" | "db-session" | "pb-character" | "pb-session";
 
 export type ToolKind = "character" | "session";
 
@@ -142,6 +142,24 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     label: "Adventure",
     file: "db_session_prep_builder.html",
     keys: ["db_session"],
+  },
+  "pb-character": {
+    id: "pb-character",
+    system: "PB",
+    systemName: "Pirate Borg",
+    kind: "character",
+    label: "Character Sheet",
+    file: "pb_character_sheet.html",
+    keys: ["pb_sheet"],
+  },
+  "pb-session": {
+    id: "pb-session",
+    system: "PB",
+    systemName: "Pirate Borg",
+    kind: "session",
+    label: "Adventure",
+    file: "pb_session_prep_builder.html",
+    keys: ["pb_session"],
   },
   // The session-prep builders below are generated from the DCC one by
   // scripts/make-session-builders.mjs (same tool, re-themed + re-keyed).
@@ -372,7 +390,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "lotr-character", "lotr-session", "db-character", "db-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "yze-character", "yze-session", "twd-character", "twd-session", "myz-character", "myz-session", "vae-character", "vae-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "lotr-character", "lotr-session", "db-character", "db-session", "pb-character", "pb-session", "d62e-character", "d62e-session", "icrpg-character", "icrpg-session", "co-character", "co-session", "mmrpg-character", "mmrpg-session", "jlu-character", "jlu-session", "gb-character", "gb-session", "yze-character", "yze-session", "twd-character", "twd-session", "myz-character", "myz-session", "vae-character", "vae-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

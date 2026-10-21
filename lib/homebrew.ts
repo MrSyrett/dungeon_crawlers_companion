@@ -35,6 +35,7 @@ export type HbType =
   | "vae-weapon" | "vae-gear"
   | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
   | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc"
+  | "pb-weapon" | "pb-armor" | "pb-gear" | "pb-relic" | "pb-ritual" | "pb-monster" | "pb-ship"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 
 const HB_TYPES = [
@@ -54,6 +55,7 @@ const HB_TYPES = [
   "vae-weapon", "vae-gear",
   "lotr-virtue", "lotr-background", "lotr-weapon", "lotr-gear", "lotr-monster",
   "db-ability", "db-spell", "db-weapon", "db-armor", "db-gear", "db-monster", "db-npc",
+  "pb-weapon", "pb-armor", "pb-gear", "pb-relic", "pb-ritual", "pb-monster", "pb-ship",
   "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq", "mmrpg-starship",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
@@ -2173,6 +2175,194 @@ function normalizeDbNpc(input: unknown): { name: string; data: Record<string, un
   return { name, data };
 }
 
+// ── Pirate Borg (PB) ────────────────────────────────────────────────────────
+// Each normaliser emits the lib/data/pb-types shape its book dataset uses
+// (source "Homebrew", homebrew: true, an id slug), so the /pirate-borg reference
+// pages, the PB sheet (public/tools-data/pb-homebrew.js) and the GM Screen can
+// merge homebrew straight into their PB_* lists. Pirate Borg vocabulary: DR,
+// ability, armor tier/die, Morale; dice are lowercase ("2d6", "d4+1").
+const PB_ARMOR_DICE = ["d2", "d4", "d6"] as const; // tier 1 / 2 / 3
+const PB_MON_DICE = ["d2", "d4", "d6", "d8", "d10", "d12"] as const;
+const PB_MON_CATS = ["npc", "undead", "beast", "spirit", "monster"] as const;
+const PB_SHIP_TYPES = ["boat", "ship", "fortification"] as const;
+const PB_GEAR_CATS = ["gear", "container", "vessel"] as const;
+const PB_ABILITY_IDS = ["STRENGTH", "AGILITY", "PRESENCE", "TOUGHNESS", "SPIRIT"] as const;
+const pbSlug = (s: string) => "hb-" + s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+// Pirate Borg dice ("2d6", "d4+1", "d10 & d6") — lowercase d, free text kept short.
+const pbDice = (v: unknown): string => str(v).replace(/(\d*)D(\d+)/g, (_m, a, b) => `${a}d${b}`).slice(0, 40);
+// Integers that may arrive with a typographic minus ("−2") or a plus ("+1").
+const pbInt = (v: unknown, lo: number, hi: number): number | null => {
+  const n = num(str(v).replace(/^[−–]/, "-").replace(/^\+/, ""));
+  return n == null ? null : Math.max(lo, Math.min(hi, n));
+};
+const pbHb = (name: string) => ({ id: pbSlug(name), name, source: "Homebrew", homebrew: true });
+const pbTierOf = (die: string): number => (PB_ARMOR_DICE as readonly string[]).indexOf(die) + 1;
+
+function normalizePbWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew weapon needs a name.");
+  const type = oneOf(o.type, ["melee", "ranged"] as const, "melee");
+  const blackPowder = truthy(o.blackPowder);
+  const data: Record<string, unknown> = {
+    ...pbHb(name), type,
+    damage: pbDice(o.damage) || null,
+    cost: pbInt(o.cost, 0, 100000),
+    hands: str(o.hands) === "2" || o.hands === 2 ? 2 : 1,
+    reach: pbInt(o.reach, 0, 100) || null,
+    range: pbInt(o.range, 0, 2000) || null,
+    reload: pbInt(o.reload, 0, 10) || null,
+    blackPowder,
+    ammo: str(o.ammo).slice(0, 40) || (blackPowder && type === "ranged" ? "shot" : null),
+    special: str(o.special).slice(0, 1000) || null,
+    page: 0,
+  };
+  if (truthy(o.thrown)) data.thrown = true;
+  if (truthy(o.sword)) data.sword = true;
+  return { name, data };
+}
+
+// Clothing & armor (slot "clothing", the PbClothing shape) or a hat (slot "hat", PbHat).
+function normalizePbArmor(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew armor or hat needs a name.");
+  const slot = oneOf(o.slot, ["clothing", "hat"] as const, "clothing");
+  const cost = pbInt(o.cost, 0, 100000);
+  const special = str(o.special).slice(0, 1000);
+  if (slot === "hat") {
+    const data: Record<string, unknown> = { ...pbHb(name), slot, roll: 0, cost, page: 0 };
+    const dr = pbInt(o.damageReduction, 0, 6);
+    if (dr) data.damageReduction = dr;
+    if (truthy(o.metal)) data.metal = true;
+    if (truthy(o.sacrifice)) data.sacrifice = true;
+    if (special) data.special = special;
+    return { name, data };
+  }
+  const tier = pbInt(o.tier, 0, 3) ?? 0;
+  const data: Record<string, unknown> = {
+    ...pbHb(name), slot, roll: 0, tier: tier as 0 | 1 | 2 | 3,
+    armorDie: tier ? PB_ARMOR_DICE[tier - 1] : null, cost,
+    agilityDR: pbInt(o.agilityDR, 0, 10) ?? (tier === 2 ? 2 : tier === 3 ? 4 : 0),
+    defenseDR: pbInt(o.defenseDR, 0, 10) ?? (tier >= 2 ? 2 : 0),
+    page: 0,
+  };
+  if (truthy(o.metal)) data.metal = true;
+  if (special) data.special = special;
+  return { name, data };
+}
+
+function normalizePbGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const cost = pbInt(o.cost, 0, 1000000);
+  const costText = str(o.costText).slice(0, 30) || (cost == null ? "—" : `${cost}s`);
+  const data: Record<string, unknown> = { ...pbHb(name), cost, costText, category: oneOf(o.category, PB_GEAR_CATS, "gear"), page: 0 };
+  const cap = pbInt(o.capacity, 0, 500);
+  if (cap) data.capacity = cap;
+  if (str(o.uses)) data.uses = str(o.uses).slice(0, 40);
+  if (truthy(o.consumable)) data.consumable = true;
+  if (pbDice(o.heal)) data.heal = pbDice(o.heal);
+  if (str(o.effect)) data.effect = str(o.effect).slice(0, 2000);
+  return { name, data };
+}
+
+function normalizePbRelic(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew relic needs a name.");
+  const data: Record<string, unknown> = { ...pbHb(name), roll: 0, text: str(o.text).slice(0, 3000), page: 0 };
+  if (str(o.duration)) data.duration = str(o.duration).slice(0, 60);
+  return { name, data };
+}
+
+function normalizePbRitual(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew ritual needs a name.");
+  const data: Record<string, unknown> = { ...pbHb(name), roll: 0, numeral: "", text: str(o.text).slice(0, 3000), page: 0 };
+  if (str(o.duration)) data.duration = str(o.duration).slice(0, 60);
+  return { name, data };
+}
+
+function normalizePbMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew creature needs a name.");
+  const attacks = (Array.isArray(o.attacks) ? (o.attacks as unknown[]) : []).slice(0, 8).map((a) => {
+    const r = (a ?? {}) as Record<string, unknown>;
+    const out: { name: string; damage: string | null; notes?: string } = { name: str(r.name).slice(0, 80), damage: pbDice(r.damage) || null };
+    if (str(r.notes)) out.notes = str(r.notes).slice(0, 400);
+    return out;
+  }).filter((a) => a.name || a.damage);
+  attacks.forEach((a, i) => { if (!a.name) a.name = `Attack ${i + 1}`; });
+  const specials = (Array.isArray(o.specials) ? (o.specials as unknown[]) : []).slice(0, 10).map((s) => {
+    const r = (s ?? {}) as Record<string, unknown>;
+    return { name: str(r.name).slice(0, 80), text: str(r.text).slice(0, 1500) };
+  }).filter((s) => s.name || s.text);
+  const ar = (o.armor && typeof o.armor === "object" ? o.armor : {}) as Record<string, unknown>;
+  const die = oneOf(str(o.armorDie ?? ar.die).replace(/^[-−]/, "").toLowerCase(), PB_MON_DICE, "d2");
+  const hasArmor = !!str(o.armorDie ?? ar.die);
+  const armor = hasArmor ? { name: str(o.armorName ?? ar.name).slice(0, 60) || "Armor", die, ...(pbTierOf(die) ? { tier: pbTierOf(die) } : {}) } : null;
+  const moraleRaw = str(o.morale);
+  const dr: { attack?: number; defend?: number } = {};
+  const da = pbInt(o.drAttack ?? (o.dr as Record<string, unknown> | undefined)?.attack, 2, 20);
+  const dd = pbInt(o.drDefend ?? (o.dr as Record<string, unknown> | undefined)?.defend, 2, 20);
+  if (da != null && da !== 12) dr.attack = da;
+  if (dd != null && dd !== 12) dr.defend = dd;
+  const data: Record<string, unknown> = {
+    ...pbHb(name), category: oneOf(o.category, PB_MON_CATS, "monster"),
+    hp: pbInt(o.hp, 1, 999) ?? 5,
+    morale: moraleRaw === "" || /^[–—-]$/.test(moraleRaw) ? null : pbInt(moraleRaw, 2, 12),
+    armor, attacks, specials, text: str(o.text).slice(0, 3000), page: 0,
+  };
+  if (Object.keys(dr).length) data.dr = dr;
+  const per = str(o.attacksPerRound).slice(0, 30);
+  if (per && per !== "1") data.attacksPerRound = /^\d+$/.test(per) ? Number(per) : per;
+  if (truthy(o.attackChoice)) data.attackChoice = "one of";
+  const dw = str(o.defendWith);
+  if (dw && dw !== "AGILITY" && (PB_ABILITY_IDS as readonly string[]).includes(dw)) data.defendWith = dw;
+  if (str(o.group)) data.group = str(o.group).slice(0, 60);
+  if (truthy(o.blackPowder)) data.blackPowder = true;
+  if (truthy(o.ignoresArmor)) data.ignoresArmor = true;
+  if (truthy(o.boss)) data.boss = true;
+  return { name, data };
+}
+
+function normalizePbShip(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew ship needs a name.");
+  const h = (o.hull && typeof o.hull === "object" ? o.hull : {}) as Record<string, unknown>;
+  const hullDie = str(o.hullDie ?? h.die).replace(/^[-−]/, "").toLowerCase();
+  const hull = (PB_ARMOR_DICE as readonly string[]).includes(hullDie) ? { tier: pbTierOf(hullDie), die: hullDie } : null;
+  const c = (o.crew && typeof o.crew === "object" ? o.crew : {}) as Record<string, unknown>;
+  const cmin = pbInt(o.crewMin ?? c.min, 0, 9999), cmax = pbInt(o.crewMax ?? c.max, 0, 9999);
+  const skillRaw = str(o.skill);
+  const data: Record<string, unknown> = {
+    ...pbHb(name), type: oneOf(o.type, PB_SHIP_TYPES, "ship"),
+    hp: pbInt(o.hp, 1, 9999) ?? 20, hull,
+    agility: str(o.agility) === "" ? null : pbInt(o.agility, -6, 6),
+    speed: pbInt(o.speed, 0, 20) ?? 0,
+    skill: skillRaw === "" ? null : pbInt(skillRaw, -6, 6),
+    broadsides: pbDice(o.broadsides) || null,
+    smallArms: pbDice(o.smallArms) || null,
+    ram: pbDice(o.ram) || null,
+    crew: cmin != null || cmax != null ? { min: cmin ?? 0, max: Math.max(cmax ?? 0, cmin ?? 0) } : null,
+    cargo: str(o.cargo) === "" ? null : pbInt(o.cargo, 0, 999),
+    special: str(o.special).slice(0, 1500) || null,
+    text: str(o.text).slice(0, 3000), page: 0,
+  };
+  const ba = pbInt(o.broadsidesAttacks, 1, 20), sa = pbInt(o.smallArmsAttacks, 1, 20);
+  if (ba && ba > 1) data.broadsidesAttacks = ba;
+  if (sa && sa > 1) data.smallArmsAttacks = sa;
+  if (data.skill == null && str(o.skillNote)) data.skillNote = str(o.skillNote).slice(0, 200);
+  const cost = pbInt(o.cost, 0, 10000000);
+  if (cost) data.cost = cost;
+  return { name, data };
+}
+
 // ── Marvel Multiverse RPG (MMRPG, d616) ─────────────────────────────────────
 function normalizeMmrpgPower(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -2424,6 +2614,13 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "db-gear": return normalizeDbGear(data);
     case "db-monster": return normalizeDbMonster(data);
     case "db-npc": return normalizeDbNpc(data);
+    case "pb-weapon": return normalizePbWeapon(data);
+    case "pb-armor": return normalizePbArmor(data);
+    case "pb-gear": return normalizePbGear(data);
+    case "pb-relic": return normalizePbRelic(data);
+    case "pb-ritual": return normalizePbRitual(data);
+    case "pb-monster": return normalizePbMonster(data);
+    case "pb-ship": return normalizePbShip(data);
     case "mmrpg-power": return normalizeMmrpgPower(data);
     case "mmrpg-trait": return normalizeMmrpgLabel(data, "trait");
     case "mmrpg-tag": return normalizeMmrpgLabel(data, "tag");
