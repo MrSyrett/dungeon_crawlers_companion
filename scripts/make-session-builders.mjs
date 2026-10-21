@@ -128,6 +128,19 @@ const SYSTEMS = [
     chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Adversaries", mobsHeading: "Adversaries &amp; Folk",
     mob: "Adversary", boss: "Chief", npc: "NPC", typePh: "UNDEAD // CR 3 // 700 XP", titlePh: "e.g. The Star of the Mist", subtitlePh: "e.g. An Adventuring Phase in Eriador",
   },
+  // Dragonbane. HAND-BUILT: db_session_prep_builder.html was derived from the
+  // LotR builder and carries Dragonbane-only sections (the Quest, Journey legs,
+  // the Adventure Site with rooms, traps and leaving-the-site consequences, a
+  // treasure picker, the book's Quest / Journey / Site / NPC generators), so the
+  // loop below skips writing it. The entry records its keys/palette/schema.
+  {
+    file: "db_session_prep_builder.html", key: "db_session", ls: "db_builder_v1", cfg: "db", random: "Random Monster", handBuilt: true,
+    name: "Dragonbane", title: "Dragonbane — Adventure",
+    accent: "#b3261e", accentDark: "#8a1c16", red: "#b3261e", redDark: "#8a1c16", highlight: "#c9a14a", boxBg: "#e9dab7",
+    paper: "#efe2c4", previewBg: "#120d09", displayFont: '"Hideout", "EB Garamond", Georgia, serif',
+    chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
+    mob: "Monster", boss: "Boss", npc: "NPC", typePh: "MONSTER // LARGE // FEROCITY 2", titlePh: "e.g. The Sinking Tower", subtitlePh: "e.g. A Dragonbane adventure",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -292,6 +305,19 @@ const SB_CONFIG = {
     abilities: [...(m.traits||[]).map(t => t.name + ': ' + t.description), ...(m.actions||[]).map(a => a.name + ': ' + a.description), ...(m.reactions||[]).map(a => 'Reaction — ' + a.name + ': ' + a.description)].join('\\n'),
   }; }, sub: m => String(m.group||'') + ' · CR ' + m.cr },
 };`,
+  // Dragonbane: HP / WP / Armor / Move / Ferocity; skills, weapons, the monster's
+  // D6 attack table ("1. Claw: …") and traits one per line. The hand-built
+  // template's dbMobPool/dbMobToCard map DB_MONSTERS, DB_NPCS and DB_ANIMALS.
+  db: `const SB_CONFIG = {
+  typePlaceholder: 'MONSTER // LARGE // FEROCITY 2',
+  hp: null,
+  rows: [
+    [{ key:'hp', label:'HP' }, { key:'wp', label:'WP' }, { key:'armor', label:'ARMOR' }, { key:'move', label:'MOVE' }, { key:'ferocity', label:'FEROCITY', ph:'1' }],
+  ],
+  abilitiesLabel: 'Skills, Weapons, Attacks & Traits',
+  abilitiesPlaceholder: 'One per line — Skills: Awareness 12, Evade 10 · Broadsword: skill 14, 2D6 + D4 · monster attacks as a D6 table: 1. Claw: …',
+  mobs: { placeholder: 'Search monsters, NPCs & animals…', pool: () => dbMobPool(), toCard: m => dbMobToCard(m), sub: m => String(m.group || '') },
+};`,
   myz: `const SB_CONFIG = {
   typePlaceholder: 'BEAST // STR 5 · FIGHT 2',
   hp: null,
@@ -428,6 +454,7 @@ const MOB_DATA = {
   myz: '',
   vae: '',
   lotr: '<script src="/tools-data/lotr-data.js"></script>',
+  db: '<script src="/tools-data/db-data.js"></script><script src="/tools-data/db-gm-tables.js"></script>',
 };
 
 function rep(s, a, b, all = true) {
@@ -455,6 +482,7 @@ const BANNERS = {
   myz:    ["#8f4517", "#cf6a2a", "#f4ece0", 800, "#d9d3c6"],
   vae:    ["#2a2016", "#b8924e", "#efe6d4", 700, "#e7dec9"],
   lotr:   ["#0f2118", "#1f4a30", "#e2c36b", 400, "#d9e4cc"],
+  db:     ["#1d1712", "#4a1410", "#e0614f", 400, "#e3d2ad"],
 };
 
 for (const S of SYSTEMS) {

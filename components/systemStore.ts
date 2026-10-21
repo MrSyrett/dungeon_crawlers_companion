@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE" | "LOTR";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG" | "JLU" | "GB" | "TWD" | "MYZ" | "VAE" | "LOTR" | "DB";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -22,6 +22,9 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Shadow points & Shadow Paths, the shared Fellowship pool, Journeys, Councils
   // and the Fellowship Phase. Mechanics adapted; descriptive text is original.
   { key: "LOTR", name: "The Lord of the Rings", short: "LotR", accent: "var(--lotr)" },
+  // Dragonbane (Free League, 2023) — roll-under D20 vs skill level, Dragons (1) and
+  // Demons (20), boons & banes, no levels: skills improve through advancement marks.
+  { key: "DB", name: "Dragonbane", short: "DB", accent: "var(--db)" },
   // Accent is the covers' hot magenta (--dcc), not the app's brick --red.
   { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--dcc)" },
   // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the

@@ -60,6 +60,10 @@
   --lotr: #c9a227;
   --lotr-ink: #e2c36b;
   --lotr-green: #1f4a30;
+  /* Dragonbane — dragon-crimson on dark parchment (mirrors app/globals.css). */
+  --db: #b3261e;
+  --db-ink: #e0614f;
+  --db-gold: #c9a14a;
   --dcc: #e8275f;
   --dcc-gold: #f2c230;
   /* ---- The systems' SECOND colours, mirrored from app/globals.css ----------
@@ -1025,6 +1029,22 @@ body {
   font-display: swap;
   src: url("/fonts/aniron.woff2") format("woff2");
 }
+/* Dragonbane: Hideout (display) and Minion Pro (accent labels) — the same
+   files app/globals.css declares. */
+@font-face {
+  font-family: "Hideout";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/hideout.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Minion Pro";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/minion-pro.woff2") format("woff2");
+}
 /* Star Wars' logo face. A LOGO font, not a text font: its real uppercase slots
    hold alternate glyphs ("ADVENTURE" comes out "ADRENTKRE"), its digits are
    pieces of the STAR WARS logo lockup, and most symbols are words from the crawl
@@ -1324,6 +1344,35 @@ body {
     radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.62) 100%),
     radial-gradient(70% 46% at 50% 0%, rgba(201, 162, 39, 0.12) 0%, rgba(201, 162, 39, 0) 70%),
     url("/themes/lotr-mist.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* --- Dragonbane (dragon-crimson on dark parchment) ------------------------- */
+:root[data-themed][data-system="DB"] {
+  --sub-color: #e3d2ad;
+  --section-hdr-dark: var(--db-ink);
+  --sys-display: "Hideout", "EB Garamond", ui-serif, Georgia, serif;
+  --sys-text: "EB Garamond", ui-serif, Georgia, serif;
+  --sys-label: "Minion Pro", "EB Garamond", ui-serif, Georgia, serif;
+  --ui-bg: #1d1712;
+  --ui-panel: #261e17;
+  --ui-border: #4a3a2c;
+  --ui-text: #eee3cc;
+  --ui-muted: #b5a68c;
+  --ui-accent: var(--db-ink);
+  --ui-highlight: var(--db);
+  --font-display: "Hideout", "EB Garamond", ui-serif, Georgia, serif;
+}
+:root[data-themed][data-system="DB"] body,
+:root[data-themed][data-system="DB"] .preview-area {
+  background-color: #120d09;
+  background-image:
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.66) 100%),
+    radial-gradient(70% 46% at 50% 0%, rgba(179, 38, 30, 0.14) 0%, rgba(179, 38, 30, 0) 70%),
+    url("/themes/db-parchment.webp");
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;

@@ -21,6 +21,7 @@ export const TITLE: Record<SystemKey, { f: string; c: string; x?: string }> = {
   NIM: { f: '"Fraunces"', c: "#ffffff", x: "-webkit-text-stroke:.1em #000000;paint-order:stroke fill;text-shadow:.05em .06em 0 #000000,0 0 .22em rgba(142,201,236,.75);font-weight:700" },
   DND: { f: '"DnDC","Cinzel"', c: "var(--gold-ink)" },
   LOTR: { f: '"Ringbearer","EB Garamond"', c: "var(--lotr-ink)" },
+  DB: { f: '"Hideout","EB Garamond"', c: "var(--db-ink)", x: "font-weight:400" },
   DCC: { f: '"Anton"', c: "var(--dcc-gold)" },
   KOB: { f: '"Dreadful"', c: "var(--kob)" },
   CO: { f: '"Cormorant Garamond"', c: "var(--candela-gold)" },
@@ -82,6 +83,7 @@ export const LABEL_FACE: Record<SystemKey, string> = {
   MYZ: '"Barlow Condensed"',
   VAE: '"Cormorant Garamond"',
   LOTR: '"Aniron"',
+  DB: '"Minion Pro"',
   JLU: '"Rubik"',
 };
 

@@ -100,6 +100,18 @@ export function readCharMeta(data: unknown, fallbackTitle: string): CharMeta | n
         level: Number.isNaN(lv) ? null : lv,
       };
     }
+    // Dragonbane: no levels — the class column shows profession (and kin).
+    const dbs = blob?.db_sheet;
+    if (typeof dbs === "string") {
+      const s = JSON.parse(dbs) as { name?: unknown; profession?: unknown; kin?: unknown };
+      const prof = typeof s.profession === "string" ? s.profession.trim() : "";
+      const kin = typeof s.kin === "string" ? s.kin.trim() : "";
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls: [kin, prof].filter(Boolean).join(" "),
+        level: null,
+      };
+    }
     // Marvel Multiverse RPG: "level" is Rank; the class column shows the origin.
     const mmrpg = blob?.mmrpg_sheet;
     if (typeof mmrpg === "string") {

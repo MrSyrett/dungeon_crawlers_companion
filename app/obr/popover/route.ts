@@ -90,6 +90,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.myz { color: #cf6a2a; }
   .group-head.vae { color: #d4a53a; }
   .group-head.lotr { color: #e2c36b; }
+  .group-head.db { color: #e0614f; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -272,6 +273,7 @@ const PAGE = String.raw`<!doctype html>
             { key: "NIM", name: "Nimble", cls: "nim" },
             { key: "DND", name: "D&D", cls: "dnd" },
             { key: "LOTR", name: "The Lord of the Rings", cls: "lotr" },
+            { key: "DB", name: "Dragonbane", cls: "db" },
             { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
             { key: "KOB", name: "Kids on Bikes", cls: "kob" },
             { key: "MMRPG", name: "Marvel Multiverse RPG", cls: "mmrpg" },

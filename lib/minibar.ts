@@ -123,6 +123,9 @@ const THEME_FONTS: Partial<Record<SystemKey, string>> = {
   // The Lord of the Rings: Ringbearer + Aniron are self-hosted (@font-face in
   // public/tokens.css); only the reading face comes from the Google set.
   LOTR: "family=EB+Garamond:ital,wght@0,400;0,600;1,400",
+  // Dragonbane: Hideout + Minion Pro are self-hosted (@font-face in
+  // public/tokens.css); only the reading face comes from the Google set.
+  DB: "family=EB+Garamond:ital,wght@0,400;0,600;1,400",
 };
 
 // What goes in <head>: the shared tokens (BEFORE the tool's own CSS so the tool

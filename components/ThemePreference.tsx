@@ -80,5 +80,5 @@ export default function ThemePreference() {
 // Kept in step with the tool list in lib/tools.ts.
 const SHEET_PREFIXES = [
   "sd", "dcc", "dnd", "ace", "kob", "nimble", "sw", "d62e",
-  "icrpg", "co", "yze", "mmrpg", "jlu", "gb", "twd", "myz", "vae", "lotr",
+  "icrpg", "co", "yze", "mmrpg", "jlu", "gb", "twd", "myz", "vae", "lotr", "db",
 ];

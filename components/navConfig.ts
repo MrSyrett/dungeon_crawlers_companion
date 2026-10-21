@@ -155,6 +155,17 @@ export const COMPENDIUM: Record<SystemKey, NavLink[]> = {
     { href: "/lotr/patrons", label: "Patrons" },
     { href: "/lotr/adventuring", label: "Adventuring" },
   ],
+  DB: [
+    { href: "/dragonbane/kin", label: "Kin" },
+    { href: "/dragonbane/professions", label: "Professions" },
+    { href: "/dragonbane/skills", label: "Skills" },
+    { href: "/dragonbane/abilities", label: "Heroic Abilities" },
+    { href: "/dragonbane/magic", label: "Magic" },
+    { href: "/dragonbane/gear", label: "Gear" },
+    { href: "/dragonbane/bestiary", label: "Bestiary" },
+    { href: "/dragonbane/npcs", label: "NPCs" },
+    { href: "/dragonbane/adventuring", label: "Adventuring" },
+  ],
 };
 
 // The Library (formerly "Rulebooks", at /rules — which now redirects here). Its
@@ -188,6 +199,7 @@ export const HOMEBREW: Partial<Record<SystemKey, string>> = {
   MYZ: "/myz/homebrew",
   VAE: "/vae/homebrew",
   LOTR: "/lotr/homebrew",
+  DB: "/dragonbane/homebrew",
 };
 
 export function homebrewFor(system: SystemKey): string | null {
@@ -317,6 +329,11 @@ const CONCEPT: Record<string, string[]> = {
   Patrons: ["creatures"],
   Adventuring: ["rules"],
   "Conditions & Injuries": ["rules"],
+  // Dragonbane
+  Kin: ["ancestry"],
+  Professions: ["archetype"],
+  "Heroic Abilities": ["traits", "skills"],
+  NPCs: ["creatures"],
 };
 
 // When the user switches system while on a compendium page, keep them in the
@@ -383,6 +400,7 @@ const PREFIX_SYSTEM: { prefix: string; key: SystemKey }[] = [
   { prefix: "/myz/", key: "MYZ" },
   { prefix: "/vae/", key: "VAE" },
   { prefix: "/lotr/", key: "LOTR" },
+  { prefix: "/dragonbane/", key: "DB" },
 ];
 
 // Shadowdark's reference pages live at top-level routes (historical), so match

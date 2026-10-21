@@ -34,6 +34,7 @@ export type HbType =
   | "myz-weapon" | "myz-gear"
   | "vae-weapon" | "vae-gear"
   | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
+  | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 
 const HB_TYPES = [
@@ -52,6 +53,7 @@ const HB_TYPES = [
   "myz-weapon", "myz-gear",
   "vae-weapon", "vae-gear",
   "lotr-virtue", "lotr-background", "lotr-weapon", "lotr-gear", "lotr-monster",
+  "db-ability", "db-spell", "db-weapon", "db-armor", "db-gear", "db-monster", "db-npc",
   "mmrpg-power", "mmrpg-trait", "mmrpg-tag", "mmrpg-iconic", "mmrpg-hq", "mmrpg-starship",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
@@ -1959,6 +1961,218 @@ function normalizeLotrMonster(input: unknown): { name: string; data: Record<stri
   return { name: base.name, data };
 }
 
+// ── Dragonbane (DB) ─────────────────────────────────────────────────────────
+// Each normaliser emits the lib/data/db-types shape its book dataset uses
+// (source "Homebrew", an id slug), so the /dragonbane reference pages, the sheet
+// and the GM Screen can merge homebrew straight into their DB_* lists.
+const DB_ATTRS = ["STR", "CON", "AGL", "INT", "WIL", "CHA"] as const;
+const DB_SKILL_NAMES = [
+  "Acrobatics", "Awareness", "Bartering", "Beast Lore", "Bluffing", "Bushcraft", "Crafting", "Evade", "Healing",
+  "Hunting & Fishing", "Languages", "Myths & Legends", "Performance", "Persuasion", "Riding", "Seamanship",
+  "Sleight of Hand", "Sneaking", "Spot Hidden", "Swimming",
+  "Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords",
+  "Animism", "Elementalism", "Mentalism",
+] as const;
+const DB_WEAPON_SKILLS = ["Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords"] as const;
+const DB_SCHOOLS = ["General", "Animism", "Elementalism", "Mentalism"] as const;
+const DB_TIMINGS = ["action", "free", "reaction", "passive", "downtime", "roundStart"] as const;
+const DB_CASTING = ["action", "reaction", "stretch", "shift"] as const;
+const DB_REQS = ["word", "gesture", "focus", "ingredient"] as const;
+const DB_SUPPLIES = ["Common", "Uncommon", "Rare", "Unique"] as const;
+const DB_UNITS = ["gold", "silver", "copper"] as const;
+const DB_FEATURES = ["Subtle", "Long", "Toppling", "Piercing", "Slashing", "Bludgeoning", "Can be thrown", "Requires quiver", "No damage bonus", "Cannot be used for parrying"] as const;
+const DB_SIZES = ["Small", "Normal", "Large", "Huge", "Swarm"] as const;
+const DB_DMG_TYPES = ["slashing", "piercing", "bludgeoning", "fire", "cold", "magic", "other"] as const;
+const DB_GEAR_CATS = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals"] as const;
+const dbSlug = (s: string) => "hb-" + s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+// Dragonbane dice ("D8", "2D6", "D6 per power level") — uppercase D, free text kept short.
+const dbDice = (v: unknown): string => str(v).replace(/(\d*)d(\d+)/gi, (_m, a, b) => `${a}D${b}`).slice(0, 60);
+const dbNum = (v: unknown, lo: number, hi: number): number | null => { const n = num(v); return n == null ? null : Math.max(lo, Math.min(hi, n)); };
+function dbCost(o: Record<string, unknown>): { amount: number; unit: string } | null {
+  const c = (o.cost ?? {}) as Record<string, unknown>;
+  const amount = num(o.costAmount ?? c.amount);
+  if (amount == null) return null;
+  return { amount: Math.max(0, Math.min(1000000, amount)), unit: oneOf(o.costUnit ?? c.unit, DB_UNITS, "silver") };
+}
+
+function normalizeDbAbility(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew heroic ability needs a name.");
+  const req = (o.requirement ?? {}) as Record<string, unknown>;
+  const skills = pickList(o.reqSkills ?? req.skills, DB_SKILL_NAMES);
+  const anyRaw = str(o.reqAny ?? req.any);
+  const any = (["melee", "strMelee", "weapon", "magic"] as const).find((x) => x === anyRaw);
+  const level = dbNum(o.reqLevel ?? req.level, 1, 18) ?? 12;
+  const wpRaw = str(o.wp);
+  const wp: number | string | null = wpRaw === "" || wpRaw === "—" ? null : /^vari/i.test(wpRaw) ? "varies" : dbNum(wpRaw, 0, 30);
+  const data: Record<string, unknown> = {
+    id: dbSlug(name), name,
+    requirement: skills.length ? { skills, level } : any ? { any, level } : null,
+    wp, timing: oneOf(o.timing, DB_TIMINGS, "action"),
+    page: 0, text: str(o.text).slice(0, 3000), source: "Homebrew",
+  };
+  if (truthy(o.repeatable)) data.repeatable = true;
+  const hp = dbNum(o.hpMax, 0, 20), wpm = dbNum(o.wpMax, 0, 20);
+  if (hp) data.hpMax = hp;
+  if (wpm) data.wpMax = wpm;
+  if (dbDice(o.damage)) data.damage = dbDice(o.damage);
+  return { name, data };
+}
+
+function normalizeDbSpell(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew spell needs a name.");
+  const trick = truthy(o.trick);
+  const data: Record<string, unknown> = {
+    id: dbSlug(name), name, school: oneOf(o.school, DB_SCHOOLS, "General"), page: 0,
+    text: str(o.text).slice(0, 3000), source: "Homebrew",
+  };
+  if (trick) { data.trick = true; return { name, data }; }
+  Object.assign(data, {
+    rank: dbNum(o.rank, 1, 5) ?? 1,
+    prerequisite: str(o.prerequisite).slice(0, 120) || (data.school === "General" ? "Any School of Magic" : String(data.school)),
+    requirements: pickList(o.requirements, DB_REQS),
+    castingTime: oneOf(o.castingTime, DB_CASTING, "action"),
+    range: str(o.range).slice(0, 60) || "10 meters",
+    duration: str(o.duration).slice(0, 60) || "Instant",
+    powerLevels: o.powerLevels == null ? true : truthy(o.powerLevels),
+    dodge: truthy(o.dodge), parry: truthy(o.parry),
+  });
+  if (str(o.requirementDetail)) data.requirementDetail = str(o.requirementDetail).slice(0, 120);
+  const dmg = (o.damage ?? {}) as Record<string, unknown>, heal = (o.healing ?? {}) as Record<string, unknown>;
+  const db = dbDice(o.damageBase ?? dmg.base), dp = dbDice(o.damagePerLevel ?? dmg.perLevel);
+  const hb = dbDice(o.healingBase ?? heal.base), hp = dbDice(o.healingPerLevel ?? heal.perLevel);
+  if (db) data.damage = { base: db, perLevel: dp };
+  if (hb) data.healing = { base: hb, perLevel: hp };
+  return { name, data };
+}
+
+function normalizeDbWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew weapon needs a name.");
+  const ranged = str(o.kind) === "ranged" || o.ranged === true;
+  const rangeRaw = str(o.range);
+  const range: number | string = /^\d+$/.test(rangeRaw) ? Number(rangeRaw) : rangeRaw ? rangeRaw.slice(0, 20) : (ranged ? 20 : 2);
+  const data: Record<string, unknown> = {
+    id: dbSlug(name), name,
+    grip: oneOf(o.grip, ["1H", "2H"] as const, "1H"),
+    str: dbNum(o.str, 0, 30),
+    range, damage: dbDice(o.damage) || "D6",
+    durability: dbNum(o.durability, 0, 40),
+    cost: dbCost(o), supply: oneOf(o.supply, DB_SUPPLIES, "Common"),
+    features: pickList(o.features, DB_FEATURES),
+    skill: oneOf(o.skill, DB_WEAPON_SKILLS, ranged ? "Bows" : "Swords"),
+    page: 0, source: "Homebrew",
+  };
+  if (ranged) data.ranged = true; else data.melee = true;
+  if (truthy(o.metal)) data.metal = true;
+  if (str(o.notes)) data.notes = str(o.notes).slice(0, 1000);
+  return { name, data };
+}
+
+function normalizeDbArmor(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew armor needs a name.");
+  const data: Record<string, unknown> = {
+    id: dbSlug(name), name,
+    slot: oneOf(o.slot, ["armor", "helmet"] as const, "armor"),
+    rating: dbNum(o.rating, 0, 12) ?? 1,
+    cost: dbCost(o), supply: oneOf(o.supply, DB_SUPPLIES, "Common"),
+    banes: pickList(o.banes, [...DB_SKILL_NAMES, "Ranged attacks"] as const),
+    metal: truthy(o.metal), page: 0, source: "Homebrew",
+  };
+  if (str(o.notes)) data.notes = str(o.notes).slice(0, 1000);
+  return { name, data };
+}
+
+function normalizeDbGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const w = str(o.weight);
+  const weight = w === "" ? 1 : w === "tiny" ? 0 : Math.max(0, Math.min(20, Number(w) || 0));
+  return { name, data: {
+    id: dbSlug(name), category: oneOf(o.category, DB_GEAR_CATS, "Trade Goods"), name,
+    cost: dbCost(o), supply: oneOf(o.supply, DB_SUPPLIES, "Common"), weight,
+    effect: str(o.effect).slice(0, 2000), source: "Homebrew",
+  } };
+}
+
+function normalizeDbMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew monster needs a name.");
+  const attacksIn = Array.isArray(o.attacks) ? (o.attacks as unknown[]) : [];
+  const attacks = attacksIn.slice(0, 6).map((a, i) => {
+    const r = (a ?? {}) as Record<string, unknown>;
+    const fearRaw = str(r.fear);
+    return {
+      roll: i + 1, name: str(r.name).slice(0, 80) || `Attack ${i + 1}`,
+      damage: dbDice(r.damage) || null, type: str(r.type) ? oneOf(r.type, DB_DMG_TYPES, "other") : null,
+      targets: str(r.targets).slice(0, 60) || "one", range: dbNum(r.range, 0, 200) ?? 2,
+      fear: fearRaw === "bane" ? "bane" : truthy(r.fear), conditions: strList(r.conditions, 6, 20),
+      prone: truthy(r.prone), parry: truthy(r.parry), dodge: r.dodge == null ? true : truthy(r.dodge),
+      text: str(r.text).slice(0, 2000),
+    };
+  }).filter((a) => a.name || a.text);
+  const traits = (Array.isArray(o.traits) ? (o.traits as unknown[]) : []).slice(0, 12).map((t) => {
+    const r = (t ?? {}) as Record<string, unknown>;
+    return { name: str(r.name).slice(0, 80), text: str(r.text ?? r.description).slice(0, 2000) };
+  }).filter((t) => t.name || t.text);
+  const armorRaw = str(o.armor);
+  const data: Record<string, unknown> = {
+    id: dbSlug(name), name, page: 0,
+    ferocity: dbNum(o.ferocity, 1, 6) ?? 1, size: oneOf(o.size, DB_SIZES, "Normal"),
+    movement: dbNum(o.movement, 0, 100) ?? 10,
+    armor: armorRaw === "" || armorRaw === "—" ? null : /^\d+$/.test(armorRaw) ? Number(armorRaw) : armorRaw.slice(0, 40),
+    hp: dbNum(o.hp, 1, 999) ?? 10, text: str(o.text).slice(0, 3000), traits, attacks, source: "Homebrew",
+  };
+  if (truthy(o.flying)) data.flying = true;
+  if (truthy(o.persuadable)) data.persuadable = true;
+  const res = strList(o.resistances, 8, 80), imm = strList(o.immunities, 8, 80);
+  if (res.length) data.resistances = res;
+  if (imm.length) data.immunities = imm;
+  return { name, data };
+}
+
+function normalizeDbNpc(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew NPC needs a name.");
+  const skills: Record<string, number> = {};
+  const skIn = Array.isArray(o.skills) ? (o.skills as unknown[]) : Object.entries((o.skills ?? {}) as Record<string, unknown>).map(([k, v]) => ({ name: k, level: v }));
+  for (const r of skIn.slice(0, 20)) {
+    const x = (r ?? {}) as Record<string, unknown>; const nm = str(x.name).slice(0, 40); const lv = dbNum(x.level, 1, 18);
+    if (nm && lv != null) skills[nm] = lv;
+  }
+  const weapons = (Array.isArray(o.weapons) ? (o.weapons as unknown[]) : []).slice(0, 6).map((w) => {
+    const r = (w ?? {}) as Record<string, unknown>;
+    return { name: str(r.name).slice(0, 60), skill: dbNum(r.skill, 1, 18) ?? 10, damage: dbDice(r.damage) || "D6" };
+  }).filter((w) => w.name);
+  const dbon: Record<string, string> = {};
+  const sB = str(o.strBonus ?? ((o.damageBonus ?? {}) as Record<string, unknown>).STR), aB = str(o.aglBonus ?? ((o.damageBonus ?? {}) as Record<string, unknown>).AGL);
+  if (/^D[46]$/i.test(sB)) dbon.STR = sB.toUpperCase();
+  if (/^D[46]$/i.test(aB)) dbon.AGL = aB.toUpperCase();
+  const armorName = str(o.armorName ?? ((o.armor ?? {}) as Record<string, unknown>).name).slice(0, 60);
+  const armorRating = dbNum(o.armorRating ?? ((o.armor ?? {}) as Record<string, unknown>).rating, 0, 12);
+  const data: Record<string, unknown> = {
+    id: dbSlug(name), name, kind: str(o.kind).slice(0, 40) || "Homebrew", page: 0,
+    movement: dbNum(o.movement, 0, 40) ?? 10,
+    damageBonus: Object.keys(dbon).length ? dbon : null,
+    hp: dbNum(o.hp, 1, 999) ?? 10, wp: dbNum(o.wp, 0, 99),
+    armor: armorName || armorRating ? { name: armorName || "Armor", rating: armorRating ?? 0 } : null,
+    skills, abilities: strList(o.abilities, 12, 60), weapons,
+    gear: strList(o.gear, 12, 80), spells: strList(o.spells, 12, 60), traits: strList(o.traits, 8, 400),
+    source: "Homebrew",
+  };
+  if (truthy(o.boss)) data.boss = true;
+  return { name, data };
+}
+
 // ── Marvel Multiverse RPG (MMRPG, d616) ─────────────────────────────────────
 function normalizeMmrpgPower(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -2203,6 +2417,13 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "lotr-weapon": return normalizeLotrWeapon(data);
     case "lotr-gear": return normalizeLotrGear(data);
     case "lotr-monster": return normalizeLotrMonster(data);
+    case "db-ability": return normalizeDbAbility(data);
+    case "db-spell": return normalizeDbSpell(data);
+    case "db-weapon": return normalizeDbWeapon(data);
+    case "db-armor": return normalizeDbArmor(data);
+    case "db-gear": return normalizeDbGear(data);
+    case "db-monster": return normalizeDbMonster(data);
+    case "db-npc": return normalizeDbNpc(data);
     case "mmrpg-power": return normalizeMmrpgPower(data);
     case "mmrpg-trait": return normalizeMmrpgLabel(data, "trait");
     case "mmrpg-tag": return normalizeMmrpgLabel(data, "tag");

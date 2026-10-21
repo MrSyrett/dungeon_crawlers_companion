@@ -176,6 +176,21 @@ function codeFromPips(p: unknown): string {
 }
 
 // ── the 16 schemas (kind → form). Keys match the lib/homebrew normalisers. ────
+// Dragonbane vocabularies — mirror lib/homebrew's DB normalisers (kept local so
+// this client bundle never pulls in lib/data/db-data).
+const DB_SKILL_LIST = ["Acrobatics", "Awareness", "Bartering", "Beast Lore", "Bluffing", "Bushcraft", "Crafting", "Evade", "Healing", "Hunting & Fishing", "Languages", "Myths & Legends", "Performance", "Persuasion", "Riding", "Seamanship", "Sleight of Hand", "Sneaking", "Spot Hidden", "Swimming", "Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords", "Animism", "Elementalism", "Mentalism"] as const;
+const DB_WEAPON_SKILL_OPTS: readonly Opt[] = ["Axes", "Bows", "Brawling", "Crossbows", "Hammers", "Knives", "Slings", "Spears", "Staves", "Swords"].map((x) => [x, x] as const);
+const DB_SUPPLY_OPTS: readonly Opt[] = [["Common", "Common"], ["Uncommon", "Uncommon"], ["Rare", "Rare"], ["Unique", "Unique"]];
+const DB_UNIT_OPTS: readonly Opt[] = [["gold", "gold"], ["silver", "silver"], ["copper", "copper"]];
+const DB_FEATURE_LIST = ["Subtle", "Long", "Toppling", "Piercing", "Slashing", "Bludgeoning", "Can be thrown", "Requires quiver", "No damage bonus", "Cannot be used for parrying"] as const;
+const DB_SCHOOL_OPTS: readonly Opt[] = [["General", "General Magic"], ["Animism", "Animism"], ["Elementalism", "Elementalism"], ["Mentalism", "Mentalism"]];
+const DB_TIMING_OPTS: readonly Opt[] = [["action", "Action"], ["free", "Free / no action"], ["reaction", "Reaction"], ["passive", "Passive"], ["downtime", "Downtime (stretch/shift)"], ["roundStart", "Start of round"]];
+const DB_SIZE_OPTS: readonly Opt[] = [["Small", "Small"], ["Normal", "Normal"], ["Large", "Large"], ["Huge", "Huge"], ["Swarm", "Swarm"]];
+const DB_DMG_OPTS: readonly Opt[] = [["", "—"], ["slashing", "Slashing"], ["piercing", "Piercing"], ["bludgeoning", "Bludgeoning"], ["fire", "Fire"], ["cold", "Cold"], ["magic", "Magic"], ["other", "Other"]];
+const DB_GEAR_CAT_OPTS: readonly Opt[] = ["Clothes", "Musical Instruments", "Trade Goods", "Studies & Magic", "Light Sources", "Tools", "Containers", "Medicine", "Services", "Hunting & Fishing", "Means of Travel", "Animals"].map((x) => [x, x] as const);
+const dbCostForm = (d: Data): Data => { const c = (d.cost ?? {}) as Data; return { costAmount: c.amount ?? "", costUnit: c.unit ?? "silver" }; };
+const dbCostTxt = (d: Data): string => { const c = (d.cost ?? null) as Data | null; return c && c.amount != null ? `${c.amount} ${c.unit}` : "—"; };
+
 const SCHEMAS: Record<string, Schema> = {
   "nimble-item": {
     title: "Homebrew Items", noun: "Item",
@@ -795,6 +810,173 @@ const SCHEMAS: Record<string, Schema> = {
     toForm: (d) => { const a = (d.abilities ?? {}) as Record<string, unknown>; const out: Data = { ...d }; for (const k of LOTR_ABIL_KEYS) out[k] = a[k] ?? ""; return out; },
     summary: (d) => `${sv(d, "group")} · CR ${sv(d, "cr") || "?"}`,
   },
+  // ── Dragonbane ──
+  "db-ability": {
+    title: "Homebrew Heroic Abilities", noun: "Heroic Ability",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "wp", label: "Willpower Points", type: "text", placeholder: "3, varies, or blank" },
+      { key: "timing", label: "Timing", type: "select", options: DB_TIMING_OPTS },
+      { key: "reqSkills", label: "Required skill(s)", type: "picker", full: true, options: DB_SKILL_LIST, addLabel: "+ Skill", placeholder: "Swords, Axes…", help: "Any one of these at the required level. Leave empty for no requirement (or use the group below)." },
+      { key: "reqAny", label: "…or any skill of a group", type: "select", options: [["", "—"], ["melee", "Any melee weapon skill"], ["strMelee", "Any STR-based melee skill"], ["weapon", "Any weapon skill"], ["magic", "Any school of magic"]] },
+      { key: "reqLevel", label: "Required level", type: "number", placeholder: "12" },
+      { key: "repeatable", label: "Can be taken more than once", type: "checkbox" },
+      { key: "damage", label: "Extra damage", type: "text", placeholder: "D8" },
+      { key: "hpMax", label: "Max HP bonus", type: "number" },
+      { key: "wpMax", label: "Max WP bonus", type: "number" },
+      { key: "text", label: "Effect", type: "textarea", full: true },
+    ],
+    blank: () => ({ timing: "action", reqSkills: [], reqLevel: 12 }),
+    toForm: (d) => { const r = (d.requirement ?? {}) as Data; return { ...d, reqSkills: Array.isArray(r.skills) ? r.skills : [], reqAny: r.any ?? "", reqLevel: r.level ?? 12, wp: d.wp ?? "" }; },
+    summary: (d) => `${sv(d, "wp") ? sv(d, "wp") + " WP" : "no WP"} · ${sv(d, "timing")}`,
+  },
+  "db-spell": {
+    title: "Homebrew Spells & Tricks", noun: "Spell",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "school", label: "School", type: "select", options: DB_SCHOOL_OPTS },
+      { key: "trick", label: "Magic trick (1 WP, always works)", type: "checkbox" },
+      { key: "rank", label: "Rank (1–5)", type: "number", placeholder: "1" },
+      { key: "prerequisite", label: "Prerequisite", type: "text", placeholder: "Animism, or another spell" },
+      { key: "requirements", label: "Requirements", type: "picker", full: true, options: ["word", "gesture", "focus", "ingredient"], addLabel: "+ Requirement", placeholder: "word, gesture…" },
+      { key: "requirementDetail", label: "Focus / ingredient detail", type: "text", placeholder: "holy symbol, pebbles…" },
+      { key: "castingTime", label: "Casting time", type: "select", options: [["action", "Action"], ["reaction", "Reaction"], ["stretch", "Stretch"], ["shift", "Shift"]] },
+      { key: "range", label: "Range", type: "text", placeholder: "10 meters, Touch, 4 meters (sphere)" },
+      { key: "duration", label: "Duration", type: "text", datalist: ["Instant", "Round", "Stretch", "Shift", "Concentration", "Permanent"], placeholder: "Instant" },
+      { key: "powerLevels", label: "Uses power levels (2 WP each)", type: "checkbox" },
+      { key: "dodge", label: "Can be dodged", type: "checkbox" },
+      { key: "parry", label: "Can be parried", type: "checkbox" },
+      { key: "damageBase", label: "Damage", type: "text", placeholder: "2D6" },
+      { key: "damagePerLevel", label: "+ per extra power level", type: "text", placeholder: "D6" },
+      { key: "healingBase", label: "Healing", type: "text", placeholder: "2D6" },
+      { key: "healingPerLevel", label: "+ per extra power level", type: "text", placeholder: "D6" },
+      { key: "text", label: "Effect", type: "textarea", full: true },
+    ],
+    blank: () => ({ school: "General", rank: 1, castingTime: "action", duration: "Instant", powerLevels: true, requirements: ["word", "gesture"] }),
+    toForm: (d) => { const dm = (d.damage ?? {}) as Data, hl = (d.healing ?? {}) as Data; return { ...d, damageBase: dm.base ?? "", damagePerLevel: dm.perLevel ?? "", healingBase: hl.base ?? "", healingPerLevel: hl.perLevel ?? "" }; },
+    summary: (d) => d.trick ? `${sv(d, "school")} trick` : `${sv(d, "school")} · rank ${sv(d, "rank") || 1} · ${sv(d, "castingTime")}`,
+  },
+  "db-weapon": {
+    title: "Homebrew Weapons", noun: "Weapon",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "kind", label: "Kind", type: "select", options: [["melee", "Melee"], ["ranged", "Ranged"]] },
+      { key: "skill", label: "Skill", type: "select", options: DB_WEAPON_SKILL_OPTS },
+      { key: "grip", label: "Grip", type: "select", options: [["1H", "One-handed"], ["2H", "Two-handed"]] },
+      { key: "str", label: "STR requirement", type: "number", placeholder: "10" },
+      { key: "range", label: "Range (m)", type: "text", placeholder: "2, 4, 30, STR" },
+      { key: "damage", label: "Damage", type: "text", placeholder: "2D6" },
+      { key: "durability", label: "Durability", type: "number", placeholder: "12" },
+      { key: "costAmount", label: "Cost", type: "number", placeholder: "10" },
+      { key: "costUnit", label: "Coin", type: "select", options: DB_UNIT_OPTS },
+      { key: "supply", label: "Supply", type: "select", options: DB_SUPPLY_OPTS },
+      { key: "metal", label: "Metal (blocks spellcasting)", type: "checkbox" },
+      { key: "features", label: "Features", type: "picker", full: true, options: DB_FEATURE_LIST, addLabel: "+ Feature", placeholder: "Slashing, Toppling…" },
+      { key: "notes", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ kind: "melee", skill: "Swords", grip: "1H", costUnit: "gold", supply: "Common", features: [], metal: true }),
+    toForm: (d) => ({ ...d, kind: d.ranged ? "ranged" : "melee", ...dbCostForm(d) }),
+    summary: (d) => `${sv(d, "damage") || "D6"} · ${sv(d, "skill")} · ${dbCostTxt(d)}`,
+  },
+  "db-armor": {
+    title: "Homebrew Armor & Helmets", noun: "Armor",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "slot", label: "Slot", type: "select", options: [["armor", "Armor"], ["helmet", "Helmet"]] },
+      { key: "rating", label: "Armor rating", type: "number", placeholder: "2" },
+      { key: "costAmount", label: "Cost", type: "number", placeholder: "10" },
+      { key: "costUnit", label: "Coin", type: "select", options: DB_UNIT_OPTS },
+      { key: "supply", label: "Supply", type: "select", options: DB_SUPPLY_OPTS },
+      { key: "metal", label: "Metal (blocks spellcasting)", type: "checkbox" },
+      { key: "banes", label: "Bane on", type: "picker", full: true, options: [...DB_SKILL_LIST, "Ranged attacks"], addLabel: "+ Skill", placeholder: "Sneaking, Evade…" },
+      { key: "notes", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ slot: "armor", costUnit: "gold", supply: "Common", banes: [] }),
+    toForm: (d) => ({ ...d, ...dbCostForm(d) }),
+    summary: (d) => `${sv(d, "slot") === "helmet" ? "Helmet +" : "Armor "}${sv(d, "rating")} · ${dbCostTxt(d)}`,
+  },
+  "db-gear": {
+    title: "Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: DB_GEAR_CAT_OPTS },
+      { key: "costAmount", label: "Cost", type: "number", placeholder: "5" },
+      { key: "costUnit", label: "Coin", type: "select", options: DB_UNIT_OPTS },
+      { key: "supply", label: "Supply", type: "select", options: DB_SUPPLY_OPTS },
+      { key: "weight", label: "Weight", type: "text", placeholder: "1, 2, or tiny" },
+      { key: "effect", label: "Effect", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "Trade Goods", costUnit: "silver", supply: "Common", weight: "1" }),
+    toForm: (d) => ({ ...d, ...dbCostForm(d), weight: d.weight === 0 ? "tiny" : d.weight ?? "1" }),
+    summary: (d) => `${sv(d, "category")} · ${dbCostTxt(d)}`,
+  },
+  "db-monster": {
+    title: "Homebrew Monsters", noun: "Monster",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "ferocity", label: "Ferocity", type: "number", placeholder: "2" },
+      { key: "size", label: "Size", type: "select", options: DB_SIZE_OPTS },
+      { key: "movement", label: "Movement", type: "number", placeholder: "12" },
+      { key: "flying", label: "Flies", type: "checkbox" },
+      { key: "armor", label: "Armor", type: "text", placeholder: "4, or blank" },
+      { key: "hp", label: "HP", type: "number", placeholder: "38" },
+      { key: "persuadable", label: "Can be persuaded (with a bane)", type: "checkbox" },
+      { key: "resistances", label: "Resistances", type: "stringList", full: true, addLabel: "+ Resistance", placeholder: "Piercing damage halved" },
+      { key: "immunities", label: "Immunities", type: "stringList", full: true, addLabel: "+ Immunity", placeholder: "Fire" },
+      { key: "text", label: "Description", type: "textarea", full: true },
+      { key: "traits", label: "Traits", type: "objectList", full: true, addLabel: "+ Trait", fields: [
+        { key: "name", label: "Name", type: "text", placeholder: "Regeneration" },
+        { key: "text", label: "Effect", type: "textarea" },
+      ] },
+      { key: "attacks", label: "Monster attacks (D6 table — up to six, in roll order)", type: "objectList", full: true, addLabel: "+ Attack", fields: [
+        { key: "name", label: "Name", type: "text", placeholder: "Claw Attack" },
+        { key: "damage", label: "Damage", type: "text", placeholder: "2D10" },
+        { key: "type", label: "Damage type", type: "select", options: DB_DMG_OPTS },
+        { key: "targets", label: "Targets", type: "text", placeholder: "one, two, all within 10 m" },
+        { key: "range", label: "Range (m)", type: "number", placeholder: "2" },
+        { key: "fear", label: "Fear attack", type: "checkbox" },
+        { key: "prone", label: "Knocks down", type: "checkbox" },
+        { key: "parry", label: "Can be parried", type: "checkbox" },
+        { key: "dodge", label: "Can be dodged", type: "checkbox" },
+        { key: "text", label: "Effect", type: "textarea" },
+      ] },
+    ],
+    blank: () => ({ ferocity: 1, size: "Normal", movement: 10, hp: 20, attacks: [{ dodge: true, range: 2 }] }),
+    toForm: (d) => ({ ...d, armor: d.armor ?? "" }),
+    summary: (d) => `Ferocity ${sv(d, "ferocity")} · ${sv(d, "size")} · HP ${sv(d, "hp")}`,
+  },
+  "db-npc": {
+    title: "Homebrew NPCs", noun: "NPC",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "kind", label: "Group", type: "text", placeholder: "Bandits, Cultists…" },
+      { key: "boss", label: "Boss (own initiative card, uses WP)", type: "checkbox" },
+      { key: "movement", label: "Movement", type: "number", placeholder: "10" },
+      { key: "hp", label: "HP", type: "number", placeholder: "12" },
+      { key: "wp", label: "WP", type: "number" },
+      { key: "strBonus", label: "STR damage bonus", type: "select", options: [["", "—"], ["D4", "+D4"], ["D6", "+D6"]] },
+      { key: "aglBonus", label: "AGL damage bonus", type: "select", options: [["", "—"], ["D4", "+D4"], ["D6", "+D6"]] },
+      { key: "armorName", label: "Armor", type: "text", placeholder: "Studded leather" },
+      { key: "armorRating", label: "Armor rating", type: "number", placeholder: "2" },
+      { key: "skills", label: "Skills", type: "objectList", full: true, addLabel: "+ Skill", fields: [
+        { key: "name", label: "Skill", type: "text", datalist: DB_SKILL_LIST, placeholder: "Awareness" },
+        { key: "level", label: "Level", type: "number", placeholder: "10" },
+      ] },
+      { key: "weapons", label: "Weapons", type: "objectList", full: true, addLabel: "+ Weapon", fields: [
+        { key: "name", label: "Weapon", type: "text", placeholder: "Broadsword" },
+        { key: "skill", label: "Skill level", type: "number", placeholder: "12" },
+        { key: "damage", label: "Damage", type: "text", placeholder: "2D6" },
+      ] },
+      { key: "abilities", label: "Heroic abilities", type: "stringList", full: true, addLabel: "+ Ability", placeholder: "Robust ×4" },
+      { key: "spells", label: "Spells", type: "stringList", full: true, addLabel: "+ Spell" },
+      { key: "gear", label: "Gear", type: "stringList", full: true, addLabel: "+ Item" },
+      { key: "traits", label: "Traits", type: "stringList", full: true, addLabel: "+ Trait" },
+    ],
+    blank: () => ({ movement: 10, hp: 10, skills: [{ name: "Awareness", level: 10 }], weapons: [] }),
+    toForm: (d) => { const sk = (d.skills ?? {}) as Record<string, unknown>; const db = (d.damageBonus ?? {}) as Data; const ar = (d.armor ?? {}) as Data;
+      return { ...d, skills: Array.isArray(d.skills) ? d.skills : Object.entries(sk).map(([name, level]) => ({ name, level })), strBonus: db.STR ?? "", aglBonus: db.AGL ?? "", armorName: ar.name ?? "", armorRating: ar.rating ?? "" }; },
+    summary: (d) => `${sv(d, "kind") || "NPC"} · HP ${sv(d, "hp")}${d.boss ? " · boss" : ""}`,
+  },
   "mmrpg-power": {
     title: "Homebrew Powers", noun: "Power",
     fields: [
@@ -910,6 +1092,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("yze-")) return "--yze";
   if (kind.startsWith("mmrpg-")) return "--mmrpg";
   if (kind.startsWith("lotr-")) return "--lotr";
+  if (kind.startsWith("db-")) return "--db";
   return "--dnd";
 }
 

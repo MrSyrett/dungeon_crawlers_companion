@@ -154,6 +154,24 @@
   src: url("/fonts/aniron.woff2") format("woff2");
 }
 
+/* Dragonbane: Hideout (display — titles, section heads, the wordmark) and
+   Minion Pro (the accent face — labels, entry names, small caps-ish captions).
+   Both self-hosted, one weight each; EB Garamond carries the running text. */
+@font-face {
+  font-family: "Hideout";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/hideout.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Minion Pro";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/minion-pro.woff2") format("woff2");
+}
+
 /* ===========================================================================
    THE SITE'S OWN LOOK
    Everything below the system accents is the app talking, not a game. Four
@@ -274,6 +292,12 @@
   --lotr: #c9a227;
   --lotr-ink: #e2c36b;
   --lotr-green: #1f4a30;
+  /* Dragonbane — dragon-crimson on dark parchment. --db is the brand crimson
+     (rules, borders, fills); --db-ink is lifted for small text on the dark
+     panels; --db-gold is the illuminated-capital gold for labels and accents. */
+  --db: #b3261e;
+  --db-ink: #e0614f;
+  --db-gold: #c9a14a;
   /* Dungeon Crawler Carl accent — the covers' hot magenta. (Its pages used to
      borrow --red, which is the app's muted brick and nowhere near the books.) */
   --dcc: #e8275f;
@@ -1384,6 +1408,48 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* --- Dragonbane: dragon-crimson on dark parchment --------------------------
+   Hideout letters the titles in crimson; Minion Pro takes the labels in old
+   gold; EB Garamond carries the reading. The ground is an original aged-parchment
+   texture darkened for dark mode (public/themes/db-parchment.webp), under a low
+   ember glow from above. */
+:root[data-system="DB"]:not([data-chrome]) body {
+  --sys-head: var(--db-ink);
+  --sys-sub: var(--db-gold);
+  --sys-link: var(--db-ink);
+  --sys-hilite: var(--db);
+  --sys-action: var(--db);
+  --panel: #1d1712;
+  --panel-2: #261e17;
+  --border: #4a3a2c;
+  --text: #eee3cc;
+  --muted: #b5a68c;
+  --gold: var(--db-gold);
+  --sys-display: "Hideout";
+  --sys-text: var(--font-garamond);
+  --sys-label: "Minion Pro";
+  background-color: #120d09;
+  background-image:
+    radial-gradient(130% 98% at 50% 42%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.66) 100%),
+    radial-gradient(70% 46% at 50% 0%, rgba(179, 38, 30, 0.14) 0%, rgba(179, 38, 30, 0) 70%),
+    url("/themes/db-parchment.webp");
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* Hideout ships one bold cut; ask for 400 so the browser doesn't synthesise a
+   heavier one, and keep the app's uppercase tracking off — the face is already
+   heavy and condensed. Garamond stands behind it for any glyph it lacks. */
+:root[data-system="DB"]:not([data-chrome]) body h1,
+:root[data-system="DB"]:not([data-chrome]) body h2,
+:root[data-system="DB"]:not([data-chrome]) body h3,
+:root[data-system="DB"]:not([data-chrome]) body [data-dash-head] {
+  font-family: "Hideout", var(--font-garamond), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
 /* --- Justice League Unlimited: an art-deco skyline -------------------------
    Russo One over Rubik. Bruce Timm's design language is flat, geometric and
    squared off, with no texture and no gradient in the drawing itself.
@@ -1736,6 +1802,7 @@ body {
 [data-sys="MYZ"],   .home-tile[data-sys="MYZ"]   { --tile-accent: var(--myz);         --tile-sub: var(--myz-steel);   --tile-namefont: var(--font-anton);      --tile-face: var(--font-anton); --tile-bg: #100c0a; --tile-tex: url("/themes/myz-metal.webp"); --tile-scrim: 0.18; }
 [data-sys="VAE"],   .home-tile[data-sys="VAE"]   { --tile-accent: var(--vae);         --tile-sub: var(--vae-bone);    --tile-namefont: var(--font-fraunces);   --tile-face: var(--font-fraunces); --tile-bg: #0c0a07; --tile-tex: url("/themes/vae-paper.webp"); --tile-scrim: 0.16; }
 [data-sys="LOTR"],  .home-tile[data-sys="LOTR"]  { --tile-accent: var(--lotr-ink);    --tile-sub: #b9cfa6;            --tile-namefont: var(--font-garamond);   --tile-face: "Ringbearer", var(--font-garamond); --tile-bg: #07120c; --tile-tex: url("/themes/lotr-mist.webp"); --tile-zoom: 1.4; --tile-scrim: 0.12; }
+[data-sys="DB"],    .home-tile[data-sys="DB"]    { --tile-accent: var(--db-ink);      --tile-sub: var(--db-gold);     --tile-namefont: var(--font-garamond);   --tile-face: "Hideout", var(--font-garamond); --tile-bg: #120d09; --tile-tex: url("/themes/db-parchment.webp"); --tile-zoom: 1.2; --tile-scrim: 0.14; }
 
 /* ===========================================================================
    HOME ROSTERS — "My Characters" / "My Campaigns" on the home page.

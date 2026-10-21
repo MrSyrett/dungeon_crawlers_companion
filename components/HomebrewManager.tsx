@@ -34,6 +34,7 @@ type HbType =
   | "myz-weapon" | "myz-gear"
   | "vae-weapon" | "vae-gear"
   | "lotr-virtue" | "lotr-background" | "lotr-weapon" | "lotr-gear" | "lotr-monster"
+  | "db-ability" | "db-spell" | "db-weapon" | "db-armor" | "db-gear" | "db-monster" | "db-npc"
   | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag" | "mmrpg-iconic" | "mmrpg-hq" | "mmrpg-starship";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {

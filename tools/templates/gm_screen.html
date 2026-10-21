@@ -2195,6 +2195,41 @@ body[data-cview="free"] .cst-log-rail{display:none}
 .pcard.lotr-pc .pty-name { font-family: "Ringbearer", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .01em; }
 .lotr-badge-bad { color: #ff7a5a !important; }
 </style>
+<style id="db-gm-style">
+/* Dragonbane GM suite (public/tools-data/db-gm-tables.js) + DB-only tracker bits. */
+html:not([data-gm-sys="DB"]) .db-only { display: none !important; }
+.db-gen-card .gen-card-name { font-family: "Hideout", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .03em; color: #e0614f; text-transform: none; }
+.db-gen-card { border-left: 3px solid #b3261e; }
+.db-gen-card .gen-card-row-label { color: #c9a14a; }
+.db-dim { color: var(--dim, #8a93a0); }
+.db-warn { color: #f0a070; }
+.db-roll { display: inline-block; font-weight: 700; padding: 0 7px; border-radius: 999px; font-size: 11.5px; border: 1px solid var(--border); }
+.db-ok { color: #9fd18b; border-color: #4f7a3f; }
+.db-bad { color: #f09a8a; border-color: #7a3a30; }
+.db-dragon { color: #1d1712; background: #c9a14a; border-color: #c9a14a; }
+.db-demon { color: #fff; background: #b3261e; border-color: #b3261e; }
+.db-die { display: inline-block; min-width: 46px; font-family: 'Share Tech Mono', 'Geist Mono', monospace; font-size: 11px; color: #c9a14a; }
+.db-tale { font-family: "EB Garamond", Georgia, serif; font-size: 14.5px; line-height: 1.5; font-style: italic; margin: 2px 0 8px; color: var(--light, #ddd); }
+.db-cols { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.db-col { display: flex; gap: 4px; align-items: baseline; }
+.db-ck { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--light, #ddd); cursor: pointer; white-space: nowrap; }
+.db-btnrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0 0; padding: 0 16px; }
+.pane.narrow .db-btnrow { padding: 0 10px; }
+@media (max-width: 768px) { .db-btnrow { padding: 0 14px; } }
+.db-btnlbl { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim, #8a93a0); min-width: 64px; }
+.gen-select.db-num { width: 62px; }
+.db-hint { font-size: 11.5px; color: var(--dim, #8a93a0); margin: 2px 0 4px; line-height: 1.4; }
+.pcard.db-pc .pty-name { font-family: "Hideout", "EB Garamond", Georgia, serif; font-weight: 400; letter-spacing: .03em; }
+.db-chip-bad { color: #ff7a5a !important; }
+/* Initiative cards on a Dragonbane combatant (lowest acts first). */
+.cc-dbcards { display: inline-flex; gap: 3px; align-items: center; }
+.cc-dbcards .l { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim, #8a93a0); margin-right: 1px; }
+.npc-card .cc-dbcard, .cc-dbcard { width: 30px; height: 22px; text-align: center; font: 700 12px 'Geist Mono', monospace; color: #1d1712; background: #eee3cc; border: 1px solid #c9a14a; border-radius: 4px; padding: 0; -moz-appearance: textfield; }
+.cc-dbcard::-webkit-inner-spin-button, .cc-dbcard::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.npc-card .cc-dbcard { background: #eee3cc !important; color: #1d1712 !important; border-color: #c9a14a !important; }
+.npc-card .cc-dbcard.first { background: #c9a14a !important; }
+@media (max-width: 768px) { .trk-db-init .trk-db-lbl { display: none; } }
+</style>
 </head>
 <body>
 
@@ -2258,6 +2293,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
     VAE: ['vaemonster','vaetreasure','vaemystery','vaenpc'],
     MYZ: ['myzmonster','myztreasure','myzsector','myznpc','myzevents','myzfind'],
     LOTR:['lotrmonster','lotrtreasure','lotrjourney','lotrcouncil','lotreye','lotrnameless','lotrnpc','lotrshadow','lotrpatron'],
+    DB:  ['dbmonster','dbtreasure','dbnpc','dbadventure','dbjourney','dbattack','dbfear','dbinjury','dbmishap','dbdemon','dbtrap','dbleaving'],
     JLU: ['npc'],
     GB:  ['npc'],
   };
@@ -2265,7 +2301,7 @@ body[data-cview="free"] .cst-log-rail{display:none}
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
   // Display names for the top-bar system indicator (the GM Screen no longer has
   // a system dropdown — the linked campaign drives it).
-  const SYS_LABEL = { SD:'Shadowdark', DCC:'DCC', ACE:'ACE!', KOB:'Kids on Bikes', NIM:'Nimble', SW:'Star Wars', DND:'D&D', D62E:'D6 System 2e', ICRPG:'Index Card RPG', MMRPG:'Marvel Multiverse', CO:'Candela Obscura', YZE:'Year Zero Engine', TWD:'The Walking Dead', VAE:'Vaesen', MYZ:'Mutant: Year Zero', LOTR:'The Lord of the Rings', JLU:'Justice League', GB:'Ghostbusters' };
+  const SYS_LABEL = { SD:'Shadowdark', DCC:'DCC', ACE:'ACE!', KOB:'Kids on Bikes', NIM:'Nimble', SW:'Star Wars', DND:'D&D', D62E:'D6 System 2e', ICRPG:'Index Card RPG', MMRPG:'Marvel Multiverse', CO:'Candela Obscura', YZE:'Year Zero Engine', TWD:'The Walking Dead', VAE:'Vaesen', MYZ:'Mutant: Year Zero', LOTR:'The Lord of the Rings', DB:'Dragonbane', JLU:'Justice League', GB:'Ghostbusters' };
   // Systems an admin hid (Admin → Systems) — injected by the server before the
   // page runs. Never let the visible set go empty (mirrors the server guard).
   const HIDDEN_SYS = (function () { try { return Array.isArray(window.__gmHiddenSystems__) ? window.__gmHiddenSystems__ : []; } catch (e) { return []; } })();
@@ -3165,6 +3201,7 @@ GMScenes.renderPins();
   <div class="tool-instance cbt-tool trk-tool" data-tool="trackers">
     <div class="toolbar-tpl" style="display:none">
       <button class="btn small primary cbt-add-monster" title="Add a monster or combatant from the bestiary" aria-label="Add combatant">&#43; Add Combatant</button>
+      <button class="btn small ghost trk-db-init db-only" title="Deal initiative cards 1–10 to every combatant (a monster draws one per point of Ferocity) and sort by the lowest card" aria-label="Draw initiative">🃏<span class="trk-db-lbl"> Initiative</span></button>
       <div class="toolbar-spacer"></div>
       <button class="btn small ghost trk-reset" title="Reset" aria-label="Reset trackers"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.6a6.4 6.4 0 0 1 5.5 3.1H15.3v2.1h5.4V5.4h-2.1v1.9A8.5 8.5 0 0 0 3.6 11.2l2.1.3A6.4 6.4 0 0 1 12 5.6z"/><path d="M12 18.4a6.4 6.4 0 0 1-5.5-3.1h2.2v-2.1H3.3v5.4h2.1v-1.9A8.5 8.5 0 0 0 20.4 12.8l-2.1-.3A6.4 6.4 0 0 1 12 18.4z"/></svg></button>
     </div>
@@ -3384,6 +3421,18 @@ GMScenes.renderPins();
         <option value="lotrnpc">Folk of Eriador (NPC)</option>
         <option value="lotrshadow">Shadow Quick-Ref</option>
         <option value="lotrpatron">Patrons</option>
+        <option value="dbmonster">Monster / NPC</option>
+        <option value="dbtreasure">Treasure</option>
+        <option value="dbnpc">NPC</option>
+        <option value="dbadventure">Adventure (Quest · Journey · Site)</option>
+        <option value="dbjourney">Journey</option>
+        <option value="dbattack">Monster Attack</option>
+        <option value="dbfear">Fear</option>
+        <option value="dbinjury">Severe Injury</option>
+        <option value="dbmishap">Magical Mishap</option>
+        <option value="dbdemon">Weapon Demon</option>
+        <option value="dbtrap">Trap</option>
+        <option value="dbleaving">Leaving the Site</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -4789,6 +4838,188 @@ GMScenes.renderPins();
         <div class="gen-results lotr-out" style="margin-top:10px;"><div class="gen-empty">Press Roll to show the patrons.</div></div>
       </div>
 
+      <!-- DRAGONBANE: MONSTER / NPC panel (DB_MONSTERS + DB_NPCS + DB_ANIMALS by type; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="dbmonster">
+        <div class="gen-controls">
+          <label class="gen-label">Type
+            <select class="gen-select" id="gen-dbmon-group"><option value="">Any Type</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-dbmon-group-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dbmon-group-results"></div>
+      </div>
+
+      <!-- DRAGONBANE: TREASURE — coins, valuables and gear (the book's treasure cards aren't in the app) -->
+      <div class="gen-panel xs-treasure" data-panel="dbtreasure" data-sys="db">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Treasure</div>
+            <div class="db-hint">Monetary treasure (coins, and valuables worth a set sum) plus gear. A short adventure usually holds 3–5 finds.</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it is found (e.g. the troll's lair under the bridge)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option><option value="valuable">Valuable</option><option value="coins">Coins only</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a find from the Dragonbane weapons, armor, gear and valuables">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search weapons, armor, gear &amp; valuables to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
+              <button class="btn small ghost xs-tr-credits" type="button" title="Add a pile of silver">💰 Coins</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Treasure</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRAGONBANE: NPC generator (attitude · kin · motivation · profession · trait · name) -->
+      <div class="gen-panel" data-panel="dbnpc">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label>
+        </div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for an NPC — one die of each type, as in the book.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: ADVENTURE generator (Quest · Journey · Adventure Site) -->
+      <div class="gen-panel" data-panel="dbadventure">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Generate
+            <select class="gen-select db-adv-kind"><option value="all">Quest + Journey + Site</option><option value="quest">The Quest</option><option value="journey">The Journey</option><option value="site">The Adventure Site</option></select>
+          </label>
+          <label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label>
+        </div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for an adventure: who wants what, the road there, and the place at its end.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: JOURNEY helper (pathfinder, mishaps, food, cold, camp) -->
+      <div class="gen-panel" data-panel="dbjourney">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Bushcraft
+            <input type="number" class="gen-select db-num dbj-skill" min="1" max="20" value="12" title="The pathfinder's BUSHCRAFT skill level">
+          </label>
+          <label class="gen-label">Shifts
+            <select class="gen-select dbj-shifts"><option value="1">1</option><option value="2">2</option><option value="3">3 (forced)</option></select>
+          </label>
+          <label class="db-ck"><input type="checkbox" class="dbj-offroad" checked> Off the road</label>
+          <label class="db-ck"><input type="checkbox" class="dbj-map"> Map</label>
+          <label class="db-ck"><input type="checkbox" class="dbj-spy"> Spyglass</label>
+          <label class="db-ck"><input type="checkbox" class="dbj-hard"> Very difficult terrain</label>
+          <label class="db-ck"><input type="checkbox" class="dbj-mounted"> Mounted</label>
+        </div>
+        <div class="db-btnrow"><span class="db-btnlbl">Travel</span>
+          <button class="btn small primary" type="button" data-db="journey" title="Roll the pathfinder's BUSHCRAFT for each shift">🎲 Pathfinder</button>
+          <button class="btn small ghost" type="button" data-db="mishap" title="Roll on the journey mishap table">Mishap D12</button></div>
+        <div class="db-btnrow"><span class="db-btnlbl">Food</span>
+          <label class="db-ck">Hunting &amp; Fishing <input type="number" class="gen-select db-num dbj-hunt" min="1" max="20" value="12"></label>
+          <button class="btn small ghost" type="button" data-db="hunt">Hunt</button>
+          <select class="gen-select dbj-gear" title="Fishing gear"><option value="rod">Rod</option><option value="net">Net</option></select>
+          <button class="btn small ghost" type="button" data-db="fish">Fish</button>
+          <select class="gen-select dbj-season" title="Season"><option value="spring">Spring</option><option value="summer" selected>Summer</option><option value="autumn">Autumn</option><option value="winter">Winter</option></select>
+          <button class="btn small ghost" type="button" data-db="forage">Forage</button></div>
+        <div class="db-btnrow"><span class="db-btnlbl">Camp</span>
+          <select class="gen-select dbj-cold" title="Protection from the cold"><option value="fur">Fur</option><option value="blanket" selected>Blanket</option><option value="none">Neither</option></select>
+          <button class="btn small ghost" type="button" data-db="cold">Withstand cold</button>
+          <label class="db-ck"><input type="checkbox" class="dbj-tent"> Tent</label>
+          <label class="db-ck"><input type="checkbox" class="dbj-pelt" checked> Sleeping pelt</label>
+          <button class="btn small ghost" type="button" data-db="camp">Make camp</button></div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">15 km a shift on foot, 30 mounted; two shifts a day. Off the road the pathfinder rolls BUSHCRAFT each shift.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: MONSTER ATTACK roller (D6, never the same attack twice in a row) -->
+      <div class="gen-panel" data-panel="dbattack">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Monster
+            <select class="gen-select dbatk-mon"><option value=""></option></select>
+          </label>
+          <button class="btn small ghost" type="button" data-db="atk-table" title="Show the monster's attack table">Table</button>
+          <button class="btn small ghost" type="button" data-db="atk-clear" title="Forget the previous attack">Reset</button>
+        </div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">Press Roll for the monster's next attack. Monster attacks hit automatically; a repeat of the last attack moves on to the next entry (6 → 1).</div></div>
+      </div>
+
+      <!-- DRAGONBANE: FEAR attack -->
+      <div class="gen-panel" data-panel="dbfear">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">WIL
+            <input type="number" class="gen-select db-num db-resist" min="1" max="20" placeholder="—" title="The target's WIL — rolled first; leave blank to go straight to the table">
+          </label>
+          <label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label>
+        </div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">A fear attack: a WIL roll resists it (not an action); on a failure roll D8 on the Fear table.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: SEVERE INJURY -->
+      <div class="gen-panel" data-panel="dbinjury">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">CON
+            <input type="number" class="gen-select db-num db-resist" min="1" max="20" placeholder="—" title="The survivor's CON — rolled first; leave blank to go straight to the table">
+          </label>
+          <label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label>
+        </div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">After surviving zero HP, roll CON; on a failure roll D20 for a severe injury.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: MAGICAL MISHAP -->
+      <div class="gen-panel" data-panel="dbmishap">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;"><label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label></div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">A Demon when casting a spell: roll D20 for the magical mishap.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: WEAPON DEMONS (melee / ranged) -->
+      <div class="gen-panel" data-panel="dbdemon">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Attack
+            <select class="gen-select db-demon-kind"><option value="demonMelee">Melee</option><option value="demonRanged">Ranged</option></select>
+          </label>
+          <label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label>
+        </div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">A Demon on an attack roll: roll D6 for what goes wrong.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: TRAPS -->
+      <div class="gen-panel" data-panel="dbtrap">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label">Trap
+            <select class="gen-select db-trap-kind"><option value="">Random</option></select>
+          </label>
+          <label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label>
+        </div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">Typical traps for an adventure site, with their damage rolled.</div></div>
+      </div>
+
+      <!-- DRAGONBANE: LEAVING THE SITE -->
+      <div class="gen-panel" data-panel="dbleaving">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;"><label class="gen-label">How many
+            <select class="gen-select db-qty"><option>1</option><option>2</option><option>3</option><option>5</option></select>
+          </label></div>
+        <div class="gen-results db-out" style="margin-top:10px;"><div class="gen-empty">The player characters leave the site for at least a shift: roll D6 for what happens meanwhile.</div></div>
+      </div>
+
       <!-- MUTANT: YEAR ZERO CREATURE PANEL (monsters / factions / NPCs; cards send to the tracker) -->
       <div class="gen-panel" data-panel="myzmonster">
         <div class="gen-controls">
@@ -5227,6 +5458,8 @@ GMScenes.renderPins();
   }
   pull("dcc-item", "__DCC_HB_ITEMS");       // → DCC Item generator pool
   pull("dcc-monster", "__DCC_HB_MONSTERS"); // → bestiary picker (add to tracker)
+  // Dragonbane homebrew monsters / NPCs → the DB bestiary (tracker picker + generator).
+  if (window.GM_SYSTEM === 'DB') { pull("db-monster", "__DB_HB_MONSTERS"); pull("db-npc", "__DB_HB_NPCS"); }
 
   // Shadowdark gear homebrew → the Treasure generator's list (same items the SD
   // character-sheet shop shows). Mapped into the SD_GEAR row shape and scoped to
@@ -7324,7 +7557,12 @@ function wireSessionPrepLoader(root) {
              clues: (prep.clues || []).length, loot: (prep.rewards || []).length, tables: tables().length,
              npcs: (prep.statblocks || []).length, maps: maps().length,
              // The Lord of the Rings prep: journeys, councils, landmarks, hoards, schemes, rumours.
-             lotr: ['journeys','councils','landmarks','hoards','schemes','rumours'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0) };
+             lotr: ['journeys','councils','landmarks','hoards','schemes','rumours'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0),
+             // Dragonbane prep: the quest, the adventure site, journey legs, traps, leaving the site.
+             db: (prep.dbQuest && Object.keys(prep.dbQuest).some(k => String(prep.dbQuest[k] || '').trim()) ? 1 : 0)
+               + (prep.dbSite && Object.keys(prep.dbSite).some(k => String(prep.dbSite[k] || '').trim()) ? 1 : 0)
+               + ['dbJourneys','dbTraps'].reduce((n, k) => n + (Array.isArray(prep[k]) ? prep[k].length : 0), 0)
+               + ((prep.dbLeaving && String(prep.dbLeaving).trim()) ? 1 : 0) };
   }
 
   function renderHub(){
@@ -7338,7 +7576,7 @@ function wireSessionPrepLoader(root) {
     // tables simply has no Tables tab. Overview is always there: it is the
     // landing tab, and it now carries the GM notes too (see sectionHtml), so a
     // prep that is only notes still has somewhere to show them.
-    const ALL = [['overview','Overview'],['lotr','Phase'],['scenes','Scenes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
+    const ALL = [['overview','Overview'],['lotr','Phase'],['db','Quest'],['scenes','Scenes'],['clues','Clues'],['loot','Loot'],['tables','Tables'],['npcs','NPCs'],['maps','Maps']];
     const TABS = ALL.filter(([k]) => k === 'overview' || c[k]);
     if(!TABS.some(([k]) => k === activeSec)) activeSec = 'overview';   // the chapter just switched to lacks the open tab
     // Overview shows no count badge, just dims when there is nothing to read.
@@ -7439,6 +7677,28 @@ function wireSessionPrepLoader(root) {
       (prep.landmarks || []).forEach(l => { h += card('Landmark — ' + (l.name || ''), ln('Rumour', l.rumour) + ln('Old Lore', l.oldlore) + ln('Background', l.background) + ln('Locations', l.locations) + ln('Trouble', l.trouble)); });
       (prep.hoards || []).forEach(x => { h += card('Hoard — ' + (x.name || x.rating || ''), ln('Rating', x.rating) + ln('Value', x.value) + ln('Greed DC', x.greed) + ln('Magic', x.magic) + ln('Contents', x.notes) + ln('Curse', x.curse)); });
       return h || '<div class="advh-empty">No Adventuring Phase notes in this prep.</div>';
+    }
+    if(sec === 'db'){
+      // Dragonbane: the quest, the adventure site, journey legs, traps and what
+      // happens if the party leaves — from the Dragonbane prep builder.
+      const card = (h, body) => '<div class="advh-card"><div class="advh-card-h">' + advEsc(h) + '</div>' + body + '</div>';
+      const ln = (l, v) => (v != null && String(v).trim()) ? '<div class="advh-desc"><b>' + advEsc(l) + ':</b> ' + advText(String(v)) + '</div>' : '';
+      const J = (typeof DB_JOURNEY !== 'undefined' && DB_JOURNEY) ? DB_JOURNEY : { pace: { foot: 15, mounted: 30 } };
+      let h = '';
+      const Q = prep.dbQuest || {};
+      if(Object.keys(Q).some(k => String(Q[k] || '').trim())) h += card('The Quest' + (Q.name ? ' — ' + Q.name : ''), ln('Hook', Q.hook) + ln('Patron', Q.patron) + ln('Goal', Q.goal) + ln('Reward', Q.reward) + ln('Notes', Q.notes));
+      const S = prep.dbSite || {};
+      if(Object.keys(S).some(k => String(S[k] || '').trim())) h += card('Adventure Site' + (S.name ? ' — ' + S.name : ''), ln('Way in', S.wayin) + ln('Features', S.feature) + ln('Unexpected guests', S.guests) + ln('Deadly challenge', S.challenge) + ln('Boss', S.boss) + ln('Notes', S.notes));
+      (prep.dbJourneys || []).forEach(j => {
+        const km = parseInt(j.km, 10) || 0, pace = j.mounted ? J.pace.mounted : J.pace.foot, shifts = km ? Math.ceil(km / pace) : 0;
+        h += card('Journey — ' + (j.name || [j.from, j.to].filter(Boolean).join(' → ') || 'Leg'),
+          ln('Route', [j.from, j.to].filter(Boolean).join(' → ')) + ln('Distance', km ? km + ' km · ' + shifts + ' shift' + (shifts === 1 ? '' : 's') + ' (' + pace + ' km/shift' + (j.mounted ? ', mounted' : '') + ') · ~' + Math.ceil(shifts / 2) + ' day' + (Math.ceil(shifts / 2) === 1 ? '' : 's') : '')
+          + ln('Terrain', [j.offroad ? 'Off the road — pathfinder BUSHCRAFT each shift' : 'Road or path', j.map ? 'map' : (j.offroad ? 'no map (bane)' : ''), j.hard ? 'very difficult terrain (bane)' : ''].filter(Boolean).join(' · '))
+          + ln('Pathfinder', j.pathfinder) + ln('Mishaps', j.mishaps) + ln('Encounters', j.encounters) + ln('Notes', j.notes));
+      });
+      (prep.dbTraps || []).forEach(t => { h += card('Trap — ' + (t.name || ''), ln('Where', t.where) + ln('Effect', t.text) + ln('Damage', t.damage) + ln('Spot / disarm', t.spot)); });
+      if(prep.dbLeaving && String(prep.dbLeaving).trim()) h += card('Leaving the Site', '<div class="advh-desc">' + advText(String(prep.dbLeaving)) + '</div>');
+      return h || '<div class="advh-empty">No quest, journey or site notes in this prep.</div>';
     }
     if(sec === 'npcs'){
       const list = prep.statblocks || [];
@@ -8105,7 +8365,9 @@ function init_trackers(root) {
     if(src === 'dnd' || src === 'lotr') {
       tag = [m.type || sum.tag, (m.cr != null && m.cr !== '') ? 'CR ' + m.cr : ''].filter(Boolean).join(' · ');
     }
-    return {
+    // Dragonbane: the group + size in the type line; Ferocity = initiative cards a round.
+    if(src === 'db') tag = [sum.tag, m.size && m._dbkind === 'monster' ? m.size : ''].filter(Boolean).join(' · ');
+    const it = {
       id: nextId++, type: 'npc',
       name: m.name || 'Monster',
       tag: tag, hpMode: hpMode,
@@ -8113,6 +8375,8 @@ function init_trackers(root) {
       statuses: [], statsOpen: true, traitsOpen: false,
       gmon: { src: src, stats: stats, lines: lines, notes: sum.notes, meta: sum.meta || [], page: m.page || '', chips: chips }
     };
+    if(src === 'db') { it.dbFerocity = sum.ferocity || 1; if(m.boss) it.tone = 'var(--boss, #7b5cff)'; }
+    return it;
   }
   const SW_WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
   // D6 System 2e adds Staggered below Stunned (core p.33).
@@ -8295,6 +8559,8 @@ function init_trackers(root) {
     if(src === 'mmrpg' && /^3d6([+-]\d+)?$/i.test(e)) return 'd616';
     // Ghostbusters: one die of every pool is the Ghost Die (Training Manual p.4).
     if(src === 'gb' && /^\d+d6$/i.test(e)) return 'gbghost';
+    // Dragonbane: a bare number is a skill level — D20 at or under it.
+    if(src === 'db' && /^\d+$/.test(e)) return 'dbskill';
     return '';
   }
 
@@ -8505,6 +8771,7 @@ function init_trackers(root) {
             ${view.badge ? `<span class="cc-badge">${escAttr(view.badge)}</span>` : ''}
             ${view.def ? `<span class="cc-defchip"><span class="l">${escAttr(view.def.l)}</span><span class="v">${escAttr(String(view.def.v))}</span></span>` : ''}
             ${view.sub ? `<span class="cc-type">${escAttr(view.sub)}</span>` : ''}
+            ${Array.isArray(n.dbCards) && n.dbCards.length ? `<span class="cc-dbcards" title="Initiative cards (1–10) — lowest acts first; one turn per card. Edit to match the cards dealt at the table."><span class="l">Init</span>${n.dbCards.map((c, i) => `<input class="cc-dbcard${i === 0 ? ' first' : ''}" type="number" min="1" max="10" data-ci="${i}" value="${c}" aria-label="Initiative card ${i + 1}">`).join('')}</span>` : ''}
           </div>
         </div>
         <button class="cc-x npc-del" title="Remove">&#10005;</button>
@@ -8556,6 +8823,15 @@ function init_trackers(root) {
     // with the Wild Die house rule on), ACE! dice explode,
     // Marvel rolls d616 — not a plain sum (see monRollKind / _monsterRoll).
     const cardSrc = n.gmon ? (n.gmon.sys || n.gmon.src) : n.dmon ? 'dcc' : 'sd';
+    // Dragonbane initiative cards: editable so the GM can match the real deal.
+    card.querySelectorAll('.cc-dbcard').forEach(inp => {
+      inp.addEventListener('pointerdown', e => e.stopPropagation());
+      inp.addEventListener('change', () => {
+        const v = Math.max(1, Math.min(10, parseInt(inp.value, 10) || 1));
+        if(Array.isArray(n.dbCards)) n.dbCards[+inp.dataset.ci] = v;
+        if(window.__ddScheduleSave) window.__ddScheduleSave();
+      });
+    });
     card.querySelectorAll('.npc-mon-roll').forEach(b => {
       b.addEventListener('click', () => {
         const label = (n.name ? n.name + ' · ' : '') + (b.dataset.rolllabel || 'Roll');
@@ -8573,6 +8849,9 @@ function init_trackers(root) {
         // from players (the log is shared), so roll only the damage.
         if(n.hpMode === 'dcc') {
           if(typeof window.rollDccAttackToDiceTray === 'function') window.rollDccAttackToDiceTray(label, dmg);
+        } else if(b.dataset.kind === 'dbweapon' && typeof window.rollMonsterToDiceTray === 'function') {
+          // Dragonbane: D20 at or under the weapon skill, damage on a hit (Dragon / Demon noted).
+          window.rollMonsterToDiceTray({ kind: 'dbweapon', label: label, roll: hit, dmg: dmg });
         } else if(b.dataset.kind === 'nim' && typeof window.rollMonsterToDiceTray === 'function') {
           // Nimble: damage only — a 1 on the primary die misses, its top face crits.
           window.rollMonsterToDiceTray({ kind: 'nimble', label: label, roll: dmg });
@@ -8598,7 +8877,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd', 'vae', 'myz', 'lotr', 'jlu'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'd62e', 'icrpg', 'mmrpg', 'gb', 'yze', 'twd', 'vae', 'myz', 'lotr', 'db', 'jlu'];
   // Map a system to its bestiary source. Unknown systems keep their own key (so
   // pickerMatches returns nothing and the picker says "No Combatants Found")
   // rather than silently falling back to the DCC bestiary.
@@ -8785,16 +9064,22 @@ function init_trackers(root) {
   }, 1000);
 
   function onClick(e) {
-    const btn = e.target.closest('.trk-next-round, .trk-reset, .cbt-add-tracker, .cbt-add-npc, .cbt-add-monster, .cbt-reset');
+    const btn = e.target.closest('.trk-next-round, .trk-reset, .cbt-add-tracker, .cbt-add-npc, .cbt-add-monster, .cbt-reset, .trk-db-init');
     if(!btn) return;
     // Only react to buttons inside THIS window (its body, or its cloned toolbar
     // in the same .pane header) — so duplicate Tracker windows stay independent.
     const pane = root.closest('.pane, .csub, .cstation');
     const toolbarSlot = pane ? pane.querySelector('.pane-toolbar-slot, .cst-toolbar') : null;
-    if(!(root.contains(btn) || (toolbarSlot && toolbarSlot.contains(btn)))) return;
+    // The Dragonbane Initiative button also works from the quick-tool popup's
+    // cloned toolbar while this tracker is the one mounted in the popup.
+    const popTb = document.getElementById('gmc-pop-toolbar'), popBody = document.getElementById('gmc-pop-body');
+    const inPop = btn.classList.contains('trk-db-init') && popTb && popTb.contains(btn) && popBody && popBody.contains(root);
+    if(!(root.contains(btn) || (toolbarSlot && toolbarSlot.contains(btn)) || inPop)) return;
 
     if(btn.classList.contains('trk-next-round')) {
       nextRound();
+    } else if(btn.classList.contains('trk-db-init')) {
+      dbDrawInitiative();
     } else if(btn.classList.contains('trk-reset') || btn.classList.contains('cbt-reset')) {
       if(!confirm('Reset the round counter and clear all trackers and combatants?')) return;
       round = 1; items = [];
@@ -8814,8 +9099,26 @@ function init_trackers(root) {
 
   // Advance the initiative round (also steps any legacy round-tracker cards).
   // Exposed so the Monitor bar's Next-Round control can drive it.
+  // Dragonbane initiative: a deck of cards 1–10 dealt each round, lowest first.
+  // Monsters draw one card per point of Ferocity (a turn per card); everyone
+  // else one. Players draw their own cards at the table, so the GM can edit any
+  // card on a combatant to match. More than ten cards needed → a second deck.
+  function dbDrawInitiative(noRender) {
+    const npcs = items.filter(it => it.type === 'npc');
+    if(!npcs.length) return;
+    const fresh = () => { const d = [1,2,3,4,5,6,7,8,9,10]; for(let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; } return d; };
+    let deck = fresh();
+    const draw = () => { if(!deck.length) deck = fresh(); return deck.pop(); };
+    npcs.forEach(n => { const f = Math.max(1, Math.min(6, parseInt(n.dbFerocity, 10) || 1)); const cards = []; for(let i = 0; i < f; i++) cards.push(draw()); n.dbCards = cards.sort((a, b) => a - b); });
+    const rest = items.filter(it => it.type !== 'npc');
+    items = npcs.slice().sort((a, b) => a.dbCards[0] - b.dbCards[0]).concat(rest);
+    if(!noRender) { render(); if(window.__ddScheduleSave) window.__ddScheduleSave(); }
+  }
+  root._dbDrawInitiative = dbDrawInitiative;
   function nextRound() {
     round += 1;
+    // Dragonbane: the initiative cards are dealt anew every round.
+    if(window.GM_SYSTEM === 'DB' && items.some(it => Array.isArray(it.dbCards) && it.dbCards.length)) dbDrawInitiative(true);
     updateRoundDisplay();
     items.forEach(it => { if(it.type === 'tracker' && it.kind === 'rounds') it.rounds = Math.max(0, it.rounds - 1); });
     render();
@@ -11486,7 +11789,34 @@ function xsBestiary(src) {
   // LotR adversaries (D&D monster shape + group) plus any Nameless Things rolled this session.
   if(src === 'lotr') return ok(typeof LOTR_MONSTERS !== 'undefined' ? LOTR_MONSTERS : undefined).concat(Array.isArray(window.__lotrNamelessThings) ? window.__lotrNamelessThings : []);
   if(src === 'jlu') return ok(typeof JLU_BESTIARY !== 'undefined' ? JLU_BESTIARY : undefined);
+  if(src === 'db') return dbBestiary();
   return [];
+}
+// Dragonbane: monsters (Ferocity + a D6 monster-attack table), typical NPCs
+// (skills, weapons, heroic abilities) and common animals, plus the viewer's
+// db-monster / db-npc homebrew. Each row is tagged _dbkind and a picker group.
+function dbBestiary() {
+  const arr = v => Array.isArray(v) ? v : [];
+  const M = arr(typeof DB_MONSTERS !== 'undefined' ? DB_MONSTERS : null).concat(arr(window.__DB_HB_MONSTERS).map(m => Object.assign({ homebrew: true }, m)));
+  const N = arr(typeof DB_NPCS !== 'undefined' ? DB_NPCS : null).concat(arr(window.__DB_HB_NPCS).map(m => Object.assign({ homebrew: true }, m)));
+  const A = arr(typeof DB_ANIMALS !== 'undefined' ? DB_ANIMALS : null);
+  const sig = M.length + '/' + N.length + '/' + A.length;
+  if(dbBestiary._sig === sig) return dbBestiary._c;
+  const npcGroup = n => n.boss ? 'Boss' : (!n.kind || n.kind === 'Typical') ? 'NPC' : String(n.kind);
+  dbBestiary._c = [].concat(
+    M.map(m => Object.assign({}, m, { _dbkind: 'monster', group: 'Monster' })),
+    N.map(n => Object.assign({}, n, { _dbkind: 'npc', group: npcGroup(n) })),
+    A.map(a => Object.assign({}, a, { _dbkind: 'animal', group: 'Animal' })));
+  dbBestiary._sig = sig;
+  return dbBestiary._c;
+}
+// "2D10" → "2d10"; "D10" + a D4 damage bonus → "d10+d4" (the tray's parser reads both).
+function dbDmg(d, bonus) { return [d, bonus].filter(Boolean).map(x => String(x).replace(/\s+/g, '').toLowerCase()).join('+'); }
+function dbAttackTable(m) {
+  return (m.attacks || []).map((a, i) => {
+    const g = Array.isArray(a.rolls) ? a.rolls : (Array.isArray(m.attackRolls) && m.attackRolls[i]) ? m.attackRolls[i] : [+a.roll || i + 1, +a.roll || i + 1];
+    return { name: a.name, rolls: g, damage: a.damage || '', type: a.type || '' };
+  });
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
 // group, D6 2e kind, ICRPG tier).
@@ -11565,7 +11895,44 @@ function icrpgAttackRoll(m, text) {
 //   { stats:[{label,val,roll?}], lines:[{label,text,roll?, hit?,dmg?,note?,kind?}], notes:[string], hp:number, tag:string }
 function xsMonSummary(src, m) {
   const out = { stats: [], lines: [], notes: [], meta: [], hp: 10, tag: xsMonType(src, m) };
-  if(src === 'ace') {
+  if(src === 'db') {
+    // Dragonbane. Monsters: Ferocity (initiative cards a round) + a D6 attack table
+    // that hits automatically (one button rolls it, never the same attack twice in
+    // a row); they dodge at 15. NPCs and animals: skills roll D20 under the level,
+    // weapons roll the skill then the damage (+ the damage bonus).
+    const k = m._dbkind || (Array.isArray(m.attacks) && m.ferocity != null ? 'monster' : m.attack ? 'animal' : 'npc');
+    const bonus = m.damageBonus ? Object.keys(m.damageBonus).map(a => m.damageBonus[a]).filter(Boolean).join('+') : '';
+    if(k === 'monster') {
+      const tbl = dbAttackTable(m);
+      out.stats.push({ label: 'Armor', val: m.armor == null ? '—' : String(m.armor) }, { label: 'Ferocity', val: String(m.ferocity ?? '1') }, { label: 'Size', val: m.size || '' }, { label: 'Move', val: String(m.movement ?? '') + (m.flying ? ' fly' : '') }, { label: 'HP', val: String(m.hp ?? '') }, { label: 'Dodge', val: '15', roll: '15' });
+      if(tbl.length) out.lines.push({ label: 'Monster attack', text: 'D6 — hits automatically; never the same attack twice in a row', roll: '1d6', kind: 'dbtable', table: tbl });
+      (m.attacks || []).forEach((a, i) => { const g = tbl[i].rolls; out.lines.push({ label: 'D6 ' + (g[0] === g[1] ? g[0] : g[0] + '–' + g[1]) + ' · ' + a.name, text: a.text || '', roll: a.damage ? dbDmg(a.damage) : '', kind: a.damage ? 'dmg' : '' }); });
+      (m.traits || []).forEach(t => out.lines.push({ label: t.name, text: t.text || '' }));
+      if(m.resistances && m.resistances.length) out.meta.push(['Resistant', m.resistances.join(', ')]);
+      if(m.immunities && m.immunities.length) out.meta.push(['Immune', m.immunities.join(', ')]);
+      if(m.gear && m.gear.length) out.meta.push(['Gear', [].concat(m.gear).join(', ')]);
+      if(m.text) out.notes.push(m.text);
+      out.ferocity = parseInt(m.ferocity, 10) || 1;
+    } else {
+      const sk = m.skills || {};
+      out.stats.push({ label: 'Armor', val: m.armor ? String(m.armor.rating != null ? m.armor.rating : m.armor) : '—' });
+      if(m.wp != null) out.stats.push({ label: 'WP', val: String(m.wp) });
+      out.stats.push({ label: 'Move', val: String(m.movement ?? '') }, { label: 'HP', val: String(m.hp ?? '') });
+      Object.keys(sk).forEach(nm => out.stats.push({ label: nm, val: String(sk[nm]), roll: String(sk[nm]) }));
+      const weps = k === 'animal' ? (m.attack ? [m.attack] : []) : (m.weapons || []);
+      weps.forEach(w => out.lines.push({ label: (w.name || 'Attack') + (w.qty > 1 ? ' ×' + w.qty : ''), text: 'Skill ' + w.skill + ' · damage ' + [w.damage, bonus].filter(Boolean).join(' + '), hit: String(w.skill || ''), dmg: dbDmg(w.damage, bonus), kind: 'dbweapon', note: 'D20 ≤ ' + w.skill }));
+      if(m.spells && m.spells.length) out.lines.push({ label: 'Spells', text: m.spells.join(', ') });
+      if(m.abilities && m.abilities.length) out.lines.push({ label: 'Heroic abilities', text: m.abilities.join(', ') });
+      const TR = (typeof DB_NPC_TRAITS !== 'undefined' && DB_NPC_TRAITS) || {};
+      (m.traits || []).forEach(t => out.lines.push({ label: t, text: TR[t] || '' }));
+      if(m.armor && m.armor.name) out.meta.push(['Armor', m.armor.name + ' (' + m.armor.rating + ')']);
+      if(bonus) out.meta.push(['Damage bonus', bonus]);
+      if(m.gear && m.gear.length) out.meta.push(['Gear', [].concat(m.gear).join(', ')]);
+      out.notes.push('Skills not listed are 5.' + (m.boss ? ' A boss draws its own initiative card.' : ''));
+      out.ferocity = 1;
+    }
+    out.hp = parseInt(m.hp, 10) || 1;
+  } else if(src === 'ace') {
     ['smarts','moves','style','brawn','power'].forEach(k => { if(m[k] != null) out.stats.push({ label: k.toUpperCase(), val: String(m[k]), roll: m[k] > 0 ? m[k] + 'd6' : '' }); });
     out.stats.push({ label: 'DEF', val: String(m.defence ?? '') }, { label: 'HEALTH', val: String(m.health ?? '') });
     // Focuses are {stat, name} objects — render "Name (Stat)", not "[object Object]".
@@ -11887,6 +12254,8 @@ const PREP_SB_FIELDS = {
   YZE:  { stats:[['str','STR'],['agi','AGI'],['wits','WITS'],['emp','EMP']], def:['armor','Armor'], lines:[['skills','Skills']], hp:'health' },
   // LOTR: the D&D 5e layout (its prep builder uses the same AC/HP/Speed + six-ability rows).
   LOTR: { stats:[['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']], def:['ac','AC'], meta:[['speed','Speed']], hp:'hp' },
+  // DB (Dragonbane): HP / WP / Armor / Move / Ferocity (db_session_prep_builder SB_CONFIG).
+  DB:   { stats:[['wp','WP'],['move','Move'],['ferocity','Ferocity']], def:['armor','Armor'], hp:'hp' },
 };
 function prepStatblockHp(sb, cfg) {
   if(!cfg) return 10;
@@ -11912,6 +12281,7 @@ function prepStatblockToItem(sb, sys, id) {
   // "+4 to hit … Hit: 5 (1d6 + 2)" → to-hit + damage (save effects: damage + DC),
   // "+5 (1d8)" → to-hit + damage, Nimble → damage with the primary-die rule.
   const SYSU = String(sys || '').toUpperCase();
+  const dbRows = [];   // Dragonbane monster-attack table rows found in the abilities box
   String(sb.abilities || '').split('\n').map(s => s.trim()).filter(Boolean).forEach(a => {
     if(/^[-–—]{3,}$/.test(a)) return;   // a "---" divider line is layout-only; skip it on the compact card
     const c = a.indexOf(':'), md = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/i.exec(a);
@@ -11920,6 +12290,16 @@ function prepStatblockToItem(sb, sys, id) {
     if(SYSU === 'DND' || SYSU === 'LOTR') {
       const r = dndActionRoll(a);
       if(r.hit || (r.note && r.dmg)) Object.assign(line, { hit: r.hit, dmg: r.dmg, note: r.note });
+    } else if(SYSU === 'DB') {
+      // "Short Sword: skill 10, D10 + D4" → D20 under the skill, then damage.
+      // "Skills: Awareness 10, Evade 12" → rollable skill cells. "3. Claw: …" → a monster-attack row.
+      const w = /\bskill\s*(\d+)\b[^,;]*[,;]\s*(\d*D\d+(?:\s*\+\s*\d*D\d+)?(?:\s*[+-]\s*\d+)?)/i.exec(a);
+      const at = /^(?:D6\s*)?([1-6])(?:\s*[–-]\s*([1-6]))?[.)]\s*([^:]+):/.exec(a);
+      if(/^skills$/i.test(line.label)) {
+        line.text.split(/[,;]/).forEach(p => { const mm = /^(.*?)\s+(\d+)$/.exec(p.trim()); if(mm) stats.push({ label: mm[1], val: mm[2], roll: mm[2] }); });
+        return;
+      } else if(w) Object.assign(line, { hit: w[1], dmg: w[2].replace(/\s+/g, '').toLowerCase(), kind: 'dbweapon', note: 'D20 ≤ ' + w[1] });
+      else if(at) { dbRows.push({ name: at[3].trim(), rolls: [+at[1], +(at[2] || at[1])] }); line.label = 'D6 ' + at[1] + (at[2] ? '–' + at[2] : '') + ' · ' + at[3].trim(); line.text = a.slice(a.indexOf(':') + 1).trim(); line.kind = roll ? 'dmg' : ''; }
     } else if(SYSU === 'NIM' && roll) {
       Object.assign(line, { dmg: roll, kind: 'nim' });
     } else if(roll && SYSU !== 'DCC') {
@@ -11928,6 +12308,7 @@ function prepStatblockToItem(sb, sys, id) {
     }
     lines.push(line);
   });
+  if(dbRows.length > 1) lines.unshift({ label: 'Monster attack', text: 'D6 — hits automatically; never the same attack twice in a row', roll: '1d6', kind: 'dbtable', table: dbRows });
   // sb.type is already shown as the card's header type line (tag), so it's left out of
   // the notes/Traits block to avoid repeating the type line there.
   const notes = [sb.flavor, sb.notes].map(s => String(s || '').trim()).filter(Boolean);
@@ -11963,6 +12344,7 @@ function prepStatblockToItem(sb, sys, id) {
     // Standard HP bar and ACE! Health pips both read hpCurrent / hpMax.
     item.hpCurrent = hp; item.hpMax = hp;
   }
+  if(SYS === 'DB') item.dbFerocity = Math.max(1, parseInt(sb.ferocity, 10) || 1);
   return item;
 }
 window.prepStatblockToItem = prepStatblockToItem;
@@ -13697,7 +14079,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg' || src === 'yze' || src === 'twd' || src === 'vae' || src === 'myz' || src === 'lotr') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'd62e' || src === 'icrpg' || src === 'mmrpg' || src === 'yze' || src === 'twd' || src === 'vae' || src === 'myz' || src === 'lotr' || src === 'db') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -13746,7 +14128,7 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'twdtreasure', 'vaetreasure', 'myztreasure', 'lotrtreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetreasure', 'twdtreasure', 'vaetreasure', 'myztreasure', 'lotrtreasure', 'dbtreasure', 'mmrpgtables', 'mmrpgtreasure', 'mmrpghenchmen'];
   // Alien table generators are driven straight from the window Roll button (no inline button).
   const YZE_TABLE_GENS = ['yzestar', 'yzeworld', 'yzejobs', 'yzeencounters', 'yzetwist', 'yzeshore', 'yzeoracle', 'yzesalvage'];
   const TWD_TABLE_GENS = ['twdscavenge', 'twdlocation', 'twdnpc', 'twdfaction', 'twdwalker', 'twdevents', 'twdrumors'];
@@ -13756,6 +14138,9 @@ window.init_gen = function(root) {
   // lotrtreasure is also a builder panel; the window Roll rolls its Hoard.
   const LOTR_TABLE_GENS = ['lotrtreasure', 'lotrjourney', 'lotrcouncil', 'lotreye', 'lotrnameless', 'lotrnpc', 'lotrshadow', 'lotrpatron'];
   try { if(typeof window.lotrPrimePanels === 'function') window.lotrPrimePanels(root); } catch(e) {}
+  // Dragonbane GM suite (public/tools-data/db-gm-tables.js → window.dbGenPanel).
+  const DB_TABLE_GENS = ['dbnpc', 'dbadventure', 'dbjourney', 'dbattack', 'dbfear', 'dbinjury', 'dbmishap', 'dbdemon', 'dbtrap', 'dbleaving'];
+  try { if(typeof window.dbPrimePanels === 'function') window.dbPrimePanels(root); } catch(e) {}
   // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
   (function(){
     const sel = root.querySelector('#gen-mmrpg-enc');
@@ -13766,7 +14151,7 @@ window.init_gen = function(root) {
     }
   })();
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group'],['twd','#gen-twdmon-group'],['vae','#gen-vaemon-group'],['myz','#gen-myzmon-group'],['lotr','#gen-lotrmon-group']].forEach(([src, id]) => {
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind'],['yze','#gen-yzemon-group'],['twd','#gen-twdmon-group'],['vae','#gen-vaemon-group'],['myz','#gen-myzmon-group'],['lotr','#gen-lotrmon-group'],['db','#gen-dbmon-group']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -13831,6 +14216,11 @@ window.init_gen = function(root) {
     if(LOTR_TABLE_GENS.indexOf(activeTab) >= 0) {
       const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
       if(panel && typeof window.lotrGenPanel === 'function') window.lotrGenPanel(panel);
+      return;
+    }
+    if(DB_TABLE_GENS.indexOf(activeTab) >= 0) {
+      const panel = root.querySelector('.gen-panel[data-panel="' + activeTab + '"]');
+      if(panel && typeof window.dbGenPanel === 'function') window.dbGenPanel(panel);
       return;
     }
     if(BUILDER_PANELS.indexOf(activeTab) >= 0) {
@@ -14085,9 +14475,9 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster' || activeTab==='yzemonster' || activeTab==='twdmonster' || activeTab==='vaemonster' || activeTab==='myzmonster' || activeTab==='lotrmonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster' || activeTab==='mmrpgmonster' || activeTab==='yzemonster' || activeTab==='twdmonster' || activeTab==='vaemonster' || activeTab==='myzmonster' || activeTab==='lotrmonster' || activeTab==='dbmonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : src === 'yze' ? '#gen-yzemon-group' : src === 'twd' ? '#gen-twdmon-group' : src === 'vae' ? '#gen-vaemon-group' : src === 'myz' ? '#gen-myzmon-group' : src === 'lotr' ? '#gen-lotrmon-group' : '#gen-mmrpgmon-kind';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'd62e' ? '#gen-d62emon-kind' : src === 'icrpg' ? '#gen-icrpgmon-tier' : src === 'yze' ? '#gen-yzemon-group' : src === 'twd' ? '#gen-twdmon-group' : src === 'vae' ? '#gen-vaemon-group' : src === 'myz' ? '#gen-myzmon-group' : src === 'lotr' ? '#gen-lotrmon-group' : src === 'db' ? '#gen-dbmon-group' : '#gen-mmrpgmon-kind';
       const type=root.querySelector(idBase).value;
       const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : src === 'lotr' ? (root.querySelector('#gen-lotrmon-cr') || {}).value || '' : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
@@ -16165,6 +16555,9 @@ else document.addEventListener('DOMContentLoaded', syncHomebrewMonsters, { once:
 <!-- The Lord of the Rings: data layer (adversaries, journeys, councils, treasure, Eye, Shadow …) + the Loremaster suite -->
 <script src="/tools-data/lotr-data.js"></script>
 <script src="/tools-data/lotr-gm-tables.js"></script>
+<!-- Dragonbane: data layer (monsters, NPCs, gear, GM tables, journeys …) + the GM suite -->
+<script src="/tools-data/db-data.js"></script>
+<script src="/tools-data/db-gm-tables.js"></script>
 <script src="/tools-data/yze-alien-gm-tables.js"></script>
 <script src="/tools-data/gm-npc-tables.js"></script>
 <!-- PDF.js + the shared reader are loaded on demand by init_rules (first Rulebooks open) — not on every GM Screen load. -->
@@ -16255,6 +16648,7 @@ function init_dice(root) {
     DCC:  [2, 4, 6, 8, 10, 12, 20, 100],
     DND:  [4, 6, 8, 10, 12, 20, 100],
     LOTR: [4, 6, 8, 10, 12, 20, 100],
+    DB:   [4, 6, 8, 10, 12, 20],
     NIM:  [4, 6, 8, 10, 12, 20],
     ICRPG:[4, 6, 8, 10, 12, 20],
     KOB:  [4, 6, 8, 10, 12, 20],
@@ -16558,6 +16952,42 @@ function init_dice(root) {
     trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => rollCore([[parseInt(b.dataset.d, 10), 1]], 0, 'none', null); });
   }
 
+  // ════════ Dragonbane — D20 at or under the skill; boons / banes; Dragon (1) / Demon (20) ════════
+  // Each net boon adds a D20 and keeps the lowest, each net bane keeps the highest
+  // (they cancel one for one). A 1 is a Dragon, a 20 a Demon (always a failure).
+  function dbSkillRoll(lv, net) {
+    lv = Math.max(1, Math.min(20, lv | 0)); net = Math.max(-3, Math.min(3, net | 0));
+    const n = 1 + Math.abs(net), rolls = [];
+    for(let i = 0; i < n; i++) rolls.push(1 + Math.floor(Math.random() * 20));
+    const kept = net > 0 ? Math.min(...rolls) : net < 0 ? Math.max(...rolls) : rolls[0];
+    const dragon = kept === 1, demon = kept === 20, ok = !demon && kept <= lv;
+    const detail = 'd20(' + rolls.join(',') + (n > 1 ? ' ' + (net > 0 ? '▼' : '▲') + ' ' + kept : '') + ') vs ' + lv + (net > 0 ? ' · ' + net + ' boon' + (net > 1 ? 's' : '') : net < 0 ? ' · ' + (-net) + ' bane' + (net < -1 ? 's' : '') : '');
+    return { kept, dragon, demon, ok, detail, word: dragon ? 'DRAGON!' : demon ? 'DEMON!' : ok ? 'SUCCESS' : 'FAILURE', type: dragon ? 'crit' : demon ? 'fumble' : '' };
+  }
+  function dbDamage(expr) {
+    const { dice, mod } = parseFormula(expr); if(!dice.length && !mod) return null;
+    let total = mod; const bits = [];
+    dice.forEach(([sides, count]) => { const r = []; for(let i = 0; i < count; i++) r.push(1 + Math.floor(Math.random() * sides)); total += r.reduce((a, b) => a + b, 0); bits.push(count + 'd' + sides + '(' + r.join(',') + ')'); });
+    if(mod) bits.push((mod > 0 ? '+' : '') + mod);
+    return { total, detail: bits.join(' ') };
+  }
+  function renderDBTray() {
+    trayEl.innerHTML = '<div class="gmt"><div class="gmt-row"><span class="gmt-etl">Skill</span>' + stepperHtml('db-lv', _tray.dbLv || 10, 1, 20)
+      + '<span class="gmt-etl" title="Positive = boons (keep the lowest), negative = banes (keep the highest)">Boon/Bane</span>' + stepperHtml('db-bb', _tray.dbBb || 0, -3, 3)
+      + '<button class="gmt-roll" id="db-roll" title="Roll D20 at or under the skill">Roll</button></div>'
+      + '<div class="gmt-row gmt-kob">' + diceForSystem('DB').map(d => '<button class="dice-die gmt-die" data-d="' + d + '" title="Roll a D' + d + '">D' + d + '</button>').join('') + '</div></div>';
+    wireStepper('db-lv', 1, 20, v => { _tray.dbLv = v; });
+    wireStepper('db-bb', -3, 3, v => { _tray.dbBb = v; });
+    trayEl.querySelector('#db-roll').onclick = () => {
+      const lv = Math.max(1, Math.min(20, parseInt((trayEl.querySelector('#db-lv') || {}).value, 10) || 10));
+      const bb = Math.max(-3, Math.min(3, parseInt((trayEl.querySelector('#db-bb') || {}).value, 10) || 0));
+      _tray.dbLv = lv; _tray.dbBb = bb;
+      const s = dbSkillRoll(lv, bb);
+      gmLog('D20 vs ' + lv, s.kept + ' · ' + s.word, s.detail, s.type);
+    };
+    trayEl.querySelectorAll('.gmt-die').forEach(b => { b.onclick = () => rollCore([[parseInt(b.dataset.d, 10), 1]], 0, 'none', null); });
+  }
+
   // Registry of system-specific trays. Systems absent here (D&D, Shadowdark,
   // Nimble, ICRPG, DCC, Justice League) use the shared generic pool tray.
   const GM_TRAYS = {
@@ -16570,6 +17000,7 @@ function init_dice(root) {
     CO: renderCandelaTray,
     MMRPG: renderMarvelTray,
     KOB: renderKOBTray,
+    DB: renderDBTray,
   };
 
   // The rolling mechanic itself, so the tray's Roll button and other tools
@@ -16873,6 +17304,36 @@ function init_dice(root) {
       if(mod) bits.push((mod > 0 ? '+' : '') + mod);
       if(primary === 1) return gmLog(label, 'MISS', 'primary die rolled 1 · ' + bits.join(' '), 'fumble');
       return gmLog(label, 'Dmg: ' + total + (crits ? ' · CRIT' + (crits > 1 ? ' ×' + crits : '') : ''), bits.join(' '), crits ? 'crit' : '');
+    }
+    if(kind === 'dbskill' || kind === 'dbweapon') {
+      // Dragonbane NPC / animal: D20 at or under the skill; a weapon rolls its damage on a hit.
+      const lv = parseInt(expr, 10); if(!lv) return null;
+      const s = dbSkillRoll(lv, 0);
+      let res = s.kept + ' · ' + s.word, det = s.detail;
+      if(kind === 'dbweapon' && s.ok && spec.dmg) {
+        const d = dbDamage(spec.dmg);
+        if(d) { res += ' · ' + d.total + ' dmg'; det += ' · dmg ' + d.detail; }
+        if(d && s.dragon) { const d2 = dbDamage(spec.dmg); if(d2) det += ' · Dragon: double the damage dice → ' + (d.total + d2.total) + ', or ignore armor (piercing), or a free extra attack'; }
+      }
+      if(kind === 'dbweapon' && s.demon) det += ' · Demon: roll on the melee / ranged mishap table';
+      return gmLog(label, res, det, s.type);
+    }
+    if(kind === 'dbtable' && Array.isArray(spec.table) && spec.table.length) {
+      // Dragonbane monster attack: D6 on its table, hits automatically, never the same
+      // attack twice in a row (a repeat becomes the next entry, 6 → 1). The memory is
+      // shared with the Monster Attack generator via window.DB_GM.attackIndex.
+      const G = window.DB_GM;
+      let k;
+      if(G && typeof G.attackIndex === 'function') k = G.attackIndex(spec.table, 'trk:' + label);
+      else {
+        const last = (root._dbLast = root._dbLast || {}), v = d6();
+        let idx = Math.max(0, spec.table.findIndex(t => { const g = t.rolls || [t.roll, t.roll]; return v >= g[0] && v <= g[1]; }));
+        let bumped = false; if(last[label] === idx && spec.table.length > 1) { idx = (idx + 1) % spec.table.length; bumped = true; }
+        last[label] = idx; k = { roll: v, idx, bumped };
+      }
+      const t = spec.table[k.idx] || {};
+      const d = t.damage ? dbDamage(t.damage) : null;
+      return gmLog(label, (t.name || '—') + (d ? ' · ' + d.total + ' dmg' : ''), 'd6(' + k.roll + ')' + (k.bumped ? ' repeat → next entry' : '') + ' · ' + (t.name || '') + (d ? ' · ' + d.detail + (t.type ? ' ' + t.type : '') : '') + ' · hits automatically', '');
     }
     if(kind === 'alientable' && Array.isArray(spec.table) && spec.table.length) {
       const r = d6();
@@ -17453,6 +17914,52 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from a Dragonbane sheet (tools/templates/
+  // db_character_sheet.html, doc key db_sheet: system 'DB', name, kin, profession,
+  // attributes STR–CHA, HP / WP current & max, conditions, death rolls, weapons,
+  // heroic abilities, spells, gear, coins). Read defensively: several field
+  // spellings are accepted and anything missing shows as "—".
+  function dbParty(d) {
+    const n = v => parseInt(v, 10) || 0;
+    const has = v => v !== undefined && v !== null && v !== '';
+    const nm = v => (v && typeof v === 'object') ? (v.name || v.label || v.id || '') : (v || '');
+    const pool = (o, a, b, c, e) => {
+      if(o && typeof o === 'object') return { cur: has(o.cur) ? n(o.cur) : has(o.current) ? n(o.current) : has(o.value) ? n(o.value) : '', max: has(o.max) ? n(o.max) : '' };
+      return { cur: has(a) ? n(a) : has(o) ? n(o) : '', max: has(b) ? n(b) : has(c) ? n(c) : has(e) ? n(e) : '' };
+    };
+    const A = d.attributes || d.attrs || d.stats || {};
+    const hp = pool(d.hp, d.hpCur, d.hpMax, d.maxHp, d.maxHP);
+    const wp = pool(d.wp, d.wpCur, d.wpMax, d.maxWp, d.maxWP);
+    if(hp.cur === '' && hp.max !== '') hp.cur = hp.max;
+    if(wp.cur === '' && wp.max !== '') wp.cur = wp.max;
+    const CD = (typeof DB_CONDITIONS !== 'undefined' && Array.isArray(DB_CONDITIONS)) ? DB_CONDITIONS : [];
+    const condName = c => { const s = String(c || ''); const f = CD.find(x => x.id === s.toLowerCase() || x.name.toLowerCase() === s.toLowerCase()); return f ? f.name : s; };
+    // Our sheet stores conditions as cond: { Exhausted: true, … }.
+    let conds = d.conditions || d.activeConditions || d.cond || [];
+    conds = Array.isArray(conds) ? conds.map(c => condName(nm(c))).filter(Boolean) : Object.keys(conds || {}).filter(k => conds[k]).map(condName);
+    const condAttr = {}; CD.forEach(c => { if(conds.indexOf(c.name) >= 0) condAttr[c.attribute] = c.name; });
+    const dr = d.deathRolls || d.death || {};
+    const list = v => Array.isArray(v) ? v : [];
+    const coins = d.coins || d.money || {};
+    return {
+      system: 'DB',
+      name: d.name || 'Unnamed',
+      kin: nm(d.kin), profession: nm(d.profession), age: nm(d.age), weakness: nm(d.weakness),
+      hpCur: hp.cur, hpMax: hp.max, wpCur: wp.cur, wpMax: wp.max,
+      movement: has(d.movement) ? d.movement : (has(d.move) ? d.move : ''),
+      armor: has(d.armorRating) ? d.armorRating : (d.armor && typeof d.armor === 'object') ? (has(d.armor.rating) ? d.armor.rating : '') : (has(d.armor) ? d.armor : ''),
+      stats: ['STR', 'CON', 'AGL', 'INT', 'WIL', 'CHA'].map(k => ({ id: k, val: has(A[k]) ? n(A[k]) : (has(A[k.toLowerCase()]) ? n(A[k.toLowerCase()]) : '—'), cond: condAttr[k] || '' })),
+      conditions: conds,
+      death: { s: n(dr.successes != null ? dr.successes : dr.s), f: n(dr.failures != null ? dr.failures : dr.f) },
+      abilities: list(d.heroicAbilities || d.abilities).map(nm).filter(Boolean),
+      spells: list(d.spells).map(nm).filter(Boolean),
+      // Our sheet saves only the weapon's name: fill damage and skill from the weapon table.
+      weapons: list(d.weapons || d.attacks).filter(w => w && nm(w)).map(w => { const def = (typeof DB_WEAPONS !== 'undefined' && Array.isArray(DB_WEAPONS)) ? (DB_WEAPONS.find(x => x.name.toLowerCase() === String(nm(w)).toLowerCase()) || {}) : {}; const dmg = w.damage || def.damage, sk = w.skill || def.skill; return { name: nm(w), damage: [dmg, sk && typeof sk !== 'object' ? '(' + sk + ')' : ''].filter(Boolean).join(' ') }; }),
+      inventory: list(d.inventory || d.gear).map(i => nm(i) + (i && n(i.qty) > 1 ? ' ×' + n(i.qty) : '')).filter(s => s && s.trim()),
+      coins: { g: n(coins.gold != null ? coins.gold : d.gold), s: n(coins.silver != null ? coins.silver : d.silver), c: n(coins.copper != null ? coins.copper : d.copper) },
+    };
+  }
+
   // Sheets come from a few exporters (our sheet, Shadowdarklings). Read defensively.
   function normalize(raw) {
     if(!raw || typeof raw !== 'object') return null;
@@ -17473,6 +17980,8 @@ function init_party(root) {
     if(d && d.system === 'JLU') return jluParty(d);
     // LotR: the sheet tags itself; a campaign roster row also names its system.
     if(d && (d.system === 'LOTR' || (raw && raw !== d && raw.system === 'LOTR') || (!d.system && d.calling && d.culture))) return lotrParty(d);
+    // Dragonbane (db_sheet): the sheet tags itself; a campaign roster row also names its system.
+    if(d && (d.system === 'DB' || (raw && raw !== d && raw.system === 'DB'))) return dbParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
@@ -17940,6 +18449,33 @@ function init_party(root) {
     return html.replace('class="pty-card pcard', 'class="pty-card pcard lotr-pc');
   }
 
+  // ── Dragonbane ──
+  function cardHTMLDB(entry) {
+    const c = entry.sheet;
+    const dash = v => (v === '' || v == null) ? '—' : v;
+    const cell = (lbl, val, bad) => '<span class="pty-chip' + (bad ? ' db-chip-bad' : '') + '">' + esc(lbl) + ' <b>' + esc(dash(val)) + '</b></span>';
+    const sub = [c.kin, c.profession, c.age].filter(s => String(s || '').trim()).join(' · ');
+    const down = c.hpMax !== '' && c.hpCur !== '' && c.hpCur <= 0;
+    let body = (c.hpMax !== '' ? pcHpBar('Hit Points', c.hpCur, c.hpMax, down ? 'death rolls' : '') : '')
+      + (c.wpMax !== '' ? pcHpBar('Willpower', c.wpCur, c.wpMax, '') : '')
+      + pcStats(c.stats.map(s => ({ l: s.id, m: String(s.val), s: s.cond ? s.cond : '' })));
+    body += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+      + cell('Move', c.movement) + cell('Armor', c.armor)
+      + (down || c.death.s || c.death.f ? cell('Death rolls', c.death.s + '✓ ' + c.death.f + '✗', true) : '')
+      + (c.weakness ? cell('Weakness', c.weakness) : '') + '</div></div>';
+    if(c.conditions.length) body += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff8a6a;">' + esc(c.conditions.join(', ')) + ' <span class="dim">— a bane on rolls with that attribute</span></div></div>';
+    if(c.abilities.length) body += '<div class="pty-sec"><div class="pty-sec-h">Heroic Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
+    if(c.weapons.length) body += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div>' + c.weapons.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b>' + (a.damage ? ' <span class="dim">' + esc(a.damage) + '</span>' : '') + '</div>').join('') + '</div>';
+    if(c.spells.length) body += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
+    if(c.inventory.length) body += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
+    if(c.coins.g || c.coins.s || c.coins.c) body += '<div class="pty-line dim" style="margin-top:4px;">' + c.coins.g + ' gold · ' + c.coins.s + ' silver · ' + c.coins.c + ' copper</div>';
+    const hpTxt = (c.hpCur !== '' ? c.hpCur + '/' : '') + dash(c.hpMax), wpTxt = (c.wpCur !== '' ? c.wpCur + '/' : '') + dash(c.wpMax);
+    const html = pcShell(entry, { name: c.name, sub,
+      chips: [{ l:'HP', v: hpTxt, bad: c.hpMax !== '' && c.hpCur !== '' && c.hpCur < c.hpMax }, { l:'WP', v: wpTxt, bad: c.wpMax !== '' && c.wpCur !== '' && c.wpCur < c.wpMax }, c.conditions.length ? { l:'Cond', v: c.conditions.length, bad: true } : null], body,
+      bubble: { hp: hpTxt, chips: [{ label:'WP', value: wpTxt }, { label:'Move', value: dash(c.movement) }, { label:'Cond', value: c.conditions.length ? c.conditions.join(', ') : '—' }] } });
+    return html.replace('class="pty-card pcard', 'class="pty-card pcard db-pc');
+  }
+
   // ── Candela Obscura ──
   function cardHTMLCO(entry) {
     const c = entry.sheet;
@@ -18032,6 +18568,7 @@ function init_party(root) {
     if(c.system === 'GB') return cardHTMLGB(entry);
     if(c.system === 'JLU') return cardHTMLJLU(entry);
     if(c.system === 'LOTR') return cardHTMLLOTR(entry);
+    if(c.system === 'DB') return cardHTMLDB(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const hpChip = c.hpCur !== '' ? c.hpCur + '/' + c.hpMax : String(c.hpMax);
     const line = [c.ancestry, c.cls].filter(Boolean).join(' ');
@@ -19114,6 +19651,23 @@ function wireAiConsole(root) {
         .concat(((typeof LOTR_ENCHANTED_REWARDS !== 'undefined' && Array.isArray(LOTR_ENCHANTED_REWARDS)) ? LOTR_ENCHANTED_REWARDS : []).map(e => ({ name: e.name || String(e), category: 'magic', desc: ['Enchanted reward', e.item || e.appliesTo || '', e.description || e.effect || ''].filter(Boolean).join(' · ').slice(0, 160) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armour',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'magic',label:'Enchanted',cats:['magic'] }],
       randomCats: ['weapon','armor','gear','gear'], money: { name: 'Silver', unit: 's', cat: 'silver', roll: () => (1 + Math.floor(Math.random() * 6)) * (1 + Math.floor(Math.random() * 6)) }, label: 'TREASURE', empty: 'LotR gear list',
+    },
+    db: {
+      // Dragonbane treasure: gear (weapons, armor & helmets, the gear lists) and
+      // valuables — monetary finds the players simply know the worth of. The
+      // book's treasure cards aren't in the app. Coins are silver (3D6).
+      list: () => {
+        const arr = v => (typeof v !== 'undefined' && Array.isArray(v)) ? v : [];
+        const cost = c => c && c.amount != null ? c.amount + ' ' + c.unit : '';
+        return []
+          .concat(arr(typeof DB_WEAPONS !== 'undefined' ? DB_WEAPONS : undefined).filter(w => !w.natural && w.cost).map(w => ({ name: w.name, category: 'weapon', desc: [w.skill, w.damage ? 'Damage ' + w.damage : '', w.grip, w.range ? 'Range ' + w.range : '', (w.features || []).join(', '), cost(w.cost)].filter(Boolean).join(' · ') })))
+          .concat(arr(typeof DB_ARMOR !== 'undefined' ? DB_ARMOR : undefined).map(a => ({ name: a.name, category: 'armor', desc: ['Armor ' + a.rating, (a.banes || []).length ? 'Bane: ' + a.banes.join(', ') : '', cost(a.cost)].filter(Boolean).join(' · ') })))
+          .concat(arr(typeof DB_HELMETS !== 'undefined' ? DB_HELMETS : undefined).map(a => ({ name: a.name, category: 'armor', desc: ['Helmet · Armor +' + a.rating, (a.banes || []).length ? 'Bane: ' + a.banes.join(', ') : '', cost(a.cost)].filter(Boolean).join(' · ') })))
+          .concat(arr(typeof DB_GEAR !== 'undefined' ? DB_GEAR : undefined).filter(g => !/^(Services|Animals)$/.test(g.category)).map(g => ({ name: g.name, category: 'gear', desc: [g.category, g.effect, cost(g.cost)].filter(Boolean).join(' · ').slice(0, 160) })))
+          .concat(arr(window.DB_GM && window.DB_GM.valuables).map(v => ({ name: v.name, category: 'valuable', desc: 'Valuable — worth ' + v.value })));
+      },
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'valuable',label:'Valuables',cats:['valuable'] }],
+      randomCats: ['weapon','armor','gear','gear','valuable','valuable'], money: { name: 'Silver', unit: 'silver', cat: 'money', roll: () => (1 + Math.floor(Math.random() * 6)) + (1 + Math.floor(Math.random() * 6)) + (1 + Math.floor(Math.random() * 6)) }, label: 'TREASURE', empty: 'Dragonbane gear list',
     },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {
